@@ -61,7 +61,7 @@ public class SFWebApplication {
 		return instance;
 	}
 
-	public void init(String logFilePath, ISFContext context) {
+	public void init(ISFContext context) {
 
 		logger.debug("init() invoked");
 

@@ -330,8 +330,7 @@ public class SFContextServlet implements Servlet {
             File sfLogDir = wd.createFolder(FolderType.LOGS,  "");
             System.setProperty("sf.log.dir", sfLogDir.getAbsolutePath());
 
-            File fullLogConfig = wd.getFile(FolderType.CFG, "log.properties");
-            CustomPropertyConfigurator.configureAndWatch(fullLogConfig.getAbsolutePath());
+            CustomPropertyConfigurator.configureAndWatch(wd);
 
             if (logger.isInfoEnabled()) {
                 logger.info("Sailfish {}", new CoreVersion());
@@ -384,7 +383,7 @@ public class SFContextServlet implements Servlet {
     		}
 
             // ---------- Global singleton init
-            SFWebApplication.getInstance().init(fullLogConfig.getAbsolutePath(), sfLocalContext);
+            SFWebApplication.getInstance().init(sfLocalContext);
 
             FacesContext.getCurrentInstance()
                         .getExternalContext()

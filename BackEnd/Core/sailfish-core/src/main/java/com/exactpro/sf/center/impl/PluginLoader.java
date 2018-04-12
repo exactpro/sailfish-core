@@ -64,6 +64,7 @@ public class PluginLoader {
 	private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
 	private final Logger userEventsLogger = LoggerFactory.getLogger("USER_EVENTS_LOG");
 
+	public static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
 	public static final String CUSTOM_DICTIONARIES_XML = "custom_dictionaries.xml";
 	public static final String VERSION_FILE_NAME = "VERSION"; 
 	
@@ -74,7 +75,6 @@ public class PluginLoader {
 	protected static final String VALIDATORS_XML_FILE_NAME = "validators.xml";
 	protected static final String ADAPTERS_XML_FILE_NAME = "adapters.xml";
 	protected static final String DATA_XML_FILE_NAME = "data.xml";
-	protected static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
     protected static final String SERVICES_FOLDER_NAME = "services";
 
 	private final IWorkspaceDispatcher wd;
