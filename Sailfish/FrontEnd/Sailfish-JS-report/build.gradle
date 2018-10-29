@@ -1,0 +1,11 @@
+task webpack(type: Exec) {
+	commandLine './node_modules/.bin/webpack'
+}
+
+task npm(type: Exec) {
+	commandLine 'npm', 'install'
+}
+
+task webpackDevServer(type: Exec) {
+	commandLine './node_modules/.bin/webpack-dev-server'
+}

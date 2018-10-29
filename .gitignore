@@ -44,3 +44,7 @@ CompilerHints
 shared_workspace
 tmp_workspace
 shared
+
+#npm
+node_modules
+package-lock.json
