@@ -15,10 +15,9 @@ interface TableNode extends ActionParameter {
 }
 
 export default class ParamsTable extends Component<IParamTableProps, IParamTableState> {
-    
-    constructor(props : IParamTableProps) {
+
+    constructor(props: IParamTableProps) {
         super(props);
-        console.log(props);
         this.state = {
             rootNode: this.paramsToNodes(props.params)
         }
@@ -30,29 +29,43 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
         isCollapsed: false
     } as TableNode : root as TableNode)
 
-    tooglerClick(...args) {
-        console.log(args);
+    tooglerClick(root: TableNode) {
+        root.isCollapsed = !root.isCollapsed;
+        this.setState(this.state);
     }
 
-    renderParams = (root: TableNode) => (root.SubParameters ? (
-        root.isCollapsed ? 
+    renderParams(root: TableNode, margin: number = 1) {
+
+        return (root.SubParameters ? ([
             <tr class="table-row-toogler">
-                <td onClick={() => root.isCollapsed = !root.isCollapsed}>{root.Name}</td>
-            </tr> : [
-            <tr class="table-row-toogler">
-                <td onClick={() => root.isCollapsed = !root.isCollapsed}>{root.Name}</td>
+                <td onClick={() => this.tooglerClick(root)}
+                    colSpan={2}>
+                    <p style={{ marginLeft: 10 * margin }}>
+                        {(root.isCollapsed ? "+  " : "-  ") + root.Name}
+                    </p>
+                </td>
             </tr>,
-            ...root.SubParameters.map((param) => this.renderParams(param) as Element)
-        ] ) : (
-            <tr class="table-row-value">
-                <td>{root.Name}</td>
-                <td>{root.Value}</td>
-            </tr>
+            root.isCollapsed ? null :
+                root.SubParameters.map(
+                    (param) => {
+                        return this.renderParams(param, margin + 1) as Element
+                    })
+        ]
+        ) : (
+                <tr class="table-row-value">
+                    <td>
+                        <p style={{ marginLeft: 10 * margin }}>{root.Name}</p>
+                    </td>
+                    <td>
+                        <p style={{ marginLeft: 10 * margin }}>{root.Value}</p>
+                    </td>
+                </tr>
+            )
         )
-    );
+    }
 
 
-    render({params} : IParamTableProps, {rootNode} : IParamTableState) {
+    render({ params }: IParamTableProps, { rootNode }: IParamTableState) {
         const { renderParams } = this;
         return (<div class="table-root">
             <table>
@@ -60,7 +73,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
                     <tr>
                         <th colSpan={2}>{params.Name}</th>
                     </tr>
-                    {renderParams(rootNode)}
+                    {this.renderParams(rootNode)}
                 </tbody>
             </table>
         </div>);

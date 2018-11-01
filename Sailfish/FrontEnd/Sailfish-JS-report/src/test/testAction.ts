@@ -115,6 +115,8 @@ export const testAction : Action = {
               }
             ]
       },
-      "Status": "PASSED",
+      "Status": {
+          "Status": "PASSED"
+      },
       "FinishTime": "2018-08-17T11:36:16.005+01:00"
     };

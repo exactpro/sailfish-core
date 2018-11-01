@@ -1,0 +1,27 @@
+.expandable-panel-root {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+}
+
+.expandable-panel-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    min-height: 40px;
+    cursor: pointer;
+
+    h5 {
+        margin: 5px 5px;
+        font-weight: bold;
+        font-size: 30px;
+        min-width: 40px;
+    }
+}
+
+.expandable-panel-body {
+    display: block;
+    padding: 10px;
+    
+}

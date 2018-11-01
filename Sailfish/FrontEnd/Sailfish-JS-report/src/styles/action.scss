@@ -1,14 +1,84 @@
-
+@import "vars";
 
 .card-root {
+    display: block;
     box-sizing: border-box;
-    display: flex;
     width: 100%;
+    height: auto;
+    padding: 10px 10px 10px 20px;
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.card-root-passed {
+    @extend .card-root;
+    background-color: $passedBackgroundColor;
+    border-color: $passedBorderColor;
+
+    h3 {
+        color: $passedTextColor;
+    }
+}
+
+.card-root-failed {
+    @extend .card-root;
+    background-color: $failedBackgroundColor;
+    border-color: $failedBorderColor;
+
+    h3 {
+        color: $failedTextColor;
+    }
+}
+
+.card-header {
+    h3 {
+        margin: 0;
+    }
+
+    p {
+        font-size: 11px;
+        color: $secondaryTextColor;
+        margin: 2px 0px 0px 5px;
+    }
+}
+
+.card-body {
+    display: block;
+    box-sizing: border-box;
 }
 
 .table-root {
+    table {
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+    td {
+        border: 1px solid black;
+        padding: 0;
+    }
+
     display: block;
     width: 100%;
     height: auto;
 }
 
+.table-row-toogler {
+    p {
+        margin: 0;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    td {
+        cursor: pointer;
+    }
+}
+
+.table-row-value {
+    p {
+        margin: 0;
+        text-decoration: none;
+        font-size: 14px;
+    }
+}
