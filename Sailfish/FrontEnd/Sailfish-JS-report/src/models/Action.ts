@@ -1,4 +1,5 @@
 import ActionParameter from "./ActionParameter"; 
+import MessageParameter from "./MessageParameter";
 
 export default interface Action {
     Name: string;
@@ -9,5 +10,6 @@ export default interface Action {
         Description?: string
     };
     FinishTime: string;
-    InputParameters?: ActionParameter; 
+    InputParameters?: ActionParameter;
+    ComparsionParameters?: Array<MessageParameter>; 
 }

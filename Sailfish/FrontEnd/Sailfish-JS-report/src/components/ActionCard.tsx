@@ -3,6 +3,7 @@ import Action from "../models/Action";
 import "../styles/action.scss";
 import ParamsTable from "./ParamsTable";
 import ExpandablePanel from "./ExpandablePanel";
+import CompasionTable from "./ComparsionTable";
 
 interface ICardProps {
     action: Action;
@@ -45,6 +46,13 @@ export default class ActionCard extends Component<ICardProps, ICardState> {
                             )}
                             body={(
                                 <ParamsTable params={action.InputParameters}/>
+                            )}/>
+                        <ExpandablePanel
+                            header={(
+                                <h4>Comparsion parameters</h4>
+                            )}
+                            body={(
+                                <CompasionTable params={action.ComparsionParameters}/>
                             )}/>
                     </div>)}/>
         </div>)

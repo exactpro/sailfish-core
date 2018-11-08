@@ -1,7 +1,7 @@
 import { h, Component } from "preact";
 import ActionParameter from "../models/ActionParameter";
 
-interface IParamTableProps {
+export interface IParamTableProps {
     params: ActionParameter;
 }
 
@@ -27,37 +27,35 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
         ...root,
         SubParameters: root.SubParameters.map(this.paramsToNodes),
         isCollapsed: false
-    } as TableNode : root as TableNode)
+    } : root)
 
     tooglerClick(root: TableNode) {
         root.isCollapsed = !root.isCollapsed;
         this.setState(this.state);
     }
 
-    renderParams(root: TableNode, margin: number = 1) {
+    renderParams(root: TableNode, padding: number = 1) {
 
         return (root.SubParameters ? ([
             <tr class="table-row-toogler">
                 <td onClick={() => this.tooglerClick(root)}
                     colSpan={2}>
-                    <p style={{ marginLeft: 10 * margin }}>
+                    <p style={{ marginLeft: 10 * padding }}>
                         {(root.isCollapsed ? "+  " : "-  ") + root.Name}
                     </p>
                 </td>
             </tr>,
             root.isCollapsed ? null :
                 root.SubParameters.map(
-                    (param) => {
-                        return this.renderParams(param, margin + 1) as Element
-                    })
+                    (param) => this.renderParams(param, padding + 1) as Element)
         ]
         ) : (
                 <tr class="table-row-value">
-                    <td>
-                        <p style={{ marginLeft: 10 * margin }}>{root.Name}</p>
+                    <td style={{ paddingLeft: 10 * padding }}> 
+                        {root.Name}
                     </td>
-                    <td>
-                        <p style={{ marginLeft: 10 * margin }}>{root.Value}</p>
+                    <td style={{ paddingLeft: 10 * padding }}>
+                        {root.Value}
                     </td>
                 </tr>
             )
@@ -66,7 +64,6 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
 
 
     render({ params }: IParamTableProps, { rootNode }: IParamTableState) {
-        const { renderParams } = this;
         return (<div class="table-root">
             <table>
                 <tbody>

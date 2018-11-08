@@ -23,5 +23,10 @@
 .expandable-panel-body {
     display: block;
     padding: 10px;
-    
+
+}
+
+.expandable-panel-body-hidden {
+    @extend .expandable-panel-body;
+    display: none;
 }
