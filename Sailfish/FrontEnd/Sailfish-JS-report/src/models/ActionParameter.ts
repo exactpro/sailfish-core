@@ -1,5 +1,5 @@
 export default interface IActionParameter {
-    Name: string;
-    SubParameters?: Array<IActionParameter>;
-    Value?: string;
+    name: string;
+    parameters?: Array<IActionParameter>;
+    value?: string;
 }

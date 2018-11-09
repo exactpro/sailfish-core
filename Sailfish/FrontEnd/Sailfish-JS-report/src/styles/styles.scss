@@ -1,9 +1,15 @@
 @import "vars";
 
+body {
+    margin: 0;
+}
+
 .root {
     display: block;
     box-sizing: border-box;
-    width: 100%;
+    width: 100vw;
+    height: 100vh;
+    padding: 8px;
 
     div {
         box-sizing: border-box;
