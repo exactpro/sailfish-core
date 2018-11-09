@@ -118,5 +118,47 @@ export const testAction : Action = {
       "Status": {
           "Status": "PASSED"
       },
-      "FinishTime": "2018-08-17T11:36:16.005+01:00"
+      "FinishTime": "2018-08-17T11:36:16.005+01:00",
+      "ComparsionParameters": [
+          {
+              "Name": "testFlat",
+              "Expected": "4",
+              "Actual": "4",
+              "Result": "PASSED"
+          },
+          {
+              "Name": "testFlat2",
+              "Expected": "null",
+              "Actual": "3",
+              "Result": "NA"
+          },
+          {
+              "Name": "testContained",
+              "SubParameters": [
+                {
+                    "Name": "testFlat",
+                    "Expected": "4",
+                    "Actual": "4",
+                    "Result": "PASSED"
+                },
+                {
+                    "Name": "testFlat2",
+                    "Expected": "null",
+                    "Actual": "3",
+                    "Result": "NA"
+                },
+                {
+                    "Name": "testSub",
+                    "SubParameters": [
+                        {
+                            "Name": "someResult",
+                            "Expected": "blabla",
+                            "Actual": "blablabla",
+                            "Result": "FAILED"
+                        }
+                    ]
+                }
+              ]
+          }
+      ]
     };

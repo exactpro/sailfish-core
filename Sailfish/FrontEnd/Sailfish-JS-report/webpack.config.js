@@ -12,7 +12,12 @@ module.exports = {
     port: 9001
   },
   resolve: {
-    extensions: ['.ts', '.js', '.json', '.tsx', '.scss']
+    extensions: ['.ts', '.js', '.json', '.tsx', '.scss'],
+    alias: {
+      'react': 'preact-compat',
+      'react-dom': 'preact-compat',
+      'create-react-class': 'preact-compat/lib/create-react-class'
+  }
   },
   output: {
     path: path.resolve(__dirname, './build/'),
