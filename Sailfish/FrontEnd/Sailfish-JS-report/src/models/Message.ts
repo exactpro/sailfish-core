@@ -4,4 +4,10 @@ export default interface Message {
     rawContent: string;
     type: string;
     relatedActions: Array<string>;
+    timestamp: string;
+    from: string;
+    to: string;
+    msgName: string;
+    contentHumanReadable: string;
+    status?: string;
 }

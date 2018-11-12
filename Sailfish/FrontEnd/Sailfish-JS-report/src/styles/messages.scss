@@ -1,0 +1,51 @@
+@import "vars";
+
+.messages-table-root {
+    padding: 5px;
+    width: 100&;
+    height: 100%;
+    overflow-y: scroll;
+
+    table {
+        width: 100%;
+        table-layout: fixed;
+        border: 2px solid transparent;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: $tableHeaderBackground;
+        color: $primaryTextColor;
+        height: 50px;
+    }
+
+    td {
+        border: 2px solid transparent;
+        padding: 5px 3px 2px 3px;
+        background-color: $passedBackgroundColor;
+    }
+
+    th.field {
+        width: 90px;
+    }
+
+    .messages-table-row {
+        &.passesd {
+            td {
+                background-color: $passedBackgroundColor;
+            }
+        }
+
+        &.failed {
+            td {
+                background-color: $failedBackgroundColor;
+            }
+        }
+
+        &.conditionaly {
+            td {
+                background-color: $conditionalyBackgroundColor;
+            }
+        }
+    }
+}

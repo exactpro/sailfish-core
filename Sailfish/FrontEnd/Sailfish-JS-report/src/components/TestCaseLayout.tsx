@@ -3,6 +3,7 @@ import { Header } from './Header';
 import { SplitView } from './SplitView'
 import ActionsList from './ActionsList';
 import TestCase from '../models/TestCase';
+import {MessagesTable} from './MessagesTable';
 import '../styles/layout.scss'
 
 interface LayoutProps {
@@ -36,7 +37,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 <div class="layout-content split">
                         <SplitView>
                             <ActionsList {...testCase}/>
-                            <div ></div>
+                            <MessagesTable messages={testCase.messages}/>
                         </SplitView>
                 </div>
             </div>

@@ -30,7 +30,6 @@ export default class ActionsList extends Component<ListProps, ListState> {
                 {actions.map(action => {
                     const className = "card-root " + action.status.toLowerCase() + 
                         (action.uuid == selectedActionId ? " selected" : "");
-                        console.log(className);
                     return (<div class={className}
                         onClick={e => this.itemClickHandler(action.uuid)}>
                         <ActionCard action={action} />

@@ -1,5 +1,6 @@
 import { h, Component } from "preact";
 import MessageParameter from "../models/MessageParameter";
+import "../styles/messages.scss"
 
 export interface IComTableProps {
     params: Array<MessageParameter>;
