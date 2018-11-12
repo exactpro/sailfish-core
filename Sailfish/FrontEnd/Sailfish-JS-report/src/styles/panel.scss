@@ -10,13 +10,16 @@
     flex-direction: row;
     justify-content: flex-start;
     min-height: 40px;
-    cursor: pointer;
 
     h5 {
         margin: 5px 5px;
         font-weight: bold;
         font-size: 30px;
         min-width: 40px;
+    }
+
+    .expandable-panel-header-icon {
+        cursor: pointer;
     }
 }
 

@@ -1,6 +1,7 @@
 import { h, Component } from 'preact';
 import { Header } from './Header';
 import { SplitView } from './SplitView'
+import ActionsList from './ActionsList';
 import TestCase from '../models/TestCase';
 import '../styles/layout.scss'
 
@@ -34,7 +35,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 </div>
                 <div class="layout-content split">
                         <SplitView>
-                            <div ></div>
+                            <ActionsList {...testCase}/>
                             <div ></div>
                         </SplitView>
                 </div>

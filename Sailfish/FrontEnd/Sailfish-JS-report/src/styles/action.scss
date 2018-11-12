@@ -6,29 +6,44 @@
     width: 100%;
     height: auto;
     padding: 10px 10px 10px 20px;
-    border: 2px solid black;
+    border: 2px solid transparent;
     border-radius: 5px;
-}
 
-.card-root-passed {
-    @extend .card-root;
-    background-color: $passedBackgroundColor;
-    border-color: $passedBorderColor;
+    &.passed {
+       &.selected {
+           background-color: $passedBackgroundColor;
+           border-color: $passedBorderColor;
+       }
 
-    h3 {
-        color: $passedTextColor;
+        h3 {
+            color: $passedTextColor;
+        }
+    }
+
+    &.failed {
+        &.selected {
+            background-color: $failedBackgroundColor;
+            border-color: $failedBorderColor;
+        }
+
+        h3 {
+            color: $failedTextColor;
+        }
+    }
+
+    &.conditionaly {
+        &.selected {
+            background-color: $conditionalyBackgroundColor;
+            border-color: $conditionalyBorderColor;
+        }
+
+        h3 {
+            color: $conditionalyTextColor;
+        }
     }
 }
 
-.card-root-failed {
-    @extend .card-root;
-    background-color: $failedBackgroundColor;
-    border-color: $failedBorderColor;
 
-    h3 {
-        color: $failedTextColor;
-    }
-}
 
 .card-header {
     h3 {
@@ -86,4 +101,9 @@
         text-decoration: none;
         font-size: 14px;
     }
+}
+
+.actions-list {
+    height: 100%;
+    overflow-y: scroll;
 }

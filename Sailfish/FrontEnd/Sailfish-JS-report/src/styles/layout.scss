@@ -1,7 +1,7 @@
 .layout-root {
     display: grid;
     height: 100%;
-    grid-template: 70px 65px auto / 1fr 1fr;
+    grid-template: 70px 65px calc(100% - 135px) / 1fr 1fr;
     grid-template-areas:
         "header header" 
         "left-buttons right-buttons"

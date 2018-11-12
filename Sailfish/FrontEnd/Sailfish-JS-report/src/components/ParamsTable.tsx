@@ -27,7 +27,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
     paramsToNodes(root: ActionParameter) : TableNode {
         return (root.parameters ? {
             ...root,
-            parameters: root.parameters.map(this.paramsToNodes),
+            parameters: root.parameters.map(parameter => this.paramsToNodes(parameter)),
             isCollapsed: false
         } : root)
     }

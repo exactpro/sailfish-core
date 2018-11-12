@@ -19,12 +19,16 @@ export default class ExpandablePanel extends Component<IPanelProps, IPanelState>
         };
     }
 
+    expandePanel() {
+        this.setState({isCollapsed: !this.state.isCollapsed})
+    }
+
     render({ header, body }: IPanelProps, { isCollapsed }: IPanelState) {
         return (<div class="expandable-panel-root">
-            <div class="expandable-panel-header" onClick={() => {
-                this.setState({ isCollapsed: !this.state.isCollapsed })
-            }}>
-                <h5>{isCollapsed ? "+" : "-"}</h5>
+            <div class="expandable-panel-header">
+                <div class="expandable-panel-header-icon" onClick={() => this.expandePanel()}>
+                    <h5>{isCollapsed ? "+" : "-"}</h5>
+                </div>
                 {header}
             </div>
             {isCollapsed ?

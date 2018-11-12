@@ -1,7 +1,6 @@
 import { h, Component } from "preact";
 import "../styles/styles.scss";
 import { testCase } from "../test/testCase";
-import ActionCard from "./ActionCard";
 import TestCaseLayout from "./TestCaseLayout";
 
 export class App extends Component<{}, {}> {
