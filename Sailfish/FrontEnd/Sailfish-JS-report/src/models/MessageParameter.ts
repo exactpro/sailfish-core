@@ -1,7 +1,7 @@
 export default interface MessageParameter {
-    Name: string;
-    Expected?: string;
-    Actual?: string;
-    Result?: string;
-    SubParameters?: Array<MessageParameter>;
+    name: string;
+    expected?: string;
+    actual?: string;
+    result?: string;
+    parameters?: Array<MessageParameter>;
 }

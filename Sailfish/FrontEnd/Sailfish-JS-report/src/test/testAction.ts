@@ -1,110 +1,110 @@
 import Action from '../models/Action';
 export const testAction : Action = {
-      "StartTime": "2018-08-17T11:36:16.003+01:00",
-      "Name": "8 eni1 send MassQuote",
-      "Description": "Send one-sided quote",
-      "InputParameters": {
-          "Name": "MassQuote",
-          "SubParameters": [
+      "uuid": "6ab515a9-5f6a-4773-b7df-b2e80ec9108e",
+      "startTime": "2018-08-17T11:36:16.003+01:00",
+      "name": "8 eni1 send MassQuote",
+      "relatedMessages": ["95259138-c905-4863-8189-d93bc8808660"],
+      "description": "Send one-sided quote",
+          "parameters": [
               {
-                "Name": "QuoteResponseLevel",
-                "Value": "2"
+                "name": "QuoteResponseLevel",
+                "value": "2"
               },
               {
-                "Name": "QuotePublishMode",
-                "Value": "2"
+                "name": "QuotePublishMode",
+                "value": "2"
               },
               {
-                "Name": "QuoteID",
-                "Value": "1534502176319"
+                "name": "QuoteID",
+                "value": "1534502176319"
               },
               {
-                "Name": "TransactTime",
-                "Value": "2018-08-17T10:36:16.003000000"
+                "name": "TransactTime",
+                "value": "2018-08-17T10:36:16.003000000"
               },
               {
-                "Name": "NoQuoteSets",
-                "SubParameters": [{
-                    "Name": "0",
-                    "SubParameters": [
+                "name": "NoQuoteSets",
+                "parameters": [{
+                    "name": "0",
+                    "parameters": [
                         {
-                          "Name": "QuoteSetID",
-                          "Value": "153450217631901"
+                          "name": "QuoteSetID",
+                          "value": "153450217631901"
                         },
                         {
-                          "Name": "NoQuoteEntries",
-                          "SubParameters" : [
+                          "name": "NoQuoteEntries",
+                          "parameters" : [
                               {
-                                "Name": "0",
-                                "SubParameters": [
+                                "name": "0",
+                                "parameters": [
                                     {
-                                      "Name": "BidNotionalAmount",
-                                      "Value": "200"
+                                      "name": "BidNotionalAmount",
+                                      "value": "200"
                                     },
                                     {
-                                      "Name": "QuoteEntryID",
-                                      "Value": "153450217631901:1"
+                                      "name": "QuoteEntryID",
+                                      "value": "153450217631901:1"
                                     },
                                     {
-                                      "Name": "BidPx",
-                                      "Value": "1.45"
+                                      "name": "BidPx",
+                                      "value": "1.45"
                                     },
                                     {
-                                      "Name": "Currency",
-                                      "Value": "EUR"
+                                      "name": "Currency",
+                                      "value": "EUR"
                                     },
                                     {
-                                      "Name": "NotionalCurrency",
-                                      "Value": "EUR"
+                                      "name": "NotionalCurrency",
+                                      "value": "EUR"
                                     },
                                     {
-                                      "Name": "SecurityID",
-                                      "Value": "120000011"
+                                      "name": "SecurityID",
+                                      "value": "120000011"
                                     },
                                     {
-                                      "Name": "SecurityIDSource",
-                                      "Value": "8"
+                                      "name": "SecurityIDSource",
+                                      "value": "8"
                                     },
                                     {
-                                      "Name": "BidSize",
-                                      "Value": "1000"
+                                      "name": "BidSize",
+                                      "value": "1000"
                                     }
                                   ]
                               },
                               {
-                                "Name": "1",
-                                "SubParameters": [
+                                "name": "1",
+                                "parameters": [
                                     {
-                                      "Name": "OfferNotionalAmount",
-                                      "Value": "200"
+                                      "name": "OfferNotionalAmount",
+                                      "value": "200"
                                     },
                                     {
-                                      "Name": "OfferPx",
-                                      "Value": "1.55"
+                                      "name": "OfferPx",
+                                      "value": "1.55"
                                     },
                                     {
-                                      "Name": "OfferSize",
-                                      "Value": "2000"
+                                      "name": "OfferSize",
+                                      "value": "2000"
                                     },
                                     {
-                                      "Name": "QuoteEntryID",
-                                      "Value": "153450217631901:2"
+                                      "name": "QuoteEntryID",
+                                      "value": "153450217631901:2"
                                     },
                                     {
-                                      "Name": "Currency",
-                                      "Value": "EUR"
+                                      "name": "Currency",
+                                      "value": "EUR"
                                     },
                                     {
-                                      "Name": "NotionalCurrency",
-                                      "Value": "EUR"
+                                      "name": "NotionalCurrency",
+                                      "value": "EUR"
                                     },
                                     {
-                                      "Name": "SecurityID",
-                                      "Value": "120000011"
+                                      "name": "SecurityID",
+                                      "value": "120000011"
                                     },
                                     {
-                                      "Name": "SecurityIDSource",
-                                      "Value": "8"
+                                      "name": "SecurityIDSource",
+                                      "value": "8"
                                     }
                                   ]
                               }
@@ -114,47 +114,45 @@ export const testAction : Action = {
                 }]
               }
             ]
-      },
-      "Status": {
-          "Status": "PASSED"
-      },
-      "FinishTime": "2018-08-17T11:36:16.005+01:00",
-      "ComparsionParameters": [
+      ,
+      "status": "PASSED",
+      "finishTime": "2018-08-17T11:36:16.005+01:00",
+      "verifications": [
           {
-              "Name": "testFlat",
-              "Expected": "4",
-              "Actual": "4",
-              "Result": "PASSED"
+              "name": "testFlat",
+              "expected": "4",
+              "actual": "4",
+              "result": "PASSED"
           },
           {
-              "Name": "testFlat2",
-              "Expected": "null",
-              "Actual": "3",
-              "Result": "NA"
+              "name": "testFlat2",
+              "expected": "null",
+              "actual": "3",
+              "result": "NA"
           },
           {
-              "Name": "testContained",
-              "SubParameters": [
+              "name": "testContained",
+              "parameters": [
                 {
-                    "Name": "testFlat",
-                    "Expected": "4",
-                    "Actual": "4",
-                    "Result": "PASSED"
+                    "name": "testFlat",
+                    "expected": "4",
+                    "actual": "4",
+                    "result": "PASSED"
                 },
                 {
-                    "Name": "testFlat2",
-                    "Expected": "null",
-                    "Actual": "3",
-                    "Result": "NA"
+                    "name": "testFlat2",
+                    "expected": "null",
+                    "actual": "3",
+                    "result": "NA"
                 },
                 {
-                    "Name": "testSub",
-                    "SubParameters": [
+                    "name": "testSub",
+                    "parameters": [
                         {
-                            "Name": "someResult",
-                            "Expected": "blabla",
-                            "Actual": "blablabla",
-                            "Result": "FAILED"
+                            "name": "someresult",
+                            "expected": "blabla",
+                            "actual": "blablabla",
+                            "result": "FAILED"
                         }
                     ]
                 }

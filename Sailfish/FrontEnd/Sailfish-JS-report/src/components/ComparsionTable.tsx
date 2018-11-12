@@ -24,41 +24,41 @@ export default class ComparsionTable extends Component<IComTableProps, IComTable
     }
 
     paramsToNodes(root: MessageParameter) : TableNode {
-        return root.SubParameters ? {
+        return root.parameters ? {
             ...root,
-            SubParameters: root.SubParameters.map((param) => this.paramsToNodes(param)),
+            parameters: root.parameters.map((param) => this.paramsToNodes(param)),
             isCollapsed: false
         } : root;
     }
 
     renderParams(root: TableNode, padding: number = 1) {
 
-        return (root.SubParameters ? ([
+        return (root.parameters ? ([
             <tr class="table-row-toogler">
                 <td onClick={() => this.tooglerClick(root)}
                     colSpan={4}>
                     <p style={{ marginLeft: 10 * padding }}>
-                        {(root.isCollapsed ? "+  " : "-  ") + root.Name}
+                        {(root.isCollapsed ? "+  " : "-  ") + root.name}
                     </p>
                 </td>
             </tr>,
             root.isCollapsed ? null :
-                root.SubParameters.map(
+                root.parameters.map(
                     (param) => this.renderParams(param, padding + 1) as Element)
         ]
         ) : (
                 <tr class="table-row-value">
                     <td style={{ paddingLeft: 10 * padding }}> 
-                        {root.Name}
+                        {root.name}
                     </td>
                     <td style={{ paddingLeft: 10 * padding }}>
-                        {root.Expected}
+                        {root.expected}
                     </td>
                     <td style={{ paddingLeft: 10 * padding }}>
-                        {root.Actual}
+                        {root.actual}
                     </td>
                     <td style={{ paddingLeft: 10 * padding }}>
-                        {root.Result}
+                        {root.result}
                     </td>
                 </tr>
             )

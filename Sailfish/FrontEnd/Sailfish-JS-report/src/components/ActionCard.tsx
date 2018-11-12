@@ -18,7 +18,7 @@ export default class ActionCard extends Component<ICardProps, ICardState> {
     constructor(props: ICardProps) {
         super(props);
         this.state = {
-            status: props.action.Status.toLowerCase()
+            status: props.action.status.toLowerCase()
         };
     }
 

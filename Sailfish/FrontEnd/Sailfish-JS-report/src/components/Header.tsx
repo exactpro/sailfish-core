@@ -2,29 +2,27 @@ import {h} from 'preact';
 import '../styles/styles.scss'
 
 export const Header = ({
-    Name,
-    Status,
-    Time,
-    StartTime,
-    FinishTime,
-    Id,
-    Hash,
-    Description,
+    name,
+    status,
+    startTime,
+    finishTime,
+    id,
+    hash,
+    description,
     nextHandler,
     prevHandler
 } : {
-    Name: string,
-    Status: string,
-    Time: string,
-    StartTime: string,
-    FinishTime: string,
-    Id: string,
-    Hash: string,
-    Description: string,
+    name: string,
+    status: string,
+    startTime: string,
+    finishTime: string,
+    id: number,
+    hash: number,
+    description: string,
     nextHandler?: Function,
     prevHandler?: Function
 }) => {
-    const statusClass = "header-status " + Status.toLowerCase();
+    const statusClass = "header-status " + status.toLowerCase();
 
     return(
         <div class="header-root">
@@ -37,7 +35,7 @@ export const Header = ({
                 </div>
                 <div class="header-status-name">
                     <h1>{'<'}</h1>
-                    <h1>{Name} — {Status} — {Time}</h1>
+                    <h1>{name} — {status}</h1>
                     <h1>{'>'}</h1>
                 </div>
                 <div class="header-status-button">
@@ -50,15 +48,15 @@ export const Header = ({
             <div class="header-description">
                 <div class="header-description-element">
                     <span>Start:</span>
-                    <p>{StartTime}</p>
+                    <p>{startTime}</p>
                     <span>Finish:</span>
-                    <p>{FinishTime}</p>
+                    <p>{finishTime}</p>
                     <span>ID:</span>
-                    <p>{Id}</p>
+                    <p>{id}</p>
                     <span>Hash:</span>
-                    <p>{Hash}</p>
+                    <p>{hash}</p>
                     <span>Description:</span>
-                    <p>{Description}</p>
+                    <p>{description}</p>
                 </div>
             </div>
         </div>

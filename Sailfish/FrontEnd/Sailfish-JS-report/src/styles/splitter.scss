@@ -1,0 +1,24 @@
+#splitter-root  {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template: 100% / 1fr 15px auto;
+    grid-template-areas: "left-pane splitter-bar right-pane"
+}
+
+.splitter-bar {
+    grid-area: splitter-bar;
+    height: 100%;
+    background-color: gray;
+    cursor: col-resize;
+}
+
+#left-pane {
+    grid-area: left-pane;
+    height: 100%;
+}
+
+#right-pane {
+    grid-area: right-pane;
+    height: 100%;
+}

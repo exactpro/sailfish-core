@@ -6,8 +6,9 @@ export default interface Action {
     name: string;
     startTime: string;
     description?: string;
-    Status: string;
-    FinishTime: string;
+    status: string;
+    finishTime?: string;
     parameters?: Array<ActionParameter>;
     verifications?: Array<MessageParameter>; 
+    relatedMessages?: Array<string>;
 }

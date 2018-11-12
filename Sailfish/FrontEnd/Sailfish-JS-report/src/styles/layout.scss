@@ -1,0 +1,33 @@
+.layout-root {
+    display: grid;
+    height: 100%;
+    grid-template: 70px 65px auto / 1fr 1fr;
+    grid-template-areas:
+        "header header" 
+        "left-buttons right-buttons"
+        "main-content main-content";
+    
+
+}
+
+.layout-header {
+    grid-area: header;
+}
+
+.layout-left-buttons {
+    grid-area: left-buttons;
+}
+
+.layout-right-buttons {
+    grid-area: right-buttons;
+}
+
+.layout-content {
+    grid-area: main-content;
+
+    &.split {
+        
+    }
+
+    
+}
