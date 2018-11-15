@@ -1,7 +1,7 @@
 import { h, Component } from 'preact';
 import { Header } from './Header';
 import { SplitView } from './SplitView'
-import ActionsList from './ActionsList';
+import { ActionsList } from './ActionsList';
 import TestCase from '../models/TestCase';
 import {MessagesTable} from './MessagesTable';
 import Message from '../models/Message';
@@ -48,7 +48,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 <div class="layout-content split">
                         <SplitView>
                             <ActionsList {...testCase}
-                                onSelect={(id) => this.actionSelectedHandler(id)}/>
+                                onSelect={(id) => this.actionSelectedHandler(id)}
+                                selectedActionId={selectedActionId}/>
                             <MessagesTable messages={testCase.messages}
                                 selectedActionID={selectedActionId}/>
                         </SplitView>
