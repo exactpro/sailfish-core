@@ -3,9 +3,10 @@ import Message from '../models/Message';
 
 interface TableProps {
     messages: Array<Message>;
+    selectedActionID: string;
 }
 
-export const MessagesTable = ({messages}: TableProps) => {
+export const MessagesTable = ({messages, selectedActionID}: TableProps) => {
     return(
         <div class="messages-table-root">
             <table>
@@ -19,15 +20,58 @@ export const MessagesTable = ({messages}: TableProps) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {messages.map(message => renderRow(message))}
+                    {renderRows(messages, selectedActionID)}
                 </tbody>
             </table>
         </div>
     )
 }
 
-const renderRow = ({timestamp, from, to, msgName, contentHumanReadable, status}: Message) : JSX.Element => {
-    const className = "messages-table-row " + ( status ? status.toLowerCase() : "");
+const renderRows = (messages: Array<Message>, actionId: string) : Array<JSX.Element> => {
+    console.log(messages)
+    console.log(actionId)
+    const relatedMessages = messages.filter(message => 
+        message.relatedActions.includes(actionId));
+    if (!relatedMessages.length) {
+        return messages.map(message => getRow(message));
+    }
+
+    const renderElements = [];
+    let includesPrev = relatedMessages.includes(messages[-1]);
+    let includesCurrent = relatedMessages.includes(messages[0]);
+    let includesNext = relatedMessages.includes(messages[1]);
+
+    for(let i = 0; i < messages.length; i++) {
+        includesNext = relatedMessages.includes(messages[i+1]);
+        if (includesCurrent) {
+            if (includesPrev) {
+                if (includesNext) {
+                    renderElements.push(getRow(messages[i], ["selected"]));
+                } else {
+                    renderElements.push(getRow(messages[i], ["selected", "last"]));
+                }
+            } else {
+                if (includesNext) {
+                    renderElements.push(getRow(messages[i], ["selected", "first"]));
+                } else {
+                    renderElements.push(getRow(messages[i], ["selected", "first", "last"]));
+                }
+            }
+        } else {
+            renderElements.push(getRow(messages[i]));
+        }
+
+        includesPrev = includesCurrent;
+        includesCurrent = includesNext;
+    }
+
+    return renderElements;
+}
+
+const getRow = ({timestamp, from, to, msgName, contentHumanReadable, status}: Message, atributes = []) : JSX.Element => {
+    let className = "messages-table-row " + ( status ? status.toLowerCase() : "");
+    atributes.forEach(attribute => className += ` ${attribute}`)
+
     return (
         <tr class={className}>
             <td>{timestamp}</td>

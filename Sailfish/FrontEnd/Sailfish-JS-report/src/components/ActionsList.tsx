@@ -10,6 +10,7 @@ interface ListState {
 
 interface ListProps {
     actions: Array<Action>;
+    onSelect: (id: string) => void;
 }
 
 export default class ActionsList extends Component<ListProps, ListState> {
@@ -22,6 +23,7 @@ export default class ActionsList extends Component<ListProps, ListState> {
         this.setState({
             selectedActionId: uuid
         });
+        this.props.onSelect(uuid);
     }
 
     render({ actions }: ListProps, { selectedActionId }: ListState) {

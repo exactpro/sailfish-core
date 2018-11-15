@@ -2,15 +2,18 @@
 
 .messages-table-root {
     padding: 5px;
-    width: 100&;
+    width: 100%;
     height: 100%;
+    min-width: 450px;
     overflow-y: scroll;
+    overflow-x: hidden;
 
     table {
         width: 100%;
         table-layout: fixed;
         border: 2px solid transparent;
         word-wrap: break-word;
+        border-collapse: collapse;
     }
 
     th {
@@ -30,22 +33,51 @@
     }
 
     .messages-table-row {
-        &.passesd {
+        td {
+            border-width: 0;
+        }
+
+        &.passed {
             td {
                 background-color: $passedBackgroundColor;
+                border-color: $passedBorderColor;
             }
         }
 
         &.failed {
             td {
                 background-color: $failedBackgroundColor;
+                border-color: $failedBorderColor;
             }
         }
 
         &.conditionaly {
             td {
                 background-color: $conditionalyBackgroundColor;
+                border-color: $conditionalyBorderColor;
             }
         }
+
+        &.selected {
+            td:first-child {
+                border-left-width: 2px;
+            }
+            td:last-child {
+                border-right-width: 2px;
+            }
+
+            &.first {
+                td {
+                    border-top-width: 2px;
+                }
+            }
+
+            &.last {
+                td {
+                    border-bottom-width: 2px;
+                }
+            }
+        }
+        
     }
 }
