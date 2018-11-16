@@ -6,6 +6,7 @@ import TestCase from '../models/TestCase';
 import {MessagesTable} from './MessagesTable';
 import {TogglerButton} from './TogglerButton';
 import Message from '../models/Message';
+import {MessagesCardList} from './MessagesCardList';
 import '../styles/layout.scss'
 import Action from '../models/Action';
 
@@ -71,9 +72,10 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         const statusElement = (<div>
             STATUS
         </div>);
-        const logsElement = (<div>
-            LOGS
-        </div>);
+        const logsElement = (
+            <MessagesCardList {...testCase}
+                selectedActionId={selectedActionId}/>
+        );
 
         let primaryPaneElement;
         let secondaryPaneElement;

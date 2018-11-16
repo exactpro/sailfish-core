@@ -81,3 +81,97 @@
         
     }
 }
+
+.message-card-root {
+    width: 100%;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    margin: 5px 0;
+
+    &.passed {
+        background-color: $passedHeaderColor;
+        border-color: $passedHeaderColor;
+
+        &.selected {
+            border-color: $passedBorderColor;
+        }
+    }
+
+    &.failed {
+        background-color: $failedHederColor;
+        border-color: $failedHederColor;
+
+        &.selected {
+            border-color: $failedBorderColor;
+        }
+    }
+
+    &.conditionaly {
+        background-color: $conditionalyHeaderColor;
+        border-color: $conditionalyHeaderColor;
+
+        &.selected {
+            border-color: $conditionalyBorderColor;
+        }
+    }
+
+
+    .message-card-header {
+        min-height: 45px;
+        display: grid;
+        grid-template: auto / 70px 1fr 1fr 1fr;
+        grid-template-areas: "timestamp name from to";
+
+        &-timestamp, &-from, &-to, &-name {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            margin-left: 5px;
+
+            span {
+                display: block;
+                font-size: 10px;
+                color: $primaryTextColor;
+            }
+
+            p {
+                font-size: 16px;
+                color: $primaryTextColor;
+                margin: 0;
+            }
+        }
+
+        &-timestamp {
+            grid-area: timestamp;
+        }
+
+        &-from {
+            grid-area: from;
+        }
+
+        &-to {
+            grid-area: to;
+        }
+
+        &-name {
+            grid-area: name;
+        }
+    }
+
+    .message-card-content {
+        padding: 7px 10px;
+        height: 100%;
+        background: white;
+
+        p {
+            margin: 0px;
+        }
+    }
+}
+
+.messages-list {
+    overflow-y: scroll;
+    height: 100%;
+    padding: 0 5px;
+}
