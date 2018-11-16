@@ -16,98 +16,26 @@ body {
     }
 }
 
-.header-root {
-    width: 100%;
-    height: 70px;
+.button-root {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 3px;
+    border: 1.5px solid transparent;
+    border-radius: 7px;
+    cursor: pointer;
 
-    .header-status {
-        width: 100%;
-        height: 70%;
-        border: 0px;
+    &.toggled {
+        border-color: black;
         border-radius: 7px;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        h1 {
-            font-weight: bold;
-            display: inline;
-            -webkit-margin-before:0em;
-            -webkit-margin-after:0em;
-        }
-        &.passed {
-            background-color: $passedHeaderColor;
-            h1 {
-                color: $passedTextColor;
-            }
-        }
-        &.failed {
-            background-color: $failedHederColor;
-            h1 {
-                color: $failedTextColor;
-            }
-        }
-        &.conditionaly {
-            background-color: $conditionalyHeaderColor;
-            h1 {
-                color: $conditionalyTextColor;
-            }
-        }
-
-        h3 {
-            font-size: 14px;
-            font-style: normal;
-            display: inline;
-            white-space: nowrap;
-            color: $primaryTextColor;
-            -webkit-margin-before:0em;
-            -webkit-margin-after:0em;
-        }
-
-        .header-status-button {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0px 10px;
-        }
-
-        .header-status-name {
-            width: 100%;
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: center;
-
-            h1 {
-                margin: 0 20px;
-            }
-        }
+        background: transparent;
     }
 
-    .header-description {
-        width: 100%;
-        height: 40%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        .header-description-element {
-            width: auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 10px;
-
-            p {
-                color: black;
-                margin: 0 5px;
-            }
-
-            span {
-                color: gray;
-                margin: 0 5px;
-            }
-        }
+    background: $buttonDisabledBackground;
+    height: 38px;
+    
+    p {
+        color: $primaryTextColor;
+        margin: 0 20px;
     }
-
 }
-

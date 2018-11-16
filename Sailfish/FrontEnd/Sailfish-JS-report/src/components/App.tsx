@@ -22,7 +22,7 @@ export class App extends Component<{}, {}> {
 
     render(props: {}, state: {}) {
         //jsonp load handler
-       // window.loadJsonp = (data) => console.log(data);
+       //window.loadJsonp = (data) => console.log(data);
        const loadedTestCase = {
            ...testCase,
            messages: this.setStatusToMessages(testCase.messages, testCase.actions)

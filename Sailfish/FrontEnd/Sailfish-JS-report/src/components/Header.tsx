@@ -1,29 +1,34 @@
 import {h} from 'preact';
-import '../styles/styles.scss'
+import TestCase  from '../models/TestCase';
+import '../styles/header.scss'
 
 export const Header = ({
     name,
-    status,
-    startTime,
-    finishTime,
-    id,
-    hash,
-    description,
+    testCase,
+    splitMode,
+    splitModeHandler,
     nextHandler,
     prevHandler
 } : {
     name: string,
-    status: string,
-    startTime: string,
-    finishTime: string,
-    id: number,
-    hash: number,
-    description: string,
+    testCase: TestCase,
+    splitMode: boolean,
     nextHandler?: Function,
-    prevHandler?: Function
+    prevHandler?: Function,
+    goTopHandler?: Function,
+    backToListHandler?: Function;
+    splitModeHandler?: Function;
+    filterHandler?: Function;
 }) => {
+    const {
+        status,
+        startTime,
+        finishTime,
+        id,
+        hash,
+        description,
+    } = testCase;
     const statusClass = "header-status " + status.toLowerCase();
-
     return(
         <div class="header-root">
             <div class={statusClass}>
@@ -38,8 +43,8 @@ export const Header = ({
                     <h1>{name} — {status}</h1>
                     <h1>{'>'}</h1>
                 </div>
-                <div class="header-status-button">
-                    <h3>Split Mode</h3>
+                <div class="header-status-button" onClick={e => splitModeHandler()}>
+                    <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>
                 </div>
                 <div class="header-status-button">
                     <h3>View filter</h3>

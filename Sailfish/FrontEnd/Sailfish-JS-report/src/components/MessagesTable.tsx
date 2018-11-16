@@ -28,8 +28,6 @@ export const MessagesTable = ({messages, selectedActionID}: TableProps) => {
 }
 
 const renderRows = (messages: Array<Message>, actionId: string) : Array<JSX.Element> => {
-    console.log(messages)
-    console.log(actionId)
     const relatedMessages = messages.filter(message => 
         message.relatedActions.includes(actionId));
     if (!relatedMessages.length) {
@@ -39,7 +37,7 @@ const renderRows = (messages: Array<Message>, actionId: string) : Array<JSX.Elem
     const renderElements = [];
     let includesPrev = relatedMessages.includes(messages[-1]);
     let includesCurrent = relatedMessages.includes(messages[0]);
-    let includesNext = relatedMessages.includes(messages[1]);
+    let includesNext ;
 
     for(let i = 0; i < messages.length; i++) {
         includesNext = relatedMessages.includes(messages[i+1]);

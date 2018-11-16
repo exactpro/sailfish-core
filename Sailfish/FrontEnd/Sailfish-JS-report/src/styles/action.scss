@@ -9,10 +9,15 @@
     border: 2px solid transparent;
     border-radius: 5px;
 
+    &.selected {
+        transition: border-color 0.5s, background-color 0.5s;
+        -webkit-transition: border-color 0.5s, background-color 0.5s;
+    }
+
     &.passed {
        &.selected {
            background-color: $passedBackgroundColor;
-           border-color: $passedBorderColor;
+           border-color: $passedBorderColor;           
        }
 
         h3 {

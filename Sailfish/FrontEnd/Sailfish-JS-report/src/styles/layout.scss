@@ -1,12 +1,11 @@
 .layout-root {
     display: grid;
     height: 100%;
-    grid-template: 70px 65px calc(100% - 135px) / 1fr 1fr;
+    grid-template: 70px 65px calc(100% - 135px) / 1fr;
     grid-template-areas:
-        "header header" 
-        "left-buttons right-buttons"
-        "main-content main-content";
-    
+        "header" 
+        "buttons"
+        "main-content";
 
 }
 
@@ -14,12 +13,30 @@
     grid-area: header;
 }
 
-.layout-left-buttons {
-    grid-area: left-buttons;
+.layout-buttons {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template: auto / auto 1fr;
+    grid-template-areas: "left right";
+    &.split {
+        grid-template: 1fr / 1fr 1fr;
+    }
 }
 
-.layout-right-buttons {
-    grid-area: right-buttons;
+.layout-buttons-left {
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+    grid-area: left;
+}
+
+.layout-buttons-right {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    grid-area: right;
 }
 
 .layout-content {
