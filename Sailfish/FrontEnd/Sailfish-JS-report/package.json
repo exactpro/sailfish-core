@@ -5,7 +5,9 @@
   "main": "intex.tsx",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "NODE_ENV=production webpack --config webpack.config.js",
+    "dev-build": "NODE_ENV=development webpack --config webpack.dev.config.js",
+    "dev-server": "NODE_ENV=development webpack-dev-server --config webpack.dev.config.js"
   },
   "author": "vladislav.kotelnikov",
   "devDependencies": {

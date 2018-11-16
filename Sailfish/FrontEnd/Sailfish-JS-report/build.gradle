@@ -1,11 +1,19 @@
-task webpack(type: Exec) {
-	commandLine './node_modules/.bin/webpack'
-}
+/*	To get production build files, run './gradlew dependencies buildDev'.
+*	Files will be located at build folder (index.html and bundle.js)
+*/
 
-task npm(type: Exec) {
+task dependencies(type: Exec) {
 	commandLine 'npm', 'install'
 }
 
-task webpackDevServer(type: Exec) {
-	commandLine './node_modules/.bin/webpack-dev-server'
+task buildProd(type: Exec) {
+	commandLine 'npm', 'run', 'build'
+}
+
+task buildDev(type: Exec) {
+	commandLine 'npm', 'run', 'build-dev'
+}
+
+task devServer(type: Exec) {
+	commandLine 'npm', 'run', 'dev-server'
 }

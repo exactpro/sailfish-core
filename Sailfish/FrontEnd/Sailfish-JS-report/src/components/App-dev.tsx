@@ -4,9 +4,9 @@ import TestCaseLayout from "./TestCaseLayout";
 import Message from '../models/Message';
 import Action from '../models/Action';
 import TestCase from "../models/TestCase";
+import {testCase} from '../test/testCase';
 
 interface AppState {
-    isLoading: boolean;
     testCase: TestCase;
 }
 
@@ -15,17 +15,8 @@ export class App extends Component<{}, {}> {
     constructor(props) {
         super(props);
         this.state = {
-            isLoading: true,
-            testCase: null
+            testCase: testCase
         }
-        window['loadJsonp'] = this.loadJsonpHandler.bind(this);
-    }
-
-    loadJsonpHandler(json: TestCase) {
-        this.setState({
-            testCase: json,
-            isLoading: false
-        })
     }
 
     //this function set status of parent action to related messsages
@@ -41,14 +32,7 @@ export class App extends Component<{}, {}> {
         })]
     }
 
-    render(props: {}, {testCase, isLoading}: AppState) {
-        if (isLoading) return (
-            <div class="root">
-                <p>Loading json...</p>
-                <script src="report.js"></script>
-            </div>
-        );
-
+    render(props: {}, {testCase}: AppState) {
         const loadedTestCase = {
             ...testCase,
             messages: this.setStatusToMessages(testCase.messages, testCase.actions)
