@@ -386,7 +386,7 @@ public class HtmlReport implements IScriptReport {
 
             ComparisonResult result = getInitialComparisonResult((IMessage) inputParameters);
             addMachineLearningData(null, result, false);
-    }
+        }
 
     }
 
@@ -403,15 +403,15 @@ public class HtmlReport implements IScriptReport {
     }
 
 
-
     @Override
     public boolean isActionCreated() throws UnsupportedOperationException {
         return currentContext == ContextType.ACTION;
     }
 
     @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
+    public void createAction(String name, String serviceName, String action, String msg, String description,
+            List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
+
         logger.debug("createAction - name: {}, service: {}, action: {}, message: {}, description: {}, parameters: {}, tag: {}", name, serviceName, action, msg, description, inputParameters, tag);
 
         checkContext(ContextType.TESTCASE);
@@ -734,8 +734,7 @@ public class HtmlReport implements IScriptReport {
         closeNode(writer, indentSize);
     }
 
-    private void writeTable(Writer writer, StatusType status, ReportTable table, int indentSize)
-            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    private void writeTable(Writer writer, StatusType status, ReportTable table, int indentSize) throws IOException, TemplateException {
         logger.debug("writeTables - context: {}", currentContext);
 
         createNode(writer, "Table: " + table.getName(), NodeType.INFO, status, MessageLevel.INFO, indentSize);
@@ -748,7 +747,7 @@ public class HtmlReport implements IScriptReport {
         closeNode(writer, indentSize);
     }
 
-    private void writeHeader(Writer writer, String title, boolean withWrapper) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    private void writeHeader(Writer writer, String title, boolean withWrapper) throws IOException, TemplateException {
         logger.debug("writeHeader - context: {}, title: {}, withWrapper: {}", currentContext, title, withWrapper);
 
         TemplateWrapper headerTemplate = templateWrapperFactory.createWrapper("header.ftlh");
@@ -758,7 +757,7 @@ public class HtmlReport implements IScriptReport {
         headerTemplate.write(writer);
     }
 
-    private void writeFooter(Writer writer, boolean withWrapper) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    private void writeFooter(Writer writer, boolean withWrapper) throws IOException, TemplateException {
         logger.debug("writeFooter - context: {}, withWrapper: {}", currentContext, withWrapper);
 
         TemplateWrapper footerTemplate = templateWrapperFactory.createWrapper("footer.ftlh");
@@ -1165,8 +1164,7 @@ public class HtmlReport implements IScriptReport {
     private void copyResources() {
         try {
             for(String resource : PAGE_RESOURCES) {
-                File destinationFile = workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder,
-                                                                      RESOURCE_FOLDER, resource);
+                File destinationFile = workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, RESOURCE_FOLDER, resource);
                 FileUtils.copyURLToFile(getClass().getResource(resource), destinationFile);
             }
         } catch(WorkspaceSecurityException | IOException e) {

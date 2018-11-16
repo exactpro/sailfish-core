@@ -89,12 +89,7 @@ public class XmlStreamReport implements IScriptReport {
      */
     private final List<List<String>> warningsTable = new ArrayList<>();
 
-	private final ThreadLocal<DateFormat> dateFormat = new ThreadLocal<DateFormat>() {
-        @Override
-        protected DateFormat initialValue() {
-            return new SimpleDateFormat("yyyyMMdd-HH:mm:ss.SSS");
-        };
-    };
+	private final ThreadLocal<DateFormat> dateFormat = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyyMMdd-HH:mm:ss.SSS"));
 
 	private class Context {
 

@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.exactpro.sf.util.BugDescription;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class StatusDescription
 {
@@ -26,10 +27,13 @@ public class StatusDescription
 
 	private final String description;
 
+	@JsonIgnore
 	private final Throwable cause;
 
+	@JsonIgnore
 	private final boolean updateTestCaseStatus;
 
+	@JsonIgnore
     private final Set<BugDescription> knownBugs;
 
 	public StatusDescription(StatusType status, String description)
