@@ -12,6 +12,8 @@ import Action from '../models/Action';
 
 interface LayoutProps {
     testCase: TestCase;
+    testCaseName?: string;
+    backToReportHandler: Function;
 }
 
 /**
@@ -20,7 +22,7 @@ interface LayoutProps {
  */
 interface LayoutState {
     messages: Array<Message>;
-    selectedActionId: string;
+    selectedActionId: number;
     isSplitMode: boolean;
     primaryPane: Pane;
     secondaryPane: Pane;
@@ -33,15 +35,28 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     constructor(props: LayoutProps) {
         super(props);
         this.state = {
-            messages: props.testCase.messages,
-            selectedActionId: "",
+            messages: this.setStatusToMessages(props.testCase.messages, props.testCase.actions),
+            selectedActionId: -1,
             isSplitMode: true,
             primaryPane: Pane.Actions,
             secondaryPane: Pane.Messages
         }
     }
 
-    actionSelectedHandler(id: string) {
+    //this function set status of parent action to related messsages
+    setStatusToMessages(messages: Array<Message>, actions: Array<Action>): Array<Message> {
+        return [...messages.map((message) => {
+            const baseAction = actions.find(action =>
+                action.relatedMessages ? 
+                action.relatedMessages.includes(message.id) : false);
+            return {
+                ...message,
+                status: baseAction ? baseAction.status.status : "NA"
+            };
+        })]
+    }
+
+    actionSelectedHandler(id: number) {
         this.setState({
             ...this.state,
             selectedActionId: id
@@ -63,7 +78,9 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         })
     }
 
-    render({testCase} : LayoutProps, {selectedActionId, isSplitMode, primaryPane, secondaryPane} : LayoutState) {
+    render({testCase, backToReportHandler, testCaseName} : LayoutProps,
+        {selectedActionId, isSplitMode, primaryPane, secondaryPane} : LayoutState) {
+
         const actionsElement = (<ActionsList {...testCase}
                 onSelect={(id) => this.actionSelectedHandler(id)}
                 selectedActionId={selectedActionId}/>);
@@ -114,9 +131,10 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 <div class="layout-header">
                     <Header 
                         testCase={testCase}
-                        name="someName"
+                        name={testCaseName ? testCaseName : "TestCase"}
                         splitMode={isSplitMode}
-                        splitModeHandler={() => this.splitModeHandler()}/>
+                        splitModeHandler={() => this.splitModeHandler()}
+                        backToListHandler={() => backToReportHandler()}/>
                 </div>
                 <div class={"layout-buttons" + (isSplitMode ? " split" : "")}>
                     <div class="layout-buttons-left">

@@ -8,7 +8,8 @@ export const Header = ({
     splitMode,
     splitModeHandler,
     nextHandler,
-    prevHandler
+    prevHandler,
+    backToListHandler
 } : {
     name: string,
     testCase: TestCase,
@@ -16,7 +17,7 @@ export const Header = ({
     nextHandler?: Function,
     prevHandler?: Function,
     goTopHandler?: Function,
-    backToListHandler?: Function;
+    backToListHandler: Function;
     splitModeHandler?: Function;
     filterHandler?: Function;
 }) => {
@@ -32,7 +33,8 @@ export const Header = ({
     return(
         <div class="header-root">
             <div class={statusClass}>
-                <div class="header-status-button">
+                <div class="header-status-button"
+                    onClick={e => backToListHandler()}>
                     <h3>Back to list</h3>
                 </div>
                 <div class="header-status-button">

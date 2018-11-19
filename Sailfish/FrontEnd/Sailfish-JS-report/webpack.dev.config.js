@@ -9,7 +9,7 @@ module.exports = {
     watchContentBase: true,
     contentBase: path.join(__dirname, 'src'),
     compress: true,
-    port: 9001
+    port: 9001,
   },
   resolve: {
     extensions: ['.ts', '.js', '.tsx', '.scss']

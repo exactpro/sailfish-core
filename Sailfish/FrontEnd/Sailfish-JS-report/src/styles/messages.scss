@@ -25,7 +25,6 @@
     td {
         border: 2px solid transparent;
         padding: 5px 3px 2px 3px;
-        background-color: $passedBackgroundColor;
     }
 
     th.field {
@@ -119,7 +118,7 @@
     .message-card-header {
         min-height: 45px;
         display: grid;
-        grid-template: auto / 70px 1fr 1fr 1fr;
+        grid-template: auto / 110px 1fr 1fr 1fr;
         grid-template-areas: "timestamp name from to";
 
         &-timestamp, &-from, &-to, &-name {
@@ -174,4 +173,5 @@
     overflow-y: scroll;
     height: 100%;
     padding: 0 5px;
+    word-wrap: break-word;
 }

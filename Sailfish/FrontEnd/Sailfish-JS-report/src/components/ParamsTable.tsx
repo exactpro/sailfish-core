@@ -20,14 +20,14 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
     constructor(props: IParamTableProps) {
         super(props);
         this.state = {
-            collapseParams: props.params.map((param) => this.paramsToNodes(param))
+            collapseParams: props.params ? props.params.map((param) => this.paramsToNodes(param)) : []
         }
     }
 
     paramsToNodes(root: ActionParameter) : TableNode {
-        return (root.parameters ? {
+        return (root.subParameters ? {
             ...root,
-            parameters: root.parameters.map(parameter => this.paramsToNodes(parameter)),
+            subParameters: root.subParameters.map(parameter => this.paramsToNodes(parameter)),
             isCollapsed: false
         } : root)
     }
@@ -39,7 +39,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
 
     renderParams(root: TableNode, padding: number = 1) {
 
-        return (root.parameters ? ([
+        return (root.subParameters && root.subParameters.length !== 0 ? ([
             <tr class="table-row-toogler">
                 <td onClick={() => this.tooglerClick(root)}
                     colSpan={2}>
@@ -49,7 +49,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
                 </td>
             </tr>,
             root.isCollapsed ? null :
-                root.parameters.map(
+                root.subParameters.map(
                     (param) => this.renderParams(param, padding + 1) as Element)
         ]
         ) : (
