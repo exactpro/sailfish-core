@@ -5,18 +5,18 @@ import '../styles/action.scss';
 
 interface ListProps {
     actions: Array<Action>;
-    onSelect: (id: string) => void;
-    selectedActionId: string;
+    onSelect: (id: number) => void;
+    selectedActionId: number;
 }
 
 export const ActionsList = ({ actions, selectedActionId, onSelect }: ListProps) => {
     return (
         <div class="actions-list">
             {actions.map(action => {
-                const className = "card-root " + action.status.toLowerCase() + 
-                    (action.uuid == selectedActionId ? " selected" : "");
+                const className = "card-root " + action.status.status.toLowerCase() + 
+                    (action.id === selectedActionId ? " selected" : "");
                 return (<div class={className}
-                    onClick={e => onSelect(action.uuid)}>
+                    onClick={e => onSelect(action.id)}>
                     <ActionCard action={action} />
                 </div>)
             })}

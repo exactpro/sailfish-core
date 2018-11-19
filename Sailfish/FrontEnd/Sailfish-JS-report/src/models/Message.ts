@@ -1,13 +1,13 @@
 export default interface Message {
-    uuid: string;
-    fields: any;
-    rawContent: string;
-    type: string;
-    relatedActions: Array<string>;
-    timestamp: string;
+    id: string;
+    checkPoint?: any;
+    raw: string;
+    relatedActions?: any;
     from: string;
     to: string;
     msgName: string;
+    content: string;
     contentHumanReadable: string;
+    timestamp: string;
     status?: string;
 }

@@ -1,16 +1,18 @@
 import Action from "./Action";
 import Message from "./Message";
+import Log from "./Log";
 
 export default interface TestCase {
-    actions: Array<Action>;
-    logs: Array<any>;
-    messages: Array<Message>;
-    bugs: Array<any>;
+    statuses: any[];
+    actions: Action[];
+    logs: Log[];
+    messages: Message[];
+    bugs: any[];
     type: string;
-    reference: string;
+    reference?: any;
     order: number;
     matrixOrder: number;
-    id: number;
+    id: string;
     hash: number;
     description: string;
     status: string;

@@ -20,7 +20,7 @@ export default class ComparsionTable extends Component<IComTableProps, IComTable
     constructor(props: IComTableProps) {
         super(props);
         this.state = {
-            nodes: props.params.map((param) => this.paramsToNodes(param))
+            nodes: props.params ? props.params.map((param) => this.paramsToNodes(param)) : []
         }
     }
 

@@ -1,14 +1,16 @@
 import TestCase from "./TestCase";
 
 export default interface Report {
+    alerts: any[];
     startTime: string;
-    endTime: string;
+    finishTime: string;
     plugins: any;
-    testCases: Array<TestCase>;
+    testCases: TestCase[];
+    bugs: any[];
     hostName: string;
     userName: string;
     name: string;
-    srciptRunId: string;
+    scriptRunId: number;
     version: string;
     branchName: string;
     description: string;

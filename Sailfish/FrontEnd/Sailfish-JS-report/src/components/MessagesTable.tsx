@@ -3,7 +3,7 @@ import Message from '../models/Message';
 
 interface TableProps {
     messages: Array<Message>;
-    selectedActionID: string;
+    selectedActionID: number;
 }
 
 export const MessagesTable = ({messages, selectedActionID}: TableProps) => {
@@ -27,9 +27,9 @@ export const MessagesTable = ({messages, selectedActionID}: TableProps) => {
     )
 }
 
-const renderRows = (messages: Array<Message>, actionId: string) : Array<JSX.Element> => {
+const renderRows = (messages: Array<Message>, actionId: number) : Array<JSX.Element> => {
     const relatedMessages = messages.filter(message => 
-        message.relatedActions.includes(actionId));
+        message.relatedActions ? message.relatedActions.includes(actionId) : false);
     if (!relatedMessages.length) {
         return messages.map(message => getRow(message));
     }

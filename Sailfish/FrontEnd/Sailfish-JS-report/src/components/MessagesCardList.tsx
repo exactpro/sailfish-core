@@ -5,7 +5,7 @@ import '../styles/messages.scss';
 
 interface MessagesListProps {
     messages: Array<Message>;
-    selectedActionId: string;
+    selectedActionId: number;
 }
 
 export const MessagesCardList = ({messages, selectedActionId}: MessagesListProps) => {
@@ -13,7 +13,8 @@ export const MessagesCardList = ({messages, selectedActionId}: MessagesListProps
         <div class="messages-list">
             {messages.map(message => <MessageCard 
                 message={message}
-                isSelected={message.relatedActions.includes(selectedActionId)}/>)}
+                isSelected={message.relatedActions ? 
+                    message.relatedActions.includes(selectedActionId) : false}/>)}
         </div>
     )
 }
