@@ -79,18 +79,18 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     }
 
     render({testCase, backToReportHandler, testCaseName} : LayoutProps,
-        {selectedActionId, isSplitMode, primaryPane, secondaryPane} : LayoutState) {
+        {selectedActionId, isSplitMode, primaryPane, secondaryPane, messages} : LayoutState) {
 
-        const actionsElement = (<ActionsList {...testCase}
+        const actionsElement = (<ActionsList actions={testCase.actions}
                 onSelect={(id) => this.actionSelectedHandler(id)}
                 selectedActionId={selectedActionId}/>);
-        const messagesElement = (<MessagesTable messages={testCase.messages}
+        const messagesElement = (<MessagesTable messages={messages}
             selectedActionID={selectedActionId}/>);
         const statusElement = (<div>
             STATUS
         </div>);
         const logsElement = (
-            <MessagesCardList {...testCase}
+            <MessagesCardList messages={messages}
                 selectedActionId={selectedActionId}/>
         );
 

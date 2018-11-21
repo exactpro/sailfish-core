@@ -1,6 +1,6 @@
 import {h} from 'preact';
 import Message from '../models/Message';
-import {MessageCard} from './MessageCard';
+import MessageCard from './MessageCard';
 import '../styles/messages.scss';
 
 interface MessagesListProps {

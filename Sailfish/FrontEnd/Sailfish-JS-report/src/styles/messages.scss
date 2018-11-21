@@ -159,12 +159,44 @@
     }
 
     .message-card-content {
-        padding: 7px 10px;
+        position: relative;
+        padding: 7px 10px 26px 10px;
         height: 100%;
         background: white;
 
+        &.passed {
+            background-color: $passedBackgroundColor;
+        }
+    
+        &.failed {
+            background-color: $failedBackgroundColor;
+        }
+    
+        &.conditionaly {
+            background-color: $conditionalyBackgroundColor;
+        }
+
         p {
             margin: 0px;
+        }
+
+        &-human {
+
+        }
+
+        &-raw {
+            margin-top: 10px;
+            font-family: monospace;
+            line-height: 20px;
+        }
+
+        &-showraw {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            color: $primaryTextColor;
         }
     }
 }
