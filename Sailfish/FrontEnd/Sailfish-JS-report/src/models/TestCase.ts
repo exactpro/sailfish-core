@@ -3,6 +3,7 @@ import Message from "./Message";
 import Log from "./Log";
 
 export default interface TestCase {
+    name?: string;
     statuses: any[];
     actions: Action[];
     logs: Log[];

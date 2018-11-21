@@ -1,16 +1,13 @@
 import { h, Component } from "preact";
 import "../styles/styles.scss";
 import TestCaseLayout from "./TestCaseLayout";
-import Message from '../models/Message';
-import Action from '../models/Action';
 import Report from '../models/Report';
 import TestCase from "../models/TestCase";
-import {ReportLayout} from '../components/ReportLayout'
+import ReportLayout from '../components/ReportLayout'
 
 interface AppState {
     report: Report;
     selectedTestCase: TestCase;
-    selectedTestCaseName: string;
     isLoading: boolean;
 }
 
@@ -27,30 +24,34 @@ export class App extends Component<{}, {}> {
         window['loadJsonp'] = this.loadJsonpHandler.bind(this);
     }
 
-    onTestCaseSelected(testCase: TestCase, name: string) {
+    onTestCaseSelected(testCase: TestCase) {
         this.setState({
             ...this.state,
             selectedTestCase: testCase,
-            selectedTestCaseName: name
         })
     }
 
     backToReport() {
         this.setState({
             ...this.state,
-            selectedTestCase: null,
-            selectedTestCaseName: ""
+            selectedTestCase: null
         })
     }
 
-    loadJsonpHandler(json: Report) {
+    loadJsonpHandler(jsonReport: Report) {
+        let count = 0;
         this.setState({
-            report: json,
+            report: {
+                ...jsonReport,
+                testCases: jsonReport.testCases.map(testCase => {
+                    return {...testCase, name: "TestCase" + count++}
+                })
+            },
             isLoading: false
         })
     }
 
-    render(props: {}, {report, selectedTestCase, selectedTestCaseName, isLoading}: AppState) {
+    render(props: {}, {report, selectedTestCase, isLoading}: AppState) {
         if (isLoading) return (
             <div class="root">
                 <p>Loading json...</p>
@@ -63,10 +64,9 @@ export class App extends Component<{}, {}> {
             {
                 selectedTestCase ?
                 (<TestCaseLayout testCase={selectedTestCase}
-                    backToReportHandler={() => this.backToReport()}
-                    testCaseName={selectedTestCaseName}/>) : 
+                    backToReportHandler={() => this.backToReport()}/>) : 
                 (<ReportLayout report={report}
-                    onTestCaseSelect={(testCase, name) => this.onTestCaseSelected(testCase, name)}/>)
+                    onTestCaseSelect={(testCase) => this.onTestCaseSelected(testCase)}/>)
             }
         </div>
         );

@@ -1,9 +1,7 @@
 import { h, Component } from "preact";
 import "../styles/styles.scss";
 import TestCaseLayout from "./TestCaseLayout";
-import {ReportLayout} from './ReportLayout';
-import Message from '../models/Message';
-import Action from '../models/Action';
+import ReportLayout from './ReportLayout';
 import TestCase from "../models/TestCase";
 import {testReport} from '../test/testReport';
 import Report from "../models/Report";
@@ -18,18 +16,23 @@ export class App extends Component<{}, {}> {
 
     constructor(props) {
         super(props);
+        let count = 1;
         this.state = {
-            report: testReport,
+            report: {
+                ...testReport,
+                testCases: testReport.testCases.map(testCase => {
+                    return {...testCase, name:"TestCase" + count++}
+                })
+            },
             selectedTestCase: null,
             selectedTestCaseName: ""
         }
     }
 
-    onTestCaseSelected(testCase: TestCase, name: string) {
+    onTestCaseSelected(testCase: TestCase) {
         this.setState({
             ...this.state,
             selectedTestCase: testCase,
-            selectedTestCaseName: name
         })
     }
 
@@ -48,10 +51,9 @@ export class App extends Component<{}, {}> {
                 {
                     selectedTestCase ?
                     (<TestCaseLayout testCase={selectedTestCase}
-                        backToReportHandler={() => this.backToReport()}
-                        testCaseName={selectedTestCaseName}/>) : 
+                        backToReportHandler={() => this.backToReport()}/>) : 
                     (<ReportLayout report={report}
-                        onTestCaseSelect={(testCase, name) => this.onTestCaseSelected(testCase, name)}/>)
+                        onTestCaseSelect={(testCase) => this.onTestCaseSelected(testCase)}/>)
                 }
             </div>
         );

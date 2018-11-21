@@ -12,7 +12,6 @@ import Action from '../models/Action';
 
 interface LayoutProps {
     testCase: TestCase;
-    testCaseName?: string;
     backToReportHandler: Function;
 }
 
@@ -78,7 +77,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         })
     }
 
-    render({testCase, backToReportHandler, testCaseName} : LayoutProps,
+    render({testCase, backToReportHandler} : LayoutProps,
         {selectedActionId, isSplitMode, primaryPane, secondaryPane, messages} : LayoutState) {
 
         const actionsElement = (<ActionsList actions={testCase.actions}
@@ -131,7 +130,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 <div class="layout-header">
                     <Header 
                         testCase={testCase}
-                        name={testCaseName ? testCaseName : "TestCase"}
+                        name={testCase.name ? testCase.name : "TestCase"}
                         splitMode={isSplitMode}
                         splitModeHandler={() => this.splitModeHandler()}
                         backToListHandler={() => backToReportHandler()}/>
