@@ -65,6 +65,26 @@
 .card-body {
     display: block;
     box-sizing: border-box;
+
+    &-verification {
+        &.passed {
+            h4 {
+                color: $passedTextColor;
+            }
+        }
+
+        &.failed {
+            h4 {
+                color: $failedTextColor;
+            }
+        }
+
+        &.conditionaly {
+            h4 {
+                color: $conditionalyTextColor;
+            }
+        }
+    }
 }
 
 .table-root {

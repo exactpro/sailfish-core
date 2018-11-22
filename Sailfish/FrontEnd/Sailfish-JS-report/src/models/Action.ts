@@ -1,5 +1,6 @@
 import ActionParameter from "./ActionParameter"; 
-import MessageParameter from "./MessageParameter";
+import Status from './Status';
+import Verification from './Verification';
 
 export default interface Action {
     id: number;
@@ -8,15 +9,11 @@ export default interface Action {
     description: string;
     parameters: ActionParameter[];
     relatedMessages: number[];
-    verifications?: any;
+    verifications?: Verification[];
     subActions?: Action[];
     logs?: any;
     startTime: string;
     finishTime: string;
-    status: {
-        status: string;
-        reason: string;
-        details?: any;
-    };
+    status: Status;
     subNodes?: any;
 }

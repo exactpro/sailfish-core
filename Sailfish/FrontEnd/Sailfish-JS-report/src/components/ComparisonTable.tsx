@@ -1,16 +1,16 @@
 import { h, Component } from "preact";
-import MessageParameter from "../models/MessageParameter";
+import Entry from "../models/Entry";
 import "../styles/messages.scss"
 
 export interface IComTableProps {
-    params: Array<MessageParameter>;
+    params: Array<Entry>;
 }
 
 interface IComTableState {
     nodes: Array<TableNode>;
 }
 
-interface TableNode extends MessageParameter {
+interface TableNode extends Entry {
     //is subnodes hidden
     isCollapsed?: boolean;
 }
@@ -24,17 +24,17 @@ export default class ComparsionTable extends Component<IComTableProps, IComTable
         }
     }
 
-    paramsToNodes(root: MessageParameter) : TableNode {
-        return root.parameters ? {
+    paramsToNodes(root: Entry) : TableNode {
+        return root.subEntries ? {
             ...root,
-            parameters: root.parameters.map((param) => this.paramsToNodes(param)),
+            subEntries: root.subEntries.map((param) => this.paramsToNodes(param)),
             isCollapsed: false
         } : root;
     }
 
     renderParams(root: TableNode, padding: number = 1) {
 
-        return (root.parameters ? ([
+        return (root.subEntries ? ([
             <tr class="table-row-toogler">
                 <td onClick={() => this.tooglerClick(root)}
                     colSpan={4}>
@@ -44,7 +44,7 @@ export default class ComparsionTable extends Component<IComTableProps, IComTable
                 </td>
             </tr>,
             root.isCollapsed ? null :
-                root.parameters.map(
+                root.subEntries.map(
                     (param) => this.renderParams(param, padding + 1) as Element)
         ]
         ) : (
@@ -59,7 +59,7 @@ export default class ComparsionTable extends Component<IComTableProps, IComTable
                         {root.actual}
                     </td>
                     <td style={{ paddingLeft: 10 * padding }}>
-                        {root.result}
+                        {root.status}
                     </td>
                 </tr>
             )

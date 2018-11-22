@@ -83,14 +83,13 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         const actionsElement = (<ActionsList actions={testCase.actions}
                 onSelect={(id) => this.actionSelectedHandler(id)}
                 selectedActionId={selectedActionId}/>);
-        const messagesElement = (<MessagesTable messages={messages}
-            selectedActionID={selectedActionId}/>);
+        const messagesElement = (<MessagesCardList messages={messages}
+            selectedActionId={selectedActionId}/>);
         const statusElement = (<div>
             STATUS
         </div>);
         const logsElement = (
-            <MessagesCardList messages={messages}
-                selectedActionId={selectedActionId}/>
+            <div>LOGS</div>
         );
 
         let primaryPaneElement;
