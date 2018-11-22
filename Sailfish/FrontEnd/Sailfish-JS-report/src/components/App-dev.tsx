@@ -21,7 +21,7 @@ export class App extends Component<{}, {}> {
             report: {
                 ...testReport,
                 testCases: testReport.testCases.map(testCase => {
-                    return {...testCase, name:"TestCase" + count++}
+                    return {...testCase, name: testCase.name || "TestCase" + count++}
                 })
             },
             selectedTestCase: null,

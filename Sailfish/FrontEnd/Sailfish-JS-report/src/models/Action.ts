@@ -7,7 +7,7 @@ export default interface Action {
     name: string;
     description: string;
     parameters: ActionParameter[];
-    relatedMessages: string[];
+    relatedMessages: number[];
     verifications?: any;
     subActions?: Action[];
     logs?: any;
@@ -18,4 +18,5 @@ export default interface Action {
         reason: string;
         details?: any;
     };
+    subNodes?: any;
 }

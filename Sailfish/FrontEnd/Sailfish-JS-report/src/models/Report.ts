@@ -1,7 +1,7 @@
 import TestCase from "./TestCase";
 
 export default interface Report {
-    alerts: any[];
+    alerts?: any[];
     startTime: string;
     finishTime: string;
     plugins: any;

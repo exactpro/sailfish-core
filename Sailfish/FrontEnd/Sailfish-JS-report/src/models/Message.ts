@@ -1,5 +1,5 @@
 export default interface Message {
-    id: string;
+    id: number;
     checkPoint?: any;
     raw: string;
     relatedActions?: any;

@@ -20,4 +20,5 @@ export default interface TestCase {
     statusDescription: string;
     startTime: string;
     finishTime: string;
+    verifications?: any[];
 }

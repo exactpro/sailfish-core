@@ -14,7 +14,8 @@ export const MessagesCardList = ({messages, selectedActionId}: MessagesListProps
             {messages.map(message => <MessageCard 
                 message={message}
                 isSelected={message.relatedActions ? 
-                    message.relatedActions.includes(selectedActionId) : false}/>)}
+                    message.relatedActions.includes(selectedActionId) : false}
+                key={message.id}/>)}
         </div>
     )
 }

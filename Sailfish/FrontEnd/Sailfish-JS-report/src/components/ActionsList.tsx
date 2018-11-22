@@ -16,8 +16,9 @@ export const ActionsList = ({ actions, selectedActionId, onSelect }: ListProps) 
                 const className = "card-root " + action.status.status.toLowerCase() + 
                     (action.id === selectedActionId ? " selected" : "");
                 return (<div class={className}
-                    onClick={e => onSelect(action.id)}>
-                    <ActionCard action={action} />
+                    onClick={e => onSelect(action.id)}
+                    key={action.id}>
+                    <ActionCard action={action}/>
                 </div>)
             })}
         </div>)
