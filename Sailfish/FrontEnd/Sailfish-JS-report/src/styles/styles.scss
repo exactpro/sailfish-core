@@ -1,10 +1,20 @@
 @import "vars";
-
+@font-face{
+    font-family: 'Open sans';
+    font-weight: normal;
+    src: url('../../resources/fonts/open-sans-v15-latin-regular.woff')
+}
+@font-face {
+    font-family: 'Open sans';
+    font-weight: bold;
+    src: url('../../resources/fonts/open-sans-v15-latin-600.woff')
+}
 body {
     margin: 0;
 }
 
 .root {
+    font-family: Open sans;
     display: block;
     box-sizing: border-box;
     width: 100vw;

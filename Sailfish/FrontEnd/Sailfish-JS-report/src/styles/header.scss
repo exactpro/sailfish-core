@@ -65,6 +65,34 @@
             h1 {
                 margin: 0 20px;
             }
+
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-size: 100%;
+
+                &.left {
+                    &.disabled {
+                        background-image: url(../../resources/icons/arr1-left-disabled.svg);
+                    }
+
+                    &.enabled {
+                        background-image: url(../../resources/icons/arr1-left-enabled.svg);
+                        cursor: pointer;
+                    }
+                }
+
+                &.right {
+                    &.disabled {
+                        background-image: url(../../resources/icons/arr1-right-disabled.svg);
+                    }
+
+                    &.enabled {
+                        background-image: url(../../resources/icons/arr1-right-enabled.svg);
+                        cursor: pointer;
+                    }
+                }
+            }
         }
     }
 

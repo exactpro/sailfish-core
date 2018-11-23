@@ -31,7 +31,7 @@ export const ActionCard = ({ action }: CardProps) => {
                             name={name}/>
                 </ExpandablePanel>
                 {
-                    verifications.map(verification => renderVerification(verification))
+                    verifications && verifications.map(verification => renderVerification(verification))
                 }
             </div>
         </ExpandablePanel>)

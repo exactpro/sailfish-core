@@ -9,10 +9,9 @@ import Report from "../models/Report";
 interface AppState {
     report: Report;
     selectedTestCase: TestCase;
-    selectedTestCaseName: string;
 }
 
-export class App extends Component<{}, {}> {
+export class App extends Component<{}, AppState> {
 
     constructor(props) {
         super(props);
@@ -21,40 +20,58 @@ export class App extends Component<{}, {}> {
             report: {
                 ...testReport,
                 testCases: testReport.testCases.map(testCase => {
-                    return {...testCase, name: testCase.name || "TestCase" + count++}
+                    return {...testCase, name: testCase.name || "TEST CASE " + count++}
                 })
             },
             selectedTestCase: null,
-            selectedTestCaseName: ""
         }
     }
 
-    onTestCaseSelected(testCase: TestCase) {
+    selectTestCase(testCase: TestCase) : void {
         this.setState({
             ...this.state,
             selectedTestCase: testCase,
         })
     }
 
-    backToReport() {
+    backToReport() : void {
         this.setState({
             ...this.state,
-            selectedTestCase: null,
-            selectedTestCaseName: ""
+            selectedTestCase: null
         })
     }
 
-    render(props: {}, {selectedTestCase, report, selectedTestCaseName}: AppState) {
+    getNextTestCase() : TestCase {
+        const currentId = this.state.report.testCases.findIndex(
+            testCase => testCase == this.state.selectedTestCase);
+        
+        return currentId != this.state.report.testCases.length - 1 &&
+            this.state.report.testCases[currentId + 1];
+    }
+
+    getPrevTestCase() : TestCase {
+        const currentId = this.state.report.testCases.findIndex(
+            testCase => testCase == this.state.selectedTestCase);
+        
+        return currentId != 0 && this.state.report.testCases[currentId - 1];
+    }
+
+    render(props: {}, {selectedTestCase, report}: AppState) {
+
+        if (!selectedTestCase) {
+            return (<ReportLayout report={report}
+                onTestCaseSelect={(testCase) => this.selectTestCase(testCase)}/>);
+        }
+
+        const next = this.getNextTestCase(),
+            prev = this.getPrevTestCase();
 
         return(
             <div class="root">
-                {
-                    selectedTestCase ?
-                    (<TestCaseLayout testCase={selectedTestCase}
-                        backToReportHandler={() => this.backToReport()}/>) : 
-                    (<ReportLayout report={report}
-                        onTestCaseSelect={(testCase) => this.onTestCaseSelected(testCase)}/>)
-                }
+                <TestCaseLayout testCase={selectedTestCase}
+                    backToReportHandler={() => this.backToReport()}
+                    nextHandler={next ? () => this.selectTestCase(next) : null}
+                    prevHandler={prev ? () => this.selectTestCase(prev) : null}/>
             </div>
         );
     };

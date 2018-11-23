@@ -11,31 +11,16 @@ interface AppState {
     isLoading: boolean;
 }
 
-export class App extends Component<{}, {}> {
+export class App extends Component<{}, AppState> {
 
     constructor(props) {
         super(props);
         this.state = {
             report: null,
             selectedTestCase: null,
-            selectedTestCaseName: "",
             isLoading: true
         }
         window['loadJsonp'] = this.loadJsonpHandler.bind(this);
-    }
-
-    onTestCaseSelected(testCase: TestCase) {
-        this.setState({
-            ...this.state,
-            selectedTestCase: testCase,
-        })
-    }
-
-    backToReport() {
-        this.setState({
-            ...this.state,
-            selectedTestCase: null
-        })
     }
 
     loadJsonpHandler(jsonReport: Report) {
@@ -51,6 +36,35 @@ export class App extends Component<{}, {}> {
         })
     }
 
+    selectTestCase(testCase: TestCase) : void {
+        this.setState({
+            ...this.state,
+            selectedTestCase: testCase,
+        })
+    }
+
+    backToReport() : void {
+        this.setState({
+            ...this.state,
+            selectedTestCase: null
+        })
+    }
+
+    getNextTestCase() : TestCase {
+        const currentId = this.state.report.testCases.findIndex(
+            testCase => testCase == this.state.selectedTestCase);
+        
+        return currentId != this.state.report.testCases.length - 1 &&
+            this.state.report.testCases[currentId + 1];
+    }
+
+    getPrevTestCase() : TestCase {
+        const currentId = this.state.report.testCases.findIndex(
+            testCase => testCase == this.state.selectedTestCase);
+        
+        return currentId != 0 && this.state.report.testCases[currentId - 1];
+    }
+
     render(props: {}, {report, selectedTestCase, isLoading}: AppState) {
         if (isLoading) return (
             <div class="root">
@@ -59,16 +73,21 @@ export class App extends Component<{}, {}> {
             </div>
         );
 
+        if (!selectedTestCase) {
+            return (<ReportLayout report={report}
+                onTestCaseSelect={(testCase) => this.selectTestCase(testCase)}/>);
+        }
+
+        const next = this.getNextTestCase(),
+            prev = this.getPrevTestCase();
+
         return(
             <div class="root">
-            {
-                selectedTestCase ?
-                (<TestCaseLayout testCase={selectedTestCase}
-                    backToReportHandler={() => this.backToReport()}/>) : 
-                (<ReportLayout report={report}
-                    onTestCaseSelect={(testCase) => this.onTestCaseSelected(testCase)}/>)
-            }
-        </div>
+                <TestCaseLayout testCase={selectedTestCase}
+                    backToReportHandler={() => this.backToReport()}
+                    nextHandler={next ? () => this.selectTestCase(next) : null}
+                    prevHandler={prev ? () => this.selectTestCase(prev) : null}/>
+            </div>
         );
     };
 }

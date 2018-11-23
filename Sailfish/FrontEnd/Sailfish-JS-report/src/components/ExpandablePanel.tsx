@@ -25,7 +25,6 @@ export default class ExpandablePanel extends Component<IPanelProps, IPanelState>
     }
 
     render({ header, body, children }: IPanelProps, { isCollapsed }: IPanelState) {
-        console.log(isCollapsed);
         return (<div class="expandable-panel-root">
             <div class="expandable-panel-header">
                 <div class="expandable-panel-header-icon" onClick={() => this.expandePanel()}>

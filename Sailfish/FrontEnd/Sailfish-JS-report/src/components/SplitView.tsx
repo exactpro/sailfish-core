@@ -32,13 +32,11 @@ export class SplitView extends Component<{}, SplitState> {
     }
 
     splitterMouseDown(e: MouseEvent) {
-        console.log("down")
         window.addEventListener("mousemove", this.onMouseMove);
         this.lastPosition = e.clientX
     }
 
     splitterMouseUp(e: MouseEvent) {
-        console.log("up")
         window.removeEventListener("mousemove", this.onMouseMove);
     }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Icons/arrrrrr2</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M29,55.7060399 L29,23.5075493 C29,21.2780149 31.6934201,20.1614959 33.268614,21.7379862 L49.3546198,37.8372315 C50.3310674,38.8144828 50.3310674,40.3991064 49.3546198,41.3763577 L33.268614,57.475603 C31.6934201,59.0522184 29,57.9355743 29,55.7060399 Z" id="path-1"></path>
+    </defs>
+    <g id="Icons/arrrrrr2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use>
+    </g>
+</svg>

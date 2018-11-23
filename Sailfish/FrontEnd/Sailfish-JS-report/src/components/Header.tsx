@@ -1,6 +1,7 @@
 import {h} from 'preact';
 import TestCase  from '../models/TestCase';
-import '../styles/header.scss'
+import '../styles/header.scss';
+
 
 export const Header = ({
     name,
@@ -29,7 +30,10 @@ export const Header = ({
         hash,
         description,
     } = testCase;
-    const statusClass = "header-status " + status.toLowerCase();
+    const statusClass = "header-status " + status.toLowerCase(),
+        prevButtonClas = ["header-status-name-icon", "left", (prevHandler ? "enabled" : "disabled")].join(' '),
+        nextButtonClass = ["header-status-name-icon", "right", (nextHandler ? "enabled" : "disabled")].join(' ');
+    
     return(
         <div class="header-root">
             <div class={statusClass}>
@@ -41,9 +45,11 @@ export const Header = ({
                     <h3>Go top</h3>
                 </div>
                 <div class="header-status-name">
-                    <h1>{'<'}</h1>
+                    <div class={prevButtonClas}
+                        onClick={prevHandler ? () => prevHandler() : null}/>
                     <h1>{name} — {status}</h1>
-                    <h1>{'>'}</h1>
+                    <div class={nextButtonClass}
+                        onClick={nextHandler ? () => nextHandler() : null}/>
                 </div>
                 <div class="header-status-button" onClick={e => splitModeHandler()}>
                     <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>

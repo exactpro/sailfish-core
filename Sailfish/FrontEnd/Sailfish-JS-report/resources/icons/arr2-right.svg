@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Icons/arrrr3</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M35.8173206,16.66 L38.5928824,13.8821539 C39.7681203,12.7059487 41.6685049,12.7059487 42.8312402,13.8821539 L67.1361595,38.1945644 C68.3113974,39.3707695 68.3113974,41.2727183 67.1361595,42.4364106 L42.8312402,66.761334 C41.6560024,67.9375391 39.7556177,67.9375391 38.5928824,66.761334 L35.8173206,63.9834878 C34.6295802,62.7947698 34.6545853,60.8552826 35.8673307,59.6915903 L50.93288,45.3268722 L15.0006073,45.3268722 C13.3377708,45.3268722 12,43.9880004 12,42.3237952 L12,38.3196926 C12,36.6554875 13.3377708,35.3166156 15.0006073,35.3166156 L50.93288,35.3166156 L35.8673307,20.9518975 C34.6420828,19.7882052 34.6170777,17.848718 35.8173206,16.66 Z" id="path-1"></path>
+    </defs>
+    <g id="Icons/arrrr3" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use>
+    </g>
+</svg>

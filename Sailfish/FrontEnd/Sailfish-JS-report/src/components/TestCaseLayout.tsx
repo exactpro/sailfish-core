@@ -13,6 +13,8 @@ import Action from '../models/Action';
 interface LayoutProps {
     testCase: TestCase;
     backToReportHandler: Function;
+    nextHandler?: Function;
+    prevHandler?: Function;
 }
 
 /**
@@ -77,7 +79,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         })
     }
 
-    render({testCase, backToReportHandler} : LayoutProps,
+    render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
         {selectedActionId, isSplitMode, primaryPane, secondaryPane, messages} : LayoutState) {
 
         const actionsElement = (<ActionsList actions={testCase.actions}
@@ -132,7 +134,9 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                         name={testCase.name ? testCase.name : "TestCase"}
                         splitMode={isSplitMode}
                         splitModeHandler={() => this.splitModeHandler()}
-                        backToListHandler={() => backToReportHandler()}/>
+                        backToListHandler={() => backToReportHandler()}
+                        nextHandler={nextHandler}
+                        prevHandler={prevHandler}/>
                 </div>
                 <div class={"layout-buttons" + (isSplitMode ? " split" : "")}>
                     <div class="layout-buttons-left">

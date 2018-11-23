@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Icons/ar1 Copy</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M71,0 L9,0 C3.8375,0 0,3.8375 0,9 L0,71 C0,76.1625 3.8375,80 9,80 L71,80 C76.1625,80 80,76.1625 80,71 L80,9 C80,3.8375 76.1625,0 71,0 Z M72,72 L9,72 L9,9 L72,9 L72,72 Z M64,29 L34,59 C32.9054798,60.2123224 31.5570466,60.2069535 31,59 L15,43 C13.7894245,42.144938 13.7947487,40.7851775 15,40 L19,36 C19.4969281,35.0814491 20.8453614,35.0868179 22,36 L32,47 L57,22 C58.2060837,20.7876776 59.5545169,20.7930465 60,22 L64,26 C65.2105536,26.5429474 65.2052295,27.9027079 64,29 Z" id="path-1"></path>
+    </defs>
+    <g id="Icons/ar1-Copy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use>
+    </g>
+</svg>
