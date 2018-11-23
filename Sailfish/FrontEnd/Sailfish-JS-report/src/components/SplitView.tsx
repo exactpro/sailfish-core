@@ -51,7 +51,9 @@ export class SplitView extends Component<{}, SplitState> {
                     {props.children[0]}
                 </div>
                 <div class="splitter-bar" onMouseDown={(e) => this.splitterMouseDown(e)}
-                    onMouseUp={e => this.splitterMouseUp(e)}/>
+                    onMouseUp={e => this.splitterMouseUp(e)}>
+                    <div class="splitter-bar-icon"/>
+                </div>
                 <div id="right-pane" ref={pane => this.rightPane = pane}
                     style={{width: rightPaneWidth}}>
                     {props.children[1]}
@@ -60,24 +62,3 @@ export class SplitView extends Component<{}, SplitState> {
         )
     }
 } 
-
-export const SplitViewFun = (props) => {
-    const initWidth = window.innerWidth / 2;
-    console.log(initWidth)
-    return (
-        <div id="splitter-root">
-            <div id="left-pane">
-                {props.children[0]}
-            </div>
-            <div class="splitter-bar" onClick={() => {
-                console.log(this.rightPane)
-                console.log(this.rightPane.style);
-                this.rightPane.style.width = "100px";
-            }}/>
-            <div id="right-pane" ref={pane => this.rightPane = pane}
-                style={{width: initWidth}}>
-                {props.children[1]}
-            </div>
-        </div>
-    )
-}

@@ -188,21 +188,40 @@
         &-raw {
             margin-top: 10px;
             font-family: monospace;
-            line-height: 20px;
+            line-height: 10px;
         }
 
         &-showraw {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: absolute;
             bottom: 5px;
             right: 5px;
             cursor: pointer;
             font-size: 13px;
             color: $primaryTextColor;
+
+            &-icon {
+                height: 14px;
+                width: 14px;
+                background-size: 100%;
+                margin-left: 5px;
+                
+                &.expanded {
+                    background-image: url(../../resources/icons/arr4-up.svg);
+                }
+
+                &.hidden {
+                    background-image: url(../../resources/icons/arr4-down.svg);
+                }
+            }
         }
     }
 }
 
 .messages-list {
+    @include scrollbar;
     overflow-y: scroll;
     height: 100%;
     padding: 0 5px;

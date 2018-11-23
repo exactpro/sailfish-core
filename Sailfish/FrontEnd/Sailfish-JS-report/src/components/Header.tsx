@@ -39,9 +39,11 @@ export const Header = ({
             <div class={statusClass}>
                 <div class="header-status-button"
                     onClick={e => backToListHandler()}>
+                    <div class="header-status-button-icon list"/>
                     <h3>Back to list</h3>
                 </div>
                 <div class="header-status-button">
+                    <div class="header-status-button-icon gotop"/>
                     <h3>Go top</h3>
                 </div>
                 <div class="header-status-name">
@@ -52,9 +54,11 @@ export const Header = ({
                         onClick={nextHandler ? () => nextHandler() : null}/>
                 </div>
                 <div class="header-status-button" onClick={e => splitModeHandler()}>
+                    <div class="header-status-button-icon mode"/>
                     <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>
                 </div>
                 <div class="header-status-button">
+                    <div class="header-status-button-icon filter"/>
                     <h3>View filter</h3>
                 </div>
             </div>

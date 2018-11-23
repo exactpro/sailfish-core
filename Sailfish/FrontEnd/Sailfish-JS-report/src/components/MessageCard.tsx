@@ -30,12 +30,10 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
     render({message, isSelected}: MessageCardProps, {showRaw}: MessageCardState) {
         const {
             msgName, status, timestamp, from, to, contentHumanReadable, raw
-        } = message;
-        const rootClass = "message-card-root " + 
-            (status ? status.toLowerCase() : "") + 
-            (isSelected ? " selected" : "");
-        const contentClass = "message-card-content " + 
-            (status ? status.toLowerCase() : "");
+        } = message,
+        rootClass = ["message-card-root", (status || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
+        contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),
+        showRawClass = ["message-card-content-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
 
         return(
             <div class={rootClass}>
@@ -65,14 +63,15 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
                         (<div class="message-card-content-raw">
                             <span class="title">Raw message</span>
                             {raw.split('\n').map((row) => {
-                                return <p>{row}<br/></p>
+                                return <pre>{row}<br/></pre>
                             })}
                         </div>)
                         : null
                     }
                     <div class="message-card-content-showraw"
                         onClick={e => this.showRaw()}>
-                        <span class="expand-button">{showRaw ? "Hide row" : "Show row"}</span>
+                        <span>{showRaw ? "Hide raw" : "Show raw"}</span>
+                        <div class={showRawClass}/>
                     </div>
                 </div>
             </div>

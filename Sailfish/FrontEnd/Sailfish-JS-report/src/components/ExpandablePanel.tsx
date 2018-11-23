@@ -4,39 +4,39 @@ import "../styles/panel.scss"
 interface IPanelProps {
     header?: JSX.Element;
     body?: JSX.Element;
-    isCollapsed?: boolean;
+    isExpanded?: boolean;
     children: JSX.Element[];
 }
 
 interface IPanelState {
-    isCollapsed: boolean;
+    isExpanded: boolean;
 }
 
 export default class ExpandablePanel extends Component<IPanelProps, IPanelState> {
     constructor(props: IPanelProps) {
         super(props);
         this.state = {
-            isCollapsed: props.isCollapsed !== undefined ? props.isCollapsed : true
+            isExpanded: props.isExpanded !== undefined ? props.isExpanded : false
         };
     }
 
     expandePanel() {
-        this.setState({isCollapsed: !this.state.isCollapsed})
+        this.setState({isExpanded: !this.state.isExpanded})
     }
 
-    render({ header, body, children }: IPanelProps, { isCollapsed }: IPanelState) {
+    render({ header, body, children }: IPanelProps, { isExpanded }: IPanelState) {
+        const iconClass = ["expandable-panel-header-icon", (isExpanded ? "expanded" : "hidden")].join(' ');
         return (<div class="expandable-panel-root">
             <div class="expandable-panel-header">
-                <div class="expandable-panel-header-icon" onClick={() => this.expandePanel()}>
-                    <h5>{isCollapsed ? "+" : "-"}</h5>
-                </div>
+                <div class={iconClass} 
+                    onClick={() => this.expandePanel()}/>
                 {header || children[0]}
             </div>
-            {isCollapsed ?
-                null :
+            {isExpanded ?
                 <div className="expandable-panel-body">
                         {body || children.slice(1)}
-                </div>}
+                </div>
+                : null}
         </div>)
     }
 }

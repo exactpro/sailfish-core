@@ -1,14 +1,6 @@
 @import "vars";
 
-.card-root {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: auto;
-    padding: 10px 10px 10px 20px;
-    border: 2px solid transparent;
-    border-radius: 5px;
-
+@mixin selectable {
     &.selected {
         transition: border-color 0.5s, background-color 0.5s;
         -webkit-transition: border-color 0.5s, background-color 0.5s;
@@ -46,6 +38,17 @@
             color: $conditionalyTextColor;
         }
     }
+}
+
+.card-root {
+    @include selectable;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    padding: 10px 10px 10px 20px;
+    border: 2px solid transparent;
+    border-radius: 5px;
 }
 
 
@@ -129,6 +132,7 @@
 }
 
 .actions-list {
+    @include scrollbar;
     height: 100%;
     overflow-y: scroll;
 }

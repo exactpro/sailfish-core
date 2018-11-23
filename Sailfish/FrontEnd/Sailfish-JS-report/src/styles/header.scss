@@ -12,24 +12,29 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+
         h1 {
             font-weight: bold;
             display: inline;
             -webkit-margin-before:0em;
             -webkit-margin-after:0em;
+            font-size: 20px;
         }
+
         &.passed {
             background-color: $passedHeaderColor;
             h1 {
                 color: $passedTextColor;
             }
         }
+
         &.failed {
             background-color: $failedHederColor;
             h1 {
                 color: $failedTextColor;
             }
         }
+
         &.conditionaly {
             background-color: $conditionalyHeaderColor;
             h1 {
@@ -53,6 +58,29 @@
             align-items: center;
             padding: 0px 10px;
             cursor: pointer;
+
+            &-icon {
+                background-size: 100%;
+                width: 15px;
+                height: 15px;
+                margin-right: 12px;
+
+                &.list {
+                    background-image: url('../../resources/icons/list.svg');
+                }    
+
+                &.gotop {
+                    background-image: url('../../resources/icons/arr2-up.svg');
+                }
+
+                &.mode {
+                    background-image: url('../../resources/icons/split.svg');
+                }
+
+                &.filter {
+                    background-image: url('../../resources/icons/filter.svg');
+                }
+            }
         }
 
         .header-status-name {

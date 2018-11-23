@@ -9,17 +9,23 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    align-items: center;
     min-height: 40px;
 
-    h5 {
-        margin: 5px 5px;
-        font-weight: bold;
-        font-size: 30px;
-        min-width: 40px;
-    }
-
     .expandable-panel-header-icon {
+        height: 15px;
+        width: 15px;
         cursor: pointer;
+        background-size: 100%;
+        margin-right: 15px;
+
+        &.expanded {
+            background-image: url(../../resources/icons/expand-on.svg);
+        }
+
+        &.hidden {
+            background-image: url(../../resources/icons/expand-off.svg);
+        }
     }
 }
 
