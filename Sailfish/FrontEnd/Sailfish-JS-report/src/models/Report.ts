@@ -5,7 +5,7 @@ export default interface Report {
     startTime: string;
     finishTime: string;
     plugins: any;
-    testCases: TestCase[];
+    testCases?: TestCase[];
     bugs: any[];
     hostName: string;
     userName: string;
@@ -14,4 +14,7 @@ export default interface Report {
     version: string;
     branchName: string;
     description: string;
+    exception?: string;
+    outcomes?: any;
+    testCaseLinks?: string[];
 }

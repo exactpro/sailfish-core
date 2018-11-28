@@ -30,7 +30,7 @@ export const Header = ({
         hash,
         description,
     } = testCase;
-    const statusClass = "header-status " + status.toLowerCase(),
+    const statusClass = "header-status " + status.status.toLowerCase(),
         prevButtonClas = ["header-status-name-icon", "left", (prevHandler ? "enabled" : "disabled")].join(' '),
         nextButtonClass = ["header-status-name-icon", "right", (nextHandler ? "enabled" : "disabled")].join(' ');
     
@@ -49,7 +49,7 @@ export const Header = ({
                 <div class="header-status-name">
                     <div class={prevButtonClas}
                         onClick={prevHandler ? () => prevHandler() : null}/>
-                    <h1>{name} — {status}</h1>
+                    <h1>{name} — {status.status}</h1>
                     <div class={nextButtonClass}
                         onClick={nextHandler ? () => nextHandler() : null}/>
                 </div>
