@@ -18,3 +18,7 @@ export default interface Report {
     outcomes?: any;
     testCaseLinks?: string[];
 }
+
+export function isReport(report: Report | TestCase): report is Report {
+    return (<Report>report).testCaseLinks !== undefined;
+}

@@ -60,7 +60,7 @@ export class App extends Component<{}, AppState> {
 
         if (!selectedTestCase) {
             return (<ReportLayout report={report}
-                onTestCaseSelect={(testCase) => this.selectTestCase(testCase)}/>);
+                onTestCaseSelect={(testCase) => this.selectTestCase(null)}/>);
         }
 
         const next = this.getNextTestCase(),

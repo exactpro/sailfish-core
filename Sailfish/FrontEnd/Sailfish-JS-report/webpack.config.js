@@ -44,5 +44,6 @@ module.exports = {
       title: "Sailfish reports",
       template: "src/index.html"
     })
-  ]
+  ],
+  watch: true
 };

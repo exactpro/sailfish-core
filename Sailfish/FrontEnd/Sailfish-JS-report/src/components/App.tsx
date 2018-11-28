@@ -1,14 +1,15 @@
 import { h, Component } from "preact";
 import "../styles/styles.scss";
 import TestCaseLayout from "./TestCaseLayout";
-import Report from '../models/Report';
+import Report, { isReport } from '../models/Report';
 import TestCase from "../models/TestCase";
-import ReportLayout from '../components/ReportLayout'
+import ReportLayout from '../components/ReportLayout';
 
 interface AppState {
     report: Report;
     selectedTestCase: TestCase;
     isLoading: boolean;
+    currentTestCasePath: string;
 }
 
 export class App extends Component<{}, AppState> {
@@ -18,76 +19,84 @@ export class App extends Component<{}, AppState> {
         this.state = {
             report: null,
             selectedTestCase: null,
-            isLoading: true
+            isLoading: true,
+            currentTestCasePath: null
         }
         window['loadJsonp'] = this.loadJsonpHandler.bind(this);
     }
 
-    loadJsonpHandler(jsonReport: Report) {
-        let count = 0;
-        this.setState({
-            report: {
-                ...jsonReport,
-                testCases: jsonReport.testCases.map(testCase => {
-                    return {...testCase, name: "TestCase" + count++}
-                })
-            },
-            isLoading: false
-        })
+    loadJsonpHandler(jsonp: Report | TestCase) {
+        if (isReport(jsonp)) {
+            this.setState({
+                ...this.state,
+                report: (jsonp as Report),
+                isLoading: false
+            })
+        } else {
+            this.setState({
+                ...this.state,
+                selectedTestCase: (jsonp as TestCase)
+            })
+        }
     }
 
-    selectTestCase(testCase: TestCase) : void {
+    setTestCasePath(testCaseName: string) : void {
         this.setState({
             ...this.state,
-            selectedTestCase: testCase,
-        })
+            currentTestCasePath: testCaseName,
+            selectedTestCase: null
+        });
     }
 
     backToReport() : void {
         this.setState({
             ...this.state,
-            selectedTestCase: null
-        })
+            currentTestCasePath: null
+        });
     }
 
-    getNextTestCase() : TestCase {
-        const currentId = this.state.report.testCases.findIndex(
-            testCase => testCase == this.state.selectedTestCase);
-        
-        return currentId != this.state.report.testCases.length - 1 &&
-            this.state.report.testCases[currentId + 1];
+    getNextTestCasePath() : string {
+        const currentIndex = this.state.report.testCaseLinks.indexOf(this.state.currentTestCasePath);
+        return this.state.report.testCaseLinks[currentIndex + 1];
     }
 
-    getPrevTestCase() : TestCase {
-        const currentId = this.state.report.testCases.findIndex(
-            testCase => testCase == this.state.selectedTestCase);
-        
-        return currentId != 0 && this.state.report.testCases[currentId - 1];
+    getPrevTestCasePath() : string {
+        const currentIndex = this.state.report.testCaseLinks.indexOf(this.state.currentTestCasePath);
+        return currentIndex !== 0 && this.state.report.testCaseLinks[currentIndex - 1];
     }
 
-    render(props: {}, {report, selectedTestCase, isLoading}: AppState) {
+    render(props: {}, {report, selectedTestCase, isLoading, currentTestCasePath}: AppState) {
         if (isLoading) return (
             <div class="root">
                 <p>Loading json...</p>
-                <script src="report.js"></script>
+                <script src="report/report.js"></script>
             </div>
         );
 
-        if (!selectedTestCase) {
+        if (!currentTestCasePath) {
             return (<ReportLayout report={report}
-                onTestCaseSelect={(testCase) => this.selectTestCase(testCase)}/>);
+                onTestCaseSelect={(testCase) => this.setTestCasePath(testCase)}/>);
         }
 
-        const next = this.getNextTestCase(),
-            prev = this.getPrevTestCase();
+        if (selectedTestCase) {
+            const next = this.getNextTestCasePath(),
+                prev = this.getPrevTestCasePath();
 
-        return(
+            return (
+                <div class="root">
+                    <TestCaseLayout testCase={selectedTestCase}
+                        backToReportHandler={() => this.backToReport()}
+                        nextHandler={next ? () => this.setTestCasePath(next) : null}
+                        prevHandler={prev ? () => this.setTestCasePath(prev) : null}/>
+                </div>
+            );
+        }
+
+        return (
             <div class="root">
-                <TestCaseLayout testCase={selectedTestCase}
-                    backToReportHandler={() => this.backToReport()}
-                    nextHandler={next ? () => this.selectTestCase(next) : null}
-                    prevHandler={prev ? () => this.selectTestCase(prev) : null}/>
+                <p>Loading json...</p>
+                <script src={"report/" + currentTestCasePath}></script>
             </div>
-        );
+        )
     };
 }
