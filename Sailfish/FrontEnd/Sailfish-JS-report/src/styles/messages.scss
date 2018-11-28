@@ -81,11 +81,17 @@
     }
 }
 
-.message-card-root {
+.message-card {
     width: 100%;
     border: 2px solid transparent;
     border-radius: 5px;
     margin: 5px 0;
+    border-color: $defaultCardBackground;
+    background: $defaultCardBackground;
+
+    &.selected {
+        border-color: $defaultCardBorderColor;
+    }
 
     &.passed {
         background-color: $passedHeaderColor;
@@ -115,7 +121,7 @@
     }
 
 
-    .message-card-header {
+    &-header {
         min-height: 45px;
         display: grid;
         grid-template: auto / 110px 1fr 1fr 1fr;
@@ -158,7 +164,7 @@
         }
     }
 
-    .message-card-content {
+    &-content {
         position: relative;
         padding: 7px 10px 26px 10px;
         height: 100%;

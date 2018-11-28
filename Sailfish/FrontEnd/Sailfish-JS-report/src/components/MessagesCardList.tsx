@@ -4,17 +4,16 @@ import MessageCard from './MessageCard';
 import '../styles/messages.scss';
 
 interface MessagesListProps {
-    messages: Array<Message>;
-    selectedActionId: number;
+    messages: Message[];
+    selectedMessages: number[];
 }
 
-export const MessagesCardList = ({messages, selectedActionId}: MessagesListProps) => {
+export const MessagesCardList = ({messages, selectedMessages}: MessagesListProps) => {
     return (
         <div class="messages-list">
             {messages.map(message => <MessageCard 
                 message={message}
-                isSelected={message.relatedActions ? 
-                    message.relatedActions.includes(selectedActionId) : false}
+                isSelected={selectedMessages.includes(message.id)}
                 key={message.id}/>)}
         </div>
     )

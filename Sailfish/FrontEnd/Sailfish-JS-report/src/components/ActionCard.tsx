@@ -8,9 +8,11 @@ import Verification from '../models/Verification';
 
 interface CardProps {
     action: Action;
+    onMessageSelect: (id: number) => void;
+    selectedMessage: number;
 }
 
-export const ActionCard = ({ action }: CardProps) => {
+export const ActionCard = ({ action, onMessageSelect, selectedMessage }: CardProps) => {
     const {
         name,
         description,
@@ -19,11 +21,11 @@ export const ActionCard = ({ action }: CardProps) => {
     } = action;
     return (
         <ExpandablePanel>
-            <div class="card-header">
+            <div class="action-card-header">
                 <h3>{name}</h3>
                 <p>{description}</p>
             </div>
-            <div class="card-body">
+            <div class="action-card-body">
                 <ExpandablePanel>
                     <h4>Input parameters</h4>
                         <ParamsTable
@@ -31,18 +33,25 @@ export const ActionCard = ({ action }: CardProps) => {
                             name={name}/>
                 </ExpandablePanel>
                 {
-                    verifications && verifications.map(verification => renderVerification(verification))
+                    verifications && verifications.map(verification => 
+                        renderVerification(verification, onMessageSelect, verification.messageId === selectedMessage))
                 }
             </div>
         </ExpandablePanel>)
 }
 
-const renderVerification = ({name, status, entries}: Verification) => {
-    const className = "card-body-verification " + 
-        (status ? status.status.toLowerCase() : "");
+const renderVerification = ({name, status, entries, messageId}: Verification, 
+    selectHandelr: Function, isSelected: boolean) => {
+
+    const className = ["action-card-body-verification", (status ? status.status.toLowerCase() : ""), 
+        (isSelected ? "selected" : "")].join(' ');
 
     return (
-        <div class={className}>
+        <div class={className}
+            onClick={e => {
+                selectHandelr(messageId);
+                e.cancelBubble = true;
+            }}>
             <ExpandablePanel>
                 <h4>{"Verification — " + name + " — " + status.status}</h4>
                 <CompasionTable params={entries}/>

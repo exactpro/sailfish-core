@@ -19,6 +19,9 @@ $secondaryTextColor: #B5B5B5;
 $tableHeaderBackground: #D8D8D8;
 $buttonDisabledBackground: #E0E0E0;
 
+$defaultCardBorderColor: #666666;
+$defaultCardBackground: #E0E0E0;
+
 @mixin scrollbar {
     &::-webkit-scrollbar {
         background-color:#fff;

@@ -5,6 +5,7 @@ import Message from '../models/Message';
 interface MessageCardProps {
     message: Message;
     isSelected?: boolean;
+    selectedStatus?: string;
 }
 
 interface MessageCardState {
@@ -27,11 +28,11 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
         })
     }
     
-    render({message, isSelected}: MessageCardProps, {showRaw}: MessageCardState) {
+    render({message, isSelected, selectedStatus}: MessageCardProps, {showRaw}: MessageCardState) {
         const {
-            msgName, status, timestamp, from, to, contentHumanReadable, raw
+            msgName, timestamp, from, to, contentHumanReadable, raw
         } = message,
-        rootClass = ["message-card-root", (status || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
+        rootClass = ["message-card", (selectedStatus || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
         contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),
         showRawClass = ["message-card-content-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
 

@@ -22,8 +22,8 @@ interface LayoutProps {
  * @param {Pane} secondaryPane - in split mode - name of right pane
  */
 interface LayoutState {
-    messages: Array<Message>;
     selectedActionId: number;
+    selectedMessages: number[];
     isSplitMode: boolean;
     primaryPane: Pane;
     secondaryPane: Pane;
@@ -36,31 +36,27 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     constructor(props: LayoutProps) {
         super(props);
         this.state = {
-            messages: this.setStatusToMessages(props.testCase.messages, props.testCase.actions),
             selectedActionId: -1,
+            selectedMessages: [],
             isSplitMode: true,
             primaryPane: Pane.Actions,
             secondaryPane: Pane.Messages
         }
     }
 
-    //this function set status of parent action to related messsages
-    setStatusToMessages(messages: Array<Message>, actions: Array<Action>): Array<Message> {
-        return [...messages.map((message) => {
-            const baseAction = actions.find(action =>
-                action.relatedMessages ? 
-                action.relatedMessages.includes(message.id) : false);
-            return {
-                ...message,
-                status: baseAction ? baseAction.status.status : "NA"
-            };
-        })]
-    }
-
-    actionSelectedHandler(id: number) {
+    actionSelectedHandler(action: Action) {
         this.setState({
             ...this.state,
-            selectedActionId: id
+            selectedActionId: action.id,
+            selectedMessages: action.relatedMessages
+        });
+    }
+
+    messageSelectedHandler(id: number) {
+        this.setState({
+            ...this.state,
+            selectedActionId: -1,
+            selectedMessages: [id]
         });
     }
 
@@ -80,16 +76,22 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     }
 
     render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
-        {selectedActionId, isSplitMode, primaryPane, secondaryPane, messages} : LayoutState) {
+        {selectedActionId, isSplitMode, primaryPane, secondaryPane, selectedMessages} : LayoutState) {
 
+        // if some action is selected, all messages inside this action should not be highlighted
         const actionsElement = (<ActionsList actions={testCase.actions}
-                onSelect={(id) => this.actionSelectedHandler(id)}
-                selectedActionId={selectedActionId}/>);
-        const messagesElement = (<MessagesCardList messages={messages}
-            selectedActionId={selectedActionId}/>);
+                onSelect={action => this.actionSelectedHandler(action)}
+                selectedActionId={selectedActionId}
+                onMessageSelect={id => this.messageSelectedHandler(id)}
+                selectedMessage={selectedActionId >= 0 ? -1 : selectedMessages[0]}/>);
+
+        const messagesElement = (<MessagesCardList messages={testCase.messages}
+            selectedMessages={selectedMessages}/>);
+
         const statusElement = (<div>
             STATUS
         </div>);
+
         const logsElement = (
             <div>LOGS</div>
         );
@@ -127,7 +129,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 break;
         }
         return (
-            <div class="layout-root">
+            <div class="layout">
                 <div class="layout-header">
                     <Header 
                         testCase={testCase}

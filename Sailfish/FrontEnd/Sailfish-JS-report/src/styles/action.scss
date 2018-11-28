@@ -40,51 +40,53 @@
     }
 }
 
-.card-root {
+.action-card {
     @include selectable;
     display: block;
     box-sizing: border-box;
     width: 100%;
     height: auto;
-    padding: 10px 10px 10px 20px;
+    padding: 10px 10px 10px 10px;
     border: 2px solid transparent;
     border-radius: 5px;
-}
 
-
-
-.card-header {
-    h3 {
-        margin: 0;
-    }
-
-    p {
-        font-size: 11px;
-        color: $secondaryTextColor;
-        margin: 2px 0px 0px 5px;
-    }
-}
-
-.card-body {
-    display: block;
-    box-sizing: border-box;
-
-    &-verification {
-        &.passed {
-            h4 {
-                color: $passedTextColor;
-            }
+    &-header {
+        h3 {
+            margin: 0;
         }
 
-        &.failed {
-            h4 {
-                color: $failedTextColor;
-            }
+        p {
+            font-size: 11px;
+            color: $secondaryTextColor;
+            margin: 2px 0px 0px 5px;
         }
+    }
 
-        &.conditionaly {
-            h4 {
-                color: $conditionalyTextColor;
+    &-body {
+        display: block;
+        box-sizing: border-box;
+
+        &-verification {
+            @include selectable();
+            border: 2px solid transparent;
+            border-radius: 5px;
+
+            &.passed {
+                h4 {
+                    color: $passedTextColor;
+                }
+            }
+
+            &.failed {
+                h4 {
+                    color: $failedTextColor;
+                }
+            }
+
+            &.conditionaly {
+                h4 {
+                    color: $conditionalyTextColor;
+                }
             }
         }
     }

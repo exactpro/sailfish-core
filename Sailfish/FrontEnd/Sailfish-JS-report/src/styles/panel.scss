@@ -3,6 +3,7 @@
     box-sizing: border-box;
     width: 100%;
     height: auto;
+    padding-left: 10px;
 }
 
 .expandable-panel-header {
@@ -32,7 +33,7 @@
 .expandable-panel-body {
     display: block;
     padding: 10px;
-
+    
 }
 
 .expandable-panel-body-hidden {
