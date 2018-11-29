@@ -72,7 +72,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             ...this.state,
             primaryPane: isPrimary ? pane : this.state.primaryPane,
             secondaryPane: !isPrimary ? pane : this.state.secondaryPane
-        })
+        });
     }
 
     render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
@@ -83,7 +83,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 onSelect={action => this.actionSelectedHandler(action)}
                 selectedActionId={selectedActionId}
                 onMessageSelect={id => this.messageSelectedHandler(id)}
-                selectedMessage={selectedActionId >= 0 ? -1 : selectedMessages[0]}/>);
+                selectedMessageId={selectedActionId >= 0 ? -1 : selectedMessages[0]}/>);
 
         const messagesElement = (<MessagesCardList messages={testCase.messages}
             selectedMessages={selectedMessages}/>);

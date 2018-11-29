@@ -30,7 +30,7 @@ export class App extends Component<{}, AppState> {
     selectTestCase(testCase: TestCase) : void {
         this.setState({
             ...this.state,
-            selectedTestCase: testCase,
+            selectedTestCase: testCase
         })
     }
 
@@ -39,6 +39,10 @@ export class App extends Component<{}, AppState> {
             ...this.state,
             selectedTestCase: null
         })
+    }
+
+    getByName(testCaseName: string) : TestCase {
+        return this.state.report.testCases.filter(tc => tc.name == testCaseName)[0];
     }
 
     getNextTestCase() : TestCase {
@@ -58,9 +62,12 @@ export class App extends Component<{}, AppState> {
 
     render(props: {}, {selectedTestCase, report}: AppState) {
 
+        console.log(report)
+
         if (!selectedTestCase) {
             return (<ReportLayout report={report}
-                onTestCaseSelect={(testCase) => this.selectTestCase(null)}/>);
+                onTestCaseSelect={(testCase) => this.selectTestCase(
+                    report.testCases[report.testCaseLinks.indexOf(testCase)])}/>);
         }
 
         const next = this.getNextTestCase(),

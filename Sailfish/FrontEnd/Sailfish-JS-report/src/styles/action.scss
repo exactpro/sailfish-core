@@ -46,9 +46,13 @@
     box-sizing: border-box;
     width: 100%;
     height: auto;
-    padding: 10px 10px 10px 10px;
     border: 2px solid transparent;
     border-radius: 5px;
+    padding-bottom: 5px;
+
+    h4 {
+        margin: 0px;
+    }
 
     &-header {
         h3 {
