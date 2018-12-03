@@ -9,6 +9,9 @@ import Message from '../models/Message';
 import {MessagesCardList} from './MessagesCardList';
 import '../styles/layout.scss'
 import Action from '../models/Action';
+import { FilterPanel } from './FilterPanel';
+import { ActionTreeProps } from './ActionTree';
+import { StatusType } from '../models/Status';
 
 interface LayoutProps {
     testCase: TestCase;
@@ -25,8 +28,11 @@ interface LayoutState {
     selectedActionId: number;
     selectedMessages: number[];
     isSplitMode: boolean;
+    showFilter: boolean;
     primaryPane: Pane;
     secondaryPane: Pane;
+    actionsFilter: StatusType[];
+    fieldsFilter: StatusType[];
 }
 
 enum Pane {Actions, Status, Messages, Logs}
@@ -39,8 +45,11 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             selectedActionId: -1,
             selectedMessages: [],
             isSplitMode: true,
+            showFilter: false,
             primaryPane: Pane.Actions,
-            secondaryPane: Pane.Messages
+            secondaryPane: Pane.Messages,
+            fieldsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED', 'N/A'],
+            actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED']
         }
     }
 
@@ -67,6 +76,41 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         });
     }
 
+    showFilterHandler() {
+        this.setState({
+            ...this.state,
+            showFilter: !this.state.showFilter
+        });
+    }
+
+    actionFilterHandler(status: StatusType) {
+        if (this.state.actionsFilter.includes(status)) {
+            this.setState({
+                ...this.state,
+                actionsFilter: this.state.actionsFilter.filter(action => action != status)
+            });
+        } else {
+            this.setState({
+                ...this.state,
+                actionsFilter: [...this.state.actionsFilter, status]
+            });
+        }
+    }
+
+    fieldFiterHandeler(status: StatusType) {
+        if (this.state.fieldsFilter.includes(status)) {
+            this.setState({
+                ...this.state,
+                fieldsFilter: this.state.fieldsFilter.filter(field => field != status)
+            });
+        } else {
+            this.setState({
+                ...this.state,
+                fieldsFilter: [...this.state.fieldsFilter, status]
+            })
+        }
+    }
+
     togglePane(pane: Pane, isPrimary: boolean) {
         this.setState({
             ...this.state,
@@ -76,7 +120,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     }
 
     render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
-        {selectedActionId, isSplitMode, primaryPane, secondaryPane, selectedMessages} : LayoutState) {
+        {selectedActionId, isSplitMode, primaryPane, secondaryPane, selectedMessages, showFilter, actionsFilter, fieldsFilter} : LayoutState) {
 
         // if some action is selected, all messages inside this action should not be highlighted
         const actionsElement = (<ActionsList actions={testCase.actions}
@@ -128,17 +172,26 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 primaryPaneElement = null;
                 break;
         }
+
+        const rootClassName = ["layout", (showFilter ? "filter" : "")].join(' ');
+
         return (
-            <div class="layout">
+            <div class={rootClassName}>
                 <div class="layout-header">
                     <Header 
                         testCase={testCase}
                         name={testCase.name ? testCase.name : "TestCase"}
                         splitMode={isSplitMode}
                         splitModeHandler={() => this.splitModeHandler()}
+                        showFilter={showFilter}
+                        showFilterHandler={() => this.showFilterHandler()}
                         backToListHandler={() => backToReportHandler()}
                         nextHandler={nextHandler}
-                        prevHandler={prevHandler}/>
+                        prevHandler={prevHandler}
+                        actionsFilter={actionsFilter}
+                        fieldsFilter={fieldsFilter}
+                        actionsFilterHandler={status => this.actionFilterHandler(status)}
+                        fieldsFilterHandler={status => this.fieldFiterHandeler(status)}/>
                 </div>
                 <div class={"layout-buttons" + (isSplitMode ? " split" : "")}>
                     <div class="layout-buttons-left">

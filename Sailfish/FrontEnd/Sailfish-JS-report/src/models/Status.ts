@@ -1,7 +1,9 @@
 import Exception from './Exception';
 
+export type StatusType = 'PASSED' | 'FAILED' | 'CONDITIONALLY_PASSED' | 'N/A';
+
 export default interface Status {
-    status: string;
+    status: StatusType;
     reason?: string;
     details?: string;
     description?: string;

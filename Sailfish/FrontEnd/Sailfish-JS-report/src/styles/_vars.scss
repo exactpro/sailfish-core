@@ -22,6 +22,11 @@ $buttonDisabledBackground: #E0E0E0;
 $defaultCardBorderColor: #666666;
 $defaultCardBackground: #E0E0E0;
 
+$filterBackground: #A3D9A3;
+$filterButtonEnabled: #3D994D;
+$filterButtonDisabled: #79BF80;
+$filterButtonTextColor: #FFFFFF;
+
 @mixin scrollbar {
     &::-webkit-scrollbar {
         background-color:#fff;

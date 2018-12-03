@@ -1,27 +1,41 @@
 import {h} from 'preact';
 import TestCase  from '../models/TestCase';
 import '../styles/header.scss';
+import { StatusType } from '../models/Status';
+import { FilterPanel } from './FilterPanel';
 
+interface HeaderProps {
+    name: string;
+    testCase: TestCase;
+    splitMode: boolean;
+    showFilter: boolean;
+    actionsFilter: StatusType[];
+    fieldsFilter: StatusType[];
+    nextHandler?: Function;
+    prevHandler?: Function;
+    goTopHandler?: Function;
+    backToListHandler: Function;
+    splitModeHandler?: Function;
+    showFilterHandler: Function;
+    actionsFilterHandler: (status: StatusType) => void;
+    fieldsFilterHandler: (status: StatusType) => void;
+}
 
 export const Header = ({
     name,
     testCase,
     splitMode,
+    showFilter,
+    actionsFilter,
+    fieldsFilter,
     splitModeHandler,
     nextHandler,
     prevHandler,
-    backToListHandler
-} : {
-    name: string,
-    testCase: TestCase,
-    splitMode: boolean,
-    nextHandler?: Function,
-    prevHandler?: Function,
-    goTopHandler?: Function,
-    backToListHandler: Function;
-    splitModeHandler?: Function;
-    filterHandler?: Function;
-}) => {
+    backToListHandler,
+    showFilterHandler,
+    actionsFilterHandler,
+    fieldsFilterHandler
+} : HeaderProps) => {
     const {
         status,
         startTime,
@@ -30,12 +44,12 @@ export const Header = ({
         hash,
         description,
     } = testCase;
-    const statusClass = "header-status " + status.status.toLowerCase(),
+    const statusClass = ["header-status", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
         prevButtonClas = ["header-status-name-icon", "left", (prevHandler ? "enabled" : "disabled")].join(' '),
         nextButtonClass = ["header-status-name-icon", "right", (nextHandler ? "enabled" : "disabled")].join(' ');
     
     return(
-        <div class="header-root">
+        <div class="header">
             <div class={statusClass}>
                 <div class="header-status-button"
                     onClick={e => backToListHandler()}>
@@ -53,15 +67,24 @@ export const Header = ({
                     <div class={nextButtonClass}
                         onClick={nextHandler ? () => nextHandler() : null}/>
                 </div>
-                <div class="header-status-button" onClick={e => splitModeHandler()}>
+                <div class="header-status-button" onClick={() => splitModeHandler()}>
                     <div class="header-status-button-icon mode"/>
                     <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>
                 </div>
-                <div class="header-status-button">
+                <div class="header-status-button" onClick={() => showFilterHandler()}>
                     <div class="header-status-button-icon filter"/>
-                    <h3>View filter</h3>
+                    <h3>{showFilter ? "Hide filter" : "Show filter"}</h3>
                 </div>
             </div>
+            {
+                    showFilter ? 
+                    <FilterPanel 
+                        actionsFilters={actionsFilter}
+                        fieldsFilters={fieldsFilter}
+                        actionFilterHandler={actionsFilterHandler}
+                        fieldsFilterHandler={fieldsFilterHandler}/>
+                    : null
+            }
             <div class="header-description">
                 <div class="header-description-element">
                     <span>Start:</span>

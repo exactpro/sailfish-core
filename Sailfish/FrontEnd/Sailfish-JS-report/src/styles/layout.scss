@@ -1,3 +1,5 @@
+@import "vars"; 
+
 .layout {
     display: grid;
     height: 100%;
@@ -7,6 +9,13 @@
         "buttons"
         "main-content";
 
+    &.filter {
+        grid-template: 130px 65px calc(100% - 190px) / 1fr;
+        grid-template-areas:
+            "header" 
+            "buttons"
+            "main-content";
+    }
 
     &-header {
         grid-area: header;

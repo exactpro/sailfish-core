@@ -1,10 +1,10 @@
 @import "vars";
 
-.header-root {
+.header {
     width: 100%;
     height: 70px;
 
-    .header-status {
+    &-status {
         width: 100%;
         height: 70%;
         border: 0px;
@@ -12,6 +12,11 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+
+        &.filter {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
 
         h1 {
             font-weight: bold;
@@ -52,7 +57,7 @@
             -webkit-margin-after:0em;
         }
 
-        .header-status-button {
+        &-button {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -83,7 +88,7 @@
             }
         }
 
-        .header-status-name {
+        &-name {
             width: 100%;
             display: flex;
             flex-direction: row;
@@ -124,14 +129,14 @@
         }
     }
 
-    .header-description {
+    &-description {
         width: 100%;
         height: 40%;
         display: flex;
         justify-content: center;
         align-items: center;
 
-        .header-description-element {
+        &-element {
             width: auto;
             display: flex;
             justify-content: center;
@@ -150,4 +155,30 @@
         }
     }
 
+    &-filter {
+        width: 100%;
+        margin: 3px 0;
+        padding: 3px 0;
+        background-color: $filterBackground;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 2px solid $filterBackground;
+        border-bottom-right-radius: 7px;
+        border-bottom-left-radius: 7px;
+
+        &-togglers {
+            margin: 0 20px;
+            display: flex;
+            justify-content: center; 
+            align-items: center;
+        }
+
+        h5 {
+            color: $primaryTextColor;
+            margin-right: 10px;
+            font-size: 14px;
+            font-weight: normal;
+        }
+    }
 }

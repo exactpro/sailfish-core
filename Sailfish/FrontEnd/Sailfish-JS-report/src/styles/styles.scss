@@ -4,11 +4,13 @@
     font-weight: normal;
     src: url('../../resources/fonts/open-sans-v15-latin-regular.woff')
 }
+
 @font-face {
     font-family: 'Open sans';
     font-weight: bold;
     src: url('../../resources/fonts/open-sans-v15-latin-600.woff')
 }
+
 body {
     margin: 0;
 }
@@ -24,10 +26,18 @@ body {
     div {
         box-sizing: border-box;
     }
+
+    p, span, h1, h2, h3, h4, h5 {
+        margin: 0;
+        padding: 0;
+        border: 0;
+        vertical-align: baseline;
+    }
 }
 
 .button-root {
     display: inline-flex;
+    height: 38px;
     justify-content: center;
     align-items: center;
     margin: 0 3px;
@@ -36,16 +46,40 @@ body {
     cursor: pointer;
 
     &.toggled {
-        border-color: black;
         border-radius: 7px;
-        background: transparent;
     }
-
-    background: $buttonDisabledBackground;
-    height: 38px;
     
     p {
-        color: $primaryTextColor;
         margin: 0 20px;
+    }
+
+    // themes for button
+    &.green {
+        background: $filterButtonDisabled;
+        border-color: $filterButtonDisabled;
+        height: 30px;
+
+        &.toggled {
+            background: $filterButtonEnabled;
+            border-color: $filterButtonEnabled;
+        }
+
+        p {
+            color: $filterButtonTextColor;
+            font-size: 14px;
+        }
+    }
+
+    &.default {
+        background: $buttonDisabledBackground;
+
+        &.toggled {
+            border-color: black;
+            background: transparent;
+        }
+
+        p {
+            color: $primaryTextColor;
+        }
     }
 }
