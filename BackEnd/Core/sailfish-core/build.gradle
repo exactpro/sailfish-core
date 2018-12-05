@@ -333,6 +333,7 @@ clean {
 
 generateVersionClass {
 	alias 		= 'core'
+	artifactName = 'core'
 }
 
 checkCompatibility {

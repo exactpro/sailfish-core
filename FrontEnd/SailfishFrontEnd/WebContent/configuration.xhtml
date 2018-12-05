@@ -56,13 +56,22 @@
 </h:form>
 
 <h:form prependId="false" id="commandForm">
-	<p:remoteCommand name="changeSection" action="#{configBean.changeSection}" />
+    <p:remoteCommand name="changeSection" action="#{configBean.changeSection}" />
     <p:remoteCommand name="onPageLoad" action="#{configBean.onPageLoad}" />
 </h:form>
 
 <div class="eps-content-panel">
 <div class="eps-config-navigation">
     <ul>
+        <div onclick="changeSection([{name:'section', value:'update'}])" class="eps-dot">
+            <li id="updateNavItem">Update Version<span>
+                    <h:graphicImage id="update_require_logo" library="sf"
+                                    styleClass="eps-cfg-update-logo"
+                                    name="images/updates/update_require.png"
+                                    rendered="#{updateBean.needsUpdate}"/>
+                </span>
+            </li>
+        </div>
         <div onclick="changeSection([{name:'section', value:'database'}])" class="eps-dot"> <li id="databaseNavItem"> Database</li> </div>
         <div onclick="changeSection([{name:'section', value:'logging'}])" class="eps-dot"><li id="loggingNavItem">  Logging </li></div>
         <div onclick="changeSection([{name:'section', value:'workspace'}])" class="eps-dot"> <li id="workspaceNavItem">      Workspace  </li></div>
@@ -91,6 +100,10 @@
 
 <div class="eps-config-content-wrapper">
 <div class="eps-config-content-inner">
+    <div id="updateConfig" class="eps-config-container">
+        <h2>Update version</h2>
+        <ui:include src="/template/update_configuration.xhtml"/>
+    </div>
 
     <div id="databaseConfig" class="eps-config-container">
     
@@ -109,7 +122,7 @@
 	        				  			  rendered="#{configBean.conStatus eq 'Error'}" />
         				</td>
         				<td>
-        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{configBean.conErrorText}" /> 
+        					<h:outputText styleClass="eps-configuration-error-message" value="#{configBean.conErrorText}" />
         				</td>
         			</tr>
         		</table>
@@ -451,18 +464,6 @@
         <p:commandButton value="Apply settings" icon="ui-icon-circle-check" actionListener="#{configBean.onApplyEnvParams()}"/>
     </h:form>
 
-    <h:form prependId="false">
-        <h2>Sailfish components</h2>
-        <p:dataTable id="buildNumbers" var="sfComponent" value="#{configBean.componentsBuildNumbers}" style="width:800px" styleClass="eps-environment-component-table">
-            <p:column headerText="Name" style="width:35%;background-color:#ffffff">
-                <h:outputText value="#{sfComponent.name}"/>
-            </p:column>
-            <p:column headerText="Version" style="width:15%;background-color:#ffffff">
-                <h:outputText value="#{sfComponent.version}"/>
-            </p:column>
-        </p:dataTable>
-    </h:form>
-
 </div>
 
 <div id="user_eventsConfig" class="eps-config-container">
@@ -519,7 +520,7 @@
         					<h:outputText value="#{statConfigBean.currentStatus}" styleClass="eps-status-label eps-status-label-Error" />
         				</td>
         				<td>
-        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{statConfigBean.errorText}"
+        					<h:outputText styleClass="eps-configuration-error-message" value="#{statConfigBean.errorText}"
         								  rendered="#{statConfigBean.currentStatus eq 'Error'}" /> 
         				</td>
         			</tr>
@@ -687,7 +688,7 @@
         					<h:outputText value="#{mlConfigBean.currentStatus}" styleClass="eps-status-label eps-status-label-Error" />
         				</td>
         				<td>
-        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{mlConfigBean.errorText}"
+        					<h:outputText styleClass="eps-configuration-error-message" value="#{mlConfigBean.errorText}"
         								  rendered="#{mlConfigBean.currentStatus eq 'Error'}" />
         				</td>
         			</tr>
@@ -765,7 +766,7 @@
                         <h:outputText value="#{emailBean.status}" styleClass="eps-status-label eps-status-label-Error"/>
                     </td>
                     <td>
-                        <h:outputText style="color: #E74C3C; font-weight: bold" value="#{emailBean.errorText}"
+                        <h:outputText styleClass="eps-configuration-error-message" value="#{emailBean.errorText}"
                                       rendered="#{emailBean.status eq 'Error'}"  />
                     </td>
                 </tr>

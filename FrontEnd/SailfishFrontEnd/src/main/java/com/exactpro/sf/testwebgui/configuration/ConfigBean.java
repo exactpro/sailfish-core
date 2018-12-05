@@ -134,8 +134,6 @@ public class ConfigBean implements Serializable {
     private boolean createIndividualAppenders;
     private String individualAppendersThreshold;
 
-	private List<ComponentInfo> infos;
-
 	private static String DEFAULT_PASSWORD = "Welcome";
 
 	private ServiceStatus conStatus = ServiceStatus.Connected;
@@ -219,8 +217,6 @@ public class ConfigBean implements Serializable {
                 return RelevantMessagesSortingMode.parse(value.toString());
             }
         }, RelevantMessagesSortingMode.class);
-
-		this.infos = createComponentsInfo();
 	}
 
 	public void preRenderView() {
@@ -836,31 +832,6 @@ public class ConfigBean implements Serializable {
 
     public List<EnvironmentEntity> getEnvironmentParamsList() {
         return environmentParamsList;
-    }
-
-    public List<ComponentInfo> getComponentsBuildNumbers() {
-        return this.infos;
-    }
-
-	public List<ComponentInfo> createComponentsInfo() {
-
-	    List<ComponentInfo> infos = new ArrayList<>();
-
-        for (IVersion v : BeanUtil.getSfContext().getPluginVersions()) {
-
-            if (v.isGeneral()) {
-                continue;
-            }
-
-            ComponentInfo info = new ComponentInfo();
-
-            info.setName(v.getAlias());
-            info.setVersion(v.buildVersion());
-
-            infos.add(info);
-        }
-
-        return infos;
     }
 
 	public boolean isDbChangesApplied() {

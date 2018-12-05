@@ -6,6 +6,12 @@
 	height: 100%;
 }
 
+.eps-cfg-update-logo {
+    top: 4px;
+    left: 2px;
+    position: relative;
+}
+
 .eps-config-navigation ul {
 	padding-left: 0;
 }
@@ -337,4 +343,9 @@
 .ue_table_message {
     padding-left: 10px;
     box-decoration-break: clone;
+}
+
+.eps-configuration-error-message {
+    color: #E74C3C;
+    font-weight: bold;
 }
