@@ -40,10 +40,10 @@
             }
         }
 
-        &.conditionaly {
-            background-color: $conditionalyHeaderColor;
+        &.conditionally_passed {
+            background-color: $conditionallyHeaderColor;
             h1 {
-                color: $conditionalyTextColor;
+                color: $conditionallyTextColor;
             }
         }
 

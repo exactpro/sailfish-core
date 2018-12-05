@@ -28,14 +28,14 @@
         }
     }
 
-    &.conditionaly {
+    &.conditionally_passed {
         &.selected {
-            background-color: $conditionalyBackgroundColor;
-            border-color: $conditionalyBorderColor;
+            background-color: $conditionallyBackgroundColor;
+            border-color: $conditionallyBorderColor;
         }
 
         h3 {
-            color: $conditionalyTextColor;
+            color: $conditionallyTextColor;
         }
     }
 }
@@ -87,9 +87,9 @@
                 }
             }
 
-            &.conditionaly {
+            &.conditionally_passed {
                 h4 {
-                    color: $conditionalyTextColor;
+                    color: $conditionallyTextColor;
                 }
             }
         }

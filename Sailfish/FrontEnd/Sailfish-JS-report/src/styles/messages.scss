@@ -50,10 +50,10 @@
             }
         }
 
-        &.conditionaly {
+        &.conditionally_passed {
             td {
-                background-color: $conditionalyBackgroundColor;
-                border-color: $conditionalyBorderColor;
+                background-color: $conditionallyBackgroundColor;
+                border-color: $conditionallyBorderColor;
             }
         }
 
@@ -111,12 +111,12 @@
         }
     }
 
-    &.conditionaly {
-        background-color: $conditionalyHeaderColor;
-        border-color: $conditionalyHeaderColor;
+    &.conditionally_passed {
+        background-color: $conditionallyHeaderColor;
+        border-color: $conditionallyHeaderColor;
 
         &.selected {
-            border-color: $conditionalyBorderColor;
+            border-color: $conditionallyBorderColor;
         }
     }
 
@@ -178,8 +178,8 @@
             background-color: $failedBackgroundColor;
         }
     
-        &.conditionaly {
-            background-color: $conditionalyBackgroundColor;
+        &.conditionaly_passed {
+            background-color: $conditionallyBackgroundColor;
         }
 
         p {

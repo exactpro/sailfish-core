@@ -33,6 +33,7 @@ interface LayoutState {
     secondaryPane: Pane;
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
+    filtredActions: Action[];
 }
 
 enum Pane {Actions, Status, Messages, Logs}
@@ -49,7 +50,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             primaryPane: Pane.Actions,
             secondaryPane: Pane.Messages,
             fieldsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED', 'N/A'],
-            actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED']
+            actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED'],
+            filtredActions: props.testCase.actions
         }
     }
 
@@ -85,14 +87,22 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
 
     actionFilterHandler(status: StatusType) {
         if (this.state.actionsFilter.includes(status)) {
+            const newActionsFilter = this.state.actionsFilter.filter(action => action != status);
+
             this.setState({
                 ...this.state,
-                actionsFilter: this.state.actionsFilter.filter(action => action != status)
+                actionsFilter: newActionsFilter,
+                filtredActions: this.props.testCase.actions.filter(action =>
+                    newActionsFilter.includes(action.status.status)) 
             });
         } else {
+            const newActionsFilter = [...this.state.actionsFilter, status];
+
             this.setState({
                 ...this.state,
-                actionsFilter: [...this.state.actionsFilter, status]
+                actionsFilter: newActionsFilter,
+                filtredActions: this.props.testCase.actions.filter(action =>
+                    newActionsFilter.includes(action.status.status)) 
             });
         }
     }
@@ -120,10 +130,18 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     }
 
     render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
-        {selectedActionId, isSplitMode, primaryPane, secondaryPane, selectedMessages, showFilter, actionsFilter, fieldsFilter} : LayoutState) {
+        {selectedActionId, 
+            isSplitMode,
+            primaryPane, 
+            secondaryPane, 
+            selectedMessages, 
+            showFilter, 
+            actionsFilter, 
+            fieldsFilter,
+            filtredActions} : LayoutState) {
 
         // if some action is selected, all messages inside this action should not be highlighted
-        const actionsElement = (<ActionsList actions={testCase.actions}
+        const actionsElement = (<ActionsList actions={filtredActions}
                 onSelect={action => this.actionSelectedHandler(action)}
                 selectedActionId={selectedActionId}
                 onMessageSelect={id => this.messageSelectedHandler(id)}
