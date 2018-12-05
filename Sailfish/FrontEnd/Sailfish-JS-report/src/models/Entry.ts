@@ -1,3 +1,5 @@
+import Exception from './Exception';
+
 export default interface Entry {
     name: string;
     actual: string;
@@ -6,4 +8,5 @@ export default interface Entry {
     precision?: string;
     systemPrecision?: string;
     subEntries?: Entry[];
+    exception: any;
 }

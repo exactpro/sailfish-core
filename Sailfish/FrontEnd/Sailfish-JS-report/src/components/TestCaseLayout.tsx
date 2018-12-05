@@ -3,14 +3,10 @@ import { Header } from './Header';
 import { SplitView } from './SplitView'
 import { ActionsList } from './ActionsList';
 import TestCase from '../models/TestCase';
-import {MessagesTable} from './MessagesTable';
 import {TogglerButton} from './TogglerButton';
-import Message from '../models/Message';
 import {MessagesCardList} from './MessagesCardList';
 import '../styles/layout.scss'
 import Action from '../models/Action';
-import { FilterPanel } from './FilterPanel';
-import { ActionTreeProps } from './ActionTree';
 import { StatusType } from '../models/Status';
 
 interface LayoutProps {

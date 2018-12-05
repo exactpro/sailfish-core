@@ -3,8 +3,11 @@ import Status from './Status';
 import Verification from './Verification';
 import Exception from './Exception';
 import MessageAction from './MessageAction';
+import Link from './Link';
 
-export type ActionType = 'action' | 'group' | 'message';
+export type ActionType = 'action' | 'verification' | 'message' | 'link';
+
+export type ActionNode = Action | MessageAction | Verification | Link;
 
 export default interface Action {
     id?: number;
@@ -14,10 +17,10 @@ export default interface Action {
     description: string;
     parameters?: ActionParameter[];
     relatedMessages: number[];
-    verifications?: Verification[];
     logs?: any;
     startTime?: string;
     finishTime?: string;
     status: Status;
-    actions?: (Action | MessageAction)[];
+    subNodes?: ActionNode[];
+    checkPointId?: number;
 }
