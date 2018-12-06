@@ -2,12 +2,13 @@ import { h, Component } from 'preact';
 import Action, { ActionNode } from '../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
-import CompasionTable from "./ComparisonTable";
+import CompasionTable from "./VerificationTable";
 import MessageAction from '../models/MessageAction';
 import Verification from '../models/Verification'
 import '../styles/action.scss';
 import ExpandablePanel from './ExpandablePanel';
 import Link from '../models/Link';
+import { StatusType } from '../models/Status';
 
 
 export interface ActionTreeProps {
@@ -16,6 +17,7 @@ export interface ActionTreeProps {
     messageSelectHandler: (id: number) => void;
     selectedMessageId: number;
     selectedActionId: number;
+    filterFields: StatusType[];
 }
 
 export const ActionTree = (props: ActionTreeProps): JSX.Element => {
@@ -23,7 +25,7 @@ export const ActionTree = (props: ActionTreeProps): JSX.Element => {
 }
 
 const ActionNode = (props: ActionTreeProps): JSX.Element => {
-    const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId } = props;
+    const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, filterFields } = props;
 
     switch (props.action.actionNodeType) {
         case 'action': {
@@ -50,7 +52,8 @@ const ActionNode = (props: ActionTreeProps): JSX.Element => {
         case 'verification': {
             const verification = props.action as Verification;
 
-            return renderVerification(verification, messageSelectHandler, verification.messageId === selectedMessageId)
+            return renderVerification(verification, messageSelectHandler,
+                verification.messageId === selectedMessageId, filterFields)
         }
 
         case 'link': {
@@ -107,23 +110,25 @@ const renderMessageAction = ({ message, level, exception, color, style }: Messag
 }
 
 const renderVerification = ({ name, status, entries, messageId }: Verification,
-    selectHandelr: Function, isSelected: boolean) => {
+    selectHandelr: Function, isSelected: boolean, filterFields: StatusType[]) => {
 
     const className = ["action-card-body-verification",
         (status ? status.status.toLowerCase() : ""),
         (isSelected ? "selected" : "")].join(' ');
 
     return (
-        <div class={className}
-            onClick={e => {
-                selectHandelr(messageId);
-                // here we cancel handling by parent divs
-                e.cancelBubble = true;
-            }}>
-            <ExpandablePanel>
-                <h4>{"Verification — " + name + " — " + status.status}</h4>
-                <CompasionTable params={entries} />
-            </ExpandablePanel>
+        <div class="action-card">
+            <div class={className}
+                onClick={e => {
+                    selectHandelr(messageId);
+                    // here we cancel handling by parent divs
+                    e.cancelBubble = true;
+                }}>
+                <ExpandablePanel>
+                    <h4>{"Verification — " + name + " — " + status.status}</h4>
+                    <CompasionTable params={entries} filterFields={filterFields} />
+                </ExpandablePanel>
+            </div>
         </div>
     )
 }

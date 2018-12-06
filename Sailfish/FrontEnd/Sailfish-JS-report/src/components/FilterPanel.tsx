@@ -43,8 +43,8 @@ export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsF
                     click={() => fieldsFilterHandler("CONDITIONALLY_PASSED")}
                     theme="green" />
                 <TogglerButton text="N/A"
-                    isToggled={fieldsFilters.includes("N/A")}
-                    click={() => fieldsFilterHandler("N/A")}
+                    isToggled={fieldsFilters.includes("NA")}
+                    click={() => fieldsFilterHandler("NA")}
                     theme="green" />
             </div>
             <div class="header-filter-togglers">

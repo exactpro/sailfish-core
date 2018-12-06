@@ -1,0 +1,71 @@
+@import "vars";
+
+.ver-table {
+    width: 100%;
+    padding: 3px 10px 0 5px;
+
+    table {
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+
+    td {
+        border: 1px solid black;
+    }
+
+    th {
+        border: 1px solid gray;
+        background-color: #B7B3BB;
+    }
+
+    &-flexible {
+        width: 50%;
+    }
+
+    &-row {
+        &-value {
+            p {
+                margin: 0;
+                text-decoration: none;
+                font-size: 14px;
+            }
+
+            &-status {
+                font-weight: bold;
+
+                &.passed {
+                    color: $passedTextColor;
+                }
+
+                &.failed {
+                    color: $failedTextColor;
+                }
+
+                &.conditionally_passed {
+                    color: $conditionallyTextColor;
+                }
+            }
+
+            td {
+                padding: 0 7px;
+            }
+        }
+
+        &-toggler {
+            p {
+                margin: 0;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 16px;
+            }
+        
+            td {
+                cursor: pointer;
+            }
+        }
+
+        td {
+            padding-right: 7px;
+        }
+    }
+}

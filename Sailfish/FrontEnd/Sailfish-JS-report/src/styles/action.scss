@@ -48,7 +48,7 @@
     height: auto;
     border: 2px solid transparent;
     border-radius: 5px;
-    padding-bottom: 5px;
+    padding: 5px;
 
     h4 {
         margin: 0px;
@@ -60,7 +60,7 @@
         }
 
         p {
-            font-size: 11px;
+            font-size: 12px;
             color: $secondaryTextColor;
             margin: 2px 0px 0px 5px;
         }
@@ -70,10 +70,15 @@
         display: block;
         box-sizing: border-box;
 
+        p {
+            word-break: break-word;
+        }
+
         &-verification {
             @include selectable();
             border: 2px solid transparent;
             border-radius: 5px;
+            padding-bottom: 5px;
 
             &.passed {
                 h4 {

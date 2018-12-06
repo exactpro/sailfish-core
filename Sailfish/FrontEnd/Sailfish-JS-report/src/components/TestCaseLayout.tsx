@@ -45,7 +45,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             showFilter: false,
             primaryPane: Pane.Actions,
             secondaryPane: Pane.Messages,
-            fieldsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED', 'N/A'],
+            fieldsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED', 'NA'],
             actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED'],
             filtredActions: props.testCase.actions
         }
@@ -141,7 +141,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 onSelect={action => this.actionSelectedHandler(action)}
                 selectedActionId={selectedActionId}
                 onMessageSelect={id => this.messageSelectedHandler(id)}
-                selectedMessageId={selectedActionId >= 0 ? -1 : selectedMessages[0]}/>);
+                selectedMessageId={selectedActionId >= 0 ? -1 : selectedMessages[0]}
+                filterFields={fieldsFilter}/>);
 
         const messagesElement = (<MessagesCardList messages={testCase.messages}
             selectedMessages={selectedMessages}/>);

@@ -3,6 +3,7 @@ import Action from '../models/Action';
 import { ActionCard } from './ActionCard';
 import '../styles/action.scss';
 import { ActionTree } from './ActionTree';
+import { StatusType } from '../models/Status';
 
 interface ListProps {
     actions: Array<Action>;
@@ -10,9 +11,10 @@ interface ListProps {
     onMessageSelect: (id: number) => void;
     selectedActionId: number;
     selectedMessageId: number;
+    filterFields: StatusType[];
 }
 
-export const ActionsList = ({ actions, selectedActionId, onSelect, onMessageSelect, selectedMessageId }: ListProps) => {
+export const ActionsList = ({ actions, selectedActionId, onSelect, onMessageSelect, selectedMessageId, filterFields }: ListProps) => {
     return (
         <div class="actions-list">
             {actions.map(action => (
@@ -20,6 +22,7 @@ export const ActionsList = ({ actions, selectedActionId, onSelect, onMessageSele
                     selectedActionId={selectedActionId}
                     selectedMessageId={selectedMessageId}
                     actionSelectHandler={onSelect}
-                    messageSelectHandler={onMessageSelect}/>))}
+                    messageSelectHandler={onMessageSelect}
+                    filterFields={filterFields}/>))}
         </div>)
 }   
