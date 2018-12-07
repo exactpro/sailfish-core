@@ -8,6 +8,8 @@ import {MessagesCardList} from './MessagesCardList';
 import '../styles/layout.scss'
 import Action from '../models/Action';
 import { StatusType } from '../models/Status';
+import { StatusPane } from './StatusPane';
+import { LogsPane } from './LogsPane';
 
 interface LayoutProps {
     testCase: TestCase;
@@ -159,12 +161,12 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         const messagesElement = (<MessagesCardList messages={testCase.messages}
             selectedMessages={selectedMessages}/>);
 
-        const statusElement = (<div>
-            STATUS
-        </div>);
+        const statusElement = (
+            <StatusPane status={testCase.status}/>
+        );
 
         const logsElement = (
-            <div>LOGS</div>
+            <LogsPane logs={testCase.logs}/>
         );
 
         let primaryPaneElement;
