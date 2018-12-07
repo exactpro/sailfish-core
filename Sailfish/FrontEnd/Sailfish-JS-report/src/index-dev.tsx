@@ -1,5 +1,6 @@
 import { h, render } from "preact";
 import { App } from "./components/App-dev";
-import 'preact/devtools';
+// enable react-devtools compatibility, APP WORKNIG SLOW WITH THIS
+//import 'preact/devtools';
 
 render(<App/>, document.getElementById("index"));

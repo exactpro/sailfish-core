@@ -16,5 +16,5 @@ export const MessagesCardList = ({messages, selectedMessages}: MessagesListProps
                 isSelected={selectedMessages.includes(message.id)}
                 key={message.id}/>)}
         </div>
-    )
+    );
 }

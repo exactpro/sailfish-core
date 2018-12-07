@@ -125,6 +125,18 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         });
     }
 
+    // it used to update actions after switching the test case: 
+    // its bad approach, but we dont have memorize feature in preact.
+    componentWillReceiveProps(nextProps: LayoutProps) {
+        if (nextProps.testCase !== this.props.testCase) {
+            this.setState({
+                ...this.state,
+                filtredActions: nextProps.testCase.actions.filter(action =>
+                    this.state.actionsFilter.includes(action.status.status)) 
+            });
+        }
+    }
+
     render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
         {selectedActionId, 
             isSplitMode,

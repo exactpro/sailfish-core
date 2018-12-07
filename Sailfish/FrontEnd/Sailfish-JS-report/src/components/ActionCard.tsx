@@ -10,13 +10,11 @@ import MessageAction from '../models/MessageAction';
 interface CardProps {
     action: Action;
     onSelect?: (action: Action) => void;
-    onMessageSelect: (id: number) => void;
-    selectedMessage: number;
     children?: JSX.Element[];
     isSelected?: boolean;
 }
 
-export const ActionCard = ({ action, onMessageSelect, selectedMessage, children, isSelected, onSelect }: CardProps) => {
+export const ActionCard = ({ action, children, isSelected, onSelect }: CardProps) => {
     const {
         name,
         description,

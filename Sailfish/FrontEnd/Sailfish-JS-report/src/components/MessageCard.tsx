@@ -18,23 +18,31 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
         super(props);
         this.state = {
             showRaw: false
-        }
+        };
+    }
+
+    shouldComponentUpdate(nextProps: MessageCardProps, nextState: MessageCardState) {
+        if (nextState !== this.state) return true;
+
+        if (nextProps.message !== this.props.message || nextProps.selectedStatus !== this.props.selectedStatus) {
+            return true;
+        } 
+
+        return nextProps.isSelected !== this.props.isSelected;
     }
 
     showRaw() {
         this.setState({
             ...this.state,
             showRaw: !this.state.showRaw
-        })
+        });
     }
     
     render({message, isSelected, selectedStatus}: MessageCardProps, {showRaw}: MessageCardState) {
-        const {
-            msgName, timestamp, from, to, contentHumanReadable, raw
-        } = message,
-        rootClass = ["message-card", (selectedStatus || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
-        contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),
-        showRawClass = ["message-card-content-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
+        const { msgName, timestamp, from, to, contentHumanReadable, raw } = message,
+            rootClass = ["message-card", (selectedStatus || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
+            contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),
+            showRawClass = ["message-card-content-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
 
         return(
             <div class={rootClass}>
@@ -76,6 +84,6 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
                     </div>
                 </div>
             </div>
-        )
+        );
     }
 }
