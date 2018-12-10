@@ -30,7 +30,7 @@ export default class ExpandablePanel extends Component<IPanelProps, IPanelState>
         return (<div class="expandable-panel-root">
             <div class="expandable-panel-header">
                 <div class={iconClass} 
-                    onClick={e => {this.expandePanel(); e.cancelBubble = true;}}/>
+                    onClick={e => this.expandePanel()}/>
                 {header || children[0]}
             </div>
             {isExpanded ?

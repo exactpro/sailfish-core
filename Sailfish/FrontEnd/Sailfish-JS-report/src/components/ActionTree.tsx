@@ -22,22 +22,30 @@ export interface ActionTreeProps {
 
 export class ActionTree extends Component<ActionTreeProps, {}> {
 
-
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
-
+        
         if (nextProps.action.actionNodeType === "action") {
-            return (nextProps.action as Action).id === nextProps.selectedActionId || this.props.selectedActionId === (nextProps.action as Action).id;
+            const nextAction = nextProps.action as Action;
+
+            if (nextProps.selectedMessageId !== this.props.selectedMessageId && 
+                nextAction.relatedMessages && 
+                nextAction.relatedMessages.includes(nextProps.selectedMessageId)){
+                    return true;
+            }
+
+            // compare current action id and selected action id
+            return nextAction.id === nextProps.selectedActionId || this.props.selectedActionId === nextAction.id;
         } else {
             return true;
         }
     }
 
-    render(props: ActionTreeProps): JSX.Element {
-        return this.ActionNode(props);
+    render(props: ActionTreeProps, state: {}): JSX.Element {
+        return this.renderNode(props);
     }
 
-    ActionNode(props: ActionTreeProps): JSX.Element {
+    renderNode(props: ActionTreeProps): JSX.Element {
         const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, filterFields } = props;
 
         switch (props.action.actionNodeType) {
@@ -49,7 +57,7 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
                         onSelect={actionSelectHandler}>
                         {
                             action.subNodes ? action.subNodes.map(
-                                action => <this.ActionNode {...props} action={action} />) : null
+                                action => this.renderNode({...props, action: action})) : null
                         }
                     </ActionCard>
                 );

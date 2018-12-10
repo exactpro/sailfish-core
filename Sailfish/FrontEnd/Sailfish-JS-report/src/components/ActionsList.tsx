@@ -1,6 +1,5 @@
-import { h } from 'preact';
+import { h, Component } from 'preact';
 import Action from '../models/Action';
-import { ActionCard } from './ActionCard';
 import '../styles/action.scss';
 import { ActionTree } from './ActionTree';
 import { StatusType } from '../models/Status';
@@ -14,9 +13,17 @@ interface ListProps {
     filterFields: StatusType[];
 }
 
-export const ActionsList = ({ actions, selectedActionId, onSelect, onMessageSelect, selectedMessageId, filterFields }: ListProps) => {
-    return (
-        <div class="actions-list">
+export class ActionsList extends Component<ListProps, {}> {
+
+    shouldComponentUpdate(nextProps: ListProps) {
+        return nextProps.actions !== this.props.actions || 
+            nextProps.selectedActionId !== this.props.selectedActionId ||
+            nextProps.selectedMessageId !== this.props.selectedMessageId;
+    }
+    
+    render({ actions, selectedActionId, selectedMessageId, onSelect, filterFields, onMessageSelect }: ListProps) {
+        return (
+            <div class="actions-list">
             {actions.map(action => (
                 <ActionTree action={action}
                     selectedActionId={selectedActionId}
@@ -25,4 +32,5 @@ export const ActionsList = ({ actions, selectedActionId, onSelect, onMessageSele
                     messageSelectHandler={onMessageSelect}
                     filterFields={filterFields}/>))}
         </div>)
+    }
 }   
