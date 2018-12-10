@@ -13,7 +13,7 @@ interface HeaderProps {
     fieldsFilter: StatusType[];
     nextHandler?: Function;
     prevHandler?: Function;
-    goTopHandler?: Function;
+    goTopHandler: Function;
     backToListHandler: Function;
     splitModeHandler?: Function;
     showFilterHandler: Function;
@@ -34,7 +34,8 @@ export const Header = ({
     backToListHandler,
     showFilterHandler,
     actionsFilterHandler,
-    fieldsFilterHandler
+    fieldsFilterHandler,
+    goTopHandler
 } : HeaderProps) => {
     const {
         status,
@@ -56,7 +57,8 @@ export const Header = ({
                     <div class="header-status-button-icon list"/>
                     <h3>Back to list</h3>
                 </div>
-                <div class="header-status-button">
+                <div class="header-status-button"
+                    onClick={() => goTopHandler()}>
                     <div class="header-status-button-icon gotop"/>
                     <h3>Go top</h3>
                 </div>

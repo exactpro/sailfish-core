@@ -38,6 +38,9 @@ enum Pane {Actions, Status, Messages, Logs}
 
 export default class TestCaseLayout extends Component<LayoutProps, LayoutState> {
 
+    private messagesListRef: MessagesCardList;
+    private actionsListRef: ActionsList;
+
     constructor(props: LayoutProps) {
         super(props);
         this.state = {
@@ -59,6 +62,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             selectedActionId: action.id,
             selectedMessages: action.relatedMessages
         });
+
+        this.messagesListRef.scrollToMessage(action.relatedMessages[0]);
     }
 
     messageSelectedHandler(id: number) {
@@ -67,6 +72,15 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             selectedActionId: -1,
             selectedMessages: [id]
         });
+
+        this.messagesListRef.scrollToMessage(id);
+    }
+
+    scrollToTop() {
+        // order is important, because chrome and opera can't render smooth scroll behavior with multipline elements -
+        // in actions list this behavior disabled
+        this.actionsListRef.scrollToAction(this.props.testCase.actions[0].id);
+        this.messagesListRef.scrollToMessage(this.props.testCase.messages[0].id);
     }
 
     splitModeHandler() {
@@ -156,10 +170,12 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 selectedActionId={selectedActionId}
                 onMessageSelect={id => this.messageSelectedHandler(id)}
                 selectedMessageId={selectedActionId >= 0 ? -1 : selectedMessages[0]}
-                filterFields={fieldsFilter}/>);
+                filterFields={fieldsFilter}
+                ref={ref => this.actionsListRef = ref}/>);
 
         const messagesElement = (<MessagesCardList messages={testCase.messages}
-            selectedMessages={selectedMessages}/>);
+            selectedMessages={selectedMessages}
+            ref={ref => this.messagesListRef = ref}/>);
 
         const statusElement = (
             <StatusPane status={testCase.status}/>
@@ -220,7 +236,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                         actionsFilter={actionsFilter}
                         fieldsFilter={fieldsFilter}
                         actionsFilterHandler={status => this.actionFilterHandler(status)}
-                        fieldsFilterHandler={status => this.fieldFiterHandeler(status)}/>
+                        fieldsFilterHandler={status => this.fieldFiterHandeler(status)}
+                        goTopHandler={() => this.scrollToTop()}/>
                 </div>
                 <div class={"layout-buttons" + (isSplitMode ? " split" : "")}>
                     <div class="layout-buttons-left">

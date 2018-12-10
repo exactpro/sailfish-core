@@ -15,22 +15,33 @@ interface ListProps {
 
 export class ActionsList extends Component<ListProps, {}> {
 
+    private elements: ActionTree[] = [];
+
+    scrollToAction = (actionId: number) => {
+        if (this.elements[actionId]) {
+            // smooth behavior is disabled here
+            this.elements[actionId].base.scrollIntoView({block: "start"});
+        }    
+    }
+
     shouldComponentUpdate(nextProps: ListProps) {
-        return nextProps.actions !== this.props.actions || 
+        return nextProps.actions !== this.props.actions ||
             nextProps.selectedActionId !== this.props.selectedActionId ||
             nextProps.selectedMessageId !== this.props.selectedMessageId;
     }
-    
+
     render({ actions, selectedActionId, selectedMessageId, onSelect, filterFields, onMessageSelect }: ListProps) {
         return (
             <div class="actions-list">
-            {actions.map(action => (
-                <ActionTree action={action}
-                    selectedActionId={selectedActionId}
-                    selectedMessageId={selectedMessageId}
-                    actionSelectHandler={onSelect}
-                    messageSelectHandler={onMessageSelect}
-                    filterFields={filterFields}/>))}
-        </div>)
+                {actions.map(action => (
+                    <ActionTree 
+                        action={action}
+                        selectedActionId={selectedActionId}
+                        selectedMessageId={selectedMessageId}
+                        actionSelectHandler={onSelect}
+                        messageSelectHandler={onMessageSelect}
+                        filterFields={filterFields} 
+                        ref={ref => this.elements[action.id] = ref}/>))}
+            </div>)
     }
 }   
