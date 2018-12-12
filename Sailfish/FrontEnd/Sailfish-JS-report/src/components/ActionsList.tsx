@@ -25,6 +25,10 @@ export class ActionsList extends Component<ListProps, {}> {
     }
 
     shouldComponentUpdate(nextProps: ListProps) {
+        if (nextProps.filterFields !== this.props.filterFields) {
+            return true;
+        }
+
         return nextProps.actions !== this.props.actions ||
             nextProps.selectedActionId !== this.props.selectedActionId ||
             nextProps.selectedMessageId !== this.props.selectedMessageId;

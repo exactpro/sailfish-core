@@ -1,5 +1,6 @@
 import { h, Component } from "preact";
 import ActionParameter from "../models/ActionParameter";
+import '../styles/tables.scss';
 
 export interface IParamTableProps {
     params: Array<ActionParameter>;
@@ -40,7 +41,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
     renderParams(root: TableNode, padding: number = 1) {
 
         return (root.subParameters && root.subParameters.length !== 0 ? ([
-            <tr class="table-row-toogler">
+            <tr class="params-table-row-toogler">
                 <td onClick={() => this.tooglerClick(root)}
                     colSpan={2}>
                     <p style={{ marginLeft: 10 * padding }}>
@@ -53,7 +54,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
                     (param) => this.renderParams(param, padding + 1) as Element)
         ]
         ) : (
-                <tr class="table-row-value">
+                <tr class="params-table-row-value">
                     <td style={{ paddingLeft: 10 * padding }}> 
                         {root.name}
                     </td>
@@ -67,7 +68,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
 
 
     render({ name }: IParamTableProps, { collapseParams }: IParamTableState) {
-        return (<div class="table-root">
+        return (<div class="params-table">
             <table>
                 <tbody>
                     <tr>

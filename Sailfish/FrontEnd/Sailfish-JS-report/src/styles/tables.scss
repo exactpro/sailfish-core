@@ -7,10 +7,13 @@
     table {
         border-collapse: collapse;
         border: 1px solid black;
+        table-layout: fixed;
+        width: 100%;
     }
 
     td {
         border: 1px solid black;
+        word-break: break-word;
     }
 
     th {
@@ -19,7 +22,7 @@
     }
 
     &-flexible {
-        width: 50%;
+        //width: 50%;
     }
 
     &-row {
@@ -66,6 +69,47 @@
 
         td {
             padding-right: 7px;
+        }
+    }
+}
+
+.params-table {
+    table {
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+    td {
+        border: 1px solid black;
+        padding: 0;
+    }
+    th {
+        border: 1px solid gray;
+        padding: 0;
+        background-color: #B7B3BB;
+    }
+
+    display: block;
+    width: 100%;
+    height: auto;
+
+    &-row-toogler {
+        p {
+            margin: 0;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        td {
+            cursor: pointer;
+        }
+    }
+
+    &-row-value {
+        p {
+            margin: 0;
+            text-decoration: none;
+            font-size: 14px;
         }
     }
 }

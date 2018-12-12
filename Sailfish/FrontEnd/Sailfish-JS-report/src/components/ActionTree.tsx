@@ -34,11 +34,40 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
                     return true;
             }
 
+            if (this.props.filterFields !== nextProps.filterFields) {
+                return true;
+            }
+
             // compare current action id and selected action id
-            return nextAction.id === nextProps.selectedActionId || this.props.selectedActionId === nextAction.id;
+            return this.shouldActionUpdate(nextAction, nextProps.selectedActionId, nextProps.selectedMessageId);
         } else {
             return true;
         }
+    }
+
+    shouldActionUpdate(action: Action, nextSelectedActionId: number, nextSelectedMessageId: number) : boolean {
+        // the first condition - current action is selected and we should update to show id
+        // the second condition - current action was selected and we should disable selection
+        if (nextSelectedActionId === action.id || this.props.selectedActionId === action.id) {
+            return true;
+        }
+
+        if (action.relatedMessages.includes(nextSelectedMessageId) || action.relatedMessages.includes(this.props.selectedMessageId)) {
+            return true;
+        }
+
+        if (action.subNodes) {
+            // if at least one of the subactions needs an update, we update the whole action
+            return action.subNodes.some(action => {
+                    if (action.actionNodeType === "action") {
+                        return this.shouldActionUpdate(action as Action, nextSelectedActionId, nextSelectedMessageId)
+                    } else {
+                        return false;
+                    }
+                });
+        }
+
+        return false;
     }
 
     render(props: ActionTreeProps, state: {}): JSX.Element {
@@ -107,7 +136,7 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
                             }}>{message} - {level}</h3>
                         </div>
                         <div class="action-card-body">
-                            <p>{exception && exception.stacktrace}</p>
+                            <pre>{exception && exception.stacktrace}</pre>
                         </div>
                     </ExpandablePanel>
                 </div>

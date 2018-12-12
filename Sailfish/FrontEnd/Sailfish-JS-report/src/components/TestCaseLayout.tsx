@@ -84,10 +84,19 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     }
 
     splitModeHandler() {
-        this.setState({
-            ...this.state,
-            isSplitMode: !this.state.isSplitMode
-        });
+        if (this.state.isSplitMode) {
+            this.setState({
+                ...this.state,
+                isSplitMode: false            
+            });
+        } else {
+            this.setState({
+                ...this.state,
+                isSplitMode: true,
+                primaryPane: Pane.Actions,
+                secondaryPane :Pane.Messages
+            })
+        }
     }
 
     showFilterHandler() {

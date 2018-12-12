@@ -71,7 +71,11 @@
         box-sizing: border-box;
 
         p {
-            word-break: break-word;
+            word-break: break-all;
+        }
+
+        pre {
+            overflow-x: scroll;
         }
 
         &-verification {
@@ -98,47 +102,6 @@
                 }
             }
         }
-    }
-}
-
-.table-root {
-    table {
-        border-collapse: collapse;
-        border: 1px solid black;
-    }
-    td {
-        border: 1px solid black;
-        padding: 0;
-    }
-    th {
-        border: 1px solid gray;
-        padding: 0;
-        background-color: #B7B3BB;
-    }
-
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-.table-row-toogler {
-    p {
-        margin: 0;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 16px;
-    }
-
-    td {
-        cursor: pointer;
-    }
-}
-
-.table-row-value {
-    p {
-        margin: 0;
-        text-decoration: none;
-        font-size: 14px;
     }
 }
 
