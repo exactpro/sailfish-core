@@ -1,4 +1,4 @@
-import { h, Component, Ref } from 'preact';
+import { h, Component } from 'preact';
 import '../styles/splitter.scss';
 
 interface SplitState {
@@ -7,7 +7,9 @@ interface SplitState {
 
 export class SplitView extends Component<{}, SplitState> {
 
-    private rightPane : any;
+    private rightPane : HTMLElement;
+    private leftPane : HTMLElement;
+    private root : HTMLElement;
     private lastPosition : number;
 
     constructor(props) {
@@ -18,22 +20,25 @@ export class SplitView extends Component<{}, SplitState> {
         this.onMouseMove = this.onMouseMove.bind(this)
     }
 
-    componentWillMount() {
-        this.setState({
-            rightPaneWidth: window.innerWidth / 2
-        });
+    componentDidMount() {
+        if (this.root) {
+            this.setState({
+                rightPaneWidth: this.root.offsetWidth / 2 - 10
+            });
+        }
     }
 
     resetPosition(newPosition: number) {
+        const diff = newPosition - this.lastPosition;
         this.setState({
-            rightPaneWidth: this.state.rightPaneWidth + this.lastPosition - newPosition
+            rightPaneWidth: this.state.rightPaneWidth - diff
         });
         this.lastPosition = newPosition;
     }
 
     splitterMouseDown(e: MouseEvent) {
         window.addEventListener("mousemove", this.onMouseMove);
-        this.lastPosition = e.clientX
+        this.lastPosition = e.clientX;
     }
 
     splitterMouseUp(e: MouseEvent) {
@@ -45,9 +50,14 @@ export class SplitView extends Component<{}, SplitState> {
     }
 
     render(props, {rightPaneWidth} : SplitState) {
+        const percentRightWidth = (this.root ? (rightPaneWidth - 10) / this.root.offsetWidth * 100 : 50); 
+        const percentLeftWidth = (this.root ? (this.root.offsetWidth - rightPaneWidth - 10) / this.root.offsetWidth * 100 : 50); 
+
         return (
-            <div id="splitter-root">
-                <div id="left-pane">
+            <div id="splitter-root" ref={ref => this.root = ref}
+                style={{gridTemplateColumns: `${percentLeftWidth}% 20px ${percentRightWidth}%`}}>
+                <div id="left-pane" 
+                    ref={ref => this.leftPane = ref}>
                     {props.children[0]}
                 </div>
                 <div class="splitter-bar" onMouseDown={(e) => this.splitterMouseDown(e)}
@@ -55,7 +65,7 @@ export class SplitView extends Component<{}, SplitState> {
                     <div class="splitter-bar-icon"/>
                 </div>
                 <div id="right-pane" ref={pane => this.rightPane = pane}
-                    style={{width: rightPaneWidth}}>
+                    >
                     {props.children[1]}
                 </div>
             </div>
