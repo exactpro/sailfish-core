@@ -21,6 +21,47 @@
         background-color: #B7B3BB;
     }
 
+    &-header {
+        position: relative;
+
+        &-name {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+
+            h5 {
+                font-size: 16px;
+            }
+        }
+
+        &-control {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+
+            span {
+                font-size: 11px;
+            }
+
+            &-button {
+                color: $passedTextColor;
+                cursor: pointer;
+                position: relative;
+
+                &::after {
+                    content: '';
+                    border-bottom: 1px solid $passedTextColor;
+                    border-bottom-style: dashed;
+                    width: 100%;
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                }
+            }
+        }
+    }
+
     &-flexible {
         //width: 50%;
     }

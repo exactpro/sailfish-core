@@ -78,9 +78,43 @@ export default class VerificationTable extends Component<VerificationTableProps,
         this.setState(this.state);
     }
 
+    setCollapseStatus(isCollapsed: boolean) {
+        this.setState({
+            nodes: this.state.nodes.map(
+                node => node.subEntries ? this.setNodeCollapseStatus(node, isCollapsed) : node)
+        });
+    }
+
+    setNodeCollapseStatus(node: TableNode, isCollapsed: boolean): TableNode {
+        return {
+            ...node,
+            isCollapsed: isCollapsed,
+            subEntries: node.subEntries ? node.subEntries.map(
+                subNode => subNode.subEntries ? this.setNodeCollapseStatus(subNode, isCollapsed) : 
+                subNode) : null
+        }
+    }
+
     render({ filterFields }: VerificationTableProps, { nodes }: VerificationTableState) {
         return (
             <div class="ver-table">
+                <div class="ver-table-header">
+                    <div class="ver-table-header-name">
+                        <h5>Comparison Table</h5>
+                    </div>
+                    <div class="ver-table-header-control">
+                        <span class="ver-table-header-control-button"
+                            onClick={() => this.setCollapseStatus(true)}>
+                            Collapse
+                        </span>
+                        <span> | </span>
+                        <span class="ver-table-header-control-button"
+                            onClick={() => this.setCollapseStatus(false)}>
+                            Expand
+                        </span>
+                        <span> all groups</span>
+                    </div>
+                </div>
                 <table>
                     <thead>
                         <th>Name</th>
