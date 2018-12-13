@@ -7,10 +7,14 @@
     }
 
     &.passed {
-       &.selected {
-           background-color: $passedBackgroundColor;
-           border-color: $passedBorderColor;           
-       }
+        &.selected {
+            background-color: $passedBackgroundColor;
+            border-color: $passedBorderColor;           
+        }
+
+        &.root {
+            border-color: $passedBorderColorSecondary;
+        }
 
         h3 {
             color: $passedTextColor;
@@ -23,6 +27,10 @@
             border-color: $failedBorderColor;
         }
 
+        &.root {
+            border-color: $failedBorderColorSecondary;
+        }
+
         h3 {
             color: $failedTextColor;
         }
@@ -32,6 +40,10 @@
         &.selected {
             background-color: $conditionallyBackgroundColor;
             border-color: $conditionallyBorderColor;
+        }
+
+        &.root {
+            border-color: $conditionallyBorderColorSecondary;
         }
 
         h3 {
@@ -49,12 +61,16 @@
     border: 2px solid transparent;
     border-radius: 5px;
     padding: 5px;
+    margin: 5px 0;
 
     h4 {
         margin: 0px;
     }
 
     &-header {
+        display: flex;
+        width: 100%;
+
         h3 {
             margin: 0;
         }
@@ -63,6 +79,20 @@
             font-size: 12px;
             color: $secondaryTextColor;
             margin: 2px 0px 0px 5px;
+        }
+
+        &-name {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        &-status {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-end;
         }
     }
 
@@ -76,6 +106,10 @@
 
         pre {
             overflow-x: scroll;
+        }
+
+        &-params {
+            padding-left: 10px;
         }
 
         &-verification {
@@ -109,4 +143,5 @@
     @include scrollbar;
     height: 100%;
     overflow-y: scroll;
+    padding: 0 5px;
 }

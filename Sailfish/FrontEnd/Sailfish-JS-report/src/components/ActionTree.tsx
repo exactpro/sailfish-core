@@ -39,20 +39,16 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
             }
 
             // compare current action id and selected action id
-            return this.shouldActionUpdate(nextAction, nextProps.selectedActionId, nextProps.selectedMessageId);
+            return this.shouldActionUpdate(nextAction, nextProps.selectedActionId);
         } else {
             return true;
         }
     }
 
-    shouldActionUpdate(action: Action, nextSelectedActionId: number, nextSelectedMessageId: number) : boolean {
+    shouldActionUpdate(action: Action, nextSelectedId: number) : boolean {
         // the first condition - current action is selected and we should update to show id
         // the second condition - current action was selected and we should disable selection
-        if (nextSelectedActionId === action.id || this.props.selectedActionId === action.id) {
-            return true;
-        }
-
-        if (action.relatedMessages.includes(nextSelectedMessageId) || action.relatedMessages.includes(this.props.selectedMessageId)) {
+        if (nextSelectedId === action.id || this.props.selectedActionId === action.id) {
             return true;
         }
 
@@ -60,7 +56,7 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
             // if at least one of the subactions needs an update, we update the whole action
             return action.subNodes.some(action => {
                     if (action.actionNodeType === "action") {
-                        return this.shouldActionUpdate(action as Action, nextSelectedActionId, nextSelectedMessageId)
+                        return this.shouldActionUpdate(action as Action, nextSelectedId)
                     } else {
                         return false;
                     }
@@ -71,10 +67,10 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
     }
 
     render(props: ActionTreeProps, state: {}): JSX.Element {
-        return this.renderNode(props);
+        return this.renderNode(props, true);
     }
 
-    renderNode(props: ActionTreeProps): JSX.Element {
+    renderNode(props: ActionTreeProps, isRoot = false): JSX.Element {
         const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, filterFields } = props;
 
         switch (props.action.actionNodeType) {
@@ -83,7 +79,8 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
                 return (
                     <ActionCard action={action}
                         isSelected={action.id === selectedActionId}
-                        onSelect={actionSelectHandler}>
+                        onSelect={actionSelectHandler}
+                        isRoot={isRoot}>
                         {
                             action.subNodes ? action.subNodes.map(
                                 action => this.renderNode({...props, action: action})) : null
