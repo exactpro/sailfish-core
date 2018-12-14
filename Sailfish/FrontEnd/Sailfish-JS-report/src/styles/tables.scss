@@ -45,6 +45,7 @@
             }
 
             &-button {
+                @include nonselect;
                 color: $passedTextColor;
                 cursor: pointer;
                 position: relative;
