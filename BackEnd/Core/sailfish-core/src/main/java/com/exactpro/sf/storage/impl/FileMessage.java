@@ -20,10 +20,12 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.storage.IMeasurable;
 import com.exactpro.sf.storage.ISerializer;
+import com.exactpro.sf.storage.util.StorageMeasureUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class FileMessage {
+public class FileMessage implements IMeasurable {
     private String namespace;
     private String name;
     private String from;
@@ -206,4 +208,11 @@ public class FileMessage {
     public void setRejectReason(String rejectReason) {
         this.rejectReason = rejectReason;
     }
+
+    @Override
+    public long getSize() {
+        return StorageMeasureUtils.getSize(from, to, namespace, name, jsonMessage, humanMessage, rejectReason, serviceID) +
+                StorageMeasureUtils.getSize(rawMessage) + (8 << 4); //8*16 - 8 field with types other than string and byte array
+    }
+
 }

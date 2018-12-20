@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.storage.BaseStorageSettings;
+import com.exactpro.sf.storage.DBStorageSettings;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -352,9 +354,9 @@ public class SFLocalContext implements ISFContext {
 	private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
 		switch (envSettings.getStorageType()) {
         case DB:
-            return new DatabaseMessageStorage(workspaceDispatcher, sessionFactory, dictionaryManager);
+            return new DatabaseMessageStorage(new DBStorageSettings(workspaceDispatcher, sessionFactory, dictionaryManager, envSettings));
         case FILE:
-            return new FileMessageStorage(envSettings.getFileStoragePath(), envSettings.isStoreAdminMessages(), workspaceDispatcher, dictionaryManager);
+            return new FileMessageStorage(new BaseStorageSettings(workspaceDispatcher, dictionaryManager, envSettings));
         default:
             throw new EPSCommonException("Unsupported message storage type. Check your descriptor.xml file.");
         }

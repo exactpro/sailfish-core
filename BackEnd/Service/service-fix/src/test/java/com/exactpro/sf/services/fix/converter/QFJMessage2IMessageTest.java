@@ -23,9 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.exactpro.sf.common.messages.MessageUtil;
-import com.exactpro.sf.configuration.factory.FIXHumanMessage;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;

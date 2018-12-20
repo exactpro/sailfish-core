@@ -22,12 +22,14 @@ import java.util.Objects;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.ServiceEvent;
+import com.exactpro.sf.storage.IMeasurable;
 import com.exactpro.sf.storage.ISerializer;
+import com.exactpro.sf.storage.util.StorageMeasureUtils;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FileServiceEvent extends ServiceEvent {
+public class FileServiceEvent extends ServiceEvent implements IMeasurable {
     private final transient ISerializer<FileServiceEvent> serializer;
     private final transient File file;
     private final transient long lastModified;
@@ -120,5 +122,12 @@ public class FileServiceEvent extends ServiceEvent {
         }
 
         loaded = true;
+    }
+
+    @Override
+    public long getSize() {
+        return StorageMeasureUtils.getSize(serviceName.toString(), message, details) +
+                (4 * 16) + //~sum of fields
+                32;//date
     }
 }

@@ -142,11 +142,13 @@ public class EnvironmentSettings implements ICommonSettings
 	private final static String FAIL_UNEXPECTED_KEY = "FailUnexpected";
 	private final static String REPORT_OUTPUT_FORMAT = "ReportOutputFormat";
     private final static String RELEVANT_MESSAGES_SORTING_MODE = "RelevantMessagesSortingMode";
+    private static final String MAX_STORAGE_QUEUE_SIZE = "MaxStorageQueueSize";
 
 	private StorageType storageType = StorageType.DB;
 	private String fileStoragePath = "storage";
 	private boolean storeAdminMessages;
 	private boolean asyncRunMatrix;
+	private long maxQueueSize;
 
 	private boolean notificationIfServicesNotStarted;
 	private int matrixCompilerPriority;
@@ -185,6 +187,7 @@ public class EnvironmentSettings implements ICommonSettings
         result.reportOutputFormat = this.reportOutputFormat;
         result.relevantMessagesSortingMode = this.relevantMessagesSortingMode;
         result.comparisonPrecision = this.comparisonPrecision;
+        result.maxQueueSize = this.maxQueueSize;
 
 	    return result;
 	}
@@ -200,6 +203,7 @@ public class EnvironmentSettings implements ICommonSettings
 	    this.failUnexpected = other.failUnexpected;
         this.relevantMessagesSortingMode = other.relevantMessagesSortingMode;
         this.comparisonPrecision = other.comparisonPrecision;
+        this.maxQueueSize = other.maxQueueSize;
 
 	    update();
 	}
@@ -239,6 +243,15 @@ public class EnvironmentSettings implements ICommonSettings
 		this.asyncRunMatrix = asyncRunMatrix;
 		update();
 	}
+
+	public long getMaxStorageQueueSize() {
+	    return maxQueueSize;
+    }
+
+    public void setMaxStorageQueueSize(long size) {
+	    maxQueueSize = size;
+	    update();
+    }
 
 	public boolean isNotificationIfServicesNotStarted() {
 		return notificationIfServicesNotStarted;
@@ -351,6 +364,8 @@ public class EnvironmentSettings implements ICommonSettings
 
 		this.asyncRunMatrix = config.getBoolean(ASYNC_RUN_MATRIX_KEY, false);
 
+		this.maxQueueSize = config.getLong(MAX_STORAGE_QUEUE_SIZE, 1024*1024*32);
+
 		this.storageType = StorageType.parse(config.getString("StorageType", StorageType.DB.getName()));
 
         this.comparisonPrecision = config.getBigDecimal(COMPARISON_PRECISION, MathProcessor.COMPARISON_PRECISION);
@@ -362,6 +377,7 @@ public class EnvironmentSettings implements ICommonSettings
 		config.setProperty(ASYNC_RUN_MATRIX_KEY, asyncRunMatrix);
         config.setProperty("StorageType", storageType.getName());
         config.setProperty(COMPARISON_PRECISION, comparisonPrecision);
+        config.setProperty(MAX_STORAGE_QUEUE_SIZE, maxQueueSize);
 	}
 
     private void loadScriptRunSettings(HierarchicalConfiguration config) {

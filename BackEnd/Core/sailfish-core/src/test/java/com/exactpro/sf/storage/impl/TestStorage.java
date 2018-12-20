@@ -17,6 +17,8 @@ package com.exactpro.sf.storage.impl;
 
 import java.io.FileNotFoundException;
 
+import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.storage.DBStorageSettings;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -31,13 +33,12 @@ import com.exactpro.sf.storage.ScriptRun;
 import com.exactpro.sf.util.AbstractTest;
 
 @Ignore //Are you sure testing DB as unit test?
-public class TestStorage extends AbstractTest
-{
+public class TestStorage extends AbstractTest {
 
-	@Test
+    @Test
 	public void testMessageStoring() throws WorkspaceStructureException, FileNotFoundException
 	{
-		IMessageStorage defMsgStorage = new DatabaseMessageStorage(null, null, null);
+		IMessageStorage defMsgStorage = new DatabaseMessageStorage(new DBStorageSettings(null, null, null, new EnvironmentSettings(null)));
 
 		ScriptRun scriptRun = defMsgStorage.openScriptRun("Example", "ExampleDescription");
 
@@ -68,7 +69,7 @@ public class TestStorage extends AbstractTest
 	@Test
 	public void testComplexMessageStoring() throws WorkspaceStructureException, FileNotFoundException
 	{
-		IMessageStorage defMsgStorage = new DatabaseMessageStorage(null, null, null);
+		IMessageStorage defMsgStorage = new DatabaseMessageStorage(new DBStorageSettings(null, null, null, new EnvironmentSettings(null)));
 
 		ScriptRun scriptRun = defMsgStorage.openScriptRun("Example", "ExampleDescription");
 
@@ -107,7 +108,7 @@ public class TestStorage extends AbstractTest
 	@Test
 	public void testMassStoring() throws InterruptedException, WorkspaceStructureException, FileNotFoundException
 	{
-		IMessageStorage defMsgStorage = new DatabaseMessageStorage(null, null, null);
+		IMessageStorage defMsgStorage = new DatabaseMessageStorage(new DBStorageSettings(null, null, null, new EnvironmentSettings(null)));
 
 		ScriptRun scriptRun = defMsgStorage.openScriptRun("Example", "ExampleDescription");
 
