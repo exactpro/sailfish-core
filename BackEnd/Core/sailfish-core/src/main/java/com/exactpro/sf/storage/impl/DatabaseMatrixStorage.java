@@ -21,11 +21,17 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.exactpro.sf.aml.Hash;
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -286,7 +292,11 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
 		}
 
         try {
-            Set<String> matrices = dispatcher.listFiles(File::isFile, FolderType.MATRIX, true, ".");
+            Set<String> matrices = dispatcher.listFiles(File::isFile, FolderType.MATRIX, true, ".").stream().filter(it -> {
+                MatrixFileTypes fileType = MatrixFileTypes.detectFileType(it);
+                return (fileType == MatrixFileTypes.CSV) || (fileType == MatrixFileTypes.XLS) || (fileType == MatrixFileTypes.XLSX);
+            }).collect(Collectors.toSet());
+
             if (list.size() != matrices.size()) {
                 for  (StoredMatrix sm : list) {
                     matrices.remove(sm.getFilePath());
