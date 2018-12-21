@@ -22,7 +22,10 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.configuration.factory.FIXHumanMessage;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
@@ -68,6 +71,30 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertEquals(
                 "8=FIXT.1.19=15535=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169",
                 fixMessageTarget.toString());
+    }
+
+    @Test
+    public void testEmptyRepeatingGroup() throws Exception {
+        String rawMessage = "8=FIX.4.4\u00019=95\u000135=W\u000149=PARFX\u000156=Bank_GA1_MD\u000134=54\u000152=20181220-09:24:07.690\u0001"
+                + "262=1545297847670\u000155=EUR/USD\u0001268=0\u000110=137\u0001";
+
+        Message fixMessageSrc = new Message();
+        DataDictionary dataDict = getFixDictionary("FIX50.xml");
+        fixMessageSrc.fromString(rawMessage, dataDict, true);
+        if (fixMessageSrc.getException() != null)
+            throw fixMessageSrc.getException();
+
+        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
+        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        IMessage iMessage = converter.convert(fixMessageSrc);
+
+        Assert.assertFalse(iMessage.isFieldSet("MDIncGrp"));
+        Assert.assertFalse(iMessage.isFieldSet("NoMDEntries"));
+
+        System.out.println(MessageUtil.convertToIHumanMessage(messageFactory, dictionary.getMessageStructure(iMessage.getName()), iMessage));
+
+        //quickfix.Message fixMessageTarget = converter.convert(iMessage, true);
+
     }
 
     @Test
