@@ -1,0 +1,49 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<div class="eps-content-block">
+    <h:form id="cleanupOptionsForm">
+        <h:panelGrid columns="2" cellpadding="5">
+            <p:outputLabel for="olderThan" value="Older than:"/>
+            <p:calendar id="olderThan" styleClass="eps-input" value="#{cleanupBean.olderThan}" pattern="yyyy-MM-dd HH:mm:ss" onfocus="$(this).mask('9999-99-99 99:99:99');"/>
+        
+            <p:outputLabel for="cleanReports" value="Clean reports"/>
+            <p:selectBooleanCheckbox id="cleanReports" value="#{cleanupBean.cleanReports}"/>
+            
+            <p:outputLabel for="cleanMatrices" value="Clean matrices"/>
+            <p:selectBooleanCheckbox id="cleanMatrices" value="#{cleanupBean.cleanMatrices}"/>
+            
+            <p:outputLabel for="cleanMessages" value="Clean messages"/>
+            <p:selectBooleanCheckbox id="cleanMessages" value="#{cleanupBean.cleanMessages}"/>
+            
+            <p:outputLabel for="cleanEvents" value="Clean events"/>
+            <p:selectBooleanCheckbox id="cleanEvents" value="#{cleanupBean.cleanEvents}"/>
+            
+            <p:outputLabel for="cleanTrafficDump" value="Clean traffic dump"/>
+            <p:selectBooleanCheckbox id="cleanTrafficDump" value="#{cleanupBean.cleanTrafficDump}"/>
+            
+            <p:outputLabel for="cleanLogs" value="Clean logs"/>
+            <p:selectBooleanCheckbox id="cleanLogs" value="#{cleanupBean.cleanLogs}"/>
+
+            <p:outputLabel for="cleanML" value="Clean ML"/>
+            <p:selectBooleanCheckbox id="cleanML" value="#{cleanupBean.cleanML}"/>
+        </h:panelGrid>
+        <br/>
+        <p:commandButton value="Clean" onclick="PF('cleanConfirmation').show()" title="Perform cleanup"/>
+        <br/>
+    </h:form>
+    
+    <h:form id="cleanConfirmForm">
+        <p:confirmDialog id="cleanConfirmDialog" message="Are you sure about cleanup?"
+                         header="Perform cleanup" severity="alert" widgetVar="cleanConfirmation">
+            <div style="text-align: center;">
+                <p:commandButton id="confirm" value="Yes" oncomplete="PF('cleanConfirmation').hide()" actionListener="#{cleanupBean.clean}"/>
+                <p:commandButton id="decline" value="No" onclick="PF('cleanConfirmation').hide()" type="button"/>
+            </div>
+        </p:confirmDialog>
+    </h:form>
+</div>
+</html>

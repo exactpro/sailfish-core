@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="TestStrictmessage">
+    <fields>
+        <field type="java.lang.Boolean" id="boolean" name="boolean"/>
+        <field type="java.lang.Double" id="double" name="double"/>
+        <field type="java.lang.Integer" id="integer" name="integer"/>
+        <field type="java.lang.String" id="string" name="string"/>
+        <field type="java.lang.Short" id="short" name="short"/>
+        <field type="java.lang.Long" id="long" name="long"/>
+        <field type="java.lang.Byte" id="byte" name="byte"/>
+        <field type="java.lang.Float" id="float" name="float"/>
+        <field type="java.lang.Character" id="character" name="character"/>
+        <field type="java.math.BigDecimal" id="bigDecimal" name="bigDecimal"/>
+        <field type="java.time.LocalDateTime" id="datetime" name="datetime"/>
+        <field type="java.time.LocalDate" id="date" name="date"/>
+        <field type="java.time.LocalTime" id="time" name="time"/>
+    </fields>
+    <messages>
+        <message name="TestMessage">
+            <field reference="boolean" name="boolean"/>
+            <field isCollection="true" reference="boolean" name="boolean_collection"/>
+            <field reference="integer" name="integer"/>
+            <field isCollection="true" reference="integer" name="integer_collection"/>
+            <field reference="string" name="string"/>
+            <field isCollection="true" reference="string" name="string_collection"/>
+            <field reference="short" name="short"/>
+            <field isCollection="true" reference="short" name="short_collection"/>
+            <field reference="long" name="long"/>
+            <field isCollection="true" reference="long" name="long_collection"/>
+            <field reference="byte" name="byte"/>
+            <field isCollection="true" reference="byte" name="byte_collection"/>
+            <field reference="float" name="float"/>
+            <field isCollection="true" reference="float" name="float_collection"/>
+            <field reference="double" name="double"/>
+            <field isCollection="true" reference="double" name="double_collection"/>
+            <field reference="character" name="character"/>
+            <field isCollection="true" reference="character" name="character_collection"/>
+            <field reference="bigDecimal" name="bigDecimal"/>
+            <field isCollection="true" reference="bigDecimal" name="bigDecimal_collection"/>
+            <field reference="datetime" name="datetime"/>
+            <field isCollection="true" reference="datetime" name="datetime_collection"/>
+            <field reference="date" name="date"/>
+            <field isCollection="true" reference="date" name="date_collection"/>
+            <field reference="time" name="time"/>
+            <field isCollection="true" reference="time" name="time_collection"/>
+            <field reference="ref_message" name="message"/>
+            <field isCollection="true" reference="ref_message" name="message_collection"/>
+        </message>
+        <message id="ref_message" name="SomeMessage">
+			<field reference="integer" name="testField"/>
+        </message>
+        <message name="TestRequedMessage">
+            <field reference="string" name="string" required="true" defaultvalue="def"/>
+            <field reference="integer" name="integer" required="true"/>
+        </message>
+    </messages>
+</dictionary>

@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="ITCH">
+    <fields>
+        <field type="java.lang.Short" id="MessageType" name="MessageType">
+            <value type="java.lang.Short" name="testInteger">88</value>            
+            <value type="java.lang.Short" name="testLong">99</value>
+            <value type="java.lang.Short" name="testShort">111</value>
+            <value type="java.lang.Short" name="testByte">222</value>
+            <value type="java.lang.Short" name="testString">121</value>
+        </field> 
+        <field defaultvalue="0" type="java.lang.Integer" id="UHSequenceNumber" name="UHSequenceNumber">
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <attribute type="java.lang.Integer" name="Length">0</attribute>
+        </field>
+        <field defaultvalue="0" type="java.lang.String" id="UHMarketDataGroup" name="UHMarketDataGroup">
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <attribute type="java.lang.Integer" name="Length">0</attribute>
+        </field>
+        <field defaultvalue="0" type="java.lang.Integer" id="MessageSequenceNumber" name="MessageSequenceNumber">
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <attribute type="java.lang.Integer" name="Length">0</attribute>
+        </field>
+    </fields>
+    <messages>
+        <message name="UnitHeader">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">256</attribute>
+            <field type="java.lang.Integer" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt16</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field type="java.lang.Short" name="MessageCount">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="MarketDataGroup">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="SequenceNumber">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+       
+       <message name="testInteger">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">88</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="10" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>            
+            <field defaultvalue="88" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="uInt16">
+                <attribute type="java.lang.String" name="Type">UInt16</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="int8">
+                <attribute type="java.lang.String" name="Type">Int8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="int16">
+                <attribute type="java.lang.String" name="Type">Int16</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field type="java.lang.Integer" name="int32">
+                <attribute type="java.lang.String" name="Type">Int32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Integer" name="STUB">
+                <attribute type="java.lang.String" name="Type">STUB</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        
+        <message name="testLong">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">99</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="17" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="99" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="uInt32">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="uInt64">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.Long" name="int16">
+                <attribute type="java.lang.String" name="Type">Int16</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field type="java.lang.Long" name="int32">
+                <attribute type="java.lang.String" name="Type">Int32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="int64">
+                <attribute type="java.lang.String" name="Type">Int64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.Long" name="STUB">
+                <attribute type="java.lang.String" name="Type">STUB</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>           
+        </message>
+        <message name="testShort">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">111</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="17" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="111" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="uInt8">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="byte">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="int8">
+                <attribute type="java.lang.String" name="Type">Int8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="int16">
+                <attribute type="java.lang.String" name="Type">Int16</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="STUB">
+                <attribute type="java.lang.String" name="Type">STUB</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message name="testByte">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">222</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="17" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="222" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Byte" name="byte">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field type="java.lang.Byte" name="int8">
+                <attribute type="java.lang.String" name="Type">Int8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>            
+        </message>
+        <message name="testString">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">121</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="46" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="121" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="Alpha">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">3</attribute>
+            </field>             
+            <field type="java.lang.String" name="Time">
+                <attribute type="java.lang.String" name="Type">Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="Date">
+                <attribute type="java.lang.String" name="Type">Date</attribute>
+                <attribute type="java.lang.Integer" name="Length">28</attribute>
+            </field>
+            <field type="java.lang.String" name="STUB">
+                <attribute type="java.lang.String" name="Type">STUB</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>           
+        </message>
+        <message name="testFloat">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">16</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="17" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="16" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Float" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">3</attribute>
+            </field>                        
+        </message>
+        <message name="testDouble">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">116</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="17" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="116" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">3</attribute>
+            </field>              
+            <field type="java.lang.Double" name="Size">
+                <attribute type="java.lang.String" name="Type">Size</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>  
+            <field type="java.lang.Double" name="Price4">
+                <attribute type="java.lang.String" name="Type">Price4</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>              
+            <field type="java.lang.Double" name="Size4">
+                <attribute type="java.lang.String" name="Type">Size4</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>        
+            <field type="java.lang.Double" name="UInt16">
+                <attribute type="java.lang.String" name="Type">UInt16</attribute>
+                <attribute type="java.lang.Integer" name="ImpliedDecimals">2</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>        
+        </message>
+        <message name="testBigDecimal">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">166</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="26" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="166" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="UInt64">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="ImpliedDecimals">2</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>  
+            <field type="java.math.BigDecimal" name="Int32">
+                <attribute type="java.lang.String" name="Type">Int32</attribute>
+                <attribute type="java.lang.Integer" name="ImpliedDecimals">2</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="UInt32">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="ImpliedDecimals">2</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>                      
+            <field type="java.math.BigDecimal" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">3</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="Size">
+                <attribute type="java.lang.String" name="Type">Size</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="UDT">
+                <attribute type="java.lang.String" name="Type">UDT</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+        </message>
+        <message name="testMessage" id="testMessage">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">138</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="2" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="138" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>                                  
+        </message>
+        <message name="testIMessage">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">137</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="2" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="137" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field name="testMessage" reference="testMessage"/>                      
+        </message>
+        <message name="testDate">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">77</attribute>
+            <field name="UHSequenceNumber" reference="UHSequenceNumber"/>
+            <field name="UHMarketDataGroup" reference="UHMarketDataGroup"/>
+            <field name="MessageSequenceNumber" reference="MessageSequenceNumber"/>
+            <field defaultvalue="17" type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="77" type="java.lang.Short" reference="MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.time.LocalDate" name="Date">
+                <attribute type="java.lang.String" name="Type">Date</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.time.LocalTime" name="Time">
+                <attribute type="java.lang.String" name="Type">Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.time.LocalDate" name="Days">
+                <attribute type="java.lang.String" name="Type">Days</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>   
+            <field type="java.time.LocalDateTime" name="STUB">
+                <attribute type="java.lang.String" name="Type">STUB</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>                     
+        </message>           
+    </messages>
+</dictionary>

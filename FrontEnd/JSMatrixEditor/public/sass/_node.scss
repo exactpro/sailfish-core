@@ -1,0 +1,215 @@
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$node-bg: #e0e0e0;
+$node-expand-icon-size: 16px;
+
+$insert-popover-total-width: 20em;
+
+$node-border-width: 1px;
+$node-small-space: 2px;
+$node-big-space: $node-small-space * 2;
+$small-button-height: 1px + $line-height-small * $font-size-small + $node-small-space * 2 + 1px * 2; // 1px - border
+$node-header-height: $small-button-height + (2 * $node-small-space);
+$node-dummy-height: $node-header-height + (2 * $node-border-width);
+$node-border-color: #ddd;
+
+$copy-source-highlighting: #54afff;
+$copy-border-color: darken($copy-source-highlighting, 40%);
+
+.panel-heading.exa-node-header-ct {
+    padding: $node-small-space;
+    height: $node-header-height;
+}
+
+.panel.exa-node-ct {
+    box-sizing: border-box;
+    margin-bottom: $node-small-space;
+    box-shadow: none;
+    border: $node-border-width solid $node-border-color;
+}
+
+.panel.panel-danger.exa-node-ct {
+    border-color: $node-danger-border;
+}
+
+.panel-body.exa-node-body-ct {
+    padding: $node-big-space;
+}
+
+.exa-node-header-ct {
+    // white-space: nowrap;
+
+    & .exa-node-expand-icon {
+        cursor: pointer;
+        display: inline-block;
+        margin-right: $node-big-space;
+        margin-left: $node-big-space;
+        vertical-align: middle;
+    }
+
+    //include header icons (except expand\collapse) and header text
+    & .exa-node-header {
+        display: inline-block;
+        width: calc(100% - 5em);
+        height: 100%;
+        vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.exa-node-over > .exa-node-header-ct .exa-node-header {
+   width: calc(100% - #{$insert-popover-total-width});
+}
+
+.exa-insert-popover > .exa-insert-popover-item:not(:first-child) {
+    margin: 0;
+    margin-left: $node-small-space;
+}
+
+.exa-insert-popover .btn {
+    padding: #{$node-small-space} #{$node-big-space}
+}
+
+.exa-node-body-ct {
+  &.exa-node-body-collapsed {
+    display: none;
+  }
+}
+
+.exa-btn-bookmark.btn-default {
+    color: $input-color-placeholder;
+}
+
+// FIXME get from Bootstrap theme
+.exa-node-ct:empty,
+.exa-node-dummy-ct {
+    box-sizing: border-box;
+    border: 1px solid $panel-default-border;
+    border-radius: 0;
+
+    background-color: $panel-default-heading-bg;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: inline-image('loader-circ-h16.gif');
+
+    height: $node-dummy-height;
+    margin: 0;
+    margin-bottom: $node-small-space;
+}
+
+
+$checkbox-vertical-align: top;
+$checkbox-icon-size: 16px;
+$checkbox-icon-margin: 2px;
+
+.exa-checkbox-label {
+  display: inline-block;
+  vertical-align: middle;
+
+  & .exa-checkbox {
+    display: none;
+
+    & + i {
+      width: $checkbox-icon-size;
+      height: $checkbox-icon-size;
+      cursor: pointer;
+      margin: $checkbox-icon-margin ;
+      background-repeat: no-repeat;
+
+      display: inline-block;
+      vertical-align: middle;;
+    }
+  }
+
+  span {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  //margin: 0 2px 0 2px;
+}
+
+.exa-checkbox-label {
+  .exa-checkbox-unstoppable:checked + i {
+    background-image: inline-image("force-16-black.png");
+    opacity: 1;
+  }
+
+  .exa-checkbox-execute + i {
+    background-image: inline-image("ignore-16-dd0000.png");
+    opacity: 1;
+  }
+
+  .exa-checkbox-filterstop:checked + i {
+    background-image: inline-image("filter-16-black.png");
+    opacity: 1;
+  }
+
+  .exa-checkbox-unstoppable + i {
+    background-image: inline-image("force-16-black.png");
+    opacity: 0.1;
+  }
+
+  .exa-checkbox-execute:checked + i {
+    background-image: inline-image("ignore-16-black.png");
+    opacity: 0.1;
+  }
+
+  .exa-checkbox-filterstop + i {
+    background-image: inline-image("filter-16-black.png");
+    opacity: 0.1;
+  }
+}
+
+.exa-checkbox-label:hover  {
+  .exa-checkbox-unstoppable:not(:checked) + i {
+    background-image: inline-image("force-16-black.png");
+    opacity: 0.35;
+  }
+
+  .exa-checkbox-execute:checked + i {
+    background-image: inline-image("ignore-16-dd0000.png");
+    opacity: 0.35;
+  }
+
+  .exa-checkbox-filterstop:not(:checked) + i {
+    background-image: inline-image("filter-16-black.png");
+    opacity: 0.35;
+  }
+}
+
+.exa-action-number {
+  float: right;
+  margin-right: $node-big-space;
+}
+
+.test-rect {
+  position: fixed;
+  background-color: red;
+}
+
+.exa-node-header-text {
+  text-overflow: ellipsis;
+}
+
+.exa-sopy-source {
+  &.panel {
+    box-shadow: rgba(0, 0, 0, 0.0745098) 0px 1px 1px 0px inset, rgba($copy-source-highlighting, 1) 0px 0px 7.01290130615234px 0px;
+    border-color: $copy-border-color;
+  }
+}

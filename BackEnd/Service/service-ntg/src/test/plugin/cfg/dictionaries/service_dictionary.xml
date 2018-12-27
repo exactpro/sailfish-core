@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary name="Service" xmlns="http://exactprosystems.com/dictionary">
+	<fields>
+        <field name="TBoolean" id="TBoolean" type="java.lang.Boolean"/>
+        <field name="TByte" id="TByte" type="java.lang.Byte"/>
+        <field name="TCharacter" id="TCharacter" type="java.lang.Character"/>
+        <field name="TShort" id="TShort" type="java.lang.Short"/>
+        <field name="TInteger" id="TInteger" type="java.lang.Integer"/>
+        <field name="TLong" id="TLong" type="java.lang.Long"/>
+        <field name="TFloat" id="TFloat" type="java.lang.Float"/>
+        <field name="TDouble" id="TDouble" type="java.lang.Double"/>
+        <field name="TBigDecimal" id="TBigDecimal" type="java.math.BigDecimal"/>
+        <field name="TString" id="TString" type="java.lang.String"/>
+    </fields>
+
+    <messages>
+        <message name="Checkpoint" id="Checkpoint">
+            <field name="Name" reference="TString"/>
+            <field name="Description" reference="TString"/>
+        </message>
+        <message name="ServiceMessage" id="ServiceMessage">
+            <field name="Text" reference="TString"/>
+        </message>
+        <message name="ErrorMessage" id="ErrorMessage">
+            <field name="Cause" reference="TString"/>
+        </message>
+    </messages>
+</dictionary>

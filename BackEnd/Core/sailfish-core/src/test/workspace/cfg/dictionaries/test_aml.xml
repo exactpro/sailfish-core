@@ -1,0 +1,697 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~ 
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="TestAML">
+	<fields>
+        <field id="F_CHAR" reference="F_TCharacter" name="CHAR"/>
+        <field id="F_STRING" reference="F_TString" name="STRING"/>
+        <field id="F_UTCTIMESTAMP" reference="F_TDateTime" name="UTCTIMESTAMP"/>
+        <field id="F_UTCDATE" reference="F_TDate" name="UTCDATE"/>
+        <field id="F_UTCTIME" reference="F_TTime" name="UTCTIME"/>
+        <field id="F_QTY" reference="F_TBigDecimal" name="QTY"/>
+        <field id="F_PRICE" reference="F_TBigDecimal" name="PRICE"/>
+        <field id="F_SEQNUM" reference="F_TInteger" name="SEQNUM"/>
+        <field id="F_CURRENCY" reference="F_TString" name="CURRENCY"/>
+        <field id="F_PERCENTAGE" reference="F_TBigDecimal" name="PERCENTAGE"/>
+        <field id="F_AMT" reference="F_TBigDecimal" name="AMT"/>
+        <field id="F_INT" reference="F_TInteger" name="INT"/>
+        <field id="F_BOOLEAN" reference="F_TBoolean" name="BOOLEAN"/>
+        <field id="F_LOCALMKTDATE" reference="F_TString" name="LOCALMKTDATE"/>
+        <field id="F_FLOAT" reference="F_TBigDecimal" name="FLOAT"/>
+        <field id="F_EXCHANGE" reference="F_TString" name="EXCHANGE"/>
+        <field id="F_Byte" reference="F_TShort" name="Byte"/>
+        <field id="F_UInt8" reference="F_TShort" name="UInt8"/>
+        <field id="F_UInt32" reference="F_TLong" name="UInt32"/>
+        <field id="F_UInt64" reference="F_TBigDecimal" name="UInt64"/>
+        <field id="F_Size4" reference="F_TDouble" name="Size4"/>
+        <field id="F_Price4" reference="F_TDouble" name="Price4"/>
+        <field id="F_Alpha" reference="F_TString" name="Alpha"/>
+        <field id="F_X1" reference="F_TString" name="X1"/>
+        <field id="F_X2" reference="F_TString" name="X2"/>
+        <field id="F_X8" reference="F_TString" name="X8"/>
+        <field id="F_X50" reference="F_TString" name="X50"/>
+        <field id="F_N8" reference="F_TLong" name="N8"/>
+        <field id="F_P10" reference="F_TDouble" name="P10"/>
+        <field id="F_S1" reference="F_TString" name="S1"/>
+        <field id="F_S2" reference="F_TString" name="S2"/>
+        <field id="F_S4" reference="F_TString" name="S4"/>
+        <field id="F_N2" reference="F_TShort" name="N2"/>
+        <field id="F_N4" reference="F_TLong" name="N4"/>
+        <field id="F_P4" reference="F_TDouble" name="P4"/>
+        <field id="F_Quantity_2" reference="F_N2" name="Quantity_2"/>
+        <field id="F_Price_4" reference="F_P4" name="Price_4"/>
+        <field type="java.lang.Character" id="F_TCharacter" name="TCharacter"/>
+        <field type="java.lang.String" id="F_TString" name="TString"/>
+        <field type="java.lang.Boolean" id="F_TBoolean" name="TBoolean"/>
+        <field type="java.lang.Byte" id="F_TByte" name="TByte"/>
+        <field type="java.lang.Short" id="F_TShort" name="TShort"/>
+        <field type="java.lang.Integer" id="F_TInteger" name="TInteger"/>
+        <field type="java.lang.Long" id="F_TLong" name="TLong"/>
+        <field type="java.lang.Float" id="F_TFloat" name="TFloat"/>
+        <field type="java.lang.Double" id="F_TDouble" name="TDouble"/>
+        <field type="java.math.BigDecimal" id="F_TBigDecimal" name="TBigDecimal"/>
+        <field type="java.time.LocalDateTime" id="F_TDateTime" name="TDateTime"/>
+        <field type="java.time.LocalDate" id="F_TDate" name="TDate"/>
+        <field type="java.time.LocalTime" id="F_TTime" name="TTime"/>
+        <field id="F_Side" reference="F_TCharacter" name="Side">
+			<value name="BUY">1</value>
+			<value name="SELL">2</value>
+		</field>
+        <field id="F_OrdType" reference="F_TCharacter" name="OrdType">
+			<value name="MARKET">1</value>
+			<value name="LIMIT">2</value>
+			<value name="PEGGED">P</value>
+		</field>
+        <field id="F_TimeInForceFIX" reference="F_TCharacter" name="TimeInForceFIX">
+			<value name="DAY">0</value>
+			<value name="GOOD_TILL_CANCEL">1</value>
+			<value name="IMMEDIATE_OR_CANCEL">3</value>
+			<value name="GOOD_TILL_DATE">6</value>
+		</field>
+        <field id="F_AccountType" reference="F_TCharacter" name="AccountType">
+			<value name="CLIENT">1</value>
+			<value name="HOUSE">3</value>
+		</field>
+        <field id="F_OrderCapacity" reference="F_TCharacter" name="OrderCapacity">
+			<value name="AGENCY">A</value>
+		</field>
+        <field id="F_PartyRole" reference="F_TInteger" name="PartyRole">
+			<value name="EXECUTING_FIRM">1</value>
+			<value name="CLEARING_FIRM">4</value>
+			<value name="TRADER_ID">12</value>
+			<value name="COUNTERPARTY">17</value>
+			<value name="TRADER_GROUP">76</value>
+		</field>
+        <field id="F_PartyIDSource" reference="F_TCharacter" name="PartyIDSource">
+			<value name="PROPRIETARY_CUSTOM_CODE">D</value>
+		</field>
+        <field id="F_ExecTypeFIX" reference="F_TCharacter" name="ExecTypeFIX">
+			<value name="NEW">0</value>
+			<value name="REPLACED">5</value>
+			<value name="REJECTED">8</value>
+			<value name="EXPIRED">C</value>
+			<value name="TRADE">F</value>
+		</field>
+        <field id="F_ExecInst" reference="F_TString" name="ExecInst">
+			<value name="NOT_HELD">1</value>
+			<value name="WORK">2</value>
+			<value name="GO_ALONG">3</value>
+			<value name="NO_CROSS">A</value>
+			<value name="OK_TO_CROSS">B</value>
+			<value name="CALL_FIRST">C</value>
+		</field>
+        <field id="F_OrdStatusFIX" reference="F_TCharacter" name="OrdStatusFIX">
+			<value name="NEW">0</value>
+			<value name="PARTIALLY_FILLED">1</value>
+			<value name="FILLED">2</value>
+			<value name="REJECTED">8</value>
+			<value name="EXPIRED">C</value>
+		</field>
+        <field id="F_MessageType" reference="F_TShort" name="MessageType">
+			<value name="LoginRequest">1</value>
+			<value name="LoginResponse">2</value>
+			<value name="ReplayRequest">3</value>
+			<value name="ReplayResponse">4</value>
+			<value name="AddOrder">65</value>
+			<value name="OrderDeleted">68</value>
+			<value name="OrderExecuted">69</value>
+			<value name="SnapshotRequest">129</value>
+			<value name="SnapshotResponse">130</value>
+			<value name="SnapshotComplete">131</value>
+		</field>
+        <field id="F_LoginResponseStatus" reference="F_TShort" name="LoginResponseStatus">
+			<value name="LoginAccepted">65</value>
+		</field>
+        <field id="F_ReplayResponseStatus" reference="F_TShort" name="ReplayResponseStatus">
+			<value name="RequestAccepted">65</value>
+		</field>
+        <field id="F_SnapshotResponseStatus" reference="F_TShort" name="SnapshotResponseStatus">
+			<value name="RequestAccepted">65</value>
+		</field>
+        <field id="F_SideITCH" reference="F_TShort" name="SideITCH">
+			<value name="BUY">66</value>
+			<value name="SELL">83</value>
+		</field>
+        <field id="F_ReceivedMessageType" reference="F_TString" name="ReceivedMessageType">
+			<value name="UserConnection">TC</value>
+			<value name="OutOfSequence">TO</value>
+		</field>
+        <field id="F_InstrumentStatus" reference="F_TString" name="InstrumentStatus">
+			<value name="Normal">N</value>
+		</field>
+        <field id="F_TByteEnum" reference="F_TByte" name="TByteEnum">
+			<value name="One">1</value>
+            <value name="Two">2</value>
+            <value name="Three">3</value>
+		</field>
+        <field id="F_TCharacterEnum" reference="F_TCharacter" name="TCharacterEnum">
+			<value name="LetterA">a</value>
+            <value name="LetterB">b</value>
+            <value name="LetterC">c</value>
+		</field>
+        <field id="F_TShortEnum" reference="F_TShort" name="TShortEnum">
+			<value name="One">1</value>
+            <value name="Two">2</value>
+            <value name="Three">3</value>
+		</field>
+        <field id="F_TIntegerEnum" reference="F_TInteger" name="TIntegerEnum">
+			<value name="Ten">10</value>
+            <value name="Thousand">1000</value>
+		</field>
+        <field id="F_TStringEnum" reference="F_TString" name="TStringEnum">
+			<value name="Enum1">Foo</value>
+            <value name="Enum2">Bar</value>
+            <value name="EnumX">x</value>
+		</field>
+        <field id="F_OrderSubType" reference="F_TInteger" name="OrderSubType">
+			<value name="Order">0</value>
+		</field>
+        <field id="F_MassCancelResponse" reference="F_TInteger" name="MassCancelResponse">
+			<value name="Accepted">7</value>
+		</field>
+        <field id="F_ClearingAccount" reference="F_TInteger" name="ClearingAccount">
+			<value name="House">3</value>
+		</field>
+        <field id="F_ExecTypeNTG" reference="F_TString" name="ExecTypeNTG">
+			<value name="New">0</value>
+			<value name="Modified">5</value>
+			<value name="Rejected">8</value>
+			<value name="Trade">F</value>
+		</field>
+        <field id="F_OrdStatusNTG" reference="F_TInteger" name="OrdStatusNTG">
+			<value name="New">0</value>
+			<value name="PartiallyFilled">1</value>
+			<value name="Filled">2</value>
+			<value name="Rejected">8</value>
+		</field>
+        <field id="F_SideNTG" reference="F_TInteger" name="SideNTG">
+			<value name="Buy">1</value>
+			<value name="Sell">2</value>
+		</field>
+        <field id="F_Container" reference="F_TInteger" name="Container">
+			<value name="None">0</value>
+			<value name="Main">1</value>
+		</field>
+        <field id="F_TimeInForceNTG" reference="F_TInteger" name="TimeInForceNTG">
+			<value name="Day">0</value>
+		</field>
+        <field id="F_OrderType" reference="F_TInteger" name="OrderType">
+			<value name="Limit">2</value>
+		</field>
+	</fields>
+	<messages>
+        <message id="M_NoApplIDs" name="NoApplIDs">
+            <field reference="F_STRING" name="RefApplID"/>
+		</message>
+        <message id="M_NoPartyIDs" name="NoPartyIDs">
+            <field reference="F_STRING" name="PartyID"/>
+            <field reference="F_PartyIDSource" name="PartyIDSource"/>
+            <field reference="F_PartyRole" name="PartyRole"/>
+		</message>
+        <message id="M_TradingParty_NoPartyIDs" name="TradingParty_NoPartyIDs">
+            <field reference="F_STRING" name="PartyID"/>
+            <field reference="F_PartyIDSource" name="PartyIDSource"/>
+            <field reference="F_PartyRole" name="PartyRole"/>
+		</message>
+        <message id="M_TradingParty" name="TradingParty">
+            <field isCollection="true" reference="M_NoPartyIDs" name="NoPartyIDs"/>
+		</message>
+        <message id="M_ApplIDRequestGrp" name="ApplIDRequestGrp">
+            <field isCollection="true" reference="M_NoApplIDs" name="NoApplIDs"/>
+		</message>
+        <message id="M_Instrument_NoSecurityAltID" name="Instrument_NoSecurityAltID">
+            <field reference="F_STRING" name="SecurityAltID"/>
+            <field reference="F_STRING" name="SecurityAltIDSource"/>
+		</message>
+        <message id="M_Instrument" name="Instrument">
+            <field reference="F_STRING" name="Symbol"/>
+            <field reference="F_STRING" name="SecurityID"/>
+            <field reference="F_STRING" name="SecurityIDSource"/>
+            <field isCollection="true" reference="M_Instrument_NoSecurityAltID" name="NoSecurityAltID"/>
+		</message>
+        <message id="M_YieldData" name="YieldData">
+            <field reference="F_STRING" name="YieldType"/>
+            <field reference="F_PERCENTAGE" name="Yield"/>
+		</message>
+        <message id="M_CommissionData" name="CommissionData">
+            <field reference="F_AMT" name="Commission"/>
+            <field reference="F_CHAR" name="CommType"/>
+            <field reference="F_CURRENCY" name="CommCurrency"/>
+		</message>
+        <message id="M_TrdCapRptSideGrp_NoSides" name="TrdCapRptSideGrp_NoSides">
+            <field reference="F_Side" name="Side"/>
+            <field reference="F_STRING" name="OrderID"/>
+            <field reference="F_CURRENCY" name="Currency"/>
+            <field reference="F_AMT" name="GrossTradeAmt"/>
+            <field reference="F_AMT" name="AccruedInterestAmt"/>
+            <field reference="F_AMT" name="NetMoney"/>
+            <field reference="M_TradingParty" name="TradingParty"/>
+            <field reference="M_CommissionData" name="CommissionData"/>
+		</message>
+        <message id="M_TrdCapRptAckSideGrp_NoSides" name="TrdCapRptAckSideGrp_NoSides">
+            <field reference="F_Side" name="Side"/>
+            <field reference="F_STRING" name="OrderID"/>
+            <field reference="F_CURRENCY" name="Currency"/>
+            <field reference="F_AMT" name="GrossTradeAmt"/>
+            <field reference="F_AMT" name="AccruedInterestAmt"/>
+            <field reference="F_AMT" name="NetMoney"/>
+            <field reference="M_TradingParty" name="TradingParty"/>
+            <field reference="M_CommissionData" name="CommissionData"/>
+		</message>
+        <message id="M_TrdCapRptSideGrp" name="TrdCapRptSideGrp">
+            <field isCollection="true" reference="M_TrdCapRptSideGrp_NoSides" name="NoSides"/>
+		</message>
+        <message id="M_TrdCapRptAckSideGrp" name="TrdCapRptAckSideGrp">
+            <field isCollection="true" reference="M_TrdCapRptAckSideGrp_NoSides" name="NoSides"/>
+		</message>
+        <message id="M_ExecutionReportFIX" name="ExecutionReportFIX">
+            <field reference="F_STRING" name="ClOrdID"/>
+            <field reference="F_ExecTypeFIX" name="ExecType"/>
+            <field reference="F_OrdStatusFIX" name="OrdStatus"/>
+            <field reference="F_UTCTIMESTAMP" name="TransactTime"/>
+            <field reference="F_UTCTIME" name="TransactTimeOnly"/>
+            <field reference="F_UTCDATE" name="TransactDateOnly"/>
+            <field reference="F_Side" name="Side"/>
+            <field reference="F_OrdType" name="OrdType"/>
+            <field reference="F_TimeInForceFIX" name="TimeInForce"/>
+            <field reference="F_QTY" name="OrderQty"/>
+            <field reference="F_QTY" name="OrderQty2"/>
+            <field reference="F_PRICE" name="Price"/>
+            <field reference="F_QTY" name="LeavesQty"/>
+            <field reference="F_QTY" name="DisplayQty"/>
+            <field reference="F_QTY" name="CumQty"/>
+            <field reference="F_QTY" name="LastQty"/>
+            <field reference="F_PRICE" name="LastPx"/>
+            <field reference="F_STRING" name="SecurityIDSource"/>
+            <field reference="F_EXCHANGE" name="SecurityExchange"/>
+            <field reference="F_STRING" name="SecurityID"/>
+            <field reference="M_TradingParty" name="TradingParty"/>
+            <field reference="F_SEQNUM" name="MsgSeqNum"/>
+            <field reference="F_CURRENCY" name="Currency"/>
+            <field reference="F_AccountType" name="AccountType"/>
+            <field reference="F_OrderCapacity" name="OrderCapacity"/>
+            <field reference="F_CHAR" name="RoutingInst"/>
+            <field reference="F_QTY" name="MinQty"/>
+            <field reference="F_STRING" name="ExpireTime"/>
+            <field reference="F_LOCALMKTDATE" name="ExpireDate"/>
+		</message>
+        <message id="M_NewOrderSingle" name="NewOrderSingle">
+            <field reference="F_STRING" name="ClOrdID"/>
+            <field reference="F_UTCTIMESTAMP" name="TransactTime"/>
+            <field reference="F_UTCTIME" name="TransactTimeOnly"/>
+            <field reference="F_UTCDATE" name="TransactDateOnly"/>
+            <field reference="F_Side" name="Side"/>
+            <field reference="F_STRING" name="Symbol"/>
+            <field reference="F_OrdType" name="OrdType"/>
+            <field reference="F_TimeInForceFIX" name="TimeInForce"/>
+            <field reference="F_QTY" name="OrderQty"/>
+            <field reference="F_QTY" name="OrderQty2"/>
+            <field reference="F_PRICE" name="Price"/>
+            <field reference="F_QTY" name="MinQty"/>
+            <field reference="F_QTY" name="DisplayQty"/>
+            <field reference="F_AccountType" name="AccountType"/>
+            <field reference="F_OrderCapacity" name="OrderCapacity"/>
+            <field reference="F_CHAR" name="RoutingInst"/>
+            <field reference="M_TradingParty" name="TradingParty"/>
+            <field reference="F_ExecInst" name="ExecInst"/>
+            <field reference="F_STRING" name="SecurityIDSource"/>
+            <field reference="F_EXCHANGE" name="SecurityExchange"/>
+            <field reference="F_STRING" name="SecurityID"/>
+            <field reference="F_CURRENCY" name="Currency"/>
+            <field reference="F_STRING" name="ExpireTime"/>
+            <field reference="F_LOCALMKTDATE" name="ExpireDate"/>
+		</message>
+        <message id="M_OrderCancelReplaceRequest" name="OrderCancelReplaceRequest">
+            <field reference="F_STRING" name="ClOrdID"/>
+            <field reference="F_UTCTIMESTAMP" name="TransactTime"/>
+            <field reference="F_UTCTIME" name="TransactTimeOnly"/>
+            <field reference="F_UTCDATE" name="TransactDateOnly"/>
+            <field reference="F_Side" name="Side"/>
+            <field reference="F_STRING" name="Symbol"/>
+            <field reference="F_OrdType" name="OrdType"/>
+            <field reference="F_QTY" name="OrderQty"/>
+            <field reference="F_PRICE" name="Price"/>
+            <field reference="F_QTY" name="DisplayQty"/>
+            <field reference="F_STRING" name="OrigClOrdID"/>
+            <field reference="M_TradingParty" name="TradingParty"/>
+            <field reference="F_SEQNUM" name="MsgSeqNum"/>
+		</message>
+        <message id="M_TradeCaptureReport" name="TradeCaptureReport">
+            <field reference="F_STRING" name="TradeReportID"/>
+            <field reference="F_INT" name="TradeReportTransType"/>
+            <field reference="F_INT" name="TradeReportType"/>
+            <field reference="F_BOOLEAN" name="PreviouslyReported"/>
+            <field reference="F_INT" name="PriceType"/>
+            <field reference="F_INT" name="Product"/>
+            <field reference="F_LOCALMKTDATE" name="MaturityDate"/>
+            <field reference="F_LOCALMKTDATE" name="IssueDate"/>
+            <field reference="F_FLOAT" name="ContractMultiplier"/>
+            <field reference="F_PERCENTAGE" name="CouponRate"/>
+            <field reference="F_STRING" name="Issuer"/>
+            <field reference="F_STRING" name="SecurityDesc"/>
+            <field reference="F_LOCALMKTDATE" name="DatedDate"/>
+            <field reference="F_LOCALMKTDATE" name="InterestAccrualDate"/>
+            <field reference="F_INT" name="QtyType"/>
+            <field reference="F_QTY" name="LastQty"/>
+            <field reference="F_PRICE" name="LastPx"/>
+            <field reference="F_LOCALMKTDATE" name="TradeDate"/>
+            <field reference="F_UTCTIMESTAMP" name="TransactTime"/>
+            <field reference="F_UTCTIME" name="TransactTimeOnly"/>
+            <field reference="F_UTCDATE" name="TransactDateOnly"/>
+            <field reference="F_STRING" name="SettlType"/>
+            <field reference="F_LOCALMKTDATE" name="SettlDate"/>
+            <field reference="F_STRING" name="MatchStatus"/>
+            <field reference="M_Instrument" name="Instrument"/>
+            <field reference="M_YieldData" name="YieldData"/>
+            <field reference="M_TrdCapRptAckSideGrp" name="TrdCapRptAckSideGrp"/>
+            <field reference="F_INT" name="TrdRptStatus"/>
+            <field reference="F_STRING" name="SecondaryTradeReportID"/>
+		</message>
+        <message id="M_TradeCaptureReportAck" name="TradeCaptureReportAck">
+            <field reference="F_STRING" name="TradeReportID"/>
+            <field reference="F_INT" name="TradeReportTransType"/>
+            <field reference="F_INT" name="TradeReportType"/>
+            <field reference="F_BOOLEAN" name="PreviouslyReported"/>
+            <field reference="F_INT" name="PriceType"/>
+            <field reference="F_INT" name="Product"/>
+            <field reference="F_LOCALMKTDATE" name="MaturityDate"/>
+            <field reference="F_LOCALMKTDATE" name="IssueDate"/>
+            <field reference="F_FLOAT" name="ContractMultiplier"/>
+            <field reference="F_PERCENTAGE" name="CouponRate"/>
+            <field reference="F_STRING" name="Issuer"/>
+            <field reference="F_STRING" name="SecurityDesc"/>
+            <field reference="F_LOCALMKTDATE" name="DatedDate"/>
+            <field reference="F_LOCALMKTDATE" name="InterestAccrualDate"/>
+            <field reference="F_INT" name="QtyType"/>
+            <field reference="F_QTY" name="LastQty"/>
+            <field reference="F_PRICE" name="LastPx"/>
+            <field reference="F_LOCALMKTDATE" name="TradeDate"/>
+            <field reference="F_UTCTIMESTAMP" name="TransactTime"/>
+            <field reference="F_UTCTIME" name="TransactTimeOnly"/>
+            <field reference="F_UTCDATE" name="TransactDateOnly"/>
+            <field reference="F_STRING" name="SettlType"/>
+            <field reference="F_LOCALMKTDATE" name="SettlDate"/>
+            <field reference="F_STRING" name="MatchStatus"/>
+            <field reference="M_Instrument" name="Instrument"/>
+            <field reference="M_YieldData" name="YieldData"/>
+            <field reference="M_TrdCapRptSideGrp" name="TrdCapRptSideGrp"/>
+            <field reference="F_INT" name="TrdRptStatus"/>
+            <field reference="F_STRING" name="SecondaryTradeReportID"/>
+            <field reference="F_STRING" name="Text"/>
+            <field reference="F_STRING" name="RejectText"/>
+		</message>
+        <message id="M_ApplicationMessageRequest" name="ApplicationMessageRequest"/>
+        <message id="M_LoginRequest" name="LoginRequest">
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_Alpha" name="Username"/>
+            <field reference="F_Alpha" name="Password"/>
+		</message>
+        <message id="M_LoginResponse" name="LoginResponse">
+            <field reference="F_LoginResponseStatus" name="Status"/>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_UInt8" name="Length"/>
+            <field reference="F_TInteger" name="MessageSequenceNumber"/>
+		</message>
+        <message id="M_ReplayRequest" name="ReplayRequest">
+            <field reference="F_UInt32" name="FirstMessage"/>
+            <field reference="F_Byte" name="MarketDataGroup"/>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_UInt8" name="Length"/>
+		</message>
+        <message id="M_ReplayResponse" name="ReplayResponse">
+            <field reference="F_UInt32" name="FirstMessage"/>
+            <field reference="F_Byte" name="MarketDataGroup"/>
+            <field reference="F_ReplayResponseStatus" name="Status"/>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_UInt8" name="Length"/>
+		</message>
+        <message id="M_SnapshotRequest" name="SnapshotRequest">
+            <field reference="F_UInt32" name="InstrumentID"/>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_Byte" name="SubBook"/>
+		</message>
+        <message id="M_SnapshotResponse" name="SnapshotResponse">
+            <field reference="F_SnapshotResponseStatus" name="Status"/>
+            <field reference="F_MessageType" name="MessageType"/>
+		</message>
+        <message id="M_SnapshotComplete" name="SnapshotComplete">
+            <field reference="F_UInt32" name="InstrumentID"/>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_Byte" name="SubBook"/>
+		</message>
+        <message id="M_Statistics" name="Statistics">
+            <field reference="F_Size4" name="Volume"/>
+            <field reference="F_Price4" name="VWAP"/>
+            <field reference="F_Price4" name="Turnover"/>
+		</message>
+        <message id="M_AddOrder" name="AddOrder">
+            <field reference="F_SideITCH" name="Side"/>
+            <field reference="F_UInt32" name="InstrumentID"/>
+            <field reference="F_Price4" name="Price"/>
+            <field reference="F_UInt64" name="OrderID"/>
+            <field reference="F_UInt64" name="Quantity"/>
+            <field reference="F_UInt8" name="Length"/>
+            <field reference="F_Byte" name="Flags"/>
+            <field reference="F_MessageType" name="MessageType"/>
+		</message>
+        <message id="M_OrderDeleted" name="OrderDeleted">
+            <field reference="F_UInt32" name="InstrumentID"/>
+            <field reference="F_UInt64" name="OrderID"/>
+            <field reference="F_UInt8" name="Length"/>
+            <field reference="F_MessageType" name="MessageType"/>
+		</message>
+        <message id="M_OrderExecuted" name="OrderExecuted">
+            <field reference="F_UInt32" name="InstrumentID"/>
+            <field reference="F_UInt64" name="OrderID"/>
+            <field reference="F_UInt64" name="TradeMatchID"/>
+            <field reference="F_UInt8" name="Length"/>
+            <field reference="F_Byte" name="Flags"/>
+            <field reference="F_MessageType" name="MessageType"/>
+            <field reference="F_UInt64" name="ExecutedQuantity"/>
+		</message>
+        <message id="M_ClearingData" name="ClearingData">
+            <field reference="F_X1" name="AccountType"/>
+            <field reference="F_X1" name="OpenClose"/>
+		</message>
+        <message id="M_OwnerData" name="OwnerData">
+            <field reference="F_X50" name="Memo"/>
+		</message>
+        <message id="M_OrderEntry" name="OrderEntry">
+            <field reference="M_ClearingData" name="ClearingData"/>
+            <field reference="F_X2" name="Group"/>
+            <field reference="F_N8" name="Quantity"/>
+            <field reference="F_P10" name="Price"/>
+            <field reference="F_X1" name="PriceType"/>
+            <field reference="F_X8" name="GTDDate"/>
+		</message>
+        <message id="M_OrderAcknowledgement" name="OrderAcknowledgement">
+            <field reference="F_X2" name="Group"/>
+            <field reference="F_N8" name="Quantity"/>
+            <field reference="F_P10" name="AssignedPrice"/>
+		</message>
+        <message id="M_UserConnection" name="UserConnection">
+            <field isCollection="true" reference="F_ReceivedMessageType" name="ReceivedMessageType"/>
+		</message>
+        <message id="M_BasicHeader" name="BasicHeader">
+            <field reference="F_TString" name="ApplicationID"/>
+            <field reference="F_TInteger" name="ServiceID"/>
+            <field reference="F_TString" name="LogicalTerminalAddress"/>
+            <field reference="F_TInteger" name="SessionNumber"/>
+            <field reference="F_TInteger" name="SequenceNumber"/>
+		</message>
+        <message id="M_ApplicationHeaderInput" name="ApplicationHeaderInput">
+            <field reference="F_TString" name="Input"/>
+            <field reference="F_TInteger" name="MessageType"/>
+            <field reference="F_TString" name="ReceiversAddress"/>
+            <field reference="F_TString" name="MessagePriority"/>
+            <field reference="F_TString" name="DeliveryMonitoring"/>
+            <field reference="F_TString" name="ObsolescencePeriod"/>
+		</message>
+        <message id="M_GENL" name="GENL">
+            <field reference="F_TString" name="SendersReference"/>
+            <field reference="F_TString" name="PreparationDateTime"/>
+            <field reference="F_TString" name="TradeType"/>
+            <field isCollection="true" reference="M_LINK" name="LINK"/>
+		</message>
+        <message id="M_LINK" name="LINK">
+            <field reference="F_TString" name="LinkedMessage"/>
+            <field reference="F_TString" name="VenueTradeReference"/>
+            <field reference="F_TString" name="TradeReference"/>
+            <field reference="F_TString" name="PreviousReference"/>
+		</message>
+        <message id="M_CONFDET" name="CONFDET">
+            <field reference="F_TString" name="TradeDateTime"/>
+            <field reference="F_TString" name="SettlementDate"/>
+            <field reference="F_TString" name="DealPriceAndCurrency_A"/>
+            <field reference="F_TString" name="DealPriceAndCurrency_B"/>
+            <field reference="F_TString" name="PlaceOfTrade"/>
+            <field reference="F_TString" name="SettlementAmountAndCurrency"/>
+            <field reference="F_TString" name="BuySellIndicator"/>
+            <field reference="F_TString" name="PaymentIndicator"/>
+            <field reference="M_CONFPRTY" name="CONFPRTY"/>
+            <field reference="F_TString" name="QuantityTraded"/>
+            <field reference="F_TString" name="FinancialInstrument"/>
+            <field reference="F_TString" name="TradeProcessingNarrative"/>
+		</message>
+        <message id="M_CONFPRTY" name="CONFPRTY">
+            <field reference="F_TString" name="Buyer_R"/>
+            <field reference="F_TString" name="Buyer_P"/>
+            <field reference="F_TString" name="Seller_R"/>
+            <field reference="F_TString" name="Seller_P"/>
+            <field reference="F_TString" name="AccountAtTradingVenue"/>
+            <field reference="F_TString" name="TradingPartyReference"/>
+            <field reference="F_TString" name="PartyNarrative"/>
+            <field reference="F_TString" name="PartyCapacity"/>
+            <field reference="F_TString" name="ClearingMember_R"/>
+            <field reference="F_TString" name="ClearingMember_P"/>
+            <field reference="F_TString" name="PositionAccount"/>
+		</message>
+        <message id="M_SETDET" name="SETDET">
+            <field reference="F_TString" name="TypeOfSettlementIndicator"/>
+            <field isCollection="true" reference="M_SETPRTY" name="SETPRTY"/>
+		</message>
+        <message id="M_SETPRTY" name="SETPRTY">
+            <field reference="F_TString" name="SettlementParty_Buyer_R"/>
+            <field reference="F_TString" name="SettlementParty_Buyer_P"/>
+            <field reference="F_TString" name="SettlementParty_Seller_R"/>
+            <field reference="F_TString" name="SettlementParty_Seller_P"/>
+            <field reference="F_TString" name="SettlementAccount"/>
+            <field reference="F_TString" name="PlaceOfSettlement"/>
+		</message>
+        <message id="M_OTHRPRTY" name="OTHRPRTY">
+            <field reference="F_TString" name="BICcode"/>
+		</message>
+        <message id="M_Trailer" name="Trailer">
+            <field reference="F_TString" name="MAC"/>
+            <field reference="F_TString" name="CHK"/>
+            <field reference="F_TString" name="TNG"/>
+		</message>
+        <message id="M_TradeConfirmation" name="TradeConfirmation">
+            <field reference="M_BasicHeader" name="BasicHeader"/>
+            <field reference="M_ApplicationHeaderInput" name="ApplicationHeaderInput"/>
+            <field reference="M_GENL" name="GENL"/>
+            <field isCollection="true" reference="M_CONFDET" name="CONFDET"/>
+            <field reference="M_SETDET" name="SETDET"/>
+            <field reference="M_OTHRPRTY" name="OTHRPRTY"/>
+            <field reference="M_Trailer" name="Trailer"/>
+		</message>
+        <message id="M_MarketDepthLevel_2_4" name="MarketDepthLevel_2_4">
+            <field reference="F_N4" name="QuoteLevel"/>
+            <field reference="F_N4" name="BidNumberOfQuotes"/>
+            <field reference="F_Quantity_2" name="BidSize"/>
+            <field reference="F_Price_4" name="BidPrice"/>
+            <field reference="F_N4" name="AskNumberOfQuotes"/>
+            <field reference="F_Quantity_2" name="AskSize"/>
+            <field reference="F_Price_4" name="AskPrice"/>
+		</message>
+        <message id="M_MarketDepthInstrument_2_4" name="MarketDepthInstrument_2_4">
+            <field reference="F_S2" name="GroupID"/>
+            <field reference="F_S4" name="Instrument"/>
+            <field reference="F_S1" name="GroupStatus"/>
+            <field reference="F_InstrumentStatus" name="InstrumentStatus"/>
+            <field reference="F_N4" name="NumberofLevel"/>
+            <field isCollection="true" reference="M_MarketDepthLevel_2_4" name="MarketDepthLevel_2_4"/>
+		</message>
+        <message id="M_SimpleMessage" name="SimpleMessage">
+            <field reference="F_TBoolean" name="FBoolean"/>
+            <field reference="F_TByte" name="FByte"/>
+            <field reference="F_TCharacter" name="FCharacter"/>
+            <field reference="F_TShort" name="FShort"/>
+            <field reference="F_TInteger" name="FInteger"/>
+            <field reference="F_TLong" name="FLong"/>
+            <field reference="F_TFloat" name="FFloat"/>
+            <field reference="F_TDouble" name="FDouble"/>
+            <field reference="F_TBigDecimal" name="FBigDecimal"/>
+            <field reference="F_TString" name="FString"/>
+            <field reference="F_TByteEnum" name="FByteEnum"/>
+            <field reference="F_TCharacterEnum" name="FCharacterEnum"/>
+            <field reference="F_TShortEnum" name="FShortEnum"/>
+            <field reference="F_TIntegerEnum" name="FIntegerEnum"/>
+            <field reference="F_TStringEnum" name="FStringEnum"/>
+            <field reference="F_TString" name="ServiceName"/>
+		</message>
+        <message id="M_ArrayMessage" name="ArrayMessage">
+            <field isCollection="true" reference="F_TBoolean" name="BooleanArray"/>
+            <field isCollection="true" reference="F_TInteger" name="IntegerArray"/>
+            <field isCollection="true" reference="F_TDouble" name="DoubleArray"/>
+            <field isCollection="true" reference="F_TBigDecimal" name="BigDecimalArray"/>
+            <field isCollection="true" reference="F_TString" name="StringArray"/>
+            <field isCollection="true" reference="M_SimpleMessage" name="MessageArray"/>
+            <field isCollection="true" reference="F_TByteEnum" name="FByteEnumArray"/>
+            <field isCollection="true" reference="F_TCharacterEnum" name="FCharacterEnumArray"/>
+            <field isCollection="true" reference="F_TShortEnum" name="FShortEnumArray"/>
+            <field isCollection="true" reference="F_TIntegerEnum" name="FIntegerEnumArray"/>
+            <field isCollection="true" reference="F_TStringEnum" name="FStringEnumArray"/>
+            <field isCollection="true" reference="F_TString" name="ServiceNames"/>
+		</message>
+        <message id="M_OrderMassCancelRequest" name="OrderMassCancelRequest">
+            <field reference="F_TString" name="ClOrdID"/>
+            <field reference="F_TInteger" name="InstrumentID"/>
+            <field reference="F_OrderSubType" name="OrderSubType"/>
+            <field reference="F_TInteger" name="MassCancelRequestType"/>
+		</message>
+        <message id="M_OrderMassCancelReport" name="OrderMassCancelReport">
+            <field reference="F_TInteger" name="AppID"/>
+            <field reference="F_TString" name="ClOrdID"/>
+            <field reference="F_MassCancelResponse" name="MassCancelResponse"/>
+		</message>
+        <message id="M_NewQuote" name="NewQuote">
+            <field reference="F_TString" name="ClOrdID"/>
+            <field reference="F_TInteger" name="InstrumentID"/>
+            <field reference="F_TDouble" name="BidPrice"/>
+            <field reference="F_TLong" name="BidSize"/>
+            <field reference="F_TDouble" name="AskPrice"/>
+            <field reference="F_TLong" name="AskSize"/>
+            <field reference="F_ClearingAccount" name="ClearingAccount"/>
+            <field reference="F_TInteger" name="Capacity"/>
+		</message>
+        <message id="M_ExecutionReportNTG" name="ExecutionReportNTG">
+            <field reference="F_TInteger" name="AppID"/>
+            <field reference="F_TString" name="ClOrdID"/>
+            <field reference="F_TString" name="ExecID"/>
+            <field reference="F_ExecTypeNTG" name="ExecType"/>
+            <field reference="F_OrdStatusNTG" name="OrdStatusNTG"/>
+            <field reference="F_SideNTG" name="Side"/>
+            <field reference="F_TInteger" name="InstrumentID"/>
+            <field reference="F_TLong" name="DisplayQty"/>
+            <field reference="F_Container" name="Container"/>
+            <field reference="F_TLong" name="LeavesQty"/>
+            <field reference="F_TString" name="OrderID"/>
+            <field reference="F_TLong" name="ExecutedQty"/>
+            <field reference="F_TDouble" name="ExecutedPrice"/>
+            <field reference="F_TDouble" name="AvgPx"/>
+            <field reference="F_TString" name="TradeLiquidityIndicator"/>
+            <field reference="F_TLong" name="TradeMatchID"/>
+            <field reference="F_TString" name="CounterParty"/>
+		</message>
+        <message id="M_NewOrder" name="NewOrder">
+            <field reference="F_TString" name="ClOrdID"/>
+            <field reference="F_SideNTG" name="Side"/>
+            <field reference="F_TInteger" name="InstrumentID"/>
+            <field reference="F_TLong" name="OrdQty"/>
+            <field reference="F_TLong" name="DisplayQty"/>
+            <field reference="F_TimeInForceNTG" name="TimeInForce"/>
+            <field reference="F_TDouble" name="LimitPrice"/>
+            <field reference="F_OrderType" name="OrderType"/>
+            <field reference="F_OrderSubType" name="OrderSubType"/>
+            <field reference="F_ClearingAccount" name="ClearingAccount"/>
+            <field reference="F_TInteger" name="Capacity"/>
+            <field reference="F_TLong" name="BidSize"/>
+		</message>
+	</messages>
+</dictionary>

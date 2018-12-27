@@ -1,0 +1,89 @@
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$selected_color: #52c6e6;
+$selected_color_inactive: #b5b5b5;
+$background: #ffffff;
+$second_color: #ccc;
+$input-min-heigth: 20px;
+
+.exa-auto-option {
+  z-index: 40001;
+  background-color: $background;
+  cursor: pointer;
+  padding: 2px;
+
+  &.exa-auto-option-selected {
+    background-color: $selected_color;
+  }
+
+  &.exa-auto-option-template {
+    font-style: italic;
+  }
+
+  &:hover {
+    background-color: tint($selected_color, 70%);
+  }
+}
+
+.exa-prop-input {
+    min-height: $input-min-heigth;
+}
+
+.exa-input-focus {
+    outline: $selected_color_inactive solid 1px;
+}
+
+.exa-prop-input:focus {
+    background-color: $background !important;
+    outline: none;
+}
+
+
+.exa-prop-input[contentEditable=false]:empty:not(:focus):before {
+  content: attr(placeholder);
+  color: $second_color;
+}
+
+.exa-prop-auto-input .exa-prop-input {
+  width: 100%;
+}
+
+.exa-prop-auto-input .exa-prop-input:after {
+  content: attr(data-autotext);
+  color: $second_color;
+}
+
+.exa-auto-options {
+  z-index: 99000;
+  border: solid $second_color 1px;
+  border-top-width: 0;
+  padding: 0;
+  background-color: $background;
+}
+
+i.exa-auto-help-ct {
+    font-style: italic;
+}
+
+.exa-prop-input > input[type="radio"] {
+    vertical-align: text-bottom;
+    margin: 0 0.3em;
+}
+.exa-prop-input > input[type="radio"]:first-child {
+    /* vertical-align: text-bottom; */
+    margin-left: 0;
+}

@@ -1,0 +1,50 @@
+.eps-wrapper-auth {
+	width: auto;
+	height: auto;
+	position: absolute;
+	left: 50%;
+	margin: 50pt 0 0 -110pt;
+	overflow: hidden;
+	color:#424242;
+	/*box-shadow: 0px 11px 30px -8px #48413F;
+	-moz-box-shadow: 0px 11px 30px -8px #48413F;
+	-webkit-box-shadow: 0px 11px 30px -8px #999;*/
+	box-shadow: 0px 2px 2px #BBB;
+	-moz-box-shadow: 0px 2px 2px #BBB;
+	-webkit-box-shadow: 0px 2px 2px #BBB;
+	border: 1px solid #ddd;
+	border-radius: 3pt;
+}
+
+.eps-auth-block {
+	padding:12pt;
+	background:#fff;
+	background-color:#fff;
+	border-top: 1px solid #eee;
+	overflow: hidden;
+}
+
+.eps-auth-panel {
+	margin: 0 auto;
+}
+
+.eps-sf-logo {
+	height: 150pt;
+}
+
+.eps-auth-panel tfoot {
+	text-align: center;
+	margin-top: 8pt;
+}
+
+.eps-auth-panel tfoot td {
+	padding-top: 12pt;
+}
+
+.eps-sign-in-header {
+	font-size: 1.2em;
+	text-align: center;
+	color: #5B7F8F;
+	padding: 0;
+	margin: .25em;
+}

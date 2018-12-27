@@ -1,0 +1,462 @@
+{
+    "id": 49,
+    "name": "22_test_Blocks.csv",
+    "date": 1431521012000,
+    "amlVersion": 3,
+    "data": [
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "",
+                "#description": "",
+                "#action": "Global Block start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "GLOBAL BLOCK",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "",
+                "#description": "",
+                "#action": "Before test case block start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "BEFORE TEST CASE",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "",
+                "#description": "",
+                "#action": "Test Case Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "AFTER TEST CASE",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "block1",
+                "#description": "",
+                "#action": "Block Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "BLOCK",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "First_Block_1",
+                "#description": "FirstBlock",
+                "#action": "First Block Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "FIRST BLOCK",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "Last_Block_1",
+                "#description": "LastBlock",
+                "#action": "Last Block Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "LAST BLOCK",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "Test_Case_1",
+                "#description": "TC1",
+                "#action": "Test Case Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#static_value": "GroupID",
+                        "#reference": "static1",
+                        "#action": "SetStatic",
+                        "#static_type": "String"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#static_value": "1",
+                        "#reference": "Normal",
+                        "#action": "SetStatic",
+                        "#static_type": "long"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "AskSize": "100",
+                        "AskPrice": "10",
+                        "BidSize": "100",
+                        "#dictionary": "TestAML",
+                        "BidPrice": "9",
+                        "#reference": "sm1",
+                        "AskNumberOfQuotes": "1",
+                        "BidNumberOfQuotes": "1",
+                        "#message_type": "MDL_2_4",
+                        "QuoteLevel": "1"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "AskSize": "100",
+                        "AskPrice": "10",
+                        "BidSize": "100",
+                        "#dictionary": "TestAML",
+                        "BidPrice": "9",
+                        "#reference": "sm2",
+                        "AskNumberOfQuotes": "1",
+                        "BidNumberOfQuotes": "1",
+                        "#message_type": "MDL_2_4",
+                        "QuoteLevel": "1"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "#reference": "m1",
+                        "GroupID": "TEST CASE",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "${m1.InstrumentStatus}",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "GroupStatus": "${m1.GroupStatus}",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "${m1.GroupID}",
+                        "Instrument": "${m1.Instrument}",
+                        "#action": "receive",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#template": "block1",
+                        "#reference": "aaaa",
+                        "#action": "Include block"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "y",
+                        "#messages_count": "2",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "x == \"GroupStatus\"",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "x > 0",
+                        "#service_name": "fake",
+                        "GroupID": "x contains \"ID\"",
+                        "Instrument": "!( x contains \"zzz\" )",
+                        "#action": "count",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        },
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "Test_Case_2",
+                "#description": "TC2",
+                "#action": "Test Case Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "AskSize": "100",
+                        "AskPrice": "10",
+                        "BidSize": "100",
+                        "#dictionary": "TestAML",
+                        "BidPrice": "9",
+                        "#reference": "sm1",
+                        "AskNumberOfQuotes": "1",
+                        "BidNumberOfQuotes": "1",
+                        "#message_type": "MDL_2_4",
+                        "QuoteLevel": "1"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "AskSize": "100",
+                        "AskPrice": "10",
+                        "BidSize": "100",
+                        "#dictionary": "TestAML",
+                        "BidPrice": "9",
+                        "#reference": "sm2",
+                        "AskNumberOfQuotes": "1",
+                        "BidNumberOfQuotes": "1",
+                        "#message_type": "MDL_2_4",
+                        "QuoteLevel": "1"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "Normal",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "GroupStatus": "GroupStatus",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "#reference": "m1",
+                        "GroupID": "TEST CASE",
+                        "Instrument": "Instrument",
+                        "#action": "send",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "y",
+                        "InstrumentStatus": "${m1.InstrumentStatus}",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "GroupStatus": "${m1.GroupStatus}",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "1",
+                        "#service_name": "fake",
+                        "GroupID": "${m1.GroupID}",
+                        "Instrument": "${m1.Instrument}",
+                        "#action": "receive",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#template": "block1",
+                        "#reference": "bbbb",
+                        "#action": "Include block"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "y",
+                        "#messages_count": "2",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "x == \"GroupStatus\"",
+                        "#dictionary": "TestAML",
+                        "NumberofLevel": "x > 0",
+                        "#service_name": "fake",
+                        "GroupID": "x contains \"ID\"",
+                        "Instrument": "!( x contains \"zzz\" )",
+                        "#action": "count",
+                        "#message_type": "MDI_2_4"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        }
+    ],
+    "errors": [
+        {
+            "paths": [
+                [
+                    6,
+                    5
+                ]
+            ],
+            "reference": "",
+            "column": null,
+            "message": "Service 'fake' is not found"
+        },
+        {
+            "paths": [
+                [
+                    6,
+                    7
+                ]
+            ],
+            "reference": "",
+            "column": null,
+            "message": "Service 'fake' is not found"
+        }
+    ]
+}

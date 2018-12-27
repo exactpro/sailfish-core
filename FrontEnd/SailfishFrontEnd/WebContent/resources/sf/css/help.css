@@ -1,0 +1,453 @@
+span.highlightSearch{
+    font-weight: bold;
+}
+
+.eps-help-form {
+	height: 100%;
+	width: 30%;
+	position: relative;
+}
+
+.eps-tab-container .eps-tab-view {
+	height: 100%;
+	padding-right: 0;
+	box-sizing: border-box;
+}
+
+.eps-tab-container {
+	position: absolute;
+	top: 59px;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+
+.eps-forest-container {
+	position: absolute;	
+	top: 34px;
+	bottom: 0;
+	left: 0;
+	right:0;
+	overflow: auto;
+}
+
+.eps-search-bar {
+	box-sizing: border-box;
+	width: 100%;
+	border-radius: 0;
+	height: 60px;
+	border: none;
+	padding: 16px 10px;
+	position: relative;
+}
+
+.eps-input-container {
+	position: absolute;
+	top: 17px;
+	left: 17px;
+	right: 110px;
+}
+
+.eps-help-search-input {
+	width: 100%;
+}
+
+.eps-main-content {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	background-color: #f4f5f8;
+	width: 70%;
+	padding: 30px;
+	box-sizing: border-box;
+	border-left: 1px solid #cdcdcd;
+}
+
+.eps-content-form {
+	padding: 0 20px 30px 20px;
+	border-radius: 5px;
+	background-color: white;
+	height: 100%;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+.eps-content-value table {
+	margin: 10px;
+}
+
+.eps-content-value table tr {
+	border: 1px solid #cdcdcd;
+}
+
+.eps-content-value table tr.helpTableHeader td {
+	background-color: #dedede;
+	text-align: center;
+}
+
+.eps-content-value table td {
+	padding: 5px 10px;
+}
+
+.eps-content-value table th {
+	padding: 0 1em;
+    text-align: center;
+}
+
+.eps-error, .eps-error td {
+	color: #D84441 !important;
+}
+
+p.eps-content-description {
+	padding-left: 0.65em;
+    color: #777;
+}
+
+.noMessageResultLabel {
+	color: #777;
+    font-size: 12pt !important;
+    text-align: center;
+    display: block;
+    padding-top: 1em;
+}
+
+#tab a {
+	outline: none;
+}
+
+.ui-tabs-nav .ui-tabs-selected.ui-state-hover {
+	background: #fff !important;
+}
+
+.eps-util-executor {
+	border-top: 1px solid #cdcdcd;
+	margin-top: 20px;
+	padding-top: 20px;
+}
+
+.eps-function-params {
+	margin: 0 10px;
+}
+
+.eps-result-label-text {
+	color: #62b45a;
+}
+
+.eps-forest-container .eps-help-tree {
+	width: 100%;
+}
+
+.eps-forest-container .eps-help-tree {
+	width: 100%;
+}
+
+.eps-messages-container .ui-tree {
+	width: 100%;
+}
+
+.eps-search-results-panel {
+	margin-top: 30px;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+.eps-search-results-table {
+	margin-top: 30px;
+	width: 90%;
+	margin: 0 auto;
+}
+
+.eps-search-results-table table {
+	border: 1px solid #cdcdcd;
+}
+
+.eps-search-results-table th {
+	background-color: #b7bdc6;
+}
+
+/* Let's get this party started */
+::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #e0e0e0; 
+	opacity: 0.5;
+}
+
+.eps-search-options {
+	background: url("#{resource['sf:/images/icons-bl.png']}") -152px 1px;
+	width: 25px;
+    height: 20px;
+    padding: 2px;
+    background-color: white !important;
+}
+
+.eps-search-bar .eps-search-options {
+	border: none;
+	position: absolute;
+	outline: none;
+	right: 101px;
+	top: 18px;
+	z-index: 3;
+}
+
+.eps-search-bar .eps-search-actions-bar {
+	position: absolute;
+	right:0;
+	top: 7px;
+	width: 90px;
+}
+
+.eps-messages-container {
+	position: absolute;
+	top: 34px;
+	left: 3px;
+	right: 0;
+	bottom: 5px;
+	overflow: auto;
+}
+
+.eps-tab-view .ui-tabs-nav {
+	border-radius: 0;
+}
+
+.eps-guide-panel {
+    position: absolute;
+    top: 34px;
+    bottom: 5px;
+    overflow: auto;
+    left: 0;
+    right: 0;
+    padding: 5px 10px;
+    box-sizing: border-box;
+}
+
+.eps-guide-panel a, .eps-wiki-content a {
+    color: #3482d9;
+}
+
+.eps-guide-panel img, .eps-wiki-content img {
+    width: 100%;
+}
+
+.eps-guide-panel li, .eps-wiki-content li {
+    margin: 3px 0;
+}
+
+.eps-guide-panel .eps-redmine-table, .eps-wiki-content .eps-redmine-table {
+    border-collapse: collapse;
+}
+
+.eps-guide-panel .eps-redmine-table td, .eps-wiki-content .eps-redmine-table td {
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+.eps-guide-panel blockquote, .eps-wiki-content blockquote {
+    font-style: italic;
+    border-left: 3px solid #e0e0e0;
+    padding-left: 0.6em;
+    margin-left: 2.4em;
+}
+
+.eps-guide-panel .attachedRow, .eps-wiki-content .attachedRow {
+    padding: 3px;
+}
+
+.eps-guide-panel a.eps-redmine-external-link, .eps-wiki-content a.eps-redmine-external-link {
+    background-image: url("#{resource['sf:/images/redmine-link.png']}");
+    background-position: 0px 3px;
+    background-repeat: no-repeat;
+    padding-left: 12px;
+}
+
+.eps-guide-panel .eps-attached-user, .eps-wiki-content .eps-attached-user {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.eps-guide-panel ins, .eps-wiki-content ins {
+    background-color: white;
+    text-decoration: underline;
+}
+
+.eps-guide-panel pre, .eps-wiki-content pre {
+    margin: 1em 1em 1em 1.6em;
+    padding: 8px;
+    background-color: #fafafa;
+    border: 1px solid #e2e2e2;
+    width: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+table.eps-content-message-table {
+    margin-bottom: 25px;
+}
+
+table.eps-content-message-table tr {
+    border: 1px solid #cdcdcd;
+}
+
+table.eps-content-message-table tr > td:first-child, .helpTableHeader {
+    font-weight: bold;
+    color: #525252;
+}
+
+.eps-help-data-type {
+    color: #B3B3B3;
+}
+
+#searchOptionsDialog td {
+    padding: 0.5em;
+    white-space: nowrap;
+}
+
+.search-path {
+    color: grey;
+}
+
+#loadingTreeStatus {
+    position: absolute;
+    top: 120px;
+    left: 50%;
+    z-index: 10000;
+    display:none;
+}
+
+#pluginTabLoadingStatus {
+    height: 15px;
+    padding: 5px 5px 0 0;
+}
+
+.pluginsProgress {
+    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+.pluginsProgress .ui-progressbar-value {
+    border: none;
+    top: 1px;
+}
+
+.pluginsProgress .ui-progressbar-label {
+    color: #555;
+}
+
+.loadingStage {
+    color: #555;
+    position: absolute;
+    top: 46px;
+    right: 23px;
+    font-size: 8pt !important;
+}
+
+#collapseAllButton {
+    position: absolute;
+    z-index: 10;
+    background: none;
+    border: none;
+    top: 0.8em;
+    right: 1em;
+    outline: none;
+    text-decoration: none;
+    color: #fff;
+}
+
+#collapseAllButton:hover {
+    color: #f1f1f1;
+}
+
+.ui-selectmanybutton {
+    margin: 0;
+}
+
+.ui-selectmanybutton .ui-button:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.ui-selectmanybutton .ui-button:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.ui-selectmanybutton .ui-state-default:hover {
+    background-color: #dfe4ea !important;
+}
+
+.ui-selectmanybutton .ui-state-active, #setHeaderButton.ui-state-active {
+    background-color: #91C8CC !important;
+    color: black !important;
+}
+
+.ui-selectmanybutton .ui-state-active:hover, #setHeaderButton.ui-state-active:hover {
+    background-color: #a7e4e8 !important;
+}
+
+#copyButtons {
+    position: absolute;
+    top: 4em;
+    right: 4em;
+}
+
+#copyButton, #setHeaderButton {
+    height: 2.4em;
+    width: 2.4em;
+    border: none;
+}
+
+#setHeaderButton {
+    vertical-align: middle;
+}
+
+#copyDialog, #copyDialog .ui-dialog-content {
+    overflow: visible;
+}
+
+#copyDialog .ui-widget-content {
+    width: auto;
+    white-space: nowrap;
+}
+
+#newColumnsPanel {
+    text-align: left;
+    max-height: 200px;
+    overflow-y: scroll;
+    margin: 1em 0;
+}
+
+.columnLabel {
+    display: block; 
+    padding: 0.3em; 
+}
+
+.newColumnLabel {
+    color: red;
+    font-weight: bold;
+}
+
+.oldColumnLabel {
+    color: green;
+}
+
+#headerProblemMenuBar {
+    float: right;
+}
+
+#wikiNotEnabled {
+	width: 90%;
+	text-align: center;
+	position: absolute;
+	top: 50%;
+}
+
+#wikiNotEnabled label {
+	cursor: default;
+	font-size: 18pt;
+    color: #bbb;
+}

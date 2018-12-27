@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Implementation-Version: local_build
+Build_Number: local_build
+AML-Actions: cfg/actions.xml
+AML-Descriptor: cfg/descriptor.xml
+AML-Dictionaries: cfg/dictionaries.xml
+AML-Validators: cfg/validators.xml
+SF-Data: cfg/data.xml

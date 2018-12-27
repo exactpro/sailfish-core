@@ -1,0 +1,89 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<div class="up-bar eps-sf-up-bar">
+
+    <div class="top-content">
+
+        <h:link outcome="/index"><h:graphicImage library="sf" name="images/logo.png" styleClass="logo" /></h:link>
+
+        <div class="eps-top-menu">
+
+            <h:link id="scriptrunsMenuItem" value="Test scripts" outcome="/scriptruns" styleClass="eps-menu-item eps-url-top"></h:link>
+
+            <h:link id="messagesMenuItem" value="Messages" outcome="/messages" styleClass="eps-menu-item eps-url-top"></h:link>
+
+            <h:link id="environmentMenuItem" value="Environment" outcome="/environment" styleClass="eps-menu-item eps-url-top"></h:link>
+            
+            <h:link id="statisticsMenuItem" outcome="/statistics/index" styleClass="eps-menu-item eps-url-top" value="Statistics"></h:link>
+            
+            <h:link id="bigbuttonMenuItem" outcome="/bigbutton" styleClass="eps-menu-item eps-url-top" value="BB"></h:link>
+
+			<h:link id="dictionariesMenuItem" value="Dictionaries" outcome="/dictionaries" styleClass="eps-menu-item eps-url-top"></h:link>
+
+            <h:link id="downloadMenuItem" value="Download" outcome="/download" styleClass="eps-menu-item eps-url-top"></h:link>
+
+            <h:link id="helpMenuItem" value="Help" outcome="/help" styleClass="eps-menu-item eps-url-top"></h:link>
+
+            <h:link id="configurationMenuItem" value="Configuration" outcome="/configuration"  styleClass="eps-menu-item eps-url-top"></h:link>
+
+        </div>
+
+        <h:form id="envelopeForm" prependId="false">
+            <p:remoteCommand name="getFacesMessages" action="#{generalBean.getFacesMessages()}" update=":facesMessagesListForm" oncomplete="PF('facesMessagesListDialog').show()"/>
+            <h:graphicImage id="closed_env" library="sf" title="Show Faces messages for this page" name="images/envelope_20.png" styleClass="eps-envelope"
+                            onclick="getFacesMessages();$('#open_env').show();$('#closed_env').hide();" rendered="true"/>
+            <h:graphicImage id="open_env" library="sf" name="images/envelope_open_20.png" styleClass="eps-envelope" style="display: none;"/>
+        </h:form>
+
+    </div>
+
+    <ui:insert name="auth">
+        <ui:include src="user.xhtml"/>
+    </ui:insert>
+
+</div>
+
+    <p:dialog header="Faces messages list for this page" width="1024" height="768" widgetVar="facesMessagesListDialog" modal="true" resizable="false" style="text-align: center; overflow-y: auto;">
+
+        <p:ajax event="close" oncomplete="$('#open_env').hide();$('#closed_env').show();" update=":envelopeForm"/>
+        <h:form id="facesMessagesListForm" styleClass="eps-faces-form">
+        <p:dataTable id="facesMessagesTable" styleClass="eps-faces-msg-table eps-main-table" rowIndexVar="index" var="wrapper" value="#{generalBean.facesMessages}"
+                     rowStyleClass="#{wrapper.getSeverity()}" scrollable="true" scrollHeight="100%">
+
+            <p:column headerText="#" width="30">
+                <h:outputText value="#{index + 1}" />
+            </p:column>
+
+            <p:column headerText="Date" width="105">
+                <h:outputText value="#{wrapper.date}">
+                    <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" />
+                </h:outputText>
+            </p:column>
+
+            <p:column headerText="Severity" width="85">
+                <!--remove ordinal from severity-->
+                <h:outputText value="#{wrapper.getSeverity()}" />
+                <span style="#{wrapper.getSeverity() eq 'ERROR' ? 'display: inline-block' : 'display: none'}" class="ui-icon ui-icon-alert eps-faces-messages-icon"/>
+                <span style="#{wrapper.getSeverity() eq 'INFO' ? 'display: inline-block' : 'display: none'}" class="ui-icon ui-icon-info eps-faces-messages-icon"/>
+                <span style="#{wrapper.getSeverity() eq 'WARN' ? 'display: inline-block' : 'display: none'}" class="ui-icon ui-icon-notice eps-faces-messages-icon"/>
+            </p:column>
+
+            <p:column headerText="Summary">
+                <h:outputText value="#{wrapper.message.getSummary()}" />
+            </p:column>
+
+            <p:column headerText="Details">
+                <h:outputText value="#{wrapper.message.getDetail()}" />
+            </p:column>
+        </p:dataTable>
+
+        <p:commandButton id="clearFacesMessafesBtn" styleClass="eps-clear-faces-messages-btn" value="Clear" icon="ui-icon-trash" action="#{generalBean.clearFacesMessagesList()}" update=":facesMessagesListForm :envelopeForm"/>
+        </h:form>
+      </p:dialog>
+
+
+</html>

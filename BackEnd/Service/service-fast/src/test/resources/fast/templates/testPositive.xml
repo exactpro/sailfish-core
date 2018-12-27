@@ -1,0 +1,41 @@
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+	<template name="testMessage" id="1" dictionary="FAST">
+		<string name="stringx"/>
+		<int8 name="int8" />
+		<int32 name="int32"/>
+		<uInt32 name="uInt32" />
+		<int64 name="int64" />
+		<uInt64 name="uInt64" />
+		<decimal name="decimal" />
+		<byteVector name="bv" />
+		<group name="grp">
+			<string name="stringx" />
+		</group>
+		<uInt32 name="sqs_length" />
+		<sequence name="sqs">
+			<length name="length"/>
+			<string name="sqsv"/>
+		</sequence>
+		<sequence name="seq">
+			<length name=""/>
+			<string name="seqv"/>
+		</sequence>		
+	</template>
+</templates>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<Services>
+	<Service name="FIX-Client">
+        <className>com.exactpro.sf.services.fix.FIXClient</className>
+        <settingsClassName>com.exactpro.sf.services.fix.FIXClientSettings</settingsClassName>
+        <dictionaryValidatorFactoryName>com.exactpro.sf.configuration.dictionary.FIXDictionaryValidatorFactory
+        </dictionaryValidatorFactoryName>
+	</Service>
+	<Service name="TCPIPClientService">
+        <className>com.exactpro.sf.services.tcpip.TCPIPClient</className>
+        <settingsClassName>com.exactpro.sf.services.tcpip.TCPIPSettings</settingsClassName>
+        <messageHandlerClassName>com.exactpro.sf.services.tcpip.TCPIPMessageHandler</messageHandlerClassName>
+	</Service>
+    <Service name="ITCH-TCP-Client">
+        <className>com.exactpro.sf.services.itch.ITCHTcpClient</className>
+        <settingsClassName>com.exactpro.sf.services.itch.ITCHTCPClientSettings</settingsClassName>
+        <dictionaryValidatorFactoryName>
+            com.exactpro.sf.configuration.dictionary.ITCHDictionaryValidatorFactory
+        </dictionaryValidatorFactoryName>
+	</Service>
+    <Service name="ITCH-UDP-Client">
+        <className>com.exactpro.sf.services.itch.ITCHUdpClient</className>
+        <settingsClassName>com.exactpro.sf.services.itch.ITCHClientSettings</settingsClassName>
+        <dictionaryValidatorFactoryName>
+            com.exactpro.sf.configuration.dictionary.ITCHDictionaryValidatorFactory
+        </dictionaryValidatorFactoryName>
+	</Service>
+    <Service name="NTG-Client">
+        <className>com.exactpro.sf.services.ntg.NTGClient</className>
+        <settingsClassName>com.exactpro.sf.services.ntg.NTGClientSettings</settingsClassName>
+        <dictionaryValidatorFactoryName>
+            com.exactpro.sf.configuration.dictionary.NTGDictionaryValidatorFactory
+        </dictionaryValidatorFactoryName>
+	</Service>
+</Services>

@@ -1,0 +1,106 @@
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$row-height: 23px;
+$icon-color: black;
+$icon-color-tint: 50%;
+
+.exa-prop-grid.table {
+  width: auto;
+}
+
+.exa-prop-grid.table {
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+//bootstrap override
+.exa-prop-grid.table-condensed > thead > tr > th,
+.exa-prop-grid.table-condensed > tbody > tr > th,
+.exa-prop-grid.table-condensed > tfoot > tr > th,
+.exa-prop-grid.table-condensed > thead > tr > td,
+.exa-prop-grid.table-condensed > tbody > tr > td,
+.exa-prop-grid.table-condensed > tfoot > tr > td {
+  padding: 2px;
+  vertical-align: middle;
+}
+
+// ajust columns widths
+.exa-prop-grid.table-condensed > thead > tr > td.exa-prop-key {
+    width: 40%;
+    min-width: 150px;
+}
+.exa-prop-grid.table-condensed > thead > tr > td.exa-prop-val {
+    width: 50%;
+    min-width: 150px;
+}
+.exa-prop-grid.table-condensed > thead > tr > td.exa-prop-type {
+    width: 40px;
+}
+.exa-prop-grid.table-condensed > thead > tr > td.exa-prop-act-ct {
+    width: 10px;
+}
+
+
+.exa-prop-grid .exa-prop-act {
+  color: tint($icon-color, $icon-color-tint);
+  background-color: transparent;
+  cursor: pointer;
+}
+
+.exa-prop-grid .exa-prop-act:hover {
+  color: $icon-color;
+}
+
+.exa-prop-grid .exa-prop-act:active {
+  text-shadow: 0 0 2px #6b6b6b;
+  color: $icon-color;
+}
+
+
+.prop-row-editing {
+  background-color: #ffffe8 !important;
+}
+
+.exa-prop-add-input.exa-prop-input {
+  border: 1px solid #e0e0e0;
+}
+
+.exa-prop-key-wrap,
+.exa-prop-input {
+  word-break: break-all;
+}
+
+.exa-prop-key-wrap {
+  overflow: hidden;
+}
+
+.exa-prop-key,
+.exa-prop-val {
+  min-width: 150px;
+}
+
+.exa-prop-grid .exa-prop-row.exa-contain-error {
+    background-color: $error-background-color;
+}
+
+.exa-prop-grid .exa-prop-row.exa-contain-warning {
+    background-color: $warning-background-color;
+}
+
+@import "prop-list-collection-row";
+
+@import "prop-list-tree";

@@ -1,0 +1,35 @@
+// Setting this property to true will make the artifactoryPublish task
+// skip this module (in our case, the root module):
+artifactoryPublish.skip = true
+
+allprojects {
+	checkCompatibility.enabled = false
+}
+
+subprojects {
+	sourceSets {
+	    main {
+	        java {
+	            srcDir "${genJavaDir}"
+	        }
+	        resources {
+	            srcDir "${genResDir}"
+	        }
+	    }
+	}
+
+    checkCompatibility {
+        dependsOn.add('writeFile')
+        cfgDirs = [file("${mainWorkspaceDir}/cfg"), 
+                   file("${genWorkspaceDir}/cfg"), 
+                   file("${externalWorkspaceDir}/cfg"),
+                   file("${mainPluginDir}/cfg"), 
+                   file("${genPluginDir}/cfg"), 
+                   file("${externalPluginDir}/cfg")]
+        versionFile = writeFile.outputFile
+        silent = silent_check
+    }
+    
+    publishPlugin.dependsOn.add('checkCompatibility')
+    zipRelease.dependsOn.add('checkCompatibility')
+}

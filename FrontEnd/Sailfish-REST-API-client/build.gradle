@@ -1,0 +1,14 @@
+defaultTasks 'build'
+
+archivesBaseName = 'sailfish-rest-api-client'
+
+dependencies {
+    compile 'org.apache.httpcomponents:httpmime:4.5.6'
+    compile "org.slf4j:slf4j-api:${version_slf4j}"
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.7'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'commons-configuration:commons-configuration:1.10'
+    compile 'com.google.guava:guava:27.0.1-jre'
+    compile 'commons-beanutils:commons-beanutils:1.9.3'
+}

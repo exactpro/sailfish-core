@@ -1,0 +1,452 @@
+apply plugin: 'com.bmuschko.tomcat'
+apply plugin: 'com.bmuschko.cargo'
+apply plugin: 'war'
+
+defaultTasks 'build'
+
+war.archiveName = 'sfgui.war'
+webAppDirName   = 'build/webapp'
+
+// Define properties
+ext {
+    webContent = file('WebContent')
+    webContentGen = file('WebContentGen')
+    redmimeParams = [
+            uri: "",
+            timeout: "5000",
+            apiKey: "",
+            project: "",
+            rootPage: ""
+    ]
+    tomcatVersion = '9.0.13'
+    branch = System.properties['branch'] ?: 'master'
+    // NodeMatrixEditor.zip version file
+    version_file = 'version_file'
+
+    downloadFolder      = file("${project(':FrontEnd').buildDir}/download")
+    extractFolder       = file("${project(':FrontEnd').buildDir}/extract")
+    cargoDir            = file("${buildDir}/cargo")
+    
+    tomcatContextDir    = file("${cargoDir}/tomcat")
+
+    deployPath          = 'sfgui'
+    tomcatUrl           = 'http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.5/bin/apache-tomcat-8.5.5.zip'
+    tpmcatPort          = 8080
+}
+archivesBaseName = 'sailfish-frontend'
+
+if(project.hasProperty('rmServer')) {
+    ext.redmimeParams.uri = project.property('rmServer')
+}
+if(project.hasProperty('rmApiKey')) {
+    ext.redmimeParams.apiKey = project.property('rmApiKey')
+}
+if(project.hasProperty('rmProject')) {
+    ext.redmimeParams.project = project.property('rmProject')
+}
+if(project.hasProperty('rmRootPage')) {
+    ext.redmimeParams.rootPage = project.property('rmRootPage')
+}
+if(project.hasProperty('rmTimeout')) {
+    ext.redmimeParams.timeout = project.property('rmTimeout')
+}
+
+// Change default project layout
+sourceSets {
+    main {
+        java {
+            srcDir genJavaDir
+        }
+    }
+}
+
+tasks.eclipse.dependsOn('copyFromData')
+
+eclipse {
+    project {
+        natures 'org.eclipse.jem.workbench.JavaEMFNature'
+
+        buildCommand 'org.eclipse.wst.validation.validationbuilder'
+    }
+    wtp {
+        facet {
+            facet name: 'jst.java', version: targetCompatibility
+            facet name: 'jst.web', version: '3.0'
+            facet name: 'wst.jsdt.web', version: '1.0'
+        }
+
+        component {
+            //you can configure the context path:
+            contextPath = "${project.name}"
+
+            //you can add a wb-resource elements; mandatory keys: 'sourcePath', 'deployPath':
+            //if sourcePath points to non-existing folder it will *not* be added.
+            resource sourcePath: "${webContent.name}".toString(), deployPath: '/'
+            resource sourcePath: "${webContentGen.name}".toString(), deployPath: '/'
+
+            //Remove default WbResource
+            resources.removeAll { it.sourcePath == "${webAppDirName}" }
+        }
+    }
+}
+
+configurations {
+    jaxb
+    data
+    zip_data
+    zip_data_channels
+    gui_data
+}
+
+dependencies {
+	if (!incremental_build) {
+    	data files("${project(':BackEnd:Core:sailfish-core').projectDir}/src/main/workspace/")
+    	data files("${project(':BackEnd:Core:sailfish-core').projectDir}/src/gen/workspace/")
+    } else {
+        zip_data "com.exactpro.sf:sailfish-core:${artifactCoreVersion}:data@zip"
+    }
+
+    zip_data_channels group: 'com.exactpro.webchannels', name: 'webchannels', version: "2.1.1", ext: 'zip'
+
+    gui_data "com.exactpro.sf:sailfish-js-matrix-editor:${artifactCoreVersion}"
+
+    jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
+    jaxb 'javax.xml:jsr173:1.0'
+
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
+    tomcat "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+
+    providedCompile 'org.apache.tomcat:tomcat-annotations-api:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-catalina-ant:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-catalina-ha:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-catalina:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-tribes:9.0.13'
+    providedCompile 'org.eclipse.jdt.core.compiler:ecj:4.6.1'
+    providedCompile 'org.apache.tomcat:tomcat-el-api:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-jasper-el:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-jasper:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-jsp-api:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-servlet-api:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-api:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-coyote:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-dbcp:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-i18n-es:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-i18n-fr:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-i18n-ja:9.0.13'
+    providedCompile 'org.apache.tomcat:tomcat-util:9.0.13'
+
+    if (incremental_build) {
+        compile "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
+        compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
+    } else {
+        compile project(':BackEnd:Core:sailfish-core')
+        compile project(':FrontEnd:Sailfish-REST-API-client')
+    }
+
+
+    compile "org.slf4j:slf4j-log4j12:${version_slf4j}"
+
+    compile 'commons-configuration:commons-configuration:1.10'
+
+    compile 'commons-io:commons-io:2.6'
+
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+
+    compile 'org.apache.commons:commons-text:1.6'
+
+    compile 'org.apache.httpcomponents:httpclient:4.5.6'
+
+    compile 'commons-fileupload:commons-fileupload:1.3.3'
+
+    compile 'org.flywaydb:flyway-core:5.2.1'
+
+    //compile 'com.google.guava:guava:18.0'
+
+    compile "org.hibernate:hibernate-core:$version_hibernate"
+
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+
+    compile 'net.sourceforge.javacsv:javacsv:2.0'
+
+    compile 'org.glassfish.jersey.containers:jersey-container-servlet-core:2.27'
+    compile 'org.glassfish.jersey.media:jersey-media-multipart:2.27'
+    compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.27'
+
+
+    //compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+    //compile 'javax.annotation:javax.annotation-api:1.2'
+
+    compile 'org.glassfish:javax.faces:2.2.13'
+
+    compile 'net.sf.json-lib:json-lib:2.4:jdk15'
+
+    compile 'com.exactpro.mvel:mvel2:2.3.2.Final.0.1-SNAPSHOT'
+
+    compile 'org.apache.poi:poi:4.0.0'
+
+    compile 'org.primefaces:primefaces:5.0'
+    compile 'org.primefaces.extensions:primefaces-extensions:1.2.1'
+    compile 'org.omnifaces:omnifaces:1.11';
+
+    compile 'org.reflections:reflections:0.9.11' // has version: 'org.jboss.errai.reflections:reflections:3.0.3.Final'
+
+    compile 'net.sf.textile4j:textile4j:1.2'
+
+    //compile 'javax.xml.bind:jaxb-api:2.2.7'
+
+    compile 'com.thoughtworks.xstream:xstream:1.4.11.1'
+    compile group: 'jaxen', name: 'jaxen', version: '1.1.6'
+
+    compile 'org.postgresql:postgresql:42.2.5'
+    compile 'org.mariadb.jdbc:mariadb-java-client:2.3.0'
+    compile 'org.apache.derby:derby:10.14.2.0'
+
+    //compile 'javax.xml:jaxp-api:1.4'
+
+    compile group: 'com.exactpro.webchannels', name: 'webchannels', version: "2.1.1"
+
+    compile 'com.taskadapter:redmine-java-api:3.1.1' //TODO: Exctract to different depend
+}
+
+
+generateVersionClass {
+	alias = 'GUI'
+}
+
+task loadRedmineWikiPages {
+    dependsOn.add("classes")
+    doLast {
+        javaexec {
+            classpath sourceSets.main.runtimeClasspath
+            main "com.exactpro.sf.testwebgui.RedmineLoader"
+            args = [redmimeParams.uri, redmimeParams.timeout, redmimeParams.apiKey, redmimeParams.project,"${webContentGen}/help/", redmimeParams.rootPage]
+        }
+    }
+}
+
+task copyFromGUIData (type: Copy) {
+    into "${webContentGen}/resources/"
+
+    from {
+        configurations.gui_data.collect { zipTree(it) }
+    }
+}
+
+task copyExternalJs (type: Copy) {
+	into "${webContentGen}/resources/sf/js/external"
+
+	from {
+		configurations.zip_data_channels.collect {
+			zipTree(it).matching {
+				include '*.js'
+			}
+		}
+	}
+}
+
+task copyFromData (type: Copy) {
+    dependsOn.add('copyFromGUIData')
+    dependsOn.add('copyExternalJs')
+    into webContentGen
+
+    from {
+        configurations.zip_data.collect { zipTree(it) }
+    }
+    from {
+        configurations.data
+    }
+}
+
+task copyWebContent (type: Copy) {
+	dependsOn.add('copyFromData')
+    dependsOn.add('generateSailfishHelp')
+    dependsOn.add('writeFile')
+
+    into webAppDirName
+
+    from (webContent)       { exclude 'resources/sf' }
+    from (webContentGen)    { exclude 'resources/sf' }
+
+    def v = formatVersionFolderName()
+
+    from ("${webContent}/resources/sf")     { into 'resources/sf/' + v  }
+    from ("${webContentGen}/resources/sf")	{ into 'resources/sf/' + v }
+}
+
+classes {
+    dependsOn.add('copyFromData')
+}
+
+war {
+    dependsOn.add("copyWebContent")
+
+    manifest {
+    attributes('Implementation-Version': "${revision}")
+	attributes(
+	    'Built-By':  System.getProperty('user.name'),
+	    'Built-JDK': System.getProperty('java.version')
+	)
+    attributes('Build_Name': "${archivesBaseName}")
+	attributes('Build_Number': "${build_number}")
+    attributes('Branch_Name': "${branch}")
+    attributes('Git_Hash': "${git_hash}")
+    }
+}
+
+task writeQuickStartConfiguration(type: com.exactpro.sf.WriteFileTask) {
+
+    onlyIf {
+        project.hasProperty('quickStart')
+    }
+
+    line ("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>")
+    line ("<configuration>")
+    line ("    <Environment>")
+    line ("        <GeneralSettings>")
+    line ("            <StorageType>file</StorageType>")
+    line ("            <FileStoragePath>storage</FileStoragePath>")
+    line ("        </GeneralSettings>")
+    line ("    </Environment>")
+    line ("</configuration>")
+
+    fileName    = "sf.cfg.xml"
+    outputDir   = file("${tmpWorkspaceDir}/cfg")
+}
+
+task writeWebXML(type: com.exactpro.sf.WriteFileTask) {
+
+    line ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+    line ("<Context>")
+    line ("<Parameter name=\"workspace\" value=\"${sharedWorkspaceDir}:${tmpWorkspaceDir}\" override=\"true\"/>")
+    line ("</Context>")
+
+    fileName    = "${deployPath}.xml"
+    outputDir   = tomcatContextDir
+}
+
+cargo {
+    containerId = 'tomcat8x'
+    port        = tpmcatPort
+
+    deployable {
+        file = file('build/libs/sfgui.war')
+        context = deployPath
+    }
+
+    local {
+        jvmArgs     = '-Xdebug -agentlib:jdwp=transport=dt_socket,address=9999,server=y,suspend=n'
+        // The log file of your local container (defaults to writing to the console).
+        outputFile  = file("${cargoDir}/container.log")
+        // The Cargo log file of your local container (defaults to writing to the console).
+        logFile     = file("${cargoDir}/cargo.log")
+        // The log level to run the container with (optional). The valid levels are low, medium and high.
+        //logLevel
+        // The home directory of your local container installation.
+        //homeDir
+        // The timeout (in ms) in which to determine if the container is successfully started or stopped (defaults to 120000ms).
+        timeout     = 30000
+        installer {
+            installUrl = tomcatUrl
+            downloadDir = downloadFolder
+            extractDir = extractFolder
+        }
+        configFile {
+            file = file("${tomcatContextDir}/${deployPath}.xml")
+            toDir = 'conf/Catalina/localhost'
+        }
+    }
+}
+
+cargoRunLocal.dependsOn war, writeWebXML, writeQuickStartConfiguration
+cargoStartLocal.dependsOn war, writeWebXML, writeQuickStartConfiguration
+
+writeFile {
+    afterEvaluate { Project project ->
+        line ("build_number: ${build_number}")
+        line ("revision: ${revision}")
+        line ("git_hash: ${git_hash}")
+        line ('group: sailfish')
+        line ("name: core")
+        line ("version: ${sailfish_version_major}.${sailfish_version_minor}.${revision}.${build_number}")
+    }
+
+    fileName    = 'VERSION'
+    outputDir   = webContentGen
+}
+
+task zipRelease(type: Zip) {
+    dependsOn.add('war')
+
+    includeEmptyDirs = false
+    archiveName = getReleaseName()
+    destinationDir = getReleaseDir(project.buildDir)
+    duplicatesStrategy = 'EXCLUDE'
+
+    from file('etc')
+    from war.archivePath
+
+    into ('Workspace/cfg/') {
+        from "${webContentGen}/cfg/sf.cfg.xml"
+        from "${webContentGen}/cfg/hibernate.cfg.xml"
+    }
+
+    doLast {
+        exec {
+            workingDir getReleaseDir(project.buildDir)
+            commandLine 'ln', '-s', getReleaseName(), 'last_build.zip'
+        }
+    }
+}
+
+task generateSailfishHelp(type: JavaExec) {
+    dependsOn.add("copyFromData")
+
+    classpath sourceSets.main.runtimeClasspath
+    args 'General', 'General', webContent, webContentGen
+    main "com.exactpro.sf.help.HelpBuilder"
+}
+
+clean {
+    delete webContentGen
+}
+
+compileJava.dependsOn.add('generateVersionClass')
+
+def formatVersionFolderName() {
+    def version = new StringBuffer(build_number)
+
+    def index = version.indexOf('-')
+    version.delete(0,index+1)
+
+    def v = version?.isInteger()?version.toInteger():getDate('ddMMyy')
+    v = v.toString() + "_0"
+
+    return v
+}
+
+writeBuildInfo {
+    doLast {
+        configurations.gui_data.each {
+            def file = (File) it
+            def zipFile = new java.util.zip.ZipFile(new File(file.absolutePath))
+            zipFile.entries().each {
+            	if (it.name.equals("${version_file}")) {
+            		println(it.text)
+            	}
+            }
+        }
+    }
+}
+
+collectDependencies {
+    type = 'war'
+}
+
+def getReleaseName() {
+    return "sf_${artifactCoreVersion}_b${build_number}.zip"
+}
+
+def getReleaseDir(buildDir) {
+    return  file("${buildDir}/release")
+}

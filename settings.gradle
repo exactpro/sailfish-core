@@ -1,0 +1,15 @@
+include 'BackEnd:Core:sailfish-common'
+include 'BackEnd:Core:sailfish-core'
+
+include 'BackEnd:Plugin:plugin-generic'
+
+include 'BackEnd:Service:service-itch'
+include 'BackEnd:Service:service-ntg'
+include 'BackEnd:Service:service-fix'
+include 'BackEnd:Service:service-fast'
+include 'BackEnd:Service:service-tcpip'
+
+include 'BackEnd:Extension:extension-aml-3'
+
+include 'FrontEnd:SailfishFrontEnd'
+include 'FrontEnd:Sailfish-REST-API-client'

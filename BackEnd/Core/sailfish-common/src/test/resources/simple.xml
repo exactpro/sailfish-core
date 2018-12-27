@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="NAME">
+    <fields>
+        <field isCollection="false" type="java.lang.Byte" id="idshnik" name="name">
+            <description>description</description>
+            <value type="java.lang.Byte" name="FIRST">1</value>
+            <value type="java.lang.Byte" name="SECOND">2</value>
+            <value type="java.lang.Byte" name="THIRD">3</value>
+        </field>
+    </fields>
+    <messages>
+        <message name="message_name">
+            <field reference="idshnik" name="f_name"/>
+        </message>
+    </messages>
+</dictionary>

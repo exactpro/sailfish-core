@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.exactpro.sf.storage.entities">
+
+	<class name="AppUser" table="APP_USER">
+		<id name="userName" column="USERNAME" length="32" />
+
+		<property name="password" column="PASSWORD" not-null="true" />
+		<property name="realName" column="REALNAME" not-null="true" />
+		<property name="realSurname" column="REALSURNAME" not-null="true" />
+		<property name="email" column="EMAIL" not-null="true" />
+		<property name="registered" column="REGISTERED" not-null="true" />
+		
+		<set name="roles" table="APP_USERS_ROLES" inverse="true" lazy="false" fetch="select" cascade="none">
+			<key column="USERNAME" not-null="true"/>
+			<many-to-many class="Role">
+				<column name="ROLENAME" not-null="true"/>
+			</many-to-many>
+		</set>
+	</class>
+	
+	<class name="Role" table="ROLE">
+		<id name="roleName" column="ROLENAME" length="32" />
+
+		<set name="users" table="APP_USERS_ROLES" inverse="false" lazy="false" fetch="select">
+			<key column="ROLENAME" not-null="true"/>
+			<many-to-many class="AppUser">
+				<column name="USERNAME" not-null="true"/>
+			</many-to-many>
+		</set>
+	</class>
+	
+</hibernate-mapping> 

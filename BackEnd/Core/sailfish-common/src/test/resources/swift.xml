@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary"
+	name="Swift">
+	<fields>
+		<field type="java.lang.String" id="_16R" name="16R" />
+		<field type="java.lang.String" id="_16S" name="16S" />
+		<field type="java.lang.String" id="_19A" name="19A" />
+		<field type="java.lang.String" id="_20C" name="20C" />
+		<field type="java.lang.String" id="_22F" name="22F" />
+		<field type="java.lang.String" id="_36B" name="36B" />
+		<field type="java.lang.String" id="_92B" name="92B" />
+		<field type="java.lang.String" id="_95P" name="95P" />
+		<field type="java.lang.String" id="_97A" name="97A" />
+	</fields>
+	<messages>
+		<message id="RepetitiveMandatorySubsequenceA1Linkages" name="RepetitiveMandatorySubsequenceA1Linkages">
+			<field name="16R" reference="_16R">
+				<attribute name="status">M</attribute>
+				<attribute name="default">LINK</attribute>
+			</field>
+			<field name="20C" reference="_20C">
+				<attribute name="status">M</attribute>
+				<attribute name="qualifier">PREV</attribute>
+				<attribute name="name">Previous Reference</attribute>
+			</field>
+			<field name="16S" reference="_16S">
+				<attribute name="status">M</attribute>
+				<attribute name="default">LINK</attribute>
+			</field>
+		</message>
+		<message id="MandatorySequenceAGeneralInformation" name="MandatorySequenceAGeneralInformation">
+			<field name="16R" reference="_16R">
+				<attribute name="status">M</attribute>
+				<attribute name="default">GENL</attribute>
+			</field>
+			<field name="RepetitiveMandatorySubsequenceA1Linkages"
+				reference="RepetitiveMandatorySubsequenceA1Linkages">
+				<attribute name="isCollection">true</attribute>
+			</field>
+		</message>
+		<message id="RepetitiveMandatorySubsequenceB1ConfirmationParties"
+			name="RepetitiveMandatorySubsequenceB1ConfirmationParties">
+			<field name="16R" reference="_16R">
+				<attribute name="status">M</attribute>
+				<attribute name="default">CONFPRTY</attribute>
+			</field>
+		</message>
+		<message id="MandatorySequenceBConfirmationDetails" name="MandatorySequenceBConfirmationDetails">
+			<field name="16R" reference="_16R">
+				<attribute name="status">M</attribute>
+				<attribute name="default">CONFDET</attribute>
+			</field>
+			<field name="RepetitiveMandatorySubsequenceB1ConfirmationParties"
+				reference="RepetitiveMandatorySubsequenceB1ConfirmationParties">
+				<attribute name="isCollection">true</attribute>
+			</field>
+			<field name="36B" reference="_36B">
+				<attribute name="status">M</attribute>
+				<attribute name="qualifier">CONF</attribute>
+				<attribute name="name">Quantity traded</attribute>
+			</field>
+		</message>
+		<message id="RepetitiveMandatorySubsequenceC1SettlementParties"
+			name="RepetitiveMandatorySubsequenceC1SettlementParties">
+			<field name="16R" reference="_16R">
+				<attribute name="status">M</attribute>
+				<attribute name="default">SETPRTY</attribute>
+			</field>
+			<field name="95P" reference="_95P" />
+			<field name="97A" reference="_97A" />
+			<field name="16S" reference="_16S" />
+			<field name="16R" reference="_16R" />
+			<field name="95P" reference="_95P" />
+			<field name="16S" reference="_16S" />
+		</message>
+		<message id="OptionalSubsequenceC3Amounts" name="OptionalSubsequenceC3Amounts">
+			<field name="16R" reference="_16R" />
+			<field name="19A" reference="_19A" />
+			<field name="19A" reference="_19A" />
+			<field name="92B" reference="_92B" />
+			<field name="16S" reference="_16S" />
+		</message>
+		<message id="MandatorySequenceCSettlementDetails" name="MandatorySequenceCSettlementDetails">
+			<field name="16R" reference="_16R" />
+			<field name="22F" reference="_22F" />
+			<field name="RepetitiveMandatorySubsequenceC1SettlementParties"
+				reference="RepetitiveMandatorySubsequenceC1SettlementParties">
+				<attribute name="isCollection">true</attribute>
+			</field>
+			<field name="OptionalSubsequenceC3Amounts" reference="OptionalSubsequenceC3Amounts" />
+			<field name="16S" reference="_16S" />
+		</message>
+		<message id="MandatorySequenceDOtherParties" name="MandatorySequenceDOtherParties">
+			<field name="16R" reference="_16R">
+				<attribute name="status">M</attribute>
+				<attribute name="default">OTHRPRTY</attribute>
+			</field>
+		</message>
+		<message id="S518" name="518">
+			<field name="SMandatorySequenceAGeneralInformation" reference="MandatorySequenceAGeneralInformation" />
+			<field name="SMandatorySequenceBConfirmationDetails" reference="MandatorySequenceBConfirmationDetails" />
+			<field name="SMandatorySequenceCSettlementDetails" reference="MandatorySequenceCSettlementDetails" />
+			<field name="SMandatorySequenceDOtherParties" reference="MandatorySequenceDOtherParties" />
+		</message>
+	</messages>
+</dictionary>

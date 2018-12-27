@@ -1,0 +1,1 @@
+ALTER TABLE stactionruns ADD COLUMN tag character varying(255) DEFAULT NULL;

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/message/" targetNamespace="http://www.example.org/message/" 
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	jaxb:version="1.0" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	jaxb:extensionBindingPrefixes="xjc">
+ 
+ 
+	<annotation>
+		<appinfo>
+			<jaxb:globalBindings>
+				<xjc:simple />
+			</jaxb:globalBindings>
+		</appinfo>
+	</annotation>
+
+	<complexType name="DataEntity">
+		<attribute name="name" type="string" use="required" />
+	</complexType>
+
+	<complexType name="DataField">
+		<complexContent>
+			<extension base="tns:DataEntity">
+				<attribute name="value" use="required" type="string" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="DataFieldArray">
+		<complexContent>
+			<extension base="tns:DataEntity">
+				<sequence>
+					<element name="value" type="string" minOccurs="0"
+						maxOccurs="unbounded" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="DataMessageArray">
+		<complexContent>
+			<extension base="tns:DataEntity">
+				<sequence>
+					<element name="message" type="tns:DataMessage" maxOccurs="unbounded" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="DataMessage">
+		<complexContent>
+			<extension base="tns:DataEntity">
+				<choice minOccurs="1" maxOccurs="unbounded">
+					<element name="fields" type="tns:DataFieldArray" />
+					<element name="field" type="tns:DataField" />
+					<element name="message" type="tns:DataMessage" />
+					<element name="messages" type="tns:DataMessageArray" />
+				</choice>
+				<attribute name="namespace" use="required" />
+			</extension>
+		</complexContent>
+	</complexType>
+
+ 	<element name="dataMessage" type="tns:DataMessage" />  
+
+</schema>

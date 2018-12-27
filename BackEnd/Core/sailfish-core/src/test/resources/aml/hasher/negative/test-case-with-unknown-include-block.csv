@@ -1,0 +1,5 @@
+#execute,#description,#template,#reference,#timeout,#action,#static_type,#static_value,#messages_count,#message_type,#dictionary,FInteger
+,,,tc,,test case start,,,,,,
+,,,sv,1000,SetStatic,Integer,5,,,,
+,send simple message,bl,,,include block,,,,SimpleMessage,TestAML,10
+,,,,,test case end,,,,,,

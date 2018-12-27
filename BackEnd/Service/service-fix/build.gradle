@@ -1,0 +1,14 @@
+archivesBaseName = 'service-fix'
+
+dependencies {
+
+    compile 'com.exactpro.quickfixj:quickfixj-core:1.6.0.1'
+
+    if (incremental_build) {
+        compile "com.exactpro.sf:service-tcpip:${artifactVersion}"
+    } else {
+        compile project(':BackEnd:Service:service-tcpip')
+    }
+
+    testRuntime group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin', version: '3.2', transitive: false
+}

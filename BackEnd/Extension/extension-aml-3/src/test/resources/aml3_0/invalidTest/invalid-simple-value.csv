@@ -1,0 +1,4 @@
+#timeout,#service_name,#action,#message_type,#dictionary,FInteger,FLong,FIntegerEnum,FIntegerEnumArray
+,,test case start,,,,,,
+1000,fake,send,SimpleMessage,TestAML,*,10,*,
+,,test case end,,,,,,

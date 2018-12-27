@@ -1,0 +1,184 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Editor :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/jquery.contextMenu.css" />
+    <h:outputStylesheet library="sf" name="css/handsontable.css" />
+    <h:outputStylesheet library="sf" name="css/custom.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>
+    <h:outputStylesheet library="sf" name="css/scriptruns.css"/>
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+    <h:outputStylesheet library="sf" name="css/excel.editor.css"/>
+
+    <script>
+	
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+	
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+	
+  	</script>
+
+    <h:outputScript library="sf" name="js/external/handsontable.js"/>
+    <h:outputScript library="sf" name="js/external/bootstrap-typeahead.js"/>
+    <h:outputScript library="sf" name="js/external/jquery.contextMenu.js"/>
+    <h:outputScript library="sf" name="js/external/jquery.ui.position.js"/>
+    <h:outputScript library="sf" name="js/external/util.js"/>
+    <h:outputScript library="sf" name="js/external/message-factory.js"/>
+    <h:outputScript library="sf" name="js/external/channels.js"/>
+    <h:outputScript library="sf" name="js/external/stacktrace-0.3.js"/>
+    <h:outputScript library="sf" name="js/excel.editor.js"/>
+    <h:outputScript library="sf" name="js/menu.js"/>
+
+</h:head>
+
+<h:body styleClass="eps-application">
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <p:ajaxStatus style="position: absolute; left:50%; top:50%; width:64px; height:64px; " id="ajaxStatusPanel">
+
+        <f:facet name="start">
+            <h:graphicImage library="sf" name="images/ajaxloader.gif" />
+        </f:facet>
+
+        <f:facet name="complete">
+            <h:outputText value="" />
+        </f:facet>
+
+    </p:ajaxStatus>
+
+    <h:form prependId="false" id="settingsForm" styleClass="eps-settings-form">
+
+        <p:remoteCommand name="stopScript" action="#{testScriptsBean.stopScript}"/>
+        <p:remoteCommand name="compileScript" action="#{testScriptsBean.compileScript}"/>
+        <p:remoteCommand name="runCompiledScript" action="#{testScriptsBean.runCompiledScript}"/>
+        <p:remoteCommand name="resumeScript" action="#{testScriptsBean.resumeScript}"/>
+        <p:remoteCommand name="pauseScript" action="#{testScriptsBean.pauseScript}"/>
+        <p:remoteCommand name="nextStep" action="#{testScriptsBean.nextStep}"/>
+
+        <p:growl id="messages" sticky="false" life="6000" showDetail="true" />
+
+        <div>
+
+            <div class="eps-excell-text-editor-buttons-panel">
+                <p:commandButton style="margin-right: 25px;" id="buttonReturn" value="Back to list" action="#{testScriptsBean.goToScriptRuns}" icon="ui-icon-circle-arrow-w" />
+                <h:outputLabel for="testcaseName" value="Test case to edit: " />
+                <p:selectOneMenu style="margin: 0 10px; vertical-align: bottom;" id="testcaseName" styleClass="eps-input" value="#{matrixEditorBean.testcaseToEdit}">
+                    <f:selectItems value="#{matrixEditorBean.testcaseNames}" />
+                    <p:ajax event="change" update="@this btnPanel"/>
+                </p:selectOneMenu>
+            </div>
+
+            <div class="eps-matrix-params-editor">
+                <div class="eps-checkboxes-excel">
+                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-continue-if-failed" id="continueIfFailedCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.continueOnFailed}">
+                        <p:ajax execute="@this" />
+                    </p:selectBooleanCheckbox>
+
+                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-auto-start" id="autostartCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.autoStart}">
+                        <p:ajax execute="@this" />
+                    </p:selectBooleanCheckbox>
+
+                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-ignore-ask" id="ignoreAskForContinueCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.ignoreAskForContinue}">
+                        <p:ajax execute="@this" />
+                    </p:selectBooleanCheckbox>
+                </div>
+                <div style="display: inline-block">
+
+                    <p:selectOneMenu id="selectedEnvironment" value="#{testScriptsBean.selectedEnvironment}" var="environment" styleClass="eps-input" style="width:145px; text-align:left; margin: 0 10px;">
+                        <f:selectItem itemLabel="Default Environment" itemValue="default" />
+                        <f:selectItems value="#{testScriptsBean.environmentValues}" />
+                        <p:ajax execute="@this" />
+                    </p:selectOneMenu>
+
+                    <p:selectOneMenu id="selectedType" value="#{testScriptsBean.selectedLanguageURI}" styleClass="eps-input" style="width:90px; text-align: left; margin: 0 10px;">
+                        <f:selectItems value="#{testScriptsBean.languageURIs}" var="generator" itemValue="#{generator}" itemLabel="#{generator}" style="width:200px"/>
+                        <p:ajax execute="@this" />
+                    </p:selectOneMenu>
+
+                    <p:selectOneMenu id="selectedEncoding" value="#{testScriptsBean.selectedEncoding}" var="encoding" styleClass="eps-input" style="width:90px; text-align: left;">
+                        <f:selectItems value="#{testScriptsBean.encodeValues}" var="encodeValue" itemLabel="#{encodeValue}" itemValue="#{encodeValue}" style="width:200px"/>
+                        <p:ajax execute="@this" />
+                    </p:selectOneMenu>
+
+                    <p:tooltip value="Environments list" for="selectedEnvironment" />
+                    <p:tooltip value="AML Version" for="selectedType" />
+                    <p:tooltip value="Encoding" for="selectedEncoding" />
+
+                </div>
+            </div>
+
+            <div style="padding: 5px 10px;">
+                <p:outputPanel id="btnPanel" styleClass="eps-editor-btn-panel" style="position: relative;">
+                    <div>
+                        <p:commandButton id="buttonLoad" value="Load" actionListener="#{matrixEditorBean.loadTestCase}" update="messages" oncomplete="handleComplete(xhr, status, args)" icon="ui-icon-mail-open"/>
+                        <p:commandButton id="buttonSave" value="Save" actionListener="#{matrixEditorBean.saveTestCase}" update="messages" onclick="document.getElementById('matrixText').value=returnData()" icon="ui-icon-disk" />
+                        <p:commandButton id="buttonCreate" value="Create" onclick="PF('createDialog').show()" icon="ui-icon-circle-plus" />
+                        <p:commandButton id="buttonRemove" value="Remove" actionListener="#{matrixEditorBean.removeTestcase}" update="messages :settingsForm" icon="ui-icon-circle-minus" />
+                        <p:commandButton id="buttonRunCurrent" value="Run TestCase" actionListener="#{testScriptsBean.runTestCaseToEdit}" update="messages :settingsForm:lastScriptRun" icon="ui-icon-circle-triangle-e" oncomplete="$('#buttonHide').show();">
+                            <f:param name="id" value="#{matrixEditorBean.matrixAdapter.matrixId}" />
+                            <f:param name="testcaseToEdit" value="#{matrixEditorBean.testcaseToEdit}" />
+                        </p:commandButton>
+                        <p:commandButton id="buttonRun" value="Run with range" actionListener="#{testScriptsBean.run(matrixEditorBean.matrixAdapter)}" update="messages :settingsForm:lastScriptRun" icon="ui-icon-circle-triangle-e" oncomplete="$('#buttonHide').show(); $('#scriptRunResult').show();"/>
+                        <p:inputText  id="range" style="padding: 5px; width: 90px;" value="#{matrixEditorBean.matrixAdapter.range}" styleClass="eps-input" />
+                        <p:watermark for="range" value=" Matrix range" id="watermark1" />
+                        <p:commandButton style="float:right; display: none; margin-right: 12px;" id="buttonHide" value="Hide script result" icon="ui-icon-circle-close" onclick="$('#buttonHide').hide(); $('#scriptRunResult').hide();" />
+                    </div>
+                    <h:inputHidden id="matrixText" value="#{matrixEditorBean.textToSave}" />
+                    <h:inputHidden id="lastScriptRun" value="#{matrixEditorBean.matrixAdapter.lastScriptRun}" />
+                </p:outputPanel>
+                
+                <p:defaultCommand target="buttonRun" scope="btnPanel" />
+
+                <div style="clear:both; height: 1px;" />
+
+                <div class="eps-matrix-text-container">
+                    <div id="scriptRunResult"></div>
+                    <div id="dataTable" class="eps-editor-table"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </h:form>
+
+    <h:form enctype="multipart/form-data" id="createDialodForm" >
+        <p:dialog header="Create Test Case" widgetVar="createDialog" modal="true" resizable="false">
+                <h:outputLabel for="createNameInput" value="Name:"/>
+                <p:inputText id="createNameInput" value="#{matrixEditorBean.testcaseName}" style="width:200px; margin-left: 5px" required="true" requiredMessage="Test Case name can not be empty"/>
+            <div style="text-align: center; margin-top: 6px;">
+                <p:commandButton id="createSubmit" value="Create" actionListener="#{matrixEditorBean.createTestcase}" update=":createDialodForm :settingsForm" oncomplete="if (!args.validationFailed) {PF('createDialog').hide()} else {PF('createDialog').show()}" />
+                <p:commandButton id="createCancel" value="Cancel" update=":createDialodForm :settingsForm" oncomplete="PF('createDialog').hide()" process="@this">
+                    <p:resetInput target=":createDialodForm" />
+                </p:commandButton>
+            </div>
+        </p:dialog>
+    </h:form>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+
+</h:body>
+
+</html>

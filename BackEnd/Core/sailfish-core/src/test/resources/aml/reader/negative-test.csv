@@ -1,0 +1,21 @@
+#execute,#comment,#description,#timeout,#action,#messages_count,#condition
+,,executable action outside of block,100,Sleep,,
+,,attempt to close block when there isn't any,,test case end,,
+,,,,,,
+,,,,test case start,,
+,,opening block inside of another block,,test case start,,
+,,closing block with wrong brace,,block end,,
+,,,,,,
+,,,,test case start,,
+,,closing condition when there isn't any,,endif,,
+,,using else statement without if,,else,,
+,,,,repeat,1,
+,,using else statement without if inside of another statement,,else,,
+,,using elif statement after else,,elif,,TRUE
+,,unclosed if stemement,,if,,TRUE
+,,opening block inside of statement,,global block start,,
+,,closing cycle when there isn't any,,next,,
+,,unclosed repeat statement,,repeat,1,
+,y,commented block open,,first block start,,
+,,uncommented block close,,first block end,,
+,,,,test case end,,

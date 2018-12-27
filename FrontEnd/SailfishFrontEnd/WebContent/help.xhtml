@@ -1,0 +1,393 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Help :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>
+
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+    <h:outputStylesheet library="sf" name="css/help.css"/>
+
+    <script>
+
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+
+  	</script>
+
+</h:head>
+<h:body styleClass="eps-application">
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <f:metadata>
+        <f:event type="preRenderView" listener="#{helpBean.preRenderView}" />
+    </f:metadata>
+    
+    <h:form id="messageForm">
+        <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true" />
+    </h:form>
+
+    <div class="eps-container">
+        <p:ajaxStatus style="width:24px;height:24px; position: absolute; top: 10px; right:10px;" id="ajaxStatusPanel">
+            <f:facet name="start">
+                <h:graphicImage library="sf" name="images/ajaxloader.gif" />
+            </f:facet>
+
+            <f:facet name="complete">
+                <h:outputText value="" />
+            </f:facet>
+        </p:ajaxStatus>
+        
+        <h:form id="commandsForm">
+            <p:remoteCommand name="initTree" actionListener="#{helpBean.initTree}" onstart="showBar()" oncomplete="hideBar()" />
+            <p:remoteCommand name="showCopiedMessage" actionListener="#{helpBean.showCopiedMessage}" />
+        </h:form>
+        
+        <h:form id="form" prependId="false" styleClass="eps-help-form">
+        
+            <h:graphicImage id="loadingTreeStatus" library="sf" name="images/ajaxloader.gif"/>
+
+            <p:outputPanel id="mainMenuBar" class="eps-search-bar">
+                <div class="eps-input-container">
+                    <p:inputText id="searchText" value="#{helpBean.searchOptions.searchText}" styleClass="eps-input eps-help-search-input"
+                                 disabled="#{helpBean.loadingProgress ne 100}"/>
+                </div>
+                <p:watermark for="searchText" value="Type text to search... " />
+
+                <p:menubar styleClass="eps-search-actions-bar">
+                    <p:menuitem icon="eps-custom-icon eps-custom-icon-search" id="createSubmit" actionListener="#{helpBean.search()}"
+                                onstart="showAjax()" oncomplete="hideAjax()" update=":contentForm @(.eps-messages-container)"
+                                disabled="#{helpBean.loadingProgress ne 100}"/>
+                    <p:menuitem icon="eps-custom-icon eps-custom-icon-close" id="clearSearchButton" 
+                                disabled="#{helpBean.loadingProgress ne 100}" actionListener="#{helpBean.hideSearchResults}" 
+                                update=":contentForm @(.eps-messages-container)"/>
+                </p:menubar>
+
+                <p:tooltip value="Search" for="createSubmit" />
+                <p:tooltip value="Hide search results" for="clearSearchButton" />
+
+				<p:commandButton id="searchOptions" value="" styleClass="eps-search-options" onclick="PF('searchOptionsDialog').show()"
+				                 disabled="#{helpBean.loadingProgress ne 100}"/>
+
+                <p:tooltip value="Search options" for="searchOptions" />
+                <p:defaultCommand target="createSubmit" />
+            </p:outputPanel>
+
+            <p:outputPanel id="tab-wrap" class="eps-tab-container">
+            
+            	<p:outputPanel id="collapseAllPanel">
+	            	<p:commandLink id="collapseAllButton" icon="ui-icon-circle-triangle-n" value="Collapse all" 
+	            				   actionListener="#{helpBean.collapseAll}" rendered="#{helpBean.someNodesExpanded}"
+	            				   onstart="showAjax()" oncomplete="hideAjax()" update=":form :contentForm" />
+            	</p:outputPanel>
+            
+                <p:tabView id="tab" styleClass="eps-tab-view" activeIndex="#{helpBean.activeTabIndex}">
+
+                    <p:ajax event="tabChange" listener="#{helpBean.onTabChange}" async="true" update=":form :contentForm"
+                            onstart="showAjax()" oncomplete="hideAjax()"/>
+
+                    <p:tab title="Plugins" id="tPlugins">
+                    
+                        <ui:fragment rendered="#{helpBean.root eq null}">
+                            <p:poll autoStart="true" async="true" interval="1" update="tab:loadingStage" />
+                                <p:progressBar widgetVar="pluginsProgress" value="#{helpBean.loadingProgress}" 
+                                               labelTemplate="{value}%" global="false" ajax="true" 
+                                               styleClass="pluginsProgress" />
+                                <p:outputLabel id="loadingStage" styleClass="loadingStage" value="#{helpBean.loadingStage}" />
+                        </ui:fragment>
+
+                        <p:outputPanel styleClass="eps-forest-container" >
+
+                            <p:tree id="helpTree" value="#{helpBean.root}" var="node" dynamic="true"
+                                    selectionMode="single" selection="#{helpBean.selectedNode}" styleClass="eps-help-tree" >
+
+                                <p:ajax event="select" update=":contentForm" listener="#{helpBean.onNodeSelect}" />
+
+                                <p:ajax event="expand" update="@([id$=helpTree])" listener="#{helpBean.onNodeExpand}"
+                                        onstart="showAjax()" oncomplete="hideAjax()" />
+
+                                <p:ajax event="collapse" update="@([id$=helpTree])" listener="#{helpBean.onNodeCollapse}"
+                                        onstart="showAjax()" oncomplete="hideAjax()" />
+
+                                <p:treeNode type="NAMED" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}" />
+                                </p:treeNode>
+
+                                <p:treeNode type="ACTION" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}" />
+                                </p:treeNode>
+
+                                <p:treeNode type="FIELD" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}"/>
+                                    <h:outputText value=" :: #{node.javaType}" styleClass="eps-help-data-type" />
+                                </p:treeNode>
+
+                                <p:treeNode type="UTIL" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}"/>
+                                </p:treeNode>
+                                <p:treeNode type="MESSAGE" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}"/>
+                                </p:treeNode>
+
+                                <p:treeNode type="METHOD" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}"/>
+                                </p:treeNode>
+
+                                <p:treeNode type="DICTIONARY" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}"/>
+                                </p:treeNode>
+
+                                <p:treeNode type="COMPONENT" icon="#{node.icon}">
+                                    <h:outputText value="#{node.name}"/>
+                                </p:treeNode>
+
+                                <p:treeNode type="ERROR">
+                                    <h:outputText styleClass="eps-error" value="#{node.name}"/>
+                                </p:treeNode>
+
+                            </p:tree>
+                                
+                        </p:outputPanel>
+                    </p:tab>
+                </p:tabView>
+            </p:outputPanel>
+        </h:form>
+
+        <div class="eps-main-content">
+            <h:form id="contentForm" enctype="multipart/form-data" prependId="false" styleClass="eps-content-form">
+
+                <p:remoteCommand name="documentReady" update=":form :contentForm" action="#{helpBean.onPageLoad()}" oncomplete="hideAjax();"/>
+
+                <p:remoteCommand name="loadRedmineWikiPage" async="true" update="contentForm" action="#{helpBean.loadRedmineWikiPage}"/>
+
+                <h:outputText value="#{helpBean.mainContent}" styleClass="eps-content-value" escape="false"/>
+                
+                <ui:fragment rendered="#{helpBean.showCopyButton}">
+                    <p:outputPanel id="copyButtons">
+                        <p:commandButton id="copyButton" icon="ui-icon-clipboard" action="#{helpBean.copyToClipboard}"/>
+                        <p:selectBooleanButton id="setHeaderButton" value="#{helpBean.customHeaderWasSet}"
+                                               onLabel="" offLabel="" onIcon="ui-icon-calculator" offIcon="ui-icon-calculator">
+                            <p:ajax oncomplete="PF('setCustomHeaderDialog').show()" />
+                        </p:selectBooleanButton>
+                        
+                        <p:tooltip value="Copy to clipboard" for="copyButton" />
+                        <p:tooltip value="Set custom header" for="setHeaderButton" />
+                    </p:outputPanel>
+                </ui:fragment>
+
+                <ui:fragment rendered="#{helpBean.showExecutor}">
+                    <div class="eps-util-executor">
+                        <h:outputLabel for="functionParams" value="#{helpBean.functionToExec}" id="execFunc" style="margin-right: 5px;"/>
+                        <p:inputText id="functionParams" value="#{helpBean.functionParameters}" styleClass="eps-function-params eps-input"/>
+
+                        <p:commandButton id="execSubmit" value="Exec" action="#{helpBean.executeFunction()}" update=":contentForm" style="margin-right: 15px;"/>
+                        <span class="eps-result-label-text">Result: </span>
+                        <h:outputText value="#{helpBean.functionResult}" class="eps-executor-result"/>
+                        <br></br><br></br>
+                        <b><h:outputText value="Tips: "/></b>
+                        <br></br>
+                        <h:outputText value=" - Add 'B' to the end of parameter (without quotes) to pass a correct BigDecimal value"/>
+                    </div>
+                </ui:fragment>
+
+                <ui:fragment rendered="#{helpBean.wikiPageVisible}">
+                    <ui:fragment rendered="#{helpBean.enabledWiki}">
+                    	<div class="eps-wiki-content">
+                        	<h:outputText escape="false" value="#{helpBean.selectedWikiPage}"/>
+                    	</div>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{not helpBean.enabledWiki}">
+                    	<p:outputPanel id="wikiNotEnabled">
+							<p:outputPanel>
+								<p:outputLabel value="#{helpBean.selectedWikiPage}" />
+							</p:outputPanel>
+						</p:outputPanel>
+                    </ui:fragment>
+                </ui:fragment>
+
+                <h:panelGrid rendered="#{helpBean.searchResult ne null}" styleClass="eps-search-results-panel">
+
+                    <p:separator style="margin-top:20px; margin-bottom: 25px; height: 1px; border: none; background-color: #cdcdcd;"/>
+
+                    <p:dataTable id="searchResultsTable" value="#{helpBean.searchResult}"
+                                 var="resultNode" styleClass="eps-search-results-table eps-main-table" rowIndexVar="index"
+                                 emptyMessage="No records found. Try to change your query or search options">
+
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="Search results: " style="line-height: 30px;"/>
+                                <p:commandButton action="#{helpBean.hideSearchResults}" icon="ui-icon-closethick" update=":contentForm" style="float: right;"/>
+                                <h:outputText style="float: right; margin-right: 30px; line-height: 30px;" rendered="#{helpBean.searchResult.size() lt helpBean.maxSearchSize}" value="Found: #{helpBean.searchResult.size()}"/>
+                                <h:outputText style="float: right; margin-right: 30px; line-height: 30px;" rendered="#{helpBean.searchResult.size() eq helpBean.maxSearchSize}" value="Displayed #{helpBean.searchResult.size()} first"/>
+                            </f:facet>
+                            <p:outputLabel value="#{helpBean.getParents(resultNode)} > " styleClass="search-path" />
+                            <p:commandLink value="#{resultNode.data.name}" action="#{helpBean.expand(resultNode)}"
+                                           onstart="showAjax()" oncomplete="hideAjax(); scrollActionsTree()" update=":form :contentForm"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </h:panelGrid>
+            </h:form>
+        </div>
+
+        <div style="clear:both; height: 1px;"></div>
+    </div>
+    
+    <h:form id="copyDialogForm" prependId="false">
+        <p:dialog id="copyDialog" header="Copy structure" widgetVar="copyDialog" modal="true" resizable="false"
+                  style="text-align:center">
+            
+            <p:outputLabel value="#{helpBean.customHeaderDialogTitle}:" />
+            
+            <p:outputPanel id="newColumnsPanel">
+                <ui:repeat value="#{helpBean.newColumnList}" var="newColumn">
+                    <p:outputLabel value="#{newColumn.name}" style="padding-left:#{newColumn.tabCount}em"
+                                   styleClass="columnLabel #{newColumn.newColumn ? 'newColumnLabel' : 'oldColumnLabel'}"/>
+                </ui:repeat>
+            </p:outputPanel>
+            
+            <p:outputPanel>
+            
+                <p:menubar id="headerProblemMenuBar">
+                
+                    <p:submenu styleClass="copyHeaderSubmenu" label="Copy header" rendered="#{helpBean.newColumnsCount > 0}">
+                    
+                        <p:menuitem id="copyNewColumns" value="Just new columns" oncomplete="PF('copyDialog').hide()" />
+                                    
+                        <p:menuitem id="copyAllHeader" value="All extended header" oncomplete="PF('copyDialog').hide()"/>
+                                    
+                    </p:submenu>
+                    
+                    <p:submenu styleClass="copyStructureSubmenu" label="Copy structure">
+                    
+                        <p:menuitem id="copyIncompleteStructure" value="${helpBean.newColumnsCount > 0 ? 'Incomplete header' : 'Without header'}" oncomplete="PF('copyDialog').hide()"/>
+                        
+                        <p:menuitem id="copyAllStructure" value="All structure" oncomplete="PF('copyDialog').hide()"/>
+                        
+                    </p:submenu>
+                </p:menubar>
+            
+                <p:tooltip value="Copy new columns only" for="copyNewColumns" />
+                <p:tooltip value="Copy an extended header" for="copyAllHeader" />
+                <p:tooltip value="Copy the structure without a header" for="copyIncompleteStructure" />
+                <p:tooltip value="Copy the common structure with an extended header" for="copyAllStructure" />
+                
+            </p:outputPanel>
+            
+        </p:dialog>
+    </h:form>
+    
+    <h:form id="setCustomHeaderDialogForm" prependId="false">
+        <p:dialog id="setCustomHeaderDialog" header="Set custom header" widgetVar="setCustomHeaderDialog" modal="true" resizable="false">
+        
+            <p:ajax event="close" update=":contentForm:copyButtons" />
+                  
+            <p:outputPanel style="padding: 1em;">
+                <p:inputText id="customHeader" value="#{helpBean.customHeader}" style="width:600px;" styleClass="eps-input"
+                             placeholder="Copy your header from a matrix (separated by tabs, commas or semicolons)">
+                    <p:ajax event="blur" execute="@this" />
+                </p:inputText>
+            </p:outputPanel>
+                  
+            <p:outputPanel style="padding: 1em; text-align: center;">
+                <p:commandButton value="OK" oncomplete="PF('setCustomHeaderDialog').hide()" update=":contentForm:copyButtons" />
+            </p:outputPanel>
+            
+        </p:dialog>
+    </h:form>
+    
+    <h:form id="searchOptionsDialogForm" prependId="false">
+    	<p:dialog id="searchOptionsDialog" header="Search options" widgetVar="searchOptionsDialog" modal="true" resizable="false">
+    			  
+    		<p:outputPanel id="searchOptionsPanel">
+				<table>
+				
+					<tr>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="Ignore case" value="#{helpBean.searchOptions.ignoreCase}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="Just in names" value="#{helpBean.searchOptions.searchJustInNames}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="In selection" value="#{helpBean.searchOptions.inSelection}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="Plugin components" value="#{helpBean.searchOptions.searchComponents}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+					</tr>
+					
+					<tr>
+						<td colspan="4" style="text-align: center">
+							<p:selectManyButton value="#{helpBean.searchOptions.searchSwitchOptions}">
+					            <f:selectItem itemLabel="Actions" itemValue="Actions" />
+					            <f:selectItem itemLabel="Dictionaries" itemValue="Dictionaries" />
+					            <p:ajax event="change" update=":searchOptionsDialogForm:searchOptionsPanel" />
+					        </p:selectManyButton>
+						</td>
+					</tr>
+				
+					<tr>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="Fields" value="#{helpBean.searchOptions.searchFields}"
+													 disabled="#{empty helpBean.searchOptions.searchSwitchOptions}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="Utils" value="#{helpBean.searchOptions.searchUtils}"
+													 disabled="#{empty helpBean.searchOptions.searchSwitchOptions}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+						<td>
+							<p:selectBooleanCheckbox itemLabel="Methods" value="#{helpBean.searchOptions.searchMethods}"
+													 disabled="#{empty helpBean.searchOptions.searchSwitchOptions}">
+								<p:ajax execute="@this" />
+							</p:selectBooleanCheckbox>
+						</td>
+					</tr>
+				</table>
+			</p:outputPanel>
+        </p:dialog>
+    </h:form>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+
+    <h:outputScript library="sf" name="js/help.js"/>
+    <h:outputScript library="sf" name="js/menu.js"/>
+
+</h:body>
+</html>

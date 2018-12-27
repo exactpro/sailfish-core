@@ -1,0 +1,14 @@
+$max-z-index: $zindex-dropdown;
+
+$error-background-color: $overrided-danger-panel-bg;
+$warning-background-color: $brand-warning;
+
+$node-danger-border: $brand-danger;
+
+@mixin input-hili($color) {
+    //@include box-shadow(inset 0 3px  0 0 $color);
+}
+
+@mixin input-hili-reset() {
+    //@include box-shadow(inset 0 0 0 0 #fff);
+}

@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>  
+    <title>Editor :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+	<!-- <h:outputStylesheet library="sf" name="css/reset.css"/> -->
+		
+	<f:facet name="first">
+		<link rel="stylesheet" type="text/css" href="#{request.contextPath}/resources/twitter-bootstrap/css/bootstrap.css"/>
+	</f:facet>
+	
+	<h:outputStylesheet library="sf" name="css/screen.css" />	
+	<h:outputStylesheet library="sf" name="css/menu.css"/>
+	<h:outputStylesheet library="sf" name="css/jqueryui/theme.css" />
+	<h:outputStylesheet library="sf" name="css/custom.css"/>
+	<h:outputStylesheet library="sf" name="css/estyles.css"/>	
+	<h:outputStylesheet library="sf" name="css/scriptruns.css" />
+    
+    <h:outputScript library="sf" name="js/external/util.js"/>
+    <h:outputScript library="sf" name="js/external/message-factory.js"/>
+    <h:outputScript library="sf" name="js/external/channels.js"/>
+    <h:outputScript library="sf" name="js/logToServer.js"/>
+	<script>
+		if (!window.console) console = {};
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+		console.debug = console.debug || function(){};
+		
+		window.EPS = {};
+		window.EPS.matrixId = <h:outputText value="#{matrixEditorBean.matrixId}"/>;
+		var encodings = '<h:outputText value="#{testScriptsBean.encodeValues}"/>';
+		window.EPS.encodings = encodings.substring(1, encodings.length-1).split(', ');
+		
+		var environments = '<h:outputText value="#{testScriptsBean.environmentValues}"/>';
+		environments = environments.substring(1, environments.length-1).split(', ');
+		
+		window.EPS.environments = {};
+		environments.forEach(function(str) {
+			if (str.trim().length === 0)
+				return true;
+			var splitted = str.split('=');
+			var key = splitted[0];
+			var value = splitted[1];
+
+			window.EPS.environments[key] = value;
+			return true;
+		});
+		window.EPS.environments['default'] = 'Default Environment';
+		
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+		
+		var contextPath = getContextPath();
+		if (contextPath.startsWith('/')) {
+			// Jersy is failed to read '//' as '/'
+			// Fix it manually:
+			contextPath = contextPath.substring(1);
+		}
+		window.serverLogger = loggerFactory(contextPath + '/sfapi/editor/'+ EPS.matrixId +'/log');
+
+		window.onerror = function(errorMsg, url, lineNum, colNum, exc) {
+			var message = errorMsg + ' at ' + url + ' [' + lineNum+ ',' + colNum+ ']';
+			var stackTrace = exc &amp;&amp; exc.stack &amp;&amp; exc.stack.split('\n') || [];
+			window.serverLogger.log('error', message, stackTrace);
+		};
+  	</script>
+  	
+  	<script>
+  		
+  	</script>
+
+</h:head>
+
+<h:body styleClass="eps-application">
+
+	<ui:insert name="menu">
+	    <ui:include src="template/menu.xhtml"/>
+	</ui:insert>
+
+    <h:form prependId="false" id="settingsForm" style="visibility:hidden" styleClass="eps-settings-form">
+		<!-- JS API -->
+        <p:remoteCommand name="stopScript" action="#{testScriptsBean.stopScript}"/>
+        <p:remoteCommand name="compileScript" action="#{testScriptsBean.compileScript}"/>
+        <p:remoteCommand name="runCompiledScript" action="#{testScriptsBean.runCompiledScript}"/>
+        <p:remoteCommand name="resumeScript" action="#{testScriptsBean.resumeScript}"/>
+        <p:remoteCommand name="pauseScript" action="#{testScriptsBean.pauseScript}"/>
+        <p:remoteCommand name="nextStep" action="#{testScriptsBean.nextStep}"/>
+		<p:remoteCommand name="runMatrix" actionListener="#{testScriptsBean.runTestCaseToEdit}" update="messages :settingsForm:lastScriptRun"/>
+
+        <p:growl id="messages" sticky="false" life="6000" showDetail="true" />
+
+        <div style="padding: 5px 10px;">
+                <p:outputPanel id="btnPanel" styleClass="eps-editor-btn-panel" style="position: relative; top: -15px;">
+				<h:inputHidden id="lastScriptRun" value="#{testScriptsBean.matrixToEdit.lastScriptRun}" />
+			</p:outputPanel>
+        </div>
+    </h:form>
+
+    <div class="eps-testrunresult-container">
+        <div id="scriptRunResult" style="width: 100%;"></div>
+    </div>
+
+	<div class="eps-editor-container">
+	</div>
+
+	<h:outputScript library="sf" name="js/gui.editor.min.js"/>
+
+</h:body>
+
+</html>

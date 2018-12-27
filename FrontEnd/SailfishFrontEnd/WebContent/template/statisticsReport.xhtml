@@ -1,0 +1,61 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"  
+    xmlns:h="http://java.sun.com/jsf/html"  
+    xmlns:f="http://java.sun.com/jsf/core"  
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+   template="/template/master.xhtml">
+   
+    <ui:define name="windowTitle">
+        Statistics
+    </ui:define>
+    
+    <ui:define name="headerLibs">
+        <h:outputStylesheet library="sf" name="css/statistics.css"/>
+        <h:outputScript library="sf" name="js/loading-block.js"/>
+    </ui:define>
+    
+    <ui:define name="metadata">
+
+		
+    </ui:define>
+    
+
+    <ui:define name="content">
+
+       <div class="eps-statistics-content">
+       		
+       		<div id="columns">
+       		
+       			<table>
+       			<tr>
+       				<td style="width:220px;vertical-align:top;">
+		       			<div id="sidebar">
+		       				<h:form id="menu-form" prependId="false">
+								<p:menu id="side-menu" styleClass="eps-statistic-side-menu">
+							        <p:submenu label="Statistics" >
+							        	<p:menuitem value="Statistics Home"     icon="ui-icon-image" outcome="/statistics/index"/>
+							        	<p:menuitem value="Script Runs History" icon="ui-icon-document" outcome="/statistics/statistics_mr"/>
+							        	<p:menuitem value="Compare Tagged" icon="ui-icon-document" outcome="/statistics/tagged_sets_comparison"/>
+							        	<p:menuitem value="Stats Per Tags" icon="ui-icon-document" outcome="/statistics/tg"/>
+							            <p:menuitem value="Test Case History"   icon="ui-icon-document" outcome="/statistics/statistics_tcr"/>
+							            <p:menuitem value="Aggregated Report"   icon="ui-icon-document" outcome="/statistics/statistics_aggregated"/>
+							            <p:menuitem value="Tags"   icon="ui-icon-tag" outcome="/statistics/tags"/>
+							        </p:submenu>
+							    </p:menu>
+						    </h:form>
+						</div>
+					</td>
+					<td style="width:100%;vertical-align:top">
+						<div style="margin-left:0.7em;white-space:nowrap;">
+							<ui:insert name="statistics-content">
+				                Default content
+				            </ui:insert>
+			            </div>
+					</td>
+				</tr>
+				</table>
+			</div>
+		</div>
+		
+	</ui:define>
+</ui:composition>

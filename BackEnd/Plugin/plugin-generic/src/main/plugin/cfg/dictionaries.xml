@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionaries>
+    <dictionary title="NTG_GENERIC">
+        <resource>NTG_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.NTGMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="ITCH_GENERIC">
+        <resource>ITCH_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.MathUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.ITCHMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="FIX_5_0_GENERIC">
+        <resource>FIX_5_0_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="FIX_4_0_GENERIC">
+        <resource>FIX_4_0_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="FIX_4_1_GENERIC">
+        <resource>FIX_4_1_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="FIX_4_2_GENERIC">
+        <resource>FIX_4_2_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="FIX_4_3_GENERIC">
+        <resource>FIX_4_3_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
+    </dictionary>
+
+    <dictionary title="FIX_4_4_GENERIC">
+        <resource>FIX_4_4_GENERIC.xml</resource>
+        <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.DateUtil</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
+        <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
+        <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
+    </dictionary>
+</dictionaries>

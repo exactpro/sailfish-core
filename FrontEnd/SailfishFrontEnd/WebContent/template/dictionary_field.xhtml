@@ -1,0 +1,469 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+				xmlns:h="http://java.sun.com/jsf/html"
+				xmlns:f="http://java.sun.com/jsf/core"
+				xmlns:p="http://primefaces.org/ui"
+				xmlns:o="http://omnifaces.org/ui"
+				xmlns:c="http://java.sun.com/jstl/core"
+				xmlns:ui="http://java.sun.com/jsf/facelets">
+				
+	<span id="inside-#{fieldModel.index}">
+		<p:outputPanel styleClass="tree-node #{fieldModel.message ? 'tree-message' : 'tree-field'} #{fieldModel.collapsed ? 'collapsed' : ''} #{fieldModel.selected ? (leftField ? 'selected-node selected-left-node' : 'selected-node selected-right-node') : ''}"
+					   id="inside">
+					   
+			<p:tooltip id="toolTipName" for="fieldLinkRight fieldLinkLeft" trackMouse="true"
+					   rendered="#{not empty fieldModel.getError('ERR_DUPLICATE_NAME') or not empty fieldModel.getError('ERR_REQUIRED_FIELD')}">
+				<h:outputText value="#{fieldModel.getError('ERR_DUPLICATE_NAME')}" escape="false" />
+				<h:outputText value="#{fieldModel.getError('ERR_REQUIRED_FIELD')}" escape="false" />
+			</p:tooltip>
+			 
+			<p:commandLink id="fieldLinkLeft" styleClass="field-link" rendered="#{leftField}"
+						   actionListener="#{dictBean.model.onSelectLeftField(fieldModel)}" 
+						   update="@(.selected-left-node) @parent :upDownPanel :messForm:messTabPanelMenu :fieldMoveButtonPanel"
+						   onstart="uiHack.saveMesScrollPos();" oncomplete="uiHack.getMesScrollPos();">
+			</p:commandLink>
+			
+			<p:commandLink id="fieldLinkRight" styleClass="field-link" rendered="#{not leftField}"
+						   actionListener="#{dictBean.model.onSelectRightField(fieldModel)}" 
+						   update="@(.selected-right-node) @parent :fieldsForm:fieldsPanelMenu :fieldMoveButtonPanel"
+						   onstart="uiHack.saveFieldsScrollPos();" oncomplete="uiHack.getFieldsScrollPos();">
+			</p:commandLink>
+
+			<p:outputPanel id="fieldInfo" styleClass="field-info">
+			
+				<h:graphicImage library="sf" name="images/refresh_bck.png" 
+							styleClass="repeat-icon #{fieldModel.required ? 'second-icon' : ''}"
+							rendered="#{fieldModel.isCollection}" title="Collection" />
+							
+				<h:graphicImage library="sf" name="images/required_field.png" styleClass="required-icon"
+							rendered='#{fieldModel.required}' title="Required" />
+							
+				<p:outputPanel id="fieldType" styleClass="field-type #{fieldModel.errorsInside ? 'field-type-error' : ''}">
+				
+					<p:outputPanel id="fieldLinksLeft" styleClass="field-links" rendered="#{leftField}">
+						<p:commandLink styleClass="field-link" rendered="#{fieldModel.propertiesCollapsed}">
+						
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onPropertiesExpanderClick(fieldModel, true)}"
+									update=":messForm:tree:treePropertiesWrapper :messForm:tree:fieldNamePanel :messForm:tree:fieldLinksLeft :messForm:messTabPanelMenu" />
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onPropertiesExpanderClickForSlide(fieldModel, false)}"
+									oncomplete="toggleProperties('#p-#{fieldModel.index}');" />
+									
+						</p:commandLink>
+						<p:commandLink styleClass="field-link" rendered="#{not fieldModel.propertiesCollapsed}">
+						
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onPropertiesExpanderClickForSlide(fieldModel, true)}"
+									oncomplete="toggleProperties('#p-#{fieldModel.index}');" />
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onPropertiesExpanderClick(fieldModel, false)}"
+									update=":messForm:tree:fieldLinksLeft :messForm:tree:fieldNamePanel :messForm:messTabPanelMenu" />
+									
+						</p:commandLink>
+					</p:outputPanel>
+					
+					<p:outputPanel id="fieldLinksRight" styleClass="field-links" rendered="#{not leftField}">
+						<p:commandLink styleClass="field-link" rendered="#{fieldModel.propertiesCollapsed}">
+						
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onPropertiesExpanderClick(fieldModel, true)}"
+									update=":fieldsForm:rightFieldEntry:treePropertiesWrapper :fieldsForm:rightFieldEntry:fieldNamePanel :fieldsForm:rightFieldEntry:fieldLinksRight :fieldsForm:fieldsPanelMenu" />
+							<p:ajax event="click" listener="#{dictBean.model.onPropertiesExpanderClickForSlide(fieldModel, false)}"
+									oncomplete="toggleProperties('#p-#{fieldModel.index}');" />
+									
+						</p:commandLink>
+						<p:commandLink styleClass="field-link" rendered="#{not fieldModel.propertiesCollapsed}">
+						
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onPropertiesExpanderClickForSlide(fieldModel, true)}"
+									oncomplete="toggleProperties('#p-#{fieldModel.index}');" />
+							<p:ajax event="click" listener="#{dictBean.model.onPropertiesExpanderClick(fieldModel, false)}"
+									update=":fieldsForm:rightFieldEntry:fieldLinksRight :fieldsForm:rightFieldEntry:fieldNamePanel :fieldsForm:fieldsPanelMenu" />
+						
+						</p:commandLink>
+					</p:outputPanel>
+					
+					<h:outputText value="#{dictBean.model.getFieldTypeLabel(fieldModel.field)}" />
+					<p:outputPanel styleClass="description-triangle" rendered="#{not empty fieldModel.description}" />
+					<p:tooltip id="toolTipFieldType" for="fieldType" trackMouse="true"
+							   value="Description: #{fieldModel.description}" 
+							   rendered="#{not empty fieldModel.description}" />
+				</p:outputPanel>
+				
+				<p:outputPanel id="fieldNamePanel" styleClass="field-name-panel">
+				
+					<h:outputText value="#{fieldModel.field.name}" styleClass="tree-name #{not empty fieldModel.getError('ERR_DUPLICATE_NAME') ? 'eps-error-name' : ''}" 
+								  id="fieldName" rendered="#{fieldModel.propertiesCollapsed}" />
+							   
+					<p:inputText styleClass="field-name-input #{fieldModel.message ? 'field-name-input-msg' : ''}" value="#{fieldModel.editedField.name}" 
+								 rendered="#{not fieldModel.propertiesCollapsed}">
+						<p:ajax event="keyup" process="@this" listener="#{dictBean.model.onPropertiesChanged(fieldModel)}"/>
+					</p:inputText>
+				
+				</p:outputPanel>
+
+				<span class="attributes #{fieldModel.childCount gt 0 ? 'expandable' : ''}">
+					<ui:repeat value="#{dictBean.model.getAttributeLabels(fieldModel.field)}" var="attr">
+						<span class="attribute">
+							<h:outputText value="#{attr.left}" styleClass="attribute-name" />
+							:
+							<h:outputText value="#{attr.right}" styleClass="attribute-value" />
+						</span>
+					</ui:repeat>
+				</span>
+				
+				<p:outputPanel styleClass="message-expander" rendered="#{leftField and fieldModel.childCount gt 0}">
+				
+					<p:outputPanel id="expanderLinks" styleClass="expander-links">
+					
+						<p:commandLink rendered="#{fieldModel.collapsed}">
+						
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onExpanderClick(fieldModel, true)}"
+									update=":messForm:tree:expanderLinks :messForm:tree:treeMessageBody :upDownPanel :messForm:messTabPanelMenu" />
+							<p:ajax event="click" listener="#{dictBean.model.onExpanderClickForSlide(fieldModel, false)}"
+									oncomplete="toggleMessageBody('#inside-#{fieldModel.index} > .tree-node');" />
+									
+						</p:commandLink>
+						<p:commandLink rendered="#{not fieldModel.collapsed}">
+						
+							<p:ajax event="click" process="@this" listener="#{dictBean.model.onExpanderClickForSlide(fieldModel, true)}"
+									oncomplete="toggleMessageBody('#inside-#{fieldModel.index} > .tree-node');" />
+							<p:ajax event="click" listener="#{dictBean.model.onExpanderClick(fieldModel, false)}"
+									update=":messForm:tree:expanderLinks :upDownPanel :messForm:messTabPanelMenu" />
+									
+						</p:commandLink>
+					</p:outputPanel>
+					
+					<p:outputPanel styleClass="toggle-message-triangle" />
+					
+				</p:outputPanel>
+			</p:outputPanel>
+			
+			
+			<div id="p-#{fieldModel.index}" class="tree-properties #{fieldModel.propertiesCollapsedForSlide ? 'collapsed' : ''}" style="#{fieldModel.propertiesCollapsedForSlide ? 'display:none;' : ''}">
+				<p:outputPanel id="treePropertiesWrapper" class="tree-properties-wrapper">
+					<p:panelGrid id="propGrid" styleClass="prop-grid" rendered="#{not fieldModel.propertiesCollapsed}">
+						<p:row>
+							<p:column style="width: 5em;">
+								<p:outputLabel for="propDescription" value="Description:" />
+							</p:column>
+							<p:column colspan="5">
+								<p:inputText id="propDescription" value="#{fieldModel.editedField.description}" 
+											 styleClass="#{fieldModel.descriptionInherited ? 'eps-inherited' : ''} #{fieldModel.descriptionOverrides ? 'eps-overrides' : ''}">
+									<p:ajax event="keyup" process="@this" listener="#{dictBean.model.onPropertiesChanged(fieldModel)}" />
+								</p:inputText>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{(leftField and fieldModel.level ne 1) or (not leftField and not empty fieldModel.field.reference)}">
+							<p:column style="width: 6.5em;">
+								<p:outputLabel for="propIsCollection" value="Is collection:" rendered="#{leftField}" />
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox id="propIsCollection" value="#{fieldModel.isCollectionEdited}" rendered="#{leftField}">
+									<p:ajax event="change" process="@this" listener="#{dictBean.model.onPropertiesChanged(fieldModel)}" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column style="width: 6.5em;">
+								<p:outputLabel for="propIsRequired" value="Is required:" rendered="#{leftField}" />
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox id="propIsRequired" value="#{fieldModel.requiredEdited}" rendered="#{leftField}">
+									<p:ajax event="change" process="@this" listener="#{dictBean.model.onPropertiesChanged(fieldModel)}" />
+								</p:selectBooleanCheckbox>
+							</p:column>
+							<p:column>
+								<p:outputLabel value="Reference:" />
+							</p:column>
+							<p:column>
+							
+								<p:remoteCommand name="goToRightReference_#{fieldModel.index}" actionListener="#{dictBean.model.goToReference(fieldModel)}" 
+												 update="@(.selected-right-node)" oncomplete="scrollToRightSelected();" />
+												 
+								<p:remoteCommand name="goToLeftReference_#{fieldModel.index}" actionListener="#{dictBean.model.goToReference(fieldModel)}"
+												 update="@(.selected-left-node)" oncomplete="scrollToLeftSelected();" />
+							
+								<p:outputLabel value="#{empty fieldModel.field.reference ? 'None' : fieldModel.field.reference.name}" 
+											   onclick="goToRightReference_#{fieldModel.index}();" rendered="#{not fieldModel.message}" />
+											   
+								<p:outputLabel value="#{empty fieldModel.field.reference ? 'None' : fieldModel.field.reference.name}" 
+											   onclick="goToLeftReference_#{fieldModel.index}();" rendered="#{fieldModel.message}" />
+							</p:column>
+						</p:row>
+						<p:row rendered="#{not fieldModel.message}">
+							<p:column style="width: 6.5em;">
+								<p:outputLabel for="propType" value="Field type:" />
+							</p:column>
+							<p:column style="width: 18em;" colspan="2">
+								<h:outputText value="#{dictBean.model.getRefFieldTypeLabel(fieldModel.editedField)}" rendered="#{not dictBean.model.isRefFieldTypeRendered(fieldModel.editedField)}" />
+								<p:selectOneMenu id="propType" value="#{fieldModel.editedFieldType}" style="width: 100%;" 
+												 rendered="#{dictBean.model.isRefFieldTypeRendered(fieldModel.editedField)}">
+												 
+									<f:selectItem itemLabel="" itemValue="" />
+									<f:selectItems value="#{dictBean.model.strJavaTypes}" var="type" 
+												   itemLabel="#{type}" itemValue="#{type}" />
+												   
+									<p:ajax event="change" process="@this" listener="#{dictBean.model.onPropertiesChanged(fieldModel)}" update="propDefaultPanel" />
+											
+								</p:selectOneMenu>
+							</p:column>
+							<p:column style="width: 6.5em;">
+								<p:outputLabel for="propDefaultInput" value="Default value:"/>
+							</p:column>
+							<p:column>
+								<p:outputPanel id="propDefaultPanel">
+								
+									<p:remoteCommand name="defValChanged#{fieldModel.index}" actionListener="#{dictBean.model.onDefValChanged(fieldModel)}" />
+									<p:remoteCommand name="addOrDeleteDefaultValuePressed#{fieldModel.index}" actionListener="#{dictBean.model.onDefValAddDeletePressed(fieldModel)}" />
+
+									<p:inputText styleClass="eps-input #{fieldModel.defaultValueInherited ? 'eps-inherited' : ''} #{fieldModel.defaultValueOverrides ? 'eps-overrides' : ''} #{not empty fieldModel.getError('ERR_DEFAULT_VALUE') ? 'eps-error-input' : ''}" 
+												 id="propDefaultInput" value="#{fieldModel.defValEdited}" rendered="#{empty fieldModel.defValues}"
+												 disabled="#{empty dictBean.model.getRefFieldType(fieldModel.editedField) or fieldModel.noDefValue}"
+												 style="width: 100%">
+												 
+										<p:ajax event="keyup" process="@this" oncomplete="defValChanged#{fieldModel.index}();" />		 
+										
+									</p:inputText>
+									
+									<p:watermark for="propDefaultInput" value="No default value" id="noDefValWatermark" rendered="#{fieldModel.noDefValue}"/>
+								
+									<p:selectOneMenu id="propDefault" editable="true" value="#{fieldModel.defValEdited}" disabled="#{empty dictBean.model.getRefFieldType(fieldModel.editedField) or fieldModel.noDefValue}"
+													 styleClass="eps-input #{fieldModel.defaultValueInherited ? 'eps-inherited' : ''} #{fieldModel.defaultValueOverrides ? 'eps-overrides' : ''} #{not empty fieldModel.getError('ERR_DEFAULT_VALUE') ? 'eps-error-input' : ''}"
+													 onchange="defValChanged#{fieldModel.index}();" style="width: 100%" rendered="#{not empty fieldModel.defValues}">
+
+										<p:ajax process="@this"/>
+										<f:selectItems value="#{fieldModel.defValues}" />
+										
+									</p:selectOneMenu>
+								
+									<p:tooltip id="toolTipDefVal" for="propDefault" trackMouse="true"
+											   rendered="#{not empty fieldModel.getError('ERR_DEFAULT_VALUE')}">
+										<h:outputText value="#{fieldModel.getError('ERR_DEFAULT_VALUE')}" escape="false" />
+									</p:tooltip>
+									
+									<p:tooltip id="toolTipDefValInput" for="propDefaultInput" trackMouse="true"
+											   rendered="#{not empty fieldModel.getError('ERR_DEFAULT_VALUE')}">
+										<h:outputText value="#{fieldModel.getError('ERR_DEFAULT_VALUE')}" escape="false" />
+									</p:tooltip>
+								</p:outputPanel>
+							</p:column>
+							<p:column>
+								<p:outputPanel id="addOrDeleteDefaultValuePanel">
+									<p:commandLink rendered="#{fieldModel.noDefValue}" id="addDefVal" styleClass="ui-icon ui-icon-circle-plus">														   
+											<f:setPropertyActionListener value="false" target="#{fieldModel.noDefValue}" />
+											<p:ajax update="addOrDeleteDefaultValuePanel" oncomplete="addOrDeleteDefaultValuePressed#{fieldModel.index}();"/>
+									</p:commandLink>
+									
+									<p:commandLink rendered="#{not fieldModel.noDefValue and dictBean.model.renderDeleteDefValLink(fieldModel)}" id="delDefVal" styleClass="ui-icon ui-icon-closethick">														   
+											<f:setPropertyActionListener value="true" target="#{fieldModel.noDefValue}" />
+											<p:ajax update="addOrDeleteDefaultValuePanel" oncomplete="addOrDeleteDefaultValuePressed#{fieldModel.index}();"/>
+									</p:commandLink>
+									
+									<p:tooltip id="toolTipDelDefVal" for="delDefVal" trackMouse="true">
+										<h:outputText value="#{dictBean.model.renderResetTooltip(fieldModel) ? 'Reset default value' : 'Delete default value'}"/>
+									</p:tooltip>
+									
+									<p:tooltip id="toolTipAddDefVal" for="addDefVal" trackMouse="true">
+										<h:outputText value="Add default value"/>
+									</p:tooltip>
+								</p:outputPanel>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column colspan="6" style="padding-right: 0.7em !important; padding-top: 0 !important">
+								<p:dataTable var="atr"
+											 value="#{fieldModel.attributeModels}"
+											 id="atrs" rowKey="#{atr.name}" editable="true"
+											 editMode="cell" styleClass="eps-main-table eps-attributes-table #{fieldModel.message ? 'message-attributes-table' : ''} #{not empty fieldModel.getError('ERR_ATTRIBUTES') ? 'eps-error-table' : ''}"
+											 rowStyleClass="#{atr.inheritedAttribute ? 'eps-inherited' : ''} #{atr.overrides ? 'eps-overrides' : ''}"
+											 style="width: 100%">
+
+									<f:facet name="header">
+										<p:tooltip id="toolTipAtrs" for="attrHeaderPanel" trackMouse="true"
+												   rendered="#{not empty fieldModel.getError('ERR_ATTRIBUTES')}">
+											<h:outputText value="#{fieldModel.getError('ERR_ATTRIBUTES')}" escape="false" />
+										</p:tooltip>
+										
+										<p:outputPanel id="attrHeaderPanel" style="width: 100%; height: 100%">
+											<h:outputText value="Attributes" />
+											<p:commandLink id="addAtrButton" styleClass="ui-icon ui-icon-circle-plus add-atr-button">
+														   
+												<f:setPropertyActionListener value="0" target="#{dictBean.model.attributeMode}" />
+														   
+												<p:ajax event="click" process="@this" listener="#{dictBean.model.preAddingAttribute(fieldModel)}" oncomplete="showAttrForm()" />
+														
+											</p:commandLink>
+										</p:outputPanel>
+									</f:facet>
+
+									<p:column headerText="Name" style="border-top-left-radius: 4px;">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{atr.actual.name}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputText styleClass="eps-input" rendered="#{not atr.inheritedAttribute}"
+															 value="#{atr.actual.name}" style="width:95%">
+															 
+													<p:ajax event="blur" execute="@this" listener="#{dictBean.model.onAttributeChange(atr, fieldModel)}" />
+															
+												</p:inputText>
+												<h:outputText styleClass="input-label" value="#{atr.actual.name}" rendered="#{atr.inheritedAttribute}" />
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+
+									<p:column headerText="Value">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{atr.actual.value}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputText styleClass="eps-input" value="#{atr.actual.value}" style="width:95%">
+															 
+													<p:ajax event="blur" execute="@this" listener="#{dictBean.model.onAttributeChange(atr, fieldModel)}" />
+															
+												</p:inputText>
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+
+									<p:column headerText="Type">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{atr.actualType}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:selectOneMenu styleClass="eps-input"
+																 value="#{atr.actualType}" 
+																 style="width:99%">
+
+													<p:ajax execute="@this" listener="#{dictBean.model.onAttributeChange(atr, fieldModel)}" />
+															
+													<f:selectItem itemLabel="" itemValue="" />
+
+													<f:selectItems value="#{dictBean.model.strJavaTypes}"
+																   var="type" itemValue="#{type}"
+																   itemLabel="#{type}" />
+												</p:selectOneMenu>
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+
+									<p:column styleClass="eps-actions-column"
+											  style="border-top-right-radius: 4px;">
+
+										<p:commandLink id="deleteLinkLeft"
+                                                       actionListener="#{dictBean.model.deleteAttribute(fieldModel, atr, true, true)}"
+                                                       styleClass="ui-icon ui-icon-closethick eps-icon-link"
+                                                       rendered="#{atr.overrides || (not atr.inheritedAttribute)}" />
+													   
+									</p:column>
+								</p:dataTable>
+							</p:column>
+						</p:row>
+						<p:row rendered="#{not leftField}">
+							<p:column colspan="6" style="padding-right: 0.7em !important; padding-top: 0 !important">
+								<p:dataTable var="atr"
+											 value="#{fieldModel.valueModels}" id="baseAtrs"
+											 rowKey="#{atr.name}" editable="true" editMode="cell"
+											 styleClass="eps-main-table eps-attributes-table #{empty dictBean.model.getRefFieldType(fieldModel.field) ? 'disabled-table' : ''} #{not empty fieldModel.getError('ERR_VALUES') ? 'eps-error-table' : ''}"
+											 rowStyleClass="#{atr.inheritedAttribute ? 'eps-inherited' : ''} #{atr.overrides ? 'eps-overrides' : ''}"
+											 rendered="#{fieldModel.valuesEditable}"
+											 style="width: 100%">
+
+									<f:facet name="header">
+										<p:tooltip id="toolTipBaseAtrs" for="valuesHeaderPanel" trackMouse="true"
+												   rendered="#{not empty fieldModel.getError('ERR_VALUES')}">
+											<h:outputText value="#{fieldModel.getError('ERR_VALUES')}" escape="false" />
+										</p:tooltip>
+										<p:outputPanel id="valuesHeaderPanel" style="width: 100%; height: 100%">
+                                			<h:outputText value="Values" />
+                                			<p:commandLink id="addAtrButton"
+														   styleClass="ui-icon ui-icon-circle-plus add-atr-button"
+														   style="display: inline-block; vertical-align: middle;">
+														   
+												<f:setPropertyActionListener value="1" target="#{dictBean.model.attributeMode}" />
+														   
+												<p:ajax event="click" process="@this" listener="#{dictBean.model.preAddingAttribute(fieldModel)}" oncomplete="showAttrForm()" />
+														   
+											</p:commandLink>
+                                		</p:outputPanel>
+									</f:facet>
+
+									<p:column headerText="Name" style="border-top-left-radius: 4px;">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{atr.actual.name}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputText styleClass="eps-input" value="#{atr.actual.name}" style="width:95%" rendered="#{not atr.inheritedAttribute}">
+												
+													<p:ajax event="blur" execute="@this" listener="#{dictBean.model.onAttributeChange(atr, fieldModel)}" />
+													
+												</p:inputText>
+												<h:outputText styleClass="input-label" value="#{atr.actual.name}" rendered="#{atr.inheritedAttribute}" />
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+
+									<p:column headerText="Value" style="text-align: center;">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{atr.actual.value}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputText styleClass="eps-input" value="#{atr.actual.value}" style="width:95%">
+												
+													<p:ajax event="blur" execute="@this" listener="#{dictBean.model.onAttributeChange(atr, fieldModel)}" />
+													
+												</p:inputText>
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+
+									<p:column styleClass="eps-actions-column" style="border-top-right-radius: 4px;">
+									
+										<p:commandLink id="deleteLink"
+                                                       action="#{dictBean.model.deleteAttribute(fieldModel, atr, false, true)}"
+                                                       styleClass="ui-icon ui-icon-closethick eps-icon-link"
+                                                       rendered="#{atr.overrides || (not atr.inheritedAttribute)}" />
+									</p:column>
+								</p:dataTable>
+							</p:column>
+						</p:row>
+						<p:row>
+							<p:column colspan="6">
+								<div id="b-#{fieldModel.index}" class="properties-buttons" style="#{not fieldModel.propertiesChanged ? 'display:none;' : ''}">
+									
+									<p:outputPanel rendered="#{leftField}">
+										<p:commandButton value="Apply" actionListener="#{dictBean.model.applyChanges(fieldModel)}" 
+														 update=":messForm:tree:inside" />
+										<p:commandButton value="Cancel" actionListener="#{dictBean.model.cancelChanges(fieldModel)}" 
+														 update=":messForm:tree:inside" />
+									</p:outputPanel>
+									
+									<p:outputPanel rendered="#{not leftField}">
+										<p:commandButton value="Apply" actionListener="#{dictBean.model.applyChanges(fieldModel)}" 
+														 update=":fieldsForm:rightFieldEntry:inside" />
+										<p:commandButton value="Cancel" actionListener="#{dictBean.model.cancelChanges(fieldModel)}" 
+														 update=":fieldsForm:rightFieldEntry:inside" />
+									</p:outputPanel>
+									
+								</div>
+							</p:column> 
+						</p:row>
+					</p:panelGrid>
+				</p:outputPanel>
+			</div>
+
+			<ui:fragment rendered="#{leftField and fieldModel.field.complex}">
+				<p:outputPanel rendered="#{fieldModel.childCount gt 0}" style="#{fieldModel.collapsedForSlide ? 'display: none;' : ''}"
+							   id="treeMessageBodyForSlide" styleClass="tree-message-body-for-slide">
+							   
+					<p:outputPanel id="treeMessageBody" styleClass="tree-message-body">
+						<ui:fragment rendered="#{not empty fieldModel.treeModelForPage}">
+							<o:treeInsertChildren />
+						</ui:fragment>
+					</p:outputPanel>
+					
+				</p:outputPanel>
+			</ui:fragment>
+		
+		</p:outputPanel>
+	</span>
+
+</ui:composition>

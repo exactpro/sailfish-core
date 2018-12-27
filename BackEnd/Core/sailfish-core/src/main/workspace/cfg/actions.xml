@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<actions>
+	<action description="New Generator" title="New Generator">
+        <actionClassName name="com.exactpro.sf.actions.TestActions"/>
+        <utilityClassName name="com.exactpro.sf.actions.ConvertUtil"/>
+        <utilityClassName name="com.exactpro.sf.actions.BugsUtils"/>
+	</action>
+	<action description="Services" title="Services">
+        <actionClassName name="com.exactpro.sf.actions.ServiceActions"/>
+	</action>
+	<action description="Fake" title="Fake">
+        <actionClassName name="com.exactpro.sf.actions.FakeActions"/>
+        <utilityClassName name="com.exactpro.sf.actions.DateUtil"/>
+        <utilityClassName name="com.exactpro.sf.actions.MessageUtil"/>
+        <utilityClassName name="com.exactpro.sf.actions.ConvertUtil"/>
+        <utilityClassName name="com.exactpro.sf.actions.MathUtil"/>
+        <utilityClassName name="com.exactpro.sf.actions.MiscUtils"/>
+	</action>
+</actions>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="testCodeGen">
+    <fields>
+        <field type="java.lang.Boolean" id="F_TBoolean" name="T_Boolean"/>
+        <field type="java.lang.Byte" id="F_TByte" name="T_Byte"/>
+        <field type="java.lang.Character" id="F_TCharacter" name="T_Character"/>
+        <field type="java.lang.Short" id="F_TShort" name="T_Short"/>
+        <field type="java.lang.Integer" id="F_TInteger" name="T_Integer"/>
+        <field type="java.lang.Long" id="F_TLong" name="T_Long"/>
+        <field type="java.lang.Float" id="F_TFloat" name="T_Float"/>
+        <field type="java.lang.Double" id="F_TDouble" name="T_Double"/>
+        <field type="java.math.BigDecimal" id="F_TBigDecimal" name="T_BigDecimal"/>
+        <field type="java.lang.String" id="F_TString" name="T_String"/>
+        <field id="F_TByteEnum" reference="F_TByte" name="T_ByteEnum">
+            <value name="One">1</value>
+            <value name="Two">2</value>
+        </field>
+        <field id="F_TCharacterEnum" reference="F_TCharacter" name="T_CharacterEnum">
+            <value name="One">1</value>
+            <value name="LetterA">a</value>
+        </field>
+        <field id="F_TShortEnum" reference="F_TShort" name="T_ShortEnum">
+            <value name="One">1</value>
+            <value name="Two">2</value>
+            <value name="Three">3</value>
+        </field>
+        <field id="F_TIntegerEnum" reference="F_TInteger" name="T_IntegerEnum">
+            <value name="Ten">10</value>
+            <value name="Hundred">2</value>
+        </field>
+        <field id="F_TStringEnum" reference="F_TString" name="T_StringEnum">
+            <value name="Enum1">Foo</value>
+            <value name="Enum2">Bar</value>
+        </field>
+    </fields>
+    <messages>
+        <message id="M_Header" name="M_Header">
+            <field reference="F_TString" name="FString"/>
+        </message>
+        <message id="M_SimpleMessage" name="M_SimpleMessage">
+        	<attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <field reference="F_TBoolean" name="FBoolean"/>
+            <field reference="F_TByte" name="FByte"/>
+            <field reference="F_TCharacter" name="FCharacter"/>
+            <field reference="F_TShort" name="FShort"/>
+            <field reference="F_TInteger" name="FInteger"/>
+            <field reference="F_TLong" name="FLong"/>
+            <field reference="F_TFloat" name="FFloat"/>
+            <field reference="F_TDouble" name="FDouble"/>
+            <field reference="F_TBigDecimal" name="FBigDecimal"/>
+            <field reference="F_TString" name="FString"/>
+            <field reference="F_TByteEnum" name="FByteEnum"/>
+            <field reference="F_TCharacterEnum" name="FCharacterEnum"/>
+            <field reference="F_TShortEnum" name="FShortEnum"/>
+            <field reference="F_TIntegerEnum" name="FIntegerEnum"/>
+            <field reference="F_TStringEnum" name="FStringEnum"/>
+        </message>
+        <message id="M_SubCollection" name="M_SubCollection">
+            <field reference="F_TString" name="FString"/>
+            <field reference="M_Header" name="Header"/>
+        </message>
+        <message id="M_Collection" name="M_Collection">
+            <field reference="F_TStringEnum" name="FStringEnum"/>
+            <field isCollection="true" reference="M_SubCollection" name="SubCollection"/>
+        </message>
+        <message id="M_ComplexMessage" name="M_ComplexMessage">
+            <field reference="M_Header" name="Header"/>
+            <field reference="F_TString" name="FString1"/>
+            <field reference="F_TString" name="FString2"/>
+            <field reference="M_SimpleMessage" name="SimpleMessage"/>
+            <field isCollection="true" reference="M_Collection" name="Collection"/>
+        </message>
+    </messages>
+</dictionary>

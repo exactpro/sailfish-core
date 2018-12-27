@@ -1,0 +1,554 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"  
+    xmlns:h="http://java.sun.com/jsf/html"  
+    xmlns:f="http://java.sun.com/jsf/core"  
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:o="http://omnifaces.org/ui"
+	template="/template/statisticsReport.xhtml">
+
+    <ui:define name="windowTitle">
+        Statistics :: Test Scripts
+    </ui:define>
+    
+    <ui:define name="otherScripts">
+		<h:outputStylesheet library="sf" name="css/statistics-tags.css"/>
+		<h:outputScript library="sf" name="js/statistics-mr.js"/>
+		<h:outputScript library="sf" name="js/statistics.js"/>
+		
+	</ui:define>
+
+    <ui:define name="statistics-content">
+    	
+    	<ui:fragment rendered="#{not mrHistBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{mrHistBean.statisticsDbAvailable}">
+	    	<div class="eps-report-parameters eps-card">
+	    		
+	    		<div class="eps-params-header">
+	    			Parameters
+	    			
+	    			<h:form id="optionsForm">
+	    				
+	    				<p:commandLink id="optionsToggler" styleClass="eps-options-link">
+	    					<h:graphicImage library="sf" name="images/menu-hamb-16.png"/>
+	    				</p:commandLink>
+	    				
+	    				<p:overlayPanel id="optionsPanel" for="optionsToggler" hideEffect="fade" dismissable="false">
+	    				
+	    					<h:panelGrid columns="1" cellpadding="5" style="text-align: left;">
+	    						
+	    						<h:outputLabel for="customLinkPath" value="Custom path to reports" />
+	    						
+						        <p:inputText id="customLinkPath" value="#{mrHistBean.customReportsPath}" style="width: 300px;" placeholder="http://localhost:8080/sfgui/report"/>
+					        
+					        </h:panelGrid>
+					        
+					        <p:separator style="border: 0px none;"/>
+					        
+					        <p:commandButton value="Apply" action="#{mrHistBean.applyOptions}" update=":msgForm:messages"/>
+					        
+					    </p:overlayPanel>
+	    				
+	    			</h:form>
+	    			
+	    		</div>
+	    		
+	    		<h:form id="params-form">
+	    			
+	    			<h:panelGrid columns="9" cellpadding="5" styleClass="top-aligned-table">
+		    			<p:outputLabel for="from" value="From" />
+		    			<p:outputLabel for="to" value="To" />
+		    			<p:outputLabel for="sfInstancesMenu" value="SF Instances" />
+		    			<p:outputLabel for="matrix-pattern" value="Matrix Name (pattern)" />
+		    			<p:outputLabel for="tags-autocomplete" value="Tags" />
+		    			<p:outputLabel for="tags-mode" value="Tags Matching" />
+		    			<p:outputLabel for="columns" value="Columns" />
+		    			<p:outputLabel for="sort-by" value="Sort By" />
+		    			<p:outputLabel for="sort-order" value="Sort Order" />
+		    			
+		    			<p:calendar id="from" value="#{mrHistBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                    requiredMessage="'From' is empty"
+                                    timeZone="UTC"/>
+		    			
+		    			
+		    			<p:calendar id="to" value="#{mrHistBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                    requiredMessage="'To' is empty"
+                                    timeZone="UTC"/>
+		    			
+		    			
+		    			<p:selectCheckboxMenu id="sfInstancesMenu" value="#{mrHistBean.selectedSfInstances}" label="Select"
+	                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
+	                               required="true" requiredMessage="Select at least one SF instance">
+				            <f:selectItems value="#{mrHistBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
+				        </p:selectCheckboxMenu>
+				        
+				        <p:inputText id="matrix-pattern" value="#{mrHistBean.matrixNamePattern}" style="width: 250px"/>
+				        
+				        <p:autoComplete id="tags-autocomplete" value="#{mrHistBean.tagToAdd}" 
+		            		completeMethod="#{mrHistBean.completeTag}"
+		                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true" 
+		                    placeholder="type to add" emptyMessage="No matching tags found">
+		                    
+		                    <p:ajax event="itemSelect" listener="#{mrHistBean.onTagSelect}" execute="@this" update="tags-autocomplete selected-tags"/>
+		                    <o:converter converterId="omnifaces.ListConverter" list="#{mrHistBean.allTags}" />
+				            <p:column>
+				                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+				            </p:column>
+				        </p:autoComplete>
+				        
+				        <p:selectOneMenu id="tags-mode" value="#{mrHistBean.anyTag}">
+			    			<f:selectItem itemLabel="Any tag" itemValue="true"/>
+			    			<f:selectItem itemLabel="All tags" itemValue="false"/>
+			    		</p:selectOneMenu>
+			    		
+			    		<p:selectCheckboxMenu id="columns" value="#{mrHistBean.selectedColumns}" label="Select"
+			    			panelStyleClass="eps-pf-select-panel-width-fix">
+			    			<p:ajax execute="@this" update=":results-form"
+			    				onstart="showLoading('.eps-report-results', '#loading-bl')" 
+			    				oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable');"/>
+			    			<p:ajax event="toggleSelect" execute="@this" update=":results-form"
+			    				onstart="showLoading('.eps-report-results', '#loading-bl')" 
+			    				oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable');"/>
+			    			<f:selectItems value="#{mrHistBean.availableColumns}" />
+			    		</p:selectCheckboxMenu>
+			    		
+			    		<p:selectOneMenu id="sort-by" value="#{mrHistBean.sortBy}">
+			    			<f:selectItem itemLabel="Start Time" itemValue="MR.startTime"/>
+			    			<f:selectItem itemLabel="Name" itemValue="M.name"/>
+			    			<f:selectItem itemLabel="id" itemValue="MR.sfRunId"/>
+			    			<f:selectItem itemLabel="Finish Time" itemValue="MR.finishTime"/>
+			    			<f:selectItem itemLabel="User Name" itemValue="U.name"/>
+			    			<f:selectItem itemLabel="Environment" itemValue="E.name"/>
+			    		</p:selectOneMenu>
+			    		
+			    		<p:selectOneMenu id="sort-order" value="#{mrHistBean.sortAsc}">
+			    			<f:selectItem itemLabel="Desc" itemValue="false"/>
+			    			<f:selectItem itemLabel="Asc" itemValue="true"/>
+			    		</p:selectOneMenu>
+		    			
+		    		</h:panelGrid>
+
+                    <h:panelGrid columns="12" cellpadding="5" styleClass="eps-chkbox-tbl">
+		    			<p:outputLabel for="empty-comment" value="Empty Comment Only" />
+		    			<p:selectBooleanCheckbox id="empty-comment" value="#{mrHistBean.emptyCommentOnly}" styleClass="eps-checkbox-tbl"/>
+		    			
+		    			<p:outputLabel for="expand-mode" value="Render Expanded" />
+		    			<p:selectBooleanCheckbox id="expand-mode" value="#{mrHistBean.renderExpaned}" styleClass="eps-checkbox-tbl"/>
+		    			
+		    			<p:outputLabel for="split-checkbox" value="Split Scripts By Status" />
+		    			<p:selectBooleanCheckbox id="split-checkbox" value="#{mrHistBean.splitByStatus}" styleClass="eps-checkbox-tbl"/>
+		    			
+		    			<p:outputLabel for="export-with-TCs-checkbox" value="Export Report with Test Cases Info" />
+		    			<p:selectBooleanCheckbox id="export-with-TCs-checkbox" value="#{mrHistBean.exportWithTCs}" styleClass="eps-checkbox-tbl"/>
+
+                        <p:outputLabel for="export-with-TCs-checkbox" value="Export Report with Actions Info"/>
+                        <p:selectBooleanCheckbox id="export-with-actions-checkbox" value="#{mrHistBean.exportWithActions}"
+                                                 styleClass="eps-checkbox-tbl"/>
+
+                        <p:outputLabel for="include-executed" value="Include Executed During 'From-To' Range"/>
+                        <p:selectBooleanCheckbox id="include-executed" value="#{mrHistBean.includeExecutedInFromToRange}"
+                                                 styleClass="eps-checkbox-tbl"/>
+		    		</h:panelGrid>
+		    		
+		    		<h:panelGrid columns="2" cellpadding="5">
+		    			<p:outputLabel for="mode" value="Display Test Cases" />
+		    			<p:selectOneRadio id="mode" value="#{mrHistBean.tcDisplayMode}"  >
+				            <f:selectItems value="#{mrHistBean.displayModes}" var="c" itemLabel="#{c.label}" itemValue="#{c}"/>
+				        </p:selectOneRadio>
+		    		</h:panelGrid>
+		    		
+		    		<div class="selected-tags-wrapper" style="padding-left: 5px;">
+			    		<h:panelGroup id="selected-tags" style="white-space: normal;">
+			            	<ui:repeat var="tag" value="#{mrHistBean.tags}">
+			            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+			            			#{tag.name}
+			            			<p:commandLink action="#{mrHistBean.removeTag(tag)}" update=":params-form:selected-tags"
+			            				styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+			            		</span>
+			            	</ui:repeat>
+		            	</h:panelGroup>
+	            	</div>
+		    		
+		    		<div class="eps-params-separator"></div>
+		    		
+		    		<p:commandButton value="Generate" action="#{mrHistBean.generateReport}" update=":msgForm:messages :params-form :results-form"
+		    			disabled="#{not mrHistBean.statisticsDbAvailable}"
+						onclick="showLoading('.eps-report-results', '#loading-bl')"		    			
+		    			onsuccess=""
+		    			oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+		    		<p:commandButton value="Export" ajax="false" id="export-button" rendered="#{not empty mrHistBean.lastResult}"
+                                     update=":msgForm:messages" action="#{mrHistBean.getExported}">
+					</p:commandButton>
+					<p:button id="downloadReportsButton" value="Download Reports" target="_blank" href="#{mrHistBean.getLastResultZipReports()}" 
+						rendered="#{not empty mrHistBean.lastResult}"
+						disabled="#{not mrHistBean.downloadReportsEnabled}"/>
+					<p:tooltip id="downloadReportsTooltip" for="downloadReportsButton" value="Download disabled because of internal error" 
+						trackMouse="true" rendered="#{not mrHistBean.downloadReportsEnabled}"/>
+		    		
+		    		<!-- 
+		    		
+		    		 
+		    		 -->
+		    		
+		    		
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    	<ui:include src="loadingCard.xhtml">
+	    		<ui:param name="blockId" value="loading-bl" />
+	    	</ui:include>
+	    	
+	    	<div class="eps-report-results eps-card" style="max-height: none; overflow: visible;"> 
+	    	
+	    		<h:form id="results-form">
+	    		
+	    			<p:remoteCommand name="toggled" actionListener="#{mrHistBean.rowToggled}" async="true"/>
+	    		
+	    			<p:dataTable id="resultsTable" value="#{mrHistBean.lastResult}" var="row" 
+	    				rowStyleClass="#{row.matrixRow ? 'eps-matrix-info-row' : (mrHistBean.isRenderExpanded(row) ? '' : 'eps-hidden')}
+	    				#{row.passedCount ne 0 ? 'eps-has-passes' : ''}
+	    				#{row.failedCount ne 0 ? 'eps-has-fails' : ''}
+	    				#{row.failedCount eq 0 and row.passedCount eq 0 ? 'eps-init-failed' : ''}" 
+	    				styleClass="eps-statistics-table"
+	    				scrollable="true" scrollHeight="50"
+	    				resizableColumns="false" 
+	    				widgetVar="pfResultsTable"
+	    				selection="#{mrHistBean.selected}"
+	    				selectionMode="single"
+	    				rowKey="#{row.rowKey}">
+	    				
+	    				<p:column style="width: 12px;" styleClass="eps-expander-column">
+	    				 	
+	    					<ui:fragment rendered="#{row.matrixRow and not (row.passedCount == 0 and row.failedCount == 0 and row.conditionallyPassedCount == 0)}">
+	    						<span class="eps-row-expander ui-icon ui-icon-circle-triangle-#{mrHistBean.isRenderExpanded(row) ? 's' : 'e'}" 
+	    							onclick="toggleTcRows(this); toggled([{name: 'mrId', value: '#{row.matrixRunId}'}])"/>
+	    					</ui:fragment>
+	    					
+	    				</p:column>
+	    				
+	    				<p:column headerText="id" rendered="#{mrHistBean.isColumnSelected('id')}">
+	    					<h:outputText value="#{row.sfId}" rendered="#{row.matrixRow}"/>
+	    					<!--h:outputText value="#{row.testCaseId}" rendered="#{(not row.matrixRow) and (not (row.testCaseId eq '_unknown_tc_'))}"/-->
+	    					
+	    					<p:commandLink value="#{row.testCaseId}" 
+	    						rendered="#{(not row.matrixRow) and (not (row.testCaseId eq '_unknown_tc_'))}" 
+	    						actionListener="#{tcrHistoryBean.selectTestCase(row.testCaseId)}" 
+	    						action="#{tcrHistoryBean.generate}"
+	    						update=":tcrHistoryForm"
+	    						oncomplete="PF('tcrHistoryDlg').show();"
+	    						styleClass="eps-dialog-open-link"/>
+	    					
+	    				</p:column>
+	    				
+	    				<p:column headerText="Name" rendered="#{mrHistBean.isColumnSelected('Name')}">	  
+	    						
+	    					<a href="#{mrHistBean.getReportRequest(row)}" target="_blank"
+	    						title="View report" class="eps-link">
+		    					<h:outputText value="#{row.matrixName}" rendered="#{row.matrixRow}"/>
+		    					<h:outputText value="#{row.testCaseName}" rendered="#{not row.matrixRow}"/>
+	    					</a>&#xA0;
+	    					<ui:fragment rendered="#{row.matrixRow}">
+	    					<a href="#{mrHistBean.buildReportUrl(row, false)}" target="_blank" download="#{row.matrixName}"
+	    							class="ui-icon ui-icon-circle-arrow-s" title="Download script"
+	    							style="display: inline-block; vertical-align: middle;"/>
+	    					</ui:fragment>
+	    					
+	    					<span> </span>
+	    					
+	    					<ui:fragment rendered="#{row.matrixRow}">
+	    					<a href="#{mrHistBean.getZipReport(row)}" target="_blank"
+	    							class="ui-icon ui-icon-circle-triangle-s" title="Download Zip Report"
+	    							style="display: inline-block; vertical-align: middle;"/>
+	    					</ui:fragment>
+	    					
+	    					<span> </span>
+	    					
+	    					<ui:fragment rendered="#{row.matrixRow}">
+		    					<ui:repeat var="tag" value="#{row.tags}">
+				            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+				            			#{tag.name}
+				            		</span>
+				            	</ui:repeat>
+			            	</ui:fragment>
+	    					
+	    				</p:column>
+	    				<p:column headerText="Description" rendered="#{mrHistBean.isColumnSelected('Description')}">
+	    					<h:outputText value="#{row.description}"/>
+	    				</p:column>
+	    				<p:column headerText="Status" style="width: 7em;"  rendered="#{mrHistBean.isColumnSelected('Status')}">
+	    					
+	    					<ui:fragment rendered="#{row.matrixRow}">
+		    					<h:outputText value="#{row.passedCount}"  rendered="#{not row.failed}" styleClass="eps-passed-label"/>
+                                <h:outputText value=" / " rendered="#{not row.failed}"/>
+                                <h:outputText value="#{row.conditionallyPassedCount}" rendered="#{not row.failed}" styleClass="eps-conditionally-passed-label"/>
+		    					<h:outputText value=" / " rendered="#{not row.failed}"/>
+		    					<h:outputText value="#{row.failedCount}" rendered="#{not row.failed}" styleClass="eps-failed-label"/>
+		    					
+		    					<p:commandLink value="FAILED"
+                                    rendered="#{row.failed}" styleClass="eps-init-failed-label eps-dialog-open-link"
+                                    actionListener="#{flReasonBean.init('Matrix failure', row.matrixFailReason)}" 
+                                    update=":failureReasonForm"
+                                    oncomplete="PF('failureReasonDlg').show();"/>
+                                    <!-- 
+		    				    <h:outputText value="FAILED" rendered="#{row.failed}" styleClass="eps-init-failed-label"/>
+		    				     -->
+	    					</ui:fragment>
+	    				
+	    				    <ui:fragment rendered="#{not row.matrixRow}">
+		    					<h:outputText value="PASSED" rendered="#{row.status == 'PASSED'}" styleClass="eps-passed-label"/>
+           
+                                <h:outputText value="CONDITIONALLY PASSED" rendered="#{row.status == 'CONDITIONALLY_PASSED'}" styleClass="eps-conditionally-passed-label"/>
+		    					
+		    					<p:commandLink value="FAILED"
+		    					    rendered="#{row.status == 'FAILED'}" styleClass="eps-failed-label eps-dialog-open-link"
+	                                actionListener="#{flReasonBean.init('Test case failure', row.failReason)}" 
+	                                update=":failureReasonForm"
+	                                oncomplete="PF('failureReasonDlg').show();"/>
+		    					<!-- 
+		    					 <h:outputText value="FAILED" rendered="#{not row.status}" styleClass="eps-failed-label"/>
+		    					  -->
+	    					</ui:fragment>
+	    				</p:column>
+	    				<!-- 
+	    				<p:column headerText="Failure Reason" rendered="#{mrHistBean.isColumnSelected('Failure Reason')}">
+    					    <h:outputText value="#{row.failReason}" title="#{row.failReason}"/>
+	    				</p:column>
+	    				 -->
+	    				<p:column headerText="Failed Actions" rendered="#{mrHistBean.isColumnSelected('Failed Actions')}">
+	    					<p:commandLink value="#{row.failedActions}"
+	    						actionListener="#{tcDetailsBean.setTcrId(row.testCaseRunId)}" 
+	    						action="#{tcDetailsBean.generateFailedReport}"
+	    						update=":tcrFailedDetailsForm"
+	    						oncomplete="PF('tcrFailedDetailsDlg').show();"
+	    						styleClass="eps-dialog-open-link"/>
+	    					
+	    				</p:column>
+                        <p:column headerText="Tagged Actions" rendered="#{mrHistBean.isColumnSelected('Tagged Actions')}">
+                            <p:commandLink value="#{row.taggedActions}"
+                                actionListener="#{tcDetailsBean.setTcrId(row.testCaseRunId)}" 
+                                action="#{tcDetailsBean.generateTaggedReport}"
+                                update=":tcrTaggedDetailsForm"
+                                oncomplete="PF('tcrTaggedDetailsDlg').show();"
+                                styleClass="eps-dialog-open-link"/>
+                        </p:column>
+	    				<p:column headerText="Start Time" style="width: 7em;" rendered="#{mrHistBean.isColumnSelected('Start Time')}">
+	    				    <ui:fragment rendered="#{row.matrixRow}">
+	    					     <h:outputText value="#{row.matrixStartTime}" title="#{row.matrixStartTime}"/>
+	    					</ui:fragment>
+	    					<ui:fragment rendered="#{not row.matrixRow}">
+                                 <h:outputText value="#{row.startTime}" title="#{row.startTime}"/>
+                            </ui:fragment>
+	    				</p:column>
+	    				<p:column headerText="Finish Time" style="width: 7em;" rendered="#{mrHistBean.isColumnSelected('Finish Time')}">
+	    				    <ui:fragment rendered="#{row.matrixRow}">
+	    					     <h:outputText value="#{row.matrixFinishTime}" title="#{row.matrixFinishTime}"/>
+    					    </ui:fragment>
+    					    <ui:fragment rendered="#{not row.matrixRow}">
+                                 <h:outputText value="#{row.finishTime}" title="#{row.finishTime}"/>
+                            </ui:fragment>
+	    				</p:column>
+	    				<p:column headerText="Execution Time" rendered="#{mrHistBean.isColumnSelected('Execution Time')}">
+	    					<h:outputText value="#{mrHistBean.msToMinutesSeconds(row.executionTime)}"/>
+	    				</p:column>
+	    				<p:column headerText="User Name" rendered="#{mrHistBean.isColumnSelected('User Name')}">
+	    					<h:outputText value="#{row.userName}" rendered="#{row.matrixRow}"/>
+	    				</p:column>
+	    				<p:column headerText="SF" rendered="#{mrHistBean.isColumnSelected('SF')}">
+	    					<h:outputText value="#{row.host}:#{row.port}#{row.sfName}" rendered="#{row.matrixRow}"/>
+	    				</p:column>
+	    				<p:column headerText="Environment" style="width: 8em;" rendered="#{mrHistBean.isColumnSelected('Environment')}">
+	    					<h:outputText value="#{row.environmentName}" rendered="#{row.matrixRow}"/>
+	    				</p:column>
+	    				<p:column headerText="Services Used" rendered="#{mrHistBean.isColumnSelected('Services Used')}">
+	    					<h:outputText value="#{row.servicesUsed}" rendered="#{row.matrixRow}"/>
+	    				</p:column>
+	    				
+	    				<p:column headerText="User Status" rendered="#{mrHistBean.isColumnSelected('User Status')}">
+	    					<h:outputText value="#{row.userComments.status.name}"/>
+	    				</p:column>
+	    				<p:column headerText="Comment" rendered="#{mrHistBean.isColumnSelected('Comment')}">
+	    					<h:outputText value="#{row.userComments.comment}"/>
+	    				</p:column>
+	    				<p:column headerText="Fix Revision" rendered="#{mrHistBean.isColumnSelected('Fix Revision')}">
+	    					<h:outputText value="#{row.userComments.fixedVersion}"/>
+	    				</p:column>
+                        <p:column headerText="Known Bugs" rendered="#{mrHistBean.isColumnSelected('Known Bugs')}">
+                            <ui:fragment rendered="#{(not row.matrixRow) and ((row.reproducedKnownBugsCount > 0) or (row.nonReproducedKnownBugsCount > 0))}">
+                                <p:commandLink value="#{row.reproducedKnownBugsCount} / #{row.reproducedKnownBugsCount + row.nonReproducedKnownBugsCount}"
+                                               actionListener="#{tcDetailsBean.initKnownBugsReport(row.testCaseRunId, row.reproducedKnownBugsCount, row.nonReproducedKnownBugsCount)}"
+                                               action="#{tcDetailsBean.generateKnownBugsReport}"
+                                               update=":tcrKnownBugDetailsForm"
+                                               oncomplete="PF('tcrKnownBugDetailsDlg').show();"
+                                               styleClass="eps-dialog-open-link"/>
+                            </ui:fragment>
+                        </p:column>
+                        <p:column headerText="Hash" rendered="#{mrHistBean.isColumnSelected('Hash')}">
+                            <h:outputText value="#{row.hash}" rendered="#{not row.matrixRow}"/>
+                        </p:column>
+	    				<p:column headerText="" style="width: 12px;">
+	    					<p:commandLink styleClass="ui-icon ui-icon-pencil" actionListener="#{mrHistBean.setSelectedRow(row)}"
+	    						update=":tcrCommentsForm" oncomplete="PF('tcrCommentsDlg').show();"
+	    						title="Edit comments"/>
+	    						
+	    					<p:commandLink styleClass="ui-icon ui-icon-copy" action="#{mrHistBean.copyUserComments(row)}"
+	    						update=":results-form" title="Copy comments from previous filled row"
+	    						onclick="saveScrollPos('#results-form\\:resultsTable .ui-datatable-scrollable-body'); showLoading('.eps-report-results', '#loading-bl')"
+		    					oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable'); restoreScrollPos('#results-form\\:resultsTable .ui-datatable-scrollable-body');"
+		    					rendered="#{not row.matrixRow}"/>
+	    				</p:column>
+	    				
+	    				<f:facet name="footer">
+                            Matrices: #{mrHistBean.matrixInfo.allMatrices} / <span
+                                class="eps-passed-label">#{mrHistBean.matrixInfo.allMatricesPassed}</span> / <span
+                                class="eps-conditionally-passed-label">#{mrHistBean.matrixInfo.allMatricesConditionallyPassed}</span> / <span
+                                class="eps-failed-label">#{mrHistBean.matrixInfo.allMatricesFailed}</span> | Test cases:
+                            #{mrHistBean.matrixInfo.allCases} / <span class="eps-passed-label">#{mrHistBean.matrixInfo.allCasesPassed}</span> / <span
+                                class="eps-conditionally-passed-label">#{mrHistBean.matrixInfo.allCasesConditionallyPassed}</span> / <span
+                                class="eps-failed-label">#{mrHistBean.matrixInfo.allCasesFailed}</span> &#160;&#160;&#160;&#160;&#160; Execution Time:
+                            #{mrHistBean.lastResultExecutionTime}
+	    				</f:facet>
+	    				
+	    			</p:dataTable>
+	    			
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    	<h:form id="tcrHistoryForm" >
+    		
+    		<p:dialog id="tcrHistoryDialod" widgetVar="tcrHistoryDlg" width="750">
+    			
+    			<ui:include src="/template/tcr_statistics_template.xhtml">
+	                    
+	            </ui:include>
+    			
+    		</p:dialog>
+    		
+    	</h:form>
+    	
+    	<h:form id="tcrFailedDetailsForm" >
+    		
+    		<p:dialog id="tcrFailedDetailsDialog" widgetVar="tcrFailedDetailsDlg" width="800">
+    			
+    			<p:dataTable id="tcr-failed-details-table" value="#{tcDetailsBean.lastFailedResult}" var="row" styleClass="eps-statistics-table">
+    				
+    				<p:column headerText="#Action">
+    					<h:outputText value="#{row.rank}"/>
+    				</p:column>
+    				<p:column headerText="Action">
+    					<h:outputText value="#{row.action}" title="#{row.action}"/>
+    				</p:column>
+    				<p:column headerText="Message">
+    					<h:outputText value="#{row.msgType}"/>
+    				</p:column>
+    				<p:column headerText="Service">
+    					<h:outputText value="#{row.service}"/>
+    				</p:column>
+    				<p:column headerText="Description">
+    					<h:outputText value="#{row.description}" title="#{row.description}"/>
+    				</p:column>
+    				<p:column headerText="Failure Reason">
+    					<h:outputText value="#{row.failReason}" title="#{row.failReason}"/>
+    				</p:column>
+    				
+    			</p:dataTable>
+    			
+    		</p:dialog>
+    		
+    	</h:form>
+    	
+        <h:form id="tcrTaggedDetailsForm" >
+            <p:dialog id="tcrTaggedDetailsDialog" widgetVar="tcrTaggedDetailsDlg" width="800">
+                <p:dataTable id="tcr-tagged-details-table" value="#{tcDetailsBean.lastTaggedResult}" var="row" styleClass="eps-statistics-table">
+                    <p:column headerText="Description">
+                        <h:outputText value="#{row.description}" title="#{row.description}"/>
+                    </p:column>
+                    <p:column headerText="Tag">
+                        <h:outputText value="#{row.tag}" title="#{row.tag}"/>
+                    </p:column>
+                </p:dataTable>
+            </p:dialog>
+        </h:form>
+
+            <h:form id="tcrKnownBugDetailsForm">
+                <p:dialog id="tcrKnownBugDetailsDialog" widgetVar="tcrKnownBugDetailsDlg" width="800" header="#{tcDetailsBean.knownBugsHeader}">
+                    <p:dataTable id="tcr-knownbug-details-table" value="#{tcDetailsBean.lastKnownBugsResult}" var="row"
+                                 styleClass="eps-statistics-table">
+                        <p:column headerText="Category">
+                            <h:outputText value="#{empty row.categoryString ? 'No Category' : row.categoryString}"/>
+                        </p:column>
+                        <p:column headerText="Reproduced">
+                            <h:outputText value="#{row.reproducedBugsString}"/>
+                        </p:column>
+                        <p:column headerText="Non-Reproduced">
+                            <h:outputText value="#{row.nonReproducedBugsString}"/>
+                        </p:column>
+                    </p:dataTable>
+                </p:dialog>
+            </h:form>
+
+    	<h:form id="failureReasonForm" >
+            
+            <p:dialog id="failureReasonDialod" widgetVar="failureReasonDlg" width="800" header="#{flReasonBean.header}" resizable="false" style="max-height:400;">
+                <p:scrollPanel mode="native" style="max-height:400px">
+                    <h:outputText value="#{flReasonBean.text}" style="white-space: pre-wrap"/>
+                </p:scrollPanel>
+            </p:dialog>
+            
+        </h:form>
+    	
+    	<h:form id="tcrCommentsForm" >
+    		
+    		<p:dialog id="tcrCommentsDialog" widgetVar="tcrCommentsDlg">
+    			
+    			<f:facet name="header">
+    			
+	    			Comments 
+	    			
+	    			<h:outputText value="#{mrHistBean.selectedRow.testCaseName}" rendered="#{not mrHistBean.selectedRow.matrixRow}" />
+	    			
+	    			<h:outputText value="#{mrHistBean.selectedRow.matrixName}" rendered="#{mrHistBean.selectedRow.matrixRow}" />
+	    			<h:outputText value=" (whole run)" style="color: #C2185B" rendered="#{mrHistBean.selectedRow.matrixRow}" />
+    			
+    			</f:facet>
+    			
+    			<h:panelGrid columns="2" cellpadding="5" >
+    				
+    				<p:outputLabel for="selected-comment" value="Comment"/>
+    				<p:inputTextarea rows="3" id="selected-comment" value="#{mrHistBean.userComments.comment}"
+    					 style="width: 300px" />
+    				
+    				<p:outputLabel for="selected-revision" value="Fix Revision"/>
+    				<p:inputText id="selected-revision" value="#{mrHistBean.userComments.fixedVersion}"
+    					 style="width: 300px"/>
+    				
+    				<p:outputLabel for="selected-status" value="Status"/>
+    				<p:selectOneMenu id="selected-status" value="#{mrHistBean.userComments.status}" converter="omnifaces.SelectItemsIndexConverter">
+    					<f:selectItem itemLabel="" noSelectionOption="true" />
+    					<f:selectItems value="#{mrHistBean.allRunStatuses}" var="status" itemLabel="#{status.name}" itemValue="#{status}" />
+    				</p:selectOneMenu>
+    				
+    				<p:outputLabel for="comment-only-failed" value="Only To Failed" rendered="#{mrHistBean.selectedRow.matrixRow}"/>
+    				<p:selectBooleanCheckbox id="comment-only-failed" value="#{mrHistBean.commentOnlyFailedTcs}"
+    					rendered="#{mrHistBean.selectedRow.matrixRow}"/>
+    				
+    			</h:panelGrid>
+    			
+    			<p:commandButton value="Save" action="#{mrHistBean.updateUserComments}" update=":msgForm:messages :results-form"
+    				onclick="saveScrollPos('#results-form\\:resultsTable .ui-datatable-scrollable-body'); showLoading('.eps-report-results', '#loading-bl')"
+		    		oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable'); restoreScrollPos('#results-form\\:resultsTable .ui-datatable-scrollable-body');"/>
+    			
+    		</p:dialog>
+    		
+    	</h:form>
+    	
+    	</ui:fragment>
+    	
+    </ui:define>
+
+</ui:composition>

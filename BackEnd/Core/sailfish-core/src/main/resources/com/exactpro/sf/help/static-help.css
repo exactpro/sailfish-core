@@ -1,0 +1,225 @@
+ul {
+    list-style-type: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 13px;
+    margin-bottom: 25px;
+}
+
+.tree span {
+    cursor: pointer;
+}
+
+.tree span:hover {
+    font-weight: bold;
+}
+
+.tree ul {
+    display: none;
+}
+
+html, body.eps-application {
+    margin: 0;
+    padding: 0;
+    font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+    font-size: 13px;
+    color: #202020;
+    line-height: 1.4;
+    min-height: 600px;
+    height: 100%;
+    width: 100%;
+    min-width: 1024px;
+    overflow: auto;
+}
+
+.eps-help-form {
+    height: 100%;
+    width: 29.6%;
+    position: absolute;
+}
+
+.eps-forest-container {
+    position: absolute;
+    top: 34px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: auto;
+}
+
+.eps-content-frame {
+    padding: 0 20px 30px 20px;
+    border-radius: 5px;
+    background-color: white;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.eps-main-content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background-color: #f4f5f8;
+    width: 70%;
+    padding: 30px;
+    box-sizing: border-box;
+    border-left: 1px solid #cdcdcd;
+}
+
+.eps-content-value table {
+    margin: 10px;
+}
+
+.eps-content-value table td {
+    padding: 5px 10px;
+}
+
+table.eps-content-message-table tr {
+    border: 1px solid #cdcdcd;
+}
+
+.eps-forest -container .eps-help-tree {
+    width: 100%;
+}
+
+.eps-application .ui-widget {
+    font-size: 12px;
+    font-family: Trebuchet MS, Arial, Helvetica, sans-serif;
+}
+
+.eps-application .ui-widget-content {
+    border: none;
+}
+
+.ui-widget {
+    font-family: Verdana, Arial, sans-serif;
+    font-size: 1.1em;
+}
+
+.ui-tree .ui-tree-container {
+    margin: 0;
+    white-space: nowrap;
+    overflow: auto;
+}
+
+.eps-content-value table tr.helpTableHeader td {
+    background-color: #dedede;
+    text-align: center;
+}
+
+.eps-content-value table td {
+    padding: 5px 10px;
+}
+
+table.eps-content-message-table tr > td:first-child, .helpTableHeader {
+    font-weight: bold;
+    color: #525252;
+}
+
+.eps-content-value table tr {
+    border: 1px solid #cdcdcd;
+}
+.eps-help-data-type{
+    color: #B3B3B3;
+}
+.ui-widget-content {
+    border: 1px solid #aaaaaa;
+    background: #ffffff url("ui-bg_flat_75_ffffff_40x100.png") 50% 50% repeat-x;
+    color: #222222;
+}
+
+.ui-icon {
+    width: 16px;
+    height: 16px;
+    display: block;
+}
+
+.ui-icon,
+.ui-widget-content .ui-icon {
+    background-image: url("ui-icons_c02669_256x240.png");
+}
+
+.ui-tree .ui-treenode-icon {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.ui-tree .ui-tree-toggler {
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: top;
+    margin-left: -16px;
+}
+
+.ui-tree .ui-tree-selectable .ui-treenode-icon {
+    cursor: pointer;
+}
+
+.ui-icon-triangle-1-e {
+    background-position: -32px -16px;
+}
+
+.ui-icon-triangle-1-s {
+    background-position: -64px -16px;
+}
+
+.ui-icon-script {
+    background-position: -240px -128px;
+}
+
+.ui-icon-document {
+    background-position: -32px -96px;
+}
+
+.ui-icon-document-b {
+    background-position: -48px -96px;
+}
+
+.ui-icon-note {
+    background-position: -64px -96px;
+}
+
+.ui-icon-flag {
+    background-position: -16px -112px;
+}
+
+.ui-icon-bookmark {
+    background-position: -224px -96px;
+}
+
+.ui-icon-mail-closed {
+    background-position: -80px -96px;
+}
+
+.ui-icon-disk {
+    background-position: -96px -112px;
+}
+
+.ui-icon-calculator {
+    background-position: -112px -112px;
+}
+
+.ui-icon-lightbulb {
+    background-position: -128px -128px;
+}
+
+.ui-icon-gear {
+    background-position: -192px -112px;
+}
+
+.ui-icon-suitcase {
+    background-position: -112px -96px;
+}
+
+.ui-icon-contact {
+    background-position: -192px -128px;
+}
+
+.ui-icon-circle-check {
+    background-position: -208px -192px;
+}

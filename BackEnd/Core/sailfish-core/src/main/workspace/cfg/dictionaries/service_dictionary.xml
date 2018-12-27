@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="Service">
+    <fields>
+        <field type="java.lang.Boolean" id="F_TBoolean" name="TBoolean"/>
+        <field type="java.lang.Byte" id="F_TByte" name="TByte"/>
+        <field type="java.lang.Character" id="F_TCharacter" name="TCharacter"/>
+        <field type="java.lang.Short" id="F_TShort" name="TShort"/>
+        <field type="java.lang.Integer" id="F_TInteger" name="TInteger"/>
+        <field type="java.lang.Long" id="F_TLong" name="TLong"/>
+        <field type="java.lang.Float" id="F_TFloat" name="TFloat"/>
+        <field type="java.lang.Double" id="F_TDouble" name="TDouble"/>
+        <field type="java.math.BigDecimal" id="F_TBigDecimal" name="TBigDecimal"/>
+        <field type="java.lang.String" id="F_TString" name="TString"/>
+    </fields>
+    <messages>
+        <message id="M_Checkpoint" name="Checkpoint">
+            <field reference="F_TString" name="Name"/>
+            <field reference="F_TString" name="Description"/>
+        </message>
+        <message id="M_ServiceMessage" name="ServiceMessage">
+            <field reference="F_TString" name="Text"/>
+        </message>
+        <message id="M_ErrorMessage" name="ErrorMessage">
+            <field reference="F_TString" name="Cause"/>
+        </message>
+    </messages>
+</dictionary>

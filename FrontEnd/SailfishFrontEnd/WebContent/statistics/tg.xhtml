@@ -1,0 +1,187 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	template="/template/statisticsReport.xhtml">
+	
+	<ui:define name="otherScripts">
+		<h:outputStylesheet library="sf" name="css/statistics-tags.css"/>
+		<h:outputStylesheet library="sf" name="css/statistics-tag-comparison.css"/>
+		<h:outputScript library="sf" name="js/statistics.js"/>
+		<h:outputScript library="sf" name="js/statistics_tg.js"/>
+	</ui:define>
+	
+	<ui:define name="statistics-content">
+	
+		<ui:fragment rendered="#{not statReportingBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{statReportingBean.statisticsDbAvailable}">
+			
+			<div class="eps-report-parameters eps-card">
+				
+				<div class="eps-params-header">
+	    			Parameters
+	    		</div>
+				
+				<h:form id="params-form">
+					
+					<div class="">
+				        <div class="selected-tags-wrapper eps-tags-set">
+				        	<span class="eps-tags-set-label">Dimensions</span>
+				    		<h:panelGroup id="first-selected-tags" style="white-space: normal; margin-left: 74px;">
+				            	<ui:repeat var="tag" value="#{tgReportBean.selectedDemensions}">
+				            	    <ui:fragment rendered="#{tag.tag}">
+					            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+					            			#{tag.name}
+					            			<p:commandLink action="#{tgReportBean.removeTag(tag)}" update=":params-form"
+					            				styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+					            		</span>
+				            		</ui:fragment>
+					                <ui:fragment rendered="#{not tag.tag}">
+					                    <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+							                <p:selectCheckboxMenu id="menu" value="#{tag.selectedSubTags}" label="#{tag.name}" converter="omnifaces.SelectItemsIndexConverter"
+		                                        filter="true" filterMatchMode="startsWith">
+									            <f:selectItems value="#{tag.possibleSubTags}" var="subTag" itemLabel="#{subTag.name}" itemValue="#{subTag}"/>
+									        </p:selectCheckboxMenu>
+									        <p:commandLink action="#{tgReportBean.removeTag(tag)}" update=":params-form"
+                                                styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+									    </span>    
+					                </ui:fragment>
+				            	</ui:repeat>
+			            	</h:panelGroup>
+			            	
+			            	<p:autoComplete id="first-tags-autocomplete" value="#{tgReportBean.tagToAdd}" 
+			            		completeMethod="#{tgReportBean.completeDimension}"
+			                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true" 
+			                    placeholder="type to add" emptyMessage="No matching found"
+			                    styleClass="eps-set-automplete">
+			                    
+			                    <p:ajax event="itemSelect" listener="#{tgReportBean.onTagSelect}" execute="@this" update="params-form"/>
+			                    <o:converter converterId="omnifaces.ListConverter" list="#{tgReportBean.allDimensions}" />
+					            <p:column>
+					               <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+					            </p:column>
+					        </p:autoComplete>
+			            	
+		            	</div>
+						
+					</div>
+					
+					<div class="eps-params-separator"></div>
+					
+					<p:commandButton value="Generate" action="#{tgReportBean.generateReport}" update=":msgForm:messages :params-form :results-form"
+		    			disabled="#{not mrHistBean.statisticsDbAvailable}"
+		    			onclick="showLoading('#no_', '#loading-bl')"
+		    			oncomplete="hideLoading('#no_', '#loading-bl'); setTreeTableScrollableBodyHeight('#results-table'); drawPassedFailedBars();"/>
+		    			
+		    		<p:commandButton value="Export" ajax="false" action="#{tgReportBean.getExported}" update=":msgForm:messages" rendered="#{not empty tgReportBean.root.children}"/>
+		    		
+		    		<p:commandButton value="Save dimensions" action="#{tgReportBean.preSaveDimensions()}"
+		    			disabled="#{not mrHistBean.statisticsDbAvailable}"
+		    			oncomplete="PF('saveLoadDimensionDialog').show()"
+		    			rendered="#{not empty tgReportBean.selectedDemensions}"
+		    			update=":saveDimensionForm"/>
+		    			
+		    		<p:commandButton value="Load dimensions" action="#{tgReportBean.preLoadDimensions()}"
+		    			disabled="#{not mrHistBean.statisticsDbAvailable}"
+		    			oncomplete="PF('saveLoadDimensionDialog').show()"
+		    			rendered="#{empty tgReportBean.selectedDemensions and not empty tgReportBean.dimensionsFileNames}"
+		    			update=":saveDimensionForm"/>
+					
+				</h:form>
+				
+			</div>
+			
+			<ui:include src="loadingCard.xhtml">
+	    		<ui:param name="blockId" value="loading-bl" />
+	    	</ui:include>
+			
+			<div class="eps-report-results eps-card no-scroll">
+	    		
+	    		<h:form id="results-form" prependId="false">
+					
+		    			<p:treeTable id="results-table" value="#{tgReportBean.root}" var="row"
+	                    	styleClass="eps-statistics-table eps-tg-tree-table"
+	                    	scrollable="true" scrollHeight="100"
+	                    	selection="#{tgReportBean.selectedNode}" selectionMode="single"
+	                    	sortBy="#{row.pathEnd}" resizableColumns="true">
+		    				
+		    				<p:column headerText="Tag" sortBy="#{row.pathEnd}">
+		    					<h:outputText value="#{row.pathEnd}"/>
+		    				</p:column>
+		    				<p:column headerText="Total Execution Time" styleClass="eps-data-column" sortBy="#{row.totalExecTime}">
+		    					<h:outputText value="#{row.formattedExecTime}"/>
+		    				</p:column>
+		    				<p:column headerText="Total Test Cases" styleClass="eps-data-column" sortBy="#{row.totalTcCount}">
+		    					<h:outputText value="#{row.totalTcCount}"/>
+		    				</p:column>
+		    				<p:column headerText="Passed Test Cases" styleClass="eps-data-column" sortBy="#{row.passedCount}">
+		    					<h:outputText value="#{row.passedCount}"/>
+		    				</p:column>                            
+		    				<p:column headerText="Failed Test Cases" styleClass="eps-data-column" sortBy="#{row.failedCount}">
+		    					<h:outputText value="#{row.failedCount}"/>
+		    				</p:column>
+                            <p:column headerText="Conditionally Passed Test Cases" styleClass="eps-data-column" sortBy="#{row.conditionallyPassedCount}">
+                                <h:outputText value="#{row.conditionallyPassedCount}"/>
+                            </p:column>
+		    				<p:column headerText="Passed %" styleClass="eps-data-column" sortBy="#{row.passedPercent}">
+		    					<h:outputText value="#{row.passedPercent}">
+		    						<f:convertNumber maxFractionDigits="2" minFractionDigits="2" groupingUsed="false" />
+		    					</h:outputText>
+		    				</p:column>
+                            <p:column headerText="Conditionally Passed %" styleClass="eps-data-column" sortBy="#{row.conditionallyPassedPercent}">
+                                <h:outputText value="#{row.conditionallyPassedPercent}">
+                                    <f:convertNumber maxFractionDigits="2" minFractionDigits="2" groupingUsed="false" />
+                                </h:outputText>
+                            </p:column>
+		    				<p:column headerText="Failed %" styleClass="eps-data-column" sortBy="{row.failedPercent}">
+		    					<h:outputText value="#{row.failedPercent}">
+		    						<f:convertNumber maxFractionDigits="2" minFractionDigits="2" groupingUsed="false" />
+		    					</h:outputText>
+		    				</p:column>
+		    				<p:column headerText="Total Matrices" styleClass="eps-data-column" sortBy="#{row.totalMatrices}">
+		    					<h:outputText value="#{row.totalMatrices}"/>
+		    				</p:column>
+		    				<p:column headerText="Failed Matrices" styleClass="eps-data-column" sortBy="#{row.failedMatrices}">
+		    					<h:outputText value="#{row.failedMatrices}"/>
+		    				</p:column>
+		    				
+		    			</p:treeTable>
+	    			
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    	<h:form id="saveDimensionForm" enctype="multipart/form-data">
+				<p:dialog id="saveLoadDimensionDialogId" header="#{tgReportBean.saveDialog ? 'Save dimensions' : 'Load dimensions'}" widgetVar="saveLoadDimensionDialog" modal="true" resizable="false">
+					<h:outputLabel for="fileNameInput" value="File name:" style="font-weight:bold" />
+					
+					<p:selectOneMenu styleClass="eps-input" id="selectedFileName"
+										 value="#{tgReportBean.dimensionsFileName}" style="width: 200px"
+										 editable="#{tgReportBean.saveDialog}">
+										 
+							<f:selectItem itemLabel="" itemValue="" />
+										 
+							<f:selectItems value="#{tgReportBean.dimensionsFileNames}" var="file"
+										   itemValue="#{file}" itemLabel="#{file}" />
+							
+						</p:selectOneMenu>
+					
+					<p:outputPanel id="submitPanel">
+						<div class="eps-dialog-button-wrapper">
+							<h:commandButton id="saveLoadSubmit" value="#{tgReportBean.saveDialog ? 'Save' : 'Load'}"
+										 action="#{tgReportBean.saveLoadDimensions()}"/>
+						</div>
+					</p:outputPanel>
+				</p:dialog>
+			</h:form>
+	    		
+	    </ui:fragment>
+	
+	</ui:define>
+	
+</ui:composition>

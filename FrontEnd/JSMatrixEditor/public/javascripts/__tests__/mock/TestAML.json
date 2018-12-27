@@ -1,0 +1,1830 @@
+{
+    "name": "TestAML",
+    "namespace": [
+        "TestAML"
+    ],
+    "utils": {
+        "TestMatrixUtil": null,
+        "MiscUtils": null,
+        "FormatUtil": null
+    },
+    "description": null,
+    "messages": {
+        "OrderMassCancelReport": {
+            "name": "OrderMassCancelReport",
+            "fields": {
+                "AppID": {
+                    "name": "AppID",
+                    "idx": 0,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "ClOrdID": {
+                    "name": "ClOrdID",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "MassCancelResponse": {
+                    "name": "MassCancelResponse",
+                    "values": {
+                        "Accepted": 7
+                    },
+                    "idx": 2,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "Statistics": {
+            "name": "Statistics",
+            "fields": {
+                "Volume": {
+                    "name": "Volume",
+                    "idx": 0,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "VWAP": {
+                    "name": "VWAP",
+                    "idx": 1,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "Turnover": {
+                    "name": "Turnover",
+                    "idx": 2,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "MDI_2_4": {
+            "name": "MDI_2_4",
+            "fields": {
+                "GroupID": {
+                    "name": "GroupID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "Instrument": {
+                    "name": "Instrument",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "GroupStatus": {
+                    "name": "GroupStatus",
+                    "idx": 2,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "InstrumentStatus": {
+                    "name": "InstrumentStatus",
+                    "values": {
+                        "Normal": "N"
+                    },
+                    "idx": 3,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "NumberofLevel": {
+                    "name": "NumberofLevel",
+                    "idx": 4,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "MDL_2_4": {
+                    "name": "MDL_2_4",
+                    "ref": "MDL_2_4",
+                    "idx": 5,
+                    "type": "SUBMESSAGE",
+                    "coll": true,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "SnapshotComplete": {
+            "name": "SnapshotComplete",
+            "fields": {
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "SubBook": {
+                    "name": "SubBook",
+                    "idx": 2,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "ArrayMessage": {
+            "name": "ArrayMessage",
+            "fields": {
+                "BooleanArray": {
+                    "name": "BooleanArray",
+                    "idx": 0,
+                    "type": "BOOLEAN",
+                    "coll": true,
+                    "req": false
+                },
+                "IntegerArray": {
+                    "name": "IntegerArray",
+                    "idx": 1,
+                    "type": "INT",
+                    "coll": true,
+                    "req": false
+                },
+                "DoubleArray": {
+                    "name": "DoubleArray",
+                    "idx": 2,
+                    "type": "DOUBLE",
+                    "coll": true,
+                    "req": false
+                },
+                "BigDecimalArray": {
+                    "name": "BigDecimalArray",
+                    "idx": 3,
+                    "type": "DECIMAL",
+                    "coll": true,
+                    "req": false
+                },
+                "StringArray": {
+                    "name": "StringArray",
+                    "idx": 4,
+                    "type": "STRING",
+                    "coll": true,
+                    "req": false
+                },
+                "MessageArray": {
+                    "name": "MessageArray",
+                    "ref": "SimpleMessage",
+                    "idx": 5,
+                    "type": "SUBMESSAGE",
+                    "coll": true,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "TradingParty": {
+            "name": "TradingParty",
+            "fields": {
+                "NoPartyIDs": {
+                    "name": "NoPartyIDs",
+                    "ref": "NoPartyIDs",
+                    "idx": 0,
+                    "type": "SUBMESSAGE",
+                    "coll": true,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "MDL_2_4": {
+            "name": "MDL_2_4",
+            "fields": {
+                "QuoteLevel": {
+                    "name": "QuoteLevel",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "BidNumberOfQuotes": {
+                    "name": "BidNumberOfQuotes",
+                    "idx": 1,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "BidSize": {
+                    "name": "BidSize",
+                    "idx": 2,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "BidPrice": {
+                    "name": "BidPrice",
+                    "idx": 3,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "AskNumberOfQuotes": {
+                    "name": "AskNumberOfQuotes",
+                    "idx": 4,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "AskSize": {
+                    "name": "AskSize",
+                    "idx": 5,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "AskPrice": {
+                    "name": "AskPrice",
+                    "idx": 6,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "TradeConfirmation": {
+            "name": "TradeConfirmation",
+            "fields": {
+                "BasicHeader": {
+                    "name": "BasicHeader",
+                    "ref": "BasicHeader",
+                    "idx": 0,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                },
+                "ApplicationHeaderInput": {
+                    "name": "ApplicationHeaderInput",
+                    "ref": "ApplicationHeaderInput",
+                    "idx": 1,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                },
+                "Trailer": {
+                    "name": "Trailer",
+                    "ref": "Trailer",
+                    "idx": 6,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "Instrument_NoSecurityAltID": {
+            "name": "Instrument_NoSecurityAltID",
+            "fields": {
+                "SecurityAltID": {
+                    "name": "SecurityAltID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityAltIDSource": {
+                    "name": "SecurityAltIDSource",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "BasicHeader": {
+            "name": "BasicHeader",
+            "fields": {
+                "ApplicationID": {
+                    "name": "ApplicationID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "ServiceID": {
+                    "name": "ServiceID",
+                    "idx": 1,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "SessionNumber": {
+                    "name": "SessionNumber",
+                    "idx": 3,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "SequenceNumber": {
+                    "name": "SequenceNumber",
+                    "idx": 4,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "ExecutionReportFIX": {
+            "name": "ExecutionReportFIX",
+            "fields": {
+                "ClOrdID": {
+                    "name": "ClOrdID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "ExecType": {
+                    "name": "ExecType",
+                    "values": {
+                        "NEW": "0",
+                        "EXPIRED": "C",
+                        "REJECTED": "8",
+                        "TRADE": "F",
+                        "REPLACED": "5"
+                    },
+                    "idx": 1,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrdStatus": {
+                    "name": "OrdStatus",
+                    "values": {
+                        "NEW": "0",
+                        "REJECTED": "8",
+                        "EXPIRED": "C",
+                        "FILLED": "2",
+                        "PARTIALLY_FILLED": "1"
+                    },
+                    "idx": 2,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "TransactTime": {
+                    "name": "TransactTime",
+                    "idx": 3,
+                    "type": "DATE",
+                    "coll": false,
+                    "req": false
+                },
+                "Side": {
+                    "name": "Side",
+                    "values": {
+                        "SELL": "2",
+                        "BUY": "1"
+                    },
+                    "idx": 4,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrdType": {
+                    "name": "OrdType",
+                    "values": {
+                        "PEGGED": "P",
+                        "LIMIT": "2",
+                        "MARKET": "1"
+                    },
+                    "idx": 5,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "TimeInForce": {
+                    "name": "TimeInForce",
+                    "values": {
+                        "GOOD_TILL_CANCEL": "1",
+                        "DAY": "0",
+                        "GOOD_TILL_DATE": "6",
+                        "IMMEDIATE_OR_CANCEL": "3"
+                    },
+                    "idx": 6,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderQty": {
+                    "name": "OrderQty",
+                    "idx": 7,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderQty2": {
+                    "name": "OrderQty2",
+                    "idx": 8,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Price": {
+                    "name": "Price",
+                    "idx": 9,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "LeavesQty": {
+                    "name": "LeavesQty",
+                    "idx": 10,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "DisplayQty": {
+                    "name": "DisplayQty",
+                    "idx": 11,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "CumQty": {
+                    "name": "CumQty",
+                    "idx": 12,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "LastQty": {
+                    "name": "LastQty",
+                    "idx": 13,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "LastPx": {
+                    "name": "LastPx",
+                    "idx": 14,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityIDSource": {
+                    "name": "SecurityIDSource",
+                    "idx": 15,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityExchange": {
+                    "name": "SecurityExchange",
+                    "idx": 16,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityID": {
+                    "name": "SecurityID",
+                    "idx": 17,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "TradingParty": {
+                    "name": "TradingParty",
+                    "ref": "TradingParty",
+                    "idx": 18,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                },
+                "MsgSeqNum": {
+                    "name": "MsgSeqNum",
+                    "idx": 19,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "Currency": {
+                    "name": "Currency",
+                    "idx": 20,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "AccountType": {
+                    "name": "AccountType",
+                    "values": {
+                        "CLIENT": "1",
+                        "HOUSE": "3"
+                    },
+                    "idx": 21,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderCapacity": {
+                    "name": "OrderCapacity",
+                    "values": {
+                        "AGENCY": "A"
+                    },
+                    "idx": 22,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "RoutingInst": {
+                    "name": "RoutingInst",
+                    "idx": 23,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "MinQty": {
+                    "name": "MinQty",
+                    "idx": 24,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "ExpireTime": {
+                    "name": "ExpireTime",
+                    "idx": 25,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "ExpireDate": {
+                    "name": "ExpireDate",
+                    "idx": 26,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "LoginRequest": {
+            "name": "LoginRequest",
+            "fields": {
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Username": {
+                    "name": "Username",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "Password": {
+                    "name": "Password",
+                    "idx": 2,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "SnapshotResponse": {
+            "name": "SnapshotResponse",
+            "fields": {
+                "Status": {
+                    "name": "Status",
+                    "values": {
+                        "RequestAccepted": 65
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "Trailer": {
+            "name": "Trailer",
+            "fields": {
+                "CHK": {
+                    "name": "CHK",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "NoPartyIDs": {
+            "name": "NoPartyIDs",
+            "fields": {
+                "PartyID": {
+                    "name": "PartyID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "PartyIDSource": {
+                    "name": "PartyIDSource",
+                    "values": {
+                        "PROPRIETARY_CUSTOM_CODE": "D"
+                    },
+                    "idx": 1,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "PartyRole": {
+                    "name": "PartyRole",
+                    "values": {
+                        "COUNTERPARTY": 17,
+                        "TRADER_ID": 12,
+                        "EXECUTING_FIRM": 1,
+                        "CLEARING_FIRM": 4,
+                        "TRADER_GROUP": 76
+                    },
+                    "idx": 2,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OwnerData": {
+            "name": "OwnerData",
+            "fields": {
+                "Memo": {
+                    "name": "Memo",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "NewOrderSingle": {
+            "name": "NewOrderSingle",
+            "fields": {
+                "ClOrdID": {
+                    "name": "ClOrdID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "TransactTime": {
+                    "name": "TransactTime",
+                    "idx": 1,
+                    "type": "DATE",
+                    "coll": false,
+                    "req": false
+                },
+                "Side": {
+                    "name": "Side",
+                    "values": {
+                        "BUY": "1",
+                        "SELL": "2"
+                    },
+                    "idx": 2,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "Symbol": {
+                    "name": "Symbol",
+                    "idx": 3,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "OrdType": {
+                    "name": "OrdType",
+                    "values": {
+                        "PEGGED": "P",
+                        "LIMIT": "2",
+                        "MARKET": "1"
+                    },
+                    "idx": 4,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "TimeInForce": {
+                    "name": "TimeInForce",
+                    "values": {
+                        "GOOD_TILL_CANCEL": "1",
+                        "DAY": "0",
+                        "GOOD_TILL_DATE": "6",
+                        "IMMEDIATE_OR_CANCEL": "3"
+                    },
+                    "idx": 5,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderQty": {
+                    "name": "OrderQty",
+                    "idx": 6,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderQty2": {
+                    "name": "OrderQty2",
+                    "idx": 7,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Price": {
+                    "name": "Price",
+                    "idx": 8,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "MinQty": {
+                    "name": "MinQty",
+                    "idx": 9,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "DisplayQty": {
+                    "name": "DisplayQty",
+                    "idx": 10,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "AccountType": {
+                    "name": "AccountType",
+                    "values": {
+                        "CLIENT": "1",
+                        "HOUSE": "3"
+                    },
+                    "idx": 11,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderCapacity": {
+                    "name": "OrderCapacity",
+                    "values": {
+                        "AGENCY": "A"
+                    },
+                    "idx": 12,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "RoutingInst": {
+                    "name": "RoutingInst",
+                    "idx": 13,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "TradingParty": {
+                    "name": "TradingParty",
+                    "ref": "TradingParty",
+                    "idx": 14,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                },
+                "ExecInst": {
+                    "name": "ExecInst",
+                    "values": {
+                        "OK_TO_CROSS": "B",
+                        "NO_CROSS": "A",
+                        "NOT_HELD": "1",
+                        "WORK": "2",
+                        "GO_ALONG": "3",
+                        "CALL_FIRST": "C"
+                    },
+                    "idx": 15,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityIDSource": {
+                    "name": "SecurityIDSource",
+                    "idx": 16,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityExchange": {
+                    "name": "SecurityExchange",
+                    "idx": 17,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityID": {
+                    "name": "SecurityID",
+                    "idx": 18,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "Currency": {
+                    "name": "Currency",
+                    "idx": 19,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "ExpireTime": {
+                    "name": "ExpireTime",
+                    "idx": 20,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "ExpireDate": {
+                    "name": "ExpireDate",
+                    "idx": 21,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "ApplicationHeaderInput": {
+            "name": "ApplicationHeaderInput",
+            "fields": {
+                "Input": {
+                    "name": "Input",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "idx": 1,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "ReceiversAddress": {
+                    "name": "ReceiversAddress",
+                    "idx": 2,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "MessagePriority": {
+                    "name": "MessagePriority",
+                    "idx": 3,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "SimpleMessage": {
+            "name": "SimpleMessage",
+            "fields": {
+                "FBoolean": {
+                    "name": "FBoolean",
+                    "idx": 0,
+                    "type": "BOOLEAN",
+                    "coll": false,
+                    "req": false
+                },
+                "FByte": {
+                    "name": "FByte",
+                    "idx": 1,
+                    "type": "BYTE",
+                    "coll": false,
+                    "req": false
+                },
+                "FCharacter": {
+                    "name": "FCharacter",
+                    "idx": 2,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "FShort": {
+                    "name": "FShort",
+                    "idx": 3,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "FInteger": {
+                    "name": "FInteger",
+                    "idx": 4,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "FLong": {
+                    "name": "FLong",
+                    "idx": 5,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "FFloat": {
+                    "name": "FFloat",
+                    "idx": 6,
+                    "type": "FLOAT",
+                    "coll": false,
+                    "req": false
+                },
+                "FDouble": {
+                    "name": "FDouble",
+                    "idx": 7,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "FBigDecimal": {
+                    "name": "FBigDecimal",
+                    "idx": 8,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "FString": {
+                    "name": "FString",
+                    "idx": 9,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "FByteEnum": {
+                    "name": "FByteEnum",
+                    "values": {
+                        "One": 1
+                    },
+                    "idx": 10,
+                    "type": "BYTE",
+                    "coll": false,
+                    "req": false
+                },
+                "FCharacterEnum": {
+                    "name": "FCharacterEnum",
+                    "values": {
+                        "LetterA": "a"
+                    },
+                    "idx": 11,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "FShortEnum": {
+                    "name": "FShortEnum",
+                    "values": {
+                        "Two": 2
+                    },
+                    "idx": 12,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "FIntegerEnum": {
+                    "name": "FIntegerEnum",
+                    "values": {
+                        "Ten": 10
+                    },
+                    "idx": 13,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "FStringEnum": {
+                    "name": "FStringEnum",
+                    "values": {
+                        "Enum1": "Foo"
+                    },
+                    "idx": 14,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "ApplicationMessageRequest": {
+            "name": "ApplicationMessageRequest",
+            "fields": {},
+            "namespace": "TestAML"
+        },
+        "ReplayResponse": {
+            "name": "ReplayResponse",
+            "fields": {
+                "FirstMessage": {
+                    "name": "FirstMessage",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "MarketDataGroup": {
+                    "name": "MarketDataGroup",
+                    "idx": 1,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Status": {
+                    "name": "Status",
+                    "values": {
+                        "RequestAccepted": 65
+                    },
+                    "idx": 2,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Length": {
+                    "name": "Length",
+                    "idx": 4,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OrderCancelReplaceRequest": {
+            "name": "OrderCancelReplaceRequest",
+            "fields": {
+                "ClOrdID": {
+                    "name": "ClOrdID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "TransactTime": {
+                    "name": "TransactTime",
+                    "idx": 1,
+                    "type": "DATE",
+                    "coll": false,
+                    "req": false
+                },
+                "Side": {
+                    "name": "Side",
+                    "values": {
+                        "BUY": "1",
+                        "SELL": "2"
+                    },
+                    "idx": 2,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "Symbol": {
+                    "name": "Symbol",
+                    "idx": 3,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "OrdType": {
+                    "name": "OrdType",
+                    "values": {
+                        "PEGGED": "P",
+                        "LIMIT": "2",
+                        "MARKET": "1"
+                    },
+                    "idx": 4,
+                    "type": "CHAR",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderQty": {
+                    "name": "OrderQty",
+                    "idx": 5,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Price": {
+                    "name": "Price",
+                    "idx": 6,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "DisplayQty": {
+                    "name": "DisplayQty",
+                    "idx": 7,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "OrigClOrdID": {
+                    "name": "OrigClOrdID",
+                    "idx": 8,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "TradingParty": {
+                    "name": "TradingParty",
+                    "ref": "TradingParty",
+                    "idx": 9,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                },
+                "MsgSeqNum": {
+                    "name": "MsgSeqNum",
+                    "idx": 10,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OrderAcknowledgement": {
+            "name": "OrderAcknowledgement",
+            "fields": {
+                "Group": {
+                    "name": "Group",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "Quantity": {
+                    "name": "Quantity",
+                    "idx": 1,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "AssignedPrice": {
+                    "name": "AssignedPrice",
+                    "idx": 2,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "ClearingData": {
+            "name": "ClearingData",
+            "fields": {
+                "AccountType": {
+                    "name": "AccountType",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "OpenClose": {
+                    "name": "OpenClose",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "LoginResponse": {
+            "name": "LoginResponse",
+            "fields": {
+                "Status": {
+                    "name": "Status",
+                    "values": {
+                        "LoginAccepted": 65
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Length": {
+                    "name": "Length",
+                    "idx": 2,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageSequenceNumber": {
+                    "name": "MessageSequenceNumber",
+                    "idx": 3,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "ReplayRequest": {
+            "name": "ReplayRequest",
+            "fields": {
+                "FirstMessage": {
+                    "name": "FirstMessage",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "MarketDataGroup": {
+                    "name": "MarketDataGroup",
+                    "idx": 1,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Length": {
+                    "name": "Length",
+                    "idx": 3,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OrderExecuted": {
+            "name": "OrderExecuted",
+            "fields": {
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderID": {
+                    "name": "OrderID",
+                    "idx": 1,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "TradeMatchID": {
+                    "name": "TradeMatchID",
+                    "idx": 2,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Length": {
+                    "name": "Length",
+                    "idx": 3,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Flags": {
+                    "name": "Flags",
+                    "idx": 4,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "ExecutedQuantity": {
+                    "name": "ExecutedQuantity",
+                    "idx": 6,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "SnapshotRequest": {
+            "name": "SnapshotRequest",
+            "fields": {
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "SubBook": {
+                    "name": "SubBook",
+                    "idx": 2,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OrderEntry": {
+            "name": "OrderEntry",
+            "fields": {
+                "ClearingData": {
+                    "name": "ClearingData",
+                    "ref": "ClearingData",
+                    "idx": 0,
+                    "type": "SUBMESSAGE",
+                    "coll": false,
+                    "req": false
+                },
+                "Group": {
+                    "name": "Group",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "Quantity": {
+                    "name": "Quantity",
+                    "idx": 2,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "Price": {
+                    "name": "Price",
+                    "idx": 3,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "PriceType": {
+                    "name": "PriceType",
+                    "idx": 4,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "NewOrder": {
+            "name": "NewOrder",
+            "fields": {
+                "ClOrdID": {
+                    "name": "ClOrdID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "Side": {
+                    "name": "Side",
+                    "values": {
+                        "Sell": 2,
+                        "Buy": 1
+                    },
+                    "idx": 1,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 2,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "OrdQty": {
+                    "name": "OrdQty",
+                    "idx": 3,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "DisplayQty": {
+                    "name": "DisplayQty",
+                    "idx": 4,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "TimeInForce": {
+                    "name": "TimeInForce",
+                    "values": {
+                        "Day": 0
+                    },
+                    "idx": 5,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "LimitPrice": {
+                    "name": "LimitPrice",
+                    "idx": 6,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderType": {
+                    "name": "OrderType",
+                    "values": {
+                        "Limit": 2
+                    },
+                    "idx": 7,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderSubType": {
+                    "name": "OrderSubType",
+                    "values": {
+                        "Order": 0
+                    },
+                    "idx": 8,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "ClearingAccount": {
+                    "name": "ClearingAccount",
+                    "values": {
+                        "House": 3
+                    },
+                    "idx": 9,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "Capacity": {
+                    "name": "Capacity",
+                    "idx": 10,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "BidSize": {
+                    "name": "BidSize",
+                    "idx": 11,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OrderDeleted": {
+            "name": "OrderDeleted",
+            "fields": {
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 0,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderID": {
+                    "name": "OrderID",
+                    "idx": 1,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Length": {
+                    "name": "Length",
+                    "idx": 2,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "AddOrder": {
+            "name": "AddOrder",
+            "fields": {
+                "Side": {
+                    "name": "Side",
+                    "values": {
+                        "BUY": 66,
+                        "SELL": 83
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 1,
+                    "type": "LONG",
+                    "coll": false,
+                    "req": false
+                },
+                "Price": {
+                    "name": "Price",
+                    "idx": 2,
+                    "type": "DOUBLE",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderID": {
+                    "name": "OrderID",
+                    "idx": 3,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Quantity": {
+                    "name": "Quantity",
+                    "idx": 4,
+                    "type": "DECIMAL",
+                    "coll": false,
+                    "req": false
+                },
+                "Length": {
+                    "name": "Length",
+                    "idx": 5,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "Flags": {
+                    "name": "Flags",
+                    "idx": 6,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                },
+                "MessageType": {
+                    "name": "MessageType",
+                    "values": {
+                        "ReplayRequest": 1,
+                        "AddOrder": 2,
+                        "OrderExecuted": 3,
+                        "SnapshotRequest": 4,
+                        "LoginRequest": 5,
+                        "OrderDeleted": 6,
+                        "SnapshotResponse": 7,
+                        "LoginResponse": 8,
+                        "SnapshotComplete": 9,
+                        "ReplayResponse": 10
+                    },
+                    "idx": 0,
+                    "type": "SHORT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "OrderMassCancelRequest": {
+            "name": "OrderMassCancelRequest",
+            "fields": {
+                "ClOrdID": {
+                    "name": "ClOrdID",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "InstrumentID": {
+                    "name": "InstrumentID",
+                    "idx": 1,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "OrderSubType": {
+                    "name": "OrderSubType",
+                    "values": {
+                        "Order": 0
+                    },
+                    "idx": 2,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                },
+                "MassCancelRequestType": {
+                    "name": "MassCancelRequestType",
+                    "idx": 3,
+                    "type": "INT",
+                    "coll": false,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        },
+        "Instrument": {
+            "name": "Instrument",
+            "fields": {
+                "Symbol": {
+                    "name": "Symbol",
+                    "idx": 0,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityID": {
+                    "name": "SecurityID",
+                    "idx": 1,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "SecurityIDSource": {
+                    "name": "SecurityIDSource",
+                    "idx": 2,
+                    "type": "STRING",
+                    "coll": false,
+                    "req": false
+                },
+                "NoSecurityAltID": {
+                    "name": "NoSecurityAltID",
+                    "ref": "Instrument_NoSecurityAltID",
+                    "idx": 3,
+                    "type": "SUBMESSAGE",
+                    "coll": true,
+                    "req": false
+                }
+            },
+            "namespace": "TestAML"
+        }
+    }
+}

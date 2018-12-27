@@ -1,0 +1,6 @@
+/bin
+/build
+/gensrc
+/temp
+/*.iml
+/.gradle

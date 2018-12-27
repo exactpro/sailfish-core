@@ -1,0 +1,359 @@
+.eps-container {
+	min-height: 170px;
+}
+
+.eps-service-status-started {
+	color: green;
+}
+
+.eps-service-status-warning {
+	color: orange;
+}
+
+.eps-service-status-error {
+	color: red;
+}
+
+.eps-service-status-disposed {
+	color: gray;
+}
+
+.eps-service-status-disabled {
+	color: gray;
+}
+
+.eps-service-name-disabled {
+	color: gray;
+}
+
+.eps-environment-options-btn .ui-button-icon-left {
+	margin: -9px 0 0 -9px;
+}
+
+.eps-environment-table.eps-main-table tr.ui-state-hover {
+	cursor: default;
+	border: none;
+}
+
+.eps-environment-form {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: left;
+}
+
+.eps-environment-table-wrapper {
+	position: absolute;
+	top: 80px;
+	bottom:0;
+	left: 0;
+	right: 0;
+}
+
+.eps-environment-table {
+	position: relative;
+	height: 100%;
+	margin: 0 auto;
+	width: 1024px;
+	border-left: 1px solid #cdcdcd;
+	border-right: 1px solid #cdcdcd;
+}
+
+.eps-environment-table tbody {
+	position: absolute;
+	top: 35px;
+	left: 0;
+	right: 0;
+	bottom: 20px;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.eps-environment-table.eps-main-table th{
+	background-color: #b7bdc6;
+	text-align: left;
+}
+
+.eps-environment-table.eps-main-table td.eps-service-action-column {
+	text-align: center;
+}
+
+.eps-environment-table .ui-datatable-footer {
+	position: absolute;
+	bottom: 0px;
+	height: 12px;
+	left: 0;
+	right: 0;
+}
+
+.eps-environment-table .ui-datatable-empty-message {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  right: 0;
+}
+
+.eps-service-toolbar-wrapper {
+	width: 1024px;
+	height: 80px;
+	margin: 0 auto;
+	position: relative;
+}
+
+.eps-left-environment-menu.ui-menu {
+	height: 80px;
+	padding-top: 20px;
+	box-sizing: border-box;
+	width: 60%;
+	float: left;
+}
+
+.eps-left-environment-menu > ul > li.ui-menuitem {
+	margin: 0 5px;
+	box-sizing: border-box;
+}
+
+.eps-right-environment-toolbar.ui-menu {
+	height: 80px;
+	padding-top: 20px;
+	box-sizing: border-box;
+	width: auto;
+}
+
+#rightMenus {
+	float: right;
+}
+
+#rightMenus > div {
+	display: inline-block;
+}
+
+.eps-right-environment-toolbar > ul > li.ui-menuitem {
+	margin: 0 5px;
+	box-sizing: border-box;
+}
+
+.eps-selected-environment {
+	margin-top: 6px;
+}
+
+.eps-environment-table th.eps-service-action-column {
+    padding-left: 25px;
+}
+
+.ui-column-filter.eps-environment-filter {
+    max-width: 50%;
+    position: absolute;
+    top: 4.5px;
+    left: 65px;
+}
+
+.eps-main-table .ui-datatable-scrollable-body {
+	overflow-x: hidden;
+	height: 100%;
+	overflow-y: auto;
+}
+
+.eps-service-action-column .ui-button {
+	width: 32px;
+	height: 32px;
+	margin-right: 5px;
+}
+
+.eps-service-buttons {
+	margin-right: 5px;
+}
+
+.eps-service-action-column .ui-state-default .ui-icon-play {
+	background: url("#{resource['sf:/images/icons-bl.png']}") -133px -1px;
+	width: 20px;
+    height: 20px;
+}
+
+.eps-service-action-column .ui-menubutton .ui-state-default .ui-icon-triangle-1-s {
+    background: url("#{resource['sf:/images/icons-bl.png']}") -67px -65px;
+    width: 20px;
+    height: 20px;
+    top: 14px;
+}
+
+.eps-service-action-column .ui-state-default .ui-icon-stop {
+	background: url("#{resource['sf:/images/icons-bl.png']}") -2px -20px;
+	width: 20px;
+    height: 20px;
+}
+
+.eps-service-action-column .ui-state-default .ui-icon-edit {
+	background: url("#{resource['sf:/images/icons-bl.png']}") -44px -66px;
+	width: 20px;
+    height: 20px;
+    margin-left: -9px;
+}
+
+.eps-file-uploader {
+	border-bottom: 1px solid #e0e0e0;
+	margin-bottom: 5px;
+	max-height: 400px;
+	overflow: auto;
+}
+
+.ui-fileupload-preview {
+    padding: 4px 10px;
+    height: 16px;
+    margin-top: 8px;
+    display: block;
+}
+
+.eps-events-table {
+    word-wrap: break-word;
+    position: absolute;
+    top: 60px;
+    bottom: 100px;
+    left: 5px;
+    right: 5px;
+}
+
+.eps-events-table.eps-main-table th {
+	background-color: #b7bdc6;
+}
+
+.eps-events-table input.ui-column-filter {
+	margin: 0;
+	max-width: 100%;
+}
+
+.ui-selectonemenu-filter-container {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.ui-selectonemenu-filter-container .ui-selectonemenu-filter.ui-inputfield {
+	background-color: white;
+	width: 75%;
+}
+
+.eps-service-toolbar-wrapper .eps-service-clear-filters-btn {
+	position: absolute;
+	top: 83.5px;
+	right: 6px;
+	z-index: 1;
+}
+
+.eps-service-param-list .ui-treetable-scrollable-body {
+	border: 1px solid #ccc;
+}
+
+.eps-service-param-list.eps-main-table table.eps-main-table {
+	table-layout: auto;
+	width: 723px;
+}
+
+.eps-service-param-list td {
+    word-break: break-word;
+}
+
+.eps-service-param-list.eps-main-table th {
+	text-align: left;
+	padding-left: 25px;
+	background-color: #b7bdc6;
+	border: none;
+}
+
+.eps-service-param-list.eps-main-table td {
+	border: none;
+}
+
+.eps-service-param-list.eps-main-table tr {
+	border-bottom: 1px solid #ccc;
+}
+
+.RequiredContainer td {
+    background-color: lemonchiffon;
+}
+
+.OptionalContainer td {
+    background-color: aliceblue;
+}
+
+.eps-application .ui-selectonemenu-items .ui-selectonemenu-item {
+	border: none;
+	border-bottom: 1px solid #cdcdcd;
+}
+
+.eps-application .ui-selectonemenu-items-wrapper .ui-state-disabled {
+	display: none;
+}
+
+.eps-environments-toolbar {
+	border-radius: 0px;
+	margin: 0 auto -1px;
+}
+
+.eps-environments-toolbar > ul > li.ui-menuitem {
+	margin: 0 5px;
+    box-sizing: border-box;
+}
+
+.eps-service-param-list.eps-main-table a.ui-spinner-button.ui-button {
+	width: 16px;
+	height: 50%;
+	margin-right: -6px;
+	padding: 0;
+}
+
+.eps-service-param-list.eps-main-table .ui-spinner-input {
+    width: 100%;
+    padding-right: 0;
+}
+
+.eps-service-param-list.eps-main-table input.ui-spinner-input {
+	text-align: left;
+}
+
+#parametersDialog > .ui-widget-content {
+	overflow: hidden;
+}
+
+.different-value-label {
+	color: #999 !important;
+}
+
+a.eps-link-button,
+a.eps-link-button:active,
+a.eps-link-button:focus {
+	outline: none;
+}
+
+.dictionary-autocomplete > input {
+    width: 377px;
+}
+
+.dictionary-autocomplete > button {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+#selectedEnvironment {
+    max-width: 200px;
+    overflow: hidden;
+}
+
+#parametersDialog_title {
+    width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eps-service-circle::before {
+	content: "";
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	border-radius: 5px;
+	margin-right: 5px;
+	box-shadow: 0px 0px 1.5px 0px black inset;
+}

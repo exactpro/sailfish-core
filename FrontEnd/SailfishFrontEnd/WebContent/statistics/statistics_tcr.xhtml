@@ -1,0 +1,79 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	template="/template/statisticsReport.xhtml">
+	
+	<ui:define name="otherScripts">
+		<h:outputScript library="sf" name="js/statistics.js"/>
+	</ui:define>
+	
+	<ui:define name="statistics-content">
+		
+		<ui:fragment rendered="#{not statReportingBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{statReportingBean.statisticsDbAvailable}">
+		
+			<div class="eps-report-parameters eps-card">
+		    		
+	    		<div class="eps-params-header">Parameters</div>
+			
+				<h:form id="params-form">	
+					
+					<h:panelGrid columns="2" cellpadding="5">
+		    			
+		    			<p:outputLabel for="testCasesMenuMenu" value="Test Case ID:" />
+		    			
+		    			<p:autoComplete id="testCasesMenuMenu" value="#{tcrHistoryBean.selectedTestCase}" 
+		            		completeMethod="#{tcrHistoryBean.completeTc}"
+		                    var="tc" itemLabel="#{tc.testCaseId}" itemValue="#{tc}" forceSelection="true" 
+		                    placeholder="enter test case id" emptyMessage="No matching found"
+		                    minQueryLength="3" required="true" requiredMessage="Test case is not selected"
+		                    size="70">
+		                    
+		                    <o:converter converterId="omnifaces.ListConverter" list="#{tcrHistoryBean.lastCompleteResult}" />
+				            
+				        </p:autoComplete>
+		    			
+		    			<!--p:selectOneMenu id="testCasesMenuMenu" value="#{tcrHistoryBean.selectedTestCase}" 
+	                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{testCaseConverter}"
+	                               required="true" requiredMessage="Select at test case">
+				            <f:selectItems value="#{tcrHistoryBean.allTestCases}" itemLabel="#{tc.testCaseId}" var="tc"/>
+				        </p:selectOneMenu-->
+		    			
+		    		</h:panelGrid>
+					
+					<p:commandButton value="Generate" action="#{tcrHistoryBean.generate}" update=":msgForm:messages :params-form :results-form"
+						onclick="showLoading('.eps-report-results', '#loading-bl')"
+		    			oncomplete="hideLoading('.eps-report-results', '#loading-bl')"/>
+				</h:form>
+				
+			</div>
+			
+			<ui:include src="loadingCard.xhtml">
+	    		<ui:param name="blockId" value="loading-bl" />
+	    	</ui:include>
+			
+			<div class="eps-report-results eps-card">
+		    	
+	    		<h:form id="results-form">
+	    		
+	    			<ui:insert name="tcrStatisticsTemplate">
+		                <ui:include src="/template/tcr_statistics_template.xhtml">
+		                    
+		                </ui:include>
+		            </ui:insert>
+	    			
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    </ui:fragment>
+		
+	</ui:define>
+	
+</ui:composition>

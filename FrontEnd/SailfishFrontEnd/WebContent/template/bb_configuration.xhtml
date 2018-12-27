@@ -1,0 +1,138 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:form id="bbForm" prependId="false">
+    <div class="eps-content-block">
+        <h3>Notification settings</h3>
+        <table class="eps-transparent-table">
+            <tr>
+                <td>
+                    <h:outputLabel for="bbRecipients" value="Recipients" />
+                </td>
+                <td class="eps-table-divider" colspan="5">
+                    <p:inputText id="bbRecipients" maxlength="255" value="#{bbConfig.settings.emailRecipients}" styleClass="eps-input"
+                                 requiredMessage="Please enter your email address."
+                                 validatorMessage="Invalid recipients format - must be the valid email addresses delimited by ';'">
+                        <p:ajax event="change" execute="@this" />
+
+                        <f:validateRegex pattern=
+                                                 "(^$|^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})(;([_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})){0,1})*$)" />
+                    </p:inputText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:outputLabel for="bbPassedRecipients" value="Recipients On Pass" />
+                </td>
+                <td class="eps-table-divider" colspan="5">
+                    <p:inputText id="bbPassedRecipients" maxlength="255" value="#{bbConfig.settings.emailPassedRecipients}" styleClass="eps-input"
+                                 requiredMessage="Please enter your email address."
+                                 validatorMessage="Invalid recipients format - must be the valid email addresses delimited by ';'">
+                        <p:ajax event="change" execute="@this" />
+
+                        <f:validateRegex pattern=
+                                                 "(^$|^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})(;([_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})){0,1})*$)" />
+                    </p:inputText>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h:outputLabel for="bbCondPassedRecipients" value="Recipients On Cond Pass"/>
+                </td>
+                <td class="eps-table-divider" colspan="5">
+                    <p:inputText id="bbCondPassedRecipients" maxlength="255" value="#{bbConfig.settings.emailCondPassedRecipients}"
+                                 styleClass="eps-input"
+                                 requiredMessage="Please enter your email address."
+                                 validatorMessage="Invalid recipients format - must be the valid email addresses delimited by ';'">
+                        <p:ajax event="change" execute="@this"/>
+
+                        <f:validateRegex pattern=
+                                                 "(^$|^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})(;([_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})){0,1})*$)"/>
+                    </p:inputText>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h:outputLabel for="bbFailedRecipients" value="Recipients On Fail" />
+                </td>
+                <td class="eps-table-divider" colspan="5">
+                    <p:inputText id="bbFailedRecipients" maxlength="255" value="#{bbConfig.settings.emailFailedRecipients}" styleClass="eps-input"
+                                 requiredMessage="Please enter your email address."
+                                 validatorMessage="Invalid recipients format - must be the valid email addresses delimited by ';'">
+                        <p:ajax event="change" execute="@this" />
+
+                        <f:validateRegex pattern=
+                                                 "(^$|^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})(;([_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})){0,1})*$)" />
+                    </p:inputText>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <h:outputLabel for="bbSubject" value="Letter subject" />
+                </td>
+                <td class="eps-table-divider-min">
+                    <p:inputText id="bbSubject" maxlength="255" value="#{bbConfig.settings.emailSubject}" styleClass="eps-input">
+                        <p:ajax event="change" execute="@this" />
+                    </p:inputText>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:outputLabel for="bbPrefix" value="Letter prefix" />
+                </td>
+
+                <td class="eps-table-divider-min">
+                    <p:inputTextarea id="bbPrefix" rows="5" cols="150" maxlength="255"  autoResize="false" value="#{bbConfig.settings.emailPrefix}" styleClass="eps-input">
+                        <p:ajax event="change" execute="@this" />
+                    </p:inputTextarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <h:outputLabel for="bbPostfix" value="Letter postfix" />
+                </td>
+                <td class="eps-table-divider-min">
+                    <p:inputTextarea id="bbPostfix" rows="5" cols="150" maxlength="255" autoResize="false" value="#{bbConfig.settings.emailPostfix}" styleClass="eps-input">
+                        <p:ajax event="change" execute="@this" />
+                    </p:inputTextarea>
+                </td>
+            </tr>
+
+        </table>
+
+		<h3>Cleanup settings</h3>
+        <table class="eps-transparent-table">
+        	<tr>
+            	<td>
+            		<h:outputLabel for="bbNeverShowPrecleanDialog" value="Show pre-clean dialog after click Big Button start" />
+            	</td>
+            	<td class="eps-table-divider-min">
+	            	<p:selectBooleanCheckbox id="showDialog" value="#{bbConfig.settings.showPreCeanDialog}"/>
+           		</td>
+       		</tr>
+        </table>
+
+        <p:tooltip value="Recipients for alerts all big button events" for="bbRecipients" />
+        <p:tooltip value="Recipients for alerts on passed events" for="bbPassedRecipients" />
+        <p:tooltip value="Recipients for alerts on failed events" for="bbFailedRecipients" />
+
+        <p:separator/>
+
+        <table class="eps-transparent-table">
+            <tr>
+                <td>
+                    <p:commandButton value="Apply" actionListener="#{bbConfig.applySettings}"
+                                     icon="ui-icon-circle-check"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</h:form>
+</html>

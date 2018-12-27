@@ -1,0 +1,12 @@
+archivesBaseName = 'service-ntg'
+
+dependencies {
+	if (incremental_build) {
+        testCompile group: 'com.exactpro.sf', name: 'service-tcpip', version: "${artifactVersion}"
+        testCompile "com.exactpro.sf:service-tcpip:${artifactVersion}:tests@jar"
+		} else {
+			testCompile project(':BackEnd:Service:service-tcpip')
+			testCompile project(path:':BackEnd:Service:service-tcpip', configuration: 'testArtifacts')						
+		}	
+	        
+}

@@ -1,0 +1,228 @@
+html, body.eps-application {
+	margin: 0;
+	padding: 0;
+	font-family:Trebuchet MS, Arial, Helvetica, sans-serif;
+	font-size: 13px;
+	color: #202020;
+	line-height: 1.4;
+	min-height: 600px;
+	height: 100%;
+	width: 100%;
+	min-width: 1024px;
+	overflow: auto;
+}
+
+.eps-application .ui-widget {
+	font-size: 12px;
+	font-family:Trebuchet MS, Arial, Helvetica, sans-serif;
+}
+
+.eps-application .ui-widget-header {
+	background-color: #b7bdc6;
+	color: black;
+}
+
+.eps-application .ui-dialog .ui-dialog-buttonpane.ui-dialog-footer {
+	text-align: center;
+}
+
+.eps-application .eps-dialog-button-wrapper {
+	text-align: center;
+	padding: 5px;
+	box-sizing: border-box;
+}
+
+.eps-application .ui-state-hover {
+	background-color: #e0e0e0;
+}
+
+.eps-main-table tr.ui-state-hover {
+	background-color: #E3EBF5;
+	border: none;
+}
+
+.eps-application .ui-inputtextarea {
+	border: none;
+	border-bottom: 1px solid #cdcdcd;
+	border-radius: 0;
+	background-color: white;
+}
+
+.eps-application .ui-button.ui-state-default {
+	border-radius: 3px;
+	background-color: #cbd0d8;
+}
+
+.eps-application .ui-button:hover {
+	background-color: #91C8CC;
+	color: black;
+}
+
+.eps-application .ui-button:active {
+	background-color: #91C8CC;
+	color: black;
+}
+
+.eps-application .ui-button:focus {
+	background-color: #e5e5e5;
+}
+
+.eps-application .ui-button-text {
+	font-size: 13px;
+	font-weight: normal;
+}
+
+.eps-application .ui-button-text:active {
+	color: black;
+}
+
+.eps-application .ui-inputfield.eps-input {
+	border: 1px solid #e5e5e5;
+	line-height: 1.4em;
+}
+
+input.eps-input {
+	background-color: white;
+}
+
+.eps-input input.ui-inputfield {
+	background-color: white;
+}
+
+.ui-widget.eps-input {
+	background-color: white;
+}
+
+.ui-inputfield.eps-input:focus {
+	border: 1px solid #a3c1e3;
+	-webkit-box-shadow: 0px 0px 5px 2px rgba(213,226,242,1);
+	-moz-box-shadow: 0px 0px 5px 2px rgba(213,226,242,1);
+	box-shadow: 0px 0px 5px 2px rgba(213,226,242,1);
+}
+
+.eps-application .eps-icon-link {
+	display: inline-block;
+    vertical-align: middle;
+}
+
+.ui-datatable.eps-main-table th, .ui-datatable.eps-main-table td {
+	border: none;
+}
+
+.ui-treetable.eps-main-table th, .ui-treetable.eps-main-table td {
+	border: none;
+}
+
+.eps-application .ui-widget-content {
+	border: none;
+}
+
+.eps-application .ui-selectonemenu-item td {
+	border: 1px solid #cdcdcd;
+}
+
+.eps-application .eps-main-table tr {
+	height: 35px;
+	border-bottom: 1px solid #ccc;
+}
+
+.eps-application .eps-main-table tr.ui-state-highlight {
+	border-left: none;
+	border-bottom-color: #cdcdcd;
+}
+
+.eps-main-table thead tr {
+	border: none;
+}
+
+.eps-application .ui-datatable-scrollable-header {
+	border-color: #a5a5a5;
+	border-radius: 5px 5px 0 0;
+	color: black;
+}
+
+.eps-application .ui-fileupload-content .ui-progressbar {
+	border: 1px solid #cdcdcd;
+}
+
+.eps-application .ui-fileupload-preview {
+	background: url("#{resource['sf:/images/icons-bl.png']}") -44px -66px;
+}
+
+.eps-application .ui-fileupload-buttonbar {
+	border: none;
+	background-color: #fafafa;
+}
+
+.eps-application .ui-fileupload-files {
+	width: 100%
+}
+
+.eps-application .ui-fileupload-files tr td:nth-child(1) {
+	max-width: 20px;
+}
+
+.eps-application .ui-fileupload-files tr td:nth-child(2) {
+	max-width: 445px;
+	width: 445px;
+}
+
+.eps-application .ui-fileupload-files tr td:nth-child(3) {
+	width: 100px;
+}
+
+.eps-application .ui-fileupload-files tr td:nth-child(4) {
+	width: 200px;
+}
+
+.eps-application .ui-fileupload-files tr td:nth-child(5) {
+	width: 37px;
+}
+
+.eps-application .ui-fileupload-files td {
+	word-wrap: break-word;
+}
+
+.eps-application .ui-widget-overlay {
+	background: #131313;
+	opacity: .3;
+
+}
+.eps-application .ui-widget-shadow {
+	background: #131313;
+}
+
+.eps-application .ui-state-active .ui-icon {
+	background-image: url("#{resource['sf:css/jqueryui/images/ui-icons_222222_256x240.png']}");
+}
+
+.eps-application .ui-growl {
+	word-wrap: break-word;
+	top: 50px;
+}
+
+.eps-application .ui-datatable-footer {
+	border-radius: 0px;
+}
+
+.ui-slider.ui-slider-horizontal.ui-widget.ui-widget-content.ui-corner-all {
+	border: 1px solid #cdcdcd;
+}
+
+/* 8 bit color*/
+
+@media all and (max-color: 4) {
+
+	.eps-application .ui-inputfield {
+		border: 1px solid black;
+	}
+
+	.eps-application .ui-state-disabled {
+		opacity: 0.50;
+	}
+}
+
+.eps-footer-wrapper {
+	background-color: #fff;
+	z-index: 1000;
+}

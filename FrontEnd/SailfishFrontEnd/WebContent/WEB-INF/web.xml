@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+   version="3.0"> 
+  
+  <!-- 
+  <context-param>
+        <param-name>workspace</param-name>
+        <param-value>.</param-value>
+  </context-param>
+  -->
+
+	<servlet>
+		<servlet-name>JVMPID</servlet-name>
+        <servlet-class>com.exactpro.sf.testwebgui.servlets.JVMProcessIDServlet</servlet-class>
+		<init-param>
+			<param-name>fileName</param-name>
+			<param-value>PIDFILE.pid</param-value>
+		</init-param>
+		<load-on-startup>0</load-on-startup>
+	</servlet>
+   
+  <servlet>
+  
+    <servlet-name>Context Servlet</servlet-name>
+      <servlet-class>com.exactpro.sf.testwebgui.servlets.SFContextServlet</servlet-class>
+
+    <!--
+	<init-param>
+		<param-name>workspace</param-name>
+		<param-value>.</param-value>
+	</init-param>
+	 -->
+	
+	<load-on-startup>1</load-on-startup>
+	
+  </servlet>
+  
+  	<servlet>
+		
+		<servlet-name>Polling</servlet-name>
+        <servlet-class>com.exactpro.sf.testwebgui.servlets.PollingServlet</servlet-class>
+		
+		<init-param>
+			<param-name>pollingInterval</param-name>
+			<param-value>1000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>sessionDestroyInterval</param-name>
+			<param-value>30000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>max_count_processed</param-name>
+			<param-value>250</param-value>
+		</init-param>
+		<init-param>
+			<param-name>requestTimeout</param-name>
+			<param-value>5000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>threadCount</param-name>
+			<param-value>4</param-value>
+		</init-param>
+		
+		<load-on-startup>2</load-on-startup>
+		<async-supported>true</async-supported>
+		
+	</servlet>
+  	
+	<servlet-mapping>
+		<servlet-name>Polling</servlet-name>
+		<url-pattern>/polling/*</url-pattern>
+	</servlet-mapping>
+	
+	<servlet>
+    	<servlet-name>Faces Servlet</servlet-name>
+    	<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    	<load-on-startup>3</load-on-startup>
+	</servlet>
+  
+	<servlet-mapping>
+    	<servlet-name>Faces Servlet</servlet-name>
+    	<url-pattern>*.xhtml</url-pattern>
+	</servlet-mapping>
+  
+  	<servlet>
+		<servlet-name>Report servlet</servlet-name>
+        <servlet-class>com.exactpro.sf.testwebgui.servlets.ReportServlet</servlet-class>
+		<load-on-startup>4</load-on-startup>
+	</servlet>
+  
+  	<servlet-mapping>
+    	<servlet-name>Report servlet</servlet-name>
+    	<url-pattern>/report/*</url-pattern>
+	</servlet-mapping>
+
+	<listener>
+		<display-name>SFContextListener</display-name>
+        <listener-class>com.exactpro.sf.testwebgui.servlets.SFContextListener</listener-class>
+	</listener>
+  
+	<welcome-file-list>
+    	<welcome-file>index.xhtml</welcome-file>
+	</welcome-file-list>
+	
+	<error-page>
+        <error-code>404</error-code>
+        <location>/error/not_found.xhtml</location>
+	</error-page>
+	
+	<error-page>
+		<exception-type>java.lang.Exception</exception-type>
+		<location>/error/internal_error.xhtml</location>
+	</error-page>
+	  
+	<context-param>
+    	<param-name>javax.faces.PROJECT_STAGE</param-name>
+    	<param-value>Production</param-value>
+	</context-param>
+  
+	<display-name>Welcome to Sailfish</display-name>
+  
+	<description>
+    	Welcome to Sailfish
+	</description>
+  
+	<context-param>
+    	<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+    	<param-value>client</param-value>
+	</context-param>
+	
+	<env-entry>
+	   <env-entry-name>jsf/ClientSideSecretKey</env-entry-name>
+	   <env-entry-type>java.lang.String</env-entry-type>
+	   <env-entry-value>am9kZXRlcHf0b2hhY2tlcg==</env-entry-value>
+	 </env-entry>
+  
+	<context-param>
+        <param-name>facelets.SKIP_COMMENTS</param-name>
+        <param-value>true</param-value>
+	</context-param>
+  
+	<context-param>	
+		<param-name>primefaces.THEME</param-name>	
+		<param-value>none</param-value>	
+	</context-param>
+  
+	<filter>
+    	<filter-name>PrimeFaces FileUpload Filter</filter-name>
+    	<filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+	</filter>
+	
+	<filter>
+    	<filter-name>Cache control filter</filter-name>
+        <filter-class>com.exactpro.sf.testwebgui.servlets.filters.CacheControlFilter</filter-class>
+	</filter>
+	
+	<filter>
+    	<filter-name>Restrictions Filter</filter-name>
+        <filter-class>com.exactpro.sf.testwebgui.servlets.filters.RestrictionsFilter</filter-class>
+	</filter>
+	
+	<filter>
+    	<filter-name>Application errors filter</filter-name>
+        <filter-class>com.exactpro.sf.testwebgui.servlets.filters.ApplicationErrorFilter</filter-class>
+	</filter>
+  
+	<filter-mapping>
+    	<filter-name>PrimeFaces FileUpload Filter</filter-name>
+    	<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+	
+	<filter-mapping>
+    	<filter-name>Cache control filter</filter-name>
+    	<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+	
+	<filter-mapping>
+    	<filter-name>Restrictions Filter</filter-name>
+    	<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+	
+	<filter-mapping>
+    	<filter-name>Application errors filter</filter-name>
+    	<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+	
+	
+	<!-- SF REST API -->
+	<servlet>
+        <servlet-name>RESTAPIServlet</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.exactpro.sf.testwebgui.restapi.SFAPIEntryPoint</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RESTAPIServlet</servlet-name>
+        <url-pattern>/sfapi/*</url-pattern>
+    </servlet-mapping>
+	
+	<!-- Uncomment to force authentication -->
+	
+	<!-- 
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Authentication required</web-resource-name>
+			<url-pattern>/index.xhtml</url-pattern>
+			<url-pattern>/messages.xhtml</url-pattern>
+			<url-pattern>/configuration.xhtml</url-pattern>
+			<url-pattern>/dictionaries.xhtml</url-pattern>
+			<url-pattern>/download.xhtml</url-pattern>
+			<url-pattern>/environment.xhtml</url-pattern>
+			<url-pattern>/help.xhtml</url-pattern>
+			<url-pattern>/exceleditor.xhtml</url-pattern>
+			<url-pattern>/plaineditor.xhtml</url-pattern>
+			<url-pattern>/guieditor.xhtml</url-pattern>
+			<url-pattern>/scriptruns.xhtml</url-pattern>
+			<url-pattern>/statistics/index.xhtml</url-pattern>
+			<url-pattern>/statistics/index.xhtml</url-pattern>
+			<url-pattern>/statistics/loadingCard.xhtml</url-pattern>
+			<url-pattern>/statistics/serviceNotAvailable.xhtml</url-pattern>
+			<url-pattern>/statistics/statistics_aggregated.xhtml</url-pattern>
+			<url-pattern>/statistics/statistics_mr.xhtml</url-pattern>
+			<url-pattern>/statistics/statistics_tcr.xhtml</url-pattern>
+			<url-pattern>/statistics/tagged_sets_comparison.xhtml</url-pattern>
+			<url-pattern>/statistics/tags.xhtml</url-pattern>
+			<url-pattern>/statistics/tg.xhtml</url-pattern>
+			<http-method>GET</http-method>
+			<http-method>POST</http-method>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>user</role-name>
+			<role-name>admin</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>NONE</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+
+	<login-config>
+    	<auth-method>FORM</auth-method>
+    	<form-login-config>
+        	<form-login-page>/authentication.xhtml</form-login-page>
+        	<form-error-page>/authentication.xhtml</form-error-page>
+    	</form-login-config>
+	</login-config>
+	 -->
+	
+</web-app>

@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+ "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"  
+    xmlns:h="http://java.sun.com/jsf/html"  
+    xmlns:f="http://java.sun.com/jsf/core"  
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets">  
+<h:head>
+
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>  
+    <title>Error :: Exactpro Systems LLC :: Sailfish 3.1</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>    
+    <h:outputStylesheet library="sf" name="css/custom.css"/>	
+    <h:outputStylesheet library="sf" name="css/error.css"/>    
+
+    <script type="text/javascript">
+		function toggleStacktrace() {
+		        var div = document.getElementById('stacktrace');
+		        var toggler = document.getElementById('stacktrace-toggler');
+		        div.style.display = div.style.display == 'block' ? 'none' : 'block';
+		        toggler.innerHTML = toggler.innerHTML == 'Show details' ? 'Hide details' : 'Show details'; 
+		}
+	</script>
+
+</h:head>
+<h:body>   
+
+    <div class="eps-container">
+
+        <div class="eps-main">
+            <div class="eps-error-header">
+                <span class="error-code"> 
+                    #{errorBean.statusCode}.
+                </span>
+                <span class="eps-error-name">
+                    Internal Sailfish error.
+                </span>
+            </div>
+            <div class="eps-error-details clearfix">
+                <h:graphicImage library="sf" name="images/exactpro/SF_gray.jpg" class="eps-sf-logo"/>
+
+                <table>
+                    <tr> <td style="font-weight: bold"> Path:     </td> <td> #{errorBean.requestUri}     </td> </tr>
+                    <tr> <td style="font-weight: bold"> Exception:</td> <td> #{errorBean.exceptionClass} </td> </tr>
+                    <tr> <td style="font-weight: bold"> Message:  </td> <td> #{errorBean.errorMessage}   </td> </tr>
+                </table>
+                
+                <p style="margin-top: 50px;"> <a id="stacktrace-toggler" onclick="toggleStacktrace();">Show details</a></p>
+                
+            </div>
+
+            <div id="stacktrace" class="stacktrace" style="display: none;">
+                <pre>
+#{errorBean.stackTrace}
+                </pre>
+            </div>
+        </div>
+
+    </div>
+    
+</h:body>  
+</html>  
+

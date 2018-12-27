@@ -1,0 +1,289 @@
+.eps-outer-link {
+	color:#3482d9;
+	text-decoration:underline;
+	outline: none !important;
+}
+
+.eps-outer-link:hover {
+	color:#202020;
+}
+
+.eps-ajax-link {
+    text-decoration: none;
+    border-bottom: 1px dashed;
+}
+
+.eps-container {
+	position: absolute;
+	top: 40px;
+	bottom:45px;  
+	left: 0;
+	right: 0;
+	min-width: 1024px;
+}
+
+.eps-main {
+	padding-bottom: 75px;
+	height: 100%;
+	box-sizing: border-box;
+}
+
+.eps-matrix-text-container {
+	position: absolute;
+	top: 120px;
+	bottom: 45px;
+	left: 0;
+	right: 0;
+	overflow: auto;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+}
+
+@media screen and (max-width: 1637px) {
+    .eps-matrix-text-container {
+        top: 125px;
+    }
+}
+
+.eps-footer-wrapper {
+	border-top: 1px solid #cdcdcd;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.eps-footer-content {
+	width: 960px;
+	margin: 0 auto;
+	vertical-align: middle;
+}
+
+.eps-footer-left {
+	float:left;
+}
+
+.eps-footer-right {
+	float:right;
+}
+
+.eps-channel-warning {
+	z-index: 555555;
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	border: 1px solid #de4848;
+	display: none;
+	padding: 5px 10px;
+	background: #f6f0d4;
+	box-shadow: #151515 2px 2px 20px 1px;
+	max-width: 350px;
+	border-radius: 4px;
+}
+
+.eps-custom-icon.ui-icon {
+	background-image: url("#{resource['sf:/images/icons-bl.png']}");
+	width: 20px;
+	height: 20px;
+	margin: 3px 2px 2px 2px;
+}
+
+.eps-custom-icon-new-next {
+	background-position: -85px -13px;
+}
+
+.eps-custom-icon + span {
+	display: inline-block;
+	margin-top: 4px;
+}
+
+.eps-faces-messages-icon {
+	position: relative;
+	top: 3px;
+}
+
+.eps-faces-form {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	bottom: 55px;
+	right: 20px;
+}
+
+.eps-faces-msg-table.ui-datatable-scrollable.eps-main-table th {
+	background-color: #b7bdc6;
+}
+
+.eps-faces-msg-table .ui-datatable-scrollable-header-box {
+	margin-right: 0 !important;
+}
+
+.eps-faces-msg-table .ui-datatable-scrollable-body {
+	border: 1px solid #cdcdcd;
+	margin-right: 0 !important;
+	overflow-x: hidden;
+}
+
+.eps-clear-faces-messages-btn {
+	margin-top: 12px;
+}
+
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background: #e0e0e0;
+	opacity: 0.5;
+}
+
+/*icons*/
+.eps-custom-icon-view {
+	background-position: -44px -176px;
+}
+
+.eps-custom-icon-first {
+	background-position: -0px -110px;
+}
+
+.eps-custom-icon-prev {
+	background-position: -22px -110px;
+}
+
+.eps-custom-icon-next {
+	background-position: -44px -110px;
+}
+
+.eps-custom-icon-last {
+	background-position: -66px -110px;
+}
+
+.eps-custom-icon-new {
+	background-position: -44px -66px;
+}
+
+.eps-custom-icon-close {
+	background-position: -110px -44px;
+}
+
+.eps-custom-icon-delete {
+	background-position: -88px 0;
+}
+
+.eps-custom-icon-download {
+	background-position: -110px 0;
+}
+
+.eps-custom-icon-download-zip {
+	background-position: -66px -88px;
+}
+
+.eps-custom-icon-arrow-right {
+	background-position: -66px 0;
+}
+
+.eps-custom-icon-goto {
+	background-position: -132px -44px;
+}
+
+.eps-custom-icon-play {
+	background-position: -0px 0;
+}
+
+.eps-custom-icon-plus {
+	background-position: -44px 0;
+}
+
+.eps-custom-icon-pencil {
+	background-position: -66px -44px;
+}
+
+.eps-custom-icon-sign {
+	background-position: -44px -44px;
+}
+
+.eps-custom-icon-upload {
+	background-position: -22px 0;
+}
+
+.eps-custom-icon-copy {
+	background-position: 0 -44px;
+}
+
+.eps-custom-icon-stop {
+	background-position: 0 -22px;
+}
+
+.eps-custom-icon-gear {
+	background-position: -154px 0px;
+}
+
+.eps-custom-icon-back {
+	background-position: -22px -44px;
+}
+
+.eps-custom-icon-checkbox-checked {
+	background-position: -22px -66px;
+}
+
+.eps-custom-icon-checkbox-unchecked {
+	background-position: -88px -22px;
+}
+
+.eps-custom-icon-folder.ui-icon {
+	background-position: -44px -88px;
+	width: 22px;
+}
+
+.eps-custom-icon-search {
+	background-position: -88px -44px;
+}
+
+.eps-custom-icon-cancel.ui-icon {
+	background-position: -110px -44px;
+	width: 21px;
+}
+
+.eps-custom-icon-refresh {
+	background-position: 0 -66px;
+}
+
+.eps-custom-icon-filter {
+    background-position: -44px -22px;
+}
+
+.eps-custom-icon-stop-all {
+    background-position: 0px -22px;
+}
+
+.eps-custom-icon-pause-all {
+    background-position: -22px -22px;
+}
+
+.eps-custom-icon-resume-all {
+	background-position: -132px 0;
+}
+
+.eps-custom-icon-calc {
+	background-position: 0px -88px;
+}
+
+.eps-custom-icon-arrow-up {
+    background-position: -120px -60px;
+}
+
+.eps-custom-icon-arrow-down {
+    background-position: -100px -60px;
+}
+
+.eps-custom-icon-disk {
+    background-position: -66px -176px;
+}
+
+.top-aligned-table td {
+	vertical-align: top;
+}

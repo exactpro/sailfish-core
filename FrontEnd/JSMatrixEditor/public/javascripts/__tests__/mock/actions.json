@@ -1,0 +1,860 @@
+{
+    "actions": {
+        "send": {
+            "name": "send",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": "SEND"
+        },
+        "reinitService": {
+            "name": "reinitService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "isConnectedService": {
+            "name": "isConnectedService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "isDisconnectedService": {
+            "name": "isDisconnectedService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "sendDirty": {
+            "name": "sendDirty",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": "SENDDIRTY"
+        },
+        "connectService": {
+            "name": "connectService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "disconnectService": {
+            "name": "disconnectService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "receive": {
+            "name": "receive",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": "RECEIVE"
+        },
+        "count": {
+            "name": "count",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": "RECEIVE"
+        },
+        "startService": {
+            "name": "startService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "stopService": {
+            "name": "stopService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "deleteService": {
+            "name": "deleteService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "createService": {
+            "name": "createService",
+            "required": [
+                "#service_name",
+                "service_type"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "initService": {
+            "name": "initService",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "convertProperty": {
+            "name": "convertProperty",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FIX_Logon": {
+            "name": "FIX_Logon",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FIX_Logout": {
+            "name": "FIX_Logout",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "SetVariables": {
+            "name": "SetVariables",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FIX_WaitMessageWithTags": {
+            "name": "FIX_WaitMessageWithTags",
+            "required": [],
+            "optional": [
+                "RealTags",
+                "WaitingTags",
+                "WaitingGroup"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "FIX_CountApplicationTotal": {
+            "name": "FIX_CountApplicationTotal",
+            "required": [
+                "#service_name",
+                "#timeout",
+                "#messages_count"
+            ],
+            "optional": [
+                "#check_point",
+                "#double_precision",
+                "#system_precision"
+            ],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "FIX_CountAdminTotal": {
+            "name": "FIX_CountAdminTotal",
+            "required": [
+                "#service_name",
+                "#timeout",
+                "#messages_count"
+            ],
+            "optional": [
+                "#check_point",
+                "#double_precision",
+                "#system_precision"
+            ],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "FIX_Disconnect": {
+            "name": "FIX_Disconnect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FIX_CheckLatency": {
+            "name": "FIX_CheckLatency",
+            "required": [
+                "StartRef",
+                "EndRef",
+                "LatencyMin",
+                "LatencyMax"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "execString": {
+            "name": "execString",
+            "required": [],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "DumpHash": {
+            "name": "DumpHash",
+            "required": [],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "ExpireDate": {
+            "name": "ExpireDate",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ExpireTime": {
+            "name": "ExpireTime",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ClOrdID": {
+            "name": "ClOrdID",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "TransactTime": {
+            "name": "TransactTime",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "SendMessage": {
+            "name": "SendMessage",
+            "required": [
+                "#service_name",
+                "BeginString",
+                "MsgType"
+            ],
+            "optional": [
+                "#reference",
+                "#timeout",
+                "#double_precision",
+                "DuplicateTag",
+                "DirtyCheckSum",
+                "DirtyBodyLength"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "SendRawMessage": {
+            "name": "SendRawMessage",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [
+                "#reference",
+                "#timeout",
+                "#double_precision",
+                "RawMessage"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "WaitMessage": {
+            "name": "WaitMessage",
+            "required": [
+                "#service_name",
+                "#timeout"
+            ],
+            "optional": [
+                "#reference",
+                "#double_precision",
+                "BeginString",
+                "MsgType"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "CountMessages": {
+            "name": "CountMessages",
+            "required": [
+                "#service_name",
+                "#timeout",
+                "BeginString"
+            ],
+            "optional": [
+                "#double_precision",
+                "MsgType"
+            ],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "Connect": {
+            "name": "Connect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference",
+                "#double_precision"
+            ],
+            "direction": null
+        },
+        "Disconnect": {
+            "name": "Disconnect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference",
+                "#double_precision"
+            ],
+            "direction": null
+        },
+        "CheckConnect": {
+            "name": "CheckConnect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference",
+                "#double_precision"
+            ],
+            "direction": null
+        },
+        "CheckDisconnect": {
+            "name": "CheckDisconnect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference",
+                "#double_precision"
+            ],
+            "direction": null
+        },
+        "WaitDisconnect": {
+            "name": "WaitDisconnect",
+            "required": [
+                "#service_name",
+                "#timeout"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "addMsgSeqNum": {
+            "name": "addMsgSeqNum",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "setMsgSeqNum": {
+            "name": "setMsgSeqNum",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ITCH_Connect": {
+            "name": "ITCH_Connect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference",
+                "#double_precision"
+            ],
+            "direction": null
+        },
+        "ITCH_Disconnect": {
+            "name": "ITCH_Disconnect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference",
+                "#double_precision"
+            ],
+            "direction": null
+        },
+        "ITCH_CountApplicationTotal": {
+            "name": "ITCH_CountApplicationTotal",
+            "required": [
+                "#service_name",
+                "#timeout",
+                "#messages_count"
+            ],
+            "optional": [
+                "#check_point",
+                "#double_precision"
+            ],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "ITCH_CountAdminTotal": {
+            "name": "ITCH_CountAdminTotal",
+            "required": [
+                "#service_name",
+                "#timeout",
+                "#messages_count"
+            ],
+            "optional": [
+                "#check_point",
+                "#double_precision"
+            ],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "ITCH_WaitDisconnect": {
+            "name": "ITCH_WaitDisconnect",
+            "required": [
+                "#service_name",
+                "#timeout"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ITCH_CheckConnection": {
+            "name": "ITCH_CheckConnection",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "reinit": {
+            "name": "reinit",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "checkStatus": {
+            "name": "checkStatus",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "GetCheckPoint": {
+            "name": "GetCheckPoint",
+            "required": [
+                "#reference"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "GetAdminCheckPoint": {
+            "name": "GetAdminCheckPoint",
+            "required": [
+                "#reference"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "WaitTillTime": {
+            "name": "WaitTillTime",
+            "required": [
+                "till_date"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "CheckLogon": {
+            "name": "CheckLogon",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "CleanMessages": {
+            "name": "CleanMessages",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "CleanAppMessages": {
+            "name": "CleanAppMessages",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "CleanAdminMessages": {
+            "name": "CleanAdminMessages",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "Compare": {
+            "name": "Compare",
+            "required": [
+                "#expression"
+            ],
+            "optional": [
+                "#reference"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "OpenFile": {
+            "name": "OpenFile",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "CloseFile": {
+            "name": "CloseFile",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "AskForContinue": {
+            "name": "AskForContinue",
+            "required": [
+                "#description"
+            ],
+            "optional": [
+                "#timeout"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "TimeSync": {
+            "name": "TimeSync",
+            "required": [
+                "TimeSync"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "InitCounter": {
+            "name": "InitCounter",
+            "required": [
+                "CounterInitialValue",
+                "CounterIncrementStep"
+            ],
+            "optional": [
+                "CounterID"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "GetSettings": {
+            "name": "GetSettings",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "GetEnvironmentName": {
+            "name": "GetEnvironmentName",
+            "required": [
+                "#reference"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "CheckMessage": {
+            "name": "CheckMessage",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "Sleep": {
+            "name": "Sleep",
+            "required": [
+                "#timeout"
+            ],
+            "optional": [],
+            "forbidden": [
+                "#reference"
+            ],
+            "direction": null
+        },
+        "ShortClOrdID": {
+            "name": "ShortClOrdID",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "CurrentDate": {
+            "name": "CurrentDate",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FAST_Disconnect": {
+            "name": "FAST_Disconnect",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FAST_Connect": {
+            "name": "FAST_Connect",
+            "required": [
+                "#service_name",
+                "#timeout"
+            ],
+            "optional": [
+                "#check_point",
+                "#reference",
+                "#double_precision"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "FAST_isConnected": {
+            "name": "FAST_isConnected",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "FAST_isDisconnected": {
+            "name": "FAST_isDisconnected",
+            "required": [
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "saveMessage": {
+            "name": "saveMessage",
+            "required": [
+                "#service_name",
+                "#reference"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "loadMessage": {
+            "name": "loadMessage",
+            "required": [
+                "#service_name",
+                "#reference"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "EMAIL_SendMessage": {
+            "name": "EMAIL_SendMessage",
+            "required": [
+                "#service_name",
+                "Recipients",
+                "Subject",
+                "Body"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "EMAIL_ReceiveMessage": {
+            "name": "EMAIL_ReceiveMessage",
+            "required": [
+                "#service_name",
+                "#timeout",
+                "Recipients",
+                "Subject",
+                "Body"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        }
+    },
+    "statements": {
+        "REPEAT": {
+            "name": "REPEAT",
+            "required": [
+                "#messages_count"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "NEXT": {
+            "name": "NEXT",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "SETSTATIC": {
+            "name": "SetStatic",
+            "required": [
+                "#reference",
+                "#static_type"
+            ],
+            "optional": [
+                "#static_value"
+            ],
+            "forbidden": [],
+            "direction": null
+        },
+        "DEFINESERVICENAME": {
+            "name": "DefineServiceName",
+            "required": [
+                "#reference",
+                "#service_name"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "DEFINEHEADER": {
+            "name": "DefineHeader",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "IF": {
+            "name": "IF",
+            "required": [
+                "#condition"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ELIF": {
+            "name": "ELIF",
+            "required": [
+                "#condition"
+            ],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ELSE": {
+            "name": "ELSE",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        },
+        "ENDIF": {
+            "name": "ENDIF",
+            "required": [],
+            "optional": [],
+            "forbidden": [],
+            "direction": null
+        }
+    }
+}

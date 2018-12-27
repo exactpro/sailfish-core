@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+ "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<title>Authentication :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+	<h:outputStylesheet library="sf" name="css/reset.css" />
+
+	<h:outputStylesheet library="sf" name="css/estyles.css" />
+	<h:outputStylesheet library="sf" name="css/auth.css" />
+
+	<script>
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+
+		if (!window.console) console = {};
+
+		console.log = console.log || function() {};
+		console.warn = console.warn || function() {};
+		console.error = console.error || function() {};
+		console.info = console.info || function() {};
+	</script>
+
+</h:head>
+<h:body styleClass="eps-application">
+
+	<div class="eps-container">
+	
+		<div class="eps-main">
+			
+			<div class="eps-wrapper-auth">
+			
+				<div>
+					<h1 class="eps-sign-in-header"> Sign-in </h1>
+				</div>
+			
+				<div class="eps-auth-block">
+				
+					<h:graphicImage library="sf" name="images/exactpro/SF_white.png" class="eps-sf-logo" />
+	
+					<h:form id="form" prependId="false">
+					
+						<p:growl id="messages" sticky="false" life="5000" showDetail="true" />
+					
+						<p:focus context="form"/>
+						
+						<h:panelGrid columns="2" cellpadding="5" styleClass="eps-auth-panel">
+											
+							<h:outputLabel for="username" value="Username:" />
+							<p:inputText value="#{authBean.username}" id="username"
+								required="true" label="username" requiredMessage="Username is empty" />
+			
+							<h:outputLabel for="password" value="Password:" />
+							<p:password value="#{authBean.password}" id="password"
+								required="true" label="password" requiredMessage="Password is empty"/>
+							
+						</h:panelGrid>
+						
+						<div style="margin-top:8pt;text-align:center;">
+							<p:commandButton value="Login" id="login" ajax="false" actionListener="#{authBean.login()}" />
+						</div>
+						
+					</h:form>
+				
+				</div>
+			
+			</div>
+			
+		</div>
+		
+	</div>
+
+</h:body>
+</html>
+

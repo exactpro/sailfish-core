@@ -1,0 +1,58 @@
+#execute,#add_to_report,#description,#outcome,#service_name,#template,#reference,#timeout,#action,#static_type,#static_value,#message_type,#dictionary,FInteger
+,,,,,,,,global block start,,,,,
+,,proceed execution?,,,,afc,,AskForContinue,,,,,
+,,,,,,,,global block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,b1,,block start,,,,,
+,,,,fake,,sm1,,send,,,SimpleMessage,TestAML,${b1.FInteger}
+,,,,fake,,,1000,receive,,,SimpleMessage,TestAML,${sm.FInteger}
+,,include block inside of another block,,,b2,br2,,include block,,,,,${b1.FInteger} + 1
+,,,,,,,,block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,b2,,block start,,,,,
+,,,,fake,,sm2,,send,,,SimpleMessage,TestAML,${b2.FInteger}
+,,,,,,,,block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,tc1,,test case start,,,,,
+,,,,,,s1,,SetStatic,Integer,1,,,
+,,,,,b1,br1,,include block,,,,,%{s1}
+,,,,,,,,test case end,,,,,
+,,,,,,,,,,,,,
+,,it will be skipped due to specified ranged,,,,tc2,,test case start,,,,,
+,,,,,,s1,,SetStatic,Integer,1,,,
+,,,,fake,,,,send,,,SimpleMessage,TestAML,2
+,,,,,,,,test case end,,,,,
+,,,,,,,,,,,,,
+,,it will be skipped because it has no executable actions,,,,tc3,,test case start,,,,,
+n,,,,,,s1,,SetStatic,Integer,1,,,
+n,,,,,,,,send,,,SimpleMessage,TestAML,3
+,,,,,,,,test case end,,,,,
+,,,,,,,,,,,,,
+,,,,,,tc4,,test case start,,,,,
+,,,,,,s2,,SetStatic,Integer,1,,,
+,,test static reference availability,,,b1,,,include block,,,,,%{s1} + %{s2}
+,,,,,,,,test case end,,,,,
+,,,,,,,,,,,,,
+,,test outcome processing,,,,tc5,,test case start,,,,,
+,,,og1:on1,,,ref1,1000,receive,,,SimpleMessage,TestAML,1
+,,,og1:on2,,,ref2,1000,receive,,,SimpleMessage,TestAML,2
+,,,og2:on1,,,ref3,1000,receive,,,SimpleMessage,TestAML,3
+,,,og2:on2,,,ref4,1000,receive,,,SimpleMessage,TestAML,4
+,,,,,,,,test case end,,,,,
+,,,,,,,,,,,,,
+,n,,,,,,,first block start,,,,,
+,,,,fake,,,,connectService,,,,,
+,,,,,b2,,,include block,,,,,
+,,,,,,,,first block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,last block start,,,,,
+,,,,fake,,,,disconnectService,,,,,
+,,,,,,,,last block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,before test case block start,,,,,
+,,,,fake,,,1000,isConnectedService,,,,,
+,,,,,,,,before test case block end,,,,,
+,,,,,,,,,,,,,
+,,,,,,,,after test case block start,,,,,
+,,,,,,,1000,Sleep,,,,,
+,,,,,,,,after test case block end,,,,,

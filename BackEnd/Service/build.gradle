@@ -1,0 +1,27 @@
+allprojects {
+	checkCompatibility.enabled = false
+}
+
+subprojects {
+	dependencies {
+		if (incremental_build) {
+            compile "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
+            testCompile "com.exactpro.sf:sailfish-core:${artifactCoreVersion}:tests@jar"
+	    } else {
+	        compile project(':BackEnd:Core:sailfish-core')
+	        testCompile project(path:':BackEnd:Core:sailfish-core', configuration: 'testArtifacts')
+	    }
+	    
+	    testRuntime 'org.apache.derby:derby:10.14.2.0'
+
+        testCompile 'org.mockito:mockito-core:2.23.4'
+    }
+    
+    collectDependencies {
+        publishResource = ''
+    }
+}
+
+// Setting this property to true will make the artifactoryPublish task
+// skip this module (in our case, the root module):
+artifactoryPublish.skip = true

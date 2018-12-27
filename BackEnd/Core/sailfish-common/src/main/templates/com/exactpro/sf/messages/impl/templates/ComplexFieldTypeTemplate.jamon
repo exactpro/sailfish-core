@@ -1,0 +1,239 @@
+<%escape #n>
+
+<%args>
+  String[] distPackagePath;
+  boolean underscoreAsPackageSeparator;
+  String packageName;
+  String typeName;
+  String namespaceName;
+  java.util.List<IFieldStructure> fields;
+</%args>
+
+<%import>
+  com.exactpro.sf.common.impl.messages.BaseMessage;
+  com.exactpro.sf.common.messages.structures.*;
+  com.exactpro.sf.common.util.CodeGenUtils;
+</%import>
+
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+package <% packageName %>;
+
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.BaseMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.FieldNotFoundException;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+@SuppressWarnings("unused")
+public class <% typeName %> extends BaseMessage
+{
+
+	public <% typeName %>()
+	{
+		super(DefaultMessageFactory.getFactory().createMessage("<% typeName %>", "<% namespaceName %>"));
+	}
+
+    public <% typeName %>(String name, String namespace)
+    {
+        super(DefaultMessageFactory.getFactory().createMessage(name, namespace));
+    }
+
+	public <% typeName %>(IMessage msg)
+	{
+		super(msg);
+	}
+
+    @Override
+    public <% typeName %> clone() {
+        return (<% typeName %>)super.clone();
+    }
+
+	<%for int i = 0; i < fields.size(); ++i %>
+	<%java>
+		IFieldStructure field = fields.get(i);
+		String fieldTypeName = CodeGenUtils.getTypeName(field, distPackagePath, underscoreAsPackageSeparator);
+		String methodCall = "";
+	</%java>
+
+	<%if ( field.isCollection() ) %>
+			public <% typeName %> add<% field.getName() %>(<% fieldTypeName %> value)
+			{
+				<%java>
+					String elType = "";
+					if ( field.isComplex() ) {
+						elType = "IMessage";
+					}
+					else
+					{
+						elType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
+					}
+				</%java>
+
+				List<<% elType %>> list = this.msg.<List<<% elType %>>>getField("<% field.getName() %>");
+
+				if(list == null){
+					list = new ArrayList<<% elType %>>();
+					this.msg.addField("<% field.getName() %>" ,list);
+				}
+
+				<%if ( field.isComplex() ) %>
+					list.add(value.getMessage());
+					return this;
+				<%elseif ( field.isEnum() ) %>
+					list.add(value.getValue());
+					return this;
+				<%elseif ( field.isSimple() ) %>
+					list.add(value);
+					return this;
+				<%else>
+					throw new EPSCommonException("Unknown type");
+				</%if>
+			}
+
+			public List<<% fieldTypeName %>> get<% field.getName() %>()
+			{
+				<%java>
+					String elemType = "";
+					if ( field.isComplex() ) {
+						elemType = "IMessage";
+					}
+					else
+					{
+						elemType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
+					}
+				</%java>
+
+                List<<% elemType %>> value = this.msg.<List<<% elemType %>>>getField("<% field.getName() %>");
+
+                if(value == null)
+                {
+                    throw new FieldNotFoundException(" <% field.getName() %> ");
+                }
+
+                List<<% fieldTypeName %>> list = new ArrayList<<% fieldTypeName %>>();
+
+				<%java>
+					if ( field.isEnum() )
+					{
+						String simpleJavaType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
+						methodCall =  fieldTypeName + ".getEnumValue((" + simpleJavaType + ")element)";
+					}
+					else if ( field.isComplex() )
+					{
+						methodCall = "new " + fieldTypeName + "((IMessage)element)";
+					}
+					else
+					{
+						String simpleJavaType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
+						methodCall = "(" + simpleJavaType + ")element";
+					}
+				</%java>
+
+				for( <% elemType %> element : value )
+				{
+					list.add(<% methodCall %>);
+				}
+
+				return list;
+			}
+	<%else>
+
+	public <% fieldTypeName %> get<% field.getName() %>()
+	{
+		Object value = this.msg.getField("<% field.getName() %>");
+
+		if(value == null)
+		{
+			throw new FieldNotFoundException(" <% field.getName() %> ");
+		}
+
+		<%java>
+			if ( field.isEnum() )
+			{
+				String simpleJavaType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
+				methodCall =  fieldTypeName + ".getEnumValue((" + simpleJavaType + ")value)";
+			}
+			else if ( field.isComplex() )
+			{
+				methodCall = "(" + fieldTypeName + ")value";
+			}
+			else
+			{
+				String simpleJavaType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
+				methodCall = "(" + simpleJavaType + ")value";
+			}
+		</%java>
+
+		return <% methodCall %>;
+	}
+
+	public <% typeName %> set<% field.getName() %>(<% fieldTypeName %> value)
+	{
+		<%java>
+
+			if ( field.isEnum() ){
+				methodCall = ".getValue()";
+			}
+			else if ( field.isComplex() ){
+				if(!field.isCollection()){
+					methodCall = ".getMessage()";
+				}
+			} else {
+				methodCall = "";
+			}
+		</%java>
+
+		this.msg.addField("<% field.getName() %>", value<% methodCall %>);
+		return this;
+	}
+	</%if>
+
+    public IFilter get<% field.getName() %>Filter()
+    {
+        return this.msg.getField("<% field.getName() %>");
+    }
+
+    public <% typeName %> set<% field.getName() %>Filter(IFilter filter)
+    {
+        this.msg.addField("<% field.getName() %>", filter);
+        return this;
+    }
+
+    public <% typeName %> remove<% field.getName() %>()
+    {
+        this.msg.removeField("<% field.getName() %>");
+        return this;
+    }
+
+	public boolean isSet<% field.getName() %>()
+	{
+		return this.msg.getField("<% field.getName() %>") != null;
+	}
+	
+	public boolean isFilter<% field.getName() %>()
+    {
+        return this.msg.getField("<% field.getName() %>") instanceof IFilter;
+    }
+	</%for>
+}

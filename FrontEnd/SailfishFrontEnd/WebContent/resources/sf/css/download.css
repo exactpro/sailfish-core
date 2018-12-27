@@ -1,0 +1,90 @@
+
+    .highlight {
+        background-color: #FFFF88;
+    }
+
+
+.eps-download-form {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.eps-download-header {
+	height: 80px;
+	width: 1024px;
+	margin: 0 auto;
+	box-sizing: border-box;
+}
+
+.eps-path-wrapper {
+	width: 60%;
+	float: left;
+	box-sizing: border-box;
+	padding: 26px;
+    height: 100%;
+    position: relative;
+}
+
+.eps-download-header .eps-download-toolbar {
+	float: right;
+	box-sizing: border-box;
+	text-align: right;
+	padding: 21px;
+}
+
+.eps-download-toolbar > ul > li.ui-menuitem {
+	margin: 0 5px;
+	box-sizing: border-box;
+}
+
+.eps-path-wrapper .eps-go-button {
+	position: absolute;
+	right: 0;
+	top: 12pt;
+}
+
+.eps-path-label {
+	display: inline-block;
+	margin-top: 6px;
+    margin-right: 10px;
+    vertical-align: top;
+}
+
+.eps-path-input {
+	margin-right: 5px;
+	vertical-align: top;
+}
+
+.eps-download-table thead#folderContent_head th {
+	text-align: left;
+	background-color: #b7bdc6;
+}
+
+.eps-download-row.ui-state-highlight {
+	border: none;
+}
+
+.eps-download-table {
+	position:absolute;
+	top: 80px;
+	bottom: 0;
+	left:0;
+	right:0;
+	margin-left:auto;
+	margin-right:auto;
+	width: 1024px;
+	box-sizing: border-box;
+}
+
+.ui-datatable-scrollable-body {
+    max-height: 90%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    border-bottom: 1px solid #cdcdcd;
+    border-left: 1px solid #cdcdcd;
+    border-right: 1px solid #cdcdcd;
+}

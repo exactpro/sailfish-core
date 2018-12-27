@@ -1,0 +1,706 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="TestAML">
+	<fields>
+		<!-- FIX TYPES -->
+		<field reference="TCharacter" id="CHAR" name="CHAR"/>
+		<field reference="TString" id="STRING" name="STRING"/>
+		<field reference="TDateTime" id="UTCTIMESTAMP" name="UTCTIMESTAMP"/>
+		<field reference="TDate" id="UTCDATE" name="UTCDATE"/>
+		<field reference="TTime" id="UTCTIME" name="UTCTIME"/>
+		<field reference="TBigDecimal" id="QTY" name="QTY"/>
+		<field reference="TBigDecimal" id="PRICE" name="PRICE"/>
+		<field reference="TInteger" id="SEQNUM" name="SEQNUM"/>
+		<field reference="TString" id="CURRENCY" name="CURRENCY"/>
+		<field reference="TBigDecimal" id="PERCENTAGE" name="PERCENTAGE"/>
+		<field reference="TBigDecimal" id="AMT" name="AMT"/>
+		<field reference="TInteger" id="INT" name="INT"/>
+		<field reference="TBoolean" id="BOOLEAN" name="BOOLEAN"/>
+		<field reference="TString" id="LOCALMKTDATE" name="LOCALMKTDATE"/>
+		<field reference="TBigDecimal" id="FLOAT" name="FLOAT"/>
+		<field reference="TString" id="EXCHANGE" name="EXCHANGE"/>
+		<field reference="TShort" id="Byte" name="Byte"/>
+		<field reference="TShort" id="UInt8" name="UInt8"/>
+		<field reference="TLong" id="UInt32" name="UInt32"/>
+		<field reference="TBigDecimal" id="UInt64" name="UInt64"/>
+		<field reference="TDouble" id="Size4" name="Size4"/>
+		<field reference="TDouble" id="Price4" name="Price4"/>
+		<field reference="TString" id="Alpha" name="Alpha"/>
+		<field reference="TString" id="X1" name="X1"/>
+		<field reference="TString" id="X2" name="X2"/>
+		<field reference="TString" id="X8" name="X8"/>
+		<field reference="TString" id="X50" name="X50"/>
+		<field reference="TLong" id="N8" name="N8"/>
+		<field reference="TDouble" id="P10" name="P10"/>
+		<field reference="TString" id="S1" name="S1"/>
+		<field reference="TString" id="S2" name="S2"/>
+		<field reference="TString" id="S4" name="S4"/>
+		<field reference="TShort" id="N2" name="N2"/>
+		<field reference="TLong" id="N4" name="N4"/>
+		<field reference="TDouble" id="P4" name="P4"/>
+		<field reference="N2" id="Quantity_2" name="Quantity_2"/>
+		<field reference="P4" id="Price_4" name="Price_4"/>
+		<!-- EXAMPLE TYPES -->
+		<field type="java.lang.Character" id="TCharacter" name="TCharacter"/>
+		<field type="java.lang.String" id="TString" name="TString"/>
+		<field type="java.lang.Boolean" id="TBoolean" name="TBoolean"/>
+		<field type="java.lang.Byte" id="TByte" name="TByte"/>
+		<field type="java.lang.Short" id="TShort" name="TShort"/>
+		<field type="java.lang.Integer" id="TInteger" name="TInteger"/>
+		<field type="java.lang.Long" id="TLong" name="TLong"/>
+		<field type="java.lang.Float" id="TFloat" name="TFloat"/>
+		<field type="java.lang.Double" id="TDouble" name="TDouble"/>
+		<field type="java.math.BigDecimal" id="TBigDecimal" name="TBigDecimal"/>
+		<field type="java.time.LocalDateTime" id="TDateTime" name="TDateTime"/>
+		<field type="java.time.LocalDate" id="TDate" name="TDate"/>
+		<field type="java.time.LocalTime" id="TTime" name="TTime"/>
+		<!-- FIX FIELDS -->
+        <field reference="TCharacter" id="SideFIX" name="SideFIX">
+			<value name="BUY">1</value>
+			<value name="SELL">2</value>
+		</field>
+		<field reference="TCharacter" id="OrdType" name="OrdType">
+			<value name="MARKET">1</value>
+			<value name="LIMIT">2</value>
+			<value name="PEGGED">P</value>
+		</field>
+		<field reference="TCharacter" id="TimeInForceFIX" name="TimeInForceFIX">
+			<value name="DAY">0</value>
+			<value name="GOOD_TILL_CANCEL">1</value>
+			<value name="IMMEDIATE_OR_CANCEL">3</value>
+			<value name="GOOD_TILL_DATE">6</value>
+		</field>
+		<field reference="TCharacter" id="AccountType" name="AccountType">
+			<value name="CLIENT">1</value>
+			<value name="HOUSE">3</value>
+		</field>
+		<field reference="TCharacter" id="OrderCapacity" name="OrderCapacity">
+			<value name="AGENCY">A</value>
+		</field>
+		<field reference="TInteger" id="PartyRole" name="PartyRole">
+			<value name="EXECUTING_FIRM">1</value>
+			<value name="CLEARING_FIRM">4</value>
+			<value name="TRADER_ID">12</value>
+			<value name="COUNTERPARTY">17</value>
+			<value name="TRADER_GROUP">76</value>
+		</field>
+		<field reference="TCharacter" id="PartyIDSource" name="PartyIDSource">
+			<value name="PROPRIETARY_CUSTOM_CODE">D</value>
+		</field>
+		<field reference="TCharacter" id="ExecTypeFIX" name="ExecTypeFIX">
+			<value name="NEW">0</value>
+			<value name="REPLACED">5</value>
+			<value name="REJECTED">8</value>
+			<value name="EXPIRED">C</value>
+			<value name="TRADE">F</value>
+		</field>
+		<field reference="TString" id="ExecInst" name="ExecInst">
+			<value name="NOT_HELD">1</value>
+			<value name="WORK">2</value>
+			<value name="GO_ALONG">3</value>
+			<value name="NO_CROSS">A</value>
+			<value name="OK_TO_CROSS">B</value>
+			<value name="CALL_FIRST">C</value>
+		</field>
+		<field reference="TCharacter" id="OrdStatusFIX" name="OrdStatusFIX">
+			<value name="NEW">0</value>
+			<value name="PARTIALLY_FILLED">1</value>
+			<value name="FILLED">2</value>
+			<value name="REJECTED">8</value>
+			<value name="EXPIRED">C</value>
+		</field>
+        <!-- ITCH FIELDS -->
+		<field reference="TShort" id="MessageType" name="MessageType">
+			<value name="LoginRequest">1</value>
+			<value name="LoginResponse">2</value>
+			<value name="ReplayRequest">3</value>
+			<value name="ReplayResponse">4</value>
+			<value name="AddOrder">65</value>
+			<value name="OrderDeleted">68</value>
+			<value name="OrderExecuted">69</value>
+			<value name="SnapshotRequest">129</value>
+			<value name="SnapshotResponse">130</value>
+			<value name="SnapshotComplete">131</value>
+		</field>
+		<field reference="TShort" id="LoginResponseStatus" name="LoginResponseStatus">
+			<value name="LoginAccepted">65</value>
+		</field>
+		<field reference="TShort" id="ReplayResponseStatus" name="ReplayResponseStatus">
+			<value name="RequestAccepted">65</value>
+		</field>
+		<field reference="TShort" id="SnapshotResponseStatus" name="SnapshotResponseStatus">
+			<value name="RequestAccepted">65</value>
+		</field>
+        <field reference="TShort" id="SideITCH" name="SideITCH">
+			<value name="BUY">66</value>
+			<value name="SELL">83</value>
+		</field>
+		<field reference="TString" id="ReceivedMessageType" name="ReceivedMessageType">
+			<value name="UserConnection">TC</value>
+			<value name="OutOfSequence">TO</value>
+		</field>
+		<field reference="TString" id="InstrumentStatus" name="InstrumentStatus">
+			<value name="Normal">N</value>
+		</field>
+		<!-- EXAMPLE FIELDS -->
+		<field reference="TByte" id="TByteEnum" name="TByteEnum">
+			<value name="One">1</value>
+            <value name="Two">2</value>
+            <value name="Three">3</value>
+		</field>
+		<field reference="TCharacter" id="TCharacterEnum" name="TCharacterEnum">
+			<value name="LetterA">a</value>
+            <value name="LetterB">b</value>
+            <value name="LetterC">c</value>
+		</field>
+		<field reference="TShort" id="TShortEnum" name="TShortEnum">
+			<value name="One">1</value>
+            <value name="Two">2</value>
+            <value name="Three">3</value>
+		</field>
+		<field reference="TInteger" id="TIntegerEnum" name="TIntegerEnum">
+			<value name="Ten">10</value>
+            <value name="Thousand">1000</value>
+		</field>
+		<field reference="TString" id="TStringEnum" name="TStringEnum">
+			<value name="Enum1">Foo</value>
+            <value name="Enum2">Bar</value>
+            <value name="EnumX">x</value>
+		</field>
+		<field reference="TInteger" id="OrderSubType" name="OrderSubType">
+			<value name="Order">0</value>
+		</field>
+		<field reference="TInteger" id="MassCancelResponse" name="MassCancelResponse">
+			<value name="Accepted">7</value>
+		</field>
+		<field reference="TInteger" id="ClearingAccount" name="ClearingAccount">
+			<value name="House">3</value>
+		</field>
+        <field reference="TString" id="ExecType" name="ExecType">
+			<value name="New">0</value>
+			<value name="Modified">5</value>
+			<value name="Rejected">8</value>
+			<value name="Trade">F</value>
+		</field>
+        <field reference="TInteger" id="OrdStatus" name="OrdStatus">
+			<value name="New">0</value>
+			<value name="PartiallyFilled">1</value>
+			<value name="Filled">2</value>
+			<value name="Rejected">8</value>
+		</field>
+        <field reference="TInteger" id="Side" name="Side">
+			<value name="Buy">1</value>
+			<value name="Sell">2</value>
+		</field>
+		<field reference="TInteger" id="Container" name="Container">
+			<value name="None">0</value>
+			<value name="Main">1</value>
+		</field>
+        <field reference="TInteger" id="TimeInForce" name="TimeInForce">
+			<value name="Day">0</value>
+		</field>
+		<field reference="TInteger" id="OrderType" name="OrderType">
+			<value name="Limit">2</value>
+		</field>
+	</fields>
+	<messages>
+		<!-- FIX COMPONENTS -->
+		<message id="NoApplIDs" name="NoApplIDs">
+			<field reference="STRING" name="RefApplID"/>
+		</message>
+		<message id="NoPartyIDs" name="NoPartyIDs">
+			<field reference="STRING" name="PartyID"/>
+			<field reference="PartyIDSource" name="PartyIDSource"/>
+			<field reference="PartyRole" name="PartyRole"/>
+		</message>
+		<message id="TradingParty_NoPartyIDs" name="TradingParty_NoPartyIDs">
+			<field reference="STRING" name="PartyID"/>
+			<field reference="PartyIDSource" name="PartyIDSource"/>
+			<field reference="PartyRole" name="PartyRole"/>
+		</message>
+		<message id="TradingParty" name="TradingParty">
+			<field isCollection="true" reference="NoPartyIDs" name="NoPartyIDs"/>
+		</message>
+		<message id="ApplIDRequestGrp" name="ApplIDRequestGrp">
+			<field isCollection="true" reference="NoApplIDs" name="NoApplIDs"/>
+		</message>
+		<message id="Instrument_NoSecurityAltID" name="Instrument_NoSecurityAltID">
+			<field reference="STRING" name="SecurityAltID"/>
+			<field reference="STRING" name="SecurityAltIDSource"/>
+		</message>
+		<message id="Instrument" name="Instrument">
+			<field reference="STRING" name="Symbol"/>
+			<field reference="STRING" name="SecurityID"/>
+			<field reference="STRING" name="SecurityIDSource"/>
+			<field isCollection="true" reference="Instrument_NoSecurityAltID" name="NoSecurityAltID"/>
+		</message>
+		<message id="YieldData" name="YieldData">
+			<field reference="STRING" name="YieldType"/>
+			<field reference="PERCENTAGE" name="Yield"/>
+		</message>
+		<message id="CommissionData" name="CommissionData">
+			<field reference="AMT" name="Commission"/>
+			<field reference="CHAR" name="CommType"/>
+			<field reference="CURRENCY" name="CommCurrency"/>
+		</message>
+		<message id="TrdCapRptSideGrp_NoSides" name="TrdCapRptSideGrp_NoSides">
+			<field reference="SideFIX" name="Side"/>
+			<field reference="STRING" name="OrderID"/>
+			<field reference="CURRENCY" name="Currency"/>
+			<field reference="AMT" name="GrossTradeAmt"/>
+			<field reference="AMT" name="AccruedInterestAmt"/>
+			<field reference="AMT" name="NetMoney"/>
+			<field reference="TradingParty" name="TradingParty"/>
+			<field reference="CommissionData" name="CommissionData"/>
+		</message>
+		<message id="TrdCapRptAckSideGrp_NoSides" name="TrdCapRptAckSideGrp_NoSides">
+			<field reference="SideFIX" name="Side"/>
+			<field reference="STRING" name="OrderID"/>
+			<field reference="CURRENCY" name="Currency"/>
+			<field reference="AMT" name="GrossTradeAmt"/>
+			<field reference="AMT" name="AccruedInterestAmt"/>
+			<field reference="AMT" name="NetMoney"/>
+			<field reference="TradingParty" name="TradingParty"/>
+			<field reference="CommissionData" name="CommissionData"/>
+		</message>
+		<message id="TrdCapRptSideGrp" name="TrdCapRptSideGrp">
+			<field isCollection="true" reference="TrdCapRptSideGrp_NoSides" name="NoSides"/>
+		</message>
+		<message id="TrdCapRptAckSideGrp" name="TrdCapRptAckSideGrp">
+			<field isCollection="true" reference="TrdCapRptAckSideGrp_NoSides" name="NoSides"/>
+		</message>
+		<!-- FIX MESSAGES -->
+		<message name="ExecutionReportFIX">
+			<field reference="STRING" name="ClOrdID"/>
+			<field reference="ExecTypeFIX" name="ExecType"/>
+			<field reference="OrdStatusFIX" name="OrdStatus"/>
+			<field reference="UTCTIMESTAMP" name="TransactTime"/>
+			<field reference="UTCTIME" name="TransactTimeOnly"/>
+			<field reference="UTCDATE" name="TransactDateOnly"/>
+			<field reference="SideFIX" name="Side"/>
+			<field reference="OrdType" name="OrdType"/>
+			<field reference="TimeInForceFIX" name="TimeInForce"/>
+			<field reference="QTY" name="OrderQty"/>
+			<field reference="QTY" name="OrderQty2"/>
+			<field reference="PRICE" name="Price"/>
+			<field reference="QTY" name="LeavesQty"/>
+			<field reference="QTY" name="DisplayQty"/>
+			<field reference="QTY" name="CumQty"/>
+			<field reference="QTY" name="LastQty"/>
+			<field reference="PRICE" name="LastPx"/>
+			<field reference="STRING" name="SecurityIDSource"/>
+			<field reference="EXCHANGE" name="SecurityExchange"/>
+			<field reference="STRING" name="SecurityID"/>
+			<field reference="TradingParty" name="TradingParty"/>
+			<field reference="SEQNUM" name="MsgSeqNum"/>
+			<field reference="CURRENCY" name="Currency"/>
+			<field reference="AccountType" name="AccountType"/>
+			<field reference="OrderCapacity" name="OrderCapacity"/>
+			<field reference="CHAR" name="RoutingInst"/>
+			<field reference="QTY" name="MinQty"/>
+			<field reference="STRING" name="ExpireTime"/>
+			<field reference="LOCALMKTDATE" name="ExpireDate"/>
+		</message>
+		<message name="NewOrderSingle">
+			<field reference="STRING" name="ClOrdID"/>
+			<field reference="UTCTIMESTAMP" name="TransactTime"/>
+			<field reference="UTCTIME" name="TransactTimeOnly"/>
+			<field reference="UTCDATE" name="TransactDateOnly"/>
+			<field reference="SideFIX" name="Side"/>
+			<field reference="STRING" name="Symbol"/>
+			<field reference="OrdType" name="OrdType"/>
+			<field reference="TimeInForceFIX" name="TimeInForce"/>
+			<field reference="QTY" name="OrderQty"/>
+			<field reference="QTY" name="OrderQty2"/>
+			<field reference="PRICE" name="Price"/>
+			<field reference="QTY" name="MinQty"/>
+			<field reference="QTY" name="DisplayQty"/>
+			<field reference="AccountType" name="AccountType"/>
+			<field reference="OrderCapacity" name="OrderCapacity"/>
+			<field reference="CHAR" name="RoutingInst"/>
+			<field reference="TradingParty" name="TradingParty"/>
+			<field reference="ExecInst" name="ExecInst"/>
+			<field reference="STRING" name="SecurityIDSource"/>
+			<field reference="EXCHANGE" name="SecurityExchange"/>
+			<field reference="STRING" name="SecurityID"/>
+			<field reference="CURRENCY" name="Currency"/>
+			<field reference="STRING" name="ExpireTime"/>
+			<field reference="LOCALMKTDATE" name="ExpireDate"/>
+		</message>
+		<message name="OrderCancelReplaceRequest">
+			<field reference="STRING" name="ClOrdID"/>
+			<field reference="UTCTIMESTAMP" name="TransactTime"/>
+			<field reference="UTCTIME" name="TransactTimeOnly"/>
+			<field reference="UTCDATE" name="TransactDateOnly"/>
+			<field reference="SideFIX" name="Side"/>
+			<field reference="STRING" name="Symbol"/>
+			<field reference="OrdType" name="OrdType"/>
+			<field reference="QTY" name="OrderQty"/>
+			<field reference="PRICE" name="Price"/>
+			<field reference="QTY" name="DisplayQty"/>
+			<field reference="STRING" name="OrigClOrdID"/>
+			<field reference="TradingParty" name="TradingParty"/>
+			<field reference="SEQNUM" name="MsgSeqNum"/>
+		</message>
+		<message name="TradeCaptureReport">
+			<field reference="STRING" name="TradeReportID"/>
+			<field reference="INT" name="TradeReportTransType"/>
+			<field reference="INT" name="TradeReportType"/>
+			<field reference="BOOLEAN" name="PreviouslyReported"/>
+			<field reference="INT" name="PriceType"/>
+			<field reference="INT" name="Product"/>
+			<field reference="LOCALMKTDATE" name="MaturityDate"/>
+			<field reference="LOCALMKTDATE" name="IssueDate"/>
+			<field reference="FLOAT" name="ContractMultiplier"/>
+			<field reference="PERCENTAGE" name="CouponRate"/>
+			<field reference="STRING" name="Issuer"/>
+			<field reference="STRING" name="SecurityDesc"/>
+			<field reference="LOCALMKTDATE" name="DatedDate"/>
+			<field reference="LOCALMKTDATE" name="InterestAccrualDate"/>
+			<field reference="INT" name="QtyType"/>
+			<field reference="QTY" name="LastQty"/>
+			<field reference="PRICE" name="LastPx"/>
+			<field reference="LOCALMKTDATE" name="TradeDate"/>
+			<field reference="UTCTIMESTAMP" name="TransactTime"/>
+			<field reference="UTCTIME" name="TransactTimeOnly"/>
+			<field reference="UTCDATE" name="TransactDateOnly"/>
+			<field reference="STRING" name="SettlType"/>
+			<field reference="LOCALMKTDATE" name="SettlDate"/>
+			<field reference="STRING" name="MatchStatus"/>
+			<field reference="Instrument" name="Instrument"/>
+			<field reference="YieldData" name="YieldData"/>
+			<field reference="TrdCapRptAckSideGrp" name="TrdCapRptAckSideGrp"/>
+			<field reference="INT" name="TrdRptStatus"/>
+			<field reference="STRING" name="SecondaryTradeReportID"/>
+		</message>
+		<message name="TradeCaptureReportAck">
+			<field reference="STRING" name="TradeReportID"/>
+			<field reference="INT" name="TradeReportTransType"/>
+			<field reference="INT" name="TradeReportType"/>
+			<field reference="BOOLEAN" name="PreviouslyReported"/>
+			<field reference="INT" name="PriceType"/>
+			<field reference="INT" name="Product"/>
+			<field reference="LOCALMKTDATE" name="MaturityDate"/>
+			<field reference="LOCALMKTDATE" name="IssueDate"/>
+			<field reference="FLOAT" name="ContractMultiplier"/>
+			<field reference="PERCENTAGE" name="CouponRate"/>
+			<field reference="STRING" name="Issuer"/>
+			<field reference="STRING" name="SecurityDesc"/>
+			<field reference="LOCALMKTDATE" name="DatedDate"/>
+			<field reference="LOCALMKTDATE" name="InterestAccrualDate"/>
+			<field reference="INT" name="QtyType"/>
+			<field reference="QTY" name="LastQty"/>
+			<field reference="PRICE" name="LastPx"/>
+			<field reference="LOCALMKTDATE" name="TradeDate"/>
+			<field reference="UTCTIMESTAMP" name="TransactTime"/>
+			<field reference="UTCTIME" name="TransactTimeOnly"/>
+			<field reference="UTCDATE" name="TransactDateOnly"/>
+			<field reference="STRING" name="SettlType"/>
+			<field reference="LOCALMKTDATE" name="SettlDate"/>
+			<field reference="STRING" name="MatchStatus"/>
+			<field reference="Instrument" name="Instrument"/>
+			<field reference="YieldData" name="YieldData"/>
+			<field reference="TrdCapRptSideGrp" name="TrdCapRptSideGrp"/>
+			<field reference="INT" name="TrdRptStatus"/>
+			<field reference="STRING" name="SecondaryTradeReportID"/>
+			<field reference="STRING" name="Text"/>
+			<field reference="STRING" name="RejectText"/>
+		</message>
+		<message name="ApplicationMessageRequest"/>
+        <!-- ITCH MESSAGES -->
+		<message name="LoginRequest">
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="Alpha" name="Username"/>
+			<field reference="Alpha" name="Password"/>
+		</message>
+		<message name="LoginResponse">
+			<field reference="LoginResponseStatus" name="Status"/>
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="UInt8" name="Length"/>
+			<field reference="TInteger" name="MessageSequenceNumber"/>
+		</message>
+		<message name="ReplayRequest">
+			<field reference="UInt32" name="FirstMessage"/>
+			<field reference="Byte" name="MarketDataGroup"/>
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="UInt8" name="Length"/>
+		</message>
+		<message name="ReplayResponse">
+			<field reference="UInt32" name="FirstMessage"/>
+			<field reference="Byte" name="MarketDataGroup"/>
+			<field reference="ReplayResponseStatus" name="Status"/>
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="UInt8" name="Length"/>
+		</message>
+		<message name="SnapshotRequest">
+			<field reference="UInt32" name="InstrumentID"/>
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="Byte" name="SubBook"/>
+		</message>
+		<message name="SnapshotResponse">
+			<field reference="SnapshotResponseStatus" name="Status"/>
+			<field reference="MessageType" name="MessageType"/>
+		</message>
+		<message name="SnapshotComplete">
+			<field reference="UInt32" name="InstrumentID"/>
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="Byte" name="SubBook"/>
+		</message>
+		<message name="Statistics">
+			<field reference="Size4" name="Volume"/>
+			<field reference="Price4" name="VWAP"/>
+			<field reference="Price4" name="Turnover"/>
+		</message>
+		<message name="AddOrder">
+            <field reference="SideITCH" name="Side"/>
+			<field reference="UInt32" name="InstrumentID"/>
+			<field reference="Price4" name="Price"/>
+			<field reference="UInt64" name="OrderID"/>
+			<field reference="UInt64" name="Quantity"/>
+			<field reference="UInt8" name="Length"/>
+			<field reference="Byte" name="Flags"/>
+			<field reference="MessageType" name="MessageType"/>
+		</message>
+		<message name="OrderDeleted">
+			<field reference="UInt32" name="InstrumentID"/>
+			<field reference="UInt64" name="OrderID"/>
+			<field reference="UInt8" name="Length"/>
+			<field reference="MessageType" name="MessageType"/>
+		</message>
+		<message name="OrderExecuted">
+			<field reference="UInt32" name="InstrumentID"/>
+			<field reference="UInt64" name="OrderID"/>
+			<field reference="UInt64" name="TradeMatchID"/>
+			<field reference="UInt8" name="Length"/>
+			<field reference="Byte" name="Flags"/>
+			<field reference="MessageType" name="MessageType"/>
+			<field reference="UInt64" name="ExecutedQuantity"/>
+		</message>
+		<message id="ClearingData" name="ClearingData">
+			<field reference="X1" name="AccountType"/>
+			<field reference="X1" name="OpenClose"/>
+		</message>
+		<message id="OwnerData" name="OwnerData">
+			<field reference="X50" name="Memo"/>
+		</message>
+		<message name="OrderEntry">
+			<field reference="ClearingData" name="ClearingData"/>
+			<field reference="X2" name="Group"/>
+			<field reference="N8" name="Quantity"/>
+			<field reference="P10" name="Price"/>
+			<field reference="X1" name="PriceType"/>
+			<field reference="X8" name="GTDDate"/>
+		</message>
+		<message name="OrderAcknowledgement">
+			<field reference="X2" name="Group"/>
+			<field reference="N8" name="Quantity"/>
+			<field reference="P10" name="AssignedPrice"/>
+		</message>
+		<message name="UserConnection">
+			<field isCollection="true" reference="ReceivedMessageType" name="ReceivedMessageType"/>
+		</message>
+		<message id="BasicHeader" name="BasicHeader">
+			<field reference="TString" name="ApplicationID"/>
+			<field reference="TInteger" name="ServiceID"/>
+			<field reference="TString" name="LogicalTerminalAddress"/>
+			<field reference="TInteger" name="SessionNumber"/>
+			<field reference="TInteger" name="SequenceNumber"/>
+		</message>
+		<message id="ApplicationHeaderInput" name="ApplicationHeaderInput">
+			<field reference="TString" name="Input"/>
+			<field reference="TInteger" name="MessageType"/>
+			<field reference="TString" name="ReceiversAddress"/>
+			<field reference="TString" name="MessagePriority"/>
+			<field reference="TString" name="DeliveryMonitoring"/>
+			<field reference="TString" name="ObsolescencePeriod"/>
+		</message>
+		<message id="GENL" name="GENL">
+			<field reference="TString" name="SendersReference"/>
+			<field reference="TString" name="PreparationDateTime"/>
+			<field reference="TString" name="TradeType"/>
+			<field isCollection="true" reference="LINK" name="LINK"/>
+		</message>
+		<message id="LINK" name="LINK">
+			<field reference="TString" name="LinkedMessage"/>
+			<field reference="TString" name="VenueTradeReference"/>
+            <field reference="TString" name="TradeReference"/>
+			<field reference="TString" name="PreviousReference"/>
+		</message>
+		<message id="CONFDET" name="CONFDET">
+			<field reference="TString" name="TradeDateTime"/>
+			<field reference="TString" name="SettlementDate"/>
+			<field reference="TString" name="DealPriceAndCurrency_A"/>
+			<field reference="TString" name="DealPriceAndCurrency_B"/>
+			<field reference="TString" name="PlaceOfTrade"/>
+			<field reference="TString" name="SettlementAmountAndCurrency"/>
+			<field reference="TString" name="BuySellIndicator"/>
+			<field reference="TString" name="PaymentIndicator"/>
+			<field reference="CONFPRTY" name="CONFPRTY"/>
+			<field reference="TString" name="QuantityTraded"/>
+			<field reference="TString" name="FinancialInstrument"/>
+			<field reference="TString" name="TradeProcessingNarrative"/>
+		</message>
+		<message id="CONFPRTY" name="CONFPRTY">
+			<field reference="TString" name="Buyer_R"/>
+			<field reference="TString" name="Buyer_P"/>
+			<field reference="TString" name="Seller_R"/>
+			<field reference="TString" name="Seller_P"/>
+			<field reference="TString" name="AccountAtTradingVenue"/>
+			<field reference="TString" name="TradingPartyReference"/>
+			<field reference="TString" name="PartyNarrative"/>
+			<field reference="TString" name="PartyCapacity"/>
+			<field reference="TString" name="ClearingMember_R"/>
+			<field reference="TString" name="ClearingMember_P"/>
+            <field reference="TString" name="PositionAccount"/>
+		</message>
+		<message id="SETDET" name="SETDET">
+			<field reference="TString" name="TypeOfSettlementIndicator"/>
+			<field isCollection="true" reference="SETPRTY" name="SETPRTY"/>
+		</message>
+		<message id="SETPRTY" name="SETPRTY">
+			<field reference="TString" name="SettlementParty_Buyer_R"/>
+			<field reference="TString" name="SettlementParty_Buyer_P"/>
+			<field reference="TString" name="SettlementParty_Seller_R"/>
+			<field reference="TString" name="SettlementParty_Seller_P"/>
+            <field reference="TString" name="SettlementAccount"/>
+			<field reference="TString" name="PlaceOfSettlement"/>
+		</message>
+		<message id="OTHRPRTY" name="OTHRPRTY">
+            <field reference="TString" name="BICcode"/>
+		</message>
+		<message id="Trailer" name="Trailer">
+			<field reference="TString" name="MAC"/>
+			<field reference="TString" name="CHK"/>
+			<field reference="TString" name="TNG"/>
+		</message>
+		<message name="TradeConfirmation">
+			<field reference="BasicHeader" name="BasicHeader"/>
+			<field reference="ApplicationHeaderInput" name="ApplicationHeaderInput"/>
+			<field reference="GENL" name="GENL"/>
+			<field isCollection="true" reference="CONFDET" name="CONFDET"/>
+			<field reference="SETDET" name="SETDET"/>
+			<field reference="OTHRPRTY" name="OTHRPRTY"/>
+			<field reference="Trailer" name="Trailer"/>
+		</message>
+		<message id="MarketDepthLevel_2_4" name="MarketDepthLevel_2_4">
+			<field reference="N4" name="QuoteLevel"/>
+			<field reference="N4" name="BidNumberOfQuotes"/>
+			<field reference="Quantity_2" name="BidSize"/>
+			<field reference="Price_4" name="BidPrice"/>
+			<field reference="N4" name="AskNumberOfQuotes"/>
+			<field reference="Quantity_2" name="AskSize"/>
+			<field reference="Price_4" name="AskPrice"/>
+		</message>
+		<message name="MarketDepthInstrument_2_4">
+			<field reference="S2" name="GroupID"/>
+			<field reference="S4" name="Instrument"/>
+			<field reference="S1" name="GroupStatus"/>
+			<field reference="InstrumentStatus" name="InstrumentStatus"/>
+			<field reference="N4" name="NumberofLevel"/>
+			<field isCollection="true" reference="MarketDepthLevel_2_4" name="MarketDepthLevel_2_4"/>
+		</message>
+		<!-- EXAMPLE MESSAGES -->
+		<message id="SimpleMessage" name="SimpleMessage">
+			<field reference="TBoolean" name="FBoolean"/>
+			<field reference="TByte" name="FByte"/>
+			<field reference="TCharacter" name="FCharacter"/>
+			<field reference="TShort" name="FShort"/>
+			<field reference="TInteger" name="FInteger"/>
+			<field reference="TLong" name="FLong"/>
+			<field reference="TFloat" name="FFloat"/>
+			<field reference="TDouble" name="FDouble"/>
+			<field reference="TBigDecimal" name="FBigDecimal"/>
+			<field reference="TString" name="FString"/>
+			<field reference="TByteEnum" name="FByteEnum"/>
+			<field reference="TCharacterEnum" name="FCharacterEnum"/>
+			<field reference="TShortEnum" name="FShortEnum"/>
+			<field reference="TIntegerEnum" name="FIntegerEnum"/>
+			<field reference="TStringEnum" name="FStringEnum"/>
+            <field isServiceName="true" reference="TString" name="ServiceName"/>
+		</message>
+		<message name="ArrayMessage">
+			<field isCollection="true" reference="TBoolean" name="BooleanArray"/>
+			<field isCollection="true" reference="TInteger" name="IntegerArray"/>
+			<field isCollection="true" reference="TDouble" name="DoubleArray"/>
+			<field isCollection="true" reference="TBigDecimal" name="BigDecimalArray"/>
+			<field isCollection="true" reference="TString" name="StringArray"/>
+			<field isCollection="true" reference="SimpleMessage" name="MessageArray"/>
+            <field isCollection="true" reference="TByteEnum" name="FByteEnumArray"/>
+            <field isCollection="true" reference="TCharacterEnum" name="FCharacterEnumArray"/>
+            <field isCollection="true" reference="TShortEnum" name="FShortEnumArray"/>
+            <field isCollection="true" reference="TIntegerEnum" name="FIntegerEnumArray"/>
+            <field isCollection="true" reference="TStringEnum" name="FStringEnumArray"/>
+            <field isServiceName="true" isCollection="true" reference="TString" name="ServiceNames"/>
+		</message>
+		<message name="OrderMassCancelRequest">
+			<field reference="TString" name="ClOrdID"/>
+			<field reference="TInteger" name="InstrumentID"/>
+			<field reference="OrderSubType" name="OrderSubType"/>
+			<field reference="TInteger" name="MassCancelRequestType"/>
+		</message>
+		<message name="OrderMassCancelReport">
+			<field reference="TInteger" name="AppID"/>
+			<field reference="TString" name="ClOrdID"/>
+			<field reference="MassCancelResponse" name="MassCancelResponse"/>
+		</message>
+		<message name="NewQuote">
+			<field reference="TString" name="ClOrdID"/>
+			<field reference="TInteger" name="InstrumentID"/>
+			<field reference="TDouble" name="BidPrice"/>
+			<field reference="TLong" name="BidSize"/>
+			<field reference="TDouble" name="AskPrice"/>
+			<field reference="TLong" name="AskSize"/>
+			<field reference="ClearingAccount" name="ClearingAccount"/>
+			<field reference="TInteger" name="Capacity"/>
+		</message>
+        <message name="ExecutionReport">
+			<field reference="TInteger" name="AppID"/>
+			<field reference="TString" name="ClOrdID"/>
+			<field reference="TString" name="ExecID"/>
+            <field reference="ExecType" name="ExecType"/>
+            <field reference="OrdStatus" name="OrdStatus"/>
+            <field reference="Side" name="Side"/>
+			<field reference="TInteger" name="InstrumentID"/>
+			<field reference="TLong" name="DisplayQty"/>
+			<field reference="Container" name="Container"/>
+			<field reference="TLong" name="LeavesQty"/>
+			<field reference="TString" name="OrderID"/>
+			<field reference="TLong" name="ExecutedQty"/>
+			<field reference="TDouble" name="ExecutedPrice"/>
+			<field reference="TDouble" name="AvgPx"/>
+			<field reference="TString" name="TradeLiquidityIndicator"/>
+			<field reference="TLong" name="TradeMatchID"/>
+			<field reference="TString" name="CounterParty"/>
+		</message>
+		<message name="NewOrder">
+			<field reference="TString" name="ClOrdID"/>
+            <field reference="Side" name="Side"/>
+			<field reference="TInteger" name="InstrumentID"/>
+			<field reference="TLong" name="OrdQty"/>
+			<field reference="TLong" name="DisplayQty"/>
+            <field reference="TimeInForce" name="TimeInForce"/>
+			<field reference="TDouble" name="LimitPrice"/>
+			<field reference="OrderType" name="OrderType"/>
+			<field reference="OrderSubType" name="OrderSubType"/>
+			<field reference="ClearingAccount" name="ClearingAccount"/>
+			<field reference="TInteger" name="Capacity"/>
+			<field reference="TLong" name="BidSize"/>
+		</message>
+	</messages>
+</dictionary>

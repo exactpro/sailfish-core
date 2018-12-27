@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.fixprotocol.org/ns/fast/td/1.1" ns="OEquity">
+    <template name="StandardHeaderClientInitiated">
+        <string name="SendingTime" id="52" presence="mandatory"></string>
+    </template>
+    <template name="StandardTrailer">
+        <typeRef name="StandardTrailer"/>
+    </template>
+    <template name="LogonHeader">
+        <typeRef name="StandardHeader"/>
+        <string name="MessageType" id="35"></string>
+        <templateRef name="StandardHeaderClientInitiated"/>
+    </template>
+    <template name="Logon" id="1">
+        <typeRef name="Logon"/>
+        <templateRef name="LogonHeader"/>
+        <string name="ApplID" id="1180" presence="optional"></string>
+        <uInt32 name="HeartBtInt" id="108" presence="optional"></uInt32>
+        <string name="Username" id="553" presence="optional"></string>
+        <string name="Password" id="554" presence="optional"></string>
+        <string name="NewPassword" id="925" presence="optional"></string>
+        <uInt32 name="SessionStatus" id="1409" presence="optional"></uInt32>
+        <templateRef name="StandardTrailer"/>
+    </template>
+</templates>

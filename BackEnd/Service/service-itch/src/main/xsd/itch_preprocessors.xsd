@@ -1,0 +1,18 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+
+	<xsd:complexType name="preprocessor">
+		<xsd:sequence>
+			<xsd:element name="resource" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="title" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:element name="preprocessors">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="preprocessor" type="preprocessor" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

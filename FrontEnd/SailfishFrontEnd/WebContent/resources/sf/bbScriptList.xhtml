@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sf="http://java.sun.com/jsf/composite/sf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="scriptList" />
+</composite:interface>
+
+<composite:implementation>	
+	
+	<p:commandLink action="#{bbBean.setSelectedList(cc.attrs.scriptList)}" 
+		update=":list-dialog-form"
+		oncomplete="PF('listDialog').show()" styleClass="list-a">
+
+        <div class="script-list #{ cc.attrs.scriptList.rejected ? 'rejected'
+                                 : cc.attrs.scriptList.executionStatistics.numFailed ne 0 ? 'failed'
+                                 : cc.attrs.scriptList.executionStatistics.numConditionallyPassed ne 0 ? 'cond-passed'
+                                 : cc.attrs.scriptList.executionStatistics.numPassed ne 0 ? 'passed'
+                                 : '' }">
+
+            <div class="script-list-body">
+			
+				<div class="success-percent" title="Success %">
+					<h:outputText value="#{cc.attrs.scriptList.executionStatistics.successPercent}"
+						rendered="#{cc.attrs.scriptList.status.executed}"/>
+					<h:graphicImage library="sf" name="images/ic_loop_white_16dp_1x.png" styleClass="progress-icon" 
+						rendered="#{not cc.attrs.scriptList.status.executed and not cc.attrs.scriptList.rejected}"/>
+					<h:graphicImage library="sf" name="images/ic_little_white_bug.png"  styleClass="progress-icon"
+						rendered="#{cc.attrs.scriptList.rejected}"/>
+				</div> 
+				<div class="list-name">
+					<h:outputText value="#{of:abbreviate(cc.attrs.scriptList.uiName, 40)}"/>
+				</div>
+				<div class="progress">
+					<div class="pass-fail">
+						<ui:fragment rendered="#{cc.attrs.scriptList.executionStatistics.executionPercent ne 0}">
+							<span class="attribute num-pass" title="Number of passed scripts">#{cc.attrs.scriptList.executionStatistics.numPassed}</span>
+                            <span class="attribute num-cond-pass" title="Number of conditionally passed scripts">#{cc.attrs.scriptList.executionStatistics.numConditionallyPassed}</span>
+                            <span class="attribute num-fail"
+                                  title="Number of failed scripts">#{cc.attrs.scriptList.executionStatistics.numFailed}</span>
+						</ui:fragment>
+					</div>
+				</div> 
+			</div>
+			<ui:fragment rendered="#{not empty cc.attrs.scriptList.currentScript}">
+				<div class="active-matrix">
+					<div class="matrix-icon">
+						<span>⇒</span>
+					</div>
+					<div class="list-name">
+						<h:outputText value="#{of:abbreviate(cc.attrs.scriptList.currentScript.shortName, 40)}"/>
+					</div>
+					<div class="progress">
+						<div class="pass-fail">
+							<span class="attribute num-pass" title="Number of passed TCs">#{cc.attrs.scriptList.currentScript.statistics.numPassed}</span>
+                            <span class="attribute num-cond-pass" title="Number of conditionally passed TCs">#{cc.attrs.scriptList.currentScript.statistics.numConditionallyPassed}</span>
+                            <span class="attribute num-fail"
+                                  title="Number of failed TCs">#{cc.attrs.scriptList.currentScript.statistics.numFailed}</span>
+						</div>
+					</div>
+					
+				</div>
+			</ui:fragment>
+		</div>
+	</p:commandLink>
+	
+</composite:implementation>
+</html>

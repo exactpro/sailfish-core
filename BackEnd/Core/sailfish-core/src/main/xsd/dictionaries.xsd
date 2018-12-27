@@ -1,0 +1,21 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+
+	<xsd:complexType name="dictionary">
+		<xsd:sequence>
+			<xsd:element name="resource" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="utilityClassName" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="utilityURI" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="factoryClassName" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="title" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:element name="dictionaries">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="dictionary" type="dictionary" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

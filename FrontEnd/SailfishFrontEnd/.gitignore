@@ -1,0 +1,9 @@
+/*.class
+/build
+/bin
+/release
+/source
+/gensrc
+/*.iml
+/srcgen
+/WebContentGen

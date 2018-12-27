@@ -1,0 +1,155 @@
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$half-hili-color: $input-border-focus;
+$half-switch-anim-time: 0.3s;
+
+$half-border-rad: 4px;
+$over_ct__bg: #ffffff;
+$over_ct__opacity: 0.8;
+$over_ct_z_index : $max-z-index - 1;
+$over_ct_item_margin: 2px;
+
+$small-button-vertical-padding: 4px;
+$small-button-border-height: 1px;
+$small-button-height: $line-height-small * $font-size-small +
+    $small-button-vertical-padding * 2 +
+    $small-button-border-height * 2;
+
+$top-toolbar-padding: 4px;
+$top-toolbar-border-bottom-width: 1px;
+$top-toolbar-height: $top-toolbar-padding * 2 + $small-button-height + $top-toolbar-border-bottom-width;
+
+.exa-over-ct {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    right: 1px;
+    padding: 0 10px 0 0;
+
+    background-color: rgba($over_ct__bg, $over_ct__opacity);
+    padding: $top-toolbar-padding;
+    border: 0 solid darken($over_ct__bg, 10%);
+    border-bottom-width: $top-toolbar-border-bottom-width;
+    z-index: $over_ct_z_index;
+    @include box-shadow(0 10px 10px -12px rgba(0,0,0,0.21));
+
+    & > * {
+        display: inline-block;
+        vertical-align: top;
+        margin: $over_ct_item_margin;
+        margin-right: 0;
+    }
+
+    & > .exa-btn-close-panel {
+        float: right;
+    }
+
+    & > .exa-bookmarks {
+        float: right;
+    }
+}
+
+.exa-sf-ed {
+  display: flex;
+  flex-flow: column;
+
+  height: 100vh;
+  margin: 0;
+  border: 0;
+  padding: 5px;
+}
+
+.exa-main-view-half-ct {
+  flex: 1;
+  position: relative;
+
+  margin: 2px 0 0 0;
+  & .exa-main-view-half {
+    border: 1px #ccc solid;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    padding: ($top-toolbar-height + $top-toolbar-padding)  10px 10px 10px;
+    @include transition(all ease $half-switch-anim-time);
+
+    &.exa-blue-glow {
+        @include box-shadow(0px -3px 0px 0px $half-hili-color);
+        border-color: $half-hili-color;
+    }
+
+    &:not(.exa-blue-glow) {
+        @include box-shadow(0px 0px 0px 0px $half-hili-color);
+    }
+  }
+}
+
+.exa-main-view-area {
+    flex-wrap: wrap;
+    display: flex;
+    height: calc(100vh - 50px);
+}
+
+.exa-main-view-half-ct {
+    flex: 1;
+    position: relative;
+}
+
+// .exa-editor-ct {
+//     height: 100%;
+// }
+
+@import "compass/css3/box-shadow";
+
+.exa-toolbar {
+    margin-bottom: 5px;
+}
+
+.exa-toolbar > * {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.exa-toolbar {
+  display: inline-block;
+
+  &.form-group {
+    margin-left: 5px;
+    margin-bottom: 0px;
+
+    label,
+    select {
+      margin-left: 4px;
+    }
+  }
+
+  & > .btn,
+  & > .btn-group,
+  & > input,
+  & > select {
+    margin-left: 3px;
+  }
+}
+
+.exa-actions-list-ct {padding-left: 1em;}
+
+.panel-heading.node-header-test-case {background-color: #FBF8E8;}

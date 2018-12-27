@@ -1,0 +1,135 @@
+/*--- TOP BAR ---*/
+
+.eps-sf-up-bar {
+    width:100%;
+    background:#444;
+    height:40px;
+    display:block;
+    top: 0;
+    left: 0;
+    z-index:1000;
+}
+
+.eps-sf-up-bar .top-content {
+    width:1000px;
+    height:40px;
+    margin:0 auto;
+    font-size:14px;
+    position: relative;
+}
+
+.eps-sf-up-bar .logo {
+    width:70px;
+    height:21px;
+    margin-top:9px;
+    display:block;
+    position:absolute;
+}
+
+.eps-sf-up-bar .eps-envelope {
+    position: absolute;
+    bottom: 14px;
+    right: 0px;
+    cursor: pointer;
+}
+
+.eps-sf-up-bar .eps-top-menu {
+    float:right;
+    height: 100%;
+    margin-right: 40px;
+}
+
+.eps-sf-up-bar .eps-faces-msg-table {
+    height: 715px;
+    overflow: auto;
+    margin: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.eps-sf-up-bar  .eps-faces-msg-table td {
+    position:relative;
+}
+
+.eps-sf-up-bar .eps-faces-msg-table .ERROR td {
+    background-color: #FFF5F5;
+}
+
+.eps-sf-up-bar .eps-faces-msg-table .INFO td {
+    background-color: #FAFEFF;
+}
+
+.eps-sf-up-bar .eps-faces-msg-table .WARN td {
+    background-color: #FAF8F0;
+}
+
+.eps-sf-up-bar .eps-faces-messages-icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    margin-top: -8px;
+}
+
+.eps-sf-up-bar .eps-top-auth {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin-top: 5.5px;
+    width: 300px;
+    height: 40px;
+    color:#fff;
+}
+
+.eps-sf-up-bar a.eps-menu-item {
+    color:#fff;
+    text-decoration:none;
+    line-height: 40px;
+}
+
+.eps-sf-up-bar a.eps-menu-item:active {
+    text-decoration:none;
+}
+
+.eps-sf-up-bar .eps-url-top {
+    margin-left:20px;
+    position: relative;
+    display: inline-block;
+    padding: 0 5px;
+    box-sizing: border-box;
+}
+
+/*--- End TOP BAR ---*/
+
+/*Highlight*/
+.eps-sf-up-bar .active:after {
+	content: "";
+	position: absolute;
+	bottom: 0;
+    left:-5px;
+    right: -5px;
+	height: 4px;
+	background-color: #5edae1;
+}
+
+.eps-sf-up-bar .eps-url-top:hover:before{
+	content: "";
+	position: absolute;
+	bottom: 0;
+    left:-5px;
+    right: -5px;
+	height: 2px;
+	background-color: #5edae1;
+}
+
+#report {
+    position: absolute;
+    top: 40px;
+    bottom: 45px;
+    left: 0;
+    right: 0;
+}
+
+#report iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}

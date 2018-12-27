@@ -1,0 +1,378 @@
+// 'id' ignores local artifactory
+
+//plugins {
+//    id "com.craigburke.client-dependencies" version "1.4.0"
+//}
+
+buildscript {
+   dependencies {
+       classpath 'com.craigburke.gradle:client-dependencies:1.4.1'
+   }
+}
+
+apply plugin: 'com.craigburke.client-dependencies'
+
+apply plugin: 'me.champeau.gradle.jmh'
+
+defaultTasks 'build'
+
+
+// Define properties
+ext {
+    dictionaryDir		= file("${mainWorkspaceDir}/cfg/dictionaries")
+    dataMessageDir = file("${mainResDir}/com/exactpro/sf/configuration/dictionaries")
+    etcDir				= file("${mainDir}/etc")
+    xsdDir				= file("${mainDir}/xsd")
+    htmlResourcesDir = file("${genResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
+	templatesDir    	= file("${mainDir}/templates")
+}
+
+archivesBaseName = 'sailfish-core'
+
+// Change default project layout
+sourceSets {
+    main {
+        java {
+            srcDir genJavaDir
+        }
+        resources {
+            srcDir genResDir
+        }
+    }    
+}
+
+eclipse.classpath {
+    plusConfigurations += [ configurations.jmh ]
+}
+
+configurations {
+	jamon
+    jaxb
+}
+
+dependencies {
+    // Maven Central
+    jamon 'org.jamon:jamon-anttask:2.4.2'
+
+    jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
+    jaxb 'javax.xml:jsr173:1.0'
+    jaxb 'javax.activation:activation:1.1.1'
+	
+    if (incremental_build) {
+        compile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}"
+        compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
+        testCompile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}:tests@jar"
+    } else {
+        compile project(':BackEnd:Core:sailfish-common')
+        compile project(':FrontEnd:Sailfish-REST-API-client')
+        testCompile project(path:':BackEnd:Core:sailfish-common', configuration: 'testArtifacts')
+    }
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
+
+    //FIXME: replace all log4j to slf4j logger 
+    compileOnly "org.slf4j:slf4j-log4j12:${version_slf4j}"
+
+    compile "org.slf4j:slf4j-api:${version_slf4j}"
+
+    compile 'junit:junit:4.12'
+    compile 'io.qameta.allure:allure-junit4:2.8.1'
+
+    compile 'com.google.guava:guava:27.0.1-jre'
+	
+    //compile 'commons-cli:commons-cli:1.2'
+    compile 'commons-configuration:commons-configuration:1.10'
+    compile 'commons-io:commons-io:2.6'
+
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'org.apache.commons:commons-text:1.6'
+
+    compile 'net.sourceforge.javacsv:javacsv:2.0'
+
+    compile 'jdom:jdom:1.1'
+
+	//compile 'org.apache.httpcomponents:httpcore:4.4.4'
+    //compile 'org.jsoup:jsoup:1.6.3'
+    compile 'com.exactprosystems:mvel2:2.3.2.Final.0.1-SNAPSHOT'
+
+    // Hibernate
+    compile "org.hibernate:hibernate-c3p0:$version_hibernate"
+    compile "org.hibernate:hibernate-envers:$version_hibernate"
+    //compile 'org.hibernate:hibernate-core:4.1.8.Final'
+    //compile 'org.hibernate:hibernate-entitymanager:4.1.8.Final'
+    
+    //compile 'com.mchange:mchange-commons-java:0.2.3' ???
+    
+    compile 'org.apache.commons:commons-email:1.5'
+    //compile 'com.sun.mail:javax.mail:1.5.2' ???
+
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
+ 
+    compile 'org.jamon:jamon-runtime:2.4.1'
+    
+	// netty
+	compile 'io.netty:netty-codec:4.1.31.Final'
+
+    //poi
+	compile 'org.apache.poi:poi-ooxml:4.0.0'
+	
+	compile 'org.flywaydb:flyway-core:5.2.1'
+
+    compile 'org.freemarker:freemarker:2.3.28'
+
+	compile 'org.apache.commons:commons-math3:3.6.1'
+
+    compile 'commons-cli:commons-cli:1.4'
+
+	jmh 'org.apache.derby:derby:10.14.2.0'
+
+    compile 'org.mockito:mockito-core:2.23.4'
+
+    compile 'org.apache.commons:commons-collections4:4.2'
+
+    runtimeOnly 'commons-collections:commons-collections:3.2.2' // for commons-configuration
+
+    testRuntime 'org.apache.derby:derby:10.14.2.0'
+
+    clientDependencies {
+        npm {
+            'jquery'('~3.3.1'){
+                include 'jquery.min.js'
+                eachFile {
+                    it.path = "../" + it.name //remove remove jquery folder
+                }
+            }
+            'components-jqueryui'('1.12.1') {
+                include 'jquery-ui.min.js', '**/ui-icons_222222_256x240.png'
+                include 'themes/base/jquery-ui.min.css'
+                eachFile {
+                    it.path = '../' + it.name //remove remove subfolders folder
+                }
+            }
+
+        }
+        installDir = "${htmlResourcesDir}"
+    }
+}
+
+task createDir {
+    doLast {
+		genJavaDir.mkdirs()
+		genResDir.mkdirs()
+	}
+}
+
+task generateJavaFromXsd (dependsOn: 'createDir') {
+
+	inputs.file file("${etcDir}/functional_report.xjb")
+	inputs.file file("${etcDir}/functional_report.xsd")
+	inputs.file file("${dataMessageDir}/datamessage.xsd")
+	inputs.file file("${xsdDir}/rules.xsd")
+	inputs.file file("${xsdDir}/actions.xsd")
+	inputs.file file("${xsdDir}/validators.xsd")
+	inputs.file file("${xsdDir}/preprocessors.xsd")
+	inputs.file file("${xsdDir}/dictionaries.xsd")
+	inputs.file file("${xsdDir}/data.xsd")
+	inputs.file file("${xsdDir}/adapters.xsd")
+	inputs.file file("${xsdDir}/services.xsd")
+	inputs.file file("${xsdDir}/help.xsd")
+
+    outputs.dir "${genJavaDir}/com/exactpro/sf/scriptrunner/reporting/xml"
+    outputs.dir "${genJavaDir}/com/exactpro/sf/storage/xml"
+    outputs.dir "${genJavaDir}/com/exactpro/sf/configuration"
+    outputs.dir "${genJavaDir}/com/exactpro/sf/aml"
+
+	doLast {
+	    ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
+
+	    ant.xjc(schema: "${etcDir}/functional_report.xsd", binding: "${etcDir}/functional_report.xjb",
+                destdir: "${genJavaDir}", package: 'com.exactpro.sf.scriptrunner.reporting.xml',
+	        removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/scriptrunner/reporting/xml", includes: '*')
+	    }
+
+	    ant.xjc(schema: "${dataMessageDir}/datamessage.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.storage.xml', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/storage/xml", includes: '*')
+	        arg(value: '-extension')
+	    }
+
+	    ant.xjc(schema: "${xsdDir}/rules.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.configuration', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/configuration", includes: '*')
+	    }
+
+	    ant.xjc(schema: "${xsdDir}/actions.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.aml.legacy', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/aml/legacy", includes: '*')
+	    }
+
+	    ant.xjc(schema: "${xsdDir}/validators.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.aml.validator', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/aml/validator", includes: '*')
+	    }
+
+	    ant.xjc(schema: "${xsdDir}/preprocessors.xsd", destdir: "${genJavaDir}",
+                package: "com.exactpro.sf.aml.preprocessor", removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/aml/preprocessor", includes: '*')
+	    }
+
+	    ant.xjc(schema: "${xsdDir}/dictionaries.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.aml', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/aml", includes: '*')
+	    }
+	    
+	    ant.xjc(schema: "${xsdDir}/data.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.configuration.data', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/configuration/data", includes: '*')
+	    }
+	    
+	    ant.xjc(schema: "${xsdDir}/services.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.configuration.services', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/configuration/services", includes: '*')
+	    }
+	    
+	    ant.xjc(schema: "${xsdDir}/adapters.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.configuration.adapters', removeOldOutput: 'yes')
+	    {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/configuration/adapters", includes: '*')
+	    }
+
+		ant.xjc(schema: "${xsdDir}/help.xsd", destdir: "${genJavaDir}",
+                package: "com.exactpro.sf.help.helpmarshaller", removeOldOutput: "yes")
+                {
+                    produces(dir: "${genJavaDir}/com/exactpro/sf/help/helpmarshaller", includes: "*")
+		}
+	}
+}
+
+task jamonGenerate {
+	inputs.files fileTree(templatesDir).include('**/*.jamon')
+	inputs.files.each { fileName ->
+		def shortName = "${fileName.absolutePath}".replaceAll(file(templatesDir).absolutePath, '').replaceAll('.jamon', '')
+		outputs.file file("${genJavaDir}${shortName}Impl.java")
+		outputs.file file("${genJavaDir}${shortName}.java")
+	}
+
+	doLast {
+	    ant.taskdef(name: 'jamon', classname: 'org.jamon.ant.JamonTask', classpath: configurations.jamon.asPath)
+		ant.jamon(destdir: "${genJavaDir}", srcdir: templatesDir)
+	}
+}
+
+task compileMatrixActGen (type: JavaCompile, dependsOn: 'jamonGenerate') {
+    source = sourceSets.main.java.srcDirs
+    include 'com/exactpro/sf/util/MatrixActionsGenerator.java'
+    classpath = sourceSets.main.compileClasspath
+
+	try {
+		destinationDir = sourceSets.main.java.outputDir
+	} catch (e) {//FIXME remove catch block when migrate to gradle 3.0+
+		destinationDir = sourceSets.main.output.classesDir
+	}
+    options.compilerArgs += ['-sourcepath', sourceSets.main.java.srcDirs.join(":")]
+}
+
+task generateTest_aml_Dictionaries{
+	def dictionaries = fileTree ("${dictionaryDir}") {
+        include 'test_aml.xml'
+    }
+
+    configureGenerateSailfishMessage(dictionaries, inputs, outputs)
+
+    doLast {
+        println " Use test_aml.xml"
+        generateSailfishMessage(dictionaries)
+    }
+}
+
+task generateService_Dictionaries{
+	def dictionaries = fileTree ("${dictionaryDir}") {
+        include 'service_dictionary.xml'
+    }
+
+    configureGenerateSailfishMessage(dictionaries, inputs, outputs)
+
+    doLast {
+        println " Use service_dictionary.xml"
+        generateSailfishMessage(dictionaries)
+    }
+}
+
+compileJava {
+    dependsOn.add("generateJavaFromXsd")
+    dependsOn.add("jamonGenerate")
+    dependsOn.add("generateTest_aml_Dictionaries")
+    dependsOn.add("generateService_Dictionaries")
+    dependsOn.add('generateVersionClass')
+    dependsOn.add('clientInstall')
+}
+
+test {
+    systemProperties "basedir": "${projectDir}"
+
+	jvmArgs '-XX:MaxPermSize=256m'
+
+
+}
+
+artifacts {
+	archives(zipWorkspaceData)
+}
+
+artifactoryPublish {
+	dependsOn zipWorkspaceData
+}
+
+build {
+	dependsOn.add("checkCompatibility")
+}
+
+clean {
+    dependsOn.add("clientClean")
+}
+
+generateVersionClass {
+	alias 		= 'core'
+}
+
+checkCompatibility {
+	cfgDirs = [file("${mainWorkspaceDir}/cfg"), file("${genWorkspaceDir}/cfg/")]
+	versionFile = File.createTempFile("${getTemporaryDir()}",'VERSION')
+}
+
+clientInstall {
+    doLast {
+        htmlResourcesDir.eachDir { //remove empty dirs
+            it.deleteDir()
+        }
+    }
+}
+
+//Functions TODO: move to parent
+def configureGenerateSailfishMessage(files, inputs, outputs) {
+	files.each { dict ->
+    	inputs.file "$dict"
+    	def namespace = ((new XmlParser()).parse(dict).@name).toLowerCase()
+        outputs.files fileTree("${genJavaDir}/com/exactpro/sf/messages/${namespace}").include('**/*.java')
+    }
+}
+
+def generateSailfishMessage(dictionaries) {
+	dictionaries.each { dict -> 
+    	println "\t${dict.name}"
+    	javaexec {
+            classpath sourceSets.main.runtimeClasspath
+            main "com.exactpro.sf.common.util.CodeGenerator"
+            args = ["${dict}", "${genJavaDir}", "com.exactpro.sf.messages"]
+        }
+    }
+}

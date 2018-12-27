@@ -1,0 +1,24 @@
+// Define properties
+ext {
+    plugin_name     = 'aml-3'
+    plugin_alias    = 'aml_3'
+}
+
+archivesBaseName = "extension-${plugin_name}"
+
+dependencies {
+    compile 'commons-cli:commons-cli:1.4'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+
+    if (incremental_build) {
+        compileOnly "com.exactpro.sf:sailfish-common:${artifactCoreVersion}"
+        compileOnly "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
+    } else {
+        compileOnly project(':BackEnd:Core:sailfish-common')
+        compileOnly project(':BackEnd:Core:sailfish-core')
+    }
+
+    testRuntime 'org.apache.derby:derby:10.14.2.0'
+}
+
+generateVersionClass.enabled = false

@@ -1,0 +1,570 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Environment :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>
+    <h:outputStylesheet library="sf" name="css/environment.css"/>
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+
+    <script>
+
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+
+  	</script>
+
+    <h:outputScript library="sf" name="js/menu.js"/>
+
+</h:head>
+<h:body styleClass="eps-application">
+
+<ui:insert name="menu">
+    <ui:include src="template/menu.xhtml"/>
+</ui:insert>
+
+<div class="eps-container">
+
+
+<p:ajaxStatus style="width:24px;height:24px; position: absolute; top: 10px; right:10px;" id="ajaxStatusPanel">
+    <f:facet name="start">
+        <h:graphicImage library="sf" name="images/ajaxloader.gif" />
+    </f:facet>
+
+    <f:facet name="complete">
+        <h:outputText value="" />
+    </f:facet>
+</p:ajaxStatus>
+
+<h:form id="onStartForm" prependId="false">
+	<p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true" />
+</h:form>
+
+<h:form id="form" styleClass="eps-environment-form" prependId="false">
+    <p:remoteCommand name="showParamDialog" oncomplete="PF('paramDialog').show()"/>
+    <p:remoteCommand name="updateParameters" update=":serviceParametersForm" />
+    <p:remoteCommand name="updateParamsFormAndShow" onstart="updateParameters()" oncomplete="PF('copyDialog').hide(); showParamDialog()" />
+    <p:remoteCommand name="updateTableAndShowParams" update=":form:table" oncomplete="updateParamsFormAndShow()" />
+    <p:remoteCommand name="updateTable" update=":form:table"/>
+    <p:remoteCommand name="changeCurrentEnvironment" actionListener="#{environmentBean.setCurrentEnvironment}" oncomplete="changeEnvironment()"/>
+    <p:remoteCommand name="changeEnvironment" actionListener="#{environmentBean.changeEnvironment}" oncomplete="updateTable()"/>
+    <p:remoteCommand name="updateRightEnvMenuBar" update=":form:rightEnvMenuBar :environmentsForm:environmentsTable"/>
+    <p:remoteCommand id="selectServiceCommand" name="selectService" update=":serviceParametersForm"
+                     actionListener="#{environmentBean.selectServiceToEdit}" oncomplete="showParamDialog()"/>
+    <p:remoteCommand id="startServiceCommand" name="startService" update="table"
+                     actionListener="#{environmentBean.startServiceByAction}" oncomplete="restoreTableScroll()"/>
+    <p:remoteCommand id="stopServiceCommand" name="stopService" update="table"
+                     actionListener="#{environmentBean.stopServiceByAction}" oncomplete="restoreTableScroll()"/>
+
+    <p:remoteCommand name="getOldEnvName" update=":renameForm" actionListener="#{environmentBean.retriveLastName}" oncomplete="PF('renameDialog').show()"/>
+    <p:remoteCommand name="getEvents" actionListener="#{environmentBean.selectServiceForEvents}" update=":eventsForm" oncomplete="PF('eventsDialogWidget').show()"/>
+    <p:remoteCommand name="showGrowlMessage" action="#{generalBean.showGrowlMessage}"/>
+
+    <p:remoteCommand id="loadSort" name="loadSort" action="#{environmentBean.loadSort}" oncomplete="PF('servicesTable').filter();" update="table"/>
+    <p:remoteCommand id="saveFilter" name="saveFilter" action="#{environmentBean.saveFilter}"/>
+    <h:outputText id="typeFilter" style="display: none;" value="#{environmentBean.typeFilter}" />
+    <h:outputText id="nameFilter" style="display: none;" value="#{environmentBean.nameFilter}" />
+
+    <div class="eps-service-toolbar-wrapper">
+        <p:menubar id="mainMenuBar" styleClass="eps-left-environment-menu">  <!--  Unknown width problem  -->
+            <p:menuitem id="addButton" icon="eps-custom-icon eps-custom-icon-plus" value="Add" onclick="PF('addDialog').show()" />
+            <p:menuitem id="startButton" icon="eps-custom-icon eps-custom-icon-play" value="Start" action="#{environmentBean.startService}" update="form:table" disabled="#{environmentBean.notSelectedDisabledOnly}" oncomplete="restoreTableScroll()"/>
+            <p:menuitem id="stopButton" icon="eps-custom-icon eps-custom-icon-stop" value="Stop" action="#{environmentBean.stopService}" update="form:table" disabled="#{environmentBean.notSelectedDisabledOnly}" oncomplete="restoreTableScroll()"/>
+            <p:menuitem id="editButton" icon="eps-custom-icon eps-custom-icon-pencil" value="Edit" action="#{environmentBean.selectedServicesToEdit}" disabled="#{environmentBean.notSelectedDisabledOnly}"/>
+            <p:menuitem id="exportButton" icon="eps-custom-icon eps-custom-icon-upload" value="Export" ajax="false"  disabled="#{environmentBean.notSelected}">
+                <p:fileDownload value="#{environmentBean.servicesInZip}" />
+            </p:menuitem>
+            <p:menuitem id="importButton" icon="eps-custom-icon eps-custom-icon-download" value="Import"   onclick="PF('uploadDialog').show()"/>
+        </p:menubar>
+
+        <p:tooltip value="Add new service" for="addButton"/>
+        <p:tooltip value="Start selected services" for="startButton"/>
+        <p:tooltip value="Stop selected services" for="stopButton"/>
+        <p:tooltip value="Save selected services as XML" for="exportButton"/>
+        <p:tooltip value="Load services from XML" for="importButton"/>
+
+        <p:outputPanel id="rightMenus">
+	        <p:menubar styleClass="eps-right-toolbar" id="rightMenuBar">
+	            <p:menuitem id="copyButton" icon="eps-custom-icon eps-custom-icon-copy"  actionListener="#{environmentBean.loadNewName}" disabled="#{environmentBean.notOneServiceSelectedAndNotDisabled}" update=":copyForm" oncomplete="PF('copyDialog').show()"/>
+	            <p:menuitem id="deleteButton" icon="eps-custom-icon eps-custom-icon-delete"  onclick="PF('confirmation').show()" disabled="#{environmentBean.notSelected}"/>
+	        </p:menubar>
+
+	        <p:menubar styleClass="eps-right-environment-toolbar" id="rightEnvMenuBar">
+	            <p:menuitem>
+	                <p:selectOneMenu id="selectedEnvironment" value="#{environmentBean.currentEnvironment}" styleClass="eps-input eps-selected-environment">
+
+	                    <p:ajax event="change" listener="#{environmentBean.changeEnvironment}" update=":form:table :form:table:totalServiceCountSpan :form:mainMenuBar :form:rightMenuBar" />
+
+	                    <f:selectItems value="#{environmentBean.environmentList}" />
+
+	                </p:selectOneMenu>
+	            </p:menuitem>
+	            <p:menuitem id="environmentOptionsBtn" update=":environmentsForm:environmentsMenuBar :environmentsForm:environmentsTable" styleClass="eps-environment-options-btn" icon="eps-custom-icon eps-custom-icon-gear" onclick="PF('environmentsDialogWidget').show();" />
+	        </p:menubar>
+        </p:outputPanel>
+
+        <p:commandButton id="reset-button" icon="ui-icon-trash" action="#{environmentBean.removeFilters}"
+                         styleClass="eps-service-clear-filters-btn" oncomplete="removeFilters();loadSort()"/>
+
+        <p:tooltip value="Reset table" for="reset-button" />
+        <p:tooltip value="Copy service" for="copyButton"/>
+        <p:tooltip value="Delete selected services" for="deleteButton"/>
+        <p:tooltip value="Environment" for="selectedEnvironment"/>
+        <p:tooltip value="Environment options" for="environmentOptionsBtn"/>
+
+    </div>
+
+    <div style="clear:both; height: 1px;">
+    </div>
+
+    <div class="eps-environment-table-wrapper">
+        <p:dataTable id="table" lazy="true" value="#{environmentBean.lazyModel}" var="service" selection="#{environmentBean.selectedNodes}"
+                     filteredValue="#{environmentBean.filteredNodes}" widgetVar="servicesTable" paginator="true" paginatorAlwaysVisible="false"
+                     rows="1000" styleClass="eps-environment-table eps-main-table" rowStyleClass="#{environmentBean.selectRowStyleClass(service.status)}"
+                     skipChildren="true" >
+
+            <p:ajax event="rowSelect"    update=":form:mainMenuBar :form:rightMenuBar" />
+            <p:ajax event="rowUnselect"  update=":form:mainMenuBar :form:rightMenuBar" />
+            <p:ajax event="rowSelectCheckbox" update=":form:mainMenuBar :form:rightMenuBar" />
+            <p:ajax event="rowUnselectCheckbox" update=":form:mainMenuBar :form:rightMenuBar" />
+            <p:ajax event="toggleSelect" update=":form:mainMenuBar :form:rightMenuBar" />
+            <p:ajax event="filter" />
+            <p:ajax event="sort" listener="#{environmentBean.onSort}" />
+
+            <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+
+            <p:column width="421" id="nameColumn" filterStyleClass="eps-environment-filter eps-service-name-filter eps-input" filterBy="#{service.name}" filterMatchMode="contains" sortBy="#{service.name}"
+                      style="position: relative; width: 471px" >
+                <f:facet name="header">
+                    <h:outputText value="Name"/>
+                    <p:watermark for="nameColumn" value=" Name filter " />
+                </f:facet>
+                <h:outputText value="#{service.name}" styleClass="eps-service-name-#{service.status.toLowerCase()}"/>
+            </p:column>
+
+            <p:column width="218" id="typeColumn" filterStyleClass="eps-environment-filter eps-service-type-filter eps-input" sortBy="#{service.serviceType}" filterBy="#{service.serviceType}"
+                      filterMatchMode="contains" style="position: relative; width: 240px">
+                <f:facet name="header">
+                    <h:outputText value="Type"/>
+                    <p:watermark for="typeColumn" value=" Type filter " />
+                </f:facet>
+                <h:outputText styleClass="eps-service-circle eps-service-name-#{service.status.toLowerCase()}" value="#{service.serviceType}"/>
+            </p:column>
+
+            <p:column width="97" sortBy="#{service.status}" headerText="Status" style="width: 105px">
+                <h:outputText id="statusOutputText" value="#{service.status}" styleClass="eps-service-status-#{service.status.toLowerCase()}"/>
+            </p:column>
+
+            <p:column width="10" id="disabledColumn" >
+                <f:facet name="header">
+                    <h:outputText value=""/>
+
+                    <p:selectBooleanCheckbox id="disabledServicesCheckbox" for="disabledColumn" value="#{environmentBean.showDisabled}">
+                        <p:ajax event="change" oncomplete="PF('servicesTable').filter()" />
+                    </p:selectBooleanCheckbox>
+
+                    <p:tooltip value="Show disabled services" for="disabledServicesCheckbox"/>
+                </f:facet>
+            </p:column>
+
+            <p:column width="112" headerText="Actions" styleClass="eps-service-action-column" style="width: 132px">
+
+				<p:commandLink rendered="#{service.status != 'STARTED' and service.status != 'WARNING'}" id="servStartButton" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only eps-link-button eps-service-start-button" type="button" icon="ui-icon-play" title="Start"
+                                 onclick="startService([{name:'name', value:'#{service.name}'}]);" disabled="#{service.status == 'DISABLED'}">
+                	<span class="ui-button-icon-left ui-icon ui-c ui-icon-play"></span>
+                	<span class="ui-button-text ui-c">ui-button</span>
+                </p:commandLink>
+
+                <p:commandLink rendered="#{service.status == 'STARTED' or service.status == 'WARNING'}" id="servStopButton" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only eps-service-start-button eps-link-button eps-service-stop-button" type="button" icon="ui-icon-stop" title="Stop"
+                                 onclick="stopService([{name:'name', value:'#{service.name}'}]);"  disabled="#{service.status == 'DISABLED'}">
+                   	<span class="ui-button-icon-left ui-icon ui-icon-stop"></span>
+                	<span class="ui-button-text ui-c">ui-button</span>
+                </p:commandLink>
+
+                <p:commandLink id="editServiceBtn" type="button" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only eps-service-start-button eps-link-button eps-edit-service-button" icon="ui-icon-edit" title="View and edit parameters"
+                                 onclick="selectService([{name:'name', value:'#{service.name}'}]);" disabled="#{service.status == 'DISABLED'}">
+                   	<span class="ui-button-icon-left ui-icon ui-c ui-icon-edit"></span>
+                	<span class="ui-button-text ui-c">ui-button</span>
+				</p:commandLink>
+				
+				<p:commandLink id="moreActionsBtn" type="button" styleClass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only eps-options-button eps-link-button" icon="ui-icon-edit" title="View and edit parameters"
+                                 onclick="displayServiceOptionsOverlay(event, '#{service.name}', this)">
+                	<span class="ui-button-icon-left ui-icon ui-c ui-icon-triangle-1-s"></span>
+                	<span class="ui-button-text ui-c">ui-button</span>
+                </p:commandLink>
+
+            </p:column>
+
+            <f:facet name="footer">
+                <h:outputText id="totalServiceCountSpan" value="#{environmentBean.eachServiceCount}" class="eps-total-service-count"/>
+            </f:facet>
+
+        </p:dataTable>
+        
+        <div id="service-options-overlay" class="ui-menu ui-menu-dynamic ui-widget ui-widget-content ui-corner-all ui-helper-clearfix ui-shadow">
+        	<ul class="ui-menu-list ui-helper-reset">
+        		<li class="ui-menuitem ui-widget ui-corner-all" role="menuitem" 
+        			onmouseover="$(this).toggleClass('ui-state-hover')"
+        			onmouseout="$(this).toggleClass('ui-state-hover')">
+        			<a tabindex="-1" id="overlay-link-1" title="Show service events" class="ui-menuitem-link ui-corner-all" href="#" onclick="getEvents([{name:'name', value: selectedServiceName}]); return false;">
+        				<span class="ui-menuitem-icon ui-icon ui-icon-notice"></span>
+        				<span class="ui-menuitem-text">Events</span>
+        			</a>
+        		</li>
+        		<li class="ui-menuitem ui-widget ui-corner-all" role="menuitem"
+        			onmouseover="$(this).toggleClass('ui-state-hover')"
+        			onmouseout="$(this).toggleClass('ui-state-hover')">
+        			<a tabindex="-1" id="overlay-link-2" title="Rename service" class="ui-menuitem-link ui-corner-all" href="#" onclick="getOldEnvName([{name:'name', value:selectedServiceName}]); return false;">
+	        			<span class="ui-menuitem-icon ui-icon ui-icon-pencil"></span>
+	        			<span class="ui-menuitem-text">Rename</span>
+        			</a>
+        		</li>
+        		<li class="ui-menuitem ui-widget ui-corner-all" role="menuitem"
+        			onmouseover="$(this).toggleClass('ui-state-hover')"
+        			onmouseout="$(this).toggleClass('ui-state-hover')">
+        			<a tabindex="-1" id="overlay-link-3" title="Show traffic dumps" class="ui-menuitem-link ui-corner-all" target="_blank" 
+        			href="configuration.xhtml?section=net_dumper&amp;servicerecords=#{service.environment}@#{service.name}">
+	        			<span class="ui-menuitem-icon ui-icon ui-icon-pencil"></span>
+	        			<span class="ui-menuitem-text">Show traffic dumps</span>
+        			</a>
+        		</li>
+       		</ul>
+        </div>
+    </div>
+</h:form>
+
+<h:form id="serviceParametersForm" prependId="false">
+    <p:dialog id="parametersDialog" header="Service parameters: #{environmentBean.lazyModel.headerForEditDialog}" widgetVar="paramDialog"
+              modal="true" height="601" width="770" resizable="false" onHide="removeOverlays()">
+
+        <h:panelGrid id="display" columns="1">
+
+            <p:treeTable id="params" value="#{environmentBean.lazyModel.paramRoot}" var="paramNode" styleClass="eps-service-param-list eps-main-table"
+                    scrollable="true" scrollHeight="514">
+
+                <p:column headerText="Name" style="width: 215px; white-space: nowrap">
+                    <h:outputText value="#{paramNode.getReadableName()}" title="#{paramNode.getReadableName()}"/>
+                </p:column>
+
+                <p:column headerText="Value" style="width: 440px;">
+
+                    <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'handlerClassNameSelect'}">
+                        <p:selectOneMenu id="handlerClassNameSelect" value="#{paramNode.value}" filter="true" filterMatchMode="contains"
+                                         style="width: 413px; margin-left: 10px;" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
+                            <f:selectItem itemLabel="#{paramNode.differentValues and empty paramNode.value ? '*' : 'Select handler class name'}"
+                            			  itemValue="#{null}" itemDisabled="true" />
+                            <f:selectItems value="#{enumSetContainer.loadHandlerClassName()}" />
+                        </p:selectOneMenu>
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'dictionaryNameSelect'}">
+                        <p:autoComplete id="advanced" dropdown="true" value="#{paramNode.value}"
+                                        style="margin-left: 10px;" styleClass="eps-input dictionary-autocomplete"
+                                        completeMethod="#{enumSetContainer.completeDictURI}"/>
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'amlVersionSelect'}">
+                        <p:selectOneMenu id="amlSelector" value="#{paramNode.value}" style="width: 413px; margin-left: 10px;" styleClass="eps-input">
+                            <f:selectItems value="#{enumSetContainer.amlVersions}" var="item" itemLabel="#{item.name}" itemValue="#{item.version}" />
+                        </p:selectOneMenu>
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'booleanCheckbox'}">
+                        <p:selectBooleanCheckbox id="parValueBoolean" value="#{paramNode.value}" style="margin-left: 10px;" styleClass="eps-input">
+                        </p:selectBooleanCheckbox>
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'integerTextbox'}">
+                        <p:spinner id="intValue" value="#{paramNode.value}" min="0" style="width: 410px; margin-left: 10px;" styleClass="eps-input"
+                        		   placeholder="#{paramNode.differentValues ? '*' : ''}">
+                        </p:spinner>
+                    </ui:fragment>
+
+                    <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'defaultTextbox'}">
+
+                        <p:inputText id="parValue" value="#{paramNode.value}" style="width:405px; margin-left: 10px;" styleClass="eps-input"
+                        			 placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{empty paramNode.inputMask}">
+                         </p:inputText>
+
+                        <p:inputMask id="parValueMasked" value="#{paramNode.value}" style="width:405px; margin-left: 10px;"
+                                     styleClass="eps-input" placeholder="#{paramNode.differentValues ? '*' : ''}"
+                                     rendered="#{not empty paramNode.inputMask}" mask="#{paramNode.inputMask}">
+                        </p:inputMask>
+
+                    </ui:fragment>
+                </p:column>
+
+                <p:column style="width: 20px;">
+                    <p:outputLabel id="helpLink" styleClass="eps-param-icon-info ui-icon ui-icon-help"/>
+
+                    <p:overlayPanel id="myPanel" for="helpLink" showEvent="mouseover" hideEvent="mouseout">
+                        <h:outputText value="#{paramNode.description}" escape="false"/>
+                    </p:overlayPanel>
+
+                </p:column>
+
+            </p:treeTable>
+        </h:panelGrid>
+        <div style="text-align: center; margin: 10px auto;">
+            <p:commandButton id="applyServiceSetting" value="Apply settings" update="serviceParametersForm" action="#{environmentBean.lazyModel.applyServiceSettings}"
+                             onsuccess="PF('paramDialog').hide(); showGrowlMessage([{name: 'Severity', value: 'INFO'},{name: 'Summary', value: 'Success'},{name: 'Detail', value: 'Service settings are applied'}])"
+                             onerror="showGrowlMessage([{name: 'Severity', value: 'ERROR'},{name: 'Summary', value: 'Error'},{name: 'Detail', value: 'Settings are not applied'}])"/>
+        </div>
+    </p:dialog>
+</h:form>
+
+<h:form id="addForm" >
+    <p:dialog header="Add new service" resizable="false" widgetVar="addDialog" modal="true">
+        <h:panelGrid id="addPanel" columns="2" cellpadding="5" style="text-align: left;">
+            <h:outputText value="Service type:" style="font-weight:bold"/>
+            <p:selectOneMenu id="selectedType" value="#{environmentBean.selectedType}" filter="true" styleClass="eps-input" filterMatchMode="contains" style="width:208px">
+                <f:selectItem itemLabel="Select Type" itemValue="" style="width:200px"/>
+                <f:selectItems value="#{environmentBean.serviceTypes}" style="width:200px"/>
+            </p:selectOneMenu>
+            <h:outputText value="Service name:" style="font-weight:bold"/>
+            <p:inputText id="nameInput" value="#{environmentBean.newServName}" styleClass="eps-input" style="width:200px" required="true" requiredMessage="Service name can't be empty"/>
+        </h:panelGrid>
+        <div style="text-align: center;">
+            <p:commandButton id="addSubmit" value="Create" action="#{environmentBean.addService}" update=":addForm :form:table :serviceParametersForm :form:table:totalServiceCountSpan" oncomplete="if (!args.validationFailed) {PF('addDialog').hide();showParamDialog()} else {PF('addDialog').show()}" />
+            <p:commandButton id="addCancel" value="Cancel" update=":addForm" oncomplete="PF('addDialog').hide()" process="@this">
+                <p:resetInput target=":addForm" />
+            </p:commandButton>
+        </div>
+    </p:dialog>
+</h:form>
+
+<h:form id="copyForm" >
+    <p:dialog header="Copy service" resizable="false" widgetVar="copyDialog" modal="true">
+        <h:panelGrid id="copyPanel" columns="2" cellpadding="5" style="text-align: left;">
+
+            <h:outputLabel for="copyNameInput" value="Enter new name:" style="font-weight:bold"/>
+            <p:inputText  id="copyNameInput" value="#{environmentBean.newServName}" style="width:200px" styleClass="eps-input" required="true" requiredMessage="Service name can't be empty"/>
+
+            <h:outputLabel for="selectedEnvironmentForCopy" value="Copy to:" style="font-weight:bold"/>
+            <p:selectOneMenu id="selectedEnvironmentForCopy" value="#{environmentBean.currentEnvironmentForCopy}" style="width:208px" styleClass="eps-input">
+
+                <f:selectItems value="#{environmentBean.environmentList}" />
+
+                <p:ajax execute="@this" />
+
+            </p:selectOneMenu>
+
+        </h:panelGrid>
+        <div style="text-align: center;">
+            <p:commandButton id="copySubmit" value="Copy" action="#{environmentBean.copyServices}" update=":copyForm :form:mainMenuBar :form:rightMenus :form:table:totalServiceCountSpan" oncomplete="if (args.validationFailed) {PF('copyDialog').show()} else {updateTableAndShowParams()}" />
+            <p:commandButton id="copyCancel" value="Cancel" update=":copyForm" oncomplete="PF('copyDialog').hide()" process="@this">
+                <p:resetInput target=":copyForm" />
+            </p:commandButton>
+        </div>
+    </p:dialog>
+</h:form>
+
+<h:form id="renameForm" >
+    <p:dialog header="Rename service" resizable="false" widgetVar="renameDialog" modal="true">
+        <h:panelGrid id="renamePanel" columns="2" cellpadding="5" style="text-align: left;">
+            <h:outputText value="Service name:" style="font-weight:bold"/>
+            <p:inputText  id="renameNameInput" value="#{environmentBean.newServName}" style="width:200px" required="true" styleClass="eps-input" requiredMessage="Service name can't be empty"/>
+        </h:panelGrid>
+        <div style="text-align: center;">
+            <p:commandButton id="renameSubmit" value="Rename" action="#{environmentBean.renameService}" update=":renameForm :form:table" oncomplete="if (!args.validationFailed) {PF('renameDialog').hide()} else {PF('renameDialog').show()}" />
+            <p:commandButton id="renameCancel" value="Cancel" update=":renameForm" oncomplete="PF('renameDialog').hide()" process="@this">
+                <p:resetInput target=":renameForm" />
+            </p:commandButton>
+        </div>
+    </p:dialog>
+</h:form>
+
+<h:form id="confirmForm" >
+    <p:confirmDialog id="confirmDialog" message="Are you sure about deleting selected services?"
+                     header="Delete" severity="alert" widgetVar="confirmation" >
+        <div style="text-align: center;">
+            <p:commandButton id="confirm" value="Yes" update=":form:table :form:mainMenuBar :form:rightMenuBar :form:table:totalServiceCountSpan" oncomplete="PF('confirmation').hide()" actionListener="#{environmentBean.deleteServices}" />
+            <p:commandButton id="decline" value="No" onclick="PF('confirmation').hide()" type="button" />
+        </div>
+    </p:confirmDialog>
+</h:form>
+
+<h:form id="eventsForm" prependId="false">
+    <p:dialog id="eventsDialog" header="Service events: #{environmentBean.lazyModel.lazyEventsModel.serviceName.serviceName}" resizable="false" widgetVar="eventsDialogWidget" modal="true" onHide="PF('_eventsTable').clearFilters(); PF('_eventsTable').getPaginator().setPage(0);" height="700" width="1000">
+
+        <p:menubar id="eventsMenuBar">
+            <p:menuitem id="refreshButton" value="Refresh" update=":eventsForm:eventsTable" icon="eps-custom-icon-refresh eps-custom-icon"/>
+            <p:menuitem id="clearButton" value="Clear" update=":eventsForm:eventsTable" action="#{environmentBean.clearEvents}" icon="eps-custom-icon-delete eps-custom-icon"/>
+        </p:menubar>
+
+        <p:tooltip value="Refresh events" for="refreshButton"/>
+
+            <p:dataTable id="eventsTable" widgetVar="_eventsTable" lazy="true" var="event" value="#{environmentBean.lazyModel.lazyEventsModel}" emptyMessage="No events found"
+                         paginator="true" rows="15" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="5,10,15,25,50,100" paginatorPosition="bottom" scrollable="true" styleClass="eps-main-table eps-events-table">
+
+                <p:column id="timestampCol" filterBy="#{event.occured}" filterStyleClass="eps-input" filterMatchMode="contains" sortBy="#{event.occured}" width="60">
+                    <f:facet name="header">
+                        <h:outputText value="Timestamp"/>
+                    </f:facet>
+                    <h:outputText value="#{event.occured}">
+                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss.SSS" />
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="levelCol" filterBy="#{event.level}" filterStyleClass="eps-input" filterMatchMode="contains" sortBy="#{event.level}" width="45">
+                    <f:facet name="header">
+                        <h:outputText value="Level" />
+                    </f:facet>
+                    <h:outputText value="#{event.level}" />
+                </p:column>
+
+                <p:column id="typeCol" filterBy="#{event.type}" filterStyleClass="eps-input" filterMatchMode="contains" sortBy="#{event.type}" width="65">
+                    <f:facet name="header">
+                        <h:outputText value="Type" />
+                    </f:facet>
+                    <h:outputText value="#{event.type}" />
+                </p:column>
+
+                <p:column id="messageCol" filterBy="#{event.message}" filterStyleClass="eps-input" filterMatchMode="contains" sortBy="#{event.message}" width="150">
+                    <f:facet name="header">
+                        <h:outputText value="Message" />
+                    </f:facet>
+                    <h:outputText value="#{event.message}" />
+                </p:column>
+
+                <p:column id="detailsCol" filterBy="#{event.details}" filterStyleClass="eps-input" filterMatchMode="contains" sortBy="#{event.details}" width="350" styleClass="eps-service-event-details-format">
+                    <f:facet name="header">
+                        <h:outputText value="Details" />
+                    </f:facet>
+                    <h:outputText value="#{event.details}" />
+                </p:column>
+
+            </p:dataTable>
+
+    </p:dialog>
+</h:form>
+
+<h:form enctype="multipart/form-data" id="uploadDialodForm" >
+    <p:dialog header="Import services" widgetVar="uploadDialog" modal="true" resizable="false" width="850" style="max-height: 500px;">
+        <p:fileUpload id="selectButton" label="Select" cancelLabel="Clear" fileUploadListener="#{environmentBean.handleServicesUpload}" multiple="true" allowTypes="/(\.|\/)(xml|zip)$/" dragDropSupport="true" styleClass="eps-file-uploader" onstart="onUploadStart()" oncomplete="onUploadComplete()"/>
+        <p:selectBooleanCheckbox id="replaceExistingServices"  value="#{environmentBean.replaceExistingServices}">
+            <p:ajax execute="@this" update="skipExistingServices" />
+        </p:selectBooleanCheckbox>
+        <p:outputLabel for="replaceExistingServices" value="Replace if exist" style="display: inline-block; margin-left: 10px; vertical-align: super;"/>
+
+        <p:selectBooleanCheckbox id="skipExistingServices" style="margin-left: 30px;" value="#{environmentBean.skipExistingServices}">
+            <p:ajax execute="@this" update="replaceExistingServices" />
+        </p:selectBooleanCheckbox>
+        <p:outputLabel for="skipExistingServices" value="Skip if exist" style="display: inline-block; margin-left: 10px; vertical-align: super;"/>
+    </p:dialog>
+</h:form>
+
+<h:form id="environmentsForm" prependId="false">
+
+    <p:remoteCommand name="setRespectFileName" actionListener="#{environmentBean.setRespectFileName}" />
+
+    <p:dialog id="environmentsDialog" width="470" header="Environments" resizable="false" widgetVar="environmentsDialogWidget" modal="true">
+
+        <p:menubar id="environmentsMenuBar" styleClass="eps-environments-toolbar" >
+            <p:menuitem id="addEnvButton" value="Add" onclick="PF('addEnvDialog').show()" icon="eps-custom-icon eps-custom-icon-plus" />
+            <p:menuitem id="renameEnvButton" value="Rename" actionListener="#{environmentBean.preEnvRename}" icon="eps-custom-icon eps-custom-icon-pencil" disabled="#{environmentBean.selectedEnvironment == null}" />
+            <p:menuitem id="deleteEnvButton" value="Delete" actionListener="#{environmentBean.preEnvDelete}" icon="eps-custom-icon eps-custom-icon-delete" disabled="#{environmentBean.selectedEnvironment == null}"/>
+            <p:menuitem id="exportEnv" value="Export" icon="eps-custom-icon eps-custom-icon-upload" ajax="false" disabled="#{environmentBean.selectedEnvironment eq NULL}">
+                <p:fileDownload value="#{environmentBean.environmentInZip}" />
+            </p:menuitem>
+            <p:menuitem id="importEnv" value="Import" onclick="setRespectFileName([{name:'respectFileName', value:'true'}]);" oncomplete="PF('uploadDialog').show()" icon="eps-custom-icon eps-custom-icon-download" />
+        </p:menubar>
+
+        <p:dataTable id="environmentsTable" var="environment" emptyMessage="No environments found" styleClass="eps-main-table"
+                     value="#{environmentBean.environmentList}" rowKey="#{environment}"
+                     selection="#{environmentBean.selectedEnvironment}" selectionMode="single"
+                     paginator="true" rows="15" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                     rowsPerPageTemplate="15,25,50,100" paginatorPosition="bottom" scrollable="true">
+
+            <p:ajax event="rowSelect" update=":environmentsForm:environmentsMenuBar"/>
+
+            <p:column id="nameCol"  width="405">
+                <f:facet name="header">
+                    <h:outputText value="Environment Name" />
+                </f:facet>
+                <h:outputText value="#{environment}" />
+            </p:column>
+
+        </p:dataTable>
+
+    </p:dialog>
+</h:form>
+
+<h:form id="addEnvForm" >
+    <p:dialog header="Add new environment" resizable="false" widgetVar="addEnvDialog" modal="true">
+        <h:panelGrid id="addEnvPanel" columns="2" cellpadding="5" style="text-align: left;">
+            <h:outputText value="Environment name:" style="font-weight:bold"/>
+            <p:inputText id="addEnvNameInput" value="#{environmentBean.newEnvName}" style="width:200px" required="true" styleClass="eps-input" requiredMessage="Environment name can't be empty" validatorMessage="Environment name value can contain letters, numbers and punctual symbols only">
+                <f:validateRegex pattern="[\w\p{Punct}&amp;&amp;[^@]]{1,}" />
+            </p:inputText>
+        </h:panelGrid>
+        <div style="text-align: center;">
+            <p:commandButton id="addEnvSubmit" value="Create" action="#{environmentBean.addEnvironment}" update=":copyForm :addEnvForm :form:rightMenus :environmentsForm:environmentsTable :form:mainMenuBar :form:table" oncomplete="if (!args.validationFailed) {PF('addEnvDialog').hide()} else {PF('addEnvDialog').show()}" />
+            <p:commandButton id="addEnvCancel" value="Cancel" update=":addEnvForm" oncomplete="PF('addEnvDialog').hide();" process="@this">
+                <p:resetInput target=":addEnvForm" />
+            </p:commandButton>
+        </div>
+    </p:dialog>
+</h:form>
+
+<h:form id="renameEnvForm" >
+    <p:dialog header="Rename environment" resizable="false" widgetVar="renameEnvDialog" modal="true">
+        <h:panelGrid id="renameEnvPanel" columns="2" cellpadding="5" style="text-align: left;">
+            <h:outputText value="Environment name:" style="font-weight:bold"/>
+            <p:inputText  id="renameEnvNameInput" value="#{environmentBean.newEnvName}" style="width:200px" required="true" styleClass="eps-input" requiredMessage="Environment name can't be empty"  validatorMessage="Environment name value can contain letters, numbers and punctual symbols only">
+                <f:validateRegex pattern="[\w\p{Punct}&amp;&amp;[^@]]{1,}" />
+            </p:inputText>
+        </h:panelGrid>
+        <div style="text-align: center;">
+            <p:commandButton id="renameEnvSubmit" value="Rename" action="#{environmentBean.renameEnvironment}" update=":form:rightMenus :copyForm :renameForm :environmentsForm:environmentsTable :form:table" oncomplete="if (!args.validationFailed) {PF('renameEnvDialog').hide()} else {PF('renameEnvDialog').show()}" />
+            <p:commandButton id="renameEnvCancel" value="Cancel" update=":renameEnvForm" oncomplete="PF('renameEnvDialog').hide();" process="@this">
+                <p:resetInput target=":renameEnvForm" />
+            </p:commandButton>
+        </div>
+    </p:dialog>
+</h:form>
+
+<h:form id="confirmEnvForm" >
+    <p:confirmDialog id="confirmEnvDialog" message="Are you sure about deleting selected environment?"
+                     header="Delete" severity="alert" widgetVar="envConfirmation" >
+        <div style="text-align: center;">
+            <p:commandButton id="envConfirm" value="Yes" update=":form :copyForm :environmentsForm:environmentsTable :environmentsForm:environmentsMenuBar :form:mainMenuBar :form:rightMenus" oncomplete="PF('envConfirmation').hide()" actionListener="#{environmentBean.deleteEnvironment}" />
+            <p:commandButton id="envDecline" value="No" onclick="PF('envConfirmation').hide();" type="button" />
+        </div>
+    </p:confirmDialog>
+</h:form>
+
+</div>
+
+<ui:insert name="footer">
+    <ui:include src="template/footer.xhtml"/>
+</ui:insert>
+
+<h:outputScript library="sf" name="js/environment.js"/>
+<h:outputScript library="sf" name="js/external/util.js"/>
+<h:outputScript library="sf" name="js/external/message-factory.js" />
+<h:outputScript library="sf" name="js/external/channels.js"/>
+<h:outputScript library="sf" name="js/environmentNotify.js"/>
+
+</h:body>
+</html>

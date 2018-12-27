@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jxb:bindings version="2.0"
+		xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+ 		xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+ 	<jxb:globalBindings localScoping="toplevel">
+ 		<jxb:serializable uid="1" />
+ 	</jxb:globalBindings>
+	<jxb:bindings schemaLocation="functional_report.xsd" node="/xsd:schema">
+		<jxb:schemaBindings>
+			<jxb:nameXmlTransform>
+				<jxb:typeName prefix="Xml" />
+				<jxb:elementName prefix="Xml" />
+				<jxb:anonymousTypeName prefix="Xml" />
+			</jxb:nameXmlTransform>
+		</jxb:schemaBindings>
+		<jxb:bindings
+				node="./xsd:element[@name='FunctionalReport']//xsd:element[@name='TestCase']">
+			<jxb:property name="testcases" />
+		</jxb:bindings>
+	</jxb:bindings>
+</jxb:bindings>

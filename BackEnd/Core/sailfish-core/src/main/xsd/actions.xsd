@@ -1,0 +1,24 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+
+	<xsd:complexType name="ClassName">
+		<xsd:attribute name="name" type="xsd:string" use="required"/>
+	</xsd:complexType>
+
+	<xsd:complexType name="ActionDefinition">
+		<xsd:sequence>
+			<xsd:element name="actionClassName" type="ClassName" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="utilityClassName" type="ClassName" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+        <xsd:attribute name="description" type="xsd:string" />
+		<xsd:attribute name="title" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:element name="actions">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="action" type="ActionDefinition" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

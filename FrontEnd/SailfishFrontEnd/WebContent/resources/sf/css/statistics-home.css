@@ -1,0 +1,62 @@
+.eps-weather-image {
+	width: 2.5em;
+	padding: 0.3em 0.3em 0 0;
+}
+
+.eps-chart-panel {
+	margin-right: 360px;
+}
+
+.eps-weather-panel {
+	width: 300px;
+	float: right;
+	margin-top: 0;
+}
+
+.eps-weather-script-column {
+	font-size: 1em;
+	padding-left: 0.5em;
+}
+
+.eps-weather-passed-column {
+	font-weight: bold;
+	color: #1ABC85;
+}
+
+.eps-weather-conditionally-passed-column {
+    font-weight: bold;
+    color: #D2AC3F;
+}
+
+.eps-weather-failed-column {
+	font-weight: bold;
+	color: #D35400;
+}
+
+.eps-weather-description {
+	background: #F9F9F9;
+	color: #6F727A;
+	border: 1px solid #D5D5D5;
+	margin: 1em 0;
+	padding: 0.5em;
+}
+
+.eps-weather-description .variable {
+	font-style: italic;
+	border: 1px solid #D2DCE6;
+	padding: 0 2px;
+	background: #E7F1FA;
+}
+
+.eps-weather-footer {
+	text-align: right;
+	background-color: #FCFCFC;
+	margin: 0px -10px -10px -10px;
+	padding: 0.3em 0.5em;
+}
+
+.eps-weather-footer .eps-more-link {
+	text-decoration: none;
+	color: #807F7F;
+	border-bottom: 1px dashed #807F7F;
+}

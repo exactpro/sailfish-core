@@ -1,0 +1,314 @@
+buildscript {
+    repositories {
+        maven {
+            name 'MavenLocal' // for local builds only
+            url 'shared'
+        }
+            jcenter()
+
+        configurations.all {
+           resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }
+    }
+
+    dependencies {
+        classpath(group: 'org.jfrog.buildinfo',                 name: 'build-info-extractor-gradle',        version: '4.7.2')
+        classpath(group: 'com.bmuschko',                        name: 'gradle-tomcat-plugin',               version: '2.5')
+        classpath(group: 'com.github.onslip',                   name: 'gradle-one-jar',                     version: '1.0.5')
+        classpath(group: 'me.champeau.gradle',                  name: 'jmh-gradle-plugin',                  version: '0.2.0')
+        classpath(group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin',             version: '3.2', changing: true)
+        classpath(group: 'javax.xml.bind',                      name: 'jaxb-api',                           version: '2.2.11')
+        classpath(group: 'com.github.ben-manes',                name: 'gradle-versions-plugin',             version: '0.20.0')
+        classpath(group: 'com.bmuschko',                        name: 'gradle-cargo-plugin',                version: '2.4')
+    }
+}
+
+allprojects {
+    apply plugin: 'com.jfrog.artifactory'
+    apply plugin: 'eclipse-wtp'
+    apply plugin: 'sailfish'
+    apply plugin: 'com.github.ben-manes.versions'
+
+    ext {
+        sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
+        artifactVersion         = "${sailfishVersion}-SNAPSHOT"
+		sailfishCoreVersion		= "${sailfishVersion}" //.${sailfish_version_maintenance}"
+        artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : sailfishCoreVersion
+
+        sharedDir               = file("${project.rootDir}/shared")
+        sharedWorkspaceDir      = file("${project.rootDir}/shared_workspace")
+        tmpWorkspaceDir         = file("${project.rootDir}/tmp_workspace")
+
+        srcDir                  = file('src')
+        mainDir                 = file("${srcDir}/main")
+        testDir                 = file("${srcDir}/test")
+        genDir                  = file("${srcDir}/gen")
+        extDir                  = file("${srcDir}/external")
+        providedDir             = file("${srcDir}/provided")
+
+        mainJavaDir             = file("${mainDir}/java")
+        mainResDir              = file("${mainDir}/resources")
+        testJavaDir             = file("${testDir}/java")
+        testResDir              = file("${testDir}/resources")
+        genJavaDir              = file("${genDir}/java")
+        genResDir               = file("${genDir}/resources")
+
+        mainWorkspaceDir        = file("${mainDir}/workspace")
+        genWorkspaceDir         = file("${genDir}/workspace")
+        externalWorkspaceDir    = file("${extDir}/workspace")
+        providedWorkspaceDir    = file("${providedDir}/workspace")
+
+        mainPluginDir           = file("${mainDir}/plugin")
+        genPluginDir            = file("${genDir}/plugin")
+        externalPluginDir       = file("${extDir}/plugin")
+        providedPluginDir       = file("${providedDir}/plugin")
+
+        zipPluginDir            = 'plugins'
+        zipPluginLibsDir        = 'libs'
+
+        incremental_build       = project.hasProperty('i')
+        silent_check            = project.hasProperty('silentCheck') || project.hasProperty('sC')
+
+        // Set defaults
+        if (!project.hasProperty('rootUrl')) {
+            rootUrl = 'http://localhost:8080/sfgui/sfapi/'
+        }
+
+        //Lib versions
+        version_slf4j = '1.7.25'
+        version_hibernate = '4.3.11.Final'
+    }
+
+    eclipse {
+        project {
+            name = "core-${project.name}"
+
+            natures 'org.springsource.ide.eclipse.gradle.core.nature'
+            natures 'org.eclipse.jdt.core.javanature'
+            natures 'edu.umd.cs.findbugs.plugin.eclipse.findbugsNature'
+
+            buildCommand 'org.eclipse.jdt.core.javabuilder'
+        }
+        classpath {
+            downloadSources = true
+            downloadJavadoc = true
+        }
+    }
+
+	task wrapper(type: Wrapper) {
+	    gradleVersion = '4.4'
+        distributionType = 'all'
+	}
+
+    generateVersionClass {
+        major               = sailfish_version_major.toInteger()
+        minor               = sailfish_version_minor.toInteger()
+        maintenance         = project.revision.toInteger()
+        // Redefined for Core and FrontEnd sub projects
+        min_core_revision   = project.min_core_revision.toInteger()
+        build               = build_number.toInteger()
+        branch              = project.branch
+    }
+
+    collectDependencies {
+        repository = 'core'
+        outputPath = project.properties.dependencyFile
+        incrementalBuild = incremental_build
+        publishResource = 'build/release'
+    }
+}
+
+// Setting this property to true will make the artifactoryPublish task
+// skip this module (in our case, the root module):
+artifactoryPublish.skip = true
+
+artifactory {
+    publish {
+        defaults {
+            // Reference to Gradle configurations defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publishConfigs('archives')
+        }
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'jacoco'
+
+    group = 'com.exactpro.sf'
+    version = artifactCoreVersion
+
+    sourceCompatibility = 1.8 //Java version compatibility to use when compiling Java source.
+    targetCompatibility = 1.8 //Java version to generate classes for.
+    compileJava.options.debugOptions.debugLevel = "source,lines,vars" // Include debug information
+
+    buildscript { // artifacrory plugin
+        repositories {
+            maven {
+                name 'MavenLocal' // for local builds only
+                url sharedDir
+                }
+                jcenter()
+        }
+
+        configurations.all {
+           resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }
+    }
+
+    repositories {
+        maven {
+            name 'MavenLocal' // for local builds only
+            url sharedDir
+        }
+        jcenter()
+        if (project.hasProperty('repository')) {
+            maven {
+                name 'UserRepository'
+                url project.repository
+                if (project.hasProperty('repositoryAccount') && project.hasProperty('repositoryPassword')) {
+                    credentials {
+                        username project.repositoryAccount
+                        password project.repositoryPassword
+                    }
+                }
+            }
+        } else {
+            maven { // for gradle fast plugin
+                name 'Artifactory-snapshot'
+                url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+            }
+        }
+    }
+
+    configurations {
+        testArtifacts
+        compile.exclude module: 'avalon-framework-api'
+        compile.exclude module: 'guava-jdk5'
+        testCompile.extendsFrom(compileOnly) // to fully emulate provided configuration
+
+        all {
+            transitive = true
+            resolutionStrategy {
+                // fail eagerly on version conflict (includes transitive dependencies)
+                // e.g. multiple different versions of the same dependency (group and name are equal)
+                failOnVersionConflict()
+
+                force "com.exactpro.sf:sailfish-core:${artifactCoreVersion}",
+                        "com.exactpro.sf:sailfish-common:${artifactCoreVersion}",
+                        "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}",
+                        'com.fasterxml.jackson.core:jackson-annotations:2.9.7', //jackson-databind:2.5.4 - max 2.6.3
+                        'com.fasterxml.jackson.core:jackson-core:2.9.7', //google-http-client-jackson2:1.19.0 - max 2.6.3
+                        'com.fasterxml.jackson.core:jackson-databind:2.9.7', //jackson-datatype-threetenbp:2.5.0 - max 2.9.0
+                        'commons-beanutils:commons-beanutils:1.9.3', //commons-digester:1.8 - max 1.9.2
+                        'commons-lang:commons-lang:2.6', //ezmorph:1.0.6, commons-configuration:1.6 - max 3.4
+                        'org.apache.commons:commons-lang3:3.8.1',
+                        'commons-logging:commons-logging:1.2',
+                    'javax.activation:activation:1.1.1', //transitive tree
+                    'org.javassist:javassist:3.22.0-GA', //hibernate-core:5.2.15.Final, hk2-locator:2.4.0-b31 - max 3.22.0-GA
+                    'org.primefaces:primefaces:5.0', //primefaces-extensions:1.2.1 - max 5.3
+                        'org.slf4j:slf4j-api:1.7.25', //redmine-java-api:2.1.0 - max 1.7.13
+                        'com.google.guava:guava:27.0.1-jre', //io.qameta.allure:allure-junit4:2.6.0
+                        'commons-io:commons-io:2.6',
+                        'commons-cli:commons-cli:1.4',
+                        'commons-collections:commons-collections:3.2.2',
+                        'org.apache.commons:commons-collections4:4.2'
+
+                // don't cache changing modules at all
+                cacheChangingModulesFor 0, 'seconds'
+            }
+        }
+    }
+
+    jar {
+        manifest {
+            attributes('Implementation-Version': "${revision}")
+            attributes('Build_Name': "${archivesBaseName}")
+            attributes('Build_Number': "${build_number}")
+            attributes('Git_Hash': "${git_hash}")
+            attributes('Project_Name': "${collectDependencies.repository}-${project.name}")
+        }
+    }
+
+    uploadArchives {
+        repositories.mavenDeployer {
+            uniqueVersion = false // publish non unique snapshots to local repository
+            repository(url: "file://${sharedDir}")
+            doLast {
+            // Remove any invalid maven-metadata.xml files that may have been created
+            // for SNAPSHOT versions that are *not* uniquely versioned.
+                pom*.each { pom ->
+                    if (pom.version.endsWith('-SNAPSHOT')) {
+                        final File artifactDir = new File(rootProject.ext.sharedDir,
+                                pom.groupId.replace('.', '/')
+                                + '/' + pom.artifactId
+                                + '/' + pom.version)
+                        delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
+                    }
+                }
+            }
+        }
+        doFirst { sharedDir.mkdirs() }
+    }
+
+    clean {
+        delete genDir
+        delete extDir
+        delete providedDir
+    }
+
+    task saveDependencies (type: Copy) {
+        from configurations.compile
+        into "${project.buildDir}/dependencies"
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+
+    task testsJar(type: Jar, dependsOn: classes) {
+        classifier = 'tests'
+        from sourceSets.test.output
+    }
+
+    task zipWorkspaceData(type: Zip) {
+        classifier = 'data'
+        includeEmptyDirs = false
+        duplicatesStrategy = 'EXCLUDE'
+        
+        from mainWorkspaceDir
+        from genWorkspaceDir
+        from externalWorkspaceDir
+    }
+
+    artifacts {
+        testArtifacts testsJar
+        archives testsJar
+        archives sourcesJar
+    }
+
+    artifactoryPublish {
+        dependsOn testsJar, sourcesJar
+    }
+    
+    dependencies {
+        compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.7'
+        compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.2.7'
+        compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.2.7'
+        compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+    }
+    
+    jacoco {
+        toolVersion = '0.8.1'
+    }
+}
+
+def getDate(String format) {
+    def date = new Date()
+    def formattedDate = date.format(format)
+    return formattedDate
+}

@@ -1,0 +1,1358 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:o="http://omnifaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Configuration :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+    <h:outputStylesheet library="sf" name="css/configuration.css"/>
+    <h:outputStylesheet library="sf" name="css/sf.css"/>
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"/>
+
+    <script>
+
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+
+  	</script>
+
+
+</h:head>
+<h:body styleClass="eps-application">
+
+<ui:insert name="menu">
+    <ui:include src="template/menu.xhtml"/>
+</ui:insert>
+
+<f:metadata>
+	<f:viewParam name="section" value="#{configBean.section}" />
+    <f:event type="preRenderView" listener="#{configBean.preRenderView}" />
+</f:metadata>
+
+<div class ="eps-container">
+
+
+<h:form prependId="false" id="msgForm">
+    <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true" />
+</h:form>
+
+<h:form prependId="false" id="commandForm">
+	<p:remoteCommand name="changeSection" action="#{configBean.changeSection}" />
+    <p:remoteCommand name="onPageLoad" action="#{configBean.onPageLoad}" />
+</h:form>
+
+<div class="eps-content-panel">
+<div class="eps-config-navigation">
+    <ul>
+        <div onclick="changeSection([{name:'section', value:'database'}])" class="eps-dot"> <li id="databaseNavItem"> Database</li> </div>
+        <div onclick="changeSection([{name:'section', value:'logging'}])" class="eps-dot"><li id="loggingNavItem">  Logging </li></div>
+        <div onclick="changeSection([{name:'section', value:'workspace'}])" class="eps-dot"> <li id="workspaceNavItem">      Workspace  </li></div>
+        <div onclick="changeSection([{name:'section', value:'user_events'}])" class="eps-dot"> <li id="userEventsNavItem">User Events</li></div>
+        <div onclick="changeSection([{name:'section', value:'statistics'}])" class="eps-dot"> <li id="statisticsNavItem">      Statistics DB  </li></div>
+        <div onclick="changeSection([{name:'section', value:'flight_recorder'}])" class="eps-dot"> <li id="flight_recorderNavItem">Flight Recorder</li></div>
+        <div onclick="changeSection([{name:'section', value:'net_dumper'}])" class="eps-dot"> <li id="net_dumperNavItem">NetDumper</li></div>
+        <div onclick="changeSection([{name:'section', value:'tomcat_manager'}])" class="eps-dot"> <li id="tomcat_managerNavItem">Tomcat Manager</li></div>
+        <div onclick="changeSection([{name:'section', value:'ml'}])" class="eps-dot"> <li id="mlNavItem">Machine Learning</li></div>
+        <div onclick="changeSection([{name:'section', value:'email'}])" class="eps-dot"> <li id="emailNavItem">EMail Notification</li></div>
+        <div onclick="changeSection([{name:'section', value:'cleanup'}])" class="eps-dot"> <li id="cleanupNavItem">Cleanup</li></div>
+        <div onclick="changeSection([{name:'section', value:'bb'}])" class="eps-dot"> <li id="bbNavItem">Big Button</li></div>
+
+        <ui:fragment rendered="#{request.isUserInRole(generalBean.adminRoleName)}">
+            <li id="UsrNavItem">
+                <div class="eps-dot" onclick="changeSection([{name:'section', value:'users'}])"> Users </div>
+            </li>
+        </ui:fragment>
+        <ui:fragment rendered="${not user.guest}">
+            <li id="StgNavItem">
+                <div onclick="changeSection([{name:'section', value:'settings'}])"> Settings </div>
+            </li>
+        </ui:fragment>
+    </ul>
+</div>
+
+<div class="eps-config-content-wrapper">
+<div class="eps-config-content-inner">
+
+    <div id="databaseConfig" class="eps-config-container">
+    
+   	    <h2>Database management</h2>
+   	    
+        <h:form id="connectionStatusForm" prependId="false">
+        
+        	<h:outputText value="Connected" styleClass="eps-status-label eps-status-label-Connected"
+        				  rendered="#{configBean.conStatus eq 'Connected' and not configBean.dbChangesApplied}" />
+        				
+        	<p:outputPanel rendered="#{configBean.conStatus eq 'Error'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:outputText value="Error" styleClass="eps-status-label eps-status-label-Error"
+	        				  			  rendered="#{configBean.conStatus eq 'Error'}" />
+        				</td>
+        				<td>
+        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{configBean.conErrorText}" /> 
+        				</td>
+        			</tr>
+        		</table>
+        	</p:outputPanel>
+        				  
+        	<p:outputPanel rendered="#{configBean.conStatus eq 'Checking'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:graphicImage library="sf" name="images/ajaxloader.gif" style="width: 60%" />
+        				</td>
+        				<td>
+        					<h:outputText styleClass="eps-status-label eps-status-label-Disconnected" value="Connecting..." /> 
+        				</td>
+        			</tr>
+        		</table>
+        	</p:outputPanel>
+        	
+        	<h:outputText value="Restart tomcat for the applied changes" styleClass="eps-status-label eps-status-label-Error" 
+        				  rendered="#{configBean.conStatus eq 'Connected' and configBean.dbChangesApplied and configBean.configWasChanged}"/>
+        </h:form>
+        
+        <h:form id="commands" prependId="false">
+			<p:remoteCommand name="checkConnection" action="#{configBean.checkConnection}" />
+			<p:remoteCommand name="applyStatSettings" action="#{statConfigBean.applySettings}" />
+		</h:form>
+        
+        <h:form id="buttonsForm" prependId="false" disabled="#{configBean.conStatus eq 'Checking'}">
+            <div class="eps-content-block">
+            
+                <h3 style="margin-top:0">Hibernate settings</h3>
+
+                <table class="eps-transparent-table">
+                
+                	<tr>
+                		<td>
+                			<h:outputLabel for="driverClass" value="Driver class" />
+                		</td>
+                		<td class="eps-table-divider-min">
+                			<p:inputText id="driverClass" value="#{configBean.configModel.driverClass}" styleClass="eps-input"
+                						 disabled="#{configBean.conStatus eq 'Checking'}">
+                				<p:ajax event="change" execute="@this" />
+                			</p:inputText>
+                		</td>
+                		<td>
+                			<h:outputLabel for="dialect" value="Dialect" />
+                		</td>
+                		<td class="eps-table-divider-min" colspan="3">
+                			<p:inputText id="dialect" value="#{configBean.configModel.dialect}" styleClass="eps-input"
+                						 disabled="#{configBean.conStatus eq 'Checking'}">
+                				<p:ajax event="change" execute="@this" />
+                			</p:inputText>
+                		</td>
+                	</tr>
+                	
+                    <tr>
+                        <td>
+                            <h:outputLabel for="protocol" value="Protocol" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:inputText id="protocol" value="#{configBean.configModel.protocol}" styleClass="eps-input"
+                            			 disabled="#{configBean.conStatus eq 'Checking'}">
+                            	<p:ajax event="change" execute="@this" />
+                            </p:inputText>
+                        </td>
+                        <td>
+                            <h:outputLabel for="subProtocol" value="Sub-Protocol" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:inputText id="subProtocol" value="#{configBean.configModel.subProtocol}" styleClass="eps-input"
+                            			 disabled="#{configBean.conStatus eq 'Checking'}">
+                            	<p:ajax event="change" execute="@this" />
+                            </p:inputText>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <h:outputLabel for="host" value="Host" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                        	<p:inputText id="host" value="#{configBean.configModel.host}" styleClass="eps-input"
+                        				 disabled="#{configBean.conStatus eq 'Checking'}">
+                        		<p:ajax event="change" execute="@this" />
+                        	</p:inputText>
+                    	</td>
+                        <td>
+                            <h:outputLabel for="port" value="Port" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                        	<p:inputText id="port" value="#{configBean.configModel.port}" styleClass="eps-input"
+                        				 disabled="#{configBean.conStatus eq 'Checking'}">
+                        		<p:ajax event="change" execute="@this" />
+                        	</p:inputText>
+                    	</td>
+                        <td>
+                            <h:outputLabel for="database" value="Database" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                        	<p:inputText id="database" value="#{configBean.configModel.path}" styleClass="eps-input"
+                        				 disabled="#{configBean.conStatus eq 'Checking'}">
+                        		<p:ajax event="change" execute="@this" />
+                        	</p:inputText>
+                    	</td>
+                    </tr>
+
+					<tr>
+						<td>
+                    		<h:outputLabel for="params" value="Parameters" />
+                    	</td>
+                    	<td class="eps-table-divider" colspan="5">
+                    		<p:inputText id="params" value="#{configBean.configModel.query}" styleClass="eps-input"
+                    					 disabled="#{configBean.conStatus eq 'Checking'}">
+                    			<p:ajax event="change" execute="@this" />
+                    		</p:inputText>
+                    	</td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <h:outputLabel for="username" value="Username" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:inputText id="username" value="#{configBean.configModel.userName}" styleClass="eps-input"
+                            			 disabled="#{configBean.conStatus eq 'Checking'}">
+                            	<p:ajax event="change" execute="@this" />
+                            </p:inputText>
+                        </td>
+                        <td>
+                            <h:outputLabel for="password" value="Password" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:inputText id="password" value="#{configBean.configModel.password}" styleClass="eps-input"
+                            			 disabled="#{configBean.conStatus eq 'Checking'}">
+                            	<p:ajax event="change" execute="@this" />
+                            </p:inputText>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                		<td>
+                			<h:outputLabel for="preferredTestQuery" value="Test query" />
+                		</td>
+                		<td class="eps-table-divider-min">
+                			<p:inputText id="preferredTestQuery" value="#{configBean.configModel.preferredTestQuery}" styleClass="eps-input"
+                						 disabled="#{configBean.conStatus eq 'Checking'}">
+                				<p:ajax event="change" execute="@this" />
+                			</p:inputText>
+                		</td>
+                	</tr>
+                </table>
+                
+                <table class="eps-transparent-table">
+                	<tr>
+                		<td>
+			       			<p:commandButton value="Apply" actionListener="#{configBean.preCheckConnection}" oncomplete="checkConnection()"
+			       							 icon="ui-icon-circle-check" disabled="#{configBean.conStatus eq 'Checking'}" />
+       					</td>
+       					<td>
+       						<p:commandButton value="Revert" actionListener="#{configBean.revertChanges}" icon="ui-icon-arrowreturnthick-1-w"
+			       							 title="Revert all changes to current connection settings"
+			       							 disabled="#{configBean.conStatus eq 'Checking' or not configBean.configWasChanged}" />
+       					</td>
+       				</tr>
+       			</table>
+            </div>
+
+            <div class="eps-content-block" style="display: none;">
+                <h3> Create database </h3>
+                <h:panelGrid columns="3" id="createPanel">
+                    <h:outputText value="Name" />
+                    <p:inputText value="#{configBean.newDBName}" styleClass="eps-input" />
+                    <p:commandButton  value="Create" actionListener="#{configBean.createDB}" icon="ui-icon-circle-check"/>
+                </h:panelGrid>
+            </div>
+
+            <div class="eps-content-block" style="margin-bottom: 1em">
+                <h3>Current database</h3>
+                <p:commandButton value="Clean" onclick="PF('cleanDBConfirmation').show()" title="Remove all messages and service events"/>
+                <p:commandButton value="Drop" onclick="PF('dropDBConfirmation').show()" title="Drop database" icon="ui-icon-closethick" style="display: none;"/>
+            </div>
+
+        </h:form>
+
+        <h:form id="cleanDBConfirmForm" >
+            <p:confirmDialog id="cleanDBConfirmDialog" message="Are you sure about clean database?"
+                             header="Clean database" severity="alert" widgetVar="cleanDBConfirmation">
+                <div style="text-align: center;">
+                    <p:commandButton id="confirm" value="Yes" oncomplete="PF('cleanDBConfirmation').hide()" actionListener="#{configBean.cleanDB}" />
+                    <p:commandButton id="decline" value="No" onclick="PF('cleanDBConfirmation').hide()" type="button" />
+                </div>
+            </p:confirmDialog>
+        </h:form>
+
+        <h:form id="dropDBConfirmForm" >
+            <p:confirmDialog id="dropDBConfirmDialog" message="Are you sure about drop database?"
+                             header="Drop database" severity="alert" widgetVar="dropDBConfirmation">
+                <div style="text-align: center;">
+                    <p:commandButton id="confirm" value="Yes" oncomplete="PF('dropDBConfirmation').hide()" actionListener="#{configBean.removeDB}" />
+                    <p:commandButton id="decline" value="No" onclick="PF('dropDBConfirmation').hide()" type="button" />
+                </div>
+            </p:confirmDialog>
+        </h:form>
+
+    </div>
+
+<div id="loggingConfig" class="eps-config-container">
+    <h2>Log configuration </h2>
+    <h:form prependId="false" id="logForm" styleClass="eps-config-container-form">
+
+        <p:remoteCommand name="restoreLogSettings" actionListener="#{configBean.restoreSettings}" update=":logForm" />
+
+        <p:outputPanel styleClass="eps-log-visualizer">
+
+            <p:selectBooleanCheckbox style="margin: 10px" value="#{configBean.createIndividualAppenders}" itemLabel=" Enable individual appenders for services"/>
+            <div>
+                <h:outputText value="Individual appenders threshold" style="margin: 10px; top: -8px; position: relative;"/>
+                <p:selectOneMenu  value="#{configBean.individualAppendersThreshold}" styleClass="eps-input eps-level-dropdown eps-general-level-dropdown">
+                    <p:ajax event="change"/>
+                    <f:selectItem itemLabel="OFF" itemValue="OFF" />
+                    <f:selectItem itemLabel="FATAL" itemValue="FATAL" />
+                    <f:selectItem itemLabel="ERROR" itemValue="ERROR" />
+                    <f:selectItem itemLabel="WARN" itemValue="WARN" />
+                    <f:selectItem itemLabel="INFO" itemValue="INFO" />
+                    <f:selectItem itemLabel="DEBUG" itemValue="DEBUG" />
+                    <f:selectItem itemLabel="ALL" itemValue="ALL" />
+                </p:selectOneMenu>
+            </div>
+
+            <p:tabView>
+
+                <p:ajax event="tabChange" listener="#{configBean.onTabChange}" update="@(.eps-config-text-area)"/>
+
+                <p:tab title="Loggers">
+
+                    <div class="eps-header-log-table">
+                        <h:outputText value="Logger level settings" styleClass="eps-logger-name" />
+                        <p:selectOneMenu  value="#{configBean.logVisualizer.level}" style="width: 79px;" panelStyle="width: 79px;" styleClass="eps-input eps-level-dropdown eps-general-level-dropdown">
+                            <p:ajax event="change" listener="#{configBean.logVisualizer.applyToAllLoggers}" update="loggerTree"/>
+                            <p:ajax execute="@this" />
+                            <f:selectItem itemLabel=" -- " itemValue="null" />
+                            <f:selectItems value="#{configBean.logVisualizer.levels}" />
+                        </p:selectOneMenu>
+                    </div>
+
+                    <p:tree id="loggerTree" value="#{configBean.logVisualizer.tree}" var="node" styleClass="eps-logger-tree">
+
+                        <p:treeNode type="logger">
+                            <h:outputText value="#{node.logger.name}" styleClass="eps-logger-name" />
+                            <p:selectOneMenu value="#{node.logger.level}" style="width: 79px;" panelStyle="width: 79px;" styleClass="eps-input eps-level-dropdown">
+                                <p:ajax event="change" update="@(.eps-general-level-dropdown)"/>
+                                <p:ajax execute="@this" />
+                                <f:selectItems value="#{configBean.logVisualizer.levels}" />
+                            </p:selectOneMenu>
+                        </p:treeNode>
+
+                        <p:treeNode type="appender">
+                            <h:outputText value="#{node.appender.name}" styleClass="eps-appender-name" />
+                        </p:treeNode>
+
+                        <p:treeNode type="param">
+                            <h:outputText styleClass="eps-appender-param" value="#{node.pairParam.left}" />
+                            <h:outputText styleClass="eps-appender-param" value="#{node.pairParam.right}" />
+                        </p:treeNode>
+
+                    </p:tree>
+                </p:tab>
+
+                <p:tab title="As text">
+                    <p:inputTextarea rows="35" autoResize="false" value="#{configBean.logConfigText}" styleClass="eps-config-text-area eps-input">
+                        <p:ajax event="blur" listener="#{configBean.updateLogConfigModel}" update=":logForm"/>
+                    </p:inputTextarea>
+                </p:tab>
+
+            </p:tabView>
+        </p:outputPanel>
+        <div class="eps-yn-wrapper">
+            <p:commandButton value="Apply settings" actionListener="#{configBean.updateLogConfig()}" />
+            <p:commandButton value="Restore settings" style="margin-left: 10px" onclick="restoreLogSettings()" />
+        </div>
+
+    </h:form>
+</div>
+
+<div id="workspaceConfig" class="eps-config-container">
+
+    <h2>Workspace configuration</h2>
+
+    <h:form prependId="false" >
+        <h:panelGrid columns="1" id="workspacePanel">
+            <h:outputText value="Workspace location:" />
+            <p:inputText value="#{configBean.workspacePath}" style="width: 395px;" styleClass="eps-input" disabled="true"/>
+            <p:commandButton value="Apply" onclick="PF('switchWorkspaceConfirmation').show()" icon="ui-icon-circle-check" disabled="true"/>
+        </h:panelGrid>
+    </h:form>
+
+    <h:form id="switchWorkspaceConfirmForm" >
+        <p:confirmDialog id="switchWorkspaceConfirmDialog" message="Are you sure about switching workspace?"
+                         header="Switch workspace" severity="alert" widgetVar="switchWorkspaceConfirmation">
+            <div style="text-align: center;">
+                <p:commandButton id="confirm" value="Yes" oncomplete="PF('switchWorkspaceConfirmation').hide()" actionListener="#{configBean.switchWorkspace}" />
+                <p:commandButton id="decline" value="No" onclick="PF('switchWorkspaceConfirmation').hide()" type="button" />
+            </div>
+        </p:confirmDialog>
+    </h:form>
+
+    <h:form prependId="false" >
+        <h:panelGrid columns="1" id="environmentConfiguration">
+            <h2>Environment configuration</h2>
+            <p:dataTable var="envParam" value="#{configBean.environmentParamsList}" style="width:800px" styleClass="eps-environment-config-table">
+
+                <p:column style="width:35%;background-color:#ffffff">
+                    <h:outputText id="paramName" value="#{envParam.readableName}"/>
+                    <p:overlayPanel id="myPanel" for="paramName" showEvent="mouseover" hideEvent="mouseout">
+                        <h:outputText value="#{envParam.paramDescription}" escape="false"/>
+                    </p:overlayPanel>
+                </p:column>
+
+                <p:tooltip value="#{envParam.paramDescription}" for="paramName"/>
+
+                <p:column style="width:25%;background-color:#ffffff">
+                	<ui:fragment rendered="#{envParam.type == null}">
+	                    <p:inputText value="#{envParam.paramValue}" styleClass="eps-input" validatorMessage="Not valid (validator)">
+	                    	<o:validator validatorId="javax.faces.RegularExpression" disabled="#{envParam.paramValidateRegex == null}" pattern="#{envParam.paramValidateRegex}" />
+	                        <p:ajax event="blur" execute="@this" />
+	                    </p:inputText>
+                    </ui:fragment>
+                    <ui:fragment rendered="#{envParam.type eq 'SET'}">
+	                    <p:inputText value="#{envParam.paramValue}" styleClass="eps-input">
+	                    	<o:converter converterId="sailfish.IterableConverter" separator="," type="#{envParam.type}"/>
+	                    	<o:validator validatorId="sailfish.IterableValidator" disabled="#{envParam.paramValidateRegex == null}" pattern="#{envParam.paramValidateRegex}" />
+
+	                        <p:ajax event="blur" execute="@this" />
+	                    </p:inputText>
+                    </ui:fragment>
+                </p:column>
+            </p:dataTable>
+        </h:panelGrid>
+        <p:commandButton value="Apply settings" icon="ui-icon-circle-check" actionListener="#{configBean.onApplyEnvParams()}"/>
+    </h:form>
+
+    <h:form prependId="false">
+        <h2>Sailfish components</h2>
+        <p:dataTable id="buildNumbers" var="sfComponent" value="#{configBean.componentsBuildNumbers}" style="width:800px" styleClass="eps-environment-component-table">
+            <p:column headerText="Name" style="width:35%;background-color:#ffffff">
+                <h:outputText value="#{sfComponent.name}"/>
+            </p:column>
+            <p:column headerText="Version" style="width:15%;background-color:#ffffff">
+                <h:outputText value="#{sfComponent.version}"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+
+</div>
+
+<div id="user_eventsConfig" class="eps-config-container">
+
+    <h2>User events</h2>
+
+    <h:form>
+        <p:dataTable id="pluginloaderlogs"  var="log" value="#{userEventsBean.pluginLoaderLog}"
+                     styleClass="eps-environment-component-table" widgetVar="logTable" filteredValue="#{userEventsBean.filteredLogs}"
+                     rowStyleClass="#{(rowIndex mod 2) eq 0 ? 'ue-table-even' : 'ue-table-odd'}" rowIndexVar="rowIndex"
+        >
+            <p:column headerText="Datetime" style="width:10%; white-space: pre-wrap; text-align:center;" sortBy="#{log.datetime}">
+                <h:outputText value="#{log.datetime}" converter="#{userEventsBean.converter}"/>
+            </p:column>
+            <p:column headerText="Priority" style="width:20%; text-align:center;" filterBy="#{log.priority}" filterMatchMode="equals">
+                <f:facet name="filter">
+                    <p:selectOneMenu onchange="PF('logTable').filter()" style="width:125px; background:#ffffff;" value="ERROR">
+                        <f:selectItem itemLabel="ALL" itemValue="" />
+                        <f:selectItem itemLabel="DEBUG" itemValue="DEBUG"/>
+                        <f:selectItem itemLabel="INFO" itemValue="INFO"/>
+                        <f:selectItem itemLabel="WARN" itemValue="WARN"/>
+                        <f:selectItem itemLabel="ERROR" itemValue="ERROR"/>
+                    </p:selectOneMenu>
+                </f:facet>
+                <h:outputText value="#{log.priority}" styleClass="#{log.style}"/>
+            </p:column>
+            <p:column headerText="Message" style="padding-top:10px;padding-bottom:10px;">
+                <h:outputText value="#{log.message}" styleClass="ue_table_message"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+         	PF('logTable').filter();
+         });
+    </script>
+</div>
+
+<!--  -->
+
+<div id="statisticsConfig" class="eps-config-container">
+        <h2>Statistics DB</h2>
+        
+        <h:form id="statConnectionStatusForm" prependId="false">
+        
+        	<h:outputText value="Connected" styleClass="eps-status-label eps-status-label-Connected"
+        				  rendered="#{statConfigBean.currentStatus eq 'Connected'}" />
+        				
+        	<p:outputPanel rendered="#{statConfigBean.currentStatus eq 'Error' or statConfigBean.currentStatus eq 'Disconnected'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:outputText value="#{statConfigBean.currentStatus}" styleClass="eps-status-label eps-status-label-Error" />
+        				</td>
+        				<td>
+        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{statConfigBean.errorText}"
+        								  rendered="#{statConfigBean.currentStatus eq 'Error'}" /> 
+        				</td>
+        			</tr>
+        		</table>
+        	</p:outputPanel>
+        				  
+        	<p:outputPanel rendered="#{statConfigBean.currentStatus eq 'Checking'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:graphicImage library="sf" name="images/ajaxloader.gif" style="width: 60%" />
+        				</td>
+        				<td>
+        					<h:outputText styleClass="eps-status-label eps-status-label-Disconnected" value="Connecting..." /> 
+        				</td>
+        			</tr>
+        		</table>
+        	</p:outputPanel>
+        </h:form>
+        
+        <h:form id="statisticsDbForm">
+        	
+        	<div class="eps-statistics-service-status-line">
+        	
+	        	<table class="eps-transparent-table" style="margin: 1em 0 0 0">
+
+                    <tr>
+                        <ui:fragment  rendered="#{not empty statConfigBean.dbVersion}">
+                            <td>
+                                <h:outputLabel value="Schema version"/>
+                            </td>
+                            <td class="eps-table-divider-min">
+                                <h:outputLabel  value="#{statConfigBean.dbVersion}"/>
+                            </td>
+                        </ui:fragment>
+
+                        <td>
+                            <p:commandButton value="Migrate" action="#{statConfigBean.invokeMigrate}" update=":statisticsDbForm"
+                                             rendered="#{statConfigBean.migrationRequired}" disabled="#{statConfigBean.currentStatus eq 'Checking'}"/>
+                        </td>
+                    </tr>
+
+                    <tr>
+                		<td colspan="3">
+                			<p:selectBooleanCheckbox itemLabel=" Store matrix execution statistics in statistics DB" 
+            						 value="#{statConfigBean.serviceEnabled}" style="margin: 10px 0 0 10px"
+            						 disabled="#{statConfigBean.currentStatus eq 'Checking'}"/>
+                		</td>
+                	</tr>
+                </table>
+        	</div>
+
+            <div class="eps-content-block">
+                <h3>Database connection settings</h3>
+
+                <table class="eps-transparent-table" style="margin-bottom:0">
+
+                    <tr>
+                    	<td>
+                            <h:outputLabel for="dbms" value="DBMS" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:selectOneMenu id="dbms" value="#{statConfigBean.settings.storageSettings.dbms}" styleClass="eps-input"
+                            			     required="true" style="width: 100%" disabled="#{statConfigBean.currentStatus eq 'Checking'}">
+                            	<f:selectItems value="#{statConfigBean.supportedDbms}" var="item" itemLabel="#{item}" itemValue="#{item}"/>
+                            	<p:ajax execute="@this"/>
+                            </p:selectOneMenu>
+                        </td>
+                        <td class="eps-table-divider">&nbsp;</td>
+                        <td>
+                        </td>
+                        <td class="eps-table-divider-min">
+                        </td>
+                        <td class="eps-table-divider">&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <h:outputLabel for="host" value="Host" />
+                        </td>
+	                    <td class="eps-table-divider-min">
+	                        <p:inputText id="host" value="#{statConfigBean.settings.storageSettings.host}" required="true" 
+	                        			 styleClass="eps-input" disabled="#{statConfigBean.currentStatus eq 'Checking'}"/>
+	                    </td>
+                        <td class="eps-table-divider">&nbsp;</td>
+                        <td>
+                            <h:outputLabel for="port" value="Port" />
+                        </td>
+                        <td  class="eps-table-divider-min">
+                        	<p:inputText id="port" value="#{statConfigBean.settings.storageSettings.port}" required="true" 
+                        				 styleClass="eps-input" disabled="#{statConfigBean.currentStatus eq 'Checking'}" />
+                    	</td>
+                        <td class="eps-table-divider">&nbsp;</td>
+                        <td>
+                            <h:outputLabel for="database" value="Database" />
+                        </td>
+                        <td  class="eps-table-divider-min">
+                        	<p:inputText id="database" value="#{statConfigBean.settings.storageSettings.dbName}" required="true" 
+                        				 styleClass="eps-input" disabled="#{statConfigBean.currentStatus eq 'Checking'}"/>
+                    	</td>
+                    </tr>
+					
+					<tr>
+						<td>
+                            <h:outputLabel for="params" value="Parameters" />
+                        </td>
+	                    <td class="eps-table-divider-min" colspan="7">
+	                        <p:inputText id="params" value="#{statConfigBean.settings.storageSettings.connectionOptionsQuery}" 
+	                        			 styleClass="eps-input" style="width: 100%; box-sizing: border-box;"
+	                        			 disabled="#{statConfigBean.currentStatus eq 'Checking'}" />
+	                    </td>
+					</tr>
+					
+					<tr>
+                        <td>
+                            <h:outputLabel for="username" value="Username" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:inputText id="username" value="#{statConfigBean.settings.storageSettings.username}" required="true" 
+                            			 styleClass="eps-input" disabled="#{statConfigBean.currentStatus eq 'Checking'}" />
+                        </td>
+                        <td class="eps-table-divider">&nbsp;</td>
+                        <td >
+                        	<h:outputLabel for="password" value="Password" />
+                        </td>
+                        <td class="eps-table-divider-min">
+                            <p:password id="password" value="#{statConfigBean.settings.storageSettings.password}" required="true" 
+                            			styleClass="eps-input" redisplay="true" disabled="#{statConfigBean.currentStatus eq 'Checking'}"/>
+                        </td>
+                        <td class="eps-table-divider-min">
+                            &nbsp;
+                        </td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                
+                <p:commandButton value="Apply" actionListener="#{statConfigBean.preApplySettings}" oncomplete="applyStatSettings()" 
+                				 icon="ui-icon-circle-check" style="margin-bottom: 10px" disabled="#{statConfigBean.currentStatus eq 'Checking'}">
+                	<f:actionListener binding="#{tagsAdminBean.refresh()}" />
+                </p:commandButton>
+
+            </div>            
+		</h:form>
+
+</div>
+
+<div id="mlConfig" class="eps-config-container">
+        <h2>Machine Learning service</h2>
+
+        <h:form id="mlConnectionStatusForm" prependId="false">
+
+        	<h:outputText value="Connected - Ready to receive training data" styleClass="eps-status-label eps-status-label-Connected"
+                          rendered="#{mlConfigBean.currentStatus eq 'Connected'}" />
+                          
+            <h:outputText value="ExtensionML - Ready to make predictions #{mlConfigBean.MLVersion}" styleClass="eps-status-label eps-status-label-Connected"
+                        rendered="#{mlConfigBean.predictorStatus eq 'Connected'}" />
+
+        	<p:outputPanel rendered="#{mlConfigBean.currentStatus eq 'Error' or mlConfigBean.currentStatus eq 'Disconnected'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:outputText value="#{mlConfigBean.currentStatus}" styleClass="eps-status-label eps-status-label-Error" />
+        				</td>
+        				<td>
+        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{mlConfigBean.errorText}"
+        								  rendered="#{mlConfigBean.currentStatus eq 'Error'}" />
+        				</td>
+        			</tr>
+        		</table>
+            </p:outputPanel>
+            
+            <h:outputText value="ExtensionML - Not awalable" styleClass="eps-status-label eps-status-label-Error"
+                        rendered="#{mlConfigBean.predictorStatus eq 'Error'}" />
+
+        	<p:outputPanel rendered="#{mlConfigBean.currentStatus eq 'Checking'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:graphicImage library="sf" name="images/ajaxloader.gif" style="width: 60%" />
+        				</td>
+        				<td>
+        					<h:outputText styleClass="eps-status-label eps-status-label-Disconnected" value="Connecting..." />
+        				</td>
+        			</tr>
+        		</table>
+            </p:outputPanel>
+            
+            <p:outputPanel rendered="#{mlConfigBean.predictorStatus eq 'Checking'}">
+        		<table class="eps-transparent-table" style="margin-bottom:0">
+	        		<tr>
+	                	<td>
+        					<h:graphicImage library="sf" name="images/ajaxloader.gif" style="width: 60%" />
+        				</td>
+        				<td>
+        					<h:outputText styleClass="eps-status-label eps-status-label-Disconnected" value="Loading..." />
+        				</td>
+        			</tr>
+        		</table>
+        	</p:outputPanel>
+
+        </h:form>
+
+        <h:form>
+            <p:commandButton ajax="false" value="Download ML dump" icon="ui-icon-arrowthick-1-s" action="#{mlConfigBean.getDump()}"/>
+        </h:form>
+
+        
+
+</div>
+
+<div id="flight_recorderConfig" class="eps-config-container">
+
+    <h2>Flight Recorder</h2>
+    
+    <ui:include src="/template/flightRecorder.xhtml"/>
+        
+</div>
+
+<div id="net_dumperConfig" class="eps-config-container">
+
+    <h2>NetDumper</h2>
+    
+    <ui:include src="/template/netDumper.xhtml"/>
+     
+</div>
+
+<div id="emailConfig" class="eps-config-container">
+
+    <h2>EMail settings</h2>
+
+    <h:form id="emailConnectionStatusForm" prependId="false">
+
+        <h:outputText value="Server is available" styleClass="eps-status-label eps-status-label-Connected"
+                      rendered="#{emailBean.status eq 'Connected'}" />
+
+        <p:outputPanel rendered="#{emailBean.status eq 'Error' or emailBean.status eq 'Disconnected'}">
+            <table class="eps-transparent-table" style="margin-bottom:0">
+                <tr>
+                    <td>
+                        <h:outputText value="#{emailBean.status}" styleClass="eps-status-label eps-status-label-Error"/>
+                    </td>
+                    <td>
+                        <h:outputText style="color: #E74C3C; font-weight: bold" value="#{emailBean.errorText}"
+                                      rendered="#{emailBean.status eq 'Error'}"  />
+                    </td>
+                </tr>
+            </table>
+        </p:outputPanel>
+
+        <p:outputPanel rendered="#{emailBean.status eq 'Checking'}">
+            <table class="eps-transparent-table" style="margin-bottom:0">
+                <tr>
+                    <td>
+                        <h:graphicImage library="sf" name="images/ajaxloader.gif" style="width: 60%" />
+                    </td>
+                    <td>
+                        <h:outputText styleClass="eps-status-label eps-status-label-Disconnected" value="Checking access to server..." />
+                    </td>
+                </tr>
+            </table>
+        </p:outputPanel>
+
+    </h:form>
+
+    <h:form id="emailCommands" prependId="false">
+        <p:remoteCommand name="applyEMailSettings" action="#{emailBean.applySettings}" />
+    </h:form>
+
+    <h:form id="emailForm" prependId="false">
+        <div class="eps-content-block">
+
+            <table class="eps-transparent-table">
+
+                <tr>
+                    <td class="eps-table-divider-min">
+                        <p:selectBooleanCheckbox value="#{emailBean.settings.serviceEnabled}"
+                                                 style="margin: 10px 0 0 0px"
+                                                 itemLabel="Enabled EMail Service"
+                                                 disabled="#{emailBean.status eq 'Checking'}"/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <h:outputLabel for="smtpHost" value="SMTP server host" />
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:inputText id="smtpHost" value="#{emailBean.settings.smtpHost}" styleClass="eps-input">
+                            <p:ajax event="change" execute="@this" />
+                        </p:inputText>
+                    </td>
+                    <td>
+                        <h:outputLabel for="smtpPort" value="SMTP port" />
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:inputText id="smtpPort" value="#{emailBean.settings.smtpPort}" styleClass="eps-input">
+                            <p:ajax event="change" execute="@this" />
+                        </p:inputText>
+                    </td>
+                    <td>
+                        <h:outputLabel for="timeout" value="Timeout" />
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:inputText id="timeout" value="#{emailBean.settings.timeout}" styleClass="eps-input">
+                            <p:ajax event="change" execute="@this" />
+                        </p:inputText>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <h:outputLabel for="mailUsername" value="Username" />
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:inputText id="mailUsername" value="#{emailBean.settings.username}" required="true" styleClass="eps-input"
+                             requiredMessage="Please enter your email address." validatorMessage="Invalid email format for 'username'">
+                            <p:ajax event="change" execute="@this" />
+
+                            <f:validateRegex pattern="(^$|^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$)" />
+                        </p:inputText>
+                    </td>
+                    <td>
+                        <h:outputLabel for="mailPassword" value="Password" />
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:password id="mailPassword" value="#{emailBean.settings.password}" styleClass="eps-input"
+                                    required="true" redisplay="true" >
+                            <p:ajax event="change" execute="@this" />
+                        </p:password>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <h:outputLabel for="recipients" value="Recipients" />
+                    </td>
+                    <td class="eps-table-divider" colspan="5">
+                        <p:inputText id="recipients" value="#{emailBean.settings.recipients}" styleClass="eps-input"
+                        			 requiredMessage="Please enter your email address." 
+                        			 validatorMessage="Invalid recipients format - must be the valid email addresses delimited by ';'">
+                            <p:ajax event="change" execute="@this" />
+                            
+                            <f:validateRegex pattern=
+                            "(^$|^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})(;([_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})){0,1})*$)" />
+                        </p:inputText>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="eps-table-divider-min">
+                        <p:selectBooleanCheckbox value="#{emailBean.settings.useSSL}" itemLabel=" Use SSL"/>
+                    </td>
+                </tr>
+            </table>
+
+            <table class="eps-transparent-table">
+                <tr>
+                    <td>
+                        <p:commandButton value="Apply" actionListener="#{emailBean.preApplySettings}"
+                                         oncomplete="if (!args.validationFailed) { applyEMailSettings() }"
+                                         icon="ui-icon-circle-check"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+    </h:form>
+</div>
+<div id="bbConfig" class="eps-config-container">
+        <h2>Big Button</h2>
+    <ui:include src="/template/bb_configuration.xhtml"/>
+</div>
+<div id="tomcat_managerConfig" class="eps-config-container">
+	<TABLE>
+		<tr>
+		    <td>
+                <H2>Tomcat Manager</H2>     
+            </td>
+			<td>
+				<h:panelGroup id="infoicon" styleClass="ui-icon ui-icon-help"/>			
+			</td>
+		</tr>
+	</TABLE>
+	
+	<span class="eps-status-label eps-status-label-#{tomcatControlBean.tomcatSpan}">
+			#{tomcatControlBean.tomcatControlFound?"TomcatControl found":"TomcatControl not found"}
+	</span>
+	<p:tooltip for="infoicon">
+	   <h:outputText value="This is simple interface helps to reload / stop / update Sailfish in Tomcat."/>
+	   <br/>
+	   <h:outputText value="'Manager Application' should be installed and tomcat-users.xml should be configured."/>
+	   <br/>
+	   <h:outputText value="User should have manager-gui and manager-script roles."/>
+	</p:tooltip>
+	<h:form id="tomcatManagerSettings">		
+		<div class="eps-content-block">
+			<h3>Tomcat control settings</h3>
+			<table>
+				<tr>
+					<td>
+				       	<h:outputLabel for="username" value="Username" />
+				   	</td>
+				   	<td class="eps-table-divider-min">
+				       	<p:inputText id="username" value="#{tomcatControlBean.user}" required="true" styleClass="eps-input">
+				       		<p:ajax event="blur"/>
+				       	</p:inputText>
+				   	</td>
+				   	<td class="eps-table-divider">&nbsp;</td>
+				   	<td >
+				   		<h:outputLabel for="password" value="Password" />
+				   	</td>
+				   	<td class="eps-table-divider-min">
+				       	<p:password id="password" value="#{tomcatControlBean.pwd}" required="true" styleClass="eps-input" redisplay="true">
+				       		<p:ajax event="blur"/>
+				       	</p:password>
+					</td>
+					<td class="eps-table-divider-min">
+						<p:commandButton id="testLogPass" value="Test" actionListener="#{tomcatControlBean.testLogPass()}"/>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<h:outputLabel for="temporaryDirectory" value="Temporary directory"/>
+					</td>
+					<td class="eps-table-divider-min">
+						<p:inputText id="temporaryDirectory" required="true" value="#{tomcatControlBean.tmpDir}">
+							<p:ajax event="blur"/>
+						</p:inputText>
+					</td>
+					<td class="eps-table-divider">&nbsp;</td>
+					<td>
+						<h:outputLabel for="backupDirectory" value="Backup directory"/>
+					</td>
+					<td class="eps-table-divider-min">
+						<p:inputText id="backupDirectory" required="true" value="#{tomcatControlBean.backupDir}">
+							<p:ajax event="blur"/>
+						</p:inputText>
+					</td>
+					<td class="eps-table-divider-min">
+						<p:commandButton id="testAllDirs" value="Test" actionListener="#{tomcatControlBean.testAllDirs()}"/>
+					</td>					
+				</tr>
+				<!-- <tr>
+					<td>
+						<h:outputLabel for="testTempDir" value="Test temporary directory is writable"/>
+					</td>
+					<td class="eps-table-divider-min">
+						<p:commandButton id="testTempDir" value="Test" actionListener="#{tomcatControlBean.testTmpDir()}"/>
+					</td>
+					<td class="eps-table-divider">&nbsp;</td>
+					<td>
+						<h:outputLabel for="testBackupDir" value=" Test backup directory is writable"/>
+					</td>
+					<td class="eps-table-divider-min">
+						<p:commandButton id="testBackupDir" value="Test" actionListener="#{tomcatControlBean.testBackupDir()}"/>
+					</td>
+				</tr> -->
+			</table>		    
+ 		</div>
+ 		
+ 		<p:separator/>		
+	</h:form>
+	<div class="eps-content-block">
+		<H3>Manager application</H3>
+		<h:form>
+			<table>
+				<tr>
+					<td><h:outputLabel value="Reload application" /></td>
+					<td class="eps-table-divider-min"><p:commandButton
+							value="Reload" ajax="false"
+							actionListener="#{tomcatControlBean.reloadApplication}" style="width:70px" /></td>
+				</tr>
+				<tr>
+					<td><p:outputLabel value="Stop application" /></td>
+					<td class="eps-table-divider-min"><p:commandButton
+							value="Stop" ajax="false"
+							actionListener="#{tomcatControlBean.stopApplication}" style="width:70px" /></td>
+				</tr>
+				<tr>
+					<td><p:outputLabel value="Make application backup" /></td>
+					<td class="eps-table-divider-min"><p:commandButton
+							value="Backup"
+							actionListener="#{tomcatControlBean.makeBackup}" style="width:70px" /></td>
+				</tr>
+			</table>
+		</h:form>
+		<h:form prependId="false" id="fileUploadForm" enctype="multipart/form-data">
+			<table>
+				<tr>
+					<td>
+						<p:outputLabel value="Choose WAR file"/>
+					</td>
+					<td class="eps-table-divider">
+						<p:fileUpload style="margin-top:20px" fileUploadListener="#{tomcatControlBean.handleFileUpload}" mode="advanced" skinSimple="true" allowTypes="/(\.|\/)(war|zip)$/" multiple="false" showButtons="false" auto="true"/>
+					</td>
+					<td class="eps-table-divider">&nbsp;</td>
+					<td>
+						<h:outputLabel value="Update application" />
+					</td>
+					<td class="eps-table-divider">&nbsp;</td>
+					<td>
+						<p:commandButton value="Update" ajax="false" actionListener="#{tomcatControlBean.handle}" disabled="#{!tomcatControlBean.tomcatControlFound}" style="width:70px"/>
+					</td>
+				</tr>
+			</table>            
+		</h:form>
+		<p:separator />
+		
+		<h:form>
+			<table>
+				<tr>
+					<td><h:outputLabel for="catalinaURL" value="RESTCatalina daemon URL"/></td>
+					<td class="eps-table-divider"><p:inputText id="catalinaURL" required="true" value="#{catalinaBean.catalinaURL}">
+							<p:ajax event="blur"/>
+						</p:inputText>
+					</td>
+				</tr>
+			</table>
+		</h:form>
+		
+		<h:form rendered="#{catalinaBean.ready}">
+			<table>
+				<tr>
+					<td class="eps-table-divider"><h:outputLabel for="catalinaRestart" value="Restart server"/></td>
+					<td><p:commandButton id="catalinaRestart" value="Restart server" ajax="true" actionListener="#{catalinaBean.restart}"/></td>
+				</tr>
+				<tr>
+					<td class="eps-table-divider"><h:outputLabel for="catalinaDeploy" value="Deploy new app"/></td>
+					<td><p:commandButton id="catalinaDeploy" value="Deploy" ajax="true" actionListener="#{catalinaBean.deploy}" style="width:70px"/></td>
+				</tr>
+			</table>
+		</h:form>
+		
+		<h:form prependId="false" id="warUploadForm" enctype="multipart/form-data" rendered="#{catalinaBean.ready}">
+			<table>
+				<tr>
+					<td>
+						<p:outputLabel value="Choose WAR file"/>
+					</td>
+					<td class="eps-table-divider">
+						<p:fileUpload style="margin-top:20px" fileUploadListener="#{catalinaBean.handleFileUpload}" mode="advanced" skinSimple="true" allowTypes="/(\.|\/)(war|zip)$/" multiple="false" showButtons="false" auto="true"/>
+					</td>
+				</tr>
+			</table>            
+		</h:form>
+	</div>
+</div>
+
+<div id="cleanupConfig" class="eps-config-container">
+    <h2>Cleanup</h2>
+    <ui:include src="/template/cleanup.xhtml"/>
+</div>
+
+<div id="usersConfig" class="eps-config-container">
+
+    <h2>Users configuration</h2>
+
+    <div class="eps-buttons-bar" style="margin-bottom:10pt;">
+        <h:form id="buttonsbarForm" prependId="false">
+            <p:commandButton value="New user" id="addUser"
+                             actionListener="#{configBean.createNewUser()}"
+                             update=":add-dialog-form :form:users-table"
+                             oncomplete="PF('addDialog').show()"
+                             icon="ui-icon-plusthick" />
+        </h:form>
+    </div>
+
+    <h:form id="form" prependId="false">
+        <p:dataTable id="users-table" var="user" value="#{configBean.users}"
+                     rowKey="#{user.name}" selection="#{configBean.selectedUser}" selectionMode="single"
+                     resizableColumns="true" liveResize="true" paginator="true" rows="20"
+                     paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                     paginatorPosition="bottom" rowsPerPageTemplate="5,10,15,20,30,100">
+
+            <p:column headerText="Login" sortBy="#{user.name}" >
+                <h:outputText value="#{user.name}"/>
+            </p:column>
+            <p:column headerText="First Name" sortBy="#{user.firstName}">
+                <h:outputText value="#{user.firstName}" />
+            </p:column>
+            <p:column headerText="Last Name" sortBy="#{user.lastName}">
+                <h:outputText value="#{user.lastName}" />
+            </p:column>
+            <p:column headerText="E-Mail" sortBy="#{user.email}">
+                <h:outputText value="#{user.email}" />
+            </p:column>
+            <p:column headerText="Date of registration"
+                      sortBy="#{user.registered}">
+                <h:outputText value="#{user.registered}" />
+            </p:column>
+
+            <p:column headerText="Edit" style="text-align: center;">
+                <p:commandButton id="editButton" value="Edit"
+                                 actionListener="#{configBean.setSelectedUser(user)}"
+                                 update=":edit-dialog-form :form:users-table"
+                                 oncomplete="PF('editDialog').show()"
+                                 style="width: 5em;" icon="ui-icon-pencil" />
+                <p:commandButton value="Delete"
+                                 actionListener="#{configBean.delete(user)}" update=":form"
+                                 style="width: 6em;"	icon="ui-icon-closethick" />
+            </p:column>
+
+            <p:rowExpansion>
+
+                <h:form id="form_expansion" prependId="false">
+
+                    <p:dataTable id="users-sub-table" var="role"
+                                 value="#{configBean.getRoles(user)}" style="width:300px;"
+                                 rowKey="#{role.name}">
+
+                        <p:column headerText="Role name" sortBy="#{role.name}">
+                            <h:outputText value="#{role.name}" />
+                        </p:column>
+
+                        <p:column headerText="Has role">
+                            <h:selectBooleanCheckbox value="#{role.hasRole}"
+                                                     disabled="true" />
+                        </p:column>
+
+                    </p:dataTable>
+
+                </h:form>
+
+            </p:rowExpansion>
+
+        </p:dataTable>
+    </h:form>		
+</div>
+
+<div id="settingsConfig" class="eps-config-container">
+
+    <h2>Settings</h2>
+
+    <div class="eps-buttons-bar" style="margin-bottom:10pt;">
+        <h:form id="buttonsbarSettingsForm" prependId="false">
+            <p:commandButton value="Change password" id="changePassword"
+                             actionListener="#{configBean.changePassword()}"
+                             update=":change-pass-dialog-form"
+                             oncomplete="PF('changePassDialog').show()"
+                             icon="ui-icon-pencil" />
+        </h:form>
+    </div>
+
+</div>
+
+</div></div>
+</div>
+
+<h:form id="change-pass-dialog-form">
+    <p:dialog id="change-pass-dialog" resizable="false"
+              header="Change password for user '#{user.name}'"
+              widgetVar="changePassDialog" style="text-align: left; width: 260pt;">
+
+        <h:panelGrid id="change-pass-properties-panel" columns="2" cellpadding="5"
+                     styleClass="eps-dialog-grid eps-inputs-panel"
+                     style="margin: 1em 0; width: auto;">
+
+            <p:outputLabel for="change-pass-old" value="Old Password: " />
+
+            <p:password id="change-pass-old" styleClass="eps-input"
+                        value="#{configBean.oldPassword}" required="true"
+                        requiredMessage="Required field" />
+
+            <p:outputLabel for="change-pass-new" value="New Password: " />
+
+            <p:password id="change-pass-new" styleClass="eps-input"
+                        value="#{configBean.newPassword}" required="true"
+                        requiredMessage="Required field" />
+
+            <p:outputLabel for="change-pass-new-confirm" value="Confirm New Password: " />
+
+            <p:password id="change-pass-new-confirm" styleClass="eps-input"
+                        value="#{configBean.newPasswordConfirm}" required="true"
+                        requiredMessage="Required field" />
+
+        </h:panelGrid>
+
+        <p:watermark for="change-pass-old" value="Type old password " />
+        <p:watermark for="change-pass-new" value="Type new password " />
+        <p:watermark for="change-pass-new-confirm" value="Type new password again" />
+
+        <div style="margin: 0.5em; text-align: center;">
+            <p:commandButton value="Save" id="save"
+                             actionListener="#{configBean.changePassword}" update=":change-pass-dialog-form:change-pass-properties-panel"
+                             style="margin-right: 0.5em; width: 6em;"
+                             oncomplete="if (args &amp;&amp; !args.validationFailed) PF('changePassDialog').hide()"
+                             icon="ui-icon-disk" />
+            <p:commandButton value="Close" type="reset" process="@this"
+                             onclick="PF('changePassDialog').hide()" update=":change-pass-dialog-form"
+                             style="width: 6em;" />
+        </div>
+
+    </p:dialog>
+</h:form>
+
+<h:form id="edit-dialog-form">
+    <p:dialog id="edit-dialog"
+              header="Edit user '#{configBean.selectedUser.name}'"
+              widgetVar="editDialog" style="text-align: left; width: 260pt;">
+
+        <h:panelGrid id="edit-properties-panel" columns="2" cellpadding="5"
+                     styleClass="eps-dialog-grid eps-inputs-panel"
+                     style="margin: 1em 0; width: auto;">
+
+            <p:outputLabel for="edit-email" value="Email: " />
+            <p:outputLabel for="edit-realName" value="First Name: " />
+
+            <p:inputText id="edit-email"
+                         value="#{configBean.selectedUser.email}" required="true"
+                         requiredMessage="Required field">
+                <f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+            </p:inputText>
+            <p:inputText id="edit-realName"
+                         value="#{configBean.selectedUser.firstName}" required="true"
+                         requiredMessage="Required field" />
+
+            <p:outputLabel for="edit-realSurname" value="Last Name: " />
+            <p:outputLabel for="edit-roles" value="Roles: " />
+
+            <p:inputText id="edit-realSurname"
+                         value="#{configBean.selectedUser.lastName}" required="true"
+                         requiredMessage="Required field" />
+            <p:dataTable id="edit-roles" var="role"
+                         value="#{configBean.getRoles(configBean.selectedUser)}"
+                         style="width:100pt;" rowKey="#{role.name}">
+
+                <p:column headerText="Role name">
+                    <h:outputText value="#{role.name}" />
+                </p:column>
+
+                <p:column headerText="Has role" style="text-align:center">
+                    <h:selectBooleanCheckbox value="#{role.hasRole}" />
+                </p:column>
+
+            </p:dataTable>
+          <p:outputLabel for="edit-password" value="Password: " />
+          <p:inputText id="edit-password"
+                       value="#{configBean.newPassword}" required="false"
+                       requiredMessage="Not required field" />
+
+        </h:panelGrid>
+
+        <div style="margin: 0.5em; text-align: right;">
+            <p:commandButton value="Reset password" id="resetPassword" actionListener="#{configBean.resetUserPassword}" update=":form:users-table :edit-dialog-form:edit-properties-panel"
+                             style="margin-right: 0.5em; width: 6em;"/>
+            <p:commandButton value="Save" id="save"
+                             actionListener="#{configBean.save}" update=":form:users-table :edit-dialog-form:edit-properties-panel"
+                             style="margin-right: 0.5em; width: 6em;"
+                             onclick="PF('editDialog').hide()"
+                             icon="ui-icon-disk" />
+            <p:commandButton value="Close" type="button"
+                             onclick="PF('editDialog').hide()" update=":edit-dialog-form"
+                             style="width: 6em;" />
+        </div>
+
+    </p:dialog>
+</h:form>
+
+<h:form id="add-dialog-form">
+    <p:dialog id="add-dialog" header="Add new application user"
+              widgetVar="addDialog" style="text-align: left; width:260pt;">
+
+        <h:panelGrid id="add-user-panel" columns="2" cellpadding="5"
+                     styleClass="eps-dialog-grid eps-inputs-panel"
+                     style="margin: 1em 0; width: auto;">
+
+            <p:outputLabel for="add-login" value="Login: " />
+            <p:outputLabel for="add-email" value="E-Mail: " />
+
+            <p:inputText id="add-login" value="#{configBean.newUser.name}"
+                         required="true" requiredMessage="Required field" />
+            <p:inputText id="add-email" value="#{configBean.newUser.email}"
+                         required="true" requiredMessage="Required field"
+                         validatorMessage="Invalid email format">
+                <f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+            </p:inputText>
+
+            <p:outputLabel for="add-first-name" value="First Name: " />
+            <p:outputLabel for="add-surname" value="Last Name: " />
+            <p:inputText id="add-first-name"
+                         value="#{configBean.newUser.firstName}" required="true"
+                         requiredMessage="Required field" />
+            <p:inputText id="add-surname"
+                         value="#{configBean.newUser.lastName}" required="true"
+                         requiredMessage="Required field" />
+
+            <p:outputLabel for="add-password" value="Password: " />
+            <p:outputLabel for="add-roles" value="Roles: " />
+
+            <p:password id="add-password"
+                        value="#{configBean.newUser.password}" required="true"
+                        requiredMessage="Required field" />
+            <p:dataTable id="add-roles" var="role"
+                         value="#{configBean.getRoles(configBean.newUser)}"
+                         style="width:100pt;" rowKey="#{role.name}">
+
+                <p:column headerText="Role name">
+                    <h:outputText value="#{role.name}" />
+                </p:column>
+
+                <p:column headerText="Has role" style="text-align:center">
+                    <h:selectBooleanCheckbox value="#{role.hasRole}" />
+                </p:column>
+
+            </p:dataTable>
+        </h:panelGrid>
+
+        <div style="margin: 0.5em; text-align: right;">
+            <p:commandButton value="Add" id="add"
+                             actionListener="#{configBean.add}"
+                             update=":add-dialog-form:add-user-panel :form:users-table"
+                             style="margin-right: 0.5em; width: 6em;"
+                             onclick="PF('addDialog').hide()"
+                             icon="ui-icon-plusthick" />
+            <p:commandButton value="Close" type="button"
+                             onclick="PF('addDialog').hide()"
+                             style="width: 6em;" />
+        </div>
+
+    </p:dialog>
+</h:form>
+
+</div>
+
+<ui:insert name="footer">
+    <ui:include src="template/footer.xhtml"/>
+</ui:insert>
+
+    <h:outputScript library="sf" name="js/menu.js"/>
+    <h:outputScript library="sf" name="js/configuration.js"/>
+
+</h:body>
+</html>

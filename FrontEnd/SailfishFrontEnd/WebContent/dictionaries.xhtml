@@ -1,0 +1,997 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+	  xmlns:f="http://java.sun.com/jsf/core"
+	  xmlns:p="http://primefaces.org/ui"
+	  xmlns:o="http://omnifaces.org/ui"
+	  xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+	<link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>Dictionaries :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+	<h:outputStylesheet library="sf" name="css/reset.css" />
+	<h:outputStylesheet library="sf" name="css/jqueryui/theme.css" />
+	<h:outputStylesheet library="sf" name="css/estyles.css" />
+	<h:outputStylesheet library="sf" name="css/menu.css" />
+	<h:outputStylesheet library="sf" name="css/custom.css" />
+	<h:outputStylesheet library="sf" name="css/dictionaries.css" />
+
+	<script>
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+
+		if (!window.console)
+			console = {};
+
+		console.log = console.log || function() {};
+		console.warn = console.warn || function() {};
+		console.error = console.error || function() {};
+		console.info = console.info || function() {};
+	</script>
+</h:head>
+<h:body styleClass="eps-application">
+
+	<ui:insert name="menu">
+		<ui:include src="template/menu.xhtml" />
+	</ui:insert>
+    <o:importConstants type="com.exactpro.sf.common.impl.messages.xml.configuration.JavaType"
+                       var="JavaType"/>
+	<div class="eps-container">
+		<div class="eps-main">
+
+			<p:ajaxStatus id="ajaxStatusPanel">
+				<f:facet name="start">
+					<h:graphicImage library="sf" name="images/ajaxloader.gif" />
+				</f:facet>
+				<f:facet name="complete">
+					<h:outputText value="" />
+				</f:facet>
+			</p:ajaxStatus>
+
+			<h:form>
+				<p:growl sticky="false" showDetail="true" autoUpdate="true" />
+			</h:form>
+
+			<p:outputPanel id="mainView">
+			
+				<h:form id="commands" prependId="false">
+					<p:remoteCommand name="showAttrForm" update=":newAtrForm" oncomplete="PF('newAtrDialog').show()" />
+					<p:remoteCommand name="updateLeftSelected" update="@(.selected-left-node)" />
+					<p:remoteCommand name="updateRightSelected" update="@(.selected-right-node)" />
+				</h:form>
+			
+				<h:form id="mainDictForm" prependId="false" styleClass="eps-dictionary-content-form" style="padding-left: 3.2em;">
+				
+					<p:panelGrid columns="7" styleClass="not-bordered without-padding">
+					
+						<p:selectOneMenu styleClass="eps-input" id="selectedDictionary"
+										 value="#{dictBean.model.selectedFileContainer}" converter="dictFileContainerConverter"
+										 style="width: 200px" filter="true" filterMatchMode="contains">
+										 
+							<f:selectItem itemLabel="#{dictBean.model.fileContainerLabel}" itemValue="" />
+										 
+							<f:selectItems value="#{dictBean.model.files}" var="file"
+										   itemValue="#{file}" itemLabel="#{file.URI}" />
+										   
+							<p:ajax event="change" process="@this" listener="#{dictBean.model.selectDictFile}" />
+							
+						</p:selectOneMenu>
+						
+						<p:selectOneMenu styleClass="eps-input" id="selectedValidator"
+										 value="#{dictBean.model.selectedValidator}"
+										 style="width: 200px" filter="true" filterMatchMode="contains">
+										 
+							<f:selectItem itemLabel="Default Validator" itemValue="#{dictBean.model.defaultValidatorURI}" />
+										 
+							<f:selectItems value="#{dictBean.model.validatorURIs}" />
+										   
+							<p:ajax event="change" process="@this" listener="#{dictBean.model.selectValidator}"
+									onstart="uiHack.saveMesScrollPos(); uiHack.saveFieldsScrollPos()" 
+									oncomplete="uiHack.getMesScrollPos(); uiHack.getFieldsScrollPos()" />
+							
+						</p:selectOneMenu>
+
+                        <p:menubar id="mainDictPanelMenu" styleClass="eps-dictionaries-toolbar" style="margin-left: 0.5em;">
+
+                            <p:submenu label="File" icon="eps-custom-icon eps-custom-icon-new">
+
+                                <p:menuitem id="createNewDictButton" icon="eps-custom-icon eps-custom-icon-new" value="New"
+                                            disabled="#{not empty dictBean.model.dict}"
+                                            title="Create new dictionary" actionListener="#{dictBean.model.createNewDictionary}" update=":mainView"/>
+
+                                <p:menuitem id="uploadButton" icon="eps-custom-icon eps-custom-icon-upload" value="Upload"
+                                            title="Upload external dictionary" actionListener="#{dictBean.preUploadClick}"/>
+
+                                <p:menuitem id="downloadCurrentButton" icon="eps-custom-icon eps-custom-icon-download" value="Download" ajax="false"
+                                            title="Download current dictionary}"
+                                            disabled="#{empty dictBean.model.dict}">
+                                    <p:fileDownload value="#{dictBean.model.downloadFiles}"/>
+                                </p:menuitem>
+
+                                <p:menuitem icon="eps-custom-icon eps-custom-icon-disk" value="Save"
+                                            actionListener="#{dictBean.model.preSaveClick(false)}"
+                                            disabled="#{dictBean.model.newDict or empty dictBean.model.dict}"/>
+
+                                <p:menuitem icon="eps-custom-icon eps-custom-icon-disk" value="Save As..." disabled="#{empty dictBean.model.dict}"
+                                            actionListener="#{dictBean.model.preSaveClick(true)}"/>
+
+                            </p:submenu>
+
+                        </p:menubar>
+
+                        <p:menubar id="toolsDictPanelMenu" styleClass="eps-dictionaries-toolbar" style="margin-left: 0.5em;">
+
+                            <p:submenu label="Tool" icon="eps-custom-icon eps-custom-icon-gear">
+
+                                <p:menuitem icon="eps-custom-icon eps-custom-icon-refresh" value="Update attributes" id="updateAttrButton"
+                                            disabled="#{empty dictBean.model.dict}"
+                                            oncomplete="PF('updateAttrsDialog').show()"/>
+
+                                <p:menuitem icon="eps-custom-icon eps-custom-icon-checkbox-checked" value="Validate" id="validateButton"
+                                            disabled="#{empty dictBean.model.dict}"
+                                            actionListener="#{dictBean.model.validateDictionary(false, true)}"
+                                            update=":messForm :fieldsForm :mainDictForm:closeDictButtonPanel"
+                                            onstart="uiHack.saveMesScrollPos(); uiHack.saveFieldsScrollPos()"
+                                            oncomplete="uiHack.getMesScrollPos(); uiHack.getFieldsScrollPos()"/>
+
+                            </p:submenu>
+
+                        </p:menubar>
+
+                        <!--<p:outputPanel rendered="#{false}">-->
+                        <!--<p:tooltip for="downloadMany" value="Select several dictionaries for downloading" trackMouse="true" />-->
+                        <!--<p:selectCheckboxMenu id="downloadMany" value="#{dictBean.model.selectedDictionariesForDownload}" converter="dictFileContainerConverter"-->
+                        <!--filter="true" filterMatchMode="contains" panelStyle="width:300px">-->
+                        <!--<f:selectItems value="#{dictBean.model.files}" var="file" itemLabel="#{file.URI}" itemValue="#{file}" />-->
+                        <!--<p:ajax event="toggleSelect" update="mainDictPanelMenu" />-->
+                        <!--<p:ajax event="change" update="mainDictPanelMenu" />-->
+                        <!--</p:selectCheckboxMenu>-->
+                        <!--</p:outputPanel>-->
+
+                        <p:menubar id="afterPanelMenu" styleClass="eps-dictionaries-toolbar" style="margin-left: 0.5em;">
+
+                            <p:menuitem id="dropCache" icon="eps-custom-icon eps-custom-icon-delete" value="Drop cache" style="margin-left: 0.5em;"
+                                        actionListener="#{dictBean.model.dropCache}" update=":mainDictForm:dropCacheOverlayPanel"/>
+
+                        </p:menubar>
+
+						<p:overlayPanel id="dropCacheOverlayPanel"  for="dropCache" widgetVat="uiHack" showEvent="mouseover" hideEvent="mousedown" dismissable="true"  onShow="uiHack.hackDropCacheOverlayPanel();">
+							<p><p:outputLabel value="Loaded dictionaries: #{empty dictBean.model.cachedDictURIs ? '0' : ''}"  /></p>
+							<ui:fragment rendered="#{not empty dictBean.model.cachedDictURIs}">
+								<ui:repeat value="#{dictBean.model.cachedDictURIs}" var="dictURI">
+									<p>
+										<p:commandLink class="cacheElement" actionListener="#{dictBean.model.dropCacheByURI(dictURI)}" update=":mainDictForm:dropCacheOverlayPanel">
+											<h:outputText value="#{dictURI}" />
+										</p:commandLink>
+									</p>
+								</ui:repeat>
+							</ui:fragment>
+						</p:overlayPanel>
+					    
+					    <p:autoComplete id="acFind" value="#{dictBean.model.searchModel}" completeMethod="#{dictBean.model.findMessageOrField}"
+					    				var="fieldModel" itemLabel="#{fieldModel.field.name}" itemValue="#{fieldModel}" 
+					    				placeholder="Search" converter="editorModelConverter" scrollHeight="250"
+					    				rendered="#{not empty dictBean.model.dict}">
+					    				
+					    	<p:column style="width:10%" styleClass="#{fieldModel.message ? 'searchTdM' : 'searchTdF'}">
+				                <h:outputText styleClass="searchLabel" value="#{fieldModel.message ? 'M' : 'F'}" />
+				            </p:column>
+				 
+				            <p:column>
+				                <h:outputText value="#{fieldModel.field.name}" />
+				            </p:column>
+					    	
+							<p:ajax event="itemSelect" listener="#{dictBean.model.goToFoundElement}" /> 
+					    </p:autoComplete>
+					</p:panelGrid>
+					
+					<p:menubar id="closeDictButtonPanel" styleClass="eps-dictionaries-toolbar">
+					
+						<p:menuitem id="mainErrorsButton" value="#{dictBean.model.mainErrors.size()} main errors" 
+									rendered="#{not empty dictBean.model.mainErrors}" update=":mainErrorsForm"
+									oncomplete="PF('mainErrorsDialog').show()" />
+						
+						<p:menuitem icon="eps-custom-icon eps-custom-icon-close" value="Close" rendered="#{not empty dictBean.model.dict}"
+									oncomplete="PF('dictCloseConfirmDialog').show()" />
+									
+					</p:menubar>
+				</h:form>
+				
+				<p:outputPanel id="mainTooltip" rendered="#{empty dictBean.model.dict}">
+					<p:outputPanel>
+						<p:outputLabel value="Load an existing dictionary or " />
+						<p:commandLink value="create" actionListener="#{dictBean.model.createNewDictionary}" update=":mainView" />
+						<p:outputLabel value=" a new one" />
+					</p:outputPanel>
+				</p:outputPanel>
+				
+				<p:outputPanel id="dictionaryPanels" rendered="#{not empty dictBean.model.dict}">
+				
+					<p:outputPanel id="upDownPanel" styleClass="dictionaryViewDiv" style="width: 3%;">
+						<h:panelGrid columns="1" cellpadding="5" styleClass="dictionaryViewDivButtons">
+							<p:commandButton id="up1" actionListener="#{dictBean.model.doUp}" icon="ui-icon-arrowthick-1-n"
+											 disabled="#{dictBean.model.upDownDisabled}" update="@(.tree-message-body:has(.selected-node))"
+											 onstart="uiHack.saveMesScrollPos();" oncomplete="uiHack.getMesScrollPos();" />
+							<p:commandButton id="down1" actionListener="#{dictBean.model.doDown}" icon="ui-icon-arrowthick-1-s"
+											 disabled="#{dictBean.model.upDownDisabled}" update="@(.tree-message-body:has(.selected-node))"
+											 onstart="uiHack.saveMesScrollPos();" oncomplete="uiHack.getMesScrollPos();" />
+						</h:panelGrid>
+					</p:outputPanel>
+	
+					<p:outputPanel styleClass="dictionaryViewDiv" style="width: 54%; position: relative; border: 1px solid #ccc; border-bottom: none; border-top-left-radius: 3pt; border-top-right-radius: 3pt;">
+						<h:form id="messForm" prependId="false" styleClass="eps-dictionary-content-form">
+						
+							<p:menubar id="messTabPanelMenu" styleClass="eps-dictionaries-toolbar">
+
+                                <p:menuitem icon="ui-icon-circle-plus" value="Add message" id="addMessButton"
+											actionListener="#{dictBean.model.preAddNewMessage}" oncomplete="PF('addMessDialog').show()" />
+								
+								<p:menuitem icon="ui-icon-circle-plus" value="Add field" id="addFieldToMessButton" actionListener="#{dictBean.model.doAddFromPage}"
+											oncomplete="PF('addFieldToMessDialog').show();" rendered="#{dictBean.model.selectedLeftField.message}" />
+											
+								<p:menuitem icon="ui-icon-copy" value="Clone" id="cloneLeftButton" actionListener="#{dictBean.model.doLeftClone}"
+											disabled="#{empty dictBean.model.selectedLeftField or dictBean.model.selectedLeftField.level ne 1}" />
+	
+								<p:menuitem icon="ui-icon-circle-minus" value="Remove" id="removeMessButton" oncomplete="PF('removeLeftConfirmDialog').show();"
+											update=":removeLeftConfirmDialogForm"
+											disabled="#{empty dictBean.model.selectedLeftField or (dictBean.model.selectedLeftField.level ne 1 and dictBean.model.selectedLeftField.treeModel.parent.data.collapsed)}" />
+							
+								<p:menuitem icon="ui-icon-circle-triangle-n" value="Collapse all" id="collapseAllMessButton"
+											actionListener="#{dictBean.model.collapseAll}" update=":messForm :upDownPanel"
+											disabled="#{dictBean.model.collapseAllButtonDisabled}"/>
+							</p:menubar>
+							
+							<div id="dictionaryTree" class="dictionary-tree">
+							
+								<p:outputPanel id="messagesTooltip" rendered="#{empty dictBean.model.tree.children}">
+									<p:commandLink value="There is no messages yet" actionListener="#{dictBean.model.preAddNewMessage}" oncomplete="PF('addMessDialog').show()" />
+								</p:outputPanel>
+							
+								<o:tree id="tree" value="#{dictBean.model.tree}" var="fieldModel" varNode="node">
+									<o:treeNode>
+										<o:treeNodeItem>
+											<div class="message-field-line clearfix #{node.level ne 1 ? 'nested' : ''}">
+	
+												<ui:fragment rendered="#{node.level ne 1}">
+	
+													<div class="index-block">
+														<h:outputText styleClass="field-index" value="#{dictBean.model.extractFieldIndex(node.index)}." />
+													</div>
+	
+												</ui:fragment>
+	
+												<ui:include src="template/dictionary_field.xhtml">
+													<ui:param name="leftField" value="true" />
+												</ui:include>
+	
+											</div>
+										</o:treeNodeItem>
+									</o:treeNode>
+								</o:tree>
+							</div>
+						</h:form>
+					</p:outputPanel>
+	
+					<p:outputPanel styleClass="dictionaryViewDiv" style="width: 3%;">
+						<h:panelGrid columns="1" cellpadding="5" id="fieldMoveButtonPanel" styleClass="dictionaryViewDivButtons">
+							<p:commandButton id="up2" actionListener="#{dictBean.model.doMoveFieldToMsg}" icon="ui-icon-arrowthick-1-w" 
+											 oncomplete="PF('addFieldToMessDialog').show();"
+											 disabled="#{empty dictBean.model.selectedRightField or empty dictBean.model.selectedLeftField or not dictBean.model.selectedLeftField.message}" />
+						</h:panelGrid>
+					</p:outputPanel>
+	
+					<p:outputPanel styleClass="dictionaryViewDiv" style="width: 40%; position: relative; border: 1px solid #ccc; border-bottom: none; border-top-left-radius: 3pt; border-top-right-radius: 3pt;">
+						<h:form id="fieldsForm" prependId="false" styleClass="eps-dictionary-content-form">
+						
+							<p:menubar id="fieldsPanelMenu" styleClass="eps-dictionaries-toolbar">
+							
+								<p:menuitem icon="ui-icon-circle-plus" value="Add field" id="addFieldButton"
+											actionListener="#{dictBean.model.preNewFieldAdding}" update=":newFieldForm" oncomplete="PF('addFieldDialog').show()" />
+								
+								<p:menuitem icon="ui-icon-circle-minus" value="Remove" id="removeFieldButton" actionListener="#{dictBean.model.preRemoveRightField}"
+											disabled="#{empty dictBean.model.selectedRightField}" />
+											
+								<p:menuitem icon="ui-icon-copy" value="Clone" id="cloneFieldButton" actionListener="#{dictBean.model.doRightClone}"
+											oncomplete="PF('addFieldDialog').show()" disabled="#{empty dictBean.model.selectedRightField}" />
+									
+								<p:menuitem icon="ui-icon-circle-triangle-n" value="Collapse all" id="collapseAllFieldsButton"
+											actionListener="#{dictBean.model.collapseAllFields}" update=":fieldsForm"
+											disabled="#{dictBean.model.collapseAllFieldsButtonDisabled}"/>
+									
+							</p:menubar>
+	
+							<!--    ********** Fields Table **********    -->
+							
+							<div id="fieldsTable">
+							
+								<p:outputPanel id="fieldsTooltip" rendered="#{empty dictBean.model.fieldModels}">
+									<p:commandLink value="There is no fields yet" actionListener="#{dictBean.model.preNewFieldAdding}" 
+												   update=":newFieldForm" oncomplete="PF('addFieldDialog').show()" />
+								</p:outputPanel>
+							
+								<ui:repeat id="rightFieldEntry" value="#{dictBean.model.fieldModels}" var="fieldModel">
+								
+									<ui:include src="template/dictionary_field.xhtml">
+										<ui:param name="leftField" value="false" />
+									</ui:include>
+									
+								</ui:repeat>
+							</div>
+						</h:form>
+					</p:outputPanel>
+				</p:outputPanel>
+			</p:outputPanel>
+
+			<!--    ********** Add Attribute Dialog **********    -->
+			<h:form id="newAtrForm">
+				<p:dialog header="Add new #{dictBean.model.attributeMode eq 0 ? 'attribute' : 'value'}" showEffect="fade" widgetVar="newAtrDialog" modal="true" resizable="false">
+						  
+					<h:panelGrid id="newAtrPanel" columns="2" cellpadding="5">
+
+						<h:outputLabel for="newAName" value="Name:" />
+						<p:inputText styleClass="eps-input"
+									 value="#{dictBean.model.newAttribute.name}" id="newAName"
+									 required="true" requiredMessage="Attribute name is required"
+									 style="width: 300px" />
+
+						<h:outputLabel for="newAValue" value="Value:" />
+						<p:inputText styleClass="eps-input"
+									 value="#{dictBean.model.newAttribute.value}" id="newAValue"
+									 style="width: 300px" />
+
+						<h:outputLabel for="newAType" value="JavaType:" rendered="#{dictBean.model.attributeMode eq 0}" />
+						<p:selectOneMenu styleClass="eps-input" rendered="#{dictBean.model.attributeMode eq 0}"
+										 value="#{dictBean.model.newAttributeType}" id="newAType"
+										 style="width: 300px">
+										 
+							<f:selectItem itemLabel="" itemValue="" />
+										 
+							<f:selectItems value="#{dictBean.model.strJavaTypes}" var="type"
+										   itemValue="#{type}" itemLabel="#{type}" />
+								
+						</p:selectOneMenu>
+					</h:panelGrid>
+
+					<div class="eps-dialog-button-wrapper">
+						<p:commandButton id="addSubmit" value="OK"
+										 action="#{dictBean.model.addNewAttribute}"
+										 update="newAtrPanel"
+										 oncomplete="if (!args.validationFailed) PF('newAtrDialog').hide()" />
+					</div>
+				</p:dialog>
+			</h:form>
+
+            <!--    ********** Update Attributes Dialog **********    -->
+            <p:dialog header="Add new attributes" showEffect="fade" width="70%" id="updateAttrsDialog" widgetVar="updateAttrsDialog" modal="true"
+                      resizable="false">
+                <o:importConstants
+                        type="com.exactpro.sf.testwebgui.dictionaries.ComplexAttributesUpdateModel.AttributeAction"
+                        var="AttributeAction"/>
+                <h:form>
+
+                    <p:selectOneButton value="#{dictBean.model.complexAttrsUpdateModel.action}" style="margin: 10px 0">
+                        <p:ajax update=":applyAttrsUpdate newAttrsDataTable"/>
+                        <f:selectItem itemLabel="#{AttributeAction.ADD.uiName}" itemValue="#{AttributeAction.ADD}"/>
+                        <f:selectItem itemLabel="#{AttributeAction.UPDATE.uiName}" itemValue="#{AttributeAction.UPDATE}"/>
+                        <f:selectItem itemLabel="#{AttributeAction.REMOVE.uiName}" itemValue="#{AttributeAction.REMOVE}"/>
+                    </p:selectOneButton>
+
+                    <p:dataTable value="#{dictBean.model.complexAttrsUpdateModel.newAttributes}" var="attr"
+                                 scrollable="true" scrollHeight="100" id="newAttrsDataTable">
+
+                        <f:facet name="header">
+                            <p:panelGrid columns="8" layout="grid" styleClass="not-bordered">
+                                New Attribute
+                                <h:outputLabel for="newAttrName" value="Name:"/>
+                                <p:inputText id="newAttrName" required="true" requiredMessage="Attribute name is required"
+                                             value="#{dictBean.model.complexAttrsUpdateModel.newAttribute.name}" styleClass="eps-input datatable-item"/>
+
+                                <h:outputLabel rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}"
+                                               for="newAttrValue" value="Value:"/>
+                                <p:inputText rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}" id="newAttrValue"
+                                             requiredMessage="Attribute name is required"
+                                             value="#{dictBean.model.complexAttrsUpdateModel.newAttribute.value}" styleClass="eps-input datatable-item"/>
+
+                                <h:outputLabel rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}" for="newAttrType"
+                                               value="JavaType:"/>
+                                <p:selectOneMenu rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}"
+                                                 id="newAttrType" styleClass="datatable-item"
+                                                 value="#{dictBean.model.newAttribute.type}"
+                                                 requiredMessage="Attribute type is required">
+
+                                    <f:selectItem itemLabel="" itemValue=""/>
+
+                                    <f:selectItems value="#{JavaType.values()}" var="type"
+                                                   itemValue="#{type}" itemLabel="#{dictBean.model.getJavaTypeLabel(type)}"/>
+
+                                </p:selectOneMenu>
+
+                                <p:commandButton icon="ui-icon-plus"
+                                                 actionListener="#{dictBean.model.complexAttrsUpdateModel.addAttr}" update="newAttrsDataTable"/>
+
+                            </p:panelGrid>
+                        </f:facet>
+
+                        <p:column headerText="Name" class="cell">
+                            <h:outputText value="#{attr.name}"/>
+                        </p:column>
+
+                        <p:column rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}" headerText="Value"
+                                  class="cell">
+                            <h:outputText value="#{attr.value}"/>
+                        </p:column>
+
+                        <p:column rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}" headerText="JavaType"
+                                  class="cell">
+                            <h:outputText value="#{attr.type != null ? dictBean.model.getJavaTypeLabel(attr.type) : ''}"/>
+                        </p:column>
+
+                        <p:column styleClass="remove-row-column">
+                            <p:commandLink styleClass="ui-icon ui-icon-closethick eps-icon-link" immediate="true"
+                                           action="#{dictBean.model.complexAttrsUpdateModel.removeAttr(attr)}" update="newAttrsDataTable"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+
+                <h:form class="new-attrs-target-form">
+                    <p:dataTable value="#{dictBean.model.complexAttrsUpdateModel.updatedFields}" var="name"
+                                 scrollable="true" scrollHeight="100" id="addToFieldDataTable"
+                                 class="new-attrs-target-datatable">
+                        <f:facet name="header">
+                            <p:panelGrid columns="4" layout="grid" styleClass="not-bordered">
+                                Fields
+                                <h:outputLabel for="fieldName" value="Name:"/>
+                                <p:autoComplete id="fieldName" required="true" requiredMessage="Field name is required"
+                                                value="#{dictBean.model.complexAttrsUpdateModel.fieldName}" styleClass="eps-input datatable-item"
+                                                completeMethod="#{dictBean.model.completeFieldName}"/>
+
+                                <p:commandButton icon="ui-icon-plus"
+                                                 actionListener="#{dictBean.model.complexAttrsUpdateModel.addField}" update="addToFieldDataTable"/>
+
+                            </p:panelGrid>
+                        </f:facet>
+
+                        <p:column headerText="Name">
+                            <h:outputText value="#{name}"/>
+                        </p:column>
+
+                        <p:column styleClass="remove-row-column">
+                            <p:commandLink styleClass="ui-icon ui-icon-closethick eps-icon-link" immediate="true"
+                                           action="#{dictBean.model.complexAttrsUpdateModel.removeField(name)}" update="addToFieldDataTable"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+
+                <h:form class="new-attrs-target-form">
+                    <p:dataTable value="#{dictBean.model.complexAttrsUpdateModel.updatedMsgs}" var="name"
+                                 scrollable="true" scrollHeight="100" id="addToMsgDataTable" class="new-attrs-target-datatable">
+                        <f:facet name="header">
+
+                            <p:panelGrid columns="4" layout="grid" styleClass="not-bordered">
+                                Messages
+                                <h:outputLabel for="msgName" value="Name:"/>
+                                <p:autoComplete id="msgName" required="true" requiredMessage="Message name is required"
+                                                value="#{dictBean.model.complexAttrsUpdateModel.msgName}" styleClass="eps-input datatable-item"
+                                                completeMethod="#{dictBean.model.completeMsgName}"/>
+
+                                <p:commandButton icon="ui-icon-plus"
+                                                 actionListener="#{dictBean.model.complexAttrsUpdateModel.addMsg}" update="addToMsgDataTable"/>
+
+                            </p:panelGrid>
+
+                        </f:facet>
+
+                        <p:column headerText="Name">
+                            <h:outputText value="#{name}"/>
+                        </p:column>
+
+                        <p:column styleClass="remove-row-column">
+                            <p:commandLink styleClass="ui-icon ui-icon-closethick eps-icon-link" immediate="true"
+                                           action="#{dictBean.model.complexAttrsUpdateModel.removeMsg(name)}" update="addToMsgDataTable"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+
+                <h:form class="new-attrs-target-form">
+                    <p:dataTable value="#{dictBean.model.complexAttrsUpdateModel.updatedMsgFields}" var="name"
+                                 scrollable="true" scrollHeight="100" id="addToMsgFieldsDataTable" class="new-attrs-target-datatable">
+
+                        <f:facet name="header">
+
+                            <p:panelGrid columns="4" layout="grid" styleClass="not-bordered">
+                                Messages Fields
+                                <h:outputLabel for="msgFieldName" value="Name:"/>
+                                <p:autoComplete id="msgFieldName" required="true" requiredMessage="Message field name is required"
+                                                value="#{dictBean.model.complexAttrsUpdateModel.msgFieldName}" styleClass="eps-input datatable-item"
+                                                completeMethod="#{dictBean.model.completeMsgFieldName}"/>
+
+                                <p:commandButton icon="ui-icon-plus"
+                                                 actionListener="#{dictBean.model.complexAttrsUpdateModel.addMsgField}"
+                                                 update="addToMsgFieldsDataTable"/>
+
+                            </p:panelGrid>
+
+                        </f:facet>
+
+                        <p:column headerText="Name">
+                            <h:outputText value="#{name}"/>
+                        </p:column>
+
+                        <p:column styleClass="remove-row-column">
+                            <p:commandLink styleClass="ui-icon ui-icon-closethick eps-icon-link" immediate="true"
+                                           action="#{dictBean.model.complexAttrsUpdateModel.removeMsgField(name)}" update="addToMsgFieldsDataTable"/>
+                        </p:column>
+
+                    </p:dataTable>
+                </h:form>
+
+                <h:form id="applyAttrsUpdate">
+                    <div class="eps-dialog-button-wrapper">
+                        <ui:fragment rendered="#{dictBean.model.complexAttrsUpdateModel.action != AttributeAction.REMOVE}">
+                            <p:commandButton id="addAttrsSubmit" value="OK"
+                                             actionListener="#{dictBean.model.complexAttrsUpdateModel.update(dictBean.model)}"
+                                             update=":updateAttrsDialog"
+                                             oncomplete="if (!args.validationFailed) PF('updateAttrsDialog').hide()"/>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{dictBean.model.complexAttrsUpdateModel.action == AttributeAction.REMOVE}">
+                            <p:commandButton id="addAttrsSubmitConfirm" value="OK"
+                                             update=":updateAttrsDialog"
+                                             onclick="PF('complexRemoveAttributesConfirmDialogForm').show()"
+                                             oncomplete="if (!args.validationFailed) PF('updateAttrsDialog').hide()"/>
+                        </ui:fragment>
+                    </div>
+                </h:form>
+
+            </p:dialog>
+
+            <!--    ********** Add Message Dialog **********    -->
+			<h:form id="newMessForm">
+				<p:dialog header="#{dictBean.model.cloneDialog ? 'Clone' : 'Add new'} Message" showEffect="fade" widgetVar="addMessDialog" modal="true" resizable="false">
+					<h:panelGrid id="addMessPanel" columns="2" cellpadding="5">
+
+						<h:outputLabel for="newMName" value="Name: " />
+						<p:inputText value="#{dictBean.model.newField.name}" id="newMName"
+									 styleClass="eps-input eps-dict-msg-param" style="width: 300px;" />
+
+						<h:outputLabel for="newMDescription" value="Description: " />
+						<p:inputTextarea id="newMDescription" rows="3" cols="33" style="width: 300px;"
+										 styleClass="eps-input" value="#{dictBean.model.newField.description}" />
+					</h:panelGrid>
+					
+					<div class="eps-dialog-button-wrapper">
+						<p:commandButton id="addMessSubmit" value="OK"
+										 actionListener="#{dictBean.model.addNewMessage}" />
+					</div>
+				</p:dialog>
+			</h:form>
+
+			<!--    ********** Add Field Dialog **********    -->
+			<h:form id="newFieldForm">
+				<p:dialog header="#{dictBean.model.cloneDialog ? 'Clone' : 'Add new'} field" showEffect="fade" widgetVar="addFieldDialog" modal="true" resizable="false">
+					<h:panelGrid id="addFieldPanel" columns="2" cellpadding="5">
+
+						<h:outputLabel for="newFName" value="Name:" />
+						<p:inputText styleClass="eps-input" value="#{dictBean.model.newField.name}"
+									 id="newFName" style="width: 300px" />
+
+						<h:outputLabel for="newFDesc" value="Description:" />
+						<p:inputTextarea id="newFDesc" rows="3" cols="33" style="width: 300px;"
+										 styleClass="eps-input" value="#{dictBean.model.newField.description}" />
+										 
+						<h:outputLabel for="newFieldRef" value="Reference:" rendered="#{not dictBean.model.cloneDialog}" />
+						<p:selectOneMenu styleClass="eps-input" style="width: 308px" rendered="#{not dictBean.model.cloneDialog}"
+										 value="#{dictBean.model.newField.reference}" id="newFieldRef" disabled="#{empty dictBean.model.fieldModels}">
+										 
+							<f:selectItem itemValue="" itemLabel="" />
+										 
+							<f:selectItems value="#{dictBean.model.fieldNames}" />
+										   
+							<p:ajax event="change" update="newFieldTypePanel newPropDefValPanel" />
+								
+						</p:selectOneMenu>
+						
+						<h:outputLabel for="newFieldType" value="Java type:" />
+						<p:outputPanel id="newFieldTypePanel">
+							<h:outputText value="#{dictBean.model.getRefFieldType(dictBean.model.newField.reference)}" id="newFieldTypeLabel"
+										  rendered="#{not empty dictBean.model.newField.reference and not empty dictBean.model.getRefFieldType(dictBean.model.newField.reference)}" />
+							<p:selectOneMenu styleClass="eps-input" style="width: 308px" value="#{dictBean.model.newFieldType}" id="newFieldType"
+											 rendered="#{empty dictBean.model.getRefFieldType(dictBean.model.newField.reference)}">
+											 
+								<f:selectItem itemLabel="" itemValue="" />
+											 
+								<f:selectItems value="#{dictBean.model.strJavaTypes}" var="type"
+											   itemValue="#{type}" itemLabel="#{type}" />
+											   
+								<p:ajax event="change" update="newPropDefValPanel" />
+									
+							</p:selectOneMenu>
+						</p:outputPanel>
+
+						<h:outputLabel for="newFdefVal propCloneDefault propAddDefault" value="Default value:" />
+						
+						<p:outputPanel id="newPropDefValPanel">
+							<p:inputText styleClass="eps-input" value="#{dictBean.model.newField.defaultValue}" 
+										 rendered="#{dictBean.model.propCloneDefValRendered}"
+										 id="newFdefVal" style="width: 300px" disabled="#{empty dictBean.model.getRefFieldType(dictBean.model.newField)}" />
+							
+							<p:selectOneMenu id="propCloneDefault" value="#{dictBean.model.cloneRightDefVal}" rendered="#{dictBean.model.cloneDialog and not empty dictBean.model.selectedRightField.defValues}"
+											 styleClass="eps-input" style="width: 308px" disabled="#{empty dictBean.model.newFieldType}">
+	
+								<p:ajax process="@this" />
+								<f:selectItem itemLabel="" itemValue="" />
+								<f:selectItems value="#{dictBean.model.selectedRightField.defValues}" />
+								
+							</p:selectOneMenu>
+							
+							<p:selectOneMenu id="propAddDefault" value="#{dictBean.model.refRightDefVal}" 
+											 rendered="#{dictBean.model.propAddDefValRendered}"
+											 styleClass="eps-input" style="width: 308px">
+	
+								<p:ajax process="@this" />
+								<f:selectItem itemLabel="" itemValue="" />
+								<f:selectItems value="#{dictBean.model.newFieldRefDefValues}" />
+								
+							</p:selectOneMenu>
+						</p:outputPanel>
+						
+					</h:panelGrid>
+
+					<div class="eps-dialog-button-wrapper">
+						<p:commandButton id="addFieldSubmit" value="OK"
+										 actionListener="#{dictBean.model.addNewField}"
+										 onstart="uiHack.saveFieldsScrollPos()"
+										 oncomplete="uiHack.getFieldsScrollPos()" />
+					</div>
+
+				</p:dialog>
+			</h:form>
+
+			<!--    ********** Add Field to Message Dialog **********    -->
+			<h:form id="addFieldToMessForm">
+				<p:dialog header="Add Field to Message" widgetVar="addFieldToMessDialog" modal="true" resizable="false">
+
+					<p:panelGrid id="addFieldToMessPanel" styleClass="not-bordered">
+						<p:row>
+							<p:column>
+								<h:outputLabel for="newFMName" value="Name:" />
+							</p:column>
+							<p:column colspan="3">
+								<p:inputText styleClass="eps-input" value="#{dictBean.model.newField.name}"
+											 id="newFMName" rendered="true" style="width: 300px" />
+							</p:column>
+						</p:row>
+
+						<p:row>
+							<p:column>
+                                <h:outputLabel for="newFDesc" value="Description:"/>
+							</p:column>
+							<p:column colspan="3">
+								<p:inputTextarea id="newFDesc" rows="3" cols="33" style="width: 300px;"
+												 styleClass="eps-input" value="#{dictBean.model.newField.description}" />
+							</p:column>
+						</p:row>
+
+                        <p:row>
+                            <p:column>
+                                <h:outputLabel for="newFDesc" value="Position:"/>
+                            </p:column>
+                            <p:column colspan="3">
+                                <p:spinner id="newPosition" style="width: 300px;" min="0" max="${dictBean.model.selectedLeftField.childCount}"
+                                           styleClass="eps-input" value="#{dictBean.model.position}"/>
+                            </p:column>
+                        </p:row>
+
+                        <p:row>
+							<p:column>
+								<h:outputLabel for="newFMisCollection" value="Is collection:" />
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox id="newFMisCollection" value="#{dictBean.model.isCollectionNewField}"
+														 styleClass="eps-input" />
+							</p:column>
+							<p:column style="width: 5em; white-space: nowrap;">
+								<h:outputLabel for="newFMisRequired" value="Is required:" />
+							</p:column>
+							<p:column>
+								<p:selectBooleanCheckbox id="newFMisRequired" value="#{dictBean.model.requiredNewField}"
+														 styleClass="eps-input" />
+							</p:column>
+						</p:row>
+
+						<p:row>
+							<p:column>
+								<h:outputLabel for="newFMType" value="Type:" />
+							</p:column>
+							<p:column colspan="3">
+								<p:outputPanel id="newFMTypePanel">
+									<h:outputText value="#{dictBean.model.getRefFieldType(dictBean.model.newField.reference)}" id="newFMTypeLabel"
+												  rendered="#{not empty dictBean.model.newField.reference and not empty dictBean.model.getRefFieldType(dictBean.model.newField.reference)}" />
+									<p:selectOneMenu styleClass="eps-input" style="width: 308px" value="#{dictBean.model.newType}" id="newFMType"
+													 rendered="#{empty dictBean.model.getRefFieldType(dictBean.model.newField.reference)}">
+
+										<f:selectItem itemLabel="" itemValue="" />
+
+										<f:selectItem itemLabel="Message" itemValue="Message"
+													  itemDisabled="#{dictBean.model.newType ne 'Message' and not empty dictBean.model.newField.reference}"/>
+
+										<f:selectItems value="#{dictBean.model.strJavaTypes}" />
+
+										<p:ajax event="change" process="@this" update="newFieldRef"/>
+
+									</p:selectOneMenu>
+								</p:outputPanel>
+							</p:column>
+						</p:row>
+
+						<p:row>
+							<p:column>
+								<h:outputLabel for="newFieldRef" value="Reference:" />
+							</p:column>
+							<p:column colspan="3">
+								<h:outputText value="#{dictBean.model.getRefName(dictBean.model.newField.reference)}" rendered="#{dictBean.model.movingFromRight}" />
+								<p:selectOneMenu styleClass="eps-input" style="width: 308px" editable="#{dictBean.model.newType eq 'Message'}"
+												 value="#{dictBean.model.newField.reference}" id="newFieldRef" rendered="#{not dictBean.model.movingFromRight}">
+
+									<f:selectItem itemValue="" itemLabel="" />
+
+									<f:selectItems value="#{dictBean.model.newType ne 'Message' ? dictBean.model.fieldNames : dictBean.model.messageNames}" />
+
+									<p:ajax event="change" process="@this" update="newFMTypePanel"/>
+
+								</p:selectOneMenu>
+							</p:column>
+						</p:row>
+					</p:panelGrid>
+
+					<div class="eps-dialog-button-wrapper">
+						<p:commandButton id="addFieldToMessSubmit" value="OK" style="margin-right: 0.8em;"
+										 actionListener="#{dictBean.model.doMoveFieldToMsgProcess}"
+										 onstart="uiHack.saveMesScrollPos()"
+										 oncomplete="uiHack.getMesScrollPos();" />
+						<p:commandButton id="cancelAdding" value="Cancel"
+										 oncomplete="PF('addFieldToMessDialog').hide()" />
+					</div>
+
+				</p:dialog>
+			</h:form>
+
+			<!--    ********** Save As Dialog **********    -->
+			<h:form id="saveAsForm">
+				<p:dialog header="Save as..." widgetVar="saveAsDialog" modal="true" resizable="false">
+				
+					<p:remoteCommand name="updateUtilityClassesLabel" update="utilityClassInput" />
+				
+					<h:panelGrid id="saveAsPanel" columns="2" cellpadding="5" style="text-align: left;">
+
+						<h:outputLabel for="titleInput" value="Title:" style="font-weight:bold" />
+						<p:inputText styleClass="eps-input" id="uriInput"
+									 value="#{dictBean.model.saveAsContainer.URI}" style="width:200px" 
+									 converterMessage="Please specify dictionary name"/>
+
+						<h:outputLabel for="namespaceInput" value="Namespace:" style="font-weight:bold" />
+						<p:inputText styleClass="eps-input" id="namespaceInput"
+									 value="#{dictBean.model.saveAsContainer.namespace}" style="width:200px" />
+
+						<h:outputLabel for="utilityClassInput" value="Utility classes:" style="font-weight:bold" />
+						<p:selectCheckboxMenu styleClass="eps-input" id="utilityClassInput" 
+											  value="#{dictBean.model.saveAsUtilityClassURIs}"
+											  label="#{dictBean.model.saveAsUtilityClassURIs.size()} selected"
+											  style="width:200px" filter="true" filterMatchMode="contains"
+											  onHide="updateUtilityClassesLabel();"
+                                              converter="utilityURIConverter">
+											  
+							<f:selectItems value="#{dictBean.model.utilitySURI}" var="utilitySURI" 
+										   itemLabel="#{utilitySURI}" itemValue="#{utilitySURI}" />									   
+										   
+							<p:ajax event="change" process="@this" />
+							<p:ajax event="toggleSelect" process="@this" />
+							
+						</p:selectCheckboxMenu>
+
+						<h:outputLabel for="overwriteMode" value="Overwrite:" style="font-weight:bold" />
+						<p:selectBooleanCheckbox styleClass="eps-input" id="overwriteMode" value="#{dictBean.model.overwriteFile}" />
+
+					</h:panelGrid>
+
+					<div class="eps-dialog-button-wrapper">
+						<p:commandButton id="saveSubmit" value="Save"
+										 action="#{dictBean.model.saveDictionaryAs}"
+										 update=":saveAsForm:saveAsPanel :mainDictForm"
+										 onstart="uiHack.saveFilesScrollPos()"
+										 oncomplete="uiHack.getFilesScrollPos();" />
+					</div>
+				</p:dialog>
+			</h:form>
+			
+			<!--    ********** Main Errors Dialog **********    -->
+			<h:form id="mainErrorsForm">
+				<p:dialog header="Main errors" widgetVar="mainErrorsDialog" width="1024" modal="true" resizable="false">
+					<p:outputPanel>
+						<p:dataTable var="error" id="errors"
+									 value="#{dictBean.model.mainErrors}"
+									 styleClass="eps-main-table eps-attributes-table" style="width: 100%">
+									 
+							<p:column headerText="Error Text">
+								<h:outputText value="#{error.error}" escape="false" />
+							</p:column>
+									 
+						</p:dataTable>
+					</p:outputPanel>
+				</p:dialog>
+			</h:form>
+
+			<!--    ********** Upload Dialog **********    -->
+			<h:form id="filenameForm" enctype="multipart/form-data">
+				<p:dialog header="Upload dictionary" widgetVar="uploadDialog" modal="true" resizable="false">
+					<p:ajax event="close" listener="#{dictBean.model.uploadDialogClose}"/>
+				
+					<p:remoteCommand name="updateUtilityClassesLabelUploadDialog" update="filenameForm:utilityClassInput" />
+					
+					<h:panelGrid columns="2" id="filenamePanel" cellPadding="5">
+					
+						<h:outputLabel value="File:" style="font-weight:bold" />
+						<h:outputLabel id="fileLabel" value="#{dictBean.uploadFile.fileName}" rendered="#{not empty dictBean.uploadFile}" />
+						<p:fileUpload id="dictionaryFileUpload" mode="advanced" rendered="#{empty dictBean.uploadFile}"
+									  fileUploadListener="#{dictBean.handleFileUpload}" update=":filenameForm:filenamePanel"
+									  value="#{dictBean.uploadFile}" auto="true"
+									  style="text-align: left; width: 200px;" />
+
+						<h:outputLabel for="titleInput" value="Title:" style="font-weight:bold" />
+						<p:inputText styleClass="eps-input" id="uriInput" disabled="#{empty dictBean.uploadFile}"
+									 value="#{dictBean.model.uploadContainer.URI}" style="width:200px"
+									 converterMessage="Please specify dictionary name"/>
+
+						<h:outputLabel for="utilityClassInput" value="Utility classes:" style="font-weight:bold" />
+						<p:selectCheckboxMenu styleClass="eps-input" disabled="#{empty dictBean.uploadFile}"
+											  id="utilityClassInput" value="#{dictBean.model.uploadUtilityClassURIs}"
+											  label="#{dictBean.model.uploadUtilityClassURIs.size()} selected"
+											  style="width:200px" filter="true" filterMatchMode="contains"
+											  onHide="updateUtilityClassesLabelUploadDialog();"
+                                              converter="utilityURIConverter">
+											  
+							<f:selectItems value="#{dictBean.model.utilitySURI}" var="utilitySURI" 
+										   itemLabel="#{utilitySURI}" itemValue="#{utilitySURI}" />
+							
+							<p:ajax event="change" process="@this" />
+							<p:ajax event="toggleSelect" process="@this" />
+							
+						</p:selectCheckboxMenu>
+
+						<h:outputLabel for="overwriteMode" value="Overwrite:" style="font-weight:bold" />
+						<p:selectBooleanCheckbox styleClass="eps-input" id="overwriteMode" disabled="#{empty dictBean.uploadFile}"
+												 value="#{dictBean.model.overwriteFile}">
+							<p:ajax event="change" process="@this" />
+						</p:selectBooleanCheckbox>
+						
+						<div class="eps-dialog-button-wrapper">
+							<h:commandButton id="uploadSubmit" value="Upload" styleClass="uploadButton"
+										 actionListener="#{dictBean.handleFileUpload}" 
+										 onstart="uiHack.saveFilesScrollPos()" ajax="false"
+										 oncomplete="uiHack.getFilesScrollPos();" 
+										 disabled="#{empty dictBean.uploadFile}"/>
+						</div>
+
+					</h:panelGrid>
+
+				</p:dialog>
+			</h:form>
+			
+			<!--    ********** Dictionary Save Confirm Dialog **********    -->
+			<h:form id="dictSaveConfirmDialogForm">
+				<p:confirmDialog id="dictSaveConfirmDialog" message="Are you sure you want to apply all changes in selected dictionary?"
+								 header="Save dictionary" severity="alert" widgetVar="dictSaveConfirmDialog"
+								 modal="true" resizable="false">
+					<div style="text-align: center;">
+			            <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.saveDictionary}"
+										 oncomplete="PF('dictSaveConfirmDialog').hide();" />
+										 
+			            <p:commandButton id="decline" value="No" onclick="PF('dictSaveConfirmDialog').hide()" type="button" />
+			        </div>
+				</p:confirmDialog>
+			</h:form>
+			
+			<!--    ********** Dictionary Close Confirm Dialog **********    -->
+			<h:form id="dictCloseConfirmDialogForm">
+				<p:confirmDialog id="dictCloseConfirmDialog" message="Are you sure about closing selected dictionary?"
+								 header="Close dictionary" severity="alert" widgetVar="dictCloseConfirmDialog"
+								 modal="true" resizable="false">
+					<div style="text-align: center;">
+			            <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.closeDictionary}"
+										 update=":mainView" onstart="uiHack.saveFilesScrollPos()"
+										 oncomplete="uiHack.getFilesScrollPos(); PF('dictCloseConfirmDialog').hide();" />
+										 
+			            <p:commandButton id="decline" value="No" onclick="PF('dictCloseConfirmDialog').hide()" type="button" />
+			        </div>
+				</p:confirmDialog>
+			</h:form>
+			
+			<!--    ********** Dictionary Load Confirm Dialog **********    -->
+			<h:form id="dictLoadConfirmDialogForm">
+				<p:confirmDialog id="dictLoadConfirmDialog" message="Are you sure about closing selected dictionary and loading another one?"
+								 header="Load dictionary" severity="alert" widgetVar="dictLoadConfirmDialog"
+								 modal="true" resizable="false">
+					<div style="text-align: center;">
+			            <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.selectDictFileProcess}"
+										 update=":mainView :ajaxStatusPanel" onstart="PF('dictLoadConfirmDialog').hide(); uiHack.saveFilesScrollPos(); disableView();" 
+										 oncomplete="uiHack.getFilesScrollPos(); enableView();" />
+										 
+			            <p:commandButton id="decline" value="No" oncomplete="PF('dictLoadConfirmDialog').hide()"
+			            				 actionListener="#{dictBean.model.cancelSelectDictFile}" update=":mainDictForm:selectedDictionary"/>
+			        </div>
+				</p:confirmDialog>
+			</h:form>
+			
+			<!--    ********** Remove Message/Field Confirm Dialog **********    -->
+			<h:form id="removeLeftConfirmDialogForm">
+			    <p:confirmDialog id="removeLeftConfirmDialog" message="Are you sure about removing selected #{dictBean.model.selectedLeftField.message ? 'message' : 'field'}?"
+			                     header="Remove #{dictBean.model.selectedLeftField.message ? 'message' : 'field'}" severity="alert" widgetVar="removeLeftConfirmDialog"
+			                     modal="true" resizable="false" >
+			        <div style="text-align: center;">
+			            <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.removeLeftField}" update=":upDownPanel" 
+										 onstart="uiHack.saveMesScrollPos();" oncomplete="uiHack.getMesScrollPos(); PF('removeLeftConfirmDialog').hide();" />
+			            <p:commandButton id="decline" value="No" onclick="PF('removeLeftConfirmDialog').hide()" type="button" />
+			        </div>
+			    </p:confirmDialog>
+			</h:form>
+			
+			<!--    ********** Remove Reference Field Confirm Dialog **********    -->
+			<h:form id="removeRightConfirmDialogForm">
+			    <p:confirmDialog id="removeRightConfirmDialog" message="Are you sure about removing selected field?"
+			                     header="Remove field" severity="alert" widgetVar="removeRightConfirmDialog"
+			                     modal="true" resizable="false" >
+			        <div style="text-align: center;">
+			        	<p><h:outputText value="There are #{dictBean.model.refCount} field#{dictBean.model.refCount ne 1 ? 's' : ''} referenced to it#{dictBen.refCount ne 1 ? ':' : '.'}" /></p>
+			        	<h:outputText value="#{dictBean.model.refString}" rendered="#{dictBean.model.refCount gt 0}" escape="false" />
+			            <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.removeRightField}"
+										 update=":fieldsForm :fieldMoveButtonPanel" onstart="uiHack.saveFieldsScrollPos()"
+										 oncomplete="uiHack.getFieldsScrollPos(); PF('removeRightConfirmDialog').hide();" />
+			            <p:commandButton id="decline" value="No" onclick="PF('removeRightConfirmDialog').hide()" type="button" />
+			        </div>
+			    </p:confirmDialog>
+			</h:form>
+			
+			<!--    ********** Remove Attribute Confirm Dialog **********    -->
+			<h:form id="removeAttributeConfirmDialogForm">
+			    <p:confirmDialog id="removeAttributeConfirmDialog" message="Are you sure #{dictBean.model.attrModelForRemoving.overrides ? 'you want to cancel changes in' : 'about removing'} &quot;#{dictBean.model.attrModelForRemoving.actual.name}&quot; #{dictBean.model.attrForRemoving ? 'attribute' : 'value'}?"
+			                     header="Remove attribute" severity="alert" widgetVar="removeAttributeConfirmDialog"
+			                     modal="true" resizable="false" >
+			        <div style="text-align: center;">
+			            <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.deleteCurrentAttribute}"
+										 oncomplete="PF('removeAttributeConfirmDialog').hide();" />
+			            <p:commandButton id="decline" value="No" onclick="PF('removeAttributeConfirmDialog').hide()" type="button" />
+			        </div>
+			    </p:confirmDialog>
+			</h:form>
+
+            <!--    ********** Complex Remove Attributes Confirm Dialog **********    -->
+            <h:form id="complexRemoveAttributesConfirmDialogForm">
+                <p:confirmDialog id="removeAttributeConfirmDialog" message="Are you sure about complex attributes removing ?"
+                                 header="Remove attributes" severity="alert" widgetVar="complexRemoveAttributesConfirmDialogForm"
+                                 modal="true" resizable="false">
+                    <div style="text-align: center;">
+                        <p:commandButton id="confirm" value="Yes" actionListener="#{dictBean.model.complexAttrsUpdateModel.update(dictBean.model)}"
+                                         update=":updateAttrsDialog" oncomplete="PF('complexRemoveAttributesConfirmDialogForm').hide();"/>
+                        <p:commandButton id="decline" value="No" onclick="PF('complexRemoveAttributesConfirmDialogForm').hide()"/>
+                    </div>
+                </p:confirmDialog>
+            </h:form>
+		</div>
+	</div>
+
+	<ui:insert name="footer">
+		<ui:include src="template/footer.xhtml" />
+	</ui:insert>
+
+	<h:outputScript library="sf" name="js/menu.js" />
+	<h:outputScript library="sf" name="js/dictionaries.js" />
+
+</h:body>
+</html>

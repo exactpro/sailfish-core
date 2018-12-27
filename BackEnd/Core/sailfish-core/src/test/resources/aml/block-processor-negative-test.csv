@@ -1,0 +1,33 @@
+#execute,#description,#template,#dependencies,#reference,#timeout,#action,#message_type,#dictionary
+,,,,,,global block start,,
+,this will cause duplicate reference error,,,s1,,send,SimpleMessage,TestAML
+,,,,,,global block end,,
+,,,,,,,,
+,,,,tc1,,test case start,,
+,,,,s1,,send,SimpleMessage,TestAML
+,,,,,1000,Sleep,,
+,,,,,,test case end,,
+,,,,,,,,
+,,,,tc1,,test case start,,
+,,,,s1,,send,SimpleMessage,TestAML
+,unknown block reference in test case,unknown,,,,include block,,
+,,b1,,,,include block,,
+,,b3,,,,include block,,
+,,,,,,test case end,,
+,,,,,,,,
+,,,,b1,,block start,,
+,block recursion,b2,,,,include block,,
+,,,,,,block end,,
+,,,,,,,,
+,,,,b2,,block start,,
+,block recursion,b1,,,,include block,,
+,,,,,,block end,,
+,,,,,,,,
+,,,,b3,,block start,,
+,unknown block reference in block,unknown,,,,include block,,
+,,,,,,block end,,
+,,,,,,,,
+,,,,,,test case start,,
+,unknown dependency,,unknown,,,send ,SimpleMessage,TestAML
+,dependency on itself,,ref,ref,,send ,SimpleMessage,TestAML
+,,,,,,test case end,,

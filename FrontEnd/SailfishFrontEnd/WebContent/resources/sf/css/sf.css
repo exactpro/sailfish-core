@@ -1,0 +1,56 @@
+.sf-table {
+	
+}
+
+.sf-table .ui-widget-header {
+	border: 0px none;
+	background: transparent;
+}
+
+.sf-table th {
+	background: #d6d6d6;
+}
+
+.sf-table tr {
+	border-top: 1px solid #CCC;
+}
+
+.eps-data-table {
+	word-wrap: break-word;
+	white-space: normal;
+}
+
+/* TODO: need to render this css file after the primefaces.css to avoid important */
+
+.eps-application .eps-data-table td, .eps-application .eps-data-table th {
+	border: 0px none;
+}
+
+.eps-application .eps-data-table .eps-matrix-info-row td {
+	background-color: #FCFCFC;
+	border-bottom: 1px solid #CCC;
+	border-top: 1px solid #CCC;
+	
+}
+
+.eps-application .eps-data-table .ui-datatable-scrollable-header {
+	border-radius: 0;
+	
+}
+
+.eps-application .eps-data-table .ui-datatable-scrollable-body {
+	margin: 0px !important;
+	
+}
+
+.eps-application .eps-data-table tbody td {
+	border-top: 1px solid #EFEFEF;
+}
+
+.eps-application .eps-data-table .ui-datatable-odd td {
+	background-color: #F8F8F8;	
+}
+
+.eps-application .eps-data-table .ui-datatable-even td {
+	background-color: #FFF;
+}

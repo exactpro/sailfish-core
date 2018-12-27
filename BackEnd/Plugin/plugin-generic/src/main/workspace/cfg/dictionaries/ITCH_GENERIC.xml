@@ -1,0 +1,1186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="ITCH_GENERIC">
+    <fields>
+        <field type="java.lang.Short" id="F_MessageType" name="MessageType">
+            <value name="LoginRequest">1</value>
+            <value name="LoginResponse">2</value>
+            <value name="ReplayRequest">3</value>
+            <value name="ReplayResponse">4</value>
+            <value name="LogoutRequest">5</value>
+            <value name="SnapshotRequest">129</value>
+            <value name="SnapshotResponse">130</value>
+            <value name="SnapshotComplete">131</value>
+            <value name="TimeMessage">84</value>
+            <value name="SystemEvent">83</value>
+            <value name="SymbolDirectory">82</value>
+            <value name="AuctionTrade">81</value>
+            <value name="AuctionInfo">73</value>
+            <value name="SymbolStatus">72</value>
+            <value name="AddAttributedOrder">70</value>
+            <value name="AddOrder">65</value>
+            <value name="OrderDeleted">68</value>
+            <value name="OrderModified">85</value>
+            <value name="Statistics">119</value>
+            <value name="OrderBookClear">121</value>
+            <value name="OrderExecuted">69</value>
+            <value name="OrderExecutedWithPrice_Size">67</value>
+            <value name="Trade">80</value>
+            <value name="OffbookTrade">120</value>
+            <value name="TradeBreak">66</value>
+            <value name="TOB">113</value>
+        </field>
+        <field type="java.lang.Short" id="F_StatisticType" name="StatisticType">
+            <value name="OpeningPrice">79</value>
+            <value name="ClosingPrice">67</value>
+        </field>
+        <field type="java.lang.Short" id="F_OpenClosePriceIndicator" name="OpenClosePriceIndicator">
+            <value name="UT">65</value>
+            <value name="AT">66</value>
+            <value name="MidOfBBO">67</value>
+            <value name="LastAT">68</value>
+            <value name="LastUT">69</value>
+            <value name="Manual">70</value>
+            <value name="DerivedFromPreviousClose">108</value>
+        </field>
+        <field type="java.lang.Short" id="F_EventCodeType" name="EventCodeType">
+            <value name="EndOfDay">67</value>
+            <value name="StartOfDay">79</value>
+        </field>
+        <field type="java.lang.Short" id="F_AuctionType" name="AuctionType">
+            <value name="ClosingAuction">67</value>
+            <value name="OpeningAuction">79</value>
+            <value name="AESP">65</value>
+            <value name="EDSP">66</value>
+            <value name="ResumeAuction">69</value>
+            <value name="PeriodicAuction">70</value>
+            <value name="Intra_day_Level_1_Auction">71</value>
+        </field>
+        <field type="java.lang.Short" id="F_PrintableType" name="PrintableType">
+            <value name="NonPrintable">78</value>
+            <value name="Printable">89</value>
+        </field>
+        <field type="java.lang.Short" id="F_ReplayResponseStatusType" name="ReplayResponseStatusType">
+            <value name="RequestAccepted">65</value>
+            <value name="RequestLimitReached">68</value>
+            <value name="InvalidMarketDataGroup">73</value>
+            <value name="OutOfRange">79</value>
+            <value name="ReplayUnavailable">85</value>
+            <value name="UnsupportedMessageType">100</value>
+            <value name="Failed">101</value>
+            <value name="ConcurrentLimitReached">99</value>
+        </field>
+        <field type="java.lang.Short" id="F_LoginStatusType" name="LoginStatusType">
+            <value name="LoginAccepted">65</value>
+            <value name="CompIDInactive_Locked">97</value>
+            <value name="LoginLimitReached">98</value>
+            <value name="ServiceUnavailable">99</value>
+            <value name="ConcurrentLimitReached">100</value>
+            <value name="Failed">101</value>
+        </field>
+        <field type="java.lang.Short" id="F_Side" name="Side">
+            <value name="BUY">66</value>
+            <value name="SELL">83</value>
+        </field>
+        <field type="java.lang.Short" id="F_TradingStatusType" name="TradingStatusType">
+            <value name="Halted">72</value>
+            <value name="RegularTrading">84</value>
+            <value name="Opening">97</value>
+            <value name="PostClose">98</value>
+            <value name="Closed">99</value>
+            <value name="ClosingAuctionCall">100</value>
+            <value name="AESPAuctionCall">101</value>
+            <value name="ResumeAuctionCall">102</value>
+            <value name="Pause">108</value>
+            <value name="PreMandatory">109</value>
+            <value name="Mandatory">110</value>
+            <value name="PostMandatory">111</value>
+            <value name="EDSPAuctionCall">113</value>
+            <value name="PeriodicAuctionCall">114</value>
+            <value name="EndTradeReporting">116</value>
+            <value name="NoActiveSession">119</value>
+            <value name="EndOfPostClose">120</value>
+            <value name="ClosingPricePublication">118</value>
+            <value name="ClosingPriceCrossing">117</value>
+            <value name="Intra_day_Level_1_Auction">71</value>
+            <value name="PreTrading">121</value>
+        </field>
+        <field type="java.lang.Short" id="F_SessionChangeReasonType" name="SessionChangeReasonType">
+            <value name="ScheduledTransition">0</value>
+            <value name="ExtendedByMarketOps">1</value>
+            <value name="ShortenedByMarketOps">2</value>
+            <value name="MarketOrderImbalance">3</value>
+            <value name="PriceOutsideRange">4</value>
+            <value name="Unavailable">9</value>
+        </field>
+        <field type="java.lang.Short" id="F_BookTypeEnum" name="BookTypeEnum">
+            <value name="OnBook">1</value>
+            <value name="OffBook">2</value>
+        </field>
+        <field type="java.lang.Short" id="F_SnapshotResponseStatusType" name="SnapshotResponseStatusType">
+            <value name="RequestAccepted">65</value>
+            <value name="SegmentOrSymbolNotSpecified">97</value>
+            <value name="RequestLimitReached">98</value>
+            <value name="OutOfRange">79</value>
+            <value name="SnapshotUnavailable">85</value>
+            <value name="UnsupportedMessageType">100</value>
+        </field>
+        <field type="java.lang.Short" id="F_CrossType" name="CrossType">
+            <value name="InternalCross">5</value>
+            <value name="InternalBTF">6</value>
+            <value name="CommittedCross">7</value>
+            <value name="CommittedBTF">8</value>
+        </field>
+        <field defaultvalue="0" type="java.lang.Integer" id="F_UHSequenceNumber" name="UHSequenceNumber">
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <attribute type="java.lang.Integer" name="Length">0</attribute>
+        </field>
+        <field defaultvalue="0" type="java.lang.Short" id="F_UHMarketDataGroup" name="UHMarketDataGroup">
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <attribute type="java.lang.Integer" name="Length">0</attribute>
+        </field>
+        <field defaultvalue="0" type="java.lang.Integer" id="F_MessageSequenceNumber" name="MessageSequenceNumber">
+            <attribute type="java.lang.String" name="Type">STUB</attribute>
+            <attribute type="java.lang.Integer" name="Length">0</attribute>
+        </field>
+    </fields>
+    <messages>
+        <message id="M_UnitHeader" name="UnitHeader">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">256</attribute>
+            <field type="java.lang.Integer" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt16</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field type="java.lang.Short" name="MessageCount">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="MarketDataGroup">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="SequenceNumber">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_LoginRequest" name="LoginRequest">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">1</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="Username">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">6</attribute>
+            </field>
+            <field type="java.lang.String" name="Password">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+        <message id="M_ReplayRequest" name="ReplayRequest">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">3</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="3" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Short" name="MarketDataGroup">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="FirstMessage">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="Count">
+                <attribute type="java.lang.String" name="Type">UInt16</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+        </message>
+        <message id="M_SnapshotRequest" name="SnapshotRequest">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">129</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="129" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="SequenceNumber">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="Segment">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">6</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_LogoutRequest" name="LogoutRequest">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">5</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="5" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_LoginResponse" name="LoginResponse">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">2</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="2" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_LoginStatusType" name="Status">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_ReplayResponse" name="ReplayResponse">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">4</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="4" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="MarketDataGroup">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="FirstMessage">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Integer" name="Count">
+                <attribute type="java.lang.String" name="Type">UInt16</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field reference="F_ReplayResponseStatusType" name="Status">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_SnapshotResponse" name="SnapshotResponse">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">130</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="130" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="SequenceNumber">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="OrderCount">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field reference="F_SnapshotResponseStatusType" name="Status">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_SnapshotComplete" name="SnapshotComplete">
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <attribute type="java.lang.Short" name="MessageType">131</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="131" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="SequenceNumber">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="Segment">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">6</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_TimeMessage" name="TimeMessage">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">84</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="84" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="Seconds">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_SystemEvent" name="SystemEvent">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">83</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="83" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field reference="F_EventCodeType" name="EventCode">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_SymbolDirectory" name="SymbolDirectory">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">82</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="82" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="SymbolStatus">
+                <attribute type="java.lang.String" name="Type">Alpha_notrim</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="ISIN">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field type="java.lang.String" name="SEDOL">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field type="java.lang.String" name="Segment">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">6</attribute>
+            </field>
+            <field type="java.lang.String" name="Underlying">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">6</attribute>
+            </field>
+            <field type="java.lang.String" name="Currency">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">3</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved3">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="Reserved4">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Double" name="PreviouseClosePrice">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+        </message>
+        <message id="M_SymbolStatus" name="SymbolStatus">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">72</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="72" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_TradingStatusType" name="TradingStatus">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="HaltReason">
+                <attribute type="java.lang.String" name="Type">Alpha_notrim</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field reference="F_SessionChangeReasonType" name="SessionChangeReason">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="NewEndTime">
+                <attribute type="java.lang.String" name="Type">Alpha_notrim</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_BookTypeEnum" name="BookType">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_AddOrder" name="AddOrder">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">65</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="65" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="OrderID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Boolean" name="SubFilter">true</attribute>
+            </field>
+            <field reference="F_Side" name="Side">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="Quantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_AddAttributedOrder" name="AddAttributedOrder">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">70</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="70" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="OrderID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Boolean" name="SubFilter">true</attribute>
+            </field>
+            <field reference="F_Side" name="Side">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="Quantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="Attribution">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">11</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_OrderDeleted" name="OrderDeleted">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">68</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="68" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="OrderID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Boolean" name="SubFilter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+        </message>
+        <message id="M_OrderModified" name="OrderModified">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">85</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="85" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="OrderID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Boolean" name="SubFilter">true</attribute>
+            </field>
+            <field type="java.lang.Long" name="NewQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Double" name="NewPrice">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_OrderBookClear" name="OrderBookClear">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">121</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="121" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_OrderExecuted" name="OrderExecuted">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">69</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="69" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="OrderID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Boolean" name="SubFilter">true</attribute>
+            </field>
+            <field type="java.lang.Long" name="ExecutedQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+        </message>
+        <message id="M_OrderExecutedWithPrice_Size" name="OrderExecutedWithPrice_Size">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">67</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="67" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="OrderID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Boolean" name="SubFilter">true</attribute>
+            </field>
+            <field type="java.lang.Long" name="ExecutedQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="DisplayQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_PrintableType" name="Printable">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+        </message>
+        <message id="M_Trade" name="Trade">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">80</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="80" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="ExecutedQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_CrossType" name="CrossType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_AuctionTrade" name="AuctionTrade">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">81</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="81" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="Quantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_AuctionType" name="AuctionType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_OffBookTrade" name="OffBookTrade">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">120</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="120" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="ExecutedQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.math.BigDecimal" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="TradeType">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="TradeTime">
+                <attribute type="java.lang.String" name="Type">Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="TradeDate">
+                <attribute type="java.lang.String" name="Type">Date</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="TradedCurrency">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Double" name="OriginalPrice">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="ExecutionVenue">
+                <attribute type="java.lang.String" name="Type">Alpha</attribute>
+                <attribute type="java.lang.Integer" name="Length">5</attribute>
+            </field>
+            <field type="java.lang.Short" name="Flags">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_TradeBreak" name="TradeBreak">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">66</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="66" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.math.BigDecimal" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Type">UInt64</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Short" name="TradeType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+        </message>
+        <message id="M_AuctionInfo" name="AuctionInfo">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">73</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="73" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="PairedQuantity">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved3">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved4">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_AuctionType" name="AuctionType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_Statistics" name="Statistics">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">119</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="119" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved1">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved2">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_StatisticType" name="StatisticType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_OpenClosePriceIndicator" name="OpenClosePriceIndicator">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Short" name="Reserved3">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_TOB" name="TOB">
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <attribute type="java.lang.Short" name="MessageType">113</attribute>
+            <field defaultvalue="0" reference="F_UHSequenceNumber" name="UHSequenceNumber"/>
+            <field defaultvalue="0" reference="F_UHMarketDataGroup" name="UHMarketDataGroup"/>
+            <field defaultvalue="0" reference="F_MessageSequenceNumber" name="MessageSequenceNumber"/>
+            <field type="java.lang.Short" name="Length">
+                <attribute type="java.lang.String" name="Type">UInt8</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="113" reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Type">Byte</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="Nanosecond">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Long" name="InstrumentID">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Filter">true</attribute>
+            </field>
+            <field type="java.lang.Double" name="BuyLimitPrice">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.Long" name="BuyLimitSize">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Double" name="SellLimitPrice">
+                <attribute type="java.lang.String" name="Type">Price</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.Long" name="SellLimitSize">
+                <attribute type="java.lang.String" name="Type">UInt32</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_MessagesList" name="MessagesList">
+            <attribute type="java.lang.Short" name="MessageType">257</attribute>
+        </message>
+    </messages>
+</dictionary>

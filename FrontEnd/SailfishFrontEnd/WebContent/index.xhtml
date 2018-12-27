@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+ "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"  
+    xmlns:h="http://java.sun.com/jsf/html"  
+    xmlns:f="http://java.sun.com/jsf/core"  
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets">  
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>  
+    <title>Welcome :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"   />
+
+    <h:outputStylesheet library="sf" name="css/estyles.css" />
+    <h:outputStylesheet library="sf" name="css/menu.css"    />
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"  />
+	
+	<script>
+	
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+	
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+	
+  	</script>    
+   	
+   	<h:outputScript library="primefaces" name="jquery/jquery.js" />
+   	<h:outputScript library="sf" name="js/menu.js"/>
+
+    <style>
+    .eps-sf-logo {
+        display: block;
+        
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: -189px 0 0 -150px;
+        z-index: -1;
+    }
+    </style>
+</h:head>
+<h:body styleClass="eps-application">
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <div class="eps-container">
+
+        <div class="eps-main">
+
+
+
+			<h:graphicImage library="sf" name="images/exactpro/SF_white.png" class="eps-sf-logo" />
+
+        </div>
+
+    </div>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+    
+</h:body>  
+</html>  
+

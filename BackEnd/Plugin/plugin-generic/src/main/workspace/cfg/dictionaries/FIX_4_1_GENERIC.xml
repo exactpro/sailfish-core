@@ -1,0 +1,2033 @@
+<?xml version="1.0" encoding="UTF-8"?><!--
+			Warning!!! This file is generated from FIX dictionary.
+			Changes possibly will be overwritten at next build.
+		-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="FIX_4_1_GENERIC">
+    <fields>
+        <field id="field-Account" name="Account" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">1</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AdvId" name="AdvId" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">2</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AdvRefID" name="AdvRefID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">3</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AdvSide" name="AdvSide" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">4</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="BUY">B</value>
+            <value name="SELL">S</value>
+            <value name="CROSS">X</value>
+            <value name="TRADE">T</value>
+        </field>
+        <field id="field-AdvTransType" name="AdvTransType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">5</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">N</value>
+            <value name="CANCEL">C</value>
+            <value name="REPLACE">R</value>
+        </field>
+        <field id="field-AvgPx" name="AvgPx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">6</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-BeginSeqNo" name="BeginSeqNo" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">7</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-BeginString" name="BeginString" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">8</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-BodyLength" name="BodyLength" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">9</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-CheckSum" name="CheckSum" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">10</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ClOrdID" name="ClOrdID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">11</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-Commission" name="Commission" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">12</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-CommType" name="CommType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">13</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="PER_SHARE">1</value>
+            <value name="PERCENTAGE">2</value>
+            <value name="ABSOLUTE">3</value>
+        </field>
+        <field id="field-CumQty" name="CumQty" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">14</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-Currency" name="Currency" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">15</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-EndSeqNo" name="EndSeqNo" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">16</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-ExecID" name="ExecID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">17</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ExecInst" name="ExecInst" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">18</attribute>
+            <attribute name="fixtype" type="java.lang.String">MULTIPLEVALUESTRING</attribute>
+            <value name="NOT_HELD">1</value>
+            <value name="WORK">2</value>
+            <value name="GO_ALONG">3</value>
+            <value name="OVER_THE_DAY">4</value>
+            <value name="HELD">5</value>
+            <value name="PARTICIPATE_DONT_INITIATE">6</value>
+            <value name="STRICT_SCALE">7</value>
+            <value name="TRY_TO_SCALE">8</value>
+            <value name="STAY_ON_BIDSIDE">9</value>
+            <value name="STAY_ON_OFFERSIDE">0</value>
+            <value name="NO_CROSS">A</value>
+            <value name="OK_TO_CROSS">B</value>
+            <value name="CALL_FIRST">C</value>
+            <value name="PERCENT_OF_VOLUME">D</value>
+            <value name="DO_NOT_INCREASE_DNI">E</value>
+            <value name="DO_NOT_REDUCE_DNR">F</value>
+            <value name="ALL_OR_NONE_AON">G</value>
+            <value name="INSTITUTIONS_ONLY">I</value>
+            <value name="LAST_PEG">L</value>
+            <value name="MIDPRICE_PEG">M</value>
+            <value name="NONNEGOTIABLE">N</value>
+            <value name="OPENING_PEG">O</value>
+            <value name="MARKET_PEG">P</value>
+            <value name="PRIMARY_PEG">R</value>
+            <value name="SUSPEND">S</value>
+            <value name="CUSTOMER_DISPLAY_INSTRUCTION">U</value>
+            <value name="NETTING">V</value>
+        </field>
+        <field id="field-ExecRefID" name="ExecRefID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">19</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ExecTransType" name="ExecTransType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">20</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">0</value>
+            <value name="CANCEL">1</value>
+            <value name="CORRECT">2</value>
+            <value name="STATUS">3</value>
+        </field>
+        <field id="field-HandlInst" name="HandlInst" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">21</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="AUTOMATED_EXECUTION_ORDER_PRIVATE_NO_BROKER_INTERVENTION">1</value>
+            <value name="AUTOMATED_EXECUTION_ORDER_PUBLIC_BROKER_INTERVENTION_OK">2</value>
+            <value name="MANUAL_ORDER_BEST_EXECUTION">3</value>
+        </field>
+        <field id="field-IDSource" name="IDSource" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">22</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="CUSIP">1</value>
+            <value name="SEDOL">2</value>
+            <value name="QUIK">3</value>
+            <value name="ISIN_NUMBER">4</value>
+            <value name="RIC_CODE">5</value>
+            <value name="ISO_CURRENCY_CODE">6</value>
+            <value name="ISO_COUNTRY_CODE">7</value>
+        </field>
+        <field id="field-IOIid" name="IOIid" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">23</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IOIOthSvc" name="IOIOthSvc" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">24</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IOIQltyInd" name="IOIQltyInd" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">25</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="LOW">L</value>
+            <value name="MEDIUM">M</value>
+            <value name="HIGH">H</value>
+        </field>
+        <field id="field-IOIRefID" name="IOIRefID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">26</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IOIShares" name="IOIShares" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">27</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IOITransType" name="IOITransType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">28</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">N</value>
+            <value name="CANCEL">C</value>
+            <value name="REPLACE">R</value>
+        </field>
+        <field id="field-LastCapacity" name="LastCapacity" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">29</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="AGENT">1</value>
+            <value name="CROSS_AS_AGENT">2</value>
+            <value name="CROSS_AS_PRINCIPAL">3</value>
+            <value name="PRINCIPAL">4</value>
+        </field>
+        <field id="field-LastMkt" name="LastMkt" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">30</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-LastPx" name="LastPx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">31</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-LastShares" name="LastShares" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">32</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-LinesOfText" name="LinesOfText" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">33</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-MsgSeqNum" name="MsgSeqNum" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">34</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-MsgType" name="MsgType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">35</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="HEARTBEAT">0</value>
+            <value name="TEST_REQUEST">1</value>
+            <value name="RESEND_REQUEST">2</value>
+            <value name="REJECT">3</value>
+            <value name="SEQUENCE_RESET">4</value>
+            <value name="LOGOUT">5</value>
+            <value name="INDICATION_OF_INTEREST">6</value>
+            <value name="ADVERTISEMENT">7</value>
+            <value name="EXECUTION_REPORT">8</value>
+            <value name="ORDER_CANCEL_REJECT">9</value>
+            <value name="LOGON">A</value>
+            <value name="NEWS">B</value>
+            <value name="EMAIL">C</value>
+            <value name="ORDER_SINGLE">D</value>
+            <value name="ORDER_LIST">E</value>
+            <value name="ORDER_CANCEL_REQUEST">F</value>
+            <value name="ORDER_CANCEL">G</value>
+            <value name="ORDER_STATUS_REQUEST">H</value>
+            <value name="ALLOCATION">J</value>
+            <value name="LIST_CANCEL_REQUEST">K</value>
+            <value name="LIST_EXECUTE">L</value>
+            <value name="LIST_STATUS_REQUEST">M</value>
+            <value name="LIST_STATUS">N</value>
+            <value name="ALLOCATION_ACK">P</value>
+            <value name="DONT_KNOW_TRADE">Q</value>
+            <value name="QUOTE_REQUEST">R</value>
+            <value name="QUOTE">S</value>
+            <value name="SETTLEMENT_INSTRUCTIONS">T</value>
+        </field>
+        <field id="field-NewSeqNo" name="NewSeqNo" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">36</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-OrderID" name="OrderID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">37</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-OrderQty" name="OrderQty" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">38</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-OrdStatus" name="OrdStatus" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">39</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">0</value>
+            <value name="PARTIALLY_FILLED">1</value>
+            <value name="FILLED">2</value>
+            <value name="DONE_FOR_DAY">3</value>
+            <value name="CANCELED">4</value>
+            <value name="REPLACED">5</value>
+            <value name="PENDING_CANCELREPLACE">6</value>
+            <value name="STOPPED">7</value>
+            <value name="REJECTED">8</value>
+            <value name="SUSPENDED">9</value>
+            <value name="PENDING_NEW">A</value>
+            <value name="CALCULATED">B</value>
+            <value name="EXPIRED">C</value>
+        </field>
+        <field id="field-OrdType" name="OrdType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">40</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="MARKET">1</value>
+            <value name="LIMIT">2</value>
+            <value name="STOP">3</value>
+            <value name="STOP_LIMIT">4</value>
+            <value name="MARKET_ON_CLOSE">5</value>
+            <value name="WITH_OR_WITHOUT">6</value>
+            <value name="LIMIT_OR_BETTER">7</value>
+            <value name="LIMIT_WITH_OR_WITHOUT">8</value>
+            <value name="ON_BASIS">9</value>
+            <value name="ON_CLOSE">A</value>
+            <value name="LIMIT_ON_CLOSE">B</value>
+            <value name="FOREX_MARKET">C</value>
+            <value name="PREVIOUSLY_QUOTED">D</value>
+            <value name="PREVIOUSLY_INDICATED">E</value>
+            <value name="FOREX_LIMIT">F</value>
+            <value name="FOREX_SWAP">G</value>
+            <value name="FOREX_PREVIOUSLY_QUOTED">H</value>
+            <value name="PEGGED">P</value>
+        </field>
+        <field id="field-OrigClOrdID" name="OrigClOrdID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">41</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-OrigTime" name="OrigTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">42</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-PossDupFlag" name="PossDupFlag" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">43</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="POSSIBLE_DUPLICATE">Y</value>
+            <value name="ORIGINAL_TRANSMISSION">N</value>
+        </field>
+        <field id="field-Price" name="Price" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">44</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-RefSeqNum" name="RefSeqNum" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">45</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-RelatdSym" name="RelatdSym" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">46</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-Rule80A" name="Rule80A" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">47</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="AGENCY_SINGLE_ORDER">A</value>
+            <value name="SHORT_EXEMPT_TRANSACTION_B">B</value>
+            <value name="PROGRAM_ORDER_NONINDEX_ARB_FOR_MEMBER_FIRMORG">C</value>
+            <value name="PROGRAM_ORDER_INDEX_ARB_FOR_MEMBER_FIRMORG">D</value>
+            <value name="REGISTERED_EQUITY_MARKET_MAKER_TRADES">E</value>
+            <value name="SHORT_EXEMPT_TRANSACTION_F">F</value>
+            <value name="SHORT_EXEMPT_TRANSACTION_H">H</value>
+            <value name="INDIVIDUAL_INVESTOR">I</value>
+            <value name="PROGRAM_ORDER_INDEX_ARB_FOR_INDIVIDUAL_CUSTOMER">J</value>
+            <value name="PROGRAM_ORDER_NONINDEX_ARB_FOR_INDIVIDUAL_CUSTOMER">K</value>
+            <value name="SHORT_EXEMPT_AFFILIATED">L</value>
+            <value name="PROGRAM_ORDER_INDEX_ARB_FOR_OTHER_MEMBER">M</value>
+            <value name="PROGRAM_ORDER_NONINDEX_ARB_FOR_OTHER_MEMBER">N</value>
+            <value name="COMPETING_DEALER_TRADES_O">O</value>
+            <value name="PRINCIPAL">P</value>
+            <value name="COMPETING_DEALER_TRADES_R">R</value>
+            <value name="SPECIALIST_TRADES">S</value>
+            <value name="COMPETING_DEALER_TRADES_T">T</value>
+            <value name="PROGRAM_ORDER_INDEX_ARB_FOR_OTHER_AGENCY">U</value>
+            <value name="ALL_OTHER_ORDERS_AS_AGENT_FOR_OTHER_MEMBER">W</value>
+            <value name="SHORT_EXEMPT_NOT_AFFILIATED">X</value>
+            <value name="PROGRAM_ORDER_NONINDEX_ARB_FOR_OTHER_AGENCY">Y</value>
+            <value name="SHORT_EXEMPT_NONMEMBER">Z</value>
+        </field>
+        <field id="field-SecurityID" name="SecurityID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">48</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SenderCompID" name="SenderCompID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">49</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SenderSubID" name="SenderSubID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">50</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SendingTime" name="SendingTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">52</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-Shares" name="Shares" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">53</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-Side" name="Side" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">54</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="BUY">1</value>
+            <value name="SELL">2</value>
+            <value name="BUY_MINUS">3</value>
+            <value name="SELL_PLUS">4</value>
+            <value name="SELL_SHORT">5</value>
+            <value name="SELL_SHORT_EXEMPT">6</value>
+            <value name="D">7</value>
+            <value name="CROSS">8</value>
+        </field>
+        <field id="field-Symbol" name="Symbol" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">55</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-TargetCompID" name="TargetCompID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">56</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-TargetSubID" name="TargetSubID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">57</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-Text" name="Text" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">58</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-TimeInForce" name="TimeInForce" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">59</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="DAY">0</value>
+            <value name="GOOD_TILL_CANCEL">1</value>
+            <value name="AT_THE_OPENING">2</value>
+            <value name="IMMEDIATE_OR_CANCEL">3</value>
+            <value name="FILL_OR_KILL">4</value>
+            <value name="GOOD_TILL_CROSSING">5</value>
+            <value name="GOOD_TILL_DATE">6</value>
+        </field>
+        <field id="field-TransactTime" name="TransactTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">60</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-Urgency" name="Urgency" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">61</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NORMAL">0</value>
+            <value name="FLASH">1</value>
+            <value name="BACKGROUND">2</value>
+        </field>
+        <field id="field-ValidUntilTime" name="ValidUntilTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">62</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-SettlmntTyp" name="SettlmntTyp" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">63</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="REGULAR">0</value>
+            <value name="CASH">1</value>
+            <value name="NEXT_DAY">2</value>
+            <value name="TPLUS2">3</value>
+            <value name="TPLUS3">4</value>
+            <value name="TPLUS4">5</value>
+            <value name="FUTURE">6</value>
+            <value name="WHEN_ISSUED">7</value>
+            <value name="SELLERS_OPTION">8</value>
+            <value name="TPLUS5">9</value>
+        </field>
+        <field id="field-FutSettDate" name="FutSettDate" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">64</attribute>
+            <attribute name="fixtype" type="java.lang.String">DATE</attribute>
+        </field>
+        <field id="field-SymbolSfx" name="SymbolSfx" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">65</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ListID" name="ListID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">66</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ListSeqNo" name="ListSeqNo" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">67</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-ListNoOrds" name="ListNoOrds" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">68</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-ListExecInst" name="ListExecInst" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">69</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AllocID" name="AllocID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">70</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AllocTransType" name="AllocTransType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">71</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">0</value>
+            <value name="REPLACE">1</value>
+            <value name="CANCEL">2</value>
+            <value name="PRELIMINARY">3</value>
+            <value name="CALCULATED">4</value>
+        </field>
+        <field id="field-RefAllocID" name="RefAllocID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">72</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NoOrders" name="NoOrders" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">73</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-AvgPrxPrecision" name="AvgPrxPrecision" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">74</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-TradeDate" name="TradeDate" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">75</attribute>
+            <attribute name="fixtype" type="java.lang.String">DATE</attribute>
+        </field>
+        <field id="field-ExecBroker" name="ExecBroker" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">76</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-OpenClose" name="OpenClose" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">77</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NoAllocs" name="NoAllocs" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">78</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-AllocAccount" name="AllocAccount" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">79</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AllocShares" name="AllocShares" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">80</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-ProcessCode" name="ProcessCode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">81</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="REGULAR">0</value>
+            <value name="SOFT_DOLLAR">1</value>
+            <value name="STEPIN">2</value>
+            <value name="STEPOUT">3</value>
+            <value name="SOFTDOLLAR_STEPIN">4</value>
+            <value name="SOFTDOLLAR_STEPOUT">5</value>
+            <value name="PLAN_SPONSOR">6</value>
+        </field>
+        <field id="field-NoRpts" name="NoRpts" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">82</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-RptSeq" name="RptSeq" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">83</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-CxlQty" name="CxlQty" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">84</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-NoDlvyInst" name="NoDlvyInst" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">85</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-DlvyInst" name="DlvyInst" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">86</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AllocStatus" name="AllocStatus" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">87</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="ACCEPTED">0</value>
+            <value name="REJECTED">1</value>
+            <value name="PARTIAL_ACCEPT">2</value>
+            <value name="RECEIVED">3</value>
+        </field>
+        <field id="field-AllocRejCode" name="AllocRejCode" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">88</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="UNKNOWN_ACCOUNT">0</value>
+            <value name="INCORRECT_QUANTITY">1</value>
+            <value name="INCORRECT_AVERAGE_PRICE">2</value>
+            <value name="UNKNOWN_EXECUTING_BROKER_MNEMONIC">3</value>
+            <value name="COMMISSION_DIFFERENCE">4</value>
+            <value name="UNKNOWN_ORDERID">5</value>
+            <value name="UNKNOWN_LISTID">6</value>
+            <value name="OTHER">7</value>
+        </field>
+        <field id="field-Signature" name="Signature" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">89</attribute>
+            <attribute name="fixtype" type="java.lang.String">DATA</attribute>
+        </field>
+        <field id="field-SecureDataLen" name="SecureDataLen" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">90</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-SecureData" name="SecureData" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">91</attribute>
+            <attribute name="fixtype" type="java.lang.String">DATA</attribute>
+        </field>
+        <field id="field-BrokerOfCredit" name="BrokerOfCredit" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">92</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SignatureLength" name="SignatureLength" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">93</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-EmailType" name="EmailType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">94</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">0</value>
+            <value name="REPLY">1</value>
+            <value name="ADMIN_REPLY">2</value>
+        </field>
+        <field id="field-RawDataLength" name="RawDataLength" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">95</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-RawData" name="RawData" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">96</attribute>
+            <attribute name="fixtype" type="java.lang.String">DATA</attribute>
+        </field>
+        <field id="field-PossResend" name="PossResend" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">97</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-EncryptMethod" name="EncryptMethod" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">98</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="NONE_OTHER">0</value>
+            <value name="PKCS">1</value>
+            <value name="DES">2</value>
+            <value name="PKCSDES">3</value>
+            <value name="PGPDES">4</value>
+            <value name="PGPDESMD5">5</value>
+            <value name="PEMDESMD5">6</value>
+        </field>
+        <field id="field-StopPx" name="StopPx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">99</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-ExDestination" name="ExDestination" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">100</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CxlRejReason" name="CxlRejReason" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">102</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="TOO_LATE_TO_CANCEL">0</value>
+            <value name="UNKNOWN_ORDER">1</value>
+        </field>
+        <field id="field-OrdRejReason" name="OrdRejReason" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">103</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="BROKER_OPTION">0</value>
+            <value name="UNKNOWN_SYMBOL">1</value>
+            <value name="EXCHANGE_CLOSED">2</value>
+            <value name="ORDER_EXCEEDS_LIMIT">3</value>
+            <value name="TOO_LATE_TO_ENTER">4</value>
+            <value name="UNKNOWN_ORDER">5</value>
+            <value name="DUPLICATE_ORDER">6</value>
+        </field>
+        <field id="field-IOIQualifier" name="IOIQualifier" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">104</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="CROSSING_OPPORTUNITY">X</value>
+            <value name="AT_THE_OPEN">O</value>
+            <value name="MORE_BEHIND">M</value>
+            <value name="TAKING_A_POSITION">P</value>
+            <value name="VERSUS">V</value>
+            <value name="AT_THE_MARKET">Q</value>
+            <value name="AT_THE_CLOSE">C</value>
+            <value name="PORTFOLIO_SHOWN">S</value>
+            <value name="IN_TOUCH_WITH">I</value>
+            <value name="INDICATION_WORKING_AWAY">W</value>
+            <value name="ALL_OR_NONE">A</value>
+            <value name="LIMIT">L</value>
+            <value name="THROUGH_THE_DAY">T</value>
+            <value name="AT_THE_MIDPOINT">Y</value>
+            <value name="PREOPEN">Z</value>
+        </field>
+        <field id="field-WaveNo" name="WaveNo" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">105</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-Issuer" name="Issuer" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">106</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecurityDesc" name="SecurityDesc" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">107</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-HeartBtInt" name="HeartBtInt" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">108</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-ClientID" name="ClientID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">109</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-MinQty" name="MinQty" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">110</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-MaxFloor" name="MaxFloor" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">111</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-TestReqID" name="TestReqID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">112</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ReportToExch" name="ReportToExch" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">113</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="YES">Y</value>
+            <value name="NO">N</value>
+        </field>
+        <field id="field-LocateReqd" name="LocateReqd" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">114</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="YES">Y</value>
+            <value name="NO">N</value>
+        </field>
+        <field id="field-OnBehalfOfCompID" name="OnBehalfOfCompID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">115</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-OnBehalfOfSubID" name="OnBehalfOfSubID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">116</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-QuoteID" name="QuoteID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">117</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NetMoney" name="NetMoney" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">118</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-SettlCurrAmt" name="SettlCurrAmt" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">119</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-SettlCurrency" name="SettlCurrency" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">120</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ForexReq" name="ForexReq" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">121</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="YES">Y</value>
+            <value name="NO">N</value>
+        </field>
+        <field id="field-OrigSendingTime" name="OrigSendingTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">122</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-GapFillFlag" name="GapFillFlag" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">123</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="GAP_FILL_MESSAGE_MSGSEQNUM_FIELD_VALID">Y</value>
+            <value name="SEQUENCE_RESET_IGNORE_MSGSEQNUM">N</value>
+        </field>
+        <field id="field-NoExecs" name="NoExecs" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">124</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-ExpireTime" name="ExpireTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">126</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-DKReason" name="DKReason" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">127</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="UNKNOWN_SYMBOL">A</value>
+            <value name="WRONG_SIDE">B</value>
+            <value name="QUANTITY_EXCEEDS_ORDER">C</value>
+            <value name="NO_MATCHING_ORDER">D</value>
+            <value name="PRICE_EXCEEDS_LIMIT">E</value>
+            <value name="OTHER">Z</value>
+        </field>
+        <field id="field-DeliverToCompID" name="DeliverToCompID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">128</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-DeliverToSubID" name="DeliverToSubID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">129</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IOINaturalFlag" name="IOINaturalFlag" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">130</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NATURAL">Y</value>
+            <value name="NOT_NATURAL">N</value>
+        </field>
+        <field id="field-QuoteReqID" name="QuoteReqID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">131</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-BidPx" name="BidPx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">132</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-OfferPx" name="OfferPx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">133</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-BidSize" name="BidSize" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">134</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-OfferSize" name="OfferSize" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">135</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-NoMiscFees" name="NoMiscFees" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">136</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-MiscFeeAmt" name="MiscFeeAmt" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">137</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-MiscFeeCurr" name="MiscFeeCurr" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">138</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-MiscFeeType" name="MiscFeeType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">139</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="REGULATORY">1</value>
+            <value name="TAX">2</value>
+            <value name="LOCAL_COMMISSION">3</value>
+            <value name="EXCHANGE_FEES">4</value>
+            <value name="STAMP">5</value>
+            <value name="LEVY">6</value>
+            <value name="OTHER">7</value>
+            <value name="MARKUP">8</value>
+        </field>
+        <field id="field-PrevClosePx" name="PrevClosePx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">140</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-ResetSeqNumFlag" name="ResetSeqNumFlag" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">141</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="YES_RESET_SEQUENCE_NUMBERS">Y</value>
+            <value name="NO">N</value>
+        </field>
+        <field id="field-SenderLocationID" name="SenderLocationID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">142</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-TargetLocationID" name="TargetLocationID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">143</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-OnBehalfOfLocationID" name="OnBehalfOfLocationID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">144</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-DeliverToLocationID" name="DeliverToLocationID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">145</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NoRelatedSym" name="NoRelatedSym" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">146</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-Subject" name="Subject" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">147</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-Headline" name="Headline" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">148</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-URLLink" name="URLLink" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">149</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ExecType" name="ExecType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">150</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">0</value>
+            <value name="PARTIAL_FILL">1</value>
+            <value name="FILL">2</value>
+            <value name="DONE_FOR_DAY">3</value>
+            <value name="CANCELLED">4</value>
+            <value name="REPLACE">5</value>
+            <value name="PENDING_CANCELREPLACE">6</value>
+            <value name="STOPPED">7</value>
+            <value name="REJECTED">8</value>
+            <value name="SUSPENDED">9</value>
+            <value name="PENDING_NEW">A</value>
+            <value name="CALCULATED">B</value>
+            <value name="EXPIRED">C</value>
+        </field>
+        <field id="field-LeavesQty" name="LeavesQty" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">151</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-CashOrderQty" name="CashOrderQty" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">152</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-AllocAvgPx" name="AllocAvgPx" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">153</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-AllocNetMoney" name="AllocNetMoney" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">154</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-SettlCurrFxRate" name="SettlCurrFxRate" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">155</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-SettlCurrFxRateCalc" name="SettlCurrFxRateCalc" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">156</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NumDaysInterest" name="NumDaysInterest" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">157</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-AccruedInterestRate" name="AccruedInterestRate" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">158</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-AccruedInterestAmt" name="AccruedInterestAmt" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">159</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-SettlInstMode" name="SettlInstMode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">160</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="DEFAULT">0</value>
+            <value name="STANDING_INSTRUCTIONS_PROVIDED">1</value>
+            <value name="SPECIFIC_ALLOCATION_ACCOUNT_OVERRIDING">2</value>
+            <value name="SPECIFIC_ALLOCATION_ACCOUNT_STANDING">3</value>
+        </field>
+        <field id="field-AllocText" name="AllocText" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">161</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SettlInstID" name="SettlInstID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">162</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SettlInstTransType" name="SettlInstTransType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">163</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="NEW">N</value>
+            <value name="CANCEL">C</value>
+            <value name="REPLACE">R</value>
+        </field>
+        <field id="field-EmailThreadID" name="EmailThreadID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">164</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SettlInstSource" name="SettlInstSource" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">165</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="BROKER">1</value>
+            <value name="INSTITUTION">2</value>
+        </field>
+        <field id="field-SettlLocation" name="SettlLocation" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">166</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="CEDEL">CED</value>
+            <value name="DEPOSITORY_TRUST_COMPANY">DTC</value>
+            <value name="EUROCLEAR">EUR</value>
+            <value name="FEDERAL_BOOK_ENTRY">FED</value>
+            <value name="PHYSICAL">PNY</value>
+            <value name="PARTICIPANT_TRUST_COMPANY">PTC</value>
+            <value name="LOCAL_MARKET_SETTLE_LOCATION">ISO</value>
+        </field>
+        <field id="field-SecurityType" name="SecurityType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">167</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="BANKERS_ACCEPTANCE">BA</value>
+            <value name="CERTIFICATE_OF_DEPOSIT">CD</value>
+            <value name="COLLATERALIZE_MORTGAGE_OBLIGATION">CMO</value>
+            <value name="CORPORATE_BOND">CORP</value>
+            <value name="COMMERCIAL_PAPER">CP</value>
+            <value name="CORPORATE_PRIVATE_PLACEMENT">CPP</value>
+            <value name="COMMON_STOCK">CS</value>
+            <value name="FEDERAL_HOUSING_AUTHORITY">FHA</value>
+            <value name="FEDERAL_HOME_LOAN">FHL</value>
+            <value name="FEDERAL_NATIONAL_MORTGAGE_ASSOCIATION">FN</value>
+            <value name="FOREIGN_EXCHANGE_CONTRACT">FOR</value>
+            <value name="FUTURE">FUT</value>
+            <value name="GOVERNMENT_NATIONAL_MORTGAGE_ASSOCIATION">GN</value>
+            <value name="TREASURIES_PLUS_AGENCY_DEBENTURE">GOVT</value>
+            <value name="MUTUAL_FUND">MF</value>
+            <value name="MORTGAGE_INTEREST_ONLY">MIO</value>
+            <value name="MORTGAGE_PRINCIPLE_ONLY">MPO</value>
+            <value name="MORTGAGE_PRIVATE_PLACEMENT">MPP</value>
+            <value name="MISCELLANEOUS_PASSTHRU">MPT</value>
+            <value name="MUNICIPAL_BOND">MUNI</value>
+            <value name="NO_ISITC_SECURITY_TYPE">NONE</value>
+            <value name="OPTION">OPT</value>
+            <value name="PREFERRED_STOCK">PS</value>
+            <value name="REPURCHASE_AGREEMENT">RP</value>
+            <value name="REVERSE_REPURCHASE_AGREEMENT">RVRP</value>
+            <value name="STUDENT_LOAN_MARKETING_ASSOCIATION">SL</value>
+            <value name="TIME_DEPOSIT">TD</value>
+            <value name="US_TREASURY_BILL">USTB</value>
+            <value name="WARRANT">WAR</value>
+            <value name="CATS_TIGERS">ZOO</value>
+        </field>
+        <field id="field-EffectiveTime" name="EffectiveTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">168</attribute>
+            <attribute name="fixtype" type="java.lang.String">TIME</attribute>
+        </field>
+        <field id="field-StandInstDbType" name="StandInstDbType" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">169</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="OTHER">0</value>
+            <value name="DTC_SID">1</value>
+            <value name="THOMSON_ALERT">2</value>
+            <value name="A_GLOBAL_CUSTODIAN">3</value>
+        </field>
+        <field id="field-StandInstDbName" name="StandInstDbName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">170</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-StandInstDbID" name="StandInstDbID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">171</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SettlDeliveryType" name="SettlDeliveryType" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">172</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-SettlDepositoryCode" name="SettlDepositoryCode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">173</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SettlBrkrCode" name="SettlBrkrCode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">174</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SettlInstCode" name="SettlInstCode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">175</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecuritySettlAgentName" name="SecuritySettlAgentName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">176</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecuritySettlAgentCode" name="SecuritySettlAgentCode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">177</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecuritySettlAgentAcctNum" name="SecuritySettlAgentAcctNum" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">178</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecuritySettlAgentAcctName" name="SecuritySettlAgentAcctName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">179</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecuritySettlAgentContactName" name="SecuritySettlAgentContactName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">180</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecuritySettlAgentContactPhone" name="SecuritySettlAgentContactPhone" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">181</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CashSettlAgentName" name="CashSettlAgentName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">182</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CashSettlAgentCode" name="CashSettlAgentCode" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">183</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CashSettlAgentAcctNum" name="CashSettlAgentAcctNum" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">184</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CashSettlAgentAcctName" name="CashSettlAgentAcctName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">185</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CashSettlAgentContactName" name="CashSettlAgentContactName" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">186</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-CashSettlAgentContactPhone" name="CashSettlAgentContactPhone" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">187</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-BidSpotRate" name="BidSpotRate" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">188</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-BidForwardPoints" name="BidForwardPoints" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">189</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-OfferSpotRate" name="OfferSpotRate" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">190</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-OfferForwardPoints" name="OfferForwardPoints" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">191</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-OrderQty2" name="OrderQty2" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">192</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-FutSettDate2" name="FutSettDate2" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">193</attribute>
+            <attribute name="fixtype" type="java.lang.String">DATE</attribute>
+        </field>
+        <field id="field-LastSpotRate" name="LastSpotRate" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">194</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-LastForwardPoints" name="LastForwardPoints" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">195</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-AllocLinkID" name="AllocLinkID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">196</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-AllocLinkType" name="AllocLinkType" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">197</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="FX_NETTING">0</value>
+            <value name="FX_SWAP">1</value>
+        </field>
+        <field id="field-SecondaryOrderID" name="SecondaryOrderID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">198</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NoIOIQualifiers" name="NoIOIQualifiers" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">199</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-MaturityMonthYear" name="MaturityMonthYear" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">200</attribute>
+            <attribute name="fixtype" type="java.lang.String">MONTHYEAR</attribute>
+        </field>
+        <field id="field-PutOrCall" name="PutOrCall" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">201</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="PUT">0</value>
+            <value name="CALL">1</value>
+        </field>
+        <field id="field-StrikePrice" name="StrikePrice" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">202</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+        <field id="field-CoveredOrUncovered" name="CoveredOrUncovered" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">203</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="COVERED">0</value>
+            <value name="UNCOVERED">1</value>
+        </field>
+        <field id="field-CustomerOrFirm" name="CustomerOrFirm" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">204</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="CUSTOMER">0</value>
+            <value name="FIRM">1</value>
+        </field>
+        <field id="field-MaturityDay" name="MaturityDay" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">205</attribute>
+            <attribute name="fixtype" type="java.lang.String">DAYOFMONTH</attribute>
+        </field>
+        <field id="field-OptAttribute" name="OptAttribute" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">206</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SecurityExchange" name="SecurityExchange" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">207</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-NotifyBrokerOfCredit" name="NotifyBrokerOfCredit" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">208</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="DETAILS_SHOULD_BE_COMMUNICATED">Y</value>
+            <value name="DETAILS_SHOULD_NOT_BE_COMMUNICATED">N</value>
+        </field>
+        <field id="field-AllocHandlInst" name="AllocHandlInst" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">209</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="MATCH">1</value>
+            <value name="FORWARD">2</value>
+            <value name="FORWARD_AND_MATCH">3</value>
+        </field>
+        <field id="field-MaxShow" name="MaxShow" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">210</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-PegDifference" name="PegDifference" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">211</attribute>
+            <attribute name="fixtype" type="java.lang.String">FLOAT</attribute>
+        </field>
+    </fields>
+    <messages>
+        <message name="IndicationofInterest_NoIOIQualifiers" id="group-IndicationofInterest_NoIOIQualifiers">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">199</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="IOIQualifier" reference="field-IOIQualifier" required="false"/>
+        </message>
+        <message name="News_NoRelatedSym" id="group-News_NoRelatedSym">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">146</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="RelatdSym" reference="field-RelatdSym" required="false"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+        </message>
+        <message name="News_LinesOfText" id="group-News_LinesOfText">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">33</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="Text" reference="field-Text" required="true"/>
+        </message>
+        <message name="Email_NoRelatedSym" id="group-Email_NoRelatedSym">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">146</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="RelatdSym" reference="field-RelatdSym" required="false"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+        </message>
+        <message name="Email_LinesOfText" id="group-Email_LinesOfText">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">33</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="Text" reference="field-Text" required="true"/>
+        </message>
+        <message name="Allocation_NoOrders" id="group-Allocation_NoOrders">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">73</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="false"/>
+            <field name="SecondaryOrderID" reference="field-SecondaryOrderID" required="false"/>
+            <field name="ListID" reference="field-ListID" required="false"/>
+            <field name="WaveNo" reference="field-WaveNo" required="false"/>
+        </message>
+        <message name="Allocation_NoExecs" id="group-Allocation_NoExecs">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">124</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="LastShares" reference="field-LastShares" required="false"/>
+            <field name="ExecID" reference="field-ExecID" required="false"/>
+            <field name="LastPx" reference="field-LastPx" required="false"/>
+            <field name="LastCapacity" reference="field-LastCapacity" required="false"/>
+        </message>
+        <message name="Allocation_NoAllocs" id="group-Allocation_NoAllocs">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">78</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="AllocAccount" reference="field-AllocAccount" required="true"/>
+            <field name="AllocShares" reference="field-AllocShares" required="true"/>
+            <field name="ProcessCode" reference="field-ProcessCode" required="false"/>
+            <field name="BrokerOfCredit" reference="field-BrokerOfCredit" required="false"/>
+            <field name="NotifyBrokerOfCredit" reference="field-NotifyBrokerOfCredit" required="false"/>
+            <field name="AllocHandlInst" reference="field-AllocHandlInst" required="false"/>
+            <field name="AllocText" reference="field-AllocText" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="Commission" reference="field-Commission" required="false"/>
+            <field name="CommType" reference="field-CommType" required="false"/>
+            <field name="AllocAvgPx" reference="field-AllocAvgPx" required="false"/>
+            <field name="AllocNetMoney" reference="field-AllocNetMoney" required="false"/>
+            <field name="SettlCurrAmt" reference="field-SettlCurrAmt" required="false"/>
+            <field name="SettlCurrency" reference="field-SettlCurrency" required="false"/>
+            <field name="SettlCurrFxRate" reference="field-SettlCurrFxRate" required="false"/>
+            <field name="SettlCurrFxRateCalc" reference="field-SettlCurrFxRateCalc" required="false"/>
+            <field name="AccruedInterestAmt" reference="field-AccruedInterestAmt" required="false"/>
+            <field name="SettlInstMode" reference="field-SettlInstMode" required="false"/>
+            <field name="NoMiscFees" reference="group-Allocation_NoAllocs_NoMiscFees" isCollection="true"
+                   required="false"/>
+        </message>
+        <message name="Allocation_NoAllocs_NoMiscFees" id="group-Allocation_NoAllocs_NoMiscFees">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">136</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="MiscFeeAmt" reference="field-MiscFeeAmt" required="false"/>
+            <field name="MiscFeeCurr" reference="field-MiscFeeCurr" required="false"/>
+            <field name="MiscFeeType" reference="field-MiscFeeType" required="false"/>
+        </message>
+        <message name="ListStatus_NoOrders" id="group-ListStatus_NoOrders">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">73</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="CumQty" reference="field-CumQty" required="true"/>
+            <field name="LeavesQty" reference="field-LeavesQty" required="true"/>
+            <field name="CxlQty" reference="field-CxlQty" required="true"/>
+            <field name="AvgPx" reference="field-AvgPx" required="true"/>
+        </message>
+        <message id="header" name="header">
+            <attribute name="entity_type" type="java.lang.String">Header</attribute>
+            <field name="BeginString" reference="field-BeginString" required="true"/>
+            <field name="BodyLength" reference="field-BodyLength" required="true"/>
+            <field name="MsgType" reference="field-MsgType" required="true"/>
+            <field name="SenderCompID" reference="field-SenderCompID" required="true"/>
+            <field name="TargetCompID" reference="field-TargetCompID" required="true"/>
+            <field name="OnBehalfOfCompID" reference="field-OnBehalfOfCompID" required="false"/>
+            <field name="DeliverToCompID" reference="field-DeliverToCompID" required="false"/>
+            <field name="SecureDataLen" reference="field-SecureDataLen" required="false"/>
+            <field name="SecureData" reference="field-SecureData" required="false"/>
+            <field name="MsgSeqNum" reference="field-MsgSeqNum" required="true"/>
+            <field name="SenderSubID" reference="field-SenderSubID" required="false"/>
+            <field name="SenderLocationID" reference="field-SenderLocationID" required="false"/>
+            <field name="TargetSubID" reference="field-TargetSubID" required="false"/>
+            <field name="TargetLocationID" reference="field-TargetLocationID" required="false"/>
+            <field name="OnBehalfOfSubID" reference="field-OnBehalfOfSubID" required="false"/>
+            <field name="OnBehalfOfLocationID" reference="field-OnBehalfOfLocationID" required="false"/>
+            <field name="DeliverToSubID" reference="field-DeliverToSubID" required="false"/>
+            <field name="DeliverToLocationID" reference="field-DeliverToLocationID" required="false"/>
+            <field name="PossDupFlag" reference="field-PossDupFlag" required="false"/>
+            <field name="PossResend" reference="field-PossResend" required="false"/>
+            <field name="SendingTime" reference="field-SendingTime" required="true"/>
+            <field name="OrigSendingTime" reference="field-OrigSendingTime" required="false"/>
+        </message>
+        <message id="trailer" name="trailer">
+            <attribute name="entity_type" type="java.lang.String">Trailer</attribute>
+            <field name="SignatureLength" reference="field-SignatureLength" required="false"/>
+            <field name="Signature" reference="field-Signature" required="false"/>
+            <field name="CheckSum" reference="field-CheckSum" required="true"/>
+        </message>
+        <message name="Heartbeat">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">0</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="TestReqID" reference="field-TestReqID" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Logon">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">A</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="EncryptMethod" reference="field-EncryptMethod" required="true"/>
+            <field name="HeartBtInt" reference="field-HeartBtInt" required="true"/>
+            <field name="RawDataLength" reference="field-RawDataLength" required="false"/>
+            <field name="RawData" reference="field-RawData" required="false"/>
+            <field name="ResetSeqNumFlag" reference="field-ResetSeqNumFlag" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="TestRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">1</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="TestReqID" reference="field-TestReqID" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="ResendRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">2</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="BeginSeqNo" reference="field-BeginSeqNo" required="true"/>
+            <field name="EndSeqNo" reference="field-EndSeqNo" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Reject">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">3</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="RefSeqNum" reference="field-RefSeqNum" required="true"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="SequenceReset">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">4</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="GapFillFlag" reference="field-GapFillFlag" required="false"/>
+            <field name="NewSeqNo" reference="field-NewSeqNo" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Logout">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+            <attribute name="MessageType" type="java.lang.String">5</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Advertisement">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">7</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="AdvId" reference="field-AdvId" required="true"/>
+            <field name="AdvTransType" reference="field-AdvTransType" required="true"/>
+            <field name="AdvRefID" reference="field-AdvRefID" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="AdvSide" reference="field-AdvSide" required="true"/>
+            <field name="Shares" reference="field-Shares" required="true"/>
+            <field name="Price" reference="field-Price" required="false"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="TradeDate" reference="field-TradeDate" required="false"/>
+            <field name="TransactTime" reference="field-TransactTime" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="URLLink" reference="field-URLLink" required="false"/>
+            <field name="LastMkt" reference="field-LastMkt" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="IndicationofInterest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">6</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="IOIid" reference="field-IOIid" required="true"/>
+            <field name="IOITransType" reference="field-IOITransType" required="true"/>
+            <field name="IOIRefID" reference="field-IOIRefID" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="IOIShares" reference="field-IOIShares" required="true"/>
+            <field name="Price" reference="field-Price" required="false"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="ValidUntilTime" reference="field-ValidUntilTime" required="false"/>
+            <field name="IOIQltyInd" reference="field-IOIQltyInd" required="false"/>
+            <field name="IOIOthSvc" reference="field-IOIOthSvc" required="false"/>
+            <field name="IOINaturalFlag" reference="field-IOINaturalFlag" required="false"/>
+            <field name="NoIOIQualifiers" reference="group-IndicationofInterest_NoIOIQualifiers" isCollection="true"
+                   required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="TransactTime" reference="field-TransactTime" required="false"/>
+            <field name="URLLink" reference="field-URLLink" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="News">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">B</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrigTime" reference="field-OrigTime" required="false"/>
+            <field name="Urgency" reference="field-Urgency" required="false"/>
+            <field name="Headline" reference="field-Headline" required="true"/>
+            <field name="NoRelatedSym" reference="group-News_NoRelatedSym" isCollection="true" required="false"/>
+            <field name="LinesOfText" reference="group-News_LinesOfText" isCollection="true" required="true"/>
+            <field name="URLLink" reference="field-URLLink" required="false"/>
+            <field name="RawDataLength" reference="field-RawDataLength" required="false"/>
+            <field name="RawData" reference="field-RawData" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Email">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">C</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="EmailThreadID" reference="field-EmailThreadID" required="true"/>
+            <field name="EmailType" reference="field-EmailType" required="true"/>
+            <field name="OrigTime" reference="field-OrigTime" required="false"/>
+            <field name="Subject" reference="field-Subject" required="true"/>
+            <field name="NoRelatedSym" reference="group-Email_NoRelatedSym" isCollection="true" required="false"/>
+            <field name="OrderID" reference="field-OrderID" required="false"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="false"/>
+            <field name="LinesOfText" reference="group-Email_LinesOfText" isCollection="true" required="true"/>
+            <field name="RawDataLength" reference="field-RawDataLength" required="false"/>
+            <field name="RawData" reference="field-RawData" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="QuoteRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">R</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="QuoteReqID" reference="field-QuoteReqID" required="true"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="PrevClosePx" reference="field-PrevClosePx" required="false"/>
+            <field name="Side" reference="field-Side" required="false"/>
+            <field name="OrderQty" reference="field-OrderQty" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="OrdType" reference="field-OrdType" required="false"/>
+            <field name="FutSettDate2" reference="field-FutSettDate2" required="false"/>
+            <field name="OrderQty2" reference="field-OrderQty2" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Quote">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">S</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="QuoteReqID" reference="field-QuoteReqID" required="false"/>
+            <field name="QuoteID" reference="field-QuoteID" required="true"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="BidPx" reference="field-BidPx" required="false"/>
+            <field name="OfferPx" reference="field-OfferPx" required="false"/>
+            <field name="BidSize" reference="field-BidSize" required="false"/>
+            <field name="OfferSize" reference="field-OfferSize" required="false"/>
+            <field name="ValidUntilTime" reference="field-ValidUntilTime" required="false"/>
+            <field name="BidSpotRate" reference="field-BidSpotRate" required="false"/>
+            <field name="OfferSpotRate" reference="field-OfferSpotRate" required="false"/>
+            <field name="BidForwardPoints" reference="field-BidForwardPoints" required="false"/>
+            <field name="OfferForwardPoints" reference="field-OfferForwardPoints" required="false"/>
+            <field name="TransactTime" reference="field-TransactTime" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="OrdType" reference="field-OrdType" required="false"/>
+            <field name="FutSettDate2" reference="field-FutSettDate2" required="false"/>
+            <field name="OrderQty2" reference="field-OrderQty2" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="NewOrderSingle">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">D</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="Account" reference="field-Account" required="false"/>
+            <field name="SettlmntTyp" reference="field-SettlmntTyp" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="HandlInst" reference="field-HandlInst" required="true"/>
+            <field name="ExecInst" reference="field-ExecInst" required="false"/>
+            <field name="MinQty" reference="field-MinQty" required="false"/>
+            <field name="MaxFloor" reference="field-MaxFloor" required="false"/>
+            <field name="ExDestination" reference="field-ExDestination" required="false"/>
+            <field name="ProcessCode" reference="field-ProcessCode" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="PrevClosePx" reference="field-PrevClosePx" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="LocateReqd" reference="field-LocateReqd" required="false"/>
+            <field name="OrderQty" reference="field-OrderQty" required="false"/>
+            <field name="CashOrderQty" reference="field-CashOrderQty" required="false"/>
+            <field name="OrdType" reference="field-OrdType" required="true"/>
+            <field name="Price" reference="field-Price" required="false"/>
+            <field name="StopPx" reference="field-StopPx" required="false"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="IOIid" reference="field-IOIid" required="false"/>
+            <field name="QuoteID" reference="field-QuoteID" required="false"/>
+            <field name="TimeInForce" reference="field-TimeInForce" required="false"/>
+            <field name="ExpireTime" reference="field-ExpireTime" required="false"/>
+            <field name="Commission" reference="field-Commission" required="false"/>
+            <field name="CommType" reference="field-CommType" required="false"/>
+            <field name="Rule80A" reference="field-Rule80A" required="false"/>
+            <field name="ForexReq" reference="field-ForexReq" required="false"/>
+            <field name="SettlCurrency" reference="field-SettlCurrency" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="FutSettDate2" reference="field-FutSettDate2" required="false"/>
+            <field name="OrderQty2" reference="field-OrderQty2" required="false"/>
+            <field name="OpenClose" reference="field-OpenClose" required="false"/>
+            <field name="CoveredOrUncovered" reference="field-CoveredOrUncovered" required="false"/>
+            <field name="CustomerOrFirm" reference="field-CustomerOrFirm" required="false"/>
+            <field name="MaxShow" reference="field-MaxShow" required="false"/>
+            <field name="PegDifference" reference="field-PegDifference" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="ExecutionReport">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">8</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="true"/>
+            <field name="SecondaryOrderID" reference="field-SecondaryOrderID" required="false"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="false"/>
+            <field name="OrigClOrdID" reference="field-OrigClOrdID" required="false"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="ListID" reference="field-ListID" required="false"/>
+            <field name="ExecID" reference="field-ExecID" required="true"/>
+            <field name="ExecTransType" reference="field-ExecTransType" required="true"/>
+            <field name="ExecRefID" reference="field-ExecRefID" required="false"/>
+            <field name="ExecType" reference="field-ExecType" required="true"/>
+            <field name="OrdStatus" reference="field-OrdStatus" required="true"/>
+            <field name="OrdRejReason" reference="field-OrdRejReason" required="false"/>
+            <field name="Account" reference="field-Account" required="false"/>
+            <field name="SettlmntTyp" reference="field-SettlmntTyp" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="OrderQty" reference="field-OrderQty" required="true"/>
+            <field name="OrdType" reference="field-OrdType" required="false"/>
+            <field name="Price" reference="field-Price" required="false"/>
+            <field name="StopPx" reference="field-StopPx" required="false"/>
+            <field name="PegDifference" reference="field-PegDifference" required="false"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="TimeInForce" reference="field-TimeInForce" required="false"/>
+            <field name="ExpireTime" reference="field-ExpireTime" required="false"/>
+            <field name="ExecInst" reference="field-ExecInst" required="false"/>
+            <field name="Rule80A" reference="field-Rule80A" required="false"/>
+            <field name="LastShares" reference="field-LastShares" required="true"/>
+            <field name="LastPx" reference="field-LastPx" required="true"/>
+            <field name="LastSpotRate" reference="field-LastSpotRate" required="false"/>
+            <field name="LastForwardPoints" reference="field-LastForwardPoints" required="false"/>
+            <field name="LastMkt" reference="field-LastMkt" required="false"/>
+            <field name="LastCapacity" reference="field-LastCapacity" required="false"/>
+            <field name="LeavesQty" reference="field-LeavesQty" required="true"/>
+            <field name="CumQty" reference="field-CumQty" required="true"/>
+            <field name="AvgPx" reference="field-AvgPx" required="true"/>
+            <field name="TradeDate" reference="field-TradeDate" required="false"/>
+            <field name="TransactTime" reference="field-TransactTime" required="false"/>
+            <field name="ReportToExch" reference="field-ReportToExch" required="false"/>
+            <field name="Commission" reference="field-Commission" required="false"/>
+            <field name="CommType" reference="field-CommType" required="false"/>
+            <field name="SettlCurrAmt" reference="field-SettlCurrAmt" required="false"/>
+            <field name="SettlCurrency" reference="field-SettlCurrency" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="DontKnowTrade">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">Q</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="false"/>
+            <field name="ExecID" reference="field-ExecID" required="false"/>
+            <field name="DKReason" reference="field-DKReason" required="true"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="OrderQty" reference="field-OrderQty" required="false"/>
+            <field name="CashOrderQty" reference="field-CashOrderQty" required="false"/>
+            <field name="LastShares" reference="field-LastShares" required="false"/>
+            <field name="LastPx" reference="field-LastPx" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="OrderCancelReplaceRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">G</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="false"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="OrigClOrdID" reference="field-OrigClOrdID" required="true"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="ListID" reference="field-ListID" required="false"/>
+            <field name="Account" reference="field-Account" required="false"/>
+            <field name="SettlmntTyp" reference="field-SettlmntTyp" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="HandlInst" reference="field-HandlInst" required="true"/>
+            <field name="ExecInst" reference="field-ExecInst" required="false"/>
+            <field name="MinQty" reference="field-MinQty" required="false"/>
+            <field name="MaxFloor" reference="field-MaxFloor" required="false"/>
+            <field name="ExDestination" reference="field-ExDestination" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="OrderQty" reference="field-OrderQty" required="false"/>
+            <field name="CashOrderQty" reference="field-CashOrderQty" required="false"/>
+            <field name="OrdType" reference="field-OrdType" required="true"/>
+            <field name="Price" reference="field-Price" required="false"/>
+            <field name="StopPx" reference="field-StopPx" required="false"/>
+            <field name="PegDifference" reference="field-PegDifference" required="false"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="TimeInForce" reference="field-TimeInForce" required="false"/>
+            <field name="ExpireTime" reference="field-ExpireTime" required="false"/>
+            <field name="Commission" reference="field-Commission" required="false"/>
+            <field name="CommType" reference="field-CommType" required="false"/>
+            <field name="Rule80A" reference="field-Rule80A" required="false"/>
+            <field name="ForexReq" reference="field-ForexReq" required="false"/>
+            <field name="SettlCurrency" reference="field-SettlCurrency" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="FutSettDate2" reference="field-FutSettDate2" required="false"/>
+            <field name="OrderQty2" reference="field-OrderQty2" required="false"/>
+            <field name="OpenClose" reference="field-OpenClose" required="false"/>
+            <field name="CoveredOrUncovered" reference="field-CoveredOrUncovered" required="false"/>
+            <field name="CustomerOrFirm" reference="field-CustomerOrFirm" required="false"/>
+            <field name="MaxShow" reference="field-MaxShow" required="false"/>
+            <field name="LocateReqd" reference="field-LocateReqd" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="OrderCancelRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">F</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrigClOrdID" reference="field-OrigClOrdID" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="false"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="ListID" reference="field-ListID" required="false"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="OrderQty" reference="field-OrderQty" required="false"/>
+            <field name="CashOrderQty" reference="field-CashOrderQty" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="OrderCancelReject">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">9</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="true"/>
+            <field name="SecondaryOrderID" reference="field-SecondaryOrderID" required="false"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="OrigClOrdID" reference="field-OrigClOrdID" required="true"/>
+            <field name="OrdStatus" reference="field-OrdStatus" required="true"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="ListID" reference="field-ListID" required="false"/>
+            <field name="CxlRejReason" reference="field-CxlRejReason" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="OrderStatusRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">H</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="OrderID" reference="field-OrderID" required="false"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="Allocation">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">J</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="AllocID" reference="field-AllocID" required="true"/>
+            <field name="AllocTransType" reference="field-AllocTransType" required="true"/>
+            <field name="RefAllocID" reference="field-RefAllocID" required="false"/>
+            <field name="AllocLinkID" reference="field-AllocLinkID" required="false"/>
+            <field name="AllocLinkType" reference="field-AllocLinkType" required="false"/>
+            <field name="NoOrders" reference="group-Allocation_NoOrders" isCollection="true" required="true"/>
+            <field name="NoExecs" reference="group-Allocation_NoExecs" isCollection="true" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="Shares" reference="field-Shares" required="true"/>
+            <field name="LastMkt" reference="field-LastMkt" required="false"/>
+            <field name="AvgPx" reference="field-AvgPx" required="true"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="AvgPrxPrecision" reference="field-AvgPrxPrecision" required="false"/>
+            <field name="TradeDate" reference="field-TradeDate" required="true"/>
+            <field name="TransactTime" reference="field-TransactTime" required="false"/>
+            <field name="SettlmntTyp" reference="field-SettlmntTyp" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="NetMoney" reference="field-NetMoney" required="false"/>
+            <field name="OpenClose" reference="field-OpenClose" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="NumDaysInterest" reference="field-NumDaysInterest" required="false"/>
+            <field name="AccruedInterestRate" reference="field-AccruedInterestRate" required="false"/>
+            <field name="NoAllocs" reference="group-Allocation_NoAllocs" isCollection="true" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="AllocationACK">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">P</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="AllocID" reference="field-AllocID" required="true"/>
+            <field name="TradeDate" reference="field-TradeDate" required="true"/>
+            <field name="TransactTime" reference="field-TransactTime" required="false"/>
+            <field name="AllocStatus" reference="field-AllocStatus" required="true"/>
+            <field name="AllocRejCode" reference="field-AllocRejCode" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="SettlementInstructions">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">T</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="SettlInstID" reference="field-SettlInstID" required="true"/>
+            <field name="SettlInstTransType" reference="field-SettlInstTransType" required="true"/>
+            <field name="SettlInstMode" reference="field-SettlInstMode" required="true"/>
+            <field name="SettlInstSource" reference="field-SettlInstSource" required="true"/>
+            <field name="AllocAccount" reference="field-AllocAccount" required="true"/>
+            <field name="SettlLocation" reference="field-SettlLocation" required="false"/>
+            <field name="TradeDate" reference="field-TradeDate" required="false"/>
+            <field name="AllocID" reference="field-AllocID" required="false"/>
+            <field name="LastMkt" reference="field-LastMkt" required="false"/>
+            <field name="Side" reference="field-Side" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="EffectiveTime" reference="field-EffectiveTime" required="false"/>
+            <field name="TransactTime" reference="field-TransactTime" required="true"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="StandInstDbType" reference="field-StandInstDbType" required="false"/>
+            <field name="StandInstDbName" reference="field-StandInstDbName" required="false"/>
+            <field name="StandInstDbID" reference="field-StandInstDbID" required="false"/>
+            <field name="SettlDeliveryType" reference="field-SettlDeliveryType" required="false"/>
+            <field name="SettlDepositoryCode" reference="field-SettlDepositoryCode" required="false"/>
+            <field name="SettlBrkrCode" reference="field-SettlBrkrCode" required="false"/>
+            <field name="SettlInstCode" reference="field-SettlInstCode" required="false"/>
+            <field name="SecuritySettlAgentName" reference="field-SecuritySettlAgentName" required="false"/>
+            <field name="SecuritySettlAgentCode" reference="field-SecuritySettlAgentCode" required="false"/>
+            <field name="SecuritySettlAgentAcctNum" reference="field-SecuritySettlAgentAcctNum" required="false"/>
+            <field name="SecuritySettlAgentAcctName" reference="field-SecuritySettlAgentAcctName" required="false"/>
+            <field name="SecuritySettlAgentContactName" reference="field-SecuritySettlAgentContactName"
+                   required="false"/>
+            <field name="SecuritySettlAgentContactPhone" reference="field-SecuritySettlAgentContactPhone"
+                   required="false"/>
+            <field name="CashSettlAgentName" reference="field-CashSettlAgentName" required="false"/>
+            <field name="CashSettlAgentCode" reference="field-CashSettlAgentCode" required="false"/>
+            <field name="CashSettlAgentAcctNum" reference="field-CashSettlAgentAcctNum" required="false"/>
+            <field name="CashSettlAgentAcctName" reference="field-CashSettlAgentAcctName" required="false"/>
+            <field name="CashSettlAgentContactName" reference="field-CashSettlAgentContactName" required="false"/>
+            <field name="CashSettlAgentContactPhone" reference="field-CashSettlAgentContactPhone" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="NewOrderList">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">E</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ListID" reference="field-ListID" required="true"/>
+            <field name="WaveNo" reference="field-WaveNo" required="false"/>
+            <field name="ListSeqNo" reference="field-ListSeqNo" required="true"/>
+            <field name="ListNoOrds" reference="field-ListNoOrds" required="true"/>
+            <field name="ListExecInst" reference="field-ListExecInst" required="false"/>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="ClientID" reference="field-ClientID" required="false"/>
+            <field name="ExecBroker" reference="field-ExecBroker" required="false"/>
+            <field name="Account" reference="field-Account" required="false"/>
+            <field name="SettlmntTyp" reference="field-SettlmntTyp" required="false"/>
+            <field name="FutSettDate" reference="field-FutSettDate" required="false"/>
+            <field name="HandlInst" reference="field-HandlInst" required="true"/>
+            <field name="ExecInst" reference="field-ExecInst" required="false"/>
+            <field name="MinQty" reference="field-MinQty" required="false"/>
+            <field name="MaxFloor" reference="field-MaxFloor" required="false"/>
+            <field name="ExDestination" reference="field-ExDestination" required="false"/>
+            <field name="ProcessCode" reference="field-ProcessCode" required="false"/>
+            <field name="Symbol" reference="field-Symbol" required="true"/>
+            <field name="SymbolSfx" reference="field-SymbolSfx" required="false"/>
+            <field name="SecurityID" reference="field-SecurityID" required="false"/>
+            <field name="IDSource" reference="field-IDSource" required="false"/>
+            <field name="SecurityType" reference="field-SecurityType" required="false"/>
+            <field name="MaturityMonthYear" reference="field-MaturityMonthYear" required="false"/>
+            <field name="MaturityDay" reference="field-MaturityDay" required="false"/>
+            <field name="PutOrCall" reference="field-PutOrCall" required="false"/>
+            <field name="StrikePrice" reference="field-StrikePrice" required="false"/>
+            <field name="OptAttribute" reference="field-OptAttribute" required="false"/>
+            <field name="SecurityExchange" reference="field-SecurityExchange" required="false"/>
+            <field name="Issuer" reference="field-Issuer" required="false"/>
+            <field name="SecurityDesc" reference="field-SecurityDesc" required="false"/>
+            <field name="PrevClosePx" reference="field-PrevClosePx" required="false"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="LocateReqd" reference="field-LocateReqd" required="false"/>
+            <field name="OrderQty" reference="field-OrderQty" required="true"/>
+            <field name="OrdType" reference="field-OrdType" required="true"/>
+            <field name="Price" reference="field-Price" required="false"/>
+            <field name="StopPx" reference="field-StopPx" required="false"/>
+            <field name="PegDifference" reference="field-PegDifference" required="false"/>
+            <field name="Currency" reference="field-Currency" required="false"/>
+            <field name="TimeInForce" reference="field-TimeInForce" required="false"/>
+            <field name="ExpireTime" reference="field-ExpireTime" required="false"/>
+            <field name="Commission" reference="field-Commission" required="false"/>
+            <field name="CommType" reference="field-CommType" required="false"/>
+            <field name="Rule80A" reference="field-Rule80A" required="false"/>
+            <field name="ForexReq" reference="field-ForexReq" required="false"/>
+            <field name="SettlCurrency" reference="field-SettlCurrency" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="FutSettDate2" reference="field-FutSettDate2" required="false"/>
+            <field name="OrderQty2" reference="field-OrderQty2" required="false"/>
+            <field name="OpenClose" reference="field-OpenClose" required="false"/>
+            <field name="CoveredOrUncovered" reference="field-CoveredOrUncovered" required="false"/>
+            <field name="CustomerOrFirm" reference="field-CustomerOrFirm" required="false"/>
+            <field name="MaxShow" reference="field-MaxShow" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="ListStatus">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">N</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ListID" reference="field-ListID" required="true"/>
+            <field name="WaveNo" reference="field-WaveNo" required="false"/>
+            <field name="NoRpts" reference="field-NoRpts" required="true"/>
+            <field name="RptSeq" reference="field-RptSeq" required="true"/>
+            <field name="NoOrders" reference="group-ListStatus_NoOrders" isCollection="true" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="ListExecute">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">L</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ListID" reference="field-ListID" required="true"/>
+            <field name="WaveNo" reference="field-WaveNo" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="ListCancelRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">K</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ListID" reference="field-ListID" required="true"/>
+            <field name="WaveNo" reference="field-WaveNo" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="ListStatusRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">M</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ListID" reference="field-ListID" required="true"/>
+            <field name="WaveNo" reference="field-WaveNo" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+    </messages>
+</dictionary>

@@ -1,0 +1,141 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	template="/template/statisticsReport.xhtml">
+	
+	<ui:define name="otherScripts">
+		<h:outputScript library="sf" name="js/statistics.js"/>
+		<h:outputStylesheet library="sf" name="css/statistics-tags.css"/> 
+	</ui:define>
+	
+	<ui:define name="statistics-content">
+	
+		<ui:fragment rendered="#{not statReportingBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{statReportingBean.statisticsDbAvailable}">
+    		
+    		<div class="eps-card">
+	    		
+	    		<div class="eps-params-header">
+		    		Script Tags
+		    	</div>
+		    	
+	            <h:form id="tags-form">
+	            
+	            	<h3>
+	            		Script Tags
+	            		<p:commandLink actionListener="#{tagsAdminBean.setEditMode(false)}" 
+		            		oncomplete="PF('newTagDialog').show();" 
+		            		update=":msgForm:messages :newTagForm"
+		            		styleClass="ui-icon ui-icon-circle-plus"
+		            		style="display: inline-block; vertical-align: middle;"/>
+	            	</h3>
+		            
+		            <div class="eps-statistics-tags-list" style="white-space: normal;">
+			            <ui:repeat var="tag" value="#{tagsAdminBean.allTags}">
+			            	
+			            	<p:commandLink actionListener="#{tagsAdminBean.setSelectedTag(tag)}" 
+		            		oncomplete="PF('newTagDialog').show();" 
+		            		update=":msgForm:messages :newTagForm" style="text-decoration: none; display: inline-block;">
+			            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+			            	</p:commandLink>
+			            	
+			            </ui:repeat>
+		            </div>
+	            
+	            </h:form>
+	            
+	            <h:form id="groups-form">
+	            
+	            	<h3>
+	            		Groups
+	            		<p:commandLink actionListener="#{tagsAdminBean.setEditMode(false)}" 
+		            		oncomplete="PF('newGroupDialog').show();" 
+		            		update=":msgForm:messages :newGroupForm"
+		            		styleClass="ui-icon ui-icon-circle-plus"
+		            		style="display: inline-block; vertical-align: middle;"/>
+	            	</h3>
+	            	
+	            	<div class="eps-statistics-groups-list">
+			            <ui:repeat var="group" value="#{tagsAdminBean.allGroups}">
+			            	
+			            	<div class="eps-group">
+			            		<h3 class="eps-group-header">#{group.name}</h3>
+			            		<div class="eps-group-tags">
+			            		
+			            			<ui:repeat var="tag" value="#{group.tags.toArray()}">
+					            	
+						            	<p:commandLink actionListener="#{tagsAdminBean.setSelectedTag(tag)}" 
+					            		oncomplete="PF('newTagDialog').show();" 
+					            		update=":msgForm:messages :newTagForm" style="text-decoration: none; display: inline-block;">
+						            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+						            	</p:commandLink>
+						            	
+						            </ui:repeat>
+			            		
+			            		</div>
+			            		
+			            	</div>
+			            	
+			            </ui:repeat>
+			            
+			        </div>
+	            
+	            </h:form>
+	            
+	            
+	            <!-- Dialogs -->
+	        
+		        <h:form id="newTagForm">
+		      	
+			      	<p:dialog id="newTagForm-Dialog" widgetVar="newTagDialog" header="Edit Tag">
+			      		
+			      		<h:panelGrid id="newTagPanel" columns="2" cellpadding="5">
+			      			
+			      			<p:outputLabel for="tag-name" value="Name: " />
+				      		<p:inputText id="tag-name" value="#{tagsAdminBean.selectedTag.name}"/>
+				      		
+				      		<p:outputLabel for="tag-group" value="Group: " />
+				      		<p:selectOneMenu id="tag-group" value="#{tagsAdminBean.selectedTag.group}" converter="omnifaces.SelectItemsIndexConverter">
+				      			<f:selectItem itemLabel="No group" noSelectionOption="true"/>
+				      			<f:selectItems value="#{tagsAdminBean.allGroups}" var="group" 
+				      				itemLabel="#{group.name}" itemValue="#{group}"/>
+				      		</p:selectOneMenu>
+				      		
+				      		<p:commandButton value="Apply" action="#{tagsAdminBean.editTagSubmit}" update=":msgForm:messages :tags-form :groups-form" />
+				      		
+			      		</h:panelGrid>
+			      		
+			      	</p:dialog>
+		      	
+		      	</h:form>
+		      	
+		      	<h:form id="newGroupForm">
+		      	
+			      	<p:dialog id="newGroupForm-Dialog" widgetVar="newGroupDialog" header="Edit Group">
+			      		
+			      		<h:panelGrid id="newGroupPanel" columns="2" cellpadding="5">
+			      			
+			      			<p:outputLabel for="group-name" value="Name: " />
+				      		
+				      		<p:inputText id="group-name" value="#{tagsAdminBean.selectedGroup.name}"/>
+				      		
+				      		<p:commandButton value="Apply" action="#{tagsAdminBean.editGroupSubmit}" update=":msgForm:messages :groups-form" />
+				      		
+			      		</h:panelGrid>
+			      		
+			      	</p:dialog>
+		      	
+		      	</h:form>
+    			
+    		</div>
+    	
+    	</ui:fragment>
+	
+	</ui:define>
+	
+</ui:composition>

@@ -1,0 +1,10 @@
+#execute,#description,#template,#reference,#timeout,#action,#condition,#static_type,#static_value,#messages_count,#message_type,#dictionary,FInteger
+,,,tc,,test case start,,,,,,,
+,,,sv,1000,SetStatic,,Integer,5,,,,
+,send simple message,,,,send,,,,,SimpleMessage,TestAML,10
+n,,,,,if,TRUE,,,,,,
+,,,,1000,Sleep,,,,,,,
+,,,,,elseif,,,,,,,
+,,,,500,Sleep,,,,,,,
+,,,,,endif,,,,,,,
+,,,,,test case end,,,,,,,

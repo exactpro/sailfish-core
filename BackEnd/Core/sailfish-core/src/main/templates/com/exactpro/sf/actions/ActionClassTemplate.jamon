@@ -1,0 +1,152 @@
+<%escape #n>
+<%import>
+java.util.List;
+com.exactpro.sf.common.messages.structures.*;
+</%import>
+
+<%args>
+  String packageName;
+  String namespaceName;
+  String messagePackageName;
+  List<IMessageStructure> messages;
+  String uncheckedFields;
+</%args>
+
+package <% packageName %>;
+
+import <% messagePackageName %>.*;
+
+import com.exactpro.sf.common.impl.messages.BaseMessage;
+import com.exactpro.sf.common.messages.IMessage;
+
+import com.exactpro.sf.aml.CommonColumn;
+import com.exactpro.sf.aml.CommonColumns;
+import com.exactpro.sf.aml.CustomColumn;
+import com.exactpro.sf.aml.CustomColumns;
+import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
+import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl.ActionContextWrapper;
+import com.exactpro.sf.aml.generator.matrix.Column;
+import com.exactpro.sf.services.IInitiatorService;
+
+import com.exactpro.sf.aml.script.actions.WaitAction;
+
+import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.scriptrunner.AbstractCaller;
+import com.exactpro.sf.scriptrunner.actionmanager.ActionMethod;
+import com.exactpro.sf.configuration.ResourceAliases;
+
+@SuppressWarnings("unused")
+@ResourceAliases({"<% namespaceName.toUpperCase() + "_SndRcvMatrixActions" %>"})
+public class <% namespaceName.toUpperCase() + "_SndRcvMatrixActions" %> extends AbstractCaller
+{
+	<%for IMessageStructure message: messages %>
+	<%java>
+		String messageClassName = message.getName();
+		Boolean isAdmin = (Boolean) message.getAttributeValueByName("IsAdmin");
+		if (isAdmin == null) {
+			isAdmin = false;
+		}
+
+		Boolean generateAction = (Boolean) message.getAttributeValueByName("generateAction");
+		if (generateAction != null && !generateAction) {
+			continue;
+		}
+
+	</%java>
+	@CommonColumns({
+        @CommonColumn(Column.Reference),
+        @CommonColumn(value = Column.ServiceName, required = true),
+        @CommonColumn(Column.Timeout)
+    })
+    @CustomColumns({<%java>boolean first = true;</%java><%if message.getFields() != null %><%for IFieldStructure field: message.getFields() %><%java>
+            if (field.isComplex() || field.getDefaultValue() != null || !field.isRequired())
+                continue;
+            Boolean autoFilled = (Boolean) field.getAttributeValueByName("autoFilled");
+            if (autoFilled != null && autoFilled) {
+                continue;
+            }
+	</%java><%if !first %>, <%else><%java>first=false;</%java></%if>@CustomColumn(value = "<% field.getName() %>", required = true)</%for></%if>})
+	@ActionMethod
+	public <% messageClassName %> <% namespaceName.toUpperCase() + "_Send" + messageClassName %> (
+		IActionContext actionContext, 
+		<% messageClassName %> message) 
+	throws Exception {
+		return (<% messageClassName %>) send(actionContext, message, "<% messageClassName %>");
+	}
+
+    
+	@CommonColumns({
+        @CommonColumn(Column.Reference),
+        @CommonColumn(value = Column.ServiceName, required = true),
+        @CommonColumn(Column.Timeout)
+    })
+	@ActionMethod
+	public <% messageClassName %> <% namespaceName.toUpperCase() + "_Wait" + messageClassName %> (
+		IActionContext actionContext, 
+		<% messageClassName %> message) 
+	throws Exception {
+		IMessage im = receive(actionContext, message, <% isAdmin %>);
+		return new <% messageClassName %>(im);
+	}
+	
+	@CommonColumns({
+        @CommonColumn(Column.CheckPoint),
+        @CommonColumn(Column.DoublePrecision),
+        @CommonColumn(value = Column.MessageCount, required = true),
+        @CommonColumn(value = Column.ServiceName, required = true),
+        @CommonColumn(Column.SystemPrecision),
+        @CommonColumn(value = Column.Timeout, required = true)
+    })
+	@ActionMethod
+	public void <% namespaceName.toUpperCase() + "_Count" + messageClassName %>(
+			IActionContext actionContext, 
+			<% messageClassName %> message) 
+	throws Exception {
+		countMessages(actionContext, message, <% isAdmin %>);
+	}
+	</%for>
+
+
+	private static IInitiatorService getClient(IActionContext actionContext)
+	{
+		return ActionUtil.getService(actionContext, IInitiatorService.class);
+	}
+
+	private static BaseMessage send(IActionContext actionContext, BaseMessage message, String msgName) throws Exception
+	{
+		String serviceName = actionContext.getServiceName();
+		IInitiatorService client = getClient(actionContext);
+		actionContext.getLogger().info("client instance [{}] has been obtained.", serviceName);
+		actionContext.getLogger().info("actionContext [{}]", actionContext);
+		actionContext.getLogger().info("{}: [{}]", msgName, message.getMessage());
+		Thread.sleep(actionContext.getTimeout());
+		ISession session = client.getSession();
+		session.send(message.getMessage()); //
+		actionContext.getLogger().info("[{}] has successfully sent {} message.", serviceName, msgName);
+		return message;
+	}
+	
+	
+	private static IMessage receive(
+		IActionContext actionContext, 
+		BaseMessage messageFilter,
+		boolean isAdmin)
+	throws Exception {
+        IInitiatorService client = getClient(actionContext);
+        ActionContextWrapper actionContextWrapper = new ActionContextWrapper(actionContext);
+        actionContextWrapper.setUncheckedFields(<% uncheckedFields %>);
+        messageFilter.getMessage().getMetaData().setAdmin(isAdmin);
+		return client.receive(actionContextWrapper, messageFilter.getMessage());
+	}
+
+	private static void countMessages(
+				IActionContext actionContext,
+				BaseMessage message,
+				boolean isAdmin) throws Exception
+	{
+		boolean isApp = !isAdmin;
+		WaitAction.countMessages(actionContext, message.getMessage(), isApp);
+	}
+
+}
+

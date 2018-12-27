@@ -1,0 +1,487 @@
+[
+    {
+        "name": "div",
+        "description": "Divides <b>d</b> by <b>divisor</b> with specified <b>precision</b><br>Usage: #{div(d, divisor, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "double"
+    },
+    {
+        "name": "substr",
+        "description": "Returns a new string that is a substring of <b>source</b>.Usage: #{substr(source, beginIndex, endIndex)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "DateToUDT",
+        "description": "Converts Date to UDT/1000000 (UnixTime).<br> Usage: #{DateToUDT(date)}",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Date"
+            }
+        ],
+        "returnType": "long"
+    },
+    {
+        "name": "DifferenceBetweenTwoDates",
+        "description": "Calculates the number of days/minutes/seconds between two dates.</br>Parameter 1: First date (more or equal to the second date)</br>Parameter 2: Second date</br>Parameter 3: Date format</br>Parameter 4: Unit of measure (d - days, H - hours, m - minutes, s - seconds, S - milliseconds)</br>Usage: #{DifferenceBetweenTwoDates(date1, date2, dateFormat, measure)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "long"
+    },
+    {
+        "name": "side_ref",
+        "description": "Prepares side field value for a Fix MD message.</br><b>to_process</b> - link to source side parameter</br><b>decrement</b> - boolean value to set MD or OE parameters (true - means decrease value on one point to use it in checks MD messages, false - means don't change level of value and use it in checks OE messages)</br><b>opposite</b> - boolean value to revert value on opposite side or not.Usage: #{side_ref(to_process, decrement, opposite)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "char"
+            },
+            {
+                "parameter": null,
+                "type": "boolean"
+            },
+            {
+                "parameter": null,
+                "type": "boolean"
+            }
+        ],
+        "returnType": "char"
+    },
+    {
+        "name": "side_ref",
+        "description": "Prepares side field value for a Fix MD message.</br><b>to_process</b> - link to source side parameter</br><b>decrement</b> - string value to set MD or OE parameters (\"y\" - means decrease value on one point to use it in checks MD messages, \"n\" - means don't change level of value and use it in checks OE messages)</br><b>opposite</b> - string value to revert value on opposite side or not (\"y\" - revert, \"n\" - do not revert).Usage: #{side_ref(to_process, decrement, opposite)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "char"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "char"
+    },
+    {
+        "name": "precise",
+        "description": "Makes <b>d</b> precised with specified <b>precision</b><br>Usage: #{precise(d, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "double"
+    },
+    {
+        "name": "TimeForTimeZone",
+        "description": "Works same as Time function, but result string is formatted for specified time zone.</br>Parameter 1: Date object to format</br>Parameter 2: Date and time format pattern</br>Parameter 3: Java time zone ID</br>Usage: #{TimeForTimeZone(date, format, forTimezone)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Date"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "TimeForTimeZone",
+        "description": "Works same as Time function, but result string is formatted for specified time zone.</br>Parameter 1: Date and time format pattern</br>Parameter 2: Java time zone ID</br>Usage: #{TimeForTimeZone(format, timeZoneID)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "StringToDate",
+        "description": "Converts the String to Date.</br>Parameter 1: Date format</br>Parameter 2: Date string</br>Usage: #{StringToDate(format, datestr)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "Date"
+    },
+    {
+        "name": "StringToDate",
+        "description": "Converts the String to Date.</br>Parameter 1: Date format</br>Parameter 2: Date time zone</br>Parameter 3: Date string</br>Usage: #{StringToDate(format, timezone, datestr)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "Date"
+    },
+    {
+        "name": "getTimeOnly",
+        "description": null,
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Date"
+            }
+        ],
+        "returnType": "Date"
+    },
+    {
+        "name": "getDateOnly",
+        "description": null,
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Date"
+            }
+        ],
+        "returnType": "Date"
+    },
+    {
+        "name": "Time",
+        "description": "Time function accept three parameters: Date object, Date and Time Format Patterns.<h4>Date and Time Format Patterns</h4> <p> Date and time formats are specified by <em>date and time pattern</em> strings. Within date and time pattern strings, unquoted letters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are interpreted as pattern letters representing the components of a date or time string. Text can be quoted using single quotes (<code>'</code>) to avoid interpretation. <code>\"''\"</code> represents a single quote. All other characters are not interpreted; they're simply copied into the output string during formatting or matched against the input string during parsing. <p> The following pattern letters are defined (all other characters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are reserved): <blockquote> <table border=0 cellspacing=3 cellpadding=0 summary=\"Chart shows pattern letters, date/time component, presentation, and examples.\">     <tr bgcolor=\"#ccccff\">         <th align=left>Letter         <th align=left>Date or Time Component         <th align=left>Presentation         <th align=left>Examples     <tr>         <td><code>G</code>         <td>Era designator         <td><a href=\"#text\">Text</a>         <td><code>AD</code>     <tr bgcolor=\"#eeeeff\">         <td><code>y</code>         <td>Year         <td><a href=\"#year\">Year</a>         <td><code>1996</code>; <code>96</code>     <tr>         <td><code>M</code>         <td>Month in year         <td><a href=\"#month\">Month</a>         <td><code>July</code>; <code>Jul</code>; <code>07</code>     <tr bgcolor=\"#eeeeff\">         <td><code>w</code>         <td>Week in year         <td><a href=\"#number\">Number</a>         <td><code>27</code>     <tr>         <td><code>W</code>         <td>Week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr bgcolor=\"#eeeeff\">         <td><code>D</code>         <td>Day in year         <td><a href=\"#number\">Number</a>         <td><code>189</code>     <tr>         <td><code>d</code>         <td>Day in month         <td><a href=\"#number\">Number</a>         <td><code>10</code>     <tr bgcolor=\"#eeeeff\">         <td><code>F</code>         <td>Day of week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr>         <td><code>E</code>         <td>Day in week         <td><a href=\"#text\">Text</a>         <td><code>Tuesday</code>; <code>Tue</code>     <tr bgcolor=\"#eeeeff\">         <td><code>a</code>         <td>Am/pm marker         <td><a href=\"#text\">Text</a>         <td><code>PM</code>     <tr>         <td><code>H</code>         <td>Hour in day (0-23)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>k</code>         <td>Hour in day (1-24)         <td><a href=\"#number\">Number</a>         <td><code>24</code>     <tr>         <td><code>K</code>         <td>Hour in am/pm (0-11)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>h</code>         <td>Hour in am/pm (1-12)         <td><a href=\"#number\">Number</a>         <td><code>12</code>     <tr>         <td><code>m</code>         <td>Minute in hour         <td><a href=\"#number\">Number</a>         <td><code>30</code>     <tr bgcolor=\"#eeeeff\">         <td><code>s</code>         <td>Second in minute         <td><a href=\"#number\">Number</a>         <td><code>55</code>     <tr>         <td><code>S</code>         <td>Millisecond         <td><a href=\"#number\">Number</a>         <td><code>978</code>     <tr bgcolor=\"#eeeeff\">         <td><code>z</code>         <td>Time zone         <td><a href=\"#timezone\">General time zone</a>         <td><code>Pacific Standard Time</code>; <code>PST</code>; <code>GMT-08:00</code>     <tr>         <td><code>Z</code>         <td>Time zone         <td><a href=\"#rfc822timezone\">RFC 822 time zone</a>         <td><code>-0800</code> </table> </blockquote> Pattern letters are usually repeated, as their number determines the exact presentation: <ul> <li><strong><a name=\"text\">Text:</a></strong>     For formatting, if the number of pattern letters is 4 or more,     the full form is used; otherwise a short or abbreviated form     is used if available.     For parsing, both forms are accepted, independent of the number     of pattern letters. <li><strong><a name=\"number\">Number:</a></strong>     For formatting, the number of pattern letters is the minimum     number of digits, and shorter numbers are zero-padded to this amount.     For parsing, the number of pattern letters is ignored unless     it's needed to separate two adjacent fields. <li><strong><a name=\"year\">Year:</a></strong>     For formatting, if the number of pattern letters is 2, the year     is truncated to 2 digits; otherwise it is interpreted as a     <a href=\"#number\">number</a>.     <p>For parsing, if the number of pattern letters is more than 2,     the year is interpreted literally, regardless of the number of     digits. So using the pattern \"MM/dd/yyyy\", \"01/11/12\" parses to     Jan 11, 12 A.D. <li><strong><a name=\"month\">Month:</a></strong>     If the number of pattern letters is 3 or more, the month is     interpreted as <a href=\"#text\">text</a>; otherwise,     it is interpreted as a <a href=\"#number\">number</a>.<br><br>Example:<br>#{Time( new Date(), \"yyyyMMdd-HH:mm:ss.SSS\")}<br>will return:<br>String: 20110904-08:58:39.123<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Date"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "Time",
+        "description": "Time function accept one parameter: Date and Time Format Patterns.<h4>Date and Time Format Patterns</h4> <p> Date and time formats are specified by <em>date and time pattern</em> strings. Within date and time pattern strings, unquoted letters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are interpreted as pattern letters representing the components of a date or time string. Text can be quoted using single quotes (<code>'</code>) to avoid interpretation. <code>\"''\"</code> represents a single quote. All other characters are not interpreted; they're simply copied into the output string during formatting or matched against the input string during parsing. <p> The following pattern letters are defined (all other characters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are reserved): <blockquote> <table border=0 cellspacing=3 cellpadding=0 summary=\"Chart shows pattern letters, date/time component, presentation, and examples.\">     <tr bgcolor=\"#ccccff\">         <th align=left>Letter         <th align=left>Date or Time Component         <th align=left>Presentation         <th align=left>Examples     <tr>         <td><code>G</code>         <td>Era designator         <td><a href=\"#text\">Text</a>         <td><code>AD</code>     <tr bgcolor=\"#eeeeff\">         <td><code>y</code>         <td>Year         <td><a href=\"#year\">Year</a>         <td><code>1996</code>; <code>96</code>     <tr>         <td><code>M</code>         <td>Month in year         <td><a href=\"#month\">Month</a>         <td><code>July</code>; <code>Jul</code>; <code>07</code>     <tr bgcolor=\"#eeeeff\">         <td><code>w</code>         <td>Week in year         <td><a href=\"#number\">Number</a>         <td><code>27</code>     <tr>         <td><code>W</code>         <td>Week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr bgcolor=\"#eeeeff\">         <td><code>D</code>         <td>Day in year         <td><a href=\"#number\">Number</a>         <td><code>189</code>     <tr>         <td><code>d</code>         <td>Day in month         <td><a href=\"#number\">Number</a>         <td><code>10</code>     <tr bgcolor=\"#eeeeff\">         <td><code>F</code>         <td>Day of week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr>         <td><code>E</code>         <td>Day in week         <td><a href=\"#text\">Text</a>         <td><code>Tuesday</code>; <code>Tue</code>     <tr bgcolor=\"#eeeeff\">         <td><code>a</code>         <td>Am/pm marker         <td><a href=\"#text\">Text</a>         <td><code>PM</code>     <tr>         <td><code>H</code>         <td>Hour in day (0-23)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>k</code>         <td>Hour in day (1-24)         <td><a href=\"#number\">Number</a>         <td><code>24</code>     <tr>         <td><code>K</code>         <td>Hour in am/pm (0-11)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>h</code>         <td>Hour in am/pm (1-12)         <td><a href=\"#number\">Number</a>         <td><code>12</code>     <tr>         <td><code>m</code>         <td>Minute in hour         <td><a href=\"#number\">Number</a>         <td><code>30</code>     <tr bgcolor=\"#eeeeff\">         <td><code>s</code>         <td>Second in minute         <td><a href=\"#number\">Number</a>         <td><code>55</code>     <tr>         <td><code>S</code>         <td>Millisecond         <td><a href=\"#number\">Number</a>         <td><code>978</code>     <tr bgcolor=\"#eeeeff\">         <td><code>z</code>         <td>Time zone         <td><a href=\"#timezone\">General time zone</a>         <td><code>Pacific Standard Time</code>; <code>PST</code>; <code>GMT-08:00</code>     <tr>         <td><code>Z</code>         <td>Time zone         <td><a href=\"#rfc822timezone\">RFC 822 time zone</a>         <td><code>-0800</code> </table> </blockquote> Pattern letters are usually repeated, as their number determines the exact presentation: <ul> <li><strong><a name=\"text\">Text:</a></strong>     For formatting, if the number of pattern letters is 4 or more,     the full form is used; otherwise a short or abbreviated form     is used if available.     For parsing, both forms are accepted, independent of the number     of pattern letters. <li><strong><a name=\"number\">Number:</a></strong>     For formatting, the number of pattern letters is the minimum     number of digits, and shorter numbers are zero-padded to this amount.     For parsing, the number of pattern letters is ignored unless     it's needed to separate two adjacent fields. <li><strong><a name=\"year\">Year:</a></strong>     For formatting, if the number of pattern letters is 2, the year     is truncated to 2 digits; otherwise it is interpreted as a     <a href=\"#number\">number</a>.     <p>For parsing, if the number of pattern letters is more than 2,     the year is interpreted literally, regardless of the number of     digits. So using the pattern \"MM/dd/yyyy\", \"01/11/12\" parses to     Jan 11, 12 A.D. <li><strong><a name=\"month\">Month:</a></strong>     If the number of pattern letters is 3 or more, the month is     interpreted as <a href=\"#text\">text</a>; otherwise,     it is interpreted as a <a href=\"#number\">number</a>.<br><br>Example:<br>#{Time(\"yyyyMMdd-HH:mm:ss.SSS\")}<br>will return:<br>String: 20110904-08:58:39.123<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "Time",
+        "description": "Time function accept two parameters: Date and Time Format Patterns and Date and Time Shifting Patterns related current time.<h4>Date and Time Format Patterns</h4> <p> Date and time formats are specified by <em>date and time pattern</em> strings. Within date and time pattern strings, unquoted letters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are interpreted as pattern letters representing the components of a date or time string. Text can be quoted using single quotes (<code>'</code>) to avoid interpretation. <code>\"''\"</code> represents a single quote. All other characters are not interpreted; they're simply copied into the output string during formatting or matched against the input string during parsing. <p> The following pattern letters are defined (all other characters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are reserved): <blockquote> <table border=0 cellspacing=3 cellpadding=0 summary=\"Chart shows pattern letters, date/time component, presentation, and examples.\">     <tr bgcolor=\"#ccccff\">         <th align=left>Letter         <th align=left>Date or Time Component         <th align=left>Presentation         <th align=left>Examples     <tr>         <td><code>G</code>         <td>Era designator         <td><a href=\"#text\">Text</a>         <td><code>AD</code>     <tr bgcolor=\"#eeeeff\">         <td><code>y</code>         <td>Year         <td><a href=\"#year\">Year</a>         <td><code>1996</code>; <code>96</code>     <tr>         <td><code>M</code>         <td>Month in year         <td><a href=\"#month\">Month</a>         <td><code>July</code>; <code>Jul</code>; <code>07</code>     <tr bgcolor=\"#eeeeff\">         <td><code>w</code>         <td>Week in year         <td><a href=\"#number\">Number</a>         <td><code>27</code>     <tr>         <td><code>W</code>         <td>Week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr bgcolor=\"#eeeeff\">         <td><code>D</code>         <td>Day in year         <td><a href=\"#number\">Number</a>         <td><code>189</code>     <tr>         <td><code>d</code>         <td>Day in month         <td><a href=\"#number\">Number</a>         <td><code>10</code>     <tr bgcolor=\"#eeeeff\">         <td><code>F</code>         <td>Day of week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr>         <td><code>E</code>         <td>Day in week         <td><a href=\"#text\">Text</a>         <td><code>Tuesday</code>; <code>Tue</code>     <tr bgcolor=\"#eeeeff\">         <td><code>a</code>         <td>Am/pm marker         <td><a href=\"#text\">Text</a>         <td><code>PM</code>     <tr>         <td><code>H</code>         <td>Hour in day (0-23)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>k</code>         <td>Hour in day (1-24)         <td><a href=\"#number\">Number</a>         <td><code>24</code>     <tr>         <td><code>K</code>         <td>Hour in am/pm (0-11)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>h</code>         <td>Hour in am/pm (1-12)         <td><a href=\"#number\">Number</a>         <td><code>12</code>     <tr>         <td><code>m</code>         <td>Minute in hour         <td><a href=\"#number\">Number</a>         <td><code>30</code>     <tr bgcolor=\"#eeeeff\">         <td><code>s</code>         <td>Second in minute         <td><a href=\"#number\">Number</a>         <td><code>55</code>     <tr>         <td><code>S</code>         <td>Millisecond         <td><a href=\"#number\">Number</a>         <td><code>978</code>     <tr bgcolor=\"#eeeeff\">         <td><code>z</code>         <td>Time zone         <td><a href=\"#timezone\">General time zone</a>         <td><code>Pacific Standard Time</code>; <code>PST</code>; <code>GMT-08:00</code>     <tr>         <td><code>Z</code>         <td>Time zone         <td><a href=\"#rfc822timezone\">RFC 822 time zone</a>         <td><code>-0800</code> </table> </blockquote> Pattern letters are usually repeated, as their number determines the exact presentation: <ul> <li><strong><a name=\"text\">Text:</a></strong>     For formatting, if the number of pattern letters is 4 or more,     the full form is used; otherwise a short or abbreviated form     is used if available.     For parsing, both forms are accepted, independent of the number     of pattern letters. <li><strong><a name=\"number\">Number:</a></strong>     For formatting, the number of pattern letters is the minimum     number of digits, and shorter numbers are zero-padded to this amount.     For parsing, the number of pattern letters is ignored unless     it's needed to separate two adjacent fields. <li><strong><a name=\"year\">Year:</a></strong>     For formatting, if the number of pattern letters is 2, the year     is truncated to 2 digits; otherwise it is interpreted as a     <a href=\"#number\">number</a>.     <p>For parsing, if the number of pattern letters is more than 2,     the year is interpreted literally, regardless of the number of     digits. So using the pattern \"MM/dd/yyyy\", \"01/11/12\" parses to     Jan 11, 12 A.D. <li><strong><a name=\"month\">Month:</a></strong>     If the number of pattern letters is 3 or more, the month is     interpreted as <a href=\"#text\">text</a>; otherwise,     it is interpreted as a <a href=\"#number\">number</a>.<br><br><h4>Date and Time Shifting Patterns</h4> Input string format is:<br>[&lt;FIELD&gt;&lt;OPERATOR&gt;&lt;VALUE&gt;[:&lt;FIELD&gt;&lt;OPERATOR&gt;&lt;VALUE&gt;]]<br><br> y+1:M-2:d=3:H+4:m-5:s=6:S=7<br><br> Where ':' is a field delimiter.The following pattern letters are defined: <blockquote> <table border=0 cellspacing=3 cellpadding=0 summary=\"Chart shows pattern letters, and date/time component.\">     <tr bgcolor=\"#ccccff\">         <th align=left>Letter         <th align=left>Date or Time Component     <tr>         <td><code>y</code>         <td>Year     <tr bgcolor=\"#eeeeff\">         <td><code>M</code>         <td>Month     <tr bgcolor=\"#eeeeff\">         <td><code>d</code>         <td>Day     <tr bgcolor=\"#eeeeff\">         <td><code>H</code>         <td>Hour     <tr bgcolor=\"#eeeeff\">         <td><code>m</code>         <td>Minute     <tr bgcolor=\"#eeeeff\">         <td><code>s</code>         <td>Second     <tr bgcolor=\"#eeeeff\">         <td><code>S</code>         <td>Millisecond </table> </blockquote> Operators:<br> \"+,-\"  - Adds the specified (unsigned) amount of time to the given time field, based on the calendar's rules<br> \"=\" - Sets the time field with the given value.<br> Value should be an integer amount of time.<br>Example:<br>#{Time(\"yyyyMMdd-HH:mm:ss.SSS\", \"Y+2:m-6:D=4:h+1:M-2:s=39\")}<br>will return:<br>String: 20110904-08:58:39.123<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "Time",
+        "description": "Time function accept three parameters: Date object, Date and Time Format Patterns and Date and Time Shifting Patterns related current time.<h4>Date and Time Format Patterns</h4> <p> Date and time formats are specified by <em>date and time pattern</em> strings. Within date and time pattern strings, unquoted letters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are interpreted as pattern letters representing the components of a date or time string. Text can be quoted using single quotes (<code>'</code>) to avoid interpretation. <code>\"''\"</code> represents a single quote. All other characters are not interpreted; they're simply copied into the output string during formatting or matched against the input string during parsing. <p> The following pattern letters are defined (all other characters from <code>'A'</code> to <code>'Z'</code> and from <code>'a'</code> to <code>'z'</code> are reserved): <blockquote> <table border=0 cellspacing=3 cellpadding=0 summary=\"Chart shows pattern letters, date/time component, presentation, and examples.\">     <tr bgcolor=\"#ccccff\">         <th align=left>Letter         <th align=left>Date or Time Component         <th align=left>Presentation         <th align=left>Examples     <tr>         <td><code>G</code>         <td>Era designator         <td><a href=\"#text\">Text</a>         <td><code>AD</code>     <tr bgcolor=\"#eeeeff\">         <td><code>y</code>         <td>Year         <td><a href=\"#year\">Year</a>         <td><code>1996</code>; <code>96</code>     <tr>         <td><code>M</code>         <td>Month in year         <td><a href=\"#month\">Month</a>         <td><code>July</code>; <code>Jul</code>; <code>07</code>     <tr bgcolor=\"#eeeeff\">         <td><code>w</code>         <td>Week in year         <td><a href=\"#number\">Number</a>         <td><code>27</code>     <tr>         <td><code>W</code>         <td>Week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr bgcolor=\"#eeeeff\">         <td><code>D</code>         <td>Day in year         <td><a href=\"#number\">Number</a>         <td><code>189</code>     <tr>         <td><code>d</code>         <td>Day in month         <td><a href=\"#number\">Number</a>         <td><code>10</code>     <tr bgcolor=\"#eeeeff\">         <td><code>F</code>         <td>Day of week in month         <td><a href=\"#number\">Number</a>         <td><code>2</code>     <tr>         <td><code>E</code>         <td>Day in week         <td><a href=\"#text\">Text</a>         <td><code>Tuesday</code>; <code>Tue</code>     <tr bgcolor=\"#eeeeff\">         <td><code>a</code>         <td>Am/pm marker         <td><a href=\"#text\">Text</a>         <td><code>PM</code>     <tr>         <td><code>H</code>         <td>Hour in day (0-23)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>k</code>         <td>Hour in day (1-24)         <td><a href=\"#number\">Number</a>         <td><code>24</code>     <tr>         <td><code>K</code>         <td>Hour in am/pm (0-11)         <td><a href=\"#number\">Number</a>         <td><code>0</code>     <tr bgcolor=\"#eeeeff\">         <td><code>h</code>         <td>Hour in am/pm (1-12)         <td><a href=\"#number\">Number</a>         <td><code>12</code>     <tr>         <td><code>m</code>         <td>Minute in hour         <td><a href=\"#number\">Number</a>         <td><code>30</code>     <tr bgcolor=\"#eeeeff\">         <td><code>s</code>         <td>Second in minute         <td><a href=\"#number\">Number</a>         <td><code>55</code>     <tr>         <td><code>S</code>         <td>Millisecond         <td><a href=\"#number\">Number</a>         <td><code>978</code>     <tr bgcolor=\"#eeeeff\">         <td><code>z</code>         <td>Time zone         <td><a href=\"#timezone\">General time zone</a>         <td><code>Pacific Standard Time</code>; <code>PST</code>; <code>GMT-08:00</code>     <tr>         <td><code>Z</code>         <td>Time zone         <td><a href=\"#rfc822timezone\">RFC 822 time zone</a>         <td><code>-0800</code> </table> </blockquote> Pattern letters are usually repeated, as their number determines the exact presentation: <ul> <li><strong><a name=\"text\">Text:</a></strong>     For formatting, if the number of pattern letters is 4 or more,     the full form is used; otherwise a short or abbreviated form     is used if available.     For parsing, both forms are accepted, independent of the number     of pattern letters. <li><strong><a name=\"number\">Number:</a></strong>     For formatting, the number of pattern letters is the minimum     number of digits, and shorter numbers are zero-padded to this amount.     For parsing, the number of pattern letters is ignored unless     it's needed to separate two adjacent fields. <li><strong><a name=\"year\">Year:</a></strong>     For formatting, if the number of pattern letters is 2, the year     is truncated to 2 digits; otherwise it is interpreted as a     <a href=\"#number\">number</a>.     <p>For parsing, if the number of pattern letters is more than 2,     the year is interpreted literally, regardless of the number of     digits. So using the pattern \"MM/dd/yyyy\", \"01/11/12\" parses to     Jan 11, 12 A.D. <li><strong><a name=\"month\">Month:</a></strong>     If the number of pattern letters is 3 or more, the month is     interpreted as <a href=\"#text\">text</a>; otherwise,     it is interpreted as a <a href=\"#number\">number</a>.<br><br><h4>Date and Time Shifting Patterns</h4> Input string format is:<br>[&lt;FIELD&gt;&lt;OPERATOR&gt;&lt;VALUE&gt;[:&lt;FIELD&gt;&lt;OPERATOR&gt;&lt;VALUE&gt;]]<br><br> y+1:M-2:d=3:H+4:m-5:s=6:S=7<br><br> Where ':' is a field delimiter.The following pattern letters are defined: <blockquote> <table border=0 cellspacing=3 cellpadding=0 summary=\"Chart shows pattern letters, and date/time component.\">     <tr bgcolor=\"#ccccff\">         <th align=left>Letter         <th align=left>Date or Time Component     <tr>         <td><code>y</code>         <td>Year     <tr bgcolor=\"#eeeeff\">         <td><code>M</code>         <td>Month     <tr bgcolor=\"#eeeeff\">         <td><code>d</code>         <td>Day     <tr bgcolor=\"#eeeeff\">         <td><code>H</code>         <td>Hour     <tr bgcolor=\"#eeeeff\">         <td><code>m</code>         <td>Minute     <tr bgcolor=\"#eeeeff\">         <td><code>s</code>         <td>Second     <tr bgcolor=\"#eeeeff\">         <td><code>S</code>         <td>Millisecond </table> </blockquote> Operators:<br> \"+,-\"  - Adds the specified (unsigned) amount of time to the given time field, based on the calendar's rules<br> \"=\" - Sets the time field with the given value.<br> Value should be an integer amount of time.<br>Example:<br>#{Time(new Date(), \"yyyyMMdd-HH:mm:ss.SSS\", \"Y+2:m-6:D=4:h+1:M-2:s=39\")}<br>will return:<br>String: 20110904-08:58:39.123<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Date"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "sub",
+        "description": "Subtracts <b>deduction</b> from <b>d</b> with specified <b>precision</b><br>Usage: #{sub(d, deduction, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "double"
+    },
+    {
+        "name": "precision",
+        "description": null,
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Number"
+            },
+            {
+                "parameter": null,
+                "type": "Number"
+            },
+            {
+                "parameter": null,
+                "type": "Number"
+            }
+        ],
+        "returnType": "boolean"
+    },
+    {
+        "name": "precision",
+        "description": null,
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Number"
+            },
+            {
+                "parameter": null,
+                "type": "Number"
+            }
+        ],
+        "returnType": "boolean"
+    },
+    {
+        "name": "precision",
+        "description": null,
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "Number"
+            },
+            {
+                "parameter": null,
+                "type": "Number"
+            },
+            {
+                "parameter": null,
+                "type": "Number"
+            },
+            {
+                "parameter": null,
+                "type": "Number"
+            }
+        ],
+        "returnType": "boolean"
+    },
+    {
+        "name": "mul",
+        "description": "Multiplies <b>d</b> by <b>multiplicand</b> with specified <b>precision</b><br>Usage: #{mul(d, multiplicand, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "double"
+    },
+    {
+        "name": "add",
+        "description": "Adds <b>summand</b> to <b>d</b> with specified <b>precision</b><br>Usage: #{add(d, summand, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "double"
+    },
+    {
+        "name": "replace",
+        "description": "Replaces each substring of this string that matches the literal target sequence with the specified literal replacement sequence. The replacement proceeds from the beginning of the string to the end, for example, replacing \"aa\" with \"b\" in the string \"aaa\" will result in \"ba\" rather than \"ab\".<br> Example 1: #{replace(\"12:12:12\", \":\", \"\")} will return \"121212\"<br> Example 2: #{replace(\"Exactpro tmp\", \"tmp\", \"Sailfish\")} will return \"Exactpro Sailfish\"",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            },
+            {
+                "parameter": null,
+                "type": "String"
+            }
+        ],
+        "returnType": "String"
+    },
+    {
+        "name": "random",
+        "description": "Returns a pseudorandom, uniformly distributed double value between <b>begin</b> (inclusive) and <b>end</b> (exclusive), drawn from this random number generator's sequence.Usage: #{random(begin, end)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "double"
+            }
+        ],
+        "returnType": "double"
+    },
+    {
+        "name": "random",
+        "description": "Returns a pseudorandom, uniformly distributed int value between <b>begin</b> (inclusive) and <b>end</b> (exclusive), drawn from this random number generator's sequence.Usage: #{random(begin, end)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "int"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "int"
+    },
+    {
+        "name": "random",
+        "description": "Returns the next pseudorandom, uniformly distributed int value from this random number generator's sequence.Usage: #{random()}<br>",
+        "parameters": [],
+        "returnType": "int"
+    },
+    {
+        "name": "random",
+        "description": "Returns a pseudorandom, uniformly distributed int value between 0 (inclusive) and the specified value (exclusive), drawn from this random number generator's sequence.Usage: #{random(n)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "int"
+    },
+    {
+        "name": "round",
+        "description": "Rounds <b>d</b> with specified <b>precision</b><br>Usage: #{round(d, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "BigDecimal"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "BigDecimal"
+    },
+    {
+        "name": "round",
+        "description": "Rounds <b>d</b> with specified <b>precision</b><br>Usage: #{round(d, precision)}<br>",
+        "parameters": [
+            {
+                "parameter": null,
+                "type": "double"
+            },
+            {
+                "parameter": null,
+                "type": "int"
+            }
+        ],
+        "returnType": "double"
+    }
+]

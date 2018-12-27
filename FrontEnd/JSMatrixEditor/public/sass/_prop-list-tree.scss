@@ -1,0 +1,67 @@
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$node-left-padding: 20px;
+$icon-size: 16px;
+
+$top-icon-pos: ($row-height - $icon-size) / 2 + 2px;
+
+.exa-action-body .exa-prop-row-leaf .exa-prop-key-wrap {
+  &::before {
+    content: inline-image("empty-16.png");
+  }
+}
+
+.exa-action-body .exa-node-collapsed .exa-prop-key-wrap {
+  align-items: center;
+
+  &::before {
+    content: inline-image("expand-16.png");
+    cursor: pointer;
+  }
+}
+
+.exa-action-body .exa-node-expanded .exa-prop-key-wrap {
+  &::before {
+    content: inline-image("collapse-16.png");
+    cursor: pointer;
+  }
+}
+
+.exa-prop-expandable {
+  cursor: pointer;
+}
+
+@for $i from 1 through 50 {
+  .exa-nested-prop-#{$i} .exa-prop-key-wrap {
+    margin-left: $node-left-padding * $i;
+
+    .prop-add-row & {
+        margin-left: 0;
+
+        // & [contenteditable="true"] {
+        //     padding-left: $node-left-padding * $i + $node-left-padding + $icon-size;
+        // }
+        & .exa-prop-input-ct {
+            margin-left: $node-left-padding * $i + $node-left-padding + $icon-size;
+        }
+    }
+  }
+}
+
+// .prop-add-row .exa-prop-key {
+//     margin-left: 0 !important;
+// }

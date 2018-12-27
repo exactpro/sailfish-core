@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="FIX_5_0">
+    <fields><field id="field-BeginString" name="BeginString" type="java.lang.String">
+        <attribute name="tag" type="java.lang.Integer">8</attribute>
+        <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+    </field>
+        <field id="field-BodyLength" name="BodyLength" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">9</attribute>
+            <attribute name="fixtype" type="java.lang.String">LENGTH</attribute>
+        </field>
+        <field id="field-CheckSum" name="CheckSum" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">10</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-MsgSeqNum" name="MsgSeqNum" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">34</attribute>
+            <attribute name="fixtype" type="java.lang.String">SEQNUM</attribute>
+        </field>
+        <field id="field-MsgType" name="MsgType" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">35</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+            <value name="XML_MESSAGE">777</value>
+        </field>
+        <field id="field-SenderCompID" name="SenderCompID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">49</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-TargetCompID" name="TargetCompID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">56</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-SendingTime" name="SendingTime" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">52</attribute>
+            <attribute name="fixtype" type="java.lang.String">UTCTIMESTAMP</attribute>
+        </field>
+
+        <field id="field-BigDecimalField" name="BigDecimalField" type="java.math.BigDecimal">
+            <attribute name="tag" type="java.lang.Integer">11111</attribute>
+            <attribute name="fixtype" type="java.lang.String">QTY</attribute>
+        </field>
+        <field id="field-StringField" name="StringField" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">22222</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IntegerField" name="IntegerField" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">33333</attribute>
+            <attribute name="fixtype" type="java.lang.String">INTEGER</attribute>
+        </field>
+        <field id="field-DoubleField" name="DoubleField" type="java.lang.Double">
+            <attribute name="tag" type="java.lang.Integer">44444</attribute>
+            <attribute name="fixtype" type="java.lang.String">DOUBLE</attribute>
+        </field>
+        <field id="field-BooleanField" name="BooleanField" type="java.lang.Boolean">
+            <attribute name="tag" type="java.lang.Integer">55555</attribute>
+            <attribute name="fixtype" type="java.lang.String">BOOLEAN</attribute>
+        </field>
+        <field id="field-LocalDateField" name="LocalDateField" type="java.time.LocalDate">
+            <attribute name="tag" type="java.lang.Integer">66666</attribute>
+            <attribute name="fixtype" type="java.lang.String">UTCDATEONLY</attribute>
+        </field>
+        <field id="field-LocalTimeField" name="LocalTimeField" type="java.time.LocalTime">
+            <attribute name="tag" type="java.lang.Integer">77777</attribute>
+            <attribute name="fixtype" type="java.lang.String">UTCTIMEONLY</attribute>
+        </field>
+        <field id="field-LocalDateTimeField" name="LocalDateTimeField" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">88888</attribute>
+            <attribute name="fixtype" type="java.lang.String">UTCTIMESTAMP</attribute>
+        </field>
+        <field id="field-CharacterField" name="CharacterField" type="java.lang.Character">
+            <attribute name="tag" type="java.lang.Integer">99999</attribute>
+            <attribute name="fixtype" type="java.lang.String">CHAR</attribute>
+        </field>
+        <field name="XmlSubMessage" id="field-XmlSubMessage" type="java.lang.String">
+            <attribute name="fixtype" type="java.lang.String">XML</attribute>
+            <attribute name="tag" type="java.lang.Integer">100001</attribute>
+        </field>
+        <field id="field-NoRepGroups" name="NoRepGroups" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">7777</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+        </field>
+        <field id="field-StringGroup" name="StringGroup" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">7778</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IntegerGroup" name="IntegerGroup" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">7779</attribute>
+            <attribute name="fixtype" type="java.lang.String">INTEGER</attribute>
+        </field>
+        <field id="field-LocalDateTimeGroup" name="LocalDateTimeGroup" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">7780</attribute>
+            <attribute name="fixtype" type="java.lang.String">UTCTIMESTAMP</attribute>
+        </field>
+        <field id="field-StringComp" name="StringComp" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">8888</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-IntegerComp" name="IntegerComp" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">8889</attribute>
+            <attribute name="fixtype" type="java.lang.String">INTEGER</attribute>
+        </field>
+        <field id="field-LocalDateTimeComp" name="LocalDateTimeComp" type="java.time.LocalDateTime">
+            <attribute name="tag" type="java.lang.Integer">8890</attribute>
+            <attribute name="fixtype" type="java.lang.String">UTCTIMESTAMP</attribute>
+        </field>
+    </fields>
+    <messages>
+        <message name="header" id="header">
+            <attribute name="entity_type" type="java.lang.String">Header</attribute>
+            <field name="BeginString" reference="field-BeginString"/>
+            <field name="BodyLength" reference="field-BodyLength"/>
+            <field name="MsgType" reference="field-MsgType"/>
+            <field name="SenderCompID" reference="field-SenderCompID"/>
+            <field name="TargetCompID" reference="field-TargetCompID"/>
+            <field name="MsgSeqNum" reference="field-MsgSeqNum"/>
+            <field name="SendingTime" reference="field-SendingTime"/>
+        </message>
+        <message id="trailer" name="trailer">
+            <attribute name="entity_type" type="java.lang.String">Trailer</attribute>
+            <field name="CheckSum" reference="field-CheckSum" required="true"/>
+        </message>
+        <message name="MessageWithXmlFields">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">777</attribute>
+            <attribute name="HasXmlFields" type="java.lang.Boolean">true</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="BigDecimalField" reference="field-BigDecimalField"/>
+            <field name="IntegerField" reference="field-IntegerField"/>
+            <field name="DoubleField" reference="field-DoubleField"/>
+            <field name="StringField" reference="field-StringField"/>
+            <field name="CharacterField" reference="field-CharacterField"/>
+            <field name="BooleanField" reference="field-BooleanField"/>
+            <field name="LocalDateField" reference="field-LocalDateField"/>
+            <field name="LocalTimeField" reference="field-LocalTimeField"/>
+            <field name="LocalDateTimeField" reference="field-LocalDateTimeField"/>
+            <field name="XmlSubMessage" reference="message-XmlSubMessage"/>
+            <field name="RepGroup" reference="component-RepGroup" />
+            <field name="SomeComp" reference="component-SomeComp" />
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="XmlSubMessage" id="message-XmlSubMessage">
+            <attribute name="entity_type" type="java.lang.String">XML</attribute>
+            <attribute name="fix_tag" type="java.lang.Integer">100001</attribute>
+            <field name="BigDecimalField" reference="field-BigDecimalField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="IntegerField" reference="field-IntegerField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="DoubleField" reference="field-DoubleField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="StringField" reference="field-StringField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="CharacterField" reference="field-CharacterField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="BooleanField" reference="field-BooleanField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="LocalDateField" reference="field-LocalDateField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="LocalTimeField" reference="field-LocalTimeField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+            <field name="LocalDateTimeField" reference="field-LocalDateTimeField">
+                <attribute name="tag" type="java.lang.Integer">-1</attribute>
+            </field>
+        </message>
+        <message id="component-RepGroup" name="RepGroup">
+            <attribute name="entity_type" type="java.lang.String">Component</attribute>
+            <field name="NoRepGroup" reference="group-RepGroup_NoRepGroup" isCollection="true" required="false"/>
+        </message>
+        <message name="RepGroup_NoRepGroup" id="group-RepGroup_NoRepGroup">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">7777</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="StringGroup" reference="field-StringGroup" required="false"/>
+            <field name="IntegerGroup" reference="field-IntegerGroup" required="false"/>
+            <field name="LocalDateTimeGroup" reference="field-LocalDateTimeGroup" required="false"/>
+        </message>
+        <message id="component-SomeComp" name="SomeComp">
+            <attribute name="entity_type" type="java.lang.String">Component</attribute>
+            <field name="StringComp" reference="field-StringComp" required="false"/>
+            <field name="IntegerComp" reference="field-IntegerComp" required="false"/>
+            <field name="LocalDateTimeComp" reference="field-LocalDateTimeComp" required="false"/>
+        </message>
+    </messages>
+</dictionary>

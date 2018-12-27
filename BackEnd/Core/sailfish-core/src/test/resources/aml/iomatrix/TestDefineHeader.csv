@@ -1,0 +1,6 @@
+#1,#2,#3,#4,#action,6,7,8,9,#10,,,,,,,,,,,,,,,,
+,,,,DefineHeader,20,,,40,,,,,,,,,,,,,,,,,#new field
+1,2,3,4,,,,,,,,,,,,,,,,,,,,,,new value
+1,2,3,4,DefineHeader,100,150,200,250,300,,,,,,,,,,,,,,,#additional field,
+,,,,test case end,,,,,,,,,,,,,,,,,,,,value,old value
+,,,,DefineHeader,,,,,,#new field,,,,,,,,,,,,,,,

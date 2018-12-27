@@ -1,0 +1,8 @@
+#execute,#comment,#description,#reference,#timeout,#action,#messages_count,#static_type,#static_value,#condition
+,,,,,test case start,,,,
+invalid,,Should be executed (sleep),,100,Sleep,,,,
+o,,optional sleep,,100,Sleep,,,,
+,,Non-executed sleep,,100,Sleep,,,,
+Y,,Non-executed sleep,,100,Sleep,,,,
+n,,Non-executed sleep,,100,Sleep,,,,
+,,,,,test case end,,,,

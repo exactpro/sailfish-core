@@ -1,0 +1,310 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:o="http://omnifaces.org/ui"
+	template="/template/statisticsReport.xhtml">
+	
+	<ui:define name="otherScripts">
+		<h:outputStylesheet library="sf" name="css/statistics-tags.css"/>
+		<h:outputStylesheet library="sf" name="css/statistics-tag-comparison.css"/>
+		<h:outputScript library="sf" name="js/statistics.js"/>
+	</ui:define>
+	
+	<ui:define name="statistics-content">
+	
+		<ui:fragment rendered="#{not statReportingBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{statReportingBean.statisticsDbAvailable}">
+			
+			<div class="eps-report-parameters eps-card">
+				
+				<div class="eps-params-header">
+	    			Parameters
+	    			
+	    			<h:form id="optionsForm">
+	    				
+	    				<p:commandLink id="optionsToggler" styleClass="eps-options-link">
+	    					<h:graphicImage library="sf" name="images/menu-hamb-16.png"/>
+	    				</p:commandLink>
+	    				
+	    				<p:overlayPanel id="optionsPanel" for="optionsToggler" hideEffect="fade" dismissable="false">
+	    				
+	    					<h:panelGrid columns="2" cellpadding="5" style="text-align: left;">
+	    						
+	    						<h:outputLabel for="columns" value="Columns" />
+	    						
+						        <p:selectCheckboxMenu id="columns" value="#{taggedSetsBean.selectedColumns}" label="Select"
+					    			panelStyleClass="eps-pf-select-panel-width-fix">
+					    			<f:selectItems value="#{taggedSetsBean.availableColumns}" />
+					    		</p:selectCheckboxMenu>
+					        
+					        </h:panelGrid>
+					        
+					        <p:separator style="border: 0px none;"/>
+					        
+					        <p:commandButton value="Apply" update=":msgForm:messages :results-form"/>
+					        
+					    </p:overlayPanel>
+	    				
+	    			</h:form>
+	    			
+	    		</div>
+				
+				<h:form id="params-form">
+				
+				<p:remoteCommand name="updateResult" oncomplete="setScrollableBodyHeight('#results-form\\:result-table')" update=":results-form"/>
+				
+					<div class="clearfix">
+						<div class="eps-first-set-params">
+					        <div class="selected-tags-wrapper eps-tags-set eps-first-set" >
+					        	<span class="eps-tags-set-label">First Set</span>
+					    		<h:panelGroup id="first-selected-tags" style="white-space: normal; margin-left: 74px;">
+					            	<ui:repeat var="tag" value="#{taggedSetsBean.firstSet}">
+					            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+					            			#{tag.name}
+					            			<p:commandLink action="#{taggedSetsBean.removeTag(tag, true)}" update=":params-form:first-selected-tags"
+					            				styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+					            		</span>
+					            	</ui:repeat>
+				            	</h:panelGroup>
+				            	
+				            	<p:autoComplete id="first-tags-autocomplete" value="#{taggedSetsBean.tagToAdd}" 
+				            		completeMethod="#{taggedSetsBean.completeFirst}"
+				                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true" 
+				                    placeholder="type to add" emptyMessage="No matching tags found"
+				                    styleClass="eps-set-automplete">
+				                    
+				                    <p:ajax event="itemSelect" listener="#{taggedSetsBean.onTagSelect(true)}" execute="@this" update="first-tags-autocomplete first-selected-tags"/>
+				                    <o:converter converterId="omnifaces.ListConverter" list="#{taggedSetsBean.allTags}" />
+						            <p:column>
+						                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+						            </p:column>
+						        </p:autoComplete>
+				            	
+			            	</div>
+							
+						</div>
+						<div class="eps-second-set-params">
+					        <div class="selected-tags-wrapper eps-tags-set eps-second-set" >
+					        	<span class="eps-tags-set-label">Second Set</span>
+					    		<h:panelGroup id="second-selected-tags" style="white-space: normal; margin-left: 74px;">
+					            	<ui:repeat var="tag" value="#{taggedSetsBean.secondSet}">
+					            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+					            			#{tag.name}
+					            			<p:commandLink action="#{taggedSetsBean.removeTag(tag, false)}" update=":params-form:second-selected-tags"
+					            				styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+					            		</span>
+					            	</ui:repeat>
+				            	</h:panelGroup>
+				            	
+				            	<p:autoComplete id="second-tags-autocomplete" value="#{taggedSetsBean.tagToAdd}" 
+				            		completeMethod="#{taggedSetsBean.completeSecond}"
+				                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true" 
+				                    placeholder="type to add" emptyMessage="No matching tags found"
+				                    styleClass="eps-set-automplete">
+				                    
+				                    <p:ajax event="itemSelect" listener="#{taggedSetsBean.onTagSelect(false)}" execute="@this" update="second-tags-autocomplete second-selected-tags"/>
+				                    <o:converter converterId="omnifaces.ListConverter" list="#{taggedSetsBean.allTags}" />
+						            <p:column>
+						                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+						            </p:column>
+						        </p:autoComplete>
+						        
+			            	</div>
+							
+						</div>
+					</div>
+					
+					<h:panelGrid columns="2" cellpadding="5" styleClass="eps-chkbox-tbl">
+						<p:outputLabel for="onlyDiffCheckbox" value="Show Diff Only" />
+						<p:selectBooleanCheckbox id="onlyDiffCheckbox" value="#{taggedSetsBean.showDiffOnly}" styleClass="eps-checkbox-tbl">
+							<p:ajax event="change" oncomplete="updateResult()"/>
+						</p:selectBooleanCheckbox>
+					</h:panelGrid>
+					
+					<div class="eps-params-separator"></div>
+					
+					<p:commandButton value="Compare" action="#{taggedSetsBean.generate}" update=":msgForm:messages :params-form :results-form"
+		    			disabled="#{not mrHistBean.statisticsDbAvailable}"
+		    			onclick="showLoading('.eps-report-results', '#loading-bl')"
+		    			oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:result-table')"/>
+		    			
+		    		<p:commandButton value="Export" ajax="false" id="export-button" rendered="#{not empty taggedSetsBean.lastResult.rows}"
+	                	update=":msgForm:messages">
+						<p:dataExporter type="csv" target=":results-form:result-table" fileName="sf_tagged_comparison"/>
+					</p:commandButton>
+					
+				</h:form>
+				
+			</div>
+			
+			<ui:include src="loadingCard.xhtml">
+	    		<ui:param name="blockId" value="loading-bl" />
+	    	</ui:include>
+			
+			<div class="eps-report-results eps-card no-scroll">
+	    	
+	    		<h:form id="results-form">
+	    			
+	    			<p:dataTable id="result-table" var="row" value="#{taggedSetsBean.lastResult.rows}" styleClass="eps-statistics-table"
+	    				scrollable="true" scrollHeight="50" selection="#{taggedSetsBean.selected}" selectionMode="single"
+	    				rowKey="#{row.testCaseId}">
+	    			
+	    				<p:column headerText="Test Case">
+	    					<h:outputText value="#{row.testCaseId}" />
+	    				</p:column>
+	    				
+	    				<p:column headerText="Matrix" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
+	    					<h:outputText value="#{row.firstMatrixName}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Matrix')}"/>
+	    				</p:column>
+	    				<p:column headerText="Status" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Status')}">
+                            <h:outputText value="Passed" rendered="#{row.firstStatus == 'PASSED'}" styleClass="eps-passed-label #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Status')}"/>
+                            <h:outputText value="Conditionally Passed" rendered="#{row.firstStatus == 'CONDITIONALLY_PASSED'}" styleClass="eps-conditionally-passed-label #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Status')}"/>
+                            <h:outputText value="Failed" rendered="#{row.firstStatus == 'FAILED'}" styleClass="eps-failed-label #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Status')}"/>
+	    				</p:column>
+                        <p:column headerText="Description" styleClass="eps-f-set-column"
+                                  rendered="#{taggedSetsBean.isColumnSelected('Description')}">
+                            <h:outputText value="#{row.firstDescription}"
+                                          styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Description')}"/>
+                        </p:column>
+	    				<p:column headerText="Fail Reason" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Fail Reason')}">
+	    					<h:outputText value="#{row.firstFailReason}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Fail Reason')}"/>
+	    				</p:column>
+	    				<p:column headerText="Failed Actions" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Failed Actions')}">
+	    					<p:commandLink value="#{row.firstFailedActions.keySet()}"
+	    						rendered="#{not empty row.firstFailedActions}"
+	    						actionListener="#{tcDetailsBean.setTcrId(row.firstTestCaseRunId)}" 
+	    						action="#{tcDetailsBean.generateFailedReport}"
+	    						update=":tcrDetailsForm"
+	    						oncomplete="PF('tcrDetailsDlg').show();"
+	    						styleClass="eps-dialog-open-link #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Failed Actions')}"/>
+	    				</p:column>
+	    				<p:column headerText="User Status" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('User Status')}">
+	    					<h:outputText value="#{row.firstUserStatus}" />
+	    				</p:column>
+	    				<p:column headerText="Comment" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Comment')}">
+	    					<h:outputText value="#{row.firstUserComment}" />
+	    				</p:column>
+	    				<p:column headerText="Start Time" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Start Time')}">
+	    					<h:outputText value="#{row.firstStartTime}" />
+	    				</p:column>
+	    				<p:column headerText="Finish Time" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Finish Time')}">
+	    					<h:outputText value="#{row.firstFinishTime}" />
+	    				</p:column>
+	    				<p:column headerText="Tags" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Tags')}">
+	    					<h:outputText value="#{row.firstRawTags}" />
+	    				</p:column>
+	    				<p:column headerText="Hash" styleClass="eps-f-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Hash')}">
+	    					<h:outputText value="#{row.firstRawHash}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Hash')}"/>
+	    				</p:column>
+	    				
+	    				<p:column headerText="Matrix" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
+	    					<h:outputText value="#{row.secondMatrixName}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Matrix')}"/>
+	    				</p:column>
+	    				<p:column headerText="Status" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Status')}">
+                            <h:outputText value="Passed" rendered="#{row.secondStatus == 'PASSED'}" styleClass="eps-passed-label #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Status')}"/>
+                            <h:outputText value="Conditionally Passed" rendered="#{row.secondStatus == 'CONDITIONALLY_PASSED'}" styleClass="eps-conditionally-passed-label #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Status')}"/>
+                            <h:outputText value="Failed" rendered="#{row.secondStatus == 'FAILED'}" styleClass="eps-failed-label #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Status')}"/>
+	    				</p:column>
+                        <p:column headerText="Description" styleClass="eps-s-set-column"
+                                  rendered="#{taggedSetsBean.isColumnSelected('Description')}">
+                            <h:outputText value="#{row.secondDescription}"
+                                          styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Description')}"/>
+                        </p:column>
+	    				<p:column headerText="Fail Reason" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Fail Reason')}">
+	    					<h:outputText value="#{row.secondFailReason}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Fail Reason')}"/>
+	    				</p:column>
+	    				<p:column headerText="Failed Actions" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Failed Actions')}">
+	    					<p:commandLink value="#{row.secondFailedActions.keySet()}"
+	    						rendered="#{not empty row.secondFailedActions}"
+	    						actionListener="#{tcDetailsBean.setTcrId(row.secondTestCaseRunId)}" 
+	    						action="#{tcDetailsBean.generateReport}"
+	    						update=":tcrDetailsForm"
+	    						oncomplete="PF('tcrDetailsDlg').show();"
+	    						styleClass="eps-dialog-open-link #{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Failed Actions')}"/>
+	    				</p:column>
+	    				<p:column headerText="User Status" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('User Status')}">
+	    					<h:outputText value="#{row.secondUserStatus}" />
+	    				</p:column>
+	    				<p:column headerText="Comment" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Comment')}">
+	    					<h:outputText value="#{row.secondUserComment}" />
+	    				</p:column>
+	    				<p:column headerText="Start Time" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Start Time')}">
+	    					<h:outputText value="#{row.secondStartTime}" />
+	    				</p:column>
+	    				<p:column headerText="Finish Time" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Finish Time')}">
+	    					<h:outputText value="#{row.secondFinishTime}" />
+	    				</p:column>
+	    				<p:column headerText="Tags" styleClass="eps-s-set-column"
+	    					rendered="#{taggedSetsBean.isColumnSelected('Tags')}">
+	    					<h:outputText value="#{row.secondRawTags}" />
+	    				</p:column>
+	    				<p:column headerText="Hash" styleClass="eps-s-set-column" 
+	    					rendered="#{taggedSetsBean.isColumnSelected('Hash')}">
+	    					<h:outputText value="#{row.secondRawHash}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Hash')}"/>
+	    				</p:column>
+	    				
+	    			</p:dataTable>
+	    			
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    	<h:form id="tcrDetailsForm" >
+    		
+    		<p:dialog id="tcrDetailsDialod" widgetVar="tcrDetailsDlg" width="800">
+    			
+    			<p:dataTable id="tcr-details-table" value="#{tcDetailsBean.lastFailedResult}" var="row" styleClass="eps-statistics-table">
+    				
+    				<p:column headerText="#Action">
+    					<h:outputText value="#{row.rank}" styleClass="#{taggedSetsBean.getActionHighlightStyle(tcDetailsBean.tcrId, row.rank)}"/>
+    				</p:column>
+    				<p:column headerText="Action">
+    					<h:outputText value="#{row.action}" title="#{row.action}" styleClass="#{taggedSetsBean.getActionHighlightStyle(tcDetailsBean.tcrId, row.rank)}"/>
+    				</p:column>
+    				<p:column headerText="Message">
+    					<h:outputText value="#{row.msgType}" styleClass="#{taggedSetsBean.getActionHighlightStyle(tcDetailsBean.tcrId, row.rank)}"/>
+    				</p:column>
+    				<p:column headerText="Service">
+    					<h:outputText value="#{row.service}" styleClass="#{taggedSetsBean.getActionHighlightStyle(tcDetailsBean.tcrId, row.rank)}"/>
+    				</p:column>
+    				<p:column headerText="Description">
+    					<h:outputText value="#{row.description}" title="#{row.description}" styleClass="#{taggedSetsBean.getActionHighlightStyle(tcDetailsBean.tcrId, row.rank)}"/>
+    				</p:column>
+    				<p:column headerText="Failure Reason">
+    					<h:outputText value="#{row.failReason}" title="#{row.failReason}" styleClass="#{taggedSetsBean.getActionFailReasonHighlightStyle(tcDetailsBean.tcrId, row.rank)}"/>
+    				</p:column>
+    				
+    			</p:dataTable>
+    			
+    		</p:dialog>
+    		
+    	</h:form>
+	    		
+	    </ui:fragment>
+	
+	</ui:define>
+	
+</ui:composition>

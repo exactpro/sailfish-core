@@ -1,0 +1,1217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="NTG_GENERIC">
+    <fields>
+        <field type="java.lang.Integer" id="F_StartOfMessage" name="StartOfMessage">
+            <value type="java.lang.Integer" name="ServerStartOfMessage">1</value>
+            <value type="java.lang.Integer" name="ClientStartOfMessage">2</value>
+        </field>
+        <field type="java.lang.String" id="F_MessageType" name="MessageType">
+            <value type="java.lang.String" name="Heartbeat">0</value>
+            <value type="java.lang.String" name="Reject">3</value>
+            <value type="java.lang.String" name="Logout">5</value>
+            <value type="java.lang.String" name="ExecutionReport">8</value>
+            <value type="java.lang.String" name="OrderCancelReject">9</value>
+            <value type="java.lang.String" name="Logon">A</value>
+            <value type="java.lang.String" name="NewOrder">D</value>
+            <value type="java.lang.String" name="NewOrderCross">C</value>
+            <value type="java.lang.String" name="CrossOrderCancelRequest">H</value>
+            <value type="java.lang.String" name="OrderCancelRequest">F</value>
+            <value type="java.lang.String" name="OrderCancelReplaceRequest">G</value>
+            <value type="java.lang.String" name="LogonReply">B</value>
+            <value type="java.lang.String" name="MissedMessageRequest">M</value>
+            <value type="java.lang.String" name="MissedMessageRequestAck">N</value>
+            <value type="java.lang.String" name="MissedMessageReport">P</value>
+            <value type="java.lang.String" name="BusinessReject">j</value>
+            <value type="java.lang.String" name="OrderMassCancelRequest">q</value>
+            <value type="java.lang.String" name="OrderMassCancelReport">r</value>
+            <value type="java.lang.String" name="NewQuote">S</value>
+            <value type="java.lang.String" name="SystemStatus">n</value>
+        </field>
+        <field type="java.lang.Integer" id="F_MassCxlResponse" name="MassCxlResponse">
+            <value type="java.lang.Integer" name="Rejected">0</value>
+            <value type="java.lang.Integer" name="Accepted">7</value>
+        </field>
+        <field type="java.lang.Integer" id="F_Side" name="Side">
+            <value type="java.lang.Integer" name="Buy">1</value>
+            <value type="java.lang.Integer" name="Sell">2</value>
+        </field>
+        <field type="java.lang.Integer" id="F_ClearingAccount" name="ClearingAccount">
+            <value type="java.lang.Integer" name="Client">1</value>
+            <value type="java.lang.Integer" name="House">3</value>
+        </field>
+        <field type="java.lang.Integer" id="F_OrderType" name="OrderType">
+            <value type="java.lang.Integer" name="Market">1</value>
+            <value type="java.lang.Integer" name="Limit">2</value>
+            <value type="java.lang.Integer" name="Stop">3</value>
+            <value type="java.lang.Integer" name="StopLimit">4</value>
+        </field>
+        <field type="java.lang.Integer" id="F_TimeInForce" name="TimeInForce">
+            <value type="java.lang.Integer" name="Day">0</value>
+            <value type="java.lang.Integer" name="GTC">1</value>
+            <value type="java.lang.Integer" name="IOC">3</value>
+            <value type="java.lang.Integer" name="FOK">4</value>
+            <value type="java.lang.Integer" name="OPG">5</value>
+            <value type="java.lang.Integer" name="GTD">6</value>
+            <value type="java.lang.Integer" name="GTT">8</value>
+            <value type="java.lang.Integer" name="ATC">10</value>
+            <value type="java.lang.Integer" name="GFA">50</value>
+            <value type="java.lang.Integer" name="GFX">51</value>
+        </field>
+        <field type="java.lang.Integer" id="F_OrderSubType" name="OrderSubType">
+            <value type="java.lang.Integer" name="Order">0</value>
+            <value type="java.lang.Integer" name="Quote">3</value>
+            <value type="java.lang.Integer" name="PeggedOrder">5</value>
+            <value type="java.lang.Integer" name="LimitPegged">51</value>
+        </field>
+        <field type="java.lang.Integer" id="F_ReportResponseType" name="ReportResponseType">
+            <value type="java.lang.Integer" name="DownloadComplete">0</value>
+            <value type="java.lang.Integer" name="MessageLimitReached">1</value>
+            <value type="java.lang.Integer" name="ServiceUnavailable">3</value>
+        </field>
+        <field type="java.lang.Integer" id="F_RequestAckResponseType" name="RequestAckResponseType">
+            <value type="java.lang.Integer" name="Successful">0</value>
+            <value type="java.lang.Integer" name="RecoveryRequestLimitReached">1</value>
+            <value type="java.lang.Integer" name="InvalidAppID">2</value>
+            <value type="java.lang.Integer" name="ServiceUnavailable">3</value>
+        </field>
+        <field type="java.lang.String" id="F_ExecType" name="ExecType">
+            <value type="java.lang.String" name="New">0</value>
+            <value type="java.lang.String" name="Cancelled">4</value>
+            <value type="java.lang.String" name="Replaced">5</value>
+            <value type="java.lang.String" name="Rejected">8</value>
+            <value type="java.lang.String" name="Suspended">9</value>
+            <value type="java.lang.String" name="Expired">C</value>
+            <value type="java.lang.String" name="Restated">D</value>
+            <value type="java.lang.String" name="Trade">F</value>
+            <value type="java.lang.String" name="TradeCancel">H</value>
+        </field>
+        <field type="java.lang.Integer" id="F_OrderStatus" name="OrderStatus">
+            <value type="java.lang.Integer" name="New">0</value>
+            <value type="java.lang.Integer" name="PartiallyFilled">1</value>
+            <value type="java.lang.Integer" name="Filled">2</value>
+            <value type="java.lang.Integer" name="Cancelled">4</value>
+            <value type="java.lang.Integer" name="Expired">6</value>
+            <value type="java.lang.Integer" name="Rejected">8</value>
+            <value type="java.lang.Integer" name="Suspended">9</value>
+        </field>
+        <field type="java.lang.Integer" id="F_Container" name="Container">
+            <value type="java.lang.Integer" name="None">0</value>
+            <value type="java.lang.Integer" name="OrderBook">1</value>
+            <value type="java.lang.Integer" name="MarketOrderContainer">3</value>
+            <value type="java.lang.Integer" name="StopOrderQueue">6</value>
+            <value type="java.lang.Integer" name="ParkedOrderQueue">5</value>
+            <value type="java.lang.Integer" name="PeggedOrderContainer">7</value>
+            <value type="java.lang.Integer" name="CrossOrder">11</value>
+        </field>
+        <field type="java.lang.Integer" id="F_TypeOfTrade" name="TypeOfTrade">
+            <value type="java.lang.Integer" name="Visible">0</value>
+            <value type="java.lang.Integer" name="Hidden">1</value>
+            <value type="java.lang.Integer" name="NotSpecified">2</value>
+        </field>
+        <field type="java.lang.Integer" id="F_Capacity" name="Capacity">
+            <value type="java.lang.Integer" name="RisklessPrincipal">1</value>
+            <value type="java.lang.Integer" name="Principal">2</value>
+            <value type="java.lang.Integer" name="Agency">3</value>
+            <value type="java.lang.Integer" name="CFD_GiveUp">4</value>
+        </field>
+        <field type="java.lang.Integer" id="F_OrderCapacity" name="OrderCapacity">
+            <value type="java.lang.Integer" name="RisklessPrincipal">1</value>
+            <value type="java.lang.Integer" name="Principal">2</value>
+            <value type="java.lang.Integer" name="Agency">3</value>
+            <value type="java.lang.Integer" name="CFDGiveUP">4</value>
+        </field>
+        <field type="java.lang.Integer" id="F_PartyRole" name="PartyRole">
+            <value type="java.lang.Integer" name="ExecutingFirm">1</value>
+            <value type="java.lang.Integer" name="CounterpartyFirm">17</value>
+        </field>
+        <field type="java.lang.Integer" id="F_OrderCrossType" name="OrderCrossType">
+            <value type="java.lang.Integer" name="InternalCross">5</value>
+            <value type="java.lang.Integer" name="InternalBTF">6</value>
+            <value type="java.lang.Integer" name="CommittedCross">7</value>
+            <value type="java.lang.Integer" name="CommittedBTF">8</value>
+        </field>
+        <field type="java.lang.Integer" id="F_AppIDEnum" name="AppIDEnum">
+            <value type="java.lang.Integer" name="Partition1">1</value>
+            <value type="java.lang.Integer" name="Partition2">2</value>
+            <value type="java.lang.Integer" name="Partition3">3</value>
+        </field>
+        <field type="java.lang.Integer" id="F_AppStatusEnum" name="AppStatusEnum">
+            <value type="java.lang.Integer" name="RecoveryServiceResumed">1</value>
+            <value type="java.lang.Integer" name="RecoveryServiceNotAvailable">2</value>
+        </field>
+        <field type="java.lang.Integer" id="F_TIF" name="TIF">
+            <value type="java.lang.Integer" name="Day">0</value>
+            <value type="java.lang.Integer" name="ImmediateOrCancel_IOC">3</value>
+            <value type="java.lang.Integer" name="FillOrKill_FOK">4</value>
+            <value type="java.lang.Integer" name="AtTheOpening_OPG">5</value>
+            <value type="java.lang.Integer" name="GoodTillDate_GTD">6</value>
+            <value type="java.lang.Integer" name="GoodTillTime_GTT">8</value>
+            <value type="java.lang.Integer" name="AtTheClose_ATC">10</value>
+            <value type="java.lang.Integer" name="ClosingPriceCross_CPX">12</value>
+            <value type="java.lang.Integer" name="GoodForAuction_GFA">50</value>
+            <value type="java.lang.Integer" name="GoodForIntradayAuction_GFX">51</value>
+            <value type="java.lang.Integer" name="GoodForScheduledAuction_GFS">52</value>
+        </field>
+        <field type="java.lang.Integer" id="F_AutoCancel" name="AutoCancel">
+            <value type="java.lang.Integer" name="DoNotCancel">0</value>
+            <value type="java.lang.Integer" name="CheckSystemConfiguration">1</value>
+        </field>
+        <field type="java.lang.Integer" id="F_Anonymity" name="Anonymity">
+            <value type="java.lang.Integer" name="Anonymous">0</value>
+            <value type="java.lang.Integer" name="Named">1</value>
+        </field>
+        <field type="java.lang.Integer" id="F_PassiveOnlyOrder" name="PassiveOnlyOrder">
+            <value type="java.lang.Integer" name="NoConstraint">0</value>
+            <value type="java.lang.Integer" name="OnlyAcceptOrderIfItWillNotMatchWithVisibleContraOrder">99</value>
+            <value type="java.lang.Integer" name="OnlyAcceptOrderIfSettingNewVisibleBBO">100</value>
+            <value type="java.lang.Integer" name="OnlyAcceptOrderIfSettingNewBBOOrJoiningExistingBBO">1</value>
+            <value type="java.lang.Integer" name="OnlyAcceptOrderIfWillBeAtBBOOrWithinOneVisiblePricePoint">2</value>
+            <value type="java.lang.Integer" name="OnlyAcceptOrderIfWillBeAtBBOOrWithinTwoVisiblePricePoints">3</value>
+        </field>
+        <field type="java.lang.Integer" id="F_AutoCancelQuote" name="AutoCancelQuote">
+            <value type="java.lang.Integer" name="DoNotCancel">0</value>
+            <value type="java.lang.Integer" name="Cancel">1</value>
+        </field>
+        <field type="java.lang.Integer" id="F_MassCancelRequestType" name="MassCancelRequestType">
+            <value type="java.lang.Integer" name="AllFirmOrdersOfAnInstrument">3</value>
+            <value type="java.lang.Integer" name="AllFirmOrdersOfASegment">4</value>
+            <value type="java.lang.Integer" name="AllOrdersSubmittedByTheTrader">7</value>
+            <value type="java.lang.Integer" name="AllFirmOrders">8</value>
+            <value type="java.lang.Integer" name="AllOrdersOfAnInstrumentSubmittedByTheTrader">9</value>
+            <value type="java.lang.Integer" name="AllOrdersOfSegmentSubmittedByTheTrader">15</value>
+        </field>
+        <field type="java.lang.Integer" id="F_RestatementReason" name="RestatementReason">
+            <value type="java.lang.Integer" name="OrderRepriced">3</value>
+            <value type="java.lang.Integer" name="MarketOption">8</value>
+            <value type="java.lang.Integer" name="OrderReplenishment">100</value>
+        </field>
+        <field type="java.lang.String" id="F_TradeLiquidityIndicator" name="TradeLiquidityIndicator">
+            <value type="java.lang.String" name="AddedLiquidity">A</value>
+            <value type="java.lang.String" name="RemovedLiquidity">R</value>
+            <value type="java.lang.String" name="Auction">C</value>
+        </field>
+    </fields>
+    <messages>
+        <message id="M_MessageHeader" name="MessageHeader">
+            <attribute type="java.lang.Integer" name="Offset">0</attribute>
+            <attribute type="java.lang.Integer" name="Length">4</attribute>
+            <field reference="F_StartOfMessage" name="StartOfMessage">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="MessageLength">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">1</attribute>
+                <attribute type="java.lang.Integer" name="Length">2</attribute>
+            </field>
+            <field reference="F_MessageType" name="MessageType">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">3</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_Logon" name="Logon">
+            <attribute type="java.lang.Byte" name="MessageType">65</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.String" name="Username">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">25</attribute>
+            </field>
+            <field type="java.lang.String" name="Password">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">29</attribute>
+                <attribute type="java.lang.Integer" name="Length">25</attribute>
+            </field>
+            <field type="java.lang.String" name="NewPassword">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">54</attribute>
+                <attribute type="java.lang.Integer" name="Length">25</attribute>
+            </field>
+            <field type="java.lang.Byte" name="MessageVersion">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">79</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_LogonReply" name="LogonReply">
+            <attribute type="java.lang.Byte" name="MessageType">66</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.Integer" name="RejectCode">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="PasswordExpiryDayCount">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">8</attribute>
+                <attribute type="java.lang.Integer" name="Length">30</attribute>
+            </field>
+        </message>
+        <message id="M_Logout" name="Logout">
+            <attribute type="java.lang.Byte" name="MessageType">53</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.String" name="Reason">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+        </message>
+        <message id="M_Heartbeat" name="Heartbeat">
+            <attribute type="java.lang.Byte" name="MessageType">48</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+        </message>
+        <message id="M_MissedMessageRequest" name="MissedMessageRequest">
+            <attribute type="java.lang.Byte" name="MessageType">77</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.Integer" name="AppID">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="LastMsgSeqNum">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">5</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_MissedMessageRequestAck" name="MissedMessageRequestAck">
+            <attribute type="java.lang.Byte" name="MessageType">78</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field reference="F_RequestAckResponseType" name="ResponseType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_MissedMessageReport" name="MissedMessageReport">
+            <attribute type="java.lang.Byte" name="MessageType">80</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field reference="F_ReportResponseType" name="ResponseType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_Reject" name="Reject">
+            <attribute type="java.lang.Byte" name="MessageType">51</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.Integer" name="RejectCode">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="RejectReason">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">8</attribute>
+                <attribute type="java.lang.Integer" name="Length">30</attribute>
+            </field>
+            <field reference="F_MessageType" name="RejectedMessageType">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">38</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">39</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+        </message>
+        <message id="M_SystemStatus" name="SystemStatus">
+            <attribute type="java.lang.Byte" name="MessageType">110</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field reference="F_AppIDEnum" name="AppID">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_AppStatusEnum" name="AppStatus">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">5</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_NewOrder" name="NewOrder">
+            <attribute type="java.lang.Byte" name="MessageType">68</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="TraderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">11</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="Account">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">35</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+            <field reference="F_ClearingAccount" name="ClearingAccount">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">45</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">46</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField1">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">50</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField2">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">51</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_OrderType" name="OrderType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">52</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_TIF" name="TIF">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">53</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ExpireDateTime">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">54</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field reference="F_Side" name="Side">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">58</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="OrderQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">59</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="DisplayQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">63</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="LimitPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">67</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field reference="F_Capacity" name="Capacity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">75</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_AutoCancel" name="AutoCancel">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">76</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_OrderSubType" name="OrderSubType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">77</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_Anonymity" name="Anonymity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">78</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="StopPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">79</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_PassiveOnlyOrder" name="PassiveOnlyOrder">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">87</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField3">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">88</attribute>
+                <attribute type="java.lang.Integer" name="Length">9</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="MinimumQuantity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">97</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_NewQuote" name="NewQuote">
+            <attribute type="java.lang.Byte" name="MessageType">83</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="TraderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">11</attribute>
+            </field>
+            <field reference="F_ClearingAccount" name="ClearingAccount">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">35</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">36</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="BidPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">40</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="BidSize">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">48</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="AskPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">52</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="AskSize">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">60</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field reference="F_Capacity" name="Capacity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">64</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_AutoCancelQuote" name="AutoCancel">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">65</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">66</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+        <message id="M_OrderCancelReplaceRequest" name="OrderCancelReplaceRequest">
+            <attribute type="java.lang.Byte" name="MessageType">71</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="OriginalClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="OrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">44</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">56</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField1">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">60</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField2">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">61</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ExpireDateTime">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">62</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="OrderQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">66</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="DisplayQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">70</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="LimitPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">74</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="Account">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">82</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_TIF" name="TIF">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">92</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_Side" name="Side">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">93</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="StopPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">94</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_PassiveOnlyOrder" name="PassiveOnlyOrder">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">102</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField3">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">103</attribute>
+                <attribute type="java.lang.Integer" name="Length">9</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="MinimumQuantity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">112</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_OrderCancelRequest" name="OrderCancelRequest">
+            <attribute type="java.lang.Byte" name="MessageType">70</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="OriginalClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="OrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">44</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">56</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField1">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">60</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField2">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">61</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_Side" name="Side">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">62</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField3">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">63</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+        <message id="M_OrderMassCancelRequest" name="OrderMassCancelRequest">
+            <attribute type="java.lang.Byte" name="MessageType">113</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field reference="F_MassCancelRequestType" name="MassCancelRequestType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">25</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField1">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">29</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField2">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">30</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="Segment">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">31</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_OrderSubType" name="OrderSubType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">35</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField3">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">36</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+        <message id="M_ExecutionReport" name="ExecutionReport">
+            <attribute type="java.lang.Byte" name="MessageType">56</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="AppID">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="SequenceNo">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">5</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ExecutionID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">9</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">21</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="OrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">41</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_ExecType" name="ExecType">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">53</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ExecutionReportRefID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">54</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_OrderStatus" name="OrderStatus">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">66</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="OrderRejectCode">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">67</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="ExecutedPrice">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">71</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ExecutedQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">79</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="LeavesQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">83</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_Container" name="Container">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">87</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="DisplayQty">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">88</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">92</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field reference="F_RestatementReason" name="RestatementReason">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">96</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="ReservedField1">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">97</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_Side" name="Side">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">98</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="ReservedField2">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">99</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="Counterparty">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">107</attribute>
+                <attribute type="java.lang.Integer" name="Length">11</attribute>
+            </field>
+            <field reference="F_TradeLiquidityIndicator" name="TradeLiquidityIndicator">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">118</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="TradeMatchID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">119</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.String" name="TransactTime">
+                <attribute type="java.lang.String" name="Format">D</attribute>
+                <attribute type="java.lang.Integer" name="Offset">127</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField3">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">135</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_TypeOfTrade" name="TypeOfTrade">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">136</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field reference="F_Capacity" name="Capacity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">137</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField4">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">138</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="PublicOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">139</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="MinimumQuantity">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">151</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+        </message>
+        <message id="M_OrderCancelReject" name="OrderCancelReject">
+            <attribute type="java.lang.Byte" name="MessageType">57</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.Integer" name="AppID">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="SequenceNo">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">5</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">9</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field type="java.lang.String" name="OrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">29</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field type="java.lang.Integer" name="CancelRejectReason">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">41</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.String" name="TransactTime">
+                <attribute type="java.lang.String" name="Format">D</attribute>
+                <attribute type="java.lang.Integer" name="Offset">45</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field type="java.lang.String" name="ReservedField">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">53</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+        <message id="M_OrderMassCancelReport" name="OrderMassCancelReport">
+            <attribute type="java.lang.Byte" name="MessageType">114</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.Integer" name="AppID">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="SequenceNo">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">5</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">9</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field reference="F_MassCxlResponse" name="MassCancelResponse">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">29</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="MassCancelRejectReason">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">30</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Integer" name="ReservedField1">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">34</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.String" name="TransactTime">
+                <attribute type="java.lang.String" name="Format">D</attribute>
+                <attribute type="java.lang.Integer" name="Offset">38</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField2">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">46</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+        <message id="M_NewOrderCross" name="NewOrderCross">
+            <attribute type="java.lang.Byte" name="MessageType">67</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="CrossID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="5" reference="F_OrderCrossType" name="CrossType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="BuySideClOrdID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">25</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_OrderCapacity" name="BuySideOrderCapacity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">45</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_ClearingAccount" name="BuySideClearingAccount">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">46</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="BuySideOrderQuantity">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">47</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="BuySideFirmID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">55</attribute>
+                <attribute type="java.lang.Integer" name="Length">11</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_PartyRole" name="BuySidePartyRole">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">66</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="SellSideClOrdID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">67</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_OrderCapacity" name="SellSideOrderCapacity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">87</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_ClearingAccount" name="SellSideClearingAccount">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">88</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="1" type="java.lang.Long" name="SellSideOrderQuantity">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">89</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="SellSideFirmID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">97</attribute>
+                <attribute type="java.lang.Integer" name="Length">11</attribute>
+            </field>
+            <field defaultvalue="1" reference="F_PartyRole" name="SellSidePartyRole">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">108</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">109</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="0.0" type="java.lang.Double" name="Price">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">113</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="2" reference="F_OrderType" name="OrderType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">121</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="0" reference="F_TimeInForce" name="TIF">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">122</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+        </message>
+        <message id="M_CrossOrderCancelRequest" name="CrossOrderCancelRequest">
+            <attribute type="java.lang.Byte" name="MessageType">72</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="CrossID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="OriginalCrossID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">24</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="CrossType">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">44</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="BuySideOriginalClOrdID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">45</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="BuySideOrderQuantity">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">65</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="SellSideOriginalClOrdID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">73</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Long" name="SellSideOrderQuantity">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">93</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.Integer" name="InstrumentID">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">101</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">105</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+        </message>
+        <message id="M_BusinessReject" name="BusinessReject">
+            <attribute type="java.lang.Byte" name="MessageType">106</attribute>
+            <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
+            <field reference="M_MessageHeader" name="MessageHeader">
+                <attribute type="java.lang.Integer" name="Offset">0</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+                <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
+            </field>
+            <field type="java.lang.Integer" name="AppID">
+                <attribute type="java.lang.String" name="Format">N</attribute>
+                <attribute type="java.lang.Integer" name="Offset">4</attribute>
+                <attribute type="java.lang.Integer" name="Length">1</attribute>
+            </field>
+            <field type="java.lang.Integer" name="SequenceNo">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">5</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.Integer" name="RejectCode">
+                <attribute type="java.lang.String" name="Format">S</attribute>
+                <attribute type="java.lang.Integer" name="Offset">9</attribute>
+                <attribute type="java.lang.Integer" name="Length">4</attribute>
+            </field>
+            <field type="java.lang.String" name="ClientOrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">13</attribute>
+                <attribute type="java.lang.Integer" name="Length">20</attribute>
+            </field>
+            <field type="java.lang.String" name="OrderID">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">33</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field defaultvalue="0" type="java.lang.String" name="TransactTime">
+                <attribute type="java.lang.String" name="Format">D</attribute>
+                <attribute type="java.lang.Integer" name="Offset">45</attribute>
+                <attribute type="java.lang.Integer" name="Length">8</attribute>
+            </field>
+            <field defaultvalue="" type="java.lang.String" name="ReservedField">
+                <attribute type="java.lang.String" name="Format">A</attribute>
+                <attribute type="java.lang.Integer" name="Offset">53</attribute>
+                <attribute type="java.lang.Integer" name="Length">10</attribute>
+            </field>
+        </message>
+    </messages>
+</dictionary>

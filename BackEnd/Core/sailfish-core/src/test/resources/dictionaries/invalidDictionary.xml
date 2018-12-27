@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="test">
+    <fields>
+        <field type="java.lang.String" name="SimpleStr" id="F_SimpleStr"/>
+        <field type="java.lang.Boolean" name="SimpleBool" id="F_SimpleBool"/>
+        <field type="java.lang.Long" name="SimpleLong" id="F_SimpleLong"/>
+        <field type="java.lang.Double" name="SimpleDouble" id="F_SimpleDouble"/>
+        <field type="java.lang.Character" name="SimpleChar" id="F_SimpleChar"/>
+        <field type="java.lang.Integer" name="EnumNumber" id="F_EnumNumber">
+            <value name="FIRST">1</value>
+            <value name="THIRD">4</value>
+        </field>
+    </fields>
+    <messages>
+        <message name="FirstMessage">
+            <attribute type="java.lang.String" name="StrAttr">test</attribute>
+            <attribute type="java.lang.Boolean" name="BoolAttr">true</attribute>
+            <field reference="F_SimpleBool" name="FirstField"/>
+            <field reference="F_SimpleLong" name="CollectionField"/>
+            <field reference="F_SimpleDouble" name="ThirdField"/>
+            <field type="java.lang.Short" name="FourthField"/>
+            <field reference="F_EnumNumber" name="EnumField"/>
+            <field reference="F_SimpleDouble" name="SecondEnumField"/>
+        </message>
+        <message name="SecondMessage">
+            <attribute type="java.lang.Long" name="LongAttr">101</attribute>
+            <field reference="F_EnumNumber" name="ComplexField"/>
+            <field isCollection="true" reference="M_SubMessage" name="CollectionComplexFiled"/>
+            <field type="java.lang.String" name="FieldWithAttr">
+                <attribute type="java.lang.String" name="StrAttr">value</attribute>
+            </field>
+        </message>
+        <message name="FourthMessage">
+            <field type="java.lang.Double" name="First"/>
+            <field type="java.lang.Double" name="Second"/>
+            <field type="java.lang.Long" name="SomeExtraField"/>
+            <field type="java.lang.Double" name="Third"/>
+        </message>
+        <message name="SubMessage" id="M_SubMessage">
+            <attribute type="java.lang.Boolean" name="BoolAttr">false</attribute>
+            <field type="java.lang.String" name="FieldWithAttr">
+                <attribute type="java.lang.String" name="StrAttr">invalidValue</attribute>
+                <attribute type="java.lang.Short" name="NumbAttr">15</attribute>
+            </field>
+        </message>
+    </messages>
+</dictionary>

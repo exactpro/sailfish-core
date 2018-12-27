@@ -1,0 +1,47 @@
+/******************************************************************************
+ * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+@import "consts";
+
+$search-result-highlighting: #fff9b4;
+$search-current-result-highlighting: #ffca95;
+$search-border-color: darken($search-result-highlighting, 40%);
+
+.exa-search-result {
+  &.panel {
+    //box-shadow: 0px 0px 3px 1px rgba($search-result-highlighting, .75)
+    box-shadow: rgba(0, 0, 0, 0.0745098) 0px 1px 1px 0px inset, rgba($search-result-highlighting, 1) 0px 0px 7.01290130615234px 0px;
+    border-color: $search-border-color;
+
+//    &>.panel-heading {
+//      border-color: $search-border-color;
+//    }
+  }
+}
+
+.exa-sf-ed .form-control.exa-search-box:focus {
+    @include input-hili($search-border-color);
+    border-color: $search-border-color;
+}
+
+
+.table.exa-prop-grid>tbody>tr.prop-row-search-result-curr {
+  background-color: $search-current-result-highlighting;
+}
+
+.table.exa-prop-grid>tbody>tr.prop-row-search-result {
+  background-color: $search-result-highlighting;
+}

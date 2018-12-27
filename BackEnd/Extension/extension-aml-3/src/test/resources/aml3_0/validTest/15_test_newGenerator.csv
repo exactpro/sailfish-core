@@ -1,0 +1,22 @@
+#reference,#service_name,#action,#timeout,#outcome,#execute,#dictionary,#message_type,#static_type,#static_value,FBoolean,FByte,FCharacter,FShort,FInteger,FLong,FFloat,FDouble,FBigDecimal,FString,FByteEnum,FCharacterEnum,FShortEnum,FIntegerEnum,FStringEnum
+,,test case start,,,,,,,,,,,,,,,,,,,,,,
+static_string,,SetStatic,,,,,,String,GroupID,,,,,,,,,,,,,,,
+static_long,,SetStatic,,,,,,long,1,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+send1,fake,send,10,,,TestAML,SimpleMessage,,,TRUE,1,a,255,1,1,1.1,1.1,1.1,foo bar,One,LetterA,Two,Ten,Enum1
+send2,fake,send,10,,,TestAML,SimpleMessage,,,${send1:FBoolean},${send1:FByte},${send1:FCharacter},${send1:FShort},${send1:FInteger},${send1:FLong},${send1:FFloat},${send1:FDouble},${send1:FBigDecimal},${send1:FString},${send1:FByteEnum},${send1:FCharacterEnum},${send1:FShortEnum},${send1:FIntegerEnum},${send1:FStringEnum}
+send3,fake,send,10,,,TestAML,SimpleMessage,,,!(${send1} == ${send2}),${send1:FByte} + ${send2:FByte},${send1:FCharacter} + ${send2:FCharacter},${send1:FShort} + ${send2:FShort},${send1:FInteger} + ${send2:FInteger},${send1:FLong} + ${send2:FLong} + %{static_long},${send1:FFloat} + ${send2:FFloat},${send1:FDouble} + ${send2:FDouble},${send1:FBigDecimal} + ${send2:FBigDecimal},"${send1:FString} + ${send2:FString} + %{static_string} + "" hello world""",1,a,2,10,Foo
+send4,fake,send,10,,,TestAML,SimpleMessage,,,,,,,,,,,,"""Prefix with slash \"" ""+#{toString(123)}",,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,
+receive_sent1,fake,receive,1000,,,TestAML,SimpleMessage,,,${send1:FBoolean},${send1:FByte},${send1:FCharacter},${send1:FShort},${send1:FInteger},${send1:FLong},${send1:FFloat},${send1:FDouble},${send1:FBigDecimal},${send1:FString},${send1:FByteEnum},${send1:FCharacterEnum},${send1:FShortEnum},${send1:FIntegerEnum},${send1:FStringEnum}
+receive_sent2,fake,receive,1000,,,TestAML,SimpleMessage,,,TRUE,1,a,255,1,1,1.1,1.1,1.1,foo bar,One,LetterA,Two,Ten,Enum1
+,,,,,,,,,,,,,,,,,,,,,,,,
+receive1,fake,receive,1000,,,TestAML,SimpleMessage,,,TRUE,1,a,255,1,1,1.1,1.1,1.1,foo bar,One,LetterA,Two,Ten,Enum1
+receive2,fake,receive,1000,,,TestAML,SimpleMessage,,,x == TRUE,x == 1,x == 'a',x == 255,x == 1,x == 1,x >= 1.0,x == 1.1,x == 1.1,"x == ""foo bar""",x == One,x == LetterA,x == Two,x == Ten,x == Enum1
+receive3,fake,receive,1000,,,TestAML,SimpleMessage,,,${receive1:FBoolean},${receive1:FByte},${receive1:FCharacter},${receive1:FShort},${receive1:FInteger},${receive1:FLong},${receive1:FFloat},${receive1:FDouble},${receive1:FBigDecimal},${receive1:FString},${receive1:FByteEnum},${receive1:FCharacterEnum},${receive1:FShortEnum},${receive1:FIntegerEnum},${receive1:FStringEnum}
+receive4,fake,receive,1000,,,TestAML,SimpleMessage,,,x == ${receive1:FBoolean},x == ${receive1:FByte},x == ${receive1:FCharacter},x == ${receive1:FShort},x == ${receive1:FInteger},x == ${receive1:FLong},x == ${receive1:FFloat},x == ${receive1:FDouble},x == ${receive1:FBigDecimal},x == ${receive1:FString},x == ${receive1:FByteEnum},x == ${receive1:FCharacterEnum},x == ${receive1:FShortEnum},x == ${receive1:FIntegerEnum} && x != 123,x == ${receive1:FStringEnum}
+receive5,fake,receive,1000,,,TestAML,SimpleMessage,,,${send1:FBoolean},${send1:FByte},${send1:FCharacter},${send1:FShort},${send1:FInteger},${send1:FLong},${send1:FFloat},${send1:FDouble},${send1:FBigDecimal},${send1:FString},${send1:FByteEnum},${send1:FCharacterEnum},${send1:FShortEnum},${send1:FIntegerEnum},${send1:FStringEnum}
+receive6,fake,receive,1000,,,TestAML,SimpleMessage,,,x == ${send1:FBoolean},x == ${send1:FByte},x == ${send1:FCharacter},x == ${send1:FShort},x == ${send1:FInteger},x == ${send1:FLong},x == ${send1:FFloat},x == ${send1:FDouble},x == ${send1:FBigDecimal},x == ${send1:FString},x == ${send1:FByteEnum},x == ${send1:FCharacterEnum},x == ${send1:FShortEnum},x == ${send1:FIntegerEnum},x == ${send1:FStringEnum}
+receive7,fake,receive,1000,,,TestAML,SimpleMessage,,,,${send1:FByte} + ${send2:FByte},${send1:FCharacter} + ${send2:FCharacter},${send1:FShort} + ${send2:FShort},${send1:FInteger} + ${send2:FInteger},${send1:FLong} + ${send2:FLong} + %{static_long},${send1:FFloat} + ${send2:FFloat},${send1:FDouble} + ${send2:FDouble},${send1:FBigDecimal} + ${send2:FBigDecimal},"${send1:FString} + ${send2:FString} + %{static_string} + "" hello world""",1,a,2,10,Enum1
+receive8,fake,receive,1000,,,TestAML,SimpleMessage,,,,,,,,,,,,"x ~= ${send1:FString} + ${send2:FString} + %{static_string} + "" .* world""",,,,,
+,,test case end,,,,,,,,,,,,,,,,,,,,,,

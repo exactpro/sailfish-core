@@ -1,0 +1,121 @@
+.eps-statistics-tag {
+	vertical-align: middle;
+    padding: 2px 4px 2px;
+    margin: 0 4px 4px 0;
+    display: inline-block;
+    background-color: #CCC;
+    line-height: 1;
+    border-radius: .25em;
+    font-weight: bold;
+    font-size: 1em;
+    color: #FFF;
+}
+
+.eps-statistics-tag .ui-selectcheckboxmenu,
+.eps-statistics-tag .ui-selectcheckboxmenu .ui-selectcheckboxmenu-label-container,
+.eps-statistics-tag .ui-selectcheckboxmenu .ui-selectcheckboxmenu-label-container .ui-state-hover,
+.eps-statistics-tag .ui-selectcheckboxmenu .ui-selectcheckboxmenu-trigger {
+	background: inherit;
+	color: inherit;
+	border: none;
+}
+
+.eps-statistics-tag .ui-selectcheckboxmenu .ui-selectcheckboxmenu-label {
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+
+.eps-statistics-tag .ui-selectcheckboxmenu .ui-selectcheckboxmenu-trigger span {
+    margin-top: 0px;
+}
+
+.eps-statistics-tag.turquoise {
+	background-color: #1abc9c;
+}
+
+.eps-statistics-tag.preaver {
+	background-color: #3498db;
+}
+
+.eps-statistics-tag.amethyst {
+	background-color: #9DA9C3/*#9b59b6*/;
+}
+
+.eps-statistics-tag.wet-asphalt {
+	background-color: #34495e;
+}
+
+.eps-statistics-tag.green-sea {
+	background-color: #16a085;
+}
+
+.eps-statistics-tag.belize-hole {
+	background-color: #2980b9;
+}
+
+.eps-statistics-tag.wisteria {
+	background-color: #BC9ABD/*#8e44ad*/;
+}
+
+.eps-statistics-tag.sun-flower {
+	background-color: #94C3C3/*#f1c40f*/;
+}
+
+.eps-statistics-tag.carrot {
+	background-color: #EA8E9C/*#e67e22*/;
+}
+
+.eps-statistics-tag.alizarin {
+	background-color: #e74c3c;
+}
+
+.eps-statistics-tag.clouds {
+	background-color: #ecf0f1;
+	color: #7D7D7D;
+}
+
+.eps-statistics-tag.orange {
+	background-color: #f39c12;
+}
+
+.eps-statistics-tag.silver {
+	background-color: #bdc3c7;
+	color: #fff;
+}
+
+.eps-statistics-tag .ui-icon {
+	background-image: url("#{resource['sf:css/jqueryui/images/ui-icons_true_ffffff_256x240.png']}");
+}
+
+.eps-statistics-tag.clouds .ui-icon {
+	background-image: url("#{resource['sf:css/jqueryui/images/ui-icons_222222_256x240.png']}");
+}
+
+
+.eps-group {
+	margin-bottom: 1em;
+    
+    padding: 10px;
+    display: block;
+    background-color: #FFF;
+    
+    border: 1px solid #CCC;
+}
+
+.eps-group-header {
+	color: #555;
+    font-size: 1.2em;
+    font-weight: bold;
+    
+    background-color: #F7F7F7;
+    border-bottom: solid 1px #E0E0E0;
+    margin: -10px -10px 10px -10px;
+    padding: 0.3em;
+    position: relative;
+    
+}
+
+.eps-group-tags {
+	white-space: normal;
+}
+

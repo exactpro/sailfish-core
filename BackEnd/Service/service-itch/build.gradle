@@ -1,0 +1,75 @@
+archivesBaseName = "service-itch"
+
+configurations {
+    jaxb
+}
+
+dependencies {
+    if (incremental_build) {
+        provided_zip_data "com.exactpro.sf:sailfish-core:${artifactCoreVersion}:data@zip"
+
+        testCompile group: 'com.exactpro.sf', name: 'service-tcpip', version: "${artifactVersion}"
+        testCompile "com.exactpro.sf:service-tcpip:${artifactVersion}:tests@jar"
+	} else {
+        provided_data files("${project(':BackEnd:Core:sailfish-core').projectDir}/src/main/workspace/")
+
+		testCompile project(':BackEnd:Service:service-tcpip')
+		testCompile project(path:':BackEnd:Service:service-tcpip', configuration: 'testArtifacts')						
+	}
+	compile 'com.jcraft:jzlib:1.1.3'
+	
+	jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
+    jaxb 'javax.xml:jsr173:1.0'
+    jaxb 'javax.activation:activation:1.1.1'
+}
+
+// Define properties
+ext {
+    xsdDir = file("${mainDir}/xsd")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir genJavaDir
+        }
+    }
+}
+
+task createDir {
+    doLast {
+	   genJavaDir.mkdirs()
+   }
+}
+
+task generateJavaFromXsd (dependsOn: 'createDir') {
+    inputs.file file("${xsdDir}/itch_preprocessors.xsd")
+
+    outputs.files fileTree("${genJavaDir}/com/exactpro/sf/services/itch/configuration/").include('*.java')
+
+	doLast {
+	    ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
+
+        ant.xjc(schema: "${xsdDir}/itch_preprocessors.xsd", destdir: "${genJavaDir}",
+                package: 'com.exactpro.sf.services.itch.configuration', removeOldOutput: 'yes')
+        {
+            produces(dir: "${genJavaDir}/com/exactpro/sf/services/itch/configuration/", includes: '*')
+        }
+	}
+}
+
+test {
+    include 'com/exactpro/sf/services/itch/**/Test*.class'
+
+    exclude '**/*$*.class'
+    
+    systemProperties "basedir": "${projectDir}"    
+    
+    jvmArgs '-XX:MaxPermSize=256m'    
+    
+
+}
+
+compileJava {
+    dependsOn.add("generateJavaFromXsd")
+}

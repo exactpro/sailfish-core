@@ -1,0 +1,69 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<div class="eps-content-block">
+
+<h:form id="ndStatusForm">
+<span id="nd-status" class="eps-status-label eps-nd-status-#{netDumperBean.status}">#{netDumperBean.status}</span>
+</h:form>
+
+<h3>NetDumper options</h3>
+
+<div>
+<h:form id="ndOptionsForm">
+	<h:panelGrid columns="2" cellpadding="5">
+		<p:outputLabel for="enabled" value="Enable recording for services' lifetime: " />
+		<p:selectBooleanCheckbox id="enabled" value="#{netDumperBean.options.enabled}" />
+	
+		<p:outputLabel for="rootHost" value="RESTDumper host: " />
+		<p:inputText id="rootHost" value="#{netDumperBean.options.rootHost}" />
+  
+        <p:outputLabel for="rootPort" value="RESTDumper port: " />
+        <p:inputText id="rootPort" value="#{netDumperBean.options.rootPort}" />
+	</h:panelGrid>
+	<p:commandButton value="Apply options" action="#{netDumperBean.applyOptions}" update=":ndStatusForm" />
+</h:form>
+</div>
+
+<h3>Recorded files</h3>
+
+<div id="ndFiles">
+<h:form id="ndFilesForm">
+	<p:dataTable id="netdumper-files-table" value="#{sfContext.netDumperService.recordedFiles}" var="file"
+    	styleClass="sf-table eps-records-table nd-table" filteredValue="#{netDumperBean.filteredFiles}" widgetVar="ndFileTable"
+    	sortBy="#{file.name}" sortOrder="descending">
+      			
+      	<f:facet name="header">
+      		Recent Records
+      	</f:facet>
+      			
+      	<p:column headerText="Name" filterBy="#{file.name}" filterStyle="float: right" style="text-align: left" filterMatchMode="contains">
+      		<f:facet name="header">
+      			Name
+      		</f:facet>
+      		<f:facet name="filter">
+      			<p:inputText widgetVar="ndFileFilter" onkeyup="PF('ndFileTable').filter()"/>
+      		</f:facet>		
+      		<h:outputText value="#{file.name}"/>
+      	</p:column>
+      	
+      	<p:column headerText="Size" style="text-align: right">
+      		<h:outputText value="#{netDumperBean.getFormattedFileSize(file)}"/>
+      	</p:column>
+      	
+      	<p:column headerText="Action" style="width: 50px; text-align: right">
+      		<p:commandLink ajax="false" styleClass="eps-record-command-link ui-icon ui-icon-circle-arrow-s"
+      			title="Download file">
+      			<p:fileDownload value="#{netDumperBean.downloadFile(file)}" />
+      		</p:commandLink>
+      	</p:column>
+	</p:dataTable>
+</h:form>
+</div>
+
+</div>
+
+</html>

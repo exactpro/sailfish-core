@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="TestAML">
+    <fields>
+        <field type="java.lang.Integer" id="Integer" name="integer"/>
+        <field reference="Integer" id="IntegerEnum" name="IntegerEnum">
+            <value name="One">1</value>
+            <value name="Two">2</value>
+        </field>
+    </fields>
+    <messages>
+        <message name="Message">
+            <field reference="IntegerEnum" name="Simple"/>
+            <field isCollection="true" reference="IntegerEnum" name="Collection"/>
+            <field reference="NestedMessage" name="NestedMessage"/>
+            <field isCollection="true" reference="NestedMessage" name="NestedMessageCollection"/>
+        </message>
+        <message id="NestedMessage" name="NestedMessage">
+            <field reference="IntegerEnum" name="NestedSimple"/>
+            <field isCollection="true" reference="IntegerEnum" name="NestedCollection"/>
+        </message>
+    </messages>
+</dictionary>

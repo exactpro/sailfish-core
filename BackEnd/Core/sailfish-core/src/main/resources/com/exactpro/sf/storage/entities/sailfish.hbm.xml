@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.exactpro.sf.storage.entities">
+
+	<class name="StoredEnvironment" table="ENVIRONMENTS">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredEnvironmentSequence</param>
+			</generator>
+		</id>
+
+		<property name="name" column="NAME" unique="true" />
+
+		<set name="services" inverse="true" lazy="true" cascade="all" fetch="join">
+			<key column="environment_id" />
+			<one-to-many class="StoredService" />
+		</set>
+	</class>
+
+	<class name="StoredService" table="SERVICES">
+		<id name="id" column="ID">
+			<generator class="assigned" />
+		</id>
+
+		<version name="version" column="VERSION" unsaved-value="null" />
+
+		<property name="name" column="NAME" />
+		<property name="type" column="TYPE"/> <!-- service URI -->
+		<property name="serviceHandlerClassName" column="HANDLER" />
+
+		<many-to-one name="environment" class="StoredEnvironment"
+			column="ENVIRONMENT_ID" cascade="save-update" />
+
+		<map name="parameters" table="SERVICEPARAMETERS" cascade="all">
+			<key column="id"/>
+			<index column="parameter_name" type="string" length="50"/>
+			<element column="parameter_value" type="string" length="32672"/>
+		</map>
+	</class>
+
+	<class name="StoredServiceEvent" table="SF_SERVICE_EVENTS">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredServiceEventSequence</param>
+			</generator>
+		</id>
+		<property name="serviceId" column="SERVICEID" />
+        <property name="occured" column="OCCURED" type="com.exactpro.sf.storage.TimestampToString"/>
+		<property name="message" column="MESSAGE" length="32672" />
+		<property name="details" column="DETAILS" length="32672" />
+		<property name="type" column="TYPE" />
+		<property name="level" column="LEVEL" />
+	</class>
+
+	<class name="StoredMessage" table="MESSAGES">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredMessageSequence</param>
+			</generator>
+		</id>
+		<property name="namespace" column="MSG_NAMESPACE" />
+		<property name="name" column="MSG_NAME" index="IDX_MSG_NAME" />
+		<property name="from" column="FROM_SERVICE" index="IDX_FROM_SRV" />
+		<property name="to" column="TO_SERVICE" index="IDX_TO_SRV" />
+        <property name="arrived" column="MSG_TIMESTAMP" index="IDX_ARRIVED"
+                  type="com.exactpro.sf.storage.TimestampToString"/>
+		<property name="admin" column="IS_ADMIN" type="boolean" index="IDX_ADMIN" />
+		<property name="humanMessage" column="HUMAN_MSG" length="32672" >
+            <type name="com.exactpro.sf.storage.TruncatedString">
+                <param name="length">32672</param>
+            </type>
+		</property>
+        <property name="rejectReason" column="REJECT_REASON" length="512"/>
+		<property name="jsonMessage" column="JSON_MSG" length="32672" >
+            <type name="com.exactpro.sf.storage.TruncatedString">
+                <param name="length">32672</param>
+            </type>
+		</property>
+		<property name="rawMessage" column="RAW_MSG" length="32672" />
+		<property name="subMessage" column="IS_SUBMESSAGE" type="boolean"/>
+		<property name="serviceId" column="service_id"/>
+		<property name="storedId" column="STORED_ID" type="long"/>
+		<set name="fields" inverse="true" cascade="all">
+			<key column="MESSAGE_ID" />
+			<one-to-many class="StoredField" />
+		</set>
+		
+	</class>
+
+	<class name="StoredField" table="FIELDS">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredFieldSequence</param>
+			</generator>
+		</id>
+		<property name="name" column="FLD_NAME" />
+		<property name="strValue" column="STRVAL" />
+		<property name="javaClass" column="JAVA_CLASS" />
+		<property name="value" column="VALUE" />
+		<property name="simple" column="SIMPLE" />
+		<many-to-one name="parentMsg" column="MESSAGE_ID"
+			not-null="true" />
+		<many-to-one name="subMessage" class="StoredMessage"
+			column="SUBMESSAGE_ID" cascade="save-update" unique="true" />
+	</class>
+
+	<class name="StoredScriptRun" table="STOREDSCRIPTRUNS">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredScriptRunSequence</param>
+			</generator>
+		</id>
+		<property name="start" column="START_TIME" />
+		<property name="scriptName" column="SCRIPT_NAME" />
+		<property name="description" column="DESCRIPTION" />
+		<property name="user" column="USERNAME" />
+		<property name="machineIP" column="MACHINEIP" />
+		<property name="hostName" column="HOSTNAME" />
+		<many-to-one name="tester" class="StoredTester" column="TESTER_ID"
+			cascade="all" not-null="false" />
+	</class>
+
+	<class name="StoredTester" table="TESTER">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredTesterSequence</param>
+			</generator>
+		</id>
+		<property name="name" column="NAME" />
+		<property name="password" column="PASSWORD" />
+		<list name="runs" inverse="true" lazy="true" cascade="all">
+			<key column="TESTER_ID" />
+			<index column="INDEX_ID" />
+			<one-to-many class="StoredScriptRun" />
+		</list>
+	</class>
+
+	<class name="StoredMatrix" table="MATRICES">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredMatrixSequence</param>
+			</generator>
+		</id>
+		<property name="name" column="NAME" />
+		<property name="creator" column="CREATOR" />
+		<property name="date" column="DATE" />
+		<property name="filePath" column="FILEPATH" />
+		<property name="description" column="DESCRIPTION" />
+		<property name="scriptSettindsPath" column="SETTINGSPATH" />
+		<property name="link" column="LINK" />
+		<property name="provider" column="PROVIDER" />
+		<property name="language" column="LANGUAGE" />
+		<list name="scriptRuns" inverse="true" lazy="true" cascade="all">
+			<key column="MATRIX_ID" />
+			<index column="RUN_INDEX" />
+			<one-to-many class="StoredScriptRun" />
+		</list>
+	</class>
+	
+	<class name="StoredOption" table="OPTIONS">
+		<id name="id" column="ID">
+			<generator class="native">
+				<param name="sequence">StoredOptionSequence</param>
+			</generator>
+		</id>
+		<property name="optionName" column="OPTION_NAME" unique="true" not-null="true"/>
+		<property name="optionValue" column="OPTION_VALUE" />
+	</class>
+</hibernate-mapping>

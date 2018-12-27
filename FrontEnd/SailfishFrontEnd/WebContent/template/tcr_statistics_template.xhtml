@@ -1,0 +1,38 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:o="http://omnifaces.org/ui"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:ui="http://java.sun.com/jsf/facelets">
+    
+    <p:dataTable id="resultsTable" value="#{tcrHistoryBean.lastResult}" var="row" styleClass="eps-statistics-table">
+    				
+		<f:facet name="header">
+			Run History 
+			<h:outputText value="[Test Case: #{tcrHistoryBean.selectedTestCase.testCaseId}]" 
+				rendered="#{not empty tcrHistoryBean.selectedTestCase}"/>
+		</f:facet>
+		
+		<p:column headerText="Script">
+			<h:outputText value="#{row.matrixName}"/>
+		</p:column>
+		<p:column headerText="Started At">
+			<h:outputText value="#{row.started}"/>
+		</p:column>
+		<p:column headerText="Duration">
+			<h:outputText value="#{row.durationString}" styleClass="eps-duration #{tcrHistoryBean.getDurationClass(row.duration)}"/>
+		</p:column>
+		<p:column headerText="Status" style="width: 7em;">
+			<h:outputText value="PASSED" rendered="#{row.status == 'PASSED'}" styleClass="eps-passed-label"/>
+            <h:outputText value="CONDITIONALLY PASSED" rendered="#{row.status == 'CONDITIONALLY_PASSED'}" styleClass="eps-conditionally-passed-label"/>
+			<h:outputText value="FAILED" rendered="#{row.status == 'FAILED'}" styleClass="eps-failed-label"/>
+		</p:column>
+		<p:column headerText="Fail Reason">
+			<h:outputText value="#{row.failReason}" title="#{row.failReason}"/>
+		</p:column>
+	
+	</p:dataTable>
+    
+    
+</ui:composition>

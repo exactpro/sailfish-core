@@ -1,0 +1,1 @@
+ALTER TABLE stactionruns ADD COLUMN `tag` varchar(255) DEFAULT NULL AFTER `status`;

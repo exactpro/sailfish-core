@@ -1,0 +1,22 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+
+	<xsd:complexType name="ServiceDefinition">
+		<xsd:sequence>
+			<xsd:element name="className" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="settingsClassName" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="description" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="dictionary" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+            <xsd:element name="dictionaryValidatorFactoryName" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="name" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:element name="Services">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Service" type="ServiceDefinition" minOccurs="0" maxOccurs="unbounded"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

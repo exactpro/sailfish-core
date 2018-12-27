@@ -1,0 +1,154 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"  
+    xmlns:h="http://java.sun.com/jsf/html"  
+    xmlns:f="http://java.sun.com/jsf/core"  
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:o="http://omnifaces.org/ui"
+	template="/template/statisticsReport.xhtml">
+
+    <ui:define name="windowTitle">
+        Statistics
+    </ui:define>       
+    
+    <ui:define name="otherScripts">
+        <h:outputStylesheet library="sf" name="css/statistics-tags.css"/>
+		<h:outputScript library="sf" name="js/statistics.js"/>
+		
+	</ui:define>
+
+    <ui:define name="statistics-content">
+    	
+    	<ui:fragment rendered="#{not statReportingBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{statReportingBean.statisticsDbAvailable}">
+	    	<div class="eps-report-parameters eps-card">
+	    		
+	    		<div class="eps-params-header">Parameters</div>
+	    		
+	    		<h:form id="params-form">
+                    <h:panelGrid columns="2" cellpadding="5">
+                        <h:outputLabel for="report-uri" value="Report type"/>
+                        <p:selectOneMenu id="report-uri" style="width: 26em;"
+                                         value="#{statReportingBean.currentReportURI}">
+                            <f:selectItems value="#{statReportingBean.reportHandlers}"/>
+                            <f:ajax event="change" render="results-form"
+                                    listener="#{statReportingBean.reportTypeChanged}"/>
+                        </p:selectOneMenu>
+                    </h:panelGrid>
+	    			<h:panelGrid columns="8" cellpadding="5">
+		    			<h:outputLabel for="from" value="From" />
+		    			<p:calendar id="from" value="#{statReportingBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                    requiredMessage="'From' is empty"
+                                    timeZone="UTC"/>
+
+		    			<h:outputLabel for="to" value="To" />
+		    			<p:calendar id="to" value="#{statReportingBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                    requiredMessage="'To' is empty"
+                                    timeZone="UTC"/>
+
+		    			<h:outputLabel for="sfInstancesMenu" value="SF Instances" />
+		    			<p:selectCheckboxMenu id="sfInstancesMenu" value="#{statReportingBean.selectedSfInstances}" label="Select"
+	                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
+	                               required="true" requiredMessage="Select at least one SF instance">
+				            <f:selectItems value="#{statReportingBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
+				        </p:selectCheckboxMenu>
+                        <h:outputLabel for="tags-autocomplete" value="Tags" />
+                        <p:autoComplete id="tags-autocomplete" value="#{statReportingBean.tagToAdd}"
+                                        completeMethod="#{statReportingBean.completeTag}"
+                                        var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true"
+                                        placeholder="type to add" emptyMessage="No matching tags found">
+
+                            <p:ajax event="itemSelect" listener="#{statReportingBean.onTagSelect}" execute="@this" update="tags-autocomplete selected-tags"/>
+                            <o:converter converterId="omnifaces.ListConverter" list="#{statReportingBean.allTags}" />
+                            <p:column>
+                                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+                            </p:column>
+                        </p:autoComplete>
+		    			
+		    		</h:panelGrid>
+
+                    <div class="selected-tags-wrapper" style="padding-left: 5px;">
+                        <h:panelGroup id="selected-tags" style="white-space: normal;">
+                            <ui:repeat var="tag" value="#{statReportingBean.tags}">
+                                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+                                    #{tag.name}
+                                    <p:commandLink action="#{statReportingBean.removeTag(tag)}" update=":params-form:selected-tags"
+                                                   styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+                                </span>
+                            </ui:repeat>
+                        </h:panelGroup>
+                    </div>
+		    		
+		    		<div class="eps-params-separator"></div>
+		    		
+		    		<p:commandButton value="Generate" action="#{statReportingBean.generateReport}" update=":msgForm:messages :params-form :results-form"
+		    			disabled="#{not statReportingBean.statisticsDbAvailable}"
+		    			onclick="showLoading('.eps-report-results', '#loading-bl')"
+		    			oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+		    		<p:commandButton value="Export" ajax="false" id="export-button" rendered="#{not empty statReportingBean.lastResult}"
+	                	update=":msgForm:messages" action="#{statReportingBean.getResultsInCSV}">
+					</p:commandButton>
+		    		
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    	<ui:include src="loadingCard.xhtml">
+	    		<ui:param name="blockId" value="loading-bl" />
+	    	</ui:include>
+	    	
+	    	<div class="eps-report-results eps-card" style="max-height: none; overflow: visible;">
+	    	
+	    		<h:form id="results-form">
+	    		
+	    			<p:dataTable id="resultsTable" value="#{statReportingBean.lastResult}" var="row" 
+	    				rowStyleClass="#{row.matrixRow ? 'eps-matrix-info-row' : ''}" styleClass="eps-statistics-table"
+	    				scrollable="true" scrollHeight="50">
+
+                        <p:columns value="#{statReportingBean.reportHeader}" var="column" style="width: 7em; height: 3em;">
+                            <f:facet name="header">
+                                <h:outputText value="#{column}"/>
+                            </f:facet>
+                            <h:outputText value="#{row.get(column)}"
+                                          rendered="#{row.matrixRow or row.get(column).simple}"/>
+
+                            <p:commandLink value="#{row.get(column)}"
+                                           rendered="#{(not row.matrixRow) and (row.get(column).testCaseId) and (not (row.get(column) eq '_unknown_tc_'))}"
+                                           actionListener="#{tcrHistoryBean.selectTestCase(row.get(column))}"
+                                           action="#{tcrHistoryBean.generate}"
+                                           update=":tcrHistoryForm"
+                                           oncomplete="PF('tcrHistoryDlg').show();"
+                                           styleClass="eps-dialog-open-link"/>
+
+                            <h:outputText value="#{row.get(column)}"
+                                          rendered="#{(not row.matrixRow) and row.get(column).runStatus}"
+                                          styleClass="#{row.get(column) eq 'CONDITIONALLY PASSED' ?
+                                           'eps-conditionally-passed-label' : row.get(column) eq 'PASSED' ? 'eps-passed-label' : 'eps-failed-label'}"/>
+                        </p:columns>
+	    			</p:dataTable>
+	    			
+	    		</h:form>
+	    		
+	    	</div>
+    	
+    	</ui:fragment>
+    	
+    	<h:form id="tcrHistoryForm" >
+    		
+    		<p:dialog id="tcrHistoryDialod" widgetVar="tcrHistoryDlg" width="750">
+    			
+    			<ui:include src="/template/tcr_statistics_template.xhtml">
+	                    
+	            </ui:include>
+    			
+    		</p:dialog>
+    		
+    	</h:form>
+    	
+    </ui:define>
+
+</ui:composition>

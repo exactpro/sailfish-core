@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:sf="http://java.sun.com/jsf/composite/sf"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+
+<composite:interface>
+	<composite:attribute name="title" />
+	<composite:attribute name="node" />
+</composite:interface>
+
+<composite:implementation>	
+	
+	<p:outputPanel id="Err" widgetVar="Err" style="width: 700px;">
+    				<ui:fragment rendered="#{'selectedList' ne cc.attrs.title.toString()}">
+    					<div style="position: relative;">
+    						<h3>#{bbBean.readable(cc.attrs.title)}</h3>
+    					</div>
+    				</ui:fragment>
+    				<ui:fragment rendered="#{'selectedList' == cc.attrs.title.toString()}">
+    					<div style="position: relative;">
+    						<h3 style="margin-bottom: 0.5em">Script List was rejected</h3>
+    					</div>
+    				</ui:fragment>
+    				<p:outputPanel id="ErrLink" widgetVar="ErrLink" rendered="#{not bbBean.isOnlyLeafsInTree(cc.attrs.node)}">
+    					<p:commandLink action="#{bbBean.collapsingORexpanding(cc.attrs.title)}" update="Err" style="position: absolute;
+																																										right: 30px;
+																																										cursor: pointer;
+																																										font-size: small;
+																																										color: #3F8FD2;
+																																										text-decoration: none;
+    																																									border-bottom: 1px dashed #3F8FD2;">
+    						#{bbBean.isExpanded(cc.attrs.title)}
+    					</p:commandLink>
+    				</p:outputPanel>
+    				<p:tree value="#{cc.attrs.node}" var="node" dynamic="true" cache="false">
+    						<p:ajax listener="#{bbBean.onNodeExpand}" update="@previous" event="expand"/>
+    						<p:ajax listener="#{bbBean.onNodeCollapse}" update="@previous" event="collapse"/>
+        				<p:treeNode>
+        					<ui:fragment rendered="#{'selectedList' ne cc.attrs.title.toString()}">
+    							<h:outputText value="#{node}" style="color: #{bbBean.errorColor(cc.attrs.title)}"/>
+    						</ui:fragment>
+    						<ui:fragment rendered="#{'selectedList' == cc.attrs.title.toString()}">
+    							<h:outputText value="#{node}" style="color: red"/>
+    						</ui:fragment>
+        				</p:treeNode>
+    				</p:tree>
+    			</p:outputPanel>
+		
+</composite:implementation>
+</html>

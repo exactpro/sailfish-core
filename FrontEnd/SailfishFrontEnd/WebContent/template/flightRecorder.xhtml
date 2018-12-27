@@ -1,0 +1,139 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+      
+      <ui:fragment rendered="#{not sfContext.flightRecorderService.canRecord}">
+      
+      	<div class="options-missing-message">
+      		<h:outputText escape="false" value="#{sfContext.flightRecorderService.errorMessage}"/>
+      	</div>
+      	
+      </ui:fragment>
+      
+      <ui:fragment rendered="#{sfContext.flightRecorderService.canRecord}">
+      	
+      	<div class="eps-recorder-options">
+      	
+	      	<h:form id="froptionsForm">
+	      	
+		      	<h:panelGrid columns="2" cellpadding="5">
+		      		
+		      		<p:outputLabel for="duration" value="Duration (sec): " />
+		      		
+		      		<p:inputText id="duration" value="#{flightRecorderBean.duration}"/>
+		      		
+		      		<p:outputLabel for="continiously-checkbox" value="Continuously: "/>
+		      		
+		      		<p:selectBooleanCheckbox id="continiously-checkbox" value="#{flightRecorderBean.continiously}"/>
+		      		
+		      		<p:commandLink value="Advanced settings" onclick="PF('advancedRecOptDialog').show();" styleClass="eps-outer-link eps-ajax-link"/>
+		      		
+		      	</h:panelGrid>
+		      	
+		      	<p:commandButton value="Start Recording" action="#{flightRecorderBean.startRecording}"
+		      		update=":froptionsForm " rendered="#{not flightRecorderBean.continiousRecordingStarted}"/>
+		      		
+		      	<p:commandButton value="Stop Recording"  action="#{flightRecorderBean.stopContiniousRecording}"
+		      		update=":froptionsForm " rendered="#{flightRecorderBean.continiousRecordingStarted}"/>
+	      	
+	      	</h:form>
+      	
+      	</div>
+      	
+      	<div class="records-list">
+      	
+      		<h:form id="recordsForm">
+      		
+      			<p:poll autoStart="true" interval="3" update="flight-records-table" process="@this"/>
+      			
+      			<p:dataTable id="flight-records-table" value="#{sfContext.flightRecorderService.recordedFiles}" var="file"
+      				styleClass="sf-table eps-records-table"
+      				rowStyleClass="#{flightRecorderBean.isRecordingFinished(file) ? 'eps-recording-status-finished' : 'eps-recording-status-recording'}">
+      			
+      				<f:facet name="header">
+      					Recent Records
+      				</f:facet>
+      			
+      				<p:column headerText="Name">
+      					
+      					<h:outputText value="#{file.name}"/>
+      					
+      				</p:column>
+      				
+      				<p:column headerText="Status">
+      					
+      					<h:outputText value="Recording..." styleClass="eps-status-text"
+      						rendered="#{not flightRecorderBean.isRecordingFinished(file)}" />
+      					<h:outputText value="Finished"  styleClass="eps-status-text"
+      						rendered="#{flightRecorderBean.isRecordingFinished(file)}"     />
+      					
+      				</p:column>
+      				
+      				<p:column headerText="From">
+      					
+      					<h:outputText value="#{file.from}">
+      						<f:convertDateTime pattern="#{generalBean.defaultGuiDateFormat}" />
+      					</h:outputText>
+      					
+      				</p:column>
+      				
+      				<p:column headerText="To">
+      					
+      					<h:outputText value="#{file.to}" styleClass="record-to">
+      						<f:convertDateTime pattern="#{generalBean.defaultGuiDateFormat}" />
+      					</h:outputText> 
+      					
+      				</p:column>
+      				
+      				<p:column headerText="Size">
+      					
+      					<h:outputText value="#{flightRecorderBean.formatFileSize(file.size)}" />
+      					
+      				</p:column>
+      				
+      				<p:column headerText="">
+      				
+      					<p:commandLink ajax="false" styleClass="eps-record-command-link ui-icon ui-icon-circle-arrow-s"
+      						rendered="#{flightRecorderBean.isRecordingFinished(file)}" title="Download file">
+      						<p:fileDownload value="#{flightRecorderBean.downloadFile(file)}" />
+      					</p:commandLink>
+      					
+      					<p:commandLink action="#{flightRecorderBean.deleteFile(file)}" 
+      						styleClass="eps-record-command-link ui-icon ui-icon-circle-close"
+      						rendered="#{flightRecorderBean.isRecordingFinished(file)}" title="Delete file"/>
+      					
+      				</p:column>
+      			
+      			</p:dataTable>
+      			
+      		</h:form>
+      		
+      	</div>
+      	
+      	<h:form id="advancedRecOptForm">
+      	
+	      	<p:dialog id="advanced-Rec-Opt-Dialog" widgetVar="advancedRecOptDialog" header="Advanced options">
+	      		
+	      		<h:panelGrid id="advancedRecOptPanel" columns="2" cellpadding="5">
+	      			
+	      			<p:outputLabel for="recordsFolder" value="Records folder: " />
+		      		
+		      		<p:inputText id="recordsFolder" value="#{flightRecorderBean.settings.recordsFolder}" styleClass="eps-rec-opt-input"/>
+	      			
+	      			<p:outputLabel for="jdkFolder" value="JDK folder: " />
+		      		
+		      		<p:inputText id="jdkFolder" value="#{flightRecorderBean.settings.jdkPath}" styleClass="eps-rec-opt-input"/>
+		      		
+		      		<p:commandButton value="Apply" action="#{flightRecorderBean.applySettings}" />
+		      		
+	      		</h:panelGrid>
+	      		
+	      	</p:dialog>
+      	
+      	</h:form>
+      	
+      </ui:fragment>
+      
+</html>

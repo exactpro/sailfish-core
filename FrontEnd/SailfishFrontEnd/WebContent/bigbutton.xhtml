@@ -1,0 +1,726 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+ "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:o="http://omnifaces.org/ui"
+      xmlns:sf="http://java.sun.com/jsf/composite/sf">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>  
+    <title>Big Button :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"   />
+
+    <h:outputStylesheet library="sf" name="css/estyles.css" />
+    <h:outputStylesheet library="sf" name="css/menu.css"    />
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"  />
+    <h:outputStylesheet library="sf" name="css/bigbutton.css"  />
+    <h:outputStylesheet library="sf" name="css/statistics-tags.css"/>
+    <h:outputStylesheet library="sf" name="css/sf.css"  />
+	
+	<script>
+	
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+	
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+	
+  	</script>    
+   	
+   	<h:outputScript library="primefaces" name="jquery/jquery.js" />
+   	<h:outputScript library="sf" name="js/menu.js"/>
+ 
+</h:head>
+<h:body styleClass="eps-application">
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <h:form id="messageForm">
+        <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true" />
+    </h:form>
+
+    <div class="eps-container">
+
+        <div class="eps-main">
+			
+			<h:form id="poll-form">
+                <p:poll listener="#{bbBean.refreshProgress}" interval="2" widgetVar="pfPoll" autoStart="true" onerror="PF('pfPoll').stop()"
+                        update=":progress-form :queue-form :rejected-form :execution-status-form :btn-wrapper :warn-form"/>
+					
+				<p:confirmDialog global="true" showEffect="fade" hideEffect="fade">
+			        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			    </p:confirmDialog>
+			</h:form>
+
+            <o:importConstants type="com.exactpro.sf.bigbutton.execution.BigButtonExecutionStatus"
+                               var="Status"/>
+
+            <o:importConstants type="com.exactpro.sf.bigbutton.execution.ExecutorState"
+                               var="ExState"/>
+
+            <o:importConstants type="com.exactpro.sf.scriptrunner.StatusType"
+                               var="StatusType"/>
+
+            <div class="columns">
+				
+				<div id="status-column">
+
+                    <div id="status">
+
+                        <div class="status-header">
+                            Big Button
+                        </div>
+
+                        <div id="upload-block" style="height: 30px">
+
+                            <h:form id="upload-form" enctype="multipart/form-data">
+
+                                <!--span class="upload-label">Upload library descriptor here:</span-->
+
+                                <p:fileUpload styleClass="bb-upload" value="#{bbBean.uploadedFile}" mode="simple" skinSimple="true"
+                                              required="true" requiredMessage="File not selected"
+                                              disabled="#{bbBean.progressView.status != Status.Inactive and bbBean.progressView.status != Status.Ready and bbBean.progressView.status != Status.Error and bbBean.progressView.currentTotalProgressPercent > 0}"/>
+
+                                <p:commandButton value="Submit" ajax="false" actionListener="#{bbBean.handleLibraryFileUpload}"
+                                                 style="float: right;"
+                                                 class="upload-form-btn"
+                                                 update=":parse-results-form :progress-form"
+                                                 rendered="#{empty bbBean.libraryImportResult and bbBean.progressView.status == Status.Inactive}"/>
+
+                            </h:form>
+
+                            <h:panelGroup id="btn-wrapper">
+                                <p:commandButton value="Reset" action="#{bbBean.reset}"
+                                                 update=":parse-results-form :upload-form :btn-wrapper"
+                                                 class="upload-form-btn"
+                                                 rendered="#{bbBean.progressView.status != Status.Inactive}"/>
+                            </h:panelGroup>
+
+                        </div>
+
+                        <div id="parse-results">
+
+                            <h:form id="parse-results-form">
+
+                                <ui:fragment rendered="#{not empty bbBean.libraryImportResult}">
+
+                                    <!--div>Executors: #{bbBean.libraryImportResult.numExecutors}</div>
+                                    <div>Scripts #{bbBean.libraryImportResult.numScripts}   </div>
+                                    <div>Services #{bbBean.libraryImportResult.numServices}  </div-->
+
+                                    <ui:fragment rendered="#{bbBean.libraryImportResult.allErrorsQty ne 0}">
+                                        <div id="parse-errors">
+
+                                            <p:commandLink
+                                                    value="#{bbBean.libraryImportResult.allErrorsQty} errors include #{bbBean.libraryImportResult.criticalErrorsQty} critical"
+                                                    update=":errors-dialog-form" oncomplete="PF('errorsDialog').show()"
+                                                    styleClass="eps-ajax-link action-link"/>
+
+                                        </div>
+                                    </ui:fragment>
+
+                                </ui:fragment>
+
+                            </h:form>
+
+                        </div>
+
+                        <div id="execution-status-block">
+
+                            <h:form id="execution-status-form" prependId="false">
+
+                                <ui:fragment rendered="#{not empty bbBean.progressView.libraryFileName}">
+                                    <div style="text-align: center;">
+
+                                        <p:commandLink actionListener="#{bbBean.setListsCollection(bbBean.progressView.library.scriptLists)}"
+                                                       update=":lists-dialog-form:lists-dialog-table" oncomplete="PF('listsDialog').show()"
+                                                       styleClass="eps-ajax-link">
+                                            <h:outputText value="#{bbBean.progressView.libraryFileName}"/>
+                                        </p:commandLink>
+
+                                    </div>
+                                </ui:fragment>
+
+                                <p:progressBar value="#{bbBean.progressView.currentTotalProgressPercent}"
+                                               labelTemplate="#{bbBean.progressView.status}" displayOnly="true"
+                                               styleClass="execution-status-label"/>
+
+                                <ui:fragment rendered="#{not empty bbBean.progressView.errorText}">
+                                    <div class="error-message-block">
+                                        #{bbBean.progressView.errorText}
+                                    </div>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{bbBean.progressView.executionStatus != StatusType.NA}">
+                                    <div class="status-type-message-block #{bbBean.progressView.executionStatus.name().toLowerCase()}">
+                                        Big Button execution status: #{bbBean.progressView.executionStatus}
+                                    </div>
+                                </ui:fragment>
+
+
+                                <ui:fragment
+                                        rendered="#{bbBean.progressView.status != Status.Inactive and bbBean.progressView.status != Status.Error and bbBean.progressView.status != Status.Finished}">
+                                    <div id="bb-block">
+                                        <p:remoteCommand name="bbPressed" action="#{bbBean.bbPressed}"/>
+                                        <ui:fragment
+                                                rendered="#{bbBean.progressView.status == Status.Ready}">
+                                            <p:commandButton id="bbb-confirm"
+                                                             class="bb-control-btn"
+                                                             onclick="if (${bbBean.libraryImportResult.nonCriticalErrorsQty ne 0}) {PF('confirmDialog').show();}
+                                                                      else if(${bbBean.showCleanupDialog}) {PF('cleanupDialog').show();}
+                                                                      else {bbPressed();}" value=""
+                                                             disabled="#{bbBean.libraryImportResult.criticalErrorsQty ne 0}"
+                                                             update=":execute-confirmation-dialog-form"/>
+                                        </ui:fragment>
+
+                                        <ui:fragment
+                                                rendered="#{bbBean.progressView.status == Status.Running or bbBean.progressView.status == Status.Preparing}">
+                                            <p:commandButton value="" action="#{bbBean.pause}"
+                                                             update=":parse-results-form"
+                                                             class="bb-control-btn"
+                                                             id="bb-pause"/>
+                                        </ui:fragment>
+
+                                        <ui:fragment rendered="#{bbBean.progressView.status == Status.Pause}">
+                                            <p:commandButton value="" action="#{bbBean.resume}"
+                                                             update=":parse-results-form"
+                                                             class="bb-control-btn"
+                                                             id="bb-resume"/>
+                                        </ui:fragment>
+
+                                        <ui:fragment
+                                                rendered="#{bbBean.progressView.status == Status.Running or bbBean.progressView.status == Status.Pause or bbBean.progressView.status == Status.Preparing}">
+                                            <p:commandButton value="" action="#{bbBean.interrupt}"
+                                                             id="bb-stop"
+                                                             update=":parse-results-form">
+                                                <p:confirm header="Confirmation" message="Are you sure?" icon="ui-icon-alert"/>
+                                            </p:commandButton>
+                                        </ui:fragment>
+
+                                    </div>
+                                </ui:fragment>
+
+                                <ui:fragment
+                                        rendered="#{not empty bbBean.progressView.executionStatistics and bbBean.progressView.currentTotalProgressPercent > 0}">
+                                    <div class="execution-stats">
+                                        <div class="name-value-block">
+                                            <div class="stat-name">
+                                                Execution time:
+                                            </div>
+                                            <div class="stat-value">
+                                                #{bbBean.formatDuration(bbBean.progressView.executionStatistics.started,
+                                                    bbBean.progressView.executionStatistics.finished)}
+                                            </div>
+                                        </div>
+
+                                        <div class="name-value-block">
+                                            <div class="stat-name">
+                                                Passed TCs:
+                                            </div>
+                                            <div class="stat-value">
+                                                #{bbBean.progressView.executionStatistics.numPassedTcs}
+                                            </div>
+                                        </div>
+
+                                        <div class="name-value-block">
+                                            <div class="stat-name">
+                                                Conditionally Passed TCs:
+                                            </div>
+                                            <div class="stat-value">
+                                                #{bbBean.progressView.executionStatistics.numCondPassedTcs}
+                                            </div>
+                                        </div>
+
+                                        <div class="name-value-block">
+                                            <div class="stat-name">
+                                                Failed TCs:
+                                            </div>
+                                            <div class="stat-value">
+                                                #{bbBean.progressView.executionStatistics.numFailedTcs}
+                                            </div>
+                                        </div>
+
+                                        <div class="name-value-block">
+                                            <div class="stat-name">
+                                                Num INIT_FAILED:
+                                            </div>
+                                            <div class="stat-value">
+                                                #{bbBean.progressView.executionStatistics.numInitFailed}
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </ui:fragment>
+
+
+                                <p:commandButton value="Download Report" ajax="false"
+                                                 rendered="#{bbBean.progressView.status == Status.Finished
+                                                                     or bbBean.progressView.status == Status.Error}">
+
+                                    <p:fileDownload value="#{bbBean.reportFile}"/>
+
+                                </p:commandButton>
+
+                            </h:form>
+
+                        </div>
+
+                    </div>
+                    <div id="status-scroll-container">
+                        <h:form id="warn-form">
+                            <p:remoteCommand name="showHideWarnings" action="#{bbBean.showHideWarnings}"
+                                             update=":warn-form"/>
+                            <ui:fragment rendered="#{not empty bbBean.progressView.warns}">
+                                <div class="#{bbBean.collapseWarnings ? 'queue-block-collapsed' : 'queue-block'}">
+                                    <div class="queue-block-header" onclick="showHideWarnings();">
+                                        Warnings
+                                    </div>
+                                    <ui:repeat var="warn" value="#{bbBean.progressView.warns}">
+                                        <div class="warn-message-block">
+                                            #{warn}
+                                        </div>
+                                    </ui:repeat>
+                                </div>
+                            </ui:fragment>
+
+                        </h:form>
+
+                        <h:form id="queue-form">
+                            <p:remoteCommand name="showHideQueue" action="#{bbBean.showHideQueue}"
+                                             update=":queue-form"/>
+
+                            <ui:fragment rendered="#{not empty bbBean.progressView.enqueued}">
+
+                                <div class="#{bbBean.collapseQueue ? 'queue-block-collapsed' : 'queue-block'}">
+                                    <div class="queue-block-header" onclick="showHideQueue();">
+                                        Queue
+                                    </div>
+
+                                    <ui:repeat value="#{bbBean.progressView.enqueued}" var="scriptList">
+
+                                        <sf:bbScriptList scriptList="#{scriptList}"/>
+
+                                    </ui:repeat>
+
+                                    <ui:fragment rendered="#{bbBean.progressView.numInQueue ne 0}">
+                                        <div class="more-label">
+                                            #{bbBean.progressView.numInQueue} more
+                                        </div>
+                                    </ui:fragment>
+
+                                </div>
+
+                            </ui:fragment>
+
+                        </h:form>
+
+                        <h:form id="rejected-form">
+                            <p:remoteCommand name="showHideRejectedQueue" action="#{bbBean.showHideRejectedQueue}"
+                                             update=":rejected-form"/>
+
+                            <ui:fragment rendered="#{not empty bbBean.progressView.rejected}">
+
+                                <div class="#{bbBean.collapseRejectedQueue ? 'queue-block-collapsed' : 'queue-block'}">
+                                    <div class="queue-block-header" onclick="showHideRejectedQueue();">
+                                        Rejected
+                                    </div>
+
+                                    <ui:repeat value="#{bbBean.progressView.rejected}" var="scriptList">
+
+                                        <sf:bbScriptList scriptList="#{scriptList}"/>
+
+                                    </ui:repeat>
+
+                                    <ui:fragment rendered="#{bbBean.progressView.numRejected ne 0}">
+                                        <div class="more-label">
+                                            #{bbBean.progressView.numInQueue} more
+                                        </div>
+                                    </ui:fragment>
+
+                                </div>
+
+                            </ui:fragment>
+
+                        </h:form>
+                    </div>
+				
+				</div>
+				
+				<div id="main-view">
+					
+					
+					<div id="progress-view">	
+						
+						<h:form id="progress-form" prependId="false">
+							
+							<ui:fragment rendered="#{not empty bbBean.progressView}">
+							
+								<div id="executed-row" class="progress-view-layer">
+									
+									<ui:repeat value="#{bbBean.progressView.allExecutors}" var="executorClient">
+										
+										<div class="executor-column lists">
+											
+											<!-- Executor -->
+											
+											<div class="executor">
+											
+												<div class="executor-header">
+												
+													<span class="executor-availability #{executorClient.executorReady}"
+														title="Availability"/>
+													
+													<a href="#{executorClient.executor.httpUrl}/scriptruns.xhtml"
+														class="executor-link" target="_blank">
+														#{executorClient.executor.name}
+													</a>
+													
+													<ui:fragment rendered="#{executorClient.state != ExState.Executing}">
+														<span class="executor-state-label #{executorClient.state}">#{executorClient.state}</span>
+													</ui:fragment>
+													
+													<ui:fragment rendered="#{executorClient.state == ExState.Executing}">
+														<p:progressBar displayOnly="true" styleClass="executor-progress"
+															value="#{bbBean.progressView.running.get(executorClient.executor).executionStatistics.executionPercent}" 
+															labelTemplate="#{executorClient.state}"/>
+													</ui:fragment>
+													
+												</div>
+												
+												<ui:fragment rendered="#{bbBean.progressView.running.containsKey(executorClient.executor)}">
+													<sf:bbScriptList scriptList="#{bbBean.progressView.running.get(executorClient.executor)}"/>
+												</ui:fragment>
+												
+												<ui:fragment rendered="#{not bbBean.progressView.running.containsKey(executorClient.executor)}">
+													
+													<ui:fragment rendered="#{not empty executorClient.errorText}">
+														<ui:repeat var="error" value="#{executorClient.errorText}">
+														<div class="error-message-block #{executorClient.state}">
+														
+															#{error}
+															
+														</div>
+														</ui:repeat>
+													</ui:fragment>
+													
+													<ui:fragment rendered="#{empty executorClient.errorText}">
+														<div class="executor-status">
+															#{executorClient.state}
+														</div>
+													</ui:fragment>
+													
+												</ui:fragment>
+												
+											</div> 
+											
+											<ui:repeat value="#{bbBean.progressView.executed.get(executorClient.executor)}" var="scriptList">
+												
+												<sf:bbScriptList scriptList="#{scriptList}"/>
+												
+											</ui:repeat>
+											
+											<ui:fragment rendered="#{bbBean.progressView.numExecuted.get(executorClient.executor) gt 0}">
+												<div class="more-label">
+													#{bbBean.progressView.numExecuted.get(executorClient.executor)} more
+												</div>
+											</ui:fragment>
+											
+										</div>
+										
+									</ui:repeat>
+									
+								</div>
+								
+								<!--div id="executors-row" class="progress-view-layer">
+									
+									<ui:repeat value="#{bbBean.progressView.allExecutors}" var="executorClient">
+										
+										<div class="executor-column">
+											
+											
+												
+										</div>
+										
+									</ui:repeat>
+									
+								</div-->
+								
+								
+							
+							</ui:fragment>
+							
+						</h:form>
+
+					
+					</div>
+				
+				</div>
+			
+			</div>
+
+        </div>
+
+    </div>
+    
+    <h:form id="list-dialog-form">
+    	<p:dialog id="list-dialog" widgetVar="listDialog" width="900">
+    		<f:facet name="header">
+    			List Details - 
+    			<h:outputText id="dialog-header" value="#{bbBean.selectedList.name}" />
+    		</f:facet>
+    		<p:scrollPanel mode="native" style="height: 600px; width: 880px; position: relative;">
+    			<ui:fragment rendered="#{bbBean.selectedList.rejected}">
+    				<sf:bbErrorNode title="#{'selectedList'}" node="#{bbBean.selectedListTreeNode}"/>
+    			</ui:fragment>
+			<p:dataTable id="list-details-table" var="row" value="#{bbBean.selectedList.scripts}"
+				styleClass="eps-data-table" scrollable="true" scrollHeight="500">
+				
+				<p:column headerText="Script">
+					<div>
+						<h:outputText value="#{row.shortName}" styleClass="dialog-script-name"/>
+					</div>
+					<div class="dialog-static-vars">
+						<ui:repeat value="#{row.apiOptions.staticVariables.entrySet().toArray()}" var="_entry">
+						        <h:outputText value="#{_entry.key}" styleClass="dialog-var-name"/> = 
+						        <h:outputText value="#{_entry.value}" styleClass="dialog-var-value"/>; 
+						</ui:repeat>
+					</div>
+					<div>
+						<ui:repeat var="tag" value="#{row.apiOptions.tags.toArray()}">
+		            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+		            			#{tag.name}
+		            		</span>
+		            	</ui:repeat>
+					</div>
+					
+				</p:column>
+				
+				<p:column headerText=""  style="width: 7em;">
+				
+					<div>
+						<h:graphicImage library="sf" styleClass="option-icon" title="Auto start"
+							name="images/lc_A#{row.apiOptions.autoStart eq true ? '' : '_gray'}.png"/>
+						<h:graphicImage library="sf" styleClass="option-icon" title="Continue if failed"
+							name="images/lc_C#{row.apiOptions.continueIfFailed eq true ? '' : '_gray'}.png"/>
+						<h:graphicImage library="sf" styleClass="option-icon" title="Ignore ask for continue"
+							name="images/lc_I#{row.apiOptions.ignoreAskForContinue eq true ? '' : '_gray'}.png"/>
+                        <h:graphicImage library="sf" styleClass="option-icon" title="Run NetDumper"
+                                        name="images/lc_N#{row.apiOptions.runNetDumper eq true ? '' : '_gray'}.png"/>
+
+						<h:graphicImage library="sf" styleClass="option-icon" title="AML 2"
+							name="images/lc_2.png" rendered="#{row.apiOptions.language eq 'AML v2'}"/>
+						<h:graphicImage library="sf" styleClass="option-icon" title="AML 3"
+							name="images/lc_3.png" rendered="#{row.apiOptions.language eq 'AML v3'}"/>
+						<h:graphicImage library="sf" styleClass="option-icon" title="AML version: auto"
+							name="images/lc_A_pink.png" rendered="#{row.apiOptions.language eq 'Auto'}"/>
+					</div>
+					<div>
+						<h:outputText value="Range: #{row.apiOptions.range}" title="Range"
+							rendered="#{not empty row.apiOptions.range}"/>
+					</div>
+					
+				</p:column>
+				
+				<p:column headerText="Status"  style="width: 9em;">
+					<h:outputText value="#{row.statistics.status}"/>
+				</p:column>
+				
+				<p:column headerText="Num. Passed" style="width: 8em;">
+					<h:outputText value="#{row.statistics.numPassed}"/>
+				</p:column>
+
+                <p:column headerText="Num. Cond. Passed" style="width: 8em;">
+                    <h:outputText value="#{row.statistics.numConditionallyPassed}"/>
+                </p:column>
+
+                <p:column headerText="Num. Failed" style="width: 8em;">
+					<h:outputText value="#{row.statistics.numFailed}"/>
+				</p:column>
+				
+			</p:dataTable>
+			</p:scrollPanel>
+		</p:dialog>
+    </h:form>
+    
+    
+    	<p:dialog id="errors-dialog" modal="true" widgetVar="errorsDialog" header="Parse Errors">
+    		<p:ajax event="close" listener="#{bbBean.collapseAllNodesOnDialogClose()}"/>
+    	<h:form id="errors-dialog-form">
+			<p:scrollPanel mode="native" style="height: 450px; width: 700px; position: relative;">
+			<ui:fragment rendered="#{not empty bbBean.errorNodes}">
+			<ui:repeat var="nodeEntry" value="#{bbBean.errorNodes.entrySet().toArray()}">
+    			<sf:bbErrorNode title="#{nodeEntry.key}" node="#{nodeEntry.value}"/>
+    		</ui:repeat>
+			</ui:fragment>
+    		</p:scrollPanel>
+		</h:form>
+		</p:dialog>
+    
+    
+    <p:dialog id="executeConfirmationDialog" widgetVar="confirmDialog" header="Confirm execute">
+    	<p:ajax event="close" listener="#{bbBean.collapseAllNodesOnDialogClose()}"/>
+    <h:form id="execute-confirmation-dialog-form">
+    		<p:outputPanel>
+    			<h3>Confirm BB execution</h3>
+    		</p:outputPanel>
+    		<ui:fragment rendered="#{not empty bbBean.errorNodes}">
+    		<p:scrollPanel mode="native" style="height:450px;width:700px; position: relative;">
+    			<ui:repeat var="nodeEntry" value="#{bbBean.errorNodes.entrySet().toArray()}">
+    				<sf:bbErrorNode title="#{nodeEntry.key}" node="#{nodeEntry.value}"/>
+    			</ui:repeat>
+    		</p:scrollPanel>
+    		</ui:fragment>
+			<table align="center">
+			<tr>
+                <td>
+                    <p:commandButton
+                            id="executionConfirmedCleanup"
+                            value="Confirm"
+                            rendered="#{bbBean.showCleanupDialog}"
+                            onclick="PF('confirmDialog').hide(); PF('cleanupDialog').show();"
+                            styleClass="ui-confirmdialog-yes"
+                            icon="ui-icon-check"
+				/></td>
+
+                <td>
+                    <p:commandButton
+                            id="executionConfirmedNoCleanup"
+                            value="Confirm"
+                            rendered="#{not bbBean.showCleanupDialog}"
+                            action="#{bbBean.bbPressed()}"
+                            onclick="PF('confirmDialog').hide();"
+                            styleClass="ui-confirmdialog-yes"
+                            icon="ui-icon-check"
+				/></td>
+
+                <td>
+                    <p:commandButton
+                            id="executionCcancelled"
+                            value="Cancel"
+                            onclick="PF('confirmDialog').hide();"
+                            styleClass="ui-confirmdialog-no"
+					icon="ui-icon-close"
+				/></td>
+			</tr>
+			</table>
+    </h:form>
+    </p:dialog>
+    
+    <h:form id="lists-dialog-form" prependId="false">
+    	<p:dialog id="lists-dialog" widgetVar="listsDialog" header="Script Lists" width="500">
+			<p:dataTable value="#{bbBean.listsCollection}" var="row"
+				scrollable="true" scrollHeight="580" styleClass="eps-data-table"
+				id="lists-dialog-table"
+				filteredValue="#{bbBean.listsCollectionFiltered}"
+				paginator="true" paginatorPosition="bottom" paginatorAlwaysVisible="true" rows="12" 
+				widgetVar="listsTable">
+				
+				<p:column filterBy="#{row.name}" filterMatchMode="contains">
+					<f:facet name="header">
+						<!--h:outputText value="Filter" styleClass="filter-label"/-->
+						<p:commandButton id="refresh-lists-table-btn" value="Refresh" update="lists-dialog-table" />
+					</f:facet>
+					<sf:bbScriptList scriptList="#{row}"/>
+				</p:column>
+			
+			</p:dataTable>
+		</p:dialog>
+    </h:form>
+
+    <p:dialog id="cleanup-dialog" widgetVar="cleanupDialog" header="Pre-run cleanup" width="500" resizable="false">
+        <h:form id="cleanup-form">
+
+            <p:remoteCommand name="preRunClean"
+                             action="#{bbBean.preRunClean()}"
+                             oncomplete="PF('cleanupDialog').hide();"
+                             update=":cleanup-form"/>
+
+            <ui:fragment rendered="#{not bbBean.inCleaning}">
+                <h:outputText value="Do you want to clean data generated by Sailfish before start?"/>
+                <table align="center">
+                    <tr>
+                        <td>
+                            <p:commandButton
+                                    id="cleanupYes"
+                                    value="Yes"
+                                    action="#{bbBean.prepareToClean()}"
+                                    oncomplete="preRunClean();"
+                                    styleClass="ui-cleanupdialog-yes"
+                                    icon="ui-icon-check"
+                                    update=":cleanup-form">
+                            </p:commandButton>
+                        </td>
+
+                        <td>
+                            <p:commandButton
+                                    id="cleanupNo"
+                                    value="No"
+                                    action="#{bbBean.bbPressed()}"
+                                    onclick="PF('cleanupDialog').hide();"
+                                    styleClass="ui-cleanupdialog-no"
+                                    icon="ui-icon-close">
+                            </p:commandButton>
+                        </td>
+
+                        <td>
+                            <p:commandButton
+                                    id="cleanupNever"
+                                    value="Never"
+                                    action="#{bbBean.setShowCleanupDialog(false)}"
+                                    onclick="PF('cleanupDialog').hide();"
+                                    styleClass="ui-cleanupdialog-never"
+                                    icon="ui-icon-close">
+                                <f:actionListener binding="#{bbBean.bbPressed()}"/>
+                            </p:commandButton>
+                        </td>
+                    </tr>
+                </table>
+            </ui:fragment>
+
+            <ui:fragment rendered="#{bbBean.inCleaning}">
+                <p:poll autoStart="true" async="true" interval="1" update=":cleanup-form:cleaningProgress"/>
+                <p:progressBar id="cleaningProgress"
+                               value="#{bbBean.cleaningProgress}"
+                               global="false"
+                               ajax="true"
+                               labelTemplate="#{bbBean.cleaningLabel}"
+                               displayOnly="true"
+                               styleClass="execution-status-label"
+                               style="width: 90%; float: left; margin-right: 10px;">
+                    <p:ajax event="complete" update=":cleanup-form:cleaningProgress" oncomplete="PF('cleanupDialog').hide();"/>
+                </p:progressBar>
+                <p:commandButton action="#{bbBean.stopCleaning}"
+                                 icon="ui-icon-stop"
+                                 update=":cleanup-form"
+                                 id="stop-cleaning-button"
+                                 async="true"
+                                 style="position:relative; top:7px;">
+                </p:commandButton>
+            </ui:fragment>
+
+        </h:form>
+    </p:dialog>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+
+    <h:outputScript library="sf" name="js/bigbutton.js"/>
+
+</h:body>  
+</html>  
+

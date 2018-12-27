@@ -1,0 +1,429 @@
+/*
+Problem: NotImplementedError: waitpid unsupported or native support failed to load flock at org/jruby/RubyFile.java:298
+Solution: apt-get install libc6-dev (and cleaning the gem cache)
+Source: https://github.com/jruby/jruby/issues/3285
+*/
+
+import org.gradle.api.internal.file.IdentityFileResolver
+import org.gradle.api.java.archives.internal.DefaultManifest
+
+buildscript {
+    repositories {
+        // If you want to use a SNAPSHOT build, add the OJO repository:
+        maven {
+            name 'MavenLocal' // for local builds only
+            url '../../shared'
+        }
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
+        //classpath 'com.github.robfletcher:compass-gradle-plugin:2.0.6'
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.12'
+        classpath group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin', version: '3.2', changing: true
+    }
+
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+plugins {
+    id "com.moowork.node" version "1.2.0"
+    //id "com.github.robfletcher.compass" version "2.0.6"
+}
+
+apply plugin: 'maven'
+apply plugin: 'java'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'sailfish'
+apply plugin: 'com.moowork.node' //https://github.com/srs/gradle-node-plugin
+//apply plugin: 'com.github.robfletcher.compass'
+
+
+repositories {
+
+    maven {
+        name 'MavenLocal' // for local builds only
+        url '../../shared'
+    }
+    jcenter()
+}
+
+//Specify artifact for artifactory-publish
+artifactory {
+    publish {
+        defaults {
+            // Reference to Gradle configurations defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publishConfigs('archives')
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4'
+    distributionType = 'all'
+}
+
+ext {
+    sailfishCoreVersion     = "${sailfish_version_major}.${sailfish_version_minor}"//.${sailfish_version_maintenance}"
+    artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : sailfishCoreVersion
+
+    sharedDir       = file('../../shared')
+    compass_cfg_dir = file('public/')
+    js_dir          = file('public/javascripts')
+    css_dir         = file("${project.buildDir}/stylesheets")
+    outGuiJs        = fileTree("${project.buildDir}/javascripts") {
+                        include 'gui.editor.js'
+                        include 'gui.editor.js.map'
+                        include 'gui.editor.min.js'
+                        include 'gui.editor.min.js.map'
+                    }
+    webpackCfg      = file("${js_dir}/webpack.config.js")
+    webpackProdCfg  = file("${js_dir}/webpack.prod.config.js")
+
+    npmDir          = file("nodejs")
+    node_modules    = file('node_modules')
+    webpackBin      = file("${node_modules}/webpack/bin/webpack.js")
+    karmaBin        = file("${node_modules}/karma/bin/karma")
+
+    twitter_bootstrap_target = "${project.buildDir}/twitter-bootstrap/"
+    twitter_bootstrap_theme = "custom"
+    twitter_bootstrap_theme_framework = "${node_modules}/bootswatch"
+    twitter_bootstrap_theme_dir = "${twitter_bootstrap_theme_framework}/${twitter_bootstrap_theme}"
+    twitter_bootstrap_full_dist_dir = "${node_modules}/bootstrap/dist"
+
+    my_bootswatch_theme_dir = 'public/sass/bootswatch-theme'
+
+    rubyGems = ['sass', 'compass']
+
+    rubyBinDir = "${buildDir}/jruby"
+
+    incremental_build = project.hasProperty('i')
+}
+
+defaultTasks 'zipData'
+
+archivesBaseName    = 'sailfish-js-matrix-editor'
+version             = artifactCoreVersion
+group = 'com.exactpro.sf'
+
+node {
+    // Version of node to use.
+    version = '10.1.0'
+    // Version of npm to use.
+    npmVersion = '5.6.0'
+    // Base URL for fetching node distributions (change if you have a mirror).
+    distBaseUrl = 'http://nodejs.org/dist'
+    // If true, it will download node using above parameters.
+    // If false, it will try to use globally installed node.
+    download = true
+
+    workDir = npmDir
+}
+
+task systemBootstrapFrameworkInstall(type: Exec) {
+    onlyIf {!project.hasProperty('useNodejsPlugin')}
+
+    inputs.file "${twitter_bootstrap_theme_framework}/package.json"
+    outputs.dir "${twitter_bootstrap_theme_framework}/node_modules"
+
+    workingDir file(twitter_bootstrap_theme_framework)
+    commandLine 'npm', 'install'
+}
+
+task gradleBootstrapFrameworkInstall(type: NpmTask, dependsOn: 'installNpmModules') {
+    onlyIf {project.hasProperty('useNodejsPlugin')}
+
+    inputs.file "${twitter_bootstrap_theme_framework}/package.json"
+    outputs.dir "${twitter_bootstrap_theme_framework}/node_modules"
+
+    args = ['install']
+    setWorkingDir file(twitter_bootstrap_theme_framework)
+}
+
+npmInstall {
+    onlyIf {project.hasProperty('useNodejsPlugin')}
+}
+
+task systemNpmInstall(type: Exec) {
+    onlyIf {!project.hasProperty('useNodejsPlugin')}
+
+    inputs.file file('package.json')
+    outputs.dir node_modules
+
+    commandLine 'npm', 'install'
+
+    doFirst {
+        println 'Npm should be installed'
+    }
+}
+
+task installNpmModules(dependsOn: [
+    'npmInstall',
+    'systemNpmInstall'
+]) {}
+
+task bootstrapFrameworkInstall(dependsOn: [
+    'installNpmModules',
+    'gradleBootstrapFrameworkInstall',
+    'systemBootstrapFrameworkInstall'
+]) {}
+
+task preCopyCustomBootswatchTheme (type: Copy, dependsOn: 'installNpmModules') {
+    from file(my_bootswatch_theme_dir)
+    into twitter_bootstrap_theme_dir
+}
+
+configurations {
+    rubyJar
+}
+
+dependencies {
+    rubyJar group: 'org.jruby', name: 'jruby-complete', version: '9.2.5.0'
+}
+
+task jrubyDeploy(type: Copy) {
+    onlyIf {
+        project.hasProperty('useJRuby')
+    }
+
+    from configurations.rubyJar
+    into rubyBinDir
+}
+
+task jrubyInstallGems(type: JavaExec, dependsOn: jrubyDeploy) {
+    onlyIf {
+        project.hasProperty('useJRuby')
+    }
+
+    classpath configurations.rubyJar
+    main 'org.jruby.Main'
+    args (['--command', 'gem', 'install'] + rubyGems)
+}
+
+task systemRebuildBootswatchTheme(type: Exec) {
+    onlyIf {!project.hasProperty('useNodejsPlugin')}
+
+    inputs.files fileTree(my_bootswatch_theme_dir).include('*.scss')
+    outputs.files fileTree(twitter_bootstrap_theme).include('*.css')
+
+    workingDir file(twitter_bootstrap_theme_framework)
+    commandLine 'grunt', "swatch_scss:${twitter_bootstrap_theme}"
+
+    doFirst {
+        println 'Grunt should be installed: npm i grunt -g'
+    }
+}
+
+task gradleRebuildBootswatchTheme(type: NodeTask) {
+    onlyIf {project.hasProperty('useNodejsPlugin')}
+
+    inputs.files fileTree(twitter_bootstrap_theme).include('*.scss')
+    outputs.files fileTree(twitter_bootstrap_theme).include('*.css')
+
+    workingDir file("${node_modules}/bootswatch")
+    script = file("${node_modules}/grunt-cli/bin/grunt")
+    args = [ "swatch_scss:${twitter_bootstrap_theme}" ]
+}
+
+task rebuildBootswatchTheme(dependsOn: [
+    'bootstrapFrameworkInstall',
+    'preCopyCustomBootswatchTheme',
+    'jrubyInstallGems',
+    'gradleRebuildBootswatchTheme',
+    'systemRebuildBootswatchTheme'
+]) {}
+
+task copyTwitterBootstrapDist (type: Copy, dependsOn: 'installNpmModules') {
+    include '**/*'
+
+    println twitter_bootstrap_full_dist_dir
+    println twitter_bootstrap_target
+
+    from twitter_bootstrap_full_dist_dir
+    into twitter_bootstrap_target
+}
+
+task copyTwitterBootstrapThemeCss (type: Copy, dependsOn: ['copyTwitterBootstrapDist', 'rebuildBootswatchTheme']) {
+    include '**/*.css'
+    from twitter_bootstrap_theme_dir
+    into "${twitter_bootstrap_target}/css"
+}
+
+task buldCss(type: Exec, dependsOn: ['jrubyInstallGems']) {
+    // inputs.files fileTree('public/sass')
+    // inputs.files fileTree('public/images')
+    // outputs.dir css_dir
+
+    if (!project.hasProperty('useJRuby')) {
+        doLast {
+            println  'Compass should be installed: gem install compass'
+        }
+    }
+
+    workingDir compass_cfg_dir
+    commandLine 'compass', 'compile'
+}
+
+def getWebpackArgs() {
+    def cmdLine = ['--config']
+    if (project.hasProperty('prod')) {
+        cmdLine.add "${webpackProdCfg}"
+        cmdLine.add '-p'
+
+    } else {
+        cmdLine.add "${webpackCfg}"
+    }
+
+    println "webpack args: ${cmdLine}"
+
+    cmdLine
+}
+
+task gradleWebpack(type: NodeTask) {
+    onlyIf {project.hasProperty('useNodejsPlugin')}
+
+    inputs.dir file('public/javascripts')
+    outputs.files outGuiJs
+
+    workingDir js_dir
+    script = webpackBin
+    args = getWebpackArgs()
+}
+
+task systemWebpack(type: Exec) {
+    onlyIf {!project.hasProperty('useNodejsPlugin')}
+
+    inputs.dir file('public/javascripts')
+    outputs.files outGuiJs
+
+    workingDir js_dir
+    def cmdLine = [webpackBin]
+    cmdLine.addAll getWebpackArgs()
+
+    doFirst {
+        println 'Webpack should be installed: npm i webpack -g'
+    }
+
+    commandLine cmdLine
+}
+
+task gradleRunKarma(type: NodeTask) {
+    onlyIf {project.hasProperty('useNodejsPlugin')}
+
+    inputs.file file('karma.conf.js')
+
+    script = karmaBin
+    args = ['start', '--single-run', 'true']
+}
+
+task systemRunKarma(type: Exec) {
+    onlyIf {!project.hasProperty('useNodejsPlugin')}
+
+    inputs.file file('karma.conf.js')
+
+    def cmdLine = [karmaBin]
+    def args = ['start', '--single-run', 'true']
+    cmdLine.addAll args
+    commandLine cmdLine
+}
+
+test {
+    dependsOn.add(['gradleRunKarma', 'systemRunKarma'])
+}
+
+task webpack(dependsOn: [
+    'installNpmModules',
+    'test',
+    'gradleWebpack',
+    'systemWebpack'
+]) {}
+
+task buildAll(dependsOn: ['copyTwitterBootstrapThemeCss', 'webpack', 'buldCss']) {
+}
+
+task dev(type: Copy,  dependsOn: 'buildAll') {
+    into file('../SailfishFrontEnd/WebContent/resources')
+    from (outGuiJs) {into 'sf/js'}
+    from (css_dir) {into 'sf/css'}
+    from (twitter_bootstrap_target) {into 'twitter-bootstrap'}
+}
+
+task zipData(type: Zip, dependsOn: 'buildAll') {
+    includeEmptyDirs = false
+    duplicatesStrategy = 'EXCLUDE'
+
+    into ('sf/js') {
+        from outGuiJs
+    }
+
+    into ('sf/css') {
+        from css_dir
+    }
+
+    into ('twitter-bootstrap') {
+        from twitter_bootstrap_target
+    }
+
+    def manifestFile = file("${project.buildDir}/META-INF/MANIFEST.MF")
+    def manifest = new DefaultManifest(new IdentityFileResolver())
+
+    manifest.attributes('Project_Name': "${collectDependencies.repository}-${project.name}")
+    manifest.writeTo(manifestFile)
+
+    into ('META-INF') {
+        from manifestFile.parentFile
+    }
+}
+
+clean {
+    delete file('nodejs/')
+    delete project.buildDir
+    delete file('.sass-cache/')
+    delete file('.gradle/')
+    delete node_modules
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        uniqueVersion = false // publish non unique snapshots to local repository
+        repository(url: "file:${sharedDir}")
+        doLast {
+	    // Remove any invalid maven-metadata.xml files that may have been created
+	    // for SNAPSHOT versions that are *not* uniquely versioned.
+		    pom*.each { pom ->
+		        if (pom.version.endsWith('-SNAPSHOT')) {
+		            final File artifactDir = new File(rootProject.ext.sharedDir,
+		                    pom.groupId.replace('.', '/')
+		                    + '/' + pom.artifactId
+		                    + '/' + pom.version)
+		            delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
+		        }
+		    }
+		}
+    }
+    doFirst {
+        sharedDir.mkdirs()
+    }
+}
+
+artifacts {
+    archives(zipData)
+}
+
+collectDependencies {
+    repository = 'core'
+    outputPath = project.properties.dependencyFile
+    incrementalBuild = incremental_build
+    environmentPath = 'execStubs/ruby/jruby/bin'
+    buildArguments = [
+        useJRuby: [],
+        useNodejsPlugin: [],
+        prod: []
+    ]
+    projectPath = "Sailfish/FrontEnd/${project.name}"
+}

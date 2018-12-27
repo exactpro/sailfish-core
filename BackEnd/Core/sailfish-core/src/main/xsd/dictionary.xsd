@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema 
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="http://exactprosystems.com/dictionary"
+	xmlns:tns="http://exactprosystems.com/dictionary" elementFormDefault="qualified"
+	xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+	jaxb:version="1.0" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+	jaxb:extensionBindingPrefixes="xjc" >
+
+	<xs:annotation>
+		<xs:appinfo>
+			<jaxb:globalBindings>
+				<xjc:simple />
+				<xjc:serializable uid="-1" />
+			</jaxb:globalBindings>
+		</xs:appinfo>
+	</xs:annotation>
+
+
+	<xs:simpleType name="JavaType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="java.lang.Boolean" />
+			<xs:enumeration value="java.lang.Short" />
+			<xs:enumeration value="java.lang.Integer" />
+			<xs:enumeration value="java.lang.Long" />
+			<xs:enumeration value="java.lang.Byte" />
+			<xs:enumeration value="java.lang.Float" />
+			<xs:enumeration value="java.lang.Double" />
+			<xs:enumeration value="java.lang.String" />
+			<xs:enumeration value="java.time.LocalDateTime" />
+			<xs:enumeration value="java.time.LocalDate" />
+			<xs:enumeration value="java.time.LocalTime" />
+			<xs:enumeration value="java.lang.Character" />
+			<xs:enumeration value="java.math.BigDecimal" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="Attribute">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+                <xs:attribute name="type" type="tns:JavaType" />
+                <xs:attribute name="name" type="xs:NMTOKEN" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="Field">
+		<xs:sequence>
+			<xs:sequence minOccurs="0">
+				<xs:element name="description" type="xs:string" minOccurs="0" maxOccurs="1"/>
+			</xs:sequence>
+			<xs:sequence minOccurs="0">
+				<xs:element name="attribute" type="tns:Attribute" maxOccurs="unbounded"
+					minOccurs="0" />
+			</xs:sequence>
+			<xs:sequence minOccurs="0">
+				<xs:element name="value" type="tns:Attribute" maxOccurs="unbounded"
+					minOccurs="0" />
+			</xs:sequence>
+		</xs:sequence>
+        <xs:attribute name="isServiceName" type="xs:boolean" default="false" use="optional" />
+        <xs:attribute name="isCollection" type="xs:boolean" default="false" use="optional" />
+        <xs:attribute name="defaultvalue" type="xs:string" use="optional" />
+        <xs:attribute name="type" type="tns:JavaType" use="optional" />
+        <xs:attribute name="id" type="xs:ID" use="optional" />
+        <xs:attribute name="reference" type="xs:IDREF" use="optional" />
+        <xs:attribute name="name" type="xs:NMTOKEN" use="optional" />
+        <xs:attribute name="required" type="xs:boolean" default="false" use="optional" />
+	</xs:complexType>
+
+	<xs:complexType name="Message">
+		<xs:complexContent>
+			<xs:extension base="tns:Field">
+				<xs:sequence>
+					<xs:element name="field" type="tns:Field" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+
+	<xs:complexType name="Dictionary">
+		<xs:sequence>
+			<xs:element name="description" type="xs:string" minOccurs="0"/>
+			<xs:sequence minOccurs="0">
+				<xs:element name="attribute" type="tns:Attribute" maxOccurs="unbounded"
+							minOccurs="0" />
+			</xs:sequence>
+			<xs:element name="fields" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="field" minOccurs="0" maxOccurs="unbounded" type="tns:Field" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="messages" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="message" minOccurs="0" maxOccurs="unbounded" type="tns:Message" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:NMTOKEN" use="required"/>
+	</xs:complexType>
+	<xs:element name="dictionary" type="tns:Dictionary"/>
+</xs:schema>

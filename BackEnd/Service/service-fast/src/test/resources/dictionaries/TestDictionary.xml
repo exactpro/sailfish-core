@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary name="FAST" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://exactprosystems.com/dictionary">
+	<fields>
+		<field name="stringx" id="stringx" type="java.lang.String">
+			<attribute name="fastName" type="java.lang.String">stringx</attribute>
+		</field>
+		<field name="sqsv"  id="sqsv" type="java.lang.String">
+			<attribute name="fastName" type="java.lang.String">sqsv</attribute>
+		</field>
+		<field name="seqv"  id="seqv" type="java.lang.String">
+			<attribute name="fastName" type="java.lang.String">seqv</attribute>
+		</field>
+		<field name="seqsv"  id="seqsv" type="java.lang.String">
+			<attribute name="fastName" type="java.lang.String">seqsv</attribute>
+		</field>
+		<field name="sqs_length" id="sqs_length" type="java.lang.Integer">
+				<attribute name="fastName" type="java.lang.String">sqs_length</attribute>
+		</field>
+		<field name="int8" id="int8" type="java.lang.Integer">
+			<attribute name="fastName" type="java.lang.String">int8</attribute>
+		</field>
+		<field name="int32" id="int32" type="java.lang.Integer">
+			<attribute name="fastName" type="java.lang.String">int32</attribute>
+		</field>
+		<field name="uInt32" id="uInt32" type="java.lang.Long">
+			<attribute name="fastName" type="java.lang.String">uInt32</attribute>
+		</field>
+		<field name="int64" id="int64" type="java.lang.Long">
+			<attribute name="fastName" type="java.lang.String">int64</attribute>
+		</field>
+		<field name="uInt64" id="uInt64" type="java.math.BigDecimal">
+			<attribute name="fastName" type="java.lang.String">uInt64</attribute>
+		</field>
+		<field name="decimal" id="decimal" type="java.math.BigDecimal">
+			<attribute name="fastName" type="java.lang.String">decimal</attribute>
+		</field>
+		<field name="bv" id="bv" type="java.lang.Byte">
+			<attribute name="fastName" type="java.lang.String">bv</attribute>
+		</field>		
+	</fields>
+	<messages>
+		<message name="testMessage" id="testMessage">
+			<attribute type="java.lang.String" name="templateId">1</attribute>
+			<attribute name="name" type="java.lang.String">testMessage</attribute>
+			<field name="stringx" reference="stringx" required="true"/>
+			<field name="int8" reference="int8" required="true"/>
+			<field name="int32" reference="int32" required="true"/>
+			<field name="uInt32" reference="uInt32" required="true"/>
+			<field name="int64" reference="int64" required="true"/>
+			<field name="uInt64" reference="uInt64" required="true"/>			
+			<field name="decimal" reference="decimal" required="true"/>
+			<field name="bv" reference="bv" required="true" isCollection="true"/>
+			<field name="grp" reference="grp" required="true"/>
+			<field name="sqs" reference="sqs" required="true" />
+			<field name="seq" reference="seq" required="true" />
+			<field name="seqs" reference="seqs" required="true" />
+			<field name="sqs_length" reference="sqs_length" required="false" />
+			<field name="seq_length" reference="sqs_length" required="false" />
+			<field name="seqs_length" reference="sqs_length" required="false" />
+		</message>
+		<message name="testMessage_grp" id="grp">
+			<attribute name="fastName" type="java.lang.String">grp</attribute>
+			<field name="stringx" reference="stringx" required="true" isCollection="true"/>
+		</message>
+		<message name="testMessage_sqs" id="sqs">
+			<attribute name="fastName" type="java.lang.String">sqs</attribute>
+			<field name="sqsv" reference="sqsv" required="true" isCollection="true"/>
+		</message>
+		<message name="testMessage_seq" id="seq">
+			<attribute name="fastName" type="java.lang.String">seq</attribute>
+			<field name="seqv" reference="seqv" required="true" isCollection="true"/>
+		</message>
+		<message name="testMessage_seqs" id="seqs">
+			<attribute name="fastName" type="java.lang.String">seqs</attribute>
+			<field name="seqsv" reference="seqsv" required="true" isCollection="true"/>
+		</message>
+	</messages>
+</dictionary>

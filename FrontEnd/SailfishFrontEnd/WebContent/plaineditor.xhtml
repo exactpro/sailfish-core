@@ -1,0 +1,141 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Editor :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css" />
+    <h:outputStylesheet library="sf" name="css/estyles.css" />
+    <h:outputStylesheet library="sf" name="css/scriptruns.css" />
+    <h:outputStylesheet library="sf" name="css/jquery.contextMenu.css" />
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+    <h:outputStylesheet library="sf" name="css/plain.editor.css"/>
+
+    <script>
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+	
+		if (!window.console) console = {};
+
+		console.log = console.log || function(){};
+		console.warn = console.warn || function(){};
+		console.error = console.error || function(){};
+		console.info = console.info || function(){};
+  	</script>
+    <h:outputScript library="sf" name="js/external/bootstrap-typeahead.js"/>
+    <h:outputScript library="sf" name="js/external/jquery.contextMenu.js"/>
+    <h:outputScript library="sf" name="js/external/jquery.ui.position.js"/>
+    <h:outputScript library="sf" name="js/external/util.js"/>
+    <h:outputScript library="sf" name="js/external/message-factory.js"/>
+    <h:outputScript library="sf" name="js/external/channels.js"/>
+    <h:outputScript library="sf" name="js/external/stacktrace-0.3.js"/>
+    <h:outputScript library="sf" name="js/plain.editor.js"/>
+    <h:outputScript library="sf" name="js/menu.js"/>
+
+</h:head>
+
+<h:body styleClass="eps-application">
+
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css" />
+    <h:outputStylesheet library="sf" name="css/custom.css" />
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <p:ajaxStatus style="position: absolute; left:50%; top:50%; width:64px; height:64px; " id="ajaxStatusPanel">
+
+        <f:facet name="start">
+            <h:graphicImage library="sf" name="images/ajaxloader.gif" />
+        </f:facet>
+
+        <f:facet name="complete">
+            <h:outputText value="" />
+        </f:facet>
+
+    </p:ajaxStatus>
+
+    <h:form prependId="false" id="settingsForm" styleClass="eps-settings-form">
+
+        <p:growl id="messages" sticky="false" life="6000" showDetail="true" />
+
+        <p:remoteCommand name="stopScript" action="#{testScriptsBean.stopScript}"/>
+        <p:remoteCommand name="compileScript" action="#{testScriptsBean.compileScript}"/>
+        <p:remoteCommand name="runCompiledScript" action="#{testScriptsBean.runCompiledScript}"/>
+        <p:remoteCommand name="resumeScript" action="#{testScriptsBean.resumeScript}"/>
+        <p:remoteCommand name="pauseScript" action="#{testScriptsBean.pauseScript}"/>
+        <p:remoteCommand name="nextStep" action="#{testScriptsBean.nextStep}"/>
+
+
+        <div class="eps-plain-text-editor-buttons-panel">
+			<p:commandButton id="buttonReturn" value="Back to list" action="#{testScriptsBean.goToScriptRuns}" icon="ui-icon-circle-arrow-w" />
+            <p:commandButton id="buttonLoad" value="Load" actionListener="#{plainTextEditorBean.getText}" update="messages" oncomplete="handleComplete(xhr, status, args)" icon="ui-icon-mail-open"/>
+            <p:commandButton id="buttonSave" value="Save" actionListener="#{plainTextEditorBean.saveText}" update="messages" onclick="document.getElementById('matrixText').value=returnData()" icon="ui-icon-disk" />
+            
+            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-continue-if-failed" id="continueIfFailedCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.continueOnFailed}">
+            	<p:ajax execute="@this" />
+            </p:selectBooleanCheckbox>
+
+			<p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-auto-start" id="autostartCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.autoStart}">
+				<p:ajax execute="@this" />
+			</p:selectBooleanCheckbox>
+			
+			<p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-ignore-ask" id="ignoreAskForContinueCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.ignoreAskForContinue}">
+				<p:ajax execute="@this" />
+			</p:selectBooleanCheckbox>
+
+
+			<p:selectOneMenu id="selectedEnvironment" value="#{testScriptsBean.selectedEnvironment}" var="environment" styleClass="eps-input">
+				<f:selectItem itemLabel="Default Environment" itemValue="default" />
+				<f:selectItems value="#{testScriptsBean.environmentValues}" />
+				<p:ajax execute="@this" />
+			</p:selectOneMenu>
+
+			<p:selectOneMenu id="selectedType" value="#{testScriptsBean.selectedLanguageURI}" styleClass="eps-input">
+				<f:selectItems value="#{testScriptsBean.languageURIs}" var="generator" itemValue="#{generator}" itemLabel="#{generator}" style="width:200px"/>
+				<p:ajax execute="@this" />
+			</p:selectOneMenu>
+
+			<p:selectOneMenu id="selectedEncoding" value="#{testScriptsBean.selectedEncoding}" var="encoding" styleClass="eps-input" >
+				<f:selectItems value="#{testScriptsBean.encodeValues}" var="encodeValue" itemLabel="#{encodeValue}" itemValue="#{encodeValue}" style="width:200px"/>
+				<p:ajax execute="@this" />
+			</p:selectOneMenu>
+
+			<p:tooltip value="Environments list" for="selectedEnvironment" />
+			<p:tooltip value="AML Version" for="selectedType" />
+			<p:tooltip value="Encoding" for="selectedEncoding" />
+
+			<p:commandButton id="buttonRun" value="Run" actionListener="#{testScriptsBean.run(testScriptsBean.matrixToEdit)}" update="messages :settingsForm:lastScriptRun" icon="ui-icon-circle-triangle-e"/>
+			<p:inputText id="range" value="#{testScriptsBean.matrixToEdit.range}" styleClass="eps-input" />
+			<p:watermark for="range" value=" Matrix range"/>
+			<h:inputHidden id="matrixText" value="#{plainTextEditorBean.textToSave}" />
+			<h:inputHidden id="lastScriptRun" value="#{testScriptsBean.matrixToEdit.lastScriptRun}" />
+
+		</div>
+		<div style="clear:both; height: 1px;" />
+
+		<div class="eps-matrix-text-container">
+			<div id="scriptRunResult">
+			</div>
+			<p:inputTextarea id="dataTable" styleClass="eps-editor-table" autoResize="false"/>
+		</div>
+		<div class="eps-results-wrapper">
+		</div>
+
+    </h:form>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+
+</h:body>
+
+</html>

@@ -1,0 +1,320 @@
+{
+    "id": 34,
+    "name": "AML3_14_test_newGenerator.csv",
+    "date": 1429177344000,
+    "amlVersion": 3,
+    "data": [
+        {
+            "values": {
+                "#execute": "true",
+                "#reference": "Test_Case_1",
+                "#description": "",
+                "#action": "Test Case Start"
+            },
+            "items": [
+                {
+                    "values": {
+                        "#execute": "",
+                        "#messages_count": "",
+                        "#static_value": "GroupID",
+                        "#dictionary": "",
+                        "#reference": "static1",
+                        "#service_name": "",
+                        "#message_type": "",
+                        "#action": "SetStatic",
+                        "#outcome": "",
+                        "#static_type": "String"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "",
+                        "#messages_count": "",
+                        "#static_value": "1",
+                        "#dictionary": "",
+                        "#reference": "Normal",
+                        "#service_name": "",
+                        "#message_type": "",
+                        "#action": "SetStatic",
+                        "#outcome": "",
+                        "#static_type": "long"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "AskSize": "100",
+                        "#messages_count": "",
+                        "#reference": "sm1",
+                        "AskNumberOfQuotes": "1",
+                        "#service_name": "",
+                        "QuoteLevel": "1",
+                        "#outcome": "",
+                        "#static_type": "",
+                        "#execute": "",
+                        "AskPrice": "10",
+                        "BidSize": "100",
+                        "#static_value": "",
+                        "BidPrice": "9",
+                        "#dictionary": "TestAML",
+                        "BidNumberOfQuotes": "1",
+                        "#message_type": "MDL_2_4",
+                        "#action": ""
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "AskSize": "100",
+                        "#messages_count": "",
+                        "#reference": "sm2",
+                        "AskNumberOfQuotes": "1",
+                        "#service_name": "",
+                        "QuoteLevel": "1",
+                        "#outcome": "",
+                        "#static_type": "",
+                        "#execute": "",
+                        "AskPrice": "10",
+                        "BidSize": "100",
+                        "#static_value": "",
+                        "BidPrice": "9",
+                        "#dictionary": "TestAML",
+                        "BidNumberOfQuotes": "1",
+                        "#message_type": "MDL_2_4",
+                        "#action": ""
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#messages_count": "",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#reference": "m1",
+                        "#service_name": "fake",
+                        "GroupID": "%{static1}",
+                        "#static_type": "",
+                        "#outcome": "",
+                        "#execute": "y",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "#static_value": "",
+                        "NumberofLevel": "1",
+                        "#dictionary": "TestAML",
+                        "Instrument": "Instrument",
+                        "#message_type": "MDI_2_4",
+                        "#action": "send"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#messages_count": "",
+                        "InstrumentStatus": "${m1.InstrumentStatus}",
+                        "GroupStatus": "${m1.GroupStatus}",
+                        "#reference": "m2",
+                        "#service_name": "fake",
+                        "GroupID": "${m1.GroupID}",
+                        "#static_type": "",
+                        "#outcome": "",
+                        "#execute": "y",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "#static_value": "",
+                        "NumberofLevel": "${m1.NumberofLevel}",
+                        "#dictionary": "TestAML",
+                        "Instrument": "${m1.Instrument}",
+                        "#message_type": "MDI_2_4",
+                        "#action": "send"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#messages_count": "",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "GroupStatus",
+                        "#reference": "",
+                        "#service_name": "fake",
+                        "GroupID": "%{static1}",
+                        "#static_type": "",
+                        "#outcome": "",
+                        "#execute": "y",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "#static_value": "",
+                        "NumberofLevel": "1",
+                        "#dictionary": "TestAML",
+                        "Instrument": "Instrument",
+                        "#message_type": "MDI_2_4",
+                        "#action": "receive"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#messages_count": "",
+                        "InstrumentStatus": "${m1.InstrumentStatus}",
+                        "GroupStatus": "${m1.GroupStatus}",
+                        "#reference": "",
+                        "#service_name": "fake",
+                        "GroupID": "${m1.GroupID}",
+                        "#static_type": "",
+                        "#outcome": "",
+                        "#execute": "y",
+                        "MDL_2_4": "[sm1, sm2]",
+                        "#static_value": "",
+                        "NumberofLevel": "${m1.NumberofLevel}",
+                        "#dictionary": "TestAML",
+                        "Instrument": "${m1.Instrument}",
+                        "#message_type": "MDI_2_4",
+                        "#action": "receive"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#messages_count": "2",
+                        "InstrumentStatus": "Normal",
+                        "GroupStatus": "x == \"GroupStatus\"",
+                        "#reference": "",
+                        "#service_name": "fake",
+                        "GroupID": "x contains \"ID\"",
+                        "#static_type": "",
+                        "#outcome": "",
+                        "#execute": "y",
+                        "#static_value": "",
+                        "NumberofLevel": "x > 0",
+                        "#dictionary": "TestAML",
+                        "Instrument": "!( x contains \"zzz\" )",
+                        "#message_type": "MDI_2_4",
+                        "#action": "count"
+                    },
+                    "metadata": {
+                        "dictionary": "TestAML"
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#messages_count": "",
+                        "GroupStatus": "${m2:GroupStatus}",
+                        "#reference": "s1",
+                        "#service_name": "",
+                        "GroupID": "${m2.MDL_2_4[0].QuoteLevel}",
+                        "#static_type": "",
+                        "#outcome": "",
+                        "#execute": "",
+                        "#static_value": "",
+                        "NumberofLevel": "${m2:NumberofLevel} + ${m1:NumberofLevel}",
+                        "#dictionary": "",
+                        "Instrument": "102",
+                        "#message_type": "",
+                        "#action": "FAKE_SendHashMap"
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "",
+                        "#messages_count": "",
+                        "#static_value": "",
+                        "GroupStatus": "${s1:GroupStatus}",
+                        "#dictionary": "",
+                        "#reference": "s2",
+                        "#service_name": "",
+                        "GroupID": "${s1.GroupID} + ${m2.MDL_2_4[0].QuoteLevel}",
+                        "#message_type": "",
+                        "#action": "",
+                        "#outcome": "",
+                        "#static_type": ""
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                },
+                {
+                    "values": {
+                        "#execute": "",
+                        "#messages_count": "",
+                        "#static_value": "",
+                        "#dictionary": "",
+                        "#reference": "s3",
+                        "#service_name": "fake",
+                        "GroupID": "[s1, s2, s1, s2]",
+                        "#message_type": "",
+                        "#action": "FAKE_SendHashMap",
+                        "#outcome": "",
+                        "#static_type": ""
+                    },
+                    "metadata": {
+                        "dictionary": ""
+                    },
+                    "errors": []
+                }
+            ],
+            "errors": []
+        }
+    ],
+    "errors": [
+        {
+            "paths": [
+                [
+                    0,
+                    6
+                ]
+            ],
+            "reference": "",
+            "column": null,
+            "message": "Service 'fake' is not found"
+        },
+        {
+            "paths": [
+                [
+                    0,
+                    7
+                ]
+            ],
+            "reference": "",
+            "column": null,
+            "message": "Service 'fake' is not found"
+        },
+        {
+            "paths": [
+                [
+                    0,
+                    8
+                ]
+            ],
+            "reference": "",
+            "column": null,
+            "message": "Service 'fake' is not found"
+        }
+    ]
+}

@@ -1,0 +1,77 @@
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<!DOCTYPE hibernate-configuration SYSTEM
+"http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.connection.driver_class">
+			<!-- org.postgresql.Driver -->
+      		org.mariadb.jdbc.Driver
+      		<!-- org.apache.derby.jdbc.EmbeddedDriver -->
+		</property>
+		<property name="hibernate.connection.url">
+			<!-- jdbc:postgresql://localhost/sailfish?useUnicode=true&amp;characterEncoding=UTF-8&amp;useFastDateParsing=false&amp;socketTimeout=15000 -->
+			jdbc:mariadb://localhost/sailfish?useUnicode=true&amp;characterEncoding=UTF-8&amp;useFastDateParsing=false&amp;socketTimeout=15000
+			<!-- jdbc:derby:/pathToDatabase;create=true -->
+		</property>
+		<property name="hibernate.connection.username">
+			sailfish
+		</property>
+		<property name="hibernate.connection.password">
+			999
+		</property>
+		<property name="hibernate.dialect">
+			<!-- org.hibernate.dialect.PostgreSQLDialect -->
+			org.hibernate.dialect.MySQLDialect
+			
+			<!-- Use this line if your Derby version is under 10.7 -->
+			<!-- org.hibernate.dialect.DerbyDialect -->
+			
+			<!-- Use this line if your Derby version is equal or above 10.7 -->
+			<!-- org.hibernate.dialect.DerbyTenSevenDialect -->
+		</property>
+		<!-- Use the C3P0 connection pool provider -->
+		<!-- EXPENSIVE DEPRECATED property name="hibernate.c3p0.validate">true</property-->
+		<!-- EXPENSIVE property name="hibernate.c3p0.testConnectionOnCheckout">true</property-->
+		<property name="hibernate.connection.provider_class">org.hibernate.connection.C3P0ConnectionProvider</property>
+		<property name="hibernate.c3p0.idleConnectionTestPeriod">3</property>
+		<property name="hibernate.c3p0.preferredTestQuery">SELECT 1;</property>
+        <!-- use following line with derby db -->
+        <!-- <property name="hibernate.c3p0.preferredTestQuery">VALUES 1;</property> -->
+		
+		<property name="hibernate.c3p0.min_size">5</property>
+		<property name="hibernate.c3p0.max_size">30</property>
+		<property name="hibernate.c3p0.timeout">300</property>
+		<property name="hibernate.c3p0.max_statements">50</property>
+		<property name="hibernate.c3p0.idle_test_period">60</property>
+
+		<!-- Show and print nice SQL on stdout -->
+		<property name="show_sql">false</property>
+		<property name="format_sql">false</property>
+		
+		<property name="hibernate.hbm2ddl.auto">update</property>
+		<property name="hibernate.jdbc.batch_size">50</property>
+		
+		<property name="javax.persistence.validation.mode">none</property>
+		
+		<!-- List of XML mapping files -->
+        <mapping resource="com/exactpro/sf/storage/entities/sailfish.hbm.xml"/>
+        <mapping resource="com/exactpro/sf/storage/xml/db/datamessage.hbm.xml"/>
+        <mapping resource="com/exactpro/sf/storage/auth/auth.hbm.xml"/>
+	</session-factory>
+</hibernate-configuration>

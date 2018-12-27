@@ -1,0 +1,393 @@
+<xsd:schema 
+	targetNamespace="Example" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="Example"
+ >
+	<xsd:annotation>
+		<xsd:appinfo>
+			<protocol name="DictionaryAttr" type="xsd:string" default="test_value" />
+		</xsd:appinfo>
+	</xsd:annotation>
+
+	<xsd:element name="LoginRequest" >
+		<xsd:annotation>
+			<xsd:appinfo>
+				<protocol name="MessageType" type="xsd:short" default="1" />
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="Length" type="xsd:short" default="18" >
+					<xsd:annotation>
+						<xsd:appinfo>
+							<protocol name="Offset" type="xsd:int" default="0" />
+							<protocol name="Length" type="xsd:int" default="1" />
+							<protocol name="Type" type="xsd:string" default="UInt8" />
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="MessageType" type="xsd:short" default="1" >
+					<xsd:annotation>
+						<xsd:appinfo>
+							<protocol name="Offset" type="xsd:int" default="1" />
+							<protocol name="Length" type="xsd:int" default="1" />
+							<protocol name="Type" type="xsd:string" default="Byte" />
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Username"  type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<protocol name="Offset" type="xsd:int" default="2" />
+							<protocol name="Length" type="xsd:int" default="6" />
+							<protocol name="Type" type="xsd:string" default="Alpha" />
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="Password"  type="xsd:string">
+					<xsd:annotation>
+						<xsd:appinfo>
+							<protocol name="Offset" type="xsd:int" default="8" />
+							<protocol name="Length" type="xsd:int" default="10" />
+							<protocol name="Type" type="xsd:string" default="Alpha" />
+						</xsd:appinfo>
+					</xsd:annotation>
+				</xsd:element>
+	  		</xsd:sequence>
+	  	</xsd:complexType>
+	</xsd:element>
+
+
+
+
+
+
+	<xsd:simpleType name="ReceivedSequenceNumberType" >
+		<xsd:annotation>
+			<xsd:appinfo>
+				<protocol name="Length" type="xsd:int" default="9" />
+				<protocol name="Format" type="xsd:string" default="N" />
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:int" />
+	</xsd:simpleType>
+	
+	
+	<xsd:simpleType name="MessageType" >
+		<xsd:annotation>
+			<xsd:appinfo>
+				<protocol name="Length" type="xsd:int" default="9" />
+				<protocol name="Format" type="xsd:string" default="N" />
+			</xsd:appinfo>
+		</xsd:annotation>
+		<xsd:restriction base="xsd:string" >
+			<xsd:enumeration value="jpeg">
+			 	<xsd:annotation>
+			 		<xsd:appinfo>
+			 			<protocol name="Alias" type="xsd:string" default="JPEG_CONST" />
+			 		</xsd:appinfo>
+			 	</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="gif">
+			 	<xsd:annotation>
+			 		<xsd:appinfo>
+			 			<protocol name="Alias" type="xsd:string" default="GIF_CONST" />
+			 		</xsd:appinfo>
+			 	</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="png">
+			 	<xsd:annotation>
+			 		<xsd:appinfo>
+			 			<protocol name="Alias" type="xsd:string" default="PNG_CONST" />
+			 		</xsd:appinfo>
+			 	</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="svg">
+			 	<xsd:annotation>
+			 		<xsd:appinfo>
+			 			<protocol name="Alias" type="xsd:string" default="SVG_CONST" />
+			 		</xsd:appinfo>
+			 	</xsd:annotation>
+			</xsd:enumeration>
+			<xsd:enumeration value="pdf">
+			 	<xsd:annotation>
+			 		<xsd:appinfo>
+			 			<protocol name="Alias" type="xsd:string" default="PDF_CONST" />
+			 		</xsd:appinfo>
+			 	</xsd:annotation>
+			</xsd:enumeration>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	
+  	<xsd:complexType name="BroadcastHeaderType" >
+  		<xsd:annotation> 
+  			<xsd:documentation>
+  				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+  				 Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+  				 Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+  				 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+  			</xsd:documentation>  
+  			<xsd:appinfo>
+  				<protocol name="Section" type="xsd:string" default="1.1.2" />
+  			</xsd:appinfo>
+    	</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="ReceivedSequenceNumber" type="ReceivedSequenceNumberType">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="3" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ServiceCode" type="xsd:string">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="9" />
+						<protocol name="Length" type="xsd:int" default="3" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+  		</xsd:sequence>
+  	</xsd:complexType>
+  	
+  	<xsd:complexType name="BroadcastMessageHeaderType">
+  		<xsd:annotation>
+  			<xsd:appinfo>
+  				<protocol name="Section" type="xsd:string" default="1.1.2" />
+  				<protocol name="ID" type="xsd:int" default="2" />
+  			</xsd:appinfo>
+
+  		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="MessageNewType" type="MessageType" />
+			<xsd:element name="MessageLength" type="xsd:int">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="12" />
+						<protocol name="Length" type="xsd:int" default="4" />
+						<protocol name="Format" type="xsd:string" default="N" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MessageSequenceNumber" type="xsd:int">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="16" />
+						<protocol name="Length" type="xsd:int" default="9" />
+						<protocol name="Format" type="xsd:string" default="N" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MessageType" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="26" />
+						<protocol name="Length" type="xsd:int" default="3" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="MessageVersionIdentifier" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="29" />
+						<protocol name="Length" type="xsd:int" default="2" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SourceSystemIdentifier" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="31" />
+						<protocol name="Length" type="xsd:int" default="6" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+  		</xsd:sequence>
+  	</xsd:complexType>
+  	
+  	
+  	<xsd:complexType name="Alphas_BetasType">
+  		<xsd:annotation>
+  			<xsd:appinfo>
+  				<protocol name="Section" type="xsd:string" default="1.2.1" />
+  				<protocol name="ID" type="xsd:int" default="3" />
+  				<protocol name="MessageType" type="xsd:string" default="5AF" />
+  				<protocol name="VersionIdentifier" type="xsd:string" default="AA" />
+  			</xsd:appinfo>
+  		</xsd:annotation>
+		<xsd:sequence>
+			<xsd:element name="BroadCastHeader" type="BroadcastHeaderType" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Inclusion" type="xsd:boolean" default="true" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="BroadCastMessageHeader" type="BroadcastMessageHeaderType" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Inclusion" type="xsd:boolean" default="true" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SegmentCode" type="xsd:string">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="37" />
+						<protocol name="Length" type="xsd:int" default="4" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SectorCode" type="xsd:string">
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="41" />
+						<protocol name="Length" type="xsd:int" default="4" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="TradableInstrumentCode" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="45" />
+						<protocol name="Length" type="xsd:int" default="12" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SEDOLCode" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="57" />
+						<protocol name="Length" type="xsd:int" default="7" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="CountryofRegister" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="64" />
+						<protocol name="Length" type="xsd:int" default="2" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="CurrencyCode" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="66" />
+						<protocol name="Length" type="xsd:int" default="3" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ThreeMonthAlpha" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="69" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SixMonthAlpha" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="87" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="OneYearAlpha" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="105" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ThreeYearAlpha" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="123" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="FiveYearAlpha" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="141" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ThreeMonthBeta" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="159" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="SixMonthBeta" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="177" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="OneYearBeta" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="195" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="ThreeYearBeta" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="213" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="FiveYearBeta" type="xsd:string" >
+				<xsd:annotation>
+					<xsd:appinfo>
+						<protocol name="Offset" type="xsd:int" default="231" />
+						<protocol name="Length" type="xsd:int" default="18" />
+						<protocol name="Format" type="xsd:string" default="A" />
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:element>
+  		</xsd:sequence>
+  	</xsd:complexType>
+  	
+	<xsd:element name="Alphas_Betas" type="Alphas_BetasType" >
+		<xsd:annotation>
+		</xsd:annotation> 
+	</xsd:element>
+	
+  	<xsd:element name="Alphas_Betas1" type="Alphas_BetasType" />
+  	
+</xsd:schema>
+ 

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary name="example" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://exactprosystems.com/dictionary">
+	<fields>
+		<field name="TBoolean" id="TBoolean" type="java.lang.Boolean"/>
+		<field name="TByte" id="TByte" type="java.lang.Byte"/>
+		<field name="TCharacter" id="TCharacter" type="java.lang.Character"/>
+		<field name="TShort" id="TShort" type="java.lang.Short"/>
+		<field name="TInteger" id="TInteger" type="java.lang.Integer"/>
+		<field name="TLong" id="TLong" type="java.lang.Long"/>
+		<field name="TFloat" id="TFloat" type="java.lang.Float"/>
+		<field name="TDouble" id="TDouble" type="java.lang.Double"/>
+		<field name="TBigDecimal" id="TBigDecimal" type="java.math.BigDecimal"/>
+		<field name="TString" id="TString" type="java.lang.String"/>
+		<field name="TDateTime" id="TDateTime" type="java.time.LocalDateTime"/>
+		<field name="TTime" id="TTime" type="java.time.LocalTime"/>
+		<field name="TDate" id="TDate" type="java.time.LocalDate"/>
+
+		<field name="TByteEnum" id="TByteEnum" reference="TByte">
+			<value name="One">1</value>
+			<value name="Two">2</value>
+		</field>
+		<field name="TCharacterEnum" id="TCharacterEnum" reference="TCharacter">
+			<value name="One">1</value>
+			<value name="LetterA">a</value>
+		</field>
+		<field name="TShortEnum" id="TShortEnum" reference="TShort">
+			<value name="One">1</value>
+			<value name="Two">2</value>
+                        <value name="Three">3</value>
+		</field>
+
+		<field name="TIntegerEnum" id="TIntegerEnum" reference="TInteger">
+			<value name="Ten">10</value>
+			<value name="Hundred">2</value>
+		</field>
+		<field name="TStringEnum" id="TStringEnum" reference="TString">
+			<value name="Enum1">Foo</value>
+			<value name="Enum2">Bar</value>
+		</field>
+	</fields>
+
+	<messages>
+		<message name="Header" id="Header">
+			<field name="FString"        reference="TString"/>
+		</message>
+		<message name="Trailer" id="Trailer">
+			<field name="FString"        reference="TString"/>
+		</message>
+
+		<message name="SimpleMessage" id="SimpleMessage">
+			<field name="FBoolean"       reference="TBoolean"/>
+			<field name="FByte"          reference="TByte"/>
+			<field name="FCharacter"     reference="TCharacter"/>
+			<field name="FShort"         reference="TShort"/>
+			<field name="FInteger"       reference="TInteger"/>
+			<field name="FLong"          reference="TLong"/>
+			<field name="FFloat"         reference="TFloat"/>
+			<field name="FDouble"        reference="TDouble"/>
+			<field name="FBigDecimal"    reference="TBigDecimal"/>
+			<field name="FString"        reference="TString"/>
+			<field name="FDateTime"      reference="TDateTime"/>
+			<field name="FTime"        	 reference="TTime"/>
+			<field name="FDate"          reference="TDate"/>
+			<field name="FByteEnum"      reference="TByteEnum"/>
+			<field name="FCharacterEnum" reference="TCharacterEnum"/>
+			<field name="FShortEnum"     reference="TShortEnum"/>
+			<field name="FIntegerEnum"   reference="TIntegerEnum"/>
+			<field name="FStringEnum"    reference="TStringEnum"/>
+		</message>
+		
+		<message name="ArrayMessage" id="ArrayMessage">
+			<field name="FBoolean"       reference="TBoolean"		isCollection="true"/>
+			<field name="FByte"          reference="TByte"			isCollection="true"/>
+			<field name="FCharacter"     reference="TCharacter"		isCollection="true"/>
+			<field name="FShort"         reference="TShort"			isCollection="true"/>
+			<field name="FInteger"       reference="TInteger"		isCollection="true"/>
+			<field name="FLong"          reference="TLong"			isCollection="true"/>
+			<field name="FFloat"         reference="TFloat"			isCollection="true"/>
+			<field name="FDouble"        reference="TDouble"		isCollection="true"/>
+			<field name="FBigDecimal"    reference="TBigDecimal"	isCollection="true"/>
+			<field name="FString"        reference="TString"		isCollection="true"/>
+			<field name="FByteEnum"      reference="TByteEnum"		isCollection="true"/>
+			<field name="FCharacterEnum" reference="TCharacterEnum"	isCollection="true"/>
+			<field name="FShortEnum"     reference="TShortEnum"		isCollection="true"/>
+			<field name="FIntegerEnum"   reference="TIntegerEnum"	isCollection="true"/>
+			<field name="FStringEnum"    reference="TStringEnum"	isCollection="true"/>
+			<field name="FDateTime"      reference="TDateTime"		isCollection="true"/>
+			<field name="FTime"        	 reference="TTime"			isCollection="true"/>
+			<field name="FDate"          reference="TDate"			isCollection="true"/>
+		</message>
+
+		<message name="SubCollection" id="SubCollection">
+			<field name="FString"        reference="TString"/>
+			<field name="Header"         reference="Header"/>
+		</message>
+
+		<message name="Collection" id="Collection">
+			<field name="FStringEnum"    reference="TStringEnum"/>
+			<field name="SubCollection"  reference="SubCollection" isCollection="true" />
+		</message>
+
+		<message name="ComplexMessage" id="ComplexMessage">
+			<field name="Header"         reference="Header"/>
+			<field name="FStringR"       reference="TString" required="true"/>
+			<field name="FString1"       reference="TString"/>
+			<field name="FString2"       reference="TString"/>
+			<field name="SimpleMessage"  reference="SimpleMessage"/>
+			<field name="ArrayMessage"	 reference="ArrayMessage"/>
+			<field name="Collection"     reference="Collection" isCollection="true" />
+			<field name="EmptyComplexCollection"     reference="Collection" isCollection="true" />
+			<field name="EmptySimpleCollection"      reference="TString" isCollection="true" />
+			<field name="Trailer"         reference="Trailer"/>
+		</message>
+
+	</messages>
+</dictionary>

@@ -1,0 +1,43 @@
+ext {
+    plugin_name = 'generic'
+    plugin_alias = plugin_name
+}
+
+archivesBaseName = "plugin-${plugin_name}"
+
+dependencies {
+
+    if (incremental_build) {
+        compileOnly "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
+        compile "com.exactpro.sf:extension-aml-3:${artifactVersion}"
+        compile "com.exactpro.sf:service-ntg:${artifactVersion}"
+        compile "com.exactpro.sf:service-itch:${artifactVersion}"
+        compile "com.exactpro.sf:service-fix:${artifactVersion}"
+        compile "com.exactpro.sf:service-fast:${artifactVersion}"
+    } else {
+        compileOnly project(':BackEnd:Core:sailfish-core')
+        compile project(':BackEnd:Extension:extension-aml-3')
+        compile project(':BackEnd:Service:service-ntg')
+        compile project(':BackEnd:Service:service-itch')
+        compile project(':BackEnd:Service:service-fix')
+        compile project(':BackEnd:Service:service-fast')
+    }
+}
+
+test {   
+    jvmArgs '-XX:MaxPermSize=256m'
+    
+    println "Test args ${allJvmArgs}"
+}
+
+generateVersionClass {
+	plugin	= true
+	alias 	= plugin_alias
+}
+
+compileJava.dependsOn.add('generateVersionClass')
+
+validateDictionary {
+    validate(NTG_VALIDATOR, 'NTG_GENERIC.xml')
+    validate(ITCH_VALIDATOR, 'ITCH_GENERIC.xml')
+}

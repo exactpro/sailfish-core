@@ -1,0 +1,13 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:form>
+    <p:outputPanel class="eps-top-auth" rendered="#{authBean.loggedIn}">
+        <span>User: #{authBean.humanUsername} </span>
+        <p:commandButton value="Logout" id="login" ajax="false" actionListener="#{authBean.logout()}"/>
+    </p:outputPanel>
+</h:form>
+</html>

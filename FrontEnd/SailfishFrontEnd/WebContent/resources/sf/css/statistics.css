@@ -1,0 +1,282 @@
+.eps-statistics-content {
+	position: absolute;
+	top: 0px;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.eps-application .eps-statistics-table .ui-datatable-odd td {
+	background-color: #F8F8F8;	
+}
+
+.eps-application .eps-statistics-table .ui-datatable-even td {
+	background-color: #FFF;
+}
+
+
+.eps-application .eps-statistics-table .ui-datatable-even.ui-state-hover td,
+.eps-application .eps-statistics-table .ui-datatable-odd.ui-state-hover td {
+	background-color: #E6E6E6;
+}
+
+.eps-application .eps-statistics-table .ui-datatable-even.ui-state-highlight td,
+.eps-application .eps-statistics-table .ui-datatable-odd.ui-state-highlight td {
+	background-color: #F7F2D7;
+}
+
+.eps-report-parameters {
+	
+}
+
+.eps-report-results {
+	box-sizing: border-box;
+    overflow: auto;
+    max-height: 650px;
+}
+
+.eps-card {
+	margin: 1em;
+	box-shadow: 0px 1px 2px 0px rgba(43, 59, 93, 0.4);
+	padding: 10px;
+	display: block;
+	background-color: #FFF;
+	border-radius: 2px;
+	border: 1px solid #CCC;
+}
+
+.eps-card.no-scroll {
+	max-height: none; 
+	overflow: visible;
+}
+
+.eps-conditionally-passed-label {
+    font-weight: bold;
+    color: #D2AC3F;
+}
+
+.eps-passed-label {
+	font-weight: bold;
+	color: #1ABC85;
+}
+
+a.eps-failed-label,
+.eps-failed-label {
+	font-weight: bold;
+	color: #D35400;
+}
+
+a.eps-init-failed-label,
+.eps-init-failed-label {
+    font-weight: bold;
+    color: #D35400;
+}
+
+.panel-separator {
+	border: 0px none;
+}
+
+.eps-params-header {
+	color: #555;
+	font-size: 1.2em;
+	font-weight: bold;
+	text-align: center;
+	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 0px;
+	border-top-right-radius: 1px;
+	border-top-left-radius: 1px;
+	background-color: #ECEFF1;
+	border-bottom: solid 1px #E0E0E0;
+	margin: -10px -10px 10px -10px;
+	padding: 0.3em;
+	position: relative;
+}
+
+.eps-params-header .eps-options-link {
+	position: absolute;
+  	top: 0.7em;
+  	right: 0.8em;
+}
+
+.eps-params-separator {
+	margin: 10px 0 ;
+	border-top: 1px solid #CCC;
+}
+
+.eps-statistics-table {
+	word-wrap: break-word;
+	white-space: normal;
+}
+
+/* TODO: need to render this css file after the primefaces.css to avoid important */
+
+.eps-application .eps-statistics-table td, .eps-application .eps-statistics-table th {
+	border: 0px none;
+}
+
+.eps-application .eps-statistics-table .eps-matrix-info-row td {
+	background-color: #FCFCFC;
+	border-bottom: 1px solid #CCC;
+	border-top: 1px solid #CCC;
+	
+}
+
+.eps-bb-row {
+	text-align: center;
+}
+
+.eps-application .eps-statistics-table .ui-datatable-scrollable-header {
+	border-radius: 0;
+	
+}
+
+.eps-application .eps-statistics-table .ui-datatable-scrollable-body {
+	margin: 0px !important;
+	
+}
+
+.eps-application .eps-statistics-table tbody td {
+	border-top: 1px solid #EFEFEF;
+}
+
+.eps-statistics-not-available {
+	color: #B94A48;
+	background-color: #F2DEDE;
+	border-color: #EED3D7; 
+}
+
+.eps-dialog-open-link {
+	text-decoration: none;
+	border-bottom: 1px dashed;
+}
+
+.eps-statistics-content .eps-statistic-side-menu {
+	margin: 1em 0 0 1em;
+	padding: 0;
+}
+
+.eps-statistics-content .eps-statistic-side-menu .ui-widget-header {
+	background-color: #ECEFF1;
+	border-radius: 0;
+}
+
+.eps-duration.good {
+	color: #1ABC85;
+}
+
+.eps-duration.warn {
+	color: #D35400;
+}
+
+#params-form\:mode td {
+	padding: 0 0.4em;
+}
+
+.eps-empty-message {
+	text-align: center;
+}
+
+.eps-empty-message span {
+	
+} 
+
+.eps-pf-select-panel-width-fix {
+	width: 150px;
+}
+
+.eps-hidden {
+	display: none;
+}
+
+.eps-row-expander {
+	cursor: pointer;
+}
+
+.eps-application .ui-datatable .ui-datatable-scrollable-body table {
+	/*width: auto;*/
+}
+
+.eps-application .eps-matrix-info-row.eps-has-passes td {
+	background-color: #F7FDF6; 
+}
+
+.eps-application .eps-matrix-info-row.eps-has-passes .eps-expander-column {
+	background-color: #E1F3DD; 
+}
+
+.eps-application .eps-matrix-info-row.eps-has-fails td {
+	background-color: #FFECEC;
+}
+
+.eps-application .eps-matrix-info-row.eps-has-fails .eps-expander-column {
+	background-color: #F9E6E6;
+}
+
+.eps-application .eps-matrix-info-row.eps-init-failed td {
+    background-color: #FFECEC;
+}
+
+.eps-application .eps-matrix-info-row.eps-init-failed .eps-expander-column {
+    background-color: #F9E6E6;
+}
+
+.eps-application .eps-matrix-info-row.eps-has-fails.eps-has-passes td {
+	background-color: #F9FFE2;
+}
+
+.eps-application .eps-matrix-info-row.eps-has-fails.eps-has-passes .eps-expander-column {
+	background-color: #F8F9D3;
+}
+
+
+.eps-application .eps-matrix-info-row.ui-state-hover td,
+.eps-application .eps-matrix-info-row.eps-has-fails.eps-has-passes.ui-state-hover td {
+	background-color: #f5f5f5;
+}
+
+.eps-application .ui-state-hover a.eps-link  {
+	text-decoration: underline;
+}
+
+
+.eps-chkbox-tbl td {
+	vertical-align: top;
+}
+
+.eps-checkbox-tbl {
+	margin-right: 1em;
+}
+
+#results-form .ui-datatable-footer {
+	background: #E6E6E6;
+    border: 1px solid #CCCCCC;
+    color: #555;
+}
+
+/** TG **/
+
+.colPassed, .colFailed {
+	height: 100%;
+    position: absolute;
+    top: 0;    
+}
+
+.colPassed {
+	background: #82da82;
+	right: 0;	
+}
+
+.colFailed {
+	background: #ff7575;
+	left: 0;	
+}
+
+.numPassed, .numFailed {
+	position: absolute;
+	line-height: 2em;
+    font-weight: bold;
+    bottom: 0;
+    left: 50%;
+}

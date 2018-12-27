@@ -1,0 +1,152 @@
+checkCompatibility.enabled = false
+
+subprojects {
+	ext {
+		dataDir	    		= file("${mainPluginDir}/data")
+		dictionaryDir		= file("${mainWorkspaceDir}/cfg/dictionaries")
+    	genDictionaryDir	= file("${genWorkspaceDir}/cfg/dictionaries")
+
+        qfjDictionaryDir    = file("${mainDir}/quickfix")
+
+		plugin_name		= 'template'
+        plugin_alias    = plugin_name
+
+        DEFAULT_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.DefaultDictionaryValidatorFactory'
+        ITCH_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.ITCHDictionaryValidatorFactory'
+        NTG_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.NTGDictionaryValidatorFactory'
+        FIX_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.FIXDictionaryValidatorFactory'
+	}
+
+	sourceSets {
+	    main {
+	        java {
+	            srcDir "${genJavaDir}"
+	        }
+	        resources {
+	            srcDir "${genResDir}"
+	        }
+	    }
+	}
+
+    dependencies {
+	    if (incremental_build) {
+            compileOnly "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
+	    } else {
+	        compileOnly project(':BackEnd:Core:sailfish-core')
+	    }
+    }
+
+    configurations {
+        zip_data
+        data
+    }
+
+	generateXmlFAST {
+		inputFolderPath "${dataDir}/fast/templates/"
+		outputFolderPath "${genDictionaryDir}"
+		includeTemplateName true
+	}
+	
+	generateXmlFix {
+	   inputDirectory file('${dictionaryDir}/fix')
+	   outputDirectory genDictionaryDir
+	}
+    
+    build.dependsOn.add('checkCompatibility')
+	
+	checkCompatibility {
+		dependsOn.add('writeFile')
+        dependsOn.add('copyFromData')
+        dependsOn.add('validateDictionary')
+        
+        onlyIf {
+            project.hasProperty('plugin_alias')
+        }
+        cfgDirs = [file("${mainWorkspaceDir}/cfg"), 
+                   file("${genWorkspaceDir}/cfg"), 
+                   file("${externalWorkspaceDir}/cfg"),
+                   file("${mainPluginDir}/cfg"), 
+                   file("${genPluginDir}/cfg"), 
+                   file("${externalPluginDir}/cfg")]
+    	versionFile = writeFile.outputFile
+    	minCoreRevision = min_core_revision
+    	silent = silent_check
+    }
+	
+	task copyFromData (type: Copy) {
+        into externalWorkspaceDir
+    
+        from {
+           configurations.zip_data.collect { zipTree(it) }
+        }
+        from { 
+            configurations.data
+        }
+    }
+    
+    publishPlugin {
+        dependsOn.add('copyFromData')
+        dependsOn.add('checkCompatibility')
+    }
+    zipRelease {
+        dependsOn.add('copyFromData')
+        dependsOn.add('checkCompatibility')
+    }
+    
+    validateDictionary() {
+        dependsOn.add('copyFromData')
+    	sourceDir([file("${mainPluginDir}/cfg/dictionaries"), file("${mainWorkspaceDir}/cfg/dictionaries"), file("${genPluginDir}/cfg/dictionaries")])
+    	setDefault(DEFAULT_VALIDATOR)
+
+        validate(ITCH_VALIDATOR, 'itch.*.xml')
+        validate(NTG_VALIDATOR, 'ntg.*.xml')
+        validate(FIX_VALIDATOR, 'FIX.*.xml')   	
+    }
+	
+    collectDependencies {
+        type = 'plugin'
+    }
+}
+
+// Setting this property to true will make the artifactoryPublish task
+// skip this module (in our case, the root module):
+artifactoryPublish.skip = true
+
+//Functions
+def configureGenerateSailfishMessage(files, inputs, outputs, genDir) {
+	files.each { dict ->
+    	inputs.file "$dict"
+    	def namespace = ((new XmlParser()).parse(dict).@name).toLowerCase()
+        outputs.dir file("${genDir}/com/exactpro/sf/messages/${namespace}")
+    }
+}
+
+def generateSailfishMessage(dictionaries, runtimeClasspath, genDir) {
+	dictionaries.each { dict -> 
+    	println "\t${dict.name}"
+    	javaexec {
+            classpath runtimeClasspath
+            main "com.exactpro.sf.common.util.CodeGenerator"
+            args = ["${dict}", "${genDir}", "com.exactpro.sf.messages"]
+        }
+    }
+}
+
+def configureGenerateSailfishAction(files, inputs, outputs, genDir) {
+	files.each { dict ->
+    	inputs.file "$dict"
+    	def namespace = ((new XmlParser()).parse(dict).@name).toUpperCase()
+        outputs.file file("${genDir}/com/exactpro/sf/actions/${namespace}_SndRcvMatrixActions.java")
+    }
+}
+
+def generateSailfishAction(dictionaries, runtimeClasspath, genDir) {
+	dictionaries.each { dict -> 
+    	println "\t${dict.name}"
+		javaexec {
+	        classpath runtimeClasspath
+            main "com.exactpro.sf.util.MatrixActionsGenerator"
+	        args = ["${dict}", "${genDir}"]
+	    }
+	}
+}

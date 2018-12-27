@@ -1,0 +1,1 @@
+ALTER TABLE stactionruns ADD COLUMN `hash` int  NOT NULL DEFAULT 0 AFTER `tag`;

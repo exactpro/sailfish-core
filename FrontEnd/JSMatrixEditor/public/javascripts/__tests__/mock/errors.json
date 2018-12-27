@@ -1,0 +1,28 @@
+{
+    "errors": [
+        {
+            "paths": [
+                [0,3]
+            ],
+            "reference": "",
+            "column": null,
+            "message": "Value in column '#messages_count' is invalid: 'y'"
+        },
+        {
+          "paths": [
+            [0,3]
+          ],
+          "reference": "",
+          "column": null,
+          "message": "Second error"
+        },
+        {
+          "paths": [
+            [0,3]
+          ],
+          "reference": "",
+          "column": null,
+          "message": "One more xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+    ]
+}

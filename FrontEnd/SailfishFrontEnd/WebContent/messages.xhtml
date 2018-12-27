@@ -1,0 +1,274 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon" />
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <title>Messages :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+    <h:outputStylesheet library="sf" name="css/messages.css"/>
+
+    <h:outputStylesheet library="sf" name="css/query-builder.css"/>
+
+    <script>
+    
+        function getContextPath() {
+            return "#{request.contextPath}";
+        };
+    
+        if (!window.console) console = {};
+
+        console.log = console.log || function(){};
+        console.warn = console.warn || function(){};
+        console.error = console.error || function(){};
+        console.info = console.info || function(){};
+    
+    </script>
+
+</h:head>
+<h:body styleClass="eps-application">
+
+    <f:metadata>
+        <f:event type="preRenderView" listener="#{messagesBean.preRenderView}" />
+    </f:metadata>
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <div class="eps-container">
+        <p:ajaxStatus style="width:24px;height:24px; position: absolute; top: 10px; right:10px;" id="ajaxStatusPanel">
+            <f:facet name="start">
+                <h:graphicImage library="sf" name="images/ajaxloader.gif"/>
+            </f:facet>
+
+            <f:facet name="complete">
+                <h:outputText value="" />
+            </f:facet>
+        </p:ajaxStatus>
+
+        <h:form id="form" prependId="false" styleClass="eps-messages-form">
+            <p:growl id="messages" sticky="false" life="12000" showDetail="true" autoupdate="true" />
+
+            <p:remoteCommand id="refresh" name="refresh" action="#{messagesBean.loadSort}" oncomplete="PF('messagesTable').filter(); wrapContent();" update="table messages"/>
+
+            <p:remoteCommand id="setRowsPerPage" name="setRowsPerPage" action="#{messagesBean.saveRows}"/>
+            <p:remoteCommand id="retrieveCommand" name="retrieveCommand"  action="#{messagesBean.getByQuery}" oncomplete="PF('messagesTable').filter()" update="form table messages"/>
+
+            <h:outputText id="rowsPerPage" style="display: none;" value="#{messagesBean.rowsPerPage}" />
+
+            <p:remoteCommand id="saveFilter" name="saveFilter" action="#{messagesBean.saveFilter}"/>
+            <h:outputText id="timeFilter" style="display: none;" value="#{messagesBean.timeFilter}" />
+            <h:outputText id="nameFilter" style="display: none;" value="#{messagesBean.nameFilter}" />
+            <h:outputText id="fromFilter" style="display: none;" value="#{messagesBean.fromFilter}" />
+            <h:outputText id="toFilter" style="display: none;" value="#{messagesBean.toFilter}" />
+            <h:outputText id="contentFilter" style="display: none;" value="#{messagesBean.contentFilter}" />
+
+            <p:outputPanel columns="1" cellpadding="0" styleClass="eps-messages-toolbar" columnClasses="options-col-1,options-col-2,options-col-3">
+                <div class="eps-messages-header">
+                    <div class="eps-messages-query-string">
+                        <h:outputLabel for="whereInput" value="Query: " styleClass="eps-message-header-label" />
+                        <p:autoComplete id="whereInput" value="#{messagesBean.whereStatement}" styleClass="eps-input eps-messages-query-input" 
+                        	completeMethod="#{messagesBean.completeText}" 
+                        	dropdown="true"  
+                        	scrollHeight="100" 
+                        	placeholder="Type HQL-query here" 
+                        	onfocus="onFocus()" 
+                        	onblur="onBlur()">
+                        	
+                            <p:ajax execute="@this"/>
+                        </p:autoComplete>
+                        <h:inputHidden id="hiddenQuery" value="#{messagesBean.queries}" valueChangeListener="#{messagesBean.queriesToList}"/>
+                        <div class="eps-messages-limit-wrapper">
+                            <h:outputLabel styleClass="eps-messages-limit-label eps-message-header-label" for="countInput" value="Limit: " />
+                            <p:inputText id="countInput" value="#{messagesBean.showCount}" styleClass="eps-input eps-messages-limit-input">
+                                <p:ajax execute="@this"/>
+                            </p:inputText>
+                        </div>
+                        <p:menubar styleClass="eps-messages-button-bar">
+                            <p:menuitem id="retrieveBtn" icon="eps-custom-icon eps-custom-icon-goto" value="Retrieve" onclick="sfQueryStorage.saveHqlQuery();retrieveCommand()"/>
+                            <p:menuitem id="wizardBtn" icon="eps-custom-icon eps-custom-icon-calc" value="Wizard" onclick="PF('wizard').show()"/>
+                        </p:menubar>
+                    	
+                    	<p:defaultCommand target="retrieveBtn" />
+                    </div>
+
+                    <p:commandButton id="export-button" icon="ui-icon-disk" styleClass="eps-export-btn" onclick="PF('exportMessagesOptionsVar').show()"/>
+                    <p:selectCheckboxMenu id="columnsToDisplay" styleClass="eps-columns-opts" value="#{messagesBean.selectedOptions}" label="&nbsp;&nbsp;&nbsp;&nbsp;" valueChangeListener="#{messagesBean.onColumnChange}">
+                        <p:ajax execute="@this" update=":form:table"/>
+                        <p:ajax event="toggleSelect" update=":form:table" execute="@this"/>
+                        <f:selectItems value="#{messagesBean.options}"/>
+                    </p:selectCheckboxMenu>
+
+                    <p:commandButton id="reset-button" icon="ui-icon-trash" action="#{messagesBean.removeFilters}" styleClass="eps-message-clear-filters-btn" oncomplete="removeFilters();refresh()"/>
+
+                    <p:tooltip value="Columns to display" for="columnsToDisplay" />
+                    <p:tooltip value="HQL-query to execute" for="whereInput" />
+                    <p:tooltip value="Messages count uploaded from database" for="countInput" />
+                    <p:tooltip value="Execute query" for="retrieveBtn" />
+                    <p:tooltip value="Open query buider" for="wizardBtn" />
+                    <p:tooltip value="Export in CSV" for="export-button" />
+                    <p:tooltip value="Reset table" for="reset-button" />
+                    <p:tooltip for="@(#table th .ui-column-filter)" trackMouse="true">
+                        <h:outputText value="Character ' * ' at filter will replace some string." escape="false" />
+                        <br />
+                        <h:outputText value="'*tcp' will find 'itch_tcp' but not 'itch_tcp2'" escape="false"/>
+                    </p:tooltip>
+
+                </div>
+            </p:outputPanel>
+
+
+
+            <p:dataTable id="table" widgetVar="messagesTable" var="message" value="#{messagesBean.messageLazyModel}" lazy="true" emptyMessage="No messages found"
+                         paginator="true" paginatorPosition="bottom" rows="#{messagesBean.rowsPerPage}" style="text-align: left; word-wrap:break-word;"
+                         paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="15,50,100,250" styleClass="eps-messages-table eps-main-table" scrollable="true" scrollHeight="100%">
+
+                <p:ajax event="page" oncomplete="showTogglerTooltip(); wrapContent();"/>
+                <p:ajax event="filter" oncomplete="showTogglerTooltip(); wrapContent();"/>
+                <p:ajax event="sort" listener="#{messagesBean.onSort}" oncomplete="wrapContent();"/>
+
+                <p:column style="width:16px" styleClass="eps-message-column eps-toggler-column">
+                    <p:rowToggler />
+                </p:column>
+
+                <p:column id="timestamp" sortBy="#{message.timestamp}"
+                          columnIndexVar="tIndex" style="position: relative;"
+                          styleClass="eps-message-column eps-message-timestamp-column" rendered="#{messagesBean.isRendered('timestamp')}">
+                    <f:facet name="header">
+                        <h:outputText value="Timestamp"/>
+                    </f:facet>
+                    <h:outputText value="#{message.timestamp}"/>
+                </p:column>
+
+                <p:column id="name" sortBy="#{message.name}" columnIndexVar="nIndex"
+                          style="position: relative;"
+                          styleClass="eps-message-column eps-message-name-column" rendered="#{messagesBean.isRendered('name')}">
+                    <f:facet name="header">
+                        <h:outputText value="Name"/>
+                    </f:facet>
+                    <h:outputText value="#{message.name}"/>
+                </p:column>
+
+                <p:column id="from" sortBy="#{message.from}" columnIndexVar="fromIndex"
+                          style="position: relative;"
+                          styleClass="eps-message-column eps-message-from-column" rendered="#{messagesBean.isRendered('from')}">
+                    <f:facet name="header">
+                        <h:outputText value="From"/>
+                    </f:facet>
+                    <h:outputText value="#{message.from}"/>
+                </p:column>
+
+                <p:column id="to" sortBy="#{message.to}" columnIndexVar="toIndex"
+                          style="position: relative;"
+                          styleClass="eps-message-column eps-message-to-column" rendered="#{messagesBean.isRendered('to')}">
+                    <f:facet name="header">
+                        <h:outputText value="To"/>
+                    </f:facet>
+                    <h:outputText value="#{message.to}"/>
+                </p:column>
+
+                <p:column id="content" sortBy="#{message.humanReadable}"
+                          columnIndexVar="cIndex" style="position: relative;"
+                          styleClass="eps-message-column eps-message-content-column" rendered="#{messagesBean.isRendered('content')}">
+                    <f:facet name="header">
+                        <h:outputText value="Content"/>
+                    </f:facet>
+                    <h:outputText value="#{message.humanReadable}"/>
+                    <div>
+                        <h:outputText value="SAILFISH REJECT REASON: #{message.rejectReason}" rendered="#{not empty message.rejectReason}"/>
+                    </div>
+                </p:column>
+
+                <p:rowExpansion>
+                    <h:panelGrid columns="1" cellpadding="4" styleClass="ui-widget-content" columnClasses="value">
+                        <f:facet name="header">
+                            <h:outputText value="Raw message "/>
+                            <p:commandButton
+                                    id="clipboard-button"
+                                    icon="ui-icon-copy"
+                                    styleClass="eps-clipboard-button"
+                                    onclick="copyPrintableMessageToClipboard('#{message.printableMessage}');"
+                            />
+                            <p:tooltip id="clipboard-button-tooltop" for="clipboard-button" value="Copy raw message to the clipboard"/>
+                        </f:facet>
+                        <pre>#{message.rawMessage}</pre>
+                    </h:panelGrid>
+                    <h:panelGrid columns="1" cellpadding="4" styleClass="ui-widget-content" columnClasses="value" rendered="#{generalBean.getReleaseName() eq 'MTE'}">
+                        <f:facet name="header">
+                            <h:outputText value="Fields table"/>
+                        </f:facet>
+                        <h:outputText value="#{message.fields}" escape="false"/>
+                    </h:panelGrid>
+                </p:rowExpansion>
+
+            </p:dataTable>
+
+            <p:selectBooleanButton styleClass="eps-highlight-content" id="isHighlightEnabled" value="#{messagesBean.highlightEnabled}" onLabel="" offLabel="" onIcon="ui-icon-check" offIcon="ui-icon-close" >
+                <p:ajax update="table" oncomplete="wrapContent();" />
+            </p:selectBooleanButton>
+            <p:tooltip value="Enable highlight same tags" for="isHighlightEnabled" />
+
+        </h:form>
+
+
+        <h:form id="exportMessagesOptionsForm" >
+            <p:dialog style="text-align: center" id="exportMessagesOptionsDialog" header="Export options" severity="alert" widgetVar="exportMessagesOptionsVar" modal="true" resizable="false">
+
+                <div style="padding: 10px;">
+                    <p:selectCheckboxMenu value="#{messagesBean.selectedOptions}" label="Columns to export" styleClass="eps-input">
+                        <f:selectItems value="#{messagesBean.options}"/>
+                    </p:selectCheckboxMenu>
+                </div>
+
+                <div style="padding: 10px;">
+                    <p:selectBooleanCheckbox value="#{messagesBean.includeRawMessage}" itemLabel="Include Raw message"/>
+                </div>
+
+                <div style="text-align: center">
+                    <p:commandButton value="Export" id="export-button-confirm" ajax="false" update=":form:messages" onclick="PF('exportMessagesOptionsVar').hide()">
+                        <p:fileDownload value="#{messagesBean.resultsInCSV}" />
+                    </p:commandButton>
+                    <p:commandButton id="cancel" value="Cancel" type="button" style="margin-top: 5px" onclick="PF('exportMessagesOptionsVar').hide()"/>
+                </div>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="wizardForm" >
+            <p:dialog header="Wizard" severity="alert" widgetVar="wizard" modal="false" resizable="false">
+                <div id="builder-basic"  style="width: 600px; height: 500px;"/>
+                <p:commandButton id="retrieve" styleClass="eps-arrow-container" value="Retrieve" onclick="sfQueryStorage.onWizardRetrieve();retrieveCommand();PF('wizard').hide()" icon="ui-icon-arrow-1-e" style="float: right;"/>
+            </p:dialog>
+        </h:form>
+    </div>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+
+    <h:outputScript library="sf" name="js/bootstrap.min.js"/>
+    <h:outputScript library="sf" name="js/jQuery.extendext.min.js"/>
+    <h:outputScript library="sf" name="js/microevent.js"/>
+    <h:outputScript library="sf" name="js/moment.js"/>
+    <h:outputScript library="sf" name="js/query-builder.js"/>
+    <h:outputScript library="sf" name="js/builder-basic.js"/>
+
+    <h:outputScript library="sf" name="js/menu.js"/>
+    <h:outputScript library="sf" name="js/messages.js"/>
+
+</h:body>
+</html>

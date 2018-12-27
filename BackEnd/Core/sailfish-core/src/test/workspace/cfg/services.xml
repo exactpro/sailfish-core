@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<Services>
+	<Service name="TCPIPClientService">
+        <className>com.exactpro.sf.services.tcpip.TCPIPClient</className>
+        <settingsClassName>com.exactpro.sf.services.tcpip.TCPIPSettings</settingsClassName>
+	</Service>
+
+	<Service name="FIX-Server">
+        <className>com.exactpro.sf.services.fix.FIXServer</className>
+        <settingsClassName>com.exactpro.sf.services.fix.FIXServerSettings</settingsClassName>
+	</Service>
+
+	<Service name="FIX-Proxy">
+        <className>com.exactpro.sf.services.tcpip.FixProxy</className>
+        <settingsClassName>com.exactpro.sf.services.tcpip.TCPIPProxySettings</settingsClassName>
+	</Service>
+
+	<Service name="ORACLE-DB-Client">
+        <className>com.exactpro.sf.services.db.client.oracle.OracleClient</className>
+        <settingsClassName>com.exactpro.sf.services.db.client.oracle.OracleClientSettings</settingsClassName>
+	</Service>
+
+	<Service name="DB-Client">
+        <className>com.exactpro.sf.services.db.client.oracle.OracleClient</className>
+        <settingsClassName>com.exactpro.sf.services.db.client.oracle.OracleClientSettings</settingsClassName>
+	</Service>
+
+	<Service name="FAKE-CLIENT-SERVICE">
+        <className>com.exactpro.sf.services.fake.FakeClientService</className>
+        <settingsClassName>com.exactpro.sf.services.fake.FakeSettings</settingsClassName>
+	</Service>
+
+	<Service name="EMail-Client">
+        <className>com.exactpro.sf.services.email.EMailClient</className>
+        <settingsClassName>com.exactpro.sf.services.email.EMailClientSettings</settingsClassName>
+	</Service>
+
+	<Service name="Data-Client">
+        <className>com.exactpro.sf.services.data.DataClient</className>
+        <settingsClassName>com.exactpro.sf.services.data.DataClientSettings</settingsClassName>
+	</Service>
+
+	<Service name="Data-CSV-Client">
+        <className>com.exactpro.sf.services.data.DataClient</className>
+        <settingsClassName>com.exactpro.sf.services.data.DataCSVClientSettings</settingsClassName>
+	</Service>
+
+	<Service name="JF Client">
+        <className>com.exactpro.sf.services.jf.JFClientService</className>
+        <settingsClassName>com.exactpro.sf.services.jf.JFClientSettings</settingsClassName>
+	</Service>
+
+</Services>

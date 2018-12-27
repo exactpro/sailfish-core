@@ -1,0 +1,68 @@
+.eps-container {
+	padding-left:  1em;
+	padding-right: 1em;
+}
+
+.eps-error-header {
+	border-bottom: 1px solid #CCC;
+	margin-bottom: 15px;	
+}
+
+.error-code {
+	font-size: 30px;
+	color: red;
+}
+
+.eps-error-name {
+	font-size: 20px;
+	
+}
+
+.eps-error-details {
+	
+}
+
+.eps-sf-logo {
+	display: block;
+	float: left;
+	margin-right: 15px;
+	border: 2px solid #fff;
+    box-shadow: #151515 0px 0px 7px 0;
+    transform: rotateX(180deg);
+}
+
+.eps-sf-logo.fatal {
+	box-shadow: #F00 0px 0px 7px 0;
+}
+
+.eps-error-details table td {
+	padding: 2px 5px;
+}
+
+#stacktrace-toggler {
+	text-decoration: none;
+	padding: 1px 3px;
+	font-size: 13px;
+	font-weight: bold;
+	line-height: 14px;
+	color: white;
+	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+	white-space: nowrap;
+	vertical-align: baseline;
+	box-shadow: #151515 0px 0px 3px 0;
+	background-color: #999;
+	cursor: pointer;
+	margin: 0 5px;
+}
+
+#stacktrace {
+	background: rgb(245, 245, 245);
+	padding: 5px;
+	margin: 15px 0;
+	border: 1px solid #CCC;
+}
+
+.eps-problem-description {
+	font-size: 13px;
+}
+

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<serviceDescription>
+    <type>test:enabled_service</type>
+    <name>enabled</name>
+    <serviceHandlerClassName>handler</serviceHandlerClassName>
+    <environment>test_environment</environment>
+    <enabledSettings>
+        <comment>comment</comment>
+        <dictionaryName>test_dictionary</dictionaryName>
+        <expectedTimeOfStarting>555</expectedTimeOfStarting>
+        <performDump>false</performDump>
+        <persistMessages>true</persistMessages>
+        <storedMessageTypes>Message1, Message2</storedMessageTypes>
+        <waitingTimeBeforeStarting>777</waitingTimeBeforeStarting>
+        <boolSetting>true</boolSetting>
+        <integerSetting>101</integerSetting>
+        <stringSetting>some string</stringSetting>
+    </enabledSettings>
+</serviceDescription>

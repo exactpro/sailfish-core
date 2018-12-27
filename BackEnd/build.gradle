@@ -1,0 +1,168 @@
+subprojects {
+    configurations {
+        provided_zip_data
+        provided_data
+    }
+
+    dependencies {
+    	//FIXME: replace all log4j to slf4j logger
+    	compileOnly "org.slf4j:slf4j-log4j12:${version_slf4j}"
+
+    	testCompile "org.slf4j:slf4j-log4j12:${version_slf4j}"
+   	}
+
+    writeBuildInfo.dependsOn.add('assemble')
+    build.dependsOn.add('writeBuildInfo')
+
+    writeFile {
+        dependsOn.add('jar')
+
+        afterEvaluate { Project project ->
+            onlyIf {
+                project.hasProperty('plugin_alias')
+            }
+
+            if (project.hasProperty('plugin_alias')) {
+	            line ("plugin_alias: ${project.plugin_alias}")
+		        line ("build_number: ${build_number}")
+		        line ("revision: ${revision}")
+		        line ("git_hash: ${git_hash}")
+                line ('group: sailfish')
+                line ("name: ${project.archivesBaseName}")
+                line ("version: ${sailfish_version_major}.${sailfish_version_minor}.${revision}.${build_number}")
+	        }
+        }
+
+        fileName    = 'VERSION'
+        outputDir   = genPluginDir
+    }
+
+    task copyFromProvidedData (type: Copy) {
+        into providedWorkspaceDir
+
+        from {
+           configurations.provided_zip_data.collect { zipTree(it) }
+        }
+        from { 
+            configurations.provided_data
+        }
+    }
+	test.dependsOn.add('copyFromProvidedData')
+
+    task publishPlugin (type: Copy) {
+        dependsOn.add('jar')
+        dependsOn.add('writeFile')
+        dependsOn.add('generateSailfishHelp')
+
+        into sharedWorkspaceDir
+
+        afterEvaluate { Project project ->
+            onlyIf {
+                project.hasProperty('plugin_name')
+            }
+
+            if (project.hasProperty('plugin_name')) {
+	            def pluginFolderName = getZipPluginFolder(project.plugin_name)
+
+	            into (pluginFolderName) {
+	                from mainPluginDir
+	                from genPluginDir
+                    from externalPluginDir
+
+                    from mainWorkspaceDir
+                    from genWorkspaceDir
+                    from externalWorkspaceDir
+	            }
+
+	            into ("${pluginFolderName}/${zipPluginLibsDir}") {
+	                from configurations.compile - configurations.compileOnly
+	                from libsDir
+	            }
+            }
+        }
+    }
+
+    task zipRelease (type: Zip) {
+        includeEmptyDirs = false
+        duplicatesStrategy = 'EXCLUDE'
+
+        dependsOn.add('jar')
+        dependsOn.add('writeFile')
+        dependsOn.add('generateSailfishHelp')
+
+        afterEvaluate { Project project ->
+            onlyIf {
+                project.hasProperty('plugin_name')
+            }
+            if (project.hasProperty('plugin_name')) {
+	            archiveName = getReleaseName(project.plugin_name)
+	            destinationDir = getReleaseDir(project.buildDir, project.plugin_name)
+
+	            def pluginFolderName = getZipPluginFolder(project.plugin_name)
+
+	            into (pluginFolderName) {
+	                from mainPluginDir
+	                from genPluginDir
+                    from externalPluginDir
+
+                    from mainWorkspaceDir
+                    from genWorkspaceDir
+                    from externalWorkspaceDir
+	            }
+
+	            into ("${pluginFolderName}/${zipPluginLibsDir}") {
+	                from configurations.compile - configurations.compileOnly
+	                from(libsDir) {
+	                    exclude '*-sources.jar'
+	                    exclude '*-tests.jar'
+	                }
+	            }
+
+                doLast {
+                    exec {
+                        workingDir getReleaseDir(project.buildDir, project.plugin_name)
+                        commandLine 'ln', '-s', getReleaseName(project.plugin_name), 'last_build.zip'
+                    }
+                }
+            }
+        }
+    }
+
+    task cleanSharedWorkspace (type: Delete) {
+        doLast {
+            fileTree(dir: sharedWorkspaceDir).visit { element ->
+                delete element.file
+            }
+        }
+    }
+
+    task generateSailfishHelp(type: JavaExec) {
+        dependsOn.add("checkCompatibility")
+        afterEvaluate { Project project ->
+            onlyIf {
+                project.hasProperty('plugin_name') && project.hasProperty('plugin_alias')
+            }
+            if (project.hasProperty('plugin_name') && project.hasProperty('plugin_alias')) {
+                classpath sourceSets.main.compileClasspath
+                args project.plugin_alias, project.plugin_name, mainPluginDir, externalPluginDir, mainWorkspaceDir, genWorkspaceDir, externalWorkspaceDir, genPluginDir
+                main "com.exactpro.sf.help.HelpBuilder"
+            }
+        }
+    }
+}
+
+def getZipPluginFolder(plugin_name) {
+    return "${zipPluginDir}/${plugin_name}"
+}
+
+def getReleaseName(plugin_name) {
+    return "${plugin_name}_${sailfishVersion}.${revision}_b${build_number}_core_${sailfishVersion}.${min_core_revision}.zip"
+}
+
+def getReleaseDir(buildDir, plugin_name) {
+    return file("${buildDir}/release/${plugin_name}")
+}
+
+// Setting this property to true will make the artifactoryPublish task
+// skip this module (in our case, the root module):
+artifactoryPublish.skip = true

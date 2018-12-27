@@ -1,0 +1,81 @@
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" >
+
+	<xsd:complexType name="FieldPosition">
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="value" type="xsd:string" />
+	</xsd:complexType>
+	
+	<xsd:complexType name="FieldMapping">
+		<xsd:attribute name="keyField" type="xsd:string" />
+		<xsd:attribute name="valueField" type="xsd:string" />
+	</xsd:complexType>
+	
+	<xsd:complexType name="FieldName">
+		<xsd:attribute name="name" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:complexType name="When">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldPosition" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+
+	<xsd:complexType name="Change">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldPosition" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="Remove">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldName" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="Save">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldPosition" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="Load">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldPosition" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="SaveMapping">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldMapping" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="LoadMapping">
+		<xsd:sequence>
+			<xsd:element name="field" type="FieldMapping" minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+		
+	<xsd:complexType name="NotSend">
+	</xsd:complexType>
+
+	<xsd:complexType name="RuleDescription">
+    	<xsd:sequence>
+			<xsd:element name="when" type="When" minOccurs="1" maxOccurs="1"/>
+			<xsd:element name="change" type="Change" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="remove" type="Remove" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="save" type="Save" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="load" type="Load" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="saveMapping" type="SaveMapping" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="loadMapping" type="LoadMapping" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="notSend" type="NotSend" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="msgType" type="xsd:string" />
+	</xsd:complexType>
+
+	<xsd:element name="rules">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="ruleDescription" type="RuleDescription" minOccurs="1" maxOccurs="unbounded" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

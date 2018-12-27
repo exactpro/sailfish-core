@@ -1,0 +1,263 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:o="http://omnifaces.org/ui"
+                template="/template/statisticsReport.xhtml">
+	
+	<ui:define name="otherScripts">
+        <h:outputStylesheet library="sf" name="css/statistics-tags.css" />
+		<h:outputScript library="sf" name="js/loading-block.js"/>
+		<h:outputScript library="sf" name="js/statistics.js"/>
+		<h:outputStylesheet library="sf" name="css/statistics-home.css"/>
+	</ui:define>
+	
+	<ui:define name="statistics-content">
+	
+		<ui:fragment rendered="#{not statReportingBean.statisticsDbAvailable}">
+	    	<ui:include src="serviceNotAvailable.xhtml"/>
+    	</ui:fragment>
+    	
+    	<ui:fragment rendered="#{statReportingBean.statisticsDbAvailable}">
+			
+			<h:form id="commandForm">
+				<p:remoteCommand name="generateCommand" action="#{statHomeBean.generateReport}" 
+	        		update=":msgForm:messages :chart-form" 
+	        		onstart="showLoading('#chart-wrapper', '#loading-block-wrapper');" 
+	        		oncomplete="hideLoading('#chart-wrapper', '#loading-block-wrapper');"/>
+	        		
+	        	<p:remoteCommand name="generateWeatherCommand" action="#{statHomeBean.generateWeatherReport}" 
+	        		update=":msgForm:messages :weather-form"
+	        		oncomplete="hideLoading('.weather-body', '#weather-loading');" 
+	        		/>
+	        		
+			</h:form>
+			
+			<div class="eps-weather-panel eps-card">
+	    		
+	    		<div class="eps-params-header">
+	    			Script Stability
+	    			
+	    			<h:form id="weatherOptionsForm">
+
+	    				<p:commandLink id="weatherOtionsToggler" styleClass="eps-options-link">
+	    					<h:graphicImage library="sf" name="images/menu-hamb-16.png"/>
+	    				</p:commandLink>
+
+	    				<p:overlayPanel id="weatheroptionsPanel" for="weatherOtionsToggler" hideEffect="fade" dismissable="false"
+                                        appendToBody="false" dynamic="false"
+                                        style="left: -100px;">
+
+	    					<div class="eps-weather-description">
+	    						For last <span class="variable">&#60;X&#62;</span> scripts executed analyze last <span class="variable">&#60;Y&#62;</span> executions
+	    					</div>
+
+	    					<h:panelGrid columns="2" cellpadding="5" style="text-align: left;">
+
+	    						<h:outputLabel for="from" value="X" />
+				    			<p:inputText id="limit1" value="#{statHomeBean.weatherScriptsLimit}" style="width: 4em"/>
+
+				    			<h:outputLabel for="to" value="Y" />
+				    			<p:inputText id="limit2" value="#{statHomeBean.weatherRunsLimit}" style="width: 4em"/>
+
+					        </h:panelGrid>
+
+					        <p:separator style="border: 0px none;"/>
+
+					        <p:commandButton value="Apply" action="#{statHomeBean.generateWeatherReport}" update=":msgForm:messages :weather-form :weatherOptionsForm"
+                                             onstart="showLoading('.weather-body', '#weather-loading');"
+                                             oncomplete="hideLoading('.weather-body', '#weather-loading');"/>
+
+					    </p:overlayPanel>
+
+	    			</h:form>
+	    		</div>
+	    		
+	    		<div id="weather-loading" style="background: #FFF; text-align: center;display: block;">
+	        		<div id="loading-block">
+	        			<h:panelGrid columns="2" style="margin: 0 auto;">
+							<h:graphicImage library="sf" name="images/ajaxloader.gif" style="float:left; margin-right: 1em;" />
+							<h:outputText value="Loading..." />
+						</h:panelGrid>
+		        	</div>
+	        	</div>
+	    		
+	    		<div class="weather-body" style="display: none;">
+	    			
+	    			<h:form id="weather-form">
+	    			
+	    				<ui:fragment rendered="#{empty statHomeBean.weatherReport}">
+	    					<div class="eps-empty-message">
+	    						<h:outputText value="No data to display"/>
+	    					</div>
+	    				</ui:fragment>
+	    				
+	    				<ui:fragment rendered="#{not empty statHomeBean.weatherReport}">
+	    				
+			    			<table>
+			    			
+				    			<ui:repeat var="row" value="#{statHomeBean.weatherReport}">
+				    			
+				    				<tr class="weather-row">
+				    					
+				    					<td class="weather-image-column">
+				    						<h:graphicImage styleClass="eps-weather-image" library="sf" name="images/statistics/weather-#{row.weatherString}.png"/>
+				    					</td>
+				    					
+				    					<td class="eps-weather-passed-column" title="100% success executions">
+				    						<h:outputText value="#{row.passed}"/>
+				    					</td>
+             
+                                        <td class="eps-weather-conditionally-passed-column" title="Executions with conditionally passed TCs">
+                                            <h:outputText value="#{row.conditionallyPassed}"/>
+                                        </td>
+				    					
+				    					<td class="eps-weather-failed-column"  title="Executions with failed TCs">
+				    						<h:outputText value="#{row.failed}"/>
+				    					</td>
+				    					
+				    					<td class="eps-weather-script-column">
+				    						<h:outputText value="#{generalBean.abbreviateString(row.matrixName, 35)}"
+				    							title="#{row.matrixName}"/>
+				    					</td>
+				    				
+				    				</tr>
+				    				
+				    			</ui:repeat>
+			    			
+			    			</table>
+			    			
+			    			<div class="eps-weather-footer">
+			    				<p:commandLink value="more" action="#{statHomeBean.moreWeather}" update=":weather-form" styleClass="eps-more-link"/>
+			    			</div>
+		    			
+		    			</ui:fragment>
+	    			
+	    			</h:form>
+	    			
+	    		</div>
+	    		
+	    	</div>
+			    	
+	    	<div class="eps-chart-panel eps-card">
+	    		
+	    		<div class="eps-params-header">
+	    			Test Cases Statistics
+	    			
+	    			<h:form id="optionsForm">
+
+                        <p:commandLink id="optionsToggler" styleClass="eps-options-link">
+                            <h:graphicImage library="sf" name="images/menu-hamb-16.png" />
+                        </p:commandLink>
+
+                        <p:overlayPanel id="optionsPanel" for="optionsToggler" hideEffect="fade" dismissable="false">
+
+                            <h:panelGrid columns="6" cellpadding="5" styleClass="top-aligned-table">
+                                <p:outputLabel for="sfInstancesMenu" value="SF Instances" />
+                                <p:outputLabel for="from" value="From" />
+                                <p:outputLabel for="to" value="To" />
+                                <p:outputLabel for="matrix-pattern" value="Matrix Name (pattern)" />
+                                <p:outputLabel for="tags-autocomplete" value="Tags" />
+                                <p:outputLabel for="tags-mode" value="Tags Matching" />
+
+                                <p:selectCheckboxMenu id="sfInstancesMenu" value="#{statHomeBean.selectedSfInstances}" label="Select"
+                                                      filter="true" filterMatchMode="startsWith" panelStyle="width:250px"
+                                                      converter="#{sfInstanceConverter}"
+                                                      required="true" requiredMessage="Select at least one SF instance">
+                                    <f:selectItems value="#{statHomeBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf" />
+                                </p:selectCheckboxMenu>
+
+                                <p:calendar id="from" value="#{statHomeBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                            onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                            requiredMessage="'From' is empty"
+                                            timeZone="UTC"/>
+
+
+                                <p:calendar id="to" value="#{statHomeBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                            onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                            requiredMessage="'To' is empty"
+                                            timeZone="UTC"/>
+
+                                <p:inputText id="matrix-pattern" value="#{statHomeBean.matrixNamePattern}" style="width: 250px" />
+
+                                <p:autoComplete id="tags-autocomplete" value="#{statHomeBean.tagToAdd}"
+                                                completeMethod="#{statHomeBean.completeTag}"
+                                                var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true"
+                                                placeholder="type to add" emptyMessage="No matching tags found">
+
+                                    <p:ajax event="itemSelect" listener="#{statHomeBean.onTagSelect}" execute="@this"
+                                            update="tags-autocomplete :optionsForm:selected-tags" />
+                                    <o:converter converterId="omnifaces.ListConverter" list="#{statHomeBean.allTags}" />
+                                    <p:column>
+                                        <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+                                    </p:column>
+                                </p:autoComplete>
+
+                                <p:selectOneMenu id="tags-mode" value="#{statHomeBean.anyTag}">
+                                    <f:selectItem itemLabel="Any tag" itemValue="true" />
+                                    <f:selectItem itemLabel="All tags" itemValue="false" />
+                                </p:selectOneMenu>
+
+                            </h:panelGrid>
+
+                            <div class="selected-tags-wrapper" style="padding-left: 5px;">
+                                <h:panelGroup id="selected-tags" style="white-space: normal;">
+                                    <ui:repeat var="tag" value="#{statHomeBean.tags}">
+			            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+			            			#{tag.name}
+                                    <p:commandLink action="#{statHomeBean.removeTag(tag)}" update=":optionsForm:selected-tags"
+                                                   styleClass="ui-icon ui-icon-close"
+                                                   style="display: inline-block; vertical-align: middle;margin-top: -2px;" />
+			            		</span>
+                                    </ui:repeat>
+                                </h:panelGroup>
+                            </div>
+
+                            <p:separator style="border: 0px none;" />
+
+                            <p:commandButton value="Apply" action="#{statHomeBean.generateReport}" update=":msgForm:messages :chart-form" />
+                        </p:overlayPanel>
+
+                    </h:form>
+	    			
+	    		</div>
+	    		
+	    		<div id="loading-block-wrapper" style="background: #FFF; text-align: center;display: none;">
+	        		<div id="loading-block">
+	        			<h:panelGrid columns="2" style="margin: 0 auto;">
+							<h:graphicImage library="sf" name="images/ajaxloader.gif" style="float:left; margin-right: 1em;" />
+							<h:outputText id="loading-label" value="Loading..." />
+						</h:panelGrid>
+		        	</div>
+	        	</div>
+	    		
+	    		<h:form id="chart-form">	
+	    			
+	    			<div id="chart-wrapper">
+	    				<p:chart type="line" model="#{statHomeBean.areaModel}" style="height:740px" rendered="#{not empty statHomeBean.areaModel}"/>
+	    				
+	    				<ui:fragment rendered="#{empty statHomeBean.areaModel}">
+	    					<div class="eps-empty-message">
+	    						<h:outputText value="No data to display"/>
+	    					</div>
+	    				</ui:fragment>
+	    				
+	    			</div>
+	    			
+	    		</h:form>
+	    		
+	    	</div>
+	    	
+	    	<ui:fragment rendered="#{statHomeBean.immediateGenerate}">
+        		<script>
+        			generateCommand();
+        			generateWeatherCommand();
+        		</script>
+        	</ui:fragment>
+	    		
+	    </ui:fragment>
+	
+	</ui:define>
+	
+</ui:composition>

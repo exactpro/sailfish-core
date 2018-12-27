@@ -1,0 +1,18 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:p="http://primefaces.org/ui"
+    xmlns:o="http://omnifaces.org/ui"
+    xmlns:c="http://java.sun.com/jstl/core"
+    xmlns:ui="http://java.sun.com/jsf/facelets">
+    
+    <div id="#{blockId}" class="eps-card loading-card" style="display: none;">
+  		<div class="loading-block">
+      		<h:panelGrid columns="2" style="margin: 0 auto;">
+				<h:graphicImage library="sf" name="images/ajaxloader.gif" style="float:left; margin-right: 1em;" />
+				<h:outputText id="loading-label" value="Loading..." />
+			</h:panelGrid>
+       	</div>
+   	</div>
+    
+</ui:composition>
