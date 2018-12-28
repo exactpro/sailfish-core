@@ -406,26 +406,15 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 	}
 
     public String getReportRequest(AggregatedReportRow row) {
-        StringBuilder sb = new StringBuilder(getContextPath(false));
-
-        sb.append("/report.xhtml?report=");
-        sb.append(buildReportUrl(row, true));
-
-        return sb.toString();
+        return BeanUtil.getReportRequest(this.customReportsPath, row, false);
     }
 
     public String getZipReport(AggregatedReportRow row) {
-        StringBuilder sb = new StringBuilder(getContextPath(false));
-
-        sb.append("/report/");
-        sb.append(row.getReportFolder());
-        sb.append("?action=simplezip");
-
-        return sb.toString();
+        return BeanUtil.getZipReport(this.customReportsPath, row, false);
     }
 
     public String getLastResultZipReports() {
-        StringBuilder sb = new StringBuilder(getContextPath(true));
+        StringBuilder sb = new StringBuilder(BeanUtil.getContextPath(this.customReportsPath, true));
 
         sb.append("/report/reports?reports=");
         sb.append(this.lastResultReportNamesJson);
@@ -433,54 +422,8 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
         return sb.toString();
     }
 
-    private String getContextPath(boolean button) {
-        return StringUtils.isEmpty(this.customReportsPath) ? (button ? StringUtils.EMPTY : FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath())
-                : customReportsPath.substring(0, customReportsPath.lastIndexOf("/"));
-    }
-
 	public String buildReportUrl(AggregatedReportRow row, boolean report) {
-
-		StringBuilder sb = new StringBuilder();
-
-        if(StringUtils.isNotEmpty(this.customReportsPath)) {
-            sb.append(this.customReportsPath).append("/");
-        } else {
-            String host;
-            Integer port;
-            String name;
-            if (row.getSfCurrentInstance() != null) {
-                SfInstance sfCurrentInstance = row.getSfCurrentInstance();
-                host = sfCurrentInstance.getHost();
-                port = sfCurrentInstance.getPort();
-                name = sfCurrentInstance.getName();
-            } else {
-                host = row.getHost();
-                port = row.getPort();
-                name = row.getSfName();
-            }
-            sb.append("http://");
-            sb.append(host)
-                    .append(":")
-                    .append(port)
-                    .append(name)
-                    .append("/");
-            sb.append(ReportServlet.REPORT_URL_PREFIX + "/"); // see web.xml > servlet-mapping
-        }
-
-		sb.append(StringUtil.escapeURL(row.getReportFolder())).append("/");
-
-		if(report) {
-
-			sb.append(row.getReportFile()).append(".html");
-
-		} else {
-
-			sb.append(StringUtil.escapeURL(row.getMatrixName()));
-
-		}
-
-		return sb.toString();
-
+        return BeanUtil.buildReportUrl(this.customReportsPath, row, report);
 	}
 
     @PreDestroy

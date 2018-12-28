@@ -1358,6 +1358,21 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         row.setFinishTime(rsRow[11] != null ? DateTimeUtility.toLocalDateTime((Timestamp) rsRow[11]) : null);
         row.setRawTags((String) rsRow[12]);
         row.setRawHash((Integer) rsRow[13]);
+
+        SfInstance sfInstance = new SfInstance();
+        sfInstance.setHost((String) rsRow[14]);
+        sfInstance.setName((String) rsRow[15]);
+        sfInstance.setPort((Integer) rsRow[16]);
+        row.setSfInstance(sfInstance);
+
+        SfInstance sfCurrentInstance = new SfInstance();
+        sfCurrentInstance.setHost((String) rsRow[17]);
+        sfCurrentInstance.setName((String) rsRow[18]);
+        sfCurrentInstance.setPort((Integer) rsRow[19]);
+        row.setSfCurrentInstance(sfCurrentInstance);
+
+        row.setReportFolder((String) rsRow[20]);
+        row.setReportFile((String) rsRow[21]);
     }
 
 	private Map<Long, String> exctractFailedActionsMap(String dbString) {
