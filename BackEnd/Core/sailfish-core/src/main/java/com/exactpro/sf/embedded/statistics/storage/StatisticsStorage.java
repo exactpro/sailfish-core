@@ -28,6 +28,7 @@ import com.exactpro.sf.storage.StorageException;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.DefaultComponentSafeNamingStrategy;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -77,7 +78,9 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	protected void configure(HibernateStorageSettings settings, Configuration configuration) {
 		// Init hibernate
         configuration.addPackage("com.exactpro.sf.statistics.entities")
-	    
+
+        .setNamingStrategy(DefaultComponentSafeNamingStrategy.INSTANCE)
+
 	    .addAnnotatedClass(SfInstance.class)
 	    .addAnnotatedClass(Matrix.class)
 	    .addAnnotatedClass(MatrixRun.class)

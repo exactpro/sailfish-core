@@ -42,7 +42,8 @@ public abstract class AbstractHibernateStorage implements IHibernateStorage {
         .setProperty("hibernate.connection.pool_size", "1")
         
         .setProperty("hibernate.hbm2ddl.auto", "none")
-        
+        .setProperty("hibernate.globally_quoted_identifiers", "true")
+
         .setProperty("show_sql", "false")
         .setProperty("format_sql", "false")
         

@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.entities;
 
-import java.util.Date;
-
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
