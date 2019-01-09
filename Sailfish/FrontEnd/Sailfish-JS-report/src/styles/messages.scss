@@ -43,26 +43,35 @@
     &-header {
         min-height: 45px;
         display: grid;
-        grid-template: auto / 110px 1fr 1fr 1fr;
-        grid-template-areas: "timestamp name from to";
+        grid-template: 20px auto / 40px 110px 1fr 1fr 1fr 80px;
+        grid-template-areas: "action-chips timestamp name from to protocol"
+                             "action-chips timestamp-value name-value from-value to-value protocol-value";
 
-        &-timestamp, &-from, &-to, &-name {
+        &-timestamp, &-from, &-to, &-name, &-protocol {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
             margin-left: 5px;
+            margin-top: 2px;
 
             span {
                 display: block;
                 font-size: 10px;
                 color: $primaryTextColor;
             }
+        } 
+
+        &-timestamp-value, &-name-value, &-from-value, &-to-value, &-protocol-value {
+            display: block;
+            margin-bottom: 5px;
+            margin-left: 5px;
 
             p {
                 font-size: 13px;
                 color: $primaryTextColor;
                 margin: 0;
+                font-weight: bold;
             }
         }
 
@@ -81,13 +90,40 @@
         &-name {
             grid-area: name;
         }
+
+        &-protocol {
+            grid-area: protocol;
+        }
+
+        &-timestamp-value {
+            grid-area: timestamp-value;
+        }
+
+        &-from-value {
+            grid-area: from-value;
+        }
+
+        &-to-value {
+            grid-area: to-value;
+        }
+
+        &-name-value {
+            grid-area: name-value;
+        }
+
+        &-protocol-value {
+            grid-area: protocol-value;
+            margin: 5px;
+            border: 0px solid transparent;
+            border-radius: 5px;
+        }
     }
 
     &-content {
         position: relative;
         padding: 7px 10px 26px 10px;
         height: 100%;
-        background: white;
+        background: $messageCardBackgroundColor;
 
         &.passed {
             background-color: $passedBackgroundColor;
@@ -103,11 +139,16 @@
 
         p {
             margin: 0px;
-            font-size: 13px;
+            font-size: 13px;    
         }
 
         &-human {
-            word-break: break-all;
+            padding-top: 5px;
+
+            p {
+                word-break: break-all;
+                line-height: 21px;
+            }
         }
 
         &-raw {

@@ -48,20 +48,33 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
             <div class={rootClass}>
                 <div class="message-card-header">
                     <div class="message-card-header-timestamp"> 
+                        <span>Time Stamp</span>
+                    </div>
+                    <div class="message-card-header-timestamp-value">
                         <p>{timestamp}</p>
                     </div>
                     <div class="message-card-header-name">
                         <span>Message Name</span>
+                    </div>
+                    <div class="message-card-header-name-value">
                         <p>{msgName}</p>
                     </div>
                     <div class="message-card-header-from">
                         <span>From</span>
+                    </div>
+                    <div class="message-card-header-from-value">
                         <p>{from}</p>
                     </div>
                     <div class="message-card-header-to">
                         <span>To</span>
+                    </div>
+                    <div className="message-card-header-to-value">
                         <p>{to}</p>
                     </div>
+                    <div class="message-card-header-protocol">
+                        <span>Protocol</span>
+                    </div>
+                    <div class="message-card-header-protocol-value" style={{backgroundColor: 'pink'}}/>
                 </div>
                 <div class={contentClass}>
                     <div class="message-card-content-human">
