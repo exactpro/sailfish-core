@@ -17,7 +17,7 @@ plugins {
     id "com.moowork.node" version "1.2.0"
 }
 
-apply plugin: 'com.moowork.node' //https://github.com/srs/gradle-node-plugin
+apply plugin: 'com.moowork.node'
 
 ext {
 	node_modules   = file('node_modules')
@@ -39,9 +39,23 @@ node {
     workDir = npmDir
 }
 
-task buildProd(type: Exec) {
-	dependsOn npmInstall
-	commandLine 'npm', 'run', 'build'
+task npmInstallDependencies(type: Exec) {
+	inputs.file npmPackageInfo
+    outputs.dir node_modules
+
+    commandLine 'npm', 'install'
+
+    doFirst {
+        println 'Npm should be installed'
+    }
+}
+
+task fixSass(type: NpmTask, dependsOn: 'npmInstall') {
+	args = ['rebuild', 'node-sass']
+}
+
+task buildProd(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
+	args = ['run', 'build']
 }
 
 task buildDev(type: Exec) {
