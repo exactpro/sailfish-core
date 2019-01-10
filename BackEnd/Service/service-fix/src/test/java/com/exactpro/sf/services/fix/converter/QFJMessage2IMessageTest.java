@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -38,6 +39,7 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.ConverterTest;
 import com.exactpro.sf.util.DateTimeUtility;
 
+import org.quickfixj.CharsetSupport;
 import quickfix.CharField;
 import quickfix.ConfigError;
 import quickfix.DataDictionary;
@@ -69,6 +71,23 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertEquals(
                 "8=FIXT.1.19=15535=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169",
                 fixMessageTarget.toString());
+    }
+
+    @Test
+    public void testRejects() throws Exception {
+
+        String fixMessage = "8=FIXT.1.19=14635=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986299=test295=148=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169";
+        Message fixMessageSrc = new Message();
+        QFJDictionaryAdapter adapter = new QFJDictionaryAdapter(getSfDictionary("FIX50.TEST.xml"));
+
+        fixMessageSrc.fromString(fixMessage, adapter, true);
+
+        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
+        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        IMessage iMessage = converter.convert(fixMessageSrc);
+        Assert.assertTrue(iMessage.getMetaData().isRejected());
+        Assert.assertNotNull(iMessage.getMetaData().getRejectReason());
+        Assert.assertEquals(fixMessage.getBytes(CharsetSupport.getCharsetInstance()).length, iMessage.getMetaData().getRawMessage().length);
     }
 
     @Test

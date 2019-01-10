@@ -296,7 +296,12 @@ public class FIXApplication implements FIXClientApplication {
 		logger.debug("onMessageRejected: {}", message);
 		try {
 			IMessage iMsg = convert(message, sessionID.getTargetCompID(), this.serviceStringName, message.isAdmin(), false, true);
-			iMsg.getMetaData().setRejected(true);
+			if (message.getException() != null) {
+                iMsg.getMetaData().setRejectReason(message.getException().getMessage());
+            } else {
+                iMsg.getMetaData().setRejectReason("Unknown");
+            }
+
             if (!isPerformance) {
                 storeMessage(sessionID, iMsg);
             }

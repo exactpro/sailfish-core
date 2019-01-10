@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.services.fix.FixUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -195,7 +196,11 @@ public class QFJIMessageConverter
 
 		// dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
 		resultMessage.getMetaData().setAdmin(message.isAdmin());
-		resultMessage.getMetaData().setRawMessage(message.toString().getBytes());
+		resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
+
+        if (message.getException() != null) {
+            resultMessage.getMetaData().setRejectReason(message.getException().getMessage());
+        }
 
 		return resultMessage;
 	}
