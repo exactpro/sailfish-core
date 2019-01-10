@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.storage;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +44,7 @@ public class AggregatedReportRow extends CommonReportRow {
                                                                  "Tagged Actions", "Message Type", "Action Row", "Reproduced Known Bugs Count", "Non-reproduced Known Bugs Count", "Known Bugs", "Test Case Number");
 
     private final Map<String, Object> fields = new HashMap<>();
+    private final List<AggregatedReportRow> testCaseRows = new ArrayList<>();
 
 	public AggregatedReportRow() {
         for (String type : TYPES) {
@@ -460,5 +461,9 @@ public class AggregatedReportRow extends CommonReportRow {
 
     public void setCategorisedKnownBugs(List<KnownBugCategoryRow> categorisedKnownBugs) {
         this.fields.put("Known Bugs", categorisedKnownBugs);
+    }
+
+    public List<AggregatedReportRow> getTestCaseRows() {
+        return testCaseRows;
     }
 }

@@ -25,6 +25,8 @@ public interface IStorage {
 	void add(Object entity) throws StorageException;
 	
 	void batchAdd(List<Object> entities) throws StorageException;
+
+	void batchUpdate(List<Object> entities) throws StorageException;
 	
 	void update(Object entity) throws StorageException;
 	

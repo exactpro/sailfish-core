@@ -16,10 +16,16 @@
 
 package com.exactpro.sf.embedded.statistics;
 
+import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
 import com.exactpro.sf.scriptrunner.StatusType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class MatrixInfo {
     private final long allMatricesPassed;
@@ -89,9 +95,15 @@ public class MatrixInfo {
         long numFailed = 0l;
         long numConditionallyPassed = 0l;
 
+        Map<Long, List<AggregatedReportRow>> testCaseRunRows = new HashMap<>();
+        Map<Long, AggregatedReportRow> matrixRows = new HashMap<>();
+
         for (int i = 0; i < rows.size(); i++) {
 
             AggregatedReportRow row = rows.get(i);
+
+            List<AggregatedReportRow> testCaseRows = testCaseRunRows.computeIfAbsent(row.getMatrixRunId(), l -> new ArrayList<>());
+            testCaseRows.add(row);
 
             if (row.getMatrixRunId() != lastMatrixRunId) {
 
@@ -119,6 +131,9 @@ public class MatrixInfo {
                 if (isMatrixFailedRow(row)) {
                     row.setReportFile("report");
                     row.setMatrixRow(true);
+
+                    matrixRows.put(row.getMatrixRunId(), row);
+                    testCaseRows.remove(row);
 
                     lastInfoRow = null;
                 } else {
@@ -149,6 +164,8 @@ public class MatrixInfo {
                     i++;
 
                     lastInfoRow = matrixInfoRow;
+
+                    matrixRows.put(row.getMatrixRunId(), matrixInfoRow);
                 }
             }
 
@@ -167,6 +184,8 @@ public class MatrixInfo {
                 allMatricesFailed++;
             }
         }
+
+        separateTagsAndSetTestCasesToMatrixRows(testCaseRunRows, matrixRows);
 
         if (lastInfoRow != null) {
             lastInfoRow.setPassedCount(numPassed);
@@ -191,4 +210,36 @@ public class MatrixInfo {
                 && row.getStartTime() == null;
     }
 
+    private static void separateTagsAndSetTestCasesToMatrixRows(Map<Long, List<AggregatedReportRow>> testCaseRunRows,
+                         Map<Long, AggregatedReportRow> matrixRows) {
+        for (Map.Entry<Long, List<AggregatedReportRow>> testCaseRunEntry : testCaseRunRows.entrySet()) {
+            List<AggregatedReportRow> testCaseRows = testCaseRunEntry.getValue();
+            if (!testCaseRows.isEmpty()) {
+                Set<Tag> matrixTags = new HashSet<>();
+                Set<Tag> allTags = new HashSet<>();
+                List<Tag> tags = testCaseRows.get(0).getTags();
+                if (tags != null) {
+                    matrixTags.addAll(tags);
+                    allTags.addAll(matrixTags);
+                }
+                for (int i = 1; i < testCaseRows.size(); i++) {
+                    List<Tag> testCaseTags = testCaseRows.get(i).getTags();
+                    if (testCaseTags != null) {
+                        matrixTags.retainAll(testCaseTags);
+                        allTags.addAll(testCaseTags);
+                    }
+                }
+                matrixTags.forEach(tag -> tag.setForAllTestCaseRuns(true));
+                AggregatedReportRow matrixRow = matrixRows.get(testCaseRunEntry.getKey());
+                matrixRow.setTags(new ArrayList<>(allTags));
+                for (AggregatedReportRow testCaseRow : testCaseRows) {
+                    tags = testCaseRow.getTags();
+                    if (tags != null) {
+                        tags.removeAll(matrixTags);
+                    }
+                }
+                matrixRow.getTestCaseRows().addAll(testCaseRows);
+            }
+        }
+    }
 }

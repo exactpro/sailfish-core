@@ -24,6 +24,8 @@ import java.util.Map;
 import com.exactpro.sf.embedded.statistics.StatisticsUtils;
 import com.exactpro.sf.embedded.statistics.entities.ActionRunKnownBug;
 import com.exactpro.sf.embedded.statistics.entities.KnownBug;
+import com.exactpro.sf.embedded.statistics.entities.TestCaseRunTag;
+import com.exactpro.sf.embedded.statistics.entities.TestCaseRunTagId;
 import com.exactpro.sf.storage.StorageException;
 
 import org.hibernate.SessionFactory;
@@ -97,6 +99,7 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	    .addAnnotatedClass(TestCaseRunStatus.class)
         .addAnnotatedClass(TagGroup.class)
         .addAnnotatedClass(KnownBug.class)
+        .addAnnotatedClass(TestCaseRunTag.class)
         .addAnnotatedClass(ActionRunKnownBug.class);
     }
 
@@ -524,5 +527,15 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 
         matrixRun.setSfCurrentInstance(currentSfInstance);
         this.storage.update(matrixRun);
+    }
+
+    @Override
+    public TestCaseRun getTestCaseRunById(long id) {
+        return (TestCaseRun)this.storage.getEntityById(TestCaseRun.class, id);
+    }
+
+    @Override
+    public MatrixRun getMatrixRunById(long id) {
+        return (MatrixRun) this.storage.getEntityById(MatrixRun.class, id);
     }
 }

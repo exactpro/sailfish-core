@@ -65,7 +65,7 @@ public class MatrixRun {
 	@JoinColumn(name = "environment_id", nullable = false)
 	private Environment environment;
 	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinTable(name = "stmrtags", joinColumns = { 
 			@JoinColumn(name = "mr_id", nullable = false, updatable = true) }, 
 			inverseJoinColumns = { @JoinColumn(name = "tag_id", 

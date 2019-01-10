@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.exactpro.sf.embedded.statistics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,10 +23,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BiFunction;
 
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
 import com.exactpro.sf.embedded.statistics.handlers.StatisticsReportHandlerLoader;
+import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
 import com.exactpro.sf.util.DateTimeUtility;
 
 import com.google.common.collect.Sets;
@@ -280,7 +283,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 	}
 
 	public void matrixStarted(String matrixName, String reportFolder, long sfRunId, String environmentName, String userName,
-			List<Tag> tags, long scriptDescriptionId) {
+                              List<Tag> tags, long scriptDescriptionId) {
 
 		if(!this.status.equals(ServiceStatus.Connected)) {
 			return;
@@ -298,9 +301,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 			matrixRun.setEnvironment(this.storage.getEnvironmentEntity(environmentName));
 			matrixRun.setUser(this.storage.getUserEntity(userName));
 			matrixRun.setReportFolder(reportFolder);
-			if(tags != null) {
-				matrixRun.setTags(new HashSet<>(tags));
-			}
+            if(tags != null) {
+                matrixRun.setTags(new HashSet<>(tags));
+            }
 
 			openMatrixRun(matrixRun, scriptDescriptionId);
 
@@ -783,4 +786,26 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
         return thisSfInstance;
     }
 
+    public void manageTagToRows(List<AggregatedReportRow> rows, BiFunction<TestCaseRun, List<Tag>, Boolean> targetAction,
+                                List<Tag> tags) {
+        List<Object> testCaseRuns = new ArrayList<>();
+        manageTagToRows(rows, targetAction, tags, testCaseRuns);
+        if (!testCaseRuns.isEmpty()) {
+            storage.update(testCaseRuns);
+        }
+    }
+
+    private void manageTagToRows(List<AggregatedReportRow> rows, BiFunction<TestCaseRun, List<Tag>, Boolean> targetAction,
+                                 List<Tag> tags, List<Object> toUpdate) {
+        for (AggregatedReportRow row : rows) {
+            if (row.isMatrixRow()) {
+                manageTagToRows(row.getTestCaseRows(), targetAction, tags, toUpdate);
+                continue;
+            }
+            TestCaseRun testCaseRun = storage.getTestCaseRunById(row.getTestCaseRunId());
+            if (targetAction.apply(testCaseRun, tags)) {
+                toUpdate.add(testCaseRun);
+            }
+        }
+    }
 }

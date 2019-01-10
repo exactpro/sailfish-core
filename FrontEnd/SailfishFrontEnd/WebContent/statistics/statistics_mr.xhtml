@@ -24,180 +24,231 @@
     	</ui:fragment>
     	
     	<ui:fragment rendered="#{mrHistBean.statisticsDbAvailable}">
-	    	<div class="eps-report-parameters eps-card">
-	    		
-	    		<div class="eps-params-header">
-	    			Parameters
-	    			
-	    			<h:form id="optionsForm">
-	    				
-	    				<p:commandLink id="optionsToggler" styleClass="eps-options-link">
-	    					<h:graphicImage library="sf" name="images/menu-hamb-16.png"/>
-	    				</p:commandLink>
-	    				
-	    				<p:overlayPanel id="optionsPanel" for="optionsToggler" hideEffect="fade" dismissable="false">
-	    				
-	    					<h:panelGrid columns="1" cellpadding="5" style="text-align: left;">
-	    						
-	    						<h:outputLabel for="customLinkPath" value="Custom path to reports" />
-	    						
-						        <p:inputText id="customLinkPath" value="#{mrHistBean.customReportsPath}" style="width: 300px;" placeholder="http://localhost:8080/sfgui/report"/>
-					        
-					        </h:panelGrid>
-					        
-					        <p:separator style="border: 0px none;"/>
-					        
-					        <p:commandButton value="Apply" action="#{mrHistBean.applyOptions}" update=":msgForm:messages"/>
-					        
-					    </p:overlayPanel>
-	    				
-	    			</h:form>
-	    			
-	    		</div>
-	    		
-	    		<h:form id="params-form">
-	    			
-	    			<h:panelGrid columns="9" cellpadding="5" styleClass="top-aligned-table">
-		    			<p:outputLabel for="from" value="From" />
-		    			<p:outputLabel for="to" value="To" />
-		    			<p:outputLabel for="sfInstancesMenu" value="SF Instances" />
-		    			<p:outputLabel for="matrix-pattern" value="Matrix Name (pattern)" />
-		    			<p:outputLabel for="tags-autocomplete" value="Tags" />
-		    			<p:outputLabel for="tags-mode" value="Tags Matching" />
-		    			<p:outputLabel for="columns" value="Columns" />
-		    			<p:outputLabel for="sort-by" value="Sort By" />
-		    			<p:outputLabel for="sort-order" value="Sort Order" />
-		    			
-		    			<p:calendar id="from" value="#{mrHistBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
-                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
-                                    requiredMessage="'From' is empty"
-                                    timeZone="UTC"/>
-		    			
-		    			
-		    			<p:calendar id="to" value="#{mrHistBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
-                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
-                                    requiredMessage="'To' is empty"
-                                    timeZone="UTC"/>
-		    			
-		    			
-		    			<p:selectCheckboxMenu id="sfInstancesMenu" value="#{mrHistBean.selectedSfInstances}" label="Select"
-	                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
-	                               required="true" requiredMessage="Select at least one SF instance">
-				            <f:selectItems value="#{mrHistBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
-				        </p:selectCheckboxMenu>
-				        
-				        <p:inputText id="matrix-pattern" value="#{mrHistBean.matrixNamePattern}" style="width: 250px"/>
-				        
-				        <p:autoComplete id="tags-autocomplete" value="#{mrHistBean.tagToAdd}" 
-		            		completeMethod="#{mrHistBean.completeTag}"
-		                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true" 
-		                    placeholder="type to add" emptyMessage="No matching tags found">
-		                    
-		                    <p:ajax event="itemSelect" listener="#{mrHistBean.onTagSelect}" execute="@this" update="tags-autocomplete selected-tags"/>
-		                    <o:converter converterId="omnifaces.ListConverter" list="#{mrHistBean.allTags}" />
-				            <p:column>
-				                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
-				            </p:column>
-				        </p:autoComplete>
-				        
-				        <p:selectOneMenu id="tags-mode" value="#{mrHistBean.anyTag}">
-			    			<f:selectItem itemLabel="Any tag" itemValue="true"/>
-			    			<f:selectItem itemLabel="All tags" itemValue="false"/>
-			    		</p:selectOneMenu>
-			    		
-			    		<p:selectCheckboxMenu id="columns" value="#{mrHistBean.selectedColumns}" label="Select"
-			    			panelStyleClass="eps-pf-select-panel-width-fix">
-			    			<p:ajax execute="@this" update=":results-form"
-			    				onstart="showLoading('.eps-report-results', '#loading-bl')" 
-			    				oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable');"/>
-			    			<p:ajax event="toggleSelect" execute="@this" update=":results-form"
-			    				onstart="showLoading('.eps-report-results', '#loading-bl')" 
-			    				oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable');"/>
-			    			<f:selectItems value="#{mrHistBean.availableColumns}" />
-			    		</p:selectCheckboxMenu>
-			    		
-			    		<p:selectOneMenu id="sort-by" value="#{mrHistBean.sortBy}">
-			    			<f:selectItem itemLabel="Start Time" itemValue="MR.startTime"/>
-			    			<f:selectItem itemLabel="Name" itemValue="M.name"/>
-			    			<f:selectItem itemLabel="id" itemValue="MR.sfRunId"/>
-			    			<f:selectItem itemLabel="Finish Time" itemValue="MR.finishTime"/>
-			    			<f:selectItem itemLabel="User Name" itemValue="U.name"/>
-			    			<f:selectItem itemLabel="Environment" itemValue="E.name"/>
-			    		</p:selectOneMenu>
-			    		
-			    		<p:selectOneMenu id="sort-order" value="#{mrHistBean.sortAsc}">
-			    			<f:selectItem itemLabel="Desc" itemValue="false"/>
-			    			<f:selectItem itemLabel="Asc" itemValue="true"/>
-			    		</p:selectOneMenu>
-		    			
-		    		</h:panelGrid>
+            <p:tabView id="parametersTabView" styleClass="eps-report-parameters eps-card">
+                <p:ajax event="tabChange" oncomplete="setScrollableBodyHeight('#results-form\\:resultsTable');"/>
+                <p:tab title="Parameters">
+                    <h:form id="optionsForm">
 
-                    <h:panelGrid columns="12" cellpadding="5" styleClass="eps-chkbox-tbl">
-		    			<p:outputLabel for="empty-comment" value="Empty Comment Only" />
-		    			<p:selectBooleanCheckbox id="empty-comment" value="#{mrHistBean.emptyCommentOnly}" styleClass="eps-checkbox-tbl"/>
-		    			
-		    			<p:outputLabel for="expand-mode" value="Render Expanded" />
-		    			<p:selectBooleanCheckbox id="expand-mode" value="#{mrHistBean.renderExpaned}" styleClass="eps-checkbox-tbl"/>
-		    			
-		    			<p:outputLabel for="split-checkbox" value="Split Scripts By Status" />
-		    			<p:selectBooleanCheckbox id="split-checkbox" value="#{mrHistBean.splitByStatus}" styleClass="eps-checkbox-tbl"/>
-		    			
-		    			<p:outputLabel for="export-with-TCs-checkbox" value="Export Report with Test Cases Info" />
-		    			<p:selectBooleanCheckbox id="export-with-TCs-checkbox" value="#{mrHistBean.exportWithTCs}" styleClass="eps-checkbox-tbl"/>
+                        <p:commandLink id="optionsToggler" style="position: absolute; top: 0.7em; right: 0.8em;">
+                            <h:graphicImage library="sf" name="images/menu-hamb-16.png"/>
+                        </p:commandLink>
 
-                        <p:outputLabel for="export-with-TCs-checkbox" value="Export Report with Actions Info"/>
-                        <p:selectBooleanCheckbox id="export-with-actions-checkbox" value="#{mrHistBean.exportWithActions}"
-                                                 styleClass="eps-checkbox-tbl"/>
+                        <p:overlayPanel id="optionsPanel" for="optionsToggler" hideEffect="fade" dismissable="false">
 
-                        <p:outputLabel for="include-executed" value="Include Executed During 'From-To' Range"/>
-                        <p:selectBooleanCheckbox id="include-executed" value="#{mrHistBean.includeExecutedInFromToRange}"
-                                                 styleClass="eps-checkbox-tbl"/>
-		    		</h:panelGrid>
-		    		
-		    		<h:panelGrid columns="2" cellpadding="5">
-		    			<p:outputLabel for="mode" value="Display Test Cases" />
-		    			<p:selectOneRadio id="mode" value="#{mrHistBean.tcDisplayMode}"  >
-				            <f:selectItems value="#{mrHistBean.displayModes}" var="c" itemLabel="#{c.label}" itemValue="#{c}"/>
-				        </p:selectOneRadio>
-		    		</h:panelGrid>
-		    		
-		    		<div class="selected-tags-wrapper" style="padding-left: 5px;">
-			    		<h:panelGroup id="selected-tags" style="white-space: normal;">
-			            	<ui:repeat var="tag" value="#{mrHistBean.tags}">
-			            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
-			            			#{tag.name}
-			            			<p:commandLink action="#{mrHistBean.removeTag(tag)}" update=":params-form:selected-tags"
-			            				styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
-			            		</span>
-			            	</ui:repeat>
-		            	</h:panelGroup>
-	            	</div>
-		    		
-		    		<div class="eps-params-separator"></div>
-		    		
-		    		<p:commandButton value="Generate" action="#{mrHistBean.generateReport}" update=":msgForm:messages :params-form :results-form"
-		    			disabled="#{not mrHistBean.statisticsDbAvailable}"
-						onclick="showLoading('.eps-report-results', '#loading-bl')"		    			
-		    			onsuccess=""
-		    			oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable')"/>
-		    		<p:commandButton value="Export" ajax="false" id="export-button" rendered="#{not empty mrHistBean.lastResult}"
-                                     update=":msgForm:messages" action="#{mrHistBean.getExported}">
-					</p:commandButton>
-					<p:button id="downloadReportsButton" value="Download Reports" target="_blank" href="#{mrHistBean.getLastResultZipReports()}" 
-						rendered="#{not empty mrHistBean.lastResult}"
-						disabled="#{not mrHistBean.downloadReportsEnabled}"/>
-					<p:tooltip id="downloadReportsTooltip" for="downloadReportsButton" value="Download disabled because of internal error" 
-						trackMouse="true" rendered="#{not mrHistBean.downloadReportsEnabled}"/>
-		    		
-		    		<!-- 
-		    		
-		    		 
-		    		 -->
-		    		
-		    		
-	    		</h:form>
-	    		
-	    	</div>
+                            <h:panelGrid columns="1" cellpadding="5" style="text-align: left;">
+
+                                <h:outputLabel for="customLinkPath" value="Custom path to reports" />
+
+                                <p:inputText id="customLinkPath" value="#{mrHistBean.customReportsPath}" style="width: 300px;" placeholder="http://localhost:8080/sfgui/report"/>
+
+                            </h:panelGrid>
+
+                            <p:separator style="border: 0px none;"/>
+
+                            <p:commandButton value="Apply" action="#{mrHistBean.applyOptions}" update=":msgForm:messages"/>
+
+                        </p:overlayPanel>
+
+                    </h:form>
+                    <h:form id="params-form">
+
+                            <h:panelGrid columns="9" cellpadding="5" styleClass="top-aligned-table">
+                                <p:outputLabel for="from" value="From" />
+                                <p:outputLabel for="to" value="To" />
+                                <p:outputLabel for="sfInstancesMenu" value="SF Instances" />
+                                <p:outputLabel for="matrix-pattern" value="Matrix Name (pattern)" />
+                                <p:outputLabel for="tags-autocomplete" value="Tags" />
+                                <p:outputLabel for="tags-mode" value="Tags Matching" />
+                                <p:outputLabel for="columns" value="Columns" />
+                                <p:outputLabel for="sort-by" value="Sort By" />
+                                <p:outputLabel for="sort-order" value="Sort Order" />
+
+                                <p:calendar id="from" value="#{mrHistBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                            onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                            requiredMessage="'From' is empty"
+                                            timeZone="UTC"/>
+
+
+                                <p:calendar id="to" value="#{mrHistBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                            onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
+                                            requiredMessage="'To' is empty"
+                                            timeZone="UTC"/>
+
+
+                                <p:selectCheckboxMenu id="sfInstancesMenu" value="#{mrHistBean.selectedSfInstances}" label="Select"
+                                          filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
+                                           required="true" requiredMessage="Select at least one SF instance">
+                                    <f:selectItems value="#{mrHistBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
+                                </p:selectCheckboxMenu>
+
+                                <p:inputText id="matrix-pattern" value="#{mrHistBean.matrixNamePattern}" style="width: 250px"/>
+
+                                <p:autoComplete id="tags-autocomplete" value="#{mrHistBean.tagToAdd}"
+                                    completeMethod="#{mrHistBean.completeTag}"
+                                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true"
+                                    placeholder="type to add" emptyMessage="No matching tags found">
+
+                                    <p:ajax event="itemSelect" listener="#{mrHistBean.onTagSelect}" execute="@this" update="tags-autocomplete selected-tags"/>
+                                    <o:converter converterId="omnifaces.ListConverter" list="#{mrHistBean.allTags}" />
+                                    <p:column>
+                                        <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+                                    </p:column>
+                                </p:autoComplete>
+
+                                <p:selectOneMenu id="tags-mode" value="#{mrHistBean.anyTag}">
+                                    <f:selectItem itemLabel="Any tag" itemValue="true"/>
+                                    <f:selectItem itemLabel="All tags" itemValue="false"/>
+                                </p:selectOneMenu>
+
+                                <p:selectCheckboxMenu id="columns" value="#{mrHistBean.selectedColumns}" label="Select"
+                                    panelStyleClass="eps-pf-select-panel-width-fix">
+                                    <p:ajax execute="@this" update=":results-form"
+                                        onstart="showLoading('.eps-report-results', '#loading-bl')"
+                                        oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable');"/>
+                                    <p:ajax event="toggleSelect" execute="@this" update=":results-form"
+                                        onstart="showLoading('.eps-report-results', '#loading-bl')"
+                                        oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable');"/>
+                                    <f:selectItems value="#{mrHistBean.availableColumns}" />
+                                </p:selectCheckboxMenu>
+
+                                <p:selectOneMenu id="sort-by" value="#{mrHistBean.sortBy}">
+                                    <f:selectItem itemLabel="Start Time" itemValue="MR.startTime"/>
+                                    <f:selectItem itemLabel="Name" itemValue="M.name"/>
+                                    <f:selectItem itemLabel="id" itemValue="MR.sfRunId"/>
+                                    <f:selectItem itemLabel="Finish Time" itemValue="MR.finishTime"/>
+                                    <f:selectItem itemLabel="User Name" itemValue="U.name"/>
+                                    <f:selectItem itemLabel="Environment" itemValue="E.name"/>
+                                </p:selectOneMenu>
+
+                                <p:selectOneMenu id="sort-order" value="#{mrHistBean.sortAsc}">
+                                    <f:selectItem itemLabel="Desc" itemValue="false"/>
+                                    <f:selectItem itemLabel="Asc" itemValue="true"/>
+                                </p:selectOneMenu>
+
+                            </h:panelGrid>
+
+                            <h:panelGrid columns="12" cellpadding="5" styleClass="eps-chkbox-tbl">
+                                <p:outputLabel for="empty-comment" value="Empty Comment Only" />
+                                <p:selectBooleanCheckbox id="empty-comment" value="#{mrHistBean.emptyCommentOnly}" styleClass="eps-checkbox-tbl"/>
+
+                                <p:outputLabel for="expand-mode" value="Render Expanded" />
+                                <p:selectBooleanCheckbox id="expand-mode" value="#{mrHistBean.renderExpaned}" styleClass="eps-checkbox-tbl"/>
+
+                                <p:outputLabel for="split-checkbox" value="Split Scripts By Status" />
+                                <p:selectBooleanCheckbox id="split-checkbox" value="#{mrHistBean.splitByStatus}" styleClass="eps-checkbox-tbl"/>
+
+                                <p:outputLabel for="export-with-TCs-checkbox" value="Export Report with Test Cases Info" />
+                                <p:selectBooleanCheckbox id="export-with-TCs-checkbox" value="#{mrHistBean.exportWithTCs}" styleClass="eps-checkbox-tbl"/>
+
+                                <p:outputLabel for="export-with-TCs-checkbox" value="Export Report with Actions Info"/>
+                                <p:selectBooleanCheckbox id="export-with-actions-checkbox" value="#{mrHistBean.exportWithActions}"
+                                                         styleClass="eps-checkbox-tbl"/>
+
+                                <p:outputLabel for="include-executed" value="Include Executed During 'From-To' Range"/>
+                                <p:selectBooleanCheckbox id="include-executed" value="#{mrHistBean.includeExecutedInFromToRange}"
+                                                         styleClass="eps-checkbox-tbl"/>
+                            </h:panelGrid>
+
+                            <h:panelGrid columns="2" cellpadding="5">
+                                <p:outputLabel for="mode" value="Display Test Cases" />
+                                <p:selectOneRadio id="mode" value="#{mrHistBean.tcDisplayMode}"  >
+                                    <f:selectItems value="#{mrHistBean.displayModes}" var="c" itemLabel="#{c.label}" itemValue="#{c}"/>
+                                </p:selectOneRadio>
+                            </h:panelGrid>
+
+                            <div class="selected-tags-wrapper" style="padding-left: 5px;">
+                                <h:panelGroup id="selected-tags" style="white-space: normal;">
+                                    <ui:repeat var="tag" value="#{mrHistBean.tags}">
+                                        <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+                                            #{tag.name}
+                                            <p:commandLink action="#{mrHistBean.removeTag(tag)}" update=":parametersTabView:params-form:selected-tags"
+                                                styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+                                        </span>
+                                    </ui:repeat>
+                                </h:panelGroup>
+                            </div>
+
+                            <div class="eps-params-separator"></div>
+
+                            <p:commandButton value="Generate" action="#{mrHistBean.generateReport}" update=":msgForm:messages :parametersTabView:params-form :results-form"
+                                disabled="#{not mrHistBean.statisticsDbAvailable}"
+                                onclick="showLoading('.eps-report-results', '#loading-bl')"
+                                onsuccess=""
+                                oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+                            <p:commandButton value="Export" ajax="false" id="export-button" rendered="#{not empty mrHistBean.lastResult}"
+                                             update=":msgForm:messages" action="#{mrHistBean.getExported}">
+                            </p:commandButton>
+                            <p:button id="downloadReportsButton" value="Download Reports" target="_blank" href="#{mrHistBean.getLastResultZipReports()}"
+                                rendered="#{not empty mrHistBean.lastResult}"
+                                disabled="#{not mrHistBean.downloadReportsEnabled}"/>
+                            <p:tooltip id="downloadReportsTooltip" for="downloadReportsButton" value="Download disabled because of internal error"
+                                trackMouse="true" rendered="#{not mrHistBean.downloadReportsEnabled}"/>
+                        </h:form>
+                </p:tab>
+                <p:tab title="Actions">
+                    <h:form id="actionsTabForm">
+                        <h:panelGrid columns="2" cellpadding="5" styleClass="top-aligned-table">
+                            <p:outputLabel for="customer-tags-autocomplete" value="Tags" />
+                            <p:outputLabel for="actions" value="Action" />
+
+                            <p:autoComplete id="customer-tags-autocomplete" value="#{mrHistBean.customTagToAdd}"
+                                            completeMethod="#{mrHistBean.completeCustomTag}"
+                                            var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true"
+                                            placeholder="type to add" emptyMessage="No matching tags found">
+                                <p:ajax event="itemSelect" listener="#{mrHistBean.onCustomTagSelect}" execute="@this"
+                                        update="customer-tags-autocomplete selected-custom-tags"/>
+                                <o:converter converterId="omnifaces.ListConverter" list="#{mrHistBean.allCustomerTags}" />
+                                <p:column>
+                                    <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+                                </p:column>
+                            </p:autoComplete>
+
+                            <p:selectOneMenu id="actions" value="#{mrHistBean.action}">
+                                <f:selectItems value="#{mrHistBean.actions}" var="action"
+                                               itemValue="#{action}" itemLabel="#{action.label}" />
+                            </p:selectOneMenu>
+
+                        </h:panelGrid>
+
+                        <div class="selected-custom-tags-wrapper" style="padding-left: 5px;">
+                            <h:panelGroup id="selected-custom-tags" style="white-space: normal;">
+                                <ui:repeat var="tag" value="#{mrHistBean.customerTags}">
+                                        <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+                                            #{tag.name}
+                                            <p:commandLink action="#{mrHistBean.removeCustomTag(tag)}" update=":parametersTabView:actionsTabForm:selected-custom-tags"
+                                                           styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+                                        </span>
+                                </ui:repeat>
+                            </h:panelGroup>
+                        </div>
+
+                        <div class="eps-params-separator"></div>
+
+                        <o:importConstants type="com.exactprosystems.testwebgui.statistics.Action" />
+
+                        <p:commandButton value="Apply actions" action="#{mrHistBean.applyAction}"
+                                         update=":msgForm:messages :results-form"
+                                         disabled="#{not mrHistBean.statisticsDbAvailable}"
+                                         onclick="#{mrHistBean.action == Action.ADD ? 'showLoading(\'.eps-report-results\', \'#loading-bl\')' : ''}"
+                                         onsuccess=""
+                                         oncomplete="#{mrHistBean.action == Action.ADD ? 'hideLoading(\'.eps-report-results\', \'#loading-bl\');' : ''} setScrollableBodyHeight('#results-form\\:resultsTable')">
+                        </p:commandButton>
+                    </h:form>
+
+                    <h:form id="confirmDeleteTagsForm" >
+                        <p:confirmDialog id="confirmDeleteTagsDialog" message="Are you sure you want to remove selected tag(s)?"
+                                         header="Delete" severity="alert" widgetVar="tagConfirmation" >
+                            <div style="text-align: center;">
+                                <p:commandButton id="confirm" value="Yes" update=":msgForm:messages :results-form"
+                                                 onclick="showLoading('.eps-report-results', '#loading-bl')"
+                                                 oncomplete="PF('tagConfirmation').hide(); hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable')"
+                                                 actionListener="#{mrHistBean.confirmAction}" />
+                                <p:commandButton id="decline" value="No" onclick="PF('tagConfirmation').hide()" type="button" />
+                            </div>
+                        </p:confirmDialog>
+                    </h:form>
+                </p:tab>
+            </p:tabView>
 	    	
 	    	<ui:include src="loadingCard.xhtml">
 	    		<ui:param name="blockId" value="loading-bl" />
@@ -218,11 +269,18 @@
 	    				scrollable="true" scrollHeight="50"
 	    				resizableColumns="false" 
 	    				widgetVar="pfResultsTable"
-	    				selection="#{mrHistBean.selected}"
-	    				selectionMode="single"
+	    				selection="#{mrHistBean.selectedRows}"
+                        rowSelectMode="add"
 	    				rowKey="#{row.rowKey}">
+
+						<p:ajax event="toggleSelect" oncomplete="setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+                        <p:ajax event="rowSelectCheckbox" oncomplete="setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+                        <p:ajax event="rowUnselectCheckbox" oncomplete="setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+                        <p:ajax event="rowSelect" oncomplete="setScrollableBodyHeight('#results-form\\:resultsTable')"/>
+
+                        <p:column selectionMode="multiple" style="width: 12px;" styleClass="eps-checkbox-tbl"/>
 	    				
-	    				<p:column style="width: 12px;" styleClass="eps-expander-column">
+	    				<p:column style="width: 10px;" styleClass="eps-expander-column">
 	    				 	
 	    					<ui:fragment rendered="#{row.matrixRow and not (row.passedCount == 0 and row.failedCount == 0 and row.conditionallyPassedCount == 0)}">
 	    						<span class="eps-row-expander ui-icon ui-icon-circle-triangle-#{mrHistBean.isRenderExpanded(row) ? 's' : 'e'}" 
@@ -235,7 +293,7 @@
 	    					<h:outputText value="#{row.sfId}" rendered="#{row.matrixRow}"/>
 	    					<!--h:outputText value="#{row.testCaseId}" rendered="#{(not row.matrixRow) and (not (row.testCaseId eq '_unknown_tc_'))}"/-->
 	    					
-	    					<p:commandLink value="#{row.testCaseId}" 
+	    					<p:commandLink value="#{row.testCaseId}"
 	    						rendered="#{(not row.matrixRow) and (not (row.testCaseId eq '_unknown_tc_'))}" 
 	    						actionListener="#{tcrHistoryBean.selectTestCase(row.testCaseId)}" 
 	    						action="#{tcrHistoryBean.generate}"
@@ -268,10 +326,19 @@
 	    					
 	    					<span> </span>
 	    					
-	    					<ui:fragment rendered="#{row.matrixRow}">
+	    					<ui:fragment>
 		    					<ui:repeat var="tag" value="#{row.tags}">
-				            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+				            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}"
+                                        style="#{((row.matrixRow) and (tag.forAllTestCaseRuns == false)) ? 'border: 2px dashed rgba(0,0,0,.5);' : 'border-style: none;'}">
 				            			#{tag.name}
+                                        <p:commandLink rendered="#{tag.custom}"
+                                                       action="#{mrHistBean.removeTagFromResult(row, tag)}"
+                                                       title="Delete tag"
+                                                       update=":results-form"
+                                                       styleClass="ui-icon ui-icon-close"
+                                                       style="border-style: none; display: inline-block; vertical-align: middle;margin-top: -2px;"
+                                                       oncomplete="hideLoading('.eps-report-results', '#loading-bl'); setScrollableBodyHeight('#results-form\\:resultsTable')"
+                                        />
 				            		</span>
 				            	</ui:repeat>
 			            	</ui:fragment>
@@ -546,7 +613,7 @@
     		</p:dialog>
     		
     	</h:form>
-    	
+
     	</ui:fragment>
     	
     </ui:define>
