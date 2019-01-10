@@ -1,11 +1,14 @@
 import {h, Component} from 'preact';
 import '../styles/messages.scss';
 import Message from '../models/Message';
+import { StatusType } from '../models/Status';
+import Action from '../models/Action';
 
 interface MessageCardProps {
     message: Message;
     isSelected?: boolean;
     selectedStatus?: string;
+    actionsMap: Map<number, Action>;
 }
 
 interface MessageCardState {
@@ -38,7 +41,8 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
         });
     }
     
-    render({message, isSelected, selectedStatus}: MessageCardProps, {showRaw}: MessageCardState) {
+    render({message, isSelected, selectedStatus, actionsMap}: MessageCardProps, {showRaw}: MessageCardState) {
+        console.log(actionsMap)
         const { msgName, timestamp, from, to, contentHumanReadable, raw } = message,
             rootClass = ["message-card", (selectedStatus || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
             contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),

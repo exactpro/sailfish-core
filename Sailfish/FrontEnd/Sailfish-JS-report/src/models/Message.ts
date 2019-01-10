@@ -2,7 +2,7 @@ export default interface Message {
     id: number;
     checkPoint?: any;
     raw: string;
-    relatedActions?: any;
+    relatedActions: number[];
     from: string;
     to: string;
     msgName: string;

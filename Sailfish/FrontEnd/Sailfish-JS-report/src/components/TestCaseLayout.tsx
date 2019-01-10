@@ -10,6 +10,7 @@ import Action from '../models/Action';
 import { StatusType } from '../models/Status';
 import { StatusPane } from './StatusPane';
 import { LogsPane } from './LogsPane';
+import { generateActionsMap } from '../helpers/mapGenerator';
 
 interface LayoutProps {
     testCase: TestCase;
@@ -41,6 +42,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
     private messagesListRef: MessagesCardList;
     private actionsListRef: ActionsList;
 
+    private actionsMap: Map<number, Action>;
+
     constructor(props: LayoutProps) {
         super(props);
         this.state = {
@@ -54,6 +57,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED'],
             filtredActions: props.testCase.actions
         }
+
+        this.actionsMap = generateActionsMap(props.testCase.actions);
     }
 
     actionSelectedHandler(action: Action) {
@@ -159,6 +164,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
                 filtredActions: nextProps.testCase.actions.filter(action =>
                     this.state.actionsFilter.includes(action.status.status)) 
             });
+
+            this.actionsMap = generateActionsMap(nextProps.testCase.actions);
         }
     }
 
@@ -184,7 +191,8 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
 
         const messagesElement = (<MessagesCardList messages={testCase.messages}
             selectedMessages={selectedMessages}
-            ref={ref => this.messagesListRef = ref}/>);
+            ref={ref => this.messagesListRef = ref}
+            actionsMap={this.actionsMap}/>);
 
         const statusElement = (
             <StatusPane status={testCase.status}/>
