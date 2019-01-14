@@ -311,7 +311,12 @@ public class JsonReport implements IScriptReport {
         IJsonReportNode curNode = getCurrentContextNode();
 
         if (result != null) {
-            curVerification.messageId = result.getMetaData().getId();
+            if (result.getMetaData() != null) {
+                curVerification.messageId = result.getMetaData().getId();
+            }
+            else {
+                logger.warn("comparison result does not contain metadata");
+            }
             Set<BugDescription> reproduced = result.getReproducedBugs();
             Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
 

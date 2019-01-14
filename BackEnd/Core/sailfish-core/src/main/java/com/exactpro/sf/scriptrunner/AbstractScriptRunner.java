@@ -245,10 +245,6 @@ public abstract class AbstractScriptRunner implements IDisposable {
 							scriptDescription.getTags()));
 
             List<IScriptReport> aggregateReportListeners = new ArrayList<>();
-            // Write Report:
-            File reportFile = workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "report.xml");
-            // New xml report
-            aggregateReportListeners.add(new XmlStreamReport(reportFile.getAbsolutePath()));
 			// json report
             aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher));
             // html report
