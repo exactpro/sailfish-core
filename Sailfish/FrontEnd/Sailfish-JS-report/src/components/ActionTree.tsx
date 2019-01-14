@@ -14,7 +14,7 @@ import { StatusType } from '../models/Status';
 export interface ActionTreeProps {
     action: ActionNode;
     actionSelectHandler: (action: Action) => void;
-    messageSelectHandler: (id: number) => void;
+    messageSelectHandler: (id: number, status: StatusType) => void;
     selectedMessageId: number;
     selectedActionId: number;
     filterFields: StatusType[];
@@ -166,7 +166,7 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
             <div class="action-card">
                 <div class={className}
                     onClick={e => {
-                        selectHandelr(messageId);
+                        selectHandelr(messageId, status.status);
                         // here we cancel handling by parent divs
                         e.cancelBubble = true;
                     }}>

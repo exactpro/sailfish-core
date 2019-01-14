@@ -7,7 +7,7 @@ import { StatusType } from '../models/Status';
 interface ListProps {
     actions: Array<Action>;
     onSelect: (messages: Action) => void;
-    onMessageSelect: (id: number) => void;
+    onMessageSelect: (id: number, status: StatusType) => void;
     selectedActionId: number;
     selectedMessageId: number;
     filterFields: StatusType[];

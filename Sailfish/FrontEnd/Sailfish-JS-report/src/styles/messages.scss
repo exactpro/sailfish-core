@@ -6,7 +6,6 @@
     border-radius: 5px;
     margin: 5px 0;
     border-color: $defaultCardBackground;
-    background: $defaultCardBackground;
 
     &.selected {
         border-color: $defaultCardBorderColor;
@@ -42,30 +41,26 @@
 
     &-header {
         min-height: 45px;
+        padding: 7px 5px 9px 10px;
+        position: relative;
         display: grid;
-        grid-template: 20px auto / 40px 110px 1fr 1fr 1fr 80px;
-        grid-template-areas: "action-chips timestamp name from to protocol"
-                             "action-chips timestamp-value name-value from-value to-value protocol-value";
+        grid-template-rows: auto auto;
+        grid-template-columns: 200px 40px 1fr 40px 1fr 40px;
+        grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
+                             "timestamp-value session from-value session-icon to-value prediction-icon";
 
-        &-timestamp, &-from, &-to, &-name, &-protocol {
+        &-session, &-name, &-timestamp-value, &-name-value, &-from-value, &-to-value {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            margin-left: 5px;
-            margin-top: 2px;
+            padding: 3px;
 
             span {
                 display: block;
                 font-size: 10px;
                 color: $primaryTextColor;
             }
-        } 
-
-        &-timestamp-value, &-name-value, &-from-value, &-to-value, &-protocol-value {
-            display: block;
-            margin-bottom: 5px;
-            margin-left: 5px;
 
             p {
                 font-size: 13px;
@@ -75,24 +70,20 @@
             }
         }
 
-        &-timestamp {
-            grid-area: timestamp;
-        }
-
-        &-from {
-            grid-area: from;
-        }
-
-        &-to {
-            grid-area: to;
+        &-timestamp-value, &-name-value, &-from-value, &-to-value {
+            padding-left: 5px;
         }
 
         &-name {
             grid-area: name;
         }
 
-        &-protocol {
-            grid-area: protocol;
+        &-session {
+            grid-area: session;
+        }
+
+        &-session-icon {
+            grid-area: session-icon;
         }
 
         &-timestamp-value {
@@ -111,11 +102,56 @@
             grid-area: name-value;
         }
 
-        &-protocol-value {
-            grid-area: protocol-value;
-            margin: 5px;
-            border: 0px solid transparent;
-            border-radius: 5px;
+        &-session-icon {
+            grid-area: session-icon;
+            background-image: url('../../resources/icons/arr2-right.svg');
+            height: 25px;
+            width: 25px;
+            background-size: 100%;
+        }
+
+        &-action {
+            grid-area: action-chips;
+            display: flex;
+
+            &-chip {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                border: 2px solid transparent;
+                border-radius: 10px;
+                height: 20px;
+                width: auto;
+                min-width: 20px;
+                margin: 0 5px;
+
+                &.passed {
+                    border-color: $passedHeaderColor;
+                }
+
+                &.failed {
+                    border-color: $failedHederColor;
+                }
+
+                &.conditionally_passed {
+                    border-color: $conditionallyHeaderColor;
+                }
+
+                p {
+                    font-size: 10px;
+                    padding: 0 5px;
+                }
+            }
+        }
+
+        &::after {
+            border-bottom: 2px solid $defaultCardBackground;
+            padding: 0 20px;
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            left: 10px;
+            right: 10px;
         }
     }
 
@@ -123,7 +159,6 @@
         position: relative;
         padding: 7px 10px 26px 10px;
         height: 100%;
-        background: $messageCardBackgroundColor;
 
         &.passed {
             background-color: $passedBackgroundColor;

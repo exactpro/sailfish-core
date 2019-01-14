@@ -9,6 +9,7 @@ interface MessagesListProps {
     messages: Message[];
     selectedMessages: number[];
     actionsMap: Map<number, Action>;
+    selectedStatus: StatusType;
 }
 
 export class MessagesCardList extends Component<MessagesListProps, {}> {
@@ -26,17 +27,25 @@ export class MessagesCardList extends Component<MessagesListProps, {}> {
             (actionId) : [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, selectedMessages, actionsMap }: MessagesListProps) {
+    render({ messages, selectedMessages, selectedStatus }: MessagesListProps) {
         return (
             <div class="messages-list">
-                {messages.map(message => <MessageCard
-                            ref={element => this.elements[message.id] = element}
-                            message={message}
-                            isSelected={selectedMessages.includes(message.id)}
-                            key={message.id} 
-                            actionsMap={this.getMessageActions(message)}/>)
-                }
+                {messages.map(message => this.renderMessage(message, selectedMessages, selectedStatus))}
             </div>
         );
+    }
+
+    renderMessage(message: Message, selectedMessages: number[], selectedStatus: StatusType) {
+        const isSelected = selectedMessages.includes(message.id);
+
+        return (
+            <MessageCard
+                ref={element => this.elements[message.id] = element}
+                message={message}
+                isSelected={isSelected}
+                status={isSelected ? selectedStatus : null}
+                key={message.id} 
+                actionsMap={this.getMessageActions(message)}
+                />);
     }
 }

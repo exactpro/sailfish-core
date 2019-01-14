@@ -26,6 +26,7 @@ interface LayoutProps {
 interface LayoutState {
     selectedActionId: number;
     selectedMessages: number[];
+    selectedStatus: StatusType;
     isSplitMode: boolean;
     showFilter: boolean;
     primaryPane: Pane;
@@ -49,6 +50,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         this.state = {
             selectedActionId: -1,
             selectedMessages: [],
+            selectedStatus: null,
             isSplitMode: true,
             showFilter: false,
             primaryPane: Pane.Actions,
@@ -65,17 +67,19 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         this.setState({
             ...this.state,
             selectedActionId: action.id,
-            selectedMessages: action.relatedMessages
+            selectedMessages: action.relatedMessages,
+            selectedStatus: action.status.status
         });
 
         this.messagesListRef.scrollToMessage(action.relatedMessages[0]);
     }
 
-    messageSelectedHandler(id: number) {
+    messageSelectedHandler(id: number, status: StatusType) {
         this.setState({
             ...this.state,
             selectedActionId: -1,
-            selectedMessages: [id]
+            selectedMessages: [id],
+            selectedStatus: status
         });
 
         this.messagesListRef.scrollToMessage(id);
@@ -178,13 +182,14 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
             showFilter, 
             actionsFilter, 
             fieldsFilter,
-            filtredActions} : LayoutState) {
+            filtredActions,
+            selectedStatus} : LayoutState) {
 
         // if some action is selected, all messages inside this action should not be highlighted
         const actionsElement = (<ActionsList actions={filtredActions}
                 onSelect={action => this.actionSelectedHandler(action)}
                 selectedActionId={selectedActionId}
-                onMessageSelect={id => this.messageSelectedHandler(id)}
+                onMessageSelect={(id, status) => this.messageSelectedHandler(id, status)}
                 selectedMessageId={selectedActionId >= 0 ? -1 : selectedMessages[0]}
                 filterFields={fieldsFilter}
                 ref={ref => this.actionsListRef = ref}/>);
@@ -192,6 +197,7 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         const messagesElement = (<MessagesCardList messages={testCase.messages}
             selectedMessages={selectedMessages}
             ref={ref => this.messagesListRef = ref}
+            selectedStatus={selectedStatus}
             actionsMap={this.actionsMap}/>);
 
         const statusElement = (
