@@ -15,6 +15,7 @@
 ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.jsonreport;
 
+import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
@@ -25,14 +26,33 @@ import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.scriptrunner.*;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.impl.ReportStats;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Alert;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Bug;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportException;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Status;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Sets;
@@ -41,9 +61,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.Instant;
@@ -52,33 +71,21 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection, unused, FieldCanBeLocal")
 public class JsonReport implements IScriptReport {
-    @JsonIgnore private static final Logger logger = LoggerFactory.getLogger(JsonReport.class);
-    @JsonIgnore private static final ObjectMapper mapper;
-    @JsonIgnore private static long actionIdCounter = 0;
+    private static final Logger logger = LoggerFactory.getLogger(JsonReport.class);
+    private static final ObjectMapper mapper;
+    private static long actionIdCounter = 0;
 
-    @JsonIgnore private Context context;
-    @JsonIgnore private IReportStats reportStats;
-    @JsonIgnore private boolean isActionCreated;
-    @JsonIgnore private Map<Long, Set<Long>> messageToActionIdMap;
-    @JsonIgnore private IWorkspaceDispatcher dispatcher;
-    @JsonIgnore private String reportRootDirectoryPath;
 
-    //IMPORTANT: access should be synchronized
-    private final List<Alert> alerts;
+    private Context context;
+    private IReportStats reportStats;
+    private boolean isActionCreated;
+    private Map<Long, Set<Long>> messageToActionIdMap;
+    private IWorkspaceDispatcher dispatcher;
+    private String reportRootDirectoryPath;
+    private final TestScriptDescription testScriptDescription;
 
-    private Instant startTime;
-    private Instant finishTime;
-    private Map<String, String> plugins;
-    private Set<Bug> bugs;
-    private String hostName;
-    private String userName;
-    private String name;
-    private long scriptRunId;
-    private String version;
-    private String branchName;
-    private String description;
-    private ReportException exception;
-    private List<String> testCaseLinks;
+    //Main bean of report
+    private final ReportRoot reportRoot = new ReportRoot();
 
     static {
         mapper = new ObjectMapper();
@@ -89,15 +96,12 @@ public class JsonReport implements IScriptReport {
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public JsonReport(String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher) {
+    public JsonReport(String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription) {
         this.messageToActionIdMap = new HashMap<>();
         this.reportStats = new ReportStats();
-        this.alerts = new ArrayList<>();
-        this.plugins = new HashMap<>();
-        this.bugs = new HashSet<>();
-        this.testCaseLinks = new ArrayList<>();
         this.dispatcher = dispatcher;
         this.reportRootDirectoryPath = reportRootDirectoryPath;
+        this.testScriptDescription = testScriptDescription;
     }
 
     @JsonIgnore public boolean isActionCreated() throws UnsupportedOperationException {
@@ -110,10 +114,10 @@ public class JsonReport implements IScriptReport {
         }
     }
 
-    private File getFile(String fileName) {
+    private File getFile(String fileName, String extension) {
         fileName = fileName.replaceAll("\\W", "_");
-        if (!fileName.endsWith(".json")) {
-            fileName = fileName.concat(".json");
+        if (!fileName.endsWith(extension)) {
+            fileName = fileName.concat(extension);
         }
 
         try {
@@ -124,18 +128,52 @@ public class JsonReport implements IScriptReport {
     }
 
     private void exportToFile(Object data, String fileName) {
-        File file = getFile(fileName);
-        if (file == null) {
-            throw new ScriptRunException(String.format("file '%s' does not exist - unable to export json report", fileName));
-        }
+        File jsonFile = getFile(fileName, ".json");
+        File jsonpFile = getFile(fileName, ".js");
 
-        try {
-            logger.info(String.format("saving json report - writing to file: '%s'", file.getAbsolutePath()));
-            mapper.writeValue(file, data);
+        try (FileOutputStream jsonpStream = new FileOutputStream(jsonpFile); FileOutputStream jsonStream = new FileOutputStream(jsonFile)) {
+            logger.info("saving json report - writing to file: '{}'", jsonpFile);
+            byte[] jsonStringBytes = mapper.writeValueAsString(data).getBytes();
+            jsonStream.write(jsonStringBytes);
+            jsonpStream.write("window.loadJsonp(".getBytes());
+            jsonpStream.write(jsonStringBytes);
+            jsonpStream.write(")".getBytes());
         } catch (IOException e) {
             throw new ScriptRunException("unable to export json report", e);
         }
-        this.testCaseLinks.add(file.getName());
+        this.reportRoot.getTestCaseLinks().add(jsonFile.getName());
+    }
+
+    private void initProperties() {
+        ScriptState state = testScriptDescription.getState();
+        ScriptStatus status = testScriptDescription.getStatus();
+        String matrixFile = testScriptDescription.getMatrixFileName();
+        long timestamp = testScriptDescription.getTimestamp().getTime();
+        String environmentNameAttr = testScriptDescription.getContext().getEnvironmentName();
+        String languageURI = testScriptDescription.getLanguageURI().toString();
+        String workFolder = testScriptDescription.getWorkFolder();
+
+        IScriptProgress progress = testScriptDescription.getContext().getScriptProgress();
+        long passed  = progress.getPassed();
+        long conditionallyPassed = progress.getConditionallyPassed();
+        long failed  = progress.getFailed();
+        long total = progress.getLoaded();
+
+        String username = testScriptDescription.getUsername();
+        long startTime = testScriptDescription.getStartedTime();
+        long finishTime = testScriptDescription.getFinishedTime();
+        String services = testScriptDescription.getServices();
+        String range = testScriptDescription.getRange();
+        boolean autostart = testScriptDescription.getAutoStart();
+        String cause = null;
+        // Cause serializing
+        if (testScriptDescription.getCause() != null) {
+            cause = SerializeUtil.serializeToBase64(testScriptDescription.getCause());
+        }
+
+        this.reportRoot.setReportProperties(
+                new ReportProperties(state, status, matrixFile, timestamp, environmentNameAttr, languageURI, workFolder, passed, conditionallyPassed,
+                        failed, total, username, startTime, finishTime, services, range, autostart, cause));
     }
 
     private void setContext(ContextType state, IJsonReportNode currentNode) {
@@ -154,31 +192,31 @@ public class JsonReport implements IScriptReport {
     public void createReport(ScriptContext scriptContext, String name, String description, long scriptRunId, String environmentName,
             String userName) {
 
-        this.startTime = Instant.now();
+        this.reportRoot.setStartTime(Instant.now());
 
         try {
-            this.hostName = InetAddress.getLocalHost().getHostName();
+            this.reportRoot.setHostName(InetAddress.getLocalHost().getHostName());
         } catch (UnknownHostException e) {
-            this.hostName = "n/a";
+            this.reportRoot.setHostName("n/a");
         }
 
-        this.name = name;
-        this.userName = userName;
-        this.scriptRunId = scriptRunId;
-        this.version = SFLocalContext.getDefault().getVersion();
-        this.branchName = SFLocalContext.getDefault().getBranchName();
+        this.reportRoot.setName(name);
+        this.reportRoot.setUserName(userName);
+        this.reportRoot.setScriptRunId(scriptRunId);
+        this.reportRoot.setVersion(SFLocalContext.getDefault().getVersion());
+        this.reportRoot.setBranchName(SFLocalContext.getDefault().getBranchName());
 
-        this.plugins = SFLocalContext.getDefault().getPluginVersions().stream().filter(i -> !i.isGeneral())
-                .collect(Collectors.toMap(IVersion::getAlias, IVersion::buildVersion));
+        this.reportRoot.setPlugins(SFLocalContext.getDefault().getPluginVersions().stream().filter(i -> !i.isGeneral())
+                .collect(Collectors.toMap(IVersion::getAlias, IVersion::buildVersion)));
 
-        this.description = description;
+        this.reportRoot.setDescription(description);
 
         setContext(ContextType.SCRIPT, null);
     }
 
     public void addAlerts(Collection<AggregateAlert> aggregatedAlerts) {
-        synchronized (alerts) {
-            alerts.addAll(aggregatedAlerts.stream().map(a -> new Alert(a.joinLines(), a.getType().toString(), a.getColumn(), a.getMessage()))
+        synchronized (reportRoot.getAlerts()) {
+            reportRoot.getAlerts().addAll(aggregatedAlerts.stream().map(a -> new Alert(a.joinLines(), a.getType().toString(), a.getColumn(), a.getMessage()))
                     .collect(Collectors.toList()));
         }
     }
@@ -189,15 +227,15 @@ public class JsonReport implements IScriptReport {
 
         TestCase testcase = new TestCase();
 
-        testcase.name = ReportUtils.generateTestCaseName(reference, matrixOrder, type);
-        testcase.order = order;
-        testcase.reference = reference;
-        testcase.type = type.getName();
-        testcase.startTime = Instant.now();
-        testcase.matrixOrder = matrixOrder;
-        testcase.id = tcId;
-        testcase.hash = tcHash;
-        testcase.description = description;
+        testcase.setName(ReportUtils.generateTestCaseName(reference, matrixOrder, type));
+        testcase.setOrder(order);
+        testcase.setReference(reference);
+        testcase.setType(type.getName());
+        testcase.setStartTime(Instant.now());
+        testcase.setMatrixOrder(matrixOrder);
+        testcase.setId(tcId);
+        testcase.setHash(tcHash);
+        testcase.setDescription(description);
 
         setContext(ContextType.TESTCASE, testcase);
     }
@@ -206,11 +244,11 @@ public class JsonReport implements IScriptReport {
         assertState(ContextType.TESTCASE);
 
         TestCase curTestCase = getCurrentContextNode();
-        curTestCase.status = new Status(status);
-        curTestCase.finishTime = Instant.now();
-        this.bugs.addAll(curTestCase.bugs);
+        curTestCase.setStatus(new Status(status));
+        curTestCase.setFinishTime(Instant.now());
+        this.reportRoot.getBugs().addAll(curTestCase.getBugs());
 
-        exportToFile(curTestCase, curTestCase.name);
+        exportToFile(curTestCase, curTestCase.getName());
 
         revertContext();
         this.reportStats.updateTestCaseStatus(status.getStatus());
@@ -231,13 +269,13 @@ public class JsonReport implements IScriptReport {
         Action curAction = new Action();
         getCurrentContextNode().addSubNodes(curAction);
 
-        curAction.id = actionIdCounter++;
-        curAction.startTime = Instant.now();
-        curAction.name = name;
-        curAction.description = description;
-        curAction.checkPointId = checkPoint != null ? checkPoint.getId() : null;
+        curAction.setId(actionIdCounter++);
+        curAction.setStartTime(Instant.now());
+        curAction.setName(name);
+        curAction.setDescription(description);
+        curAction.setCheckPointId(checkPoint != null ? checkPoint.getId() : null);
         if (inputParameters != null) {
-            curAction.parameters = inputParameters.stream().map(p -> new Parameter(new ReportEntity("Parameter", p))).collect(Collectors.toList());
+            curAction.setParameters(inputParameters.stream().map(p -> new Parameter(new ReportEntity("Parameter", p))).collect(Collectors.toList()));
         }
         setContext(ContextType.ACTION, curAction);
         isActionCreated = true;
@@ -247,8 +285,8 @@ public class JsonReport implements IScriptReport {
         assertState(ContextType.ACTION);
 
         Action curAction = getCurrentContextNode();
-        curAction.status = new Status(status);
-        curAction.finishTime = Instant.now();
+        curAction.setStatus(new Status(status));
+        curAction.setFinishTime(Instant.now());
 
         if (status.isUpdateTestCaseStatus()) {
             this.reportStats.updateActions(status.getStatus());
@@ -261,14 +299,14 @@ public class JsonReport implements IScriptReport {
         //content propagation
         IJsonReportNode parentNode = getCurrentContextNode();
 
-        parentNode.addSubNodes(curAction.bugs);
+        parentNode.addSubNodes(curAction.getBugs());
         if (parentNode instanceof Action) {
-            ((Action) parentNode).relatedMessages.addAll(curAction.relatedMessages);
+            ((Action) parentNode).getRelatedMessages().addAll(curAction.getRelatedMessages());
         }
 
-        for (Long id : curAction.relatedMessages) {
+        for (Long id : curAction.getRelatedMessages()) {
             //noinspection ConstantConditions
-            this.messageToActionIdMap.computeIfAbsent(id, k -> new HashSet<>()).add(curAction.id);
+            this.messageToActionIdMap.computeIfAbsent(id, k -> new HashSet<>()).add(curAction.getId());
         }
     }
 
@@ -277,9 +315,9 @@ public class JsonReport implements IScriptReport {
         Action curGroup = new Action();
         getCurrentContextNode().addSubNodes(curGroup);
 
-        curGroup.id = actionIdCounter++;
-        curGroup.name = name;
-        curGroup.description = description;
+        curGroup.setId(actionIdCounter++);
+        curGroup.setName(name);
+        curGroup.setDescription(description);
 
         setContext(ContextType.ACTIONGROUP, curGroup);
     }
@@ -287,16 +325,16 @@ public class JsonReport implements IScriptReport {
     public void closeGroup(StatusDescription status) {
         assertState(ContextType.ACTIONGROUP);
         Action curGroup = getCurrentContextNode();
-        curGroup.status = new Status(status);
+        curGroup.setStatus(new Status(status));
 
         revertContext();
 
         //content propagation
         IJsonReportNode parentNode = getCurrentContextNode();
-        parentNode.addSubNodes(curGroup.bugs);
+        parentNode.addSubNodes(curGroup.getBugs());
 
         if (parentNode instanceof Action) {
-            ((Action) parentNode).relatedMessages.addAll(curGroup.relatedMessages);
+            ((Action) parentNode).getRelatedMessages().addAll(curGroup.getRelatedMessages());
         }
     }
 
@@ -304,15 +342,15 @@ public class JsonReport implements IScriptReport {
         assertState(ContextType.ACTION, ContextType.ACTIONGROUP, ContextType.TESTCASE);
 
         Verification curVerification = new Verification();
-        curVerification.name = name;
-        curVerification.description = description;
-        curVerification.status = status;
+        curVerification.setName(name);
+        curVerification.setDescription(description);
+        curVerification.setStatus(status);
 
         IJsonReportNode curNode = getCurrentContextNode();
 
         if (result != null) {
             if (result.getMetaData() != null) {
-                curVerification.messageId = result.getMetaData().getId();
+                curVerification.setMessageId(result.getMetaData().getId());
             }
             else {
                 logger.warn("comparison result does not contain metadata");
@@ -323,7 +361,7 @@ public class JsonReport implements IScriptReport {
             curNode.addSubNodes(reproduced.stream().map(d -> new Bug(d).markAsReproduced()).collect(Collectors.toList()));
             curNode.addSubNodes(notReproduced.stream().map(Bug::new).collect(Collectors.toList()));
 
-            curVerification.entries = result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList());
+            curVerification.setEntries(result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList()));
         }
         curNode.addSubNodes(curVerification);
     }
@@ -357,8 +395,8 @@ public class JsonReport implements IScriptReport {
             if (getCurrentContextNode() != null) {
                 getCurrentContextNode().addException(cause);
             } else {
-                if (this.exception == null) {
-                    this.exception = new ReportException(cause);
+                if (this.reportRoot.getException() == null) {
+                    this.reportRoot.setException(new ReportException(cause));
                 }
             }
         }
@@ -373,16 +411,16 @@ public class JsonReport implements IScriptReport {
             List<Message> messages = table.getRows().stream().map(Message::new).collect(Collectors.toList());
 
             if (currentNode instanceof Action) {
-                long actionId = ((Action) currentNode).id;
+                long actionId = ((Action) currentNode).getId();
 
                 for (Message message : messages) {
-                    this.messageToActionIdMap.computeIfAbsent(message.id, k -> new HashSet<>()).add(actionId);
+                    this.messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()).add(actionId);
                 }
             }
 
             if (currentNode instanceof TestCase) {
                 for (Message message : messages) {
-                    message.relatedActions = this.messageToActionIdMap.computeIfAbsent(message.id, k -> new HashSet<>());
+                    message.setRelatedActions(this.messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
                 }
             }
             currentNode.addSubNodes(messages);
@@ -404,7 +442,7 @@ public class JsonReport implements IScriptReport {
 
         for (String group : outcomes.getGroupOrder()) {
             for (String name : outcomes.getDefinedOutcomes().get(group)) {
-                curTestCase.outcomes
+                curTestCase.getOutcomes()
                         .add(new OutcomeSummary(name, outcomes.getPassedCount(group, name), outcomes.getConditionallyPassedCount(group, name),
                                 outcomes.getFailedCount(group, name)));
             }
@@ -417,8 +455,9 @@ public class JsonReport implements IScriptReport {
 
     public void closeReport() {
         assertState(null, ContextType.SCRIPT);
-        this.finishTime = Instant.now();
-        exportToFile(this, "report");
+        this.reportRoot.setFinishTime(Instant.now());
+        initProperties();
+        exportToFile(reportRoot, "report");
     }
 
     public void createLinkToReport(String linkToReport) {
@@ -429,12 +468,6 @@ public class JsonReport implements IScriptReport {
     public void flush() {
         //do nothing
     }
-
-    private enum ContextType {SCRIPT, TESTCASE, ACTION, ACTIONGROUP}
-
-
-    private enum KnownBugStatus {REPRODUCED, NOT_REPRODUCED}
-
 
     private class Context {
         final Context prev;
@@ -448,360 +481,4 @@ public class JsonReport implements IScriptReport {
         }
     }
 
-
-    private class Parameter {
-        String name;
-        String value;
-        List<Parameter> subParameters;
-
-        public Parameter(ReportEntity e) {
-            this.name = e.getName();
-            this.value = e.getValue().toString();
-            this.subParameters = e.getFields().stream().map(Parameter::new).collect(Collectors.toList());
-        }
-    }
-
-
-    private class Bug implements IJsonReportNode {
-        final BugDescription description;
-        KnownBugStatus status;
-
-        Bug(BugDescription description) {
-            this.description = description;
-            this.status = KnownBugStatus.NOT_REPRODUCED;
-        }
-
-        Bug markAsReproduced() {
-            this.status = KnownBugStatus.REPRODUCED;
-            return this;
-        }
-    }
-
-
-    private class Message implements IJsonReportNode {
-        long id;
-        Set<Long> relatedActions;
-        String checkPoint;
-        String raw;
-        String from;
-        String to;
-        String msgName;
-        String content;
-        String contentHumanReadable;
-        String timestamp; //IMPORTANT: datetime format may divert from the default one
-
-        Message(Map<String, String> data) {
-            this.id = Long.parseLong(data.get("Id"));
-            this.contentHumanReadable = data.get("ContentJson");
-            this.content = data.get("Content");
-            this.checkPoint = data.get("UnderCheckPoint").isEmpty() ? null : data.get("UnderCheckPoint");
-            this.raw = data.get("RawMessage");
-            this.from = data.get("From");
-            this.to = data.get("To");
-            this.msgName = data.get("MsgName");
-            this.timestamp = data.get("Timestamp");
-        }
-    }
-
-
-    private class TestCase implements IJsonReportNode {
-        final List<IJsonReportNode> actions;
-        final List<LogEntry> logs;
-        final List<Message> messages;
-        final List<Verification> verifications;
-        final Set<Bug> bugs;
-        final List<OutcomeSummary> outcomes;
-        public Instant startTime;
-        public Instant finishTime;
-        String name;
-        String type;
-        String reference;
-        int order;
-        int matrixOrder;
-        String id;
-        int hash;
-        String description;
-        Status status;
-
-        TestCase() {
-            this.outcomes = new ArrayList<>();
-            this.actions = new ArrayList<>();
-            this.logs = new ArrayList<>();
-            this.messages = new ArrayList<>();
-            this.bugs = new HashSet<>();
-            this.verifications = new ArrayList<>();
-        }
-
-        @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
-            for (IJsonReportNode child : nodes) {
-                if (child instanceof Action || child instanceof CustomMessage) {
-                    this.actions.add(child);
-                } else if (child instanceof Message) {
-                    this.messages.add((Message) child);
-                } else if (child instanceof Bug) {
-                    this.bugs.add((Bug) child);
-                } else if (child instanceof LogEntry) {
-                    this.logs.add((LogEntry) child);
-                } else if (child instanceof Verification) {
-                    this.verifications.add((Verification) child);
-                } else {
-                    throw new IllegalArgumentException("unsupported child node type: " + child.getClass().toString());
-                }
-            }
-        }
-
-        @Override public void addException(Throwable t) {
-            if (this.status == null) {
-                this.status = new Status(t);
-            }
-        }
-    }
-
-
-    private class Verification implements IJsonReportNode {
-        private static final String ACTION_NODE_TYPE = "verification";
-
-        Long messageId;
-        String name;
-        String description;
-        StatusDescription status;
-        List<VerificationEntry> entries;
-
-        Verification() {
-            this.entries = new ArrayList<>();
-        }
-
-        @JsonProperty("actionNodeType")
-        public String getActionNodeType() {
-            return ACTION_NODE_TYPE;
-        }
-    }
-
-
-    private class VerificationEntry {
-        String name;
-        String actual;
-        String expected;
-        StatusType status;
-        Double precision;
-        Double systemPrecision;
-        List<VerificationEntry> subEntries;
-        ReportException exception;
-
-        VerificationEntry(ComparisonResult result) {
-            this.name = result.getName();
-            this.actual = Objects.toString(result.getActual(), null);
-            this.expected = Objects.toString(result.getExpected(), null);
-            this.precision = result.getDoublePrecision();
-            this.systemPrecision = result.getSystemPrecision();
-            this.status = result.getStatus();
-            this.exception = result.getException() != null ? new ReportException(result.getException()) : null;
-
-            if (result.hasResults()) {
-                this.subEntries = result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList());
-            }
-        }
-    }
-
-
-    private class Alert {
-        String lines;
-        String type;
-        String column;
-        String message;
-
-        Alert(String lines, String type, String column, String message) {
-            this.lines = lines;
-            this.type = type;
-            this.column = column;
-            this.message = message;
-        }
-    }
-
-
-    private class Action implements IJsonReportNode {
-        private static final String ACTION_NODE_TYPE = "action";
-
-        long id;
-        Long checkPointId;
-        List<IJsonReportNode> subNodes;
-        String name;
-        String description;
-        Set<Bug> bugs;
-        Set<Long> relatedMessages;
-        Status status;
-        List<Parameter> parameters;
-        List<LogEntry> logs;
-        Instant startTime;
-        Instant finishTime;
-
-        Action() {
-            this.bugs = new HashSet<>();
-            this.subNodes = new ArrayList<>();
-            this.relatedMessages = new HashSet<>();
-            this.logs = new ArrayList<>();
-            this.bugs = new HashSet<>();
-        }
-
-        @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
-            for (IJsonReportNode child : nodes) {
-                if (child instanceof Message) {
-                    this.relatedMessages.add(((Message) child).id);
-                } else if (child instanceof Action || child instanceof CustomMessage || child instanceof CustomTable || child instanceof CustomLink) {
-                    this.subNodes.add(child);
-                } else if (child instanceof Bug) {
-                    this.bugs.add((Bug) child);
-                } else if (child instanceof Verification) {
-                    this.subNodes.add(child);
-                    if (((Verification) child).messageId != null) {
-                        this.relatedMessages.add(((Verification) child).messageId);
-                    }
-                } else if (child instanceof LogEntry) {
-                    this.logs.add((LogEntry) child);
-                } else {
-                    throw new IllegalArgumentException("unsupported child node type: " + child.getClass().toString());
-                }
-            }
-        }
-
-        @Override public void addException(Throwable t) {
-            if (this.status == null) {
-                this.status = new Status(t);
-            }
-        }
-
-        @JsonProperty("actionNodeType")
-        public String getActionNodeType() {
-            return ACTION_NODE_TYPE;
-        }
-    }
-
-
-    private class CustomMessage implements IJsonReportNode {
-        private static final String ACTION_NODE_TYPE = "message";
-
-        String message;
-        String color;
-        String style;
-        MessageLevel level;
-        ReportException exception;
-
-        CustomMessage(String message, String color, String style, MessageLevel level, Throwable t) {
-            this.message = message;
-            this.level = level;
-            this.exception = t != null ? new ReportException(t) : null;
-            this.color = color;
-            this.style = style;
-        }
-
-        @JsonProperty("actionNodeType")
-        public String getActionNodeType() {
-            return ACTION_NODE_TYPE;
-        }
-    }
-
-
-    private class CustomLink implements IJsonReportNode {
-        private static final String ACTION_NODE_TYPE = "link";
-
-        String link;
-
-        CustomLink(String link) {
-            this.link = link;
-        }
-
-        @JsonProperty("actionNodeType")
-        public String getActionNodeType() {
-            return ACTION_NODE_TYPE;
-        }
-    }
-
-
-    private class CustomTable implements IJsonReportNode {
-        private static final String ACTION_NODE_TYPE = "table";
-
-        List<Map<String, String>> content;
-
-        CustomTable(List<Map<String, String>> content) {
-            this.content = content;
-        }
-
-        @JsonProperty("actionNodeType")
-        public String getActionNodeType() {
-            return ACTION_NODE_TYPE;
-        }
-    }
-
-
-    private class ReportException implements IJsonReportNode {
-        String message;
-        ReportException cause;
-
-        String stacktrace;
-
-        ReportException(Throwable t) {
-            this.message = t.getMessage();
-
-            StringWriter writer = new StringWriter();
-            t.printStackTrace(new PrintWriter(writer));
-            this.stacktrace = writer.toString();
-
-            this.cause = t.getCause() != null ? new ReportException(t.getCause()) : null;
-        }
-
-    }
-
-
-    private class Status {
-        StatusType status;
-        ReportException cause;
-        String description;
-
-        Status(StatusDescription description) {
-            this.status = description.getStatus();
-            this.description = description.getDescription();
-            this.cause = description.getCause() != null ? new ReportException(description.getCause()) : null;
-        }
-
-        Status(Throwable t) {
-            this.status = StatusType.FAILED;
-            this.cause = new ReportException(t);
-        }
-    }
-
-
-    private class LogEntry implements IJsonReportNode {
-        Instant timestamp;
-        String level;
-        String thread;
-        String message;
-        ReportException exception;
-
-        @JsonProperty("class")
-        String clazz;
-
-        LogEntry(LoggerRow row) {
-            this.timestamp = Instant.ofEpochMilli(row.getTimestamp());
-            this.level = Objects.toString(row.getLevel(), null);
-            this.thread = row.getThread();
-            this.message = row.getMessage();
-            this.clazz = row.getClazz();
-            this.exception = row.getEx() != null ? new ReportException(row.getEx()) : null;
-        }
-    }
-
-
-    private class OutcomeSummary {
-        String name;
-        int passedCount;
-        int conditionallyPassedCount;
-        int failedCount;
-
-        OutcomeSummary(String name, int passed, int conditionallyPassed, int failed) {
-            this.name = name;
-            this.passedCount = passed;
-            this.conditionallyPassedCount = conditionallyPassed;
-            this.failedCount = failed;
-        }
-    }
 }

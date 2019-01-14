@@ -18,7 +18,7 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport;
 import java.util.Arrays;
 import java.util.Collection;
 
-interface IJsonReportNode {
+public interface IJsonReportNode {
     default void addSubNodes(IJsonReportNode... nodes) {
         addSubNodes(Arrays.asList(nodes));
     }
