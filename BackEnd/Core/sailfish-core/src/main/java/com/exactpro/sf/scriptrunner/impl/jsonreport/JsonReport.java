@@ -55,6 +55,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class JsonReport implements IScriptReport {
         mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withCreatorVisibility(JsonAutoDetect.Visibility.NONE).withSetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE).withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        mapper.registerModule(new JsonInstantModule());
+        mapper.registerModule(new JavaTimeModule());
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
@@ -162,7 +163,7 @@ public class JsonReport implements IScriptReport {
         String username = testScriptDescription.getUsername();
         long startTime = testScriptDescription.getStartedTime();
         long finishTime = testScriptDescription.getFinishedTime();
-        String services = testScriptDescription.getServices();
+        List<String> services = testScriptDescription.getContext().getServiceList();
         String range = testScriptDescription.getRange();
         boolean autostart = testScriptDescription.getAutoStart();
         String cause = null;

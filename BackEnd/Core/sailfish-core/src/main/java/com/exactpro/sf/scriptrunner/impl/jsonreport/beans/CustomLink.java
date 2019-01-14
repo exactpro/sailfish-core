@@ -17,20 +17,15 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CustomLink implements IJsonReportNode {
-    private static final String ACTION_NODE_TYPE = "link";
-
     private String link;
 
-    public CustomLink(String link) {
+    @JsonCreator
+    public CustomLink(@JsonProperty("link") String link) {
         this.link = link;
-    }
-
-    @JsonProperty("actionNodeType")
-    public String getActionNodeType() {
-        return ACTION_NODE_TYPE;
     }
 
     public String getLink() {

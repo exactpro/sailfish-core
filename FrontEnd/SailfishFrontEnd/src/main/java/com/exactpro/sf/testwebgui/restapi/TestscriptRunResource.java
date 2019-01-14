@@ -18,15 +18,22 @@ package com.exactpro.sf.testwebgui.restapi;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -41,6 +48,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBException;
 
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,19 +64,8 @@ import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.scriptrunner.IScriptProgress;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions.Duration;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
-import com.exactpro.sf.scriptrunner.reportbuilder.IXMLReportCreator;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportType;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportWriterException;
-import com.exactpro.sf.scriptrunner.reportbuilder.XMLReportCreatorImpl;
-import com.exactpro.sf.scriptrunner.reporting.xml.XmlActionType;
-import com.exactpro.sf.scriptrunner.reporting.xml.XmlFunctionalReport;
-import com.exactpro.sf.scriptrunner.reporting.xml.XmlStatusType;
-import com.exactpro.sf.scriptrunner.reporting.xml.XmlTestCaseType;
-import com.exactpro.sf.scriptrunner.reporting.xml.XmlTestStepType;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlFailedAction;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
@@ -70,15 +74,21 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestSciptrunList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
 
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_DIR;
+
 @Path("testscriptruns")
 public class TestscriptRunResource {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestscriptRunResource.class);
 
 	private static final String DATE_FORMAT = "yyyyMMdd_HHmmss";
-	private static final String REPORT_FILE_NAME = "report.xml";
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-	@GET
+    static {
+        OBJECT_MAPPER.registerModule(new JavaTimeModule());
+    }
+
+    @GET
     @Produces(MediaType.APPLICATION_XML)
 	public Response handlerGET() {
 	    return getTestscriptRunsList(false);
@@ -118,34 +128,40 @@ public class TestscriptRunResource {
                         if (testScriptRun.isLocked()) {
                             return getLockedReportResponse();
                         }
-						final File xmlReportFile = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_FILE_NAME);
+                        final File reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_DIR);
+                        File zipFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
+
+                        try (ZipOutputStream archive = new ZipOutputStream(new FileOutputStream(zipFile))) {
+                            Consumer<java.nio.file.Path> reportZipper = path -> {
+                                try {
+                                    archive.putNextEntry(new ZipEntry(path.toFile().getName()));
+                                    Files.copy(path, archive);
+                                    archive.closeEntry();
+                                } catch (IOException e) {
+                                    throw new EPSCommonException(e);
+                                }
+                            };
+
+                            Files.walk(reportFolder.toPath()).filter(path -> path.toFile().isFile()).forEach(reportZipper);
+                        }
 
 						StreamingOutput stream = null;
 
-						stream = new StreamingOutput() {
-							@Override
-							public void write(OutputStream out)
-									throws IOException, WebApplicationException {
+						stream = out -> {
 
-								try (InputStream in = new FileInputStream(xmlReportFile)) {
-									int read = 0;
-									byte[] bytes = new byte[1024];
-
-									while ((read = in.read(bytes)) != -1) {
-										out.write(bytes, 0, read);
-									}
-								} catch (Exception e) {
-								    logger.error(e.getMessage(), e);
-									throw new WebApplicationException(e);
-								}
-							}
-						};
+                            try {
+                                Files.copy(zipFile.toPath(), out);
+                            } catch (Exception e) {
+                                logger.error(e.getMessage(), e);
+                                throw new WebApplicationException(e);
+                            }
+                        };
 
 						return Response
 								.ok(stream)
 								.header("content-disposition",
 										"attachment; filename = "
-												+ xmlReportFile.getName()).build();
+												+ zipFile.getName()).build();
 					} catch (FileNotFoundException e) {
 					    logger.error(e.getMessage(), e);
 						errorMessage = "report doesn't exists";
@@ -336,80 +352,6 @@ public class TestscriptRunResource {
     }
 
     @GET
-    @Path("aggregate")
-    @Produces(MediaType.APPLICATION_XML)
-    public Response aggregateReport(@DefaultValue("") @QueryParam("startDate") String startDate,
-            @DefaultValue("") @QueryParam("endDate") String endDate,
-            @DefaultValue("false") @QueryParam("details") boolean details,
-            @DefaultValue("Today") @QueryParam("duration") String duration,
-            @DefaultValue("BASE") @QueryParam("type") String reportType) {
-        DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-
-        try {
-            ReportWriterOptions reportWriterOptions = new ReportWriterOptions();
-            if (StringUtils.isNotEmpty(startDate)) {
-                reportWriterOptions.setCustomStart(dateFormat.parse(startDate));
-            }
-            if (StringUtils.isNotEmpty(endDate)) {
-                reportWriterOptions.setCustomEnd(dateFormat.parse(endDate));
-            }
-            reportWriterOptions.setWriteDetails(details);
-            if (reportWriterOptions.getCustomStart() != null || reportWriterOptions.getCustomEnd() != null) {
-                reportWriterOptions.setSelectedDuration(Duration.Custom);
-            } else if (StringUtils.isNotEmpty(duration)) {
-                try {
-                    reportWriterOptions.setSelectedDuration(ReportWriterOptions.Duration.valueOf(duration));
-                } catch (IllegalArgumentException e) {
-                    logger.error(e.getMessage(), e);
-                    return createBadResponse("Incorrect duration value, please use one of " + Arrays.toString(ReportWriterOptions.Duration.values()),
-                            e.getMessage());
-                }
-            }
-
-            if (StringUtils.isNotEmpty(reportType)) {
-                try {
-                    reportWriterOptions.setSelectedReportType(ReportType.valueOf(reportType));
-                } catch (IllegalArgumentException e) {
-                    logger.error(e.getMessage(), e);
-                    return createBadResponse("Incorrect type value, please use one of " + Arrays.toString(ReportType.values()),
-                            e.getMessage());
-                }
-            }
-
-            final File file = TestToolsAPI.getInstance().createAggrigateReport("aggregate_report", reportWriterOptions);
-
-            StreamingOutput stream = null;
-
-            stream = new StreamingOutput() {
-                @Override
-                public void write(OutputStream out)
-                        throws IOException, WebApplicationException {
-
-                    try (InputStream in = new FileInputStream(file)) {
-                        int read = 0;
-                        byte[] bytes = new byte[1024];
-
-                        while ((read = in.read(bytes)) != -1) {
-                            out.write(bytes, 0, read);
-                        }
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
-                        throw new WebApplicationException(e);
-                    }
-                }
-            };
-
-            return Response.ok(stream).header("content-disposition", "attachment; filename = " + file.getName()).build();
-        } catch (ParseException e) {
-            logger.error(e.getMessage(), e);
-            return createBadResponse("Incorrect date format, please use " + DATE_FORMAT, e.getMessage());
-        } catch (ReportWriterException | IOException e ) {
-            logger.error(e.getMessage(), e);
-            return createBadResponse("Creation of the aggregate report failed, reason: " + e.getMessage(), getRootCause(e));
-        }
-    }
-
-    @GET
     @Path("delete")
     @Produces(MediaType.APPLICATION_XML)
     public Response deleteAllReport(@DefaultValue("false") @QueryParam("deleteOnDisk") boolean deleteOnDisk) {
@@ -528,33 +470,45 @@ public class TestscriptRunResource {
 
         if (ScriptState.FINISHED == testScriptDescr.getState()) {
             try {
-                IXMLReportCreator creator = new XMLReportCreatorImpl(SFLocalContext.getDefault().getWorkspaceDispatcher());
-                XmlFunctionalReport report = creator.create(testScriptDescr);
+
+                IWorkspaceDispatcher workspaceDispatcher = SFLocalContext.getDefault().getWorkspaceDispatcher();
+
+                ReportRoot report = OBJECT_MAPPER
+                        .readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder(), "reportData", "report.json"),
+                                ReportRoot.class);
+
 
                 List<XmlTestCaseDescription> list = new ArrayList<>();
-                for (XmlTestCaseType testcase : report.getTestcases()) {
+                for (String testcaseLink : report.getTestCaseLinks()) {
+
+                    TestCase testCase = OBJECT_MAPPER
+                            .readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder(), "reportData", testcaseLink), TestCase.class);
+
                     XmlTestCaseDescription xmlTestCaseDescription = new XmlTestCaseDescription();
-                    xmlTestCaseDescription.setDescription(testcase.getDescription());
-                    xmlTestCaseDescription.setId(testcase.getId());
-                    xmlTestCaseDescription.setMatrixOrder(testcase.getMatrixOrder());
-                    xmlTestCaseDescription.setTestcaseName(testcase.getTestCaseName());
-                    XmlStatusType statusType = testcase.getStatus() == null ? XmlStatusType.N_A : testcase.getStatus().getStatus();
+                    xmlTestCaseDescription.setDescription(testCase.getDescription());
+                    xmlTestCaseDescription.setId(String.valueOf(testCase.getId()));
+                    xmlTestCaseDescription.setMatrixOrder(testCase.getMatrixOrder());
+                    xmlTestCaseDescription.setTestcaseName(testCase.getName());
+                    StatusType statusType = (testCase.getStatus() == null) ?
+                            StatusType.NA :
+                            testCase.getStatus().getStatus();
                     xmlTestCaseDescription.setStatus(statusType.toString());
 
 
-                    if (statusType.equals(XmlStatusType.FAILED)
-                            || statusType.equals(XmlStatusType.CONDITIONALLY_FAILED)) {
-                        for (int i = 0; i < testcase.getTestSteps().size(); i++) {
-                            XmlTestStepType testStep = testcase.getTestSteps().get(i);
-                            XmlActionType action = testStep.getAction();
+                    if (statusType.equals(StatusType.FAILED)
+                            || statusType.equals(StatusType.CONDITIONALLY_FAILED)) {
+                        List<?> actions = testCase.getActions();
+                        for (int i = 0; i < actions.size(); i++) {
+                            Action action = (Action) actions.get(i);
                             if (action != null) {
-                                if (action.getStatus().getStatus().equals(XmlStatusType.FAILED)
-                                        || action.getStatus().getStatus().equals(XmlStatusType.CONDITIONALLY_FAILED)) {
+                                StatusType actionStatusType = action.getStatus().getStatus();
+                                if (StatusType.FAILED.equals(actionStatusType)
+                                        || StatusType.CONDITIONALLY_FAILED.equals(actionStatusType)) {
                                     XmlFailedAction failedAction = new XmlFailedAction();
-                                    failedAction.setActionNumber(i + 1);
+                                    failedAction.setActionNumber(i++);
                                     failedAction.setActionName(action.getName());
                                     failedAction.setDescription(action.getDescription());
-                                    failedAction.setCause(action.getStatus().getDescription());
+                                    failedAction.setCause(action.getStatus().getCause().getMessage());
                                     xmlTestCaseDescription.setFailedAction(failedAction);
                                     break;
                                 }
@@ -564,7 +518,7 @@ public class TestscriptRunResource {
                     list.add(xmlTestCaseDescription);
                 }
                 xmlDescr.setTestcases(list);
-            } catch (JAXBException | FileNotFoundException e) {
+            } catch (IOException e) {
                 logger.error(e.getMessage(), e);
             }
         }

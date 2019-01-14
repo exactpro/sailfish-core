@@ -39,7 +39,6 @@ import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
-import com.exactpro.sf.scriptrunner.reportbuilder.IReportWriter;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IServiceContext;
@@ -85,7 +84,6 @@ public interface ISFContext {
 
 	// Other
 	EnvironmentManager getEnvironmentManager();
-    IReportWriter getReportWriter();
 
     // don't use it in your code. It is prefered to use <code>@ManagedProperty(value="#{" + BeanUtil.MATRIX_PROVIDER_HOLDER + "}")</code>
     @Deprecated

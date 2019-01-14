@@ -73,8 +73,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.impl.DefaultConnectionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
-import com.exactpro.sf.scriptrunner.reportbuilder.DefaultReportWriter;
-import com.exactpro.sf.scriptrunner.reportbuilder.IReportWriter;
 import com.exactpro.sf.scriptrunner.services.DefaultStaticServiceManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
@@ -155,7 +153,6 @@ public class SFLocalContext implements ISFContext {
 
 	private final MatrixProviderHolder matrixProviderHolder;
 	private final MatrixConverterManager matrixConverterManager;
-	private final IReportWriter reportWriter;
 	private final List<IValidator> validators;
 	private final ListMultimap<IVersion, IValidator> pluginToValidators;
 	private final List<IPreprocessor> preprocessors;
@@ -251,7 +248,6 @@ public class SFLocalContext implements ISFContext {
 
 		optionsStorage = createOptionsStorage(envSettings, storage, workspaceDispatcher);
 
-		reportWriter = new DefaultReportWriter(wd);
         taskExecutor = new TaskExecutor();
 		this.disposables.add(taskExecutor);
 
@@ -513,11 +509,6 @@ public class SFLocalContext implements ISFContext {
     @Override
 	public IOptionsStorage getOptionsStorage() {
 		return optionsStorage;
-	}
-
-	@Override
-	public IReportWriter getReportWriter() {
-		return this.reportWriter;
 	}
 
 	@Override

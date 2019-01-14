@@ -19,14 +19,14 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 import com.exactpro.sf.scriptrunner.StatusDescription;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Verification implements IJsonReportNode {
-    private static final String ACTION_NODE_TYPE = "verification";
-
     private Long messageId;
     private String name;
     private String description;
@@ -35,11 +35,6 @@ public class Verification implements IJsonReportNode {
 
     public Verification() {
         this.entries = new ArrayList<>();
-    }
-
-    @JsonProperty("actionNodeType")
-    public String getActionNodeType() {
-        return ACTION_NODE_TYPE;
     }
 
     public Long getMessageId() {

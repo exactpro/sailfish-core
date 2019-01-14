@@ -19,6 +19,8 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 
+import java.util.List;
+
 public class ReportProperties {
     private ScriptState state;
     private ScriptStatus status;
@@ -34,14 +36,18 @@ public class ReportProperties {
     private String username;
     private long startTime;
     private long finishTime;
-    private String services;
+    private List<String> services;
     private String range;
     private boolean autostart;
     private String cause;
 
+    public ReportProperties() {
+
+    }
+
     public ReportProperties(ScriptState state, ScriptStatus status, String matrixFile, long timestamp, String environmentNameAttr, String languageURI,
-            String workFolder, long passed, long conditionallyPassed, long failed, long total, String username, long startTime,
-            long finishTime, String services, String range, boolean autostart, String cause) {
+                            String workFolder, long passed, long conditionallyPassed, long failed, long total, String username, long startTime,
+                            long finishTime, List<String> services, String range, boolean autostart, String cause) {
 
         this.state = state;
         this.status = status;
@@ -175,11 +181,11 @@ public class ReportProperties {
         this.finishTime = finishTime;
     }
 
-    public String getServices() {
+    public List<String> getServices() {
         return services;
     }
 
-    public void setServices(String services) {
+    public void setServices(List<String> services) {
         this.services = services;
     }
 

@@ -33,6 +33,10 @@ public class Message implements IJsonReportNode {
     private String contentHumanReadable;
     private String timestamp; //IMPORTANT: datetime format may divert from the default one
 
+    public Message() {
+
+    }
+
     public Message(Map<String, String> data) {
         this.id = Long.parseLong(data.get("Id"));
         this.contentHumanReadable = data.get("ContentJson");

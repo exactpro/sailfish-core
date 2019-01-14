@@ -65,9 +65,7 @@ import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions.Duration;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportType;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.SFWebApplication;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
@@ -144,13 +142,6 @@ public class TestScriptsBean implements Serializable, IView {
 
 	private boolean statisticsEnabled = false;
 
-	private Map<String, ReportType> mapReportTypes;
-	private Date startReportDate;
-	private Date endReportDate;
-	private boolean printReportDetails;
-	private Duration reportDuration;
-	private String reportType;
-
     private Map<String, Comparator<TestScriptDescription>> comparators;
     private String sortBy;
 
@@ -204,12 +195,6 @@ public class TestScriptsBean implements Serializable, IView {
 		for (MatrixAdapter matrixAdapter: matrixAdapterList) {
 			matrixAdapter.setView(this);
 		}
-
-		ReportType[] reportTypes = ReportType.values();
-		this.mapReportTypes = new LinkedHashMap<>();
-		for (ReportType reportType : reportTypes) {
-		    this.mapReportTypes.put(reportType.getShortName(), reportType);
-        }
 
 		try {
     		StatisticsService statisticsService = BeanUtil.getSfContext().getStatisticsService();
@@ -367,25 +352,6 @@ public class TestScriptsBean implements Serializable, IView {
 
 		return path;
 
-	}
-
-	public StreamedContent getResultsInCSV() {
-		try {
-			logger.debug("getResultsInCSV invoked {}", BeanUtil.getUser());
-
-			ReportType reportType = this.mapReportTypes.get(this.reportType);
-
-			String fileName = SFLocalContext.getDefault().getReportWriter().getFileName(reportType);
-
-            File reportFile = TestToolsAPI.getInstance().createAggrigateReport(fileName, this.startReportDate, this.endReportDate,
-                    this.printReportDetails, this.reportDuration, reportType);
-
-			return new DefaultStreamedContent(new FileInputStream(reportFile), "text/csv", fileName);
-
-		} catch(Exception e) {
-			logger.error("Could not create csv file", e);
-			return null;
-		}
 	}
 
 	public String getCurrentRunsSnapshot() {
@@ -926,54 +892,6 @@ public class TestScriptsBean implements Serializable, IView {
 	public List<String> getEncodeValues() {
 		return ENCODE_VALUES;
 	}
-
-	public Set<String> getReportTypes() {
-		return this.mapReportTypes.keySet();
-	}
-
-    public Duration[] getDurations() {
-        return Duration.values();
-    }
-
-	public Date getStartReportDate() {
-        return startReportDate;
-    }
-
-    public void setStartReportDate(Date startReportDate) {
-        this.startReportDate = startReportDate;
-    }
-
-    public Date getEndReportDate() {
-        return endReportDate;
-    }
-
-    public void setEndReportDate(Date endReportDate) {
-        this.endReportDate = endReportDate;
-    }
-
-    public boolean isPrintReportDetails() {
-        return printReportDetails;
-    }
-
-    public void setPrintReportDetails(boolean printReportDetails) {
-        this.printReportDetails = printReportDetails;
-    }
-
-    public Duration getReportDuration() {
-        return reportDuration;
-    }
-
-    public void setReportDuration(Duration reportDuration) {
-        this.reportDuration = reportDuration;
-    }
-
-    public String getReportType() {
-        return reportType;
-    }
-
-    public void setReportType(String reportType) {
-        this.reportType = reportType;
-    }
 
 	public String getSelectedEnvironment() {
 		return selectedEnvironment;

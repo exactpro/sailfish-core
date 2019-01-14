@@ -32,6 +32,10 @@ public class LogEntry implements IJsonReportNode {
 
     @JsonProperty("class") private String clazz;
 
+    public LogEntry() {
+
+    }
+
     public LogEntry(LoggerRow row) {
         this.timestamp = Instant.ofEpochMilli(row.getTimestamp());
         this.level = Objects.toString(row.getLevel(), null);

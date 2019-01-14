@@ -17,14 +17,16 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 import com.exactpro.sf.util.BugDescription;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Bug implements IJsonReportNode {
     private final BugDescription description;
     private KnownBugStatus status;
 
-    public Bug(BugDescription description) {
+    @JsonCreator
+    public Bug(@JsonProperty("description") BugDescription description) {
         this.description = description;
         this.status = KnownBugStatus.NOT_REPRODUCED;
     }

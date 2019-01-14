@@ -23,17 +23,15 @@ import java.util.List;
 import java.util.Map;
 
 public class CustomTable implements IJsonReportNode {
-    private static final String ACTION_NODE_TYPE = "table";
 
     private List<Map<String, String>> content;
 
-    public CustomTable(List<Map<String, String>> content) {
-        this.content = content;
+    public CustomTable() {
+
     }
 
-    @JsonProperty("actionNodeType")
-    public String getActionNodeType() {
-        return ACTION_NODE_TYPE;
+    public CustomTable(List<Map<String, String>> content) {
+        this.content = content;
     }
 
     public List<Map<String, String>> getContent() {

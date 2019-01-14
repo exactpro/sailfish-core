@@ -19,7 +19,9 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.exactpro.sf.util.BugDescription;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class StatusDescription
 {
@@ -36,7 +38,8 @@ public class StatusDescription
 	@JsonIgnore
     private final Set<BugDescription> knownBugs;
 
-	public StatusDescription(StatusType status, String description)
+	@JsonCreator
+	public StatusDescription(@JsonProperty("status") StatusType status, @JsonProperty("description") String description)
 	{
         this(status, description, true, null);
 	}

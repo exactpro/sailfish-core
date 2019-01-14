@@ -17,7 +17,6 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Action implements IJsonReportNode {
-    private static final String ACTION_NODE_TYPE = "action";
 
     private long id;
     private Long checkPointId;
@@ -75,11 +73,6 @@ public class Action implements IJsonReportNode {
         if (this.status == null) {
             this.status = new Status(t);
         }
-    }
-
-    @JsonProperty("actionNodeType")
-    public String getActionNodeType() {
-        return ACTION_NODE_TYPE;
     }
 
     public long getId() {

@@ -34,6 +34,10 @@ public class VerificationEntry {
     private List<VerificationEntry> subEntries;
     private ReportException exception;
 
+    public VerificationEntry() {
+
+    }
+
     public VerificationEntry(ComparisonResult result) {
         this.name = result.getName();
         this.actual = Objects.toString(result.getActual(), null);

@@ -18,16 +18,19 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CustomMessage implements IJsonReportNode {
-    private static final String ACTION_NODE_TYPE = "message";
-
     private String message;
     private String color;
     private String style;
     private MessageLevel level;
     private ReportException exception;
+
+    public CustomMessage() {
+
+    }
 
     public CustomMessage(String message, String color, String style, MessageLevel level, Throwable t) {
         this.message = message;
@@ -35,11 +38,6 @@ public class CustomMessage implements IJsonReportNode {
         this.exception = t != null ? new ReportException(t) : null;
         this.color = color;
         this.style = style;
-    }
-
-    @JsonProperty("actionNodeType")
-    public String getActionNodeType() {
-        return ACTION_NODE_TYPE;
     }
 
     public String getMessage() {

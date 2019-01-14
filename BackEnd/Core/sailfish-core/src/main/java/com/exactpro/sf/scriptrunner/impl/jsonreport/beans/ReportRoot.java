@@ -16,6 +16,7 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;

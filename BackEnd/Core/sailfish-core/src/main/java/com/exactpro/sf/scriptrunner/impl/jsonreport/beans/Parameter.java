@@ -18,6 +18,8 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.ReportEntity;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,6 +28,10 @@ public class Parameter {
     private String name;
     private String value;
     private List<Parameter> subParameters;
+
+    public Parameter() {
+
+    }
 
     public Parameter(ReportEntity e) {
         this.name = e.getName();

@@ -22,6 +22,10 @@ public class Alert {
     private String column;
     private String message;
 
+    public Alert() {
+
+    }
+
     public Alert(String lines, String type, String column, String message) {
         this.lines = lines;
         this.type = type;

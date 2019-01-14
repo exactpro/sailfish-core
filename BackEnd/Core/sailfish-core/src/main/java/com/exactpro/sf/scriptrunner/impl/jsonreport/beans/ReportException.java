@@ -17,7 +17,6 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,6 +26,10 @@ public class ReportException implements IJsonReportNode {
     private ReportException cause;
 
     private String stacktrace;
+
+    public ReportException() {
+
+    }
 
     public ReportException(Throwable t) {
         this.message = t.getMessage();

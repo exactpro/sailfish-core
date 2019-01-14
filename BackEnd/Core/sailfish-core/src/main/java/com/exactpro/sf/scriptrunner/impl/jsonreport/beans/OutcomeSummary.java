@@ -22,6 +22,10 @@ public class OutcomeSummary {
     private int conditionallyPassedCount;
     private int failedCount;
 
+    public OutcomeSummary() {
+
+    }
+
     public OutcomeSummary(String name, int passed, int conditionallyPassed, int failed) {
         this.name = name;
         this.passedCount = passed;

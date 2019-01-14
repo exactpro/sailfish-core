@@ -24,6 +24,10 @@ public class Status {
     private ReportException cause;
     private String description;
 
+    public Status() {
+
+    }
+
     public Status(StatusDescription description) {
         this.status = description.getStatus();
         this.description = description.getDescription();

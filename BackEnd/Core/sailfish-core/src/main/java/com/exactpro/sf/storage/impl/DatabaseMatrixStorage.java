@@ -297,11 +297,7 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
                 return (fileType == MatrixFileTypes.CSV) || (fileType == MatrixFileTypes.XLS) || (fileType == MatrixFileTypes.XLSX);
             }).collect(Collectors.toSet());
 
-            if (list.size() != matrices.size()) {
-                for  (StoredMatrix sm : list) {
-                    matrices.remove(sm.getFilePath());
-                }
-            }
+            list.forEach(storedMatrix -> matrices.remove(storedMatrix.getFilePath()));
 
             Transaction tx = null;
 
