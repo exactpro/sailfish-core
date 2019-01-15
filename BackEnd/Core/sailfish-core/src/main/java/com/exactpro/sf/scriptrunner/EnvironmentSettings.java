@@ -152,8 +152,6 @@ public class EnvironmentSettings implements ICommonSettings
 
 	private boolean notificationIfServicesNotStarted;
 	private int matrixCompilerPriority;
-	@Description(value = "Exclude messages from information block about all messages in report")
-	@ValidateRegex(regex = IDictionaryValidator.NAME_REGEX)
 	private Set<String> excludedMessages = ImmutableSet.of("Heartbeat");
     private String failUnexpected = "N";
     private ReportOutputFormat reportOutputFormat = ReportOutputFormat.ZIP_FILES;
@@ -288,6 +286,8 @@ public class EnvironmentSettings implements ICommonSettings
         return excludedMessages;
     }
 
+    @Description(value = "Exclude messages from information block about all messages in report")
+    @ValidateRegex(regex = IDictionaryValidator.NAME_REGEX)
     public void setExcludedMessages(Set<String> excludedMessages) {
         this.excludedMessages = CollectionUtils.isEmpty(excludedMessages) ? Collections.emptySet() : ImmutableSet.copyOf(excludedMessages);
         update();

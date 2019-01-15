@@ -29,7 +29,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -187,10 +187,10 @@ public class ConfigBean implements Serializable {
             environmentParamsList = new ArrayList<>();
             try {
                 for (Object key : environmentBeanMap.keySet()) {
-                    if (environmentBeanMap.getWriteMethod(key.toString()) != null) {
-                        Field field = environmentSettings.getClass().getDeclaredField(key.toString());
-                        Description description =  field.getAnnotation(Description.class);
-                        ValidateRegex validateRegex = field.getAnnotation(ValidateRegex.class);
+                    Method writeMethod = environmentBeanMap.getWriteMethod(key.toString());
+                    if (writeMethod != null) {
+                        Description description =  writeMethod.getAnnotation(Description.class);
+                        ValidateRegex validateRegex = writeMethod.getAnnotation(ValidateRegex.class);
                         String descriptionValue = description != null ? description.value() : null;
                         String regex = validateRegex != null ? validateRegex.regex() : null;
 
@@ -198,8 +198,9 @@ public class ConfigBean implements Serializable {
                         environmentParamsList.add(environmentEntity);
                     }
                 }
-            } catch (NoSuchFieldException e) {
+            } catch (Exception e) {
                 logger.error(e.getMessage(), e);
+                BeanUtil.addErrorMessage("Can't load environment settings", e.getMessage());
             }
 
             refresh();
