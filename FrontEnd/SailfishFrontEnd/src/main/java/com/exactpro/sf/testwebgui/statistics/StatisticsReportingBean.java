@@ -290,7 +290,7 @@ public class StatisticsReportingBean implements Serializable {
     }
 
     public List<String> getReportHeader() {
-        return statisticsReportHandler.getHeaderColumns();
+        return (statisticsReportHandler != null) ? statisticsReportHandler.getHeaderColumns() : Collections.emptyList();
     }
 
     public SailfishURI getCurrentReportURI() {
