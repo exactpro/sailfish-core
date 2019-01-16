@@ -1362,13 +1362,13 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         SfInstance sfInstance = new SfInstance();
         sfInstance.setHost((String) rsRow[14]);
         sfInstance.setName((String) rsRow[15]);
-        sfInstance.setPort((Integer) rsRow[16]);
+        sfInstance.setPort(rsRow[16] != null ? (Integer) rsRow[16] : 0);
         row.setSfInstance(sfInstance);
 
         SfInstance sfCurrentInstance = new SfInstance();
         sfCurrentInstance.setHost((String) rsRow[17]);
         sfCurrentInstance.setName((String) rsRow[18]);
-        sfCurrentInstance.setPort((Integer) rsRow[19]);
+        sfCurrentInstance.setPort(rsRow[19] != null ? (Integer) rsRow[19] : 0);
         row.setSfCurrentInstance(sfCurrentInstance);
 
         row.setReportFolder((String) rsRow[20]);
