@@ -1,5 +1,14 @@
-import { testCaseReducer } from '../reducers/testCaseReducers';
+import { appReducer } from '../reducers/reducers';
 import { createStore } from 'redux';
-import { initialTestCaseState } from '../state/initialStates';
+import { devToolsEnhancer } from 'redux-devtools-extension';
+import { initialAppState } from '../state/initialStates';
+import Report from '../models/Report';
 
-export const appStore = createStore(testCaseReducer, initialTestCaseState as any)
+export const createAppStore = (report: Report) => createStore(
+    appReducer,
+    {
+        ...initialAppState,
+        report: report
+    } as any,
+    devToolsEnhancer({name: 'redux'})
+)
