@@ -3,83 +3,50 @@ import "../styles/styles.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import ReportLayout from './ReportLayout';
 import TestCase from "../models/TestCase";
-import {testReport} from '../test/testReport';
 import Report from "../models/Report";
+import { connect } from 'preact-redux';
+import AppState from "../state/AppState";
+import { setTestCase } from "../actions/actionCreators";
 
-interface AppState {
+interface AppProps {
     report: Report;
-    selectedTestCase: TestCase;
+    testCase: TestCase;
+    testCaseFilePath: string;
+    updateTestCase: (testCase: TestCase) => void;
 }
 
-export class App extends Component<{}, AppState> {
+const AppBase = ({report, testCase, testCaseFilePath, updateTestCase}: AppProps) => {
+    console.log(report)
 
-    constructor(props) {
-        super(props);
-        let count = 1;
-        this.state = {
-            report: {
-                ...testReport,
-                testCases: testReport.testCases.map(testCase => {
-                    return {...testCase, name: testCase.name || "TEST CASE " + count++}
-                })
-            },
-            selectedTestCase: null,
-        }
-    }
-
-    selectTestCase(testCase: TestCase) : void {
-        this.setState({
-            ...this.state,
-            selectedTestCase: testCase
-        })
-    }
-
-    backToReport() : void {
-        this.setState({
-            ...this.state,
-            selectedTestCase: null
-        })
-    }
-
-    getByName(testCaseName: string) : TestCase {
-        return this.state.report.testCases.filter(tc => tc.name == testCaseName)[0];
-    }
-
-    getNextTestCase() : TestCase {
-        const currentId = this.state.report.testCases.findIndex(
-            testCase => testCase == this.state.selectedTestCase);
-        
-        return currentId != this.state.report.testCases.length - 1 &&
-            this.state.report.testCases[currentId + 1];
-    }
-
-    getPrevTestCase() : TestCase {
-        const currentId = this.state.report.testCases.findIndex(
-            testCase => testCase == this.state.selectedTestCase);
-        
-        return currentId != 0 && this.state.report.testCases[currentId - 1];
-    }
-
-    render(props: {}, {selectedTestCase, report}: AppState) {
-
-        console.log(report)
-
-        if (!selectedTestCase) {
-            return (<ReportLayout report={report}
-                onTestCaseSelect={(testCase) => this.selectTestCase(
-                    report.testCases[report.testCaseLinks.indexOf(testCase)])}/>);
-        }
-
-        const next = this.getNextTestCase(),
-            prev = this.getPrevTestCase();
-
-        return(
+    if (testCase) {
+        return(     
             <div class="root">
-                <TestCaseLayout testCase={selectedTestCase}
-                    backToReportHandler={() => this.backToReport()}
-                    nextHandler={next ? () => this.selectTestCase(next) : null}
-                    prevHandler={prev ? () => this.selectTestCase(prev) : null}/>
+                <TestCaseLayout/>
             </div>
         );
-    };
+    }
+
+    if (testCaseFilePath) {
+        updateTestCase(report.testCases.find(testCase => testCase.name === testCaseFilePath))
+        return null;
+    }
+
+    return (
+        <div class="root">
+            <ReportLayout/>
+        </div>
+    );
 }
+
+export const App = connect(
+    (state: AppState) => ({
+        report: state.report,
+        testCase: state.testCase,
+        testCaseFilePath: state.currentTestCasePath
+    }),
+    dispatch => ({
+        updateTestCase: (testCase: TestCase) => {
+            dispatch(setTestCase(testCase))
+        }
+    })
+)(AppBase as any)

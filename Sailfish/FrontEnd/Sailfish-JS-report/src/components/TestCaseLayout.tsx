@@ -1,4 +1,5 @@
 import { h, Component } from 'preact';
+import { connect } from 'preact-redux';
 import { Header } from './Header';
 import { SplitView } from './SplitView'
 import { ActionsList } from './ActionsList';
@@ -11,12 +12,14 @@ import { StatusType } from '../models/Status';
 import { StatusPane } from './StatusPane';
 import { LogsPane } from './LogsPane';
 import { generateActionsMap } from '../helpers/mapGenerator';
+import AppState from '../state/AppState';
+import { setTestCase, nextTestCase, prevTestCase, resetTestCase } from '../actions/actionCreators';
 
 interface LayoutProps {
     testCase: TestCase;
-    backToReportHandler: Function;
-    nextHandler?: Function;
-    prevHandler?: Function;
+    backToReportHandler: () => void;
+    nextHandler?: () => void;
+    prevHandler?: () => void;
 }
 
 /**
@@ -38,7 +41,7 @@ interface LayoutState {
 
 enum Pane {Actions, Status, Messages, Logs}
 
-export default class TestCaseLayout extends Component<LayoutProps, LayoutState> {
+class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
 
     private messagesListRef: MessagesCardList;
     private actionsListRef: ActionsList;
@@ -300,3 +303,22 @@ export default class TestCaseLayout extends Component<LayoutProps, LayoutState> 
         )
     }
 }
+
+const TestCaseLayout = connect(
+    (state: AppState) => ({
+        testCase: state.testCase
+    }),
+    dispatch => ({
+        backToReportHandler: () => {
+            dispatch(resetTestCase())
+        },
+        nextHandler: () => {
+            dispatch(nextTestCase())
+        },
+        prevHandler: () => {
+            dispatch(prevTestCase())
+        }
+    })
+)(TestCaseLayoutBase as any);
+
+export default TestCaseLayout;

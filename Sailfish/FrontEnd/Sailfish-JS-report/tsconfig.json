@@ -2,14 +2,19 @@
     "compilerOptions": {
       "outDir": "./build/",
       "target": "es6",
+      "keyofStringsOnly": true,
       "lib": ["es2016", "dom"],
       "module": "commonjs",
       "noImplicitAny": false,
       "removeComments": true,
       "sourceMap": true,
       "jsx": "react",
-      "jsxFactory": "h"
+      "jsxFactory": "h",
+      "skipLibCheck": true
     },
+    "exclude": [
+      "node_modules"
+    ],
     "include": [
       "./src/**/*"
     ]

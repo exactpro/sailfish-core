@@ -1,5 +1,10 @@
 import { h, render } from "preact";
 import { App } from "./components/App";
-import 'preact/devtools';
+import { Provider } from 'preact-redux';
+import { createAppStore } from './store/store';
 
-render(<App/>, document.getElementById("index"));
+render(
+    <Provider store={createAppStore(null)}>
+        <App/>
+    </Provider>, 
+    document.getElementById("index"));
