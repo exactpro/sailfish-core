@@ -3,6 +3,9 @@ import Action from '../models/Action';
 import '../styles/action.scss';
 import { ActionTree } from './ActionTree';
 import { StatusType } from '../models/Status';
+import AppState from '../state/AppState';
+import { connect } from 'preact-redux';
+import { selectAction, selectMessages } from '../actions/actionCreators';
 
 interface ListProps {
     actions: Array<Action>;
@@ -13,7 +16,7 @@ interface ListProps {
     filterFields: StatusType[];
 }
 
-export class ActionsList extends Component<ListProps, {}> {
+class ActionsListBase extends Component<ListProps, {}> {
 
     private elements: ActionTree[] = [];
 
@@ -49,3 +52,14 @@ export class ActionsList extends Component<ListProps, {}> {
             </div>)
     }
 }   
+
+export const ActionsList = connect((state: AppState) => ({
+        actions: state.testCase.actions,
+        selectedActionId: state.selected.actionId,
+        selectedMessageId: state.selected.actionId ? null : state.selected.messagesId[0]
+    }),
+    dispatch => ({
+        onSelect: (action: Action) => dispatch(selectAction(action)),
+        onMessageSelect: (id: number, status: StatusType) => dispatch(selectMessages([id], status))
+    })
+)(ActionsListBase as any);

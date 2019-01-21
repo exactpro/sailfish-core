@@ -20,7 +20,7 @@ export interface ActionTreeProps {
     filterFields: StatusType[];
 }
 
-export class ActionTree extends Component<ActionTreeProps, {}> {
+export class ActionTree extends Component<ActionTreeProps, any> {
 
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
@@ -28,35 +28,36 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
         if (nextProps.action.actionNodeType === "action") {
             const nextAction = nextProps.action as Action;
 
-            if (nextProps.selectedMessageId !== this.props.selectedMessageId && 
-                nextAction.relatedMessages && 
-                nextAction.relatedMessages.includes(nextProps.selectedMessageId)){
-                    return true;
-            }
-
             if (this.props.filterFields !== nextProps.filterFields) {
                 return true;
             }
 
             // compare current action id and selected action id
-            return this.shouldActionUpdate(nextAction, nextProps.selectedActionId);
+            return this.shouldActionUpdate(nextAction, nextProps, this.props);
         } else {
             return true;
         }
     }
 
-    shouldActionUpdate(action: Action, nextSelectedId: number) : boolean {
+    shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps) : boolean {
         // the first condition - current action is selected and we should update to show id
         // the second condition - current action was selected and we should disable selection
-        if (nextSelectedId === action.id || this.props.selectedActionId === action.id) {
+        if (nextProps.selectedActionId === action.id || prevProps.selectedActionId === action.id) {
             return true;
+        }
+
+        // here we check verification selection
+        if (nextProps.selectedMessageId !== prevProps.selectedMessageId && 
+            action.relatedMessages && 
+            (action.relatedMessages.some(msgId => msgId == nextProps.selectedMessageId || msgId == prevProps.selectedMessageId))) {
+                return true;
         }
 
         if (action.subNodes) {
             // if at least one of the subactions needs an update, we update the whole action
             return action.subNodes.some(action => {
                     if (action.actionNodeType === "action") {
-                        return this.shouldActionUpdate(action as Action, nextSelectedId)
+                        return this.shouldActionUpdate(action as Action, nextProps, prevProps)
                     } else {
                         return false;
                     }
@@ -66,7 +67,7 @@ export class ActionTree extends Component<ActionTreeProps, {}> {
         return false;
     }
 
-    render(props: ActionTreeProps, state: {}): JSX.Element {
+    render(props: ActionTreeProps): JSX.Element {
         return this.renderNode(props, true);
     }
 

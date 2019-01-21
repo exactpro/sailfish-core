@@ -4,7 +4,7 @@ import SelectedState from './SelectedState';
 
 export const initialSelectedState: SelectedState = {
     actionId: null,
-    messagesId: null,
+    messagesId: [],
     status: 'NA'
 }
 

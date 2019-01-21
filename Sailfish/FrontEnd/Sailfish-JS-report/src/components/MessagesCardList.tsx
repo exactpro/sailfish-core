@@ -4,6 +4,9 @@ import MessageCard from './MessageCard';
 import '../styles/messages.scss';
 import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
+import { connect } from 'preact-redux';
+import AppState from '../state/AppState';
+import { generateActionsMap } from '../helpers/mapGenerator';
 
 interface MessagesListProps {
     messages: Message[];
@@ -12,9 +15,13 @@ interface MessagesListProps {
     selectedStatus: StatusType;
 }
 
-export class MessagesCardList extends Component<MessagesListProps, {}> {
+class MessagesCardListBase extends Component<MessagesListProps, {}> {
 
     private elements: MessageCard[] = [];
+
+    componentDidUpdate(prevProps: MessagesListProps) {
+        this.scrollToMessage(this.props.selectedMessages[0]);
+    }
 
     scrollToMessage(messageId: number) {
         if (this.elements[messageId]) {
@@ -49,3 +56,13 @@ export class MessagesCardList extends Component<MessagesListProps, {}> {
                 />);
     }
 }
+
+export const MessagesCardList = connect(
+    (state: AppState) : MessagesListProps => ({
+        messages: state.testCase.messages,
+        selectedMessages: state.selected.messagesId,
+        selectedStatus: state.selected.status,
+        actionsMap: generateActionsMap(state.testCase.actions)
+    }),
+    dispatch => ({})
+)(MessagesCardListBase as any);

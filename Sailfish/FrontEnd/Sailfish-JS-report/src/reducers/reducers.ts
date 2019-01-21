@@ -32,7 +32,8 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 selected: {
                     ...state.selected,
                     messagesId: stateAction.messagesId,
-                    status: stateAction.status
+                    status: stateAction.status,
+                    actionId: null
                 }
             }
         }

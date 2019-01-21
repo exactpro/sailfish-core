@@ -13,7 +13,7 @@ import { StatusPane } from './StatusPane';
 import { LogsPane } from './LogsPane';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import AppState from '../state/AppState';
-import { setTestCase, nextTestCase, prevTestCase, resetTestCase } from '../actions/actionCreators';
+import { nextTestCase, prevTestCase, resetTestCase } from '../actions/actionCreators';
 
 interface LayoutProps {
     testCase: TestCase;
@@ -43,11 +43,6 @@ enum Pane {Actions, Status, Messages, Logs}
 
 class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
 
-    private messagesListRef: MessagesCardList;
-    private actionsListRef: ActionsList;
-
-    private actionsMap: Map<number, Action>;
-
     constructor(props: LayoutProps) {
         super(props);
         this.state = {
@@ -62,37 +57,13 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
             actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED'],
             filtredActions: props.testCase.actions
         }
-
-        this.actionsMap = generateActionsMap(props.testCase.actions);
-    }
-
-    actionSelectedHandler(action: Action) {
-        this.setState({
-            ...this.state,
-            selectedActionId: action.id,
-            selectedMessages: action.relatedMessages,
-            selectedStatus: action.status.status
-        });
-
-        this.messagesListRef.scrollToMessage(action.relatedMessages[0]);
-    }
-
-    messageSelectedHandler(id: number, status: StatusType) {
-        this.setState({
-            ...this.state,
-            selectedActionId: -1,
-            selectedMessages: [id],
-            selectedStatus: status
-        });
-
-        this.messagesListRef.scrollToMessage(id);
     }
 
     scrollToTop() {
         // order is important, because chrome and opera can't render smooth scroll behavior with multipline elements -
         // in actions list this behavior disabled
-        this.actionsListRef.scrollToAction(this.props.testCase.actions[0].id);
-        this.messagesListRef.scrollToMessage(this.props.testCase.messages[0].id);
+        // this.actionsListRef.scrollToAction(this.props.testCase.actions[0].id);
+        // this.messagesListRef.scrollToMessage(this.props.testCase.messages[0].id);
     }
 
     splitModeHandler() {
@@ -171,8 +142,6 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
                 filtredActions: nextProps.testCase.actions.filter(action =>
                     this.state.actionsFilter.includes(action.status.status)) 
             });
-
-            this.actionsMap = generateActionsMap(nextProps.testCase.actions);
         }
     }
 
@@ -189,19 +158,9 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
             selectedStatus} : LayoutState) {
 
         // if some action is selected, all messages inside this action should not be highlighted
-        const actionsElement = (<ActionsList actions={filtredActions}
-                onSelect={action => this.actionSelectedHandler(action)}
-                selectedActionId={selectedActionId}
-                onMessageSelect={(id, status) => this.messageSelectedHandler(id, status)}
-                selectedMessageId={selectedActionId >= 0 ? -1 : selectedMessages[0]}
-                filterFields={fieldsFilter}
-                ref={ref => this.actionsListRef = ref}/>);
+        const actionsElement = (<ActionsList/>);
 
-        const messagesElement = (<MessagesCardList messages={testCase.messages}
-            selectedMessages={selectedMessages}
-            ref={ref => this.messagesListRef = ref}
-            selectedStatus={selectedStatus}
-            actionsMap={this.actionsMap}/>);
+        const messagesElement = (<MessagesCardList/>);
 
         const statusElement = (
             <StatusPane status={testCase.status}/>
