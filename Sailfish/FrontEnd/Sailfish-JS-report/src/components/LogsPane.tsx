@@ -7,6 +7,6 @@ interface LogsPaneProps {
 
 export const LogsPane = ({logs}: LogsPaneProps) => {
     return (
-        <div>LOGS</div>
+        <div style={{paddingTop: 60}}>LOGS - SOON...</div>
     );
 }

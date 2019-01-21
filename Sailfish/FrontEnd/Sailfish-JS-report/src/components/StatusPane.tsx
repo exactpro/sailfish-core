@@ -7,6 +7,6 @@ interface StatusPaneProps {
 
 export const StatusPane = ({status}: StatusPaneProps) => {
     return (
-        <div>STATUS</div>
+        <div style={{paddingTop: 60}}>STATUS - SOON...</div>
     );
 }

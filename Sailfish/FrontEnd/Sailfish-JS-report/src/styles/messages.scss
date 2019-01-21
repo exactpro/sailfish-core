@@ -12,30 +12,18 @@
     }
 
     &.passed {
-        background-color: $passedHeaderColor;
-        border-color: $passedHeaderColor;
-
-        &.selected {
-            border-color: $passedBorderColor;
-        }
+        background-color: $passedBackgroundColor;
+        border-color: $passedBorderColor;
     }
 
     &.failed {
-        background-color: $failedHederColor;
-        border-color: $failedHederColor;
-
-        &.selected {
-            border-color: $failedBorderColor;
-        }
+        background-color: $failedBackgroundColor;
+        border-color: $failedBorderColor;
     }
 
     &.conditionally_passed {
-        background-color: $conditionallyHeaderColor;
-        border-color: $conditionallyHeaderColor;
-
-        &.selected {
-            border-color: $conditionallyBorderColor;
-        }
+        background-color: $conditionallyBackgroundColor;
+        border-color: $conditionallyBorderColor;
     }
 
 
@@ -222,10 +210,19 @@
     }
 }
 
-.messages-list {
-    @include scrollbar;
-    overflow-y: scroll;
+.messages {
+
     height: 100%;
-    padding: 0 5px;
-    word-wrap: break-word;
+
+    &-control {
+        height: 50px;
+    }
+
+    &-list {
+        @include scrollbar;
+        overflow-y: scroll;
+        height: calc(100% - 50px);
+        padding: 0 5px;
+        word-wrap: break-word;
+    }
 }

@@ -36,8 +36,11 @@ class MessagesCardListBase extends Component<MessagesListProps, {}> {
 
     render({ messages, selectedMessages, selectedStatus }: MessagesListProps) {
         return (
-            <div class="messages-list">
-                {messages.map(message => this.renderMessage(message, selectedMessages, selectedStatus))}
+            <div class="messages">
+                <div class="messages-control"></div>
+                <div class="messages-list">
+                    {messages.map(message => this.renderMessage(message, selectedMessages, selectedStatus))}
+                </div>
             </div>
         );
     }

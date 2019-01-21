@@ -39,17 +39,21 @@ class ActionsListBase extends Component<ListProps, {}> {
 
     render({ actions, selectedActionId, selectedMessageId, onSelect, filterFields, onMessageSelect }: ListProps) {
         return (
-            <div class="actions-list">
-                {actions.map(action => (
-                    <ActionTree 
-                        action={action}
-                        selectedActionId={selectedActionId}
-                        selectedMessageId={selectedMessageId}
-                        actionSelectHandler={onSelect}
-                        messageSelectHandler={onMessageSelect}
-                        filterFields={filterFields} 
-                        ref={ref => this.elements[action.id] = ref}/>))}
-            </div>)
+            <div class="actions">
+                <div class="actions-controls"></div>
+                <div class="actions-list">
+                    {actions.map(action => (
+                        <ActionTree 
+                            action={action}
+                            selectedActionId={selectedActionId}
+                            selectedMessageId={selectedMessageId}
+                            actionSelectHandler={onSelect}
+                            messageSelectHandler={onMessageSelect}
+                            filterFields={filterFields} 
+                            ref={ref => this.elements[action.id] = ref}/>))}
+                </div>
+            </div> 
+        )
     }
 }   
 

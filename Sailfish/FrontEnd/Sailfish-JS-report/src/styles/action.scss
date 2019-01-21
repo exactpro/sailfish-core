@@ -4,6 +4,8 @@
     &.selected {
         transition: border-color 0.5s, background-color 0.5s;
         -webkit-transition: border-color 0.5s, background-color 0.5s;
+        background-color: $defaultCardBackground;
+        border-color: $defaultCardBorderColor;
     }
 
     &.passed {
@@ -14,10 +16,6 @@
 
         &.root {
             border-color: $passedBorderColorSecondary;
-        }
-
-        h3 {
-            color: $passedTextColor;
         }
     }
 
@@ -30,10 +28,6 @@
         &.root {
             border-color: $failedBorderColorSecondary;
         }
-
-        h3 {
-            color: $failedTextColor;
-        }
     }
 
     &.conditionally_passed {
@@ -45,7 +39,23 @@
         &.root {
             border-color: $conditionallyBorderColorSecondary;
         }
+    }
+}
 
+@mixin status-text {
+    &.passed {
+        h3 {
+            color: $passedTextColor;
+        }
+    }
+
+    &.failed {
+        h3 {
+            color: $failedTextColor;
+        }
+    }
+
+    &.conditionally_passed {
         h3 {
             color: $conditionallyTextColor;
         }
@@ -68,6 +78,7 @@
     }
 
     &-header {
+        @include status-text;
         display: flex;
         width: 100%;
 
@@ -139,9 +150,17 @@
     }
 }
 
-.actions-list {
-    @include scrollbar;
-    height: 100%;
-    overflow-y: scroll;
-    padding: 0 5px;
+.actions {
+    height: calc(100% - 50px);
+
+    &-list {
+        @include scrollbar;
+        height: 100%;
+        overflow-y: scroll;
+        padding: 0 5px;
+    }
+
+    &-controls {
+        height: 50px;
+    }
 }

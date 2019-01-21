@@ -6,7 +6,7 @@
 
     &-status {
         width: 100%;
-        height: 70%;
+        height: 47px;
         border: 0px;
         border-radius: 7px;
         display: flex;
@@ -67,8 +67,8 @@
 
             &-icon {
                 background-size: 100%;
-                width: 15px;
-                height: 15px;
+                width: 19px;
+                height: 19px;
                 margin-right: 12px;
 
                 &.list {
@@ -132,7 +132,7 @@
 
     &-description {
         width: 100%;
-        height: 40%;
+        height: 40px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -152,6 +152,7 @@
             span {
                 color: gray;
                 margin: 0 5px;
+                font-size: 14px;
             }
         }
     }

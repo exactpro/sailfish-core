@@ -14,6 +14,7 @@ import {
     switchFieldsFilter,
     showFilter
 } from '../actions/actionCreators';
+import { getSecondsPeriod } from '../helpers/dateFormatter';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -49,6 +50,8 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTest
         prevButtonClas = ["header-status-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
         nextButtonClass = ["header-status-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
 
+    const period = getSecondsPeriod(startTime, finishTime);
+
     return (
         <div class="header">
             <div class={statusClass}>
@@ -65,7 +68,7 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTest
                 <div class="header-status-name">
                     <div class={prevButtonClas}
                         onClick={prevTestCaseHandler} />
-                    <h1>{(name || 'Test Case')} — {status.status}</h1>
+                    <h1>{(name || 'Test Case')} — {status.status} — {period}</h1>
                     <div class={nextButtonClass}
                         onClick={nextTestCaseHandler} />
                 </div>

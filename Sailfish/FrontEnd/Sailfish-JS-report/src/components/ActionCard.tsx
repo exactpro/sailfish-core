@@ -6,6 +6,7 @@ import CompasionTable from "./VerificationTable";
 import "../styles/action.scss";
 import Verification from '../models/Verification';
 import MessageAction from '../models/MessageAction';
+import { getSecondsPeriod } from "../helpers/dateFormatter";
 
 interface CardProps {
     action: Action;
@@ -24,17 +25,14 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot }: C
         startTime,
         finishTime
     } = action;
-    const className = ["action-card", status.status.toLowerCase(), (isRoot && !isSelected ? "root" : null),
-        (isSelected ? "selected" : null)].join(' ');
+    const rootClassName = ["action-card", status.status.toLowerCase(), (isRoot && !isSelected ? "root" : null),
+        (isSelected ? "selected" : null)].join(' '),
+        headerClassName = ["action-card-header", status.status.toLowerCase()].join(' ');
 
-    let time = "";
-    if (startTime && finishTime) {
-        const date =  new Date(new Date(finishTime).getTime() - new Date(startTime).getTime());
-        time = `${date.getSeconds()}.${date.getMilliseconds()}s`;
-    }
+    const time = getSecondsPeriod(startTime, finishTime);
 
     return (
-        <div class={className}
+        <div class={rootClassName}
             onClick={e => {
                 if (!onSelect) return;
                 onSelect(action);
@@ -43,7 +41,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot }: C
             }}
             key={action.id}>
             <ExpandablePanel>
-                <div class="action-card-header">
+                <div class={headerClassName}>
                     <div class="action-card-header-name">
                         <h3>{name}</h3>
                         <p>{description}</p>

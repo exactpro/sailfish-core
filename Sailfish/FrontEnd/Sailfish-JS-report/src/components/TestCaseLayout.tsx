@@ -31,17 +31,60 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
     render({testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler} : LayoutProps) {
 
-        // if some action is selected, all messages inside this action should not be highlighted
-        const actionsElement = (<ActionsList/>);
+        const leftButtons = (
+            <div class="layout-buttons">
+                <TogglerButton
+                    isToggled={leftPane == Pane.Actions}
+                    click={() => leftPaneHandler(Pane.Actions)}
+                    text="Actions"/>
+                <TogglerButton
+                    isToggled={leftPane == Pane.Status}
+                    click={() => leftPaneHandler(Pane.Status)}
+                    text="Status"/>
+            </div>
+        )
 
-        const messagesElement = (<MessagesCardList/>);
+        const rightButtons = (
+            <div class="layout-buttons">
+                <TogglerButton
+                    isToggled={leftPane == Pane.Messages || 
+                        (rightPane == Pane.Messages && splitMode)}
+                    click={() => splitMode ? rightPaneHandler(Pane.Messages) : leftPaneHandler(Pane.Messages)}
+                    text="Messages"/>
+                <TogglerButton
+                    isToggled={leftPane == Pane.Logs || 
+                        (rightPane == Pane.Logs && splitMode)}
+                    click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}
+                    text="Logs"/>
+            </div>
+        )
 
-        const statusElement = (
-            <StatusPane status={testCase.status}/>
+        const actionsPane = (
+            <div class="layout-content-pane">
+                {leftButtons}
+                <ActionsList/>
+            </div>
         );
 
-        const logsElement = (
-            <LogsPane logs={testCase.logs}/>
+        const messagesPane = (
+            <div class="layout-content-pane">
+                {rightButtons}
+                <MessagesCardList/>
+            </div>
+        );
+
+        const statusPane = (
+            <div class="layout-content-pane">
+                {leftButtons}
+                <StatusPane status={testCase.status}/>
+            </div>
+        );
+
+        const logsPane = (
+            <div class="layout-content-pane">
+                {rightButtons}
+                <LogsPane logs={testCase.logs}/>
+            </div>
         );
 
         let primaryPaneElement;
@@ -49,16 +92,16 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
         switch (leftPane) {
             case Pane.Actions:
-                primaryPaneElement = actionsElement;
+                primaryPaneElement = actionsPane;
                 break;
             case Pane.Messages:
-                primaryPaneElement = messagesElement;
+                primaryPaneElement = messagesPane;
                 break;
             case Pane.Status: 
-                primaryPaneElement = statusElement;
+                primaryPaneElement = statusPane;
                 break;
             case Pane.Logs:
-                primaryPaneElement = logsElement;
+                primaryPaneElement = logsPane;
                 break;
             default:
                 primaryPaneElement = null;
@@ -67,10 +110,10 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
         switch (rightPane) {
             case Pane.Messages:
-                secondaryPaneElement = messagesElement;
+                secondaryPaneElement = messagesPane;
                 break;
             case Pane.Logs:
-                secondaryPaneElement = logsElement;
+                secondaryPaneElement = logsPane;
                 break;
             default:
                 primaryPaneElement = null;
@@ -84,7 +127,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                 <div class="layout-header">
                     <Header/>
                 </div>
-                <div class={"layout-buttons" + (splitMode ? " split" : "")}>
+                {/* <div class={"layout-buttons" + (splitMode ? " split" : "")}>
                     <div class="layout-buttons-left">
                         <TogglerButton
                             isToggled={leftPane == Pane.Actions}
@@ -107,7 +150,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                             click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}
                             text="Logs"/>
                     </div>
-                </div>
+                </div> */}
                 {splitMode ?
                     (<div class="layout-content split">
                         <SplitView>

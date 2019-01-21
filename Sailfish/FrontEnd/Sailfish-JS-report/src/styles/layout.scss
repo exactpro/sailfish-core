@@ -3,17 +3,15 @@
 .layout {
     display: grid;
     height: 100%;
-    grid-template: 70px 65px calc(100% - 135px) / 1fr;
+    grid-template: 87px calc(100% - 87px) / 1fr;
     grid-template-areas:
         "header" 
-        "buttons"
         "main-content";
 
     &.filter {
-        grid-template: 130px 65px calc(100% - 190px) / 1fr;
+        grid-template: 147px calc(100% - 147px) / 1fr;
         grid-template-areas:
             "header" 
-            "buttons"
             "main-content";
     }
 
@@ -22,40 +20,21 @@
     }
 
     &-buttons {
-        height: 100%;
-        width: 100%;
-        display: grid;
-        grid-template: auto / auto 1fr;
-        grid-template-areas: "left right";
-        &.split {
-            grid-template: 1fr / 1fr 1fr;
-            //need to work in firefox
-            grid-template-areas: "left right";
-        }
-
-        &-left {
-            display: inline-flex;
-            justify-content: flex-start;
-            align-items: center;
-            grid-area: left;
-        }
-
-        &-right {
-            display: inline-flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-            grid-area: right;
-        }
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        grid-area: left;
+        position: absolute;
+        top: 6px;
+        left: 4px;
     }
 
     &-content {
         grid-area: main-content;
 
-        &.split {
-            
-        }
-
-        
+        &-pane {
+            height: 100%;
+            position: relative;
+        }        
     }
 }   
