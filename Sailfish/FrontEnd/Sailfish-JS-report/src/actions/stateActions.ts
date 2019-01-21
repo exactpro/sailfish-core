@@ -2,6 +2,7 @@ import TestCase from "../models/TestCase";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from '../models/Report';
+import { Pane } from "../helpers/Pane";
 
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
@@ -12,8 +13,12 @@ export enum StateActionTypes {
     RESET_TEST_CASE= 'RESET_TEST_CASE',
     SELECT_ACTION = 'SELECT_ACTION',
     SELECT_MESSAGES = 'SELECT_MESSAGES',
-    ADD_ACTION_FILTER = 'ADD_ACTION_FILTER',
-    REMOVE_ACTION_FILTER = 'REMOVE_ACTION_FILTER'
+    SWITCH_ACTIONS_FILTER = 'SWITCH_ACTIONS_FILTER',
+    SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
+    SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
+    SHOW_FILTER = 'SHOW_FILTER',
+    SET_LEFT_PANE = 'SET_LEFT_PANE',
+    SET_RIGHT_PANE = 'SET_RIGHT_PANE'
 }
 
 export interface SetReportStateAction {
@@ -41,13 +46,13 @@ export interface MessagesSelectStateAction {
     status: StatusType;
 }
 
-export interface AddActionFilterStateAction {
-    type: StateActionTypes.ADD_ACTION_FILTER;
+export interface SwitchActionFilterStateAction {
+    type: StateActionTypes.SWITCH_ACTIONS_FILTER;
     status: StatusType;
 }
 
-export interface RemoveActionFilterStateAction {
-    type: StateActionTypes.REMOVE_ACTION_FILTER;
+export interface SwitchFieldsFilterStateAction {
+    type: StateActionTypes.SWITCH_FIELDS_FILTER;
     status: StatusType;
 }
 
@@ -64,14 +69,36 @@ export interface SetTestCasePathStateAction {
     testCasePath: string;
 }
 
+export interface SwitchSplitModeStateAction {
+    type: StateActionTypes.SWITCH_SPLIT_MODE;
+}
+
+export interface ShowFilterStateAction {
+    type: StateActionTypes.SHOW_FILTER;
+}
+
+export interface SetLeftPaneStateActions {
+    type: StateActionTypes.SET_LEFT_PANE;
+    pane: Pane;
+}
+
+export interface SetRightPaneStateAction {
+    type: StateActionTypes.SET_RIGHT_PANE;
+    pane: Pane;
+}
+
 export type StateActionType = SetReportStateAction |
     SetTestCaseStateAction | 
     ResetTestCaseStateAction |
     ActionSelectStateAction |
     MessagesSelectStateAction | 
-    AddActionFilterStateAction | 
-    RemoveActionFilterStateAction | 
     NextTestCaseStateAction |
     PrevTestCaseStateAction | 
     SetTestCaseStateAction | 
-    SetTestCasePathStateAction;
+    SetTestCasePathStateAction | 
+    SwitchSplitModeStateAction | 
+    SwitchActionFilterStateAction | 
+    SwitchFieldsFilterStateAction | 
+    ShowFilterStateAction | 
+    SetRightPaneStateAction | 
+    SetLeftPaneStateActions;

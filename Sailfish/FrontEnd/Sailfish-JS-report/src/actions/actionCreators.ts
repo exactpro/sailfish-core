@@ -4,17 +4,22 @@ import {
     StateActionTypes,
     ActionSelectStateAction,
     MessagesSelectStateAction,
-    AddActionFilterStateAction,
-    RemoveActionFilterStateAction,
     NextTestCaseStateAction,
     PrevTestCaseStateAction,
     SetTestCasePathStateAction,
     SetReportStateAction,
-    ResetTestCaseStateAction
+    ResetTestCaseStateAction,
+    SwitchSplitModeStateAction,
+    SwitchActionFilterStateAction,
+    SwitchFieldsFilterStateAction,
+    ShowFilterStateAction,
+    SetLeftPaneStateActions,
+    SetRightPaneStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
+import { Pane } from "../helpers/Pane";
 
 export const setReport = (report: Report): SetReportStateAction => ({
     type: StateActionTypes.SET_REPORT,
@@ -41,13 +46,13 @@ export const selectMessages = (messages: number[], status: StatusType = 'NA'): M
     status: status
 })
 
-export const addActionFilter = (status: StatusType): AddActionFilterStateAction => ({
-    type: StateActionTypes.ADD_ACTION_FILTER,
+export const switchActionsFilter = (status: StatusType): SwitchActionFilterStateAction => ({
+    type: StateActionTypes.SWITCH_ACTIONS_FILTER,
     status: status
 })
 
-export const removeActionFilter = (status: StatusType): RemoveActionFilterStateAction => ({
-    type: StateActionTypes.REMOVE_ACTION_FILTER,
+export const switchFieldsFilter = (status: StatusType): SwitchFieldsFilterStateAction => ({
+    type: StateActionTypes.SWITCH_FIELDS_FILTER,
     status: status
 })
 
@@ -62,4 +67,22 @@ export const prevTestCase = (): PrevTestCaseStateAction => ({
 export const setTestCasePath = (testCasePath: string): SetTestCasePathStateAction => ({
     type: StateActionTypes.SET_TEST_CASE_PATH,
     testCasePath: testCasePath
+})
+
+export const switchSplitMode = (): SwitchSplitModeStateAction => ({
+    type: StateActionTypes.SWITCH_SPLIT_MODE
+})
+
+export const showFilter = (): ShowFilterStateAction => ({
+    type: StateActionTypes.SHOW_FILTER
+})
+
+export const setLeftPane = (pane: Pane): SetLeftPaneStateActions => ({
+    type: StateActionTypes.SET_LEFT_PANE,
+    pane: pane
+})
+
+export const setRightPane = (pane: Pane): SetRightPaneStateAction => ({
+    type: StateActionTypes.SET_RIGHT_PANE,
+    pane: pane
 })

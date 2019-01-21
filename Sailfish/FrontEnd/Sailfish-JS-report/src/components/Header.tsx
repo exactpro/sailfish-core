@@ -1,43 +1,42 @@
-import {h} from 'preact';
-import TestCase  from '../models/TestCase';
+import { h, Component } from 'preact';
+import TestCase from '../models/TestCase';
 import '../styles/header.scss';
 import { StatusType } from '../models/Status';
 import { FilterPanel } from './FilterPanel';
+import { connect } from 'preact-redux';
+import AppState from '../state/AppState';
+import {
+    nextTestCase,
+    prevTestCase,
+    resetTestCase,
+    switchSplitMode,
+    switchActionsFilter,
+    switchFieldsFilter,
+    showFilter
+} from '../actions/actionCreators';
 
 interface HeaderProps {
-    name: string;
     testCase: TestCase;
     splitMode: boolean;
     showFilter: boolean;
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
-    nextHandler?: Function;
-    prevHandler?: Function;
-    goTopHandler: Function;
-    backToListHandler: Function;
-    splitModeHandler?: Function;
-    showFilterHandler: Function;
-    actionsFilterHandler: (status: StatusType) => void;
-    fieldsFilterHandler: (status: StatusType) => void;
+    nextTestCaseHandler: () => any;
+    prevTestCaseHandler: () => any;
+    // TODO: implement
+    //goTopHandler: () => any;
+    backToListHandelr: () => any;
+    switchSplitMode: () => any;
+    switchActionsFilter: (status: StatusType) => any;
+    switchFieldsFilter: (status: StatusType) => any;
+    showFilterHandler: () => any;
 }
 
-export const Header = ({
-    name,
-    testCase,
-    splitMode,
-    showFilter,
-    actionsFilter,
-    fieldsFilter,
-    splitModeHandler,
-    nextHandler,
-    prevHandler,
-    backToListHandler,
-    showFilterHandler,
-    actionsFilterHandler,
-    fieldsFilterHandler,
-    goTopHandler
-} : HeaderProps) => {
+const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandelr,
+    switchSplitMode: switchSplitMode, switchActionsFilter, switchFieldsFilter, showFilter, showFilterHandler }: HeaderProps) => {
+
     const {
+        name,
         status,
         startTime,
         finishTime,
@@ -45,46 +44,47 @@ export const Header = ({
         hash,
         description,
     } = testCase;
-    const statusClass = ["header-status", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
-        prevButtonClas = ["header-status-name-icon", "left", (prevHandler ? "enabled" : "disabled")].join(' '),
-        nextButtonClass = ["header-status-name-icon", "right", (nextHandler ? "enabled" : "disabled")].join(' ');
     
-    return(
+    const statusClass = ["header-status", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
+        prevButtonClas = ["header-status-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
+        nextButtonClass = ["header-status-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
+
+    return (
         <div class="header">
             <div class={statusClass}>
                 <div class="header-status-button"
-                    onClick={e => backToListHandler()}>
-                    <div class="header-status-button-icon list"/>
+                    onClick={backToListHandelr}>
+                    <div class="header-status-button-icon list" />
                     <h3>Back to list</h3>
                 </div>
                 <div class="header-status-button"
-                    onClick={() => goTopHandler()}>
-                    <div class="header-status-button-icon gotop"/>
+                    onClick={() => { }}>
+                    <div class="header-status-button-icon gotop" />
                     <h3>Go top</h3>
                 </div>
                 <div class="header-status-name">
                     <div class={prevButtonClas}
-                        onClick={prevHandler ? () => prevHandler() : null}/>
-                    <h1>{name} — {status.status}</h1>
+                        onClick={prevTestCaseHandler} />
+                    <h1>{(name || 'Test Case')} — {status.status}</h1>
                     <div class={nextButtonClass}
-                        onClick={nextHandler ? () => nextHandler() : null}/>
+                        onClick={nextTestCaseHandler} />
                 </div>
-                <div class="header-status-button" onClick={() => splitModeHandler()}>
-                    <div class="header-status-button-icon mode"/>
+                <div class="header-status-button" onClick={() => switchSplitMode()}>
+                    <div class="header-status-button-icon mode" />
                     <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>
                 </div>
                 <div class="header-status-button" onClick={() => showFilterHandler()}>
-                    <div class="header-status-button-icon filter"/>
+                    <div class="header-status-button-icon filter" />
                     <h3>{showFilter ? "Hide filter" : "Show filter"}</h3>
                 </div>
             </div>
             {
-                    showFilter ? 
-                    <FilterPanel 
+                showFilter ?
+                    <FilterPanel
                         actionsFilters={actionsFilter}
                         fieldsFilters={fieldsFilter}
-                        actionFilterHandler={actionsFilterHandler}
-                        fieldsFilterHandler={fieldsFilterHandler}/>
+                        actionFilterHandler={switchActionsFilter}
+                        fieldsFilterHandler={switchFieldsFilter} />
                     : null
             }
             <div class="header-description">
@@ -104,3 +104,23 @@ export const Header = ({
         </div>
     );
 }
+
+
+export const Header = connect(
+    (state: AppState) => ({
+        testCase: state.testCase,
+        splitMode: state.splitMode,
+        actionsFilter: state.actionsFilter,
+        fieldsFilter: state.fieldsFilter,
+        showFilter: state.showFilter
+    }),
+    dispatch => ({
+        nextTestCaseHandler: () => dispatch(nextTestCase()),
+        prevTestCaseHandler: () => dispatch(prevTestCase()),
+        backToListHandelr: () => dispatch(resetTestCase()),
+        switchSplitMode: () => dispatch(switchSplitMode()),
+        switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),
+        switchActionsFilter: (status: StatusType) => dispatch(switchActionsFilter(status)),
+        showFilterHandler: () => dispatch(showFilter())
+    })
+)(HeaderBase)

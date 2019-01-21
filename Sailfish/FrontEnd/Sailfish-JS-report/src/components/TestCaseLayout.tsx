@@ -6,156 +6,30 @@ import { ActionsList } from './ActionsList';
 import TestCase from '../models/TestCase';
 import {TogglerButton} from './TogglerButton';
 import {MessagesCardList} from './MessagesCardList';
-import '../styles/layout.scss'
-import Action from '../models/Action';
-import { StatusType } from '../models/Status';
 import { StatusPane } from './StatusPane';
 import { LogsPane } from './LogsPane';
-import { generateActionsMap } from '../helpers/mapGenerator';
 import AppState from '../state/AppState';
-import { nextTestCase, prevTestCase, resetTestCase } from '../actions/actionCreators';
+import { setLeftPane, setRightPane } from '../actions/actionCreators';
+import { Pane } from '../helpers/Pane';
+import '../styles/layout.scss';
 
 interface LayoutProps {
     testCase: TestCase;
-    backToReportHandler: () => void;
-    nextHandler?: () => void;
-    prevHandler?: () => void;
-}
-
-/**
- * @param {Pane} primaryPane - in non split mode name of rendered panel, in split mode - name of left pane
- * @param {Pane} secondaryPane - in split mode - name of right pane
- */
-interface LayoutState {
-    selectedActionId: number;
-    selectedMessages: number[];
-    selectedStatus: StatusType;
-    isSplitMode: boolean;
+    splitMode: boolean;
     showFilter: boolean;
-    primaryPane: Pane;
-    secondaryPane: Pane;
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
-    filtredActions: Action[];
+    leftPane: Pane;
+    rightPane: Pane;
+    leftPaneHandler: (pane: Pane) => any;
+    rightPaneHandler: (pane: Pane) => any;
 }
 
-enum Pane {Actions, Status, Messages, Logs}
-
-class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
+class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
     constructor(props: LayoutProps) {
         super(props);
-        this.state = {
-            selectedActionId: -1,
-            selectedMessages: [],
-            selectedStatus: null,
-            isSplitMode: true,
-            showFilter: false,
-            primaryPane: Pane.Actions,
-            secondaryPane: Pane.Messages,
-            fieldsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED', 'NA'],
-            actionsFilter: ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED'],
-            filtredActions: props.testCase.actions
-        }
     }
 
-    scrollToTop() {
-        // order is important, because chrome and opera can't render smooth scroll behavior with multipline elements -
-        // in actions list this behavior disabled
-        // this.actionsListRef.scrollToAction(this.props.testCase.actions[0].id);
-        // this.messagesListRef.scrollToMessage(this.props.testCase.messages[0].id);
-    }
-
-    splitModeHandler() {
-        if (this.state.isSplitMode) {
-            this.setState({
-                ...this.state,
-                isSplitMode: false            
-            });
-        } else {
-            this.setState({
-                ...this.state,
-                isSplitMode: true,
-                primaryPane: Pane.Actions,
-                secondaryPane :Pane.Messages
-            })
-        }
-    }
-
-    showFilterHandler() {
-        this.setState({
-            ...this.state,
-            showFilter: !this.state.showFilter
-        });
-    }
-
-    actionFilterHandler(status: StatusType) {
-        if (this.state.actionsFilter.includes(status)) {
-            const newActionsFilter = this.state.actionsFilter.filter(action => action != status);
-
-            this.setState({
-                ...this.state,
-                actionsFilter: newActionsFilter,
-                filtredActions: this.props.testCase.actions.filter(action =>
-                    newActionsFilter.includes(action.status.status)) 
-            });
-        } else {
-            const newActionsFilter = [...this.state.actionsFilter, status];
-
-            this.setState({
-                ...this.state,
-                actionsFilter: newActionsFilter,
-                filtredActions: this.props.testCase.actions.filter(action =>
-                    newActionsFilter.includes(action.status.status)) 
-            });
-        }
-    }
-
-    fieldFiterHandeler(status: StatusType) {
-        if (this.state.fieldsFilter.includes(status)) {
-            this.setState({
-                ...this.state,
-                fieldsFilter: this.state.fieldsFilter.filter(field => field != status)
-            });
-        } else {
-            this.setState({
-                ...this.state,
-                fieldsFilter: [...this.state.fieldsFilter, status]
-            })
-        }
-    }
-
-    togglePane(pane: Pane, isPrimary: boolean) {
-        this.setState({
-            ...this.state,
-            primaryPane: isPrimary ? pane : this.state.primaryPane,
-            secondaryPane: !isPrimary ? pane : this.state.secondaryPane
-        });
-    }
-
-    // it used to update actions after switching the test case: 
-    // its bad approach, but we dont have memorize feature in preact.
-    componentWillReceiveProps(nextProps: LayoutProps) {
-        if (nextProps.testCase !== this.props.testCase) {
-            this.setState({
-                ...this.state,
-                filtredActions: nextProps.testCase.actions.filter(action =>
-                    this.state.actionsFilter.includes(action.status.status)) 
-            });
-        }
-    }
-
-    render({testCase, backToReportHandler, nextHandler, prevHandler} : LayoutProps,
-        {selectedActionId, 
-            isSplitMode,
-            primaryPane, 
-            secondaryPane, 
-            selectedMessages, 
-            showFilter, 
-            actionsFilter, 
-            fieldsFilter,
-            filtredActions,
-            selectedStatus} : LayoutState) {
+    render({testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler} : LayoutProps) {
 
         // if some action is selected, all messages inside this action should not be highlighted
         const actionsElement = (<ActionsList/>);
@@ -173,7 +47,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
         let primaryPaneElement;
         let secondaryPaneElement;
 
-        switch (primaryPane) {
+        switch (leftPane) {
             case Pane.Actions:
                 primaryPaneElement = actionsElement;
                 break;
@@ -191,7 +65,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
                 break;
         }
 
-        switch (secondaryPane) {
+        switch (rightPane) {
             case Pane.Messages:
                 secondaryPaneElement = messagesElement;
                 break;
@@ -208,47 +82,33 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
         return (
             <div class={rootClassName}>
                 <div class="layout-header">
-                    <Header 
-                        testCase={testCase}
-                        name={testCase.name ? testCase.name : "TestCase"}
-                        splitMode={isSplitMode}
-                        splitModeHandler={() => this.splitModeHandler()}
-                        showFilter={showFilter}
-                        showFilterHandler={() => this.showFilterHandler()}
-                        backToListHandler={() => backToReportHandler()}
-                        nextHandler={nextHandler}
-                        prevHandler={prevHandler}
-                        actionsFilter={actionsFilter}
-                        fieldsFilter={fieldsFilter}
-                        actionsFilterHandler={status => this.actionFilterHandler(status)}
-                        fieldsFilterHandler={status => this.fieldFiterHandeler(status)}
-                        goTopHandler={() => this.scrollToTop()}/>
+                    <Header/>
                 </div>
-                <div class={"layout-buttons" + (isSplitMode ? " split" : "")}>
+                <div class={"layout-buttons" + (splitMode ? " split" : "")}>
                     <div class="layout-buttons-left">
                         <TogglerButton
-                            isToggled={primaryPane == Pane.Actions}
-                            click={() => this.togglePane(Pane.Actions, true)}
+                            isToggled={leftPane == Pane.Actions}
+                            click={() => leftPaneHandler(Pane.Actions)}
                             text="Actions"/>
                         <TogglerButton
-                            isToggled={primaryPane == Pane.Status}
-                            click={() => this.togglePane(Pane.Status, true)}
+                            isToggled={leftPane == Pane.Status}
+                            click={() => leftPaneHandler(Pane.Status)}
                             text="Status"/>
                     </div>
                     <div class="layout-buttons-right">
                         <TogglerButton
-                            isToggled={primaryPane == Pane.Messages || 
-                                (secondaryPane == Pane.Messages && isSplitMode)}
-                            click={() => this.togglePane(Pane.Messages, !isSplitMode)}
+                            isToggled={leftPane == Pane.Messages || 
+                                (rightPane == Pane.Messages && splitMode)}
+                            click={() => splitMode ? rightPaneHandler(Pane.Messages) : leftPaneHandler(Pane.Messages)}
                             text="Messages"/>
                         <TogglerButton
-                            isToggled={primaryPane == Pane.Logs || 
-                                (secondaryPane == Pane.Logs && isSplitMode)}
-                            click={() => this.togglePane(Pane.Logs, !isSplitMode)}
+                            isToggled={leftPane == Pane.Logs || 
+                                (rightPane == Pane.Logs && splitMode)}
+                            click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}
                             text="Logs"/>
                     </div>
                 </div>
-                {isSplitMode ?
+                {splitMode ?
                     (<div class="layout-content split">
                         <SplitView>
                             {primaryPaneElement}
@@ -265,19 +125,16 @@ class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
 
 const TestCaseLayout = connect(
     (state: AppState) => ({
-        testCase: state.testCase
+        testCase: state.testCase,
+        splitMode: state.splitMode,
+        showFilter: state.showFilter,
+        leftPane: state.leftPane,
+        rightPane: state.rightPane
     }),
-    dispatch => ({
-        backToReportHandler: () => {
-            dispatch(resetTestCase())
-        },
-        nextHandler: () => {
-            dispatch(nextTestCase())
-        },
-        prevHandler: () => {
-            dispatch(prevTestCase())
-        }
+    dispatch => ({ 
+        leftPaneHandler: (pane: Pane) => dispatch(setLeftPane(pane)),
+        rightPaneHandler: (pane: Pane) => dispatch(setRightPane(pane))
     })
-)(TestCaseLayoutBase as any);
+)(TestCaseLayoutBase);
 
 export default TestCaseLayout;

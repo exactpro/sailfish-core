@@ -1,6 +1,7 @@
 import { initialSelectedState, initialAppState } from '../state/initialStates';
 import { StateActionType, StateActionTypes } from '../actions/stateActions';
 import AppState from '../state/AppState';
+import { Pane } from '../helpers/Pane';
 
 export function appReducer(state: AppState = initialAppState, stateAction: StateActionType): AppState {
     switch (stateAction.type) {
@@ -38,17 +39,31 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             }
         }
 
-        case StateActionTypes.ADD_ACTION_FILTER: {
+        case StateActionTypes.SWITCH_ACTIONS_FILTER: {
+            if (state.actionsFilter.includes(stateAction.status)) {
+                return {
+                    ...state,
+                    actionsFilter: state.actionsFilter.filter(status => status != stateAction.status)
+                }
+            }
+
             return {
                 ...state,
                 actionsFilter: [ ...state.actionsFilter, stateAction.status]
             }
         }
 
-        case StateActionTypes.REMOVE_ACTION_FILTER: {
+        case StateActionTypes.SWITCH_FIELDS_FILTER: {
+            if (state.fieldsFilter.includes(stateAction.status)) {
+                return {
+                    ...state,
+                    fieldsFilter: state.fieldsFilter.filter(status => status != stateAction.status)
+                }
+            }
+
             return {
                 ...state,
-                actionsFilter: state.actionsFilter.filter(status => status != status)
+                fieldsFilter: [ ...state.fieldsFilter, stateAction.status ]
             }
         }
 
@@ -94,6 +109,42 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 testCase: null,
                 currentTestCasePath: stateAction.testCasePath
+            }
+        }
+
+        case StateActionTypes.SWITCH_SPLIT_MODE: {
+            if (state.splitMode) {
+                return {
+                    ...state,
+                    splitMode: false
+                }
+            }
+
+            return {
+                ...state,
+                splitMode: true,
+                leftPane: Pane.Actions
+            }
+        }
+
+        case StateActionTypes.SHOW_FILTER: {
+            return {
+                ...state,
+                showFilter: !state.showFilter
+            }
+        }
+
+        case StateActionTypes.SET_LEFT_PANE: {
+            return {
+                ...state,
+                leftPane: stateAction.pane
+            }
+        }
+
+        case StateActionTypes.SET_RIGHT_PANE: {
+            return {
+                ...state,
+                rightPane: stateAction.pane
             }
         }
 
