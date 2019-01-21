@@ -2,7 +2,7 @@ import { h, Component } from 'preact';
 import Action, { ActionNode } from '../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
-import CompasionTable from "./VerificationTable";
+import { VerificationTable } from "./VerificationTable";
 import MessageAction from '../models/MessageAction';
 import Verification from '../models/Verification'
 import '../styles/action.scss';
@@ -173,7 +173,7 @@ export class ActionTree extends Component<ActionTreeProps, any> {
                     }}>
                     <ExpandablePanel>
                         <h4>{"Verification — " + name + " — " + status.status}</h4>
-                        <CompasionTable params={entries} filterFields={filterFields} />
+                        <VerificationTable params={entries} />
                     </ExpandablePanel>
                 </div>
             </div>

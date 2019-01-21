@@ -2,10 +2,13 @@ import { h, Component } from "preact";
 import Entry from "../models/Entry";
 import { StatusType } from "../models/Status";
 import "../styles/tables.scss";
+import { VerificationTableProps } from './VerificationTable';
+import { connect } from 'preact-redux';
+import AppState from "../state/AppState";
 
 export interface VerificationTableProps {
     params: Entry[];
-    filterFields: StatusType[];
+    fieldsFilter: StatusType[];
 }
 
 interface VerificationTableState {
@@ -17,7 +20,7 @@ interface TableNode extends Entry {
     isCollapsed?: boolean;
 }
 
-export default class VerificationTable extends Component<VerificationTableProps, VerificationTableState> {
+class VerificationTableBase extends Component<VerificationTableProps, VerificationTableState> {
 
     constructor(props: VerificationTableProps) {
         super(props);
@@ -34,7 +37,7 @@ export default class VerificationTable extends Component<VerificationTableProps,
         } : root;
     }
 
-    renderParams(node: TableNode, filterFields: StatusType[], padding: number = 1) {
+    renderParams(node: TableNode, fieldsFilter: StatusType[], padding: number = 1) {
 
         const { subEntries, isCollapsed, expected, name, status, actual } = node;
 
@@ -50,10 +53,10 @@ export default class VerificationTable extends Component<VerificationTableProps,
                 </tr>,
                 isCollapsed ? null :
                     subEntries.map(
-                        (param) => this.renderParams(param, filterFields, padding + 1) as Element)
+                        (param) => this.renderParams(param, fieldsFilter, padding + 1) as Element)
             ]
             );
-        } else if (filterFields.includes(status)) {
+        } else if (fieldsFilter.includes(status)) {
             return (
                 <tr class="ver-table-row-value">
                     <td style={{ paddingLeft: 10 * padding }}>
@@ -95,7 +98,7 @@ export default class VerificationTable extends Component<VerificationTableProps,
         }
     }
 
-    render({ filterFields }: VerificationTableProps, { nodes }: VerificationTableState) {
+    render({ fieldsFilter }: VerificationTableProps, { nodes }: VerificationTableState) {
         return (
             <div class="ver-table">
                 <div class="ver-table-header">
@@ -123,10 +126,17 @@ export default class VerificationTable extends Component<VerificationTableProps,
                         <th>Status</th>
                     </thead>
                     <tbody>
-                        {nodes.map((param) => this.renderParams(param, filterFields))}
+                        {nodes.map((param) => this.renderParams(param, fieldsFilter))}
                     </tbody>
                 </table>
             </div>
         )
     }
 }
+
+export const VerificationTable = connect(
+    (state: AppState) => ({
+        fieldsFilter: state.fieldsFilter
+    }),
+    dispatch => ({})
+)(VerificationTableBase);

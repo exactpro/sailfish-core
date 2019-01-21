@@ -2,10 +2,7 @@ import { h } from "preact";
 import Action from "../models/Action";
 import ParamsTable from "./ParamsTable";
 import ExpandablePanel from "./ExpandablePanel";
-import CompasionTable from "./VerificationTable";
 import "../styles/action.scss";
-import Verification from '../models/Verification';
-import MessageAction from '../models/MessageAction';
 import { getSecondsPeriod } from "../helpers/dateFormatter";
 
 interface CardProps {
