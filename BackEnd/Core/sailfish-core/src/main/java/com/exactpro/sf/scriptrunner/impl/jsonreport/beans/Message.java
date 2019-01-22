@@ -39,8 +39,8 @@ public class Message implements IJsonReportNode {
 
     public Message(Map<String, String> data) {
         this.id = Long.parseLong(data.get("Id"));
-        this.contentHumanReadable = data.get("ContentJson");
-        this.content = data.get("Content");
+        this.contentHumanReadable = data.get("Content");
+        this.content = data.get("ContentJson");
         this.checkPoint = data.get("UnderCheckPoint").isEmpty() ? null : data.get("UnderCheckPoint");
         this.raw = data.get("RawMessage");
         this.from = data.get("From");
