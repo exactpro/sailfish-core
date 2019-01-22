@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -244,10 +245,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
 							scriptDescription.getTags()));
 
             List<IScriptReport> aggregateReportListeners = new ArrayList<>();
-            // Write Report:
-            File reportFile = workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "report.xml");
-            // New xml report
-            aggregateReportListeners.add(new XmlStreamReport(reportFile.getAbsolutePath()));
+			// json report
+            aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher));
             // html report
             aggregateReportListeners.add(new HtmlReport(reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
             // properties for gui

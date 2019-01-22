@@ -213,6 +213,7 @@ public class WaitAction {
      * Count all application or administration messages received after checkpoint and
      * successfully compared with messages filter.
      *
+     * @param actionContext contains action context
      * @param message message filter
      * @param isApp is {@code true} for application messages and {@code false}
      * for administration messages
@@ -226,6 +227,7 @@ public class WaitAction {
 	 * Count all application or administration messages received after checkpoint and
 	 * successfully compared with messages filter.
 	 *
+     * @param actionContext contains action context
 	 * @param message message filter
 	 * @param isApp is {@code true} for application messages and {@code false}
 	 * for administration messages
@@ -240,6 +242,8 @@ public class WaitAction {
     /**
      * Count all application or administration messages received after checkpoint
      * without UnitHeader messages.
+     * @param actionContext contains action context
+     *
      * @throws Exception
      */
     public static void countMessages(IActionContext actionContext) throws Exception {
@@ -250,6 +254,8 @@ public class WaitAction {
 	 * Count all application or administration messages received after checkpoint
 	 * without UnitHeader messages.
 	 * @param description
+     *
+     * @param actionContext contains action context
 	 * @throws Exception
 	 */
 	public static void countMessages(IActionContext actionContext, String description) throws Exception
@@ -280,9 +286,9 @@ public class WaitAction {
 		IActionReport report = actionContext.getReport();
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected,
+        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " of " + expected,
                 description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+            groupReport.createMessage(status, MessageLevel.INFO, result.getException(), description, String.format("Received messages: %s of %s", receivedMessages, expected));
             for (IMessage message : reportMessages) {
                 groupReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
@@ -304,6 +310,7 @@ public class WaitAction {
      * Count all application or administration messages received after checkpoint and
      * successfully compared with messages filter.
      *
+     * @param actionContext contains action context
      * @param message message filter
      * @param isApp is {@code true} for application messages and {@code false}
      * for administration messages
@@ -318,11 +325,12 @@ public class WaitAction {
 	 * Count all application or administration messages received after checkpoint and
 	 * successfully compared with messages filter.
 	 *
+     * @param actionContext contains action context
 	 * @param message message filter
 	 * @param isApp is {@code true} for application messages and {@code false}
 	 * for administration messages
-	 * @param description
-	 * @param postValidation do custom validation after standard validation
+     * @param postValidation do custom validation after standard validation
+     * @param description
 	 * @throws Exception
 	 */
     @SuppressWarnings("deprecation")
@@ -359,9 +367,13 @@ public class WaitAction {
      * successfully compared with messages filter.
      * @param serviceName service name
      * @param messageFilter message filter
+     * @param expectedMessageCount expected message count
      * @param handler service handler
      * @param isession session
-     * @param settings
+     * @param checkPoint checkpoint
+     * @param fromApp is {@code true} for application messages and {@code false}
+     * for administration messages
+     * @param settings comparator settings
      * @return count of received messages passed throw message filter
      * @throws InterruptedException actually should not be thrown
      */
@@ -380,19 +392,23 @@ public class WaitAction {
 	/**
 	 * Count all application or administration messages received after checkpoint and
 	 * successfully compared with messages filter.
+     * @param report action report
 	 * @param serviceName service name
 	 * @param messageFilter message filter
+     * @param expectedMessageCount expected message count
 	 * @param handler service handler
 	 * @param isession session
-	 * @param settings
+     * @param checkPoint checkpoint
+     * @param fromApp is {@code true} for application messages and {@code false}
+     * for administration messages
+     * @param settings comparator settings
 	 * @param description
 	 * @return count of received messages passed throw message filter
-	 * @throws InterruptedException actually should not be thrown
 	 */
     public static final int countMessages(IActionReport report, String serviceName, IMessage messageFilter,
                                           Object expectedMessageCount, IServiceHandler handler, ISession isession,
                                           CheckPoint checkPoint, boolean fromApp, ComparatorSettings settings,
-                                          String description) throws InterruptedException {
+                                          String description) {
         log.debug("countMessages 1");
 
         List<Pair<IMessage, ComparisonResult>> allResults = new ArrayList<>();
@@ -412,14 +428,14 @@ public class WaitAction {
     public static boolean addResultToReport(IGroupReport report,
             Object expectedMessageCount,
             String description,
-            List<Pair<IMessage, ComparisonResult>> allResults, int messageCount, boolean exceptionOnFail) throws InterruptedException
+            List<Pair<IMessage, ComparisonResult>> allResults, int messageCount, boolean exceptionOnFail)
     {
         ComparisonResult comparisonResult = validateMessageCount(messageCount, expectedMessageCount);
         StatusType status = ComparisonUtil.getStatusType(comparisonResult);
         String expected = Formatter.formatExpected(comparisonResult);
 
         if(status == StatusType.PASSED || status == StatusType.CONDITIONALLY_PASSED) { // was ==
-            report.createVerification(status, "Received messages: " + messageCount + " from " + expected, description, "", comparisonResult, comparisonResult.getException());
+            report.createMessage(status, MessageLevel.INFO, comparisonResult.getException(), description, String.format("Received messages: %s of %s", messageCount, expected));
 
             int i = 1;
             for (Pair<IMessage, ComparisonResult> result : allResults) {
@@ -432,8 +448,7 @@ public class WaitAction {
 
             return true;
         } else {
-            report.createVerification(status, "Received messages: " + messageCount + " from " + expected, description, "",
-                    comparisonResult, comparisonResult.getException());
+            report.createMessage(status, MessageLevel.INFO, comparisonResult.getException(), description, String.format("Received messages: %s of %s", messageCount, expected));
 
             int i = 1;
             for (Pair<IMessage, ComparisonResult> result : allResults) {
@@ -454,15 +469,14 @@ public class WaitAction {
      * @param isession session
      * @param settings
      * @param checkPoint
-     * @param fromApp
+     * @param fromApp is {@code true} for application messages and {@code false}
+     * for administration messages
      * @param allResults
      * @return count of received messages passed throw message filter
-     * @throws InterruptedException actually should not be thrown
      */
     public static final void countMessages(IMessage messageFilter, IServiceHandler handler, ISession isession,
                                            CheckPoint checkPoint, boolean fromApp, ComparatorSettings settings,
-                                           List<Pair<IMessage, ComparisonResult>> allResults)
-            throws InterruptedException {
+                                           List<Pair<IMessage, ComparisonResult>> allResults) {
 
         CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, fromApp
                                                                                ? ServiceHandlerRoute.FROM_APP
@@ -473,8 +487,7 @@ public class WaitAction {
     }
 
     public static void countMessages(IMessage messageFilter, ICSHIterator<IMessage> messagesIterator,
-                                     ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> allResults)
-            throws InterruptedException {
+                                     ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> allResults) {
 
         while (messagesIterator.hasNext()) {
             IMessage message = messagesIterator.next();
@@ -499,12 +512,15 @@ public class WaitAction {
 
     /**
      * Count all application or administration messages received after checkpoint.
+     * @param report action report
      * @param serviceName service name
+     * @param mc
      * @param handler service handler
      * @param isession session
      * @param checkPoint checkpoint
+     * @param fromApp is {@code true} for application messages and {@code false}
+     * for administration messages
      * @return count of received messages passed throw message filter
-     * @throws InterruptedException actually should not be thrown
      */
     public static final int countMessages(IActionReport report,
             String serviceName, Object mc,
@@ -520,7 +536,6 @@ public class WaitAction {
 	 * @param checkPoint checkpoint
 	 * @param description
 	 * @return count of received messages passed throw message filter
-	 * @throws InterruptedException actually should not be thrown
 	 */
 	public static final int countMessages(IActionReport report,
             String serviceName, Object mc,
@@ -535,7 +550,7 @@ public class WaitAction {
         String expected = Formatter.formatExpected(result);
 
         try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected, description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+            groupReport.createMessage(status, MessageLevel.INFO, result.getException(), description, String.format("Received messages: %s of %s", result, expected));
             for (IMessage message : messages) {
                 groupReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
@@ -587,7 +602,7 @@ public class WaitAction {
         String expected = Formatter.formatExpected(result);
 
         try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + actualCount + " from " + expected, description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+            groupReport.createMessage(status, MessageLevel.INFO, result.getException(), description, String.format("Received messages: %s of %s", result, expected));
             for (IMessage message : messages) {
                 groupReport.createMessage(status, MessageLevel.INFO, message.toString());
             }

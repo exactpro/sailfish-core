@@ -38,19 +38,17 @@ public class OutcomeCollector {
 	private final Map<String, List<String>> completed;
 	private final Map<String, Set<String>> defined;
 
-	public OutcomeCollector()
-	{
-		this.groups = new HashMap<String, Group>();
-		this.groupOrder = new ArrayList<String>();
-		this.completed = new HashMap<String, List<String>>();
-		this.defined = new HashMap<String, Set<String>>();
+	public OutcomeCollector() {
+		this.groups = new HashMap<>();
+		this.groupOrder = new ArrayList<>();
+		this.completed = new HashMap<>();
+		this.defined = new HashMap<>();
 	}
 
 	/**
 	 * Clear outcome state
 	 */
-	public void clear()
-	{
+	public void clear() {
 		for (List<String> list : this.completed.values()) {
 			list.clear();
 		}
@@ -66,8 +64,7 @@ public class OutcomeCollector {
 	 * If outcome status is FAILED this method add outcome to failed set.
 	 * @param outcome
 	 */
-	public void storeOutcome(Outcome outcome)
-	{
+	public void storeOutcome(Outcome outcome) {
 		logger.debug("storeOutcome: {}", outcome);
 		Group group = this.groups.get(outcome.getGroup());
 		if (group == null) {
@@ -84,8 +81,7 @@ public class OutcomeCollector {
             group.conditionallyPassed.add(outcome.getName());
         }
 
-		if (outcome.getStatus() == Status.FAILED)
-		{
+		if (outcome.getStatus() == Status.FAILED) {
 			group.failed.add(outcome.getName());
             group.failedCounter.add(outcome.getName());
 			logger.debug("storeOutcome: {}", group.failed);
@@ -99,8 +95,7 @@ public class OutcomeCollector {
 	 * @return {@code false} if Outcome is not completed yet or it is failed.
 	 *  {@code true} if Outcome completed and all verifications are passed.
 	 */
-    public Status getOutcomeStatus(String group, String name)
-	{
+    public Status getOutcomeStatus(String group, String name) {
 		Group grp = this.groups.get(group);
 		if (grp == null) {
 			logger.debug("getOutcomeStatus: {}:{} grp {} not started", group, name, group);
@@ -218,12 +213,7 @@ public class OutcomeCollector {
 		}
 		logger.debug("onOutcomeComplete: {}:{} groupPassed: {} groupConditionallyPassed: {}", group, name, grp.groupPassed, grp.groupConditionallyPassed);
 
-
-		Set<String> set = this.defined.get(group);
-		if (set == null) {
-			set = new HashSet<String>();
-			this.defined.put(group, set);
-		}
+		Set<String> set = this.defined.computeIfAbsent(group, k -> new HashSet<>());
 		set.add(name);
 	}
 
@@ -243,13 +233,8 @@ public class OutcomeCollector {
 			grp.name = "Unexpected";
 		}
 
-		List<String> list = this.completed.get(group);
+		List<String> list = this.completed.computeIfAbsent(group, k -> new LinkedList<>());
 
-		if (list == null)
-		{
-			list = new LinkedList<String>();
-			this.completed.put(group, list);
-		}
 		list.add(grp.name);
 
         if (!grp.groupPassed && !grp.groupConditionallyPassed) {
@@ -290,7 +275,7 @@ public class OutcomeCollector {
 
     class Counter
 	{
-		private Map<String, Integer> counter = new HashMap<String, Integer>();
+		private Map<String, Integer> counter = new HashMap<>();
 
 		public void add(String name) {
 			Integer cnt = counter.get(name);

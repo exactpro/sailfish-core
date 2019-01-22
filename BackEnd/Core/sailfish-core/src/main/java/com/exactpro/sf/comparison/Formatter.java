@@ -165,7 +165,7 @@ public class Formatter {
 						|| s.endsWith("\t")) {
 					s = "["+s+"]";
 				}
-				if (s.indexOf(Convention.CONV_MISSED_CHAR_FIX_STRING) != -1) {
+				if (s.contains(Convention.CONV_MISSED_CHAR_FIX_STRING)) {
 					s = s.replace(Convention.CONV_MISSED_CHAR_FIX_STRING, Convention.CONV_MISSED_STRING);
 				}
 				if (s.indexOf(Convention.CONV_MISSED_CHAR) != -1) {
