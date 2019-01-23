@@ -26,11 +26,15 @@ $defaultCardBorderColor: #666666;
 $defaultCardBackground: #E0E0E0;
 
 $messageCardBackgroundColor: #F2F2F2;
+$messageCardRawHoverBackground: rgba(102, 102, 102, 0.15);
 
 $filterBackground: #A3D9A3;
 $filterButtonEnabled: #3D994D;
 $filterButtonDisabled: #79BF80;
 $filterButtonTextColor: #FFFFFF;
+
+$notificationBackground: #d9d9d9;
+
 
 @mixin scrollbar {
     &::-webkit-scrollbar {

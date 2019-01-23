@@ -3,6 +3,9 @@ import '../styles/messages.scss';
 import Message from '../models/Message';
 import { StatusType, statusValues } from '../models/Status';
 import Action from '../models/Action';
+import { MessageRaw } from './MessageRaw';
+import { copyTextToClipboard } from '../helpers/copyHandler';
+import { showNotification } from '../helpers/showNotification';
 
 interface MessageCardProps {
     message: Message;
@@ -45,7 +48,7 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
         const { msgName, timestamp, from, to, contentHumanReadable, raw } = message,
             rootClass = ["message-card", (status || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
             contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),
-            showRawClass = ["message-card-content-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
+            showRawClass = ["message-card-content-controls-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
 
         const actions = [...actionsMap.values()];
 
@@ -85,23 +88,41 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
                     <div class="message-card-content-human">
                         <p>{contentHumanReadable}</p>
                     </div>
+                    <div class="message-card-content-controls">
+                        <div class="message-card-content-controls-showraw"
+                            onClick={e => this.showRaw()}>
+                            <div class="message-card-content-controls-showraw-title">
+                                <span>{showRaw ? "Close raw" : "Show raw"}</span>
+                            </div>
+                            <div class={showRawClass}/>
+                        </div>
+                        {
+                            showRaw ? 
+                            (<div class="message-card-content-controls-copy-all"
+                                onClick={() => this.copyToClipboard(raw)}
+                                title="Copy all raw content to clipboard">
+                                <div class="message-card-content-controls-copy-all-icon"/>
+                                <div class="message-card-content-controls-copy-all-title">
+                                    <span>Copy All</span>
+                                </div>
+                            </div>)
+                            : null
+                        }
+                    </div>
                     {
                         showRaw ?
-                        (<div class="message-card-content-raw">
-                            <span class="title">Raw message</span>
-                            {raw.split('\n').map((row) => {
-                                return <pre>{row}<br/></pre>
-                            })}
-                        </div>)
+                        <MessageRaw 
+                            rawContent={raw}
+                            copyHandler={this.copyToClipboard}/>
                         : null
                     }
-                    <div class="message-card-content-showraw"
-                        onClick={e => this.showRaw()}>
-                        <span>{showRaw ? "Hide raw" : "Show raw"}</span>
-                        <div class={showRawClass}/>
-                    </div>
                 </div>
             </div>
         );
+    }
+
+    private copyToClipboard(text: string) {
+        copyTextToClipboard(text);
+        showNotification('Text copied to the clipboard!');
     }
 }

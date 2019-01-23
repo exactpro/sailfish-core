@@ -27,7 +27,7 @@ body {
         box-sizing: border-box;
     }
 
-    p, span, h1, h2, h3, h4, h5 {
+    p, span, h1, h2, h3, h4, h5, pre {
         margin: 0;
         padding: 0;
         border: 0;
@@ -82,5 +82,24 @@ body {
         p {
             color: $primaryTextColor;
         }
+    }
+}
+
+.notification {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 19px;
+    padding: 10px;
+    color: $primaryTextColor;
+    background-color: $notificationBackground;
+    border-radius: 5px;
+    font-family: Open sans;
+    
+    p {
+        margin: 0;
     }
 }

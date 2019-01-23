@@ -145,7 +145,7 @@
 
     &-content {
         position: relative;
-        padding: 7px 10px 26px 10px;
+        padding: 7px 10px 10px 15px;
         height: 100%;
 
         &.passed {
@@ -175,35 +175,104 @@
         }
 
         &-raw {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
             margin-top: 10px;
             font-family: monospace;
-            line-height: 10px;
+            line-height: 18px;
+            letter-spacing: 0.5px;
+            font-size: 11px;
+
+            &-numbers {
+                color: $secondaryTextColor;
+            }
+
+            &-symbols, &-string {
+                color: $primaryTextColor;
+                padding-left: 5px;
+                display: flex;
+
+                &:hover {
+                    background: $messageCardRawHoverBackground;
+                }
+            }
+
+            &-copy-btn {
+                display: inline-block;
+                margin: 4px 4px 4px 10px;
+                height: 13px;
+                width: 13px;
+                background-image: url('../../resources/icons/clipboard.svg');
+                background-size: 100%;
+                filter: opacity(0.6);
+                cursor: pointer;
+
+                &:hover {
+                    filter: opacity(1);
+                }
+            }
         }
 
-        &-showraw {
-            @include nonselect;
+        &-controls {
             display: flex;
-            justify-content: center;
+            flex-direction: row;
             align-items: center;
-            position: absolute;
-            bottom: 5px;
-            right: 5px;
-            cursor: pointer;
-            font-size: 13px;
-            color: $primaryTextColor;
+            width: 100%;
+            padding-top: 10px;
 
-            &-icon {
-                height: 14px;
-                width: 14px;
-                background-size: 100%;
-                margin-left: 5px;
-                
-                &.expanded {
-                    background-image: url(../../resources/icons/arr4-up.svg);
+            &-showraw {
+                @include nonselect;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                font-size: 13px;
+                color: $primaryTextColor;
+
+                &-title {
+                    font-weight: bold;
                 }
 
-                &.hidden {
-                    background-image: url(../../resources/icons/arr4-down.svg);
+                &-icon {
+                    height: 14px;
+                    width: 14px;
+                    background-size: 100%;
+                    margin-left: 5px;
+                    
+                    &.expanded {
+                        background-image: url(../../resources/icons/arr4-up.svg);
+                    }
+
+                    &.hidden {
+                        background-image: url(../../resources/icons/arr4-down.svg);
+                    }
+                }
+            }
+
+            &-copy-all {
+                @include nonselect;
+                display: inline-flex;
+                align-items: center;
+                margin-left: 10px;
+                padding: 2px;
+                cursor: pointer;
+
+                &-icon {
+                    height: 13px;
+                    width: 13px;
+                    background-image: url('../../resources/icons/clipboard.svg');
+                    background-size: 100%;
+                    filter: opacity(0.6);
+                }
+
+                &-title {
+                    font-size: 12px;
+                    color: $primaryTextColor;
+                    padding-left: 5px;
+                }
+
+                &:hover {
+                    background: $messageCardRawHoverBackground;
                 }
             }
         }
