@@ -17,6 +17,7 @@ export interface ActionTreeProps {
     messageSelectHandler: (id: number, status: StatusType) => void;
     selectedMessageId: number;
     selectedActionId: number;
+    actionsFilter: StatusType[];
     filterFields: StatusType[];
 }
 
@@ -29,6 +30,9 @@ export class ActionTree extends Component<ActionTreeProps, any> {
             const nextAction = nextProps.action as Action;
 
             if (this.props.filterFields !== nextProps.filterFields) {
+                return true;
+            }
+            if (this.props.actionsFilter !== nextProps.actionsFilter) {
                 return true;
             }
 
@@ -72,7 +76,7 @@ export class ActionTree extends Component<ActionTreeProps, any> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, filterFields } = props;
+        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, actionsFilter, filterFields } = props;
 
         switch (props.action.actionNodeType) {
             case 'action': {
@@ -80,6 +84,7 @@ export class ActionTree extends Component<ActionTreeProps, any> {
                 return (
                     <ActionCard action={action}
                         isSelected={action.id === selectedActionId}
+                        isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={actionSelectHandler}
                         isRoot={isRoot}>
                         {
@@ -98,9 +103,10 @@ export class ActionTree extends Component<ActionTreeProps, any> {
 
             case 'verification': {
                 const verification = props.action as Verification;
+                const isSelected = verification.messageId === selectedMessageId;
+                const isTransparent = !actionsFilter.includes(verification.status.status);
 
-                return this.renderVerification(verification, messageSelectHandler,
-                    verification.messageId === selectedMessageId, filterFields)
+                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, filterFields)
             }
 
             case 'link': {
@@ -157,11 +163,12 @@ export class ActionTree extends Component<ActionTreeProps, any> {
     }
 
     renderVerification({ name, status, entries, messageId }: Verification,
-        selectHandelr: Function, isSelected: boolean, filterFields: StatusType[]) {
+        selectHandelr: Function, isSelected: boolean, isTransaparent, filterFields: StatusType[]) {
 
         const className = ["action-card-body-verification",
-            (status ? status.status.toLowerCase() : ""),
-            (isSelected ? "selected" : "")].join(' ');
+            (status ? status.status : ""),
+            (isSelected ? "selected" : ""),
+            (isTransaparent && !isSelected ? "transparent" : "")].join(' ').toLowerCase();
 
         return (
             <div class="action-card">

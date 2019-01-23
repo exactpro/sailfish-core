@@ -13,6 +13,7 @@ interface ListProps {
     onMessageSelect: (id: number, status: StatusType) => void;
     selectedActionId: number;
     selectedMessageId: number;
+    actionsFilter: StatusType[];
     filterFields: StatusType[];
 }
 
@@ -31,13 +32,16 @@ class ActionsListBase extends Component<ListProps, {}> {
         if (nextProps.filterFields !== this.props.filterFields) {
             return true;
         }
+        if (nextProps.actionsFilter !== this.props.actionsFilter) {
+            return true;
+        }
 
         return nextProps.actions !== this.props.actions ||
             nextProps.selectedActionId !== this.props.selectedActionId ||
             nextProps.selectedMessageId !== this.props.selectedMessageId;
     }
 
-    render({ actions, selectedActionId, selectedMessageId, onSelect, filterFields, onMessageSelect }: ListProps) {
+    render({ actions, selectedActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect }: ListProps) {
         return (
             <div class="actions">
                 <div class="actions-controls"></div>
@@ -49,6 +53,7 @@ class ActionsListBase extends Component<ListProps, {}> {
                             selectedMessageId={selectedMessageId}
                             actionSelectHandler={onSelect}
                             messageSelectHandler={onMessageSelect}
+                            actionsFilter={actionsFilter}
                             filterFields={filterFields} 
                             ref={ref => this.elements[action.id] = ref}/>))}
                 </div>
@@ -60,7 +65,8 @@ class ActionsListBase extends Component<ListProps, {}> {
 export const ActionsList = connect((state: AppState) => ({
         actions: state.testCase.actions,
         selectedActionId: state.selected.actionId,
-        selectedMessageId: state.selected.actionId ? null : state.selected.messagesId[0]
+        selectedMessageId: state.selected.actionId ? null : state.selected.messagesId[0],
+        actionsFilter: state.actionsFilter
     }),
     dispatch => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),

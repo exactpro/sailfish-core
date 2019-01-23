@@ -28,8 +28,7 @@ export const MessagesTable = ({messages, selectedActionID}: TableProps) => {
 }
 
 const renderRows = (messages: Array<Message>, actionId: number) : Array<JSX.Element> => {
-    const relatedMessages = messages.filter(message => 
-        message.relatedActions ? message.relatedActions.includes(actionId) : false);
+    const relatedMessages = messages.filter(message => message.relatedActions && message.relatedActions.includes(actionId));
     if (!relatedMessages.length) {
         return messages.map(message => getRow(message));
     }

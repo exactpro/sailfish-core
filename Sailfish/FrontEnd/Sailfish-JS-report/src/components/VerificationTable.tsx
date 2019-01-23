@@ -56,9 +56,10 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
                         (param) => this.renderParams(param, fieldsFilter, padding + 1) as Element)
             ]
             );
-        } else if (fieldsFilter.includes(status)) {
+        } else {
+            const className = ["ver-table-row-value", !fieldsFilter.includes(status) ? "transparent" : ""].join(" ").toLowerCase();
             return (
-                <tr class="ver-table-row-value">
+                <tr class={className}>
                     <td style={{ paddingLeft: 10 * padding }}>
                         {name}
                     </td>

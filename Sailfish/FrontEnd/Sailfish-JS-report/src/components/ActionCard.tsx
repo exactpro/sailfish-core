@@ -11,9 +11,10 @@ interface CardProps {
     children?: JSX.Element[];
     isSelected?: boolean;
     isRoot?: boolean;
+    isTransaparent?: boolean;
 }
 
-export const ActionCard = ({ action, children, isSelected, onSelect, isRoot }: CardProps) => {
+export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent }: CardProps) => {
     const {
         name,
         status,
@@ -22,9 +23,22 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot }: C
         startTime,
         finishTime
     } = action;
-    const rootClassName = ["action-card", status.status.toLowerCase(), (isRoot && !isSelected ? "root" : null),
-        (isSelected ? "selected" : null)].join(' '),
-        headerClassName = ["action-card-header", status.status.toLowerCase()].join(' ');
+    const rootClassName = [
+            "action-card",
+            status.status,
+            (isRoot && !isSelected ? "root" : null),
+            (isSelected ? "selected" : null)
+        ].join(' ').toLowerCase(),
+        headerClassName = [
+            "action-card-header",
+            status.status,
+            (isTransaparent && !isSelected ? "transparent" : null)
+        ].join(' ').toLowerCase(),
+        inputParametersClassName = [
+            "action-card-body-params",
+            (isTransaparent && !isSelected ? "transparent" : null)
+        ].join(' ').toLowerCase();
+
 
     const time = getSecondsPeriod(startTime, finishTime);
 
@@ -49,7 +63,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot }: C
                     </div>
                 </div>
                 <div class="action-card-body">
-                    <div class="action-card-body-params">
+                    <div class={inputParametersClassName}>
                         <ExpandablePanel>
                             <h4>Input parameters</h4>
                             <ParamsTable
