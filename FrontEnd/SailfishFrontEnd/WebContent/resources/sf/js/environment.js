@@ -167,4 +167,31 @@ $(document).click(function(event) {
 	}
 });
 
+var variableSetsFilesTotal = -1;
+var variableSetsFilesUploaded = 0;
+var isVariableSetsUploading = false;
 
+function onVariableSetsImportStart() {
+    if(isVariableSetsUploading) {
+        return;
+    }
+
+    //file upload callback should call once
+    variableSetsFilesTotal = $(".ui-fileupload-preview").size();
+    variableSetsFilesUploaded = 0;
+    isVariableSetsUploading = true;
+}
+
+function onVariableSetsImportComplete() {
+    variableSetsFilesUploaded++;
+
+    if(variableSetsFilesUploaded === variableSetsFilesTotal) {
+        variableSetsFilesUploaded = 0;
+        variableSetsFilesTotal = -1;
+        isVariableSetsUploading = false;
+        PF('variableSetsImportDialog').hide();
+        PF('variableSetsDialogWidget').hide();
+
+        return;
+    }
+}

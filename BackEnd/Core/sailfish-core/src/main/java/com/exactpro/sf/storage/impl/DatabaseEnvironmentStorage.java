@@ -15,13 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.storage.IEnvironmentStorage;
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.StorageException;
@@ -32,6 +33,10 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     public DatabaseEnvironmentStorage(IStorage storage) {
         this.storage = storage;
+
+        if(!exists(DEFAULT_ENVIRONMENT)) {
+            add(DEFAULT_ENVIRONMENT);
+        }
     }
 
     @Override
@@ -40,8 +45,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Environment name cannot be blank");
         }
 
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
-            throw new StorageException("Default environment already exists");
+        if(exists(name)) {
+            throw new StorageException("Environment already exists: " + name);
         }
 
         StoredEnvironment environment = new StoredEnvironment();
@@ -56,7 +61,7 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Environment name cannot be blank");
         }
 
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
+        if(DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
             throw new StorageException("Cannot remove default environment");
         }
 
@@ -76,10 +81,6 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Environment name cannot be blank");
         }
 
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
-            return true;
-        }
-
         return storage.getEntityByField(StoredEnvironment.class, "name", name) != null;
     }
 
@@ -93,11 +94,11 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("New environment name cannot be blank");
         }
 
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(oldName)) {
+        if(DEFAULT_ENVIRONMENT.equalsIgnoreCase(oldName)) {
             throw new StorageException("Cannot rename default environment to: " + newName);
         }
 
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(newName)) {
+        if(DEFAULT_ENVIRONMENT.equalsIgnoreCase(newName)) {
             throw new StorageException("Cannot rename to default environment: " + newName);
         }
 
@@ -126,5 +127,28 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
         }
 
         return Collections.unmodifiableList(names);
+    }
+
+    @Override
+    public String getVariableSet(String name) {
+        StoredEnvironment environment = storage.getEntityByField(StoredEnvironment.class, "name", name);
+
+        if(environment == null) {
+            throw new StorageException("Environment doesn't exist: " + name);
+        }
+
+        return environment.getVariableSet();
+    }
+
+    @Override
+    public void setVariableSet(String name, String variableSet) {
+        StoredEnvironment environment = storage.getEntityByField(StoredEnvironment.class, "name", name);
+
+        if(environment == null) {
+            throw new StorageException("Environment doesn't exist: " + name);
+        }
+
+        environment.setVariableSet(variableSet);
+        storage.update(environment);
     }
 }

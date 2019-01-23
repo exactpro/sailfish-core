@@ -15,7 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.convertMapToServiceSettings;
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.convertServiceSettingsToMap;
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.copySettings;
+
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -26,6 +32,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
 
@@ -41,7 +49,8 @@ import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
     "name",
     "serviceHandlerClassName",
     "environment",
-    "settings"
+        "settings",
+        "variables"
 })
 public class ServiceDescription implements Cloneable, Serializable {
 	@XmlElement(name="type")
@@ -55,6 +64,8 @@ public class ServiceDescription implements Cloneable, Serializable {
 	private String environment;
 	@XmlAnyElement(lax=true)
 	private IServiceSettings settings;
+    @XmlElement(name = "variables")
+    private Map<String, String> variables = new HashMap<>();
 
 	public ServiceDescription()
 	{
@@ -107,7 +118,34 @@ public class ServiceDescription implements Cloneable, Serializable {
 		this.environment = environment;
 	}
 
-	@Override
+    public Map<String, String> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map<String, String> variables) {
+        this.variables = variables;
+    }
+
+    public ServiceName getServiceName() {
+        return new ServiceName(environment, name);
+    }
+
+    public IServiceSettings applyVariableSet(Map<String, String> variableSet) {
+        try {
+            Map<String, String> properties = new HashMap<>();
+            IServiceSettings result = settings.getClass().newInstance();
+
+            convertServiceSettingsToMap(properties, settings);
+            properties.replaceAll((key, value) -> variableSet.getOrDefault(variables.get(key), value));
+            convertMapToServiceSettings(result, properties);
+
+            return result;
+        } catch(InstantiationException | IllegalAccessException e) {
+            throw new EPSCommonException(e);
+        }
+    }
+
+    @Override
 	public ServiceDescription clone() {
 		ServiceDescription cloned = new ServiceDescription(type);
 
@@ -115,9 +153,15 @@ public class ServiceDescription implements Cloneable, Serializable {
 		cloned.setName(name);
 		cloned.setType(type);
 		cloned.setServiceHandlerClassName(serviceHandlerClassName);
-		cloned.setSettings(settings);
+
+        if(settings != null) {
+            cloned.setSettings(copySettings(settings));
+        }
+
+        if(variables != null) {
+            cloned.setVariables(new HashMap<>(variables));
+        }
 
 		return cloned;
 	}
-
 }

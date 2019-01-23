@@ -77,12 +77,18 @@ import com.exactpro.sf.storage.IOptionsStorage;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.util.PropertiesSettingsReaderSerializer;
 import com.exactpro.sf.testwebgui.servlets.ReportTask;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class TestToolsAPI {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestToolsAPI.class);
 
 	private static TestToolsAPI instance = null;
+
+    private static ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
 
 	private final ISFContext context;
 
@@ -349,9 +355,9 @@ public class TestToolsAPI {
         }
     }
 
-    public void addService(ServiceName serviceName, SailfishURI serviceURI, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
+    public void addService(ServiceDescription serviceDescription, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
     	IConnectionManager conManager = context.getConnectionManager();
-    	conManager.addService(serviceName, serviceURI, null, notifyListener).get();
+        conManager.addService(serviceDescription, notifyListener).get();
 	}
 
     public void copyService(String oldServiceName, String oldEnv, String newServiceName, String newEnv, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
@@ -468,6 +474,35 @@ public class TestToolsAPI {
     	conManager.addEnvironment(envName, null).get();
     }
 
+    public void removeVariableSet(String name) {
+        context.getConnectionManager().removeVariableSet(name);
+    }
+
+    public Set<String> getVariableSets() {
+        return context.getConnectionManager().getVariableSets();
+    }
+
+    public void setEnvironmentVariableSet(String environmentName, String variableSetName) {
+        context.getConnectionManager().setEnvironmentVariableSet(environmentName, variableSetName);
+    }
+
+    public String getEnvironmentVariableSet(String environmentName) {
+        return context.getConnectionManager().getEnvironmentVariableSet(environmentName);
+    }
+
+    public void importVariableSets(InputStream stream, boolean replace) throws IOException {
+        IConnectionManager connectionManager = context.getConnectionManager();
+        Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(stream);
+
+        variableSets.forEach((name, variableSet) -> {
+            if(connectionManager.isVariableSetExists(name) && !replace) {
+                return;
+            }
+
+            connectionManager.putVariableSet(name, variableSet);
+        });
+    }
+
     public ImportServicesResult importServices(InputStream inputStream, boolean isZip, String environment, boolean replace,
     		boolean skip, boolean skipEnvDescFile, IServiceNotifyListener notifyListener) throws FileNotFoundException {
 
@@ -548,8 +583,7 @@ public class TestToolsAPI {
                 }
 
                 descr.setEnvironment(environment);
-                conManager.addService(new ServiceName(descr.getEnvironment(), descr.getName()), descr.getType(), descr.getSettings(), notifyListener)
-                        .get();
+                conManager.addService(descr, notifyListener).get();
                 importedCount++;
                 lastImported = descr.getName();
                 importStatus = new ImportStatus(descr.getName(), ImportStatus.OK);

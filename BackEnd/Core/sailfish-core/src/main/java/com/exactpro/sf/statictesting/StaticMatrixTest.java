@@ -330,7 +330,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         }
 
         for (ServiceDescription service : services) {
-            connectionManager.addService(ServiceName.parse(service.getName()), service.getType(), service.getSettings(), null).get();
+            connectionManager.addService(service, null).get();
         }
     }
 

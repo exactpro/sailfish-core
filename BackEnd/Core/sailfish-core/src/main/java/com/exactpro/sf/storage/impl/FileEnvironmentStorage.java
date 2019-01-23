@@ -15,52 +15,63 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
+import static com.exactpro.sf.storage.impl.JSONSerializer.of;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.io.FilenameUtils.concat;
+
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.storage.FileBackedList;
 import com.exactpro.sf.storage.IEnvironmentStorage;
 import com.exactpro.sf.storage.StorageException;
-import com.google.common.collect.ImmutableList;
 
 public class FileEnvironmentStorage implements IEnvironmentStorage {
     private static final String ENVIRONMENTS_DIR = "environments";
 
-    private final List<String> environments;
+    private final List<FileEnvironment> environments;
 
     public FileEnvironmentStorage(String path, IWorkspaceDispatcher dispatcher) {
         Objects.requireNonNull(path, "path cannot be null");
         Objects.requireNonNull(dispatcher, "dispatcher cannot be null");
 
-        this.environments = new FileBackedList<>(FilenameUtils.concat(path, ENVIRONMENTS_DIR), JSONSerializer.of(String.class), dispatcher);
+        String directory = concat(path, ENVIRONMENTS_DIR);
+        this.environments = new FileBackedList<>(directory, of(FileEnvironment.class), dispatcher);
+
+        if(!environments.isEmpty()) {
+            try {
+                environments.get(0);
+            } catch(Exception e) {
+                int index = 0;
+
+                for(String environmentName : new FileBackedList<>(directory, of(String.class), dispatcher)) {
+                    environments.set(index++, new FileEnvironment().setName(environmentName));
+                }
+            }
+        }
+
+        if(!exists(DEFAULT_ENVIRONMENT)) {
+            add(DEFAULT_ENVIRONMENT);
+        }
     }
 
     @Override
     public void add(String name) {
-        if(exists(name)) {
-            throw new StorageException("Environment already exists: " + name);
-        }
-
-        environments.add(name);
+        requireNonExisting(name);
+        environments.add(new FileEnvironment().setName(name));
     }
 
     @Override
     public void remove(String name) {
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
-            throw new StorageException("Cannot remove default environment");
-        }
-
-        if(!exists(name)) {
-            throw new StorageException("Environment doesn't exist: " + name);
-        }
-
-        environments.remove(name);
+        requireNonDefault(name, "Cannot remove default environment");
+        requireExisting(name);
+        environments.removeIf(environment -> environment.name.equalsIgnoreCase(name));
     }
 
     @Override
@@ -69,35 +80,95 @@ public class FileEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Environment name cannot be blank");
         }
 
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
-            return true;
-        }
-
         StringUtil.validateFileName(name);
 
-        return environments.contains(name);
+        return environments.stream().anyMatch(environment -> environment.name.equalsIgnoreCase(name));
     }
 
     @Override
     public void rename(String oldName, String newName) {
-        if(ServiceName.DEFAULT_ENVIRONMENT.equalsIgnoreCase(oldName)) {
-            throw new StorageException("Cannot rename default environment to: " + newName);
-        }
+        requireNonDefault(oldName, "Cannot rename default environment to: " + newName);
+        requireNonDefault(newName, "Cannot rename to default environment: " + oldName);
+        requireExisting(oldName);
+        requireNonExisting(newName);
+        updateEnvironment(oldName, environment -> environment.setName(newName));
+    }
 
-        if(!exists(oldName)) {
-            throw new StorageException("Environment doesn't exist: " + oldName);
-        }
+    @Override
+    public void setVariableSet(String name, String variableSet) {
+        requireExisting(name);
+        updateEnvironment(name, environment -> environment.setVariableSet(variableSet));
+    }
 
-        if(exists(newName)) {
-            throw new StorageException("Environment already exists: " + newName);
-        }
-
-        environments.remove(oldName);
-        environments.add(newName);
+    @Override
+    public String getVariableSet(String name) {
+        requireExisting(name);
+        return environments.stream()
+                .filter(environment -> environment.name.equalsIgnoreCase(name))
+                .findFirst()
+                .get()
+                .variableSet;
     }
 
     @Override
     public List<String> list() {
-        return ImmutableList.copyOf(environments);
+        return environments.stream().map(FileEnvironment::getName).collect(toList());
+    }
+
+    public static class FileEnvironment {
+        private String name;
+        private String variableSet;
+
+        public String getName() {
+            return name;
+        }
+
+        public FileEnvironment setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public String getVariableSet() {
+            return variableSet;
+        }
+
+        public FileEnvironment setVariableSet(String variableSet) {
+            this.variableSet = variableSet;
+            return this;
+        }
+    }
+
+    private String requireNonExisting(String name) {
+        if(exists(name)) {
+            throw new StorageException("Environment already exists: " + name);
+        }
+
+        return name;
+    }
+
+    private String requireExisting(String name) {
+        if(!exists(name)) {
+            throw new StorageException("Environment does not exist:  " + name);
+        }
+
+        return name;
+    }
+
+    private String requireNonDefault(String name, String message) {
+        if(DEFAULT_ENVIRONMENT.equalsIgnoreCase(name)) {
+            throw new StorageException(message);
+        }
+
+        return name;
+    }
+
+    private void updateEnvironment(String name, Consumer<FileEnvironment> consumer) {
+        environments.replaceAll(environment -> {
+            if(environment.name.equalsIgnoreCase(name)) {
+                consumer.accept(environment);
+            }
+
+            return environment;
+        });
     }
 }

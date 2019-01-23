@@ -24,16 +24,23 @@ import java.io.OutputStream;
 import com.exactpro.sf.storage.ISerializer;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonInclude.Value;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class JSONSerializer<T> implements ISerializer<T> {
-    protected final ObjectMapper mapper = new ObjectMapper().setPropertyInclusion(Value.construct(Include.NON_NULL, Include.NON_NULL));
-    private final ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
-    private final Class<T> clazz;
+    private static final ObjectMapper MAPPER = new ObjectMapper().setDefaultPropertyInclusion(Value.construct(Include.NON_NULL, Include.NON_NULL));
+    private static final ObjectWriter WRITER = MAPPER.writerWithDefaultPrettyPrinter();
+
+    private final ObjectReader reader;
 
     public JSONSerializer(Class<T> clazz) {
-        this.clazz = clazz;
+        this.reader = MAPPER.readerFor(clazz);
+    }
+
+    public JSONSerializer(TypeReference<T> typeReference) {
+        this.reader = MAPPER.readerFor(typeReference);
     }
 
     @Override
@@ -45,7 +52,7 @@ public class JSONSerializer<T> implements ISerializer<T> {
 
     @Override
     public T deserialize(InputStream input) throws Exception {
-        return mapper.readValue(input, clazz);
+        return reader.readValue(input);
     }
 
     @Override
@@ -57,10 +64,14 @@ public class JSONSerializer<T> implements ISerializer<T> {
 
     @Override
     public void serialize(T object, OutputStream output) throws Exception {
-        writer.writeValue(output, object);
+        WRITER.writeValue(output, object);
     }
 
     public static <T> JSONSerializer<T> of(Class<T> clazz) {
         return new JSONSerializer<>(clazz);
+    }
+
+    public static <T> JSONSerializer<T> of(TypeReference<T> typeReference) {
+        return new JSONSerializer<>(typeReference);
     }
 }

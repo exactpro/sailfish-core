@@ -1,0 +1,78 @@
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+package com.exactpro.sf.storage.impl;
+
+import static java.util.stream.Collectors.toCollection;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+
+import com.exactpro.sf.storage.IStorage;
+import com.exactpro.sf.storage.StorageException;
+import com.exactpro.sf.storage.entities.StoredVariableSet;
+
+public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
+    private final IStorage storage;
+
+    public DatabaseVariableSetStorage(IStorage storage) {
+        this.storage = Objects.requireNonNull(storage, "storage cannot be null");
+    }
+
+    @Override
+    public Map<String, String> get(String name) {
+        StoredVariableSet variableSet = storage.getEntityByField(StoredVariableSet.class, "name", checkName(name));
+        return variableSet != null ? variableSet.getVariables() : null;
+    }
+
+    @Override
+    public void put(String name, Map<String, String> variableSet) {
+        StoredVariableSet storedVariableSet = storage.getEntityByField(StoredVariableSet.class, "name", checkName(name));
+
+        if(storedVariableSet == null) {
+            storedVariableSet = new StoredVariableSet().setName(name);
+            storage.add(storedVariableSet);
+        }
+
+        storedVariableSet.setVariables(checkVariableSet(variableSet));
+        storage.update(storedVariableSet);
+    }
+
+    @Override
+    public void remove(String name) {
+        StoredVariableSet storedVariableSet = storage.getEntityByField(StoredVariableSet.class, "name", checkName(name));
+
+        if(storedVariableSet == null) {
+            throw new StorageException("Variable set does not exist: " + name);
+        }
+
+        storage.delete(storedVariableSet);
+    }
+
+    @Override
+    public boolean exists(String name) {
+        return storage.getEntityByField(StoredVariableSet.class, "name", checkName(name)) != null;
+    }
+
+    @Override
+    public Set<String> list() {
+        return storage.getAllEntities(StoredVariableSet.class)
+                .stream()
+                .map(StoredVariableSet::getName)
+                .collect(toCollection(TreeSet::new));
+    }
+}

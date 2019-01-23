@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -39,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
 import com.exactpro.sf.services.IService;
-import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.testwebgui.BeanUtil;
@@ -204,7 +204,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
         	if (this.severalEdit == null) {
 
-                this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, false, null, null, null,
+                this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, false, null, null, null, null,
 		        		new ArrayList<EnvironmentNode>(), null, null);
 
 		        for (String name : this.serviceNamesToEdit) {
@@ -221,7 +221,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 		        			this.severalEdit.getNodeChildren().add(
 		        					new EnvironmentNode(toClone.getType(), new ServiceDescription(), toClone.getName(),
                                             toClone.getDescription(), toClone.isServiceParamRequired(), toClone.getInputMask(),
-                                            toClone.getValue(), toClone.getParamClassType(), null, null, null));
+                                            toClone.getValue(), toClone.getVariable(), toClone.getParamClassType(), null, null, toClone.getEnvironment()));
 		        		}
 
 		        	} else {
@@ -245,10 +245,15 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 		        			if (found == null) {
 		        				iter.remove();
 		        			} else {
-		        				if (!nullEquals(found.getValue(), paramInSeveral.getValue())) {
+                                if(!Objects.equals(found.getValue(), paramInSeveral.getValue())) {
 		        					paramInSeveral.setValue(null);
 		        					paramInSeveral.setDifferentValues(true);
 		        				}
+		        				
+                                if(!Objects.equals(found.getVariable(), paramInSeveral.getVariable())) {
+                                    paramInSeveral.setVariable(null);
+                                    paramInSeveral.setDifferentVariables(true);
+                                }
 		        			}
 		        		}
 		        	}
@@ -291,15 +296,6 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public TreeNode getParamRoot() {
     	return this.paramRoot;
-    }
-
-    private boolean nullEquals(Object obj1, Object obj2) {
-    	if (obj1 == obj2) return true;
-    	if (obj1 == null) {
-    		if (obj2 == null) return true;
-    		return false;
-    	}
-    	return obj1.equals(obj2);
     }
 
     public ServiceEventLazyModel<ServiceEventModel> getLazyEventsModel() {
@@ -473,6 +469,11 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 	        					param.setValue(paramInSeveral.getValue());
 	        				}
 
+                            if(!paramInSeveral.isDifferentVariables() ||
+                                    (paramInSeveral.isDifferentVariables() && StringUtils.isNotBlank(paramInSeveral.getVariable()))) {
+                                param.setVariable(paramInSeveral.getVariable());
+                            }
+
 	        				break;
 	        			}
 	        		}
@@ -489,20 +490,17 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
 	        boolean error = false;
 
-	        IServiceSettings settingsCopy = serviceDescription.clone().getSettings();
-	        String serviceHandlerClassNameCopy = serviceDescription.getServiceHandlerClassName();
-
 	        EnvironmentNode serviceParam = null;
 	        try {
 	            Iterator<EnvironmentNode> iterator = serviceNode.getNodeChildren().iterator();
 	            while(iterator.hasNext()) {
 	                serviceParam = iterator.next();
-	                logger.info("update param {}: {}", serviceParam.getName(), serviceParam.getValue());
+                    logger.info("update param {}: {} (variable: {})", serviceParam.getName(), serviceParam.getValue(), serviceParam.getVariable());
 	                serviceParam.updateParentProperty(serviceDescription);
 	            }
 
 	            try {
-	                serviceNode.saveParamToDataBase(serviceName, BeanUtil.getSfContext().getConnectionManager(), serviceDescription);
+                    serviceNode.saveParamToDataBase(BeanUtil.getSfContext().getConnectionManager(), serviceDescription);
 	            } catch (Exception e) {
 	                error = true;
 	                BeanUtil.addErrorMessage("Can not set parameters in database", "Problem with setting to " + serviceNode.getName());
@@ -512,10 +510,6 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
                 logger.error(e.getMessage(), e);
 	            error = true;
 	            BeanUtil.addErrorMessage("Can not set parameter", "Problem with setting to " + serviceParam.getName() + " value " + serviceParam.getValue());
-
-	            // rollback settings
-	            serviceDescription.setSettings(settingsCopy);
-	            serviceDescription.setServiceHandlerClassName(serviceHandlerClassNameCopy);
 	        }
 
 	        if (error) {
@@ -555,12 +549,12 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
     private EnvironmentNode createServiceNode(ServiceName serviceName) {
 
         ServiceDescription sd = BeanUtil.getSfContext().getConnectionManager().getServiceDescription(serviceName);
-
+        Map<String, String> variables = sd.getVariables();
         GuiSettingsProxy proxy = new GuiSettingsProxy(sd.getSettings());
         List<EnvironmentNode> params = new ArrayList<>();
 
         EnvironmentNode handlerClassParamNode = new EnvironmentNode(EnvironmentNode.Type.DESCRIPTION, sd,
-                "HandlerClassName", "", false, null, sd.getServiceHandlerClassName(), String.class, null,
+                "HandlerClassName", "", false, null, sd.getServiceHandlerClassName(), null, String.class, null,
                 notifyListener, null);
 
         params.add(handlerClassParamNode);
@@ -571,7 +565,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
                 EnvironmentNode paramNode = new EnvironmentNode(EnvironmentNode.Type.PARAMETER, sd, name,
                         proxy.getParameterDescription(name), proxy.checkRequiredParameter(name), proxy.getParameterMask(name),
-                        proxy.getParameterValue(name), proxy.getParameterType(name), null, notifyListener, null);
+                        proxy.getParameterValue(name), variables.get(name), proxy.getParameterType(name), null, notifyListener, serviceName.getEnvironment());
 
                 params.add(paramNode);
             }
@@ -580,7 +574,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         Collections.sort(params, Collections.reverseOrder());
 
         EnvironmentNode envNode = new EnvironmentNode(
-                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "", false, null, null, null, params,
+                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "", false, null, null, null, null, params,
                 notifyListener, serviceName.getEnvironment());
 
         envNode.setStatus(BeanUtil.getSfContext().getConnectionManager().getService(serviceName).getStatus());

@@ -16,6 +16,7 @@
 package com.exactpro.sf.storage.impl;
 
 import java.beans.PropertyDescriptor;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -38,7 +39,6 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.Instant;
 
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
@@ -119,7 +119,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
             criteria.add(Restrictions.eq("name", serviceName.getServiceName()));
 
-            if (null != serviceName.getEnvironment() && !serviceName.isDefault()) {
+            if(null != serviceName.getEnvironment()) {
                 criteria.createAlias("environment", "environment");
                 criteria.add(Restrictions.eq("environment.name", serviceName.getEnvironment()));
             } else {
@@ -145,7 +145,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 	@Override
 	public synchronized void addServiceDescription(ServiceDescription description) {
 
-		StoredService stored = createServiceStorage(description);
+        StoredService stored = convertServiceDescription(description);
 
 		Session session = null;
 		Transaction tx = null;
@@ -241,6 +241,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
         ServiceStorageHelper.setServiceSettingsToMap(params, description.getSettings());
 
 		stored.setParameters(params);
+        stored.setVariables(description.getVariables());
 
 		Session session = null;
 		Transaction tx = null;
@@ -494,14 +495,14 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		}
 	}
 
-	private StoredService createServiceStorage(ServiceDescription description) {
+    private StoredService convertServiceDescription(ServiceDescription description) {
 
 		StoredService stored = null;
 
 		synchronized (descriptionMap) {
 			stored = new StoredService();
 
-			if (description.getEnvironment() != null && !description.getEnvironment().equals("default")) {
+            if(description.getEnvironment() != null) {
 
 				Session session = null;
 
@@ -529,6 +530,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		stored.setName(description.getName());
 		stored.setType(description.getType().toString());
 		stored.setServiceHandlerClassName(description.getServiceHandlerClassName());
+        stored.setVariables(description.getVariables());
 
         ServiceStorageHelper.setServiceSettingsToMap(stored.getParameters(), description.getSettings());
 
@@ -560,6 +562,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		if (null != storedDescription.getEnvironment())
 			description.setEnvironment(storedDescription.getEnvironment().getName());
 		description.setServiceHandlerClassName(storedDescription.getServiceHandlerClassName());
+        description.setVariables(new HashMap<>(storedDescription.getVariables()));
 
         ServiceStorageHelper.setMapToServiceSettings(description.getSettings(), storedDescription.getParameters());
 
@@ -702,7 +705,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 			String environment = description.getEnvironment();
 			Query query;
 
-			if (environment != null && !environment.equals("default")) {
+            if(environment != null) {
 				strQuery += " and environment.name = :environment";
                 query =  session.createQuery(strQuery);
                 query.setParameter("environment", environment);

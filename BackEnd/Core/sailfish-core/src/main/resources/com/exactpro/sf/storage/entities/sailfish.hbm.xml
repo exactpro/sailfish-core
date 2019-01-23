@@ -29,6 +29,7 @@
 		</id>
 
 		<property name="name" column="NAME" unique="true" />
+        <property name="variableSet" column="VARIABLE_SET"/>
 
 		<set name="services" inverse="true" lazy="true" cascade="all" fetch="join">
 			<key column="environment_id" />
@@ -55,6 +56,12 @@
 			<index column="parameter_name" type="string" length="50"/>
 			<element column="parameter_value" type="string" length="32672"/>
 		</map>
+
+        <map name="variables" table="SERVICE_VARIABLES" cascade="all">
+            <key column="id"/>
+            <index column="parameter_name" type="string" length="50"/>
+            <element column="variable_name" type="string" length="50"/>
+        </map>
 	</class>
 
 	<class name="StoredServiceEvent" table="SF_SERVICE_EVENTS">
@@ -185,4 +192,17 @@
 		<property name="optionName" column="OPTION_NAME" unique="true" not-null="true"/>
 		<property name="optionValue" column="OPTION_VALUE" />
 	</class>
+
+    <class name="StoredVariableSet" table="VARIABLE_SETS">
+        <id name="id" column="ID">
+            <generator class="assigned"/>
+        </id>
+        <version name="version" column="VERSION" unsaved-value="null"/>
+        <property name="name" column="NAME"/>
+        <map name="variables" table="VARIABLE_SET_VARIABLES" cascade="all" lazy="false">
+            <key column="id"/>
+            <index column="variable_name" type="string" length="50"/>
+            <element column="variable_value" type="string" length="32762"/>
+        </map>
+    </class>
 </hibernate-mapping>

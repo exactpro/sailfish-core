@@ -31,11 +31,11 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
+import org.apache.commons.lang3.StringUtils;
 import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIConverter;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -64,13 +64,15 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     private final SailfishURI parentType;
     
 	private Object value;
+    private String variable;
     private String name;
     private String environment;
-	private ServiceStatus status;
-	
+    private ServiceStatus status;
+
     private String serviceParamRenderComponent = "defaultTextbox";
 	
 	private boolean differentValues = false; // for several services editing
+    private boolean differentVariables = false;
 	
 	static {
 		
@@ -111,6 +113,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 			boolean serviceParamRequired,
             String inputMask,
 			Object value,
+            String variable,
 			Class<?> paramClassType,
 			List<EnvironmentNode> nodes,
 			IServiceNotifyListener notifyListener,
@@ -120,6 +123,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		this.name = name;
 		this.environment = environment;
 		this.value = value;
+        this.variable = variable;
 		this.nodes = nodes;
 		this.paramClassType = paramClassType;
 		this.notifyListener = notifyListener;
@@ -160,6 +164,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				false,
                 null,
 				"false",
+                null,
 				boolean.class,
 				null,
 				null,
@@ -175,6 +180,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				"name='" + name + '\'' +
 				", description='" + description + '\'' +
 				", value=" + value +
+                ", variable=" + variable +
 				", type=" + type +
 				", id='" + id + '\'' +
 				", nodes=" + nodes +
@@ -214,8 +220,16 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		}
 	}
 
-	public void saveParamToDataBase(ServiceName serviceName, IConnectionManager conManager, ServiceDescription parent) throws Exception {
-		conManager.updateService(serviceName, parent.getSettings(), notifyListener).get(); 
+    public String getVariable() {
+        return variable;
+    }
+
+    public void setVariable(String variable) {
+        this.variable = variable;
+    }
+
+    public void saveParamToDataBase(IConnectionManager conManager, ServiceDescription parent) throws Exception {
+        conManager.updateService(parent, notifyListener).get();
 	}
 	
 	private synchronized String convert(Object value) {
@@ -243,6 +257,12 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				convertedValue = convert(this.value, paramClassType);
 			}
 			BeanUtils.setProperty(parent.getSettings(), name, convertedValue);
+
+            if(StringUtils.isBlank(variable)) {
+                parent.getVariables().remove(name);
+            } else {
+                parent.getVariables().put(name, variable);
+            }
 		} else if ( type == Type.DESCRIPTION ) {
 			parent.setServiceHandlerClassName(this.value.toString());
 		}
@@ -347,7 +367,28 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		this.differentValues = differentValues;
 	}
 
+    public boolean isDifferentVariables() {
+        return differentVariables;
+    }
+
+    public void setDifferentVariables(boolean differentVariables) {
+        this.differentVariables = differentVariables;
+    }
+
     public String getInputMask() {
         return inputMask;
+    }
+
+    public String getFinalValue() {
+        if(StringUtils.isNotBlank(variable) && environment != null) {
+            IConnectionManager manager = BeanUtil.getSfContext().getConnectionManager();
+            String environmentVariableSet = manager.getEnvironmentVariableSet(environment);
+
+            if(environmentVariableSet != null) {
+                return manager.getVariableSet(environmentVariableSet).getOrDefault(variable, getValue());
+            }
+        }
+
+        return getValue();
     }
 }

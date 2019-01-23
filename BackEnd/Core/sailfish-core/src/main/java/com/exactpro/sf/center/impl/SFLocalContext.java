@@ -89,12 +89,14 @@ import com.exactpro.sf.storage.IOptionsStorage;
 import com.exactpro.sf.storage.IServiceStorage;
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.ITestScriptStorage;
+import com.exactpro.sf.storage.IVariableSetStorage;
 import com.exactpro.sf.storage.impl.DatabaseAuthStorage;
 import com.exactpro.sf.storage.impl.DatabaseEnvironmentStorage;
 import com.exactpro.sf.storage.impl.DatabaseMatrixStorage;
 import com.exactpro.sf.storage.impl.DatabaseMessageStorage;
 import com.exactpro.sf.storage.impl.DatabaseOptionsStorage;
 import com.exactpro.sf.storage.impl.DatabaseServiceStorage;
+import com.exactpro.sf.storage.impl.DatabaseVariableSetStorage;
 import com.exactpro.sf.storage.impl.DefaultTestScriptStorage;
 import com.exactpro.sf.storage.impl.DummyAuthStorage;
 import com.exactpro.sf.storage.impl.FileEnvironmentStorage;
@@ -102,6 +104,7 @@ import com.exactpro.sf.storage.impl.FileMatrixStorage;
 import com.exactpro.sf.storage.impl.FileMessageStorage;
 import com.exactpro.sf.storage.impl.FileOptionStorage;
 import com.exactpro.sf.storage.impl.FileServiceStorage;
+import com.exactpro.sf.storage.impl.FileVariableSetStorage;
 import com.exactpro.sf.storage.impl.HibernateFactory;
 import com.exactpro.sf.storage.impl.HibernateStorage;
 import com.exactpro.sf.storage.impl.MemoryServiceStorage;
@@ -309,6 +312,7 @@ public class SFLocalContext implements ISFContext {
         		staticServiceManager,
         		serviceStorage,
         		createEnvironmentStorage(envSettings, storage, workspaceDispatcher),
+                createVariableSetStorage(envSettings, storage, workspaceDispatcher),
         		this.serviceContext);
         this.disposables.add(this.connectionManager);
 
@@ -421,6 +425,17 @@ public class SFLocalContext implements ISFContext {
             throw new EPSCommonException("Unsupported auth storage type. Check your descriptor.xml file.");
 		}
 	}
+
+    private IVariableSetStorage createVariableSetStorage(EnvironmentSettings settings, IStorage storage, IWorkspaceDispatcher dispatcher) {
+        switch(settings.getStorageType()) {
+        case DB:
+            return new DatabaseVariableSetStorage(storage);
+        case FILE:
+            return new FileVariableSetStorage(settings.getFileStoragePath(), dispatcher);
+        default:
+            throw new EPSCommonException("Unsupported variable set storage type. Check your descriptor.xml file.");
+        }
+    }
 
 	@Override
 	public IServiceContext getServiceContext() {

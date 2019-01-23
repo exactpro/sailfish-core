@@ -15,13 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import static com.exactpro.sf.storage.impl.JSONSerializer.of;
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.io.FilenameUtils.concat;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -32,33 +34,23 @@ import com.exactpro.sf.storage.StorageException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class FileOptionStorage implements IOptionsStorage {
+    private static final ISerializer<Map<String, String>> SERIALIZER = of(new TypeReference<Map<String, String>>() {});
     private static final String OPTIONS_FILE_NAME = "options.json";
 
     private final String path;
     private final IWorkspaceDispatcher dispatcher;
     private final Map<String, String> options;
-    private final ISerializer<Map<String, String>> serializer;
 
     public FileOptionStorage(String path, IWorkspaceDispatcher dispatcher) {
-        Objects.requireNonNull(path, "path cannot be null");
-        Objects.requireNonNull(dispatcher, "dispatcher cannot be null");
-
-        this.path = path;
-        this.dispatcher = dispatcher;
-
-        this.serializer = new JSONSerializer<Map<String, String>>(null) {
-            @Override
-            public Map<String, String> deserialize(InputStream input) throws Exception {
-                return mapper.readValue(input, new TypeReference<Map<String, String>>(){});
-            }
-        };
+        this.path = requireNonNull(path, "path cannot be null");
+        this.dispatcher = requireNonNull(dispatcher, "dispatcher cannot be null");
 
         try {
             if(dispatcher.exists(FolderType.ROOT, path, OPTIONS_FILE_NAME)) {
                 File file = dispatcher.getFile(FolderType.ROOT, path, OPTIONS_FILE_NAME);
 
                 try {
-                    this.options = this.serializer.deserialize(file);
+                    this.options = SERIALIZER.deserialize(file);
                 } catch(Exception e) {
                     throw new StorageException("Failed to deserialize options file: " + file.getCanonicalPath());
                 }
@@ -66,7 +58,7 @@ public class FileOptionStorage implements IOptionsStorage {
                 this.options = new HashMap<>();
             }
         } catch(WorkspaceSecurityException | IOException e) {
-            throw new StorageException("Failed to initialize file: " + path, e);
+            throw new StorageException("Failed to initialize file: " + concat(path, OPTIONS_FILE_NAME), e);
         }
     }
 
@@ -76,7 +68,7 @@ public class FileOptionStorage implements IOptionsStorage {
 
         try {
             File file = dispatcher.createFile(FolderType.ROOT, true, path, OPTIONS_FILE_NAME);
-            serializer.serialize(options, file);
+            SERIALIZER.serialize(options, file);
         } catch(Exception e) {
             throw new StorageException("Failed to set option '" + key + "' to: " + value, e);
         }
