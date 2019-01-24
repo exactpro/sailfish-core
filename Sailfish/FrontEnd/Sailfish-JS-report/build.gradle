@@ -1,4 +1,4 @@
-/*	To get production build files, run './gradlew npmInstall buildDev'.
+/*	To get production build files, run './gradlew build'.
 *	Files will be located at build folder (index.html and bundle.js)
 */
 
@@ -26,28 +26,14 @@ ext {
 }
 
 node {
-    // Version of node to use.
     version = '10.1.0'
-    // Version of npm to use.
     npmVersion = '5.6.0'
-    // Base URL for fetching node distributions (change if you have a mirror).
     distBaseUrl = 'http://nodejs.org/dist'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
     download = true
 
     workDir = npmDir
-}
-
-task npmInstallDependencies(type: Exec) {
-	inputs.file npmPackageInfo
-    outputs.dir node_modules
-
-    commandLine 'npm', 'install'
-
-    doFirst {
-        println 'Npm should be installed'
-    }
 }
 
 task fixSass(type: NpmTask, dependsOn: 'npmInstall') {
@@ -58,14 +44,12 @@ task buildProd(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
 	args = ['run', 'build']
 }
 
-task buildDev(type: Exec) {
-	dependsOn npmInstall
-	commandLine 'npm', 'run', 'build-dev'
+task buildDev(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
+	args = ['run', 'dev-build']
 }
 
-task devServer(type: Exec) {
-	dependsOn npmInstall
-	commandLine 'npm', 'run', 'dev-server'
+task devServer(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
+	args = ['run', 'dev-server']
 }
 
 task build(dependsOn: [
