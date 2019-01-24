@@ -36,7 +36,7 @@ body {
 }
 
 .button-root {
-    @include nonselect;
+    @include unselectable;
     display: inline-flex;
     height: 38px;
     justify-content: center;

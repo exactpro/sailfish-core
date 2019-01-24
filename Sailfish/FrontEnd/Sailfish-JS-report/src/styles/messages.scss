@@ -222,7 +222,7 @@
             padding-top: 10px;
 
             &-showraw {
-                @include nonselect;
+                @include unselectable;
                 display: flex;
                 align-items: center;
                 cursor: pointer;
@@ -250,7 +250,7 @@
             }
 
             &-copy-all {
-                @include nonselect;
+                @include unselectable;
                 display: inline-flex;
                 align-items: center;
                 margin-left: 10px;

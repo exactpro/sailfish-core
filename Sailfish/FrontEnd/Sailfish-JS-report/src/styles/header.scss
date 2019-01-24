@@ -58,7 +58,7 @@
         }
 
         &-button {
-            @include nonselect;
+            @include unselectable;
             display: flex;
             justify-content: center;
             align-items: center;

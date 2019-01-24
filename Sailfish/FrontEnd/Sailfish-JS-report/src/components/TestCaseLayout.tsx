@@ -153,7 +153,8 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                 </div> */}
                 {splitMode ?
                     (<div class="layout-content split">
-                        <SplitView>
+                        <SplitView
+                            minPanelPercentageWidth={30}>
                             {primaryPaneElement}
                             {secondaryPaneElement}
                         </SplitView>

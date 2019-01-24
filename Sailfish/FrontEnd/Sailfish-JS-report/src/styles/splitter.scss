@@ -1,34 +1,71 @@
-#splitter-root  {
+@import "vars";
+
+.splitter  {
     width: 100%;
     height: 100%;
     display: grid;
     grid-template-rows: 100%;
-    grid-template-columns: calc(50% - 10px) 20px calc(50% - 10px);
-    grid-template-areas: "left-pane splitter-bar right-pane"
-}
+    grid-template-columns: calc(50% - 10px) 25px calc(50% - 10px);
+    grid-template-areas: "left-pane splitter-bar right-pane";
+    position: relative;
 
-.splitter-bar {
-    grid-area: splitter-bar;
-    height: 100%;
-    background-color: #F2F2F2;
-    cursor: col-resize;
-    display: flex;
-    align-items: center;
-
-    &-icon {
-        height: 20px;
-        width: 20px;
-        background-size: 100%;
-        background-image: url('../../resources/icons/splitter.svg');
+    &.dragging {
+        @include unselectable;
     }
-}
 
-#left-pane {
-    grid-area: left-pane;
-    height: 100%;
-}
+    &-bar {
+        grid-area: splitter-bar;
+        height: 100%;
+        cursor: col-resize;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
 
-#right-pane {
-    grid-area: right-pane;
-    height: 100%;
+        &-icon {
+            margin-top: 50px;
+            height: 23px;
+            width: 23px;
+            background-size: 100%;
+            background-image: url('../../resources/icons/splitter-disabled.svg');
+        }
+
+        &.dragging {
+            grid-area: initial;
+            position: absolute;
+        }
+
+        &:hover:after {
+            content: "";
+            height: calc(100% - 55px);
+            width: 0px;
+            border: 1.5px solid $splitterColor;
+            position: absolute;
+            left: 11px;
+            top: 55px;
+            border-radius: 5px;
+        }
+
+        &:hover > &-icon {
+            background-image: url('../../resources/icons/splitter-active.svg');
+        }
+    }
+
+    &-pane {
+        &-left {
+            grid-area: left-pane;
+        }
+
+        &-right {
+            grid-area: right-pane;
+        }
+
+        &-left, &-right {
+            height: 100%;
+
+            &.dragging {
+                filter: opacity(0.3);
+            }
+        }
+    }
 }
