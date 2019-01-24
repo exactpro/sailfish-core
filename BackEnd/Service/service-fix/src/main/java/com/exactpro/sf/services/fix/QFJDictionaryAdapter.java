@@ -672,7 +672,8 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 	@Override
 	public boolean isMsgField(String msgType, int tag) {
-		return mesgFields.get(msgType).containsKey(tag);
+		final HashMap<Integer, IFieldStructure> fields = mesgFields.get(msgType);
+		return fields != null && fields.containsKey(tag);
 	}
 
 	@Override
