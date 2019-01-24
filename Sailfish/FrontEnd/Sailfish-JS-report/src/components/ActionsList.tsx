@@ -24,6 +24,7 @@ class ActionsListBase extends Component<ListProps, {}> {
     scrollToAction = (actionId: number) => {
         if (this.elements[actionId]) {
             // smooth behavior is disabled here
+            // base - get HTMLElement by ref
             this.elements[actionId].base.scrollIntoView({block: "start"});
         }    
     }

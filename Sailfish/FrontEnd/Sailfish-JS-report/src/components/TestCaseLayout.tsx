@@ -4,7 +4,7 @@ import { Header } from './Header';
 import { SplitView } from './SplitView'
 import { ActionsList } from './ActionsList';
 import TestCase from '../models/TestCase';
-import {TogglerButton} from './TogglerButton';
+import {ToggleButton} from './ToggleButton';
 import {MessagesCardList} from './MessagesCardList';
 import { StatusPane } from './StatusPane';
 import { LogsPane } from './LogsPane';
@@ -33,11 +33,11 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
         const leftButtons = (
             <div class="layout-buttons">
-                <TogglerButton
+                <ToggleButton
                     isToggled={leftPane == Pane.Actions}
                     click={() => leftPaneHandler(Pane.Actions)}
                     text="Actions"/>
-                <TogglerButton
+                <ToggleButton
                     isToggled={leftPane == Pane.Status}
                     click={() => leftPaneHandler(Pane.Status)}
                     text="Status"/>
@@ -46,12 +46,12 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
         const rightButtons = (
             <div class="layout-buttons">
-                <TogglerButton
+                <ToggleButton
                     isToggled={leftPane == Pane.Messages || 
                         (rightPane == Pane.Messages && splitMode)}
                     click={() => splitMode ? rightPaneHandler(Pane.Messages) : leftPaneHandler(Pane.Messages)}
                     text="Messages"/>
-                <TogglerButton
+                <ToggleButton
                     isToggled={leftPane == Pane.Logs || 
                         (rightPane == Pane.Logs && splitMode)}
                     click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}

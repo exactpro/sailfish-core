@@ -27,7 +27,7 @@ const ReportLayout = connect(
         report: state.report
     }),
     dispatch => ({
-        onTestCaseSelect: (testCaseName: string) => dispatch(setTestCasePath(testCaseName))
+        onTestCaseSelect: (testCaseLink: string) => dispatch(setTestCasePath(testCaseLink))
     })
 )(ReportLayoutBase);
 

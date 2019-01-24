@@ -8,7 +8,7 @@ interface ButtonProps {
     theme?: string;
 }
 
-export const TogglerButton = ({click, isToggled, text, theme}: ButtonProps) => {
+export const ToggleButton = ({click, isToggled, text, theme}: ButtonProps) => {
     const className = ["button-root", (theme || "default"), (isToggled ? "toggled" : "")].join(' ');
 
     return (<div class={className} onClick={e => click(text)}>

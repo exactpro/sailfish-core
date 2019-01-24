@@ -26,14 +26,14 @@ interface HeaderProps {
     prevTestCaseHandler: () => any;
     // TODO: implement
     //goTopHandler: () => any;
-    backToListHandelr: () => any;
+    backToListHandler: () => any;
     switchSplitMode: () => any;
     switchActionsFilter: (status: StatusType) => any;
     switchFieldsFilter: (status: StatusType) => any;
     showFilterHandler: () => any;
 }
 
-const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandelr,
+const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler,
     switchSplitMode: switchSplitMode, switchActionsFilter, switchFieldsFilter, showFilter, showFilterHandler }: HeaderProps) => {
 
     const {
@@ -47,7 +47,7 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTest
     } = testCase;
     
     const statusClass = ["header-status", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
-        prevButtonClas = ["header-status-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
+        prevButtonClass = ["header-status-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
         nextButtonClass = ["header-status-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
 
     const period = getSecondsPeriod(startTime, finishTime);
@@ -56,7 +56,7 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTest
         <div class="header">
             <div class={statusClass}>
                 <div class="header-status-button"
-                    onClick={backToListHandelr}>
+                    onClick={backToListHandler}>
                     <div class="header-status-button-icon list" />
                     <h3>Back to list</h3>
                 </div>
@@ -66,7 +66,7 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTest
                     <h3>Go top</h3>
                 </div>
                 <div class="header-status-name">
-                    <div class={prevButtonClas}
+                    <div class={prevButtonClass}
                         onClick={prevTestCaseHandler} />
                     <h1>{(name || 'Test Case')} — {status.status} — {period}</h1>
                     <div class={nextButtonClass}
@@ -120,7 +120,7 @@ export const Header = connect(
     dispatch => ({
         nextTestCaseHandler: () => dispatch(nextTestCase()),
         prevTestCaseHandler: () => dispatch(prevTestCase()),
-        backToListHandelr: () => dispatch(resetTestCase()),
+        backToListHandler: () => dispatch(resetTestCase()),
         switchSplitMode: () => dispatch(switchSplitMode()),
         switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),
         switchActionsFilter: (status: StatusType) => dispatch(switchActionsFilter(status)),
