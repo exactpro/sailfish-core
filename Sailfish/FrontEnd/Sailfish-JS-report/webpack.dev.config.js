@@ -10,6 +10,7 @@ module.exports = {
     contentBase: path.join(__dirname, 'src'),
     compress: true,
     port: 9001,
+    host: "0.0.0.0"
   },
   resolve: {
     extensions: ['.ts', '.js', '.tsx', '.scss']
@@ -37,12 +38,12 @@ module.exports = {
         ]
       },
       {
-        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        test: /\.(woff(2)?|ttf|eot|svg|jpg)(\?v=\d+\.\d+\.\d+)?$/,
         use: [{
             loader: 'file-loader',
             options: {
                 name: '[name].[ext]',
-                outputPath: 'fonts/'
+                outputPath: 'resources/'
             }
         }]
       }

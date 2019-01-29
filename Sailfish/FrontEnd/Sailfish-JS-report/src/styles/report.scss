@@ -1,0 +1,79 @@
+@import "vars";
+
+.report {
+    width: 100%;
+    display: grid;
+    grid-template-rows: 47px auto;
+    grid-template-columns: 1fr 500px;
+    grid-template-areas: "report-header report-header"
+                         "report-testcases report-info";
+
+    &-header {
+        grid-area: report-header;
+        width: 100%;
+        height: 100%;
+        padding: 5px;
+        border: 0px solid transparent;
+        border-radius: 5px;
+        background: $reportHeaderBackground;
+        font-size: 18px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &-testcases {
+        grid-area: report-testcases;
+        
+        &-list {
+            line-height: 25px;
+            margin: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    }
+
+    &-info {
+        grid-area: report-info;
+        margin: 10px;
+        box-shadow: 0 0 15px 5px $reportInfoShadowColor;
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+
+        &-logo {
+            margin-top: 20px;
+            background-image: url(../../resources/icons/sf-logo.jpg);
+            background-size: 100%;
+            width: 172px;
+            height: 150px;
+        }
+
+        &-table {
+            margin-top: 20px;
+
+            &-name {
+                width: 30%;
+                font-weight: bold;
+            }
+
+            &-value {
+                width: 70%;
+                word-wrap: break-word;
+                overflow: hidden;
+
+                &-plugins {
+                    overflow: scroll;
+                }
+            }
+
+            table {
+                table-layout: fixed;
+                width: 100%;
+            }
+        }
+    }
+}
