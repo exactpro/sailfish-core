@@ -4,8 +4,8 @@ import { Header } from './Header';
 import { SplitView } from './SplitView'
 import { ActionsList, ActionsListBase } from './ActionsList';
 import TestCase from '../models/TestCase';
-import {ToggleButton} from './ToggleButton';
-import {MessagesCardList, MessagesCardListBase} from './MessagesCardList';
+import { ToggleButton } from './ToggleButton';
+import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';
 import { StatusPane } from './StatusPane';
 import { LogsPane } from './LogsPane';
 import AppState from '../state/AppState';
@@ -43,34 +43,48 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
         }
     }
 
-    render({testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler} : LayoutProps) {
+    render({ testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler }: LayoutProps) {
+
 
         const leftButtons = (
             <div class="layout-buttons">
                 <ToggleButton
                     isToggled={leftPane == Pane.Actions}
                     click={() => leftPaneHandler(Pane.Actions)}
-                    text="Actions"/>
+                    text="Actions" />
                 <ToggleButton
                     isToggled={leftPane == Pane.Status}
                     click={() => leftPaneHandler(Pane.Status)}
-                    text="Status"/>
+                    text="Status" />
             </div>
         )
 
+        // DISABLED known bugs and logs
         const rightButtons = (
             <div class="layout-buttons">
                 <ToggleButton
-                    isToggled={leftPane == Pane.Messages || 
+                    isToggled={leftPane == Pane.Messages ||
                         (rightPane == Pane.Messages && splitMode)}
                     click={() => splitMode ? rightPaneHandler(Pane.Messages) : leftPaneHandler(Pane.Messages)}
-                    text="Messages"/>
-                {/* DISABLED
+                    text="Messages" />
+                <div style={{filter: "opacity(0.4)"}} title="Not implemeted">
                     <ToggleButton
-                    isToggled={leftPane == Pane.Logs || 
+                        isToggled={false}
+                        text="Logs"
+                        click={() => alert("Not implemented...")}/>
+                </div>
+                <div style={{filter: "opacity(0.4)"}} title="Not implemeted">
+                    <ToggleButton
+                        isToggled={false}
+                        text="Known bugs"
+                        click={() => alert("Not implemented...")}/>
+                </div>
+
+                {/* <ToggleButton
+                    isToggled={leftPane == Pane.Logs ||
                         (rightPane == Pane.Logs && splitMode)}
                     click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}
-                    text="Logs"/> */}
+                    text="Logs" /> */}
             </div>
         )
 
@@ -78,7 +92,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
         const actionsPane = (
             <div class="layout-content-pane">
                 {leftButtons}
-                <ActionsList ref={ref => this.actionsListRef = ref ? ref._component : null}/>
+                <ActionsList ref={ref => this.actionsListRef = ref ? ref._component : null} />
             </div>
         );
 
@@ -86,21 +100,21 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
         const messagesPane = (
             <div class="layout-content-pane">
                 {rightButtons}
-                <MessagesCardList ref={ref => this.messagesListRef = ref ? ref._component : null}/>
+                <MessagesCardList ref={ref => this.messagesListRef = ref ? ref._component : null} />
             </div>
         );
 
         const statusPane = (
             <div class="layout-content-pane">
                 {leftButtons}
-                <StatusPane status={testCase.status}/>
+                <StatusPane status={testCase.status} />
             </div>
         );
 
         const logsPane = (
             <div class="layout-content-pane">
                 {rightButtons}
-                <LogsPane logs={testCase.logs}/>
+                <LogsPane logs={testCase.logs} />
             </div>
         );
 
@@ -114,7 +128,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
             case Pane.Messages:
                 primaryPaneElement = messagesPane;
                 break;
-            case Pane.Status: 
+            case Pane.Status:
                 primaryPaneElement = statusPane;
                 break;
             case Pane.Logs:
@@ -142,7 +156,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
         return (
             <div class={rootClassName}>
                 <div class="layout-header">
-                    <Header goTopHandler={() => this.scrollToTopHandler()}/>
+                    <Header goTopHandler={() => this.scrollToTopHandler()} />
                 </div>
                 {splitMode ?
                     (<div class="layout-content split">
@@ -151,7 +165,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                             {primaryPaneElement}
                             {secondaryPaneElement}
                         </SplitView>
-                    </div>) : 
+                    </div>) :
                     (<div class="layout-content">
                         {primaryPaneElement}
                     </div>)}
@@ -168,7 +182,7 @@ const TestCaseLayout = connect(
         leftPane: state.leftPane,
         rightPane: state.rightPane
     }),
-    dispatch => ({ 
+    dispatch => ({
         leftPaneHandler: (pane: Pane) => dispatch(setLeftPane(pane)),
         rightPaneHandler: (pane: Pane) => dispatch(setRightPane(pane))
     })

@@ -93,10 +93,27 @@
 
         &-session-icon {
             grid-area: session-icon;
-            background-image: url('../../resources/icons/arr2-right.svg');
+            background-image: url('../../resources/icons/session-icon.svg');
             height: 25px;
             width: 25px;
             background-size: 100%;
+        }
+
+        &-prediction {
+            grid-area: prediction-icon;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &-icon {
+                background-image: url(../../resources/icons/ml-message.svg);
+                background-size: 100%;
+                width: 22px;
+                height: 22px;
+                // TODO - DISABLED
+                filter: opacity(0.2);
+                cursor: not-allowed;
+            }
         }
 
         &-action {

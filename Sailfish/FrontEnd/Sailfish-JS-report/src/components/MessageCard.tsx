@@ -93,6 +93,12 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
                             style={{filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)`}}/>
                         : null
                     }
+                    {/* DISABLED */}
+                    <div class="message-card-header-prediction"
+                        title="Not implemeted">
+                        <div class="message-card-header-prediction-icon"
+                            onClick={() => alert("Not implemented...")}/>
+                    </div>
                 </div>
                 <div class={contentClass}>
                     <div class="message-card-content-human">
