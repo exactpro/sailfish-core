@@ -268,8 +268,10 @@ public class QFJIMessageConverter
                         componentParent = componentParent.getField(fieldPath.get(i).getName());
                     }
 
-                    String fieldToRemove = fieldPath.get(fieldPath.size() - 1).getName();
-                    componentParent.removeField(fieldToRemove);
+                    if (!fieldPath.isEmpty()) {
+                        String fieldToRemove = fieldPath.get(fieldPath.size() - 1).getName();
+                        componentParent.removeField(fieldToRemove);
+                    }
                 }
 			} else {
 				try {

@@ -2636,6 +2636,31 @@
 			<attribute name="tag" type="java.lang.Integer">11111</attribute>
 			<attribute name="fixtype" type="java.lang.String">UTCTIMESTAMPSECONDPRECISION</attribute>
 		</field>
+        <field id="field-QuoteSetID" name="QuoteSetID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">302</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-ApplID" name="ApplID" type="java.lang.String">
+            <attribute name="tag" type="java.lang.Integer">1180</attribute>
+            <attribute name="fixtype" type="java.lang.String">STRING</attribute>
+        </field>
+        <field id="field-QuoteStatus" name="QuoteStatus" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">297</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+            <value name="ACCEPTED">0</value>
+            <value name="CANCELLED">17</value>
+            <value name="REJECTED">5</value>
+            <value name="REMOVED_FROM_MARKET">6</value>
+            <value name="EXPIRED">7</value>
+        </field>
+        <field id="field-QuoteRejectReason" name="QuoteRejectReason" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">300</attribute>
+            <attribute name="fixtype" type="java.lang.String">INT</attribute>
+        </field>
+        <field id="field-NoQuoteSets" name="NoQuoteSets" type="java.lang.Integer">
+            <attribute name="tag" type="java.lang.Integer">296</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+        </field>
 	</fields>
 	<messages>
 		<message name="TradingParty_NoPartyIDs" id="group-TradingParty_NoPartyIDs">
@@ -3488,5 +3513,25 @@
             <field reference="component-MDIncGrp" name="MDIncGrp" required="true" />
             <field name="trailer" reference="trailer" required="true"/>
         </message>
+        <message name="MassQuoteAcknowledgement">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">b</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="QuoteID" reference="field-QuoteID" required="false"/>
+            <field name="QuoteReqID" reference="field-QuoteReqID" required="false"/>
+            <field name="QuoteStatus" reference="field-QuoteStatus" required="true"/>
+            <field name="QuoteRejectReason" reference="field-QuoteRejectReason" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="NoQuoteSets" reference="group-QuotSetAckGrp_NoQuoteSets" isCollection="true" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="QuotSetAckGrp_NoQuoteSets" id="group-QuotSetAckGrp_NoQuoteSets">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">296</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="QuoteSetID" reference="field-QuoteSetID" required="false"/>
+        </message>
+
 	</messages>
 </dictionary>

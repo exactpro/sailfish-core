@@ -31,6 +31,7 @@ import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
@@ -112,6 +113,27 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         //quickfix.Message fixMessageTarget = converter.convert(iMessage, true);
 
+    }
+
+    @Test
+    public void testEmptyRepeatingGroup2() throws Exception {
+        String rawMessage = "8=FIXT.1.1\u00019=105\u000135=b\u000149=TEST\u000156=TEST\u000134=0008\u000152=20190128-11:49:38.780000\u00011128=9\u0001"
+                + "131=1548676178699\u0001297=0\u0001296=0\u000110=043\u0001";
+
+        QFJDictionaryAdapter a = new QFJDictionaryAdapter(getSfDictionary("FIX50.TEST.xml"));
+
+        Message fixMessageSrc = new Message();
+        DataDictionary dataDict = getFixDictionary("FIX50.xml");
+        fixMessageSrc.fromString(rawMessage, a, true);
+        if (fixMessageSrc.getException() != null)
+            throw fixMessageSrc.getException();
+
+        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
+        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        IMessage iMessage = converter.convert(fixMessageSrc);
+        Assert.assertEquals(false, iMessage.getMetaData().isRejected());
+
+        System.out.println(MessageUtil.convertToIHumanMessage(messageFactory, dictionary.getMessageStructure(iMessage.getName()), iMessage));
     }
 
     @Test
