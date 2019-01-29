@@ -15,7 +15,7 @@ interface MessagesListProps {
     selectedStatus: StatusType;
 }
 
-class MessagesCardListBase extends Component<MessagesListProps, {}> {
+export class MessagesCardListBase extends Component<MessagesListProps, {}> {
 
     private elements: MessageCard[] = [];
 

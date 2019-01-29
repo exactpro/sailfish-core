@@ -24,8 +24,7 @@ interface HeaderProps {
     fieldsFilter: StatusType[];
     nextTestCaseHandler: () => any;
     prevTestCaseHandler: () => any;
-    // TODO: implement
-    //goTopHandler: () => any;
+    goTopHandler?: () => any;
     backToListHandler: () => any;
     switchSplitMode: () => any;
     switchActionsFilter: (status: StatusType) => any;
@@ -33,7 +32,7 @@ interface HeaderProps {
     showFilterHandler: () => any;
 }
 
-const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler,
+const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, goTopHandler, nextTestCaseHandler, prevTestCaseHandler, backToListHandler,
     switchSplitMode: switchSplitMode, switchActionsFilter, switchFieldsFilter, showFilter, showFilterHandler }: HeaderProps) => {
 
     const {
@@ -61,7 +60,7 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, nextTest
                     <h3>Back to list</h3>
                 </div>
                 <div class="header-status-button"
-                    onClick={() => { }}>
+                    onClick={goTopHandler || (() => {})}>
                     <div class="header-status-button-icon gotop" />
                     <h3>Go top</h3>
                 </div>

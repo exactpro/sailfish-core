@@ -17,11 +17,11 @@ interface ListProps {
     filterFields: StatusType[];
 }
 
-class ActionsListBase extends Component<ListProps, {}> {
+export class ActionsListBase extends Component<ListProps, {}> {
 
     private elements: ActionTree[] = [];
 
-    scrollToAction = (actionId: number) => {
+    scrollToAction(actionId: number) {
         if (this.elements[actionId]) {
             // smooth behavior is disabled here
             // base - get HTMLElement by ref
