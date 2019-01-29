@@ -65,11 +65,12 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                         (rightPane == Pane.Messages && splitMode)}
                     click={() => splitMode ? rightPaneHandler(Pane.Messages) : leftPaneHandler(Pane.Messages)}
                     text="Messages"/>
-                <ToggleButton
+                {/* DISABLED
+                    <ToggleButton
                     isToggled={leftPane == Pane.Logs || 
                         (rightPane == Pane.Logs && splitMode)}
                     click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}
-                    text="Logs"/>
+                    text="Logs"/> */}
             </div>
         )
 

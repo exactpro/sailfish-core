@@ -71,10 +71,11 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, goTopHan
                     <div class={nextButtonClass}
                         onClick={nextTestCaseHandler} />
                 </div>
+                {/* DISABLED 
                 <div class="header-status-button" onClick={() => switchSplitMode()}>
                     <div class="header-status-button-icon mode" />
                     <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>
-                </div>
+                </div> */}
                 <div class="header-status-button" onClick={() => showFilterHandler()}>
                     <div class="header-status-button-icon filter" />
                     <h3>{showFilter ? "Hide filter" : "Show filter"}</h3>
