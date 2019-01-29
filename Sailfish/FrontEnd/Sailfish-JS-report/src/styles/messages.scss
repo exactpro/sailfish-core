@@ -33,7 +33,7 @@
         position: relative;
         display: grid;
         grid-template-rows: auto auto;
-        grid-template-columns: 200px 40px 1fr 40px 1fr 40px;
+        grid-template-columns: 200px 40px auto 40px 1fr 40px;
         grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
                              "timestamp-value session from-value session-icon to-value prediction-icon";
 
@@ -80,6 +80,7 @@
 
         &-from-value {
             grid-area: from-value;
+            margin-right: 25px;
         }
 
         &-to-value {

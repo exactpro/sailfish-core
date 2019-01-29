@@ -6,6 +6,9 @@ import Action from '../models/Action';
 import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
+import { getHashCode } from '../helpers/stringHash';
+
+const HUE_SEGMENTS_COUNT = 36;
 
 interface MessageCardProps {
     message: Message;
@@ -52,6 +55,8 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
 
         const actions = [...actionsMap.values()];
 
+       const hueValue = this.calculateHueValue(from, to);
+
         return(
             <div class={rootClass}>
                 <div class="message-card-header">
@@ -82,20 +87,29 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
                     <div class="message-card-header-session">
                         <span>Session</span>
                     </div>
-                    <div class="message-card-header-session-icon"/>
+                    {
+                        from && to ? 
+                        <div class="message-card-header-session-icon" 
+                            style={{filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)`}}/>
+                        : null
+                    }
                 </div>
                 <div class={contentClass}>
                     <div class="message-card-content-human">
                         <p>{contentHumanReadable}</p>
                     </div>
                     <div class="message-card-content-controls">
-                        <div class="message-card-content-controls-showraw"
-                            onClick={e => this.showRaw()}>
-                            <div class="message-card-content-controls-showraw-title">
-                                <span>{showRaw ? "Close raw" : "Show raw"}</span>
+                        {
+                            (raw && raw !== "null") ? 
+                            <div class="message-card-content-controls-showraw"
+                                onClick={e => this.showRaw()}>
+                                <div class="message-card-content-controls-showraw-title">
+                                    <span>{showRaw ? "Close raw" : "Show raw"}</span>
+                                </div>
+                                <div class={showRawClass}/>
                             </div>
-                            <div class={showRawClass}/>
-                        </div>
+                            : null
+                        }
                         {
                             showRaw ? 
                             (<div class="message-card-content-controls-copy-all"
@@ -124,5 +138,10 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
     private copyToClipboard(text: string) {
         copyTextToClipboard(text);
         showNotification('Text copied to the clipboard!');
+    }
+
+    private calculateHueValue(from: string, to: string): number {
+        return (getHashCode([from, to].filter(str => str).sort((a, b) => a.localeCompare(b)).join(''))
+            % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
     }
 }
