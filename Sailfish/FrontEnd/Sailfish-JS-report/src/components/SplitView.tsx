@@ -40,7 +40,9 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
     }
     
     splitterMouseDown(e: MouseEvent) {
-        document.addEventListener("mousemove", this.onMouseMove);
+        this.root.addEventListener("mousemove", this.onMouseMove);
+        this.root.addEventListener("mouseleave", this.onMouseUpOrLeave)
+        this.root.addEventListener("mouseup", this.onMouseUpOrLeave)
         this.lastPosition = e.clientX;
         this.splitter.style.left = this.leftPanel.scrollWidth.toString() + 'px';
 
@@ -50,12 +52,16 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
         }) 
     }
 
-    splitterMouseUp(e: MouseEvent) {
+    onMouseUpOrLeave = (e: MouseEvent) => {
+        this.root.removeEventListener("mouseleave", this.onMouseUpOrLeave);
+        this.root.removeEventListener("mouseup", this.onMouseUpOrLeave);
+        this.root.removeEventListener("mousemove", this.onMouseMove);
+
         this.stopDragging();
     }
     
-    onMouseMove(e: MouseEvent) {
-        // here we catching situation when the mouse is outside the browser window 
+    onMouseMove = (e: MouseEvent) => {
+        // here we catching situation when the mouse is outside the browser document 
         if (e.clientX > document.documentElement.scrollWidth) {
             this.stopDragging();
         } else {
@@ -70,8 +76,6 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
     }
 
     stopDragging() {
-        document.removeEventListener("mousemove", this.onMouseMove);
-
         this.setState({
             ...this.state,
             isDragging: false,
@@ -116,7 +120,6 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
                     {children[1]}
                 </div>
                 <div class={splitterClassName} onMouseDown={(e) => this.splitterMouseDown(e)}
-                    onMouseUp={e => this.splitterMouseUp(e)}
                     ref={ref => this.splitter = ref}>
                     <div class="splitter-bar-icon"/>
                 </div>
