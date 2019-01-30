@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -99,7 +100,7 @@ public class ZipReport implements IScriptReport {
 
     @Override
     public void createTestCase(String reference, String description, int order, int matrixOrder,
-            String tcId, int tcHash, AMLBlockType type) {
+                               String tcId, int tcHash, AMLBlockType type, Set<String> tags) {
     }
 
     @Override

@@ -17,6 +17,7 @@ package com.exactpro.sf.aml.generator;
 
 import java.io.IOException;
 
+import com.exactpro.sf.aml.Tags;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.aml.AMLBlockType;
@@ -69,6 +70,7 @@ public class TestCaseCodeBuilder extends AbstractCodeBuilder {
         stream.writeLine(1, "@%s(%s)", Hash.class.getSimpleName(), testCase.getHash());
         stream.writeLine(1, "@%s(%s.%s)", Type.class.getSimpleName(), AMLBlockType.class.getSimpleName(), testCase.getBlockType().name());
         stream.writeLine(1, "@%s(%s)", AddToReport.class.getSimpleName(), testCase.isAddToReport());
+        stream.writeLine(1, "@%s(%s)", Tags.class.getSimpleName(), testCase.getTagsAsString());
         stream.writeLine(1, "@%s(\"%s\")", Reference.class.getSimpleName(), StringUtil.toJavaString(reference));
     }
 

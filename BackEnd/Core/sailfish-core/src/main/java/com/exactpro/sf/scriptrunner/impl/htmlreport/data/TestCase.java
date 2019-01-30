@@ -28,6 +28,7 @@ public class TestCase extends BaseEntity {
     private Date startTime;
     private Date finishTime;
     private int hash;
+    private boolean optional;
     private StatusDescription status;
 
     public TestCase() {
@@ -82,6 +83,14 @@ public class TestCase extends BaseEntity {
     	return status;
     }
 
+    public boolean isOptional() {
+        return optional;
+    }
+
+    public void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -91,6 +100,7 @@ public class TestCase extends BaseEntity {
         builder.append("startTime", startTime);
         builder.append("finishTime", finishTime);
         builder.append("hash", hash);
+        builder.append("optional", optional);
         builder.append(super.toString());
 
         return builder.toString();

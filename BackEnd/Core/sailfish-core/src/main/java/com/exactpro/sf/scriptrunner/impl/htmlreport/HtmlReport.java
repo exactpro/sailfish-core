@@ -235,7 +235,8 @@ public class HtmlReport implements IScriptReport {
     }
 
     @Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
         logger.debug("createTestCase - reference: {}, description: {}, order: {}, matrixOrder: {}, id: {}, hash: {}, type: {}", reference, description, order, matrixOrder, tcId, tcHash, type);
 
         checkContext(ContextType.REPORT);
