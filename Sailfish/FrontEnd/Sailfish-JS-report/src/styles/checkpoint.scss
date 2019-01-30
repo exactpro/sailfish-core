@@ -1,0 +1,38 @@
+@import "vars";
+
+.checkpoint {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 13px 7px;
+    border: 2px solid transparent;
+    border-radius: 5px;
+
+    &.selected {
+        border-color: $checkpointBorderColor;
+        background-color: $checkpointBackground;
+    }
+
+    &-icon {
+        margin-left: 15px;
+        height: 20px;
+        width: 20px;
+        background-image: url(../../resources/icons/checkpoint.svg);
+        background-size: 100%;
+    }
+
+    &-count {
+        padding-left: 5px;
+        font-weight: bold;
+        font-size: 15px;
+        color: $primaryTextColor;
+    }
+
+    &-name {
+        padding-left: 20px;
+        font-weight: bold;
+        font-size: 14px;
+        color: $primaryTextColor;
+    }
+}

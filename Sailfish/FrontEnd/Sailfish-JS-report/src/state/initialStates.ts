@@ -6,7 +6,8 @@ import { Pane } from "../helpers/Pane";
 export const initialSelectedState: SelectedState = {
     actionId: null,
     messagesId: [],
-    status: 'NA'
+    status: 'NA',
+    checkpointMessageId: null
 }
 
 export const initialAppState: AppState = {

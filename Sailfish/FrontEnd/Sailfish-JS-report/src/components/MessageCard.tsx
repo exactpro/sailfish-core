@@ -55,7 +55,7 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
 
         const actions = [...actionsMap.values()];
 
-       const hueValue = this.calculateHueValue(from, to);
+        const hueValue = this.calculateHueValue(from, to);
 
         return(
             <div class={rootClass}>

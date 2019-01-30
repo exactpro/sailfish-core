@@ -7,10 +7,13 @@ import { StatusType, statusValues } from '../models/Status';
 import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
+import { Checkpoint } from './Checkpoint';
+import { isCheckpoint } from '../helpers/messageType';
 
 interface MessagesListProps {
     messages: Message[];
     selectedMessages: number[];
+    selectedCheckpointId: number;
     actionsMap: Map<number, Action>;
     selectedStatus: StatusType;
 }
@@ -20,7 +23,13 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
     private elements: MessageCard[] = [];
 
     componentDidUpdate(prevProps: MessagesListProps) {
-        this.scrollToMessage(this.props.selectedMessages[0]);
+        if (prevProps.selectedMessages !== this.props.selectedMessages) {
+            this.scrollToMessage(this.props.selectedMessages[0]);
+        }
+
+        if (prevProps.selectedCheckpointId !== this.props.selectedCheckpointId) {
+            this.scrollToMessage(this.props.selectedCheckpointId);
+        }
     }
 
     scrollToMessage(messageId: number) {
@@ -34,18 +43,22 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
             (actionId) : [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, selectedMessages, selectedStatus }: MessagesListProps) {
+    render({ messages, selectedMessages, selectedStatus, selectedCheckpointId }: MessagesListProps) {
+        const checkpoints = messages.filter(isCheckpoint);
+
         return (
             <div class="messages">
                 <div class="messages-control"></div>
                 <div class="messages-list">
-                    {messages.map(message => this.renderMessage(message, selectedMessages, selectedStatus))}
+                    {messages.map(message => checkpoints.includes(message) ? 
+                        this.renderCheckpoint(message, checkpoints.indexOf(message) + 1, selectedCheckpointId) : 
+                        this.renderMessage(message, selectedMessages, selectedStatus))}
                 </div>
             </div>
         );
     }
 
-    renderMessage(message: Message, selectedMessages: number[], selectedStatus: StatusType) {
+    private renderMessage(message: Message, selectedMessages: number[], selectedStatus: StatusType) {
         const isSelected = selectedMessages.includes(message.id);
 
         return (
@@ -58,12 +71,24 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
                 actionsMap={this.getMessageActions(message)}
                 />);
     }
+
+    private renderCheckpoint(message: Message, checkpointCount: number, selectedCheckpointId: number) {
+        const isSelected = message.id === selectedCheckpointId;
+
+        return (
+            <Checkpoint name={message.msgName}
+                count={checkpointCount}
+                isSelected={isSelected}
+                ref={ref => this.elements[message.id] = ref}/>
+        )
+    }
 }
 
 export const MessagesCardList = connect(
     (state: AppState) : MessagesListProps => ({
         messages: state.testCase.messages,
         selectedMessages: state.selected.messagesId,
+        selectedCheckpointId: state.selected.checkpointMessageId,
         selectedStatus: state.selected.status,
         actionsMap: generateActionsMap(state.testCase.actions)
     }),

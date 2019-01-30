@@ -14,7 +14,8 @@ import {
     SwitchFieldsFilterStateAction,
     ShowFilterStateAction,
     SetLeftPaneStateActions,
-    SetRightPaneStateAction
+    SetRightPaneStateAction,
+    CheckpointSelectStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
@@ -44,6 +45,11 @@ export const selectMessages = (messages: number[], status: StatusType = 'NA'): M
     type: StateActionTypes.SELECT_MESSAGES,
     messagesId: messages,
     status: status
+})
+
+export const selectCheckpoint = (checkpointId: number): CheckpointSelectStateAction => ({
+    type: StateActionTypes.SELECT_CHECKPOINT,
+    checkpointId: checkpointId
 })
 
 export const switchActionsFilter = (status: StatusType): SwitchActionFilterStateAction => ({

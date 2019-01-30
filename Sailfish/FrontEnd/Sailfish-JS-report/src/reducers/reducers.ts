@@ -39,6 +39,16 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             }
         }
 
+        case StateActionTypes.SELECT_CHECKPOINT: {
+            return {
+                ...state,
+                selected: {
+                    ...state.selected,
+                    checkpointMessageId: stateAction.checkpointId
+                }
+            }
+        }
+
         case StateActionTypes.SWITCH_ACTIONS_FILTER: {
             if (state.actionsFilter.includes(stateAction.status)) {
                 return {
@@ -79,7 +89,8 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: null,
-                currentTestCasePath: ""
+                currentTestCasePath: "",
+                selected: initialSelectedState
             }
         }
 

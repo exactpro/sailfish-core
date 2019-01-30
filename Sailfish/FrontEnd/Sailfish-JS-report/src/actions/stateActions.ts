@@ -13,6 +13,7 @@ export enum StateActionTypes {
     RESET_TEST_CASE= 'RESET_TEST_CASE',
     SELECT_ACTION = 'SELECT_ACTION',
     SELECT_MESSAGES = 'SELECT_MESSAGES',
+    SELECT_CHECKPOINT = 'SELECT_CHECKPOINT',
     SWITCH_ACTIONS_FILTER = 'SWITCH_ACTIONS_FILTER',
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
     SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
@@ -44,6 +45,11 @@ export interface MessagesSelectStateAction {
     type: StateActionTypes.SELECT_MESSAGES;
     messagesId: number[];
     status: StatusType;
+}
+
+export interface CheckpointSelectStateAction {
+    type: StateActionTypes.SELECT_CHECKPOINT;
+    checkpointId: number;
 }
 
 export interface SwitchActionFilterStateAction {
@@ -92,6 +98,7 @@ export type StateActionType = SetReportStateAction |
     ResetTestCaseStateAction |
     ActionSelectStateAction |
     MessagesSelectStateAction | 
+    CheckpointSelectStateAction |
     NextTestCaseStateAction |
     PrevTestCaseStateAction | 
     SetTestCaseStateAction | 
