@@ -210,6 +210,7 @@ public class FileMessage implements IMeasurable {
     }
 
     @Override
+    @JsonIgnore
     public long getSize() {
         return StorageMeasureUtils.getSize(from, to, namespace, name, jsonMessage, humanMessage, rejectReason, serviceID) +
                 StorageMeasureUtils.getSize(rawMessage) + (8 << 4); //8*16 - 8 field with types other than string and byte array

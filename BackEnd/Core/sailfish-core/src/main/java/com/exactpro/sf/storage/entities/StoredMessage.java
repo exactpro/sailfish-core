@@ -20,6 +20,7 @@ import java.util.Set;
 
 import com.exactpro.sf.storage.IMeasurable;
 import com.exactpro.sf.storage.util.StorageMeasureUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class StoredMessage implements IMeasurable {
@@ -181,6 +182,8 @@ public class StoredMessage implements IMeasurable {
         this.rejectReason = rejectReason;
     }
 
+    @Override
+    @JsonIgnore
     public long getSize() {
         return StorageMeasureUtils.getSize(from) + StorageMeasureUtils.getSize(to) + StorageMeasureUtils.getSize(namespace) + StorageMeasureUtils
                 .getSize(name) + StorageMeasureUtils.getSize(humanMessage)

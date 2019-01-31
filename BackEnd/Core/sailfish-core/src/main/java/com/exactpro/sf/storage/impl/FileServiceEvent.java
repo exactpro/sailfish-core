@@ -125,6 +125,7 @@ public class FileServiceEvent extends ServiceEvent implements IMeasurable {
     }
 
     @Override
+    @JsonIgnore
     public long getSize() {
         return StorageMeasureUtils.getSize(serviceName.toString(), message, details) +
                 (4 * 16) + //~sum of fields

@@ -19,6 +19,7 @@ import java.util.Date;
 
 import com.exactpro.sf.storage.IMeasurable;
 import com.exactpro.sf.storage.util.StorageMeasureUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class StoredServiceEvent implements IMeasurable {
@@ -100,8 +101,9 @@ public class StoredServiceEvent implements IMeasurable {
 				append("id", id).
 				toString();
 	}
-	
+
     @Override
+    @JsonIgnore
     public long getSize() {
         return StorageMeasureUtils.getSize(serviceId) + StorageMeasureUtils.getSize(message) + StorageMeasureUtils.getSize(details) + StorageMeasureUtils
                 .getSize(type) +
