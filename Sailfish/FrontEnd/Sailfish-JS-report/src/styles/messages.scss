@@ -9,6 +9,7 @@
     display: grid;
     grid-template-columns: auto 1fr;
     grid-template-areas: "message-label message-card";
+    position: relative;
 
     &.selected {
         border-color: $defaultCardBorderColor;
@@ -31,29 +32,92 @@
 
     &-label {
         grid-area: message-label;
-        width: 20px;
-        height: 100%;
         display: flex;
-        flex-direction: row;
-        justify-content: center;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
 
-        &.rejected {
-            background-color: $rejectedMessageLabelBackground;
+        div:first-of-type {
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
         }
 
-        &-icon {
+        &-rejected, &-admin {
+            width: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        &-rejected {
+            background-color: $rejectedMessageLabelBackground;
+
+            &-icon {
+                background-image: url(../../resources/icons/rejected-label.svg);
+            }
+        }
+
+        &-admin {
+            background-color: $adminMessageLabelBackground;
+
+            &-icon {
+                background-image: url(../../resources/icons/admin-icon.svg)
+            }
+        }
+
+        &-rejected-icon, &-admin-icon {
             height: 14px;
             width: 14px;
             margin-top: 20px;
             background-size: 100%;
             filter: opacity(0.4);
-
-            &.rejected {
-                background-image: url(../../resources/icons/rejected-label.svg)
-            }
         }
+    }
+
+    &-wrapper {
+        grid-area: message-card;
+
+        display: grid;
+        grid-template: 35px / 200px 40px auto 1fr 40px;
+        grid-template-areas: "actions-chips name name-value empty expand-icon";
+
+        &-name, &-name-value {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 3px;
+            color: $primaryTextColor;
+        }
+
+        &-name {
+            grid-area: name;
+            padding-top: 3px;
+            font-size: 10px;
+        }
+
+        &-name-value {
+            grid-area: name-value;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        &-actionschips {
+            grid-area: action-chips;
+        }
+
+        &-expand {
+            grid-area: expand-icon;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &-icon {
+                height: 18px;
+                width: 18px;
+                background-image: url(../../resources/icons/arr4-down.svg);
+                background-size: 100%;
+                cursor: pointer;
+            }
+       }
     }
 
     &-card {
@@ -341,6 +405,22 @@
             }
         }
     }
+
+    &-expand {
+        position: absolute;
+        top: 56px;
+        right: 8px;
+        padding-right: 5px;
+        background-color: white;
+
+        &-icon {
+            height: 18px;
+            width: 18px;
+            background-image: url(../../resources/icons/arr4-up.svg);
+            background-size: 100%;
+            cursor: pointer;
+        }
+    }
 }
 
 .messages {
@@ -388,6 +468,40 @@
 
                 &.next {
                     background-image: url(../../resources/icons/arr1-right.svg)
+                }
+            }
+        }
+
+        &-admin {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 7px;
+            cursor: pointer;
+
+            &-title {
+                @include unselectable;
+                font-size: 15px;
+                font-weight: bold;
+                padding-left: 8px;
+                padding-right: 5px;
+                color: $primaryTextColor;
+
+                &.active {
+                    color: $adminMessageLabelBackground;
+                }
+            }
+
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-image: url(../../resources/icons/admin-icon.svg);
+                background-size: 100%;
+                filter: opacity(0.5);
+
+                &.active {
+                    background-image: url(../../resources/icons/admin-icon-active.svg)
                 }
             }
         }

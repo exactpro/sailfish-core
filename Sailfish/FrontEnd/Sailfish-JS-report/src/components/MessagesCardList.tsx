@@ -1,6 +1,6 @@
 import { h, Component } from 'preact';
 import Message from '../models/Message';
-import MessageCard from './MessageCard';
+import { MessageCard } from './MessageCard';
 import '../styles/messages.scss';
 import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
@@ -10,11 +10,13 @@ import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
 import { isCheckpoint, getRejectReason } from '../helpers/messageType';
 import { selectRejectedMessageId } from '../actions/actionCreators';
+import { AdminMessageWrapper } from './AdminMessageWrapper';
 
 interface MessagesListProps {
     messages: Message[];
     checkpoints: Message[];
     rejectedMessages: Message[];
+    adminMessages: Message[];
     selectedMessages: number[];
     selectedCheckpointId: number;
     selectedRejectedMessageId: number;
@@ -23,9 +25,21 @@ interface MessagesListProps {
     selectRejectedMessage: (messageId: number) => any;
 }
 
-export class MessagesCardListBase extends Component<MessagesListProps> {
+interface MessagesListState {
+    adminFilter: boolean;
+}
+
+export class MessagesCardListBase extends Component<MessagesListProps, MessagesListState> {
 
     private elements: MessageCard[] = [];
+
+    constructor(props: MessagesListProps) {
+        super(props);
+
+        this.state = {
+            adminFilter: false
+        }
+    }
 
     componentDidUpdate(prevProps: MessagesListProps) {
         if (prevProps.selectedMessages !== this.props.selectedMessages) {
@@ -52,9 +66,18 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             (actionId) : [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, rejectedMessages, selectedRejectedMessageId, selectRejectedMessage }: MessagesListProps) {
+    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage }: MessagesListProps, { adminFilter }: MessagesListState) {
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId);
+
+        const adminIconClass = [
+                "messages-controls-admin-icon",
+                adminFilter ? "active" : ""
+            ].join(' '),
+            adminTitleClass = [
+                "messages-controls-admin-title",
+                adminFilter ? "active" : ""
+            ].join(' ');
 
         return (
             <div class="messages">
@@ -79,6 +102,19 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                         )
                         : null
                     }
+                    {
+                        adminMessages && adminMessages.length ? 
+                        (
+                            <div class="messages-controls-admin"
+                                onClick={this.adminFilterHandler}>
+                                <div class={adminIconClass}/>
+                                <div class={adminTitleClass}>
+                                    <p>Admin Messages</p>
+                                </div>
+                            </div>
+                        )
+                        : null
+                    }
                 </div>
                 <div class="messages-list">
                     {messages.map(message => this.renderMessage(message))}
@@ -93,6 +129,18 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
 
         if (checkpoints.includes(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
+        }
+
+        if (message.isAdmin) {
+            return (
+                <AdminMessageWrapper
+                    ref={ref => this.elements[message.id] = ref}
+                    message={message}
+                    key={message.id}
+                    actionsMap={this.getMessageActions(message)}
+                    isExpanded={this.state.adminFilter}
+                    isSelected={selectedRejectedMessageId === message.id}/>
+            )
         }
 
         if (rejectedMessages.includes(message)) {
@@ -158,6 +206,12 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             }
         }
     }
+
+    private adminFilterHandler = () => {
+        this.setState({
+            adminFilter: !this.state.adminFilter
+        })
+    }
 }
 
 export const MessagesCardList = connect(
@@ -165,6 +219,7 @@ export const MessagesCardList = connect(
         messages: state.testCase.messages,
         checkpoints: state.testCase.messages.filter(isCheckpoint),
         rejectedMessages: state.testCase.messages.filter(message => message.isRejected),
+        adminMessages: state.testCase.messages.filter(message => message.isAdmin),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
         selectedRejectedMessageId: state.selected.rejectedMessageId,

@@ -11,7 +11,7 @@ import { getMessageType, MessageType, getRejectReason } from '../helpers/message
 
 const HUE_SEGMENTS_COUNT = 36;
 
-interface MessageCardProps {
+export interface MessageCardProps {
     message: Message;
     isSelected?: boolean;
     actionsMap: Map<number, Action>;
@@ -23,7 +23,7 @@ interface MessageCardState {
     showRaw: boolean;
 }
 
-export default class MessageCard extends Component<MessageCardProps, MessageCardState> {
+export class MessageCard extends Component<MessageCardProps, MessageCardState> {
 
     constructor(props: MessageCardProps) {
         super(props);
@@ -54,7 +54,6 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
 
         const actions = [...actionsMap.values()],
             hueValue = this.calculateHueValue(from, to),
-            type = getMessageType(message),
             rejectedTitle = message.isRejected ? getRejectReason(message) : null;
 
         const rootClass = [
@@ -69,27 +68,13 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
             showRawClass = [
                 "message-card-content-controls-showraw-icon",
                 (showRaw ? "expanded" : "hidden")
-            ].join(" "),
-            labelClass = [
-                "message-label",
-                type
-            ].join(" "),
-            labelIconClass = [
-                "message-label-icon",
-                type
             ].join(" ");
 
         return (
             <div class={rootClass}>
-                {
-                    type != MessageType.MESSAGE ? 
-                    (
-                        <div class={labelClass}>
-                            <div class={labelIconClass}></div>
-                        </div>
-                    )
-                    : null
-                }
+                <div class="message-label">
+                    { this.renderMessageTypeLabels(message) }
+                </div>
                 <div class="message-card">
                     <div class="message-card-header">
                         <div class="message-card-header-action">
@@ -193,6 +178,28 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
 
             return statusCount ? (<div class={className}><p>{statusCount}</p></div>) : null;
         }
+    }
+
+    private renderMessageTypeLabels(message: Message): JSX.Element[] {
+        const labels = [];
+
+        if (message.isAdmin) {
+            labels.push(
+                <div class="message-label-admin">
+                    <div class="message-label-admin-icon"/>
+                </div>
+            )
+        }
+
+        if (message.isRejected) {
+            labels.push(
+                <div class="message-label-rejected">
+                    <div class="message-label-rejected-icon"/>
+                </div>
+            );
+        }
+
+        return labels;
     }
 
     private copyToClipboard(text: string) {
