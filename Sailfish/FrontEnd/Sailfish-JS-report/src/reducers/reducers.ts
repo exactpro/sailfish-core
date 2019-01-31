@@ -121,23 +121,24 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
         }
 
         case StateActionTypes.NEXT_TEST_CASE: {
-            const nextTestCaseIndex = state.report.testCaseLinks.findIndex(link => link === state.currentTestCasePath) + 1;
+            const nextTestCaseIndex = state.report.metadata.findIndex(metadata => metadata.jsonpFileName === state.currentTestCasePath) + 1;
 
             return {
                 ...state,
                 testCase: null,
-                currentTestCasePath: state.report.testCaseLinks[nextTestCaseIndex] || state.report.testCaseLinks[0]
+                currentTestCasePath: state.report.metadata[nextTestCaseIndex] ? 
+                    state.report.metadata[nextTestCaseIndex].jsonpFileName : state.report.metadata[0].jsonpFileName
             }
         }
 
         case StateActionTypes.PREV_TEST_CASE: {
-            const prevTestCaseIndex = state.report.testCaseLinks.findIndex(link => link === state.currentTestCasePath) - 1;
+            const prevTestCaseIndex = state.report.metadata.findIndex(metadata => metadata.jsonpFileName === state.currentTestCasePath) - 1;
 
             return {
                 ...state,
                 testCase: null,
-                currentTestCasePath: state.report.testCaseLinks[prevTestCaseIndex] || 
-                    state.report.testCaseLinks[state.report.testCaseLinks.length - 1]
+                currentTestCasePath: state.report.metadata[prevTestCaseIndex] ? 
+                    state.report.metadata[prevTestCaseIndex].jsonpFileName : state.report.metadata[state.report.metadata.length - 1].jsonpFileName
             }
         }
 

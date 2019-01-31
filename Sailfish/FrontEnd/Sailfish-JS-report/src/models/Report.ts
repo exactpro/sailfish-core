@@ -15,11 +15,12 @@
  ******************************************************************************/
 
 import TestCase from "./TestCase";
+import { ReportMetadata } from "./ReportMetadata";
 
 export default interface Report {
     alerts?: any[];
-    startTime: number;
-    finishTime: number;
+    startTime: string;
+    finishTime: string;
     plugins: any;
     testCases?: TestCase[];
     bugs: any[];
@@ -32,10 +33,10 @@ export default interface Report {
     description: string;
     exception?: string;
     outcomes?: any;
-    testCaseLinks?: string[];
     reportProperties?: any;
+    metadata: ReportMetadata[];
 }
 
 export function isReport(report: Report | TestCase): report is Report {
-    return (<Report>report).testCaseLinks !== undefined;
+    return (<Report>report).metadata !== undefined;
 }

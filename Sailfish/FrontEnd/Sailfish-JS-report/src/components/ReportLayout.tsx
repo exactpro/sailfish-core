@@ -22,6 +22,7 @@ import AppState from '../state/AppState';
 import { setTestCasePath } from '../actions/actionCreators';
 import "../styles/report.scss";
 import { getSecondsPeriod } from '../helpers/dateFormatter';
+import { ReportMetadata } from '../models/ReportMetadata';
 
 interface ReportLayoutProps {
     report: Report;
@@ -31,11 +32,10 @@ interface ReportLayoutProps {
 const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
 
     const executionTime = getSecondsPeriod(report.startTime, report.finishTime);
-        
-    // use *1000 to get correct time
-    const date = new Date(report.startTime * 1000).toString();
     
-    let testCaseCount = 1;
+    const passedCount = report.metadata.filter(metadata => metadata.status.status === "PASSED").length,
+        failedCount = report.metadata.filter(metadata => metadata.status.status === "FAILED").length,
+        conditionallyCount = report.metadata.filter(metadata => metadata.status.status === "CONDITIONALLY_PASSED").length;
 
     return (
         <div class="report">
@@ -69,7 +69,7 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
                             </tr>
                             <tr>
                                 <td class="report-info-table-name">Date:</td>
-                                <td>{date}</td>
+                                <td>{report.startTime}</td>
                             </tr>
                             <tr>
                                 <td class="report-info-table-name">Version:</td>
@@ -87,7 +87,19 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
                             </tr>
                             <tr>
                                 <td class="report-info-table-name">Test cases:</td>
-                                <td>{report.testCaseLinks.length}</td>
+                                <td>{report.metadata.length}</td>
+                            </tr>
+                            <tr>
+                                <td class="report-info-table-name">PASSED:</td>
+                                <td>{passedCount}</td>
+                            </tr>
+                            <tr>
+                                <td class="report-info-table-name">FAILED:</td>
+                                <td>{failedCount}</td>
+                            </tr>
+                            <tr>
+                                <td class="report-info-table-name">CONDITIONALLY PASSED:</td>
+                                <td>{conditionallyCount}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -95,13 +107,21 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
             </div>
             <div class="report-testcases">
                 <div class="report-testcases-list">
-                    {report.testCaseLinks.map(testCase => (<div
-                        style={{ cursor: "pointer" }}
-                        onClick={() => onTestCaseSelect(testCase)}>
-                        Test Case {testCaseCount++} : {testCase}
-                    </div>))}
+                    {report.metadata.map(metadata => renderTestCaseItem(metadata, onTestCaseSelect))}
                 </div>
             </div>
+        </div>
+    )
+}
+
+const renderTestCaseItem = (metadata: ReportMetadata, onSelect: Function) => {
+    const className = ["report-testcases-list-item", metadata.status.status.toLowerCase()].join(' ');
+
+    const executionTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
+
+    return (
+        <div class={className} onClick={() => onSelect(metadata.jsonpFileName)}>
+            {metadata.name} ({metadata.status.status}) [{executionTime}]
         </div>
     )
 }

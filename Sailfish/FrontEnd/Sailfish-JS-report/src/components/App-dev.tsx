@@ -43,7 +43,10 @@ const AppBase = ({report, testCase, testCaseFilePath, updateTestCase}: AppProps)
     }
 
     if (testCaseFilePath) {
-        updateTestCase(report.testCases.find(testCase => testCase.name === testCaseFilePath))
+        const currentMetadata = report.metadata.find(metadata => metadata.jsonpFileName === testCaseFilePath),
+            currentTestCase = report.testCases.find(testCase => testCase.name === currentMetadata.name);
+
+        updateTestCase(currentTestCase)
         return null;
     }
 

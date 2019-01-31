@@ -35,7 +35,7 @@ export default interface TestCase {
     hash: number;
     description: string;
     status: Status;
-    startTime: number;
-    finishTime: number;
+    startTime: string;
+    finishTime: string;
     verifications?: any[];
 }

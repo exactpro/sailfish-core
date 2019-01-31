@@ -14,13 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-export function getSecondsPeriod(startTime: number, finishTime: number) {
+export function getSecondsPeriod(startTime: string, finishTime: string) {
 
     if (!startTime || !finishTime) {
         return '';
     }
 
-    const date =  new Date(finishTime * 1000 - startTime * 1000);
+    const date =  new Date(new Date(finishTime).getTime() - new Date(startTime).getTime());
 
     return `${date.getSeconds()}.${date.getMilliseconds()}s`;
 }

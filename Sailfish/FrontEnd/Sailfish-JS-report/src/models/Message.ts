@@ -25,7 +25,7 @@ export default interface Message {
     from: string;
     to: string;
     msgName: string;
-    content: string;
+    content: any;
     contentHumanReadable: string;
     timestamp: string;
     status?: string;
