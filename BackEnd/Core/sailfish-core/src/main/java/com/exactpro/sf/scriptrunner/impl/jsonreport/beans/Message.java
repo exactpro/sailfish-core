@@ -16,7 +16,11 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
+import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.exactpro.sf.storage.util.JsonMessageConverter;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import java.util.Map;
 import java.util.Set;
@@ -29,9 +33,11 @@ public class Message implements IJsonReportNode {
     private String from;
     private String to;
     private String msgName;
-    private String content;
     private String contentHumanReadable;
     private String timestamp; //IMPORTANT: datetime format may divert from the default one
+
+    @JsonRawValue
+    private String content;
 
     public Message() {
 

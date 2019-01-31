@@ -30,28 +30,12 @@ import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.impl.ReportStats;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Alert;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Bug;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportException;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Status;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.*;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -66,6 +50,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,7 +62,7 @@ public class JsonReport implements IScriptReport {
     private static final ObjectMapper mapper;
     private static long actionIdCounter = 0;
 
-
+    private ScriptContext scriptContext;
     private Context context;
     private IReportStats reportStats;
     private boolean isActionCreated;
@@ -95,6 +81,7 @@ public class JsonReport implements IScriptReport {
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE).withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
         mapper.registerModule(new JavaTimeModule());
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
     }
 
     public JsonReport(String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription) {
@@ -142,7 +129,10 @@ public class JsonReport implements IScriptReport {
         } catch (IOException e) {
             throw new ScriptRunException("unable to export json report", e);
         }
-        this.reportRoot.getTestCaseLinks().add(jsonFile.getName());
+
+        if (data instanceof TestCase) {
+            this.reportRoot.getMetadata().add(new TestCaseMetadata(((TestCase) data), jsonpFile, jsonFile));
+        }
     }
 
     private void initProperties() {
@@ -193,6 +183,7 @@ public class JsonReport implements IScriptReport {
     public void createReport(ScriptContext scriptContext, String name, String description, long scriptRunId, String environmentName,
             String userName) {
 
+        this.scriptContext = scriptContext;
         this.reportRoot.setStartTime(Instant.now());
 
         try {

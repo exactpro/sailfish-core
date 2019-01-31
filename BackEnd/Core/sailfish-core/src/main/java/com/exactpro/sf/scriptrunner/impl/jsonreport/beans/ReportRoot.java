@@ -17,6 +17,8 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,12 +28,13 @@ import java.util.Map;
 import java.util.Set;
 
 public class ReportRoot {
-    //IMPORTANT: access should be synchronized
-    private final List<Alert> alerts = new ArrayList<>();
-    private Instant startTime;
     private Instant finishTime;
-    private Map<String, String> plugins = new HashMap<>();
+    private Instant startTime;
+
+    private final List<Alert> alerts = new ArrayList<>();
+    //IMPORTANT: access should be synchronized
     private Set<Bug> bugs = new HashSet<>();
+    private Map<String, String> plugins = new HashMap<>();
     private String hostName;
     private String userName;
     private String name;
@@ -40,7 +43,7 @@ public class ReportRoot {
     private String branchName;
     private String description;
     private ReportException exception;
-    private List<String> testCaseLinks = new ArrayList<>();
+    private List<TestCaseMetadata> metadata = new ArrayList<>();
     private ReportProperties reportProperties;
 
     /**
@@ -147,12 +150,12 @@ public class ReportRoot {
         this.exception = exception;
     }
 
-    public List<String> getTestCaseLinks() {
-        return testCaseLinks;
+    public List<TestCaseMetadata> getMetadata() {
+        return metadata;
     }
 
-    public void setTestCaseLinks(List<String> testCaseLinks) {
-        this.testCaseLinks = testCaseLinks;
+    public void setMetadata(List<TestCaseMetadata> metadata) {
+        this.metadata = metadata;
     }
 
     public ReportProperties getReportProperties() {

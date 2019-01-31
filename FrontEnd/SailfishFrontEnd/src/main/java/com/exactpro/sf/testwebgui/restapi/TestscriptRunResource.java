@@ -31,6 +31,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -54,9 +55,11 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.lang3.StringUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -479,10 +482,10 @@ public class TestscriptRunResource {
 
 
                 List<XmlTestCaseDescription> list = new ArrayList<>();
-                for (String testcaseLink : report.getTestCaseLinks()) {
 
-                    TestCase testCase = OBJECT_MAPPER
-                            .readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder(), "reportData", testcaseLink), TestCase.class);
+                for (TestCaseMetadata metadata : report.getMetadata()) {
+                    TestCase testCase = OBJECT_MAPPER.readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr
+                            .getWorkFolder(), "reportData", metadata.getJsonFileName()), TestCase.class);
 
                     XmlTestCaseDescription xmlTestCaseDescription = new XmlTestCaseDescription();
                     xmlTestCaseDescription.setDescription(testCase.getDescription());
@@ -517,6 +520,7 @@ public class TestscriptRunResource {
                     }
                     list.add(xmlTestCaseDescription);
                 }
+
                 xmlDescr.setTestcases(list);
             } catch (IOException e) {
                 logger.error(e.getMessage(), e);

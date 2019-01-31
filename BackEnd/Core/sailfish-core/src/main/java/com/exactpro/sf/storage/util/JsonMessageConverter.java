@@ -58,6 +58,7 @@ public class JsonMessageConverter {
     public static final String JSON_MESSAGE_TIMESTAMP = "timestamp";
     public static final String JSON_MESSAGE_ID = "id";
     public static final String JSON_MESSAGE_RR = "rejectReason";
+    public static final String JSON_MESSAGE_ADMIN = "admin";
 
     private static final Map<Class<?>, DateTimeFormatter> CLASS_TO_FORMATTER = new HashMap<>();
 
@@ -100,6 +101,7 @@ public class JsonMessageConverter {
             generator.writeStringField(JSON_MESSAGE_DICTIONARY_URI, Objects.toString(metaData.getDictionaryURI(), StringUtils.EMPTY));
             generator.writeStringField(JSON_MESSAGE_PROTOCOL, StringUtils.defaultString(metaData.getProtocol()));
             generator.writeStringField(JSON_MESSAGE_DIRTY, Objects.toString(metaData.isDirty(), StringUtils.EMPTY));
+            generator.writeStringField(JSON_MESSAGE_ADMIN, Objects.toString(metaData.isAdmin(), StringUtils.EMPTY));
             generator.writeStringField(JSON_MESSAGE_RR, metaData.getRejectReason());
             generator.writeFieldName(JSON_MESSAGE);
 
