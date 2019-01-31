@@ -2,8 +2,8 @@ import TestCase from "./TestCase";
 
 export default interface Report {
     alerts?: any[];
-    startTime: string;
-    finishTime: string;
+    startTime: number;
+    finishTime: number;
     plugins: any;
     testCases?: TestCase[];
     bugs: any[];
@@ -17,6 +17,7 @@ export default interface Report {
     exception?: string;
     outcomes?: any;
     testCaseLinks?: string[];
+    reportProperties?: any;
 }
 
 export function isReport(report: Report | TestCase): report is Report {

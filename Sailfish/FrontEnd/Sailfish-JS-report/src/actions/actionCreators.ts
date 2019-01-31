@@ -15,7 +15,8 @@ import {
     ShowFilterStateAction,
     SetLeftPaneStateActions,
     SetRightPaneStateAction,
-    CheckpointSelectStateAction
+    CheckpointSelectStateAction,
+    RejectedMessageSelectStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
@@ -50,6 +51,11 @@ export const selectMessages = (messages: number[], status: StatusType = 'NA'): M
 export const selectCheckpoint = (checkpointId: number): CheckpointSelectStateAction => ({
     type: StateActionTypes.SELECT_CHECKPOINT,
     checkpointId: checkpointId
+})
+
+export const selectRejectedMessageId = (messageId: number): RejectedMessageSelectStateAction => ({
+    type: StateActionTypes.SELECT_REJECTED_MESSAGE,
+    messageId: messageId
 })
 
 export const switchActionsFilter = (status: StatusType): SwitchActionFilterStateAction => ({

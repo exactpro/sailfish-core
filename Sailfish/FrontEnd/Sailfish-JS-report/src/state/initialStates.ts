@@ -7,7 +7,8 @@ export const initialSelectedState: SelectedState = {
     actionId: null,
     messagesId: [],
     status: 'NA',
-    checkpointMessageId: null
+    checkpointMessageId: null,
+    rejectedMessageId: null
 }
 
 export const initialAppState: AppState = {

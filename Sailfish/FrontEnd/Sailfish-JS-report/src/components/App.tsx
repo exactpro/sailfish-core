@@ -49,7 +49,11 @@ class AppBase extends Component<AppProps, {}> {
         }
 
         if (!testCaseFilePath) {
-            return (<ReportLayout/>);
+            return (
+                <div class="root">
+                    <ReportLayout/>
+                </div>
+            );
         }
 
         return (

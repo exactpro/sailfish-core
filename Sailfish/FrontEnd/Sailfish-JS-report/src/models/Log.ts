@@ -1,5 +1,6 @@
 export default interface Log {
-    timestamp: string;
+    actionNodeType: string;
+    timestamp: number;
     level: string;
     thread: string;
     message: string;

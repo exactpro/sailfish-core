@@ -1,11 +1,14 @@
 @import "vars";
 
-.message-card {
+.message {
     width: 100%;
     border: 2px solid transparent;
     border-radius: 5px;
     margin: 5px 0;
     border-color: $defaultCardBackground;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "message-label message-card";
 
     &.selected {
         border-color: $defaultCardBorderColor;
@@ -26,271 +29,314 @@
         border-color: $conditionallyBorderColor;
     }
 
+    &-label {
+        grid-area: message-label;
+        width: 20px;
+        height: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
 
-    &-header {
-        min-height: 45px;
-        padding: 7px 5px 9px 10px;
-        position: relative;
-        display: grid;
-        grid-template-rows: auto auto;
-        grid-template-columns: 200px 40px auto 40px 1fr 40px;
-        grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
-                             "timestamp-value session from-value session-icon to-value prediction-icon";
-
-        &-session, &-name, &-timestamp-value, &-name-value, &-from-value, &-to-value {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 3px;
-
-            span {
-                display: block;
-                font-size: 10px;
-                color: $primaryTextColor;
-            }
-
-            p {
-                font-size: 13px;
-                color: $primaryTextColor;
-                margin: 0;
-                font-weight: bold;
-            }
+        &.rejected {
+            background-color: $rejectedMessageLabelBackground;
         }
 
-        &-timestamp-value, &-name-value, &-from-value, &-to-value {
-            padding-left: 5px;
-        }
-
-        &-name {
-            grid-area: name;
-        }
-
-        &-session {
-            grid-area: session;
-        }
-
-        &-session-icon {
-            grid-area: session-icon;
-        }
-
-        &-timestamp-value {
-            grid-area: timestamp-value;
-        }
-
-        &-from-value {
-            grid-area: from-value;
-            margin-right: 25px;
-        }
-
-        &-to-value {
-            grid-area: to-value;
-        }
-
-        &-name-value {
-            grid-area: name-value;
-        }
-
-        &-session-icon {
-            grid-area: session-icon;
-            background-image: url('../../resources/icons/session-icon.svg');
-            height: 25px;
-            width: 25px;
+        &-icon {
+            height: 14px;
+            width: 14px;
+            margin-top: 20px;
             background-size: 100%;
-        }
+            filter: opacity(0.4);
 
-        &-prediction {
-            grid-area: prediction-icon;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            &-icon {
-                background-image: url(../../resources/icons/ml-message.svg);
-                background-size: 100%;
-                width: 22px;
-                height: 22px;
-                // TODO - DISABLED
-                filter: opacity(0.2);
-                cursor: not-allowed;
+            &.rejected {
+                background-image: url(../../resources/icons/rejected-label.svg)
             }
-        }
-
-        &-action {
-            grid-area: action-chips;
-            display: flex;
-
-            &-chip {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border: 2px solid transparent;
-                border-radius: 10px;
-                height: 20px;
-                width: auto;
-                min-width: 20px;
-                margin: 0 5px;
-
-                &.passed {
-                    border-color: $passedHeaderColor;
-                }
-
-                &.failed {
-                    border-color: $failedHederColor;
-                }
-
-                &.conditionally_passed {
-                    border-color: $conditionallyHeaderColor;
-                }
-
-                p {
-                    font-size: 10px;
-                    padding: 0 5px;
-                }
-            }
-        }
-
-        &::after {
-            border-bottom: 2px solid $defaultCardBackground;
-            padding: 0 20px;
-            content: '';
-            position: absolute;
-            bottom: 0px;
-            left: 10px;
-            right: 10px;
         }
     }
 
-    &-content {
-        position: relative;
-        padding: 7px 10px 10px 15px;
-        height: 100%;
+    &-card {
+        grid-area: message-card;
 
-        &.passed {
-            background-color: $passedBackgroundColor;
-        }
-    
-        &.failed {
-            background-color: $failedBackgroundColor;
-        }
-    
-        &.conditionaly_passed {
-            background-color: $conditionallyBackgroundColor;
-        }
+        &-header {
+            min-height: 45px;
+            padding: 7px 5px 9px 10px;
+            position: relative;
+            display: grid;
+            grid-template-rows: auto auto;
+            grid-template-columns: 200px 40px auto 40px 1fr 40px;
+            grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
+                                "timestamp-value session from-value session-icon to-value prediction-icon";
 
-        p {
-            margin: 0px;
-            font-size: 13px;    
-        }
-
-        &-human {
-            padding-top: 5px;
-
-            p {
-                word-break: break-all;
-                line-height: 21px;
-            }
-        }
-
-        &-raw {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            margin-top: 10px;
-            font-family: monospace;
-            line-height: 18px;
-            letter-spacing: 0.5px;
-            font-size: 11px;
-
-            &-numbers {
-                color: $secondaryTextColor;
-            }
-
-            &-symbols, &-string {
+            &-session, &-name, &-timestamp-value, &-name-value, &-from-value, &-to-value {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                padding: 3px;
                 color: $primaryTextColor;
+            }
+
+            &-timestamp-value, &-name-value, &-from-value, &-to-value {
                 padding-left: 5px;
-                display: flex;
+            }
 
-                &:hover {
-                    background: $messageCardRawHoverBackground;
+            &-name-value, &-from-value, &-to-value {
+                font-size: 13px;
+                font-weight: bold;
+            }
+
+            &-session, &-name {
+                padding-top: 3px;
+                font-size: 10px;
+            }
+
+            &-name {
+                grid-area: name;
+            }
+
+            &-session {
+                grid-area: session;
+            }
+
+            &-session-icon {
+                grid-area: session-icon;
+            }
+
+            &-timestamp-value {
+                grid-area: timestamp-value;
+                font-size: 13px;
+            }
+
+            &-from-value {
+                grid-area: from-value;
+                margin-right: 25px;
+            }
+
+            &-to-value {
+                grid-area: to-value;
+            }
+
+            &-name-value {
+                grid-area: name-value;
+            }
+
+            &-session-icon {
+                grid-area: session-icon;
+                background-image: url('../../resources/icons/session-icon.svg');
+                height: 25px;
+                width: 25px;
+                background-size: 100%;
+            }
+
+            &-prediction {
+                grid-area: prediction-icon;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                &-icon {
+                    background-image: url(../../resources/icons/ml-message.svg);
+                    background-size: 100%;
+                    width: 22px;
+                    height: 22px;
+                    // TODO - DISABLED
+                    filter: opacity(0.2);
+                    cursor: not-allowed;
                 }
             }
 
-            &-copy-btn {
-                display: inline-block;
-                margin: 4px 4px 4px 10px;
-                height: 13px;
-                width: 13px;
-                background-image: url('../../resources/icons/clipboard.svg');
-                background-size: 100%;
-                filter: opacity(0.6);
-                cursor: pointer;
+            &-action {
+                grid-area: action-chips;
+                display: flex;
+                align-items: center;
 
-                &:hover {
-                    filter: opacity(1);
+                &-chip {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border: 2px solid transparent;
+                    border-radius: 10px;
+                    height: 20px;
+                    width: auto;
+                    min-width: 20px;
+                    margin: 0 5px;
+
+                    &.passed {
+                        border-color: $passedHeaderColor;
+                    }
+
+                    &.failed {
+                        border-color: $failedHederColor;
+                    }
+
+                    &.conditionally_passed {
+                        border-color: $conditionallyHeaderColor;
+                    }
+
+                    p {
+                        font-size: 10px;
+                        padding: 0 5px;
+                    }
                 }
+
+                &-rejected {
+                    font-weight: bold;
+                    font-size: 13px;
+                    padding-left: 6px;
+                    color: $primaryTextColor;
+                }
+            }
+
+            &::after {
+                border-bottom: 2px solid $defaultCardBackground;
+                padding: 0 20px;
+                content: '';
+                position: absolute;
+                bottom: 0px;
+                left: 10px;
+                right: 10px;
             }
         }
 
-        &-controls {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            width: 100%;
-            padding-top: 10px;
+        &-content {
+            grid: message-card-body;
+            position: relative;
+            padding: 7px 10px 10px 15px;
+            height: 100%;
 
-            &-showraw {
-                @include unselectable;
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                font-size: 13px;
+            &.passed {
+                background-color: $passedBackgroundColor;
+            }
+        
+            &.failed {
+                background-color: $failedBackgroundColor;
+            }
+        
+            &.conditionaly_passed {
+                background-color: $conditionallyBackgroundColor;
+            }
+
+            &-title {
                 color: $primaryTextColor;
+                font-size: 14px;
+                font-weight: bold;
+                padding-bottom: 2px;
+                padding-top: 5px;
+            }
 
-                &-title {
-                    font-weight: bold;
-                }
+            &-human {
+                padding-top: 5px;
 
-                &-icon {
-                    height: 14px;
-                    width: 14px;
-                    background-size: 100%;
-                    margin-left: 5px;
-                    
-                    &.expanded {
-                        background-image: url(../../resources/icons/arr4-up.svg);
-                    }
-
-                    &.hidden {
-                        background-image: url(../../resources/icons/arr4-down.svg);
-                    }
+                p {
+                    word-break: break-all;
+                    line-height: 21px;
+                    margin: 0px;
+                    font-size: 13px;    
                 }
             }
 
-            &-copy-all {
-                @include unselectable;
-                display: inline-flex;
-                align-items: center;
-                margin-left: 10px;
-                padding: 2px;
-                cursor: pointer;
+            &-raw {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                margin-top: 10px;
+                font-family: monospace;
+                line-height: 18px;
+                letter-spacing: 0.5px;
+                font-size: 11px;
 
-                &-icon {
+                &-numbers {
+                    color: $secondaryTextColor;
+                }
+
+                &-symbols, &-string {
+                    color: $primaryTextColor;
+                    padding-left: 5px;
+                    display: flex;
+
+                    &:hover {
+                        background: $messageCardRawHoverBackground;
+                    }
+                }
+
+                &-copy-btn {
+                    display: inline-block;
+                    margin: 4px 4px 4px 10px;
                     height: 13px;
                     width: 13px;
                     background-image: url('../../resources/icons/clipboard.svg');
                     background-size: 100%;
                     filter: opacity(0.6);
-                }
+                    cursor: pointer;
 
-                &-title {
-                    font-size: 12px;
+                    &:hover {
+                        filter: opacity(1);
+                    }
+                }
+            }
+
+            &-controls {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                width: 100%;
+                padding-top: 10px;
+
+                &-showraw {
+                    @include unselectable;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    font-size: 13px;
                     color: $primaryTextColor;
-                    padding-left: 5px;
+
+                    &-title {
+                        font-weight: bold;
+                    }
+
+                    &-icon {
+                        height: 14px;
+                        width: 14px;
+                        background-size: 100%;
+                        margin-left: 5px;
+                        
+                        &.expanded {
+                            background-image: url(../../resources/icons/arr4-up.svg);
+                        }
+
+                        &.hidden {
+                            background-image: url(../../resources/icons/arr4-down.svg);
+                        }
+                    }
                 }
 
-                &:hover {
-                    background: $messageCardRawHoverBackground;
+                &-copy-all {
+                    @include unselectable;
+                    display: inline-flex;
+                    align-items: center;
+                    margin-left: 10px;
+                    padding: 2px;
+                    cursor: pointer;
+
+                    &-icon {
+                        height: 13px;
+                        width: 13px;
+                        background-image: url('../../resources/icons/clipboard.svg');
+                        background-size: 100%;
+                        filter: opacity(0.6);
+                    }
+
+                    &-title {
+                        font-size: 12px;
+                        color: $primaryTextColor;
+                        padding-left: 5px;
+                    }
+
+                    &:hover {
+                        background: $messageCardRawHoverBackground;
+                    }
                 }
             }
         }
@@ -301,8 +347,50 @@
 
     height: 100%;
 
-    &-control {
+    &-controls {
         height: 50px;
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: flex-end;
+        padding-right: 20px;
+
+        &-rejected {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 7px 7px 10px 7px;
+            
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-image: url(../../resources/icons/rejected-icon.svg);
+                background-size: 100%;
+                cursor: pointer;
+            }
+
+            &-title, &-count {
+                font-size: 15px;
+                font-weight: bold;
+                padding: 0 10px;
+                color: $primaryTextColor;
+            }
+
+            &-btn {
+                height: 20px;
+                width: 20px;
+                background-size: 100%;
+                filter: opacity(0.7);
+                cursor: pointer;
+
+                &.prev {
+                    background-image: url(../../resources/icons/arr1-left.svg);
+                }
+
+                &.next {
+                    background-image: url(../../resources/icons/arr1-right.svg)
+                }
+            }
+        }
     }
 
     &-list {

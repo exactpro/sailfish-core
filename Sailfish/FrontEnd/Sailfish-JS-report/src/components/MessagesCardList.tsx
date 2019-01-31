@@ -8,17 +8,22 @@ import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
-import { isCheckpoint } from '../helpers/messageType';
+import { isCheckpoint, getRejectReason } from '../helpers/messageType';
+import { selectRejectedMessageId } from '../actions/actionCreators';
 
 interface MessagesListProps {
     messages: Message[];
+    checkpoints: Message[];
+    rejectedMessages: Message[];
     selectedMessages: number[];
     selectedCheckpointId: number;
+    selectedRejectedMessageId: number;
     actionsMap: Map<number, Action>;
     selectedStatus: StatusType;
+    selectRejectedMessage: (messageId: number) => any;
 }
 
-export class MessagesCardListBase extends Component<MessagesListProps, {}> {
+export class MessagesCardListBase extends Component<MessagesListProps> {
 
     private elements: MessageCard[] = [];
 
@@ -29,6 +34,10 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
 
         if (prevProps.selectedCheckpointId !== this.props.selectedCheckpointId) {
             this.scrollToMessage(this.props.selectedCheckpointId);
+        }
+
+        if (prevProps.selectedRejectedMessageId !== this.props.selectedRejectedMessageId) {
+            this.scrollToMessage(this.props.selectedRejectedMessageId);
         }
     }
 
@@ -43,22 +52,53 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
             (actionId) : [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, selectedMessages, selectedStatus, selectedCheckpointId }: MessagesListProps) {
-        const checkpoints = messages.filter(isCheckpoint);
+    render({ messages, rejectedMessages, selectedRejectedMessageId, selectRejectedMessage }: MessagesListProps) {
+
+        const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId);
 
         return (
             <div class="messages">
-                <div class="messages-control"></div>
+                <div class="messages-controls">
+                    {
+                        rejectedMessages && rejectedMessages.length ?
+                        (
+                            <div class="messages-controls-rejected">
+                                <div class="messages-controls-rejected-icon"
+                                    onClick={() => this.scrollToMessage(selectedRejectedMessageId)}/>
+                                <div class="messages-controls-rejected-title">
+                                    <p>Rejected</p>
+                                </div>
+                                <div class="messages-controls-rejected-btn prev"
+                                    onClick={this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                                <div class="messages-controls-rejected-count">
+                                    <p>{currentRejectedIndex === -1 ? 0 : currentRejectedIndex + 1} of {rejectedMessages.length}</p>
+                                </div>
+                                <div class="messages-controls-rejected-btn next"
+                                    onClick={this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                            </div>
+                        )
+                        : null
+                    }
+                </div>
                 <div class="messages-list">
-                    {messages.map(message => checkpoints.includes(message) ? 
-                        this.renderCheckpoint(message, checkpoints.indexOf(message) + 1, selectedCheckpointId) : 
-                        this.renderMessage(message, selectedMessages, selectedStatus))}
+                    {messages.map(message => this.renderMessage(message))}
                 </div>
             </div>
         );
     }
 
-    private renderMessage(message: Message, selectedMessages: number[], selectedStatus: StatusType) {
+    private renderMessage(message: Message) {
+
+        const {selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectRejectedMessage, selectedRejectedMessageId} = this.props;
+
+        if (checkpoints.includes(message)) {
+            return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
+        }
+
+        if (rejectedMessages.includes(message)) {
+            return this.renderRejected(message, rejectedMessages, selectedRejectedMessageId);
+        }
+
         const isSelected = selectedMessages.includes(message.id);
 
         return (
@@ -72,8 +112,9 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
                 />);
     }
 
-    private renderCheckpoint(message: Message, checkpointCount: number, selectedCheckpointId: number) {
-        const isSelected = message.id === selectedCheckpointId;
+    private renderCheckpoint(message: Message, checkpoints: Message[], selectedCheckpointId: number) {
+        const isSelected = message.id === selectedCheckpointId,
+            checkpointCount = checkpoints.indexOf(message) + 1;
 
         return (
             <Checkpoint name={message.msgName}
@@ -82,15 +123,55 @@ export class MessagesCardListBase extends Component<MessagesListProps, {}> {
                 ref={ref => this.elements[message.id] = ref}/>
         )
     }
+
+    private renderRejected(message: Message, rejectedMessages: Message[], selectedRejectedMessageId: number) {
+        const isSelected = message.id === selectedRejectedMessageId,
+            rejectedCount = rejectedMessages.indexOf(message) + 1;
+
+        return (
+            <MessageCard
+                ref={element => this.elements[message.id] = element}
+                message={message}
+                isSelected={isSelected}
+                key={message.id} 
+                actionsMap={this.getMessageActions(message)}
+                rejectedMessagesCount={rejectedCount}/>
+        )
+    }
+
+    private nextRejectedHandler = (rejectedMessages: Message[], currentRejectedIndex: number, selectRejectedHandler: (id: number) => any) => {
+        return () => {
+            if (currentRejectedIndex === -1) {
+                selectRejectedHandler(rejectedMessages[0].id);
+            } else {
+                selectRejectedHandler((rejectedMessages[currentRejectedIndex + 1] || rejectedMessages[0]).id)
+            }
+        }
+    }
+
+    private prevRejectedHandler = (rejectedMessages: Message[], currentRejectedIndex: number, selectRejectedMessage: (id: number) => any) => {
+        return () => {
+            if (currentRejectedIndex === -1) {
+                selectRejectedMessage(rejectedMessages[rejectedMessages.length - 1].id);
+            } else {
+                selectRejectedMessage((rejectedMessages[currentRejectedIndex - 1] || rejectedMessages[rejectedMessages.length - 1]).id)
+            }
+        }
+    }
 }
 
 export const MessagesCardList = connect(
-    (state: AppState) : MessagesListProps => ({
+    (state: AppState) => ({
         messages: state.testCase.messages,
+        checkpoints: state.testCase.messages.filter(isCheckpoint),
+        rejectedMessages: state.testCase.messages.filter(message => message.isRejected),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
+        selectedRejectedMessageId: state.selected.rejectedMessageId,
         selectedStatus: state.selected.status,
         actionsMap: generateActionsMap(state.testCase.actions)
     }),
-    dispatch => ({})
+    dispatch => ({
+        selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId))
+    })
 )(MessagesCardListBase as any);

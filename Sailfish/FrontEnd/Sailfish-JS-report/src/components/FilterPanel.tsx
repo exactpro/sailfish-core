@@ -47,13 +47,6 @@ export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsF
                     click={() => fieldsFilterHandler("NA")}
                     theme="green" />
             </div>
-            <div class="header-filter-togglers">
-                <h5>Messages</h5>
-                <ToggleButton text="Checkpoints"
-                    isToggled={true}
-                    click={() => {}}
-                    theme="green" />
-            </div>
         </div>
     )
 }

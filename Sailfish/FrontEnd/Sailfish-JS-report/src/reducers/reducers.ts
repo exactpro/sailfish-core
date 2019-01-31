@@ -49,6 +49,16 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             }
         }
 
+        case StateActionTypes.SELECT_REJECTED_MESSAGE: {
+            return {
+                ...state,
+                selected: {
+                    ...state.selected,
+                    rejectedMessageId: stateAction.messageId
+                }
+            }
+        }
+
         case StateActionTypes.SWITCH_ACTIONS_FILTER: {
             if (state.actionsFilter.includes(stateAction.status)) {
                 return {

@@ -18,8 +18,8 @@ export default interface Action {
     parameters?: ActionParameter[];
     relatedMessages: number[];
     logs?: any;
-    startTime?: string;
-    finishTime?: string;
+    startTime?: number;
+    finishTime?: number;
     status: Status;
     subNodes?: ActionNode[];
     checkPointId?: number;

@@ -1,4 +1,4 @@
-import {h, Component} from 'preact';
+import { h, Component } from 'preact';
 import '../styles/messages.scss';
 import Message from '../models/Message';
 import { StatusType, statusValues } from '../models/Status';
@@ -7,6 +7,7 @@ import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
+import { getMessageType, MessageType, getRejectReason } from '../helpers/messageType';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -15,6 +16,7 @@ interface MessageCardProps {
     isSelected?: boolean;
     actionsMap: Map<number, Action>;
     status?: StatusType;
+    rejectedMessagesCount?: number;
 }
 
 interface MessageCardState {
@@ -22,7 +24,7 @@ interface MessageCardState {
 }
 
 export default class MessageCard extends Component<MessageCardProps, MessageCardState> {
-    
+
     constructor(props: MessageCardProps) {
         super(props);
         this.state = {
@@ -35,7 +37,7 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
 
         if (nextProps.message !== this.props.message || nextProps.status !== this.props.status) {
             return true;
-        } 
+        }
 
         return nextProps.isSelected !== this.props.isSelected;
     }
@@ -46,99 +48,151 @@ export default class MessageCard extends Component<MessageCardProps, MessageCard
             showRaw: !this.state.showRaw
         });
     }
-    
-    render({message, isSelected, actionsMap, status}: MessageCardProps, {showRaw}: MessageCardState) {
-        const { msgName, timestamp, from, to, contentHumanReadable, raw } = message,
-            rootClass = ["message-card", (status || "").toLowerCase(), (isSelected ? "selected" : "")].join(" "),
-            contentClass = ["message-card-content", (status || "").toLowerCase()].join(" "),
-            showRawClass = ["message-card-content-controls-showraw-icon", (showRaw ? "expanded" : "hidden")].join(" ");
 
-        const actions = [...actionsMap.values()];
+    render({ message, isSelected, actionsMap, status, rejectedMessagesCount }: MessageCardProps, { showRaw }: MessageCardState) {
+        const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
-        const hueValue = this.calculateHueValue(from, to);
+        const actions = [...actionsMap.values()],
+            hueValue = this.calculateHueValue(from, to),
+            type = getMessageType(message),
+            rejectedTitle = message.isRejected ? getRejectReason(message) : null;
 
-        return(
+        const rootClass = [
+                "message",
+                (status || "").toLowerCase(),
+                (isSelected ? "selected" : "")
+            ].join(" "),
+            contentClass = [
+                "message-card-content",
+                (status || "").toLowerCase()
+            ].join(" "),
+            showRawClass = [
+                "message-card-content-controls-showraw-icon",
+                (showRaw ? "expanded" : "hidden")
+            ].join(" "),
+            labelClass = [
+                "message-label",
+                type
+            ].join(" "),
+            labelIconClass = [
+                "message-label-icon",
+                type
+            ].join(" ");
+
+        return (
             <div class={rootClass}>
-                <div class="message-card-header">
-                    <div class="message-card-header-action">
-                        {statusValues.map(statusValue => {
-                            //getting status chip element for each status
-                            const statusCount = actions.filter(action => action.status.status === statusValue).length,
-                                className = ["message-card-header-action-chip", statusValue.toLowerCase()].join(' ');
-
-                            return statusCount ? (<div class={className}><p>{statusCount}</p></div>) : null;
-                        })}
-                    </div>
-                    <div class="message-card-header-timestamp-value">
-                        <p>{timestamp}</p>
-                    </div>
-                    <div class="message-card-header-name-value">
-                        <p>{msgName}</p>
-                    </div>
-                    <div class="message-card-header-from-value">
-                        <p>{from}</p>
-                    </div>
-                    <div className="message-card-header-to-value">
-                        <p>{to}</p>
-                    </div>
-                    <div class="message-card-header-name">
-                        <span>Name</span>
-                    </div>
-                    <div class="message-card-header-session">
-                        <span>Session</span>
-                    </div>
-                    {
-                        from && to ? 
-                        <div class="message-card-header-session-icon" 
-                            style={{filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)`}}/>
-                        : null
-                    }
-                    {/* DISABLED */}
-                    <div class="message-card-header-prediction"
-                        title="Not implemeted">
-                        <div class="message-card-header-prediction-icon"
-                            onClick={() => alert("Not implemented...")}/>
-                    </div>
-                </div>
-                <div class={contentClass}>
-                    <div class="message-card-content-human">
-                        <p>{contentHumanReadable}</p>
-                    </div>
-                    <div class="message-card-content-controls">
+                {
+                    type != MessageType.MESSAGE ? 
+                    (
+                        <div class={labelClass}>
+                            <div class={labelIconClass}></div>
+                        </div>
+                    )
+                    : null
+                }
+                <div class="message-card">
+                    <div class="message-card-header">
+                        <div class="message-card-header-action">
+                            {
+                                rejectedMessagesCount ? 
+                                (
+                                    <div class="message-card-header-action-rejected">
+                                        <p>Rejected {rejectedMessagesCount}</p>
+                                    </div>
+                                )
+                                : statusValues.map(this.renderActionChip(actions))
+                            }
+                        </div>
+                        <div class="message-card-header-timestamp-value">
+                            <p>{timestamp}</p>
+                        </div>
+                        <div class="message-card-header-name-value">
+                            <p>{msgName}</p>
+                        </div>
+                        <div class="message-card-header-from-value">
+                            <p>{from}</p>
+                        </div>
+                        <div className="message-card-header-to-value">
+                            <p>{to}</p>
+                        </div>
+                        <div class="message-card-header-name">
+                            <span>Name</span>
+                        </div>
+                        <div class="message-card-header-session">
+                            <span>Session</span>
+                        </div>
                         {
-                            (raw && raw !== "null") ? 
-                            <div class="message-card-content-controls-showraw"
-                                onClick={e => this.showRaw()}>
-                                <div class="message-card-content-controls-showraw-title">
-                                    <span>{showRaw ? "Close raw" : "Show raw"}</span>
+                            from && to ?
+                                <div class="message-card-header-session-icon"
+                                    style={{ filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)` }} />
+                                : null
+                        }
+                        {/* DISABLED */}
+                        <div class="message-card-header-prediction"
+                            title="Not implemeted">
+                            <div class="message-card-header-prediction-icon"
+                                onClick={() => alert("Not implemented...")} />
+                        </div>
+                    </div>
+                    <div class={contentClass}>
+                        {
+                            message.isRejected ? 
+                            (
+                                <div class="message-card-content-title">
+                                    <p>{rejectedTitle}</p>
                                 </div>
-                                <div class={showRawClass}/>
-                            </div>
+                            )
                             : null
                         }
+                        <div class="message-card-content-human">
+                            <p>{contentHumanReadable}</p>
+                        </div>
+                        <div class="message-card-content-controls">
+                            {
+                                (raw && raw !== "null") ?
+                                    <div class="message-card-content-controls-showraw"
+                                        onClick={e => this.showRaw()}>
+                                        <div class="message-card-content-controls-showraw-title">
+                                            <span>{showRaw ? "Close raw" : "Show raw"}</span>
+                                        </div>
+                                        <div class={showRawClass} />
+                                    </div>
+                                    : null
+                            }
+                            {
+                                showRaw ?
+                                    (<div class="message-card-content-controls-copy-all"
+                                        onClick={() => this.copyToClipboard(raw)}
+                                        title="Copy all raw content to clipboard">
+                                        <div class="message-card-content-controls-copy-all-icon" />
+                                        <div class="message-card-content-controls-copy-all-title">
+                                            <span>Copy All</span>
+                                        </div>
+                                    </div>)
+                                    : null
+                            }
+                        </div>
                         {
-                            showRaw ? 
-                            (<div class="message-card-content-controls-copy-all"
-                                onClick={() => this.copyToClipboard(raw)}
-                                title="Copy all raw content to clipboard">
-                                <div class="message-card-content-controls-copy-all-icon"/>
-                                <div class="message-card-content-controls-copy-all-title">
-                                    <span>Copy All</span>
-                                </div>
-                            </div>)
-                            : null
+                            showRaw ?
+                                <MessageRaw
+                                    rawContent={raw}
+                                    copyHandler={this.copyToClipboard} />
+                                : null
                         }
                     </div>
-                    {
-                        showRaw ?
-                        <MessageRaw 
-                            rawContent={raw}
-                            copyHandler={this.copyToClipboard}/>
-                        : null
-                    }
                 </div>
             </div>
         );
+    }
+
+    private renderActionChip(actions: Action[]) {
+        return (statusValue: StatusType) => {
+            //getting status chip element for each status
+            const statusCount = actions.filter(action => action.status.status === statusValue).length,
+                className = ["message-card-header-action-chip", statusValue.toLowerCase()].join(' ');
+
+            return statusCount ? (<div class={className}><p>{statusCount}</p></div>) : null;
+        }
     }
 
     private copyToClipboard(text: string) {

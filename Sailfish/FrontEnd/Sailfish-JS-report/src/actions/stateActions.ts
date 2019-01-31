@@ -14,6 +14,7 @@ export enum StateActionTypes {
     SELECT_ACTION = 'SELECT_ACTION',
     SELECT_MESSAGES = 'SELECT_MESSAGES',
     SELECT_CHECKPOINT = 'SELECT_CHECKPOINT',
+    SELECT_REJECTED_MESSAGE = 'SELECT_REJECTED_MESSAGE',
     SWITCH_ACTIONS_FILTER = 'SWITCH_ACTIONS_FILTER',
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
     SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
@@ -50,6 +51,11 @@ export interface MessagesSelectStateAction {
 export interface CheckpointSelectStateAction {
     type: StateActionTypes.SELECT_CHECKPOINT;
     checkpointId: number;
+}
+
+export interface RejectedMessageSelectStateAction {
+    type: StateActionTypes.SELECT_REJECTED_MESSAGE;
+    messageId: number;
 }
 
 export interface SwitchActionFilterStateAction {
@@ -99,6 +105,7 @@ export type StateActionType = SetReportStateAction |
     ActionSelectStateAction |
     MessagesSelectStateAction | 
     CheckpointSelectStateAction |
+    RejectedMessageSelectStateAction |
     NextTestCaseStateAction |
     PrevTestCaseStateAction | 
     SetTestCaseStateAction | 

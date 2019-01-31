@@ -4,6 +4,7 @@ import Log from "./Log";
 import Status from './Status';
 
 export default interface TestCase {
+    actionNodeType: string;
     name?: string;
     actions: Action[];
     logs: Log[];
@@ -18,7 +19,7 @@ export default interface TestCase {
     hash: number;
     description: string;
     status: Status;
-    startTime: string;
-    finishTime: string;
+    startTime: number;
+    finishTime: number;
     verifications?: any[];
 }
