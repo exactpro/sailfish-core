@@ -22,7 +22,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.tsx', '.scss']
   },
   output: {
-    path: path.resolve(__dirname, './build/'),
+    path: path.resolve(__dirname, './build/out/'),
     filename: 'bundle.js'
   },
   entry: path.resolve("./src/index.tsx"),

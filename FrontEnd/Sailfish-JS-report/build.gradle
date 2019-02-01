@@ -18,14 +18,20 @@
 *	Files will be located at build folder (index.html and bundle.js)
 */
 
+import org.gradle.api.internal.file.IdentityFileResolver
+import org.gradle.api.java.archives.internal.DefaultManifest
+
 buildscript {
   repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
+      maven {
+          name 'MavenLocal' // for local builds only
+          url '../../shared'
+      }
+      jcenter()
   }
   dependencies {
-    classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+      classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+      classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.12'
   }
 }
 
@@ -33,13 +39,28 @@ plugins {
     id "com.moowork.node" version "1.2.0"
 }
 
+apply plugin: 'maven'
 apply plugin: 'com.moowork.node'
+apply plugin: 'com.jfrog.artifactory'
 
 ext {
-	node_modules   = file('node_modules')
-	npmPackageInfo = file('package.json')  
-	npmDir         = file("nodejs")
+    sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
+    artifactVersion         = "${sailfishVersion}-SNAPSHOT"
+    sailfishCoreVersion		= "${sailfishVersion}" //.${sailfish_version_maintenance}"
+    artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : sailfishCoreVersion
+
+    node_modules    = file("node_modules")
+    npmPackageInfo  = file("package.json")
+    npmDir          = file("${project.buildDir}/nodejs")
+
+    sharedDir       = file('../../shared')
 }
+
+group = 'com.exactpro.sf'
+version = artifactCoreVersion
+archivesBaseName = 'sailfish-js-report'
+
+defaultTasks 'zipData'
 
 node {
     version = '10.1.0'
@@ -68,9 +89,41 @@ task devServer(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
 	args = ['run', 'dev-server']
 }
 
-task build(dependsOn: [
-	'buildProd']) { }
+task zipData(type: Zip, dependsOn: 'buildProd') {
+    includeEmptyDirs = false
+    duplicatesStrategy = 'EXCLUDE'
 
-task uA {
-	// upload archives here
+    from file("${project.buildDir}/out")
+}
+
+clean {
+    delete project.buildDir
+    delete node_modules
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        uniqueVersion = false // publish non unique snapshots to local repository
+        repository(url: "file:${sharedDir}")
+        doLast {
+            // Remove any invalid maven-metadata.xml files that may have been created
+            // for SNAPSHOT versions that are *not* uniquely versioned.
+            pom*.each { pom ->
+                if (pom.version.endsWith('-SNAPSHOT')) {
+                    final File artifactDir = new File(rootProject.ext.sharedDir,
+                            pom.groupId.replace('.', '/')
+                                    + '/' + pom.artifactId
+                                    + '/' + pom.version)
+                    delete fileTree(dir: artifactDir, include: 'maven-metadata.xml*')
+                }
+            }
+        }
+    }
+    doFirst {
+        sharedDir.mkdirs()
+    }
+}
+
+artifacts {
+    archives(zipData)
 }
