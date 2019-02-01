@@ -120,6 +120,8 @@ public class ExecutorClient {
 
     private final BigButtonSettings settings;
 
+    private final Set<String> uploadedVariableSets = new HashSet<>();
+
     public ExecutorClient(IWorkspaceDispatcher workspaceDispatcher, CombineQueue<ScriptList> listsQueue, Library library, ExecutionProgressMonitor monitor,
 			Executor executor, EMailService mailService, RegressionRunner runner, BigButtonSettings settings) {
 		
@@ -221,7 +223,13 @@ public class ExecutorClient {
                 createApiClient();
             }
             apiClient.setStatisticsDBSettings(xmlConfig);
+            uploadVariableSets();
             uploadExecutorServices();
+
+            if(prepareExecutorServices().stream().anyMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
+                setVariableSet(executor.getVariableSet());
+            }
+
             serviceCommand(executorServicesUploaded.values().stream(), apiClient::startService, "start", StartMode.EXECUTOR);
             return true;
         } catch (Exception e) {
@@ -264,6 +272,28 @@ public class ExecutorClient {
 
             }
         }
+    }
+
+    private void uploadVariableSets() throws Exception {
+        String variableSetsFile = library.getVariableSetsFile();
+
+        if(variableSetsFile == null) {
+            return;
+        }
+
+        try(InputStream variableSets = BigButtonUtil.getStream(library.getRootFolder(), variableSetsFile, workspaceDispatcher)) {
+            Set<String> uploadedVariableSets = apiClient.importVariableSets(variableSetsFile, variableSets, true).getVariableSets();
+            logger.debug("Uploaded variable sets: {}", uploadedVariableSets);
+            this.uploadedVariableSets.addAll(uploadedVariableSets);
+        }
+    }
+
+    private void setVariableSet(String name) throws Exception {
+        if(name == null) {
+            name = library.getGlobals().map(Globals::getVariableSet).orElse(null);
+        }
+
+        apiClient.setEnvironmentVariableSet(BB_ENVIRONMENT, name);
     }
 
     private void serviceCommand(Stream<Service> services, APIServiceConsumer command, String commandName, StartMode startMode) {
@@ -315,7 +345,13 @@ public class ExecutorClient {
         } catch (RuntimeException e) {
             toErrorState(e);
         }
-
+        try {
+            for(String uploadedVariableSet : uploadedVariableSets) {
+                apiClient.deleteVariableSet(uploadedVariableSet);
+            }
+        } catch(Exception e) {
+            toErrorState(e);
+        }
     }
 
 	public void registerTags(List<Tag> tags) {
@@ -432,8 +468,13 @@ public class ExecutorClient {
 		private boolean beforeListRun() {
 			
 			try {
-				
                 uploadScriptListServices();
+
+                if(prepareScriptListServices().stream().allMatch(service -> service.getStartMode() == StartMode.LIST) &&
+                        prepareExecutorServices().stream().noneMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
+                    setVariableSet(currentList.getVariableSet());
+                }
+
                 Stream<Service> uploaded = Stream.concat(
                         executorServicesUploaded.values().stream(),
                         scriptListServicesUploaded.values().stream());
@@ -929,7 +970,7 @@ public class ExecutorClient {
                 }
             } else {
     			ScriptList newScriptList = new ScriptList(currentList.getName(), null, currentList.getServiceLists(),
-                    currentList.getApiOptions(), currentList.getPriority(), currentList.getLineNumber());
+                        currentList.getApiOptions(), currentList.getPriority(), currentList.getLineNumber(), currentList.getVariableSet());
 			
 			boolean firstUnfinished = true;
 			

@@ -975,6 +975,11 @@ public class EnvironmentBean implements Serializable {
     }
 
     public String getCurrentEnvironment() {
+        // hotfix for a case when environment was deleted not from GUI (e.g. by REST API)
+        if(!BeanUtil.getSfContext().getConnectionManager().getEnvironmentList().contains(currentEnvironment)) {
+            setCurrentEnvironment(ServiceName.DEFAULT_ENVIRONMENT);
+        }
+
 		return currentEnvironment;
 	}
 
@@ -986,7 +991,7 @@ public class EnvironmentBean implements Serializable {
 	}
 
     public String getCurrentVariableSet() {
-        this.currentVariableSet = BeanUtil.getSfContext().getConnectionManager().getEnvironmentVariableSet(currentEnvironment);
+        this.currentVariableSet = BeanUtil.getSfContext().getConnectionManager().getEnvironmentVariableSet(getCurrentEnvironment());
         return currentVariableSet;
     }
 

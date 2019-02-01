@@ -229,6 +229,18 @@ public class CsvLibraryBuilder {
 
 	}
 
+    private String parseVariableSetsFile(Map<String, String> row) throws InvalidRowException {
+
+        String variableSetsFile = row.get(CsvHeader.Path.getFieldKey());
+
+        if(variableSetsFile == null) {
+            throw new InvalidRowException(CsvHeader.Path.getFieldKey() + " is missing");
+        }
+
+        return variableSetsFile;
+
+    }
+
     private Globals parseGlobals(Map<String, String> row, long lineNumber) throws InvalidRowException {
 
 		Globals result = new Globals();
@@ -244,6 +256,8 @@ public class CsvLibraryBuilder {
 		result.setApiOptions( parseApiOptions(row) );
 
         result.setLineNumber(lineNumber);
+
+        result.setVariableSet(row.get(CsvHeader.VariableSet.getFieldKey()));
 
 		return result;
 
@@ -283,6 +297,7 @@ public class CsvLibraryBuilder {
 		}
 
         result.setLineNumber(lineNumber);
+        result.setVariableSet(StringUtils.stripToNull(row.get(CsvHeader.VariableSet.getFieldKey())));
 
 		return result;
 	}
@@ -462,8 +477,9 @@ public class CsvLibraryBuilder {
 		}
 
 		String executor = StringUtils.defaultIfBlank(row.get(CsvHeader.Executor.getFieldKey()), null);
+        String variableSet = StringUtils.stripToNull(row.get(CsvHeader.VariableSet.getFieldKey()));
 
-        ScriptList result = new ScriptList(name, executor, serviceNames, parseApiOptions(row), priority, currentRecordNumber);
+        ScriptList result = new ScriptList(name, executor, serviceNames, parseApiOptions(row), priority, currentRecordNumber, variableSet);
 
         if (!priorityParsed) {
             result.addRejectCause(new ImportError(currentRecordNumber, "'Priority' value is not parsable to number (long)"));
@@ -690,6 +706,12 @@ public class CsvLibraryBuilder {
 				this.library.setReportsFolder(parseLibraryFolder(row));
 
 				break;
+
+        case "variable sets file":
+
+            this.library.setVariableSetsFile(parseVariableSetsFile(row));
+
+            break;
 
 			case "globals":
 

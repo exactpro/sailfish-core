@@ -191,7 +191,5 @@ function onVariableSetsImportComplete() {
         isVariableSetsUploading = false;
         PF('variableSetsImportDialog').hide();
         PF('variableSetsDialogWidget').hide();
-
-        return;
     }
 }

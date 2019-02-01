@@ -108,7 +108,7 @@
 	height: 80px;
 	padding-top: 20px;
 	box-sizing: border-box;
-	width: 60%;
+	width: 50%;
 	float: left;
 }
 
@@ -142,7 +142,7 @@
 }
 
 .eps-selected-variable-set {
-	margin-top: 6px;
+    margin-top: 6px;
 }
 
 .eps-environment-table th.eps-service-action-column {
@@ -339,7 +339,6 @@ a.eps-link-button:focus {
 .dictionary-autocomplete > button {
     border-radius: 0 4px 4px 0 !important;
 }
-
 
 #selectedEnvironment {
     max-width: 200px;

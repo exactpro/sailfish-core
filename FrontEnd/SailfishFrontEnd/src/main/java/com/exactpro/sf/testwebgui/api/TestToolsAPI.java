@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -490,9 +491,10 @@ public class TestToolsAPI {
         return context.getConnectionManager().getEnvironmentVariableSet(environmentName);
     }
 
-    public void importVariableSets(InputStream stream, boolean replace) throws IOException {
+    public Set<String> importVariableSets(InputStream stream, boolean replace) throws IOException {
         IConnectionManager connectionManager = context.getConnectionManager();
         Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(stream);
+        Set<String> importedSets = new HashSet<>();
 
         variableSets.forEach((name, variableSet) -> {
             if(connectionManager.isVariableSetExists(name) && !replace) {
@@ -500,7 +502,10 @@ public class TestToolsAPI {
             }
 
             connectionManager.putVariableSet(name, variableSet);
+            importedSets.add(name);
         });
+
+        return importedSets;
     }
 
     public ImportServicesResult importServices(InputStream inputStream, boolean isZip, String environment, boolean replace,
