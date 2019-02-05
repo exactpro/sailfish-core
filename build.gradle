@@ -52,6 +52,7 @@ allprojects {
         testResDir              = file("${testDir}/resources")
         genJavaDir              = file("${genDir}/java")
         genResDir               = file("${genDir}/resources")
+        providedResDir          = file("${providedDir}/resources/")
 
         mainWorkspaceDir        = file("${mainDir}/workspace")
         genWorkspaceDir         = file("${genDir}/workspace")

@@ -717,14 +717,6 @@ iframe {
     border-radius: 3px;
 }
 
-.report-menu {
-    position: absolute;
-    top: 15%;
-    right: 10%;
-    left: inherit;
-    width: 70px;
-}
-
 
 .menu > input[type=checkbox], .submenu > li > input[type=checkbox], .submenu-item  > input[type=checkbox]{
     display: none;

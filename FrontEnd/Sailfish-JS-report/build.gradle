@@ -90,6 +90,8 @@ task devServer(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
 }
 
 task zipData(type: Zip, dependsOn: 'buildProd') {
+    classifier = "data"
+
     includeEmptyDirs = false
     duplicatesStrategy = 'EXCLUDE'
 
