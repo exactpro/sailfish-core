@@ -100,8 +100,8 @@ public class JsonMessageConverter {
             generator.writeStringField(JSON_MESSAGE_NAMESPACE, metaData.getMsgNamespace());
             generator.writeStringField(JSON_MESSAGE_DICTIONARY_URI, Objects.toString(metaData.getDictionaryURI(), StringUtils.EMPTY));
             generator.writeStringField(JSON_MESSAGE_PROTOCOL, StringUtils.defaultString(metaData.getProtocol()));
-            generator.writeStringField(JSON_MESSAGE_DIRTY, Objects.toString(metaData.isDirty(), StringUtils.EMPTY));
-            generator.writeStringField(JSON_MESSAGE_ADMIN, Objects.toString(metaData.isAdmin(), StringUtils.EMPTY));
+            generator.writeBooleanField(JSON_MESSAGE_DIRTY, metaData.isDirty());
+            generator.writeBooleanField(JSON_MESSAGE_ADMIN, metaData.isAdmin());
             generator.writeStringField(JSON_MESSAGE_RR, metaData.getRejectReason());
             generator.writeFieldName(JSON_MESSAGE);
 
