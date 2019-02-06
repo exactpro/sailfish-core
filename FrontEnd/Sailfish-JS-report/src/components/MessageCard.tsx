@@ -70,7 +70,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
 
         const actions = [...actionsMap.values()],
             hueValue = this.calculateHueValue(from, to),
-            rejectedTitle = message.isRejected ? getRejectReason(message) : null;
+            rejectedTitle = (message.content.rejectReason !== null) ? getRejectReason(message) : null;
 
         const rootClass = [
                 "message",
@@ -137,7 +137,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     </div>
                     <div class={contentClass}>
                         {
-                            message.isRejected ? 
+                            (message.content.rejectReason !== null) ?
                             (
                                 <div class="message-card-content-title">
                                     <p>{rejectedTitle}</p>
@@ -199,7 +199,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
         const labels = [];
 
-        if (message.isAdmin) {
+        if (message.content.admin) {
             labels.push(
                 <div class="message-label-admin">
                     <div class="message-label-admin-icon"/>
@@ -207,7 +207,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
             )
         }
 
-        if (message.isRejected) {
+        if (message.content.rejectReason !== null) {
             labels.push(
                 <div class="message-label-rejected">
                     <div class="message-label-rejected-icon"/>

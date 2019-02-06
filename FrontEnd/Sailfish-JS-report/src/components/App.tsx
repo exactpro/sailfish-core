@@ -52,7 +52,7 @@ class AppBase extends Component<AppProps, {}> {
         if (!report) return (
             <div class="root">
                 <p>Loading json...</p>
-                <script src="report/report.js"></script>
+                <script src="reportData/report.js"></script>
             </div>
         );
 
@@ -75,7 +75,7 @@ class AppBase extends Component<AppProps, {}> {
         return (
             <div class="root">
                 <p>Loading json...</p>
-                <script src={"report/" + testCaseFilePath}></script>
+                <script src={"reportData/" + testCaseFilePath}></script>
             </div>
         )
     };
