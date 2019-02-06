@@ -81,7 +81,7 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
         const labels = [];
 
-        if (message.isAdmin) {
+        if (message.content.admin) {
             labels.push(
                 <div class="message-label-admin">
                     <div class="message-label-admin-icon" style={{marginTop: "10px"}}/>
@@ -89,7 +89,7 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
             )
         }
 
-        if (message.isRejected) {
+        if (message.content.rejectReason !== null) {
             labels.push(
                 <div class="message-label-rejected">
                     <div class="message-label-rejected-icon" style={{marginTop: "10px"}}/>

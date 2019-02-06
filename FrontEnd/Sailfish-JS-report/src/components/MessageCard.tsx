@@ -23,7 +23,7 @@ import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
-import { getMessageType, MessageType, getRejectReason } from '../helpers/messageType';
+import { getMessageType, MessageType } from '../helpers/messageType';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -70,7 +70,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
 
         const actions = [...actionsMap.values()],
             hueValue = this.calculateHueValue(from, to),
-            rejectedTitle = (message.content.rejectReason !== null) ? getRejectReason(message) : null;
+            rejectedTitle = message.content.rejectReason;
 
         const rootClass = [
                 "message",
@@ -130,7 +130,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                         }
                         {/* DISABLED */}
                         <div class="message-card-header-prediction"
-                            title="Not implemeted">
+                            title="Not implemented">
                             <div class="message-card-header-prediction-icon"
                                 onClick={() => alert("Not implemented...")} />
                         </div>

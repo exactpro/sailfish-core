@@ -24,7 +24,7 @@ import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
-import { isCheckpoint, getRejectReason } from '../helpers/messageType';
+import { isCheckpoint } from '../helpers/messageType';
 import { selectRejectedMessageId } from '../actions/actionCreators';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 
@@ -147,7 +147,7 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
         }
 
-        if (message.isAdmin) {
+        if (message.content.admin) {
             return (
                 <AdminMessageWrapper
                     ref={ref => this.elements[message.id] = ref}
@@ -234,8 +234,8 @@ export const MessagesCardList = connect(
     (state: AppState) => ({
         messages: state.testCase.messages,
         checkpoints: state.testCase.messages.filter(isCheckpoint),
-        rejectedMessages: state.testCase.messages.filter(message => message.isRejected),
-        adminMessages: state.testCase.messages.filter(message => message.isAdmin),
+        rejectedMessages: state.testCase.messages.filter(message => message.content.rejectReason !== null),
+        adminMessages: state.testCase.messages.filter(message => message.content.admin),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
         selectedRejectedMessageId: state.selected.rejectedMessageId,

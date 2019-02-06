@@ -28,17 +28,12 @@ export function isCheckpoint(message: Message) : boolean {
     return !message.from && !message.to;
 }
 
-export function getRejectReason(message: Message) : string {
-    const content = JSON.parse(message.content);
-    return content['rejectReason'];
-}
-
 export function getMessageType(message: Message) : MessageType {
     if (isCheckpoint(message)) {
         return MessageType.CHECKPOINT;
     }
 
-    if (message.isRejected) {
+    if (message.content.rejectReason !== null) {
         return MessageType.REJECTED;
     }
 
