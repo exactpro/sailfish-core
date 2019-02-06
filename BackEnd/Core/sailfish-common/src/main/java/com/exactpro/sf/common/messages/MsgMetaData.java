@@ -160,6 +160,7 @@ public class MsgMetaData implements Cloneable {
 	    metaData.setServiceInfo(serviceInfo);
         metaData.setDictionaryURI(dictionaryURI);
         metaData.setProtocol(protocol);
+        metaData.setRejectReason(rejectReason);
 
 	    if(rawMessage != null) {
 	        metaData.setRawMessage(Arrays.copyOf(rawMessage, rawMessage.length));

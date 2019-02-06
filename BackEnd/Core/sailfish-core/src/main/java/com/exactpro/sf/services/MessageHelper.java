@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
@@ -29,6 +30,7 @@ import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageNotFoundException;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.configuration.IDictionaryManager;
 
 public abstract class MessageHelper {
 
@@ -58,13 +60,8 @@ public abstract class MessageHelper {
     public boolean isAdmin(IMessage message) throws MessageNotFoundException, AttributeNotFoundException {
         IMessageStructure messageStructure = this.dictionaryStructure.getMessageStructure(message.getName());
         if (messageStructure != null) {
-            Object isAdminAttribute = messageStructure.getAttributeValueByName(ATTRIBUTE_IS_ADMIN);
-            if (isAdminAttribute instanceof Boolean) {
-                return (Boolean)isAdminAttribute;
-            }
-            throw new AttributeNotFoundException("Message " + messageStructure.getName() + " does not contains boolean attribute name " + ATTRIBUTE_IS_ADMIN + " namespace " + message.getNamespace());
+            return isAdmin(messageStructure);
         }
-
         return true;
     }
 
@@ -82,6 +79,17 @@ public abstract class MessageHelper {
 
     public String getNamespace() {
         return namespace;
+    }
+
+    public static boolean isAdmin(IMessageStructure structure) throws AttributeNotFoundException {
+
+        Object isAdminAttribute = structure.getAttributeValueByName(ATTRIBUTE_IS_ADMIN);
+        if (isAdminAttribute instanceof Boolean || isAdminAttribute == null) {
+            return BooleanUtils.toBoolean((Boolean) isAdminAttribute);
+        }
+
+        throw new AttributeNotFoundException("Message structure" + structure.getName()
+            + " does not contains boolean attribute name " + ATTRIBUTE_IS_ADMIN + " namespace " + structure.getNamespace());
     }
 
     public static HashMap<String, Object> convert(IMessage message) {
@@ -111,4 +119,5 @@ public abstract class MessageHelper {
         }
         return field;
     }
+
 }
