@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.services.fix.FixUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -195,7 +196,11 @@ public class QFJIMessageConverter
 
 		// dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
 		resultMessage.getMetaData().setAdmin(message.isAdmin());
-		resultMessage.getMetaData().setRawMessage(message.toString().getBytes());
+		resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
+
+        if (message.getException() != null) {
+            resultMessage.getMetaData().setRejectReason(message.getException().getMessage());
+        }
 
 		return resultMessage;
 	}
@@ -250,11 +255,24 @@ public class QFJIMessageConverter
 
                 for(Group group : message.getGroups(fieldTag)) {
                     IMessage iGroup = factory.createMessage(fieldStructure.getReferenceName(), fieldStructure.getNamespace());
-                    iGroups.add(iGroup);
                     traverseMessage(iGroup, group, factory, iGroup, verifyTags, skipTags, ignoreFieldType);
+                    iGroups.add(iGroup);
                 }
 
-				messageComponent.addField(fieldName, iGroups);
+                if (!iGroups.isEmpty()) {
+                    messageComponent.addField(fieldName, iGroups);
+                } else {
+                    //group is empty, lets find group wrapper and remove it
+                    IMessage componentParent = resultMessage;
+                    for (int i = 0; i < fieldPath.size() - 1; i++) {
+                        componentParent = componentParent.getField(fieldPath.get(i).getName());
+                    }
+
+                    if (!fieldPath.isEmpty()) {
+                        String fieldToRemove = fieldPath.get(fieldPath.size() - 1).getName();
+                        componentParent.removeField(fieldToRemove);
+                    }
+                }
 			} else {
 				try {
 					if (message.getString(fieldTag).isEmpty()) {
@@ -552,4 +570,6 @@ public class QFJIMessageConverter
     public IDictionaryStructure getDictionary() {
         return dictionary;
     }
+
+
 }

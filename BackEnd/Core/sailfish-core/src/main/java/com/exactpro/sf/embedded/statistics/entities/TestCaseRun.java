@@ -15,8 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.entities;
 
-import java.util.Date;
-
+import javax.persistence.CascadeType;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,10 +24,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.exactpro.sf.statistics.LocalDateTimeDBConverter;
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Parameter;
@@ -36,6 +37,12 @@ import org.hibernate.annotations.Type;
 
 import com.exactpro.sf.scriptrunner.StatusType;
 import java.time.LocalDateTime;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name="sttestcaseruns")
@@ -81,6 +88,9 @@ public class TestCaseRun {
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "status_id", nullable = true)
 	private TestCaseRunStatus runStatus;
+
+    @OneToMany(mappedBy = "testCaseRun", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TestCaseRunTag> tags = new HashSet<>();
 
     private int hash;
 
@@ -196,4 +206,47 @@ public class TestCaseRun {
         this.hash = hash;
     }
 
+    public boolean addTags(List<Tag> tags, Boolean custom) {
+	    boolean result = false;
+        for (Tag tag : tags) {
+            TestCaseRunTag testCaseRunTag = new TestCaseRunTag(this, tag);
+            testCaseRunTag.setCustom(custom);
+            result |= this.tags.add(testCaseRunTag);
+        }
+        return result;
+    }
+
+    public boolean addTags(List<Tag> tags) {
+        return addTags(tags, false);
+    }
+
+    public boolean removeTags(List<Tag> tags) {
+        boolean result = false;
+        for (Tag tag : tags) {
+            TestCaseRunTag expected = new TestCaseRunTag(this, tag);
+            result |= this.tags.remove(expected);
+        }
+        return result;
+    }
+
+    public Set<TestCaseRunTag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<TestCaseRunTag> tags) {
+        this.tags = tags;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TestCaseRun that = (TestCaseRun) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

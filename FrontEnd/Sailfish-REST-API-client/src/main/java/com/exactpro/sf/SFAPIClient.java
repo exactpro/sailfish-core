@@ -17,8 +17,10 @@ package com.exactpro.sf;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.ClosedWatchServiceException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -34,6 +36,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -237,6 +241,101 @@ public class SFAPIClient implements AutoCloseable {
 		startService(envName, svc.getName());
 		return;
 	}
+
+	public void forceMigrateStatistics() throws  APICallException, APIResponseException {
+        HttpGet migrateDB = new  HttpGet(rootUrl + "statistics/migrate");
+        try {
+            CloseableHttpResponse migrateResponse = http.execute(migrateDB);
+            checkHttpResponse(migrateResponse);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public void runBB(long id) throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/run/"+id);
+        try {
+            CloseableHttpResponse runResponse = http.execute(runBB);
+            checkHttpResponse(runResponse);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public void pauseBB() throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/pause");
+        try {
+            CloseableHttpResponse runResponse = http.execute(runBB);
+            checkHttpResponse(runResponse);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public void resumeBB() throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/resume");
+        try {
+            CloseableHttpResponse runResponse = http.execute(runBB);
+            checkHttpResponse(runResponse);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public void stopBB() throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/stop");
+        try {
+            CloseableHttpResponse runResponse = http.execute(runBB);
+            checkHttpResponse(runResponse);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public XmlBbExecutionStatus getBBStatus() throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/status");
+        try {
+            CloseableHttpResponse runResponse = http.execute(runBB);
+            checkHttpResponse(runResponse);
+            return unmarshall(XmlBbExecutionStatus.class, runResponse);
+        } catch (IOException e) {
+            throw new APICallException(e);
+        } catch (JAXBException e) {
+            throw new APIResponseException(e);
+        }
+    }
+
+    public InputStream getBBReport() throws  APICallException, APIResponseException {
+        HttpGet runBB = new  HttpGet(rootUrl + "bb/report");
+        try {
+            CloseableHttpResponse runResponse = http.execute(runBB);
+            checkHttpResponse(runResponse);
+            return runResponse.getEntity().getContent();
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+
+    public XmlLibraryImportResult uploadBBLibrary(File libFile, String name) throws APICallException, APIResponseException {
+        HttpPost uploadDescription = new HttpPost(rootUrl + "bb/upload");
+        MultipartEntityBuilder mpb = MultipartEntityBuilder.create();
+        mpb.addBinaryBody("file", libFile, ContentType.APPLICATION_OCTET_STREAM, name);
+        uploadDescription.setEntity(mpb.build());
+
+        try {
+            CloseableHttpResponse response = http.execute(uploadDescription);
+            checkHttpResponse(response);
+
+            return unmarshall(XmlLibraryImportResult.class, response);
+
+        } catch  (IOException e) {
+            throw new APICallException(e);
+        } catch (JAXBException e) {
+            throw new APIResponseException(e);
+        }
+
+    }
 	
 	public void stopService(String envName, String svcName) throws APICallException{
 		 try {
@@ -307,9 +406,14 @@ public class SFAPIClient implements AutoCloseable {
 			throw new APICallException(e);
 		}
 	}
-	
-	public XmlResponse uploadTestLibrary(InputStream stream, String filename) throws APICallException, APIResponseException {
-		String url = rootUrl + TEST_LIBRARY_UPLOAD;
+
+    public XmlResponse uploadTestLibrary(InputStream stream, String filename) throws APICallException, APIResponseException {
+        return uploadTestLibrary(stream, filename, false);
+    }
+
+	public XmlResponse uploadTestLibrary(InputStream stream, String filename, boolean overwrite) throws APICallException, APIResponseException {
+		String url = rootUrl + TEST_LIBRARY_UPLOAD + (overwrite ? "?overwrite=true":"");
+
 		try {
 			MultipartEntityBuilder mpb = MultipartEntityBuilder.create();
 			mpb.addBinaryBody("file", stream, ContentType.APPLICATION_OCTET_STREAM, filename);

@@ -65,6 +65,7 @@ import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticStatusResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticsDBSettings;
 import com.exactpro.sf.util.DateTimeUtility;
 
@@ -492,7 +493,7 @@ public class StatisticsResource {
     @Produces(MediaType.APPLICATION_XML)
 	public Response status() {
 		
-		XmlResponse xmlResponse = new XmlResponse();
+		XmlStatisticStatusResponse xmlResponse = new XmlStatisticStatusResponse();
 		Response.Status status = Response.Status.OK;
 		
 		try {
@@ -514,6 +515,9 @@ public class StatisticsResource {
 				}
 				
 			}
+
+            xmlResponse.setMigrationRequired(service.isMigrationRequired());
+            xmlResponse.setSailfishUpdateRequired(service.isSfUpdateRequired());
 			
 		} catch (Throwable t) {
 			

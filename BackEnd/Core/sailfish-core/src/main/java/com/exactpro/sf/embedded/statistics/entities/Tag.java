@@ -16,8 +16,10 @@
 package com.exactpro.sf.embedded.statistics.entities;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -26,8 +28,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 @SuppressWarnings("serial")
@@ -42,23 +46,32 @@ public class Tag implements Serializable {
 	private Long id;
 	
 	private String name;
-	
-	@ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
-	private Set<MatrixRun> matrixRuns;
-	
+
+    @OneToMany(mappedBy = "tag", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TestCaseRunTag> testCaseRuns = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "tags")
+    private Set<MatrixRun> matrixRuns;
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "group_id", nullable = true)
 	private TagGroup group;
-	
-	public Set<MatrixRun> getMatrixRuns() {
-		return matrixRuns;
-	}
 
-	public void setMatrixRuns(Set<MatrixRun> matrixRuns) {
-		this.matrixRuns = matrixRuns;
-	}
+    @Transient
+    private boolean forAllTestCaseRuns;
 
-	public Long getId() {
+    @Transient
+    private Boolean custom;
+
+    public Set<MatrixRun> getMatrixRuns() {
+        return matrixRuns;
+    }
+
+    public void setMatrixRuns(Set<MatrixRun> matrixRuns) {
+        this.matrixRuns = matrixRuns;
+    }
+
+    public Long getId() {
 		return id;
 	}
 
@@ -74,7 +87,31 @@ public class Tag implements Serializable {
 		this.name = name;
 	}
 
-	@Override
+    public Set<TestCaseRunTag> getTestCaseRuns() {
+        return testCaseRuns;
+    }
+
+    public void setTestCaseRuns(Set<TestCaseRunTag> testCaseRuns) {
+        this.testCaseRuns = testCaseRuns;
+    }
+
+    public boolean isForAllTestCaseRuns() {
+        return forAllTestCaseRuns;
+    }
+
+    public Boolean getCustom() {
+        return custom;
+    }
+
+    public void setCustom(Boolean custom) {
+        this.custom = custom;
+    }
+
+    public void setForAllTestCaseRuns(boolean forAllTestCaseRuns) {
+        this.forAllTestCaseRuns = forAllTestCaseRuns;
+    }
+
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

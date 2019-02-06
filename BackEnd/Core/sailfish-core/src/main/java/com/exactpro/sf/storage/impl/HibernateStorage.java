@@ -27,13 +27,17 @@ import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class HibernateStorage implements IStorage {
 
 	private static final Logger logger = LoggerFactory.getLogger(HibernateStorage.class);
 	
 	private SessionFactory sessionFactory;
+
+    private static final int BATCH_SIZE = 50;
 	
 	public HibernateStorage(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -88,60 +92,15 @@ public class HibernateStorage implements IStorage {
 		}
 		
 	}
+	
+	public void batchAdd(List<Object> entities) throws StorageException {
+        batchOperation(entities, (session, entity) -> session.save(entity));
+	}
 
     @Override
-    public void batchAdd(List<Object> entities) throws StorageException {
-		
-		Session session = null;
-		Transaction tx = null;
-		
-		try {
-			
-			session = this.sessionFactory.openSession();
-			tx = session.beginTransaction();
-			
-			for(Object entity : entities) {
-			
-				session.save(entity);
-			
-			}
-			
-			tx.commit();
-			
-		} catch (ConstraintViolationException e) {
-			
-			if (tx != null) {
-				tx.rollback();
-			}
-			throw new StorageException(e.getMessage(), e);
-		
-		} catch (JDBCConnectionException e) {
-			
-			if (tx != null) {
-				tx.rollback();
-			}
-			throw new StorageException("JDBC connection exception", e);
-		
-		} catch (SQLGrammarException e) {
-			
-			if (tx != null) {
-				tx.rollback();
-			}
-			throw new StorageException("SQL grammar exception", e);
-		
-		} catch (HibernateException e) {
-			
-			if (tx != null) {
-				tx.rollback();
-			}
-			throw new StorageException("Unknown exception", e);
-			
-		} finally {
-			if (session != null)
-				session.close();
-		}
-		
-	}
+    public void batchUpdate(List<Object> entities) throws StorageException {
+        batchOperation(entities, (session, entity) -> session.update(entity));
+    }
 
 	@Override
 	public void update(Object entity) throws StorageException {
@@ -439,4 +398,46 @@ public class HibernateStorage implements IStorage {
 		return this.sessionFactory;
 	}
 
+    private void batchOperation(List<Object> entities, BiConsumer<Session, Object> sessionOperation) {
+        Session session = null;
+        Transaction tx = null;
+        try {
+            session = this.sessionFactory.openSession();
+            tx = session.beginTransaction();
+            Iterator<Object> iterator = entities.iterator();
+            int count = 0;
+            while (iterator.hasNext()) {
+                Object entity = iterator.next();
+                sessionOperation.accept(session, entity);
+                if ( ++count % BATCH_SIZE == 0 ) {
+                    session.flush();
+                    session.clear();
+                }
+            }
+            tx.commit();
+        } catch (ConstraintViolationException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new StorageException(e.getMessage(), e);
+        } catch (JDBCConnectionException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new StorageException("JDBC connection exception", e);
+        } catch (SQLGrammarException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new StorageException("SQL grammar exception", e);
+        } catch (HibernateException e) {
+            if (tx != null) {
+                tx.rollback();
+            }
+            throw new StorageException("Unknown exception", e);
+        } finally {
+            if (session != null)
+                session.close();
+        }
+    }
 }

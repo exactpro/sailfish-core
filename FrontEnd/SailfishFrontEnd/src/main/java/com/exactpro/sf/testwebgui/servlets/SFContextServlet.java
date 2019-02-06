@@ -36,6 +36,8 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
+import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.storage.impl.ObjectFlusher;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -355,7 +357,8 @@ public class SFContextServlet implements Servlet {
 
     		try {
     		    sfLocalContext = SFLocalContext.createContext(wd, sfContextSettings);
-                BigDecimal comparisonPrecision = sfLocalContext.getEnvironmentManager().getEnvironmentSettings().getComparisonPrecision();
+                EnvironmentSettings environmentSettings = sfLocalContext.getEnvironmentManager().getEnvironmentSettings();
+                BigDecimal comparisonPrecision = environmentSettings.getComparisonPrecision();
                 MathProcessor.COMPARISON_PRECISION = comparisonPrecision;
                 MessageComparator.COMPARISON_PRECISION = comparisonPrecision.doubleValue();
     		} catch (Throwable ex) {

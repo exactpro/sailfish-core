@@ -24,12 +24,15 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
 
-import com.exactpro.sf.scriptrunner.PropertiesReport;
 import com.exactpro.sf.scriptrunner.ZipReport;
+
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_DIR;
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_FILE;
 
 public class ReportFilter implements FileFilter {
 
     private static final ReportFilter instance = new ReportFilter();
+    private final static String reportPath = REPORT_DIR + '/' + REPORT_FILE;
 
     public static ReportFilter getInstance() {
         return instance;
@@ -42,19 +45,20 @@ public class ReportFilter implements FileFilter {
         if(FilenameUtils.isExtension(name, ZipReport.ZIP_EXTENSION)) {
             String baseName = FilenameUtils.getBaseName(name);
 
-            if(new File(file.getParentFile(), PropertiesReport.PROPERTIES_FILE_NAME).exists()) {
+
+            if(new File(file.getParentFile(), reportPath).exists()) {
                 return false;
             }
 
             try(ZipFile zipFile = new ZipFile(file)) {
-                ZipEntry entry = zipFile.getEntry(baseName + "/" + PropertiesReport.PROPERTIES_FILE_NAME);
+                ZipEntry entry = zipFile.getEntry(baseName + '/' + reportPath );
                 return entry != null;
             } catch(IOException e) {
                 return false;
             }
         }
 
-        return file.isDirectory() && new File(file, PropertiesReport.PROPERTIES_FILE_NAME).exists();
+        return file.isDirectory() && new File(file, reportPath).exists();
     }
 
 }

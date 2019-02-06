@@ -26,6 +26,7 @@ import com.exactpro.sf.scriptrunner.impl.BroadcastScriptReport;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 // TODO: split ScriptReport and listening functionality
 public interface IScriptReport
@@ -56,6 +57,7 @@ public interface IScriptReport
 
 	void closeTestCase(StatusDescription status);
 
+	@JsonIgnore
     default boolean isTestCaseCreated() {
         throw new UnsupportedOperationException("Only " + BroadcastScriptReport.class.getSimpleName() + " should implement this method");
     }

@@ -395,6 +395,8 @@ public class FIXClient implements IInitiatorService {
         sessionSettings.setBool( sessionID, FIXApplication.ADD_NEXT_EXPECTED_SEQ_NUM, this.fixSettings.isAddNextExpectedMsgSeqNum());
         sessionSettings.setBool(sessionID, Session.SETTING_REJECT_INVALID_MESSAGE,this.fixSettings.isRejectInvalidMessage());
 
+        sessionSettings.setBool(sessionID, Session.SETTING_REJECT_MESSAGE_ON_UNHANDLED_EXCEPTION, true);
+
         if (this.fixSettings.isUseSSL()) {
             sessionSettings.setBool(SSLSupport.SETTING_USE_SSL, this.fixSettings.isUseSSL());
             if (this.fixSettings.getSslKeyStore() != null) {

@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.storage;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
-public class AggregatedReportRow implements Serializable {
+public class AggregatedReportRow extends CommonReportRow {
 
     private static final List<String> TYPES = Lists.newArrayList("id", "Name", "Test Case Id", "Test Case Name", "Description", "Status",
                                                                  "Failure Reason",
@@ -44,12 +44,14 @@ public class AggregatedReportRow implements Serializable {
                                                                  "Tagged Actions", "Message Type", "Action Row", "Reproduced Known Bugs Count", "Non-reproduced Known Bugs Count", "Known Bugs", "Test Case Number");
 
     private final Map<String, Object> fields = new HashMap<>();
+    private final List<AggregatedReportRow> testCaseRows = new ArrayList<>();
 
 	public AggregatedReportRow() {
         for (String type : TYPES) {
             this.fields.put(type, null);
         }
         this.fields.put("User Comments", new TestCaseRunComments());
+        this.fields.put("SfInstance", new SfInstance());
 	}
 
 	public AggregatedReportRow(Long sfId, String name, String description,
@@ -66,7 +68,9 @@ public class AggregatedReportRow implements Serializable {
         this.fields.put("Start Time", DateTimeUtility.toLocalDateTime(startTime));
         this.fields.put("Finish Time", DateTimeUtility.toLocalDateTime(finishTime));
         this.fields.put("User Name", userName);
-        this.fields.put("Host", host);
+        SfInstance sfInstance = new SfInstance();
+        sfInstance.setHost(host);
+        this.fields.put("SfInstance", sfInstance);
 		//this.servicesUsed = servicesUsed;
 
         this.fields.put("Report Folder", reportFolder);
@@ -202,11 +206,11 @@ public class AggregatedReportRow implements Serializable {
 	}
 
 	public String getHost() {
-        return (String) this.fields.get("Host");
+        return getSfInstance().getHost();
 	}
 
 	public void setHost(String host) {
-        this.fields.put("Host", host);
+        getSfInstance().setHost(host);
 	}
 
 	public String getServicesUsed() {
@@ -282,19 +286,19 @@ public class AggregatedReportRow implements Serializable {
 	}
 
 	public int getPort() {
-        return get("Port", 0);
+        return getSfInstance().getPort();
 	}
 
 	public void setPort(int port) {
-        this.fields.put("Port", port);
+        getSfInstance().setPort(port);
 	}
 
 	public String getSfName() {
-        return (String) this.fields.get("SF");
+        return getSfInstance().getName();
 	}
 
 	public void setSfName(String sfName) {
-        this.fields.put("SF", sfName);
+        getSfInstance().setName(sfName);
 	}
 
 	public Long getMatrixRunId() {
@@ -427,6 +431,14 @@ public class AggregatedReportRow implements Serializable {
         this.fields.put("sfCurrentInstance", sfCurrent);
     }
 
+    public SfInstance getSfInstance() {
+        return (SfInstance) this.fields.get("SfInstance");
+    }
+
+    public void setSfInstance(SfInstance instance) {
+        this.fields.put("SfInstance", instance);
+    }
+
     public long getReproducedKnownBugsCount() {
         return get("Reproduced Known Bugs Count", 0L);
     }
@@ -449,5 +461,9 @@ public class AggregatedReportRow implements Serializable {
 
     public void setCategorisedKnownBugs(List<KnownBugCategoryRow> categorisedKnownBugs) {
         this.fields.put("Known Bugs", categorisedKnownBugs);
+    }
+
+    public List<AggregatedReportRow> getTestCaseRows() {
+        return testCaseRows;
     }
 }

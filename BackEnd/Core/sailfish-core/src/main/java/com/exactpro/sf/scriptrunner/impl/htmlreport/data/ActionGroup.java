@@ -26,6 +26,7 @@ public class ActionGroup extends BaseEntity {
         copy.setName(this.getName());
         copy.setDescription(this.getDescription());
         copy.setStatus(status);
+        copy.setLinkToReport(this.linkToReport);
         for (Object element : this.getElements()) {
             copy.addElement(element);
         }

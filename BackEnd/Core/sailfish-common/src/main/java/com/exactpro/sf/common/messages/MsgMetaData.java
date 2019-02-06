@@ -88,6 +88,10 @@ public class MsgMetaData implements Cloneable {
         return isRejected;
     }
 
+    @Deprecated
+    /**
+     * @deprecated please use more userfriendly setRejectReason, it automatically set isRejected when reason non-null
+     */
     public void setRejected(boolean isRejected) {
         this.isRejected = isRejected;
     }
@@ -188,6 +192,8 @@ public class MsgMetaData implements Cloneable {
         builder.append(this.rawMessage, that.rawMessage);
         builder.append(this.serviceInfo, that.serviceInfo);
         builder.append(this.dictionaryURI, that.dictionaryURI);
+        builder.append(this.rejectReason, that.rejectReason);
+
 
         return builder.isEquals();
     }
@@ -207,6 +213,7 @@ public class MsgMetaData implements Cloneable {
         builder.append(this.rawMessage);
         builder.append(this.serviceInfo);
         builder.append(this.dictionaryURI);
+        builder.append(this.rejectReason);
 
         return builder.toHashCode();
     }

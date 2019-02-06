@@ -73,6 +73,8 @@ public class TaggedSetsComparisonBean implements Serializable {
 	private SetMultimap<Long, Long> actionDiffHighlights;
 	
 	private SetMultimap<Long, Long> actionFailReasonDiffHighlights;
+
+    private String customReportsPath = null;
 	
 	@PostConstruct
 	public void init() {
@@ -273,6 +275,14 @@ public class TaggedSetsComparisonBean implements Serializable {
     	}
     	
     }
+
+    public String getReportRequest(TaggedComparisonRow.TaggedComparisonSet set) {
+        return BeanUtil.getReportRequest(this.customReportsPath, set, false);
+    }
+    
+    public String buildReportUrl(TaggedComparisonRow.TaggedComparisonSet set, boolean report) {
+        return BeanUtil.buildReportUrl(this.customReportsPath, set, report);
+    }
 	
 	private List<Tag> completeTag(String query, List<Tag> alreadySelected) {
     	
@@ -358,5 +368,13 @@ public class TaggedSetsComparisonBean implements Serializable {
 	public void setSelected(TaggedComparisonRow selected) {
 		this.selected = selected;
 	}
+
+    public String getCustomReportsPath() {
+        return customReportsPath;
+    }
+
+    public void setCustomReportsPath(String customReportsPath) {
+        this.customReportsPath = customReportsPath;
+    }
 	
 }

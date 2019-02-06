@@ -60,6 +60,7 @@ public class FileServiceStorage implements IServiceStorage {
     private static final String EVENTS_DIR = "events";
     private static final String SERVICES_DIR = "services";
     private static final int BUFFER_SIZE = 50;
+    public static final int MAX_STORAGE_QUEUE_SIZE = 1024 * 1024 * 32;
 
     private final String path;
     private final IWorkspaceDispatcher dispatcher;
@@ -97,7 +98,7 @@ public class FileServiceStorage implements IServiceStorage {
 
                 descriptionMap.put(serviceName, description);
                 eventsMap.put(serviceName, events);
-                flusherMap.put(serviceName, new ObjectFlusher<>(new ListFlushProvider<>(events), BUFFER_SIZE));
+                flusherMap.put(serviceName, new ObjectFlusher<>(new ListFlushProvider<>(events), BUFFER_SIZE, MAX_STORAGE_QUEUE_SIZE));
             }
 
             for(IObjectFlusher<FileServiceEvent> flusher : flusherMap.values()) {
@@ -144,7 +145,7 @@ public class FileServiceStorage implements IServiceStorage {
                 flusherLock.writeLock().lock();
 
                 List<FileServiceEvent> events = new ServiceEventList(Paths.get(path, EVENTS_DIR, serviceName.toString()).toString(), dispatcher);
-                IObjectFlusher<FileServiceEvent> flusher = new ObjectFlusher<>(new ListFlushProvider<>(events), BUFFER_SIZE);
+                IObjectFlusher<FileServiceEvent> flusher = new ObjectFlusher<>(new ListFlushProvider<>(events), BUFFER_SIZE, 1024 * 1024 * 32);
 
                 eventsMap.put(serviceName, events);
                 flusherMap.put(serviceName, flusher);

@@ -31,7 +31,7 @@ import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "stknown_bugs", uniqueConstraints = {@UniqueConstraint(columnNames = {"known_bug"})})
+@Table(name = "stknown_bugs")
 @SequenceGenerator(name = "stknown_bugs_generator", sequenceName = "stknown_bugs_sequence")
 public class KnownBug {
 
@@ -46,7 +46,7 @@ public class KnownBug {
      * {@code ["Category1","Subject"]}<br/>
      */
     @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
-    @Column(name = "known_bug")
+    @Column(name = "known_bug", unique = true)
     private String knownBug;
 
     public Long getId() {

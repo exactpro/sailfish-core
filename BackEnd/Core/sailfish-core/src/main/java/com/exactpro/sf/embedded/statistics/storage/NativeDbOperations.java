@@ -145,6 +145,14 @@ public class NativeDbOperations {
 			query.addScalar("ffinishtime", TimestampType.INSTANCE);
 			query.addScalar("ftags", StringType.INSTANCE);
 			query.addScalar("fhash", IntegerType.INSTANCE);
+			query.addScalar("fhost", StringType.INSTANCE);
+			query.addScalar("fname", StringType.INSTANCE);
+			query.addScalar("fport", IntegerType.INSTANCE);
+			query.addScalar("fchost", StringType.INSTANCE);
+			query.addScalar("fcname", StringType.INSTANCE);
+			query.addScalar("fcport", IntegerType.INSTANCE);
+            query.addScalar("freportfolder", StringType.INSTANCE);
+            query.addScalar("freportfile", StringType.INSTANCE);
 
 			query.addScalar("stcid", BigIntegerType.INSTANCE);
 			query.addScalar("smatrix", StringType.INSTANCE);
@@ -160,6 +168,14 @@ public class NativeDbOperations {
 			query.addScalar("sfinishtime", TimestampType.INSTANCE);
 			query.addScalar("stags", StringType.INSTANCE);
 			query.addScalar("shash", IntegerType.INSTANCE);
+            query.addScalar("shost", StringType.INSTANCE);
+            query.addScalar("sname", StringType.INSTANCE);
+            query.addScalar("sport", IntegerType.INSTANCE);
+            query.addScalar("schost", StringType.INSTANCE);
+            query.addScalar("scname", StringType.INSTANCE);
+            query.addScalar("scport", IntegerType.INSTANCE);
+            query.addScalar("sreportfolder", StringType.INSTANCE);
+            query.addScalar("sreportfile", StringType.INSTANCE);
 
 			query.setLong("fcount", firstSetIds.length);
 			query.setLong("scount", secondSetIds.length);

@@ -23,6 +23,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.storage.BaseStorageSettings;
 import org.apache.commons.io.FilenameUtils;
 import java.time.Instant;
 
@@ -53,15 +55,18 @@ public class FileMessageStorage extends AbstractMessageStorage {
     private final CHMInterner<String> interner;
     private final AtomicLong messageID;
 
-    public FileMessageStorage(String path, boolean storeAdminMessages, IWorkspaceDispatcher dispatcher, DictionaryManager dictionaryManager) {
-        super(dictionaryManager);
+    public FileMessageStorage(BaseStorageSettings settings) {
+        super(settings.getDictionaryManager());
         
-        Objects.requireNonNull(path, "path cannot be null");
-        Objects.requireNonNull(dispatcher, "dispatcher cannot be null");
+        EnvironmentSettings environmentSettings = settings.getEnvironmentSettings();
 
-        this.messages = new MessageList(FilenameUtils.concat(path, MESSAGES_DIR), dispatcher);
-        this.storeAdminMessages = storeAdminMessages;
-        this.flusher = new ObjectFlusher<>(new ListFlushProvider<>(this.messages), BUFFER_SIZE);
+        Objects.requireNonNull(environmentSettings.getFileStoragePath(), "path cannot be null");
+        Objects.requireNonNull(settings.getWorkspaceDispatcher(), "dispatcher cannot be null");
+
+        this.messages = new MessageList(FilenameUtils.concat(environmentSettings.getFileStoragePath(), MESSAGES_DIR), settings.getWorkspaceDispatcher());
+
+        this.storeAdminMessages = environmentSettings.isStoreAdminMessages();
+        this.flusher = new ObjectFlusher<>(new ListFlushProvider<>(messages), BUFFER_SIZE, environmentSettings.getMaxStorageQueueSize());
         this.scriptRunId = new AtomicLong();
         this.interner = new CHMInterner<>();
         this.messageID = new AtomicLong(messages.size());

@@ -7,7 +7,6 @@
     "baobab": "1.1.2",
     "bootstrap": "^3.3.7",
     "bootswatch": "3.3.5",
-    "debug": "~2.1.1",
     "fuse.js": "^2.2.0",
     "jquery": "*",
     "lodash": "*",

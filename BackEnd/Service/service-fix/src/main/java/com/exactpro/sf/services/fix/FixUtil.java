@@ -28,6 +28,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.quickfixj.CharsetSupport;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -410,5 +411,11 @@ public class FixUtil {
                 throw new EPSCommonException(FixMessageHelper.MSG_SEQ_NUM_FIELD + " is not a number", e);
             }
         }
+    }
+
+    public static byte[] getRawMessage(Message message) {
+        return (message.getMessageData() != null) ?
+                message.getMessageData().getBytes(CharsetSupport.getCharsetInstance()) :
+                message.toString().getBytes(CharsetSupport.getCharsetInstance());
     }
 }

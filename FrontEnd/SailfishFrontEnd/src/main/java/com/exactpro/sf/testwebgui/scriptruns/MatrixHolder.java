@@ -35,8 +35,9 @@ import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 public class MatrixHolder implements IMatrixListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MatrixHolder.class);
+    public static final Logger USER_EVENTS_LOG = LoggerFactory.getLogger("USER_EVENTS_LOG");
 
-	private final IWorkspaceDispatcher wd;
+    private final IWorkspaceDispatcher wd;
 	private final IMatrixStorage matrixStorage;
 	private final MatrixProviderHolder matrixProviderHolder;
 
@@ -80,19 +81,24 @@ public class MatrixHolder implements IMatrixListener {
         while (iterator.hasNext()) {
             IMatrix matrix = iterator.next();
             boolean removeMatrix = false;
-            if (!wd.exists(FolderType.MATRIX, matrix.getFilePath())) {
-                if (StringUtils.isNoneEmpty(matrix.getLink())) {
-                    try {
-                        wd.createFile(FolderType.MATRIX, false, matrix.getFilePath());
-                        MatrixUtil.reloadMatrixByLink(matrixStorage, matrixProviderHolder, matrix);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage(), e);
+            try {
+                if (!wd.exists(FolderType.MATRIX, matrix.getFilePath())) {
+                    if (StringUtils.isNoneEmpty(matrix.getLink())) {
+                        try {
+                            wd.createFile(FolderType.MATRIX, false, matrix.getFilePath());
+                            MatrixUtil.reloadMatrixByLink(matrixStorage, matrixProviderHolder, matrix);
+                        } catch (Exception e) {
+                            logger.error(e.getMessage(), e);
+                            removeMatrix = true;
+                        }
+                    } else {
                         removeMatrix = true;
+                        logger.warn("cant find matrix file by specified path {}, matrix will be removed", matrix.getFilePath());
                     }
-                } else {
-                    removeMatrix = true;
-                    logger.warn("cant find matrix file by specified path {}, matrix will be removed", matrix.getFilePath());
                 }
+            } catch (RuntimeException e) {
+                removeMatrix  = true;
+                USER_EVENTS_LOG.warn("Broken matrix found {}. Removing it from storage", matrix);
             }
             if (removeMatrix) {
                 logger.warn("Removing matrix from storage {} ", matrix);
