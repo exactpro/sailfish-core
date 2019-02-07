@@ -29,6 +29,8 @@ const TEST_CASE_PARAM_KEY = 'tc',
       ACTION_PARAM_KEY = 'action',
       MESSAGE_PARAM_KEY = 'message';
 
+const REPORT_FILE_PATH = 'index.html';
+
 interface AppProps {
     report: Report;
     testCase: TestCase;
@@ -59,6 +61,10 @@ class AppBase extends Component<AppProps, {}> {
         }
     }
 
+    componentWillMount() {
+        this.validateUrl();
+    }
+
     componentDidUpdate(prevProps: AppProps) {
 
         // we use top.window instared of window to work with real window url, not iframe url
@@ -66,7 +72,7 @@ class AppBase extends Component<AppProps, {}> {
         // We can't use componentDidMount for this, because report file not yet loaded.
         // Only first funciton call will use it.
         if (!this.searchParams) {
-            this.searchParams = new URLSearchParams(top.window.location.search);
+            this.searchParams = new URLSearchParams(this.getUrlSearchString(top.window.location.href));
             this.handleSharedUrl();
             return;
         }
@@ -100,11 +106,12 @@ class AppBase extends Component<AppProps, {}> {
             }
         }
 
-        let newUrl = "";
+        let newUrl = "",
+            searchString = this.getUrlSearchString(top.window.location.href);
 
-        if (top.window.location.search) {
+        if (searchString != '?' && searchString) {
             // replacing old search params with the new search params
-            const oldParams = new URLSearchParams(top.window.location.search);
+            const oldParams = new URLSearchParams(searchString);
 
             newUrl = top.window.location.href.replace(oldParams.toString(), this.searchParams.toString());
         } else {
@@ -134,6 +141,30 @@ class AppBase extends Component<AppProps, {}> {
 
         if (Number(actionId)) {
             this.props.selectAction(Number(actionId));
+        }
+    }
+
+    // we can't use window.location.search because it can be another serach params in url
+    getUrlSearchString(url: string) {
+        // removing previous search params
+        const urlEnd = url.slice(url.lastIndexOf('/'));
+        
+        if (urlEnd.indexOf('?') == -1) {
+            return "";
+        }
+
+        return urlEnd.slice(urlEnd.lastIndexOf('?'));
+    }
+
+    /**
+     * This function replaces url file path to index.html when we go to the new report from the old
+     */
+    validateUrl() {
+        const href = top.window.location.href,
+            filePath = href.slice(href.lastIndexOf('/'));
+
+        if (!filePath.includes(REPORT_FILE_PATH)) {
+            top.window.history.pushState({}, "", href.replace(filePath, '/' + REPORT_FILE_PATH));
         }
     }
 
