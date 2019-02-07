@@ -14,35 +14,44 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component, PreactDOMAttributes } from "preact";
+import { h, Component } from "preact";
 import "../styles/panel.scss"
 
-interface IPanelProps {
+interface PanelProps {
     header?: JSX.Element;
     body?: JSX.Element;
     isExpanded?: boolean;
     children: JSX.Element[];
 }
 
-interface IPanelState {
+interface PanelState {
     isExpanded: boolean;
 }
 
-export default class ExpandablePanel extends Component<IPanelProps, IPanelState> {
-    constructor(props: IPanelProps) {
+export default class ExpandablePanel extends Component<PanelProps, PanelState> {
+    constructor(props: PanelProps) {
         super(props);
         this.state = {
-            isExpanded: props.isExpanded !== undefined ? props.isExpanded : false
+            isExpanded: props.isExpanded != null ? props.isExpanded : false
         };
     }
 
     expandPanel() {
         this.setState({isExpanded: !this.state.isExpanded})
-
     }
 
-    render({ header, body, children }: IPanelProps, { isExpanded }: IPanelState) {
-        const iconClass = ["expandable-panel-header-icon", (isExpanded ? "expanded" : "hidden")].join(' ');
+    componentWillReceiveProps(nextProps: PanelProps) {
+        if (nextProps.isExpanded != null) {
+            this.setState({isExpanded: nextProps.isExpanded});
+        }
+    }
+
+    render({ header, body, children }: PanelProps, { isExpanded }: PanelState) {
+        const iconClass = [
+            "expandable-panel-header-icon", 
+            (isExpanded ? "expanded" : "hidden")
+        ].join(' ');
+
         return (<div class="expandable-panel-root">
             <div class="expandable-panel-header">
                 <div class={iconClass} 

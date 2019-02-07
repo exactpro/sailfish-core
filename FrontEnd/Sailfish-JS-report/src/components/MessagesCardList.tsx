@@ -71,6 +71,24 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
         }
     }
 
+    componentDidMount() {
+        const selectedMessageId = this.props.selectedMessages[0];
+
+        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
+        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
+        // At this point React passed components tree to DOM, however it still could be not redered.
+        // First callback will be called before actual render
+        // Second callback will be called when DOM is fully rendered.
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                // smooth behavior doesn't work here because render is not complete yet
+                if (this.elements[selectedMessageId]) {
+                    this.elements[selectedMessageId].base.scrollIntoView({block: 'center'});
+                }
+            });
+        });
+    }
+
     scrollToMessage(messageId: number) {
         if (this.elements[messageId]) {
             this.elements[messageId].base.scrollIntoView({block: 'center', behavior: 'smooth', inline: 'nearest'});

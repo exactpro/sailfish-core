@@ -23,7 +23,6 @@ import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
-import { getMessageType, MessageType } from '../helpers/messageType';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -70,7 +69,8 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
 
         const actions = [...actionsMap.values()],
             hueValue = this.calculateHueValue(from, to),
-            rejectedTitle = message.content.rejectReason;
+            rejectedTitle = message.content.rejectReason,
+            labelsCount = this.getLabelsCount(message);
 
         const rootClass = [
                 "message",
@@ -92,7 +92,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     { this.renderMessageTypeLabels(message) }
                 </div>
                 <div class="message-card">
-                    <div class="message-card-header">
+                    <div class="message-card-header" data-lb-count={labelsCount}>
                         <div class="message-card-header-action">
                             {
                                 rejectedMessagesCount ? 
@@ -197,15 +197,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
     }
 
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
-        const labels = [];
-
-        if (message.content.admin) {
-            labels.push(
-                <div class="message-label-admin">
-                    <div class="message-label-admin-icon"/>
-                </div>
-            )
-        }
+        let labels = [];
 
         if (message.content.rejectReason !== null) {
             labels.push(
@@ -215,7 +207,29 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
             );
         }
 
+        if (message.content.admin) {
+            labels.push(
+                <div class="message-label-admin">
+                    <div class="message-label-admin-icon"/>
+                </div>
+            )
+        }
+
         return labels;
+    }
+
+    private getLabelsCount(message: Message) {
+        let count = 0;
+        
+        if (message.content.rejecteReason != null) {
+            count++;
+        }
+
+        if (message.content.isAdmin) {
+            count++;
+        }
+
+        return count;
     }
 
     private copyToClipboard(text: string) {

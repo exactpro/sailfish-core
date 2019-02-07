@@ -127,8 +127,8 @@
             align-items: center;
 
             &-icon {
-                height: 18px;
-                width: 18px;
+                height: 19px;
+                width: 19px;
                 background-image: url(../../resources/icons/arr4-down.svg);
                 background-size: 100%;
                 cursor: pointer;
@@ -140,12 +140,14 @@
         grid-area: message-card;
 
         &-header {
+            // lb-count - number of displaying labels - to make offset for name and session 
+            --lb-count: 0;
             min-height: 45px;
             padding: 7px 5px 9px 10px;
             position: relative;
             display: grid;
             grid-template-rows: auto auto;
-            grid-template-columns: 200px 40px auto 40px 1fr 40px;
+            grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
             grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
                                 "timestamp-value session from-value session-icon to-value prediction-icon";
 
@@ -280,11 +282,15 @@
             }
         }
 
+        // lb-count variable assgnment through the custom html property
+        [data-lb-count="0"] { --lb-count: 0; }
+        [data-lb-count="1"] { --lb-count: 1; }
+        [data-lb-count="2"] { --lb-count: 2; }
+
         &-content {
-            grid: message-card-body;
+            grid-area: message-card-body;
             position: relative;
             padding: 7px 10px 10px 15px;
-            height: 100%;
 
             &.passed {
                 background-color: $passedBackgroundColor;
@@ -424,14 +430,18 @@
 
     &-expand {
         position: absolute;
-        top: 56px;
-        right: 8px;
+        top: 67px;
+        right: 12px;
         padding-right: 5px;
         background-color: white;
 
+        &.rejected {
+            top: 80px;
+        }
+
         &-icon {
-            height: 18px;
-            width: 18px;
+            height: 19px;
+            width: 19px;
             background-image: url(../../resources/icons/arr4-up.svg);
             background-size: 100%;
             cursor: pointer;

@@ -37,7 +37,24 @@ export interface ActionTreeProps {
     filterFields: StatusType[];
 }
 
-export class ActionTree extends Component<ActionTreeProps, any> {
+export class ActionTree extends Component<ActionTreeProps> {
+
+    private expandedTreePath = null;
+
+    componentWillMount() {
+        if (this.props.action.actionNodeType == "action") {
+            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        }
+    }
+
+    componentWillReceiveProps(nextProps: ActionTreeProps) {
+        // handling action change to update expand tree
+        if (this.props.action !== nextProps.action && nextProps.action.actionNodeType == "action") {
+            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        } else {
+            this.expandedTreePath = null
+        }
+    }
 
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
@@ -87,25 +104,64 @@ export class ActionTree extends Component<ActionTreeProps, any> {
         return false;
     }
 
-    render(props: ActionTreeProps): JSX.Element {
-        return this.renderNode(props, true);
+    updateTreePath() {
+        if (this.props.action.actionNodeType == "action") {
+            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        } else {
+            this.expandedTreePath = [];
+        }
     }
 
-    renderNode(props: ActionTreeProps, isRoot = false): JSX.Element {
+    getExpandedTreePath(action: Action, treePath: number[], targetActionId: number): number[] {
+
+        const actionTreePath = [...treePath, action.id]; 
+
+        if (action.id == targetActionId) {
+            return actionTreePath;
+        }
+
+        if (action.subNodes) {
+            for (let i = 0; i < action.subNodes.length; i++) {
+                const subNode = action.subNodes[i];
+
+                if (subNode.actionNodeType == "action") {
+                    const subNodePath = this.getExpandedTreePath(subNode as Action, actionTreePath, targetActionId);
+
+                    if (subNodePath.includes(targetActionId)) {
+                        // target action found in one of subNodes
+                        return subNodePath;
+                    }
+                }
+            }
+        }
+
+        // we did't find any sub node with the given action id
+        return treePath;
+    }
+
+    render(props: ActionTreeProps): JSX.Element {
+        return this.renderNode(props, true, this.expandedTreePath);
+    }
+
+    renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: number[] = null): JSX.Element {
         const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, actionsFilter, filterFields } = props;
 
         switch (props.action.actionNodeType) {
             case 'action': {
-                const action = props.action as Action;
+                const action = props.action as Action,
+                    isExpanded = expandTreePath ? expandTreePath[0] == action.id : null,
+                    newTreePath = expandTreePath ? expandTreePath.slice(1) : null;
+
                 return (
                     <ActionCard action={action}
                         isSelected={action.id === selectedActionId}
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={actionSelectHandler}
-                        isRoot={isRoot}>
+                        isRoot={isRoot}
+                        isExpanded={isExpanded}>
                         {
                             action.subNodes ? action.subNodes.map(
-                                action => this.renderNode({...props, action: action})) : null
+                                action => this.renderNode({...props, action: action}, false, newTreePath)) : null
                         }
                     </ActionCard>
                 );

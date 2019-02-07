@@ -32,7 +32,8 @@ import {
     SetLeftPaneStateActions,
     SetRightPaneStateAction,
     CheckpointSelectStateAction,
-    RejectedMessageSelectStateAction
+    RejectedMessageSelectStateAction,
+    ActionSelectByIdStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
@@ -56,6 +57,11 @@ export const resetTestCase = (): ResetTestCaseStateAction => ({
 export const selectAction = (action: Action): ActionSelectStateAction => ({
     type: StateActionTypes.SELECT_ACTION,
     action: action
+})
+
+export const selectActionById = (actionId: number): ActionSelectByIdStateAction => ({
+    type: StateActionTypes.SELECT_ACTION_BY_ID,
+    actionId: actionId
 })
 
 export const selectMessages = (messages: number[], status: StatusType = 'NA'): MessagesSelectStateAction => ({

@@ -28,9 +28,10 @@ interface CardProps {
     isSelected?: boolean;
     isRoot?: boolean;
     isTransaparent?: boolean;
+    isExpanded?: boolean;
 }
 
-export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent }: CardProps) => {
+export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded }: CardProps) => {
     const {
         name,
         status,
@@ -67,7 +68,8 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 e.cancelBubble = true;
             }}
             key={action.id}>
-            <ExpandablePanel>
+            <ExpandablePanel
+                isExpanded={isExpanded}>
                 <div class={headerClassName}>
                     <div class="action-card-header-name">
                         <h3>{name}</h3>

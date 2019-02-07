@@ -28,6 +28,7 @@ export enum StateActionTypes {
     SET_TEST_CASE = 'SET_TEST_CASE',
     RESET_TEST_CASE= 'RESET_TEST_CASE',
     SELECT_ACTION = 'SELECT_ACTION',
+    SELECT_ACTION_BY_ID = 'SELECT_ACTION_BY_ID',
     SELECT_MESSAGES = 'SELECT_MESSAGES',
     SELECT_CHECKPOINT = 'SELECT_CHECKPOINT',
     SELECT_REJECTED_MESSAGE = 'SELECT_REJECTED_MESSAGE',
@@ -56,6 +57,11 @@ export interface ResetTestCaseStateAction {
 export interface ActionSelectStateAction {
     type: StateActionTypes.SELECT_ACTION;
     action: Action;
+}
+
+export interface ActionSelectByIdStateAction {
+    type: StateActionTypes.SELECT_ACTION_BY_ID;
+    actionId: number;
 }
 
 export interface MessagesSelectStateAction {
@@ -119,6 +125,7 @@ export type StateActionType = SetReportStateAction |
     SetTestCaseStateAction | 
     ResetTestCaseStateAction |
     ActionSelectStateAction |
+    ActionSelectByIdStateAction |
     MessagesSelectStateAction | 
     CheckpointSelectStateAction |
     RejectedMessageSelectStateAction |

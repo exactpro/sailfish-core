@@ -45,7 +45,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
         if (this.elements[actionId]) {
             // smooth behavior is disabled here
             // base - get HTMLElement by ref
-            this.elements[actionId].base.scrollIntoView({block: "start"});
+            this.elements[actionId].base.scrollIntoView({block: 'center'});
         }    
     }
 
@@ -65,6 +65,19 @@ export class ActionsListBase extends Component<ListProps, {}> {
         return nextProps.actions !== this.props.actions ||
             nextProps.selectedActionId !== this.props.selectedActionId ||
             nextProps.selectedMessageId !== this.props.selectedMessageId;
+    }
+
+    componentDidMount() {
+        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
+        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
+        // At this point React passed components tree to DOM, however it still could be not redered.
+        // First callback will be called before actual render
+        // Second callback will be called when DOM is fully rendered.
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                this.scrollToAction(this.props.selectedActionId);
+            });
+        });
     }
 
     render({ actions, checkpointMessagesIds, selectedCheckpointId, selectedActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setCheckpointId }: ListProps) {

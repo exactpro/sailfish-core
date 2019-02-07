@@ -14,35 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Message from '../models/Message';
+import { appReducer } from '../reducers/reducers';
+import { createStore } from 'redux';
+import { devToolsEnhancer } from 'redux-devtools-extension';
+import { initialAppState } from '../state/initialStates';
+import Report from '../models/Report';
 
-const CHECKPOINT_NAME = 'checkpoint';
-
-export enum MessageType {
-    MESSAGE = '',
-    CHECKPOINT = 'checkpoint',
-    REJECTED = 'rejected',
-    ADMIN = 'admin'
-}
-
-export function isCheckpoint(message: Message) : boolean {
-    const name = message.content['name'] as string;
-
-    if (!name) {
-        return false;
-    }
-
-    return name.toLowerCase() == CHECKPOINT_NAME;
-}
-
-export function getMessageType(message: Message) : MessageType {
-    if (isCheckpoint(message)) {
-        return MessageType.CHECKPOINT;
-    }
-
-    if (message.content.rejectReason !== null) {
-        return MessageType.REJECTED;
-    }
-
-    return MessageType.MESSAGE;
-}
+export const createAppStore = (report: Report) => createStore(
+    appReducer,
+    {
+        ...initialAppState,
+        report: report
+    },
+    devToolsEnhancer({name: 'redux'})
+)

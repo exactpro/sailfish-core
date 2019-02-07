@@ -43,6 +43,17 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             } 
         }
 
+        case StateActionTypes.SELECT_ACTION_BY_ID: {
+            return {
+                ...state,
+                selected: {
+                    ...state.selected,
+                    actionId: stateAction.actionId,
+                    status: initialSelectedState.status
+                }
+            }
+        }
+
         case StateActionTypes.SELECT_MESSAGES: {
             return {
                 ...state,
@@ -107,7 +118,6 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: stateAction.testCase,
-                selected: initialSelectedState
             }
         }
 
@@ -126,6 +136,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: null,
+                selected: initialSelectedState,
                 currentTestCasePath: state.report.metadata[nextTestCaseIndex] ? 
                     state.report.metadata[nextTestCaseIndex].jsonpFileName : state.report.metadata[0].jsonpFileName
             }
@@ -137,6 +148,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: null,
+                selected: initialSelectedState,
                 currentTestCasePath: state.report.metadata[prevTestCaseIndex] ? 
                     state.report.metadata[prevTestCaseIndex].jsonpFileName : state.report.metadata[state.report.metadata.length - 1].jsonpFileName
             }
