@@ -20,7 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ObjectArrays;
+import com.google.common.primitives.Longs;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.hibernate.Query;
@@ -112,11 +116,13 @@ public class NativeDbOperations {
 
 	@SuppressWarnings("unchecked")
 	public List<Object[]> executeTaggedComparisonQuery(Session session, Long[] firstSetIds, Long[] secondSetIds) {
+        Long[] allTags = ImmutableSet.copyOf(ObjectArrays.concat(firstSetIds, secondSetIds, Long.class))
+                .toArray(new Long[0]);
 
 		if(isPostgreSql()) {
 
-			String queryString = String.format("SELECT * FROM tagged_sets_comparison(ARRAY %s, :fcount, ARRAY %s, :scount )",
-					Arrays.toString(firstSetIds), Arrays.toString(secondSetIds));
+			String queryString = String.format("SELECT * FROM tagged_sets_comparison(ARRAY %s, ARRAY %s, :fcount, ARRAY %s, :scount )",
+                    Arrays.toString(allTags), Arrays.toString(firstSetIds), Arrays.toString(secondSetIds));
 
 			Query query = session.createSQLQuery(queryString);
 
@@ -127,8 +133,8 @@ public class NativeDbOperations {
 
 		} else if(isMysql()) {
 
-			String queryString = String.format("call tagged_sets_comparison('%s', :fcount, '%s', :scount )",
-					toMysqlSet(firstSetIds), toMysqlSet(secondSetIds));
+			String queryString = String.format("call tagged_sets_comparison('%s', '%s', :fcount, '%s', :scount )",
+                    toMysqlSet(allTags), toMysqlSet(firstSetIds), toMysqlSet(secondSetIds));
 
 			SQLQuery query = session.createSQLQuery(queryString);
 
