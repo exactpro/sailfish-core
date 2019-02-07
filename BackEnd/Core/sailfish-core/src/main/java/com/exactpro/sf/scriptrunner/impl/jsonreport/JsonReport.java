@@ -35,7 +35,6 @@ import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -50,7 +49,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
@@ -60,6 +58,8 @@ import java.util.stream.Collectors;
 public class JsonReport implements IScriptReport {
     private static final Logger logger = LoggerFactory.getLogger(JsonReport.class);
     private static final ObjectMapper mapper;
+    private static final String REPORT_ROOT_FILE_NAME = "report";
+
     private static long actionIdCounter = 0;
 
     private ScriptContext scriptContext;
@@ -240,6 +240,7 @@ public class JsonReport implements IScriptReport {
         this.reportRoot.getBugs().addAll(curTestCase.getBugs());
 
         exportToFile(curTestCase, curTestCase.getName());
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
 
         revertContext();
         this.reportStats.updateTestCaseStatus(status.getStatus());
@@ -448,7 +449,7 @@ public class JsonReport implements IScriptReport {
         assertState(null, ContextType.SCRIPT);
         this.reportRoot.setFinishTime(Instant.now());
         initProperties();
-        exportToFile(reportRoot, "report");
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
     }
 
     public void createLinkToReport(String linkToReport) {
