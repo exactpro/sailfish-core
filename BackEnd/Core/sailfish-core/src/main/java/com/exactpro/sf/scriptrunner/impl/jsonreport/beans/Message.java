@@ -19,8 +19,10 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonRawValueDeserializer;
 import com.exactpro.sf.storage.util.JsonMessageConverter;
 import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +39,7 @@ public class Message implements IJsonReportNode {
     private String timestamp; //IMPORTANT: datetime format may divert from the default one
 
     @JsonRawValue
+    @JsonDeserialize(using = JsonRawValueDeserializer.class)
     private String content;
 
     public Message() {
