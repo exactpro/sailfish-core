@@ -166,7 +166,7 @@ public class StatisticScriptReport extends DefaultScriptReport {
     @Override
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
         if (this.statisticsService != null) {
-            this.statisticsService.actionVerification(matrixName, result);
+            this.statisticsService.addKnownBugsToActionRun(matrixName, result);
         }
     }
 

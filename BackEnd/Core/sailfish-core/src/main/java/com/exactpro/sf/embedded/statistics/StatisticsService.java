@@ -26,6 +26,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 
 import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
 import com.exactpro.sf.embedded.statistics.handlers.StatisticsReportHandlerLoader;
 import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
@@ -537,8 +538,8 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	}
 
-    public void actionVerification(String matrixName, ComparisonResult result) {
-        if (result != null) {
+    public void addKnownBugsToActionRun(String matrixName, ComparisonResult result) {
+        if (result != null && ComparisonUtil.getStatusType(result) != StatusType.FAILED) {
             Set<BugDescription> allKnownBugs = result.getAllKnownBugs();
             if (!allKnownBugs.isEmpty()) {
                 Set<BugDescription> reproducedBugs = result.getReproducedBugs();

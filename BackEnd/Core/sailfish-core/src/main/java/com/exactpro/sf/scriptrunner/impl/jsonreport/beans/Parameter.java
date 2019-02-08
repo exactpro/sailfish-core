@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Parameter {
@@ -35,7 +36,7 @@ public class Parameter {
 
     public Parameter(ReportEntity e) {
         this.name = e.getName();
-        this.value = e.getValue().toString();
+        this.value = Objects.toString(e.getValue());
         this.subParameters = e.getFields().stream().map(Parameter::new).collect(Collectors.toList());
     }
 
