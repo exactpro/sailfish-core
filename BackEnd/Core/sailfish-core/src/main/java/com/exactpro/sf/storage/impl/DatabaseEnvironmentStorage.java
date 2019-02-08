@@ -16,6 +16,8 @@
 package com.exactpro.sf.storage.impl;
 
 import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
+import static com.google.common.collect.ImmutableList.of;
+import static org.hibernate.criterion.Restrictions.ilike;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.entities.StoredEnvironment;
 
 public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
+    private static final String NAME = "name";
     private final IStorage storage;
 
     public DatabaseEnvironmentStorage(IStorage storage) {
@@ -65,7 +68,7 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Cannot remove default environment");
         }
 
-        StoredEnvironment environment = storage.getEntityByField(StoredEnvironment.class, "name", name);
+        StoredEnvironment environment = getEnvironment(name);
 
         if(environment == null) {
             throw new StorageException("Environment doesn't exist: " + name);
@@ -81,7 +84,7 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Environment name cannot be blank");
         }
 
-        return storage.getEntityByField(StoredEnvironment.class, "name", name) != null;
+        return getEnvironment(name) != null;
     }
 
     @Override
@@ -102,8 +105,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
             throw new StorageException("Cannot rename to default environment: " + newName);
         }
 
-        StoredEnvironment oldEnvironment = storage.getEntityByField(StoredEnvironment.class, "name", oldName);
-        StoredEnvironment newEnvironment = storage.getEntityByField(StoredEnvironment.class, "name", newName);
+        StoredEnvironment oldEnvironment = getEnvironment(oldName);
+        StoredEnvironment newEnvironment = getEnvironment(newName);
 
         if(oldEnvironment == null) {
             throw new StorageException("Environment doesn't exist: " + oldName);
@@ -131,7 +134,7 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public String getVariableSet(String name) {
-        StoredEnvironment environment = storage.getEntityByField(StoredEnvironment.class, "name", name);
+        StoredEnvironment environment = getEnvironment(name);
 
         if(environment == null) {
             throw new StorageException("Environment doesn't exist: " + name);
@@ -142,7 +145,7 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void setVariableSet(String name, String variableSet) {
-        StoredEnvironment environment = storage.getEntityByField(StoredEnvironment.class, "name", name);
+        StoredEnvironment environment = getEnvironment(name);
 
         if(environment == null) {
             throw new StorageException("Environment doesn't exist: " + name);
@@ -150,5 +153,10 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
         environment.setVariableSet(variableSet);
         storage.update(environment);
+    }
+
+    private StoredEnvironment getEnvironment(String name) {
+        List<StoredEnvironment> environments = storage.getAllEntities(StoredEnvironment.class, of(ilike(NAME, name)));
+        return environments.isEmpty() ? null : environments.get(0);
     }
 }

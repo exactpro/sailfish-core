@@ -15,8 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.environment;
 
+import static org.apache.commons.lang3.StringUtils.stripToNull;
+
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import javax.faces.application.FacesMessage;
 
@@ -31,7 +34,6 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
-import org.apache.commons.lang3.StringUtils;
 import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +67,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     
 	private Object value;
     private String variable;
+    private Map<String, String> variableSet;
     private String name;
     private String environment;
     private ServiceStatus status;
@@ -114,6 +117,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
             String inputMask,
 			Object value,
             String variable,
+            Map<String, String> variableSet,
 			Class<?> paramClassType,
 			List<EnvironmentNode> nodes,
 			IServiceNotifyListener notifyListener,
@@ -123,7 +127,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		this.name = name;
 		this.environment = environment;
 		this.value = value;
-        this.variable = variable;
+        setVariable(variable);
+        this.variableSet = variableSet;
 		this.nodes = nodes;
 		this.paramClassType = paramClassType;
 		this.notifyListener = notifyListener;
@@ -164,6 +169,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				false,
                 null,
 				"false",
+                null,
                 null,
 				boolean.class,
 				null,
@@ -225,7 +231,11 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     }
 
     public void setVariable(String variable) {
-        this.variable = variable;
+        this.variable = stripToNull(variable);
+    }
+
+    public Map<String, String> getVariableSet() {
+        return variableSet;
     }
 
     public void saveParamToDataBase(IConnectionManager conManager, ServiceDescription parent) throws Exception {
@@ -258,7 +268,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 			}
 			BeanUtils.setProperty(parent.getSettings(), name, convertedValue);
 
-            if(StringUtils.isBlank(variable)) {
+            if(variable == null) {
                 parent.getVariables().remove(name);
             } else {
                 parent.getVariables().put(name, variable);
@@ -380,13 +390,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     }
 
     public String getFinalValue() {
-        if(StringUtils.isNotBlank(variable) && environment != null) {
-            IConnectionManager manager = BeanUtil.getSfContext().getConnectionManager();
-            String environmentVariableSet = manager.getEnvironmentVariableSet(environment);
-
-            if(environmentVariableSet != null) {
-                return manager.getVariableSet(environmentVariableSet).getOrDefault(variable, getValue());
-            }
+        if(environment != null && variableSet != null && variable != null) {
+            return variableSet.getOrDefault(variable, getValue());
         }
 
         return getValue();

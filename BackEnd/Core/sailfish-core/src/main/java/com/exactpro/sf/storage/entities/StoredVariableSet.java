@@ -16,6 +16,8 @@
 package com.exactpro.sf.storage.entities;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
 import static java.util.Comparator.nullsFirst;
 
 import java.util.Map;
@@ -28,7 +30,7 @@ import com.exactpro.sf.storage.impl.AbstractPersistentObject;
 
 public class StoredVariableSet extends AbstractPersistentObject {
     private String name;
-    private Map<String, String> variables = new TreeMap<>(nullsFirst(CASE_INSENSITIVE_ORDER));
+    private Map<String, String> variables = emptyMap();
 
     public String getName() {
         return name;
@@ -44,8 +46,9 @@ public class StoredVariableSet extends AbstractPersistentObject {
     }
 
     public StoredVariableSet setVariables(Map<String, String> variables) {
-        this.variables.clear();
-        this.variables.putAll(variables);
+        Map<String, String> copy = new TreeMap<>(nullsFirst(CASE_INSENSITIVE_ORDER));
+        copy.putAll(variables);
+        this.variables = unmodifiableMap(copy);
         return this;
     }
 

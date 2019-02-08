@@ -81,7 +81,7 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
     }
 
     private StoredVariableSet getVariableSet(String name) {
-        List<StoredVariableSet> variableSets = storage.getAllEntities(StoredVariableSet.class, of(ilike(NAME, name)));
+        List<StoredVariableSet> variableSets = storage.getAllEntities(StoredVariableSet.class, of(ilike(NAME, checkName(name))));
         return variableSets.isEmpty() ? null : variableSets.get(0);
     }
 }

@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.ServiceDescription;
@@ -204,8 +205,8 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
         	if (this.severalEdit == null) {
 
-                this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, false, null, null, null, null,
-		        		new ArrayList<EnvironmentNode>(), null, null);
+                this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, false, null, null, null, null, null,
+                        new ArrayList<>(), null, null);
 
 		        for (String name : this.serviceNamesToEdit) {
 
@@ -221,7 +222,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 		        			this.severalEdit.getNodeChildren().add(
 		        					new EnvironmentNode(toClone.getType(), new ServiceDescription(), toClone.getName(),
                                             toClone.getDescription(), toClone.isServiceParamRequired(), toClone.getInputMask(),
-                                            toClone.getValue(), toClone.getVariable(), toClone.getParamClassType(), null, null, toClone.getEnvironment()));
+                                            toClone.getValue(), toClone.getVariable(), toClone.getVariableSet(), toClone.getParamClassType(), null, null, toClone.getEnvironment()));
 		        		}
 
 		        	} else {
@@ -548,13 +549,16 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     private EnvironmentNode createServiceNode(ServiceName serviceName) {
 
-        ServiceDescription sd = BeanUtil.getSfContext().getConnectionManager().getServiceDescription(serviceName);
+        IConnectionManager connectionManager = BeanUtil.getSfContext().getConnectionManager();
+        ServiceDescription sd = connectionManager.getServiceDescription(serviceName);
         Map<String, String> variables = sd.getVariables();
         GuiSettingsProxy proxy = new GuiSettingsProxy(sd.getSettings());
         List<EnvironmentNode> params = new ArrayList<>();
+        String environmentVariableSet = connectionManager.getEnvironmentVariableSet(serviceName.getEnvironment());
+        Map<String, String> variableSet = environmentVariableSet != null ? connectionManager.getVariableSet(environmentVariableSet) : null;
 
         EnvironmentNode handlerClassParamNode = new EnvironmentNode(EnvironmentNode.Type.DESCRIPTION, sd,
-                "HandlerClassName", "", false, null, sd.getServiceHandlerClassName(), null, String.class, null,
+                "HandlerClassName", "", false, null, sd.getServiceHandlerClassName(), null, null, String.class, null,
                 notifyListener, null);
 
         params.add(handlerClassParamNode);
@@ -565,7 +569,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
                 EnvironmentNode paramNode = new EnvironmentNode(EnvironmentNode.Type.PARAMETER, sd, name,
                         proxy.getParameterDescription(name), proxy.checkRequiredParameter(name), proxy.getParameterMask(name),
-                        proxy.getParameterValue(name), variables.get(name), proxy.getParameterType(name), null, notifyListener, serviceName.getEnvironment());
+                        proxy.getParameterValue(name), variables.get(name), variableSet, proxy.getParameterType(name), null, notifyListener, serviceName.getEnvironment());
 
                 params.add(paramNode);
             }
@@ -574,10 +578,10 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         Collections.sort(params, Collections.reverseOrder());
 
         EnvironmentNode envNode = new EnvironmentNode(
-                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "", false, null, null, null, null, params,
+                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "", false, null, null, null, null, null, params,
                 notifyListener, serviceName.getEnvironment());
 
-        envNode.setStatus(BeanUtil.getSfContext().getConnectionManager().getService(serviceName).getStatus());
+        envNode.setStatus(connectionManager.getService(serviceName).getStatus());
         return envNode;
     }
 

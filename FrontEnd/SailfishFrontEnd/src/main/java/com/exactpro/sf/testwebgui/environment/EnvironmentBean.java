@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.environment;
 
+import static java.util.Collections.emptySet;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -100,6 +102,7 @@ public class EnvironmentBean implements Serializable {
 	private String oldServName = "";			// service
 
 	private List<IService> services;
+    private Set<String> variables = emptySet();
 
     private ServiceNodeLazyModel<EnvironmentNode> lazyModel;
 
@@ -998,6 +1001,12 @@ public class EnvironmentBean implements Serializable {
     public void setCurrentVariableSet(String currentVariableSet) {
         logger.info("setCurrentVariableSet invoked {} currentVariableSet[{}]", getUser(), currentVariableSet);
         this.currentVariableSet = StringUtils.stripToNull(currentVariableSet);
+
+        if(this.currentVariableSet == null) {
+            this.variables = emptySet();
+        } else {
+            this.variables = BeanUtil.getSfContext().getConnectionManager().getVariableSet(currentVariableSet).keySet();
+        }
     }
 
     public void changeVariableSet() {
@@ -1147,14 +1156,7 @@ public class EnvironmentBean implements Serializable {
 		return this.lazyModel.isShowDisabled();
 	}
 
-    public List<String> getVariables() {
-        IConnectionManager connectionManager = BeanUtil.getSfContext().getConnectionManager();
-        String environmentVariableSet = connectionManager.getEnvironmentVariableSet(currentEnvironment);
-
-        if(environmentVariableSet != null) {
-            return new ArrayList<>(connectionManager.getVariableSet(environmentVariableSet).keySet());
-        }
-
-        return Collections.emptyList();
+    public Set<String> getVariables() {
+        return variables;
     }
 }
