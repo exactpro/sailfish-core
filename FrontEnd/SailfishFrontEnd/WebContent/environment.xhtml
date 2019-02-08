@@ -269,7 +269,7 @@
 
 <h:form id="serviceParametersForm" prependId="false">
     <p:dialog id="parametersDialog" header="Service parameters: #{environmentBean.lazyModel.headerForEditDialog}" widgetVar="paramDialog"
-              modal="true" height="601" width="1220" resizable="false" onHide="removeOverlays()">
+              modal="true" height="601" width="auto" resizable="false" onHide="removeOverlays()">
 
         <h:panelGrid id="display" columns="1">
 
@@ -335,7 +335,7 @@
                     </ui:fragment>
                 </p:column>
 
-                <p:column headerText="Variable" style="width: 230px;">
+                <p:column headerText="Variable" rendered="#{environmentBean.currentVariableSet != null}">
                     <p:selectOneMenu id="variableSelector"
                                      value="#{paramNode.variable}"
                                      filter="true"
@@ -351,8 +351,8 @@
                     </p:selectOneMenu>
                 </p:column>
 
-                <p:column headerText="Final value" style="width: 215px; white-space: nowrap">
-                    <h:outputText value="#{paramNode.finalValue}" title="#{paramNode.finalValue}"/>
+                <p:column headerText="Final value" style="width: 440px" rendered="#{environmentBean.currentVariableSet != null}">
+                    <h:outputText value="#{paramNode.finalValue}" rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}"/>
                 </p:column>
 
                 <p:column style="width: 20px;">

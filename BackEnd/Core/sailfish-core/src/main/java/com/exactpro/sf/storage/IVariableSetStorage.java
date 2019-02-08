@@ -18,6 +18,7 @@ package com.exactpro.sf.storage;
 import java.util.Map;
 import java.util.Set;
 
+// implementations should be case-insensitive to variable names and set names
 public interface IVariableSetStorage {
     Map<String, String> get(String name);
     void put(String name, Map<String, String> variableSet);

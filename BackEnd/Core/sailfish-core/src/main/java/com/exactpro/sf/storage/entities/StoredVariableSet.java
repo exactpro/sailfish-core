@@ -15,8 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.entities;
 
-import java.util.HashMap;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.util.Comparator.nullsFirst;
+
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -25,7 +28,7 @@ import com.exactpro.sf.storage.impl.AbstractPersistentObject;
 
 public class StoredVariableSet extends AbstractPersistentObject {
     private String name;
-    private Map<String, String> variables = new HashMap<>();
+    private Map<String, String> variables = new TreeMap<>(nullsFirst(CASE_INSENSITIVE_ORDER));
 
     public String getName() {
         return name;
@@ -41,7 +44,8 @@ public class StoredVariableSet extends AbstractPersistentObject {
     }
 
     public StoredVariableSet setVariables(Map<String, String> variables) {
-        this.variables = variables;
+        this.variables.clear();
+        this.variables.putAll(variables);
         return this;
     }
 

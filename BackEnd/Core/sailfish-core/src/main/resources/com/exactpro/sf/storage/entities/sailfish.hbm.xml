@@ -60,7 +60,7 @@
         <map name="variables" table="SERVICE_VARIABLES" cascade="all">
             <key column="id"/>
             <index column="parameter_name" type="string" length="50"/>
-            <element column="variable_name" type="string" length="50"/>
+            <element column="variable_name" type="string" length="100"/>
         </map>
 	</class>
 
@@ -201,7 +201,7 @@
         <property name="name" column="NAME"/>
         <map name="variables" table="VARIABLE_SET_VARIABLES" cascade="all" lazy="false">
             <key column="id"/>
-            <index column="variable_name" type="string" length="50"/>
+            <index column="variable_name" type="string" length="100"/>
             <element column="variable_value" type="string" length="32762"/>
         </map>
     </class>

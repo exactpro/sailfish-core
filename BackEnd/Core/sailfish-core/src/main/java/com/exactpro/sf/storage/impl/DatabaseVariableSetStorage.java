@@ -15,10 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import static com.google.common.collect.ImmutableList.of;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toCollection;
+import static org.hibernate.criterion.Restrictions.ilike;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -27,21 +30,22 @@ import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.entities.StoredVariableSet;
 
 public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
+    private static final String NAME = "name";
     private final IStorage storage;
 
     public DatabaseVariableSetStorage(IStorage storage) {
-        this.storage = Objects.requireNonNull(storage, "storage cannot be null");
+        this.storage = requireNonNull(storage, "storage cannot be null");
     }
 
     @Override
     public Map<String, String> get(String name) {
-        StoredVariableSet variableSet = storage.getEntityByField(StoredVariableSet.class, "name", checkName(name));
+        StoredVariableSet variableSet = getVariableSet(name);
         return variableSet != null ? variableSet.getVariables() : null;
     }
 
     @Override
     public void put(String name, Map<String, String> variableSet) {
-        StoredVariableSet storedVariableSet = storage.getEntityByField(StoredVariableSet.class, "name", checkName(name));
+        StoredVariableSet storedVariableSet = getVariableSet(name);
 
         if(storedVariableSet == null) {
             storedVariableSet = new StoredVariableSet().setName(name);
@@ -54,7 +58,7 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public void remove(String name) {
-        StoredVariableSet storedVariableSet = storage.getEntityByField(StoredVariableSet.class, "name", checkName(name));
+        StoredVariableSet storedVariableSet = getVariableSet(name);
 
         if(storedVariableSet == null) {
             throw new StorageException("Variable set does not exist: " + name);
@@ -65,7 +69,7 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public boolean exists(String name) {
-        return storage.getEntityByField(StoredVariableSet.class, "name", checkName(name)) != null;
+        return getVariableSet(name) != null;
     }
 
     @Override
@@ -74,5 +78,10 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
                 .stream()
                 .map(StoredVariableSet::getName)
                 .collect(toCollection(TreeSet::new));
+    }
+
+    private StoredVariableSet getVariableSet(String name) {
+        List<StoredVariableSet> variableSets = storage.getAllEntities(StoredVariableSet.class, of(ilike(NAME, name)));
+        return variableSets.isEmpty() ? null : variableSets.get(0);
     }
 }

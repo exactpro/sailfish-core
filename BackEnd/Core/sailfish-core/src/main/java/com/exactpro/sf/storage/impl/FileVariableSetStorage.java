@@ -16,14 +16,16 @@
 package com.exactpro.sf.storage.impl;
 
 import static com.exactpro.sf.storage.impl.JSONSerializer.of;
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.util.Comparator.nullsFirst;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.concat;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.exactpro.sf.configuration.workspace.FolderType;
@@ -39,7 +41,7 @@ public class FileVariableSetStorage extends AbstractVariableSetStorage {
 
     private final String path;
     private final IWorkspaceDispatcher dispatcher;
-    private final Map<String, Map<String, String>> variableSets;
+    private final Map<String, Map<String, String>> variableSets = new TreeMap<>(nullsFirst(CASE_INSENSITIVE_ORDER));
 
     public FileVariableSetStorage(String path, IWorkspaceDispatcher dispatcher) {
         this.path = requireNonNull(path, "path cannot be null");
@@ -50,12 +52,10 @@ public class FileVariableSetStorage extends AbstractVariableSetStorage {
                 File file = dispatcher.getFile(FolderType.ROOT, path, VARIABLE_SETS_FILE_NAME);
 
                 try {
-                    this.variableSets = SERIALIZER.deserialize(file);
+                    SERIALIZER.deserialize(file).forEach(this::put);
                 } catch(Exception e) {
                     throw new StorageException("Failed to deserialize variable sets file: " + file.getCanonicalPath());
                 }
-            } else {
-                this.variableSets = new HashMap<>();
             }
         } catch(WorkspaceSecurityException | IOException e) {
             throw new StorageException("Failed to initialize file: " + concat(path, VARIABLE_SETS_FILE_NAME), e);

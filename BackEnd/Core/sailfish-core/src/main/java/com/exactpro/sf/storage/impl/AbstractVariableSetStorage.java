@@ -15,12 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.util.Collections.unmodifiableMap;
+import static java.util.Comparator.nullsFirst;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import com.exactpro.sf.storage.IVariableSetStorage;
 import com.exactpro.sf.storage.StorageException;
@@ -31,14 +33,14 @@ public abstract class AbstractVariableSetStorage implements IVariableSetStorage 
     }
 
     protected String checkName(String name) {
-        return requireNonEmpty(name, "name cannot be empty").toLowerCase();
+        return requireNonEmpty(name, "name cannot be empty");
     }
 
     protected Map<String, String> checkVariableSet(Map<String, String> variableSet) {
-        Map<String, String> checkedVariableSet = new HashMap<>();
+        Map<String, String> checkedVariableSet = new TreeMap<>(nullsFirst(CASE_INSENSITIVE_ORDER));
 
         variableSet.forEach((name, value) -> {
-            name = requireNonEmpty(name, "Variable name cannot be empty").toLowerCase();
+            name = requireNonEmpty(name, "Variable name cannot be empty");
             value = requireNonEmpty(value, "Variable value cannot be empty: " + name);
 
             if(checkedVariableSet.put(name, value) != null) {
@@ -46,6 +48,6 @@ public abstract class AbstractVariableSetStorage implements IVariableSetStorage 
             }
         });
 
-        return Collections.unmodifiableMap(checkedVariableSet);
+        return unmodifiableMap(checkedVariableSet);
     }
 }
