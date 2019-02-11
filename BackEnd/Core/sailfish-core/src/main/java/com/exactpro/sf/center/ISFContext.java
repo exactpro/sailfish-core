@@ -34,12 +34,12 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.embedded.machinelearning.MachineLearningService;
 import com.exactpro.sf.embedded.mail.EMailService;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
+import com.exactpro.sf.embedded.updater.UpdateService;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
-import com.exactpro.sf.scriptrunner.reportbuilder.IReportWriter;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IServiceContext;
@@ -82,10 +82,10 @@ public interface ISFContext {
 	RegressionRunner getRegressionRunner();
 	FlightRecorderService getFlightRecorderService();
 	NetDumperService getNetDumperService();
+	UpdateService getUpdateService();
 
 	// Other
 	EnvironmentManager getEnvironmentManager();
-    IReportWriter getReportWriter();
 
     // don't use it in your code. It is prefered to use <code>@ManagedProperty(value="#{" + BeanUtil.MATRIX_PROVIDER_HOLDER + "}")</code>
     @Deprecated

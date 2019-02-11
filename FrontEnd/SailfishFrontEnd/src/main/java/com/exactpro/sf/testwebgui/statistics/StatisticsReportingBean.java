@@ -19,9 +19,13 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -132,11 +136,21 @@ public class StatisticsReportingBean implements Serializable {
         try {
             statisticsReportHandler.reset();
             StatisticsReportingStorage reportingStorage = BeanUtil.getSfContext().getStatisticsService().getReportingStorage();
-            List<Long> matrixIds = reportingStorage.getMatrixRunIDs(params);
-            if (!matrixIds.isEmpty()) {
+            SortedMap<Long, List<Long>> matrixToTestCaseIds = reportingStorage.getMatrixRunAndTestCaseRunIDs(params);
+            if (!matrixToTestCaseIds.isEmpty()) {
                 int limit = 0;
+                List<Long> matrixIds = new ArrayList<>(matrixToTestCaseIds.keySet());
+                List<List<Long>> testCaseRunIds = new ArrayList<>(matrixToTestCaseIds.values());
                 while (limit < matrixIds.size()) {
-                    params.setMatrixRunIds(matrixIds.subList(limit, Math.min((limit += LOADING_MATRIX_LIMIT), matrixIds.size())));
+                    List<Long> batchMatrixIds = matrixIds.subList(
+                            limit, Math.min((limit + LOADING_MATRIX_LIMIT), matrixIds.size()));
+                    List<Long> batchTestCaseIds = testCaseRunIds.subList(
+                            limit, Math.min(limit += LOADING_MATRIX_LIMIT, matrixToTestCaseIds.size()))
+                            .stream()
+                            .flatMap(List::stream)
+                            .collect(Collectors.toList());
+                    params.setMatrixRunIds(batchMatrixIds);
+                    params.setTestCaseRunIds(batchTestCaseIds);
                     statisticsReportHandler.handleMatrixRunTestCases(reportingStorage.generateAggregatedReport(params), reportingStorage);
                 }
             }
@@ -290,7 +304,7 @@ public class StatisticsReportingBean implements Serializable {
     }
 
     public List<String> getReportHeader() {
-        return statisticsReportHandler.getHeaderColumns();
+        return (statisticsReportHandler != null) ? statisticsReportHandler.getHeaderColumns() : Collections.emptyList();
     }
 
     public SailfishURI getCurrentReportURI() {

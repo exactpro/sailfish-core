@@ -23,6 +23,10 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.embedded.IEmbeddedService;
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.storage.BaseStorageSettings;
+import com.exactpro.sf.storage.DBStorageSettings;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -71,8 +75,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.impl.DefaultConnectionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
-import com.exactpro.sf.scriptrunner.reportbuilder.DefaultReportWriter;
-import com.exactpro.sf.scriptrunner.reportbuilder.IReportWriter;
 import com.exactpro.sf.scriptrunner.services.DefaultStaticServiceManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
@@ -144,8 +146,11 @@ public class SFLocalContext implements ISFContext {
 	// Additional services:
 	private final StatisticsService statisticsService;
 	private final MachineLearningService machineLearningService;
+	private final UpdateService updateService;
 	private EMailService mailService;
 	private RegressionRunner regressionRunner;
+
+	private final Queue<IEmbeddedService> embeddedServices = new LinkedList<>();
 
 	private FlightRecorderService flightRecorderService;
 
@@ -156,7 +161,6 @@ public class SFLocalContext implements ISFContext {
 
 	private final MatrixProviderHolder matrixProviderHolder;
 	private final MatrixConverterManager matrixConverterManager;
-	private final IReportWriter reportWriter;
 	private final List<IValidator> validators;
 	private final ListMultimap<IVersion, IValidator> pluginToValidators;
 	private final List<IPreprocessor> preprocessors;
@@ -252,7 +256,6 @@ public class SFLocalContext implements ISFContext {
 
 		optionsStorage = createOptionsStorage(envSettings, storage, workspaceDispatcher);
 
-		reportWriter = new DefaultReportWriter(wd);
         taskExecutor = new TaskExecutor();
 		this.disposables.add(taskExecutor);
 
@@ -278,6 +281,10 @@ public class SFLocalContext implements ISFContext {
 		ValidatorLoader validatorLoader = new ValidatorLoader();
 
         this.statisticsService = new StatisticsService();
+        this.embeddedServices.add(statisticsService);
+
+        this.updateService = new UpdateService(workspaceDispatcher, settings.getUpdateServiceConfiguration(), taskExecutor);
+        this.embeddedServices.add(updateService);
 
         // 5) Load core & plugins
         PluginLoader pluginLoader = new PluginLoader(
@@ -333,6 +340,7 @@ public class SFLocalContext implements ISFContext {
 		this.disposables.add(this.scriptRunner);
 
         this.mailService = new EMailService();
+        this.embeddedServices.add(mailService);
 
 		this.flightRecorderService = new FlightRecorderService(taskExecutor, this.optionsStorage);
 
@@ -351,14 +359,15 @@ public class SFLocalContext implements ISFContext {
         this.pluginClassLoaders = pluginVersions.stream().collect(Collectors.collectingAndThen(Collectors.toMap(IVersion::getAlias, x -> x.getClass().getClassLoader()), Collections::unmodifiableMap));
 
         this.machineLearningService = new MachineLearningService(workspaceDispatcher, dictionaryManager, dataManager, pluginClassLoaders);
+        this.embeddedServices.add(machineLearningService);
     }
 
 	private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
 		switch (envSettings.getStorageType()) {
         case DB:
-            return new DatabaseMessageStorage(workspaceDispatcher, sessionFactory, dictionaryManager);
+            return new DatabaseMessageStorage(new DBStorageSettings(workspaceDispatcher, sessionFactory, dictionaryManager, envSettings));
         case FILE:
-            return new FileMessageStorage(envSettings.getFileStoragePath(), envSettings.isStoreAdminMessages(), workspaceDispatcher, dictionaryManager);
+            return new FileMessageStorage(new BaseStorageSettings(workspaceDispatcher, dictionaryManager, envSettings));
         default:
             throw new EPSCommonException("Unsupported message storage type. Check your descriptor.xml file.");
         }
@@ -496,6 +505,14 @@ public class SFLocalContext implements ISFContext {
 	            logger.error(e.getMessage(), e);
             }
         }
+
+        while (!this.embeddedServices.isEmpty()) {
+            try {
+                this.embeddedServices.remove().tearDown();
+            } catch (RuntimeException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
 	}
 
 	@Override
@@ -524,13 +541,13 @@ public class SFLocalContext implements ISFContext {
     }
 
     @Override
+    public UpdateService getUpdateService() {
+        return updateService;
+    }
+
+    @Override
 	public IOptionsStorage getOptionsStorage() {
 		return optionsStorage;
-	}
-
-	@Override
-	public IReportWriter getReportWriter() {
-		return this.reportWriter;
 	}
 
 	@Override

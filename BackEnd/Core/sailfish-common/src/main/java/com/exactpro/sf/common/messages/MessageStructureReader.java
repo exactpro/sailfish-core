@@ -31,7 +31,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 public class MessageStructureReader {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final static Logger LOGGER = LoggerFactory.getLogger(MessageStructureReader.class);
 
     public MessageStructureReader() {
     }
@@ -104,7 +104,7 @@ public class MessageStructureReader {
                     value = curFieldDefaultValue;
                     isDefault = true;
                 } else {
-                    logger.warn("Incorrect default value for [{}] field", fieldName);
+                    LOGGER.warn("Incorrect default value for [{}] field", fieldName);
                 }
             }
 

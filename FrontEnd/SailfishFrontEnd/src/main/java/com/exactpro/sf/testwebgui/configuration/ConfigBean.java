@@ -29,7 +29,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
@@ -134,8 +134,6 @@ public class ConfigBean implements Serializable {
     private boolean createIndividualAppenders;
     private String individualAppendersThreshold;
 
-	private List<ComponentInfo> infos;
-
 	private static String DEFAULT_PASSWORD = "Welcome";
 
 	private ServiceStatus conStatus = ServiceStatus.Connected;
@@ -187,10 +185,10 @@ public class ConfigBean implements Serializable {
             environmentParamsList = new ArrayList<>();
             try {
                 for (Object key : environmentBeanMap.keySet()) {
-                    if (environmentBeanMap.getWriteMethod(key.toString()) != null) {
-                        Field field = environmentSettings.getClass().getDeclaredField(key.toString());
-                        Description description =  field.getAnnotation(Description.class);
-                        ValidateRegex validateRegex = field.getAnnotation(ValidateRegex.class);
+                    Method writeMethod = environmentBeanMap.getWriteMethod(key.toString());
+                    if (writeMethod != null) {
+                        Description description =  writeMethod.getAnnotation(Description.class);
+                        ValidateRegex validateRegex = writeMethod.getAnnotation(ValidateRegex.class);
                         String descriptionValue = description != null ? description.value() : null;
                         String regex = validateRegex != null ? validateRegex.regex() : null;
 
@@ -198,8 +196,9 @@ public class ConfigBean implements Serializable {
                         environmentParamsList.add(environmentEntity);
                     }
                 }
-            } catch (NoSuchFieldException e) {
+            } catch (Exception e) {
                 logger.error(e.getMessage(), e);
+                BeanUtil.addErrorMessage("Can't load environment settings", e.getMessage());
             }
 
             refresh();
@@ -218,8 +217,6 @@ public class ConfigBean implements Serializable {
                 return RelevantMessagesSortingMode.parse(value.toString());
             }
         }, RelevantMessagesSortingMode.class);
-
-		this.infos = createComponentsInfo();
 	}
 
 	public void preRenderView() {
@@ -835,31 +832,6 @@ public class ConfigBean implements Serializable {
 
     public List<EnvironmentEntity> getEnvironmentParamsList() {
         return environmentParamsList;
-    }
-
-    public List<ComponentInfo> getComponentsBuildNumbers() {
-        return this.infos;
-    }
-
-	public List<ComponentInfo> createComponentsInfo() {
-
-	    List<ComponentInfo> infos = new ArrayList<>();
-
-        for (IVersion v : BeanUtil.getSfContext().getPluginVersions()) {
-
-            if (v.isGeneral()) {
-                continue;
-            }
-
-            ComponentInfo info = new ComponentInfo();
-
-            info.setName(v.getAlias());
-            info.setVersion(v.buildVersion());
-
-            infos.add(info);
-        }
-
-        return infos;
     }
 
 	public boolean isDbChangesApplied() {

@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 
@@ -600,6 +601,11 @@ public class DictionaryEditorModel {
             if (errors.isEmpty()) {
                 BeanUtil.addInfoMessage("Info", "Dictionary has been successfully " + (load ? "loaded" : "validated"));
             } else {
+                for (DictionaryValidationError validationError :
+                        errors) {
+                    BeanUtil.addWarningMessage("Warning", validationError.getError() + " [message=" + validationError.getMessage() + ", field=" + validationError.getField() + "]");
+                }
+
                 if (load) {
                     BeanUtil.addWarningMessage("Warning", "Dictionary is loaded with " + errors.size() + " errors");
                 } else {
@@ -691,7 +697,7 @@ public class DictionaryEditorModel {
     public void createFieldEditorModel(ModifiableFieldStructure field, boolean standaloneField) {
         this.fieldEditorModel = new FieldEditorModel(field, standaloneField);
     }
-
+    
     private void populateDictionaryFields(TreeModel<FieldEditorModel> model) {
 
         if (model.getData() != null) {
@@ -1219,18 +1225,14 @@ public class DictionaryEditorModel {
             result.setJavaType(field.getImplJavaType());
             result.setReference(field.getReference());
 
-            if (!field.getImplValues().isEmpty()) {
-                result.addValues(field.getImplValues());
-            }
+            result.addValues(AttributeModel.cloneAttributes(field.getImplValues()));
         }
 
         result.setDescription(field.getDescription());
         result.setId(field.getId());
         result.setName(field.getName());
 
-        if (!field.getImplAttributes().isEmpty()) {
-            result.addAttributes(field.getImplAttributes());
-        }
+        result.addAttributes(AttributeModel.cloneAttributes(field.getImplAttributes()));
 
         return result;
     }

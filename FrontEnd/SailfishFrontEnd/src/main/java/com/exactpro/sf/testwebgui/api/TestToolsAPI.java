@@ -20,19 +20,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,11 +61,6 @@ import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.IScriptReport;
 import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions.Duration;
-import com.exactpro.sf.scriptrunner.TestScriptDescription;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportType;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportWriterException;
 import com.exactpro.sf.services.EnvironmentDescription;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
@@ -127,26 +125,6 @@ public class TestToolsAPI {
 		return matrix;
 	}
 
-	public File createAggrigateReport(String name, Date startDate, Date endDate, boolean details, Duration duration, ReportType reportType) throws ReportWriterException, IOException {
-	    ReportWriterOptions options = new ReportWriterOptions();
-	    options.setCustomStart(startDate);
-	    options.setCustomEnd(endDate);
-	    options.setWriteDetails(details);
-	    options.setSelectedDuration(duration);
-	    options.setSelectedReportType(reportType);
-
-        return createAggrigateReport(name, options);
-	}
-
-	public File createAggrigateReport(String name, ReportWriterOptions reportWriterOptions) throws ReportWriterException, IOException {
-        File reportFile = File.createTempFile(name, ".csv");
-
-        List<TestScriptDescription> descrs = this.context.getScriptRunner().getDescriptions();
-        this.context.getReportWriter().write(reportFile, descrs, reportWriterOptions);
-
-        return reportFile;
-    }
-
 	public void stopScriptRun(long id){
 	    logger.info("stopScript() invoked: {}", id);
 	    context.getScriptRunner().stopScript(id);
@@ -169,11 +147,11 @@ public class TestToolsAPI {
         return this.context.getMatrixConverterManager().getMatrixConverters();
 		}
 
-    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri) throws FileNotFoundException, WorkspaceSecurityException, WorkspaceStructureException {
+    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
         return prepareConverterSettings(matrixId, environment, converterUri, null);
     }
 
-    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri, String newMatrixName) throws FileNotFoundException, WorkspaceSecurityException, WorkspaceStructureException {
+    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri, String newMatrixName) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
 	    IMatrixConverterSettings settings = getMatrixConverterSettings(converterUri);
 	    IMatrixStorage matrixStorage = this.context.getMatrixStorage();
         IMatrix matrix = matrixStorage.getMatrixById(matrixId);
@@ -189,7 +167,9 @@ public class TestToolsAPI {
         if (newMatrixName == null) {
             newMatrixName = converterUri.getResourceName() + "_" + matrix.getName();
         }
-        File outMatrixFilePath = wd.createFile(FolderType.MATRIX, true, matrixFilePath.getParentFile().getName(), newMatrixName);
+
+        File outMatrixFilePath = null;
+        outMatrixFilePath = new File(Files.createTempDirectory(UUID.randomUUID().toString()).toFile(), newMatrixName);
 
         settings.setEnvironment(environment);
         settings.setInputFile(matrixFilePath);
@@ -249,6 +229,10 @@ public class TestToolsAPI {
             try (InputStream matrixInputStream = new FileInputStream(newMatrixFile)) {
 				IMatrix aml3matrix = uploadMatrix(matrixInputStream, newName, null, "Converter", SailfishURI.unsafeParse("AML_v3"), null, null);
                 return aml3matrix.getId();
+            } finally {
+                if (!newMatrixFile.delete()) {
+                    logger.error("can't remove matrix converter temp file {}", newMatrixFile);
+                }
             }
         } else {
             throw new IllegalStateException(newMatrixFile + " didn't exists");
@@ -678,6 +662,16 @@ public class TestToolsAPI {
         RegressionRunner runner = this.context.getRegressionRunner();
 
         runner.setSettings(settings);
+
+        saveSettings(settings, false, null);
+    }
+
+    public void setUpdateServiceSettings(UpdateServiceSettings settings) throws Exception {
+        UpdateService updateService = this.context.getUpdateService();
+        updateService.tearDown();
+
+        updateService.setSettings(settings);
+        updateService.init();
 
         saveSettings(settings, false, null);
     }

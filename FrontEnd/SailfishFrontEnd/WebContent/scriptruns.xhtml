@@ -102,7 +102,6 @@
             <p:menuitem id="createButton" icon="eps-custom-icon eps-custom-icon-plus" value="Create" onclick="PF('createDialog').show()"/>
             <p:menuitem id="runButton" icon="eps-custom-icon eps-custom-icon-play" value="Run" rendered="#{not empty testScriptsBean.selectedMatrices}" action="#{testScriptsBean.runSelected}" update=":testScriptForm"/>
             <p:menuitem id="runAllButton" icon="eps-custom-icon eps-custom-icon-play" value="Run all" disabled="#{empty testScriptsBean.matrixAdapterList}" rendered="#{empty testScriptsBean.selectedMatrices}" action="#{testScriptsBean.runAll}" update=":testScriptForm"/>
-            <p:menuitem id="downloadRunsReport" icon="eps-custom-icon eps-custom-icon-arrow-right" value="Aggregate reports" onclick="PF('csvexportDialoggg').show()"/>
         </p:menubar>
 
         <p:menubar id="secondMenuBar" styleClass="eps-scriptruns-sub-toolbar">
@@ -117,8 +116,6 @@
         <p:tooltip value="Download selected matrices" for="downloadButton" />
         <p:tooltip value="Add empty matrix" for="createButton" />
         <p:tooltip value="Run selected matrices" for="runButton" />
-        <p:tooltip value="Add empty matrix" for="createButton" />
-        <p:tooltip value="Download reports for some period" for="downloadRunsReport" />
 
         <div style="clear:both; height: 1px;"/>
 
@@ -552,51 +549,6 @@
         <div style="text-align: center;">
             <p:commandButton id="closeButton" value="Close" onclick="PF('clearTestScriptsErrorDialod').hide()" />
         </div>
-    </p:dialog>
-</h:form>
-
-<h:form enctype="multipart/form-data" id="exportCSVDialodForm" prependId="false" >
-    <p:dialog header="Aggregate options" widgetVar="csvexportDialoggg" modal="true" resizable="false">
-        <h:panelGrid id="cSVExportPanel" columns="2" cellpadding="3" style="text-align:left;">
-
-            <p:outputLabel for="aggregateOptionPeriod" value="Period:" />
-            <p:selectOneMenu id="aggregateOptionPeriod" value="#{testScriptsBean.reportDuration}" style="width:115px; text-align: left;" styleClass="eps-input" >
-                <f:selectItems value="#{testScriptsBean.durations}"/>
-                <p:ajax process="@this" update="cSVExportPanel"/>
-            </p:selectOneMenu>
-
-            <p:outputLabel for="optCustomStart" value="Custom start:" rendered="#{testScriptsBean.reportDuration eq 'Custom'}" />
-            <p:calendar rendered="#{testScriptsBean.reportDuration eq 'Custom'}" id="optCustomStart" styleClass="eps-input"
-                        value="#{testScriptsBean.startReportDate}" pattern="yyyy-MM-dd HH:mm:ss" onfocus="$(this).mask('9999-99-99 99:99:99');"
-                        placeholder=" From "
-                        timeZone="UTC">
-                <p:ajax execute="@this" />
-            </p:calendar>
-
-            <p:outputLabel for="optCustomEnd" value="Custom end:" rendered="#{testScriptsBean.reportDuration eq 'Custom'}" />
-            <p:calendar rendered="#{testScriptsBean.reportDuration eq 'Custom'}" id="optCustomEnd" styleClass="eps-input"
-                        value="#{testScriptsBean.endReportDate}" pattern="yyyy-MM-dd HH:mm:ss" onfocus="$(this).mask('9999-99-99 99:99:99');"
-                        placeholder=" To "
-                        timeZone="UTC">
-                <p:ajax execute="@this" />
-            </p:calendar>
-
-            <p:outputLabel for="aggregateOptionType" value="Report type:" />
-			<p:selectOneMenu value="#{testScriptsBean.reportType}" id="aggregateOptionType" style="width:115px; text-align: left;" styleClass="eps-input">
-                <f:selectItems value="#{testScriptsBean.reportTypes}"/>
-                <p:ajax process="@this"/>
-            </p:selectOneMenu>
-
-            <p:selectBooleanCheckbox id="exportDetailsCheckbox" value="#{testScriptsBean.printReportDetails}" itemLabel=" Include test cases"/>
-
-        </h:panelGrid>
-
-        <div style="text-align: center;">
-            <p:commandButton id="exportAccept" value="Export" icon="ui-icon-circle-arrow-s" ajax="false" onclick="PrimeFaces.monitorDownload(onDownloadStart, onDownloadFinish);">
-                <p:fileDownload id="martixDownload" value="#{testScriptsBean.resultsInCSV}" />
-            </p:commandButton>
-        </div>
-
     </p:dialog>
 </h:form>
 

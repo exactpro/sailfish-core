@@ -16,7 +16,6 @@
 package com.exactpro.sf.storage.impl;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,12 +26,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.zip.ZipFile;
 
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.JDOMException;
-import org.jdom.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +42,6 @@ import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IScriptRunListener;
-import com.exactpro.sf.scriptrunner.PropertiesReport;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.ScriptProgress;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
@@ -56,9 +54,17 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultTestScriptStorage.class);
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static {
+        OBJECT_MAPPER.registerModule(new JavaTimeModule());
+    }
+
     private final IWorkspaceDispatcher workspaceDispatcher;
     private IScriptRunListener scriptRunListener;
 
+    public final static String REPORT_DIR = "reportData";
+    public final static String REPORT_FILE = "report.json";
 
     public DefaultTestScriptStorage(IWorkspaceDispatcher workspaceDispatcher) {
     	this.workspaceDispatcher = workspaceDispatcher;
@@ -90,25 +96,22 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
 		}
 
         List<TestScriptDescription> result  = new ArrayList<>();
-        SAXBuilder builder = new SAXBuilder();
 
         try {
             for(String reportFile : reportFiles) {
                 try {
                     if(isZip(reportFile)) {
-                        loadReportFromZip(reportFile, result, builder);
+                        loadReportFromZip(reportFile, result);
                     } else {
-                        File propertiesFile = workspaceDispatcher.getFile(FolderType.REPORT, reportFile, PropertiesReport.PROPERTIES_FILE_NAME);
-                        logger.info("Property file : " + propertiesFile.getAbsolutePath());
+                        File jsonReport = workspaceDispatcher.getFile(FolderType.REPORT, reportFile, REPORT_DIR,  REPORT_FILE);
+                        logger.info("Property file : " + jsonReport.getAbsolutePath());
 
-                        try (FileInputStream propertiesFileStream = new FileInputStream(propertiesFile)) {
-                            Document document = builder.build(propertiesFileStream);
-                            result.add(convertToTestScriptDescription(reportFile, document.getRootElement()));
-                        }
+                        ReportRoot report = OBJECT_MAPPER.readValue(jsonReport, ReportRoot.class);
+                        result.add(convertToTestScriptDescription(reportFile, report.getReportProperties()));
                     }
                 } catch (FileNotFoundException ex) {
                     if (logger.isDebugEnabled()) {
-                        logger.debug("File {} in directory {} not exist", PropertiesReport.PROPERTIES_FILE_NAME, reportFile);
+                        logger.debug("File {} in directory {} not exist", reportFile, REPORT_FILE);
                     }
                 }
             }
@@ -157,32 +160,30 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
         return errors;
 	}
 
-    protected TestScriptDescription convertToTestScriptDescription(String workFolder, Element propertiesRootElem) throws SailfishURIException {
+    protected TestScriptDescription convertToTestScriptDescription(String workFolder, ReportProperties propertiesRootElem) throws SailfishURIException {
         TestScriptDescription testScriptDescription = new TestScriptDescription(scriptRunListener,
-                new Date(Long.valueOf(propertiesRootElem.getChildText(PropertiesReport.TIMESTAMP_ATTR_NAME))),workFolder,
-                propertiesRootElem.getChildText(PropertiesReport.MATRIX_FILE_NAME_ATTR_NAME),
-                propertiesRootElem.getChildText(PropertiesReport.RANGE),
-                Boolean.valueOf(propertiesRootElem.getChildText(PropertiesReport.AUTOSTART)),
-                propertiesRootElem.getChildText(PropertiesReport.USER));
-
-        testScriptDescription.setLanguageURI(SailfishURI.parse(propertiesRootElem.getChildText(PropertiesReport.LANGUAGE_URI_ATTR_NAME)));
+                new Date(propertiesRootElem.getTimestamp()), workFolder,
+                String.valueOf(propertiesRootElem.getMatrixFile()),
+                propertiesRootElem.getRange(),
+                propertiesRootElem.getAutostart(),
+                propertiesRootElem.getUsername());
+        testScriptDescription.setLanguageURI(SailfishURI.parse(propertiesRootElem.getLanguageURI()));
 
         ScriptProgress scriptProgress = new ScriptProgress(0, new ScriptRunProgressListenerStub());
-        scriptProgress.setFailed(Long.valueOf(propertiesRootElem.getChildText(PropertiesReport.FAILED_ATTR_NAME)));
-        scriptProgress.setLoaded(Integer.valueOf(propertiesRootElem.getChildText(PropertiesReport.TOTAL_ATTR_NAME)));
-        scriptProgress.setConditionallyPassed(Long.valueOf(propertiesRootElem.getChildText(PropertiesReport.CONDITIONALLY_PASSED_ATTR_NAME)));
-        scriptProgress.setPassed(Long.valueOf(propertiesRootElem.getChildText(PropertiesReport.PASSED_ATTR_NAME)));
+        scriptProgress.setFailed(propertiesRootElem.getFailed());
+        scriptProgress.setLoaded((int) propertiesRootElem.getTotal());
+        scriptProgress.setConditionallyPassed(propertiesRootElem.getConditionallyPassed());
+        scriptProgress.setPassed(propertiesRootElem.getPassed());
         ScriptContext scriptContext = new ScriptContext(SFLocalContext.getDefault(), scriptProgress, null, null,
-                propertiesRootElem.getChildText(PropertiesReport.USER), 0, propertiesRootElem.getChildText(PropertiesReport.ENVIRONMENT_NAME_ATTR_NAME));
+                propertiesRootElem.getUsername(), 0, propertiesRootElem.getEnvironmentNameAttr());
+        scriptContext.getServiceList().addAll(propertiesRootElem.getServices());
 
         testScriptDescription.setContext(scriptContext);
-        testScriptDescription.setState(
-                TestScriptDescription.ScriptState.valueOf(propertiesRootElem.getChildText(PropertiesReport.STATE_ATTR_NAME)));
-        testScriptDescription.setStatus(
-                TestScriptDescription.ScriptStatus.valueOf(propertiesRootElem.getChildText(PropertiesReport.STATUS_ATTR_NAME)));
-        testScriptDescription.setStartedTime(Long.parseLong(propertiesRootElem.getChildText(PropertiesReport.START_TIME)));
-        testScriptDescription.setFinishedTime(Long.parseLong(propertiesRootElem.getChildText(PropertiesReport.FINISH_TIME)));
-        testScriptDescription.setCause(SerializeUtil.deserializeBase64Obj(propertiesRootElem.getChildText(PropertiesReport.CAUSE), Throwable.class));
+        testScriptDescription.setState(propertiesRootElem.getState());
+        testScriptDescription.setStatus(propertiesRootElem.getStatus());
+        testScriptDescription.setStartedTime(propertiesRootElem.getStartTime());
+        testScriptDescription.setFinishedTime(propertiesRootElem.getFinishTime());
+        testScriptDescription.setCause(SerializeUtil.deserializeBase64Obj(propertiesRootElem.getCause(), Throwable.class));
 
         return testScriptDescription;
     }
@@ -195,16 +196,16 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
         return FilenameUtils.isExtension(fileName, ZipReport.ZIP_EXTENSION);
     }
 
-    protected void loadReportFromZip(String fileName, List<TestScriptDescription> result, SAXBuilder builder)
-            throws IOException, SailfishURIException, JDOMException {
+    protected void loadReportFromZip(String fileName, List<TestScriptDescription> result)
+            throws IOException, SailfishURIException {
         File zip = workspaceDispatcher.getFile(FolderType.REPORT, fileName);
         String reportDir = FilenameUtils.getBaseName(zip.getName());
-        String propertiesFile = reportDir + "/" + PropertiesReport.PROPERTIES_FILE_NAME;
+        String propertiesFile = reportDir + '/' + REPORT_DIR + '/' + REPORT_FILE;
 
         try (ZipFile zipFile = new ZipFile(zip)) {
             try(InputStream inputStream = zipFile.getInputStream(zipFile.getEntry(propertiesFile))) {
-                Document document = builder.build(inputStream);
-                result.add(convertToTestScriptDescription(fileName, document.getRootElement()));
+                ReportRoot report = OBJECT_MAPPER.readValue(inputStream, ReportRoot.class);
+                result.add(convertToTestScriptDescription(fileName, report.getReportProperties()));
             }
         }
     }

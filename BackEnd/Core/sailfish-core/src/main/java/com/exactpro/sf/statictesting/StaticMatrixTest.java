@@ -115,7 +115,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                     .collect(Collectors.joining(System.lineSeparator()));
 
             throw new AssertionError("Failed to compile matrix. Errors: " + System.lineSeparator() + errors, e);
-        } catch (Exception e) {
+        } catch(Throwable e) {
             attachFiles();
             throw e;
         }

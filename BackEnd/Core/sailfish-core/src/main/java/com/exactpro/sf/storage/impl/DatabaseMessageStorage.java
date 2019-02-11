@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import com.exactpro.sf.storage.DBStorageSettings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.Criteria;
@@ -63,11 +64,11 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 	private final Interner<String> interner;
     private final IObjectFlusher<StoredMessage> flusher;
 
-	public DatabaseMessageStorage(IWorkspaceDispatcher workspaceDispatcher, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
-	    super(dictionaryManager);
+	public DatabaseMessageStorage(DBStorageSettings dbStorageSettings) throws WorkspaceStructureException, FileNotFoundException {
+	    super(dbStorageSettings.getDictionaryManager());
 	    
 
-		this.sessionFactory = sessionFactory;
+		this.sessionFactory = dbStorageSettings.getSessionFactory();
         this.interner = new CHMInterner<>();
 
 		/*
@@ -76,7 +77,7 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 		 */
 		this.openScriptRun("Initialisation", "Initialisation of services");
 
-        this.flusher = new ObjectFlusher<>(new HibernateFlushProvider<StoredMessage>(this.sessionFactory), BUFFER_SIZE);
+        this.flusher = new ObjectFlusher<StoredMessage>(new HibernateFlushProvider<StoredMessage>(this.sessionFactory), BUFFER_SIZE, dbStorageSettings.getEnvironmentSettings().getMaxStorageQueueSize());
         this.flusher.start();
 	}
 

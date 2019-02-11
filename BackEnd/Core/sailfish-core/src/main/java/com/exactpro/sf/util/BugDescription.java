@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -29,9 +31,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
 public class BugDescription implements Comparable<BugDescription> {
-    
+
+    @JsonProperty("category")
     private final Category category;
     private final String subject;
+
+    @JsonCreator
+    public BugDescription(@JsonProperty("description") String subject, @JsonProperty("category")Category categories) {
+
+        this.subject = subject;
+        this.category = categories;
+    }
 
     public BugDescription(String subject, String... categories) {
         if (StringUtils.isBlank(subject)) {
@@ -106,9 +116,12 @@ public class BugDescription implements Comparable<BugDescription> {
     }
     
     public static class Category implements Comparable<Category> {
+
+        @JsonProperty("categories")
         private final List<String> categories;
 
-        public Category(String... categories) {
+        @JsonCreator
+        public Category(@JsonProperty("categories") String... categories) {
             if (categories.length > 0 && StringUtils.isAnyBlank(categories)) {
                 throw new EPSCommonException("Categories should't be blank " + Arrays.toString(categories));
             }

@@ -165,8 +165,6 @@ task createDir {
 
 task generateJavaFromXsd (dependsOn: 'createDir') {
 
-	inputs.file file("${etcDir}/functional_report.xjb")
-	inputs.file file("${etcDir}/functional_report.xsd")
 	inputs.file file("${dataMessageDir}/datamessage.xsd")
 	inputs.file file("${xsdDir}/rules.xsd")
 	inputs.file file("${xsdDir}/actions.xsd")
@@ -185,13 +183,6 @@ task generateJavaFromXsd (dependsOn: 'createDir') {
 
 	doLast {
 	    ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
-
-	    ant.xjc(schema: "${etcDir}/functional_report.xsd", binding: "${etcDir}/functional_report.xjb",
-                destdir: "${genJavaDir}", package: 'com.exactpro.sf.scriptrunner.reporting.xml',
-	        removeOldOutput: 'yes')
-	    {
-            produces(dir: "${genJavaDir}/com/exactpro/sf/scriptrunner/reporting/xml", includes: '*')
-	    }
 
 	    ant.xjc(schema: "${dataMessageDir}/datamessage.xsd", destdir: "${genJavaDir}",
                 package: 'com.exactpro.sf.storage.xml', removeOldOutput: 'yes')
@@ -344,6 +335,7 @@ clean {
 
 generateVersionClass {
 	alias 		= 'core'
+	artifactName = 'core'
 }
 
 checkCompatibility {

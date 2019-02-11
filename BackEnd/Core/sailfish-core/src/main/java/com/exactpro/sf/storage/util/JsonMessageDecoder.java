@@ -15,16 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.util;
 
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_DICTIONARY_URI;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_DIRTY;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_ID;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_NAME;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_NAMESPACE;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_PROTOCOL;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_RR;
-import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_TIMESTAMP;
-
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -55,6 +45,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+
+import static com.exactpro.sf.storage.util.JsonMessageConverter.*;
 
 public abstract class JsonMessageDecoder <T> {
 
@@ -104,10 +96,12 @@ public abstract class JsonMessageDecoder <T> {
             checkFieldName(parser, parser.getCurrentToken(), JSON_MESSAGE);
             parser.nextToken();
             boolean dirty = BooleanUtils.toBoolean(optionalTokens.get(JSON_MESSAGE_DIRTY));
+            boolean admin = BooleanUtils.toBoolean(optionalTokens.get(JSON_MESSAGE_ADMIN));
             T message = parse(parser, protocol, dictionaryURI, namespace, name, compact, dirty);
             if (message instanceof IMessage) {
                 ((IMessage)message).getMetaData().setRejectReason(optionalTokens.get(JSON_MESSAGE_RR));
                 ((IMessage)message).getMetaData().setDirty(dirty);
+                ((IMessage)message).getMetaData().setAdmin(admin);
             }
 
     //        IMessage message = messageFactory.createMessage(name, namespace);

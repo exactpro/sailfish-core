@@ -18,11 +18,14 @@ package com.exactpro.sf.storage.entities;
 import java.sql.Timestamp;
 import java.util.Set;
 
+import com.exactpro.sf.storage.IMeasurable;
+import com.exactpro.sf.storage.util.StorageMeasureUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class StoredMessage {
-	
-	private String from;
+public class StoredMessage implements IMeasurable {
+
+    private String from;
 	private String to;
 	private Timestamp arrived;
 	private boolean admin;
@@ -177,5 +180,15 @@ public class StoredMessage {
 
     public void setRejectReason(String rejectReason) {
         this.rejectReason = rejectReason;
+    }
+
+    @Override
+    @JsonIgnore
+    public long getSize() {
+        return StorageMeasureUtils.getSize(from) + StorageMeasureUtils.getSize(to) + StorageMeasureUtils.getSize(namespace) + StorageMeasureUtils
+                .getSize(name) + StorageMeasureUtils.getSize(humanMessage)
+                + StorageMeasureUtils.getSize(jsonMessage) + StorageMeasureUtils.getSize(rejectReason) + StorageMeasureUtils.getSize(serviceId) + StorageMeasureUtils
+                .getSize(rawMessage) + (5
+                << 4); //5*16 - 5 field with types other than string and byte array
     }
 }

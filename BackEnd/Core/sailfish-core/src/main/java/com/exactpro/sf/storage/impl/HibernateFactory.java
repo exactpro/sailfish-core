@@ -21,7 +21,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.FolderType;
@@ -29,6 +32,7 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 
 public class HibernateFactory {
+    private static final Logger logger = LoggerFactory.getLogger(HibernateFactory.class);
 
     private static final String HIBERNATE_CFG = "hibernate.cfg.xml";
 
@@ -66,8 +70,11 @@ public class HibernateFactory {
 
 			if (sessionFactory == null) {
 				try {
-					Configuration config = new Configuration();
-                    sessionFactory = config.configure(fDescr).buildSessionFactory();
+					Configuration config = new Configuration()
+                            .configure(fDescr);
+                    logger.info("Initializing new session factory for user [{}]; URL: {}",
+                            config.getProperty(AvailableSettings.USER), config.getProperty(AvailableSettings.URL));
+                    sessionFactory = config.buildSessionFactory();
 					sessionFactories.put(cfgFolder, sessionFactory);
 				} catch ( Throwable e ) {
 					throw new EPSCommonException("Could not initialize DB Storage", e);

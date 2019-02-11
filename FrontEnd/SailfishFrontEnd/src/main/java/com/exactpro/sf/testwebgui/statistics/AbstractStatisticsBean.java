@@ -146,13 +146,13 @@ public abstract class AbstractStatisticsBean {
 
     }
 
-    public List<Tag> completeTag(String query) {
+    protected List<Tag> completeTag(String query, List<Tag> allTags) {
 
         List<Tag> result = new ArrayList<>();
 
         String loweredQuery = query.toLowerCase();
 
-        for (Tag tag : this.allTags) {
+        for (Tag tag : allTags) {
 
             if (tag.getName().toLowerCase().contains(loweredQuery)) {
 
@@ -164,6 +164,10 @@ public abstract class AbstractStatisticsBean {
 
         return result;
 
+    }
+
+    public List<Tag> completeTag(String query) {
+        return completeTag(query, this.allTags);
     }
 
     public Tag getTagToAdd() {

@@ -166,7 +166,7 @@ public class ConverterBean implements Serializable {
 
             Future<Boolean> converterTask = BeanUtil.getSfContext().getTaskExecutor().addTask(new ConversionTask(converter, settings, monitor));
             task = new MatrixConverterFeature(monitor, converterTask, settings.getOutputFile());
-        } catch(RuntimeException | FileNotFoundException | WorkspaceStructureException | IllegalAccessException | InvocationTargetException e) {
+        } catch(RuntimeException |  IOException | IllegalAccessException | InvocationTargetException e) {
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), "");
             logger.error(e.getMessage(), e);
         }

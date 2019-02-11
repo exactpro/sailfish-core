@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class StatisticsFlywayWrapper {
     private final static String PSQL_SCRIPT_LOCATION = "com/exactpro/sf/statistics/storage/pg/migration";
     private final static String MYSQL_SCRIPT_LOCATION = "com/exactpro/sf/statistics/storage/mysql/migration";
+    private final static String[] MYSQL_INIT_SQL = new String[] { "SET default_storage_engine=InnoDB;" };
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -55,7 +56,7 @@ public class StatisticsFlywayWrapper {
 
             flyway.getPlaceholders().put("db_name", settings.getDbName());
 
-            flyway.setDataSource(settings.buildConnectionUrl(), settings.getUsername(), settings.getPassword());
+            String[] initSqls = new String[0];
 
             if (settings.getDbms().equals(DbmsType.PostgreSQL.getValue())) {
                 flyway.setLocations(PSQL_SCRIPT_LOCATION);
@@ -63,7 +64,10 @@ public class StatisticsFlywayWrapper {
 
             if (settings.getDbms().equals(DbmsType.MySql.getValue())) {
                 flyway.setLocations(MYSQL_SCRIPT_LOCATION);
+                initSqls = MYSQL_INIT_SQL;
             }
+
+            flyway.setDataSource(settings.buildConnectionUrl(), settings.getUsername(), settings.getPassword(), initSqls);
 
             flyway.setBaselineOnMigrate(false);
 

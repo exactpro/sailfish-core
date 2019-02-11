@@ -17,7 +17,6 @@ package com.exactpro.sf.services.fix;
 
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,6 +35,7 @@ import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +96,8 @@ public class FIXCodec extends AbstractCodec {
 
 		this.settings = (TCPIPSettings)settings;
 
+		FixPropertiesReader.loadAndSetCharset(serviceContext);
+
         this.msgFactory = msgFactory;
 		this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
 		this.fieldConverter = new FixFieldConverter();
@@ -130,7 +132,7 @@ public class FIXCodec extends AbstractCodec {
 
         in.get(buffer);
 
-        String out = new String(buffer, 0, buffer.length, Charset.forName("ISO-8859-1"));
+        String out = new String(buffer, 0, buffer.length, Charset.forName(CharsetSupport.getCharset()));
 
         int beginStringIdx = out.indexOf("8=FIX");
 
@@ -246,7 +248,7 @@ public class FIXCodec extends AbstractCodec {
                 errorMessage.setCause(exMessage.replace('\001', '|'));
 
                 message = errorMessage.getMessage();
-                message.getMetaData().setRawMessage(fixString.getBytes(StandardCharsets.ISO_8859_1));
+                message.getMetaData().setRawMessage(fixString.getBytes(CharsetSupport.getCharset()));
             }
 
             logger.debug("doDecode: IMessage = {}", message);
@@ -424,7 +426,7 @@ public class FIXCodec extends AbstractCodec {
         copyFields(message.getTrailer(), trailer, trailerStructure);
 
         iMessage.getMetaData().setAdmin(message.isAdmin());
-        iMessage.getMetaData().setRawMessage(message.toString().getBytes());
+        iMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
 
         return iMessage;
     }
