@@ -470,7 +470,7 @@ public class ExecutorClient {
 			try {
                 uploadScriptListServices();
 
-                if(prepareScriptListServices().stream().allMatch(service -> service.getStartMode() == StartMode.LIST) &&
+                if(!prepareScriptListServices().isEmpty() &&
                         prepareExecutorServices().stream().noneMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
                     setVariableSet(currentList.getVariableSet());
                 }
