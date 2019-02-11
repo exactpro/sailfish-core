@@ -262,5 +262,9 @@ export const MessagesCardList = connect(
     }),
     dispatch => ({
         selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId))
-    })
-)(MessagesCardListBase as any);
+    }),
+    null,
+    {
+        withRef: true
+    }
+)(MessagesCardListBase);

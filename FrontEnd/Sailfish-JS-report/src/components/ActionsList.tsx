@@ -157,5 +157,9 @@ export const ActionsList = connect((state: AppState) => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),
         onMessageSelect: (id: number, status: StatusType) => dispatch(selectMessages([id], status)),
         setCheckpointId: (id: number) => dispatch(selectCheckpoint(id))
-    })
+    }),
+    null,
+    {
+        withRef: true
+    }
 )(ActionsListBase);

@@ -64,12 +64,12 @@ $splitterColor: #C4C4C4;
 
 @mixin scrollbar {
     &::-webkit-scrollbar {
-        background-color:#fff;
+        background-color:rgba(0, 0, 0, 0.0);
         width:16px
     }
     
     &::-webkit-scrollbar-track {
-        background-color:#fff
+        background-color:rgba(0, 0, 0, 0.0);
     }
     
     &::-webkit-scrollbar-thumb {
@@ -79,6 +79,26 @@ $splitterColor: #C4C4C4;
     }
     
     &::-webkit-scrollbar-button {display:none}
+}
+
+@mixin status-text {
+    &.passed {
+        h3 {
+            color: $passedTextColor;
+        }
+    }
+
+    &.failed {
+        h3 {
+            color: $failedTextColor;
+        }
+    }
+
+    &.conditionally_passed {
+        h3 {
+            color: $conditionallyTextColor;
+        }
+    }
 }
 
 @mixin unselectable {

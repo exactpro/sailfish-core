@@ -61,7 +61,6 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
 
     render({ testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler }: LayoutProps) {
 
-
         const leftButtons = (
             <div class="layout-buttons">
                 <ToggleButton
@@ -103,69 +102,57 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                     text="Logs" /> */}
             </div>
         )
+        
+        const actionsPanelClass = ["layout-content-pane", (leftPane == Pane.Actions ? "" : "disabled")].join(' '),
+            actionsPanel = (
+                <div class={actionsPanelClass}>
+                    {leftButtons}
+                    <ActionsList 
+                        ref={ref => this.actionsListRef = ref ? ref.getWrappedInstance() : null} />
+                </div>
+            );
 
-        // to get real component, not a redux wrapper function, we need to get it through the "_component" property
-        const actionsPane = (
-            <div class="layout-content-pane">
-                {leftButtons}
-                <ActionsList ref={ref => this.actionsListRef = ref ? ref._component : null} />
+        const messagesPanelClass = ["layout-content-pane", (rightPane == Pane.Messages ? "" : "disabled")].join(' '),
+            messagesPane = (
+                <div class={messagesPanelClass}>
+                    {rightButtons}
+                    <MessagesCardList ref={ref => this.messagesListRef = ref ? ref.getWrappedInstance() : null} />
+                </div>
+            );
+
+        const statusPanelClass = ["layout-content-pane", (leftPane == Pane.Status ? "" : "disabled")].join(' '),
+            statusPane = (
+                <div class={statusPanelClass}>
+                    {leftButtons}
+                    <StatusPane status={testCase.status} />
+                </div>
+            );
+
+        const logsPanelClass = ["layout-content-pane", (rightPane == Pane.Logs ? "" : "disabled")].join(' '),
+            logsPane = (
+                <div class={logsPanelClass}>
+                    {rightButtons}
+                    <LogsPane logs={testCase.logs} />
+                </div>
+            );
+
+        const primaryPaneElement = (
+            <div class="layout-content-wrapper">
+                {[
+                    actionsPanel,
+                    statusPane
+                ]}
             </div>
         );
 
-        // to get real component, not a redux wrapper function, we need to get it through the "_component" property
-        const messagesPane = (
-            <div class="layout-content-pane">
-                {rightButtons}
-                <MessagesCardList ref={ref => this.messagesListRef = ref ? ref._component : null} />
+        const secondaryPaneElement = (
+            <div class="layout-content-wrapper">
+                {[
+                    messagesPane,
+                    logsPane
+                ]}
             </div>
         );
-
-        const statusPane = (
-            <div class="layout-content-pane">
-                {leftButtons}
-                <StatusPane status={testCase.status} />
-            </div>
-        );
-
-        const logsPane = (
-            <div class="layout-content-pane">
-                {rightButtons}
-                <LogsPane logs={testCase.logs} />
-            </div>
-        );
-
-        let primaryPaneElement;
-        let secondaryPaneElement;
-
-        switch (leftPane) {
-            case Pane.Actions:
-                primaryPaneElement = actionsPane;
-                break;
-            case Pane.Messages:
-                primaryPaneElement = messagesPane;
-                break;
-            case Pane.Status:
-                primaryPaneElement = statusPane;
-                break;
-            case Pane.Logs:
-                primaryPaneElement = logsPane;
-                break;
-            default:
-                primaryPaneElement = null;
-                break;
-        }
-
-        switch (rightPane) {
-            case Pane.Messages:
-                secondaryPaneElement = messagesPane;
-                break;
-            case Pane.Logs:
-                secondaryPaneElement = logsPane;
-                break;
-            default:
-                primaryPaneElement = null;
-                break;
-        }
 
         const rootClassName = ["layout", (showFilter ? "filter" : "")].join(' ');
 

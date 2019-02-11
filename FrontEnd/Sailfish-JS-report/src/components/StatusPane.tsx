@@ -16,13 +16,45 @@
 
 import {h} from 'preact';
 import Status from '../models/Status';
+import ExpandablePanel from './ExpandablePanel';
+import Exception from '../models/Exception';
+import '../styles/statusPanel.scss';
 
 interface StatusPaneProps {
     status: Status;
 }
 
 export const StatusPane = ({status}: StatusPaneProps) => {
+
+    const rootClass = ["status-panel", status.status.toLowerCase()].join(' '),
+        headerClass = ["status-panel-header", status.status.toLowerCase()].join(' ');
+
     return (
-        <div style={{paddingTop: 60}}>STATUS - SOON...</div>
+        <div class="status">
+            <div class="status-controls"/>
+            <div class={rootClass}>
+                <ExpandablePanel>
+                    <div class={headerClass}>   
+                        <h3>{status.status.toUpperCase()}</h3>
+                        <p>{status.description}</p>
+                    </div>
+                    {status.cause ? renderCause(status.cause) : null}
+                </ExpandablePanel>
+            </div>
+        </div>
     );
 }
+
+const renderCause = (exception: Exception) => (
+    <div class="status-panel-cause">
+        <ExpandablePanel>
+            <div class="status-panel-cause-header">
+                <h3>{exception.message}</h3>
+            </div>
+            {exception.cause ? renderCause(exception.cause) : null}
+            <div class="status-panel-cause-stacktrace">
+                <pre>{exception.stacktrace}</pre>
+            </div>
+        </ExpandablePanel>
+    </div>
+)

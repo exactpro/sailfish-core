@@ -50,9 +50,17 @@
     &-content {
         grid-area: main-content;
 
+        &-wrapper {
+            height: 100%;
+        }
+
         &-pane {
             height: 100%;
             position: relative;
+
+            &.disabled {
+                display: none;
+            }
         }        
     }
 }   

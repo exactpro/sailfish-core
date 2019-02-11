@@ -58,26 +58,6 @@
     }
 }
 
-@mixin status-text {
-    &.passed {
-        h3 {
-            color: $passedTextColor;
-        }
-    }
-
-    &.failed {
-        h3 {
-            color: $failedTextColor;
-        }
-    }
-
-    &.conditionally_passed {
-        h3 {
-            color: $conditionallyTextColor;
-        }
-    }
-}
-
 .action-card {
     @include selectable;
     display: block;
