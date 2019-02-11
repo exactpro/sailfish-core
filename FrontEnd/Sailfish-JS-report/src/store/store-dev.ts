@@ -15,10 +15,11 @@
  ******************************************************************************/
 
 import { appReducer } from '../reducers/reducers';
-import { createStore } from 'redux';
-import { devToolsEnhancer } from 'redux-devtools-extension';
+import { createStore, applyMiddleware } from 'redux';
+import { devToolsEnhancer, composeWithDevTools } from 'redux-devtools-extension';
 import { initialAppState } from '../state/initialStates';
 import Report from '../models/Report';
+import { urlHandler } from '../middleware/urlHandler';
 
 export const createAppStore = (report: Report) => createStore(
     appReducer,
@@ -26,5 +27,5 @@ export const createAppStore = (report: Report) => createStore(
         ...initialAppState,
         report: report
     },
-    devToolsEnhancer({name: 'redux'})
+    composeWithDevTools(applyMiddleware(urlHandler))
 )

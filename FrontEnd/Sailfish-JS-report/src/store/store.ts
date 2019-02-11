@@ -15,14 +15,16 @@
  ******************************************************************************/
 
 import { appReducer } from '../reducers/reducers';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import { initialAppState } from '../state/initialStates';
 import Report from '../models/Report';
+import { urlHandler } from '../middleware/urlHandler';
 
 export const createAppStore = (report: Report) => createStore(
     appReducer,
     {
         ...initialAppState,
         report: report
-    }
+    },
+    applyMiddleware(urlHandler)
 )

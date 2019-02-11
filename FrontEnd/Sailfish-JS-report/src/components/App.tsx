@@ -24,10 +24,12 @@ import { connect } from 'preact-redux';
 import AppState from "../state/AppState";
 import { setTestCase, setReport, setTestCasePath, selectActionById } from "../actions/actionCreators";
 import { selectMessages } from '../actions/actionCreators';
-
-const TEST_CASE_PARAM_KEY = 'tc',
-      ACTION_PARAM_KEY = 'action',
-      MESSAGE_PARAM_KEY = 'message';
+import { 
+    getUrlSearchString,
+    ACTION_PARAM_KEY,
+    MESSAGE_PARAM_KEY,
+    TEST_CASE_PARAM_KEY
+} from "../middleware/urlHandler";
 
 const REPORT_FILE_PATH = 'index.html';
 
@@ -35,8 +37,6 @@ interface AppProps {
     report: Report;
     testCase: TestCase;
     testCaseFilePath: string;
-    selectedActionId: number;
-    selectedMessages: number[];
     updateTestCase: (testCase: TestCase) => any;
     updateTestCasePath: (testCasePath: string) => any;
     selectAction: (actionId: number) => any;
@@ -72,58 +72,10 @@ class AppBase extends Component<AppProps, {}> {
         // We can't use componentDidMount for this, because report file not yet loaded.
         // Only first funciton call will use it.
         if (!this.searchParams) {
-            this.searchParams = new URLSearchParams(this.getUrlSearchString(top.window.location.href));
+            this.searchParams = new URLSearchParams(getUrlSearchString(top.window.location.href));
             this.handleSharedUrl();
             return;
         }
-
-        if (prevProps.testCase == this.props.testCase && prevProps.selectedActionId == this.props.selectedActionId) {
-            return;
-        }
-
-        if (prevProps.testCase != this.props.testCase) {
-            if (this.props.testCase) {
-                this.searchParams.set(TEST_CASE_PARAM_KEY, this.props.testCase.id);
-            } else {
-                this.searchParams.delete(TEST_CASE_PARAM_KEY);
-            }
-        }
-
-        if (prevProps.selectedActionId != this.props.selectedActionId) {
-            if (this.props.selectedActionId != null) {
-                this.searchParams.set(ACTION_PARAM_KEY, this.props.selectedActionId.toString());
-            } else {
-                this.searchParams.delete(ACTION_PARAM_KEY);
-            }
-        }
-
-        // verification message selection handling
-        if (this.props.selectedActionId == null && prevProps.selectedMessages != this.props.selectedMessages) {
-            if (this.props.selectedMessages && this.props.selectedMessages.length != 0) {
-                this.searchParams.set(MESSAGE_PARAM_KEY, this.props.selectedMessages[0].toString());
-            } else {
-                this.searchParams.delete(MESSAGE_PARAM_KEY);
-            }
-        }
-
-        let newUrl = "",
-            searchString = this.getUrlSearchString(top.window.location.href);
-
-        if (searchString != '?' && searchString) {
-            // replacing old search params with the new search params
-            const oldParams = new URLSearchParams(searchString);
-
-            newUrl = top.window.location.href.replace(oldParams.toString(), this.searchParams.toString());
-        } else {
-            // creating new search params and appending it to the current url 
-            const href = top.window.location.href;
-            newUrl = [href, 
-                href[href.length - 1] != '?' ? '?' : null,
-                this.searchParams.toString()
-            ].join('');
-        }
-
-        top.window.history.pushState({}, "", newUrl);
     }
 
     handleSharedUrl() {
@@ -142,18 +94,6 @@ class AppBase extends Component<AppProps, {}> {
         if (Number(actionId)) {
             this.props.selectAction(Number(actionId));
         }
-    }
-
-    // we can't use window.location.search because it can be another serach params in url
-    getUrlSearchString(url: string) {
-        // removing previous search params
-        const urlEnd = url.slice(url.lastIndexOf('/'));
-        
-        if (urlEnd.indexOf('?') == -1) {
-            return "";
-        }
-
-        return urlEnd.slice(urlEnd.lastIndexOf('?'));
     }
 
     /**
@@ -213,9 +153,7 @@ export const App = connect(
     (state: AppState) => ({
         report: state.report,
         testCase: state.testCase,
-        testCaseFilePath: state.currentTestCasePath,
-        selectedActionId: state.selected.actionId,
-        selectedMessages: state.selected.messagesId
+        testCaseFilePath: state.currentTestCasePath
     }),
     dispatch => ({
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
