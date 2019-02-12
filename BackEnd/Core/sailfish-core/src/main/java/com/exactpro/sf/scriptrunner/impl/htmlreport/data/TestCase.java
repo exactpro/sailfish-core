@@ -15,12 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
-import java.util.Date;
-
+import com.exactpro.sf.common.util.Utils;
+import com.exactpro.sf.scriptrunner.StatusDescription;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.exactpro.sf.scriptrunner.StatusDescription;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class TestCase extends BaseEntity {
     private String id;
@@ -28,8 +33,8 @@ public class TestCase extends BaseEntity {
     private Date startTime;
     private Date finishTime;
     private int hash;
-    private boolean optional;
     private StatusDescription status;
+    private Map<String, String> tags = Collections.emptyMap(); //maps tag name to css class
 
     public TestCase() {
         super();
@@ -83,12 +88,12 @@ public class TestCase extends BaseEntity {
     	return status;
     }
 
-    public boolean isOptional() {
-        return optional;
+    public Map<String, String> getTags() {
+        return tags;
     }
 
-    public void setOptional(boolean optional) {
-        this.optional = optional;
+    public void setTags(Set<String> tags) {
+        this.tags = tags.stream().collect(Collectors.toMap(Function.identity(), tagName -> Utils.getTagColorClass(tagName)));
     }
 
     @Override
@@ -100,7 +105,7 @@ public class TestCase extends BaseEntity {
         builder.append("startTime", startTime);
         builder.append("finishTime", finishTime);
         builder.append("hash", hash);
-        builder.append("optional", optional);
+        builder.append("tags", tags);
         builder.append(super.toString());
 
         return builder.toString();

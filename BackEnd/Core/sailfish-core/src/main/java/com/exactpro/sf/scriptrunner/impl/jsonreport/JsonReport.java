@@ -228,6 +228,7 @@ public class JsonReport implements IScriptReport {
         testcase.setId(tcId);
         testcase.setHash(tcHash);
         testcase.setDescription(description);
+        testcase.setTags(tags);
 
         setContext(ContextType.TESTCASE, testcase);
     }
