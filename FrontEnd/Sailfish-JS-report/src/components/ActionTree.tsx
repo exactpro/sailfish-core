@@ -40,11 +40,30 @@ export interface ActionTreeProps {
 export class ActionTree extends Component<ActionTreeProps> {
 
     private expandedTreePath = null;
+    private treeElements: Component[] = []; 
 
     componentWillMount() {
         if (this.props.action.actionNodeType == "action") {
             this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
         }
+    }
+
+    // scrolling to action, selected by url sharing
+    componentDidMount() {
+        if (!this.treeElements[this.props.selectedActionId]) {
+            return;
+        }
+
+        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
+        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
+        // At this point React passed components tree to DOM, however it still could be not redered.
+        // First callback will be called before actual render
+        // Second callback will be called when DOM is fully rendered.
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                this.scrollToAction(this.props.selectedActionId);
+            });
+        });
     }
 
     componentWillReceiveProps(nextProps: ActionTreeProps) {
@@ -139,6 +158,12 @@ export class ActionTree extends Component<ActionTreeProps> {
         return treePath;
     }
 
+    scrollToAction(actionId: number) {
+        if (this.treeElements[actionId]) {
+            this.treeElements[actionId].base.scrollIntoView({block: 'center'});
+        }
+    }
+
     render(props: ActionTreeProps): JSX.Element {
         return this.renderNode(props, true, this.expandedTreePath);
     }
@@ -158,7 +183,8 @@ export class ActionTree extends Component<ActionTreeProps> {
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={actionSelectHandler}
                         isRoot={isRoot}
-                        isExpanded={isExpanded}>
+                        isExpanded={isExpanded}
+                        ref={ref => this.treeElements[action.id] = ref }>
                         {
                             action.subNodes ? action.subNodes.map(
                                 action => this.renderNode({...props, action: action}, false, newTreePath)) : null

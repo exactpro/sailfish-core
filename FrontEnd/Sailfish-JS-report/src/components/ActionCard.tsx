@@ -29,6 +29,7 @@ interface CardProps {
     isRoot?: boolean;
     isTransaparent?: boolean;
     isExpanded?: boolean;
+    ref?: Function;
 }
 
 export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded }: CardProps) => {
@@ -59,14 +60,16 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
 
     const time = getSecondsPeriod(startTime, finishTime);
 
+    const clickHandler = e => {
+        if (!onSelect) return;
+        onSelect(action);
+        // here we cancel handling by parent divs
+        e.cancelBubble = true;
+    };
+
     return (
         <div class={rootClassName}
-            onClick={e => {
-                if (!onSelect) return;
-                onSelect(action);
-                // here we cancel handling by parent divs
-                e.cancelBubble = true;
-            }}
+            onClick={clickHandler}
             key={action.id}>
             <ExpandablePanel
                 isExpanded={isExpanded}>
