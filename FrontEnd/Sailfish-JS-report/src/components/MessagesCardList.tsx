@@ -102,53 +102,51 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
 
     render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage }: MessagesListProps, { adminFilter }: MessagesListState) {
 
-        const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId);
+        const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
+            rejectedEnabled = rejectedMessages.length != 0,
+            adminEnabled = adminMessages.length != 0;
 
-        const adminIconClass = [
+        const adminRootClass = [
+                "messages-controls-admin",
+                adminEnabled ? "" : "disabled"
+            ].join(' '), 
+            adminIconClass = [
                 "messages-controls-admin-icon",
                 adminFilter ? "active" : ""
             ].join(' '),
             adminTitleClass = [
                 "messages-controls-admin-title",
                 adminFilter ? "active" : ""
+            ].join(' '),
+            rejectedRootClass = [
+                "messages-controls-rejected",
+                rejectedEnabled ? "" : "disabled"
             ].join(' ');
 
         return (
             <div class="messages">
                 <div class="messages-controls">
-                    {
-                        rejectedMessages && rejectedMessages.length ?
-                        (
-                            <div class="messages-controls-rejected">
-                                <div class="messages-controls-rejected-icon"
-                                    onClick={() => this.scrollToMessage(selectedRejectedMessageId)}/>
-                                <div class="messages-controls-rejected-title">
-                                    <p>Rejected</p>
-                                </div>
-                                <div class="messages-controls-rejected-btn prev"
-                                    onClick={this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
-                                <div class="messages-controls-rejected-count">
-                                    <p>{currentRejectedIndex === -1 ? 0 : currentRejectedIndex + 1} of {rejectedMessages.length}</p>
-                                </div>
-                                <div class="messages-controls-rejected-btn next"
-                                    onClick={this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                    <div class={rejectedRootClass}>
+                        <div class="messages-controls-rejected-icon"
+                            onClick={() => this.scrollToMessage(selectedRejectedMessageId)}/>
+                        <div class="messages-controls-rejected-title">
+                            <p>{rejectedEnabled ? "" : "No "}Rejected</p>
+                        </div>
+                        <div class="messages-controls-rejected-btn prev"
+                            onClick={rejectedEnabled && this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                        <div class="messages-controls-rejected-count">
+                            <p>{currentRejectedIndex === -1 ? 0 : currentRejectedIndex + 1} of {rejectedMessages.length}</p>
+                        </div>
+                        <div class="messages-controls-rejected-btn next"
+                            onClick={rejectedEnabled && this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                    </div>
+                        <div class={adminRootClass}
+                            onClick={adminEnabled && this.adminFilterHandler}>
+                            <div class={adminIconClass}/>
+                            <div class={adminTitleClass}>
+                                <p>{adminEnabled ? "" : "No"} Admin Messages</p>
                             </div>
-                        )
-                        : null
-                    }
-                    {
-                        adminMessages && adminMessages.length ? 
-                        (
-                            <div class="messages-controls-admin"
-                                onClick={this.adminFilterHandler}>
-                                <div class={adminIconClass}/>
-                                <div class={adminTitleClass}>
-                                    <p>Admin Messages</p>
-                                </div>
-                            </div>
-                        )
-                        : null
-                    }
+                        </div>
                 </div>
                 <div class="messages-list">
                     {messages.map(message => this.renderMessage(message))}

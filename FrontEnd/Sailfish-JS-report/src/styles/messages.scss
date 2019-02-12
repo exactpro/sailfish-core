@@ -496,6 +496,11 @@
                     background-image: url(../../resources/icons/arr1-right.svg)
                 }
             }
+
+            &.disabled {
+                filter: opacity(0.5);
+                cursor: default;
+            }
         }
 
         &-admin {
@@ -505,6 +510,11 @@
             align-items: center;
             padding: 7px;
             cursor: pointer;
+
+            &.disabled {
+                filter: opacity(0.5);
+                cursor: default;
+            }
 
             &-title {
                 @include unselectable;

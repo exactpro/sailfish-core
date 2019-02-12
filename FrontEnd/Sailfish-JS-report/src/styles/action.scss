@@ -180,6 +180,11 @@
             flex-direction: row;
             align-items: center;
             padding: 7px 7px 10px 7px;
+
+            &.disabled {
+                filter: opacity(0.5);
+                cursor: default;
+            }
             
             &-icon {
                 height: 20px;

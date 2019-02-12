@@ -69,30 +69,29 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
     render({ actions, checkpointMessagesIds, selectedCheckpointId, selectedActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setCheckpointId }: ListProps) {
 
-        const cpIndex = checkpointMessagesIds.indexOf(selectedCheckpointId);
+        const cpIndex = checkpointMessagesIds.indexOf(selectedCheckpointId),
+            cpEnabled = checkpointMessagesIds.length != 0,
+            cpRootClass = [
+                "actions-controls-checkpoints",
+                cpEnabled ? "" : "disabled"
+            ].join(' ');
 
         return (
             <div class="actions">
                 <div class="actions-controls">
-                    {
-                        checkpointMessagesIds && checkpointMessagesIds.length ? 
-                        (
-                            <div class="actions-controls-checkpoints">
-                                <div class="actions-controls-checkpoints-icon"/>
-                                <div class="actions-controls-checkpoints-title">
-                                    <p>Checkpoints</p>
-                                </div>
-                                <div class="actions-controls-checkpoints-btn prev"
-                                    onClick={this.prevCpHandler(checkpointMessagesIds, setCheckpointId, cpIndex)}/>
-                                <div class="actions-controls-checkpoints-count">
-                                    <p>{cpIndex === -1 ? 0 : cpIndex + 1} of {checkpointMessagesIds.length}</p>
-                                </div>
-                                <div class="actions-controls-checkpoints-btn next"
-                                    onClick={this.nextCpHandler(checkpointMessagesIds, setCheckpointId, cpIndex)}/>
-                            </div>
-                        )
-                        : null
-                    }
+                    <div class={cpRootClass}>
+                        <div class="actions-controls-checkpoints-icon"/>
+                        <div class="actions-controls-checkpoints-title">
+                            <p>{cpEnabled ? "" : "No "}Checkpoints</p>
+                        </div>
+                        <div class="actions-controls-checkpoints-btn prev"
+                            onClick={cpEnabled && this.prevCpHandler(checkpointMessagesIds, setCheckpointId, cpIndex)}/>
+                        <div class="actions-controls-checkpoints-count">
+                            <p>{cpIndex === -1 ? 0 : cpIndex + 1} of {checkpointMessagesIds.length}</p>
+                        </div>
+                        <div class="actions-controls-checkpoints-btn next"
+                            onClick={cpEnabled && this.nextCpHandler(checkpointMessagesIds, setCheckpointId, cpIndex)}/>
+                    </div>
                 </div>
                 <div class="actions-list">
                     {actions.map(action => (
