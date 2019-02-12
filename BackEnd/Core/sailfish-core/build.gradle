@@ -115,7 +115,7 @@ dependencies {
     //poi
 	compile 'org.apache.poi:poi-ooxml:4.0.0'
 	
-	compile 'org.flywaydb:flyway-core:5.2.1'
+	compile 'org.flywaydb:flyway-core:4.2.0'
 
     compile 'org.freemarker:freemarker:2.3.28'
 
