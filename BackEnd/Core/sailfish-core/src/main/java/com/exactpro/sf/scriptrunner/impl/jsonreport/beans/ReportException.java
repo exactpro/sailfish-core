@@ -17,15 +17,21 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
+@JsonPropertyOrder({"class", "message", "stacktrace", "cause"})
 public class ReportException implements IJsonReportNode {
-    private String message;
-    private ReportException cause;
 
+    @JsonProperty("class")
+    private String clazz;
+
+    private String message;
     private String stacktrace;
+    private ReportException cause;
 
     public ReportException() {
 
@@ -33,12 +39,13 @@ public class ReportException implements IJsonReportNode {
 
     public ReportException(Throwable t) {
         this.message = t.getMessage();
+        this.clazz = t.getClass().getCanonicalName();
+
+        this.cause = t.getCause() != null ? new ReportException(t.getCause()) : null;
 
         StringWriter writer = new StringWriter();
         t.printStackTrace(new PrintWriter(writer));
         this.stacktrace = writer.toString();
-
-        this.cause = t.getCause() != null ? new ReportException(t.getCause()) : null;
     }
 
     public String getMessage() {
