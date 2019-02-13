@@ -60,6 +60,7 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.util.BugDescription;
+import java.time.LocalDateTime;
 
 public class StatisticsService extends StatisticsReportHandlerLoader implements IEmbeddedService{
 
@@ -429,7 +430,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			tcRun.setReportFile(reportFile);
 			tcRun.setDescription(StringEscapeUtils.escapeEcmaScript(description));
-			tcRun.setStartTime(DateTimeUtility.nowLocalDateTime());
+            LocalDateTime now= DateTimeUtility.nowLocalDateTime();
+            tcRun.setStartTime(now);
+            tcRun.setFinishTime(now);
 			tcRun.setRank(rank);
 			tcRun.setHash(tcHash);
 
