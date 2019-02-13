@@ -92,7 +92,7 @@
         grid-area: message-card;
 
         display: grid;
-        grid-template: 35px / 200px 40px auto 1fr 40px;
+        grid-template: 35px / 210px 40px auto 1fr 40px;
         grid-template-areas: "actions-chips name name-value empty expand-icon";
 
         &-name, &-name-value {

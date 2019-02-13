@@ -221,11 +221,11 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
     private getLabelsCount(message: Message) {
         let count = 0;
         
-        if (message.content.rejecteReason != null) {
+        if (message.content.rejectReason != null) {
             count++;
         }
 
-        if (message.content.isAdmin) {
+        if (message.content.admin) {
             count++;
         }
 
