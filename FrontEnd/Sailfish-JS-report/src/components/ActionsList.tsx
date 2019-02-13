@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component, rerender } from 'preact';
+import { h, Component } from 'preact';
 import Action from '../models/Action';
 import '../styles/action.scss';
 import { ActionTree } from './ActionTree';
@@ -23,6 +23,8 @@ import AppState from '../state/AppState';
 import { connect } from 'preact-redux';
 import { selectAction, selectMessages, selectCheckpoint } from '../actions/actionCreators';
 import { isCheckpoint } from '../helpers/messageType';
+
+const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
 
 interface ListProps {
     actions: Array<Action>;
@@ -40,6 +42,7 @@ interface ListProps {
 export class ActionsListBase extends Component<ListProps, {}> {
 
     private elements: ActionTree[] = [];
+    private checkpoints: number[] = [];
 
     scrollToAction(actionId: number) {
         if (this.elements[actionId]) {
@@ -47,6 +50,16 @@ export class ActionsListBase extends Component<ListProps, {}> {
             // base - get HTMLElement by ref
             this.elements[actionId].base.scrollIntoView({block: 'center'});
         }    
+    }
+
+    componentWillMount() {
+        this.checkpoints = this.getAllCheckpoints(this.props.actions);
+    }
+
+    componentWillUpdate(nextProps: ListProps) {
+        if (nextProps.actions != this.props.actions) {
+            this.checkpoints = this.getAllCheckpoints(nextProps.actions);
+        }
     }
 
     shouldComponentUpdate(nextProps: ListProps) {
@@ -103,10 +116,36 @@ export class ActionsListBase extends Component<ListProps, {}> {
                             messageSelectHandler={onMessageSelect}
                             actionsFilter={actionsFilter}
                             filterFields={filterFields} 
+                            checkpoints={this.checkpoints}
+                            checkpointSelectHandler={() => {}}
                             ref={ref => this.elements[action.id] = ref}/>))}
                 </div>
             </div> 
         )
+    }
+
+    getAllCheckpoints(actions: Action[]) {
+        let checkpoints = [];
+
+        actions.forEach(action => {
+            checkpoints.push(...this.getActionCheckpoints(action));
+        });
+
+        return checkpoints;
+    }
+
+    private getActionCheckpoints(action: Action, checkpoints: number[] = []): number[]  {
+        if (action.name == ACTION_CHECKPOINT_NAME) {
+            return [...checkpoints, action.id];
+        }
+
+        action.subNodes.forEach(subNode => {
+            if (subNode.actionNodeType == 'action') {
+                checkpoints = [...checkpoints, ...this.getActionCheckpoints(subNode as Action, checkpoints)];
+            }
+        });
+
+        return checkpoints;
     }
 
     private nextCpHandler = (checkpointMessagesIds: number[], setCheckpointId: (id: number) => any, currentCpIndex: number) => {

@@ -25,14 +25,17 @@ import '../styles/action.scss';
 import ExpandablePanel from './ExpandablePanel';
 import Link from '../models/Link';
 import { StatusType } from '../models/Status';
+import { Checkpoint } from './Checkpoint';
 
 
 export interface ActionTreeProps {
     action: ActionNode;
-    actionSelectHandler: (action: Action) => void;
-    messageSelectHandler: (id: number, status: StatusType) => void;
+    actionSelectHandler: (action: Action) => any;
+    messageSelectHandler: (id: number, status: StatusType) => any;
+    checkpointSelectHandler: (action: Action) => any;
     selectedMessageId: number;
     selectedActionId: number;
+    checkpoints: number[];
     actionsFilter: StatusType[];
     filterFields: StatusType[];
 }
@@ -169,12 +172,17 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: number[] = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, actionsFilter, filterFields } = props;
+        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
 
         switch (props.action.actionNodeType) {
             case 'action': {
-                const action = props.action as Action,
-                    isExpanded = expandTreePath ? expandTreePath[0] == action.id : null,
+                const action = props.action as Action;
+
+                if (checkpoints.includes(action.id)) {
+                    return this.renderCheckpoint(action, checkpoints, false, checkpointSelectHandler);
+                }
+
+                const isExpanded = expandTreePath ? expandTreePath[0] == action.id : null,
                     newTreePath = expandTreePath ? expandTreePath.slice(1) : null;
 
                 return (
@@ -224,18 +232,20 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     renderMessageAction({ message, level, exception, color, style }: MessageAction) {
+        // italic style value - only for fontStyle css property
+        //bold style value - only for fontWeight css property
+        const messageStyle = {
+            color: (color || "").toLowerCase(),
+            fontStyle: (style || "").toLowerCase(),
+            fontWeight: (style || "").toLowerCase()
+        };
+
         if (exception) {
             return (
                 <div class="action-card">
                     <ExpandablePanel>
                         <div class="action-card-header">
-                            {/* italic style value - only for fontStyle css property
-                            bold style value - only for fontWeight css property */}
-                            <h3 style={{
-                                color: (color || "").toLowerCase(),
-                                fontStyle: (style || "").toLowerCase(),
-                                fontWeight: (style || "").toLowerCase()
-                            }}>{message} - {level}</h3>
+                            <h3 style={messageStyle}>{message} - {level}</h3>
                         </div>
                         <div class="action-card-body">
                             <pre>{exception && exception.stacktrace}</pre>
@@ -247,13 +257,7 @@ export class ActionTree extends Component<ActionTreeProps> {
             return (
                 <div class="action-card">
                     <div class="action-card-header">
-                        {/* italic style value - only for fontStyle css property
-                        bold style value - only for fontWeight css property */}
-                        <h3 style={{
-                            color: (color || "").toLowerCase(),
-                            fontStyle: (style || "").toLowerCase(),
-                            fontWeight: (style || "").toLowerCase()
-                        }}>{message} - {level}</h3>
+                        <h3 style={messageStyle}>{message} - {level}</h3>
                     </div>
                 </div>
             );
@@ -282,6 +286,18 @@ export class ActionTree extends Component<ActionTreeProps> {
                     </ExpandablePanel>
                 </div>
             </div>
+        )
+    }
+
+    renderCheckpoint(action: Action, checkpoints: number[], isSelected: boolean, selectHandler: Function) {
+        const checkpointIndex = checkpoints.indexOf(action.id) + 1;
+
+        return (
+            <Checkpoint
+                name={action.name}
+                count={checkpointIndex}
+                isSelected={isSelected}
+                clickHandler={() => selectHandler(action.id)}/>
         )
     }
 }

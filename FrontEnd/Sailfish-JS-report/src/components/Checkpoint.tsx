@@ -21,16 +21,18 @@ interface CheckpointProps {
     name: string;
     count: number;
     isSelected: boolean;
+    clickHandler?: () => any;
 }
 
 export class Checkpoint extends Component<CheckpointProps> {
 
-    render({ name, count, isSelected }: CheckpointProps) {
+    render({ name, count, isSelected, clickHandler }: CheckpointProps) {
 
         const rootClassName = ["checkpoint", (isSelected ? "selected" : "")].join(' ')
 
         return (
-            <div class={rootClassName}>
+            <div class={rootClassName}
+                onClick={clickHandler}>
                 <div class="checkpoint-icon" />
                 <div class="checkpoint-count">Checkpoint {count}</div>
                 <div class="checkpoint-name">{name}</div>
