@@ -19,8 +19,23 @@ import '../styles/splitter.scss';
 
 const SPLITTER_WIDTH = 25;
 
-interface SplitViewProps {
+/**
+ * Props for splitter component
+ */
+export interface SplitViewProps {
+    /**
+     * Min precentage width for all panels 
+     */
     minPanelPercentageWidth: number;
+    
+    /**
+     * (optional) Resize event handler, recieves left and right widths in px.
+     */
+    resizeHandler?: (leftPanelWidth: number, rightPanelWidth: number) => any; 
+
+    /**
+     * Panel for compoentns : first child - for left panel, second child - for right panel, other childs will be ignored
+     */
     children: JSX.Element[];
 }
 
@@ -52,6 +67,12 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
                 ...this.state,
                 leftPanelWidth: this.root.offsetWidth / 2
             });
+        }
+    }
+
+    componentDidUpdate(prevProps: SplitViewProps, prevState: SplitState) {
+        if (this.state.leftPanelWidth != prevState.leftPanelWidth && this.props.resizeHandler) {
+            this.props.resizeHandler(this.leftPanel.offsetWidth, this.rightPanel.offsetWidth);
         }
     }
     

@@ -475,6 +475,7 @@
             }
 
             &-title, &-count {
+                @include unselectable;
                 font-size: 15px;
                 font-weight: bold;
                 padding: 0 10px;
@@ -539,6 +540,33 @@
                 &.active {
                     background-image: url(../../resources/icons/admin-icon-active.svg)
                 }
+            }
+        }
+
+        &-predictions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 7px 7px 10px 7px;
+
+            // disabled
+            filter: opacity(0.3);
+            cursor: not-allowed;
+
+            &-title {
+                @include unselectable;
+                font-size: 15px;
+                font-weight: bold;
+                padding-left: 8px;
+                padding-right: 5px;
+                color: $failedTextColor;
+            }
+
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-image: url(../../resources/icons/ml-control-icon-active.svg);
+                background-size: 100%;
             }
         }
     }

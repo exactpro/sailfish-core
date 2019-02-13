@@ -39,13 +39,21 @@ interface LayoutProps {
     rightPaneHandler: (pane: Pane) => any;
 }
 
-class TestCaseLayoutBase extends Component<LayoutProps, any> {
+interface LayoutState {
+    rightPanelWidth: number;
+}
+
+class TestCaseLayoutBase extends Component<LayoutProps, LayoutState> {
 
     private actionsListRef: ActionsListBase;
     private messagesListRef: MessagesCardListBase;
 
     constructor(props: LayoutProps) {
         super(props);
+
+        this.state = {
+            rightPanelWidth: null
+        }
     }
 
     // FIXME : need to move this logic to redux
@@ -59,7 +67,7 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
         }
     }
 
-    render({ testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler }: LayoutProps) {
+    render({ testCase, splitMode, showFilter, leftPane, rightPane, leftPaneHandler, rightPaneHandler }: LayoutProps, {rightPanelWidth}: LayoutState) {
 
         const leftButtons = (
             <div class="layout-buttons">
@@ -116,7 +124,9 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
             messagesPane = (
                 <div class={messagesPanelClass}>
                     {rightButtons}
-                    <MessagesCardList ref={ref => this.messagesListRef = ref ? ref.getWrappedInstance() : null} />
+                    <MessagesCardList 
+                        ref={ref => this.messagesListRef = ref ? ref.getWrappedInstance() : null}
+                        panelWidth={rightPanelWidth} />
                 </div>
             );
 
@@ -164,7 +174,8 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                 {splitMode ?
                     (<div class="layout-content split">
                         <SplitView
-                            minPanelPercentageWidth={30}>
+                            minPanelPercentageWidth={30}
+                            resizeHandler={this.splitResizeHandler}>
                             {primaryPaneElement}
                             {secondaryPaneElement}
                         </SplitView>
@@ -174,6 +185,12 @@ class TestCaseLayoutBase extends Component<LayoutProps, any> {
                     </div>)}
             </div>
         )
+    }
+
+    private splitResizeHandler = (leftPanelWidth: number, rightPanelWidth: number) => {
+        this.setState({
+            rightPanelWidth: rightPanelWidth
+        });
     }
 }
 

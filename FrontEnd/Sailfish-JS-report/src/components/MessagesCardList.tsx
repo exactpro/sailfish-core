@@ -28,6 +28,8 @@ import { isCheckpoint } from '../helpers/messageType';
 import { selectRejectedMessageId } from '../actions/actionCreators';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 
+const MIN_CONTROL_BUTTONS_WIDTH = 880;
+
 interface MessagesListProps {
     messages: Message[];
     checkpoints: Message[];
@@ -39,6 +41,7 @@ interface MessagesListProps {
     actionsMap: Map<number, Action>;
     selectedStatus: StatusType;
     selectRejectedMessage: (messageId: number) => any;
+    panelWidth?: number;
 }
 
 interface MessagesListState {
@@ -83,7 +86,7 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
             window.requestAnimationFrame(() => {
                 // smooth behavior doesn't work here because render is not complete yet
                 if (this.elements[selectedMessageId]) {
-                    this.elements[selectedMessageId].base.scrollIntoView({block: 'center'});
+                    this.elements[selectedMessageId].base.scrollIntoView({ block: 'center' });
                 }
             });
         });
@@ -91,25 +94,26 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
 
     scrollToMessage(messageId: number) {
         if (this.elements[messageId]) {
-            this.elements[messageId].base.scrollIntoView({block: 'center', behavior: 'smooth', inline: 'nearest'});
+            this.elements[messageId].base.scrollIntoView({ block: 'center', behavior: 'smooth', inline: 'nearest' });
         }
     }
 
-    getMessageActions(message: Message) : Map<number, Action> {
+    getMessageActions(message: Message): Map<number, Action> {
         return new Map<number, Action>(message.relatedActions.map(
-            (actionId) : [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
+            (actionId): [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage }: MessagesListProps, { adminFilter }: MessagesListState) {
+    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage, panelWidth }: MessagesListProps, { adminFilter }: MessagesListState) {
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
+            controlShowTitles = panelWidth == null || panelWidth > MIN_CONTROL_BUTTONS_WIDTH,
             rejectedEnabled = rejectedMessages.length != 0,
             adminEnabled = adminMessages.length != 0;
 
         const adminRootClass = [
                 "messages-controls-admin",
                 adminEnabled ? "" : "disabled"
-            ].join(' '), 
+            ].join(' '),
             adminIconClass = [
                 "messages-controls-admin-icon",
                 adminFilter ? "active" : ""
@@ -126,27 +130,38 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
         return (
             <div class="messages">
                 <div class="messages-controls">
+                    <div class="messages-controls-predictions"
+                        title="Show predictions (Not implemented)">
+                        <div class="messages-controls-predictions-icon"/>
+                        <div class="messages-controls-predictions-title">
+                            {controlShowTitles ? <p>Predictions</p> : null}
+                        </div>
+                    </div>
                     <div class={rejectedRootClass}>
                         <div class="messages-controls-rejected-icon"
-                            onClick={() => this.scrollToMessage(selectedRejectedMessageId)}/>
+                            title="Scroll to current rejected message"
+                            onClick={() => this.scrollToMessage(selectedRejectedMessageId)} />
                         <div class="messages-controls-rejected-title">
-                            <p>{rejectedEnabled ? "" : "No "}Rejected</p>
+                            {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
                         </div>
                         <div class="messages-controls-rejected-btn prev"
-                            onClick={rejectedEnabled && this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                            title="Scroll to previous rejected message"
+                            onClick={rejectedEnabled && this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)} />
                         <div class="messages-controls-rejected-count">
                             <p>{currentRejectedIndex === -1 ? 0 : currentRejectedIndex + 1} of {rejectedMessages.length}</p>
                         </div>
                         <div class="messages-controls-rejected-btn next"
-                            onClick={rejectedEnabled && this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
+                            title="Scroll to next rejected message"
+                            onClick={rejectedEnabled && this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)} />
                     </div>
-                        <div class={adminRootClass}
-                            onClick={adminEnabled && this.adminFilterHandler}>
-                            <div class={adminIconClass}/>
-                            <div class={adminTitleClass}>
-                                <p>{adminEnabled ? "" : "No"} Admin Messages</p>
-                            </div>
+                    <div class={adminRootClass}
+                        onClick={adminEnabled && this.adminFilterHandler}
+                        title={(adminFilter ? "Hide" : "Show") + " Admin messages"}>
+                        <div class={adminIconClass} />
+                        <div class={adminTitleClass}>
+                            {controlShowTitles ? <p>{adminEnabled ? "" : "No"} Admin Messages</p> : null}
                         </div>
+                    </div>
                 </div>
                 <div class="messages-list">
                     {messages.map(message => this.renderMessage(message))}
@@ -157,7 +172,7 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
 
     private renderMessage(message: Message) {
 
-        const {selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectRejectedMessage, selectedRejectedMessageId} = this.props;
+        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectRejectedMessage, selectedRejectedMessageId } = this.props;
 
         if (checkpoints.includes(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
@@ -171,7 +186,7 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                     key={message.id}
                     actionsMap={this.getMessageActions(message)}
                     isExpanded={this.state.adminFilter}
-                    isSelected={selectedRejectedMessageId === message.id}/>
+                    isSelected={selectedRejectedMessageId === message.id} />
             )
         }
 
@@ -187,9 +202,10 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                 message={message}
                 isSelected={isSelected}
                 status={isSelected ? selectedStatus : null}
-                key={message.id} 
+                key={message.id}
                 actionsMap={this.getMessageActions(message)}
-                />);
+            />
+        );
     }
 
     private renderCheckpoint(message: Message, checkpoints: Message[], selectedCheckpointId: number) {
@@ -200,7 +216,7 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
             <Checkpoint name={message.msgName}
                 count={checkpointCount}
                 isSelected={isSelected}
-                ref={ref => this.elements[message.id] = ref}/>
+                ref={ref => this.elements[message.id] = ref} />
         )
     }
 
@@ -213,9 +229,9 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                 ref={element => this.elements[message.id] = element}
                 message={message}
                 isSelected={isSelected}
-                key={message.id} 
+                key={message.id}
                 actionsMap={this.getMessageActions(message)}
-                rejectedMessagesCount={rejectedCount}/>
+                rejectedMessagesCount={rejectedCount} />
         )
     }
 
