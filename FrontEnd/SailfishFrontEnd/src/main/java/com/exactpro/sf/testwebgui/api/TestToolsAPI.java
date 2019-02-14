@@ -34,8 +34,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import com.exactpro.sf.embedded.updater.UpdateService;
-import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +56,8 @@ import com.exactpro.sf.embedded.mail.configuration.EMailServiceSettings;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.IScriptReport;
 import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
@@ -460,34 +460,50 @@ public class TestToolsAPI {
     }
 
     public void removeVariableSet(String name) {
+        logger.debug("Removing variable set: {}", name);
         context.getConnectionManager().removeVariableSet(name);
     }
 
     public Set<String> getVariableSets() {
+        logger.debug("Getting list of all variable sets");
         return context.getConnectionManager().getVariableSets();
     }
 
     public void setEnvironmentVariableSet(String environmentName, String variableSetName) {
+        if(variableSetName == null) {
+            logger.debug("Removing variable set from environment: {}", environmentName);
+        } else {
+            logger.debug("Setting variable set for environment '{}' to '{}'", environmentName, variableSetName);
+        }
+
         context.getConnectionManager().setEnvironmentVariableSet(environmentName, variableSetName);
     }
 
     public String getEnvironmentVariableSet(String environmentName) {
+        logger.debug("Getting variable set for environment: {}", environmentName);
         return context.getConnectionManager().getEnvironmentVariableSet(environmentName);
     }
 
     public Set<String> importVariableSets(InputStream stream, boolean replace) throws IOException {
+        logger.debug("Importing variable sets with replace existing set to: {}", replace);
+
         IConnectionManager connectionManager = context.getConnectionManager();
         Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(stream);
         Set<String> importedSets = new HashSet<>();
 
         variableSets.forEach((name, variableSet) -> {
+            logger.debug("Loaded variable set '{}': {}", name, variableSet);
+
             if(connectionManager.isVariableSetExists(name) && !replace) {
+                logger.debug("Skipping variable set '{}' because replace existing is disabled", name);
                 return;
             }
 
             connectionManager.putVariableSet(name, variableSet);
             importedSets.add(name);
         });
+
+        logger.debug("Successfully imported variables sets: {}", importedSets);
 
         return importedSets;
     }

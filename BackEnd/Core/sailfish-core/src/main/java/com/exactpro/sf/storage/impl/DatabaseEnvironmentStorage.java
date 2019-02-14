@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.storage.IEnvironmentStorage;
 import com.exactpro.sf.storage.IStorage;
@@ -31,7 +33,9 @@ import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.entities.StoredEnvironment;
 
 public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseEnvironmentStorage.class);
     private static final String NAME = "name";
+
     private final IStorage storage;
 
     public DatabaseEnvironmentStorage(IStorage storage) {
@@ -44,6 +48,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void add(String name) {
+        LOGGER.debug("Adding environment: {}", name);
+
         if(StringUtils.isBlank(name)) {
             throw new StorageException("Environment name cannot be blank");
         }
@@ -60,6 +66,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void remove(String name) {
+        LOGGER.debug("Removing environment: {}", name);
+
         if(StringUtils.isBlank(name)) {
             throw new StorageException("Environment name cannot be blank");
         }
@@ -80,6 +88,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public boolean exists(String name) {
+        LOGGER.debug("Checking existence of environment: {}", name);
+
         if(StringUtils.isBlank(name)) {
             throw new StorageException("Environment name cannot be blank");
         }
@@ -89,6 +99,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void rename(String oldName, String newName) {
+        LOGGER.debug("Renaming environment '{}' to '{}'", oldName, newName);
+
         if(StringUtils.isBlank(oldName)) {
             throw new StorageException("Old environment name cannot be blank");
         }
@@ -122,6 +134,8 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public List<String> list() {
+        LOGGER.debug("Getting list of all environments");
+
         List<StoredEnvironment> environments = storage.getAllEntities(StoredEnvironment.class);
         List<String> names = new ArrayList<>();
 
@@ -134,6 +148,7 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public String getVariableSet(String name) {
+        LOGGER.debug("Getting variable set for environment: {}", name);
         StoredEnvironment environment = getEnvironment(name);
 
         if(environment == null) {
@@ -145,6 +160,12 @@ public class DatabaseEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void setVariableSet(String name, String variableSet) {
+        if(variableSet == null) {
+            LOGGER.debug("Removing variable set from environment: {}", name);
+        } else {
+            LOGGER.debug("Setting variable set for environment '{}' to '{}'", name, variableSet);
+        }
+
         StoredEnvironment environment = getEnvironment(name);
 
         if(environment == null) {

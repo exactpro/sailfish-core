@@ -227,7 +227,10 @@ public class ExecutorClient {
             uploadExecutorServices();
 
             if(prepareExecutorServices().stream().anyMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
+                logger.debug("Setting variable set for executor '{}' to '{}'", executor.getName(), executor.getVariableSet());
                 setVariableSet(executor.getVariableSet());
+            } else {
+                logger.debug("Skipped setting variable set for executor '{}' to '{}'", executor.getName(), executor.getVariableSet());
             }
 
             serviceCommand(executorServicesUploaded.values().stream(), apiClient::startService, "start", StartMode.EXECUTOR);
@@ -281,9 +284,11 @@ public class ExecutorClient {
             return;
         }
 
+        logger.debug("Uploading variable sets from file '{}' to '{}'", variableSetsFile, executor.getName());
+
         try(InputStream variableSets = BigButtonUtil.getStream(library.getRootFolder(), variableSetsFile, workspaceDispatcher)) {
             Set<String> uploadedVariableSets = apiClient.importVariableSets(variableSetsFile, variableSets, true).getVariableSets();
-            logger.debug("Uploaded variable sets: {}", uploadedVariableSets);
+            logger.debug("Uploaded variable sets '{}' to '{}'", uploadedVariableSets, executor.getName());
             this.uploadedVariableSets.addAll(uploadedVariableSets);
         }
     }
@@ -293,6 +298,7 @@ public class ExecutorClient {
             name = library.getGlobals().map(Globals::getVariableSet).orElse(null);
         }
 
+        logger.debug("Setting variable set for '{}' to '{}'", executor.getName(), name);
         apiClient.setEnvironmentVariableSet(BB_ENVIRONMENT, name);
     }
 
@@ -472,6 +478,7 @@ public class ExecutorClient {
 
                 if(!prepareScriptListServices().isEmpty() &&
                         prepareExecutorServices().stream().noneMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
+                    logger.debug("Setting variable set before script list '{}' run to '{}'", currentList.getName(), currentList.getVariableSet());
                     setVariableSet(currentList.getVariableSet());
                 }
 

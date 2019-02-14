@@ -32,6 +32,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -53,6 +56,8 @@ import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
         "variables"
 })
 public class ServiceDescription implements Cloneable, Serializable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDescription.class);
+
 	@XmlElement(name="type")
 	@XmlJavaTypeAdapter(SailfishURIAdapter.class)
 	private SailfishURI type;
@@ -131,12 +136,26 @@ public class ServiceDescription implements Cloneable, Serializable {
     }
 
     public IServiceSettings applyVariableSet(Map<String, String> variableSet) {
+        LOGGER.debug("Applying variable set '{}' to service '{}@{}'", variableSet, environment, name);
+
         try {
             Map<String, String> properties = new HashMap<>();
             IServiceSettings result = settings.getClass().newInstance();
 
             convertServiceSettingsToMap(properties, settings);
-            properties.replaceAll((key, value) -> variableSet.getOrDefault(variables.get(key), value));
+
+            variables.forEach((property, variable) -> {
+                LOGGER.debug("Trying to apply variable '{}' to property '{}'", variable, property);
+                String variableValue = variableSet.get(variable);
+
+                if(variableValue == null) {
+                    LOGGER.debug("Variable '{}' does not exist in variable set: {}", variable, variableSet);
+                } else {
+                    String propertyValue = properties.put(property, variableValue);
+                    LOGGER.debug("Changed value of property '{}' from '{}' to '{}'", property, propertyValue, variableValue);
+                }
+            });
+
             convertMapToServiceSettings(result, properties);
 
             return result;

@@ -443,6 +443,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
                     Map<String, String> variableSet = variableSetStorage.get(environmentVariableSet);
 
                     if(variableSet != null) {
+                        logger.debug("Applying variable set '{}' to service '{}'", environmentVariableSet, serviceName);
                         settings = description.applyVariableSet(variableSet);
                     }
                 }
@@ -933,6 +934,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     @Override
     public Map<String, String> getVariableSet(String name) {
+        logger.debug("Getting variable set: {}", name);
         return withReadLock(() -> variableSetStorage.get(name));
     }
 
@@ -960,6 +962,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     @Override
     public void putVariableSet(String name, Map<String, String> variableSet) {
+        logger.debug("Putting variable set '{}': {}", name, variableSet);
         updateVariableSet(name, () -> {
             variableSetStorage.put(name, variableSet);
             return this;
@@ -968,6 +971,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     @Override
     public void removeVariableSet(String name) {
+        logger.debug("Removing variable set: {}", name);
         updateVariableSet(name, () -> {
             variableSetStorage.remove(name);
 
@@ -983,16 +987,25 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     @Override
     public boolean isVariableSetExists(String name) {
+        logger.debug("Checking existence of variable set: {}", name);
         return withReadLock(() -> variableSetStorage.exists(name));
     }
 
     @Override
     public Set<String> getVariableSets() {
+        logger.debug("Getting list of all variable sets");
         return withReadLock(variableSetStorage::list);
     }
 
     @Override
     public void setEnvironmentVariableSet(String environmentName, String variableSetName) {
+        if(variableSetName == null) {
+            logger.debug("Removing variable set from environment: {}", environmentName);
+        } else {
+            logger.debug("Setting variable set for environment '{}' to '{}'", environmentName, variableSetName);
+        }
+
+
         withWriteLock(() -> {
             if(variableSetName != null && !variableSetStorage.exists(variableSetName)) {
                 throw new StorageException("Variable set does not exist: " + variableSetName);
@@ -1011,6 +1024,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     @Override
     public String getEnvironmentVariableSet(String environmentName) {
+        logger.debug("Getting variable set for environment: {}", environmentName);
         return withReadLock(() -> envStorage.getVariableSet(environmentName));
     }
 

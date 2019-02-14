@@ -25,12 +25,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.entities.StoredVariableSet;
 
 public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseVariableSetStorage.class);
     private static final String NAME = "name";
+
     private final IStorage storage;
 
     public DatabaseVariableSetStorage(IStorage storage) {
@@ -39,12 +44,14 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public Map<String, String> get(String name) {
+        LOGGER.debug("Getting variable set: {}", name);
         StoredVariableSet variableSet = getVariableSet(name);
         return variableSet != null ? variableSet.getVariables() : null;
     }
 
     @Override
     public void put(String name, Map<String, String> variableSet) {
+        LOGGER.debug("Putting variable set '{}': {}", name, variableSet);
         StoredVariableSet storedVariableSet = getVariableSet(name);
 
         if(storedVariableSet == null) {
@@ -58,6 +65,7 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public void remove(String name) {
+        LOGGER.debug("Removing variable set: {}", name);
         StoredVariableSet storedVariableSet = getVariableSet(name);
 
         if(storedVariableSet == null) {
@@ -69,11 +77,13 @@ public class DatabaseVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public boolean exists(String name) {
+        LOGGER.debug("Checking existence of variable set: {}", name);
         return getVariableSet(name) != null;
     }
 
     @Override
     public Set<String> list() {
+        LOGGER.debug("Getting list of all variable sets");
         return storage.getAllEntities(StoredVariableSet.class)
                 .stream()
                 .map(StoredVariableSet::getName)

@@ -28,6 +28,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
@@ -36,6 +39,7 @@ import com.exactpro.sf.storage.StorageException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 public class FileVariableSetStorage extends AbstractVariableSetStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileVariableSetStorage.class);
     private static final ISerializer<Map<String, Map<String, String>>> SERIALIZER = of(new TypeReference<Map<String, Map<String, String>>>() {});
     private static final String VARIABLE_SETS_FILE_NAME = "variable-sets.json";
 
@@ -64,11 +68,13 @@ public class FileVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public Map<String, String> get(String name) {
+        LOGGER.debug("Getting variable set: {}", name);
         return variableSets.get(checkName(name));
     }
 
     private void save() {
         try {
+            LOGGER.debug("Saving variable sets to disk");
             File file = dispatcher.createFile(FolderType.ROOT, true, path, VARIABLE_SETS_FILE_NAME);
             SERIALIZER.serialize(variableSets, file);
         } catch(Exception e) {
@@ -78,12 +84,15 @@ public class FileVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public void put(String name, Map<String, String> variableSet) {
+        LOGGER.debug("Putting variable set '{}': {}", name, variableSet);
         variableSets.put(checkName(name), checkVariableSet(variableSet));
         save();
     }
 
     @Override
     public void remove(String name) {
+        LOGGER.debug("Removing variable set: {}", name);
+
         if(variableSets.remove(checkName(name)) == null) {
             throw new StorageException("Variable set does not exist: " + name);
         }
@@ -93,11 +102,13 @@ public class FileVariableSetStorage extends AbstractVariableSetStorage {
 
     @Override
     public boolean exists(String name) {
+        LOGGER.debug("Checking existence of variable set: {}", name);
         return variableSets.containsKey(checkName(name));
     }
 
     @Override
     public Set<String> list() {
+        LOGGER.debug("Getting list of all variable sets");
         return new TreeSet<>(variableSets.keySet());
     }
 }

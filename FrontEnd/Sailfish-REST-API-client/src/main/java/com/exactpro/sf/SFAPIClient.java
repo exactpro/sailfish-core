@@ -17,12 +17,11 @@ package com.exactpro.sf;
 
 import static java.lang.String.valueOf;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.ClosedWatchServiceException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,8 +39,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -64,6 +61,8 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.exceptions.APIResponseException;
 import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixLinkUploadResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
@@ -1010,26 +1009,31 @@ public class SFAPIClient implements AutoCloseable {
 	}
 
     public XmlResponse getEnvironmentVariableSet(String name) throws APIResponseException, APICallException {
+        logger.debug("Sending request to get variable set for environment '{}' to: {}", name, rootUrl);
         String url = ENVIRONMENT_GET_VARIABLE_SET.replace("!name", name);
         return getXmlResponse(url);
     }
 
     public XmlResponse setEnvironmentVariableSet(String environmentName, String variableSetName) throws APIResponseException, APICallException {
+        logger.debug("Sending request to set variable set for environment '{}' to '{}' to: {}", environmentName, variableSetName, rootUrl);
         String url = ENVIRONMENT_SET_VARIABLE_SET.replace("!name", environmentName)
                 .replace("!set", Objects.toString(variableSetName, ""));
         return getXmlResponse(url);
     }
 
     public Set<String> getVariableSets() throws APIResponseException, APICallException {
+        logger.debug("Sending request to get variable sets from: {}", rootUrl);
         return getResponse(VARIABLE_SETS, XmlVariableSets.class).getVariableSets();
     }
 
     public XmlResponse deleteVariableSet(String name) throws APIResponseException, APICallException {
+        logger.debug("Sending request to delete variable set '{}' from '{}'", name, rootUrl);
         String url = VARIABLE_SET_DELETE.replace("!name", name);
         return getXmlResponse(url);
     }
 
     public XmlVariableSets importVariableSets(String fileName, InputStream data, boolean replaceExisting) throws APIResponseException, APICallException {
+        logger.debug("Importing variable sets from file '{}' to '{}' with replace existing set to '{}'", fileName, rootUrl, replaceExisting);
         String url = rootUrl + VARIABLE_SETS_IMPORT.replace("!re", valueOf(replaceExisting));
 
         try {

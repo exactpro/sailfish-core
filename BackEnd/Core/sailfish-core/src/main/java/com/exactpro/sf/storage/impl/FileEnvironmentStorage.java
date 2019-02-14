@@ -25,6 +25,8 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -33,6 +35,7 @@ import com.exactpro.sf.storage.IEnvironmentStorage;
 import com.exactpro.sf.storage.StorageException;
 
 public class FileEnvironmentStorage implements IEnvironmentStorage {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileEnvironmentStorage.class);
     private static final String ENVIRONMENTS_DIR = "environments";
 
     private final List<FileEnvironment> environments;
@@ -63,12 +66,14 @@ public class FileEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void add(String name) {
+        LOGGER.debug("Adding environment: {}", name);
         requireNonExisting(name);
         environments.add(new FileEnvironment().setName(name));
     }
 
     @Override
     public void remove(String name) {
+        LOGGER.debug("Removing environment: {}", name);
         requireNonDefault(name, "Cannot remove default environment");
         requireExisting(name);
         environments.removeIf(environment -> environment.name.equalsIgnoreCase(name));
@@ -76,6 +81,8 @@ public class FileEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public boolean exists(String name) {
+        LOGGER.debug("Checking existence of environment: {}", name);
+
         if(StringUtils.isBlank(name)) {
             throw new StorageException("Environment name cannot be blank");
         }
@@ -87,6 +94,7 @@ public class FileEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void rename(String oldName, String newName) {
+        LOGGER.debug("Renaming environment '{}' to '{}'", oldName, newName);
         requireNonDefault(oldName, "Cannot rename default environment to: " + newName);
         requireNonDefault(newName, "Cannot rename to default environment: " + oldName);
         requireExisting(oldName);
@@ -96,12 +104,19 @@ public class FileEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public void setVariableSet(String name, String variableSet) {
+        if(variableSet == null) {
+            LOGGER.debug("Removing variable set from environment: {}", name);
+        } else {
+            LOGGER.debug("Setting variable set for environment '{}' to '{}'", name, variableSet);
+        }
+
         requireExisting(name);
         updateEnvironment(name, environment -> environment.setVariableSet(variableSet));
     }
 
     @Override
     public String getVariableSet(String name) {
+        LOGGER.debug("Getting variable set for environment: {}", name);
         requireExisting(name);
         return environments.stream()
                 .filter(environment -> environment.name.equalsIgnoreCase(name))
@@ -112,6 +127,7 @@ public class FileEnvironmentStorage implements IEnvironmentStorage {
 
     @Override
     public List<String> list() {
+        LOGGER.debug("Getting list of all environments");
         return environments.stream().map(FileEnvironment::getName).collect(toList());
     }
 
