@@ -72,7 +72,7 @@ export interface MessagesSelectStateAction {
 
 export interface CheckpointSelectStateAction {
     type: StateActionTypes.SELECT_CHECKPOINT;
-    checkpointId: number;
+    checkpointAction: Action;
 }
 
 export interface RejectedMessageSelectStateAction {

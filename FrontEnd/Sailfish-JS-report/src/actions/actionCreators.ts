@@ -70,9 +70,9 @@ export const selectMessages = (messages: number[], status: StatusType = 'NA'): M
     status: status
 })
 
-export const selectCheckpoint = (checkpointId: number): CheckpointSelectStateAction => ({
+export const selectCheckpoint = (checkpointAction: Action): CheckpointSelectStateAction => ({
     type: StateActionTypes.SELECT_CHECKPOINT,
-    checkpointId: checkpointId
+    checkpointAction: checkpointAction
 })
 
 export const selectRejectedMessageId = (messageId: number): RejectedMessageSelectStateAction => ({

@@ -35,7 +35,8 @@ export interface ActionTreeProps {
     checkpointSelectHandler: (action: Action) => any;
     selectedMessageId: number;
     selectedActionId: number;
-    checkpoints: number[];
+    selectedCheckpointId: number;
+    checkpoints: Action[];
     actionsFilter: StatusType[];
     filterFields: StatusType[];
 }
@@ -78,6 +79,12 @@ export class ActionTree extends Component<ActionTreeProps> {
         }
     }
 
+    componentDidUpdate(prevProps: ActionTreeProps) {
+        if (prevProps.selectedCheckpointId != this.props.selectedCheckpointId) {
+            this.scrollToAction(this.props.selectedCheckpointId);
+        }
+    }
+
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
         
@@ -99,7 +106,7 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps) : boolean {
-        // the first condition - current action is selected and we should update to show id
+        // the first condition - current action is selected and we should update to show it
         // the second condition - current action was selected and we should disable selection
         if (nextProps.selectedActionId === action.id || prevProps.selectedActionId === action.id) {
             return true;
@@ -109,6 +116,12 @@ export class ActionTree extends Component<ActionTreeProps> {
         if (nextProps.selectedMessageId !== prevProps.selectedMessageId && 
             action.relatedMessages && 
             (action.relatedMessages.some(msgId => msgId == nextProps.selectedMessageId || msgId == prevProps.selectedMessageId))) {
+                return true;
+        }
+
+        // same as first if statement, but with checkpoint
+        if (nextProps.checkpoints.includes(action) && nextProps.selectedCheckpointId !== prevProps.selectedCheckpointId && 
+            (nextProps.selectedCheckpointId === action.id || prevProps.selectedCheckpointId === action.id)) {
                 return true;
         }
 
@@ -172,14 +185,14 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: number[] = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
+        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
 
         switch (props.action.actionNodeType) {
             case 'action': {
                 const action = props.action as Action;
 
-                if (checkpoints.includes(action.id)) {
-                    return this.renderCheckpoint(action, checkpoints, false, checkpointSelectHandler);
+                if (checkpoints.includes(action)) {
+                    return this.renderCheckpoint(props, action);
                 }
 
                 const isExpanded = expandTreePath ? expandTreePath[0] == action.id : null,
@@ -289,15 +302,17 @@ export class ActionTree extends Component<ActionTreeProps> {
         )
     }
 
-    renderCheckpoint(action: Action, checkpoints: number[], isSelected: boolean, selectHandler: Function) {
-        const checkpointIndex = checkpoints.indexOf(action.id) + 1;
+    renderCheckpoint({checkpoints, selectedCheckpointId, checkpointSelectHandler}: ActionTreeProps, action: Action) {
+        const checkpointIndex = checkpoints.indexOf(action) + 1,
+            isSelected = selectedCheckpointId == action.id;
 
         return (
             <Checkpoint
                 name={action.name}
                 count={checkpointIndex}
                 isSelected={isSelected}
-                clickHandler={() => selectHandler(action.id)}/>
+                clickHandler={() => checkpointSelectHandler(action)}
+                ref={ref => this.treeElements[action.id] = ref}/>
         )
     }
 }

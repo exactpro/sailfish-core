@@ -71,7 +71,8 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 selected: {
                     ...state.selected,
-                    checkpointMessageId: stateAction.checkpointId
+                    checkpointMessageId: stateAction.checkpointAction.relatedMessages[0] || null,
+                    checkpointActionId: stateAction.checkpointAction.id
                 }
             }
         }

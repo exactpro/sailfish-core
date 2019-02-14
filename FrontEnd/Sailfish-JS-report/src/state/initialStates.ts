@@ -24,6 +24,7 @@ export const initialSelectedState: SelectedState = {
     messagesId: [],
     status: 'NA',
     checkpointMessageId: null,
+    checkpointActionId: null,
     rejectedMessageId: null
 }
 
