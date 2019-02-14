@@ -311,6 +311,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                 name={action.name}
                 count={checkpointIndex}
                 isSelected={isSelected}
+                description={action.description}
                 clickHandler={() => checkpointSelectHandler(action)}
                 ref={ref => this.treeElements[action.id] = ref}/>
         )

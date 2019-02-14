@@ -66,7 +66,9 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
         }
 
         if (prevProps.selectedCheckpointId !== this.props.selectedCheckpointId) {
-            this.scrollToMessage(this.props.selectedCheckpointId);
+            // [Chrome] smooth behavior doesn't work in chrome with multimple elements
+            // https://chromium.googlesource.com/chromium/src.git/+/bbf870d971d95af7ae1ee688a7ed100e3787d02b
+            this.scrollToMessage(this.props.selectedCheckpointId, false);
         }
 
         if (prevProps.selectedRejectedMessageId !== this.props.selectedRejectedMessageId) {
@@ -85,16 +87,18 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
                 // smooth behavior doesn't work here because render is not complete yet
-                if (this.elements[selectedMessageId]) {
-                    this.elements[selectedMessageId].base.scrollIntoView({ block: 'center' });
-                }
+                this.scrollToMessage(selectedMessageId, false);
             });
         });
     }
 
-    scrollToMessage(messageId: number) {
+    scrollToMessage(messageId: number, isSmooth: boolean = true) {
         if (this.elements[messageId]) {
-            this.elements[messageId].base.scrollIntoView({ block: 'center', behavior: 'smooth', inline: 'nearest' });
+            this.elements[messageId].base.scrollIntoView({ 
+                block: 'center', 
+                behavior: isSmooth ? 'smooth' : 'auto',
+                inline: 'nearest' 
+            });
         }
     }
 
@@ -210,12 +214,14 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
 
     private renderCheckpoint(message: Message, checkpoints: Message[], selectedCheckpointId: number) {
         const isSelected = message.id === selectedCheckpointId,
-            checkpointCount = checkpoints.indexOf(message) + 1;
+            checkpointCount = checkpoints.indexOf(message) + 1,
+            description = message.content["message"] ? message.content["message"]["Description"] : "";
 
         return (
             <Checkpoint name={message.msgName}
                 count={checkpointCount}
                 isSelected={isSelected}
+                description={description}
                 ref={ref => this.elements[message.id] = ref} />
         )
     }

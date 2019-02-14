@@ -51,4 +51,11 @@
         font-size: 14px;
         color: $primaryTextColor;
     }
+
+    &-description {
+        font-size: 12px;
+        padding-left: 10px;
+        color: $secondaryTextColor;
+        word-wrap: break-word;
+    }
 }

@@ -20,13 +20,14 @@ import "../styles/checkpoint.scss";
 interface CheckpointProps {
     name: string;
     count: number;
+    description?: string;
     isSelected: boolean;
     clickHandler?: () => any;
 }
 
 export class Checkpoint extends Component<CheckpointProps> {
 
-    render({ name, count, isSelected, clickHandler }: CheckpointProps) {
+    render({ name, count, isSelected, clickHandler, description }: CheckpointProps) {
 
         const rootClassName = ["checkpoint", (isSelected ? "selected" : "")].join(' ')
 
@@ -36,6 +37,7 @@ export class Checkpoint extends Component<CheckpointProps> {
                 <div class="checkpoint-icon" />
                 <div class="checkpoint-count">Checkpoint {count}</div>
                 <div class="checkpoint-name">{name}</div>
+                <div class="checkpoint-description">{description}</div>
             </div>
         )
     }
