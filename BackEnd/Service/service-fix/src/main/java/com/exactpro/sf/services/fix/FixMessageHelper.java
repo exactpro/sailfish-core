@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.util.Map;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
@@ -101,11 +103,11 @@ public class FixMessageHelper extends MessageHelper {
         message.addField(HEADER, subMessage);
         
         if (!subMessage.isFieldSet(MSG_TYPE_FIELD)) {
-            IMessageStructure structure = getDictionaryStructure().getMessageStructure(message.getName());
+            IMessageStructure structure = getDictionaryStructure().getMessages().get(message.getName());
             if (structure == null) {
                 throw new EPSCommonException("Message " + message.getName() + " not found in dictionary " + getNamespace());
             }
-            subMessage.addField(MSG_TYPE_FIELD, structure.getAttributeValueByName(MESSAGE_TYPE_ATTR_NAME));
+            subMessage.addField(MSG_TYPE_FIELD, getAttributeValue(structure, MESSAGE_TYPE_ATTR_NAME));
         }
         
         if (message.isFieldSet(TRAILER)) {

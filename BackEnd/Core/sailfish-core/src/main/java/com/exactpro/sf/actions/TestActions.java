@@ -15,9 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,16 +44,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.common.services.ServiceInfo;
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.aml.CommonColumn;
 import com.exactpro.sf.aml.CommonColumns;
 import com.exactpro.sf.aml.CustomColumn;
@@ -60,6 +54,14 @@ import com.exactpro.sf.aml.Direction;
 import com.exactpro.sf.aml.MessageDirection;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.script.actions.WaitAction;
+import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.services.ServiceInfo;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.DummyDictionaryManager;
@@ -658,11 +660,12 @@ public class TestActions extends AbstractCaller {
             messageFilter.setServicesIdSet(ImmutableSet.of(serviceInfo.getID()));
             messageFilter.setSortOrder(false);
 
-            IMessageStructure messageStructure = dictionary.getMessageStructure(message.getName());
+            IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
 
             Boolean isAdmin = false;
             if (messageStructure != null) {
-                Object isAdminFromDict = messageStructure.getAttributeValueByName(MessageHelper.ATTRIBUTE_IS_ADMIN);
+                Object isAdminFromDict = getAttributeValue(messageStructure, MessageHelper.ATTRIBUTE_IS_ADMIN);
+
                 if (isAdminFromDict instanceof Boolean) {
                     isAdmin = (Boolean) isAdminFromDict;
                 }

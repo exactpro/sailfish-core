@@ -40,7 +40,6 @@
         <message name="Test">
             <attribute type="java.lang.Double" name="Double">2.2</attribute>
             <field type="java.lang.Integer" name="DuplicateField"/>
-            <field type="java.lang.String" name="DuplicateField"/>
         </message>
         <message name="protected">
             <attribute type="java.lang.String" name="static">stat</attribute>

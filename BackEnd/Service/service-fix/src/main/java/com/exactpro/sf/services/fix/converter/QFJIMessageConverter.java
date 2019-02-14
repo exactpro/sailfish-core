@@ -15,8 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix.converter;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,14 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.exactpro.sf.services.fix.FixUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
@@ -40,6 +41,7 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.services.fix.FixMessageHelper;
+import com.exactpro.sf.services.fix.FixUtil;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.HashBasedTable;
@@ -105,8 +107,8 @@ public class QFJIMessageConverter
         this.orderingFields = orderingFields;
         
         if (this.orderingFields) {
-            this.fieldOrderHeader = getFieldOrderPrimitive(this.dictionary.getMessageStructure(FixMessageHelper.HEADER));
-            this.fieldOrderTrailer = getFieldOrderPrimitive(this.dictionary.getMessageStructure(FixMessageHelper.TRAILER));
+            this.fieldOrderHeader = getFieldOrderPrimitive(this.dictionary.getMessages().get(FixMessageHelper.HEADER));
+            this.fieldOrderTrailer = getFieldOrderPrimitive(this.dictionary.getMessages().get(FixMessageHelper.TRAILER));
         } else {
             this.fieldOrderHeader = null;
             this.fieldOrderTrailer = null;
@@ -116,8 +118,8 @@ public class QFJIMessageConverter
     }
 
 	private void indexMessages() {
-        for(IMessageStructure messageStructure : dictionary.getMessageStructures()) {
-            String messageType = (String)messageStructure.getAttributeValueByName(ATTRIBUTE_MESSAGE_TYPE);
+        for(IMessageStructure messageStructure : dictionary.getMessages().values()) {
+            String messageType = getAttributeValue(messageStructure, ATTRIBUTE_MESSAGE_TYPE);
 
             if(messageType != null) {
                 typeToStructure.put(messageType, messageStructure);
@@ -130,8 +132,8 @@ public class QFJIMessageConverter
 	private void indexMessageFields(IFieldStructure messageStructure, ArrayList<IFieldStructure> fieldPath, IMessageStructure rootMessage) {
         String messageName = rootMessage.getName();
 
-        for(IFieldStructure fieldStructure : messageStructure.getFields()) {
-            Integer fieldTag = (Integer)fieldStructure.getAttributeValueByName(ATTRIBUTE_TAG);
+        for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
+            Integer fieldTag = getAttributeValue(fieldStructure, ATTRIBUTE_TAG);
 
             if(fieldTag != null) {
                 tagToStructure.put(fieldTag, messageName, fieldStructure);
@@ -373,7 +375,7 @@ public class QFJIMessageConverter
 
     protected Message createInstance(String messageName, Class<? extends Message> messageClass) throws InstantiationException, IllegalAccessException {
         if (this.orderingFields && Message.class == messageClass) {
-            IMessageStructure messageStructure = dictionary.getMessageStructure(messageName);
+            IMessageStructure messageStructure = dictionary.getMessages().get(messageName);
             int[] fieldOrder = getFieldOrderPrimitive(messageStructure);
             return new SailfishQuickfixMessage(fieldOrder, this.fieldOrderHeader, this.fieldOrderTrailer);
         }
@@ -381,9 +383,9 @@ public class QFJIMessageConverter
     }
 	
     protected void traverseIMessage(final FieldMap resultMessage, final IMessage message) throws MessageConvertException {
-		IMessageStructure messageStructure = dictionary.getMessageStructure(message.getName());
+        IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
 
-        for(IFieldStructure fieldStructure : messageStructure.getFields()) {
+        for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
 			String fieldName = fieldStructure.getName();
 			Object fieldValue = message.getField(fieldName);
 
@@ -409,10 +411,10 @@ public class QFJIMessageConverter
                 continue;
             }
 
-			Integer fieldTag = (Integer)fieldStructure.getAttributeValueByName(ATTRIBUTE_TAG);
+            Integer fieldTag = getAttributeValue(fieldStructure, ATTRIBUTE_TAG);
 
 			if(fieldStructure.isComplex()) {
-				String entityType = (String)fieldStructure.getAttributeValueByName(ATTRIBUTE_ENTITY_TYPE);
+                String entityType = getAttributeValue(fieldStructure, ATTRIBUTE_ENTITY_TYPE);
 
 				switch(entityType) {
 				case "Group":
@@ -477,7 +479,7 @@ public class QFJIMessageConverter
                     boolean includeMillis = includeMilliseconds;
                     boolean includeMicros = includeMicroseconds;
 
-                    Object fixType = fieldStructure.getAttributeValueByName(QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
+                    Object fixType = getAttributeValue(fieldStructure, QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
                     if (FieldType.UtcTimeStampSecondPresicion.getName().equals(fixType)) {
                         includeMillis = includeMicros = false;
                     }
@@ -529,27 +531,27 @@ public class QFJIMessageConverter
             return null;
         }
 
-        IFieldStructure firstFieldStructure = fieldStructure.getFields().get(0);
+        IFieldStructure firstFieldStructure = fieldStructure.getFields().values().iterator().next();
 
         if(firstFieldStructure.isCollection()) {
-            return (Integer)firstFieldStructure.getAttributeValueByName(ATTRIBUTE_TAG);
+            return getAttributeValue(firstFieldStructure, ATTRIBUTE_TAG);
         }
 
         if(firstFieldStructure.isComplex()) {
             return getGroupDelimiter(firstFieldStructure);
         }
 
-        return (Integer)firstFieldStructure.getAttributeValueByName(ATTRIBUTE_TAG);
+        return getAttributeValue(firstFieldStructure, ATTRIBUTE_TAG);
 	}
 
 	private List<Integer> getFieldOrder(IFieldStructure fieldStructure) {
         List<Integer> fieldOrder = new ArrayList<>();
 
-        for(IFieldStructure field : fieldStructure.getFields()) {
+        for(IFieldStructure field : fieldStructure.getFields().values()) {
             if(field.isComplex() && !field.isCollection()) {
                 fieldOrder.addAll(getFieldOrder(field));
             } else {
-                Integer fieldTag = (Integer)field.getAttributeValueByName(ATTRIBUTE_TAG);
+                Integer fieldTag = getAttributeValue(field, ATTRIBUTE_TAG);
 
                 if(fieldTag == null) {
                     logger.error("Field {} in dictionary {} does not contain {}", field.getName(), field.getNamespace(), ATTRIBUTE_TAG);

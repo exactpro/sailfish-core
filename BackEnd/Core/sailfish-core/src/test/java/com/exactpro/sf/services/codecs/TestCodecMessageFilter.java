@@ -102,12 +102,12 @@ public class TestCodecMessageFilter {
             IMessage dropped_5 = DefaultMessageFactory.getFactory().createMessage("SubFilter", dictionary.getNamespace());
             dropped_5.addField("Hello", "asdasdadsasd");
 
-            IMessageStructure filterStructure = dictionary.getMessageStructure("Filter");
-            IMessageStructure subFilterStructure = dictionary.getMessageStructure("SubFilter");
-            IMessageStructure filterSubFilterStructure = dictionary.getMessageStructure("FilterSubFilter");
-            IMessageStructure noFiltersStructure = dictionary.getMessageStructure("NoFilters");
-            IMessageStructure filtersSubFilterStructure = dictionary.getMessageStructure("FiltersSubFilter");
-            IMessageStructure filterSubFiltersStructure = dictionary.getMessageStructure("FilterSubFilters");
+            IMessageStructure filterStructure = dictionary.getMessages().get("Filter");
+            IMessageStructure subFilterStructure = dictionary.getMessages().get("SubFilter");
+            IMessageStructure filterSubFilterStructure = dictionary.getMessages().get("FilterSubFilter");
+            IMessageStructure noFiltersStructure = dictionary.getMessages().get("NoFilters");
+            IMessageStructure filtersSubFilterStructure = dictionary.getMessages().get("FiltersSubFilter");
+            IMessageStructure filterSubFiltersStructure = dictionary.getMessages().get("FilterSubFilters");
 
             Assert.assertEquals(false, filter.dropMessage(session, filterStructure, notDropped_1));
             Assert.assertEquals(false, filter.dropMessage(session, filterStructure, notDropped_2));

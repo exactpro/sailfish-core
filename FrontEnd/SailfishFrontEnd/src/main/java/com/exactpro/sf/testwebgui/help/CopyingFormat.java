@@ -220,7 +220,7 @@ public class CopyingFormat {
                 addToLine(null, structure.getName(), "[" + groupName + "]");
             }
 
-            for (IFieldStructure child : structure.getFields()) {
+            for(IFieldStructure child : structure.getFields().values()) {
                 formatStructureChildren(child, groupName, level + 1);
             }
         }

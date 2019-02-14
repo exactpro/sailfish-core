@@ -30,7 +30,7 @@ public class StructureBuilder {
 	private String namespace;
 	
 	public StructureBuilder(String namespace) {
-		this(namespace, new HashMap<String, IMessageStructure>(), new HashMap<String, IFieldStructure>());
+        this(namespace, new HashMap<>(), new HashMap<>());
 	}
 	
 	protected StructureBuilder(String namespace, Map<String, IMessageStructure> msg, Map<String, IFieldStructure> field) {
@@ -83,10 +83,6 @@ public class StructureBuilder {
 
 	public Map<String, IMessageStructure> getMsgStructureMap() {
 		return msgStructures;
-	}
-	
-	public List<IFieldStructure> getFieldStructures() {
-		return new ArrayList<>(fieldStructures.values());
 	}
 
 	public Map<String, IFieldStructure> getFieldStructureMap() {

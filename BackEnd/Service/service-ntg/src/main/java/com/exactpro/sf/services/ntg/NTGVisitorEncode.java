@@ -15,12 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageStructureReader;
@@ -49,11 +51,9 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
 		logger.debug("   Encode visiting IMessage field [{}] , value = [{}]", fieldName, message);
 
-		int	length = (Integer)complexField.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
+        int length = getAttributeValue(complexField, NTGProtocolAttribute.Length.toString());
 
-		int	offset = (Integer)complexField.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int offset = getAttributeValue(complexField, NTGProtocolAttribute.Offset.toString());
 
 		validateOffset(fieldName, accumulatedLength, offset);
 
@@ -76,12 +76,9 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
         validateAttributesMap(fieldName, String.class, fldStruct);
 
-        int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-        int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
-        String format = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Format.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
+        String format = getAttributeValue(fldStruct, NTGProtocolAttribute.Format.toString());
 
         validateOffset(fieldName, accumulatedLength, offset);
 
@@ -133,10 +130,8 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
         validateAttributesMap(fieldName, LocalDateTime.class, fldStruct);
 
-        int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-        int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
         validateOffset(fieldName, accumulatedLength, offset);
 
@@ -150,7 +145,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 	@Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault)
 	{
-		if(fldStruct.getAttributeNames().size() == 0 )
+        if(fldStruct.getAttributes().isEmpty())
 		{
 			throw new NullFieldValue(String.format( "Field name = [%s] has null value" , fieldName ));
 		}
@@ -162,14 +157,11 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		}
 		validateAttributesMap(fieldName, Double.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
 
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
-		String type = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Type.toString());
+        String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
 		int precision = "Price4".equals(type) ? 4 : 8;
 
@@ -192,22 +184,20 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 	@Override
 	public void visit(String fieldName, Float value, IFieldStructure fldStruct, boolean isDefault)
 	{
-		if(fldStruct.getAttributeNames().size() == 0 )
+        if(fldStruct.getAttributes().isEmpty())
 		{
 			throw new NullFieldValue(String.format( "Field name = [%s] has null value" , fieldName ));
 		}
-		
+
 		if (logger.isDebugEnabled()) {
 			logger.debug("   Encode visiting Float field [{}] , value = [{}]", fieldName, value);			
 			logger.debug("         float value [{}] will be encoded as integer [{}]", value, (int) (value * 10000.0f));
 		}
 		validateAttributesMap(fieldName, Float.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
 
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 		if (writeFiller(value, length, fieldName)) {
             return;
@@ -232,19 +222,16 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 			logger.debug("   Encode visiting Long field [{}] , value = [{}]", fieldName, value);
 		}
 
-		if(fldStruct.getAttributeNames().size() == 0 )
+        if(fldStruct.getAttributes().isEmpty())
 		{
 			throw new NullFieldValue(String.format( "Field name = [%s] has null value" , fieldName ));
 		}
 
 		validateAttributesMap(fieldName, Long.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
-        String type = (String) fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Type.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
+        String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
         ProtocolType protocolType = type != null ? ProtocolType.parse(type) : null;
 
@@ -271,14 +258,12 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 			logger.debug("   Encode visiting Integer field [{}] , value = [{}]", fieldName, value);
 		}
 
-		if (fldStruct.getAttributeNames().size() == 0) {
+        if(fldStruct.getAttributes().isEmpty()) {
 			throw new NullFieldValue(String.format( "Field name = [%s] has null value" , fieldName ));
 		}
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 		logger.debug("   length = {}", length);
 		logger.debug("   offset = {}", offset);
@@ -320,17 +305,15 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 			logger.debug("   Encode visiting Byte field [{}] , value = [{}]", fieldName, value);
 		}
 
-		if(fldStruct.getAttributeNames().size() == 0 )
+        if(fldStruct.getAttributes().isEmpty())
 		{
 			throw new NullFieldValue(String.format( "Field name = [%s] has null value" , fieldName ));
 		}
 
 		validateAttributesMap(fieldName, Byte.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 		validateLength(fieldName, lengthByte, length);
 		validateOffset(fieldName, accumulatedLength, offset);
@@ -356,14 +339,11 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		}
 		validateAttributesMap(fieldName, BigDecimal.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
 
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
-		String type = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Type.toString());
+        String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
 		validateLength(fieldName, lengthBigDecimal, length);
 		validateOffset(fieldName, accumulatedLength, offset);

@@ -15,10 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast.converter;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.openfast.GroupValue;
@@ -53,27 +54,21 @@ public class IMessageToFastConverter {
 	}
 
 	private void hashMessageFields() {
-		List<IMessageStructure> structures = dictionary.getMessageStructures();
-		for (IMessageStructure msgStructure : structures) {
-			Map<String, IFieldStructure> map = new HashMap<String, IFieldStructure>();
-			msgFielsMap.put(msgStructure, map);
-			List<IFieldStructure> fieldsDesc = msgStructure.getFields();
-			for (IFieldStructure fieldDesc:fieldsDesc) {
-				map.put(fieldDesc.getName(), fieldDesc);
-			}
+        for(IMessageStructure msgStructure : dictionary.getMessages().values()) {
+            msgFielsMap.put(msgStructure, msgStructure.getFields());
 		}
 	}
 
 	public Message convert(IMessage iMsg) throws ConverterException {
 
-		IMessageStructure structure = dictionary.getMessageStructure(iMsg.getName());
+        IMessageStructure structure = dictionary.getMessages().get(iMsg.getName());
 
 		if (structure == null) {
 			throw new EPSCommonException("Can not find message " + iMsg.getName() +
 					" in the namespace " + iMsg.getNamespace());
 		}
 
-		String templateId = (String) structure.getAttributeValueByName("templateId");
+        String templateId = getAttributeValue(structure, "templateId");
 
 		MessageTemplate template = templateRegistry.get(Integer.valueOf(templateId));
 		Message fastMsg = new Message(template);
@@ -85,7 +80,7 @@ public class IMessageToFastConverter {
 
 	private void convertFields(GroupValue fastMsg, 	IMessage message)
 	throws ConverterException {
-		IMessageStructure structure = dictionary.getMessageStructure(message.getName());
+        IMessageStructure structure = dictionary.getMessages().get(message.getName());
 		if (structure == null) {
 			logger.error("Can get description from dictionary for {}:{}", message.getName(), message.getNamespace());
 			throw new ConverterException("Can get description from dictionary for " +
@@ -101,10 +96,10 @@ public class IMessageToFastConverter {
 			String fieldName, IMessageStructure structure) throws ConverterException {
 		String fastFieldName = null;
 		IFieldStructure messageFieldDescr = msgFielsMap.get(structure).get(fieldName);
-		fastFieldName = (String) messageFieldDescr.getAttributeValueByName("fastName");
+        fastFieldName = getAttributeValue(messageFieldDescr, "fastName");
 
 		if (fastFieldName == null) {
-			Boolean isLength = (Boolean) messageFieldDescr.getAttributeValueByName("isLength");
+            Boolean isLength = getAttributeValue(messageFieldDescr, "isLength");
 			if (isLength != null && isLength) {
 				return;
 			}

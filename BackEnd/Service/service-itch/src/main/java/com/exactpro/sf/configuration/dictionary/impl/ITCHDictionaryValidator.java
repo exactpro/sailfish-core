@@ -15,6 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -27,9 +37,6 @@ import com.exactpro.sf.configuration.dictionary.ValidationHelper;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
 import com.exactpro.sf.services.itch.ITCHVisitorBase;
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.util.*;
 
 public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
@@ -103,8 +110,8 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
     private boolean isSubMessage(IDictionaryStructure dictionary, IMessageStructure subMessage) {
 
-        for (IMessageStructure message : dictionary.getMessageStructures()) {
-            for (IFieldStructure field : message.getFields()) {
+        for(IMessageStructure message : dictionary.getMessages().values()) {
+            for(IFieldStructure field : message.getFields().values()) {
                 if (field.getReferenceName() != null && field.getReferenceName().equals(subMessage.getName()))
                     return true;
             }
@@ -114,7 +121,7 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
     private void checkRequiredField(List<DictionaryValidationError> errors, IMessageStructure message,
                                     String fieldName) {
-        if(message.getField(fieldName) == null) {
+        if(!message.getFields().containsKey(fieldName)) {
             errors.add(new DictionaryValidationError(message.getName(), null,
                     "Message  <strong>\"" + message.getName() + "\"</strong> doesn't contain" + fieldName +" field",
                     DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));
@@ -156,8 +163,8 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                 }
 
                 ITCHVisitorBase.ProtocolType type =
-                        ITCHVisitorBase.ProtocolType.getEnum((String) field.getAttributeValueByName(ITCHVisitorBase.TYPE_ATTRIBUTE));
-                Integer length = (Integer) field.getAttributeValueByName(ITCHVisitorBase.LENGTH_ATTRIBUTE);
+                        ITCHVisitorBase.ProtocolType.getEnum(getAttributeValue(field, ITCHVisitorBase.TYPE_ATTRIBUTE));
+                Integer length = getAttributeValue(field, ITCHVisitorBase.LENGTH_ATTRIBUTE);
 
                 JavaType javaType = field.getJavaType();
                 switch (type) {
@@ -414,8 +421,8 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
     private void checkMessageTypes(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
         Set<Object> messageTypes = new HashSet<>();
 
-        for(IMessageStructure message : dictionary.getMessageStructures()) {
-            Object messageTypeAttribute = message.getAttributeValueByName(ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
+        for(IMessageStructure message : dictionary.getMessages().values()) {
+            Object messageTypeAttribute = getAttributeValue(message, ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
 
             if(messageTypeAttribute != null) {
 
@@ -426,8 +433,7 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                             DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
                 }
 
-                IFieldStructure messageTypeEnum =
-                        dictionary.getFieldStructure(ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
+                IFieldStructure messageTypeEnum = dictionary.getFields().get(ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
                 
                 if (messageTypeEnum != null) {
 

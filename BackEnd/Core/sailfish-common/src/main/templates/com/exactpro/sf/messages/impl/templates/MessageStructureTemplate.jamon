@@ -7,7 +7,7 @@
   String typeName;
   String messageName;
   String namespaceName;
-  java.util.List<IFieldStructure> fields;
+  java.util.Collection<IFieldStructure> fields;
   java.util.Map<String, String> attributes;
 </%args>
 
@@ -98,9 +98,8 @@ public class <% typeName %> extends BaseMessage
     </%for>
 
 	<%if ( fields != null ) %>
-		<%for int i = 0; i < fields.size(); ++i %>
+		<%for IFieldStructure field : fields %>
 			<%java>
-				IFieldStructure field = fields.get(i);
 				String fieldTypeName = CodeGenUtils.getTypeName(field, distPackagePath, underscoreAsPackageSeparator);
 				String methodCall = "";
 			</%java>

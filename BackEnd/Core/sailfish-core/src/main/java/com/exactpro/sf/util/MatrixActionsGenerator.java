@@ -15,16 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.util.Collection;
+
+import com.exactpro.sf.actions.ActionClassTemplate;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XsdDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.actions.ActionClassTemplate;
-
-import java.io.*;
-import java.util.List;
 
 public class MatrixActionsGenerator {
     private static final String actionPackage = "com.exactpro.sf.actions";
@@ -39,7 +44,7 @@ public class MatrixActionsGenerator {
 			String uncheckedFields)
 	throws IOException {
 
-		List<IMessageStructure> messages = dictionary.getMessageStructures();
+        Collection<IMessageStructure> messages = dictionary.getMessages().values();
 
 		StringWriter strWriter = new StringWriter();
 		String typeNamespace = messagesPackageName + "." + dictionary.getNamespace().toLowerCase();

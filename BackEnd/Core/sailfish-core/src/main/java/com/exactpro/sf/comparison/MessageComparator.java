@@ -63,7 +63,7 @@ public class MessageComparator {
         IFieldStructure messageStructure = null;
 
         if(dictionaryStructure != null) {
-            messageStructure = dictionaryStructure.getMessageStructure(name);
+            messageStructure = dictionaryStructure.getMessages().get(name);
         }
 
         ComparisonResult result = compareValues(name, actual, expected, false, messageStructure, Collections.singletonList(settings.getMetaContainer()), settings);
@@ -309,7 +309,7 @@ public class MessageComparator {
         Collection<String> fieldNames = null;
 
         if(structure != null) {
-            fieldNames = structure.getFieldNames();
+            fieldNames = structure.getFields().keySet();
         } else {
             fieldNames = new LinkedHashSet<>();
             fieldNames.addAll(actualMessage.getFieldNames());
@@ -326,7 +326,7 @@ public class MessageComparator {
 
             boolean fieldUncheck = uncheck || settings.getUncheckedFields().contains(fieldName);
 
-            IFieldStructure fieldStructure = structure != null ? structure.getField(fieldName) : null;
+            IFieldStructure fieldStructure = structure != null ? structure.getFields().get(fieldName) : null;
             List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName);
 
             result.addResult(compareValues(fieldName, actualValue, expectedValue, fieldUncheck, fieldStructure, subMetaContainers, settings));
@@ -432,7 +432,7 @@ public class MessageComparator {
             }
 
             IMessage message = (IMessage)object;
-            Collection<String> fieldNames = structure != null ? structure.getFieldNames() : message.getFieldNames();
+            Collection<String> fieldNames = structure != null ? structure.getFields().keySet() : message.getFieldNames();
 
             for(String fieldName : fieldNames) {
                 Object value = message.getField(fieldName);
@@ -441,7 +441,7 @@ public class MessageComparator {
                     continue;
                 }
 
-                IFieldStructure subStructure = structure != null ? structure.getField(fieldName) : null;
+                IFieldStructure subStructure = structure != null ? structure.getFields().get(fieldName) : null;
                 List<MetaContainer> subMetaContainers = getMetaContainers(metaContainers, fieldName);
                 ComparisonResult subResult = new ComparisonResult(fieldName);
 

@@ -16,17 +16,18 @@
 package com.exactpro.sf.util;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import com.exactpro.sf.common.util.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
+import com.exactpro.sf.aml.scriptutil.StaticUtil;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageStructureVisitor;
@@ -35,8 +36,7 @@ import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureUtils;
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.util.EnumUtils;
 import com.exactpro.sf.comparison.ComparisonResult;
 
 public class EnumReplacer {
@@ -54,7 +54,7 @@ public class EnumReplacer {
                 IFieldStructure subFieldStructure = fieldStructure;
 
                 if(fieldStructure.isComplex()) {
-                    subFieldStructure = fieldStructure.getField(subComparison.getName());
+                    subFieldStructure = fieldStructure.getFields().get(subComparison.getName());
                 }
 
                 if (subFieldStructure != null) {

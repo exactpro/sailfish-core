@@ -17,6 +17,7 @@ package com.exactpro.sf.configuration.dictionary.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
         if (full) {
 
             if (fieldsOnly == null || fieldsOnly) {
-                checkDictionaryFields(dictionary.getFieldStructures(), errors);
+                checkDictionaryFields(dictionary.getFields().values(), errors);
             }
 
             if (fieldsOnly == null || !fieldsOnly) {
@@ -95,13 +96,13 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
     protected void checkMessages(IDictionaryStructure dictionary, List<DictionaryValidationError> errors, boolean full) {
 
-        for (IMessageStructure message : dictionary.getMessageStructures()) {
+        for(IMessageStructure message : dictionary.getMessages().values()) {
 
             errors.addAll(this.validate(dictionary, message, full));
         }
     }
 
-    protected void checkDictionaryFields(List<IFieldStructure> fields, List<DictionaryValidationError> errors) {
+    protected void checkDictionaryFields(Collection<IFieldStructure> fields, List<DictionaryValidationError> errors) {
 
         for (IFieldStructure field : fields) {
 
@@ -111,7 +112,7 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
     protected void checkMessageFields(IMessageStructure message, List<DictionaryValidationError> errors) {
 
-        for (IFieldStructure field : message.getFields()) {
+        for(IFieldStructure field : message.getFields().values()) {
 
             errors.addAll(this.validate(message, field));
         }

@@ -15,17 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.services.IServiceContext;
-import com.exactpro.sf.services.itch.configuration.Preprocessor;
-import com.exactpro.sf.services.itch.configuration.Preprocessors;
-import com.exactpro.sf.util.DateTimeUtility;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.mina.core.session.IoSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 
 import javax.xml.bind.JAXBContext;
@@ -33,8 +26,19 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
-import java.io.IOException;
-import java.io.InputStream;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.mina.core.session.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.itch.configuration.Preprocessor;
+import com.exactpro.sf.services.itch.configuration.Preprocessors;
+import com.exactpro.sf.util.DateTimeUtility;
 
 public class DefaultPreprocessor implements IITCHPreprocessor {
     private static final Logger logger = LoggerFactory.getLogger(DefaultPreprocessor.class);
@@ -49,15 +53,15 @@ public class DefaultPreprocessor implements IITCHPreprocessor {
             String secondsField = getSecondsField();
             String nanosField = getNanoField();
             if (isTimeMessage(msgStructure)) {
-                if (msgStructure.getFieldNames().contains(secondsField)) {
+                if(msgStructure.getFields().containsKey(secondsField)) {
                     session.setAttribute(ITCHMessageHelper.FIELD_SECONDS, message.getField(secondsField));
                 } else {
                     logger.warn("Message {} [{}] not contains field {}", message.getName(), message.getFieldNames(),
                             secondsField);
                 }
-            } else if (msgStructure.getFieldNames().contains(ITCHMessageHelper.FAKE_FIELD_MESSAGE_TIME)
+            } else if(msgStructure.getFields().containsKey(ITCHMessageHelper.FAKE_FIELD_MESSAGE_TIME)
                     && session.containsAttribute(ITCHMessageHelper.FIELD_SECONDS)
-                    && msgStructure.getFieldNames().contains(nanosField)) {
+                    && msgStructure.getFields().containsKey(nanosField)) {
                 long seconds = ((Number) ObjectUtils.defaultIfNull(session.getAttribute(ITCHMessageHelper.FIELD_SECONDS), -1l)).longValue();
                 if (seconds != -1l) {
                     long nanoSeconds = ObjectUtils.defaultIfNull(message.getField(nanosField), 0L);
@@ -71,8 +75,7 @@ public class DefaultPreprocessor implements IITCHPreprocessor {
     }
 
     protected boolean isTimeMessage(IMessageStructure structure) {
-        return ITCHMessageHelper.MESSAGE_TYPE_TIME.equals(
-                structure.getAttributeValueByName(ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE));
+        return ITCHMessageHelper.MESSAGE_TYPE_TIME.equals(getAttributeValue(structure, ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE));
     }
 
     protected String getSecondsField() {

@@ -16,6 +16,7 @@
 package com.exactpro.sf.common.messages;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,16 +53,16 @@ public class MessageTraverser extends MessageStructureReader {
     }
 
     @Override
-    public void traverse(IMessageStructureVisitor msgStrVisitor, List<IFieldStructure> fields, IMessage message,
+    public void traverse(IMessageStructureVisitor msgStrVisitor, Map<String, IFieldStructure> fields, IMessage message,
             IMessageStructureReaderHandler handler) {
-        Set<String> namesByDictionary = fields.stream().map(IFieldStructure::getName).collect(Collectors.toSet());
+        Set<String> namesByDictionary = fields.keySet();
 
-        List<IFieldStructure> combinedFields = Stream.concat(fields.stream(),
+        Map<String, IFieldStructure> combinedFields = Stream.concat(fields.values().stream(),
                 message.getFieldNames().stream()
                         .filter(name -> !namesByDictionary.contains(name))
                         .map(name -> createFieldStructure(message, name))
                         .filter(Objects::nonNull))
-                .collect(Collectors.toList());
+                .collect(LinkedHashMap::new, (map, value) -> map.put(value.getName(), value), Map::putAll);
 
         super.traverse(msgStrVisitor, combinedFields, message, handler);
     }

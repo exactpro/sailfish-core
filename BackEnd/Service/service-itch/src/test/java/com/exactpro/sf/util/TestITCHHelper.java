@@ -15,6 +15,23 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.junit.Assert;
+
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -31,22 +48,6 @@ import com.exactpro.sf.services.MockProtocolEncoderOutput;
 import com.exactpro.sf.services.itch.ITCHCodec;
 import com.exactpro.sf.services.itch.ITCHCodecSettings;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.DummySession;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.junit.Assert;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 
 public class TestITCHHelper extends AbstractTest {
 	
@@ -220,7 +221,7 @@ public class TestITCHHelper extends AbstractTest {
 	
 	protected void testFieldNames(IDictionaryStructure dictionary, List<String> expectedNames){
 		List<String> names = new ArrayList<>();
-		for ( IFieldStructure fieldType : dictionary.getFieldStructures() ){
+        for(IFieldStructure fieldType : dictionary.getFields().values()) {
 			names.add(fieldType.getName());
 		}
 		for (String name : expectedNames){
@@ -230,7 +231,7 @@ public class TestITCHHelper extends AbstractTest {
 	
 	protected void testMessageNames(IDictionaryStructure dictionary, List<String> expectedNames){
 		List<String> names = new ArrayList<>();
-		for ( IMessageStructure msgStruct : dictionary.getMessageStructures() ){
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
 			names.add(msgStruct.getName());
 		}
 		for (String name : expectedNames){

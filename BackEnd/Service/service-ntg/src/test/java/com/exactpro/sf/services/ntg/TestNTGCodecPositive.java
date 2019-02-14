@@ -15,16 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.impl.messages.MapMessage;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.common.util.ErrorUtil;
-import com.exactpro.sf.services.MockProtocolDecoderOutput;
-import com.exactpro.sf.storage.util.JsonMessageConverter;
-import com.exactpro.sf.util.AbstractTest;
-import com.exactpro.sf.util.DateTimeUtility;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.ByteOrder;
+import java.util.Queue;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
@@ -39,10 +34,16 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.ByteOrder;
-import java.util.Queue;
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.util.ErrorUtil;
+import com.exactpro.sf.services.MockProtocolDecoderOutput;
+import com.exactpro.sf.storage.util.JsonMessageConverter;
+import com.exactpro.sf.util.AbstractTest;
+import com.exactpro.sf.util.DateTimeUtility;
 
 public class TestNTGCodecPositive extends AbstractTest {
 
@@ -341,7 +342,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 	private void testRoundTrip(IMessage message, IDictionaryStructure dictionary) {
 		try
 		{
-			IMessageStructure msgStruct = dictionary.getMessageStructure(message.getName());
+            IMessageStructure msgStruct = dictionary.getMessages().get(message.getName());
 
 			Assert.assertNotNull("Message structure is null.", msgStruct);
 

@@ -56,7 +56,7 @@ public class TestNTGMessageHelper extends AbstractTest {
 
     @Test
     public void testMessageType() throws IOException {
-        IFieldStructure typeField = this.dictionary.getFieldStructure("MessageType");
+        IFieldStructure typeField = this.dictionary.getFields().get("MessageType");
         for (String element : typeField.getValues().keySet()) {
             IMessage message = this.messageFactory.createMessage(element, this.namespace);
             this.messageHelper.prepareMessageToEncode(message, null);

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.FileInputStream;
@@ -419,12 +421,10 @@ public class FIXClient implements IInitiatorService {
             this.fixSettings.isValidateFieldsOutOfRange());
 
         IDictionaryStructure dictionaryStructure = dictionaryProvider.getDictionaryStructure();
-        IMessageStructure logonStructure = dictionaryStructure.getMessageStructure(FixMessageHelper.LOGON_MESSAGE);
-        boolean sendSupportsMicros = logonStructure.getFields().stream()
-            .map(fieldStructure -> fieldStructure.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG))
-            .filter(SUPPORTS_MICROSECOND_TIMESTAMPS_TAG::equals)
-            .findFirst()
-            .isPresent();
+        IMessageStructure logonStructure = dictionaryStructure.getMessages().get(FixMessageHelper.LOGON_MESSAGE);
+        boolean sendSupportsMicros = logonStructure.getFields().values().stream()
+                .map(fieldStructure -> getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG))
+                .anyMatch(SUPPORTS_MICROSECOND_TIMESTAMPS_TAG::equals);
         
         sessionSettings.setBool( sessionID, SUPPORTS_MICROSECOND_TIMESTAMPS, sendSupportsMicros);
     }

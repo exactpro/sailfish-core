@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -93,21 +96,21 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	}
 
 	private void loadMsgTypes() {
-		IMessageStructure header = iMsgDict.getMessageStructure("header");
+        IMessageStructure header = iMsgDict.getMessages().get("header");
 		if (header != null) {
-			indexFields(HEADER_ID, header.getFields(), false);
-		}
-		IMessageStructure trailer = iMsgDict.getMessageStructure("trailer");
+            indexFields(HEADER_ID, header.getFields().values(), false);
+        }
+        IMessageStructure trailer = iMsgDict.getMessages().get("trailer");
 		if (trailer != null) {
-			indexFields(TRAILER_ID, trailer.getFields(), false);
-		}
-		for (IMessageStructure struct : iMsgDict.getMessageStructures()) {
-			String messageType = (String) struct.getAttributeValueByName("MessageType");
+            indexFields(TRAILER_ID, trailer.getFields().values(), false);
+        }
+        for(IMessageStructure struct : iMsgDict.getMessages().values()) {
+            String messageType = getAttributeValue(struct, "MessageType");
 			if (messageType == null) {
 				continue;
 			}
 			messages.put(messageType, struct);
-			indexFields(messageType, struct.getFields(), false);
+            indexFields(messageType, struct.getFields().values(), false);
 		}
 	}
 
@@ -117,7 +120,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
         }
     }
 
-	private void indexFields(String messageType, List<IFieldStructure> fieldStructures, boolean onlyFields) {
+    private void indexFields(String messageType, Collection<IFieldStructure> fieldStructures, boolean onlyFields) {
 		HashMap<Integer, IFieldStructure> msgFields = mesgFields.get(messageType);
 		if (msgFields == null && !onlyFields) {
 			msgFields = new HashMap<>();
@@ -130,15 +133,15 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		}
 
 		for (IFieldStructure fs : fieldStructures) {
-			Integer tag = (Integer) fs.getAttributeValueByName("tag");
+            Integer tag = getAttributeValue(fs, "tag");
 			if (tag == null) {
 				if (fs.isComplex()) {
-					indexFields(messageType, fs.getFields(), onlyFields || fs.isCollection());
+                    indexFields(messageType, fs.getFields().values(), onlyFields || fs.isCollection());
 				}
 				continue;
 			}
 			if (fs.isComplex() && fs.isCollection()) {
-				indexFields(null, fs.getFields(), true);
+                indexFields(null, fs.getFields().values(), true);
 			}
 			if (!onlyFields) {
 				msgFields.put(tag, fs);
@@ -176,7 +179,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			        }
                 }
 
-                Object allowOtherValues = fs.getAttributeValueByName(ALLOW_OTHER_VALUES_ATTRIBUTE);
+                Object allowOtherValues = getAttributeValue(fs, ALLOW_OTHER_VALUES_ATTRIBUTE);
 				if (allowOtherValues instanceof Boolean && (Boolean)allowOtherValues) {
 				    fldValues.add(ANY_VALUE);
 				}
@@ -226,13 +229,13 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		if (subMsgType.getFields().isEmpty()) {
 			return null;
 		}
-		IFieldStructure firstFld = subMsgType.getFields().get(0);
+        IFieldStructure firstFld = subMsgType.getFields().values().iterator().next();
 		if (!firstFld.isCollection()) {
     		if (firstFld.isComplex()) {
     			return getFirstFieldWithTag(firstFld);
     		}
 		}
-		return (Integer) firstFld.getAttributeValueByName("tag");
+        return getAttributeValue(firstFld, "tag");
 	}
 
 	@Override
@@ -566,7 +569,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	    if (tag == MsgType.FIELD)
             return getMessageName(value);
         String result = null;
-        IFieldStructure fieldType = iMsgDict.getFieldStructure(fields.get(tag).getName());
+        IFieldStructure fieldType = iMsgDict.getFields().get(fields.get(tag).getName());
         if (fieldType != null && fieldType.isEnum()) {
             for (String el : fieldType.getValues().keySet()) {
                 if (fieldType.getValues().get(el).getValue().equals(value)) {
@@ -624,7 +627,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		if (fs == null) {
 			return false;
 		}
-		String fixType = (String) fs.getAttributeValueByName(ATTRIBUTE_FIX_TYPE);
+        String fixType = getAttributeValue(fs, ATTRIBUTE_FIX_TYPE);
 		if (fixType == null) {
 			//group field
 			return false;
@@ -656,7 +659,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		if (fldType == null) {
 			throw new FieldNotFoundException("tag:" + tag);
 		}
-		String fixType = (String) fldType.getAttributeValueByName(ATTRIBUTE_FIX_TYPE);
+        String fixType = getAttributeValue(fldType, ATTRIBUTE_FIX_TYPE);
 		if (bs == null || fixType == null)	{
 			throw new EPSCommonException("Can not get field type");
 		}
@@ -726,7 +729,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		public GroupInfo getGroup(String msg, int field) {
 
 			IFieldStructure grpFld = null;
-			for (IFieldStructure fld : fieldStructure.getFields()) {
+            for(IFieldStructure fld : fieldStructure.getFields().values()) {
 				if (fld.isComplex() && !fld.isCollection()) {
 					GroupDictionary dd1 = new GroupDictionary(msg, field, fld);
 					GroupInfo grp = dd1.getGroup(msg, field);
@@ -799,7 +802,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 		private void addSubmessageRequiredFields(
 				Set<Integer> requiredFields, IFieldStructure msgStruct) {
-			for(IFieldStructure fldstrct: msgStruct.getFields()) {
+            for(IFieldStructure fldstrct : msgStruct.getFields().values()) {
 				Integer tag = getFieldTag(fldstrct);
 				if (fldstrct.isRequired()) {
 					requiredFields.add(tag);
@@ -816,7 +819,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		@Override
 		public boolean isGroup(String headerId, int field) {
 			//FIXME : rehash all submessages of submessages
-			for (IFieldStructure fld : fieldStructure.getFields()) {
+            for(IFieldStructure fld : fieldStructure.getFields().values()) {
 				if (fld.isComplex() && !fld.isCollection()) {
 					GroupDictionary dd1 = new GroupDictionary(headerId, field, fld);
 					if (dd1.isGroup(headerId, field)) {
@@ -856,7 +859,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 		private void addSubmessageFields(ArrayList<Integer> fields,
 				IFieldStructure msgStruct) {
-			for(IFieldStructure fldstrct: msgStruct.getFields()) {
+            for(IFieldStructure fldstrct : msgStruct.getFields().values()) {
 				Integer tag = getFieldTag(fldstrct);
 				if (tag == null) {
 					if (fldstrct.isComplex() && !fldstrct.isCollection()) {
@@ -869,8 +872,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		}
 
 		private Integer getFieldTag(IFieldStructure fldstrct) {
-			Integer tag = (Integer) fldstrct.getAttributeValueByName("tag");
-			return tag;
+            return getAttributeValue(fldstrct, "tag");
 		}
 
 		@Override

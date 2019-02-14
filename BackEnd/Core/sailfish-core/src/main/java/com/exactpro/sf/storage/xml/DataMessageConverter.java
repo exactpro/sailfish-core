@@ -34,7 +34,7 @@ public class DataMessageConverter {
 	public static MapMessage createMapMessage(DataMessage message, IDictionaryStructure dataDicionary){
 		
 		MapMessage mapMessage = new MapMessage(message.getNamespace(), message.getName());
-		IMessageStructure messageStructure = dataDicionary.getMessageStructure(message.getName());
+        IMessageStructure messageStructure = dataDicionary.getMessages().get(message.getName());
 		
 		MessageStructureWriter wtraverser = new MessageStructureWriter();
 		wtraverser.traverse(new DataMessageReaderVisitor(message, mapMessage), messageStructure);
@@ -43,8 +43,8 @@ public class DataMessageConverter {
 	}
 	
 	public static DataMessage createDataMessage(IMessage imessage, IDictionaryStructure dataDictionary){
-		
-		IMessageStructure messageStructure = dataDictionary.getMessageStructure(imessage.getName());
+
+        IMessageStructure messageStructure = dataDictionary.getMessages().get(imessage.getName());
 		DataMessage dataMessage = new DataMessage();
 		dataMessage.setName(imessage.getName());
 		dataMessage.setNamespace(imessage.getNamespace());

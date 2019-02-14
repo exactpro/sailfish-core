@@ -86,13 +86,9 @@
 			<field name="95P" reference="_95P" />
 			<field name="97A" reference="_97A" />
 			<field name="16S" reference="_16S" />
-			<field name="16R" reference="_16R" />
-			<field name="95P" reference="_95P" />
-			<field name="16S" reference="_16S" />
 		</message>
 		<message id="OptionalSubsequenceC3Amounts" name="OptionalSubsequenceC3Amounts">
 			<field name="16R" reference="_16R" />
-			<field name="19A" reference="_19A" />
 			<field name="19A" reference="_19A" />
 			<field name="92B" reference="_92B" />
 			<field name="16S" reference="_16S" />

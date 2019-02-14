@@ -16,13 +16,13 @@
 package com.exactpro.sf.common.impl.messages.xml.converter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.Attribute;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
@@ -69,14 +69,14 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 
 		newField.setIsCollection(fldStruct.isCollection());
 
-		for (String name : fldStruct.getAttributes().keySet()) {
+        fldStruct.getAttributes().forEach((name, attributeStructure) -> {
 			Attribute attribute = new Attribute();
 			attribute.setName(name);
-			Object val = fldStruct.getAttributeValueByName(name);
+            Object val = attributeStructure.getCastValue();
 			attribute.setValue(val == null ? null : val.toString());
 			attribute.setType(val == null ? null : JavaType.fromValue(val.getClass().getName()));
 			newField.getAttributes().add(attribute);
-		}
+        });
 
 		if (fldStruct.isEnum()) {
 			Field enumXmlField;
@@ -288,10 +288,10 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 
         logger.debug("the filed structure names {}", complexField.getReferenceName());
 
-		for (String name : complexField.getAttributes().keySet()) {
+        complexField.getAttributes().forEach((name, attributeStructure) -> {
 			Attribute attribute = new Attribute();
 			attribute.setName(name);
-			Object val = complexField.getAttributeValueByName(name);
+            Object val = attributeStructure.getCastValue();
 			attribute.setValue(val == null ? null : val.toString());
 
             if(val != null) {
@@ -300,7 +300,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 
 			attribute.setType(val == null ? null : JavaType.fromValue(val.getClass().getName()));
 			messageField.getAttributes().add(attribute);
-		}
+        });
 
 		xmlMessage.getFields().add(messageField);
 	}
