@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.statictesting;
 
+import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
 import static com.google.common.collect.Lists.reverse;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
@@ -35,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -67,7 +69,6 @@ import com.exactpro.sf.aml.generator.GeneratedScript;
 import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -75,11 +76,17 @@ import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.languagemanager.AutoLanguageFactory;
 import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceMarshalManager;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.qameta.allure.Allure;
 
 @RunWith(Parameterized.class)
 public class StaticMatrixTest extends AbstractStaticTest {
+    private static ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
+
     private static List<Object[]> testData = Collections.emptyList();
 
     private ISFContext context;
@@ -155,6 +162,8 @@ public class StaticMatrixTest extends AbstractStaticTest {
             File loggerConfigFile = (File)commandLine.getParsedOptionValue("logger-config");
             File logsZipFile = (File)commandLine.getParsedOptionValue("logs-zip");
             boolean skipOptional = commandLine.hasOption("skip-optional");
+            File variableSetsFile = (File)commandLine.getParsedOptionValue("variable-sets");
+            String environmentVariableSet = commandLine.getOptionValue("environment-variable-set");
 
             if(!reportDir.exists() && !reportDir.mkdirs()) {
                 throw new Exception("Report directory '" + reportDir + "' can be created");
@@ -200,6 +209,8 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             try (AutoCloseable closeable = context::dispose) {
                 loadServices(servicesPaths, context);
+                loadVariableSets(variableSetsFile, environmentVariableSet, context);
+                servicesPaths.add(variableSetsFile);
                 zipFile(servicesPaths, services);
 
                 testData = new ArrayList<>();
@@ -295,6 +306,21 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .desc("skip optional actions")
                 .build();
 
+        Option variableSetsFileOption = Option.builder("vs")
+                .longOpt("variable-sets")
+                .hasArg()
+                .argName("file")
+                .type(File.class)
+                .desc("path to variable sets file")
+                .build();
+
+        Option environmentVariableSetOption = Option.builder("ev")
+                .longOpt("environment-variable-set")
+                .hasArg()
+                .argName("name")
+                .desc("name of variable set to apply to environment")
+                .build();
+
         options.addOption(workspacePathOption);
         options.addOption(matricesPathOption);
         options.addOption(servicesPathOption);
@@ -302,6 +328,8 @@ public class StaticMatrixTest extends AbstractStaticTest {
         options.addOption(loggerConfigFileOption);
         options.addOption(logsZipFileOption);
         options.addOption(skipOptionalOption);
+        options.addOption(variableSetsFileOption);
+        options.addOption(environmentVariableSetOption);
 
         try {
             return new DefaultParser().parse(options, args);
@@ -331,6 +359,17 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
         for (ServiceDescription service : services) {
             connectionManager.addService(service, null).get();
+        }
+    }
+
+    private static void loadVariableSets(File variableSetsFile, String environmentVariableSet, ISFContext context) throws IOException {
+        IConnectionManager connectionManager = context.getConnectionManager();
+        Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(variableSetsFile);
+
+        variableSets.forEach(connectionManager::putVariableSet);
+
+        if(environmentVariableSet != null) {
+            connectionManager.setEnvironmentVariableSet(DEFAULT_ENVIRONMENT, environmentVariableSet);
         }
     }
 
@@ -380,7 +419,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 context.getUtilityManager(),
                 context.getCompilerClassPath());
 
-        ScriptContext scriptContext = new ScriptContext(context, null, null, null, System.getProperty("user.name"), 0, ServiceName.DEFAULT_ENVIRONMENT);
+        ScriptContext scriptContext = new ScriptContext(context, null, null, null, System.getProperty("user.name"), 0, DEFAULT_ENVIRONMENT);
         GeneratedScript script = aml.run(scriptContext, "UTF-8");
 
         if(aml.getAlertCollector().getCount(AlertType.ERROR) != 0) {

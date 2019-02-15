@@ -691,8 +691,7 @@ public class EnvironmentBean implements Serializable {
 			List<ServiceDescription> descriptions = new ArrayList<>();
 
 			for (final EnvironmentNode node : this.selectedNodes) {
-                descriptions.add(connManager.getServiceDescription(new ServiceName(node.getEnvironment(), node.getName()))
-                        .clone());
+                descriptions.add(connManager.getServiceDescription(new ServiceName(node.getEnvironment(), node.getName())));
 			}
 
 			for (ServiceDescription sd : descriptions) {
