@@ -336,19 +336,17 @@
                 </p:column>
 
                 <p:column headerText="Variable" rendered="#{environmentBean.currentVariableSet != null}">
-                    <p:selectOneMenu id="variableSelector"
-                                     value="#{paramNode.variable}"
-                                     filter="true"
-                                     filterMatchMode="contains"
-                                     editable="true"
-                                     style="width: 220px;"
-                                     styleClass="eps-input #{paramNode.differentVariables and empty paramNode.variable ? 'different-value-label' : ''}"
-                                     rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}">
-                        <f:selectItem itemLabel="#{paramNode.differentVariables and empty paramNode.variable ? '*' : 'Select a variable'}"
-                                      itemValue="#{null}" itemDisabled="true"/>
-                        <f:selectItems value="#{environmentBean.variables}"/>
+                    <p:autoComplete id="variableSelector"
+                                    value="#{paramNode.variable}"
+                                    completeMethod="#{environmentBean.completeVariableName}"
+                                    dropdown="true"
+                                    scrollHeight="250"
+                                    style="width: 220px;"
+                                    styleClass="eps-input #{paramNode.differentVariables and empty paramNode.variable ? 'different-value-label' : ''}"
+                                    rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}">
                         <p:ajax event="change" update=":serviceParametersForm:display"/>
-                    </p:selectOneMenu>
+                        <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                    </p:autoComplete>
                 </p:column>
 
                 <p:column headerText="Final value" style="width: 440px" rendered="#{environmentBean.currentVariableSet != null}">

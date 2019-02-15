@@ -15,7 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.environment;
 
-import static java.util.Collections.emptySet;
+import static com.google.common.collect.ImmutableList.copyOf;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -102,7 +106,7 @@ public class EnvironmentBean implements Serializable {
 	private String oldServName = "";			// service
 
 	private List<IService> services;
-    private Set<String> variables = emptySet();
+    private List<String> variables = emptyList();
 
     private ServiceNodeLazyModel<EnvironmentNode> lazyModel;
 
@@ -1003,9 +1007,9 @@ public class EnvironmentBean implements Serializable {
         this.currentVariableSet = StringUtils.stripToNull(currentVariableSet);
 
         if(this.currentVariableSet == null) {
-            this.variables = emptySet();
+            this.variables = emptyList();
         } else {
-            this.variables = BeanUtil.getSfContext().getConnectionManager().getVariableSet(currentVariableSet).keySet();
+            this.variables = copyOf(BeanUtil.getSfContext().getConnectionManager().getVariableSet(currentVariableSet).keySet());
         }
     }
 
@@ -1156,7 +1160,13 @@ public class EnvironmentBean implements Serializable {
 		return this.lazyModel.isShowDisabled();
 	}
 
-    public Set<String> getVariables() {
-        return variables;
+    public List<String> completeVariableName(String name) {
+        if(isBlank(name)) {
+            return variables;
+        }
+
+        return variables.stream()
+                .filter(variable -> containsIgnoreCase(variable, name))
+                .collect(toList());
     }
 }
