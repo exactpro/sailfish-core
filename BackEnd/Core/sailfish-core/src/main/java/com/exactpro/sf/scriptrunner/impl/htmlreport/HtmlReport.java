@@ -251,7 +251,9 @@ public class HtmlReport implements IScriptReport {
         testCase.setStartTime(new Date());
         testCase.setHash(tcHash);
         testCase.setId(tcId);
-        testCase.setTags(tags);
+        if (tags != null) {
+            testCase.setTags(tags);
+        }
 
         testCaseWriter = createWriter(testCase.getName().replaceAll("\\W", "_") + ".html");
 
