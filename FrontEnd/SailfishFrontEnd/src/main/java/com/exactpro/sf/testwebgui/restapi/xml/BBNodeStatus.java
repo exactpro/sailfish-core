@@ -13,24 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************/
+
 package com.exactpro.sf.testwebgui.restapi.xml;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlRootElement;
+public class BBNodeStatus {
 
-@XmlRootElement(name = "bbstatus")
-public class XmlBbExecutionStatus {
-
+    private String name;
     private String status;
+    private List<String> errorMessage;
 
-    private String errorMessage;
+    public BBNodeStatus(String name, String status, List<String> errorMessage) {
+        this.name = name;
+        this.status = status;
+        this.errorMessage = errorMessage;
+    }
 
-    private List<String> warnMessages;
+    public String getName() {
+        return name;
+    }
 
-    private int progress;
-
-    private List<XmlBBNodeStatus> slaveStatuses;
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getStatus() {
         return status;
@@ -40,35 +46,11 @@ public class XmlBbExecutionStatus {
         this.status = status;
     }
 
-    public String getErrorMessage() {
+    public List<String> getErrorMessage() {
         return errorMessage;
     }
 
-    public void setErrorMessage(String errorMessage) {
+    public void setErrorMessage(List<String> errorMessage) {
         this.errorMessage = errorMessage;
-    }
-
-    public List<String> getWarnMessages() {
-        return warnMessages;
-    }
-
-    public void setWarnMessages(List<String> warnMessages) {
-        this.warnMessages = warnMessages;
-    }
-
-    public int getProgress() {
-        return progress;
-    }
-
-    public void setProgress(int progress) {
-        this.progress = progress;
-    }
-
-    public List<XmlBBNodeStatus> getSlaveStatuses() {
-        return slaveStatuses;
-    }
-
-    public void setSlaveStatuses(List<XmlBBNodeStatus> slaveStatuses) {
-        this.slaveStatuses = slaveStatuses;
     }
 }

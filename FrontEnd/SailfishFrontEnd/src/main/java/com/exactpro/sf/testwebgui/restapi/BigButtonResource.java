@@ -15,13 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
+import com.exactpro.sf.bigbutton.RegressionRunner;
+import com.exactpro.sf.bigbutton.execution.ProgressView;
+import com.exactpro.sf.bigbutton.importing.CsvLibraryBuilder;
+import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
+import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
+import com.exactpro.sf.testwebgui.restapi.xml.BBNodeStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.BbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -36,22 +43,16 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.Instant;
-
-import com.exactpro.sf.bigbutton.RegressionRunner;
-import com.exactpro.sf.bigbutton.execution.ProgressView;
-import com.exactpro.sf.bigbutton.importing.CsvLibraryBuilder;
-import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
-import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
-import com.exactpro.sf.testwebgui.restapi.xml.BbExecutionStatus;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Path("bb")
 @Singleton
@@ -181,6 +182,12 @@ public class BigButtonResource {
         result.setWarnMessages(progressView.getWarns());
 
 		result.setProgress(progressView.getCurrentTotalProgressPercent());
+
+        List<BBNodeStatus> nodeStatuses = progressView.getAllExecutors().stream()
+                .map(e -> new BBNodeStatus(e.getExecutor().getName(), e.getState().name(), e.getErrorText()))
+                .collect(Collectors.toList());
+
+        result.setSlaveStatuses(nodeStatuses);
 		
 		return Response.
                 status(Response.Status.OK).
