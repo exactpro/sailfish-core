@@ -20,5 +20,15 @@
             <td><strong>Hash:</strong></td>
             <td>${hash?c}</td>
         </tr>
+        <tr>
+            <td><strong>Tags:</strong></td>
+            <td>
+                <div class="eps-statistics-tags-list" style="display: inline;">
+                    <#list tags.keySet() as key>
+                    <span class="eps-statistics-tag ${tags[key]}">${key}</span>
+                    </#list>
+                </div>
+            </td>
+        </tr>
     </table>
 </div>

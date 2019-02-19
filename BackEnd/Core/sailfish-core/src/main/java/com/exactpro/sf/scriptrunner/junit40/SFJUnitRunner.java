@@ -15,18 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.junit40;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AddToReport;
 import com.exactpro.sf.aml.AfterMatrix;
@@ -36,6 +24,7 @@ import com.exactpro.sf.aml.ExecutionSequence;
 import com.exactpro.sf.aml.Hash;
 import com.exactpro.sf.aml.Id;
 import com.exactpro.sf.aml.Reference;
+import com.exactpro.sf.aml.Tags;
 import com.exactpro.sf.aml.Type;
 import com.exactpro.sf.configuration.IEnvironmentManager;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -47,6 +36,19 @@ import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.StatusDescription;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.storage.ScriptRun;
+import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 
 public class SFJUnitRunner
 {
@@ -71,6 +73,8 @@ public class SFJUnitRunner
             String reference = null;
 
             boolean addToReport = true;
+
+            Set<String> tags = null;
 
 			String description = null;
 
@@ -114,6 +118,8 @@ public class SFJUnitRunner
 					methodsCalledAfterScript.add(method);
                 } else if(annotationType == AddToReport.class) {
                     addToReport = ((AddToReport)annotation).value();
+                }  else if (annotationType == Tags.class) {
+                    tags = ImmutableSet.copyOf(((Tags)annotation).value());
                 } else if(annotationType == Type.class) {
                     type = ((Type)annotation).value();
                 } else if(annotationType == Reference.class) {
@@ -128,7 +134,7 @@ public class SFJUnitRunner
             }
 
             if(type == AMLBlockType.TestCase || type == AMLBlockType.FirstBlock || type == AMLBlockType.LastBlock) {
-                testcaseDescriptions.add(new TestCaseDescription(reference, seqNum, matrixOrder, description, method, id, hash, type, addToReport));
+                testcaseDescriptions.add(new TestCaseDescription(reference, seqNum, matrixOrder, description, method, id, hash, type, addToReport, tags));
 			}
 		}
 
@@ -283,7 +289,9 @@ public class SFJUnitRunner
 
         private final boolean addToReport;
 
-        public TestCaseDescription(String reference, int seqnum, int matrixOrder, String description, Method method, String id, int hash, AMLBlockType type, boolean addToReport)
+        private final Set<String> tags;
+
+        public TestCaseDescription(String reference, int seqnum, int matrixOrder, String description, Method method, String id, int hash, AMLBlockType type, boolean addToReport, Set<String> tags)
 		{
             this.reference = reference;
 
@@ -302,6 +310,8 @@ public class SFJUnitRunner
             this.type = type;
 
             this.addToReport = addToReport;
+
+            this.tags = tags;
 		}
 
         public boolean hasReference() {
@@ -348,6 +358,9 @@ public class SFJUnitRunner
             return addToReport;
         }
 
+        public Set<String> getTags() {
+            return tags;
+        }
 
         @Override
 		public String toString() {
@@ -440,7 +453,8 @@ public class SFJUnitRunner
 				testcaseDescription.getMatrixOrder(),
 				testcaseDescription.getId(),
                 testcaseDescription.getHash(),
-                testcaseDescription.getType());
+                testcaseDescription.getType(),
+                testcaseDescription.getTags());
 	}
 
     private void onTestCase(ScriptContext context, StatusDescription statusDescription) {

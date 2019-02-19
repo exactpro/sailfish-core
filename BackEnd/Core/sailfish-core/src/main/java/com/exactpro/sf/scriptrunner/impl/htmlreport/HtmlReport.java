@@ -121,7 +121,7 @@ import freemarker.template.TemplateNotFoundException;
 public class HtmlReport implements IScriptReport {
     private static final Logger logger = LoggerFactory.getLogger(HtmlReport.class);
     private static final String TEMPLATE_PACKAGE_PATH = "/com/exactpro/sf/scriptrunner/template/report";
-    private static final String[] PAGE_RESOURCES = new String[] { "1.gif", "2.gif", "SF_white.jpg", "SFicon.png",
+    private static final String[] PAGE_RESOURCES = new String[] { "1.gif", "2.gif", "SF_white.jpg", "SFicon.png", "report_tag_classes.css",
             "logic.js", "htmlreport.css", "checkpoint.png", "jquery.min.js", "jquery-ui.min.js", "jquery-ui.min.css", "ui-icons_222222_256x240.png"};
     private static final String RESOURCE_FOLDER = "resources";
     private static final int MAX_VERIFICATIONS = 100;
@@ -235,7 +235,8 @@ public class HtmlReport implements IScriptReport {
     }
 
     @Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
         logger.debug("createTestCase - reference: {}, description: {}, order: {}, matrixOrder: {}, id: {}, hash: {}, type: {}", reference, description, order, matrixOrder, tcId, tcHash, type);
 
         checkContext(ContextType.REPORT);
@@ -250,6 +251,7 @@ public class HtmlReport implements IScriptReport {
         testCase.setStartTime(new Date());
         testCase.setHash(tcHash);
         testCase.setId(tcId);
+        testCase.setTags(tags);
 
         testCaseWriter = createWriter(testCase.getName().replaceAll("\\W", "_") + ".html");
 
@@ -322,6 +324,7 @@ public class HtmlReport implements IScriptReport {
             testCaseSummaryTemplate.setData("finish_time", testCase.getFinishTime());
             testCaseSummaryTemplate.setData("hash", testCase.getHash());
             testCaseSummaryTemplate.setData("id", testCase.getId());
+            testCaseSummaryTemplate.setData("tags", testCase.getTags());
             testCaseSummaryTemplate.write(testCaseWriter, 4);
 
             writeLine(testCaseWriter, "</div>", 3);
@@ -1677,6 +1680,7 @@ public class HtmlReport implements IScriptReport {
                 reportTestCaseLinkTemplate.setData("description", this.testcase.getDescription());
                 reportTestCaseLinkTemplate.setData("status", status);
                 reportTestCaseLinkTemplate.setData("duration", duration);
+                reportTestCaseLinkTemplate.setData("tags", this.testcase.getTags());
                 reportTestCaseLinkTemplate.write(writer, 5);
 
             } catch (TemplateException | IOException e) {

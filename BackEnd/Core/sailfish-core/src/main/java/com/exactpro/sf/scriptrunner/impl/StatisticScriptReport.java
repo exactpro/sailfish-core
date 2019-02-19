@@ -15,7 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -86,12 +89,14 @@ public class StatisticScriptReport extends DefaultScriptReport {
 	}
 
 	@Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId,
+                               int tcHash, AMLBlockType type, Set<String> tags) {
         String name = ReportUtils.generateTestCaseName(reference, matrixOrder, type);
         logger.debug("Create test case {}", name);
 
 		if(this.statisticsService != null) {
-            this.statisticsService.testCaseStarted(this.matrixName, tcId, name.replaceAll("\\W", "_"), description, order, tcHash);
+            this.statisticsService.testCaseStarted(this.matrixName, tcId, name.replaceAll("\\W", "_"),
+                    description, order, tcHash, tags);
 
 		}
 

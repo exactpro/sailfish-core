@@ -1,0 +1,1 @@
+UPDATE sttestcaseruns SET `finishtime` = `starttime` WHERE `finishtime` IS NULL;

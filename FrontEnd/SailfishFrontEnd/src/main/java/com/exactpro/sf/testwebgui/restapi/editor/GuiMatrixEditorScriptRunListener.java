@@ -20,6 +20,8 @@ import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.StatusDescription;
 import com.exactpro.sf.scriptrunner.impl.DefaultScriptReport;
 
+import java.util.Set;
+
 public class GuiMatrixEditorScriptRunListener extends DefaultScriptReport {
 
 	private final CollectorReceivedMessageProvider provider = new CollectorReceivedMessageProvider();
@@ -33,7 +35,8 @@ public class GuiMatrixEditorScriptRunListener extends DefaultScriptReport {
 	}
 
 	@Override
-    public void createTestCase(String name, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String name, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
 		provider.startRecording(context, name);
 	}
 

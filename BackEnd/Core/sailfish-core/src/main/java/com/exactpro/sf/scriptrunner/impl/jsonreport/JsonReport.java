@@ -212,7 +212,8 @@ public class JsonReport implements IScriptReport {
         }
     }
 
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
         this.reportStats = new ReportStats();
         assertState(ContextType.SCRIPT);
 
@@ -227,6 +228,7 @@ public class JsonReport implements IScriptReport {
         testcase.setId(tcId);
         testcase.setHash(tcHash);
         testcase.setDescription(description);
+        testcase.setTags(tags);
 
         setContext(ContextType.TESTCASE, testcase);
     }
