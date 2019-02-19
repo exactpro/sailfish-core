@@ -22,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @JsonPropertyOrder({"class", "message", "stacktrace", "cause"})
 public class ReportException implements IJsonReportNode {
@@ -43,9 +46,9 @@ public class ReportException implements IJsonReportNode {
 
         this.cause = t.getCause() != null ? new ReportException(t.getCause()) : null;
 
-        StringWriter writer = new StringWriter();
-        t.printStackTrace(new PrintWriter(writer));
-        this.stacktrace = writer.toString();
+        this.stacktrace = Arrays.stream(t.getStackTrace())
+                        .map(Object::toString)
+                        .collect(Collectors.joining("\n"));
     }
 
     public String getMessage() {
@@ -70,5 +73,13 @@ public class ReportException implements IJsonReportNode {
 
     public void setStacktrace(String stacktrace) {
         this.stacktrace = stacktrace;
+    }
+
+    public String getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(String clazz) {
+        this.clazz = clazz;
     }
 }
