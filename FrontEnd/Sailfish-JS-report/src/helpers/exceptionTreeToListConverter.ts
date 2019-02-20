@@ -13,11 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+import Exception from '../models/Exception';
 
-export default interface Exception {
-    actionNodeType?: string;
-    message: string;
-    cause?: any;
-    stacktrace?: string;
-    class?: string;
-}
+export function treeToList(tree:Exception) {
+    if (!tree) return []
+
+    const result = []
+    let currentNode = tree;
+    while (currentNode) {
+        result.push(currentNode);
+        currentNode = currentNode.cause;
+    }
+    return result;
+};

@@ -20,6 +20,7 @@ import ParamsTable from "./ParamsTable";
 import ExpandablePanel from "./ExpandablePanel";
 import "../styles/action.scss";
 import { getSecondsPeriod } from "../helpers/dateFormatter";
+import { ExceptionChain } from "./ExceptionChain";
 
 interface CardProps {
     action: Action;
@@ -96,6 +97,12 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         // rendering inner actions
                         {children}
                     }
+                    <div class="action-card-status">
+                        <ExpandablePanel>
+                            <h4>Status</h4>
+                            <ExceptionChain exception = {action.status.cause}/>
+                        </ExpandablePanel>
+                    </div>
                 </div>
             </ExpandablePanel>
         </div>)
