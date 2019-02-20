@@ -20,7 +20,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ObjectArrays;
+import com.google.common.primitives.Longs;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
@@ -49,6 +54,8 @@ public class NativeDbOperations {
 	private static final String DIMENSION_NAME_POSTFIX = "__d_";
 
 	private static final String DURATION_FORMAT = "HH:mm:ss";
+
+	private static final String FILTERED_NAME = "filtered";
 
 	private HibernateStorageSettings settings;
 
@@ -109,11 +116,13 @@ public class NativeDbOperations {
 
 	@SuppressWarnings("unchecked")
 	public List<Object[]> executeTaggedComparisonQuery(Session session, Long[] firstSetIds, Long[] secondSetIds) {
+        Long[] allTags = ImmutableSet.copyOf(ObjectArrays.concat(firstSetIds, secondSetIds, Long.class))
+                .toArray(new Long[0]);
 
 		if(isPostgreSql()) {
 
-			String queryString = String.format("SELECT * FROM tagged_sets_comparison(ARRAY %s, :fcount, ARRAY %s, :scount )",
-					Arrays.toString(firstSetIds), Arrays.toString(secondSetIds));
+			String queryString = String.format("SELECT * FROM tagged_sets_comparison(ARRAY %s, ARRAY %s, :fcount, ARRAY %s, :scount )",
+                    Arrays.toString(allTags), Arrays.toString(firstSetIds), Arrays.toString(secondSetIds));
 
 			Query query = session.createSQLQuery(queryString);
 
@@ -124,8 +133,8 @@ public class NativeDbOperations {
 
 		} else if(isMysql()) {
 
-			String queryString = String.format("call tagged_sets_comparison('%s', :fcount, '%s', :scount )",
-					toMysqlSet(firstSetIds), toMysqlSet(secondSetIds));
+			String queryString = String.format("call tagged_sets_comparison('%s', '%s', :fcount, '%s', :scount )",
+                    toMysqlSet(allTags), toMysqlSet(firstSetIds), toMysqlSet(secondSetIds));
 
 			SQLQuery query = session.createSQLQuery(queryString);
 
@@ -199,7 +208,19 @@ public class NativeDbOperations {
 		return dimension.getName() + DIMENSION_NAME_POSTFIX + index;
 	}
 
-	private String buildDimensionColumns(TagGroupReportParameters params) {
+    private String buildDimensionTagsColumns(TagGroupReportParameters params) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i<= params.getLoadForLevel(); i++) {
+            TagGroupDimension dimension = params.getDimensions().get(i);
+            sb.append("'").append(dimension.getName()).append("'");
+            sb.append(" AS ");
+            sb.append(buildDimensionPostfix(dimension, i));
+            sb.append(", ");
+        }
+        return sb.toString();
+    }
+
+	private String buildDimensionFilteredColumns(TagGroupReportParameters params) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -207,18 +228,7 @@ public class NativeDbOperations {
 
 			TagGroupDimension dimension = params.getDimensions().get(i);
 
-			if(dimension.isTag()) {
-
-				sb.append("'").append(dimension.getName()).append("'");
-
-			} else {
-				sb.append(String.format("(SELECT T.name FROM stmatrixruns MR2 "
-			            + "JOIN stmrtags MRT ON MR2.id = MRT.mr_id "
-			            + "JOIN sttags T ON MRT.tag_id = T.id "
-			            + "JOIN sttaggroups G ON T.group_id = G.id "
-			            + "WHERE MR2.id = MR.id  "
-			            + "AND G.id = %s ORDER BY T.id LIMIT 1 ) ", dimension.getId()));
-			}
+            sb.append(FILTERED_NAME).append(".d").append(i);
 
 			sb.append(" AS ");
 			sb.append(buildDimensionPostfix(dimension, i));
@@ -227,6 +237,34 @@ public class NativeDbOperations {
 		}
 
 		return sb.toString();
+
+	}
+
+	private String buildDimensionFilter(TagGroupReportParameters params, boolean isPostgres) {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i<= params.getLoadForLevel(); i++) {
+            TagGroupDimension dimension = params.getDimensions().get(i);
+            if (dimension.isTag()) {
+                if (isPostgres) {
+                    sb.append("cast(")
+                        .append("'").append(dimension.getName()).append("'")
+                        .append(" AS TEXT)");
+                } else {
+                    sb.append("'").append(dimension.getName()).append("'");
+                }
+            } else {
+                sb.append(" MAX(CASE WHEN (MG.id = ")
+                    .append(dimension.getId())
+                    .append(") THEN MT.name ELSE CASE WHEN (TCG.id = ")
+                    .append(dimension.getId())
+                    .append(") THEN TCT.name ELSE NULL END END)");
+            }
+            sb.append(" AS d").append(i);
+            if (i < params.getLoadForLevel() ) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
 
 	}
 
@@ -291,7 +329,9 @@ public class NativeDbOperations {
 
 		queryBuilder.append("SELECT ");
 
-		queryBuilder.append(buildDimensionColumns(params));
+        boolean dimensionsExist = isDimensionsExist(params);
+
+        queryBuilder.append(dimensionsExist ? buildDimensionFilteredColumns(params) : buildDimensionTagsColumns(params));
 
 		String execTimeCalc;
 
@@ -318,21 +358,38 @@ public class NativeDbOperations {
                     + "CASE WHEN (count(TCR.id) <> 0) THEN (sum(CASE WHEN TCR.status = " + StatusType.CONDITIONALLY_PASSED.getId() + " THEN 1.0 ELSE 0.0 END) / count(distinct TCR.id) * 100) ELSE 0.0 END AS conditionally_passed_percent, "
                     + "CASE WHEN (count(TCR.id) <> 0) THEN (sum(CASE WHEN TCR.status = " + StatusType.FAILED.getId() + " THEN 1.0 ELSE 0.0 END) / count(DISTINCT TCR.id) * 100) ELSE 0.0 END AS failed_percent, "
                     + "count(DISTINCT MR.id) AS total_matrixruns, "
-                    + "sum(CASE WHEN MR.failReason IS NULL THEN 0 ELSE 1 END) as failed_matrices "
+                    + "sum(CASE WHEN MR.failReason IS NULL THEN 0 ELSE 1 END) as failed_matrices ");
 
-                    + "FROM stmatrixruns MR LEFT JOIN sttestcaseruns TCR ON MR.id = TCR.matrix_run_id ");
-
-	        queryBuilder.append("WHERE ");
-
-        if (params.getNumberOfGroups() > 0 && params.getTagIds() != null && !params.getTagIds().isEmpty()) {
-            queryBuilder.append("(SELECT count(DISTINCT G2.id) ")
-                .append("FROM stmatrixruns MR2 ").append("    JOIN stmrtags MRT ON MR2.id = MRT.mr_id ")
-                .append("    JOIN sttags T ON MRT.tag_id = T.id ")
-                .append("    JOIN sttaggroups G2 ON T.group_id = G2.id ")
-                .append("WHERE MR2.id = MR.id ")
-                .append("AND T.id IN (").append(toMysqlSet(params.getTagIds())).append(") ")
-                .append(") = ").append(params.getNumberOfGroups()).append(" ");
-        	}
+        if (dimensionsExist) {
+            String tagIds = "(" + toMysqlSet(params.getTagIds()) + ")";
+            queryBuilder.append(" FROM (SELECT MR.id as m_id, TCR.id as tc_id, ")
+                .append(buildDimensionFilter(params, isPostgres))
+                .append(" FROM stmatrixruns MR ")
+                .append("    LEFT JOIN sttestcaseruns TCR ON MR.id = TCR.matrix_run_id")
+                .append("    LEFT JOIN stmrtags AS MRTS ON MRTS.mr_id = MR.id ")
+                .append("    LEFT JOIN sttcrtags AS TCRTS ON TCRTS.tcr_id = TCR.id ")
+                .append("   LEFT JOIN sttags AS MT ON MRTS.tag_id = MT.id ")
+                .append("   LEFT JOIN sttaggroups MG ON MT.group_id = MG.id ")
+                .append("   LEFT JOIN sttags AS TCT ON TCRTS.tag_id = TCT.id ")
+                .append("   LEFT JOIN sttaggroups TCG ON TCT.group_id = TCG.id ")
+                .append("   WHERE (MRTS.tag_id IN ")
+                .append(tagIds)
+                .append("   OR TCRTS.tag_id IN  ")
+                .append(tagIds)
+                .append(")   GROUP BY 1,2 ")
+                .append("   HAVING COUNT(DISTINCT(CASE WHEN TCRTS.tag_id IN ")
+                .append(tagIds)
+                .append(" THEN TCG.id ELSE NULL END)) + COUNT(DISTINCT(CASE WHEN MRTS.tag_id IN ")
+                .append(tagIds)
+                .append(" THEN MG.id ELSE NULL END)) = ")
+                .append(params.getNumberOfGroups())
+                .append(") as filtered ")
+                .append(" JOIN stmatrixruns MR ON filtered.m_id = MR.id ")
+                .append(" LEFT JOIN sttestcaseruns TCR ON filtered.tc_id = TCR.id ");
+        } else {
+            queryBuilder.append(" FROM stmatrixruns MR ")
+                .append(" LEFT JOIN sttestcaseruns TCR ON MR.id = TCR.matrix_run_id ");
+        }
 
 		queryBuilder.append(" GROUP BY " + toMysqlSet(groupingColumns));
 		queryBuilder.append(" ORDER BY " + toMysqlSet(groupingColumns));
@@ -365,4 +422,7 @@ public class NativeDbOperations {
 
 	}
 
+    private boolean isDimensionsExist(TagGroupReportParameters params) {
+        return params.getNumberOfGroups() > 0 && CollectionUtils.isNotEmpty(params.getTagIds());
+    }
 }

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.aml;
 
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
+
 import java.util.List;
 
 public interface ITestCase {
@@ -24,8 +26,8 @@ public interface ITestCase {
 	String getId();
 	void setId(String id);
 
-	boolean isExecutable();
-	void setExecutable(boolean isExecutable);
+    ExecutionMode getExecutionMode();
+	void setExecutionMode(ExecutionMode executionMode);
 
 	String getDescription();
 	void setDescription(String description);

@@ -33,6 +33,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -621,6 +623,16 @@ public class TestToolsAPI {
         RegressionRunner runner = this.context.getRegressionRunner();
 
         runner.setSettings(settings);
+
+        saveSettings(settings, false, null);
+    }
+
+    public void setUpdateServiceSettings(UpdateServiceSettings settings) throws Exception {
+        UpdateService updateService = this.context.getUpdateService();
+        updateService.tearDown();
+
+        updateService.setSettings(settings);
+        updateService.init();
 
         saveSettings(settings, false, null);
     }

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.embedded.IEmbeddedService;
+import com.exactpro.sf.embedded.updater.UpdateService;
 import com.exactpro.sf.storage.BaseStorageSettings;
 import com.exactpro.sf.storage.DBStorageSettings;
 import org.hibernate.Session;
@@ -141,8 +143,11 @@ public class SFLocalContext implements ISFContext {
 	// Additional services:
 	private final StatisticsService statisticsService;
 	private final MachineLearningService machineLearningService;
+	private final UpdateService updateService;
 	private EMailService mailService;
 	private RegressionRunner regressionRunner;
+
+	private final Queue<IEmbeddedService> embeddedServices = new LinkedList<>();
 
 	private FlightRecorderService flightRecorderService;
 
@@ -273,6 +278,10 @@ public class SFLocalContext implements ISFContext {
 		ValidatorLoader validatorLoader = new ValidatorLoader();
 
         this.statisticsService = new StatisticsService();
+        this.embeddedServices.add(statisticsService);
+
+        this.updateService = new UpdateService(workspaceDispatcher, settings.getUpdateServiceConfiguration(), taskExecutor);
+        this.embeddedServices.add(updateService);
 
         // 5) Load core & plugins
         PluginLoader pluginLoader = new PluginLoader(
@@ -327,6 +336,7 @@ public class SFLocalContext implements ISFContext {
 		this.disposables.add(this.scriptRunner);
 
         this.mailService = new EMailService();
+        this.embeddedServices.add(mailService);
 
 		this.flightRecorderService = new FlightRecorderService(taskExecutor, this.optionsStorage);
 
@@ -345,6 +355,7 @@ public class SFLocalContext implements ISFContext {
         this.pluginClassLoaders = pluginVersions.stream().collect(Collectors.collectingAndThen(Collectors.toMap(IVersion::getAlias, x -> x.getClass().getClassLoader()), Collections::unmodifiableMap));
 
         this.machineLearningService = new MachineLearningService(workspaceDispatcher, dictionaryManager, dataManager, pluginClassLoaders);
+        this.embeddedServices.add(machineLearningService);
     }
 
 	private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
@@ -479,6 +490,14 @@ public class SFLocalContext implements ISFContext {
 	            logger.error(e.getMessage(), e);
             }
         }
+
+        while (!this.embeddedServices.isEmpty()) {
+            try {
+                this.embeddedServices.remove().tearDown();
+            } catch (RuntimeException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
 	}
 
 	@Override
@@ -504,6 +523,11 @@ public class SFLocalContext implements ISFContext {
     @Override
     public NetDumperService getNetDumperService() {
     	return netDumperService;
+    }
+
+    @Override
+    public UpdateService getUpdateService() {
+        return updateService;
     }
 
     @Override

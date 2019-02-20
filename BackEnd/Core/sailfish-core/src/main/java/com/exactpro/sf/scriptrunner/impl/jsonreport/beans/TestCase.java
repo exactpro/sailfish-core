@@ -32,6 +32,7 @@ public class TestCase implements IJsonReportNode {
     private final List<Verification> verifications;
     private final Set<Bug> bugs;
     private final List<OutcomeSummary> outcomes;
+    private Set<String> tags;
     private Instant startTime;
     private Instant finishTime;
     private String name;
@@ -51,6 +52,7 @@ public class TestCase implements IJsonReportNode {
         this.messages = new ArrayList<>();
         this.bugs = new HashSet<>();
         this.verifications = new ArrayList<>();
+        this.tags = new HashSet<>();
     }
 
     @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
@@ -187,5 +189,11 @@ public class TestCase implements IJsonReportNode {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Set<String> getTags() { return tags; }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 }

@@ -99,7 +99,8 @@ public class ScriptReportWithLogs implements IScriptReport {
 	}
 
 	@Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
         this.lastTestCaseName = ReportUtils.generateTestCaseName(reference, matrixOrder, type);
 
 		// Add report appender:
@@ -108,7 +109,7 @@ public class ScriptReportWithLogs implements IScriptReport {
 
 		startTime = System.currentTimeMillis();
 
-        report.createTestCase(reference, description, order, matrixOrder, tcId, tcHash, type);
+        report.createTestCase(reference, description, order, matrixOrder, tcId, tcHash, type, tags);
 
         getLogger().info("TestCase [{}] started", lastTestCaseName);
 	}

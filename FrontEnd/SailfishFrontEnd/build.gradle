@@ -108,7 +108,7 @@ dependencies {
 
     zip_data_channels group: 'com.exactpro.webchannels', name: 'webchannels', version: "2.1.1", ext: 'zip'
 
-    gui_data "com.exactpro.sf:sailfish-js-matrix-editor:${artifactCoreVersion}"
+    gui_data group: 'com.exactpro.sf', name: 'sailfish-js-matrix-editor', version: artifactCoreVersion, ext: 'zip'
 
     jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
     jaxb 'javax.xml:jsr173:1.0'
