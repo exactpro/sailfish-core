@@ -251,7 +251,7 @@
 	border: 1px solid #ccc;
 }
 
-.eps-service-param-list.eps-main-table table.eps-main-table {
+table.eps-main-table {
 	table-layout: auto;
 	width: 723px;
 }
@@ -333,10 +333,18 @@ a.eps-link-button:focus {
 }
 
 .dictionary-autocomplete > input {
-    width: 377px;
+    width: 100%;
 }
 
 .dictionary-autocomplete > button {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+.variable-autocomplete > input {
+    width: 100%;
+}
+
+.variable-autocomplete > button {
     border-radius: 0 4px 4px 0 !important;
 }
 
