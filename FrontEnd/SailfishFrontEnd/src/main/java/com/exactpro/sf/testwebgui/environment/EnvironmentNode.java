@@ -16,6 +16,7 @@
 package com.exactpro.sf.testwebgui.environment;
 
 import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 import java.io.Serializable;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,17 +184,20 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 
 	@Override
 	public String toString() {
-		return "EnvironmentNode{" +
-				"name='" + name + '\'' +
-				", description='" + description + '\'' +
-				", value=" + value +
-                ", variable=" + variable +
-				", type=" + type +
-				", id='" + id + '\'' +
-				", nodes=" + nodes +
-				", status=" + status +
-				'}';
-	}
+        ToStringBuilder builder = new ToStringBuilder(this, SHORT_PREFIX_STYLE);
+
+        builder.append("name", name);
+        builder.append("description", description);
+        builder.append("value", value);
+        builder.append("variable", variable);
+        builder.append("variableSet", variableSet);
+        builder.append("type", type);
+        builder.append("id", id);
+        builder.append("nodes", nodes);
+        builder.append("status", status);
+
+        return builder.toString();
+    }
 
 	public enum Type {
 		SERVICE,
