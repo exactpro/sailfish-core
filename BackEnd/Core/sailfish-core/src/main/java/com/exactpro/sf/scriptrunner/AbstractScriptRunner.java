@@ -395,7 +395,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     public void resumeScript(long id) {
         TestScriptDescription descr = testScripts.get(id);
-        if (descr != null) {
+        if (descr != null && descr.isLocked()) {
             descr.getContext().getDebugController().resumeScript();
         }
     }
