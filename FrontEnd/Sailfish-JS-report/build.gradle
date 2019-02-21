@@ -115,6 +115,16 @@ clean {
     delete node_modules
 }
 
+task install (type: Upload) {
+    repositories.mavenInstaller {
+        pom.version = project.version
+        pom.artifactId = project.archivesBaseName
+        pom.groupId = project.group
+        pom.packaging = 'zip'
+    }
+    configuration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
+}
+
 uploadArchives {
     repositories.mavenDeployer {
         uniqueVersion = false // publish non unique snapshots to local repository
