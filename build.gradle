@@ -32,7 +32,7 @@ allprojects {
     ext {
         sailfishVersion         = "${sailfish_version_major}.${sailfish_version_minor}"
         artifactVersion         = "${sailfishVersion}-SNAPSHOT"
-		sailfishCoreVersion		= "${sailfishVersion}" //.${sailfish_version_maintenance}"
+		sailfishCoreVersion		= "${sailfishVersion}"
         artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : sailfishCoreVersion
 
         sharedDir               = file("${project.rootDir}/shared")
