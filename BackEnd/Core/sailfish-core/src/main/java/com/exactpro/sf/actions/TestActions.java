@@ -139,8 +139,9 @@ public class TestActions extends AbstractCaller {
     })
     @ActionMethod
     public IMessage sendDirty(IActionContext actionContext, IMessage msg) throws InterruptedException {
-        String serviceName = actionContext.getServiceName();
+	    String serviceName = actionContext.getServiceName();
         msg.getMetaData().setFromService(serviceName);
+        msg.getMetaData().setDirty(true);
         IInitiatorService initiatorService = ActionUtil.getService(actionContext, IInitiatorService.class);
 
         ISession session = initiatorService.getSession();

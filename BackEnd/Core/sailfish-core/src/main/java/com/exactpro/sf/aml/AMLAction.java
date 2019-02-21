@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -57,7 +58,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	private String template = "";
 	private String id = null;
 	private String serviceName = null;
-	private boolean execute = true;
+    private ExecutionMode executionMode = ExecutionMode.EXECUTABLE;
 	private SailfishURI actionURI = null; // null if not set
 	private SailfishURI dictionaryURI = null;
 	private Value timeout = null;
@@ -215,15 +216,15 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	@Override
-	public void setExecute(boolean b)
+	public void setExecutionMode(ExecutionMode executionMode)
 	{
-		this.execute = b;
+		this.executionMode = executionMode;
 	}
 
 	@Override
-	public boolean isExecute()
+	public ExecutionMode getExecutionMode()
 	{
-		return this.execute;
+		return this.executionMode;
 	}
 
 	@Override
@@ -535,7 +536,10 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		this.isGroupFinished = isGroupFinished;
 	}
 
-	@Override
+    public boolean isOptional() {
+        return executionMode == ExecutionMode.OPTIONAL;
+    }
+    @Override
 	public void addMessageReference(String lineRef, MessageReference ref) {
 		this.messageReferences.put(lineRef, ref);
 	}
@@ -596,7 +600,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		that.dictionaryURI =  this.dictionaryURI;
         that.dependencies = this.dependencies;
 		that.description = this.description;
-		that.execute = this.execute;
+		that.executionMode = this.executionMode;
 		that.actionURI = this.actionURI;
 		that.failUnexpected = this.failUnexpected;
 		that.headers = this.headers;
@@ -673,7 +677,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		sb.append("line", line);
 		sb.append("reference", reference);
 		sb.append("actionURI", actionURI);
-		sb.append("executable", execute);
+		sb.append("executionMode", executionMode);
 		sb.append("description", description);
 		sb.append("serviceName", serviceName);
 		sb.append("id", id);

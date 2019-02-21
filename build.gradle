@@ -101,16 +101,6 @@ allprojects {
         distributionType = 'all'
 	}
 
-    generateVersionClass {
-        major               = sailfish_version_major.toInteger()
-        minor               = sailfish_version_minor.toInteger()
-        maintenance         = project.revision.toInteger()
-        // Redefined for Core and FrontEnd sub projects
-        min_core_revision   = project.min_core_revision.toInteger()
-        build               = build_number.toInteger()
-        branch              = project.branch
-    }
-
     collectDependencies {
         repository = 'core'
         outputPath = project.properties.dependencyFile
@@ -222,6 +212,17 @@ subprojects {
                 cacheChangingModulesFor 0, 'seconds'
             }
         }
+    }
+
+    generateVersionClass {
+        major               = sailfish_version_major.toInteger()
+        minor               = sailfish_version_minor.toInteger()
+        maintenance         = project.revision.toInteger()
+        // Redefined for Core and FrontEnd sub projects
+        min_core_revision   = project.min_core_revision.toInteger()
+        build               = build_number.toInteger()
+        branch              = project.branch
+        artifactName        = project.archivesBaseName
     }
 
     jar {

@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.aml.Tags;
 import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -147,6 +148,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(FolderType.class.getCanonicalName());
         imports.add(MultiConverter.class.getCanonicalName());
         imports.add(AddToReport.class.getCanonicalName());
+        imports.add(Tags.class.getCanonicalName());
         imports.add(AMLBlockType.class.getCanonicalName());
         imports.add(Type.class.getCanonicalName());
         imports.add(Reference.class.getCanonicalName());

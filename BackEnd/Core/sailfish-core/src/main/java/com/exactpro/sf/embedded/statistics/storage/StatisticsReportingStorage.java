@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -318,7 +319,9 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 			reportRows.add(row);
         }
         loadAndAddMatrixTags(matrixRows);
-        loadAndAddTestCaseTags(testCaseRows);
+        if (!testCaseRows.isEmpty()) {
+            loadAndAddTestCaseTags(testCaseRows);
+        }
 	}
 
 	private void findUsedServices(List<AggregatedReportRow> rows) {
@@ -511,7 +514,8 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 	}
 
-	private Map<Long, List<Tag>> readTagsResultSet(List<Object[]> resultSet, boolean matrixTag) {
+	private Map<Long, List<Tag>> readTagsResultSet(List<Object[]> resultSet, BiConsumer<Tag, Object[]> customSetter,
+                                                   boolean matrixTag) {
 
 		Map<Long, List<Tag>> result = new HashMap<>();
 
@@ -534,7 +538,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 			tag.setId(tagId);
 			tag.setName(tagName);
-			tag.setCustom(!matrixTag);
+			customSetter.accept(tag, rsRow);
 			tag.setForAllTestCaseRuns(matrixTag);
 
             if (groupName != null) {
@@ -1519,7 +1523,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             query.setParameterList("ids", matrixRows.keySet());
             @SuppressWarnings("unchecked")
             List<Object[]> resultSet = query.list();
-            Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, true);
+            Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, (t, row) -> t.setCustom(false), true);
             for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
                 List<AggregatedReportRow> rows = matrixRows.get(entry.getKey());
                 rows.forEach(r -> r.setTags(new ArrayList<>(entry.getValue())));
@@ -1536,7 +1540,8 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "TCR.id, "
                 + "TCRT.tag.id, "
                 + "TCRT.tag.name, "
-                + "G.name "
+                + "G.name, "
+                + "TCRT.custom "
                 + "from TestCaseRun as TCR "
                 + "join TCR.tags as TCRT "
                 + "left join TCRT.tag.group as G "
@@ -1549,10 +1554,15 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             query.setParameterList("ids", rows.keySet());
             @SuppressWarnings("unchecked")
             List<Object[]> resultSet = query.list();
-            Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, false);
+            Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, (t, row) -> t.setCustom((Boolean)row[4]), false);
             for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
                 AggregatedReportRow row = rows.get(entry.getKey());
-                row.getTags().addAll(entry.getValue());
+                List<Tag> tags = row.getTags();
+                if (tags == null) {
+                    tags = new ArrayList<>();
+                    row.setTags(tags);
+                }
+                tags.addAll(entry.getValue());
             }
         } finally {
             if(session != null) {

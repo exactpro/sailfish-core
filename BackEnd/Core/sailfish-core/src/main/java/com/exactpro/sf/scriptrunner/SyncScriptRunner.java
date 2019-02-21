@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
-import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -43,8 +42,6 @@ import com.exactpro.sf.storage.ITestScriptStorage;
 public class SyncScriptRunner extends AbstractScriptRunner {
 
 	private final static Logger logger = LoggerFactory.getLogger(SyncScriptRunner.class);
-
-	private volatile Long currentTestScript = null;
 
 	public SyncScriptRunner(
 			final IWorkspaceDispatcher wd,
@@ -147,13 +144,14 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 
 		@Override
         public void run() {
+            Long currentTestScript = null;
 
 			ExecutorService executor = null;
 			boolean execute = false;
 
 			try {
 			    logger.info("Thread [{}] start", Thread.currentThread().getName());
-				executor = new ThreadPoolExecutor(1, 1, 1000, TimeUnit.MICROSECONDS, new LinkedBlockingQueue<Runnable>());
+				executor = new ThreadPoolExecutor(1, 1, 1000, TimeUnit.MICROSECONDS, new LinkedBlockingQueue<>());
 
 				Future<Throwable> future = null;
 
@@ -175,7 +173,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
                             }
                         }
 
-						if (execute == false) {
+						if (!execute) {
 						    synchronized (preparedTestScripts) {
                                 currentTestScript = preparedTestScripts.poll();
                             }
@@ -187,15 +185,18 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 
 		        			if (descr == null) {
 		        				logger.warn("Can't find script [{}]. Probably it was removed", currentTestScript);
+		        				currentTestScript = null;
 		        				continue;
 		        			}
 
 							if (descr.getStatus() == ScriptStatus.CANCELED) {
+		        			    currentTestScript = null;
 								continue;
 							}
 
                             if (descr.isSetCancelFlag()) {
                                 cancelScript(descr);
+                                currentTestScript = null;
                                 continue;
                             }
 
@@ -272,7 +273,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 						}
 					} catch (InterruptedException e) {
 						if (isDisposing) {
-							if (execute == true) {
+							if (execute) {
 								TestScriptDescription descr = testScripts.get(currentTestScript);
 
 
@@ -295,7 +296,7 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 					}
 				}
 
-				if (execute == true) {
+				if (execute) {
 
 					TestScriptDescription descr = testScripts.get(currentTestScript);
 
@@ -307,10 +308,6 @@ public class SyncScriptRunner extends AbstractScriptRunner {
 						logger.info("TestScript {} was executed", currentTestScript);
 					}
                     onRunFinished(descr);
-
-					execute = false;
-
-					currentTestScript = -1L;
 				}
 
                 processNotStartedScripts();

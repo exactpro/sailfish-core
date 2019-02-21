@@ -17,6 +17,7 @@ package com.exactpro.sf.scriptrunner.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
@@ -51,7 +52,8 @@ public class DefaultScriptReport implements IScriptReport {
 	}
 
 	@Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
 	}
 
 	@Override

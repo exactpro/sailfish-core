@@ -34,6 +34,7 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.embedded.machinelearning.MachineLearningService;
 import com.exactpro.sf.embedded.mail.EMailService;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
+import com.exactpro.sf.embedded.updater.UpdateService;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -81,6 +82,7 @@ public interface ISFContext {
 	RegressionRunner getRegressionRunner();
 	FlightRecorderService getFlightRecorderService();
 	NetDumperService getNetDumperService();
+	UpdateService getUpdateService();
 
 	// Other
 	EnvironmentManager getEnvironmentManager();

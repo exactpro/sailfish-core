@@ -8,6 +8,7 @@
         <style></style> <!-- Empty style for dynamic hiding passed actions/fields (look logic.js). Should be first style in document. -->
         <link rel="stylesheet" type="text/css" href="resources/htmlreport.css">
         <link rel="stylesheet" type="text/css" href="resources/jquery-ui.min.css">
+        <link rel="stylesheet" type="text/css" href="resources/report_tag_classes.css">
     </head>
     <body onkeypress="onKeyPress(event)">
         <script src="resources/logic.js"></script>

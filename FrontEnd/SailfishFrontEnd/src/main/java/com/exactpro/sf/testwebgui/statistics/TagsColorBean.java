@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.statistics;
 
+import com.exactpro.sf.common.util.Utils;
+
 import java.io.Serializable;
 
 import javax.faces.bean.ApplicationScoped;
@@ -25,18 +27,8 @@ import javax.faces.bean.ManagedBean;
 @SuppressWarnings("serial")
 public class TagsColorBean implements Serializable {
 	
-	private static final String[] colorClasses = 
-			new String[] {"turquoise", "preaver", "amethyst", /*"wet-asphalt",*/ "green-sea", 
-		"belize-hole", "wisteria", "sun-flower", "carrot", /*"alizarin",*/ "clouds", "orange", "silver"};
-	
 	public static String getColorClass(String name) {
-		
-		if(name != null) {
-			return colorClasses[Math.abs(name.hashCode()) % colorClasses.length];
-		}
-		
-		return colorClasses[0]; 
-		
+		return Utils.getTagColorClass(name);
 	}
 	
 }

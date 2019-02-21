@@ -16,11 +16,13 @@
 package com.exactpro.sf.common.messages;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,17 +56,44 @@ public class MessageTraverser extends MessageStructureReader {
     @Override
     public void traverse(IMessageStructureVisitor msgStrVisitor, List<IFieldStructure> fields, IMessage message,
             IMessageStructureReaderHandler handler) {
-        Set<String> namesByDictionary = fields.stream().map(IFieldStructure::getName).collect(Collectors.toSet());
-
-        List<IFieldStructure> combinedFields = Stream.concat(fields.stream(),
-                message.getFieldNames().stream()
-                        .filter(name -> !namesByDictionary.contains(name))
-                        .map(name -> createFieldStructure(message, name))
-                        .filter(Objects::nonNull))
-                .collect(Collectors.toList());
+        List<IFieldStructure> combinedFields = combineUnknownFields(fields, message);
 
         super.traverse(msgStrVisitor, combinedFields, message, handler);
     }
+
+    protected List<IFieldStructure> combineUnknownFields(List<IFieldStructure> fields, IMessage message) {
+        Map<String, JavaType> namesByDictionary = fields.stream()
+                .filter(e -> !e.isComplex())
+                .collect(Collectors.toMap(IFieldStructure::getName, IFieldStructure::getJavaType));
+
+        fields.stream()
+                .filter(IFieldStructure::isComplex)
+                .forEach(e ->namesByDictionary.put(e.getName(), null));
+
+        return Stream.concat(fields.stream(),
+                message.getFieldNames().stream()
+                        .filter(name -> !contains(namesByDictionary, name, message.getField(name)))
+                        .map(name -> createFieldStructure(message, name)))
+                .collect(Collectors.groupingBy(IFieldStructure::getName, LinkedHashMap::new, Collectors.reducing(this::overrideStructure)))
+                .values().stream()
+                .map(Optional::get).collect(Collectors.toList());
+    }
+
+    private IFieldStructure overrideStructure(IFieldStructure a, IFieldStructure b) {
+        return b;
+    }
+
+    private boolean contains(Map<String, JavaType> namesByDictionary, String name, Object fieldValue) {
+
+        try {
+            JavaType fieldType = (fieldValue != null) ? JavaType.fromValue(fieldValue.getClass().getName()) : null;
+            return namesByDictionary.entrySet().stream()
+                    .anyMatch(p -> p.getKey().equals(name) && (fieldType != null) && (p.getValue() == fieldType));
+        } catch (IllegalArgumentException e) {
+            return namesByDictionary.containsKey(name);
+        }
+    }
+
 
     @Override
     protected void visitField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessageStructureReaderHandler handler,
@@ -157,7 +186,7 @@ public class MessageTraverser extends MessageStructureReader {
         return createFieldStructure(fieldStructure, message.getNamespace(), fieldName, message.getField(fieldName));
     }
     
-    private IFieldStructure createFieldStructure(IMessage message, String fieldName) {
+    protected IFieldStructure createFieldStructure(IMessage message, String fieldName) {
         return createFieldStructure(null, message, fieldName);
     }
 }

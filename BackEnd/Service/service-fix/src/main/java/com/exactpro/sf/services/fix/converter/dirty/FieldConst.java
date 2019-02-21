@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix.converter.dirty;
 
+import com.exactpro.sf.common.messages.DirtyConst;
 import quickfix.field.BeginString;
 import quickfix.field.BodyLength;
 import quickfix.field.CheckSum;
@@ -25,7 +26,7 @@ import quickfix.field.SendingTime;
 import quickfix.field.TargetCompID;
 
 public class FieldConst {
-    public static final String FIELD_ORDER = "FieldOrder";
+    public static final String FIELD_ORDER = DirtyConst.FIELD_ORDER;
     public static final String GROUP_COUNTERS = "GroupCounters";
     /**
      * @deprecated Use FIELD_ORDER instead this
@@ -33,11 +34,7 @@ public class FieldConst {
     @Deprecated
     public static final String FIELD_GROUP_DELIMITER = "GroupDelimiter";
     
-    public static final Object EXCLUDED_FIELD = new Object() {
-        public String toString() {
-            return "excluded field";
-        };
-    };  
+    public static final Object EXCLUDED_FIELD = DirtyConst.EXCLUDED_FIELD;
 
     public static final String HEADER = "header";
     public static final String TRAILER = "trailer";
