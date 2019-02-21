@@ -83,3 +83,8 @@
 .eps-diff-highlight {
 	background: #ffff00;
 }
+
+.eps-report-parameters-custom-path-apply-button {
+    display: flex;
+    justify-content: flex-end;
+}
