@@ -132,7 +132,7 @@
             <p:ajax event="rowSelectCheckbox" update=":form:mainMenuBar :form:secondMenuBar" />
             <p:ajax event="rowUnselectCheckbox" update=":form:mainMenuBar :form:secondMenuBar" />
             <p:ajax event="toggleSelect" update=":form:mainMenuBar :form:secondMenuBar" />
-            <p:ajax event="rowReorder" listener="#{testScriptsBean.onRowReorder}"/>
+            <p:ajax event="rowReorder" listener="#{testScriptsBean.onRowReorder}" update="@this" />
             <p:ajax event="filter" oncomplete="saveFilterText()" update=":form:table" />
 
             <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
