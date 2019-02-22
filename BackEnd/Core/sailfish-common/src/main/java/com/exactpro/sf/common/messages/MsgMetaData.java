@@ -18,6 +18,7 @@ package com.exactpro.sf.common.messages;
 import java.util.Arrays;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -80,6 +81,7 @@ public class MsgMetaData implements Cloneable {
 		return isAdmin;
 	}
 
+	@JsonSetter("isAdmin")
 	public void setAdmin(boolean isAdmin) {
 		this.isAdmin = isAdmin;
 	}
@@ -92,6 +94,7 @@ public class MsgMetaData implements Cloneable {
     /**
      * @deprecated please use more userfriendly setRejectReason, it automatically set isRejected when reason non-null
      */
+    @JsonSetter("isRejected")
     public void setRejected(boolean isRejected) {
         this.isRejected = isRejected;
     }
@@ -100,6 +103,7 @@ public class MsgMetaData implements Cloneable {
         return isDirty;
     }
 
+    @JsonSetter("isDirty")
     public void setDirty(boolean dirty) {
         isDirty = dirty;
     }

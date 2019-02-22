@@ -17,6 +17,7 @@ package com.exactpro.sf.testwebgui.restapi;
 
 import javax.ws.rs.ApplicationPath;
 
+import com.exactpro.sf.testwebgui.restapi.machinelearning.api.MachineLearningResourceV2;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -37,6 +38,7 @@ public class SFAPIEntryPoint extends ResourceConfig {
         register(StatisticsResource.class);
         register(CORSFilter.class);
         register(MachineLearningResource.class);
+        register(MachineLearningResourceV2.class);
         register(BigButtonResource.class);
         register(TestLibraryResource.class);
         register(SailfishInfoResource.class);

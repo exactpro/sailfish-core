@@ -42,8 +42,11 @@ public class SailfishURI implements Comparable<SailfishURI>, Serializable {
     private final String pluginAlias;
     private final String classAlias;
     private final String resourceName;
+    @JsonIgnore
     private final int hashPluginAlias;
+    @JsonIgnore
     private final int hashClassAlias;
+    @JsonIgnore
     private final int hashResourceName;
 
     public SailfishURI(String pluginAlias) throws SailfishURIException {

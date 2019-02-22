@@ -15,16 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
+import com.exactpro.sf.common.messages.IMessage;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.exactpro.sf.common.messages.IMessage;
 
 public class ReportEntity implements Iterable<ReportEntity> {
     private final String name;
@@ -47,9 +46,10 @@ public class ReportEntity implements Iterable<ReportEntity> {
         } else if(value instanceof Map<?, ?>) {
             Map<?, ?> map = (Map<?, ?>)value;
 
-            for(Object key : map.keySet()) {
-                fields.add(new ReportEntity(Objects.toString(key), map.get(key)));
-            }
+            map.forEach((k,v) -> {
+                fields.add(new ReportEntity(Objects.toString(k), v));
+            });
+
         } else if(value instanceof IMessage) {
             IMessage message = (IMessage)value;
 

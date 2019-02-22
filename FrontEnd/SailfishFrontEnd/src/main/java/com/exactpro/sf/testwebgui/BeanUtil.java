@@ -34,6 +34,7 @@ import com.exactpro.sf.testwebgui.context.PopupMessageHolder;
 import com.exactpro.sf.testwebgui.environment.EnumSetContainer;
 import com.exactpro.sf.testwebgui.help.HelpContentHolder;
 import com.exactpro.sf.testwebgui.restapi.RESTUtil;
+import com.exactpro.sf.testwebgui.restapi.machinelearning.MLPersistenceManager;
 import com.exactpro.sf.testwebgui.scriptruns.MatrixHolder;
 import com.exactpro.sf.testwebgui.scriptruns.ScriptRunsBean;
 import com.exactpro.sf.testwebgui.servlets.ReportServlet;
@@ -51,6 +52,7 @@ public class BeanUtil {
     public final static String HELP_CONTENT_HOLDER = "helpContentHolder";
     public final static String SESSION_MODELS_MAPPER = "sessionModelsMapper";
     public final static String ENVIRONMENT_TRACKING_BEAN = "environmentTrackingBean";
+    public final static String SESSION_ML_PERSISTENCE_MAPPER = "sessionMLPersistenceMapper";
 
     private static ServletContext servletContext;
 
@@ -117,6 +119,10 @@ public class BeanUtil {
 
     public static SessionModelsMapper getSessionModelsMapper() {
         return (SessionModelsMapper) servletContext.getAttribute(SESSION_MODELS_MAPPER);
+    }
+
+    public static MLPersistenceManager getMLPersistenceManager() {
+        return (MLPersistenceManager) servletContext.getAttribute(SESSION_ML_PERSISTENCE_MAPPER);
     }
 
     public static PopupMessageHolder getFacesMesageHolder() {
