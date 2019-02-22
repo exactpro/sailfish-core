@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -305,15 +306,24 @@ public class ExecutorClient {
     private void serviceCommand(Stream<Service> services, APIServiceConsumer command, String commandName, StartMode startMode) {
         if (startMode != null) {
             services = services.filter(service -> startMode == service.getStartMode());
-                }
-        services.distinct()
-                .forEach(service -> {
-                    try {
-                        command.accept(BB_ENVIRONMENT, service.getName());
-                    } catch (Exception e) {
-                        throw new EPSCommonException(String.format("Command %s can't be executed for service %s", commandName, service.getName()), e);
+        }
+
+        Map<String, Exception> serviceExceptions = new HashMap<>();
+
+        services.distinct().map(Service::getName).forEach(name -> {
+            try {
+                command.accept(BB_ENVIRONMENT, name);
+            } catch(Exception e) {
+                logger.error("Command '{}' was not executed for service: {}", commandName, name);
+                serviceExceptions.put(name, e);
             }
         });
+
+        if(!serviceExceptions.isEmpty()) {
+            RuntimeException e = new EPSCommonException(String.format("Command '%s' was not executed for services: %s", commandName, serviceExceptions.keySet()));
+            serviceExceptions.values().forEach(e::addSuppressed);
+            throw e;
+        }
     }
 
     private Set<Service> prepareExecutorServices() {
