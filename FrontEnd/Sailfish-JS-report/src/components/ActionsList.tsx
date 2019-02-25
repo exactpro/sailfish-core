@@ -23,6 +23,8 @@ import AppState from '../state/AppState';
 import { connect } from 'preact-redux';
 import { selectAction, selectMessages, selectCheckpoint } from '../actions/actionCreators';
 import { isCheckpoint } from '../helpers/messageType';
+import { HeatmapScrollbar } from './HeatmapScrollbar';
+import { actionsHeatmap } from '../helpers/heatmapCreator';
 
 const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
 
@@ -106,19 +108,22 @@ export class ActionsListBase extends Component<ListProps, {}> {
                     </div>
                 </div>
                 <div class="actions-list">
-                    {actions.map(action => (
-                        <ActionTree 
-                            action={action}
-                            selectedActionId={selectedActionId}
-                            selectedMessageId={selectedMessageId}
-                            selectedCheckpointId={selectedCheckpointId}
-                            actionSelectHandler={onSelect}
-                            messageSelectHandler={onMessageSelect}
-                            actionsFilter={actionsFilter}
-                            filterFields={filterFields} 
-                            checkpoints={this.checkpointActions}
-                            checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
-                            ref={ref => this.elements[action.id] = ref}/>))}
+                    <HeatmapScrollbar
+                        selectedElements={actionsHeatmap(actions, selectedActionId)}>
+                        {actions.map(action => (
+                            <ActionTree 
+                                action={action}
+                                selectedActionId={selectedActionId}
+                                selectedMessageId={selectedMessageId}
+                                selectedCheckpointId={selectedCheckpointId}
+                                actionSelectHandler={onSelect}
+                                messageSelectHandler={onMessageSelect}
+                                actionsFilter={actionsFilter}
+                                filterFields={filterFields} 
+                                checkpoints={this.checkpointActions}
+                                checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
+                                ref={ref => this.elements[action.id] = ref}/>))}
+                    </HeatmapScrollbar>
                 </div>
             </div> 
         )

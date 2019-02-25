@@ -573,7 +573,7 @@
 
     &-list {
         @include scrollbar;
-        overflow-y: scroll;
+        //overflow-y: scroll;
         height: calc(100% - 50px);
         padding: 0 5px;
         word-wrap: break-word;

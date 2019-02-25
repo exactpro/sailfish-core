@@ -168,8 +168,8 @@
     &-list {
         @include scrollbar;
         height: 100%;
-        overflow-y: scroll;
         padding: 0 5px;
+        overflow: hidden;
     }
 
     &-controls {

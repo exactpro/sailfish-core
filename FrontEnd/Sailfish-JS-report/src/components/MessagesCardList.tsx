@@ -17,6 +17,7 @@
 import { h, Component } from 'preact';
 import Message from '../models/Message';
 import { MessageCard } from './MessageCard';
+import { Scrollbars } from 'preact-custom-scrollbars';
 import '../styles/messages.scss';
 import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
@@ -27,6 +28,8 @@ import { Checkpoint } from './Checkpoint';
 import { isCheckpoint } from '../helpers/messageType';
 import { selectRejectedMessageId } from '../actions/actionCreators';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
+import { HeatmapScrollbar } from './HeatmapScrollbar';
+import { messagesHeatmap } from '../helpers/heatmapCreator';
 
 const MIN_CONTROL_BUTTONS_WIDTH = 880;
 
@@ -107,7 +110,7 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
             (actionId): [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage, panelWidth }: MessagesListProps, { adminFilter }: MessagesListState) {
+    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage, panelWidth, selectedMessages, selectedStatus }: MessagesListProps, { adminFilter }: MessagesListState) {
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
             controlShowTitles = panelWidth == null || panelWidth > MIN_CONTROL_BUTTONS_WIDTH,
@@ -168,7 +171,10 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                     </div>
                 </div>
                 <div class="messages-list">
-                    {messages.map(message => this.renderMessage(message))}
+                    <HeatmapScrollbar
+                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}>
+                        {messages.map(message => this.renderMessage(message))}
+                    </HeatmapScrollbar>
                 </div>
             </div>
         );

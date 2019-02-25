@@ -19,6 +19,8 @@ import "../styles/panel.scss"
 
 interface PanelProps {
     header?: JSX.Element;
+    // shows, when panel is expanded
+    expandedHeader?: JSX.Element;
     body?: JSX.Element;
     isExpanded?: boolean;
     children: JSX.Element[];
@@ -46,23 +48,25 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
         }
     }
 
-    render({ header, body, children }: PanelProps, { isExpanded }: PanelState) {
+    render({ header, body, children, expandedHeader }: PanelProps, { isExpanded }: PanelState) {
         const iconClass = [
             "expandable-panel-header-icon", 
             (isExpanded ? "expanded" : "hidden")
         ].join(' ');
 
-        return (<div class="expandable-panel-root">
-            <div class="expandable-panel-header">
-                <div class={iconClass} 
-                    onClick={e => this.expandPanel()}/>
-                {header || children[0]}
-            </div>
-            {isExpanded ?
-                <div className="expandable-panel-body">
-                        {body || children.slice(1)}
+        return (
+            <div class="expandable-panel-root">
+                <div class="expandable-panel-header">
+                    <div class={iconClass} 
+                        onClick={e => this.expandPanel()}/>
+                    {(expandedHeader && isExpanded) || header || children[0]}
                 </div>
-                : null}
-        </div>)
+                {isExpanded ?
+                    <div className="expandable-panel-body">
+                            {body || children.slice(1)}
+                    </div>
+                    : null}
+            </div>
+        )
     }
 }
