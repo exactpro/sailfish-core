@@ -33,12 +33,13 @@ import {
     SetRightPaneStateAction,
     CheckpointSelectStateAction,
     RejectedMessageSelectStateAction,
-    ActionSelectByIdStateAction
+    ActionSelectByIdStateAction,
+    SetAdminMessageEnabledStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
-import { Pane } from "../helpers/Pane";
+import { Panel } from "../helpers/Panel";
 
 export const setReport = (report: Report): SetReportStateAction => ({
     type: StateActionTypes.SET_REPORT,
@@ -107,16 +108,21 @@ export const switchSplitMode = (): SwitchSplitModeStateAction => ({
     type: StateActionTypes.SWITCH_SPLIT_MODE
 })
 
+export const setAdminMsgEnabled = (isEnabled: boolean) : SetAdminMessageEnabledStateAction => ({
+    type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
+    adminEnabled: isEnabled
+})
+
 export const showFilter = (): ShowFilterStateAction => ({
     type: StateActionTypes.SHOW_FILTER
 })
 
-export const setLeftPane = (pane: Pane): SetLeftPaneStateActions => ({
+export const setLeftPane = (pane: Panel): SetLeftPaneStateActions => ({
     type: StateActionTypes.SET_LEFT_PANE,
     pane: pane
 })
 
-export const setRightPane = (pane: Pane): SetRightPaneStateAction => ({
+export const setRightPane = (pane: Panel): SetRightPaneStateAction => ({
     type: StateActionTypes.SET_RIGHT_PANE,
     pane: pane
 })

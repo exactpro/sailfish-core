@@ -14,4 +14,4 @@
  * limitations under the License.
  ******************************************************************************/
 
-export enum Pane {Actions, Status, Messages, Logs}
+export enum Panel {Actions, Status, Messages, Logs, KnownBugs}

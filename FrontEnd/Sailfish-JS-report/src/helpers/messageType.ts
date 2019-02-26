@@ -35,6 +35,14 @@ export function isCheckpoint(message: Message) : boolean {
     return name.toLowerCase() == CHECKPOINT_NAME;
 }
 
+export function isRejected(message: Message) : boolean {
+    return message.content.rejectReason !== null;
+}
+
+export function isAdmin(message: Message) : boolean {
+    return message.content.admin !== false;
+}
+
 export function getMessageType(message: Message) : MessageType {
     if (isCheckpoint(message)) {
         return MessageType.CHECKPOINT;

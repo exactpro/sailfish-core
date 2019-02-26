@@ -47,19 +47,218 @@
         z-index: 4;
     }
 
-    &-content {
+    &-body {
         grid-area: main-content;
 
         &-wrapper {
             height: 100%;
         }
-
-        &-pane {
+        
+        &-panel {
             height: 100%;
-            position: relative;
 
-            &.disabled {
-                display: none;
+            &-controls {
+                height: 50px;
+                width: 100%;
+                position: relative;
+
+                &-panels {
+                    display: inline-flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                    grid-area: left;
+                    position: absolute;
+                    top: 6px;
+                    left: 4px;
+                    background-color: #ffffff;
+                    z-index: 4;
+                }
+
+                &-left, &-right {
+                    position: absolute;
+                    right: 10px;
+                    top: 4px;
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding: 7px 7px 10px 7px;
+                }
+
+                &-left-checkpoints {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    padding: 5px 7px 0px 7px;
+        
+                    &.disabled {
+                        filter: opacity(0.5);
+                        cursor: default;
+                    }
+                    
+                    &-icon {
+                        height: 20px;
+                        width: 20px;
+                        background-image: url(../../resources/icons/checkpoint.svg);
+                        background-size: 100%;
+                    }
+        
+                    &-title, &-count {
+                        font-size: 15px;
+                        font-weight: bold;
+                        padding: 0 10px;
+                        color: $primaryTextColor;
+                        min-width: 60px;
+                    }
+        
+                    &-btn {
+                        height: 20px;
+                        width: 20px;
+                        background-size: 100%;
+                        filter: opacity(0.7);
+                        cursor: pointer;
+        
+                        &.prev {
+                            background-image: url(../../resources/icons/arr1-left.svg);
+                        }
+        
+                        &.next {
+                            background-image: url(../../resources/icons/arr1-right.svg)
+                        }
+                    }
+                }
+
+                &-right {
+                    
+                    &-rejected {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 7px 7px 10px 7px;
+                        
+                        &-icon {
+                            height: 20px;
+                            width: 20px;
+                            background-image: url(../../resources/icons/rejected-icon.svg);
+                            background-size: 100%;
+                            cursor: pointer;
+                        }
+            
+                        &-title, &-count {
+                            @include unselectable;
+                            font-size: 15px;
+                            font-weight: bold;
+                            padding: 0 10px;
+                            color: $primaryTextColor;
+                        }
+            
+                        &-btn {
+                            height: 20px;
+                            width: 20px;
+                            background-size: 100%;
+                            filter: opacity(0.7);
+                            cursor: pointer;
+            
+                            &.prev {
+                                background-image: url(../../resources/icons/arr1-left.svg);
+                            }
+            
+                            &.next {
+                                background-image: url(../../resources/icons/arr1-right.svg)
+                            }
+                        }
+            
+                        &.disabled {
+                            filter: opacity(0.5);
+                            cursor: default;
+                        }
+                    }
+            
+                    &-admin {
+                        height: 40px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        padding: 7px;
+                        cursor: pointer;
+            
+                        &.disabled {
+                            filter: opacity(0.5);
+                            cursor: default;
+                        }
+            
+                        &-title {
+                            @include unselectable;
+                            font-size: 15px;
+                            font-weight: bold;
+                            padding-left: 8px;
+                            padding-right: 5px;
+                            color: $primaryTextColor;
+            
+                            &.active {
+                                color: $adminMessageLabelBackground;
+                            }
+                        }
+            
+                        &-icon {
+                            height: 20px;
+                            width: 20px;
+                            background-image: url(../../resources/icons/admin-icon.svg);
+                            background-size: 100%;
+                            filter: opacity(0.5);
+            
+                            &.active {
+                                background-image: url(../../resources/icons/admin-icon-active.svg)
+                            }
+                        }
+                    }
+            
+                    &-predictions {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        padding: 7px 7px 10px 7px;
+            
+                        // disabled
+                        filter: opacity(0.3);
+                        cursor: not-allowed;
+            
+                        &-title {
+                            @include unselectable;
+                            font-size: 15px;
+                            font-weight: bold;
+                            padding-left: 8px;
+                            padding-right: 5px;
+                            color: $failedTextColor;
+                        }
+            
+                        &-icon {
+                            height: 20px;
+                            width: 20px;
+                            background-image: url(../../resources/icons/ml-control-icon-active.svg);
+                            background-size: 100%;
+                        }
+                    }
+                    
+                }
+            }
+
+            &-content {
+                width: 100%;
+                // we need calc here to work fine with control header in top of the root element
+                height: calc(100% - 50px);
+                position: relative;
+
+                &-wrapper {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    bottom: 0;
+                    right: 0;
+
+                    &.disabled {
+                        display: none;
+                    }
+                }
             }
         }        
     }

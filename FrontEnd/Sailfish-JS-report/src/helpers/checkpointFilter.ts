@@ -14,25 +14,28 @@
  * limitations under the License.
  ******************************************************************************/
 
-import TestCase from "../models/TestCase";
-import { StatusType } from "../models/Status";
-import SelectedState from './SelectedState';
-import Report from '../models/Report';
-import { Panel } from "../helpers/Panel";
 import Action from '../models/Action';
 
+const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
 
-export default interface AppState {
-    report: Report;
-    currentTestCasePath: string;
-    testCase: TestCase;
-    checkpointActions: Action[];
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
-    selected: SelectedState;
-    adminMessagesEnabled: boolean;
-    splitMode: boolean;
-    showFilter: boolean;
-    leftPane: Panel;
-    rightPane: Panel;
+export function isCheckpoint(action: Action): boolean {
+    return action.name.includes(ACTION_CHECKPOINT_NAME);
+}
+
+export function getCheckpointActions(actions: Action[]) {
+    return actions.reduce((checkpoints, action) => [...checkpoints, ...getActionCheckpoints(action)], []);
+}
+
+function getActionCheckpoints(action: Action, checkpoints: Action[] = []): Action[]  {
+    if (isCheckpoint(action)) {
+        return [...checkpoints, action];
+    }
+
+    return action.subNodes.reduce((checkpoints, subNode) => {
+        if (subNode.actionNodeType == 'action') {
+            return [...checkpoints, ...getActionCheckpoints(subNode as Action, checkpoints)];
+        } else {
+            return checkpoints;
+        }
+    }, [])
 }

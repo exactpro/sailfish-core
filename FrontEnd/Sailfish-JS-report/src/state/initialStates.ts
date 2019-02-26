@@ -17,7 +17,7 @@
 import AppState from "./AppState";
 import { statusValues } from "../models/Status";
 import SelectedState from './SelectedState';
-import { Pane } from "../helpers/Pane";
+import { Panel } from "../helpers/Panel";
 
 export const initialSelectedState: SelectedState = {
     actionId: null,
@@ -34,9 +34,11 @@ export const initialAppState: AppState = {
     actionsFilter: statusValues,
     fieldsFilter: statusValues,
     testCase: null,
+    checkpointActions: [],
     selected: initialSelectedState,
+    adminMessagesEnabled: false,
     splitMode: true,
     showFilter: false,
-    leftPane: Pane.Actions,
-    rightPane: Pane.Messages
+    leftPane: Panel.Actions,
+    rightPane: Panel.Messages
 }

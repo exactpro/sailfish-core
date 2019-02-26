@@ -17,7 +17,8 @@
 import { initialSelectedState, initialAppState } from '../state/initialStates';
 import { StateActionType, StateActionTypes } from '../actions/stateActions';
 import AppState from '../state/AppState';
-import { Pane } from '../helpers/Pane';
+import { Panel } from '../helpers/Panel';
+import { getCheckpointActions } from '../helpers/checkpointFilter';
 
 export function appReducer(state: AppState = initialAppState, stateAction: StateActionType): AppState {
     switch (stateAction.type) {
@@ -119,6 +120,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: stateAction.testCase,
+                checkpointActions: getCheckpointActions(stateAction.testCase.actions)
             }
         }
 
@@ -163,6 +165,13 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             }
         }
 
+        case StateActionTypes.SET_ADMIN_MSG_ENABLED: {
+            return {
+                ...state,
+                adminMessagesEnabled: stateAction.adminEnabled
+            }
+        }
+
         case StateActionTypes.SWITCH_SPLIT_MODE: {
             if (state.splitMode) {
                 return {
@@ -174,7 +183,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 splitMode: true,
-                leftPane: Pane.Actions
+                leftPane: Panel.Actions
             }
         }
 

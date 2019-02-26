@@ -15,18 +15,16 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
+import '../styles/messages.scss';
 import Message from '../models/Message';
 import { MessageCard } from './MessageCard';
-import { Scrollbars } from 'preact-custom-scrollbars';
-import '../styles/messages.scss';
 import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
-import { isCheckpoint } from '../helpers/messageType';
-import { selectRejectedMessageId } from '../actions/actionCreators';
+import { isCheckpoint, isRejected, isAdmin } from '../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { messagesHeatmap } from '../helpers/heatmapCreator';
@@ -37,30 +35,21 @@ interface MessagesListProps {
     messages: Message[];
     checkpoints: Message[];
     rejectedMessages: Message[];
-    adminMessages: Message[];
+    adminMessagesEnabled: boolean;
     selectedMessages: number[];
     selectedCheckpointId: number;
     selectedRejectedMessageId: number;
     actionsMap: Map<number, Action>;
     selectedStatus: StatusType;
-    selectRejectedMessage: (messageId: number) => any;
     panelWidth?: number;
 }
 
-interface MessagesListState {
-    adminFilter: boolean;
-}
-
-export class MessagesCardListBase extends Component<MessagesListProps, MessagesListState> {
+export class MessagesCardListBase extends Component<MessagesListProps> {
 
     private elements: MessageCard[] = [];
 
     constructor(props: MessagesListProps) {
         super(props);
-
-        this.state = {
-            adminFilter: false
-        }
     }
 
     componentDidUpdate(prevProps: MessagesListProps) {
@@ -110,66 +99,10 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
             (actionId): [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
     }
 
-    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage, panelWidth, selectedMessages, selectedStatus }: MessagesListProps, { adminFilter }: MessagesListState) {
-
-        const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
-            controlShowTitles = panelWidth == null || panelWidth > MIN_CONTROL_BUTTONS_WIDTH,
-            rejectedEnabled = rejectedMessages.length != 0,
-            adminEnabled = adminMessages.length != 0;
-
-        const adminRootClass = [
-                "messages-controls-admin",
-                adminEnabled ? "" : "disabled"
-            ].join(' '),
-            adminIconClass = [
-                "messages-controls-admin-icon",
-                adminFilter ? "active" : ""
-            ].join(' '),
-            adminTitleClass = [
-                "messages-controls-admin-title",
-                adminFilter ? "active" : ""
-            ].join(' '),
-            rejectedRootClass = [
-                "messages-controls-rejected",
-                rejectedEnabled ? "" : "disabled"
-            ].join(' ');
+    render({ messages,selectedMessages, selectedStatus }: MessagesListProps) {
 
         return (
             <div class="messages">
-                <div class="messages-controls">
-                    <div class="messages-controls-predictions"
-                        title="Show predictions (Not implemented)">
-                        <div class="messages-controls-predictions-icon"/>
-                        <div class="messages-controls-predictions-title">
-                            {controlShowTitles ? <p>Predictions</p> : null}
-                        </div>
-                    </div>
-                    <div class={rejectedRootClass}>
-                        <div class="messages-controls-rejected-icon"
-                            title="Scroll to current rejected message"
-                            onClick={() => this.scrollToMessage(selectedRejectedMessageId)} />
-                        <div class="messages-controls-rejected-title">
-                            {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
-                        </div>
-                        <div class="messages-controls-rejected-btn prev"
-                            title="Scroll to previous rejected message"
-                            onClick={rejectedEnabled && this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)} />
-                        <div class="messages-controls-rejected-count">
-                            <p>{currentRejectedIndex === -1 ? 0 : currentRejectedIndex + 1} of {rejectedMessages.length}</p>
-                        </div>
-                        <div class="messages-controls-rejected-btn next"
-                            title="Scroll to next rejected message"
-                            onClick={rejectedEnabled && this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)} />
-                    </div>
-                    <div class={adminRootClass}
-                        onClick={adminEnabled && this.adminFilterHandler}
-                        title={(adminFilter ? "Hide" : "Show") + " Admin messages"}>
-                        <div class={adminIconClass} />
-                        <div class={adminTitleClass}>
-                            {controlShowTitles ? <p>{adminEnabled ? "" : "No"} Admin Messages</p> : null}
-                        </div>
-                    </div>
-                </div>
                 <div class="messages-list">
                     <HeatmapScrollbar
                         selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}>
@@ -182,25 +115,25 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
 
     private renderMessage(message: Message) {
 
-        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectRejectedMessage, selectedRejectedMessageId } = this.props;
+        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled } = this.props;
 
-        if (checkpoints.includes(message)) {
+        if (isCheckpoint(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
         }
 
-        if (message.content.admin) {
+        if (isAdmin(message)) {
             return (
                 <AdminMessageWrapper
                     ref={ref => this.elements[message.id] = ref}
                     message={message}
                     key={message.id}
                     actionsMap={this.getMessageActions(message)}
-                    isExpanded={this.state.adminFilter}
+                    isExpanded={adminMessagesEnabled}
                     isSelected={selectedRejectedMessageId === message.id} />
             )
         }
 
-        if (rejectedMessages.includes(message)) {
+        if (isRejected(message)) {
             return this.renderRejected(message, rejectedMessages, selectedRejectedMessageId);
         }
 
@@ -246,49 +179,21 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                 rejectedMessagesCount={rejectedCount} />
         )
     }
-
-    private nextRejectedHandler = (rejectedMessages: Message[], currentRejectedIndex: number, selectRejectedHandler: (id: number) => any) => {
-        return () => {
-            if (currentRejectedIndex === -1) {
-                selectRejectedHandler(rejectedMessages[0].id);
-            } else {
-                selectRejectedHandler((rejectedMessages[currentRejectedIndex + 1] || rejectedMessages[0]).id)
-            }
-        }
-    }
-
-    private prevRejectedHandler = (rejectedMessages: Message[], currentRejectedIndex: number, selectRejectedMessage: (id: number) => any) => {
-        return () => {
-            if (currentRejectedIndex === -1) {
-                selectRejectedMessage(rejectedMessages[rejectedMessages.length - 1].id);
-            } else {
-                selectRejectedMessage((rejectedMessages[currentRejectedIndex - 1] || rejectedMessages[rejectedMessages.length - 1]).id)
-            }
-        }
-    }
-
-    private adminFilterHandler = () => {
-        this.setState({
-            adminFilter: !this.state.adminFilter
-        })
-    }
 }
 
 export const MessagesCardList = connect(
     (state: AppState) => ({
         messages: state.testCase.messages,
         checkpoints: state.testCase.messages.filter(isCheckpoint),
-        rejectedMessages: state.testCase.messages.filter(message => message.content.rejectReason !== null),
-        adminMessages: state.testCase.messages.filter(message => message.content.admin),
+        rejectedMessages: state.testCase.messages.filter(isRejected),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         selectedStatus: state.selected.status,
+        adminMessagesEnabled: state.adminMessagesEnabled,
         actionsMap: generateActionsMap(state.testCase.actions)
     }),
-    dispatch => ({
-        selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId))
-    }),
+    dispatch => ({}),
     null,
     {
         withRef: true
