@@ -265,11 +265,11 @@
                     <h:outputText value="#{paramNode.getReadableName()}" title="#{paramNode.getReadableName()}"/>
                 </p:column>
 
-                <p:column headerText="Value" style="width: 440px;">
+                <p:column headerText="Value" style="width: 350px;">
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'handlerClassNameSelect'}">
                         <p:selectOneMenu id="handlerClassNameSelect" value="#{paramNode.value}" filter="true" filterMatchMode="contains"
-                                         style="width: 413px; margin-left: 10px;" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
+                                         style="width: 100%" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
                             <f:selectItem itemLabel="#{paramNode.differentValues and empty paramNode.value ? '*' : 'Select handler class name'}"
                             			  itemValue="#{null}" itemDisabled="true" />
                             <f:selectItems value="#{enumSetContainer.loadHandlerClassName()}" />
@@ -278,37 +278,43 @@
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'dictionaryNameSelect'}">
                         <p:autoComplete id="advanced" dropdown="true" value="#{paramNode.value}"
-                                        style="margin-left: 10px;" styleClass="eps-input dictionary-autocomplete"
+                                        style="width: 92%" styleClass="eps-input eps-autocomplete"
                                         completeMethod="#{enumSetContainer.completeDictURI}"/>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'amlVersionSelect'}">
-                        <p:selectOneMenu id="amlSelector" value="#{paramNode.value}" style="width: 413px; margin-left: 10px;" styleClass="eps-input">
-                            <f:selectItems value="#{enumSetContainer.amlVersions}" var="item" itemLabel="#{item.name}" itemValue="#{item.version}" />
-                        </p:selectOneMenu>
+                        <p:autoComplete id="amlSelector" dropdown="true" value="#{paramNode.value}"
+                                        style="width: 100%" styleClass="eps-input"
+                                        completeMethod="#{paramNode.getEnumeratedValues()}"/>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'booleanCheckbox'}">
-                        <p:selectBooleanCheckbox id="parValueBoolean" value="#{paramNode.value}" style="margin-left: 10px;" styleClass="eps-input">
+                        <p:selectBooleanCheckbox id="parValueBoolean" value="#{paramNode.value}" style="width: 100%" styleClass="eps-input">
                         </p:selectBooleanCheckbox>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'integerTextbox'}">
-                        <p:spinner id="intValue" value="#{paramNode.value}" min="0" style="width: 410px; margin-left: 10px;" styleClass="eps-input"
-                        		   placeholder="#{paramNode.differentValues ? '*' : ''}">
-                        </p:spinner>
+                        <!--onkeypress handler disables any input except digits-->
+                        <p:inputText id="intValue" value="#{paramNode.value}" min="0"
+                                     style="width: 100%" styleClass="eps-input"
+                                     placeholder="#{paramNode.differentValues ? '*' : ''}"
+                                     onkeypress="if(event.which &lt; 48 || event.which &gt; 57) return false;"/>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'defaultTextbox'}">
+                        <p:autoComplete id="parValueAutocomplete" value="#{paramNode.value}"
+                                        style="width: 92%" styleClass="eps-input eps-autocomplete" dropdown="true"
+                                        placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{paramNode.hasEnumeratedValues() and (empty paramNode.inputMask)}"
+                                        completeMethod="#{paramNode.completeEnumeratedValues}"/>
 
-                        <p:inputText id="parValue" value="#{paramNode.value}" style="width:405px; margin-left: 10px;" styleClass="eps-input"
-                        			 placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{empty paramNode.inputMask}">
-                         </p:inputText>
+                        <p:inputText id="parValue" value="#{paramNode.value}"
+                                     style="width: 100%" styleClass="eps-input"
+                                     placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{(not paramNode.hasEnumeratedValues()) and (empty paramNode.inputMask)}"/>
 
-                        <p:inputMask id="parValueMasked" value="#{paramNode.value}" style="width:405px; margin-left: 10px;"
+                        <p:inputMask id="parValueMasked" value="#{paramNode.value}"
+                                     style="width: 100%"
                                      styleClass="eps-input" placeholder="#{paramNode.differentValues ? '*' : ''}"
-                                     rendered="#{not empty paramNode.inputMask}" mask="#{paramNode.inputMask}">
-                        </p:inputMask>
+                                     rendered="#{not empty paramNode.inputMask}" mask="#{paramNode.inputMask}"/>
 
                     </ui:fragment>
                 </p:column>

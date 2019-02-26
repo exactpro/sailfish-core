@@ -204,8 +204,8 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
         	if (this.severalEdit == null) {
 
-                this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, false, null, null, null,
-		        		new ArrayList<EnvironmentNode>(), null, null);
+                this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, Collections.emptyList(), false, null, null, null,
+		        		new ArrayList<>(), null, null);
 
 		        for (String name : this.serviceNamesToEdit) {
 
@@ -220,7 +220,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 		        		for (EnvironmentNode toClone : current.getNodeChildren()) {
 		        			this.severalEdit.getNodeChildren().add(
 		        					new EnvironmentNode(toClone.getType(), new ServiceDescription(), toClone.getName(),
-                                            toClone.getDescription(), toClone.isServiceParamRequired(), toClone.getInputMask(),
+                                            toClone.getDescription(), toClone.getEnumeratedValues(), toClone.isServiceParamRequired(), toClone.getInputMask(),
                                             toClone.getValue(), toClone.getParamClassType(), null, null, null));
 		        		}
 
@@ -560,7 +560,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         List<EnvironmentNode> params = new ArrayList<>();
 
         EnvironmentNode handlerClassParamNode = new EnvironmentNode(EnvironmentNode.Type.DESCRIPTION, sd,
-                "HandlerClassName", "", false, null, sd.getServiceHandlerClassName(), String.class, null,
+                "HandlerClassName", "", Collections.emptyList(), false, null, sd.getServiceHandlerClassName(), String.class, null,
                 notifyListener, null);
 
         params.add(handlerClassParamNode);
@@ -569,9 +569,17 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
             if (proxy.haveWriteMethod(name)) {
 
-                EnvironmentNode paramNode = new EnvironmentNode(EnvironmentNode.Type.PARAMETER, sd, name,
-                        proxy.getParameterDescription(name), proxy.checkRequiredParameter(name), proxy.getParameterMask(name),
-                        proxy.getParameterValue(name), proxy.getParameterType(name), null, notifyListener, null);
+                EnvironmentNode paramNode = new EnvironmentNode(
+                        EnvironmentNode.Type.PARAMETER,
+                        sd,
+                        name,
+                        proxy.getParameterDescription(name),
+                        proxy.getEnumeratedValues(name),
+                        proxy.checkRequiredParameter(name),
+                        proxy.getParameterMask(name),
+                        proxy.getParameterValue(name),
+                        proxy.getParameterType(name),
+                        null, notifyListener, null);
 
                 params.add(paramNode);
             }
@@ -580,7 +588,8 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         Collections.sort(params, Collections.reverseOrder());
 
         EnvironmentNode envNode = new EnvironmentNode(
-                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "", false, null, null, null, params,
+                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "",
+                Collections.emptyList(), false, null, null, null, params,
                 notifyListener, serviceName.getEnvironment());
 
         envNode.setStatus(BeanUtil.getSfContext().getConnectionManager().getService(serviceName).getStatus());

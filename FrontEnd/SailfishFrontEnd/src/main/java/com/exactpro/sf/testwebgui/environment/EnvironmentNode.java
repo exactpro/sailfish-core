@@ -16,7 +16,8 @@
 package com.exactpro.sf.testwebgui.environment;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 
@@ -31,6 +32,8 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.QueryTimeoutException;
 import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 
 	private final String id;
     private final String description;
+
+	private final List<String> enumeratedValues;
     private final String inputMask;
     private final Type type;
     private final List<EnvironmentNode> nodes;
@@ -108,6 +113,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
             ServiceDescription parent,
 			String name,
 			String description,
+			List<String> enumeratedValues,
 			boolean serviceParamRequired,
             String inputMask,
 			Object value,
@@ -124,12 +130,10 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		this.paramClassType = paramClassType;
 		this.notifyListener = notifyListener;
 		this.serviceParamRequired = serviceParamRequired;
-		
 		this.parentType = parent.getType();
-		
         this.inputMask = inputMask;
-
         this.description = description == null ? null : description.trim();
+        this.enumeratedValues = enumeratedValues;
 
         this.id = Type.SERVICE.equals(type) ? parent.toString() : parent.toString() + name;
 
@@ -157,6 +161,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				new ServiceDescription(),
 				title,
 				description,
+				Collections.emptyList(),
 				false,
                 null,
 				"false",
@@ -349,5 +354,19 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 
     public String getInputMask() {
         return inputMask;
+    }
+
+    public List<String> getEnumeratedValues() {
+        return enumeratedValues;
+    }
+
+    public boolean hasEnumeratedValues() {
+        return !enumeratedValues.isEmpty();
+    }
+
+    public List<String> completeEnumeratedValues(String query) {
+        return StringUtils.isNotEmpty(query)
+                ? enumeratedValues.stream().filter(value -> StringUtils.containsIgnoreCase(value, query)).collect(Collectors.toList())
+                : enumeratedValues;
     }
 }

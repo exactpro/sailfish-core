@@ -328,8 +328,8 @@ a.eps-link-button:focus {
 	outline: none;
 }
 
-.dictionary-autocomplete > input {
-    width: 377px;
+.eps-autocomplete > input {
+    width: 100%;
 }
 
 .dictionary-autocomplete > button {
