@@ -19,6 +19,7 @@ import { Scrollbars } from 'preact-custom-scrollbars';
 import { StatusType } from '../models/Status';
 import '../styles/heatmap.scss';
 
+const MIN_HEATMAP_ELEMENT_HEIGHT = 8;
 const SCROLLBAR_TRACK_WIDTH = 11;
 
 interface HeatmapScrollbarProps {
@@ -47,12 +48,50 @@ export const HeatmapScrollbar = ({children, selectedElements}: HeatmapScrollbarP
 }
 
 function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): JSX.Element[] {
+    // here we calculate how much heatmap elements we can render without overlaping
+    const maxElementsCount = document.body.scrollHeight / MIN_HEATMAP_ELEMENT_HEIGHT;
+
+    return elementsCount > maxElementsCount ? 
+        renderBigHeatmap(elementsCount, selectedElements, Math.ceil(elementsCount / maxElementsCount)) :
+        renderSmallHeatmap(elementsCount, selectedElements);
+}
+
+function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): JSX.Element[] {
     let resultHeatmap : JSX.Element[] = [];
 
     for (let i = 0; i < elementsCount; i++) {
         resultHeatmap.push(
             <div class={"heatmap-scrollbar-item " + (selectedElements.get(i) || "").toLowerCase()}/>            
-        )
+        );
+    }
+
+    return resultHeatmap;
+}
+
+function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, chunkSize: number): JSX.Element[] {
+    // this fucntion is used for rendering heatmap only for big lists
+    // the idea is that we divide the list of elements into chunks and render only one heatmap element for each chunk
+
+    // WARNING : we can render only one element in a chunk,
+    // so if chunk contains multiple selected elements with different status,
+    // it will render ONLY FIRST status element in a chunk
+
+    let resultHeatmap : JSX.Element[] = [];
+
+    for (let i = 0; i < elementsCount; i++) {
+        if (selectedElements.get(i)) { 
+            resultHeatmap.push(
+                <div class={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()}/>            
+            );
+
+            // after we added heatmap element to the list, we shoul skip other elements in chunk
+            i += chunkSize - ((i + 1) % chunkSize);
+        } else if ((i + 1) % chunkSize == 0) {
+            // no selected elements in current chunk, render empty heatmap element
+            resultHeatmap.push(
+                <div class="heatmap-scrollbar-item"/>            
+            );
+        }
     }
 
     return resultHeatmap;
