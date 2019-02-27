@@ -75,6 +75,11 @@ if "%VAR%" neq "" (
     goto :readArgs
 )
 
+if not exist "%MYSQL%\mysqldump.exe" (
+    echo Can't find '%MYSQL%\mysqldump.exe'
+    exit /b 1
+)
+
 if "%DATABASE%" eq "" (
     echo Database name has not been set
     exit /b 1
