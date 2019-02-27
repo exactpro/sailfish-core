@@ -34,6 +34,7 @@ import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
 
+import com.exactpro.sf.common.logging.CommonLoggers;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ import com.google.common.collect.Iterables;
 public class PluginLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
-	private final Logger userEventsLogger = LoggerFactory.getLogger("USER_EVENTS_LOG");
+	private final Logger userEventsLogger = CommonLoggers.USER_EVENTS_LOGGER;
 
 	public static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
 	public static final String CUSTOM_DICTIONARIES_XML = "custom_dictionaries.xml";
