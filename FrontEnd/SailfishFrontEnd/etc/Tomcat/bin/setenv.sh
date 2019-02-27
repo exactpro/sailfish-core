@@ -22,7 +22,7 @@ export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError" #Option tells the 
 #export JAVA_OPTS="$JAVA_OPTS -XX:HeapDumpPath=" #For example -XX:HeapDumpPath=/disk2/dumps will cause the heap dump to be generated in the /disk2/dumps directory.
 #export JAVA_OPTS="$JAVA_OPTS -Duser.timezone=UTC" #Use the user.timezone property value as the default time zone ID if it's available.
 #export JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addresses preferred over IPv6 addresses
-export JAVA_OPTS="$JAVA_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" #Use for configure jvm FlightRecorder
+#export JAVA_OPTS="$JAVA_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" #Use for configure jvm FlightRecorder
 
 #Deployer Jvm arguments:
 export DEPLOYER_JAVA_OPTS=""
