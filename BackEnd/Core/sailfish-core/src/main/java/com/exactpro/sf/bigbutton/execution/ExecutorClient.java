@@ -121,8 +121,6 @@ public class ExecutorClient {
 
     private final BigButtonSettings settings;
 
-    private final Set<String> uploadedVariableSets = new HashSet<>();
-
     public ExecutorClient(IWorkspaceDispatcher workspaceDispatcher, CombineQueue<ScriptList> listsQueue, Library library, ExecutionProgressMonitor monitor,
 			Executor executor, EMailService mailService, RegressionRunner runner, BigButtonSettings settings) {
 		
@@ -290,7 +288,6 @@ public class ExecutorClient {
         try(InputStream variableSets = BigButtonUtil.getStream(library.getRootFolder(), variableSetsFile, workspaceDispatcher)) {
             Set<String> uploadedVariableSets = apiClient.importVariableSets(variableSetsFile, variableSets, true).getVariableSets();
             logger.debug("Uploaded variable sets '{}' to '{}'", uploadedVariableSets, executor.getName());
-            this.uploadedVariableSets.addAll(uploadedVariableSets);
         }
     }
 
@@ -359,13 +356,6 @@ public class ExecutorClient {
         try {
             serviceCommand(executorServicesUploaded.values().stream(), apiClient::deleteService, "delete", null);
         } catch (RuntimeException e) {
-            toErrorState(e);
-        }
-        try {
-            for(String uploadedVariableSet : uploadedVariableSets) {
-                apiClient.deleteVariableSet(uploadedVariableSet);
-            }
-        } catch(Exception e) {
             toErrorState(e);
         }
     }
