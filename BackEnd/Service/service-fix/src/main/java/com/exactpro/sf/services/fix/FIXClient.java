@@ -616,7 +616,16 @@ public class FIXClient implements IInitiatorService {
 		}
 	}
 
-	@Override
+    @Override
+    public long getLatency() {
+        if(session != null && application != null) {
+            return application.getLatency(session.getSessionID());
+        }
+
+        return 0;
+    }
+
+    @Override
 	public String toString() {
 		return new ToStringBuilder(this).append("name", serviceName).toString();
 	}

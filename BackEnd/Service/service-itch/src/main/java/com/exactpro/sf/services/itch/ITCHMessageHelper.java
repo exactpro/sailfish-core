@@ -15,6 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.messages.IMessage;
@@ -27,12 +37,8 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.MessageHelper;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 public class ITCHMessageHelper extends MessageHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ITCHMessageHelper.class);
 
     //Codec constants
     public static final String FIELD_SECONDS = "Seconds";
@@ -163,5 +169,20 @@ public class ITCHMessageHelper extends MessageHelper {
         }
 
         throw new EPSCommonException("Sent message is not an " + IMessage.class.getSimpleName());
+    }
+
+    @Override
+    public long getSenderTime(IMessage message) {
+        try {
+            LocalDateTime messageTime = message.getField(FAKE_FIELD_MESSAGE_TIME);
+
+            if(messageTime != null) {
+                return getMillisecond(messageTime);
+            }
+        } catch(Throwable t) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        }
+
+        return super.getSenderTime(message);
     }
 }

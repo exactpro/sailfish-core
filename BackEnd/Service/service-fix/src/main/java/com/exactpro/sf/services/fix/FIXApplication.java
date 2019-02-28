@@ -43,6 +43,7 @@ import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceEvent;
 import com.exactpro.sf.services.ServiceEventFactory;
 import com.exactpro.sf.services.ServiceHandlerException;
@@ -95,6 +96,7 @@ public class FIXApplication implements FIXClientApplication {
     private IServiceMonitor serviceMonitor;
     private ServiceInfo serviceInfo;
 	private IServiceHandler handler;
+    private MessageHelper messageHelper;
 	private volatile DirtyQFJIMessageConverter converter;
 
 	private final Map<SessionID, ISession> sessionMap;
@@ -114,6 +116,8 @@ public class FIXApplication implements FIXClientApplication {
 
 	private boolean autorelogin = true;
 
+    private FIXLatencyCalculator latencyCalculator;
+
     public FIXApplication() {
         this.sessionMap = new HashMap<>();
     }
@@ -127,6 +131,7 @@ public class FIXApplication implements FIXClientApplication {
         this.logConfigurator = serviceContext.getLoggingConfigurator();
         this.serviceMonitor = this.applicationContext.getServiceMonitor();
         this.handler = this.applicationContext.getServiceHandler();
+        this.messageHelper = this.applicationContext.getMessageHelper();
         this.converter = this.applicationContext.getConverter();
         this.storage = serviceContext.getMessageStorage();
         this.serviceInfo = serviceContext.lookupService(serviceName);
@@ -160,6 +165,7 @@ public class FIXApplication implements FIXClientApplication {
 
         this.useDefaultApplVerID = fixSettings.isUseDefaultApplVerID();
         this.isPerformance = fixSettings.isPerformanceMode();
+        this.latencyCalculator = new FIXLatencyCalculator(this.messageHelper);
     }
 
     @Override
@@ -374,6 +380,7 @@ public class FIXApplication implements FIXClientApplication {
 			session.logout("Logon After Server Logout");
 		}
 
+        latencyCalculator.removeLatency(sessionID);
 	}
 
 	@Override
@@ -636,6 +643,10 @@ public class FIXApplication implements FIXClientApplication {
                 iMsg = convert(message, from, to, isAdmin, null);
                 storeMessage(sessionID, iMsg);
                 handler.putMessage(iSession, route, iMsg);
+
+                if(route == ServiceHandlerRoute.FROM_ADMIN || route == ServiceHandlerRoute.FROM_APP) {
+                    latencyCalculator.updateLatency(sessionID, iMsg);
+                }
             } catch (ServiceHandlerException e) {
                 handler.exceptionCaught(iSession, e);
                 logger.error("{}: Can not put the message {} to handler", route.getAlias(), iMsg, e);
@@ -684,5 +695,10 @@ public class FIXApplication implements FIXClientApplication {
     public void onSendToApp(Message message, SessionID sessionId) {
         logger.debug("Save message toApp: {}", message);
         processMessage(sessionId, message, ServiceHandlerRoute.TO_APP, serviceStringName, sessionId.getTargetCompID(), false);
+    }
+
+    @Override
+    public long getLatency(SessionID sessionID) {
+        return latencyCalculator.getLatency(sessionID);
     }
 }

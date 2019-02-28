@@ -15,7 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
+
+import java.time.LocalDateTime;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.messages.IMessage;
@@ -30,7 +36,8 @@ import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
  *
  */
 public class FixMessageHelper extends MessageHelper {
-    
+    private static final Logger LOGGER = LoggerFactory.getLogger(FixMessageHelper.class);
+
     public static final String ATTRIBUTE_TAG = "tag";
     public static final String HEADER = FieldConst.HEADER;
     public static final String TRAILER = FieldConst.TRAILER;
@@ -119,5 +126,17 @@ public class FixMessageHelper extends MessageHelper {
             subMessage.addField(CHECK_SUM, null); //Set default value for TreeComparer
         }
         return message;
+    }
+
+    @Override
+    public long getSenderTime(IMessage message) {
+        try {
+            LocalDateTime sendingTime = message.<IMessage>getField(HEADER).getField(SENDING_TIME_FIELD);
+            return getMillisecond(sendingTime);
+        } catch(Throwable t) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        }
+
+        return super.getSenderTime(message);
     }
 }
