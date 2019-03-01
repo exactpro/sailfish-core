@@ -15,18 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf;
 
+import static java.lang.String.valueOf;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.File;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.ClosedWatchServiceException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -36,8 +39,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -60,6 +61,8 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.exceptions.APIResponseException;
 import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixLinkUploadResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
@@ -67,7 +70,7 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlRunReference;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
-
+import com.exactpro.sf.testwebgui.restapi.xml.XmlVariableSets;
 
 public class SFAPIClient implements AutoCloseable {
 	
@@ -85,7 +88,13 @@ public class SFAPIClient implements AutoCloseable {
 	private static final String ENVIRONMENT_CREATE = "environment/add?name=!name";
 	private static final String ENVIRONMENT_DELETE = "environment/delete?name=!name";
 	private static final String ENVIRONMENT_RENAME = "environment/rename?oldname=!old&newname=!new";
-	
+    private static final String ENVIRONMENT_GET_VARIABLE_SET = "environment/get_variable_set?name=!name";
+    private static final String ENVIRONMENT_SET_VARIABLE_SET = "environment/set_variable_set?environment=!name&variable_set=!set";
+
+    private static final String VARIABLE_SETS = "variable_sets/";
+    private static final String VARIABLE_SET_DELETE = "variable_sets/delete?name=!name";
+    private static final String VARIABLE_SETS_IMPORT = "variable_sets/import?replace_existing=!re";
+
 	private static final String MATRICES = "scripts/";
 	private static final String RUN_REFERENCE = "scripts/reference/run";
 	private static final String MATRIX_UPLOAD = "scripts/upload";
@@ -129,7 +138,7 @@ public class SFAPIClient implements AutoCloseable {
     private Map<Class<?>, Unmarshaller> unmarshallers = new HashMap<Class<?>, Unmarshaller>();
 
     private String defaultServiceHandlerClassName = "com.exactpro.sf.services.CollectorServiceHandler";
-	
+
 	/**
 	 * Creates an instance of SFAPI client
 	 * @param rootUrl Root url of SFAPI, e.g. "http://localhost/sfgui/sfapi/"
@@ -362,8 +371,8 @@ public class SFAPIClient implements AutoCloseable {
 	public List<ServiceImportResult> importServices(String fileName, String envName, InputStream zipStream, boolean replaceExisting, boolean skipExisting) throws APICallException, APIResponseException {
 		String url = rootUrl + SERVICES_IMPORT
 				.replace("!env", envName)
-				.replace("!re", String.valueOf(replaceExisting))
-				.replace("!se", String.valueOf(skipExisting));
+                .replace("!re", valueOf(replaceExisting))
+                .replace("!se", valueOf(skipExisting));
 		try {
 			MultipartEntityBuilder mpb = MultipartEntityBuilder.create();
 			mpb.addBinaryBody("file", zipStream, ContentType.APPLICATION_OCTET_STREAM, fileName);
@@ -500,7 +509,7 @@ public class SFAPIClient implements AutoCloseable {
     }
 	
 	public InputStream downloadMatrix(int id) throws APICallException, APIResponseException {
-		String url = rootUrl + MATRIX_DOWNLOAD.replace("!id", String.valueOf(id));
+        String url = rootUrl + MATRIX_DOWNLOAD.replace("!id", valueOf(id));
 		try {
 			HttpGet req = new HttpGet(url);
 			CloseableHttpResponse res = http.execute(req);
@@ -584,27 +593,27 @@ public class SFAPIClient implements AutoCloseable {
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("continueonfailed=");
-		paramsBuilder.append(String.valueOf(continueOnFailed));
+        paramsBuilder.append(valueOf(continueOnFailed));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("autostart=");
-		paramsBuilder.append(String.valueOf(autoStart));
+        paramsBuilder.append(valueOf(autoStart));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("autorun=");
-		paramsBuilder.append(String.valueOf(autoRun));
+        paramsBuilder.append(valueOf(autoRun));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("ignoreaskforcontinue=");
-		paramsBuilder.append(String.valueOf(ignoreAskForContinue));
+        paramsBuilder.append(valueOf(ignoreAskForContinue));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("runnetdumper=");
-		paramsBuilder.append(String.valueOf(runNetDumper));
+        paramsBuilder.append(valueOf(runNetDumper));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("skipoptional=");
-		paramsBuilder.append(String.valueOf(skipOptional));
+        paramsBuilder.append(valueOf(skipOptional));
 
 		if(tags != null) {
 			for(String tag : tags) {
@@ -666,7 +675,7 @@ public class SFAPIClient implements AutoCloseable {
 															 String staticVariables,
 															 String subFolder
 															 ) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(mat.getId()), actionName, rangeParam, environmentParam,
+        return performMatrixActionInt(valueOf(mat.getId()), actionName, rangeParam, environmentParam,
 				                       fileEncodingParam, amlParam, continueOnFailed, autoStart,
 		                               autoRun, ignoreAskForContinue, tags, staticVariables, subFolder);
 	}
@@ -684,7 +693,7 @@ public class SFAPIClient implements AutoCloseable {
 															 List<String> tags,
 															 String staticVariables,
 															 String subFolder) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(id), actionName, rangeParam, environmentParam,
+        return performMatrixActionInt(valueOf(id), actionName, rangeParam, environmentParam,
 				fileEncodingParam, amlParam, continueOnFailed, autoStart,
 				autoRun, ignoreAskForContinue, tags, staticVariables,subFolder);
 	}
@@ -703,7 +712,7 @@ public class SFAPIClient implements AutoCloseable {
 			 String staticVariables,
 			 String subFolder,
 			 String language) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(id), actionName, rangeParam, environmentParam,
+        return performMatrixActionInt(valueOf(id), actionName, rangeParam, environmentParam,
 				fileEncodingParam, amlParam, continueOnFailed, autoStart,
 				autoRun, ignoreAskForContinue, true, false, tags, staticVariables,subFolder,language);
 }
@@ -724,7 +733,7 @@ public class SFAPIClient implements AutoCloseable {
             String staticVariables,
             String subFolder,
             String language) throws APICallException, APIResponseException {
-        return performMatrixActionInt(String.valueOf(id), actionName, rangeParam, environmentParam,
+        return performMatrixActionInt(valueOf(id), actionName, rangeParam, environmentParam,
                 fileEncodingParam, amlParam, continueOnFailed, autoStart,
                 autoRun, ignoreAskForContinue, runNetDumper, skipOptional, tags, staticVariables,subFolder,language);
     }
@@ -759,12 +768,12 @@ public class SFAPIClient implements AutoCloseable {
     }
 	
 	public XmlTestscriptActionResponse runMatrix(Matrix mat) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(mat.getId()), "start", null, "default",
+        return performMatrixActionInt(valueOf(mat.getId()), "start", null, "default",
 		        "ISO-8859-1", 2, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse runMatrix(int id) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(id), "start", null, "default",
+        return performMatrixActionInt(valueOf(id), "start", null, "default",
 				"ISO-8859-1", 2, false, false, true, true, null, null, null);
 	}
 	
@@ -774,12 +783,12 @@ public class SFAPIClient implements AutoCloseable {
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(Matrix mat) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(mat.getId()), "stop", null, "default",
+        return performMatrixActionInt(valueOf(mat.getId()), "stop", null, "default",
 				"ISO-8859-1", 2, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(int id) throws APICallException, APIResponseException {
-		return performMatrixActionInt(String.valueOf(id), "stop", null, "default",
+        return performMatrixActionInt(valueOf(id), "stop", null, "default",
 				"ISO-8859-1", 2, false, false, true, true, null, null, null);
 	}
 	
@@ -803,7 +812,7 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public XmlResponse deleteMatrix(int id) throws APICallException, APIResponseException {
 		String url = MATRIX_DELETE_BY_ID
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		return getXmlResponse(url);
 	}
 	
@@ -824,7 +833,7 @@ public class SFAPIClient implements AutoCloseable {
 
     public XmlMatrixUploadResponse convertMatrix(int id, String environment, SailfishURI converterUri)
             throws APICallException, APIResponseException {
-        String url = MATRIX_CONVERT_ENVIRONMENT.replace("!id", String.valueOf(id))
+        String url = MATRIX_CONVERT_ENVIRONMENT.replace("!id", valueOf(id))
                                                .replace("!environment", environment)
                                                .replace("!converter_uri", converterUri.toString());
         XmlMatrixUploadResponse res = getResponse(url, XmlMatrixUploadResponse.class);
@@ -838,7 +847,7 @@ public class SFAPIClient implements AutoCloseable {
 
     public XmlMatrixUploadResponse convertMatrix(int id, SailfishURI converterUri)
             throws APICallException, APIResponseException {
-        String url = MATRIX_CONVERT.replace("!id", String.valueOf(id))
+        String url = MATRIX_CONVERT.replace("!id", valueOf(id))
                                    .replace("!converter_uri", converterUri.toString());
         XmlMatrixUploadResponse res = getResponse(url, XmlMatrixUploadResponse.class);
         return res != null ? res : new XmlMatrixUploadResponse();
@@ -865,20 +874,20 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public XmlTestscriptRunDescription getTestScriptRunInfo(int id) throws APICallException, APIResponseException {
 		String url=TEST_SCRIPT_RUN_INFO
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		XmlTestscriptRunDescription res= getResponse(url, XmlTestscriptRunDescription.class);
 		return res!=null? res: new XmlTestscriptRunDescription();		
 	}
 	
     public XmlTestScriptShortReport getTestScriptRunShortReport(int id) throws APICallException, APIResponseException {
-        String url = TEST_SCRIPT_RUN_SHORTREPORT.replace("!id", String.valueOf(id));
+        String url = TEST_SCRIPT_RUN_SHORTREPORT.replace("!id", valueOf(id));
         XmlTestScriptShortReport res = getResponse(url, XmlTestScriptShortReport.class);
         return res != null ? res : new XmlTestScriptShortReport();
     }
 
     public InputStream getTestScriptRunReport(int id) throws APICallException, APIResponseException {
 		String url = rootUrl + TEST_SCRIPT_RUN_REPORT
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		try {
 			HttpGet req = new HttpGet(url);
 			CloseableHttpResponse res = http.execute(req);
@@ -893,7 +902,7 @@ public class SFAPIClient implements AutoCloseable {
 
 	public FileDownloadWrapper getTestScriptRunReportZip(int id) throws APICallException, APIResponseException {
 		String url = rootUrl + TEST_SCRIPT_RUN_REPORT_ZIP
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		try {
 			HttpGet req = new HttpGet(url);
 			CloseableHttpResponse res = http.execute(req);
@@ -922,26 +931,26 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public XmlResponse deleteTestScriptRun(int id) throws APICallException, APIResponseException {
 		String url = TEST_SCRIPT_RUN_DELETE
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		return getXmlResponse(url);
 	}
 
     public XmlResponse setSfCurrentID(int id, long sfCurrentID) throws APICallException, APIResponseException {
         String url = TEST_SCRIPT_RUN_UPDATE
-                .replace("!id", String.valueOf(id))
-                .replace("!sfCurrentID", String.valueOf(sfCurrentID));
+                .replace("!id", valueOf(id))
+                .replace("!sfCurrentID", valueOf(sfCurrentID));
         return getXmlResponse(url);
     }
 
 
     public XmlResponse compileTestScriptRun(int id) throws APICallException, APIResponseException {
 		String url = TEST_SCRIPT_RUN_COMPILE
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		return getXmlResponse(url);
 	}
 	public XmlResponse runCompiledTestScript(int id) throws APICallException, APIResponseException {
 		String url = TEST_SCRIPT_RUN_RUN_COMPILED_SCRIPT
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		return getXmlResponse(url);
 	}
 	
@@ -957,7 +966,7 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public XmlResponse stopTestScriptRun(int id) throws APICallException, APIResponseException {
 		String url = TEST_SCRIPT_RUN_STOP
-				.replace("!id", String.valueOf(id));
+                .replace("!id", valueOf(id));
 		return getXmlResponse(url);
 	}
 	
@@ -998,7 +1007,53 @@ public class SFAPIClient implements AutoCloseable {
 				.replace("!new", newName);
 		return getXmlResponse(url);
 	}
-	
+
+    public XmlResponse getEnvironmentVariableSet(String name) throws APIResponseException, APICallException {
+        logger.debug("Sending request to get variable set for environment '{}' to: {}", name, rootUrl);
+        String url = ENVIRONMENT_GET_VARIABLE_SET.replace("!name", name);
+        return getXmlResponse(url);
+    }
+
+    public XmlResponse setEnvironmentVariableSet(String environmentName, String variableSetName) throws APIResponseException, APICallException {
+        logger.debug("Sending request to set variable set for environment '{}' to '{}' to: {}", environmentName, variableSetName, rootUrl);
+        String url = ENVIRONMENT_SET_VARIABLE_SET.replace("!name", environmentName)
+                .replace("!set", Objects.toString(variableSetName, ""));
+        return getXmlResponse(url);
+    }
+
+    public Set<String> getVariableSets() throws APIResponseException, APICallException {
+        logger.debug("Sending request to get variable sets from: {}", rootUrl);
+        return getResponse(VARIABLE_SETS, XmlVariableSets.class).getVariableSets();
+    }
+
+    public XmlResponse deleteVariableSet(String name) throws APIResponseException, APICallException {
+        logger.debug("Sending request to delete variable set '{}' from '{}'", name, rootUrl);
+        String url = VARIABLE_SET_DELETE.replace("!name", name);
+        return getXmlResponse(url);
+    }
+
+    public XmlVariableSets importVariableSets(String fileName, InputStream data, boolean replaceExisting) throws APIResponseException, APICallException {
+        logger.debug("Importing variable sets from file '{}' to '{}' with replace existing set to '{}'", fileName, rootUrl, replaceExisting);
+        String url = rootUrl + VARIABLE_SETS_IMPORT.replace("!re", valueOf(replaceExisting));
+
+        try {
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+                    .addBinaryBody("file", data, ContentType.APPLICATION_OCTET_STREAM, fileName);
+
+            HttpPost request = new HttpPost(url);
+            request.setEntity(builder.build());
+
+            try(CloseableHttpResponse response = http.execute(request)) {
+                checkHttpResponse(response);
+                return unmarshall(XmlVariableSets.class, response);
+            }
+        } catch(APIResponseException e) {
+            throw new APIResponseException("URL: " + url, e);
+        } catch(Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
 	// Statistics
 	
 	public XmlResponse registerTag(String name) throws APICallException, APIResponseException {

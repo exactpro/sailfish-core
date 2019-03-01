@@ -39,6 +39,8 @@ public class Executor implements Serializable {
 
     private ImportError rejectCause;
 
+    private String variableSet;
+
 	public String getHttpUrl() {
 		
 		String result = this.path;
@@ -125,5 +127,13 @@ public class Executor implements Serializable {
 
     public void setRejectCause(ImportError rejectCause) {
         this.rejectCause = rejectCause;
+    }
+
+    public String getVariableSet() {
+        return variableSet;
+    }
+
+    public void setVariableSet(String variableSet) {
+        this.variableSet = variableSet;
     }
 }

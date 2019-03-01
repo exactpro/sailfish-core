@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.storage;
+package com.exactpro.sf.testwebgui.restapi.xml;
 
-import java.util.List;
+import java.util.Set;
 
-public interface IEnvironmentStorage {
-    void add(String name);
-    void remove(String name);
-    boolean exists(String name);
-    void rename(String oldName, String newName);
-    List<String> list();
-    String getVariableSet(String name);
-    void setVariableSet(String name, String variableSet);
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "variableSets")
+public class XmlVariableSets {
+    private Set<String> variableSets;
+
+    @XmlElement(name = "variableSet")
+    public Set<String> getVariableSets() {
+        return variableSets;
+    }
+
+    public void setVariableSets(Set<String> variableSets) {
+        this.variableSets = variableSets;
+    }
 }

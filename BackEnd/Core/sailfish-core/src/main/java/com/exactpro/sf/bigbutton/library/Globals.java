@@ -15,11 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.library;
 
-import com.exactpro.sf.bigbutton.importing.ImportError;
-
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.exactpro.sf.bigbutton.importing.ImportError;
 
 @SuppressWarnings("serial")
 public class Globals implements Serializable {
@@ -31,6 +31,8 @@ public class Globals implements Serializable {
 	private Set<String> serviceLists;
 
     private Set<ImportError> rejectCause = new HashSet<>();
+
+    private String variableSet;
 
 	public SfApiOptions getApiOptions() {
 		return apiOptions;
@@ -72,5 +74,12 @@ public class Globals implements Serializable {
     public void setLineNumber(long lineNumber) {
         this.lineNumber = lineNumber;
     }
-	
+
+    public String getVariableSet() {
+        return variableSet;
+    }
+
+    public void setVariableSet(String variableSet) {
+        this.variableSet = variableSet;
+    }
 }

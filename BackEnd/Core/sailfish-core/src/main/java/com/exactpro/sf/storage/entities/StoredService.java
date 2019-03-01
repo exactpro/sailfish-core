@@ -29,6 +29,7 @@ public class StoredService extends AbstractPersistentObject {
 	private String type;
 	private String serviceHandlerClassName;
 	private Map<String, String> parameters = new HashMap<String, String>();
+    private Map<String, String> variables = new HashMap<>();
 	private StoredEnvironment environment;
 
 	public String getName() {
@@ -64,7 +65,15 @@ public class StoredService extends AbstractPersistentObject {
 		this.parameters = parameters;
 	}
 
-	public StoredEnvironment getEnvironment() {
+    public Map<String, String> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map<String, String> variables) {
+        this.variables = variables;
+    }
+
+    public StoredEnvironment getEnvironment() {
 		return environment;
 	}
 
@@ -79,6 +88,7 @@ public class StoredService extends AbstractPersistentObject {
 				append("type", type).
 				append("handler", serviceHandlerClassName).
 				append("settings", parameters).
+                append("variables", variables).
 				append("environment", (null != environment) ? environment.getName() : "").
 				toString();
 	}

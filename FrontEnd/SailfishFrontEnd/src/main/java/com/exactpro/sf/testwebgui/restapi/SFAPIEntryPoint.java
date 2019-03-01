@@ -43,5 +43,6 @@ public class SFAPIEntryPoint extends ResourceConfig {
         register(JacksonFeature.class);
         register(StorageResource.class);
         register(InternalResources.class);
+        register(VariableSetsResource.class);
     }
 }

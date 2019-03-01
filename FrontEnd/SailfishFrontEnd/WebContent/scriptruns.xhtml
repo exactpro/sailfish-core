@@ -249,7 +249,6 @@
 
 					<h:panelGroup>
 		                <p:selectOneMenu id="selectedEnvironment" value="#{testScriptsBean.selectedEnvironment}" var="environment" styleClass="eps-input" style="width:145px; text-align:left; margin-top: -1px;">
-		                    <f:selectItem itemLabel="Default Environment" itemValue="default" />
 		                    <f:selectItems value="#{testScriptsBean.environmentValues}" />
 		                    <p:ajax execute="@this" />
 		                </p:selectOneMenu>

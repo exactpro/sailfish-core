@@ -15,13 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.execution;
 
+import static java.lang.System.lineSeparator;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Stream.concat;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getThrowableList;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,19 +60,10 @@ public class RegressionRunnerUtils {
     }
 
     public static String createErrorText(Throwable t) {
-
-        StringBuilder sb = new StringBuilder();
-
-        Throwable[] exceptions = ExceptionUtils.getThrowables(t);
-
-        for (Throwable exception : exceptions) {
-
-            sb.append(exception.getMessage()).append(". ");
-
-        }
-
-        return sb.toString();
-
+        return concat(getThrowableList(t).stream(), stream(t.getSuppressed()))
+                .distinct()
+                .map(Throwable::getMessage)
+                .collect(joining(lineSeparator()));
     }
 
     public static String getStatisticsDBSettings() {

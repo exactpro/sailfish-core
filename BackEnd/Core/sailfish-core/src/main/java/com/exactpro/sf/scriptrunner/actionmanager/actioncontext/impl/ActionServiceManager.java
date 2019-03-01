@@ -26,6 +26,7 @@ import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionServiceManager;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
+import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.storage.IServiceStorage;
 
 public class ActionServiceManager implements IActionServiceManager {
@@ -59,12 +60,20 @@ public class ActionServiceManager implements IActionServiceManager {
 
     @Override
     public Future<?> addService(ServiceName serviceName, SailfishURI uri, IServiceSettings settings, IServiceNotifyListener exceptionListener) {
-        return connectionManager.addService(serviceName, uri, settings, exceptionListener);
+        ServiceDescription serviceDescription = new ServiceDescription(uri);
+
+        serviceDescription.setEnvironment(serviceName.getEnvironment());
+        serviceDescription.setName(serviceName.getServiceName());
+        serviceDescription.setSettings(settings);
+
+        return connectionManager.addService(serviceDescription, exceptionListener);
     }
 
     @Override
     public Future<?> updateService(ServiceName serviceName, IServiceSettings settings, IServiceNotifyListener exceptionListener) {
-        return connectionManager.updateService(serviceName, settings, exceptionListener);
+        ServiceDescription serviceDescription = connectionManager.getServiceDescription(serviceName);
+        serviceDescription.setSettings(settings);
+        return connectionManager.updateService(serviceDescription, exceptionListener);
     }
 
     @Override

@@ -16,4 +16,5 @@
         <integerSetting>101</integerSetting>
         <stringSetting>some string</stringSetting>
     </enabledSettings>
+    <variables/>
 </serviceDescription>

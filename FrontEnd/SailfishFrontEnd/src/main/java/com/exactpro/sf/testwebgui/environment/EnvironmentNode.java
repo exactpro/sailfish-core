@@ -15,9 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.environment;
 
+import static org.apache.commons.lang3.StringUtils.stripToNull;
+import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Map;
 
 import javax.faces.application.FacesMessage;
 
@@ -32,13 +36,13 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.QueryTimeoutException;
 import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIConverter;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -69,6 +73,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     private final SailfishURI parentType;
     
 	private Object value;
+    private String variable;
+    private Map<String, String> variableSet;
     private String name;
     private String environment;
 	private ServiceStatus status;
@@ -76,6 +82,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     private String serviceParamRenderComponent = "defaultTextbox";
 	
 	private boolean differentValues = false; // for several services editing
+    private boolean differentVariables = false;
 	
 	static {
 		
@@ -117,6 +124,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 			boolean serviceParamRequired,
             String inputMask,
 			Object value,
+            String variable,
+            Map<String, String> variableSet,
 			Class<?> paramClassType,
 			List<EnvironmentNode> nodes,
 			IServiceNotifyListener notifyListener,
@@ -126,6 +135,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		this.name = name;
 		this.environment = environment;
 		this.value = value;
+        setVariable(variable);
+        this.variableSet = variableSet;
 		this.nodes = nodes;
 		this.paramClassType = paramClassType;
 		this.notifyListener = notifyListener;
@@ -165,6 +176,8 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				false,
                 null,
 				"false",
+                null,
+                null,
 				boolean.class,
 				null,
 				null,
@@ -176,15 +189,19 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 
 	@Override
 	public String toString() {
-		return "EnvironmentNode{" +
-				"name='" + name + '\'' +
-				", description='" + description + '\'' +
-				", value=" + value +
-				", type=" + type +
-				", id='" + id + '\'' +
-				", nodes=" + nodes +
-				", status=" + status +
-				'}';
+        ToStringBuilder builder = new ToStringBuilder(this, SHORT_PREFIX_STYLE);
+
+        builder.append("name", name);
+        builder.append("description", description);
+        builder.append("value", value);
+        builder.append("variable", variable);
+        builder.append("variableSet", variableSet);
+        builder.append("type", type);
+        builder.append("id", id);
+        builder.append("nodes", nodes);
+        builder.append("status", status);
+
+        return builder.toString();
 	}
 
 	public enum Type {
@@ -219,8 +236,20 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		}
 	}
 
-	public void saveParamToDataBase(ServiceName serviceName, IConnectionManager conManager, ServiceDescription parent) throws Exception {
-		conManager.updateService(serviceName, parent.getSettings(), notifyListener).get(); 
+    public String getVariable() {
+        return variable;
+    }
+
+    public void setVariable(String variable) {
+        this.variable = stripToNull(variable);
+    }
+
+    public Map<String, String> getVariableSet() {
+        return variableSet;
+    }
+
+    public void saveParamToDataBase(IConnectionManager conManager, ServiceDescription parent) throws Exception {
+        conManager.updateService(parent, notifyListener).get();
 	}
 	
 	private synchronized String convert(Object value) {
@@ -248,6 +277,12 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 				convertedValue = convert(this.value, paramClassType);
 			}
 			BeanUtils.setProperty(parent.getSettings(), name, convertedValue);
+
+            if(variable == null) {
+                parent.getVariables().remove(name);
+            } else {
+                parent.getVariables().put(name, variable);
+            }
 		} else if ( type == Type.DESCRIPTION ) {
 			parent.setServiceHandlerClassName(this.value.toString());
 		}
@@ -352,8 +387,24 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 		this.differentValues = differentValues;
 	}
 
+    public boolean isDifferentVariables() {
+        return differentVariables;
+    }
+
+    public void setDifferentVariables(boolean differentVariables) {
+        this.differentVariables = differentVariables;
+    }
+
     public String getInputMask() {
         return inputMask;
+    }
+
+    public String getFinalValue() {
+        if(environment != null && variableSet != null && variable != null) {
+            return variableSet.getOrDefault(variable, getValue());
+        }
+
+        return getValue();
     }
 
     public List<String> getEnumeratedValues() {
