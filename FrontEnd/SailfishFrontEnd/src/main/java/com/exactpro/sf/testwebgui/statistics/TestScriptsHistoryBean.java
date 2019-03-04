@@ -64,7 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ManagedBean(name="mrHistBean")
 @ViewScoped
 @SuppressWarnings("serial")
-public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Serializable {
+public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestScriptsHistoryBean.class);
 

@@ -36,6 +36,8 @@ public class TagGroupDimension implements Serializable {
 
     private String name;
 
+    private boolean hasGroup;
+
     private List<TagGroupDimension> possibleSubTags;
 	private List<TagGroupDimension> selectedSubTags;
 	
@@ -43,18 +45,19 @@ public class TagGroupDimension implements Serializable {
 			
 		}
 	
-	public TagGroupDimension(long id, String name, List<TagGroupDimension> subTags) {
+	public TagGroupDimension(long id, String name, List<TagGroupDimension> subTags, boolean hasGroup) {
 		this.id = id;
 		this.name = name;
 		this.possibleSubTags = subTags;
 		if (subTags != null) {
 		    this.selectedSubTags = new ArrayList<>(this.possibleSubTags);
 		}
+        this.hasGroup = hasGroup;
 	}	
 	
 	public static TagGroupDimension fromTag(Tag tag) {
 		
-		return new TagGroupDimension(tag.getId(), tag.getName(), null);
+		return new TagGroupDimension(tag.getId(), tag.getName(), null, tag.getGroup() != null);
 		
 	}
 	
@@ -66,7 +69,7 @@ public class TagGroupDimension implements Serializable {
             list.add(fromTag(tag));
         }
 	    
-		return new TagGroupDimension(group.getId(), group.getName(), Collections.unmodifiableList(list));
+		return new TagGroupDimension(group.getId(), group.getName(), Collections.unmodifiableList(list), true);
 		
 	}
 
@@ -81,6 +84,10 @@ public class TagGroupDimension implements Serializable {
 	public boolean isTag() {
 		return possibleSubTags == null;
 	}
+
+    public boolean hasGroup() {
+        return hasGroup;
+    }
 
     public List<TagGroupDimension> getPossibleSubTags() {
         return possibleSubTags;
