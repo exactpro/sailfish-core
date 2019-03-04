@@ -19,7 +19,11 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   resolve: {
-    extensions: ['.ts', '.js', '.tsx', '.scss']
+    extensions: ['.ts', '.js', '.tsx', '.scss'],
+    alias: {
+      'react': 'preact-compat',
+      'react-dom': 'preact-compat'
+  }
   },
   output: {
     path: path.resolve(__dirname, './build/out/'),

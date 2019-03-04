@@ -29,7 +29,11 @@ module.exports = {
     host: "0.0.0.0"
   },
   resolve: {
-    extensions: ['.ts', '.js', '.tsx', '.scss']
+    extensions: ['.ts', '.js', '.tsx', '.scss'],
+    alias: {
+        'react': 'preact-compat',
+        'react-dom': 'preact-compat'
+    }
   },
   output: {
     path: path.resolve(__dirname, './build/dev/'),
