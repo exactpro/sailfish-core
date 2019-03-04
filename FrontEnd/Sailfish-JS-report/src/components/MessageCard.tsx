@@ -36,6 +36,8 @@ export interface MessageCardProps {
     status?: StatusType;
     rejectedMessagesCount?: number;
     selectHandler: (message: Message, status?: StatusType) => any;
+    showRaw?: boolean;
+    showRawHandler?: (showRaw: boolean) => any;
 }
 
 interface MessageCardState {
@@ -66,6 +68,16 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
             ...this.state,
             showRaw: !this.state.showRaw
         });
+
+        this.props.showRawHandler && this.props.showRawHandler(this.state.showRaw);
+    }
+
+    componentWillReceiveProps(nextProps: MessageCardProps) {
+        if (nextProps.showRaw != this.state.showRaw) {
+            this.setState({
+                showRaw: nextProps.showRaw
+            });
+        }
     }
 
     render({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler }: MessageCardProps, { showRaw }: MessageCardState) {

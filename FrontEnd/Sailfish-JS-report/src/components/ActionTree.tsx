@@ -31,6 +31,8 @@ import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode } from '../models/util/Tree';
 import { createSelector } from '../helpers/styleCreators';
+import { connect } from 'preact-redux';
+import AppState from '../state/models/AppState';
 
 
 export interface ActionTreeProps {
@@ -47,7 +49,7 @@ export interface ActionTreeProps {
     filterFields: StatusType[];
 }
 
-export class ActionTree extends Component<ActionTreeProps> {
+class ActionTreeBase extends Component<ActionTreeProps> {
 
     private expandedTreePath: Tree<number> = null;
     private treeElements: Component[] = [];
@@ -364,3 +366,17 @@ export class ActionTree extends Component<ActionTreeProps> {
         )
     }
 }
+
+export const ActionTree = connect(
+    (state: AppState) => ({
+        selectedMessageId: state.selected.messagesId[0],
+        selectedActionsId: state.selected.actionsId,
+        selectedCheckpointId: state.selected.checkpointActionId,
+        scrolledActionId: state.selected.scrolledActionId
+    }),
+    dispatch => ({}),
+    null,
+    {
+        withRef: true
+    }
+)(ActionTreeBase);

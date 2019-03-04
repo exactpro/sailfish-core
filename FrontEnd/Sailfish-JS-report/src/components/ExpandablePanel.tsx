@@ -24,6 +24,7 @@ interface PanelProps {
     expandedHeader?: JSX.Element;
     body?: JSX.Element;
     isExpanded?: boolean;
+    onExpand?: (isExpanded: boolean) => any;
     children: JSX.Element[];
 }
 
@@ -40,7 +41,8 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
     }
 
     expandPanel() {
-        this.setState({isExpanded: !this.state.isExpanded})
+        this.setState({isExpanded: !this.state.isExpanded});
+        this.props.onExpand && this.props.onExpand(this.state.isExpanded);
     }
 
     componentWillReceiveProps(nextProps: PanelProps) {

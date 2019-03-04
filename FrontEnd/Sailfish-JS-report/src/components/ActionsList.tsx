@@ -25,6 +25,7 @@ import { selectAction, selectCheckpoint, selectVerification } from '../actions/a
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { actionsHeatmap } from '../helpers/heatmapCreator';
 import { getActions } from '../helpers/actionType';
+import { VirtualizedList } from './VirtualizedList';
 
 interface ListProps {
     actions: Array<Action>;
@@ -42,19 +43,20 @@ interface ListProps {
 
 export class ActionsListBase extends Component<ListProps, {}> {
 
-    private elements: ActionTree[] = [];
+    //private elements: ActionTree[] = [];
     private scrollbar: HeatmapScrollbar;
 
     scrollToTop() {
         this.scrollbar && this.scrollbar.scrollToTop();
     }
+    private elements: any[] = [];
 
     scrollToAction(actionId: number) {
-        if (this.elements[actionId]) {
-            // smooth behavior is disabled here
-            // base - get HTMLElement by ref
-            this.elements[actionId].base.scrollIntoView({block: 'center'});
-        }    
+        // if (this.elements[actionId]) {
+        //     // smooth behavior is disabled here
+        //     // base - get HTMLElement by ref
+        //     this.elements[actionId].base.scrollIntoView({block: 'center'});
+        // }    
     }
 
     shouldComponentUpdate(nextProps: ListProps) {
@@ -85,9 +87,22 @@ export class ActionsListBase extends Component<ListProps, {}> {
         return (
             <div class="actions">
                 <div class="actions__list">
-                    <HeatmapScrollbar
-                        selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}
-                        ref={ref => this.scrollbar = ref}>
+                    <VirtualizedList
+                        rowCount={actions.length}
+                        elementRenderer={idx => (
+                            <ActionTree 
+                                action={actions[idx]}
+                                actionSelectHandler={onSelect}
+                                messageSelectHandler={onMessageSelect}
+                                actionsFilter={actionsFilter}
+                                filterFields={filterFields} 
+                                checkpoints={checkpointActions}
+                                checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
+                                ref={ref => this.elements[actions[idx].id] = ref}/>
+                        )}/>
+
+                    {/* <HeatmapScrollbar
+                        selectedElements={actionsHeatmap(actions, selectedActionId)}>
                         {actions.map(action => (
                             <ActionTree 
                                 action={action}
@@ -102,7 +117,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
                                 checkpoints={checkpointActions}
                                 checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
                                 ref={ref => this.elements[action.id] = ref}/>))}
-                    </HeatmapScrollbar>
+                    </HeatmapScrollbar> */}
                 </div>
             </div> 
         )

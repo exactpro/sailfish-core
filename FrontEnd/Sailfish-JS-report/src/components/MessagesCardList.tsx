@@ -30,6 +30,8 @@ import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { messagesHeatmap } from '../helpers/heatmapCreator';
 import { selectMessage } from '../actions/actionCreators';
+import { VirtualizedList } from './VirtualizedList';
+import { MessagesVirtualizedList } from './MessagesVirtualizedList';
 
 const MIN_CONTROL_BUTTONS_WIDTH = 880;
 
@@ -116,17 +118,22 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         return (
             <div class="messages">
                 <div class="messages-list">
-                    <HeatmapScrollbar
-                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
-                        ref={ref => this.scrollbar = ref}>
+                    <MessagesVirtualizedList
+                        messagesCount={messages.length}
+                        messageRenderer={(index, showRaw, showRawHandler) => this.renderMessage(messages[index], showRaw, showRawHandler)}/>
+                    {/* <VirtualizedList
+                        rowCount={messages.length}
+                        elementRenderer={idx => this.renderMessage(messages[idx])}/> */}
+                    {/* <HeatmapScrollbar
+                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}>
                         {messages.map(message => this.renderMessage(message))}
-                    </HeatmapScrollbar>
+                    </HeatmapScrollbar> */}
                 </div>
             </div>
         );
     }
 
-    private renderMessage(message: Message) {
+    private renderMessage(message: Message, showRaw: boolean, showRawHandler: (showRaw: boolean) => any) {
 
         const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled, messageSelectHandler } = this.props;
         const isSelected = selectedMessages.includes(message.id);
@@ -152,6 +159,8 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                 key={message.id}
                 actions={this.getMessageActions(message)}
                 selectHandler={messageSelectHandler}
+                showRaw={showRaw}
+                showRawHandler={showRawHandler}
             />
         );
     }
