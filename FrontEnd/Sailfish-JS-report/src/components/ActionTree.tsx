@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
-import Action, { ActionNode } from '../models/Action';
+import Action, { ActionNode, ActionNodeType } from '../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
 import { VerificationTable } from "./VerificationTable";
@@ -188,7 +188,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
 
         switch (props.action.actionNodeType) {
-            case 'action': {
+            case ActionNodeType.ACTION: {
                 const action = props.action as Action;
 
                 if (checkpoints.includes(action)) {
@@ -214,13 +214,13 @@ export class ActionTree extends Component<ActionTreeProps> {
                 );
             }
 
-            case 'message': {
+            case ActionNodeType.CUSTOM_MESSAGE: {
                 const messageAction = props.action as MessageAction;
 
                 return this.renderMessageAction(messageAction);
             }
 
-            case 'verification': {
+            case ActionNodeType.VERIFICATION: {
                 const verification = props.action as Verification;
                 const isSelected = verification.messageId === selectedMessageId;
                 const isTransparent = !actionsFilter.includes(verification.status.status);
@@ -228,7 +228,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                 return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, filterFields)
             }
 
-            case 'link': {
+            case ActionNodeType.LINK: {
                 const { link } = props.action as Link;
 
                 return (

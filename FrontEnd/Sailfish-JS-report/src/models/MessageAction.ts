@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionType } from './Action';
+import Action, { ActionNodeType } from './Action';
 import Exception from './Exception';
 
 export type MessageTextColor =  'BLACK' | 'BLUE' | 'RED' | 'ORANGE' | 'GRAY';

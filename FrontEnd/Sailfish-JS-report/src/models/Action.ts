@@ -21,13 +21,18 @@ import Exception from './Exception';
 import MessageAction from './MessageAction';
 import Link from './Link';
 
-export type ActionType = 'action' | 'verification' | 'message' | 'link';
+export enum ActionNodeType {
+    ACTION = "action",
+    VERIFICATION = "verification",
+    CUSTOM_MESSAGE = "customMessage",
+    LINK = "link"
+}
 
 export type ActionNode = Action | MessageAction | Verification | Link;
 
 export default interface Action {
     id?: number;
-    actionNodeType: ActionType;
+    actionNodeType: ActionNodeType;
     bugs: any[];
     name: string;
     description: string;
