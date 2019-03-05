@@ -38,7 +38,11 @@ $checkpointBackground: #effff1;
 $primaryTextColor: #4A4A4A;
 $secondaryTextColor: #969696;
 
-$tableHeaderBackground: #D8D8D8;
+$tableHeaderBackground: #B7B3BB;
+$tableHeaderCellBorderColor: #7c7c7c;
+$tableCellBorderColor: #B3B3B3;
+$tableBodyBackground: rgba(255, 255, 255, 0.7);
+
 $buttonDisabledBackground: #E0E0E0;
 
 $defaultCardBorderColor: #666666;
@@ -111,4 +115,26 @@ $splitterColor: #C4C4C4;
     -moz-user-select: none; 
     -ms-user-select: none; 
     user-select: none; 
+}
+
+@mixin default-table {
+    table {
+        border-collapse: collapse;
+        border: 1px solid $tableCellBorderColor;
+        table-layout: fixed;
+    }
+
+    td {
+        border: 1px solid $tableCellBorderColor;
+        word-break: break-word;
+    }
+
+    th {
+        border: 1px solid $tableHeaderCellBorderColor;
+        background-color: $tableHeaderBackground;
+    }
+
+    tbody {
+        background: $tableBodyBackground;
+    }
 }

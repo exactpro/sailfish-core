@@ -20,15 +20,17 @@ import Verification from './Verification';
 import Exception from './Exception';
 import MessageAction from './MessageAction';
 import Link from './Link';
+import UserTable from "./UserTable";
 
 export enum ActionNodeType {
     ACTION = "action",
     VERIFICATION = "verification",
     CUSTOM_MESSAGE = "customMessage",
-    LINK = "link"
+    LINK = "link",
+    TABLE = "table"
 }
 
-export type ActionNode = Action | MessageAction | Verification | Link;
+export type ActionNode = Action | MessageAction | Verification | Link | UserTable;
 
 export default interface Action {
     id?: number;

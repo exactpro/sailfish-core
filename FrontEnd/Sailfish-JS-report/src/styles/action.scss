@@ -131,6 +131,10 @@
             }
         }
 
+        &-table {
+            padding-left: 10px;
+        }
+
         &-verification {
             @include selectable();
             border: 2px solid transparent;
