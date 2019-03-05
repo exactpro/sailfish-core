@@ -14,28 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionNode } from "./Action";
-import Message from "./Message";
-import Log from "./Log";
-import Status from './Status';
+import { ActionNode, ActionNodeType } from "../models/Action";
+import Action from '../models/Action';
 
-export default interface TestCase {
-    actionNodeType: string;
-    name?: string;
-    actions: ActionNode[];
-    logs: Log[];
-    messages: Message[];
-    bugs: any[];
-    type: string;
-    reference?: any;
-    order: number;
-    outcomes?: any[];
-    matrixOrder: number;
-    id: string;
-    hash: number;
-    description: string;
-    status: Status;
-    startTime: string;
-    finishTime: string;
-    verifications?: any[];
+const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
+
+export function getActions(actionNodes: ActionNode[]) : Action[] {
+    return actionNodes.reduce((actions, node) => 
+        isAction(node) ? [...actions, node as Action] : actions,
+        []);
+}
+
+export function isAction(actionNode: ActionNode) : boolean {
+    return actionNode.actionNodeType == ActionNodeType.ACTION;
+}
+
+export function isCheckpoint(action: Action): boolean {
+    return action.name.includes(ACTION_CHECKPOINT_NAME);
 }

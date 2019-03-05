@@ -24,6 +24,7 @@ import AppState from '../state/AppState';
 import { selectAction, selectMessages, selectCheckpoint } from '../actions/actionCreators';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { actionsHeatmap } from '../helpers/heatmapCreator';
+import { getActions } from '../helpers/actionType';
 
 interface ListProps {
     actions: Array<Action>;
@@ -74,7 +75,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
             <div class="actions">
                 <div class="actions-list">
                     <HeatmapScrollbar
-                        selectedElements={actionsHeatmap(actions, selectedActionId)}>
+                        selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}>
                         {actions.map(action => (
                             <ActionTree 
                                 action={action}

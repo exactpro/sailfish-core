@@ -18,13 +18,14 @@ import { h, Component } from 'preact';
 import '../styles/messages.scss';
 import Message from '../models/Message';
 import { MessageCard } from './MessageCard';
-import Action from '../models/Action';
+import Action, { ActionNodeType } from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
 import { isCheckpoint, isRejected, isAdmin } from '../helpers/messageType';
+import { getActions } from '../helpers/actionType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { messagesHeatmap } from '../helpers/heatmapCreator';
@@ -191,7 +192,7 @@ export const MessagesCardList = connect(
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         selectedStatus: state.selected.status,
         adminMessagesEnabled: state.adminMessagesEnabled,
-        actionsMap: generateActionsMap(state.testCase.actions)
+        actionsMap: generateActionsMap(getActions(state.testCase.actions))
     }),
     dispatch => ({}),
     null,
