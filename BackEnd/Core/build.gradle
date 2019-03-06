@@ -7,9 +7,5 @@ allprojects {
 }
 
 subprojects {
-	generateVersionClass {
-		maintenance = sailfish_version_maintenance.toInteger()
-	}
-	
 	version = artifactCoreVersion
 }

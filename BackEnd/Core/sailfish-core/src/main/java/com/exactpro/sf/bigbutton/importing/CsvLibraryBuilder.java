@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.importing;
 
+import static com.google.common.collect.Sets.union;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toMap;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -80,9 +85,11 @@ import com.google.common.io.Files;
 
 public class CsvLibraryBuilder {
 
-	private static final Logger logger = LoggerFactory.getLogger(CsvLibraryBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(CsvLibraryBuilder.class);
 
 	private static final String ITEM_COLUMN_NAME = "item";
+
+    private static final String SCRIPT_LIST_VARIABLE_SET_ERROR_TEMPLATE = "Script list '%s' cannot have variable set because executor '%s' has services with start mode = %s";
 
     private final IWorkspaceDispatcher workspaceDispatcher;
 
@@ -215,6 +222,34 @@ public class CsvLibraryBuilder {
                     this.importResult.getCommonErrors().add(new ImportError(scriptList.getLineNumber(),
                             "Unknown executor '" + scriptList.getExecutor() + "' in script list '" + scriptList.getName() + "\'"));
                 });
+
+        Set<String> globalServiceLists = library.getGlobals().map(Globals::getServiceLists).orElse(emptySet());
+        Map<String, Set<String>> executorServiceLists = library.getExecutors()
+                .getExecutors()
+                .stream()
+                .collect(toMap(Executor::getName, executor -> union(executor.getServices(), globalServiceLists)));
+
+        for(ScriptList scriptList : library.getScriptLists()) {
+            if(scriptList.getVariableSet() == null) {
+                continue;
+            }
+
+            String name = scriptList.getName();
+            long line = scriptList.getLineNumber();
+            String listExecutor = scriptList.getExecutor();
+            Set<String> executors = executorServiceLists.containsKey(listExecutor) ? singleton(listExecutor) : executorServiceLists.keySet();
+
+            executors.stream()
+                    .filter(executor -> executorServiceLists.get(executor)
+                            .stream()
+                            .map(library.getServiceLists()::get)
+                            .map(ServiceList::getServices)
+                            .flatMap(List::stream)
+                            .map(Service::getStartMode)
+                            .anyMatch(StartMode.EXECUTOR::equals))
+                    .map(executor -> new ImportError(line, String.format(SCRIPT_LIST_VARIABLE_SET_ERROR_TEMPLATE, name, executor, StartMode.EXECUTOR)))
+                    .forEach(importResult.getCommonErrors()::add);
+        }
     }
 
     private String parseLibraryFolder(Map<String, String> row) throws InvalidRowException {
@@ -228,6 +263,18 @@ public class CsvLibraryBuilder {
 		return libraryFolder;
 
 	}
+
+    private String parseVariableSetsFile(Map<String, String> row) throws InvalidRowException {
+
+        String variableSetsFile = row.get(CsvHeader.Path.getFieldKey());
+
+        if(variableSetsFile == null) {
+            throw new InvalidRowException(CsvHeader.Path.getFieldKey() + " is missing");
+        }
+
+        return variableSetsFile;
+
+    }
 
     private Globals parseGlobals(Map<String, String> row, long lineNumber) throws InvalidRowException {
 
@@ -244,6 +291,8 @@ public class CsvLibraryBuilder {
 		result.setApiOptions( parseApiOptions(row) );
 
         result.setLineNumber(lineNumber);
+
+        result.setVariableSet(row.get(CsvHeader.VariableSet.getFieldKey()));
 
 		return result;
 
@@ -283,6 +332,7 @@ public class CsvLibraryBuilder {
 		}
 
         result.setLineNumber(lineNumber);
+        result.setVariableSet(StringUtils.stripToNull(row.get(CsvHeader.VariableSet.getFieldKey())));
 
 		return result;
 	}
@@ -462,8 +512,9 @@ public class CsvLibraryBuilder {
 		}
 
 		String executor = StringUtils.defaultIfBlank(row.get(CsvHeader.Executor.getFieldKey()), null);
+        String variableSet = StringUtils.stripToNull(row.get(CsvHeader.VariableSet.getFieldKey()));
 
-        ScriptList result = new ScriptList(name, executor, serviceNames, parseApiOptions(row), priority, currentRecordNumber);
+        ScriptList result = new ScriptList(name, executor, serviceNames, parseApiOptions(row), priority, currentRecordNumber, variableSet);
 
         if (!priorityParsed) {
             result.addRejectCause(new ImportError(currentRecordNumber, "'Priority' value is not parsable to number (long)"));
@@ -477,7 +528,7 @@ public class CsvLibraryBuilder {
 
 
 		if(StringUtils.isEmpty(value)) {
-			return Collections.emptySet();
+            return emptySet();
 		}
 
 		String[] splitted = value.split(",");
@@ -690,6 +741,12 @@ public class CsvLibraryBuilder {
 				this.library.setReportsFolder(parseLibraryFolder(row));
 
 				break;
+
+        case "variable sets file":
+
+            this.library.setVariableSetsFile(parseVariableSetsFile(row));
+
+            break;
 
 			case "globals":
 

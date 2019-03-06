@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
+import com.exactpro.sf.aml.EnumeratedValues;
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.InputMask;
 import com.exactpro.sf.configuration.netdumper.NetDumperListenHost;
@@ -82,6 +83,7 @@ public class FIXClientSettings extends AbstractServiceSettings {
 	        + "    <tr bgcolor=\"#eeeeff\"><td><code>8</code><td>FIX50SP1"
 	        + "    <tr bgcolor=\"#eeeeff\"><td><code>9</code><td>FIX50SP2"
 	        + "</table>")
+	@EnumeratedValues({"2", "3", "4", "5", "6", "7", "8", "9"})
 	private String DefaultApplVerID = "9";
 	@Description("If set to checked, messages must be received from the counterparty within a defined number of seconds (see MaxLatency).<br>"
 	        + "It is useful to turn this off if a system uses localtime for it's timestamps instead of GMT.")
@@ -97,6 +99,7 @@ public class FIXClientSettings extends AbstractServiceSettings {
 	        + "    <tr bgcolor=\"#eeeeff\"><td><code>FIX.4.4</code>"
 	        + "    <tr bgcolor=\"#eeeeff\"><td><code>FIXT.1.1</code>"
 	        + "</table>")
+	@EnumeratedValues({"FIX.4.0", "FIX.4.1", "FIX.4.2", "FIX.4.3", "FIX.4.4", "FIXT.1.1"})
 	private String BeginString;
 	
 	@RequiredParam

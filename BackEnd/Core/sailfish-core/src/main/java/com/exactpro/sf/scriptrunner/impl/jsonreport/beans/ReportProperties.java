@@ -18,9 +18,11 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportProperties {
     private ScriptState state;
     private ScriptStatus status;
@@ -33,21 +35,17 @@ public class ReportProperties {
     private long conditionallyPassed;
     private long failed;
     private long total;
-    private String username;
-    private long startTime;
-    private long finishTime;
     private List<String> services;
     private String range;
     private boolean autostart;
     private String cause;
 
     public ReportProperties() {
-
     }
 
     public ReportProperties(ScriptState state, ScriptStatus status, String matrixFile, long timestamp, String environmentNameAttr, String languageURI,
-                            String workFolder, long passed, long conditionallyPassed, long failed, long total, String username, long startTime,
-                            long finishTime, List<String> services, String range, boolean autostart, String cause) {
+            String workFolder, long passed, long conditionallyPassed, long failed, long total, List<String> services, String range, boolean autostart,
+            String cause) {
 
         this.state = state;
         this.status = status;
@@ -60,9 +58,6 @@ public class ReportProperties {
         this.conditionallyPassed = conditionallyPassed;
         this.failed = failed;
         this.total = total;
-        this.username = username;
-        this.startTime = startTime;
-        this.finishTime = finishTime;
         this.services = services;
         this.range = range;
         this.autostart = autostart;
@@ -155,30 +150,6 @@ public class ReportProperties {
 
     public void setTotal(long total) {
         this.total = total;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public long getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(long startTime) {
-        this.startTime = startTime;
-    }
-
-    public long getFinishTime() {
-        return finishTime;
-    }
-
-    public void setFinishTime(long finishTime) {
-        this.finishTime = finishTime;
     }
 
     public List<String> getServices() {

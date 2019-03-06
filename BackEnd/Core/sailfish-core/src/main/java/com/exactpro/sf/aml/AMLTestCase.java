@@ -17,8 +17,13 @@ package com.exactpro.sf.aml;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.exactpro.sf.common.util.StringUtil;
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
+import com.exactpro.sf.embedded.statistics.StatisticsService;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +40,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
     private String reference;
 	private long line;
 	private String id;
-	private boolean isExecutable;
+	private ExecutionMode executionMode;
 	private String description = "";
 	private int execOrder;
 	private int matrixOrder;
@@ -49,7 +54,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 		this.id = id;
 		this.actions = new ArrayList<>();
 		// good defaults:
-		this.isExecutable = true;
+		this.executionMode = ExecutionMode.EXECUTABLE;
         this.blockType = AMLBlockType.TestCase;
 		this.uid = uid;
 		this.hash = hash;
@@ -143,7 +148,9 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
     public AMLAction findActionByRef(String lineRef)
 	{
         for(AMLAction action : this.actions) {
-            if(action.isExecute() && (lineRef.equals(action.getReference()) || lineRef.equals(action.getReferenceToFilter()))) {
+            if((action.getExecutionMode() == ExecutionMode.EXECUTABLE || action.getExecutionMode() == ExecutionMode.OPTIONAL)
+                    && (lineRef.equals(action.getReference())
+                    || lineRef.equals(action.getReferenceToFilter()))) {
                 return action;
             }
         }
@@ -162,13 +169,13 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 	}
 
 	@Override
-    public void setExecutable(boolean isExecutable) {
-		this.isExecutable = isExecutable;
+    public void setExecutionMode(ExecutionMode executionMode) {
+		this.executionMode = executionMode;
 	}
 
 	@Override
-    public boolean isExecutable() {
-		return isExecutable;
+    public ExecutionMode getExecutionMode() {
+		return this.executionMode;
 	}
 
 	public boolean isEmpty() {
@@ -233,6 +240,22 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
         return hash;
     }
 
+    public boolean isOptional() {
+        if (executionMode == ExecutionMode.OPTIONAL) {
+            return true;
+        }
+        for (AMLAction action : actions) {
+            if (action.isOptional()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getTagsAsString() {
+        return isOptional() ? "{\"" + StatisticsService.OPTIONAL_TAG_NAME + "\"}" : "{}";
+    }
+
     @Override
 	public AMLTestCase clone() {
 
@@ -244,7 +267,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
         that.reference = this.reference;
 		that.line = this.line;
 		that.description = this.description;
-		that.isExecutable = this.isExecutable;
+		that.executionMode = this.executionMode;
 		that.execOrder = this.execOrder;
 		that.matrixOrder = this.matrixOrder;
         that.blockType = this.blockType;
@@ -259,7 +282,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 
 		sb.append("line", line);
         sb.append("reference", reference);
-		sb.append("isExecutable", isExecutable);
+		sb.append("executionMode", executionMode);
 		sb.append("description", description);
 		sb.append("execOrder", execOrder);
 		sb.append("matrixOrder", matrixOrder);

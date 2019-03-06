@@ -69,7 +69,7 @@ task wrapper(type: Wrapper) {
 }
 
 ext {
-    sailfishCoreVersion     = "${sailfish_version_major}.${sailfish_version_minor}"//.${sailfish_version_maintenance}"
+    sailfishCoreVersion     = "${sailfish_version_major}.${sailfish_version_minor}"
     artifactCoreVersion     = build_mode == 'snapshot' ? "${sailfishCoreVersion}-SNAPSHOT" : sailfishCoreVersion
 
     sharedDir       = file('../../shared')

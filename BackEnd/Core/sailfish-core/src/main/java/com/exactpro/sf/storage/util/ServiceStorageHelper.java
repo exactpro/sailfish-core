@@ -16,6 +16,7 @@
 package com.exactpro.sf.storage.util;
 
 import java.beans.PropertyDescriptor;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -80,18 +81,25 @@ public class ServiceStorageHelper {
         PropertyDescriptor[] descriptors = beanUtils.getPropertyDescriptors(serviceSettings);
 
         converter.register(new SailfishURIConverter(), SailfishURI.class);
+        converter.register(true, false, 0);
 
-        try {
-            for (PropertyDescriptor descr : descriptors) {
-                //check that setter exists
-                if (descr.getWriteMethod() != null) {
-                    if (params.containsKey(descr.getName()))
-                        BeanUtils.setProperty(serviceSettings, descr.getName(),
-                                converter.convert(params.get(descr.getName()), descr.getPropertyType()));
-                }
+        for(PropertyDescriptor descriptor : descriptors) {
+            if(descriptor.getWriteMethod() == null) {
+                continue;
             }
-        } catch (Exception e) {
-            throw new EPSCommonException(e);
+
+            String name = descriptor.getName();
+            String value = params.get(name);
+
+            if(value == null) {
+                continue;
+            }
+
+            try {
+                BeanUtils.setProperty(serviceSettings, name, converter.convert(value, descriptor.getPropertyType()));
+            } catch(Throwable t) {
+                throw new EPSCommonException(String.format("Failed to set setting '%s' to: %s", name, value), t);
+            }
         }
     }
 
@@ -127,5 +135,19 @@ public class ServiceStorageHelper {
         }
 
         return serviceDescription;
+    }
+
+    public static IServiceSettings copySettings(IServiceSettings settings) {
+        try {
+            IServiceSettings copy = settings.getClass().newInstance();
+            Map<String, String> properties = new HashMap<>();
+
+            setServiceSettingsToMap(properties, settings);
+            setMapToServiceSettings(copy, properties);
+
+            return copy;
+        } catch(InstantiationException | IllegalAccessException e) {
+            throw new EPSCommonException(e);
+        }
     }
 }

@@ -1,0 +1,111 @@
+/******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$failedTextColor: #CC2929;  
+$failedBorderColor: #CC2929;
+$failedBorderColorSecondary: #FFCCCC;
+$failedBackgroundColor: #FFF2F2;
+$failedHederColor: #FFCCCC;
+
+$passedTextColor: #4189D2;
+$passedBorderColor: #4189D2;
+$passedBorderColorSecondary: #C0E0FF;
+$passedHeaderColor: #C0E0FF;
+$passedBackgroundColor: #EDF6FF;
+
+$conditionallyTextColor: #ff822a;
+$conditionallyBorderColor: #FFCDA8;
+$conditionallyBorderColorSecondary: #FFD2B3;
+$conditionallyHeaderColor: #FFD2B3;
+$conditionallyBackgroundColor: #FFF0E6;
+
+$checkpointBorderColor: #59B368;
+$checkpointBackground: #effff1;
+
+$primaryTextColor: #4A4A4A;
+$secondaryTextColor: #969696;
+
+$tableHeaderBackground: #D8D8D8;
+$buttonDisabledBackground: #E0E0E0;
+
+$defaultCardBorderColor: #666666;
+$defaultCardBackground: #E0E0E0;
+
+$messageCardBackgroundColor: #F2F2F2;
+$messageCardRawHoverBackground: rgba(102, 102, 102, 0.15);
+
+$rejectedMessageLabelBackground: #FFE699;
+$adminMessageLabelBackground: #7ACCCC;
+
+$filterBackground: #A3D9A3;
+$filterButtonEnabled: #3D994D;
+$filterButtonDisabled: #79BF80;
+$filterButtonTextColor: #FFFFFF;
+
+$notificationBackground: #d9d9d9;
+
+$reportHeaderBackground: #E0E0E0;
+$reportInfoShadowColor: #e2e2e2;
+
+$splitterColor: #C4C4C4;
+
+@mixin scrollbar {
+    &::-webkit-scrollbar {
+        background-color:rgba(0, 0, 0, 0.0);
+        width:16px
+    }
+    
+    &::-webkit-scrollbar-track {
+        background-color:rgba(0, 0, 0, 0.0);
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background-color:#babac0;
+        border-radius:16px;
+        border:4px solid #fff
+    }
+    
+    &::-webkit-scrollbar-button {display:none}
+}
+
+@mixin status-text {
+    &.passed {
+        h3 {
+            color: $passedTextColor;
+        }
+    }
+
+    &.failed {
+        h3 {
+            color: $failedTextColor;
+        }
+    }
+
+    &.conditionally_passed {
+        h3 {
+            color: $conditionallyTextColor;
+        }
+    }
+}
+
+@mixin unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none; 
+    -khtml-user-select: none; 
+    -moz-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
+}

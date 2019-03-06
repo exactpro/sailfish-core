@@ -69,7 +69,7 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestSciptrunList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
 
-import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_DIR;
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_DATA_DIR;
 
 @Path("testscriptruns")
 public class TestscriptRunResource {
@@ -123,7 +123,7 @@ public class TestscriptRunResource {
                         if (testScriptRun.isLocked()) {
                             return getLockedReportResponse();
                         }
-                        final File reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_DIR);
+                        final File reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_DATA_DIR);
                         File zipFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
 
                         try (ZipOutputStream archive = new ZipOutputStream(new FileOutputStream(zipFile))) {

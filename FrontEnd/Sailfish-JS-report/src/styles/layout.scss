@@ -1,0 +1,66 @@
+/******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+ 
+@import "vars"; 
+
+.layout {
+    display: grid;
+    height: 100%;
+    grid-template: 87px calc(100% - 87px) / 1fr;
+    grid-template-areas:
+        "header" 
+        "main-content";
+
+    &.filter {
+        grid-template: 147px calc(100% - 147px) / 1fr;
+        grid-template-areas:
+            "header" 
+            "main-content";
+    }
+
+    &-header {
+        grid-area: header;
+    }
+
+    &-buttons {
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        grid-area: left;
+        position: absolute;
+        top: 6px;
+        left: 4px;
+        background-color: #ffffff;
+        z-index: 4;
+    }
+
+    &-content {
+        grid-area: main-content;
+
+        &-wrapper {
+            height: 100%;
+        }
+
+        &-pane {
+            height: 100%;
+            position: relative;
+
+            &.disabled {
+                display: none;
+            }
+        }        
+    }
+}   

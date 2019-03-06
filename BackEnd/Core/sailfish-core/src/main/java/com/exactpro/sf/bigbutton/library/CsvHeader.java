@@ -39,7 +39,8 @@ public enum CsvHeader {
     Ignore("ignore"),
     ExecuteOnPassed("execute_on_passed"),
     ExecuteOnConditionallyPassed("execute_on_conditionally_passed"),
-	ExecuteOnFailed("execute_on_failed");
+    ExecuteOnFailed("execute_on_failed"),
+    VariableSet("variable_set");
 
 	private final String fieldKey;
 

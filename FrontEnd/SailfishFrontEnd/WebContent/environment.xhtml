@@ -120,6 +120,20 @@
 	            </p:menuitem>
 	            <p:menuitem id="environmentOptionsBtn" update=":environmentsForm:environmentsMenuBar :environmentsForm:environmentsTable" styleClass="eps-environment-options-btn" icon="eps-custom-icon eps-custom-icon-gear" onclick="PF('environmentsDialogWidget').show();" />
 	        </p:menubar>
+
+            <p:menubar id="variableSetMenuBar">
+                <p:menuitem>
+                    <p:selectOneMenu id="selectedVariableSet" value="#{environmentBean.currentVariableSet}" styleClass="eps-input eps-selected-variable-set">
+                        <p:ajax event="change" listener="#{environmentBean.changeVariableSet}" update=":form:rightMenus"/>
+                        <f:selectItem itemLabel="Select a variable set" itemValue="#{null}"/>
+                        <f:selectItems value="#{environmentBean.variableSetList}"/>
+                    </p:selectOneMenu>
+                </p:menuitem>
+                <p:menuitem id="variableSetOptionsButton"
+                            update=":variableSetsForm:variableSetsMenuBar :variableSetsForm:variableSetsTable"
+                            icon="eps-custom-icon eps-custom-icon-gear"
+                            onclick="PF('variableSetsDialogWidget').show();"/>
+            </p:menubar>
         </p:outputPanel>
 
         <p:commandButton id="reset-button" icon="ui-icon-trash" action="#{environmentBean.removeFilters}"
@@ -130,7 +144,8 @@
         <p:tooltip value="Delete selected services" for="deleteButton"/>
         <p:tooltip value="Environment" for="selectedEnvironment"/>
         <p:tooltip value="Environment options" for="environmentOptionsBtn"/>
-
+        <p:tooltip value="Variable set" for="selectedVariableSet"/>
+        <p:tooltip value="Variable set options" for="variableSetOptionsButton"/>
     </div>
 
     <div style="clear:both; height: 1px;">
@@ -254,63 +269,101 @@
 
 <h:form id="serviceParametersForm" prependId="false">
     <p:dialog id="parametersDialog" header="Service parameters: #{environmentBean.lazyModel.headerForEditDialog}" widgetVar="paramDialog"
-              modal="true" height="601" width="770" resizable="false" onHide="removeOverlays()">
+              modal="true" height="601" width="auto" resizable="false" onHide="removeOverlays()">
 
         <h:panelGrid id="display" columns="1">
 
-            <p:treeTable id="params" value="#{environmentBean.lazyModel.paramRoot}" var="paramNode" styleClass="eps-service-param-list eps-main-table"
+            <p:treeTable id="params" value="#{environmentBean.lazyModel.paramRoot}" var="paramNode" style="table-layout: auto" styleClass="eps-service-param-list eps-main-table"
                     scrollable="true" scrollHeight="514">
 
                 <p:column headerText="Name" style="width: 215px; white-space: nowrap">
                     <h:outputText value="#{paramNode.getReadableName()}" title="#{paramNode.getReadableName()}"/>
                 </p:column>
 
-                <p:column headerText="Value" style="width: 440px;">
+                <p:column headerText="Value" style="width: 350px;">
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'handlerClassNameSelect'}">
                         <p:selectOneMenu id="handlerClassNameSelect" value="#{paramNode.value}" filter="true" filterMatchMode="contains"
-                                         style="width: 413px; margin-left: 10px;" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
+                                         style="width: 100%" styleClass="eps-input #{paramNode.differentValues and empty paramNode.value ? 'different-value-label' : ''}">
                             <f:selectItem itemLabel="#{paramNode.differentValues and empty paramNode.value ? '*' : 'Select handler class name'}"
                             			  itemValue="#{null}" itemDisabled="true" />
                             <f:selectItems value="#{enumSetContainer.loadHandlerClassName()}" />
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
                         </p:selectOneMenu>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'dictionaryNameSelect'}">
                         <p:autoComplete id="advanced" dropdown="true" value="#{paramNode.value}"
-                                        style="margin-left: 10px;" styleClass="eps-input dictionary-autocomplete"
-                                        completeMethod="#{enumSetContainer.completeDictURI}"/>
+                                        style="width: 92%" styleClass="eps-input eps-autocomplete"
+                                        completeMethod="#{enumSetContainer.completeDictURI}">
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                        </p:autoComplete>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'amlVersionSelect'}">
-                        <p:selectOneMenu id="amlSelector" value="#{paramNode.value}" style="width: 413px; margin-left: 10px;" styleClass="eps-input">
-                            <f:selectItems value="#{enumSetContainer.amlVersions}" var="item" itemLabel="#{item.name}" itemValue="#{item.version}" />
-                        </p:selectOneMenu>
+                        <p:autoComplete id="amlSelector" dropdown="true" value="#{paramNode.value}"
+                                        style="width: 100%" styleClass="eps-input"
+                                        completeMethod="#{paramNode.getEnumeratedValues()}">
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                        </p:autoComplete>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'booleanCheckbox'}">
-                        <p:selectBooleanCheckbox id="parValueBoolean" value="#{paramNode.value}" style="margin-left: 10px;" styleClass="eps-input">
+                        <p:selectBooleanCheckbox id="parValueBoolean" value="#{paramNode.value}" style="width: 100%" styleClass="eps-input">
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
                         </p:selectBooleanCheckbox>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'integerTextbox'}">
-                        <p:spinner id="intValue" value="#{paramNode.value}" min="0" style="width: 410px; margin-left: 10px;" styleClass="eps-input"
-                        		   placeholder="#{paramNode.differentValues ? '*' : ''}">
-                        </p:spinner>
+                        <!--onkeypress handler disables any input except digits-->
+                        <p:inputText id="intValue" value="#{paramNode.value}" min="0"
+                                     style="width: 100%" styleClass="eps-input"
+                                     placeholder="#{paramNode.differentValues ? '*' : ''}"
+                                     onkeypress="if(event.which &lt; 48 || event.which &gt; 57) return false;">
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                        </p:inputText>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'defaultTextbox'}">
+                        <p:autoComplete id="parValueAutocomplete" value="#{paramNode.value}"
+                                        style="width: 92%" styleClass="eps-input eps-autocomplete" dropdown="true"
+                                        placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{paramNode.hasEnumeratedValues() and (empty paramNode.inputMask)}"
+                                        completeMethod="#{paramNode.completeEnumeratedValues}">
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                        </p:autoComplete>
 
-                        <p:inputText id="parValue" value="#{paramNode.value}" style="width:405px; margin-left: 10px;" styleClass="eps-input"
-                        			 placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{empty paramNode.inputMask}">
-                         </p:inputText>
+                        <p:inputText id="parValue" value="#{paramNode.value}"
+                                     style="width: 100%" styleClass="eps-input"
+                                     placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{(not paramNode.hasEnumeratedValues()) and (empty paramNode.inputMask)}">
+                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                        </p:inputText>
 
-                        <p:inputMask id="parValueMasked" value="#{paramNode.value}" style="width:405px; margin-left: 10px;"
+                        <p:inputMask id="parValueMasked" value="#{paramNode.value}" style="width: 100%;"
                                      styleClass="eps-input" placeholder="#{paramNode.differentValues ? '*' : ''}"
                                      rendered="#{not empty paramNode.inputMask}" mask="#{paramNode.inputMask}">
                         </p:inputMask>
-
                     </ui:fragment>
+                </p:column>
+
+                <p:column headerText="Variable" style="width: 250px" rendered="#{environmentBean.currentVariableSet != null}">
+                    <p:autoComplete id="variableSelector"
+                                    value="#{paramNode.variable}"
+                                    completeMethod="#{environmentBean.completeVariableName}"
+                                    dropdown="true"
+                                    scrollHeight="250"
+                                    style="width: 85%"
+                                    styleClass="eps-input variable-autocomplete #{paramNode.differentVariables and empty paramNode.variable ? 'different-value-label' : ''}"
+                                    rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}">
+                        <p:ajax event="change" update=":serviceParametersForm:display"/>
+                        <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                    </p:autoComplete>
+                </p:column>
+
+                <p:column headerText="Final value" rendered="#{environmentBean.currentVariableSet != null}">
+                    <h:outputText value="#{paramNode.finalValue}" rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}"/>
                 </p:column>
 
                 <p:column style="width: 20px;">
@@ -508,6 +561,83 @@
         </p:dataTable>
 
     </p:dialog>
+</h:form>
+
+    <h:form id="variableSetsForm" prependId="false">
+        <p:dialog id="variableSetsDialog" width="470" header="Variable Sets" resizable="false" widgetVar="variableSetsDialogWidget" modal="true">
+            <p:menubar id="variableSetsMenuBar">
+                <p:menuitem id="deleteVariableSetButton"
+                            value="Delete"
+                            actionListener="#{environmentBean.preVariableSetDelete}"
+                            icon="eps-custom-icon eps-custom-icon-delete"
+                            disabled="#{environmentBean.selectedVariableSet == null}"/>
+                <p:menuitem id="importVariableSetsButton"
+                            value="Import"
+                            oncomplete="PF('variableSetsImportDialog').show()"
+                            icon="eps-custom-icon eps-custom-icon-download"/>
+            </p:menubar>
+            <p:dataTable id="variableSetsTable"
+                         var="variableSet"
+                         emptyMessage="No variable sets found"
+                         styleClass="eps-main-table"
+                         value="#{environmentBean.variableSetList}"
+                         rowKey="#{variableSet}"
+                         selection="#{environmentBean.selectedVariableSet}"
+                         selectionMode="single"
+                         paginator="true"
+                         rows="15"
+                         paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                         rowsPerPageTemplate="15,25,50,100"
+                         paginatorPosition="bottom"
+                         scrollable="true">
+                <p:ajax event="rowSelect" update=":variableSetsForm:variableSetsMenuBar"/>
+                <p:column id="variableSetNameColumn" width="405">
+                    <f:facet name="header">
+                        <h:outputText value="Variable Set Name"/>
+                    </f:facet>
+                    <h:outputText value="#{variableSet}"/>
+                </p:column>
+            </p:dataTable>
+        </p:dialog>
+    </h:form>
+
+    <h:form enctype="multipart/form-data" id="variableSetsImportDialogForm">
+        <p:dialog header="Import variable sets" widgetVar="variableSetsImportDialog" modal="true" resizable="false" width="850" style="max-height: 500px;">
+            <p:fileUpload id="selectButton"
+                          label="Select"
+                          cancelLabel="Clear"
+                          fileUploadListener="#{environmentBean.handleVariableSetsImport}"
+                          multiple="true"
+                          allowTypes="/(\.|\/)(ya?ml)$/"
+                          dragDropSupport="true"
+                          styleClass="eps-file-uploader"
+                          onstart="onVariableSetsImportStart()"
+                          oncomplete="onVariableSetsImportComplete()"/>
+            <p:selectBooleanCheckbox id="replaceExistingVariableSets" value="#{environmentBean.replaceExistingVariableSets}">
+                <p:ajax execute="@this" update="replaceExistingVariableSets"/>
+            </p:selectBooleanCheckbox>
+            <p:outputLabel for="replaceExistingVariableSets" value="Replace if exists" style="display: inline-block; margin-left: 10px; vertical-align: super;"/>
+        </p:dialog>
+    </h:form>
+
+    <h:form id="confirmVariableSetDeletionForm">
+        <p:confirmDialog id="confirmVariableSetDeletionDialog"
+                         message="Are you sure about deleting selected variable set?"
+                         header="Delete"
+                         severity="alert"
+                         widgetVar="variableSetDeletionConfirmation">
+            <div style="text-align: center;">
+                <p:commandButton id="variableSetDeletionConfirm"
+                                 value="Yes"
+                                 update=":form :variableSetsForm:variableSetsTable :variableSetsForm:variableSetsMenuBar :form:mainMenuBar :form:rightMenus"
+                                 oncomplete="PF('variableSetDeletionConfirmation').hide()"
+                                 actionListener="#{environmentBean.deleteVariableSet}"/>
+                <p:commandButton id="variableSetDeletionDecline"
+                                 value="No"
+                                 onclick="PF('variableSetDeletionConfirmation').hide()"
+                                 type="button"/>
+            </div>
+        </p:confirmDialog>
 </h:form>
 
 <h:form id="addEnvForm" >

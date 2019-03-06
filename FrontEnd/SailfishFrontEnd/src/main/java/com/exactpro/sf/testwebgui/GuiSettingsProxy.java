@@ -17,13 +17,13 @@
 package com.exactpro.sf.testwebgui;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.aml.EnumeratedValues;
 import com.exactpro.sf.aml.Ignore;
 import com.exactpro.sf.aml.InputMask;
 import com.exactpro.sf.common.util.ICommonSettings;
@@ -48,13 +48,13 @@ public class GuiSettingsProxy extends AbstractSettingsProxy {
 
         if (field == null) {
             field = getSettingsParameter(clazz,name);
-            fieldsCache.put(new ImmutablePair<String, Class<?>>(name, clazz), field);
+            fieldsCache.put(new ImmutablePair<>(name, clazz), field);
         }
 
         return field;
     }
 
-    private  Field getSettingsParameter(Class<?> clazz, String name){
+    private Field getSettingsParameter(Class<?> clazz, String name){
         while (!clazz.equals(Object.class)) {
             //fixme different naming style for service setting classes
             Field[] fields = clazz.getDeclaredFields();
@@ -105,6 +105,14 @@ public class GuiSettingsProxy extends AbstractSettingsProxy {
         }
 
         return descr.value();
+    }
+
+    public List<String> getEnumeratedValues(String name) {
+        Field field = getSettingsParameter(name);
+
+        return (field != null && field.isAnnotationPresent(EnumeratedValues.class))
+                ? Arrays.asList(field.getAnnotation(EnumeratedValues.class).value())
+                : Collections.emptyList();
     }
 
     public boolean checkRequiredParameter(String name) {

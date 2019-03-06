@@ -1,0 +1,581 @@
+/******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+@import "vars";
+
+.message {
+    width: 100%;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    margin: 5px 0;
+    border-color: $defaultCardBackground;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "message-label message-card";
+    position: relative;
+
+    &.selected {
+        border-color: $defaultCardBorderColor;
+    }
+
+    &.passed {
+        background-color: $passedBackgroundColor;
+        border-color: $passedBorderColor;
+    }
+
+    &.failed {
+        background-color: $failedBackgroundColor;
+        border-color: $failedBorderColor;
+    }
+
+    &.conditionally_passed {
+        background-color: $conditionallyBackgroundColor;
+        border-color: $conditionallyBorderColor;
+    }
+
+    &-label {
+        grid-area: message-label;
+        display: flex;
+
+        div:first-of-type {
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+        }
+
+        &-rejected, &-admin {
+            width: 20px;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        &-rejected {
+            background-color: $rejectedMessageLabelBackground;
+
+            &-icon {
+                background-image: url(../../resources/icons/rejected-label.svg);
+            }
+        }
+
+        &-admin {
+            background-color: $adminMessageLabelBackground;
+
+            &-icon {
+                background-image: url(../../resources/icons/admin-icon.svg)
+            }
+        }
+
+        &-rejected-icon, &-admin-icon {
+            height: 14px;
+            width: 14px;
+            margin-top: 20px;
+            background-size: 100%;
+            filter: opacity(0.4);
+        }
+    }
+
+    &-wrapper {
+        grid-area: message-card;
+
+        display: grid;
+        grid-template: 35px / 210px 40px auto 1fr 40px;
+        grid-template-areas: "actions-chips name name-value empty expand-icon";
+
+        &-name, &-name-value {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 3px;
+            color: $primaryTextColor;
+        }
+
+        &-name {
+            grid-area: name;
+            padding-top: 3px;
+            font-size: 10px;
+        }
+
+        &-name-value {
+            grid-area: name-value;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        &-actionschips {
+            grid-area: action-chips;
+        }
+
+        &-expand {
+            grid-area: expand-icon;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &-icon {
+                height: 19px;
+                width: 19px;
+                background-image: url(../../resources/icons/arr4-down.svg);
+                background-size: 100%;
+                cursor: pointer;
+            }
+       }
+    }
+
+    &-card {
+        grid-area: message-card;
+
+        &-header {
+            // lb-count - number of displaying labels - to make offset for name and session 
+            --lb-count: 0;
+            min-height: 45px;
+            padding: 7px 5px 9px 10px;
+            position: relative;
+            display: grid;
+            grid-template-rows: auto auto;
+            grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
+            grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
+                                "timestamp-value session from-value session-icon to-value prediction-icon";
+
+            &-session, &-name, &-timestamp-value, &-name-value, &-from-value, &-to-value {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                padding: 3px;
+                color: $primaryTextColor;
+            }
+
+            &-timestamp-value, &-name-value, &-from-value, &-to-value {
+                padding-left: 5px;
+            }
+
+            &-name-value, &-from-value, &-to-value {
+                font-size: 13px;
+                font-weight: bold;
+            }
+
+            &-session, &-name {
+                padding-top: 3px;
+                font-size: 10px;
+            }
+
+            &-name {
+                grid-area: name;
+            }
+
+            &-session {
+                grid-area: session;
+            }
+
+            &-session-icon {
+                grid-area: session-icon;
+            }
+
+            &-timestamp-value {
+                grid-area: timestamp-value;
+                font-size: 13px;
+            }
+
+            &-from-value {
+                grid-area: from-value;
+                margin-right: 25px;
+            }
+
+            &-to-value {
+                grid-area: to-value;
+            }
+
+            &-name-value {
+                grid-area: name-value;
+            }
+
+            &-session-icon {
+                grid-area: session-icon;
+                background-image: url('../../resources/icons/session-icon.svg');
+                height: 25px;
+                width: 25px;
+                background-size: 100%;
+            }
+
+            &-prediction {
+                grid-area: prediction-icon;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                &-icon {
+                    background-image: url(../../resources/icons/ml-message.svg);
+                    background-size: 100%;
+                    width: 22px;
+                    height: 22px;
+                    // TODO - DISABLED
+                    filter: opacity(0.2);
+                    cursor: not-allowed;
+                }
+            }
+
+            &-action {
+                grid-area: action-chips;
+                display: flex;
+                align-items: center;
+
+                &-chip {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    border: 2px solid transparent;
+                    border-radius: 10px;
+                    height: 20px;
+                    width: auto;
+                    min-width: 20px;
+                    margin: 0 5px;
+
+                    &.passed {
+                        border-color: $passedHeaderColor;
+                    }
+
+                    &.failed {
+                        border-color: $failedHederColor;
+                    }
+
+                    &.conditionally_passed {
+                        border-color: $conditionallyHeaderColor;
+                    }
+
+                    p {
+                        font-size: 10px;
+                        padding: 0 5px;
+                    }
+                }
+
+                &-rejected {
+                    font-weight: bold;
+                    font-size: 13px;
+                    padding-left: 6px;
+                    color: $primaryTextColor;
+                }
+            }
+
+            &::after {
+                border-bottom: 2px solid $defaultCardBackground;
+                padding: 0 20px;
+                content: '';
+                position: absolute;
+                bottom: 0px;
+                left: 10px;
+                right: 10px;
+            }
+        }
+
+        // lb-count variable assgnment through the custom html property
+        [data-lb-count="0"] { --lb-count: 0; }
+        [data-lb-count="1"] { --lb-count: 1; }
+        [data-lb-count="2"] { --lb-count: 2; }
+
+        &-content {
+            grid-area: message-card-body;
+            position: relative;
+            padding: 7px 10px 10px 15px;
+
+            &.passed {
+                background-color: $passedBackgroundColor;
+            }
+        
+            &.failed {
+                background-color: $failedBackgroundColor;
+            }
+        
+            &.conditionaly_passed {
+                background-color: $conditionallyBackgroundColor;
+            }
+
+            &-title {
+                color: $primaryTextColor;
+                font-size: 14px;
+                font-weight: bold;
+                padding-bottom: 2px;
+                padding-top: 5px;
+            }
+
+            &-human {
+                padding-top: 5px;
+
+                p {
+                    word-break: break-all;
+                    line-height: 21px;
+                    margin: 0px;
+                    font-size: 13px;    
+                }
+            }
+
+            &-raw {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                margin-top: 10px;
+                font-family: monospace;
+                line-height: 18px;
+                letter-spacing: 0.5px;
+                font-size: 11px;
+
+                &-numbers {
+                    color: $secondaryTextColor;
+                }
+
+                &-symbols, &-string {
+                    color: $primaryTextColor;
+                    padding-left: 5px;
+                    display: flex;
+
+                    &:hover {
+                        background: $messageCardRawHoverBackground;
+                    }
+                }
+
+                &-copy-btn {
+                    display: inline-block;
+                    margin: 4px 4px 4px 10px;
+                    height: 13px;
+                    width: 13px;
+                    background-image: url('../../resources/icons/clipboard.svg');
+                    background-size: 100%;
+                    filter: opacity(0.6);
+                    cursor: pointer;
+
+                    &:hover {
+                        filter: opacity(1);
+                    }
+                }
+            }
+
+            &-controls {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                width: 100%;
+                padding-top: 10px;
+
+                &-showraw {
+                    @include unselectable;
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    font-size: 13px;
+                    color: $primaryTextColor;
+
+                    &-title {
+                        font-weight: bold;
+                    }
+
+                    &-icon {
+                        height: 14px;
+                        width: 14px;
+                        background-size: 100%;
+                        margin-left: 5px;
+                        
+                        &.expanded {
+                            background-image: url(../../resources/icons/arr4-up.svg);
+                        }
+
+                        &.hidden {
+                            background-image: url(../../resources/icons/arr4-down.svg);
+                        }
+                    }
+                }
+
+                &-copy-all {
+                    @include unselectable;
+                    display: inline-flex;
+                    align-items: center;
+                    margin-left: 10px;
+                    padding: 2px;
+                    cursor: pointer;
+
+                    &-icon {
+                        height: 13px;
+                        width: 13px;
+                        background-image: url('../../resources/icons/clipboard.svg');
+                        background-size: 100%;
+                        filter: opacity(0.6);
+                    }
+
+                    &-title {
+                        font-size: 12px;
+                        color: $primaryTextColor;
+                        padding-left: 5px;
+                    }
+
+                    &:hover {
+                        background: $messageCardRawHoverBackground;
+                    }
+                }
+            }
+        }
+    }
+
+    &-expand {
+        position: absolute;
+        top: 67px;
+        right: 12px;
+        padding-right: 5px;
+        background-color: white;
+
+        &.rejected {
+            top: 80px;
+        }
+
+        &-icon {
+            height: 19px;
+            width: 19px;
+            background-image: url(../../resources/icons/arr4-up.svg);
+            background-size: 100%;
+            cursor: pointer;
+        }
+    }
+}
+
+.messages {
+
+    height: 100%;
+
+    &-controls {
+        height: 50px;
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: flex-end;
+        padding-right: 20px;
+
+        &-rejected {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 7px 7px 10px 7px;
+            
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-image: url(../../resources/icons/rejected-icon.svg);
+                background-size: 100%;
+                cursor: pointer;
+            }
+
+            &-title, &-count {
+                @include unselectable;
+                font-size: 15px;
+                font-weight: bold;
+                padding: 0 10px;
+                color: $primaryTextColor;
+            }
+
+            &-btn {
+                height: 20px;
+                width: 20px;
+                background-size: 100%;
+                filter: opacity(0.7);
+                cursor: pointer;
+
+                &.prev {
+                    background-image: url(../../resources/icons/arr1-left.svg);
+                }
+
+                &.next {
+                    background-image: url(../../resources/icons/arr1-right.svg)
+                }
+            }
+
+            &.disabled {
+                filter: opacity(0.5);
+                cursor: default;
+            }
+        }
+
+        &-admin {
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 7px;
+            cursor: pointer;
+
+            &.disabled {
+                filter: opacity(0.5);
+                cursor: default;
+            }
+
+            &-title {
+                @include unselectable;
+                font-size: 15px;
+                font-weight: bold;
+                padding-left: 8px;
+                padding-right: 5px;
+                color: $primaryTextColor;
+
+                &.active {
+                    color: $adminMessageLabelBackground;
+                }
+            }
+
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-image: url(../../resources/icons/admin-icon.svg);
+                background-size: 100%;
+                filter: opacity(0.5);
+
+                &.active {
+                    background-image: url(../../resources/icons/admin-icon-active.svg)
+                }
+            }
+        }
+
+        &-predictions {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 7px 7px 10px 7px;
+
+            // disabled
+            filter: opacity(0.3);
+            cursor: not-allowed;
+
+            &-title {
+                @include unselectable;
+                font-size: 15px;
+                font-weight: bold;
+                padding-left: 8px;
+                padding-right: 5px;
+                color: $failedTextColor;
+            }
+
+            &-icon {
+                height: 20px;
+                width: 20px;
+                background-image: url(../../resources/icons/ml-control-icon-active.svg);
+                background-size: 100%;
+            }
+        }
+    }
+
+    &-list {
+        @include scrollbar;
+        overflow-y: scroll;
+        height: calc(100% - 50px);
+        padding: 0 5px;
+        word-wrap: break-word;
+    }
+}

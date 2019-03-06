@@ -1,0 +1,87 @@
+/******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+@import "vars";
+
+.splitter  {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: calc(50% - 10px) 25px calc(50% - 10px);
+    grid-template-areas: "left-pane splitter-bar right-pane";
+    position: relative;
+
+    &.dragging {
+        @include unselectable;
+    }
+
+    &-bar {
+        grid-area: splitter-bar;
+        height: 100%;
+        cursor: col-resize;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+
+        &-icon {
+            margin-top: 50px;
+            height: 23px;
+            width: 23px;
+            background-size: 100%;
+            background-image: url('../../resources/icons/splitter-disabled.svg');
+        }
+
+        &.dragging {
+            grid-area: initial;
+            position: absolute;
+        }
+
+        &:hover:after {
+            content: "";
+            height: calc(100% - 55px);
+            width: 0px;
+            border: 1.5px solid $splitterColor;
+            position: absolute;
+            left: 11px;
+            top: 55px;
+            border-radius: 5px;
+        }
+
+        &:hover > &-icon {
+            background-image: url('../../resources/icons/splitter-active.svg');
+        }
+    }
+
+    &-pane {
+        &-left {
+            grid-area: left-pane;
+        }
+
+        &-right {
+            grid-area: right-pane;
+        }
+
+        &-left, &-right {
+            height: 100%;
+
+            &.dragging {
+                filter: opacity(0.3);
+            }
+        }
+    }
+}

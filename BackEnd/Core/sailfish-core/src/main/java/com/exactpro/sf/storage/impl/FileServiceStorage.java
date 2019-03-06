@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.filefilter.FileFilterUtils;
-import java.time.Instant;
 
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
@@ -419,6 +419,7 @@ public class FileServiceStorage implements IServiceStorage {
             description.setEnvironment(name.getEnvironment());
             description.setServiceHandlerClassName(service.getHandlerClassName());
             description.setSettings(settings);
+            description.setVariables(service.getVariables());
 
             ServiceStorageHelper.convertMapToServiceSettings(settings, service.getParameters());
 
@@ -433,6 +434,7 @@ public class FileServiceStorage implements IServiceStorage {
             service.setName(name);
             service.setURI(description.getType());
             service.setParameters(parameters);
+            service.setVariables(description.getVariables());
             service.setHandlerClassName(description.getServiceHandlerClassName());
 
             ServiceStorageHelper.convertServiceSettingsToMap(parameters, description.getSettings());

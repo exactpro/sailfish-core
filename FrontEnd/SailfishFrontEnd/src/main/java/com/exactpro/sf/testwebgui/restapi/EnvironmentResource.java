@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
+import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
+import static org.apache.commons.lang.StringUtils.stripToNull;
+
+import java.util.Objects;
+
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -119,4 +125,63 @@ public class EnvironmentResource {
         return Response.ok(response).build();
     }
 
+    @GET
+    @Path("get_variable_set")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response getEnvironmentVariableSet(@QueryParam("name") @DefaultValue(DEFAULT_ENVIRONMENT) String environmentName) {
+        environmentName = stripToNull(environmentName);
+
+        if(environmentName != null) {
+            try {
+                XmlResponse response = new XmlResponse();
+                response.setMessage(TestToolsAPI.getInstance().getEnvironmentVariableSet(environmentName));
+                return Response.ok(response).build();
+            } catch(Exception e) {
+                logger.error(e.getMessage(), e);
+                XmlResponse response = new XmlResponse();
+                response.setMessage(e.getMessage());
+                response.setRootCause(Objects.toString(e.getCause(), null));
+                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            }
+        }
+
+        XmlResponse response = new XmlResponse();
+        response.setMessage("Environment name cannot be empty");
+        return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+    }
+
+    @GET //FIXME: use PUT when SFAPIClient will be supporting it
+    @Path("set_variable_set")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response setEnvironmentVariableSet(@QueryParam("environment") @DefaultValue(DEFAULT_ENVIRONMENT) String environmentName,
+            @QueryParam("variable_set") String variableSetName) {
+        environmentName = stripToNull(environmentName);
+        variableSetName = stripToNull(variableSetName);
+
+        if(environmentName != null) {
+            try {
+                TestToolsAPI.getInstance().setEnvironmentVariableSet(environmentName, variableSetName);
+            } catch(Exception e) {
+                logger.error(e.getMessage(), e);
+                XmlResponse response = new XmlResponse();
+                response.setMessage(e.getMessage());
+                response.setRootCause(Objects.toString(e.getCause(), null));
+                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            }
+        } else {
+            XmlResponse response = new XmlResponse();
+            response.setMessage("Environment name cannot be empty");
+            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        }
+
+        XmlResponse response = new XmlResponse();
+
+        if(variableSetName != null) {
+            response.setMessage("Successfully changed variable set for environment '" + environmentName + "' to: " + variableSetName);
+        } else {
+            response.setMessage("Successfully removed variable set from environment: " + environmentName);
+        }
+
+        return Response.ok(response).build();
+    }
 }

@@ -30,6 +30,8 @@ public class XmlBbExecutionStatus {
 
     private int progress;
 
+    private List<XmlBBNodeStatus> slaveStatuses;
+
     public String getStatus() {
         return status;
     }
@@ -62,4 +64,11 @@ public class XmlBbExecutionStatus {
         this.progress = progress;
     }
 
+    public List<XmlBBNodeStatus> getSlaveStatuses() {
+        return slaveStatuses;
+    }
+
+    public void setSlaveStatuses(List<XmlBBNodeStatus> slaveStatuses) {
+        this.slaveStatuses = slaveStatuses;
+    }
 }

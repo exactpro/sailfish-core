@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Icons/arrr4</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M38.1766895,55.2807645 L13.8788966,30.9628484 C12.7070345,29.7900217 12.7070345,27.8885734 13.8788966,26.7158719 L16.7128452,23.8795908 C17.882707,22.7087662 19.7787158,22.7065139 20.9513281,23.8745857 L40.298494,43.1469572 L59.6455348,23.8745857 C60.8181471,22.7065139 62.7141559,22.7087662 63.8840177,23.8795908 L66.7179663,26.7158719 C67.8898284,27.8886986 67.8898284,29.7901468 66.7179663,30.9628484 L42.4202984,55.2807645 C41.2484362,56.4534661 39.3485517,56.4534661 38.1766895,55.2807645 Z" id="path-1"></path>
+    </defs>
+    <g id="Icons/arrr4" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use>
+    </g>
+</svg>

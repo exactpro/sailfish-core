@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -116,7 +117,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
         AMLAction action = new AMLAction(element.getUID(), hash);
 
         action.setLine(element.getLine());
-        action.setExecute(element.isExecutable());
+        action.setExecutionMode(ExecutionMode.from(element.getValue(Column.Execute)));
         action.setActionURI(actionURI);
         action.getDefinedColumns().addAll(element.getCells().keySet());
         action.setHeaders(new ArrayList<>(action.getDefinedColumns()));
@@ -531,7 +532,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
             currentBlock.setLine(block.getLine());
             currentBlock.setBlockType(blockType);
-            currentBlock.setExecutable(true);
+            currentBlock.setExecutionMode(ExecutionMode.from(block.getValue(Column.Execute)));
             currentBlock.setDescription(block.getValue(Column.Description));
             currentBlock.setFailOnUnexpectedMessage(failOnUnexpectedMessage);
             currentBlock.setReference(reference);

@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
@@ -98,10 +100,11 @@ public class BroadcastScriptReport implements IScriptReport {
 	}
 
 	@Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
 		for (IScriptReport listener: listeners) {
 			try {
-                listener.createTestCase(reference, description, order, matrixOrder, tcId, tcHash, type);
+                listener.createTestCase(reference, description, order, matrixOrder, tcId, tcHash, type, tags);
 			} catch (Exception e) {
 				logger.error("Error while firing create testcase with {} listener", listener.getClass().getName(), e);
 			}

@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.Value;
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 
@@ -48,8 +49,8 @@ public interface IAction extends Cloneable {
 	void setDoublePrecision(String precision);
 	String getDoublePrecision();
 
-	void setExecute(boolean b);
-	boolean isExecute();
+    void setExecutionMode(ExecutionMode executionMode);
+    ExecutionMode getExecutionMode();
 
 	SailfishURI getActionURI();
 	void setActionURI(SailfishURI actionURI);

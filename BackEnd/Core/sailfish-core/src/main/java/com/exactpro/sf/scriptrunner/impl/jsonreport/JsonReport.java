@@ -37,7 +37,6 @@ import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.ArrayUtils;
@@ -149,9 +148,6 @@ public class JsonReport implements IScriptReport {
         long failed  = progress.getFailed();
         long total = progress.getLoaded();
 
-        String username = testScriptDescription.getUsername();
-        long startTime = testScriptDescription.getStartedTime();
-        long finishTime = testScriptDescription.getFinishedTime();
         List<String> services = testScriptDescription.getContext().getServiceList();
         String range = testScriptDescription.getRange();
         boolean autostart = testScriptDescription.getAutoStart();
@@ -163,7 +159,7 @@ public class JsonReport implements IScriptReport {
 
         this.reportRoot.setReportProperties(
                 new ReportProperties(state, status, matrixFile, timestamp, environmentNameAttr, languageURI, workFolder, passed, conditionallyPassed,
-                        failed, total, username, startTime, finishTime, services, range, autostart, cause));
+                        failed, total, services, range, autostart, cause));
     }
 
     private void setContext(ContextType state, IJsonReportNode currentNode) {
@@ -212,7 +208,8 @@ public class JsonReport implements IScriptReport {
         }
     }
 
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
         this.reportStats = new ReportStats();
         assertState(ContextType.SCRIPT);
 
@@ -227,6 +224,7 @@ public class JsonReport implements IScriptReport {
         testcase.setId(tcId);
         testcase.setHash(tcHash);
         testcase.setDescription(description);
+        testcase.setTags(tags);
 
         setContext(ContextType.TESTCASE, testcase);
     }

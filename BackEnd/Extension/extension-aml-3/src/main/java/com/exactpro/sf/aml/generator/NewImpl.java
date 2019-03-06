@@ -21,6 +21,7 @@ import static java.lang.String.format;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -1111,6 +1112,9 @@ public class NewImpl {
         sb.append(AMLBlockType.class.getSimpleName());
         sb.append('.');
         sb.append(tc.getBlockType().name());
+        sb.append(", ");
+
+        sb.append("new HashSet<>(Arrays.asList(new String[]" + tc.getTagsAsString() + "))");
 
         sb.append(");");
         sb.append(EOL);

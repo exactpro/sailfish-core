@@ -395,7 +395,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     public void resumeScript(long id) {
         TestScriptDescription descr = testScripts.get(id);
-        if (descr != null) {
+        if (descr != null && descr.isLocked()) {
             descr.getContext().getDebugController().resumeScript();
         }
     }
@@ -522,7 +522,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
             logger.error(e.getMessage(), e);
         }
 
-        descr.unlock(); // unlock ability to remove report
+        descr.unlock(); // unlock report (report is complete; writing is finished)
+        fireEvent(descr); // update script run status after report is complete
     }
 
 	protected GeneratedScript generateJavaSourcesFromMatrix(final TestScriptDescription description) throws ScriptRunException, IOException {
