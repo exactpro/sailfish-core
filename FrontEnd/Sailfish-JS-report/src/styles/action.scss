@@ -105,6 +105,31 @@
         &.transparent {
             opacity: 0.3;
         }
+
+        &-custom-msg {
+            color: $primaryTextColor;
+            padding-left: 10px;
+
+            &.debug {
+                color: gray;
+            }
+
+            &.info {
+                color: black;
+            }
+
+            &.warn {
+                color: #edcc10;
+            }
+
+            &.error {
+                color: orange;
+            }
+
+            &.fail {
+                color: red;
+            }
+        }
     }
 
     &-status {

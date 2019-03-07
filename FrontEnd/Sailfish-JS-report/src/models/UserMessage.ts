@@ -17,15 +17,17 @@
 import Action, { ActionNodeType } from './Action';
 import Exception from './Exception';
 
-export type MessageTextColor =  'BLACK' | 'BLUE' | 'RED' | 'ORANGE' | 'GRAY';
+export type UserMessageTextColor =  'BLACK' | 'BLUE' | 'RED' | 'ORANGE' | 'GRAY';
 
-export type MessageTextStyle = 'BOLD' | 'NORMAL' | 'ITALIC';
+export type UserMessageTextStyle = 'BOLD' | 'NORMAL' | 'ITALIC';
 
-export default interface MessageAction {
+export type UserMessageLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' | 'FAIL';
+
+export default interface UserMessage {
     message: string;
     color: string;
     style: string;
-    level?: any;
-    exception?: any;
+    level?: string;
+    exception?: Exception;
     actionNodeType: string;
 }

@@ -18,7 +18,7 @@ import ActionParameter from "./ActionParameter";
 import Status from './Status';
 import Verification from './Verification';
 import Exception from './Exception';
-import MessageAction from './MessageAction';
+import UserMessage from './UserMessage';
 import Link from './Link';
 import UserTable from "./UserTable";
 
@@ -30,7 +30,7 @@ export enum ActionNodeType {
     TABLE = "table"
 }
 
-export type ActionNode = Action | MessageAction | Verification | Link | UserTable;
+export type ActionNode = Action | UserMessage | Verification | Link | UserTable;
 
 export default interface Action {
     id?: number;

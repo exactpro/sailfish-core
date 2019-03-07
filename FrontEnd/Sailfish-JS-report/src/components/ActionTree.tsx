@@ -19,7 +19,7 @@ import Action, { ActionNode, ActionNodeType } from '../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
 import { VerificationTable } from "./VerificationTable";
-import MessageAction from '../models/MessageAction';
+import UserMessage from '../models/UserMessage';
 import Verification from '../models/Verification'
 import '../styles/action.scss';
 import ExpandablePanel from './ExpandablePanel';
@@ -28,6 +28,7 @@ import { StatusType } from '../models/Status';
 import { Checkpoint } from './Checkpoint';
 import UserTable from '../models/UserTable';
 import { CustomTable } from './CustomTable';
+import { CustomMessage } from './CustomMessage';
 
 
 export interface ActionTreeProps {
@@ -217,9 +218,16 @@ export class ActionTree extends Component<ActionTreeProps> {
             }
 
             case ActionNodeType.CUSTOM_MESSAGE: {
-                const messageAction = props.action as MessageAction;
+                const messageAction = props.action as UserMessage;
 
-                return this.renderMessageAction(messageAction);
+                if (!messageAction.message && !messageAction.exception) {
+                    return <div/>;
+                }
+
+                return (
+                    <CustomMessage
+                        userMessage={messageAction}/>
+                );
             }
 
             case ActionNodeType.VERIFICATION: {
@@ -253,7 +261,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         }
     }
 
-    renderMessageAction({ message, level, exception, color, style }: MessageAction) {
+    renderMessageAction({ message, level, exception, color, style }: UserMessage) {
         // italic style value - only for fontStyle css property
         //bold style value - only for fontWeight css property
         const messageStyle = {
