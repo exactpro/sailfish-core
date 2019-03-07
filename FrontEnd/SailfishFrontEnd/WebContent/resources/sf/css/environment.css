@@ -349,7 +349,12 @@ a.eps-link-button:focus {
 }
 
 #selectedEnvironment {
-    max-width: 200px;
+    max-width: 100px;
+    overflow: hidden;
+}
+
+#selectedVariableSet {
+    max-width: 100px;
     overflow: hidden;
 }
 
