@@ -130,14 +130,24 @@ public class TestStrictMessageWrapper {
     }
 
     @Test
-    public void testRequiedFields() {
+    public void testRequiredField() {
         expectedException.expect(EPSCommonException.class);
-        expectedException.expectMessage("Requied field [integer] must have NOT NULL value or default value");
-        String msgName = "TestRequedMessage";
+        expectedException.expectMessage("Required field [integer] must have NOT NULL value or default value");
+        String msgName = "TestRequiredField";
         IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("string", null);
         strictMsg.addField("integer", null);
+    }
+
+    @Test
+    public void testRequiredSubMessage() {
+        expectedException.expect(EPSCommonException.class);
+        expectedException.expectMessage("Required field [subMessage] must have NOT NULL value or default value");
+        String msgName = "TestRequiredSubMessage";
+        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessage strictMsg = new StrictMessageWrapper(msgStr);
+        strictMsg.addField("subMessage", null);
     }
 
     @Test
@@ -153,8 +163,8 @@ public class TestStrictMessageWrapper {
     @Test
     public void testEmptyListInNoneCollectionRequiredField() {
         expectedException.expect(EPSCommonException.class);
-        expectedException.expectMessage("Requied field [integer] must have NOT NULL value or default value");
-        String msgName = "TestRequedMessage";
+        expectedException.expectMessage("Required field [integer] must have NOT NULL value or default value");
+        String msgName = "TestRequiredField";
         IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("integer", new ArrayList<Integer>());

@@ -100,37 +100,37 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public Map<String, IAttributeStructure> getValues() {
-		throw new UnsupportedOperationException("Messages don't have values");
+		throw new UnsupportedOperationException("Messages don't have values. Message: " + getName());
 	}
 
 	@Override
 	public List<ModifiableAttributeStructure> getImplValues() {
-		throw new UnsupportedOperationException("Messages don't have values");
+		throw new UnsupportedOperationException("Messages don't have values. Message: " + getName());
 	}
 
 	@Override
 	public void addValue(ModifiableAttributeStructure val) {
-		throw new UnsupportedOperationException("Messages don't have values");
+		throw new UnsupportedOperationException("Messages don't have values. Message: " + getName());
 	}
 
 	@Override
 	public void addValues(List<ModifiableAttributeStructure> vals) {
-		throw new UnsupportedOperationException("Messages don't have values");
+		throw new UnsupportedOperationException("Messages don't have values. Message: " + getName());
 	}
 
 	@Override
     public void removeValue(String name) {
-		throw new UnsupportedOperationException("Messages don't have values");
+		throw new UnsupportedOperationException("Messages don't have values. Message: " + getName());
 	}
 
 	@Override
 	public JavaType getJavaType() {
-		throw new UnsupportedOperationException("Messages don't have a java type");
+		throw new UnsupportedOperationException("Messages don't have a java type. Message: " + getName());
 	}
 
 	@Override
 	public void setJavaType(JavaType type) {
-		throw new UnsupportedOperationException("Messages don't have a java type");
+		throw new UnsupportedOperationException("Messages don't have a java type. Message: " + getName());
 	}
 
 	@Override
@@ -140,7 +140,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 			return super.isRequired();
 		}
 
-		throw new UnsupportedOperationException("Messages don't have a 'required' parameter");
+		throw new UnsupportedOperationException("Messages don't have a 'required' parameter. Message: " + getName());
 	}
 	
     @Override
@@ -181,7 +181,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 			return;
 		}
 
-		throw new UnsupportedOperationException("Messages don't have a 'required' parameter");
+		throw new UnsupportedOperationException("Messages don't have a 'required' parameter. Message: " + getName());
 	}
 
 	@Override
@@ -191,7 +191,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 			return super.isCollection();
 		}
 
-		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter");
+		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter. Message: " + getName());
 	}
 
 	@Override
@@ -202,32 +202,32 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 			return;
 		}
 
-		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter");
+		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter. Message: " + getName());
 	}
 
     @Override
     public boolean isServiceName() {
-        throw new UnsupportedOperationException("Messages don't have a 'serviceName' parameter");
+        throw new UnsupportedOperationException("Messages don't have a 'serviceName' parameter. Message: " + getName());
     }
 
     @Override
     public void setServiceName(boolean serviceName) {
-        throw new UnsupportedOperationException("Messages don't have a 'serviceName' parameter");
+        throw new UnsupportedOperationException("Messages don't have a 'serviceName' parameter. Message: " + getName());
     }
 
 	@Override
 	public Object getDefaultValue() {
-		throw new UnsupportedOperationException("Messages don't have a default value");
+		throw new UnsupportedOperationException("Messages don't have a default value. Message: " + getName());
 	}
 
 	@Override
 	public String getImplDefaultValue() {
-		throw new UnsupportedOperationException("Messages don't have a default value");
+		throw new UnsupportedOperationException("Messages don't have a default value. Message: " + getName());
 	}
 
 	@Override
 	public void setDefaultValue(String defaultValue) {
-		throw new UnsupportedOperationException("Messages don't have a default value");
+		throw new UnsupportedOperationException("Messages don't have a default value. Message: " + getName());
 	}
 
 	/** IMPL **/

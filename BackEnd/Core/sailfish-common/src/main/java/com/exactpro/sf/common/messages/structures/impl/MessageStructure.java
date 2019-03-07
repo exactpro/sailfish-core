@@ -116,12 +116,12 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public Map<String, IAttributeStructure> getValues() {
-		throw new UnsupportedOperationException("Messages don't have values");
+		throw new UnsupportedOperationException("Messages don't have values. Message: " + getName());
 	}
 
 	@Override
 	public JavaType getJavaType() {
-		throw new UnsupportedOperationException("Messages don't have a java type");
+		throw new UnsupportedOperationException("Messages don't have a java type. Message: " + getName());
 	}
 
 	@Override
@@ -131,7 +131,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 			return super.isRequired();
 		}
 
-		throw new UnsupportedOperationException("Messages don't have a 'required' parameter");
+		throw new UnsupportedOperationException("Messages don't have a 'required' parameter. Message: " + getName());
 	}
 
 	@Override
@@ -141,16 +141,16 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 			return super.isCollection();
 		}
 
-		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter");
+		throw new UnsupportedOperationException("Messages don't have a 'collection' parameter. Message: " + getName());
 	}
 
     @Override
     public boolean isServiceName() {
-        throw new UnsupportedOperationException("Messages don't have a 'serviceName' parameter");
+        throw new UnsupportedOperationException("Messages don't have a 'serviceName' parameter. Message: " + getName());
     }
 
 	@Override
 	public Object getDefaultValue() {
-		throw new UnsupportedOperationException("Messages don't have a default value");
+		throw new UnsupportedOperationException("Messages don't have a default value. Message: " + getName());
 	}
 }

@@ -106,7 +106,7 @@ public class StrictMessageWrapper implements IMessage {
         }
 
         if (value == null) {
-            message.addField(name, requiedNotNull(value, fieldStructure));
+            message.addField(name, requiredNotNull(value, fieldStructure));
             return;
         }
 
@@ -118,7 +118,7 @@ public class StrictMessageWrapper implements IMessage {
                 if (value instanceof List<?>) {
                     element = extractValueFromCollection((List<?>)value);
                 }
-                this.message.addField(name, checkElement(requiedNotNull(element, fieldStructure), StrictMessageWrapper.class));
+                this.message.addField(name, checkElement(requiredNotNull(element, fieldStructure), StrictMessageWrapper.class));
             }
         } else {
             try {
@@ -131,7 +131,7 @@ public class StrictMessageWrapper implements IMessage {
                     if (value instanceof List<?>) {
                         element = extractValueFromCollection((List<?>)value);
                     }
-                    this.message.addField(name, checkElement(requiedNotNull(element, fieldStructure), clazz));
+                    this.message.addField(name, checkElement(requiredNotNull(element, fieldStructure), clazz));
                 }
             } catch (ClassNotFoundException e) {
                 throw new EPSCommonException("Unknown field type: " + fieldStructure.getJavaType().value(), e);
@@ -290,10 +290,10 @@ public class StrictMessageWrapper implements IMessage {
      * @param fieldStructure
      * @return value if it can be NULL, else throw Exception
      */
-    private Object requiedNotNull(Object value, IFieldStructure fieldStructure) {
-        if (value == null && fieldStructure.isRequired() && fieldStructure.getDefaultValue() == null) {
+    private Object requiredNotNull(Object value, IFieldStructure fieldStructure) {
+        if (value == null && fieldStructure.isRequired() && (fieldStructure.isComplex() || fieldStructure.getDefaultValue() == null)) {
             throw new EPSCommonException(
-                    "Requied field [" + fieldStructure.getName() + "] must have NOT NULL value or default value");
+                    "Required field [" + fieldStructure.getName() + "] must have NOT NULL value or default value");
         }
         return value;
     }
