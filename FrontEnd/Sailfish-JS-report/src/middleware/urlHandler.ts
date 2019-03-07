@@ -76,6 +76,8 @@ function getNextSearchParams(searchParams : URLSearchParams, prevState : AppStat
     if (prevState.selected.actionId != nextState.selected.actionId) {
         if (nextState.selected.actionId != null) {
             searchParams.set(ACTION_PARAM_KEY, nextState.selected.actionId.toString());
+            // removing verification message id from url
+            searchParams.delete(MESSAGE_PARAM_KEY);
         } else {
             searchParams.delete(ACTION_PARAM_KEY);
         }
