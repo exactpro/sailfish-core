@@ -48,6 +48,7 @@ interface MessagesListProps {
 export class MessagesCardListBase extends Component<MessagesListProps> {
 
     private elements: MessageCard[] = [];
+    private scrollbar: HeatmapScrollbar;
 
     constructor(props: MessagesListProps) {
         super(props);
@@ -95,6 +96,10 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         }
     }
 
+    scrollToTop() {
+        this.scrollbar && this.scrollbar.scrollToTop();
+    }
+
     getMessageActions(message: Message): Map<number, Action> {
         return new Map<number, Action>(message.relatedActions.map(
             (actionId): [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
@@ -106,7 +111,8 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             <div class="messages">
                 <div class="messages-list">
                     <HeatmapScrollbar
-                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}>
+                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
+                        ref={ref => this.scrollbar = ref}>
                         {messages.map(message => this.renderMessage(message))}
                     </HeatmapScrollbar>
                 </div>

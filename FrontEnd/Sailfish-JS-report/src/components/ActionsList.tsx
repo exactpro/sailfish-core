@@ -42,6 +42,12 @@ interface ListProps {
 export class ActionsListBase extends Component<ListProps, {}> {
 
     private elements: ActionTree[] = [];
+    private scrollbar: HeatmapScrollbar;
+    private root: HTMLElement;
+
+    scrollToTop() {
+        this.scrollbar && this.scrollbar.scrollToTop();
+    }
 
     scrollToAction(actionId: number) {
         if (this.elements[actionId]) {
@@ -73,9 +79,11 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
         return (
             <div class="actions">
-                <div class="actions-list">
+                <div class="actions-list"
+                    ref={ref => this.root = ref}>
                     <HeatmapScrollbar
-                        selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}>
+                        selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}
+                        ref={ref => this.scrollbar = ref}>
                         {actions.map(action => (
                             <ActionTree 
                                 action={action}

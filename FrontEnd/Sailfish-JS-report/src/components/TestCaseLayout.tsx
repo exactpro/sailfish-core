@@ -33,23 +33,9 @@ interface LayoutProps {
 
 class TestCaseLayoutBase extends Component<LayoutProps> {
 
-    private actionsListRef: ActionsListBase;
-    private messagesListRef: MessagesCardListBase;
-
     constructor(props: LayoutProps) {
         super(props);
     }
-
-    // FIXME : need to move this logic to redux
-    // scrollToTopHandler() {
-    //     if (this.actionsListRef) {
-    //         this.actionsListRef.scrollToAction(this.props.testCase.actions[0].id);
-    //     }
-
-    //     if (this.messagesListRef) {
-    //         this.messagesListRef.scrollToMessage(this.props.testCase.messages[0].id);
-    //     }
-    // }
 
     render({ showFilter }: LayoutProps) { 
 
@@ -58,7 +44,7 @@ class TestCaseLayoutBase extends Component<LayoutProps> {
         return (
             <div class={rootClassName}>
                 <div class="layout-header">
-                    <Header goTopHandler={() => {}} />
+                    <Header/>
                 </div>
                     <div class="layout-body split">
                         <SplitView

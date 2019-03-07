@@ -34,22 +34,19 @@ import { getSecondsPeriod } from '../helpers/dateFormatter';
 
 interface HeaderProps {
     testCase: TestCase;
-    splitMode: boolean;
     showFilter: boolean;
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
     nextTestCaseHandler: () => any;
     prevTestCaseHandler: () => any;
-    goTopHandler?: () => any;
     backToListHandler: () => any;
-    switchSplitMode: () => any;
     switchActionsFilter: (status: StatusType) => any;
     switchFieldsFilter: (status: StatusType) => any;
     showFilterHandler: () => any;
 }
 
-const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, goTopHandler, nextTestCaseHandler, prevTestCaseHandler, backToListHandler,
-    switchSplitMode: switchSplitMode, switchActionsFilter, switchFieldsFilter, showFilter, showFilterHandler }: HeaderProps) => {
+const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler,
+    switchActionsFilter, switchFieldsFilter, showFilter, showFilterHandler }: HeaderProps) => {
 
     const {
         name,
@@ -75,11 +72,6 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, goTopHan
                     <div class="header-status-button-icon list" />
                     <h3>Back to list</h3>
                 </div>
-                <div class="header-status-button"
-                    onClick={goTopHandler || (() => {})}>
-                    <div class="header-status-button-icon gotop" />
-                    <h3>Go top</h3>
-                </div>
                 <div class="header-status-name">
                     <div class={prevButtonClass}
                         onClick={prevTestCaseHandler} />
@@ -87,11 +79,6 @@ const HeaderBase = ({ testCase, splitMode, actionsFilter, fieldsFilter, goTopHan
                     <div class={nextButtonClass}
                         onClick={nextTestCaseHandler} />
                 </div>
-                {/* DISABLED 
-                <div class="header-status-button" onClick={() => switchSplitMode()}>
-                    <div class="header-status-button-icon mode" />
-                    <h3>{splitMode ? "List Mode" : "Split Mode"}</h3>
-                </div> */}
                 <div class="header-status-button" onClick={() => showFilterHandler()}>
                     <div class="header-status-button-icon filter" />
                     <h3>{showFilter ? "Hide filter" : "Show filter"}</h3>

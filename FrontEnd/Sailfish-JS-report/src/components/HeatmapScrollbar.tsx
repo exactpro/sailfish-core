@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
+import { h, Component } from 'preact';
 import { Scrollbars } from 'preact-custom-scrollbars';
 import { StatusType } from '../models/Status';
 import '../styles/heatmap.scss';
@@ -27,24 +27,34 @@ interface HeatmapScrollbarProps {
     selectedElements: Map<number, StatusType>;
 }
 
-export const HeatmapScrollbar = ({children, selectedElements}: HeatmapScrollbarProps) => {
-    return (
-        <div class="heatmap">
-            <Scrollbars
-                renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb"/>}
-                renderTrackVertical={({style, ...props}) => 
-                    <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }}/>
-                }
-                >
-                <div class="heatmap-wrapper">
-                    {children}
+export class HeatmapScrollbar extends Component<HeatmapScrollbarProps> {
+
+    private scrollbar: Scrollbars;
+
+    scrollToTop() {
+        this.scrollbar && this.scrollbar.scrollToTop();
+    }
+
+    render({children, selectedElements}: HeatmapScrollbarProps) {
+        return (
+            <div class="heatmap">
+                <Scrollbars
+                    renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb"/>}
+                    renderTrackVertical={({style, ...props}) => 
+                        <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }}/>
+                    }
+                    ref={ref => this.scrollbar = ref}
+                    >
+                    <div class="heatmap-wrapper">
+                        {children}
+                    </div>
+                </Scrollbars>
+                <div class="heatmap-scrollbar">
+                    {renderHeatmap(children.length, selectedElements)}
                 </div>
-            </Scrollbars>
-            <div class="heatmap-scrollbar">
-                {renderHeatmap(children.length, selectedElements)}
             </div>
-        </div>
-    )
+        )
+    }
 }
 
 function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): JSX.Element[] {

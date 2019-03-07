@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import { h, Component } from 'preact';
 import { connect } from 'preact-redux';
 import '../styles/layout.scss';
 import { Panel } from '../helpers/Panel';
@@ -24,6 +24,7 @@ import { ActionsList } from './ActionsList';
 import AppState from '../state/AppState';
 import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPane';
+import { ActionsListBase } from './ActionsList';
 
 interface LeftPanelProps {
     panel: Panel;
@@ -33,99 +34,119 @@ interface LeftPanelProps {
     setSelectedCheckpoint: (checkpointAciton: Action) => any;
 }
 
-const LeftPanelBase = ({panel, panelSelectHandler, checkpointActions, setSelectedCheckpoint, selectedCheckpointId}: LeftPanelProps) => {
+class LeftPanelBase extends Component<LeftPanelProps> {
 
-    const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
-        cpEnabled = checkpointActions.length != 0,
-        cpRootClass = [
-            "layout-body-panel-controls-left-checkpoints",
-            cpEnabled ? "" : "disabled"
-        ].join(' ');
+    private actionPanel: ActionsListBase;
+    
+    scrollPanelToTop(panel: Panel) {
+        switch (panel) {
+            case Panel.Actions: {
+                this.actionPanel && this.actionPanel.scrollToTop();
+                break;
+            }
+            default: {
+                return;
+            }
+        }
+    }
 
-    const [nextCpHandler, prevCpHandler] = getCpHanler(setSelectedCheckpoint, checkpointActions);
+    render({panel, checkpointActions, selectedCheckpointId}: LeftPanelProps) {
 
-    return (
-        <div class="layout-body-panel">
-            <div class="layout-body-panel-controls">
-                <div class="layout-body-panel-controls-panels">
-                    <ToggleButton
-                        isToggled={panel == Panel.Actions}
-                        click={() => panelSelectHandler(Panel.Actions)}
-                        text="Actions" />
-                    <ToggleButton
-                        isToggled={panel == Panel.Status}
-                        click={() => panelSelectHandler(Panel.Status)}
-                        text="Status" />
-                </div>
-                <div class="layout-body-panel-controls-left">
-                    <div class="layout-body-panel-controls-left-checkpoints">
-                        <div class={cpRootClass}>
-                            <div class="layout-body-panel-controls-left-checkpoints-icon"/>
-                            <div class="layout-body-panel-controls-left-checkpoints-title">
-                                <p>{cpEnabled ? "" : "No "}Checkpoints</p>
+        const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
+            cpEnabled = checkpointActions.length != 0,
+            cpRootClass = [
+                "layout-body-panel-controls-left-checkpoints",
+                cpEnabled ? "" : "disabled"
+            ].join(' ');
+
+        return (
+            <div class="layout-body-panel">
+                <div class="layout-body-panel-controls">
+                    <div class="layout-body-panel-controls-panels">
+                        <ToggleButton
+                            isToggled={panel == Panel.Actions}
+                            click={() => this.selectPanel(Panel.Actions)}
+                            text="Actions" />
+                        <ToggleButton
+                            isToggled={panel == Panel.Status}
+                            click={() => this.selectPanel(Panel.Status)}
+                            text="Status" />
+                    </div>
+                    <div class="layout-body-panel-controls-left">
+                        <div class="layout-body-panel-controls-left-checkpoints">
+                            <div class={cpRootClass}>
+                                <div class="layout-body-panel-controls-left-checkpoints-icon"/>
+                                <div class="layout-body-panel-controls-left-checkpoints-title">
+                                    <p>{cpEnabled ? "" : "No "}Checkpoints</p>
+                                </div>
+                                {
+                                    cpEnabled ? 
+                                    (
+                                        [
+                                            <div class="layout-body-panel-controls-left-checkpoints-btn prev"
+                                                onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>,
+                                            <div class="layout-body-panel-controls-left-checkpoints-count">
+                                                <p>{cpIndex + 1} of {checkpointActions.length}</p>
+                                            </div>,
+                                            <div class="layout-body-panel-controls-left-checkpoints-btn next"
+                                                onClick={cpEnabled && (() => this.nextCpHandler(cpIndex))}/>
+                                        ]
+                                    ) : null
+                                }
                             </div>
-                            {
-                                cpEnabled ? 
-                                (
-                                    [
-                                        <div class="layout-body-panel-controls-left-checkpoints-btn prev"
-                                            onClick={cpEnabled && (() => prevCpHandler(cpIndex))}/>,
-                                        <div class="layout-body-panel-controls-left-checkpoints-count">
-                                            <p>{cpIndex + 1} of {checkpointActions.length}</p>
-                                        </div>,
-                                        <div class="layout-body-panel-controls-left-checkpoints-btn next"
-                                            onClick={cpEnabled && (() => nextCpHandler(cpIndex))}/>
-                                    ]
-                                ) : null
-                            }
                         </div>
                     </div>
                 </div>
+                <div class="layout-body-panel-content">
+                    {this.renderPanels(panel)}
+                </div>
             </div>
-            <div class="layout-body-panel-content">
-                {renderPanels(panel)}
+        )
+    }
+
+    private renderPanels(selectedPanel: Panel): JSX.Element[] {
+        const actionRootClass = [
+                "layout-body-panel-content-wrapper",
+                selectedPanel == Panel.Actions ? "" : "disabled"
+            ].join(' '),
+            statusRootClass = [
+                "layout-body-panel-content-wrapper",
+                selectedPanel == Panel.Status ? "" : "disabled"
+            ].join(' ');
+    
+        return [
+            <div class={actionRootClass}>
+                <ActionsList
+                    ref={ref => this.actionPanel = ref ? ref.wrappedInstance : null}/>
+            </div>,
+            <div class={statusRootClass}>
+                <StatusPanel/>
             </div>
-        </div>
-    )
-}
+        ]
+    }
 
-function renderPanels(selectedPanel: Panel): JSX.Element[] {
-    const actionRootClass = [
-            "layout-body-panel-content-wrapper",
-            selectedPanel == Panel.Actions ? "" : "disabled"
-        ].join(' '),
-        statusRootClass = [
-            "layout-body-panel-content-wrapper",
-            selectedPanel == Panel.Status ? "" : "disabled"
-        ].join(' ');
-
-    return [
-        <div class={actionRootClass}>
-            <ActionsList/>
-        </div>,
-        <div class={statusRootClass}>
-            <StatusPanel/>
-        </div>
-    ]
-}
-
-function getCpHanler(setSelectedCheckpoint: (cp: Action) => any, checkpointActions: Action[]) {
-    return [
-        function nextCpHandler (currentCpIndex: number) {
-            const idx = (currentCpIndex + 1) % checkpointActions.length;
-            setSelectedCheckpoint(checkpointActions[idx]);
-        },
-        function prevCpHandler (currentCpIndex: number) {
-            const idx = (checkpointActions.length + currentCpIndex - 1) % checkpointActions.length;
-            setSelectedCheckpoint(checkpointActions[idx]);
+    private selectPanel(panel: Panel) {
+        if (panel == this.props.panel) {
+            this.scrollPanelToTop(panel);
+        } else {
+            this.props.panelSelectHandler(panel);
         }
-    ]
+    }
+
+    private nextCpHandler (currentCpIndex: number) {
+        const idx = (currentCpIndex + 1) % this.props.checkpointActions.length;
+        this.props.setSelectedCheckpoint(this.props.checkpointActions[idx]);
+    }
+
+    private prevCpHandler (currentCpIndex: number) {
+        const idx = (this.props.checkpointActions.length + currentCpIndex - 1) % this.props.checkpointActions.length;
+        this.props.setSelectedCheckpoint(this.props.checkpointActions[idx]);
+    }
 }
 
 export const LeftPanel = connect(
     (state: AppState) => ({
         panel: state.leftPane,
-        actions: state.testCase.actions,
         selectedCheckpointId: state.selected.checkpointActionId,
         checkpointActions: state.checkpointActions
     }),
