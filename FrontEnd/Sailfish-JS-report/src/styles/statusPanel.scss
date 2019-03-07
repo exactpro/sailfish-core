@@ -30,7 +30,7 @@
     &-container {
         @include scrollbar;
         overflow-y: scroll;
-        height: calc(100% - 50px);
+        height: 100%;
     }
 
     &-panel {
