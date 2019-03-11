@@ -38,7 +38,6 @@ export const initialAppState: AppState = {
     selected: initialSelectedState,
     adminMessagesEnabled: false,
     splitMode: true,
-    showFilter: false,
     leftPane: Panel.Actions,
     rightPane: Panel.Messages
 }

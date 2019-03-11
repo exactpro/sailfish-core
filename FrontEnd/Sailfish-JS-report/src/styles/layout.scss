@@ -19,32 +19,13 @@
 .layout {
     display: grid;
     height: 100%;
-    grid-template: 87px calc(100% - 87px) / 1fr;
+    grid-template: auto 1fr / 1fr;
     grid-template-areas:
         "header" 
         "main-content";
 
-    &.filter {
-        grid-template: 147px calc(100% - 147px) / 1fr;
-        grid-template-areas:
-            "header" 
-            "main-content";
-    }
-
     &-header {
         grid-area: header;
-    }
-
-    &-buttons {
-        display: inline-flex;
-        justify-content: flex-start;
-        align-items: center;
-        grid-area: left;
-        position: absolute;
-        top: 6px;
-        left: 4px;
-        background-color: #ffffff;
-        z-index: 4;
     }
 
     &-body {

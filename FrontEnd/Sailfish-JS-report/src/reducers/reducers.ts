@@ -187,13 +187,6 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             }
         }
 
-        case StateActionTypes.SHOW_FILTER: {
-            return {
-                ...state,
-                showFilter: !state.showFilter
-            }
-        }
-
         case StateActionTypes.SET_LEFT_PANE: {
             return {
                 ...state,

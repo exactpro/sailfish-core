@@ -28,7 +28,6 @@ import {
     SwitchSplitModeStateAction,
     SwitchActionFilterStateAction,
     SwitchFieldsFilterStateAction,
-    ShowFilterStateAction,
     SetLeftPaneStateActions,
     SetRightPaneStateAction,
     CheckpointSelectStateAction,
@@ -111,10 +110,6 @@ export const switchSplitMode = (): SwitchSplitModeStateAction => ({
 export const setAdminMsgEnabled = (isEnabled: boolean) : SetAdminMessageEnabledStateAction => ({
     type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
     adminEnabled: isEnabled
-})
-
-export const showFilter = (): ShowFilterStateAction => ({
-    type: StateActionTypes.SHOW_FILTER
 })
 
 export const setLeftPane = (pane: Panel): SetLeftPaneStateActions => ({

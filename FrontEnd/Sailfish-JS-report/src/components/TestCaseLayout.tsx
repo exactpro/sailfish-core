@@ -14,63 +14,26 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
-import { connect } from 'preact-redux';
+import { h } from 'preact';
 import { Header } from './Header';
 import { SplitView } from './SplitView'
-import { ActionsListBase } from './ActionsList';
-import TestCase from '../models/TestCase';
-import { MessagesCardListBase } from './MessagesCardList';
-import AppState from '../state/AppState';
-import '../styles/layout.scss';
 import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
+import '../styles/layout.scss';
 
-interface LayoutProps {
-    testCase: TestCase;
-    showFilter: boolean;
-}
-
-class TestCaseLayoutBase extends Component<LayoutProps> {
-
-    constructor(props: LayoutProps) {
-        super(props);
-    }
-
-    render({ showFilter }: LayoutProps) { 
-
-        const rootClassName = ["layout", (showFilter ? "filter" : "")].join(' ');
-
-        return (
-            <div class={rootClassName}>
-                <div class="layout-header">
-                    <Header/>
-                </div>
-                    <div class="layout-body split">
-                        <SplitView
-                            minPanelPercentageWidth={30}
-                            resizeHandler={this.splitResizeHandler}>
-                            <LeftPanel/>
-                            <RightPanel/>
-                        </SplitView>
-                    </div>
+const TestCaseLayout = () =>  (
+    <div class="layout">
+        <div class="layout-header">
+            <Header/>
+        </div>
+            <div class="layout-body split">
+                <SplitView
+                    minPanelPercentageWidth={30}>
+                    <LeftPanel/>
+                    <RightPanel/>
+                </SplitView>
             </div>
-        )
-    }
-
-    private splitResizeHandler = (leftPanelWidth: number, rightPanelWidth: number) => {
-        this.setState({
-            rightPanelWidth: rightPanelWidth
-        });
-    }
-}
-
-const TestCaseLayout = connect(
-    (state: AppState) => ({
-        testCase: state.testCase,
-        showFilter: state.showFilter
-    }),
-    dispatch => ({})
-)(TestCaseLayoutBase);
+    </div>
+)
 
 export default TestCaseLayout;

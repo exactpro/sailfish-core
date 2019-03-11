@@ -36,7 +36,6 @@ export enum StateActionTypes {
     SWITCH_ACTIONS_FILTER = 'SWITCH_ACTIONS_FILTER',
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
     SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
-    SHOW_FILTER = 'SHOW_FILTER',
     SET_LEFT_PANE = 'SET_LEFT_PANE',
     SET_RIGHT_PANE = 'SET_RIGHT_PANE'
 }
@@ -113,10 +112,6 @@ export interface SwitchSplitModeStateAction {
     type: StateActionTypes.SWITCH_SPLIT_MODE;
 }
 
-export interface ShowFilterStateAction {
-    type: StateActionTypes.SHOW_FILTER;
-}
-
 export interface SetLeftPaneStateActions {
     type: StateActionTypes.SET_LEFT_PANE;
     pane: Panel;
@@ -143,6 +138,5 @@ export type StateActionType = SetReportStateAction |
     SwitchSplitModeStateAction | 
     SwitchActionFilterStateAction | 
     SwitchFieldsFilterStateAction | 
-    ShowFilterStateAction | 
     SetRightPaneStateAction | 
     SetLeftPaneStateActions;

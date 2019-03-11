@@ -32,7 +32,6 @@ export default interface AppState {
     selected: SelectedState;
     adminMessagesEnabled: boolean;
     splitMode: boolean;
-    showFilter: boolean;
     leftPane: Panel;
     rightPane: Panel;
 }
