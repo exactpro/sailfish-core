@@ -26,7 +26,7 @@ const TestCaseLayout = () =>  (
         <div class="layout-header">
             <Header/>
         </div>
-            <div class="layout-body split">
+            <div class="layout-body">
                 <SplitView
                     minPanelPercentageWidth={30}>
                     <LeftPanel/>

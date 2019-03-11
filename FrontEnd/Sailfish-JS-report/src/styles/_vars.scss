@@ -19,18 +19,24 @@ $failedBorderColor: #CC2929;
 $failedBorderColorSecondary: #FFCCCC;
 $failedBackgroundColor: #FFF2F2;
 $failedHederColor: #FFCCCC;
+$failedHeaderSecondaryBackground: #FFE6E6;
+$failedHeaderSecondaryTextColor: rgba(204, 41, 41, 0.7);
 
 $passedTextColor: #4189D2;
 $passedBorderColor: #4189D2;
 $passedBorderColorSecondary: #C0E0FF;
 $passedHeaderColor: #C0E0FF;
 $passedBackgroundColor: #EDF6FF;
+$passedHeaderSecondaryBackground: rgba(192, 224, 255, 0.7);
+$passedHeaderSecondaryTextColor: rgba(65, 138, 210, 0.7);
 
 $conditionallyTextColor: #ff822a;
 $conditionallyBorderColor: #FFCDA8;
 $conditionallyBorderColorSecondary: #FFD2B3;
 $conditionallyHeaderColor: #FFD2B3;
 $conditionallyBackgroundColor: #FFF0E6;
+$conditionallyHeaderSecondaryBackground: rgba(255, 240, 230, 0.7);
+$conditionallyHeaderSecondaryTextColor: #ff832acb;
 
 $checkpointBorderColor: #59B368;
 $checkpointBackground: #effff1;

@@ -77,30 +77,52 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
             description,
         } = testCase;
 
-        const statusClass = ["header-status", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
-            prevButtonClass = ["header-status-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
-            nextButtonClass = ["header-status-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
+        const mainClass = ["header-main", status.status.toLowerCase()].join(' '),
+            infoClass = ["header-info", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
+            prevButtonClass = ["header-main-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
+            nextButtonClass = ["header-main-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
 
         const period = getSecondsPeriod(startTime, finishTime);
 
         return (
             <div class="header">
-                <div class={statusClass}>
-                    <div class="header-status-button"
+                <div class={mainClass}>
+                    <div class="header-main-button"
                         onClick={backToListHandler}>
-                        <div class="header-status-button-icon list" />
+                        <div class="header-main-button-icon list" />
                         <h3>Back to list</h3>
                     </div>
-                    <div class="header-status-name">
+                    <div class="header-main-name">
                         <div class={prevButtonClass}
                             onClick={prevTestCaseHandler} />
                         <h1>{(name || 'Test Case')} — {status.status} — {period}</h1>
                         <div class={nextButtonClass}
                             onClick={nextTestCaseHandler} />
                     </div>
-                    <div class="header-status-button" onClick={() => this.switchFilter()}>
-                        <div class="header-status-button-icon filter" />
+                    <div class="header-main-button" onClick={() => this.switchFilter()}>
+                        <div class="header-main-button-icon filter" />
                         <h3>{showFilter ? "Hide filter" : "Show filter"}</h3>
+                    </div>
+                </div>
+                <div class={infoClass}>
+                    <div class="header-info-start">
+                        <span>Start:</span>
+                        <p>{formatTime(startTime)}</p>
+                    </div>
+                    <div class="header-info-finish">
+                        <span>Finish:</span>
+                        <p>{formatTime(finishTime)}</p>
+                    </div>
+                    <div class="header-info-description">
+                        <h2>{description}</h2>
+                    </div>
+                    <div class="header-info-id">
+                        <span>ID:</span>
+                        <p>{id}</p>
+                    </div>
+                    <div class="header-info-hash">
+                        <span>Hash:</span>
+                        <p>{hash}</p>
                     </div>
                 </div>
                 {
@@ -112,20 +134,6 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
                             fieldsFilterHandler={switchFieldsFilter} />
                         : null
                 }
-                <div class="header-description">
-                    <div class="header-description-element">
-                        <span>Start:</span>
-                        <p>{formatTime(startTime)}</p>
-                        <span>Finish:</span>
-                        <p>{formatTime(finishTime)}</p>
-                        <span>ID:</span>
-                        <p>{id}</p>
-                        <span>Hash:</span>
-                        <p>{hash}</p>
-                        <span>Description:</span>
-                        <p>{description}</p>
-                    </div>
-                </div>
             </div>
         );
     }

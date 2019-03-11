@@ -19,7 +19,7 @@
 .header {
     width: 100%;
 
-    &-status {
+    &-main {
         width: 100%;
         height: 47px;
         border: 0px;
@@ -27,6 +27,8 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        z-index: 1;
+        position: relative;
 
         &.filter {
             border-bottom-left-radius: 0;
@@ -137,12 +139,78 @@
         }
     }
 
-    &-description {
+    &-info {
         width: 100%;
-        height: 40px;
         display: flex;
+        min-height: 38px;
         justify-content: center;
         align-items: center;
+        z-index: 0;
+        margin-top: -5px;
+        padding-top: 5px;
+        position: relative;
+        border-bottom-left-radius: 7px;
+        border-bottom-right-radius: 7px;
+
+        &.passed {
+            background-color: $passedHeaderSecondaryBackground;
+            h2 {
+                color: $passedHeaderSecondaryTextColor;
+            }
+        }
+
+        &.failed {
+            background-color: $failedHeaderSecondaryBackground;
+            h2 {
+                color: $failedHeaderSecondaryTextColor;
+            }
+        }
+
+        &.conditionally_passed {
+            background-color: $conditionallyHeaderSecondaryBackground;
+            h2 {
+                color: $conditionallyHeaderSecondaryTextColor;
+            }
+        }
+
+        &.filter {
+            border-radius: 0px;
+        }
+
+        &-start, &-finish, &-id, &-hash, &-ml-btn {
+            width: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 10px;
+            white-space: nowrap;
+
+            p {
+                color: $primaryTextColor;
+                margin: 0 5px;
+                font-size: 13px;
+            }
+
+            span {
+                color: $secondaryTextColor;
+                margin: 0 5px;
+                font-size: 14px;
+                font-size: 13px;
+            }
+        }
+
+        &-description {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            text-align: center;
+
+            h2 {
+                font-size: 19px;
+            }
+        }
 
         &-element {
             width: auto;
