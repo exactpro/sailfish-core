@@ -16,19 +16,19 @@
 package com.exactpro.sf.scriptrunner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
 import com.exactpro.sf.center.IDisposable;
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceDescription;
 
 public interface IConnectionManager extends IDisposable
 {
-	Future<?> addService(ServiceName serviceName, SailfishURI uri, IServiceSettings settings, IServiceNotifyListener exceptionListener);
+    Future<?> addService(ServiceDescription serviceDescription, IServiceNotifyListener exceptionListener);
 
 	Future<?> initService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
 
@@ -38,7 +38,7 @@ public interface IConnectionManager extends IDisposable
 
 	Future<?> removeService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
 
-	Future<?> updateService(ServiceName serviceName, IServiceSettings settings, IServiceNotifyListener exceptionListener);
+    Future<?> updateService(ServiceDescription serviceDescription, IServiceNotifyListener exceptionListener);
 
 	Future<?> copyService(ServiceName from, ServiceName to, IServiceNotifyListener notifyListener);
 
@@ -86,4 +86,18 @@ public interface IConnectionManager extends IDisposable
 	void unSubscribeForEvents(IEnvironmentListener listener);
 
 	List<IEnvironmentListener> getEnvironmentListeners();
+
+    Map<String, String> getVariableSet(String name);
+
+    void putVariableSet(String name, Map<String, String> variableSet);
+
+    void removeVariableSet(String name);
+
+    boolean isVariableSetExists(String name);
+
+    Set<String> getVariableSets();
+
+    void setEnvironmentVariableSet(String environmentName, String variableSetName);
+
+    String getEnvironmentVariableSet(String environmentName);
 }

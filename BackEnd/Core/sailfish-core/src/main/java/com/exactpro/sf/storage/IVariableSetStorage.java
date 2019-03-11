@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.storage;
 
-import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public interface IEnvironmentStorage {
-    void add(String name);
+// implementations should be case-insensitive to variable names and set names
+public interface IVariableSetStorage {
+    Map<String, String> get(String name);
+    void put(String name, Map<String, String> variableSet);
     void remove(String name);
     boolean exists(String name);
-    void rename(String oldName, String newName);
-    List<String> list();
-    String getVariableSet(String name);
-    void setVariableSet(String name, String variableSet);
+    Set<String> list();
 }

@@ -31,6 +31,7 @@ import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
+import com.exactpro.sf.services.ServiceDescription;
 
 public class TestAML3_0 extends TestAML3Base {
 
@@ -349,7 +350,10 @@ public class TestAML3_0 extends TestAML3Base {
 	    ServiceName serviceName = new ServiceName(ServiceName.DEFAULT_ENVIRONMENT, name);
 	    conManager.getService(serviceName);
 	    if (conManager.getService(serviceName) == null) {
-	    	conManager.addService(serviceName, serviceURI, null, null).get();
+            ServiceDescription serviceDescription = new ServiceDescription(serviceURI);
+            serviceDescription.setName(name);
+            serviceDescription.setEnvironment(ServiceName.DEFAULT_ENVIRONMENT);
+            conManager.addService(serviceDescription, null).get();
 	    }
 	}
 }

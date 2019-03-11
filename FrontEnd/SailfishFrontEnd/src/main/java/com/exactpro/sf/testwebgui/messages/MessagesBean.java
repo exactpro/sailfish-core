@@ -73,7 +73,7 @@ public class MessagesBean implements Serializable {
     //load from js, look builder-basic.js
     private String queries = "";
 
-    private List<String> storedQueries;
+    private List<String> storedQueries = Collections.emptyList();
 
     private MessagesLazyModel messageLazyModel;
 

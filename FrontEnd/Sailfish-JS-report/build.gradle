@@ -62,6 +62,18 @@ archivesBaseName = 'sailfish-js-report'
 
 defaultTasks 'zipData'
 
+artifactory {
+    publish {
+        defaults {
+            // Reference to Gradle configurations defined in the build script.
+            // This is how we tell the Artifactory Plugin which artifacts should be
+            // published to Artifactory.
+            publishConfigs('archives')
+        }
+    }
+}
+
+
 node {
     version = '10.1.0'
     npmVersion = '5.6.0'
@@ -101,6 +113,16 @@ task zipData(type: Zip, dependsOn: 'buildProd') {
 clean {
     delete project.buildDir
     delete node_modules
+}
+
+task install (type: Upload) {
+    repositories.mavenInstaller {
+        pom.version = project.version
+        pom.artifactId = project.archivesBaseName
+        pom.groupId = project.group
+        pom.packaging = 'zip'
+    }
+    configuration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
 }
 
 uploadArchives {

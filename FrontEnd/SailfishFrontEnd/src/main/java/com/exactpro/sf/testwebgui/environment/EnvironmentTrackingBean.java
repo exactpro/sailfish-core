@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.scriptrunner.IEnvironmentListener;
 import com.exactpro.sf.services.ChangeEnvironmentEvent;
 import com.exactpro.sf.services.EnvironmentEvent;
@@ -32,10 +31,7 @@ public class EnvironmentTrackingBean implements IEnvironmentListener {
 
 	public EnvironmentTrackingBean() {
 		this.environmentList = new CopyOnWriteArrayList<>();
-
         this.environmentList.addAll(BeanUtil.getSfContext().getConnectionManager().getEnvironmentList());
-        this.environmentList.add(0, ServiceName.DEFAULT_ENVIRONMENT);
-
         BeanUtil.getSfContext().getConnectionManager().subscribeForEvents(this);
 	}
 

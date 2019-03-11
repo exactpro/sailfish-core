@@ -108,7 +108,7 @@
 	height: 80px;
 	padding-top: 20px;
 	box-sizing: border-box;
-	width: 60%;
+	width: 50%;
 	float: left;
 }
 
@@ -139,6 +139,10 @@
 
 .eps-selected-environment {
 	margin-top: 6px;
+}
+
+.eps-selected-variable-set {
+    margin-top: 6px;
 }
 
 .eps-environment-table th.eps-service-action-column {
@@ -247,7 +251,7 @@
 	border: 1px solid #ccc;
 }
 
-.eps-service-param-list.eps-main-table table.eps-main-table {
+table.eps-main-table {
 	table-layout: auto;
 	width: 723px;
 }
@@ -328,16 +332,29 @@ a.eps-link-button:focus {
 	outline: none;
 }
 
-.dictionary-autocomplete > input {
-    width: 377px;
+.eps-autocomplete > input {
+    width: 100%;
 }
 
-.dictionary-autocomplete > button {
+.eps-autocomplete > button {
+    border-radius: 0 4px 4px 0 !important;
+}
+
+.variable-autocomplete > input {
+    width: 100%;
+}
+
+.variable-autocomplete > button {
     border-radius: 0 4px 4px 0 !important;
 }
 
 #selectedEnvironment {
-    max-width: 200px;
+    max-width: 100px;
+    overflow: hidden;
+}
+
+#selectedVariableSet {
+    max-width: 100px;
     overflow: hidden;
 }
 

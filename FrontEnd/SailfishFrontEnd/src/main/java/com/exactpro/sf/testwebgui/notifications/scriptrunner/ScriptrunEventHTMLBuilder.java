@@ -636,13 +636,8 @@ public class ScriptrunEventHTMLBuilder {
 			int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
 			progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-			if(finishedCount > 0) {
-				String report = ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(descr.getWorkFolder()) + "/report.html";
-				progressBlock ="<a href=\"report.xhtml?report="+ report +"\">" + formatProgressBar(progress, progressText) + "</a>";
-			} else
-			{
-				progressBlock =formatProgressBar(progress, progressText);
-			}
+			String report = ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(descr.getWorkFolder()) + "/report.html";
+			progressBlock ="<a href=\"report.xhtml?report="+ report +"\">" + formatProgressBar(progress, progressText) + "</a>";
 
 			String postfix = descr.getPauseTimeout() == 0 ? PERMANENT_PAUSED_CLASS_POSTFIX : TIME_PAUSED_CLASS_POSTFIX;
 

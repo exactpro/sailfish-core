@@ -24,6 +24,7 @@ public class FileService {
     private ServiceName name;
     private SailfishURI uri;
     private Map<String, String> parameters;
+    private Map<String, String> variables;
     private String handlerClassName;
 
     public ServiceName getName() {
@@ -48,6 +49,14 @@ public class FileService {
 
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
+    }
+
+    public Map<String, String> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map<String, String> variables) {
+        this.variables = variables;
     }
 
     public String getHandlerClassName() {

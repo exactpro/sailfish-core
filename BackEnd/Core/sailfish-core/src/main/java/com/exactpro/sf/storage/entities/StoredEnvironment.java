@@ -22,6 +22,8 @@ public class StoredEnvironment implements Cloneable {
 	private Long id;
 	
 	private String name;
+
+    private String variableSet;
 	
 	private Set<StoredService> services;
 
@@ -41,7 +43,15 @@ public class StoredEnvironment implements Cloneable {
 		this.name = name;
 	}
 
-	public Set<StoredService> getServices() {
+    public String getVariableSet() {
+        return variableSet;
+    }
+
+    public void setVariableSet(String variableSet) {
+        this.variableSet = variableSet;
+    }
+
+    public Set<StoredService> getServices() {
 		return services;
 	}
 
@@ -73,6 +83,7 @@ public class StoredEnvironment implements Cloneable {
 	public StoredEnvironment clone() {
 		StoredEnvironment env = new StoredEnvironment();
 		env.setName(this.name);
+        env.setVariableSet(variableSet);
 		return env;
 	}
 
