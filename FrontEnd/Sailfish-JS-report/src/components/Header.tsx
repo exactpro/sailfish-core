@@ -30,7 +30,7 @@ import {
     switchFieldsFilter,
     showFilter
 } from '../actions/actionCreators';
-import { getSecondsPeriod } from '../helpers/dateFormatter';
+import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -96,9 +96,9 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
             <div class="header-description">
                 <div class="header-description-element">
                     <span>Start:</span>
-                    <p>{startTime}</p>
+                    <p>{formatTime(startTime)}</p>
                     <span>Finish:</span>
-                    <p>{finishTime}</p>
+                    <p>{formatTime(finishTime)}</p>
                     <span>ID:</span>
                     <p>{id}</p>
                     <span>Hash:</span>

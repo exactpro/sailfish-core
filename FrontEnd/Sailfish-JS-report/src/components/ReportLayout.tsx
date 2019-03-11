@@ -21,7 +21,7 @@ import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { setTestCasePath } from '../actions/actionCreators';
 import "../styles/report.scss";
-import { getSecondsPeriod } from '../helpers/dateFormatter';
+import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { ReportMetadata } from '../models/ReportMetadata';
 
 interface ReportLayoutProps {
@@ -69,7 +69,7 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
                             </tr>
                             <tr>
                                 <td class="report-info-table-name">Date:</td>
-                                <td>{report.startTime}</td>
+                                <td>{formatTime(report.startTime)}</td>
                             </tr>
                             <tr>
                                 <td class="report-info-table-name">Version:</td>
