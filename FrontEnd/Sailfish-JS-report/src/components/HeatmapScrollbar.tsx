@@ -85,6 +85,7 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
     // WARNING : we can render only one element in a chunk,
     // so if chunk contains multiple selected elements with different status,
     // it will render ONLY FIRST status element in a chunk
+    // In current version several selected elements can't have different statuses, so we can safely use this trick
 
     let resultHeatmap : JSX.Element[] = [];
 
@@ -94,7 +95,7 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
                 <div class={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()}/>            
             );
 
-            // after we added heatmap element to the list, we shoul skip other elements in chunk
+            // after we added heatmap element to the list, we should skip other elements in chunk
             i += chunkSize - ((i + 1) % chunkSize);
         } else if ((i + 1) % chunkSize == 0) {
             // no selected elements in current chunk, render empty heatmap element
