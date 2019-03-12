@@ -20,6 +20,6 @@ import com.exactpro.sf.services.ISession;
 import quickfix.SessionID;
 
 public interface FIXClientApplication extends IQuickfixApplication {
-
-	public void addSessionId(SessionID sessionID, ISession iSession);
+    void addSessionId(SessionID sessionID, ISession iSession);
+    long getLatency(SessionID sessionID);
 }

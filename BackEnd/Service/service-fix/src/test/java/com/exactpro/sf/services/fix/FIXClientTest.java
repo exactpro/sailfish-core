@@ -41,7 +41,7 @@ public class FIXClientTest extends AbstractTest {
 	public void testInit() throws ConfigError, InterruptedException
 	{
 		FIXApplication application = new FIXApplication();
-		application.init(serviceContext, new ApplicationContext(null, new CollectorServiceHandler(), new FIXClientSettings(), new SessionSettings(), null, null, null), ServiceName.parse("fix"));
+        application.init(serviceContext, new ApplicationContext(null, new CollectorServiceHandler(), new FIXClientSettings(), new SessionSettings(), new FixMessageHelper(), null, null), ServiceName.parse("fix"));
 //		application.setSessionName("wwer");
 		SessionSettings settings = new SessionSettings();
 		SessionID sessionID = new SessionID("FIXT.1.1", "BANZAI1", "EXEC1");

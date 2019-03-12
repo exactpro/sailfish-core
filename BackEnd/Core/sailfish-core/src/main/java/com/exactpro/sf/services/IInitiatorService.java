@@ -19,8 +19,11 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 
 public interface IInitiatorService extends IService {
-
 	ISession getSession();
 	void connect() throws Exception;
 	IMessage receive(IActionContext actionContext, IMessage msg) throws InterruptedException;
+
+    default long getLatency() {
+        return 0;
+    }
 }

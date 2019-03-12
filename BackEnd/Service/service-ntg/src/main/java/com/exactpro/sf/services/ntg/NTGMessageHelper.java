@@ -15,9 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import static com.exactpro.sf.services.ntg.NTGUtility.getTransactTimeAsDate;
+import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.messages.IMessage;
@@ -32,6 +38,7 @@ import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ntg.exceptions.UndefinedMessageException;
 
 public class NTGMessageHelper extends MessageHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NTGMessageHelper.class);
 
     public static String MESSAGE_HEADER = "MessageHeader";
     public static String FIELD_DIRTY_MSG_TYPE = "NTGMsgType";
@@ -40,6 +47,7 @@ public class NTGMessageHelper extends MessageHelper {
 
 	public static final String FIELD_MESSAGE_LENGTH = "MessageLength";
 	public static final String FIELD_START_OF_MESSAGE = "StartOfMessage";
+    public static final String FIELD_TRANSACT_TIME = "TransactTime";
 	public static final String MESSAGE_TYPE = "MessageType";
 
 	public static final String MESSAGE_LOGON = "Logon";
@@ -197,4 +205,19 @@ public class NTGMessageHelper extends MessageHelper {
 		}
 		return m;
 	}
+
+    @Override
+    public long getSenderTime(IMessage message) {
+        try {
+            String transactTime = message.getField(FIELD_TRANSACT_TIME);
+
+            if(transactTime != null) {
+                return getMillisecond(getTransactTimeAsDate(transactTime));
+            }
+        } catch(Throwable t) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        }
+
+        return super.getSenderTime(message);
+    }
 }
