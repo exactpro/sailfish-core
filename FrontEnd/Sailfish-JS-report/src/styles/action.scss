@@ -56,6 +56,17 @@
             border-color: $conditionallyBorderColorSecondary;
         }
     }
+
+    &.conditionally_failed {
+        &.selected {
+            background-color: $conditionallyFailedBackgroundColor;
+            border-color: $conditionallyFailedBorderColor;
+        }
+
+        &.root {
+            border-color: $conditionallyFailedBorderColorSecondary;
+        }
+    }
 }
 
 .action-card {
@@ -181,6 +192,12 @@
             &.conditionally_passed {
                 h4 {
                     color: $conditionallyTextColor;
+                }
+            }
+
+            &.conditionally_failed {
+                h4 {
+                    color: $conditionallyFailedTextColor;
                 }
             }
 

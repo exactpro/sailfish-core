@@ -46,6 +46,11 @@
         border-color: $conditionallyBorderColor;
     }
 
+    &.conditionally_failed {
+        background-color: $conditionallyFailedBackgroundColor;
+        border-color: $conditionallyFailedBorderColor;
+    }
+
     &-label {
         grid-area: message-label;
         display: flex;
@@ -257,6 +262,10 @@
                         border-color: $conditionallyHeaderColor;
                     }
 
+                    &.conditionally_failed {
+                        border-color: $conditionallyHeaderColor;
+                    }
+
                     p {
                         font-size: 10px;
                         padding: 0 5px;
@@ -302,6 +311,10 @@
         
             &.conditionaly_passed {
                 background-color: $conditionallyBackgroundColor;
+            }
+
+            &.conditionally_failed {
+                background-color: $conditionallyFailedBackgroundColor;
             }
 
             &-title {

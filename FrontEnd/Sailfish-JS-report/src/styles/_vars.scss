@@ -20,23 +20,31 @@ $failedBorderColorSecondary: #FFCCCC;
 $failedBackgroundColor: #FFF2F2;
 $failedHederColor: #FFCCCC;
 $failedHeaderSecondaryBackground: #FFE6E6;
-$failedHeaderSecondaryTextColor: rgba(204, 41, 41, 0.7);
+$failedHeaderSecondaryTextColor: #DF4759;
 
 $passedTextColor: #4189D2;
 $passedBorderColor: #4189D2;
 $passedBorderColorSecondary: #C0E0FF;
 $passedHeaderColor: #C0E0FF;
 $passedBackgroundColor: #EDF6FF;
-$passedHeaderSecondaryBackground: rgba(192, 224, 255, 0.7);
-$passedHeaderSecondaryTextColor: rgba(65, 138, 210, 0.7);
+$passedHeaderSecondaryBackground: #D9ECFF;
+$passedHeaderSecondaryTextColor: #76ABE3;
 
 $conditionallyTextColor: #ff822a;
 $conditionallyBorderColor: #FFCDA8;
 $conditionallyBorderColorSecondary: #FFD2B3;
 $conditionallyHeaderColor: #FFD2B3;
 $conditionallyBackgroundColor: #FFF0E6;
-$conditionallyHeaderSecondaryBackground: rgba(255, 240, 230, 0.7);
-$conditionallyHeaderSecondaryTextColor: #ff832acb;
+$conditionallyHeaderSecondaryBackground: #FFE1CC;
+$conditionallyHeaderSecondaryTextColor: #FF8E3E;
+
+$conditionallyFailedTextColor: #EDBD36;
+$conditionallyFailedBorderColor: #EDBD36;
+$conditionallyFailedBorderColorSecondary: rgba(237, 188, 54, 0.7);
+$conditionallyFailedHeaderColor: #FFEBB3;
+$conditionallyFailedBackgroundColor: #FFEBB3;
+$conditionallyFailedHeaderSecondaryBackground: #FFF2CC;
+$conditionallyFailedHeaderSecondaryTextColor: #F5D77C;
 
 $checkpointBorderColor: #59B368;
 $checkpointBackground: #effff1;
@@ -88,10 +96,12 @@ $splitterColor: #C4C4C4;
     &::-webkit-scrollbar-thumb {
         background-color:#babac0;
         border-radius:16px;
-        border:4px solid #fff
+        border:4px solid #fff;
     }
     
-    &::-webkit-scrollbar-button {display:none}
+    &::-webkit-scrollbar-button {
+        display:none;
+    }
 }
 
 @mixin status-text {
@@ -110,6 +120,12 @@ $splitterColor: #C4C4C4;
     &.conditionally_passed {
         h3 {
             color: $conditionallyTextColor;
+        }
+    }
+
+    &.conditionally_failed {
+        h3 {
+            color: $conditionallyFailedTextColor;
         }
     }
 }

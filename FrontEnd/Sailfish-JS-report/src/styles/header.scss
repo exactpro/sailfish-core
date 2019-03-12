@@ -64,6 +64,13 @@
             }
         }
 
+        &.conditionally_failed {
+            background-color: $conditionallyFailedBackgroundColor;
+            h1 {
+                color: $conditionallyFailedTextColor;
+            }
+        }
+
         h3 {
             font-size: 14px;
             font-style: normal;
@@ -170,6 +177,13 @@
             background-color: $conditionallyHeaderSecondaryBackground;
             h2 {
                 color: $conditionallyHeaderSecondaryTextColor;
+            }
+        }
+
+        &.conditionally_failed {
+            background-color: $conditionallyFailedHeaderSecondaryBackground;
+            h2 {
+                color: $conditionallyFailedHeaderSecondaryTextColor;
             }
         }
 

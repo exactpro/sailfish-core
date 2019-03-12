@@ -62,6 +62,10 @@
                 &.conditionally_passed {
                     color: $conditionallyTextColor;
                 }
+
+                &.conditionally_failed {
+                    color: $conditionallyFailedTextColor;
+                }
             }
         }
     }
