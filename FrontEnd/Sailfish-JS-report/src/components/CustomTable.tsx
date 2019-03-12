@@ -15,25 +15,36 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import { Header } from './Header';
-import { SplitView } from './SplitView'
-import { LeftPanel } from './LeftPanel';
-import { RightPanel } from './RightPanel';
-import '../styles/layout.scss';
+import '../styles/tables.scss';
 
-const TestCaseLayout = () =>  (
-    <div class="layout">
-        <div class="layout-header">
-            <Header/>
+interface CustomTableProps {
+    content: any[];
+}
+
+export const CustomTable = ({content}: CustomTableProps) => {
+
+    if (!content || content.length < 1) {
+        return null;
+    }
+
+    const headers = Object.keys(content[0]);
+
+    return (
+        <div class="user-table">
+            <table>
+                <thead>
+                    {headers.map(header => <th>{header}</th>)}
+                </thead>
+                <tbody>
+                    {
+                        content.map(row => (
+                            <tr>
+                                {headers.map(cell => <td>{row[cell]}</td>)}
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
         </div>
-            <div class="layout-body">
-                <SplitView
-                    minPanelPercentageWidth={30}>
-                    <LeftPanel/>
-                    <RightPanel/>
-                </SplitView>
-            </div>
-    </div>
-)
-
-export default TestCaseLayout;
+    )
+}

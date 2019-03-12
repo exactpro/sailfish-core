@@ -14,15 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
-import Log from '../models/Log';
+import { ActionNode, ActionNodeType } from "../models/Action";
+import Action from '../models/Action';
 
-interface LogsPaneProps {
-    logs?: Log[];
+const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
+
+export function getActions(actionNodes: ActionNode[]) : Action[] {
+    return actionNodes.reduce((actions, node) => 
+        isAction(node) ? [...actions, node as Action] : actions,
+        []);
 }
 
-export const LogsPane = ({logs}: LogsPaneProps) => {
-    return (
-        <div style={{paddingTop: 60}}>LOGS - SOON...</div>
-    );
+export function isAction(actionNode: ActionNode) : boolean {
+    return actionNode.actionNodeType == ActionNodeType.ACTION;
+}
+
+export function isCheckpoint(action: Action): boolean {
+    return action.name.includes(ACTION_CHECKPOINT_NAME);
 }

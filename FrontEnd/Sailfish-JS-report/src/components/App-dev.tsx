@@ -61,11 +61,11 @@ class AppBase extends Component<AppProps> {
             this.selectTestCaseById(testCaseId)
         }
 
-        if (Number(msgId)) {
+        if (msgId !== null && !isNaN(Number(msgId))) {
             this.props.selectMessage(Number(msgId))
         }
 
-        if (Number(actionId)) {
+        if (actionId !== null && !isNaN(Number(actionId))) {
             this.props.selectAction(Number(actionId));
         }
     }

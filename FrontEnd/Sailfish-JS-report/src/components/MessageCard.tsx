@@ -23,6 +23,7 @@ import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
+import { formatTime } from '../helpers/dateFormatter';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -105,7 +106,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                             }
                         </div>
                         <div class="message-card-header-timestamp-value">
-                            <p>{timestamp}</p>
+                            <p>{formatTime(timestamp)}</p>
                         </div>
                         <div class="message-card-header-name-value">
                             <p>{msgName}</p>

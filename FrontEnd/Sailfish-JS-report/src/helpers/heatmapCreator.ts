@@ -13,25 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-
-import TestCase from "../models/TestCase";
-import { StatusType } from "../models/Status";
-import SelectedState from './SelectedState';
-import Report from '../models/Report';
-import { Panel } from "../helpers/Panel";
+import Message from '../models/Message';
+import { StatusType } from '../models/Status';
 import Action from '../models/Action';
 
+export function messagesHeatmap(messages: Message[], selectedMessages: number[], selectedStatus: StatusType): Map<number, StatusType> {
+    const heatmap = new Map<number, StatusType>();
 
-export default interface AppState {
-    report: Report;
-    currentTestCasePath: string;
-    testCase: TestCase;
-    checkpointActions: Action[];
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
-    selected: SelectedState;
-    adminMessagesEnabled: boolean;
-    splitMode: boolean;
-    leftPane: Panel;
-    rightPane: Panel;
+    messages.forEach((message, idx) => {
+        if (selectedMessages.includes(message.id)) {
+            heatmap.set(idx, selectedStatus);
+        }
+    });
+
+    return heatmap;
+}
+
+export function actionsHeatmap(actions: Action[], selectedActionId: number): Map<number, StatusType> {
+    const heatmap = new Map<number, StatusType>();
+
+    actions.forEach((action, idx) => {
+        if (action.id == selectedActionId) {
+            heatmap.set(idx, action.status.status);
+        }
+    });
+
+    return heatmap;
 }

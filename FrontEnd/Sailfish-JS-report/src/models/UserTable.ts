@@ -14,4 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-export enum Pane {Actions, Status, Messages, Logs}
+import { ActionNodeType } from "./Action";
+
+export default interface UserTable {
+    actionNodeType: ActionNodeType;
+    name?: string;
+    content: Object[];
+}

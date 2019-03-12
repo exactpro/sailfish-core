@@ -105,6 +105,31 @@
         &.transparent {
             opacity: 0.3;
         }
+
+        &-custom-msg {
+            color: $primaryTextColor;
+            padding-left: 10px;
+
+            &.debug {
+                color: gray;
+            }
+
+            &.info {
+                color: black;
+            }
+
+            &.warn {
+                color: #edcc10;
+            }
+
+            &.error {
+                color: orange;
+            }
+
+            &.fail {
+                color: red;
+            }
+        }
     }
 
     &-status {
@@ -129,6 +154,10 @@
             &.transparent {
                 opacity: 0.3;
             }
+        }
+
+        &-table {
+            padding-left: 10px;
         }
 
         &-verification {
@@ -163,62 +192,11 @@
 }
 
 .actions {
-    height: calc(100% - 50px);
+    height: 100%;
 
     &-list {
-        @include scrollbar;
         height: 100%;
-        overflow-y: scroll;
         padding: 0 5px;
-    }
-
-    &-controls {
-        height: 50px;
-        display: flex;
-        flex-direction: row-reverse;
-        align-items: flex-end;
-        padding-right: 10px;
-
-        &-checkpoints {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            padding: 7px 7px 10px 7px;
-
-            &.disabled {
-                filter: opacity(0.5);
-                cursor: default;
-            }
-            
-            &-icon {
-                height: 20px;
-                width: 20px;
-                background-image: url(../../resources/icons/checkpoint.svg);
-                background-size: 100%;
-            }
-
-            &-title, &-count {
-                font-size: 15px;
-                font-weight: bold;
-                padding: 0 10px;
-                color: $primaryTextColor;
-            }
-
-            &-btn {
-                height: 20px;
-                width: 20px;
-                background-size: 100%;
-                filter: opacity(0.7);
-                cursor: pointer;
-
-                &.prev {
-                    background-image: url(../../resources/icons/arr1-left.svg);
-                }
-
-                &.next {
-                    background-image: url(../../resources/icons/arr1-right.svg)
-                }
-            }
-        }
+        overflow: hidden;
     }
 }

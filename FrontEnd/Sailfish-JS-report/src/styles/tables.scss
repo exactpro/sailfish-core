@@ -17,24 +17,20 @@
 @import "vars";
 
 .ver-table {
+    @include default-table;
     width: 100%;
     padding: 3px 10px 0 5px;
 
     table {
-        border-collapse: collapse;
-        border: 1px solid black;
-        table-layout: fixed;
         width: 100%;
     }
 
-    td {
-        border: 1px solid black;
-        word-break: break-word;
+    th {
+        padding: 3px 7px;
     }
 
-    th {
-        border: 1px solid gray;
-        background-color: #B7B3BB;
+    td {
+        padding: 5px;
     }
 
     &-header {
@@ -107,15 +103,38 @@
                 }
             }
 
+            &-expected, &-actual {
+                font-family: monospace;
+            }
+
             td {
                 padding: 0 7px;
             }
+            
             &.transparent {
                 opacity: 0.3;
             }
         }
 
         &-toggler {
+
+            &.collapsed {
+                p::before {
+                    content: "+";
+                }
+            }
+    
+            &.expanded {
+                p::before {
+                    content: "-";
+                }
+            }
+    
+            p::before {
+                padding-right: 2px;
+                margin-left: -3px;
+            }
+
             p {
                 margin: 0;
                 text-decoration: none;
@@ -135,18 +154,10 @@
 }
 
 .params-table {
-    table {
-        border-collapse: collapse;
-        border: 1px solid black;
-    }
-    td {
-        border: 1px solid black;
-        padding: 0;
-    }
-    th {
-        border: 1px solid gray;
-        padding: 0;
-        background-color: #B7B3BB;
+    @include default-table;
+
+    td, th {
+        padding: 2px 7px;
     }
 
     display: block;
@@ -154,6 +165,24 @@
     height: auto;
 
     &-row-toogler {
+
+        &.collapsed {
+            p::before {
+                content: "+";
+            }
+        }
+
+        &.expanded {
+            p::before {
+                content: "-";
+            }
+        }
+
+        p::before {
+            padding-right: 2px;
+            margin-left: -3px;
+        }
+
         p {
             margin: 0;
             text-decoration: none;
@@ -172,5 +201,16 @@
             text-decoration: none;
             font-size: 14px;
         }
+    }
+}
+
+.user-table {
+    overflow: auto;
+    @include scrollbar;
+    @include default-table;
+    margin: 5px 10px 5px 0;
+
+    th, td {
+        padding: 3px 7px;
     }
 }

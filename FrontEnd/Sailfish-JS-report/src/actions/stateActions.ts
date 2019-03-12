@@ -18,7 +18,7 @@ import TestCase from "../models/TestCase";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from '../models/Report';
-import { Pane } from "../helpers/Pane";
+import { Panel } from "../helpers/Panel";
 
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
@@ -32,10 +32,10 @@ export enum StateActionTypes {
     SELECT_MESSAGES = 'SELECT_MESSAGES',
     SELECT_CHECKPOINT = 'SELECT_CHECKPOINT',
     SELECT_REJECTED_MESSAGE = 'SELECT_REJECTED_MESSAGE',
+    SET_ADMIN_MSG_ENABLED = 'SET_ADMIN_MSG_ENABLED',
     SWITCH_ACTIONS_FILTER = 'SWITCH_ACTIONS_FILTER',
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
     SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
-    SHOW_FILTER = 'SHOW_FILTER',
     SET_LEFT_PANE = 'SET_LEFT_PANE',
     SET_RIGHT_PANE = 'SET_RIGHT_PANE'
 }
@@ -80,6 +80,11 @@ export interface RejectedMessageSelectStateAction {
     messageId: number;
 }
 
+export interface SetAdminMessageEnabledStateAction {
+    type: StateActionTypes.SET_ADMIN_MSG_ENABLED;
+    adminEnabled: boolean;
+}
+
 export interface SwitchActionFilterStateAction {
     type: StateActionTypes.SWITCH_ACTIONS_FILTER;
     status: StatusType;
@@ -107,18 +112,14 @@ export interface SwitchSplitModeStateAction {
     type: StateActionTypes.SWITCH_SPLIT_MODE;
 }
 
-export interface ShowFilterStateAction {
-    type: StateActionTypes.SHOW_FILTER;
-}
-
 export interface SetLeftPaneStateActions {
     type: StateActionTypes.SET_LEFT_PANE;
-    pane: Pane;
+    pane: Panel;
 }
 
 export interface SetRightPaneStateAction {
     type: StateActionTypes.SET_RIGHT_PANE;
-    pane: Pane;
+    pane: Panel;
 }
 
 export type StateActionType = SetReportStateAction |
@@ -133,9 +134,9 @@ export type StateActionType = SetReportStateAction |
     PrevTestCaseStateAction | 
     SetTestCaseStateAction | 
     SetTestCasePathStateAction | 
+    SetAdminMessageEnabledStateAction |
     SwitchSplitModeStateAction | 
     SwitchActionFilterStateAction | 
     SwitchFieldsFilterStateAction | 
-    ShowFilterStateAction | 
     SetRightPaneStateAction | 
     SetLeftPaneStateActions;
