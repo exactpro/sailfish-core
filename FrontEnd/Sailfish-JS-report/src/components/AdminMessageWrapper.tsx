@@ -18,6 +18,7 @@ import {h, Component} from "preact";
 import "../styles/messages.scss";
 import { MessageCardProps, MessageCard } from "./MessageCard";
 import Message from '../models/Message';
+import { MessageCardActionChips } from "./MessageCardActionChips";
 
 interface WrapperProps extends MessageCardProps {
     isExpanded: boolean;
@@ -64,6 +65,7 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
 
         const rootClass = [
             "message",
+            (props.status || "").toLowerCase(),
             (props.isSelected ? "selected" : "")
         ].join(' ');
 
@@ -73,7 +75,11 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
                     {this.renderMessageTypeLabels(props.message)}
                 </div>
                 <div class="message-wrapper">
-                    <div class="message-wrapper-actionchips"/>
+                    <div class="message-wrapper-actionschips">
+                        <MessageCardActionChips
+                            actions={props.actions}
+                            selectedStatus={props.status}/>
+                    </div>
                     <div class="message-wrapper-name">Name</div>
                     <div class="message-wrapper-name-value">{props.message.msgName}</div>
                     <div class="message-wrapper-expand">

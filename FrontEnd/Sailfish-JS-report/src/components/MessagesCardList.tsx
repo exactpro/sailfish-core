@@ -100,9 +100,9 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         this.scrollbar && this.scrollbar.scrollToTop();
     }
 
-    getMessageActions(message: Message): Map<number, Action> {
-        return new Map<number, Action>(message.relatedActions.map(
-            (actionId): [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
+    getMessageActions(message: Message): Action[] {
+        return message.relatedActions.map(
+            actionId => this.props.actionsMap.get(actionId));
     }
 
     render({ messages,selectedMessages, selectedStatus }: MessagesListProps) {
@@ -123,28 +123,19 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
     private renderMessage(message: Message) {
 
         const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled } = this.props;
+        const isSelected = selectedMessages.includes(message.id);
 
         if (isCheckpoint(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
         }
 
         if (isAdmin(message)) {
-            return (
-                <AdminMessageWrapper
-                    ref={ref => this.elements[message.id] = ref}
-                    message={message}
-                    key={message.id}
-                    actionsMap={this.getMessageActions(message)}
-                    isExpanded={adminMessagesEnabled}
-                    isSelected={selectedRejectedMessageId === message.id} />
-            )
+            return this.renderAdmin(message, adminMessagesEnabled, selectedRejectedMessageId, isSelected, selectedStatus);
         }
 
         if (isRejected(message)) {
-            return this.renderRejected(message, rejectedMessages, selectedRejectedMessageId);
+            return this.renderRejected(message, rejectedMessages, selectedRejectedMessageId, isSelected, selectedStatus);
         }
-
-        const isSelected = selectedMessages.includes(message.id);
 
         return (
             <MessageCard
@@ -153,7 +144,7 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                 isSelected={isSelected}
                 status={isSelected ? selectedStatus : null}
                 key={message.id}
-                actionsMap={this.getMessageActions(message)}
+                actions={this.getMessageActions(message)}
             />
         );
     }
@@ -172,18 +163,34 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         )
     }
 
-    private renderRejected(message: Message, rejectedMessages: Message[], selectedRejectedMessageId: number) {
-        const isSelected = message.id === selectedRejectedMessageId,
+    private renderRejected(message: Message, rejectedMessages: Message[], selectedRejectedMessageId: number, isSelected: boolean, selectedStatus: StatusType) {
+        const isRejectedSelected = message.id === selectedRejectedMessageId,
             rejectedCount = rejectedMessages.indexOf(message) + 1;
 
         return (
             <MessageCard
                 ref={element => this.elements[message.id] = element}
                 message={message}
-                isSelected={isSelected}
+                isSelected={isRejectedSelected || isSelected}
                 key={message.id}
-                actionsMap={this.getMessageActions(message)}
-                rejectedMessagesCount={rejectedCount} />
+                actions={this.getMessageActions(message)}
+                rejectedMessagesCount={rejectedCount} 
+                status={isSelected ? selectedStatus : null}/>
+        )
+    }
+
+    private renderAdmin(message: Message, adminMessagesEnabled: boolean, selectedRejectedMessageId: number, isSelected: boolean, selectedStatus: StatusType) {
+        const isRejectedSelected = message.id == selectedRejectedMessageId;
+        
+        return (
+            <AdminMessageWrapper
+                ref={ref => this.elements[message.id] = ref}
+                message={message}
+                key={message.id}
+                actions={this.getMessageActions(message)}
+                isExpanded={adminMessagesEnabled}
+                isSelected={isSelected || isRejectedSelected}
+                status={isSelected ? selectedStatus : null} />
         )
     }
 }

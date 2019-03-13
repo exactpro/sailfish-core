@@ -17,6 +17,7 @@
 @import "vars";
 
 .message {
+    @include selectable-card;
     width: 100%;
     border: 2px solid transparent;
     border-radius: 5px;
@@ -26,30 +27,6 @@
     grid-template-columns: auto 1fr;
     grid-template-areas: "message-label message-card";
     position: relative;
-
-    &.selected {
-        border-color: $defaultCardBorderColor;
-    }
-
-    &.passed {
-        background-color: $passedBackgroundColor;
-        border-color: $passedBorderColor;
-    }
-
-    &.failed {
-        background-color: $failedBackgroundColor;
-        border-color: $failedBorderColor;
-    }
-
-    &.conditionally_passed {
-        background-color: $conditionallyBackgroundColor;
-        border-color: $conditionallyBorderColor;
-    }
-
-    &.conditionally_failed {
-        background-color: $conditionallyFailedBackgroundColor;
-        border-color: $conditionallyFailedBorderColor;
-    }
 
     &-label {
         grid-area: message-label;
@@ -94,6 +71,7 @@
     }
 
     &-wrapper {
+        @include selectable-card;
         grid-area: message-card;
 
         display: grid;
@@ -122,7 +100,9 @@
         }
 
         &-actionschips {
-            grid-area: action-chips;
+            grid-area: actions-chips;
+            display: flex;
+            padding-left: 7px;
         }
 
         &-expand {
@@ -239,39 +219,6 @@
                 display: flex;
                 align-items: center;
 
-                &-chip {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    border: 2px solid transparent;
-                    border-radius: 10px;
-                    height: 20px;
-                    width: auto;
-                    min-width: 20px;
-                    margin: 0 5px;
-
-                    &.passed {
-                        border-color: $passedHeaderColor;
-                    }
-
-                    &.failed {
-                        border-color: $failedHederColor;
-                    }
-
-                    &.conditionally_passed {
-                        border-color: $conditionallyHeaderColor;
-                    }
-
-                    &.conditionally_failed {
-                        border-color: $conditionallyHeaderColor;
-                    }
-
-                    p {
-                        font-size: 10px;
-                        padding: 0 5px;
-                    }
-                }
-
                 &-rejected {
                     font-weight: bold;
                     font-size: 13px;
@@ -300,6 +247,7 @@
             grid-area: message-card-body;
             position: relative;
             padding: 7px 10px 10px 15px;
+            border-radius: 5px;
 
             &.passed {
                 background-color: $passedBackgroundColor;
@@ -446,7 +394,6 @@
         top: 67px;
         right: 12px;
         padding-right: 5px;
-        background-color: white;
 
         &.rejected {
             top: 80px;

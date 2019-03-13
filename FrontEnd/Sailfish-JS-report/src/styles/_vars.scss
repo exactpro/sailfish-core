@@ -130,6 +130,32 @@ $splitterColor: #C4C4C4;
     }
 }
 
+@mixin selectable-card {
+    &.selected {
+        border-color: $defaultCardBorderColor;
+    }
+
+    &.passed {
+        background-color: $passedBackgroundColor;
+        border-color: $passedBorderColor;
+    }
+
+    &.failed {
+        background-color: $failedBackgroundColor;
+        border-color: $failedBorderColor;
+    }
+
+    &.conditionally_passed {
+        background-color: $conditionallyBackgroundColor;
+        border-color: $conditionallyBorderColor;
+    }
+
+    &.conditionally_failed {
+        background-color: $conditionallyFailedBackgroundColor;
+        border-color: $conditionallyFailedBorderColor;
+    }
+}
+
 @mixin unselectable {
     -webkit-touch-callout: none;
     -webkit-user-select: none; 

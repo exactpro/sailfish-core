@@ -16,6 +16,7 @@
 
 import { ActionNode, ActionNodeType } from "../models/Action";
 import Action from '../models/Action';
+import { StatusType } from "../models/Status";
 
 const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
 
@@ -31,4 +32,11 @@ export function isAction(actionNode: ActionNode) : boolean {
 
 export function isCheckpoint(action: Action): boolean {
     return action.name.includes(ACTION_CHECKPOINT_NAME);
+}
+
+export function getStatusChipDescription(status: StatusType): string {
+    const statusFormatted = status.toLowerCase().replace('_', ' '),
+        statusCapitalized = statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1);
+
+    return `${statusCapitalized} actions count.`;
 }

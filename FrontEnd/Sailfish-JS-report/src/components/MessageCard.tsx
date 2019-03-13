@@ -15,22 +15,23 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
-import '../styles/messages.scss';
 import Message from '../models/Message';
-import { StatusType, statusValues } from '../models/Status';
+import { StatusType } from '../models/Status';
 import Action from '../models/Action';
 import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
 import { formatTime } from '../helpers/dateFormatter';
+import { MessageCardActionChips } from './MessageCardActionChips';
+import '../styles/messages.scss';
 
 const HUE_SEGMENTS_COUNT = 36;
 
 export interface MessageCardProps {
     message: Message;
     isSelected?: boolean;
-    actionsMap: Map<number, Action>;
+    actions: Action[];
     status?: StatusType;
     rejectedMessagesCount?: number;
 }
@@ -65,11 +66,10 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
         });
     }
 
-    render({ message, isSelected, actionsMap, status, rejectedMessagesCount }: MessageCardProps, { showRaw }: MessageCardState) {
+    render({ message, isSelected, actions, status, rejectedMessagesCount }: MessageCardProps, { showRaw }: MessageCardState) {
         const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
-        const actions = [...actionsMap.values()],
-            hueValue = this.calculateHueValue(from, to),
+        const hueValue = this.calculateHueValue(from, to),
             rejectedTitle = message.content.rejectReason,
             labelsCount = this.getLabelsCount(message);
 
@@ -96,13 +96,17 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     <div class="message-card-header" data-lb-count={labelsCount}>
                         <div class="message-card-header-action">
                             {
-                                rejectedMessagesCount ? 
+                                rejectedMessagesCount && actions.length == 0 ? 
                                 (
                                     <div class="message-card-header-action-rejected">
                                         <p>Rejected {rejectedMessagesCount}</p>
                                     </div>
                                 )
-                                : statusValues.map(this.renderActionChip(actions))
+                                : (
+                                    <MessageCardActionChips
+                                        actions={actions}
+                                        selectedStatus={status}/>
+                                )
                             }
                         </div>
                         <div class="message-card-header-timestamp-value">
@@ -185,16 +189,6 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                 </div>
             </div>
         );
-    }
-
-    private renderActionChip(actions: Action[]) {
-        return (statusValue: StatusType) => {
-            //getting status chip element for each status
-            const statusCount = actions.filter(action => action.status.status === statusValue).length,
-                className = ["message-card-header-action-chip", statusValue.toLowerCase()].join(' ');
-
-            return statusCount ? (<div class={className}><p>{statusCount}</p></div>) : null;
-        }
     }
 
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
