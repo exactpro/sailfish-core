@@ -19,8 +19,6 @@ import Message from '../models/Message';
 import { StatusType } from '../models/Status';
 import Action from '../models/Action';
 import { MessageRaw } from './MessageRaw';
-import { copyTextToClipboard } from '../helpers/copyHandler';
-import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
 import { formatTime } from '../helpers/dateFormatter';
 import { MessageCardActionChips } from './MessageCardActionChips';
@@ -74,39 +72,39 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
             labelsCount = this.getLabelsCount(message);
 
         const rootClass = [
-                "message",
-                (status || "").toLowerCase(),
-                (isSelected ? "selected" : "")
-            ].join(" "),
+            "message",
+            (status || "").toLowerCase(),
+            (isSelected ? "selected" : "")
+        ].join(" "),
             contentClass = [
                 "message-card-content",
                 (status || "").toLowerCase()
             ].join(" "),
             showRawClass = [
-                "message-card-content-controls-showraw-icon",
+                "message-card-content-human-showraw-icon",
                 (showRaw ? "expanded" : "hidden")
             ].join(" ");
 
         return (
             <div class={rootClass}>
                 <div class="message-label">
-                    { this.renderMessageTypeLabels(message) }
+                    {this.renderMessageTypeLabels(message)}
                 </div>
                 <div class="message-card">
                     <div class="message-card-header" data-lb-count={labelsCount}>
                         <div class="message-card-header-action">
                             {
-                                rejectedMessagesCount && actions.length == 0 ? 
-                                (
-                                    <div class="message-card-header-action-rejected">
-                                        <p>Rejected {rejectedMessagesCount}</p>
-                                    </div>
-                                )
-                                : (
-                                    <MessageCardActionChips
-                                        actions={actions}
-                                        selectedStatus={status}/>
-                                )
+                                rejectedMessagesCount && actions.length == 0 ?
+                                    (
+                                        <div class="message-card-header-action-rejected">
+                                            <p>Rejected {rejectedMessagesCount}</p>
+                                        </div>
+                                    )
+                                    : (
+                                        <MessageCardActionChips
+                                            actions={actions}
+                                            selectedStatus={status} />
+                                    )
                             }
                         </div>
                         <div class="message-card-header-timestamp-value">
@@ -143,46 +141,31 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     <div class={contentClass}>
                         {
                             (message.content.rejectReason !== null) ?
-                            (
-                                <div class="message-card-content-title">
-                                    <p>{rejectedTitle}</p>
-                                </div>
-                            )
-                            : null
+                                (
+                                    <div class="message-card-content-title">
+                                        <p>{rejectedTitle}</p>
+                                    </div>
+                                )
+                                : null
                         }
                         <div class="message-card-content-human">
-                            <p>{contentHumanReadable}</p>
-                        </div>
-                        <div class="message-card-content-controls">
-                            {
-                                (raw && raw !== "null") ?
-                                    <div class="message-card-content-controls-showraw"
-                                        onClick={e => this.showRaw()}>
-                                        <div class="message-card-content-controls-showraw-title">
-                                            <span>{showRaw ? "Close raw" : "Show raw"}</span>
+                            <p>
+                                {contentHumanReadable}
+                                {
+                                    (raw && raw !== 'null') ? (
+                                        <div class="message-card-content-human-showraw"
+                                            onClick={e => this.showRaw()}>
+                                            <div class="message-card-content-human-showraw-title">RAW</div>
+                                            <div class={showRawClass} />
                                         </div>
-                                        <div class={showRawClass} />
-                                    </div>
-                                    : null
-                            }
-                            {
-                                showRaw ?
-                                    (<div class="message-card-content-controls-copy-all"
-                                        onClick={() => this.copyToClipboard(raw)}
-                                        title="Copy all raw content to clipboard">
-                                        <div class="message-card-content-controls-copy-all-icon" />
-                                        <div class="message-card-content-controls-copy-all-title">
-                                            <span>Copy All</span>
-                                        </div>
-                                    </div>)
-                                    : null
-                            }
+                                    ) : null
+                                }
+                            </p>
                         </div>
                         {
                             showRaw ?
                                 <MessageRaw
-                                    rawContent={raw}
-                                    copyHandler={this.copyToClipboard} />
+                                    rawContent={raw} />
                                 : null
                         }
                     </div>
@@ -197,7 +180,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
         if (message.content.rejectReason !== null) {
             labels.push(
                 <div class="message-label-rejected">
-                    <div class="message-label-rejected-icon"/>
+                    <div class="message-label-rejected-icon" />
                 </div>
             );
         }
@@ -205,7 +188,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
         if (message.content.admin) {
             labels.push(
                 <div class="message-label-admin">
-                    <div class="message-label-admin-icon"/>
+                    <div class="message-label-admin-icon" />
                 </div>
             )
         }
@@ -215,7 +198,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
 
     private getLabelsCount(message: Message) {
         let count = 0;
-        
+
         if (message.content.rejectReason != null) {
             count++;
         }
@@ -225,11 +208,6 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
         }
 
         return count;
-    }
-
-    private copyToClipboard(text: string) {
-        copyTextToClipboard(text);
-        showNotification('Text copied to the clipboard!');
     }
 
     private calculateHueValue(from: string, to: string): number {

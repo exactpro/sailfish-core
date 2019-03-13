@@ -276,63 +276,9 @@
             &-human {
                 padding-top: 5px;
 
-                p {
-                    word-break: break-all;
-                    line-height: 21px;
-                    margin: 0px;
-                    font-size: 13px;    
-                }
-            }
-
-            &-raw {
-                display: flex;
-                flex-direction: row;
-                justify-content: flex-start;
-                margin-top: 10px;
-                font-family: monospace;
-                line-height: 18px;
-                letter-spacing: 0.5px;
-                font-size: 11px;
-
-                &-numbers {
-                    color: $secondaryTextColor;
-                }
-
-                &-symbols, &-string {
-                    color: $primaryTextColor;
-                    padding-left: 5px;
-                    display: flex;
-
-                    &:hover {
-                        background: $messageCardRawHoverBackground;
-                    }
-                }
-
-                &-copy-btn {
-                    display: inline-block;
-                    margin: 4px 4px 4px 10px;
-                    height: 13px;
-                    width: 13px;
-                    background-image: url('../../resources/icons/clipboard.svg');
-                    background-size: 100%;
-                    filter: opacity(0.6);
-                    cursor: pointer;
-
-                    &:hover {
-                        filter: opacity(1);
-                    }
-                }
-            }
-
-            &-controls {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                width: 100%;
-                padding-top: 10px;
-
                 &-showraw {
                     @include unselectable;
+                    float: right;
                     display: flex;
                     align-items: center;
                     cursor: pointer;
@@ -359,30 +305,94 @@
                     }
                 }
 
-                &-copy-all {
-                    @include unselectable;
-                    display: inline-flex;
-                    align-items: center;
-                    margin-left: 10px;
-                    padding: 2px;
-                    cursor: pointer;
+                p {
+                    word-break: break-word;
+                    line-height: 21px;
+                    margin: 0px;
+                    font-size: 13px;    
+                }
+            }
 
-                    &-icon {
+            &-raw {
+                &-header {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    width: 100%;
+                    padding-top: 10px;
+    
+                    &-title {
+                        @include unselectable;
+                        font-size: 13px;
+                        color: $primaryTextColor;
+                        font-weight: bold;
+                    }
+    
+                    &-copy-all {
+                        @include unselectable;
+                        display: inline-flex;
+                        align-items: center;
+                        margin-left: 10px;
+                        padding: 2px;
+                        cursor: pointer;
+    
+                        &-icon {
+                            height: 13px;
+                            width: 13px;
+                            background-image: url('../../resources/icons/clipboard.svg');
+                            background-size: 100%;
+                            filter: opacity(0.6);
+                        }
+    
+                        &-title {
+                            font-size: 12px;
+                            color: $primaryTextColor;
+                            padding-left: 5px;
+                        }
+    
+                        &:hover {
+                            background: $messageCardRawHoverBackground;
+                        }
+                    }
+                }
+
+                &-content {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: flex-start;
+                    margin-top: 10px;
+                    font-family: monospace;
+                    line-height: 18px;
+                    letter-spacing: 0.5px;
+                    font-size: 11px;
+
+                    &-numbers {
+                        color: $secondaryTextColor;
+                    }
+
+                    &-symbols, &-string {
+                        color: $primaryTextColor;
+                        padding-left: 5px;
+                        display: flex;
+
+                        &:hover {
+                            background: $messageCardRawHoverBackground;
+                        }
+                    }
+
+                    &-copy-btn {
+                        display: inline-block;
+                        margin: 4px 4px 4px 10px;
                         height: 13px;
                         width: 13px;
                         background-image: url('../../resources/icons/clipboard.svg');
                         background-size: 100%;
                         filter: opacity(0.6);
-                    }
+                        cursor: pointer;
 
-                    &-title {
-                        font-size: 12px;
-                        color: $primaryTextColor;
-                        padding-left: 5px;
-                    }
-
-                    &:hover {
-                        background: $messageCardRawHoverBackground;
+                        &:hover {
+                            filter: opacity(1);
+                        }
                     }
                 }
             }

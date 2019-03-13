@@ -17,33 +17,54 @@
 import { h } from 'preact';
 import { splitRawContent } from '../helpers/rawFormatter';
 import '../styles/messages.scss';
+import { copyTextToClipboard } from '../helpers/copyHandler';
+import { showNotification } from '../helpers/showNotification';
+
+const COPY_NOTIFICATION_TEXT = 'Text copied to the clipboard!';
 
 export interface MessageRawProps {
     rawContent: string;
-    copyHandler: (text: string) => any;
 }
 
-export const MessageRaw = ({rawContent, copyHandler}: MessageRawProps) => {
-    
+export const MessageRaw = ({ rawContent }: MessageRawProps) => {
+
     const [offset, hexadecimal, humanReadable] = splitRawContent(rawContent);
 
     return (
         <div class="message-card-content-raw">
-            <div class="message-card-content-raw-numbers">
-                <pre>{offset}</pre>
+            <div class="message-card-content-raw-header">
+                <div class="message-card-content-raw-header-title">Raw message</div>
+                <div class="message-card-content-raw-header-copy-all"
+                    onClick={() => copyHandler(rawContent)}
+                    title="Copy all raw content to clipboard">
+                    <div class="message-card-content-raw-header-copy-all-icon" />
+                    <div class="message-card-content-raw-header-copy-all-title">
+                        <span>Copy All</span>
+                    </div>
+                </div>
             </div>
-            <div class="message-card-content-raw-symbols">
-                <pre>{hexadecimal}</pre>
-                <div class="message-card-content-raw-copy-btn"
-                    onClick={() => copyHandler(hexadecimal)}
-                    title="Copy to clipboard"/>
-            </div>
-            <div class="message-card-content-raw-string">
-                <pre>{humanReadable}</pre>
-                <div class="message-card-content-raw-copy-btn"
-                    onClick={() => copyHandler(humanReadable)}
-                    title="Copy to clipboard"/>
+            <div class="message-card-content-raw-content">
+                <div class="message-card-content-raw-content-numbers">
+                    <pre>{offset}</pre>
+                </div>
+                <div class="message-card-content-raw-content-symbols">
+                    <pre>{hexadecimal}</pre>
+                    <div class="message-card-content-raw-content-copy-btn"
+                        onClick={() => copyHandler(hexadecimal)}
+                        title="Copy to clipboard" />
+                </div>
+                <div class="message-card-content-raw-content-string">
+                    <pre>{humanReadable}</pre>
+                    <div class="message-card-content-raw-content-copy-btn"
+                        onClick={() => copyHandler(humanReadable)}
+                        title="Copy to clipboard" />
+                </div>
             </div>
         </div>
     )
+}
+
+function copyHandler(content: string) {
+    copyTextToClipboard(content);
+    showNotification(COPY_NOTIFICATION_TEXT);
 }
