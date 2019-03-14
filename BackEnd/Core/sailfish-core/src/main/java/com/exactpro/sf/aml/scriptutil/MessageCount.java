@@ -27,7 +27,8 @@ public class MessageCount {
         String operationRegex = "(>|<|>=|<=|=|\\!=)";
         String arithmeticOperationRegex = "(\\+|\\-|\\*|\\/)";
         String referenceRegex = "(\\$\\{\\w+([.:]\\w+(\\[\\d+\\])?)+\\})";
-        String arithmeticReferenceRegex = "\\(?" + referenceRegex + "(" + arithmeticOperationRegex + "\\d+)?\\)?";
+        String valueOrReference = "(\\d+|" + referenceRegex + ")";
+        String arithmeticReferenceRegex = "\\(?" + referenceRegex + "(" + arithmeticOperationRegex + valueOrReference +")*\\)?";
         String valueOrReferenceRegex = "(\\d+|" + arithmeticReferenceRegex + ")";
         String functionRegex = "(#\\{(Expected(Any|Empty)?)\\(.*?\\)(\\.(Bug(Any|Empty)?|Actual|validate)\\(.*?\\))*\\})";
         EXPRESSION_PATTERN = Pattern.compile("^("

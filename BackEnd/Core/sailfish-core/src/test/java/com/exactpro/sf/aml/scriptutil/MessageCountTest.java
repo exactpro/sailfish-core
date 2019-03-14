@@ -94,7 +94,10 @@ public class MessageCountTest {
         checkIsValidExpression("${ref.field[1]}");
         checkIsValidExpression("${ref.field.field}");
         checkIsValidExpression("${ref.field[1].field}");
-        
+        checkIsValidExpression("${ref.field1} + ${ref.field2}");
+        checkIsValidExpression("${ref.field1} + ${ref.field2} + 100");
+        checkIsValidExpression("${ref.field1} + ${ref.field2} + ${ref.field3}");
+
         for (Operation operation : MessageCount.Operation.values()) {
             checkIsValidExpression(operation.getValue() + " ${ref.field}");
         }
