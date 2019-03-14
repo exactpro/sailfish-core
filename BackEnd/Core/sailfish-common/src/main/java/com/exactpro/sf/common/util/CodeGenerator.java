@@ -118,11 +118,6 @@ public class CodeGenerator {
 	{
 		MessageStructureTemplate msgStructTemplate = new MessageStructureTemplate();
 		
-		Map<String, String> attributes = new HashMap<>();
-		
-		for (String name : msgStruct.getAttributes().keySet()) {
-			attributes.put(name, msgStruct.getAttributeValueByName(name).toString());
-		}
 		msgStructTemplate.render(writer,
 		                            distPackagePath,
 		                            underscoreAsPackageSeparator,
@@ -131,7 +126,7 @@ public class CodeGenerator {
 									messageName,
 									namespace,
 									msgStruct.getFields(),
-									attributes);
+									msgStruct.getAttributes());
 
 		return true;
 	}

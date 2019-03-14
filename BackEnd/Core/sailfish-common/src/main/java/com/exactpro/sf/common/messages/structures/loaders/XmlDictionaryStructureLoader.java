@@ -410,7 +410,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
             Object value = getAttributeValue(attribute, javaType);
 
             result.put(attribute.getName(),
-                    createAttributeStructure(attribute.getName(), attribute.getValue(), value, isValues ? javaType : attribute.getType()));
+                    createAttributeStructure(attribute.getName(), attribute.getValue(), value, isValues ? javaType : defaultIfNull(attribute.getType(), JavaType.JAVA_LANG_STRING)));
         }
         return result;
     }

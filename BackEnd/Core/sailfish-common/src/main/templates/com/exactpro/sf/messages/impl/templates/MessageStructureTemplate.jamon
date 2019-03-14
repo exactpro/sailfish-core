@@ -8,7 +8,7 @@
   String messageName;
   String namespaceName;
   java.util.List<IFieldStructure> fields;
-  java.util.Map<String, String> attributes;
+  java.util.Map<String, IAttributeStructure> attributes;
 </%args>
 
 <%import>
@@ -51,14 +51,18 @@ import java.lang.Deprecated;
 @SuppressWarnings("unused")
 public class <% typeName %> extends BaseMessage
 {
-
-	<%for String key : attributes.keySet() %>
-	public static final String <% key %> = "<% attributes.get(key) %>";
+    public static final String MESSAGE_NAME = "<% messageName %>";
+	<%for IAttributeStructure attr : attributes.values() %>
+	<%java>
+        String attrTypeName = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(attr.getType());
+        String attrValue = CodeGenUtils.getStringValueView(attr.getType(), attr.getCastValue());
+    </%java>
+	public static final <% attrTypeName %> <% attr.getName() %> = <% attrValue %>;
 	</%for>
 
 	public <% typeName %>(IMessageFactory messageFactory)
 	{
-		this(messageFactory.createMessage("<% messageName %>", "<% namespaceName %>"));
+		this(messageFactory.createMessage(MESSAGE_NAME, "<% namespaceName %>"));
 	}
 
 	/**
@@ -92,7 +96,7 @@ public class <% typeName %> extends BaseMessage
 	<%for String key : attributes.keySet() %>
 		<%if (key.equalsIgnoreCase("IsAdmin"))%>
     		public boolean isAdmin(){
-    			return Boolean.valueOf(<% key %>);
+    			return <% key %>;
     		}
     	</%if>
     </%for>
