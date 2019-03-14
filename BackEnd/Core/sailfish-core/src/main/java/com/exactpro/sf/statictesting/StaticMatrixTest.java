@@ -166,17 +166,32 @@ public class StaticMatrixTest extends AbstractStaticTest {
             String environmentVariableSet = commandLine.getOptionValue("environment-variable-set");
 
             if(!reportDir.exists() && !reportDir.mkdirs()) {
-                throw new Exception("Report directory '" + reportDir + "' can be created");
+                throw new Exception("Report directory cannot be created: " + reportDir.getCanonicalPath());
             }
 
             if(loggerConfigFile == null) {
                 for(File workspacePath : reverse(workspacePaths)) {
-                    loggerConfigFile = new File(workspacePath, concat("cfg", "log.properties"));
+                    File layerConfigFile = new File(workspacePath, concat("cfg", "log.properties"));
 
-                    if(loggerConfigFile.exists()) {
+                    if(layerConfigFile.exists() && layerConfigFile.isFile()) {
+                        loggerConfigFile = layerConfigFile;
                         break;
                     }
                 }
+
+                if(loggerConfigFile == null) {
+                    throw new Exception("Unable to locate logger config file");
+                }
+            } else if(!loggerConfigFile.isFile()) {
+                throw new Exception("Logger config is not a file: " + loggerConfigFile.getCanonicalPath());
+            }
+
+            if(logsZipFile.exists()) {
+                throw new Exception("Logs zip file already exists: " + logsZipFile.getCanonicalPath());
+            }
+
+            if(variableSetsFile != null && !variableSetsFile.isFile()) {
+                throw new Exception("Variable sets is not a file: " + variableSetsFile.getCanonicalPath());
             }
 
             File lastWorkspaceLayer = Files.createTempDirectory("statictest").toFile();
@@ -209,8 +224,12 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             try (AutoCloseable closeable = context::dispose) {
                 loadServices(servicesPaths, context);
-                loadVariableSets(variableSetsFile, environmentVariableSet, context);
-                servicesPaths.add(variableSetsFile);
+
+                if(variableSetsFile != null) {
+                    loadVariableSets(variableSetsFile, environmentVariableSet, context);
+                    servicesPaths.add(variableSetsFile);
+                }
+
                 zipFile(servicesPaths, services);
 
                 testData = new ArrayList<>();
@@ -363,14 +382,15 @@ public class StaticMatrixTest extends AbstractStaticTest {
     }
 
     private static void loadVariableSets(File variableSetsFile, String environmentVariableSet, ISFContext context) throws IOException {
+        if(environmentVariableSet == null) {
+            return;
+        }
+
         IConnectionManager connectionManager = context.getConnectionManager();
         Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(variableSetsFile);
 
         variableSets.forEach(connectionManager::putVariableSet);
-
-        if(environmentVariableSet != null) {
-            connectionManager.setEnvironmentVariableSet(DEFAULT_ENVIRONMENT, environmentVariableSet);
-        }
+        connectionManager.setEnvironmentVariableSet(DEFAULT_ENVIRONMENT, environmentVariableSet);
     }
 
     private static List<File> getMatrices(File path) throws IOException {
