@@ -113,6 +113,7 @@ body {
     min-width: 20px;
     margin: 0 5px;
     color: $primaryTextColor;
+    border-color: $reportHeaderBackground;
 
     &.selected {
         font-weight: bold;

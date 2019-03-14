@@ -20,7 +20,7 @@ $failedBorderColorSecondary: #FFCCCC;
 $failedBackgroundColor: #FFF2F2;
 $failedHederColor: #FFCCCC;
 $failedHeaderSecondaryBackground: #FFE6E6;
-$failedHeaderSecondaryTextColor: #DF4759;
+$failedSecondaryTextColor: #DF4759;
 
 $passedTextColor: #4189D2;
 $passedBorderColor: #4189D2;
@@ -28,7 +28,7 @@ $passedBorderColorSecondary: #C0E0FF;
 $passedHeaderColor: #C0E0FF;
 $passedBackgroundColor: #EDF6FF;
 $passedHeaderSecondaryBackground: #D9ECFF;
-$passedHeaderSecondaryTextColor: #76ABE3;
+$passedSecondaryTextColor: #76ABE3;
 
 $conditionallyTextColor: #ff822a;
 $conditionallyBorderColor: #FFCDA8;
@@ -36,7 +36,7 @@ $conditionallyBorderColorSecondary: #FFD2B3;
 $conditionallyHeaderColor: #FFD2B3;
 $conditionallyBackgroundColor: #FFF0E6;
 $conditionallyHeaderSecondaryBackground: #FFE1CC;
-$conditionallyHeaderSecondaryTextColor: #FF8E3E;
+$conditionallySecondaryTextColor: #FF8E3E;
 
 $conditionallyFailedTextColor: #EDBD36;
 $conditionallyFailedBorderColor: #EDBD36;
@@ -44,7 +44,7 @@ $conditionallyFailedBorderColorSecondary: rgba(237, 188, 54, 0.7);
 $conditionallyFailedHeaderColor: #FFEBB3;
 $conditionallyFailedBackgroundColor: #FFEBB3;
 $conditionallyFailedHeaderSecondaryBackground: #FFF2CC;
-$conditionallyFailedHeaderSecondaryTextColor: #F5D77C;
+$conditionallyFailedSecondaryTextColor: #F5D77C;
 
 $checkpointBorderColor: #59B368;
 $checkpointBackground: #effff1;
@@ -82,6 +82,7 @@ $scrollbarThumbBackground: #C4C4C4;
 $scrollbarTrackBackground: #F2F2F2;
 
 $splitterColor: #C4C4C4;
+
 
 @mixin scrollbar {
     &::-webkit-scrollbar {

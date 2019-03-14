@@ -37,7 +37,7 @@ export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
     };
 
     const rootClass = [
-        "action-card-header-custom-msg",
+        "action-custom-msg",
         (level || "").toLowerCase()
     ].join(' ');
 

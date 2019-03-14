@@ -162,28 +162,28 @@
         &.passed {
             background-color: $passedHeaderSecondaryBackground;
             h2 {
-                color: $passedHeaderSecondaryTextColor;
+                color: $passedSecondaryTextColor;
             }
         }
 
         &.failed {
             background-color: $failedHeaderSecondaryBackground;
             h2 {
-                color: $failedHeaderSecondaryTextColor;
+                color: $failedSecondaryTextColor;
             }
         }
 
         &.conditionally_passed {
             background-color: $conditionallyHeaderSecondaryBackground;
             h2 {
-                color: $conditionallyHeaderSecondaryTextColor;
+                color: $conditionallySecondaryTextColor;
             }
         }
 
         &.conditionally_failed {
             background-color: $conditionallyFailedHeaderSecondaryBackground;
             h2 {
-                color: $conditionallyFailedHeaderSecondaryTextColor;
+                color: $conditionallyFailedSecondaryTextColor;
             }
         }
 

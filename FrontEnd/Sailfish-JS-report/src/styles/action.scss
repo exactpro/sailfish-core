@@ -69,141 +69,223 @@
     }
 }
 
-.action-card {
-    @include selectable;
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: auto;
-    border: 2px solid transparent;
-    border-radius: 5px;
-    padding: 5px;
-    margin: 5px 0;
+.action {
 
-    h4 {
-        margin: 0px;
-    }
-
-    &-header {
-        @include status-text;
-        display: flex;
-        width: 100%;
-
-        h3 {
-            margin: 0;
-        }
-
-        p {
-            font-size: 12px;
-            color: $secondaryTextColor;
-            margin: 2px 0px 0px 5px;
-        }
-
-        &-name {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            width: 100%;
-        }
-
-        &-status {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-end;
-        }
-
-        &.transparent {
-            opacity: 0.3;
-        }
-
-        &-custom-msg {
-            color: $primaryTextColor;
-            padding-left: 10px;
-
-            &.debug {
-                color: gray;
-            }
-
-            &.info {
-                color: black;
-            }
-
-            &.warn {
-                color: #edcc10;
-            }
-
-            &.error {
-                color: orange;
-            }
-
-            &.fail {
-                color: red;
-            }
-        }
-    }
-
-    &-status {
-        padding-left: 10px;
-    }
-
-    &-body {
+    &-card {
+        @include selectable;
         display: block;
         box-sizing: border-box;
+        width: 100%;
+        height: auto;
+        border: 2px solid transparent;
+        border-radius: 5px;
+        padding: 5px;
+        margin: 5px 0;
 
-        p {
-            word-break: break-all;
+        h4 {
+            margin: 0px;
         }
 
-        pre {
-            overflow-x: scroll;
-        }
+        &-header {
+            width: 100%;
+            padding: 3px;
+            display: grid;
+            grid-template-columns: 1fr 180px 70px;
+            grid-template-rows: auto auto;
+            grid-template-areas: "action-name action-controls action-controls"
+                                 "action-description action-start-time action-elapsed-time";
 
-        &-params {
-            padding-left: 10px;
-
-            &.transparent {
-                opacity: 0.3;
+            h3 {
+                margin: 0;
+                font-size: 17px;
             }
-        }
-
-        &-table {
-            padding-left: 10px;
-        }
-
-        &-verification {
-            @include selectable();
-            border: 2px solid transparent;
-            border-radius: 5px;
-            padding-bottom: 5px;
 
             &.passed {
-                h4 {
-                    color: $passedTextColor;
-                }
+                // we can't symply assign scss variable to css variable because sass doesn't know css varible type,
+                // so we use #{ ... } syntax to tell sass that we use variable as color
+                // https://github.com/sass/libsass/issues/2621
+                --status-primary-color: #{$passedTextColor};
+                --status-secondary-color: #{$passedSecondaryTextColor};
             }
 
             &.failed {
-                h4 {
-                    color: $failedTextColor;
-                }
+                --status-primary-color: #{$failedTextColor};
+                --status-secondary-color: #{$failedSecondaryTextColor};
             }
-
+            
             &.conditionally_passed {
-                h4 {
-                    color: $conditionallyTextColor;
-                }
+                --status-primary-color: #{$conditionallyTextColor};
+                --status-secondary-color: #{$conditionallySecondaryTextColor};
             }
 
             &.conditionally_failed {
-                h4 {
-                    color: $conditionallyFailedTextColor;
+                --status-primary-color: #{$conditionallyFailedTextColor};
+                --status-secondary-color: #{$conditionallyFailedSecondaryTextColor};
+            }
+
+            &-name {
+                grid-area: action-name;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                width: 100%;
+
+                color: var(--status-primary-color);
+            }
+            
+            &-description {
+                grid-area: action-description;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+
+                color: var(--status-secondary-color);
+            }
+
+            &-name, &-description {
+                padding-right: 8px;
+            }
+
+            &-time {
+                &-elapsed {
+                    grid-area: action-elapsed-time;
+                    color: var(--status-primary-color);
+                    display: flex;
+                    flex-direction: row-reverse
+                }
+
+                &-start {
+                    grid-area: action-start-time;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: flex-end;
+                    align-items: flex-start;
+                    padding-right: 8px;
+                    padding-top: 4px;
+
+                    p {
+                        font-size: 12px;
+                        color: $secondaryTextColor;
+                        white-space: nowrap;
+                    }
+
+                    span {
+                        font-size: 11px;
+                        color: $secondaryTextColor;
+                        padding-right: 10px;
+                        padding-top: 1px;
+                    }
+                }
+            }
+
+            &-controls {
+                grid-area: action-controls;
+                display: flex;
+                flex-direction: row-reverse;
+                justify-content: start;
+                align-items: center;
+
+                &-status {
+                    color: var(--status-primary-color);
+                }
+
+                &-chips {
+                    padding-right: 8px;
                 }
             }
 
             &.transparent {
                 opacity: 0.3;
             }
+        }
+
+        &-status {
+            padding-left: 10px;
+        }
+
+        &-body {
+            display: block;
+            box-sizing: border-box;
+
+            p {
+                word-break: break-all;
+            }
+
+            pre {
+                overflow-x: scroll;
+            }
+
+            &-params {
+                padding-left: 10px;
+
+                &.transparent {
+                    opacity: 0.3;
+                }
+            }
+
+            &-table {
+                padding-left: 10px;
+            }
+
+            &-verification {
+                @include selectable();
+                border: 2px solid transparent;
+                border-radius: 5px;
+                padding-bottom: 5px;
+
+                &.passed {
+                    h4 {
+                        color: $passedTextColor;
+                    }
+                }
+
+                &.failed {
+                    h4 {
+                        color: $failedTextColor;
+                    }
+                }
+
+                &.conditionally_passed {
+                    h4 {
+                        color: $conditionallyTextColor;
+                    }
+                }
+
+                &.conditionally_failed {
+                    h4 {
+                        color: $conditionallyFailedTextColor;
+                    }
+                }
+
+                &.transparent {
+                    opacity: 0.3;
+                }
+            }
+        }
+    }
+
+    &-custom-msg {
+        color: $primaryTextColor;
+        padding-left: 10px;
+
+        &.debug {
+            color: gray;
+        }
+
+        &.info {
+            color: black;
+        }
+
+        &.warn {
+            color: #edcc10;
+        }
+
+        &.error {
+            color: orange;
+        }
+
+        &.fail {
+            color: red;
         }
     }
 }

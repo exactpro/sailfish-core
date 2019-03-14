@@ -18,9 +18,11 @@ import { h } from "preact";
 import Action from "../models/Action";
 import ParamsTable from "./ParamsTable";
 import ExpandablePanel from "./ExpandablePanel";
+import { StatusType } from "../models/Status";
 import "../styles/action.scss";
-import { getSecondsPeriod } from "../helpers/dateFormatter";
+import { getSecondsPeriod, formatTime } from "../helpers/dateFormatter";
 import { ExceptionChain } from "./ExceptionChain";
+import { Chip } from "./Chip";
 
 interface CardProps {
     action: Action;
@@ -43,11 +45,11 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         finishTime
     } = action;
     const rootClassName = [
-            "action-card",
-            status.status,
-            (isRoot && !isSelected ? "root" : null),
-            (isSelected ? "selected" : null)
-        ].join(' ').toLowerCase(),
+        "action-card",
+        status.status,
+        (isRoot && !isSelected ? "root" : null),
+        (isSelected ? "selected" : null)
+    ].join(' ').toLowerCase(),
         headerClassName = [
             "action-card-header",
             status.status,
@@ -59,7 +61,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         ].join(' ').toLowerCase();
 
 
-    const time = getSecondsPeriod(startTime, finishTime);
+    const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
     const clickHandler = e => {
         if (!onSelect) return;
@@ -76,12 +78,30 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 isExpanded={isExpanded}>
                 <div class={headerClassName}>
                     <div class="action-card-header-name">
-                        <h3>{name}</h3>
-                        <p>{description}</p>
+                        <h3>{action.name}</h3>
                     </div>
-                    <div class="action-card-header-status">
-                        <h3>{status.status.toUpperCase()}</h3>
-                        <h3>{time}</h3>
+                    <div class="action-card-header-description">
+                        <h3>{action.description}</h3>
+                    </div>
+                    <div class="action-card-header-time-start">
+                        <span>Start</span>
+                        <p>{formatTime(action.startTime)}</p>
+                    </div>
+                    <div class="action-card-header-time-elapsed">
+                        <h3>{elapsedTime}</h3>
+                    </div>
+                    <div class="action-card-header-controls">
+                        <div class="action-card-header-controls-status">
+                            <h3>{action.status.status.toUpperCase()}</h3>
+                        </div>
+                        {
+                            action.relatedMessages.length > 0 ? (
+                                <div class="action-card-header-controls-chips">
+                                    <Chip
+                                        count={action.relatedMessages.length}/>
+                                </div>
+                            ) : null
+                        }
                     </div>
                 </div>
                 <div class="action-card-body">
@@ -94,15 +114,19 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         </ExpandablePanel>
                     </div>
                     {
-                        // rendering inner actions
-                        {children}
+                        // rendering inner nodes
+                        children
                     }
-                    <div class="action-card-status">
-                        <ExpandablePanel>
-                            <h4>Status</h4>
-                            <ExceptionChain exception = {action.status.cause}/>
-                        </ExpandablePanel>
-                    </div>
+                    {
+                        action.status.status == 'FAILED' ? (
+                            <div class="action-card-status">
+                                <ExpandablePanel>
+                                    <h4>Status</h4>
+                                    <ExceptionChain exception={action.status.cause} />
+                                </ExpandablePanel>
+                            </div>
+                        ) : null
+                    }
                 </div>
             </ExpandablePanel>
         </div>)
