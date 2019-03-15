@@ -16,6 +16,8 @@
 package com.exactpro.sf.actions;
 
 
+import static com.exactpro.sf.util.DateTimeUtility.toZonedDateTime;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -184,6 +186,12 @@ public class DateUtil extends AbstractCaller {
         return toTime(getDateTime(modifyPattern));
     }
 
+    @Description("Returns current time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{getTimeByZoneId(modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalTime getTimeByZoneId(String modifyPattern, String timeZoneId) {
+        return toTime(getDateTimeByZoneId(modifyPattern, timeZoneId));
+    }
+
     @Description("Returns current date in UTC time zone<br/>Example: #{getDate()}")
     @UtilityMethod
     public LocalDate getDate() {
@@ -194,6 +202,12 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalDate getDate(String modifyPattern) {
         return toDate(getDateTime(modifyPattern));
+    }
+
+    @Description("Returns current date in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{getDateByZoneId(modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDate getDateByZoneId(String modifyPattern, String timeZoneId) {
+        return toDate(getDateTimeByZoneId(modifyPattern, timeZoneId));
     }
 
     @Description("Returns current date time in UTC time zone<br/>Example: #{getDateTime()}")
@@ -216,15 +230,39 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public final LocalDateTime getDateTime(String modifyPattern, boolean skipWeekends) {
         LocalDateTime nowDate = DateTimeUtility.nowLocalDateTime();
-        LocalDateTime modifiedDate = modifyTemporal(nowDate, modifyPattern);
+        return modifyDateTime(nowDate, modifyPattern, skipWeekends);
+    }
+
+    @Description("Returns current date time in UTC time zone modified by pattern after applying time zone offset (DST aware).<br/>"
+            + "If modified date time is on weekend and <code>skipWeekends</code> is <code>true</code> then the next working day in direction of modification will be returned"
+            + MODIFY_HELP
+            + "Example: #{getDateTimeByZoneId(modifyPattern, skipWeekends, timeZoneId)}"
+    )
+    @UtilityMethod
+    public final LocalDateTime getDateTimeByZoneId(String modifyPattern, boolean skipWeekends, String timeZoneId) {
+        ZoneId zoneId = ZoneId.of(timeZoneId);
+        LocalDateTime nowDate = LocalDateTime.now(zoneId);
+        nowDate = modifyDateTime(nowDate, modifyPattern, skipWeekends);
+        return ZonedDateTime.of(nowDate, zoneId).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+    }
+
+    @Description("Returns provided datetime in UTC time zone modified by pattern<br/>"
+            + "If modified date time is on weekend and <code>skipWeekends</code> is <code>true</code> then the next working day in direction of modification will be returned"
+            + MODIFY_HELP
+            + "Example: #{modifyDateTime(dateTime, modifyPattern, skipWeekends)}"
+    )
+    @UtilityMethod
+    public final LocalDateTime modifyDateTime(LocalDateTime dateTime, String modifyPattern, boolean skipWeekends){
+        LocalDateTime modifiedDate = modifyTemporal(dateTime, modifyPattern);
+
         if (skipWeekends) {
             DayOfWeek dayOfWeek = modifiedDate.getDayOfWeek();
-            long currentMillis = DateTimeUtility.getMillisecond(nowDate);
+            long currentMillis = DateTimeUtility.getMillisecond(dateTime);
             long modifiedMillis = DateTimeUtility.getMillisecond(modifiedDate);
-            if (DayOfWeek.SATURDAY.equals(dayOfWeek)) {
+            if(DayOfWeek.SATURDAY.equals(dayOfWeek)) {
                 int shift = modifiedMillis - currentMillis >= 0 ? 2 : -1;
-                return  modifiedDate.plusDays(shift);
-            } else if (DayOfWeek.SUNDAY.equals(dayOfWeek)) {
+                return modifiedDate.plusDays(shift);
+            } else if(DayOfWeek.SUNDAY.equals(dayOfWeek)) {
                 int shift = modifiedMillis - currentMillis >= 0 ? 1 : -2;
                 return modifiedDate.plusDays(shift);
             }
@@ -276,6 +314,15 @@ public class DateUtil extends AbstractCaller {
         return toTime(toDateTime(epochMillis, modifyPattern));
     }
 
+    @Description("Converts epoch milliseconds to time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toTimeByZoneId(epochMillis, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalTime toTimeByZoneId(long epochMillis, String modifyPattern, String timeZoneId) {
+        ZonedDateTime time = DateTimeUtility.toZonedDateTime(epochMillis).withZoneSameInstant(ZoneId.of(timeZoneId));
+
+        time = modifyTemporal(time, modifyPattern);
+        return toTime(DateTimeUtility.toLocalDateTime(time));
+    }
+
     @Description("Converts string using format pattern to time in UTC time zone." + FORMAT_HELP + "Example: #{toTime(source, formatPattern)}")
     @UtilityMethod
     public LocalTime toTime(String source, String formatPattern) {
@@ -286,6 +333,13 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalTime toTime(String source, String formatPattern, String modifyPattern) {
         return toTime(toDateTime(source, formatPattern, modifyPattern));
+    }
+
+    @Description("Converts string using format pattern to time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{toTimeByZoneId(source, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalTime toTimeByZoneId(String source, String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(source, formatPattern);
+        return toTimeByZoneId(time, modifyPattern, timeZoneId);
     }
 
     @Description("Converts date time to time in UTC time zone<br/>Example: #{toTime(dateTime)}")
@@ -300,6 +354,12 @@ public class DateUtil extends AbstractCaller {
         return toTime(modifyDateTime(dateTime, modifyPattern));
     }
 
+    @Description("Converts date time to time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toTimeByZoneId(dateTime, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalTime toTimeByZoneId(LocalDateTime dateTime, String modifyPattern, String timeZoneId) {
+        return toTime(modifyDateTimeByZoneId(dateTime, modifyPattern, timeZoneId));
+    }
+
     @Description("Converts epoch milliseconds to date in UTC time zone<br/>Example: #{toDate(epochMillis)}")
     @UtilityMethod
     public LocalDate toDate(long epochMillis) {
@@ -312,6 +372,13 @@ public class DateUtil extends AbstractCaller {
         return toDate(toDateTime(epochMillis, modifyPattern));
     }
 
+    @Description("Converts epoch milliseconds to date in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toDateByZoneId(epochMillis, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDate toDateByZoneId(long epochMillis, String modifyPattern, String timeZoneId) {
+        return toDate(toDateTimeByZoneId(epochMillis, modifyPattern, timeZoneId));
+    }
+
+
     @Description("Converts string using format pattern to date in UTC time zone." + FORMAT_HELP + "Example: #{toDate(source, formatPattern)}")
     @UtilityMethod
     public LocalDate toDate(String source, String formatPattern) {
@@ -322,6 +389,13 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalDate toDate(String source, String formatPattern, String modifyPattern) {
         return toDate(toDateTime(source, formatPattern, modifyPattern));
+    }
+
+    @Description("Converts string using format pattern to date in UTC time zone modified by pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{toDateByZoneId(source, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDate toDateByZoneId(String source, String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(source, formatPattern);
+        return toDateByZoneId(time, modifyPattern, timeZoneId);
     }
 
     @Description("Converts date time to date in UTC time zone<br/>Example: #{toDate(dateTime)}")
@@ -336,6 +410,12 @@ public class DateUtil extends AbstractCaller {
         return toDate(modifyDateTime(dateTime, modifyPattern));
     }
 
+    @Description("Converts date time to date in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toDateByZoneId(dateTime, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDate toDateByZoneId(LocalDateTime dateTime, String modifyPattern, String timeZoneId) {
+        return toDate(modifyDateTimeByZoneId(dateTime, modifyPattern, timeZoneId));
+    }
+
     @Description("Converts epoch milliseconds to date time in UTC time zone<br/>Example: #{toDateTime(epochMillis)}")
     @UtilityMethod
     public LocalDateTime toDateTime(long epochMillis) {
@@ -346,6 +426,14 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalDateTime toDateTime(long epochMillis, String modifyPattern) {
         return modifyDateTime(toDateTime(epochMillis), modifyPattern);
+    }
+
+    @Description("Converts epoch milliseconds to date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toDateTimeByZoneId(epochMillis, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime toDateTimeByZoneId(long epochMillis, String modifyPattern, String timeZoneId) {
+        ZonedDateTime time = toZonedDateTime(epochMillis).withZoneSameInstant(ZoneId.of(timeZoneId));
+        time = modifyTemporal(time, modifyPattern);
+        return DateTimeUtility.toLocalDateTime(time);
     }
 
     @Description("Converts string using automatic format pattern detection to date time in UTC time zone<br/>"
@@ -434,6 +522,13 @@ public class DateUtil extends AbstractCaller {
         return modifyDateTime(toDateTime(source, formatPattern), modifyPattern);
     }
 
+    @Description("Converts string using format pattern to date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{toDateTimeByZoneId(source, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime toDateTimeByZoneId(String source, String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(source, formatPattern);
+        return modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
+    }
+
     @Description("Converts time to date time in UTC time zone<br/>Example: #{toDateTime(time)}")
     @UtilityMethod
     public LocalDateTime toDateTime(LocalTime time) {
@@ -444,6 +539,12 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalDateTime toDateTime(LocalTime time, String modifyPattern) {
         return modifyDateTime(toDateTime(time), modifyPattern);
+    }
+
+    @Description("Converts time to date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toDateTimeByZoneId(time, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime toDateTimeByZoneId(LocalTime time, String modifyPattern, String timeZoneId) {
+        return modifyDateTimeByZoneId(toDateTime(time), modifyPattern, timeZoneId);
     }
 
     @Description("Converts date to date time in UTC time zone<br/>Example: #{toDateTime(date)}")
@@ -458,6 +559,13 @@ public class DateUtil extends AbstractCaller {
         return modifyDateTime(toDateTime(date), modifyPattern);
     }
 
+    @Description("Converts date to date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{toDateTimeByZoneId(date, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime toDateTimeByZoneId(LocalDate date, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(date);
+        return modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
+    }
+
     @Description("Formats time in UTC time zone into string using format pattern." + FORMAT_HELP + "Example: #{formatTime(time, formatPattern)}")
     @UtilityMethod
     public String formatTime(LocalTime time, String formatPattern) {
@@ -468,6 +576,14 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public String formatTime(LocalTime time, String formatPattern, String modifyPattern) {
         return formatDateTime(toDateTime(time), formatPattern, modifyPattern);
+    }
+
+    @Description("Formats time in UTC time zone modified by pattern into string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatTimeByZoneId(time, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String formatTimeByZoneId(LocalTime time, String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime localDateTime = toDateTime(time);
+        localDateTime = modifyDateTimeByZoneId(localDateTime, modifyPattern, timeZoneId);
+        return formatDateTime(localDateTime, formatPattern);
     }
 
     @Description("Formats date in UTC time zone into string using format pattern." + FORMAT_HELP + "Example: #{formatDate(date, formatPattern)}")
@@ -482,6 +598,14 @@ public class DateUtil extends AbstractCaller {
         return formatDateTime(toDateTime(date), formatPattern, modifyPattern);
     }
 
+    @Description("Formats date in UTC time zone modified by pattern into string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatDateByZoneId(date, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String formatDateByZoneId(LocalDate date, String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(date);
+        time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
+        return formatDateTime(time, formatPattern);
+    }
+
     @Description("Formats date time in UTC time zone into string using format pattern." + FORMAT_HELP + "Example: #{formatDateTime(dateTime, formatPattern)}")
     @UtilityMethod
     public String formatDateTime(LocalDateTime dateTime, String formatPattern) {
@@ -492,6 +616,13 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public String formatDateTime(LocalDateTime dateTime, String formatPattern, String modifyPattern) {
         return formatTemporal(modifyDateTime(dateTime, modifyPattern), formatPattern);
+    }
+
+    @Description("Formats date time in UTC time zone modified by pattern into string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatDateTimeByZoneId(dateTime, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String formatDateTimeByZoneId(LocalDateTime dateTime, String formatPattern, String modifyPattern, String timeZoneId) {
+        dateTime = modifyDateTimeByZoneId(dateTime, modifyPattern, timeZoneId);
+        return formatDateTime(dateTime, formatPattern);
     }
 
     @Description("Merges date and time into date time in UTC time zone<br/>Example: #{mergeDateTime(date, time)}")
@@ -506,6 +637,13 @@ public class DateUtil extends AbstractCaller {
         return modifyDateTime(mergeDateTime(date, time), modifyPattern);
     }
 
+    @Description("Merges date and time into date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{mergeDateTimeByZoneId(date, time, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime mergeDateTimeByZoneId(LocalDate date, LocalTime time, String modifyPattern, String timeZoneId) {
+        LocalDateTime localDateTime = mergeDateTime(date, time);
+        return modifyDateTimeByZoneId(localDateTime, modifyPattern, timeZoneId);
+    }
+
     @Description("Merges date and date time (only time is used) into date time in UTC time zone<br/>Example: #{mergeDateTime(date, dateTime)}")
     @UtilityMethod
     public LocalDateTime mergeDateTime(LocalDate date, LocalDateTime dateTime) {
@@ -516,6 +654,12 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalDateTime mergeDateTime(LocalDate date, LocalDateTime dateTime, String modifyPattern) {
         return mergeDateTime(date, toTime(dateTime), modifyPattern);
+    }
+
+    @Description("Merges date and date time (only time is used) into date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{mergeDateTimeByZoneId(date, dateTime, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime mergeDateTimeByZoneId(LocalDate date, LocalDateTime dateTime, String modifyPattern, String timeZoneId) {
+        return mergeDateTimeByZoneId(date, dateTime.toLocalTime(), modifyPattern, timeZoneId);
     }
 
     @Description("Merges date time (only date is used) and time into date time in UTC time zone<br/>Example: #{mergeDateTime(dateTime, time)}")
@@ -530,6 +674,12 @@ public class DateUtil extends AbstractCaller {
         return mergeDateTime(toDate(dateTime), time, modifyPattern);
     }
 
+    @Description("Merges date time (only date is used) and time into date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{mergeDateTimeByZoneId(dateTime, time, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime mergeDateTimeByZoneId(LocalDateTime dateTime, LocalTime time, String modifyPattern, String timeZoneId) {
+        return mergeDateTimeByZoneId(dateTime.toLocalDate(), time, modifyPattern, timeZoneId);
+    }
+
     @Description("Merges date time (only date is used) and date time (only time is used) into date time in UTC time zone<br/>Example: #{mergeDateTime(firstDateTime, secondDateTime)}")
     @UtilityMethod
     public LocalDateTime mergeDateTime(LocalDateTime firstDateTime, LocalDateTime secondDateTime) {
@@ -540,6 +690,12 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public LocalDateTime mergeDateTime(LocalDateTime firstDateTime, LocalDateTime secondDateTime, String modifyPattern) {
         return mergeDateTime(toDate(firstDateTime), toTime(secondDateTime), modifyPattern);
+    }
+
+    @Description("Merges date time (only date is used) and date time (only time is used) into date time in UTC time zone modified by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{mergeDateTimeByZoneId(firstDateTime, secondDateTime, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDateTime mergeDateTimeByZoneId(LocalDateTime firstDateTime, LocalDateTime secondDateTime, String modifyPattern, String timeZoneId) {
+        return mergeDateTimeByZoneId(firstDateTime.toLocalDate(), secondDateTime.toLocalTime(), modifyPattern, timeZoneId);
     }
 
     @Description("Formats current date time in UTC time zone into string using format pattern." + FORMAT_HELP + "Example: #{formatDateTime(formatPattern)}")
@@ -554,10 +710,26 @@ public class DateUtil extends AbstractCaller {
         return formatDateTime(getDateTime(), formatPattern, modifyPattern);
     }
 
+    @Description("Formats current date time in UTC time zone modified by pattern into string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatDateTimeByZoneId(formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String formatDateTimeByZoneId(String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = getDateTime();
+        time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
+        return formatDateTime(time, formatPattern);
+    }
+
     @Description("Modifies date time string using format and modify patterns." + FORMAT_HELP + MODIFY_HELP + "Example; #{modifyDateTime(source, formatPattern, modifyPattern)}")
     @UtilityMethod
     public String modifyDateTime(String source, String formatPattern, String modifyPattern) {
         return formatDateTime(toDateTime(source, formatPattern, modifyPattern), formatPattern);
+    }
+
+    @Description("Modifies date time string using format and modify patterns after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example; #{modifyDateTimeByZoneId(source, formatPattern, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public String modifyDateTimeByZoneId(String source, String formatPattern, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(source);
+        time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
+        return formatDateTime(time, formatPattern);
     }
 
     @Description("Modifies time in UTC time zone by pattern." + MODIFY_HELP + "Example: #{modifyTime(time, modifyPattern)}")
@@ -566,10 +738,23 @@ public class DateUtil extends AbstractCaller {
         return toTime(toDateTime(time, modifyPattern));
     }
 
+    @Description("Modifies time in UTC time zone by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{modifyTimeByZoneId(time, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalTime modifyTimeByZoneId(LocalTime time, String modifyPattern, String timeZoneId) {
+        return toTime(modifyDateTimeByZoneId(toDateTime(time), modifyPattern, timeZoneId));
+    }
+
     @Description("Modifies date in UTC time zone by pattern." + MODIFY_HELP + "Example: #{modifyDate(date, modifyPattern)}")
     @UtilityMethod
     public LocalDate modifyDate(LocalDate date, String modifyPattern) {
         return toDate(toDateTime(date, modifyPattern));
+    }
+
+    @Description("Modifies date in UTC time zone by pattern after applying time zone offset (DST aware)." + MODIFY_HELP + "Example: #{modifyDateByZoneId(date, modifyPattern, timeZoneId)}")
+    @UtilityMethod
+    public LocalDate modifyDateByZoneId(LocalDate date, String modifyPattern, String timeZoneId) {
+        LocalDateTime time = toDateTime(date);
+        return toDate(modifyDateTimeByZoneId(time, modifyPattern, timeZoneId));
     }
 
     @Description("Modifies date time in UTC time zone by pattern." + MODIFY_HELP + "Example: #{modifyDateTime(dateTime, modifyPattern)}")

@@ -37,6 +37,11 @@ public class DateTimeUtility {
     public static final LocalTime MIN_TIME = LocalTime.MIN;
     public static final LocalDateTime MIN_DATE_TIME = LocalDateTime.of(MIN_DATE, MIN_TIME);
 
+    public static ZonedDateTime toZonedDateTime(long millisecond) {
+        Instant instant = Instant.ofEpochMilli(millisecond);
+        return ZonedDateTime.ofInstant(instant, ZoneOffset.UTC);
+    }
+
     public static ZonedDateTime toZonedDateTime(TemporalAccessor temporalAccessor) {
         int year = getOrDefault(temporalAccessor, ChronoField.YEAR, MIN_DATE.getYear());
         int month = getOrDefault(temporalAccessor, ChronoField.MONTH_OF_YEAR, 1);
