@@ -55,7 +55,6 @@ public class TestDefaultDictionaryValidator {
                 "DictionaryValidationError[message=<null>,field=for,error=Prohibited name <strong>while</strong> for Attribute. Name can't be Java keyword or have value that presents in this list [_],level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=protected,field=<null>,error=Prohibited name <strong>protected</strong> for Message. Name can't be Java keyword or have value that presents in this list [_],level=MESSAGE,type=ERR_NAME]",
                 "DictionaryValidationError[message=protected,field=<null>,error=Prohibited name <strong>static</strong> for Attribute. Name can't be Java keyword or have value that presents in this list [_],level=MESSAGE,type=ERR_ATTRIBUTES]",
-                "DictionaryValidationError[message=Test,field=DuplicateField,error=Duplicated field <strong>\"DuplicateField\"</strong>,level=MESSAGE,type=ERR_DUPLICATE_NAME]",
                 "DictionaryValidationError[message=DuplicateMessage,field=Field1,error=Value <strong>\"3.3\"</strong> wasn't found in values table,level=FIELD,type=ERR_DEFAULT_VALUE]",
                 "DictionaryValidationError[message=DuplicateMessage,field=SomeField1,error=Value <strong>\"net\"</strong> is not applicable for Boolean type,level=FIELD,type=ERR_ATTRIBUTES]"
         };

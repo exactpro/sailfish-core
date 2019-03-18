@@ -15,7 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix.converter.dirty;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,9 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAccessor;
 
 import com.exactpro.sf.actions.DirtyFixUtil;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
@@ -76,10 +78,10 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
     }
 
     private void init() {
-        IMessageStructure header = dictionary.getMessageStructure(FieldConst.HEADER);
+        IMessageStructure header = dictionary.getMessages().get(FieldConst.HEADER);
         headerFields = getFieldOrder(header);
 
-        IMessageStructure trailer = dictionary.getMessageStructure(FieldConst.TRAILER);
+        IMessageStructure trailer = dictionary.getMessages().get(FieldConst.TRAILER);
         trailerFields = getFieldOrder(trailer);
 
         fieldConverter = new FixFieldConverter();
@@ -135,7 +137,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
         replaceDirtyFields(message);
 
         RawMessage resultMessage = new RawMessage();
-        IMessageStructure messageStructure = dictionary.getMessageStructure(messageName);
+        IMessageStructure messageStructure = dictionary.getMessages().get(messageName);
 
         if(fillHeader) {
             fillHeader(message, messageStructure, beginString, msgSeqNum, senderCompID, targetCompID);
@@ -309,7 +311,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                             boolean includeMillis = includeMilliseconds;
                             boolean includeMicros = includeMicroseconds;
 
-                            Object fixType = fieldStructure.getAttributeValueByName(QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
+                            Object fixType = getAttributeValue(fieldStructure, QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
                             if (FieldType.UtcTimeStampSecondPresicion.getName().equals(fixType)) {
                                 includeMillis = includeMicros = false;
                             }
@@ -352,8 +354,8 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
 
         List<String> fieldOrder = new ArrayList<>();
 
-        for(IFieldStructure fieldStructure : messageStructure.getFields()) {
-            Integer fieldTag = (Integer)fieldStructure.getAttributeValueByName(ATTRIBUTE_TAG);
+        for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
+            Integer fieldTag = getAttributeValue(fieldStructure, ATTRIBUTE_TAG);
 
             if(fieldTag != null) {
                 fieldOrder.add(fieldTag.toString());
@@ -372,7 +374,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
     private IFieldStructure getFieldStructure(String name, IFieldStructure messageStructure) {
         if(messageStructure == null) {
             if (FieldConst.HEADER.equals(name) || FieldConst.TRAILER.equals(name)) {
-                return this.dictionary.getMessageStructure(name);
+                return this.dictionary.getMessages().get(name);
             }
             return null;
         }
@@ -381,11 +383,11 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
             return null;
         }
 
-        IFieldStructure fieldStructure = messageStructure.getField(name);
+        IFieldStructure fieldStructure = messageStructure.getFields().get(name);
 
         if(fieldStructure == null) {
-            for(IFieldStructure field : messageStructure.getFields()) {
-                Integer tag = (Integer)field.getAttributeValueByName(ATTRIBUTE_TAG);
+            for(IFieldStructure field : messageStructure.getFields().values()) {
+                Integer tag = getAttributeValue(field, ATTRIBUTE_TAG);
 
                 if(tag != null && name.equals(tag.toString())) {
                     return field;
@@ -403,7 +405,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
             String fieldTag = fieldConverter.convertToTag(fieldName);
 
             if(fieldTag == null) {
-                IMessageStructure messageStructure = dictionary.getMessageStructure(fieldName);
+                IMessageStructure messageStructure = dictionary.getMessages().get(fieldName);
 
                 if(messageStructure == null) {
                     throw new MessageConvertException("Unknown field in field order: " + fieldName);
@@ -451,7 +453,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
         replaceIfNotExist(header, FieldConst.BEGIN_STRING, beginString);
         replaceIfNotExist(header, FieldConst.MSG_SEQ_NUM, msgSeqNum);
 
-        String msgType = messageStructure != null ? (String)messageStructure.getAttributeValueByName(ATTRIBUTE_MESSAGE_TYPE) : null;
+        String msgType = messageStructure != null ? getAttributeValue(messageStructure, ATTRIBUTE_MESSAGE_TYPE) : null;
         replaceIfNotExist(header, FieldConst.MSG_TYPE, msgType);
 
         replaceIfNotExist(header, FieldConst.SENDER_COMP_ID, senderCompID);

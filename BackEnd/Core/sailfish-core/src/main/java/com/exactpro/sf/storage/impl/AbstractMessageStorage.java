@@ -55,7 +55,7 @@ public abstract class AbstractMessageStorage implements IMessageStorage {
         if (dictionaryURI != null) {
             dictionary = this.dictionaryManager.getDictionary(dictionaryURI);
             if (dictionary != null) {
-                messageStructure = dictionary.getMessageStructure(message.getName());
+                messageStructure = dictionary.getMessages().get(message.getName());
             }
             messageFactory = this.dictionaryManager.getMessageFactory(dictionaryURI);
         }

@@ -99,7 +99,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public void addField(String name, Object value) {
-        IFieldStructure fieldStructure = messageStructure.getField(name);
+        IFieldStructure fieldStructure = messageStructure.getFields().get(name);
         if (fieldStructure == null) {
             message.addField(name, value);
             return;

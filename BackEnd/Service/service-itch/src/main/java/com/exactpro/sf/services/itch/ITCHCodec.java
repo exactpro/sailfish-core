@@ -15,12 +15,36 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.messages.*;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.IMessageStructureVisitor;
+import com.exactpro.sf.common.messages.MessageStructureReader;
+import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
+import com.exactpro.sf.common.messages.MessageStructureWriter;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.HexDumper;
 import com.exactpro.sf.common.util.ICommonSettings;
@@ -30,15 +54,6 @@ import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.codecs.CodecMessageFilter;
 import com.exactpro.sf.services.mina.MINAUtil;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolDecoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteOrder;
-import java.util.*;
 
 public class ITCHCodec extends AbstractCodec {
     private static final SailfishURI ITCH_PREPROCESSORS_MAPPING_FILE_URI = SailfishURI.unsafeParse("itch_preprocessors");
@@ -85,8 +100,8 @@ public class ITCHCodec extends AbstractCodec {
 
 		this.msgTypeToMsgStruct.clear();
 
-		for (IMessageStructure msgStruct : dictionary.getMessageStructures()) {
-            Short msgType = (Short) msgStruct.getAttributeValueByName(ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
+            Short msgType = getAttributeValue(msgStruct, ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
             if(msgType != null) {
                 if (!msgTypeToMsgStruct.containsKey(msgType)) {
                     msgTypeToMsgStruct.put(msgType, msgStruct);
@@ -180,7 +195,7 @@ public class ITCHCodec extends AbstractCodec {
 			if (drop) {
 				someMsgDropped = true;
 			} else {
-				boolean isAdmin = (Boolean)msgStructure.getAttributeValueByName(MessageHelper.ATTRIBUTE_IS_ADMIN);
+                boolean isAdmin = getAttributeValue(msgStructure, MessageHelper.ATTRIBUTE_IS_ADMIN);
 
 				MsgMetaData metaData = message.getMetaData();
 				metaData.setAdmin(isAdmin);
@@ -238,12 +253,12 @@ public class ITCHCodec extends AbstractCodec {
 
 	private int getMessageLength(IFieldStructure message) {
 	    int sum = 0;
-	    for (IFieldStructure field:message.getFields()) {
+        for(IFieldStructure field : message.getFields().values()) {
 
 	        if (field.isComplex()) {
 	            sum+=getMessageLength(field);
 	        } else {
-                sum += (int) field.getAttributeValueByName(ITCHVisitorBase.LENGTH_ATTRIBUTE);
+                sum += StructureUtils.<Integer>getAttributeValue(field, ITCHVisitorBase.LENGTH_ATTRIBUTE);
 	        }
 	    }
 
@@ -254,7 +269,7 @@ public class ITCHCodec extends AbstractCodec {
 	    int sumforHead = 0;
 	    for (Object message:messages) {
 	        IMessage m = (IMessage) message;
-	        IFieldStructure structure = this.msgDictionary.getMessageStructure(m.getName());
+            IFieldStructure structure = this.msgDictionary.getMessages().get(m.getName());
 	        if (structure == null) {
                 throw new EPSCommonException("Could not find IMessageStructure for messageName=[" + m.getName() + "] Namespace=[" + m.getNamespace() + "]");
             }
@@ -263,7 +278,7 @@ public class ITCHCodec extends AbstractCodec {
 
 	        if (m.getField("Length") == null) {
 	            Number l;
-	            switch (structure.getField("Length").getJavaType()) {
+                switch(structure.getFields().get("Length").getJavaType()) {
 	            case JAVA_LANG_BYTE:
 	                l = length.byteValue();
 	                break;
@@ -274,7 +289,7 @@ public class ITCHCodec extends AbstractCodec {
 	                l = length.intValue();
 	                break;
 	            default:
-	                throw new EPSCommonException(String.format("Unknown type %s of length field", structure.getField("Length").getJavaType()));
+                    throw new EPSCommonException(String.format("Unknown type %s of length field", structure.getFields().get("Length").getJavaType()));
 	            }
 	            m.addField("Length", l);
 	        }
@@ -325,7 +340,7 @@ public class ITCHCodec extends AbstractCodec {
 			String msgName = message.getName();
 			String msgNamespace = message.getNamespace();
 
-			IMessageStructure msgStructure = this.msgDictionary.getMessageStructure(msgName);
+            IMessageStructure msgStructure = this.msgDictionary.getMessages().get(msgName);
 
 			if (msgStructure == null) {
 				throw new EPSCommonException("Could not find IMessageStructure for messageName=[" + msgName + "] Namespace=[" + msgNamespace + "]");
@@ -341,7 +356,7 @@ public class ITCHCodec extends AbstractCodec {
 			buffer.position(startpos);
 			buffer.get(rawMessage);
 
-			boolean isAdmin = (Boolean)msgStructure.getAttributeValueByName("IsAdmin");
+            boolean isAdmin = getAttributeValue(msgStructure, "IsAdmin");
 
 			message.getMetaData().setAdmin(isAdmin);
 			message.getMetaData().setRawMessage(rawMessage);

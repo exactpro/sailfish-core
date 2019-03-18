@@ -9,39 +9,38 @@
  */
 package com.exactpro.sf.common.messages;
 
-import com.exactpro.sf.common.messages.structures.IFieldStructure;
-
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ReorderFieldComparator implements Comparator<IFieldStructure> {
+public class ReorderFieldComparator implements Comparator<String> {
 
-    private final Map<IFieldStructure, Integer> order = new LinkedHashMap<>();
+    private final Map<String, Integer> order = new LinkedHashMap<>();
 
-    public ReorderFieldComparator(List<String> order, List<IFieldStructure> fields) {
+    public ReorderFieldComparator(List<String> order, Collection<String> names) {
 
-        for (IFieldStructure fieldStructure : fields) {
-            int index = order.indexOf(fieldStructure.getName());
+        for (String name : names) {
+            int index = order.indexOf(name);
 
             if (index == -1) continue;
 
-            this.order.put(fieldStructure, index);
+            this.order.put(name, index);
         }
 
         int counter = order.size();
 
-        for (IFieldStructure fieldStructure : fields) {
+        for (String name : names) {
 
-            if (!this.order.containsKey(fieldStructure)) {
-                this.order.put(fieldStructure, counter++);
+            if (!this.order.containsKey(name)) {
+                this.order.put(name, counter++);
             }
         }
     }
 
     @Override
-    public int compare(IFieldStructure o1, IFieldStructure o2) {
+    public int compare(String o1, String o2) {
         return this.order.get(o1) - this.order.get(o2);
     }
 }

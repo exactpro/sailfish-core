@@ -80,7 +80,7 @@ public class StoreTest extends AbstractTest {
 
 		MessageStructureWriter wtraverser = new MessageStructureWriter();
 
-		IMessageStructure messageStructure = dictionary.getMessageStructures().get(0);
+        IMessageStructure messageStructure = dictionary.getMessages().values().iterator().next();
 
 		CreateIMessageVisitor visitor = new CreateIMessageVisitor(imf, messageStructure.getName(), dictionary.getNamespace());
 

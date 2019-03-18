@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -58,7 +57,6 @@ public class ModifiableFieldStructure implements IFieldStructure {
 	public ModifiableFieldStructure(String id, String name, String namespace, String description,
 			  Map<String, ModifiableAttributeStructure> attributes, Map<String, ModifiableAttributeStructure> values,
 			  JavaType javaType, boolean isRequired, boolean isCollection, boolean isServiceName, String defaultValue) throws EPSCommonException {
-
 		this.id = id;
 		this.name = name;
 		this.namespace = namespace;
@@ -69,33 +67,8 @@ public class ModifiableFieldStructure implements IFieldStructure {
 		this.serviceName = isServiceName;
 		this.defaultValue = defaultValue;
 
-		this.attributes = attributes == null ? new LinkedHashMap<String, ModifiableAttributeStructure>() : attributes;
-		this.values = values == null ? new LinkedHashMap<String, ModifiableAttributeStructure>() : values;
-	}
-
-	@Override
-	public Object getAttributeValueByName(String name) {
-
-        IAttributeStructure attr = getAttributes().get(name);
-		return (attr == null) ? null : attr.getCastValue();
-	}
-
-	@Override
-	public Object getAttributeValueIgnoreCase(String name) {
-        Map<String, IAttributeStructure> fullAttributes = getAttributes();
-	    
-        for (String attrName: fullAttributes.keySet()) {
-			if (attrName.equalsIgnoreCase(name)) {
-                return fullAttributes.get(attrName).getCastValue();
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public Set<String> getAttributeNames() {
-        return getAttributes().keySet();
+        this.attributes = attributes == null ? new LinkedHashMap<>() : attributes;
+        this.values = values == null ? new LinkedHashMap<>() : values;
 	}
 
 	@Override
@@ -172,8 +145,8 @@ public class ModifiableFieldStructure implements IFieldStructure {
     }
 
     @Override
-	public Object getDefaultValue() {
-		return defaultValue;
+    public <T> T getDefaultValue() {
+        return (T)defaultValue;
 	}
 
 	@Override
@@ -187,17 +160,7 @@ public class ModifiableFieldStructure implements IFieldStructure {
 	}
 
 	@Override
-	public ModifiableFieldStructure getField(String name) {
-		throw new UnsupportedOperationException("Fields don't have another fields");
-	}
-
-	@Override
-	public List<String> getFieldNames() {
-		throw new UnsupportedOperationException("Fields don't have another fields");
-	}
-
-	@Override
-	public List<IFieldStructure> getFields() {
+    public Map<String, IFieldStructure> getFields() {
 		throw new UnsupportedOperationException("Fields don't have another fields");
 	}
 

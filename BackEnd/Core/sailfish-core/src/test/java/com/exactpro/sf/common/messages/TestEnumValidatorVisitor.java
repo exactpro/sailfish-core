@@ -39,7 +39,7 @@ public class TestEnumValidatorVisitor extends EPSTestCase {
     public void testValidation() throws EPSCommonException, FileNotFoundException {
         IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
         IDictionaryStructure dictionary = loader.load(new FileInputStream(new File(getBaseDir(), DICTIONARY_PATH)));
-        IMessageStructure structure = dictionary.getMessageStructure("Message");
+        IMessageStructure structure = dictionary.getMessages().get("Message");
 
         IMessage nested1 = new MapMessage(dictionary.getNamespace(), "NestedMessage");
 

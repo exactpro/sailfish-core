@@ -23,7 +23,7 @@ public interface IAttributeStructure {
 	
 	String getValue();
 	
-	Object getCastValue();
+	<T> T getCastValue();
 	
 	JavaType getType();
 	

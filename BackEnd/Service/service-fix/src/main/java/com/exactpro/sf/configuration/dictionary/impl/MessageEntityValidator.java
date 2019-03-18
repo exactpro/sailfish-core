@@ -78,7 +78,7 @@ public class MessageEntityValidator extends EntityValidator {
     }
 
     private void checkFields(IFieldStructure message, SetMultimap<String, String> duplicates) {
-        for (IFieldStructure messageField : message.getFields()) {
+        for(IFieldStructure messageField : message.getFields().values()) {
             if (messageField.isComplex()) {
                 checkFields(messageField, duplicates);
             } else {
@@ -89,7 +89,7 @@ public class MessageEntityValidator extends EntityValidator {
 
     private void checkFieldRepeating(IFieldStructure message, IFieldStructure field,
             SetMultimap<String, String> duplicates) {
-        for (IFieldStructure messageField : message.getFields()) {
+        for(IFieldStructure messageField : message.getFields().values()) {
             if (messageField.isComplex()) {
                 checkFieldRepeating(messageField, field, duplicates);
             } else {

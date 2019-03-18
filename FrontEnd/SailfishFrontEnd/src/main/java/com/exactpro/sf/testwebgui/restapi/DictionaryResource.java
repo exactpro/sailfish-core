@@ -66,10 +66,10 @@ public class DictionaryResource {
 		private final LinkedHashMap<String, JsonField> fields = new LinkedHashMap<>();
 
 		public void traverse(IMessageStructure msgStructure) {
-			this.traverse(msgStructure.getFields());
+            this.traverse(msgStructure.getFields().values());
 		}
 
-		public void traverse(List<IFieldStructure> fields) {
+        public void traverse(Collection<IFieldStructure> fields) {
 
 			int i = 0;
 			for (IFieldStructure curField : fields) {
@@ -201,7 +201,7 @@ public class DictionaryResource {
 
             response.setUtils(utils);
 
-			for (IMessageStructure structure : dictionary.getMessageStructures()) {
+            for(IMessageStructure structure : dictionary.getMessages().values()) {
 				response.getMessages().put(structure.getName(), convert(structure, deep != null));
 			}
 
@@ -227,7 +227,7 @@ public class DictionaryResource {
 
 			List<JsonMessageStructure> response = new ArrayList<>();
 
-			IMessageStructure structure = dictionary.getMessageStructure(message_name);
+            IMessageStructure structure = dictionary.getMessages().get(message_name);
 			if (structure != null) {
 				response.add(convert(structure, true));
 			}

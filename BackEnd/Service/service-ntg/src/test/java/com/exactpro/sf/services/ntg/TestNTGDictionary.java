@@ -15,20 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.util.AbstractTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 
 public final class TestNTGDictionary extends AbstractTest {
     private static final Logger logger = LoggerFactory.getLogger(TestNTGDictionary.class);
@@ -57,14 +58,14 @@ public final class TestNTGDictionary extends AbstractTest {
 
                 logger.trace("Field types:");
 
-                for ( IFieldStructure fieldType : dictionary.getFieldStructures() )
+                for(IFieldStructure fieldType : dictionary.getFields().values())
                 {
                     logger.trace("\t{}", fieldType.getName());
                 }
 
                 logger.trace("Messages:");
 
-                for ( IMessageStructure msgStruct : dictionary.getMessageStructures() )
+                for(IMessageStructure msgStruct : dictionary.getMessages().values())
                 {
                     logger.trace("\t{}", msgStruct.getName());
                 }

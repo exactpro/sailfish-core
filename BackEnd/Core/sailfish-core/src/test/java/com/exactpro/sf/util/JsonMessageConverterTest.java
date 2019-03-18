@@ -16,6 +16,7 @@
 package com.exactpro.sf.util;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,8 +25,8 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import java.time.LocalDateTime;
 
+import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
 import com.exactpro.sf.common.messages.CreateIMessageVisitor;
 import com.exactpro.sf.common.messages.IHumanMessage;
@@ -34,7 +35,6 @@ import com.exactpro.sf.common.messages.MessageStructureWriter;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
@@ -60,7 +60,7 @@ public class JsonMessageConverterTest extends AbstractTest {
         manager = SFLocalContext.getDefault().getDictionaryManager();
         dictionaryURI = SailfishURI.unsafeParse("Example");
         dictionary = manager.getDictionary(dictionaryURI);
-        messageStructure = dictionary.getMessageStructure("ComplexMessage");
+        messageStructure = dictionary.getMessages().get("ComplexMessage");
         messageFactory = new AbstractMessageFactory() {
 
             @Override

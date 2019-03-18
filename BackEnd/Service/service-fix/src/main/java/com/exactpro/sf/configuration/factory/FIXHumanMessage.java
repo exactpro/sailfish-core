@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.factory;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import com.exactpro.sf.common.impl.messages.HumanMessage;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.services.fix.FixMessageHelper;
@@ -24,7 +26,7 @@ public class FIXHumanMessage extends HumanMessage {
     protected void appendName(String fieldName, IFieldStructure fieldStructure) {
         super.appendName(fieldName, fieldStructure);
         if (fieldStructure != null) {
-            Object tag = fieldStructure.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG);
+            Object tag = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG);
             if (tag != null) {
                 builder.append('(').append(tag).append(')');
             }

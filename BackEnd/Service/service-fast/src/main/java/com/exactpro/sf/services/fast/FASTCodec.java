@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -79,7 +81,7 @@ public class FASTCodec extends AbstractCodec {
 
 	    this.serviceContext = Objects.requireNonNull(serviceContext, "'Service context' parameter cannot be null");
 		this.msgDictionary = Objects.requireNonNull(dictionary, "'dictionary' parameter cannot be null");
-		String fastTemplate = Objects.requireNonNull((String) dictionary.getAttributeValueByName(FASTMessageHelper.TEMPLATE_ATTRIBYTE), "'Template attribute' parameter");
+        String fastTemplate = Objects.requireNonNull(getAttributeValue(dictionary, FASTMessageHelper.TEMPLATE_ATTRIBYTE), "'Template attribute' parameter");
 		this.msgFactory = msgFactory;
 
 		if ( settings != null )
@@ -211,8 +213,8 @@ public class FASTCodec extends AbstractCodec {
 			IoBuffer in,
 			IMessage imsg,
 			byte[] rawMessage) {
-		IMessageStructure msgStructure = msgDictionary.getMessageStructure(imsg.getName());
-		Boolean isAdmin = (Boolean)msgStructure.getAttributeValueByName("IsAdmin");
+        IMessageStructure msgStructure = msgDictionary.getMessages().get(imsg.getName());
+        Boolean isAdmin = getAttributeValue(msgStructure, "IsAdmin");
 		if (isAdmin == null) {
 			isAdmin = false;
 		}

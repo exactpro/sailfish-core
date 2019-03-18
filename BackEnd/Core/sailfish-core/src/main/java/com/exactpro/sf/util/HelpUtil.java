@@ -18,7 +18,6 @@ package com.exactpro.sf.util;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -78,14 +77,15 @@ public class HelpUtil {
         }
 
         if(first.isComplex()){
-            List<IFieldStructure> firstFields = first.getFields();
-            List<IFieldStructure> secondFields = second.getFields();
-            if(firstFields.size() != secondFields.size()){
+            Map<String, IFieldStructure> firstFields = first.getFields();
+            Map<String, IFieldStructure> secondFields = second.getFields();
+
+            if(firstFields.size() != secondFields.size()) {
                 return false;
             }
 
-            for(int i = 0; i < firstFields.size(); i ++){
-                if(!equals(firstFields.get(i),secondFields.get(i))){
+            for(String name : firstFields.keySet()) {
+                if(!equals(firstFields.get(name), secondFields.get(name))) {
                     return false;
                 }
             }
@@ -137,7 +137,7 @@ public class HelpUtil {
 
 
         if(fieldStructure.isComplex()){
-            for (IFieldStructure field : fieldStructure.getFields()){
+            for(IFieldStructure field : fieldStructure.getFields().values()) {
                 getHashCode(field, hashCode);
             }
         }

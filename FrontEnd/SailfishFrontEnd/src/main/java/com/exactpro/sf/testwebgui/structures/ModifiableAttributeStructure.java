@@ -53,8 +53,8 @@ public class ModifiableAttributeStructure implements IAttributeStructure {
 	}
 	
 	@Override
-	public Object getCastValue() {
-		return castValue;
+    public <T> T getCastValue() {
+        return (T)castValue;
 	}
 	
 	@Override

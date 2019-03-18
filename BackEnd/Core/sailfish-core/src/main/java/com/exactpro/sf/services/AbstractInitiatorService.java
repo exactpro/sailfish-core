@@ -203,7 +203,7 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
     }
 
     protected String getHumanReadable(IMessage message) {
-        IMessageStructure messageStructure = dictionary.getMessageStructure(message.getName());
+        IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
 
         if(messageStructure == null) {
             throw new ServiceException("Unknown message: " + message.getName());

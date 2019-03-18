@@ -15,8 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.scriptrunner.StatusType.FAILED;
-import static java.lang.Long.compare;
 import static java.util.Comparator.comparingLong;
 
 import java.io.BufferedWriter;
@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
@@ -44,7 +43,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -110,6 +108,7 @@ import com.exactpro.sf.util.EnumReplacer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.MultimapBuilder.SortedSetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -1401,7 +1400,7 @@ public class HtmlReport implements IScriptReport {
             return null;
         }
 
-        return dictionaryStructure.getMessageStructure(metaData.getMsgName());
+        return dictionaryStructure.getMessages().get(metaData.getMsgName());
     }
 
     private List<VerificationParameter> convert(ComparisonResult result, String parentRaw, int counter, int nestingLevel) {
@@ -1461,8 +1460,8 @@ public class HtmlReport implements IScriptReport {
 
         IMessage message = (IMessage)returnedValue;
         IMessageStructure messageStructure = Optional.ofNullable(message.getMetaData().getDictionaryURI())
-                .map(x -> dictionaryManager.getDictionary(x))
-                .map(x -> x.getMessageStructure(message.getName())).orElse(null);
+                .map(dictionaryManager::getDictionary)
+                .map(x -> x.getMessages().get(message.getName())).orElse(null);
 
         if(messageStructure == null) {
             return originalDescription;
@@ -1470,12 +1469,12 @@ public class HtmlReport implements IScriptReport {
 
         StringBuilder generatedDescription = new StringBuilder();
 
-        for(IFieldStructure field : messageStructure.getFields()) {
+        for(IFieldStructure field : messageStructure.getFields().values()) {
             if(field.isComplex()) {
                 continue;
             }
 
-            String descriptionPrefix = (String)field.getAttributeValueByName(MessageHelper.ATTRIBUTE_DESCRIPTION_PREFIX);
+            String descriptionPrefix = getAttributeValue(field, MessageHelper.ATTRIBUTE_DESCRIPTION_PREFIX);
 
             if(descriptionPrefix == null) {
                 continue;

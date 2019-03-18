@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -151,7 +152,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 			stack.pop();
 
 			IMessageStructure msgStructure = new MessageStructure(msgName, namespace,
-						description, new ArrayList<>(msgStructureBuilder.getFieldStructures()), protocolAttributes);
+                    description, new LinkedHashMap<>(msgStructureBuilder.getFieldStructureMap()), protocolAttributes);
 
 			builder.addMessageStructure(msgStructure);
 		}
@@ -268,7 +269,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 						stack.pop();
 
 						IMessageStructure msgStructure = new MessageStructure(subMessageName, builder.getNamespace(),
-								description, new ArrayList<>(msgStructureBuilder.getFieldStructures()), typeProtocolAttributes);
+                                description, new LinkedHashMap<>(msgStructureBuilder.getFieldStructureMap()), typeProtocolAttributes);
 
 						fieldAttributes.put("FieldType", msgStructure);
 

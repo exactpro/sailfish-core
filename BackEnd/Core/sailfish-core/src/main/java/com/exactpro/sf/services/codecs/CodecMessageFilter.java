@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.codecs;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,11 +63,11 @@ public class CodecMessageFilter {
     }
 
     public void init(IDictionaryStructure dictionary){
-        for (IMessageStructure msgStruct : dictionary.getMessageStructures()) {
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
             if (!filterValues.isEmpty()) {
-                for (IFieldStructure fieldStructure : msgStruct.getFields()) {
+                for(IFieldStructure fieldStructure : msgStruct.getFields().values()) {
                     for (SpecialAttribute specialAttribute : SpecialAttribute.values()) {
-                        if (fieldStructure.getAttributeValueByName(specialAttribute.getAttribut()) != null) {
+                        if(getAttributeValue(fieldStructure, specialAttribute.getAttribut()) != null) {
                             Multimap<SpecialAttribute, String> attributeToField = messageSpecialField.get(msgStruct);
                             if (attributeToField == null) {
                                 attributeToField =  HashMultimap.create();
