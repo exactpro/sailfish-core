@@ -37,7 +37,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 selected: {
                     ...state.selected,
-                    actionId: stateAction.action.id,
+                    actionsId: [stateAction.action.id],
                     status: stateAction.action.status.status,
                     messagesId: stateAction.action.relatedMessages
                 }
@@ -49,7 +49,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 selected: {
                     ...state.selected,
-                    actionId: stateAction.actionId,
+                    actionsId: [stateAction.actionId],
                     status: initialSelectedState.status
                 }
             }
@@ -62,7 +62,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                     ...state.selected,
                     messagesId: stateAction.messagesId,
                     status: stateAction.status,
-                    actionId: null
+                    actionsId: initialSelectedState.actionsId
                 }
             }
         }

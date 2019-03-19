@@ -20,7 +20,7 @@ import SelectedState from './SelectedState';
 import { Panel } from "../helpers/Panel";
 
 export const initialSelectedState: SelectedState = {
-    actionId: null,
+    actionsId: [],
     messagesId: [],
     status: 'NA',
     checkpointMessageId: null,

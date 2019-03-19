@@ -29,7 +29,7 @@ import { getActions } from '../helpers/actionType';
 interface ListProps {
     actions: Array<Action>;
     checkpointActions: Array<Action>;
-    selectedActionId: number;
+    selectedActionId: number[];
     selectedMessageId: number;
     selectedCheckpointId: number;
     actionsFilter: StatusType[];
@@ -43,7 +43,6 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
     private elements: ActionTree[] = [];
     private scrollbar: HeatmapScrollbar;
-    private root: HTMLElement;
 
     scrollToTop() {
         this.scrollbar && this.scrollbar.scrollToTop();
@@ -79,15 +78,14 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
         return (
             <div class="actions">
-                <div class="actions-list"
-                    ref={ref => this.root = ref}>
+                <div class="actions-list">
                     <HeatmapScrollbar
                         selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}
                         ref={ref => this.scrollbar = ref}>
                         {actions.map(action => (
                             <ActionTree 
                                 action={action}
-                                selectedActionsId={[selectedActionId]}
+                                selectedActionsId={selectedActionId}
                                 selectedMessageId={selectedMessageId}
                                 selectedCheckpointId={selectedCheckpointId}
                                 actionSelectHandler={onSelect}
@@ -106,8 +104,8 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
 export const ActionsList = connect((state: AppState) => ({
         actions: state.testCase.actions,
-        selectedActionId: state.selected.actionId,
-        selectedMessageId: state.selected.actionId ? null : state.selected.messagesId[0],
+        selectedActionId: state.selected.actionsId,
+        selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
         selectedCheckpointId: state.selected.checkpointActionId,
         actionsFilter: state.actionsFilter,
         filterFields: state.fieldsFilter,

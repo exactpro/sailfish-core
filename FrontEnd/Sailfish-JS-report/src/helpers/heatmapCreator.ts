@@ -29,11 +29,11 @@ export function messagesHeatmap(messages: Message[], selectedMessages: number[],
     return heatmap;
 }
 
-export function actionsHeatmap(actions: Action[], selectedActionId: number): Map<number, StatusType> {
+export function actionsHeatmap(actions: Action[], selectedActionsId: number[]): Map<number, StatusType> {
     const heatmap = new Map<number, StatusType>();
 
     actions.forEach((action, idx) => {
-        if (action.id == selectedActionId) {
+        if (selectedActionsId.includes(action.id)) {
             heatmap.set(idx, action.status.status);
         }
     });

@@ -48,7 +48,7 @@ export const urlHandler = store =>  next => (action: StateActionType) => {
 function hadnleStateUpdate(prevState : AppState, nextState : AppState) {
     // we use top.window instared of window to work with real window url, not iframe url
 
-    if (prevState.selected.actionId == nextState.selected.actionId && 
+    if (prevState.selected.actionsId == nextState.selected.actionsId && 
         prevState.selected.messagesId == nextState.selected.messagesId && 
         prevState.testCase == nextState.testCase) {
 
@@ -73,9 +73,9 @@ function getNextSearchParams(searchParams : URLSearchParams, prevState : AppStat
         }
     }
     
-    if (prevState.selected.actionId != nextState.selected.actionId) {
-        if (nextState.selected.actionId != null) {
-            searchParams.set(ACTION_PARAM_KEY, nextState.selected.actionId.toString());
+    if (prevState.selected.actionsId != nextState.selected.actionsId) {
+        if (nextState.selected.actionsId.length > 0) {
+            searchParams.set(ACTION_PARAM_KEY, nextState.selected.actionsId.toString());
             // removing verification message id from url
             searchParams.delete(MESSAGE_PARAM_KEY);
         } else {
@@ -84,7 +84,7 @@ function getNextSearchParams(searchParams : URLSearchParams, prevState : AppStat
     }
     
      // verification message selection handling
-     if (nextState.selected.actionId == null && prevState.selected.messagesId != nextState.selected.messagesId) {
+     if (nextState.selected.actionsId.length == 0 && prevState.selected.messagesId != nextState.selected.messagesId) {
         if (nextState.selected.messagesId && nextState.selected.messagesId.length != 0) {
             searchParams.set(MESSAGE_PARAM_KEY, nextState.selected.messagesId[0].toString());
         } else {
