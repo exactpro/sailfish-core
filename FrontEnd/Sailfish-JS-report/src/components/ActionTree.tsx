@@ -29,6 +29,7 @@ import { Checkpoint } from './Checkpoint';
 import UserTable from '../models/UserTable';
 import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
+import Tree, { createNode } from '../models/util/Tree';
 
 
 export interface ActionTreeProps {
@@ -37,7 +38,7 @@ export interface ActionTreeProps {
     messageSelectHandler: (id: number, status: StatusType) => any;
     checkpointSelectHandler: (action: Action) => any;
     selectedMessageId: number;
-    selectedActionId: number;
+    selectedActionsId: number[];
     selectedCheckpointId: number;
     checkpoints: Action[];
     actionsFilter: StatusType[];
@@ -46,18 +47,16 @@ export interface ActionTreeProps {
 
 export class ActionTree extends Component<ActionTreeProps> {
 
-    private expandedTreePath = null;
+    private expandedTreePath: Tree<number> = null;
     private treeElements: Component[] = [];
 
     componentWillMount() {
-        if (this.props.action.actionNodeType == "action") {
-            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
-        }
+        this.updateTreePath(this.props.action, this.props.selectedActionsId);
     }
 
     // scrolling to action, selected by url sharing
     componentDidMount() {
-        if (!this.treeElements[this.props.selectedActionId]) {
+        if (!this.treeElements[this.props.selectedActionsId[0]]) {
             return;
         }
 
@@ -68,17 +67,17 @@ export class ActionTree extends Component<ActionTreeProps> {
         // Second callback will be called when DOM is fully rendered.
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
-                this.scrollToAction(this.props.selectedActionId);
+                this.scrollToAction(this.props.selectedActionsId[0]);
             });
         });
     }
 
     componentWillReceiveProps(nextProps: ActionTreeProps) {
         // handling action change to update expand tree
-        if (this.props.action !== nextProps.action && nextProps.action.actionNodeType == "action") {
-            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        if (this.props.action !== nextProps.action) {
+            this.updateTreePath(this.props.action, this.props.selectedActionsId);
         } else {
-            this.expandedTreePath = null
+            this.expandedTreePath = null;
         }
     }
 
@@ -91,7 +90,7 @@ export class ActionTree extends Component<ActionTreeProps> {
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
 
-        if (nextProps.action.actionNodeType === "action") {
+        if (nextProps.action.actionNodeType === ActionNodeType.ACTION) {
             const nextAction = nextProps.action as Action;
 
             if (this.props.filterFields !== nextProps.filterFields) {
@@ -111,7 +110,8 @@ export class ActionTree extends Component<ActionTreeProps> {
     shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps): boolean {
         // the first condition - current action is selected and we should update to show it
         // the second condition - current action was selected and we should disable selection
-        if (nextProps.selectedActionId === action.id || prevProps.selectedActionId === action.id) {
+        if (nextProps.selectedActionsId != prevProps.selectedActionsId && (
+                nextProps.selectedActionsId.includes(action.id) || prevProps.selectedActionsId.includes(action.id))) {
             return true;
         }
 
@@ -131,7 +131,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         if (action.subNodes) {
             // if at least one of the subactions needs an update, we update the whole action
             return action.subNodes.some(action => {
-                if (action.actionNodeType === "action") {
+                if (action.actionNodeType === ActionNodeType.ACTION) {
                     return this.shouldActionUpdate(action as Action, nextProps, prevProps)
                 } else {
                     return false;
@@ -142,39 +142,40 @@ export class ActionTree extends Component<ActionTreeProps> {
         return false;
     }
 
-    updateTreePath() {
-        if (this.props.action.actionNodeType == "action") {
-            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+    updateTreePath(action: ActionNode, targetActionsId: number[]) {
+        if (action.actionNodeType == ActionNodeType.ACTION) {
+            this.expandedTreePath = this.getExpandedTreePath(action as Action, targetActionsId);
         } else {
-            this.expandedTreePath = [];
+            this.expandedTreePath = null;
         }
     }
 
-    getExpandedTreePath(action: Action, treePath: number[], targetActionId: number): number[] {
+    getExpandedTreePath(action: Action, targetActionsId: number[]): Tree<number> {
 
-        const actionTreePath = [...treePath, action.id];
-
-        if (action.id == targetActionId) {
-            return actionTreePath;
-        }
+        const treeNode = createNode(action.id);
 
         if (action.subNodes) {
-            for (let i = 0; i < action.subNodes.length; i++) {
-                const subNode = action.subNodes[i];
+            action.subNodes.forEach(actionNode => {
+                if (actionNode.actionNodeType == ActionNodeType.ACTION) {
+                    const subNodePath = this.getExpandedTreePath(actionNode as Action, targetActionsId);
 
-                if (subNode.actionNodeType == "action") {
-                    const subNodePath = this.getExpandedTreePath(subNode as Action, actionTreePath, targetActionId);
-
-                    if (subNodePath.includes(targetActionId)) {
-                        // target action found in one of subNodes
-                        return subNodePath;
-                    }
+                    subNodePath && treeNode.nodes.push(subNodePath);
                 }
-            }
+            })
         }
 
-        // we did't find any sub node with the given action id
-        return treePath;
+        // checking wheather the current action is the one of target acitons OR some of action's sub nodes is the target aciton
+        return targetActionsId.includes(action.id) || treeNode.nodes.length != 0 ? 
+                treeNode : 
+                null;
+    }
+
+    getSubTree(action: ActionNode, expandTree: Tree<number>): Tree<number> {
+        if (action.actionNodeType == ActionNodeType.ACTION) {
+            return expandTree && expandTree.nodes.find(subNode => subNode.value == (action as Action).id);
+        } else {
+            return null;
+        }
     }
 
     scrollToAction(actionId: number) {
@@ -187,8 +188,8 @@ export class ActionTree extends Component<ActionTreeProps> {
         return this.renderNode(props, true, this.expandedTreePath);
     }
 
-    renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: number[] = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
+    renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null): JSX.Element {
+        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
 
         switch (props.action.actionNodeType) {
             case ActionNodeType.ACTION: {
@@ -198,12 +199,12 @@ export class ActionTree extends Component<ActionTreeProps> {
                     return this.renderCheckpoint(props, action);
                 }
 
-                const isExpanded = expandTreePath ? expandTreePath[0] == action.id : null,
-                    newTreePath = expandTreePath ? expandTreePath.slice(1) : null;
+                // we need to use undefined here to prevent closing action card when it not included in current tree path 
+                const isExpanded = expandTreePath ? expandTreePath.value == action.id : undefined;
 
                 return (
                     <ActionCard action={action}
-                        isSelected={action.id === selectedActionId}
+                        isSelected={selectedActionsId.includes(action.id)}
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={actionSelectHandler}
                         isRoot={isRoot}
@@ -211,7 +212,11 @@ export class ActionTree extends Component<ActionTreeProps> {
                         ref={ref => this.treeElements[action.id] = ref}>
                         {
                             action.subNodes ? action.subNodes.map(
-                                action => this.renderNode({ ...props, action: action }, false, newTreePath)) : null
+                                action => this.renderNode(
+                                    { ...props, action: action },
+                                    false, 
+                                    this.getSubTree(action, expandTreePath)
+                                )) : null
                         }
                     </ActionCard>
                 );

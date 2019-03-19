@@ -87,7 +87,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
                         {actions.map(action => (
                             <ActionTree 
                                 action={action}
-                                selectedActionId={selectedActionId}
+                                selectedActionsId={[selectedActionId]}
                                 selectedMessageId={selectedMessageId}
                                 selectedCheckpointId={selectedCheckpointId}
                                 actionSelectHandler={onSelect}
