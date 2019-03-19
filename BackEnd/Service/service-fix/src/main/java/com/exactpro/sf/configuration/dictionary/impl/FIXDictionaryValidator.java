@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.services.fix.FixMessageHelper.ATTRIBUTE_ENTITY_TYPE;
 import static com.exactpro.sf.services.fix.FixMessageHelper.COMPONENT_ENTITY;
 import static com.exactpro.sf.services.fix.FixMessageHelper.DAY_OF_MONTH;
@@ -42,7 +43,9 @@ import static com.exactpro.sf.services.fix.FixMessageHelper.TZTIMESTAMP;
 import static com.exactpro.sf.services.fix.FixMessageHelper.XMLDATA;
 
 import java.math.BigDecimal;
-import java.util.Collection;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -50,13 +53,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import org.apache.commons.lang3.ObjectUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -70,7 +66,9 @@ import com.exactpro.sf.configuration.dictionary.ValidationHelper;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 
 import quickfix.FieldType;
@@ -200,15 +198,15 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
     private void checkTagDuplicates(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
         Multimap<Integer, FieldHolder> tags = ArrayListMultimap.create();
 
-        Set<String> references = dictionary.getMessageStructures().stream()
+        Set<String> references = dictionary.getMessages().values().stream()
                 .flatMap(message ->
-                        message.getFields().stream()
+                        message.getFields().values().stream()
                                 .peek(field -> addTagToMap(tags, message, field))
                                 .map(IFieldStructure::getReferenceName)
                                 .filter(Objects::nonNull))
                 .collect(Collectors.toSet());
 
-        dictionary.getFieldStructures().stream()
+        dictionary.getFields().values().stream()
                 .filter(field -> !references.contains(field.getName()))
                 .forEach(field -> addTagToMap(tags, null, field));
 
@@ -240,7 +238,7 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     private void addTagToMap(Multimap<Integer, FieldHolder> tags, IMessageStructure message, IFieldStructure field) {
-        Integer tag = (Integer) field.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG);
+        Integer tag = getAttributeValue(field, FixMessageHelper.ATTRIBUTE_TAG);
         if (tag != null) {
             tags.put(tag, new FieldHolder(message == null ? null : message.getName(), field.getName()));
         }
@@ -248,12 +246,19 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
 
     private void checkMessageTypes(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
         Set<Object> messageTypes = new HashSet<>();
+        Set<String> knownMessageTypes = dictionary.getFields()
+                .get(MSG_TYPE_FIELD)
+                .getValues()
+                .values()
+                .stream()
+                .map(IAttributeStructure::getValue)
+                .collect(Collectors.toSet());
 
-        for(IMessageStructure message : dictionary.getMessageStructures()) {
-            String entity_type = (String) message.getAttributeValueByName(ATTRIBUTE_ENTITY_TYPE);
+        for(IMessageStructure message : dictionary.getMessages().values()) {
+            String entity_type = getAttributeValue(message, ATTRIBUTE_ENTITY_TYPE);
 
             if(entity_type != null && entity_type.equals(MESSAGE_ENTITY)) {
-                Object messageTypeAttribute = message.getAttributeValueByName(MESSAGE_TYPE_ATTR_NAME);
+                Object messageTypeAttribute = getAttributeValue(message, MESSAGE_TYPE_ATTR_NAME);
 
                 if(messageTypeAttribute != null) {
 
@@ -264,15 +269,8 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
                                 DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
                     }
 
-                    IFieldStructure messageTypeEnum =
-                            dictionary.getFieldStructure(MSG_TYPE_FIELD);
-
-                    Map<String, IAttributeStructure> messageTypeValues = messageTypeEnum.getValues();
-
-                    for(IAttributeStructure messageTypeValue : messageTypeValues.values()) {
-                        if(messageTypeValue.getValue().equals(messageTypeAttribute.toString())) {
-                            return;
-                        }
+                    if(knownMessageTypes.contains(messageTypeAttribute.toString())) {
+                        continue;
                     }
 
                     errors.add(new DictionaryValidationError(message.getName(), null,
@@ -305,7 +303,7 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
                     DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
         } else {
 
-            String entityType = (String) message.getAttributeValueByName(ATTRIBUTE_ENTITY_TYPE);
+            String entityType = getAttributeValue(message, ATTRIBUTE_ENTITY_TYPE);
 
             if(entityType == null) {
                 errors.add(new DictionaryValidationError(message.getName(), null, "Message  <strong>\""
@@ -336,7 +334,7 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
         if(ValidationHelper.checkFieldAttributeType(errors, field, FixMessageHelper.ATTRIBUTE_TAG,
                 JavaType.JAVA_LANG_INTEGER, null)) {
 
-            Integer tag = (Integer) field.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG);
+            Integer tag = getAttributeValue(field, FixMessageHelper.ATTRIBUTE_TAG);
 
             if (tag == null) {
                 errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
@@ -349,7 +347,7 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
 
     private void checkFixType(List<DictionaryValidationError> errors, IMessageStructure message,
                               IFieldStructure field) {
-        String fixType = (String) field.getAttributeValueByName(QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
+        String fixType = getAttributeValue(field, QFJDictionaryAdapter.ATTRIBUTE_FIX_TYPE);
 
         if(fixType == null) {
             errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),

@@ -15,9 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration;
 
+import static java.util.Collections.singletonMap;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -77,11 +79,13 @@ public class TestAbstractDictionaryValidator {
         this.fieldStructure = Mockito.mock(IFieldStructure.class);
 
         this.messageStructure = Mockito.mock(IMessageStructure.class);
-        Mockito.when(this.messageStructure.getFields()).thenReturn(Arrays.asList(new IFieldStructure[] { this.fieldStructure }));
+        Map<String, IFieldStructure> fields = singletonMap(this.fieldStructure.getName(), this.fieldStructure);
+        Mockito.when(this.messageStructure.getFields()).thenReturn(fields);
 
         this.dictionaryStructure = Mockito.mock(IDictionaryStructure.class);
-        Mockito.when(this.dictionaryStructure.getMessageStructures()).thenReturn(Arrays.asList(new IMessageStructure[] { this.messageStructure }));
-        Mockito.when(this.dictionaryStructure.getFieldStructures()).thenReturn(Arrays.asList(new IFieldStructure[] { this.fieldStructure }));
+        Map<String, IMessageStructure> messages = singletonMap(this.messageStructure.getName(), this.messageStructure);
+        Mockito.when(this.dictionaryStructure.getMessages()).thenReturn(messages);
+        Mockito.when(this.dictionaryStructure.getFields()).thenReturn(fields);
 
         AbstractDictionaryValidator parent = new AbstractDictionaryValidator() {
 

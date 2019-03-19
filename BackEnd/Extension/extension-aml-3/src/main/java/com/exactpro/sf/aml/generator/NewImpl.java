@@ -16,6 +16,7 @@
 package com.exactpro.sf.aml.generator;
 
 import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static java.lang.String.format;
 
 import java.math.BigDecimal;
@@ -349,7 +350,7 @@ public class NewImpl {
 
 		String namespace = dictionary.getNamespace();
 
-		IFieldStructure dm = dictionary.getMessageStructure(action.getMessageTypeColumn());
+        IFieldStructure dm = dictionary.getMessages().get(action.getMessageTypeColumn());
 		if (dm == null) {
 			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Dictionary "+action.getDictionaryURI()+
 					" does not contain message "+action.getMessageTypeColumn()));
@@ -414,7 +415,7 @@ public class NewImpl {
 
             logger.trace("name = {} == {}", fieldName, value.getOrigValue());
 
-			IFieldStructure fStruct = dm.getField(fieldName);
+            IFieldStructure fStruct = dm.getFields().get(fieldName);
 
 			if (fStruct == null) {
 			    if(isDirty) {
@@ -1196,7 +1197,7 @@ public class NewImpl {
 
 		String namespace = dictionary.getNamespace();
 
-		IFieldStructure dm = dictionary.getMessageStructure(action.getMessageTypeColumn());
+        IFieldStructure dm = dictionary.getMessages().get(action.getMessageTypeColumn());
 		if (dm == null) {
 			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Dictionary "+action.getDictionaryURI()+
 					" does not contain message "+action.getMessageTypeColumn()));
@@ -1210,7 +1211,7 @@ public class NewImpl {
 		Boolean isAdmin = null;
 		for (String attributeName : dm.getAttributes().keySet()) {
             if ("IsAdmin".equalsIgnoreCase(attributeName)) { //Attribute value may be null
-                isAdmin = (Boolean) dm.getAttributeValueByName(attributeName);
+                isAdmin = getAttributeValue(dm, attributeName);
                 break;
             }
         }
@@ -1230,7 +1231,7 @@ public class NewImpl {
 
             logger.trace("name = {} == {}", fieldName, value.getOrigValue());
 
-			IFieldStructure fStruct = dm.getField(fieldName);
+            IFieldStructure fStruct = dm.getFields().get(fieldName);
 
 			if (fStruct == null) {
 				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '"+dm.getName()+"' in namespace '"+dm.getNamespace()+"' does not contain '"+fieldName+"' field"));
@@ -1477,7 +1478,7 @@ public class NewImpl {
                 return;
             }
 
-            if(msgStruct.getField(subField) == null) {
+            if(msgStruct.getFields().get(subField) == null) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
                         "Column '%s': Reference to unknown column '%s' in reference '%s'", fieldName, subField, reference)));
                 return;
@@ -1756,7 +1757,7 @@ public class NewImpl {
             String messageName) {
         try {
         	IDictionaryStructure dictionary = dictionaryManager.getDictionary(dictionaryURI);
-        	return dictionary.getMessageStructure(messageName);
+            return dictionary.getMessages().get(messageName);
         } catch (RuntimeException ex) {
         	return null; // should be handled by caller
         }

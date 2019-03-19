@@ -19,18 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 public interface IDictionaryStructure {
-
     Map<String, IAttributeStructure> getAttributes();
-
-    Object getAttributeValueByName(String name);
-
-	IMessageStructure getMessageStructure(String name);
 	
-	IFieldStructure getFieldStructure(String name);
+	Map<String, IMessageStructure> getMessages();
 	
-	List<IMessageStructure> getMessageStructures();
-	
-	List<IFieldStructure> getFieldStructures();
+	Map<String, IFieldStructure> getFields();
 	
 	String getNamespace();
 	

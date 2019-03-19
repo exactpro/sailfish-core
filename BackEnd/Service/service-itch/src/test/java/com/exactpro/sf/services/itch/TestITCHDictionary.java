@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -154,8 +156,8 @@ public class TestITCHDictionary extends TestITCHHelper {
 		testMessageNames(dictionary, messageNames);
 
 		short messageType=256;
-		for ( IMessageStructure msgStruct : dictionary.getMessageStructures() )	{
-			Assert.assertEquals(messageType,(short)msgStruct.getAttributeValueByName("MessageType"));
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
+            Assert.assertEquals(messageType, (short)getAttributeValue(msgStruct, "MessageType"));
 		}
 	}
 

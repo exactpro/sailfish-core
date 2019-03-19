@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.ATTRIBUTE_MESSAGE_TYPE;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_MESSAGE_LENGTH;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_START_OF_MESSAGE;
@@ -33,6 +34,7 @@ import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorLevel;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType;
@@ -110,10 +112,10 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     private void checkFieldOffsets(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure structure) {
 
         long sum = 0;
-        for (IFieldStructure field : message.getFields()) {
+        for(IFieldStructure field : message.getFields().values()) {
 
             if (structure.getName().equals(field.getName())) {
-                int offset = (int) field.getAttributeValueByName("Offset");
+                int offset = getAttributeValue(field, "Offset");
                 if (sum != offset) {
 
                     String errorText = String.format("Offset attribute is incorrect. actual - %s %s - expected", offset, sum);
@@ -124,7 +126,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 break;
             }
 
-            sum += (int) field.getAttributeValueByName("Length");
+            sum += StructureUtils.<Integer>getAttributeValue(field, "Length");
         }
     }
 
@@ -151,7 +153,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     private void checkFormat(List<DictionaryValidationError> errors, IMessageStructure message,
                              IFieldStructure field) {
         JavaType javaType = field.getJavaType();
-        Integer length = (Integer) field.getAttributeValueByName(NTGProtocolAttribute.Length.toString());
+        Integer length = getAttributeValue(field, NTGProtocolAttribute.Length.toString());
 
         switch (javaType) {
             case JAVA_LANG_BOOLEAN:
@@ -258,11 +260,11 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
 //        Set<Object> messageTypes = new HashSet<>();
         SetMultimap<Object, Boolean> test = HashMultimap.create();
         outerLoop:
-        for(IMessageStructure message : dictionary.getMessageStructures()) {
+        for(IMessageStructure message : dictionary.getMessages().values()) {
 
-            if(message.getAttributeNames().contains(ATTRIBUTE_MESSAGE_TYPE)) {
-                Object messageTypeAttribute = message.getAttributeValueByName(ATTRIBUTE_MESSAGE_TYPE);
-                Boolean isIncoming = (Boolean) message.getAttributeValueByName("IsInput");
+            if(message.getAttributes().containsKey(ATTRIBUTE_MESSAGE_TYPE)) {
+                Object messageTypeAttribute = getAttributeValue(message, ATTRIBUTE_MESSAGE_TYPE);
+                Boolean isIncoming = getAttributeValue(message, "IsInput");
                 if(messageTypeAttribute != null) {
 
                     if(!test.put(messageTypeAttribute, isIncoming)) {
@@ -272,8 +274,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                                 DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
                     }
 
-                    IFieldStructure messageTypeEnum =
-                            dictionary.getFieldStructure(ATTRIBUTE_MESSAGE_TYPE);
+                    IFieldStructure messageTypeEnum = dictionary.getFields().get(ATTRIBUTE_MESSAGE_TYPE);
 
                     if (messageTypeEnum != null) {
 

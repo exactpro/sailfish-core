@@ -18,6 +18,7 @@ package com.exactpro.sf.externalapi;
 import java.io.InputStream;
 import java.util.Set;
 
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.externalapi.impl.ServiceFactoryException;
@@ -74,6 +75,12 @@ public interface IServiceFactory extends AutoCloseable {
      * @return set of available dictionaries. This set may be changed by calling {@link #registerDictionary(String, InputStream, boolean)}
      */
     Set<SailfishURI> getDictionaries();
+
+    /**
+     * @param uri URI of a dictionary to return (set of URIs can be obtained from {@link #getDictionary(SailfishURI)})
+     * @return dictionary structure
+     */
+    IDictionaryStructure getDictionary(SailfishURI uri);
 
     /**
      * Create factory proxy for creating instance of IMessage.

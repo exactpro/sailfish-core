@@ -30,6 +30,8 @@ import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageNotFoundException;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.messages.structures.StructureUtils;
+import com.exactpro.sf.configuration.IDictionaryManager;
 
 public abstract class MessageHelper {
 
@@ -57,7 +59,7 @@ public abstract class MessageHelper {
     }
 
     public boolean isAdmin(IMessage message) throws MessageNotFoundException, AttributeNotFoundException {
-        IMessageStructure messageStructure = this.dictionaryStructure.getMessageStructure(message.getName());
+        IMessageStructure messageStructure = this.dictionaryStructure.getMessages().get(message.getName());
         if (messageStructure != null) {
             return isAdmin(messageStructure);
         }
@@ -81,8 +83,8 @@ public abstract class MessageHelper {
     }
 
     public static boolean isAdmin(IMessageStructure structure) throws AttributeNotFoundException {
+        Object isAdminAttribute = StructureUtils.getAttributeValue(structure, ATTRIBUTE_IS_ADMIN);
 
-        Object isAdminAttribute = structure.getAttributeValueByName(ATTRIBUTE_IS_ADMIN);
         if (isAdminAttribute instanceof Boolean || isAdminAttribute == null) {
             return BooleanUtils.toBoolean((Boolean) isAdminAttribute);
         }

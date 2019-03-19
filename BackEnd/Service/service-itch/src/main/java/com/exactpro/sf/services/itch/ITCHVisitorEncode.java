@@ -15,23 +15,26 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.ByteOrder;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageStructureReader;
 import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.util.DateTimeUtility;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.nio.ByteOrder;
-import java.util.List;
 
 public class ITCHVisitorEncode extends ITCHVisitorBase {
 
@@ -51,8 +54,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 	@Override
 	public void visit(String fieldName, Integer value, IFieldStructure fldStruct, boolean isDefault) {
 
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (type != ProtocolType.STUB && value == null) {
 		    writeDefaultValue(length, fieldName);
@@ -76,8 +79,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Long value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (type != ProtocolType.STUB && value == null) {
 		    writeDefaultValue(length, fieldName);
@@ -103,8 +106,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Short value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (type != ProtocolType.STUB && value == null) {
             writeDefaultValue(length, fieldName);
@@ -128,7 +131,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Byte value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 
 		if (value == null) {
             value = DEFAULT_BYTE;
@@ -145,8 +148,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (type != ProtocolType.STUB && value == null) {
             writeDefaultValue(length, fieldName);
@@ -171,8 +174,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Float value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (value == null) {
 		    writeDefaultValue(length, fieldName);
@@ -189,8 +192,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (value == null) {
             writeDefaultValue(length, fieldName);
@@ -205,7 +208,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 			buffer.putLong(val);
 		} else if (type == ProtocolType.UINT16) {
 			double val = value.doubleValue();
-			Integer impliedDecimals = (Integer) fldStruct.getAttributeValueByName(IMPILED_DECIMALS_ATTRIBUTE);
+            Integer impliedDecimals = getAttributeValue(fldStruct, IMPILED_DECIMALS_ATTRIBUTE);
 			if (impliedDecimals != null) {
 				for (int i = 0; i < impliedDecimals; i++) {
 					val*=10;
@@ -219,8 +222,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
 	@Override
     public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-        Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
         
 		tryToFillDefaultBytes(type, value, fieldName, length);
 
@@ -233,8 +236,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
     @Override
     public void visit(String fieldName, LocalDate value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		tryToFillDefaultBytes(type, value, fieldName, length);
 
@@ -250,8 +253,8 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
     @Override
     public void visit(String fieldName, LocalTime value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		tryToFillDefaultBytes(type, value, fieldName, length);
 
@@ -265,9 +268,9 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 	
 	@Override
 	public void visit(String fieldName, BigDecimal value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
-		Integer impliedDecimals = (Integer) fldStruct.getAttributeValueByName(IMPILED_DECIMALS_ATTRIBUTE);
-		Integer length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
+        Integer impliedDecimals = getAttributeValue(fldStruct, IMPILED_DECIMALS_ATTRIBUTE);
+        Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		if (value == null) {
 		    writeDefaultValue(length, fieldName);

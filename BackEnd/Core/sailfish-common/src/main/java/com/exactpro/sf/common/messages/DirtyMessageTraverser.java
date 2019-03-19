@@ -16,6 +16,8 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.exactpro.sf.common.messages.DirtyConst.FIELD_ORDER;
 import static com.exactpro.sf.common.messages.DirtyConst.EXCLUDED_FIELD;
@@ -25,8 +27,8 @@ public class DirtyMessageTraverser extends MessageTraverser {
 
 
     @Override
-    public void traverse(IMessageStructureVisitor msgStrVisitor, List<IFieldStructure> fields, IMessage message,
-            IMessageStructureReaderHandler handler) {
+    public void traverse(IMessageStructureVisitor msgStrVisitor, Map<String, IFieldStructure> fields, IMessage message,
+                         IMessageStructureReaderHandler handler) {
 
         fields = combineUnknownFields(fields, message);
 
@@ -37,14 +39,15 @@ public class DirtyMessageTraverser extends MessageTraverser {
         super.traverse(msgStrVisitor, fields, message, handler);
     }
 
-    protected List<IFieldStructure> handleFieldOrderMode(List<IFieldStructure> fields, IMessage message) {
+    protected Map<String, IFieldStructure> handleFieldOrderMode(Map<String, IFieldStructure> fields, IMessage message) {
         Object fieldValue = message.getField(FIELD_ORDER);
         List<String> newFieldOrder = validateFieldOrderValue(fieldValue, String.class);
 
-        ReorderFieldComparator comparator = new ReorderFieldComparator(newFieldOrder, fields);
-        fields.sort(comparator);
+        ReorderFieldComparator comparator = new ReorderFieldComparator(newFieldOrder, fields.keySet());
+        TreeMap<String, IFieldStructure> result = new TreeMap<>(comparator);
+        result.putAll(fields);
 
-        return fields;
+        return result;
     }
 
     protected boolean ensureListType(List<?> list, Class<?> type) {

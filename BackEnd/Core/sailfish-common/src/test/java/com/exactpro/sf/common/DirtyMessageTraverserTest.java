@@ -29,12 +29,28 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.hamcrest.CoreMatchers.is;
 
 public class DirtyMessageTraverserTest {
+
+    public static final String FIRST_FIELD = "firstField";
+    public static final String SECOND_FIELD = "secondField";
+
+    private final IMessageStructure byDictionary;
+
+    public DirtyMessageTraverserTest() {
+        IFieldStructure firstField = new FieldStructure(FIRST_FIELD, "test", JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
+        IFieldStructure secondField = new FieldStructure(SECOND_FIELD, "test", JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
+        Map<String, IFieldStructure> fields = new LinkedHashMap<>();
+        fields.put(firstField.getName(), firstField);
+        fields.put(secondField.getName(), secondField);
+        byDictionary = new MessageStructure("test", "test", "", fields, Collections.emptyMap());
+    }
 
     /**
      * Test that additional dirty fields presented at IMessage with name same to original will be overriden
@@ -43,13 +59,9 @@ public class DirtyMessageTraverserTest {
     public void testOverrideDirty() {
         MessageTraverser traverser = new MessageTraverser();
 
-        IFieldStructure firstField = new FieldStructure("firstField", "test", JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
-        IFieldStructure secondField = new FieldStructure("secondField", "test", JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
-        IMessageStructure byDictionary = new MessageStructure("test", "test", "", Arrays.asList(firstField, secondField), Collections.emptyMap());
-
         IMessage message = DefaultMessageFactory.getFactory().createMessage("test", "test");
-        message.addField("firstField", 1L);
-        message.addField("secondField", "kek");
+        message.addField(FIRST_FIELD, 1L);
+        message.addField(SECOND_FIELD, "kek");
         message.addField("unknownField", 1.0F);
 
         AtomicInteger e = new AtomicInteger();
@@ -57,14 +69,14 @@ public class DirtyMessageTraverserTest {
         traverser.traverse(new DefaultMessageStructureVisitor() {
             @Override
             public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
-                Assert.assertThat(fieldName, is("secondField"));
+                Assert.assertThat(fieldName, is(SECOND_FIELD));
                 Assert.assertThat(value, is("kek"));
                 e.incrementAndGet();
             }
 
             @Override
             public void visit(String fieldName, Long value, IFieldStructure fldStruct, boolean isDefault) {
-                Assert.assertThat(fieldName, is("firstField"));
+                Assert.assertThat(fieldName, is(FIRST_FIELD));
                 Assert.assertThat(value, is(1L));
                 e.incrementAndGet();
             }
@@ -88,16 +100,12 @@ public class DirtyMessageTraverserTest {
     public void testDirtyFieldOrder() {
         MessageTraverser traverser = new DirtyMessageTraverser();
 
-        IFieldStructure firstField = new FieldStructure("firstField", "test", JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
-        IFieldStructure secondField = new FieldStructure("secondField", "test", JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
-        IMessageStructure byDictionary = new MessageStructure("test", "test", "", Arrays.asList(firstField, secondField), Collections.emptyMap());
-
         IMessage message = DefaultMessageFactory.getFactory().createMessage("test", "test");
-        message.addField("firstField", 1L);
-        message.addField("secondField", "kek");
+        message.addField(FIRST_FIELD, 1L);
+        message.addField(SECOND_FIELD, "kek");
         message.addField("unknownField", 1.0F);
         message.addField("excludeMePls", DirtyConst.EXCLUDED_FIELD);
-        message.addField(DirtyConst.FIELD_ORDER, Arrays.asList("unknownField", "secondField"));
+        message.addField(DirtyConst.FIELD_ORDER, Arrays.asList("unknownField", SECOND_FIELD));
 
         List<String> orderHistoty = new ArrayList<>();
 
@@ -105,14 +113,14 @@ public class DirtyMessageTraverserTest {
             @Override
             public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
                 orderHistoty.add(fieldName);
-                Assert.assertThat(fieldName, is("secondField"));
+                Assert.assertThat(fieldName, is(SECOND_FIELD));
                 Assert.assertThat(value, is("kek"));
             }
 
             @Override
             public void visit(String fieldName, Long value, IFieldStructure fldStruct, boolean isDefault) {
                 orderHistoty.add(fieldName);
-                Assert.assertThat(fieldName, is("firstField"));
+                Assert.assertThat(fieldName, is(FIRST_FIELD));
                 Assert.assertThat(value, is(1L));
             }
 
@@ -124,7 +132,7 @@ public class DirtyMessageTraverserTest {
             }
         }, byDictionary, message, MessageStructureReaderHandlerImpl.instance());
 
-        Assert.assertThat(orderHistoty, is(Arrays.asList("unknownField", "secondField", "firstField" )));
+        Assert.assertThat(orderHistoty, is(Arrays.asList("unknownField", SECOND_FIELD, FIRST_FIELD )));
     }
 
 }

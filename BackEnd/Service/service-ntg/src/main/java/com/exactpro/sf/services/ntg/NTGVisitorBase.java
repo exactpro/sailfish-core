@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.nio.ByteOrder;
 
 import org.apache.commons.lang3.StringUtils;
@@ -109,8 +111,8 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 		if (clazz == String.class || clazz == String[].class)
 		{
             // If the value in the protocol attributes is not FieldFormat.A
-			String format = fldStruct.getAttributeValueByName(
-                    NTGProtocolAttribute.Format.toString()).toString();
+            String format = getAttributeValue(fldStruct, NTGProtocolAttribute.Format.toString()).toString();
+
             if (!NTGFieldFormat.A.toString().equals(format) &&
                     !NTGFieldFormat.D.toString().equals(format))
 			{

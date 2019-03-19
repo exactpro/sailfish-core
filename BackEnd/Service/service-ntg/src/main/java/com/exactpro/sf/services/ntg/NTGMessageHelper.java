@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.services.ntg.NTGUtility.getTransactTimeAsDate;
 import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
 
@@ -75,8 +76,8 @@ public class NTGMessageHelper extends MessageHelper {
 
 		@Override
 		public void visit(String fieldName, Object value, IFieldStructure fldStruct, boolean isDefault) {
-            int length = (Integer) fldStruct.getAttributeValueByName(NTGProtocolAttribute.Length.toString());
-            int offset = (Integer) fldStruct.getAttributeValueByName(NTGProtocolAttribute.Offset.toString());
+            int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+            int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 			if (messageSize != offset)
 				throw new IllegalStateException();
@@ -97,7 +98,8 @@ public class NTGMessageHelper extends MessageHelper {
 			MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
 			messageStructureWriter.traverse(visitor, complexField.getFields());
 
-            Integer length = (Integer) fldStruct.getAttributeValueByName(NTGProtocolAttribute.Length.toString());
+            Integer length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+
 			if (length != null && visitor.getMessageSize() != length) {
 				throw new IllegalStateException();
 			}
@@ -122,12 +124,12 @@ public class NTGMessageHelper extends MessageHelper {
 
         metadata = new HashMap<String, NTGMessageMetadata>();
 
-		List<IMessageStructure> messages = messageDictionary.getMessageStructures();
-		for (IMessageStructure structure : messages) {
+        for(IMessageStructure structure : messageDictionary.getMessages().values()) {
             // part of validation is done in NTGVisitorBase
             // part of message header creation is done in NTGVisitorBase
 			
-		    Byte messageTypeCode = (Byte)structure.getAttributeValueByName(ATTRIBUTE_MESSAGE_TYPE); //Fields block can not contain MessageType 
+            Byte messageTypeCode = getAttributeValue(structure, ATTRIBUTE_MESSAGE_TYPE); //Fields block can not contain MessageType
+
 			if (messageTypeCode != null) { // skip headers...
 				// calculate message sizes
 				Integer messageSize = null;
@@ -219,5 +221,5 @@ public class NTGMessageHelper extends MessageHelper {
         }
 
         return super.getSenderTime(message);
-    }
+	}
 }

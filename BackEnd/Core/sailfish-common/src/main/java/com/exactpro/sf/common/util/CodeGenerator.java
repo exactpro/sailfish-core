@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.common.util;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
@@ -24,9 +26,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -51,7 +54,7 @@ public class CodeGenerator {
     public void generate(String path, String[] distPackagePath, final IDictionaryStructure dictStructure, boolean adminOnly,
             boolean underscoreAsPackageSeparator) throws IOException {
 
-        List<IMessageStructure> filteredMessages = filterMessages(dictStructure, adminOnly);
+        Set<IMessageStructure> filteredMessages = filterMessages(dictStructure, adminOnly);
         for (IMessageStructure msgStruct : filteredMessages) {
             StringWriter strWriter = new StringWriter();
             String fullPackage = CodeGenUtils.getPackage(msgStruct, distPackagePath, underscoreAsPackageSeparator);
@@ -74,42 +77,44 @@ public class CodeGenerator {
         }
     }
 
-    private List<IFieldStructure> filterFields(IDictionaryStructure dictStructure, List<IMessageStructure> filteredMessages, boolean adminOnly) {
+    private Set<IFieldStructure> filterFields(IDictionaryStructure dictStructure, Set<IMessageStructure> filteredMessages, boolean adminOnly) {
+        Map<String, IFieldStructure> fields = dictStructure.getFields();
         if (adminOnly) {
             return filteredMessages.stream()
                     .peek(msg -> System.out.println("Search fields in message '" + msg.getName() + "'"))
-                    .flatMap(msg -> msg.getFields().stream())
+                    .flatMap(msg -> msg.getFields().values().stream())
                     .filter(field -> !field.isComplex())
                     .map(IFieldStructure::getReferenceName)
                     .distinct()
                     .filter(Objects::nonNull)
                     .peek(name -> System.out.println("Filed '" + name + "' for generate"))
-                    .map(dictStructure::getFieldStructure)
-                    .collect(Collectors.toList());
+                    .map(fields::get)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        return dictStructure.getFieldStructures();
+        return new LinkedHashSet<>(fields.values());
     }
 
-    private List<IMessageStructure> filterMessages(IDictionaryStructure dictStructure, boolean adminOnly) {
+    private Set<IMessageStructure> filterMessages(IDictionaryStructure dictStructure, boolean adminOnly) {
+        Map<String, IMessageStructure> messages = dictStructure.getMessages();
         if (adminOnly) {
-            return dictStructure.getMessageStructures().stream()
-                    .filter(msg -> Boolean.TRUE.equals(msg.getAttributeValueByName("IsAdmin")))
+            return messages.values().stream()
+                    .filter(msg -> Boolean.TRUE.equals(getAttributeValue(msg, "IsAdmin")))
                     .peek(msg -> System.out.println("Search fields in admin message '" + msg.getName() + "'"))
                     .flatMap(this::searchComplex)
                     .map(field -> ObjectUtils.defaultIfNull(field.getReferenceName(), field.getName()))
                     .distinct()
-                    .map(dictStructure::getMessageStructure)
+                    .map(messages::get)
                     .peek(msg -> System.out.println("Message '" + msg.getName() + "' for generate"))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
         }
-        return dictStructure.getMessageStructures();
+        return new LinkedHashSet<>(messages.values());
     }
     
     private Stream<IFieldStructure> searchComplex(IFieldStructure structure) {
         return Stream.concat(
                 Stream.of(structure),
-                structure.getFields().stream()
-                        .filter(field -> field.isComplex())
+                structure.getFields().values().stream()
+                        .filter(IFieldStructure::isComplex)
                         .flatMap(this::searchComplex));
     }
     
@@ -125,7 +130,7 @@ public class CodeGenerator {
 									className,
 									messageName,
 									namespace,
-									msgStruct.getFields(),
+                msgStruct.getFields().values(),
 									msgStruct.getAttributes());
 
 		return true;

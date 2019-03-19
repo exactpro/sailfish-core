@@ -18,6 +18,9 @@ package com.exactpro.sf.common.impl.messages;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,9 +29,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -61,7 +61,7 @@ public class TestStrictMessageWrapper {
     @Test
     public void testPositive() {
         String msgName = "TestMessage";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
 
         // add normal fields
@@ -112,7 +112,7 @@ public class TestStrictMessageWrapper {
         expectedException.expect(ConversionException.class);
         expectedException.expectMessage("Cannot convert from");
         String msgName = "TestMessage";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("byte", "some number");
     }
@@ -124,7 +124,7 @@ public class TestStrictMessageWrapper {
                 "com.exactpro.sf.common.impl.messages.MapMessage is not instance or subclass of "
                         + "com.exactpro.sf.common.impl.messages.StrictMessageWrapper");
         String msgName = "TestMessage";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("message", iMessage("SomeMessage"));
     }
@@ -134,7 +134,7 @@ public class TestStrictMessageWrapper {
         expectedException.expect(EPSCommonException.class);
         expectedException.expectMessage("Required field [integer] must have NOT NULL value or default value");
         String msgName = "TestRequiredField";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("string", null);
         strictMsg.addField("integer", null);
@@ -145,7 +145,7 @@ public class TestStrictMessageWrapper {
         expectedException.expect(EPSCommonException.class);
         expectedException.expectMessage("Required field [subMessage] must have NOT NULL value or default value");
         String msgName = "TestRequiredSubMessage";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("subMessage", null);
     }
@@ -155,7 +155,7 @@ public class TestStrictMessageWrapper {
         expectedException.expect(EPSCommonException.class);
         expectedException.expectMessage("Can't extract single value from collection cause it have more than 1 element");
         String msgName = "TestMessage";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("integer", Arrays.asList(1, 2));
     }
@@ -165,7 +165,7 @@ public class TestStrictMessageWrapper {
         expectedException.expect(EPSCommonException.class);
         expectedException.expectMessage("Required field [integer] must have NOT NULL value or default value");
         String msgName = "TestRequiredField";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("integer", new ArrayList<Integer>());
     }
@@ -177,7 +177,7 @@ public class TestStrictMessageWrapper {
                 + "com.exactpro.sf.common.impl.messages.MapMessage element into collection with "
                 + "element type class com.exactpro.sf.common.impl.messages.StrictMessageWrapper");
         String msgName = "TestMessage";
-        IMessageStructure msgStr = dictionary.getMessageStructure(msgName);
+        IMessageStructure msgStr = dictionary.getMessages().get(msgName);
         IMessage strictMsg = new StrictMessageWrapper(msgStr);
         strictMsg.addField("message_collection", Arrays.asList(new IMessage[] { wrappedTestMsg(), wrappedTestMsg() }));
         List<IMessage> testList = strictMsg.getField("message_collection");
@@ -186,7 +186,7 @@ public class TestStrictMessageWrapper {
 
     private IMessage wrappedTestMsg() {
         String refMsgName = "SomeMessage";
-        IMessageStructure str = dictionary.getMessageStructure(refMsgName);
+        IMessageStructure str = dictionary.getMessages().get(refMsgName);
         IMessage msg = new StrictMessageWrapper(str);
         msg.addField("testField", 101);
         return msg;

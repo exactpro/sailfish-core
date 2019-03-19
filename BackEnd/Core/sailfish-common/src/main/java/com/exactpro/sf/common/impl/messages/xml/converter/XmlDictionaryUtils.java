@@ -39,18 +39,18 @@ public class XmlDictionaryUtils {
 
     public static List<Map<String, Object>> getGroupFieldsName(IFieldStructure fieldStructure){
         List<Map<String, Object>> fieldsName = new ArrayList<Map<String, Object>>();
-        List<IFieldStructure> fields = fieldStructure.getFields();
-        for(IFieldStructure field : fields) {
+        Map<String, IFieldStructure> fields = fieldStructure.getFields();
+        fields.forEach((name, field) -> {
             if(field.isComplex()) {
                 Map<String, Object> groupFieldsName = new HashMap<String, Object>();
-                groupFieldsName.put(field.getName(), getGroupFieldsName(field));
+                groupFieldsName.put(name, getGroupFieldsName(field));
                 fieldsName.add(groupFieldsName);
             } else if (field.getReferenceName() != null) {
                 Map<String, Object> groupFieldsName = new HashMap<String, Object>();
                 groupFieldsName.put(field.getReferenceName(), null);
                 fieldsName.add(groupFieldsName);
             }
-        }
+        });
         return fieldsName;
     }
 

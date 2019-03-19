@@ -54,29 +54,30 @@ public class MessageTraverser extends MessageStructureReader {
     }
 
     @Override
-    public void traverse(IMessageStructureVisitor msgStrVisitor, List<IFieldStructure> fields, IMessage message,
+    public void traverse(IMessageStructureVisitor msgStrVisitor, Map<String, IFieldStructure> fields, IMessage message,
             IMessageStructureReaderHandler handler) {
-        List<IFieldStructure> combinedFields = combineUnknownFields(fields, message);
+        Map<String, IFieldStructure> combinedFields = combineUnknownFields(fields, message);
 
         super.traverse(msgStrVisitor, combinedFields, message, handler);
     }
 
-    protected List<IFieldStructure> combineUnknownFields(List<IFieldStructure> fields, IMessage message) {
-        Map<String, JavaType> namesByDictionary = fields.stream()
+    protected Map<String, IFieldStructure> combineUnknownFields(Map<String, IFieldStructure> fields, IMessage message) {
+        Map<String, JavaType> namesByDictionary = fields.values().stream()
                 .filter(e -> !e.isComplex())
                 .collect(Collectors.toMap(IFieldStructure::getName, IFieldStructure::getJavaType));
 
-        fields.stream()
+        fields.values().stream()
                 .filter(IFieldStructure::isComplex)
                 .forEach(e ->namesByDictionary.put(e.getName(), null));
 
-        return Stream.concat(fields.stream(),
+        return Stream.concat(fields.values().stream(),
                 message.getFieldNames().stream()
                         .filter(name -> !contains(namesByDictionary, name, message.getField(name)))
                         .map(name -> createFieldStructure(message, name)))
                 .collect(Collectors.groupingBy(IFieldStructure::getName, LinkedHashMap::new, Collectors.reducing(this::overrideStructure)))
                 .values().stream()
-                .map(Optional::get).collect(Collectors.toList());
+                .map(Optional::get)
+                .collect(LinkedHashMap::new, (map, value) -> map.put(value.getName(), value), Map::putAll);
     }
 
     private IFieldStructure overrideStructure(IFieldStructure a, IFieldStructure b) {

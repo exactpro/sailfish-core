@@ -49,7 +49,7 @@ public class StrictMessageFactoryWrapper implements IMessageFactory {
             throw new EPSCommonException(String.format("Unexpected namespace: [%s]. Expected: [%s]", namespace, getNamespace()));
         }
 
-        IMessageStructure messageStructure = dictionaryStructure.getMessageStructure(name);
+        IMessageStructure messageStructure = dictionaryStructure.getMessages().get(name);
         if (messageStructure == null) {
             throw new EPSCommonException("Can't find structure for message " + name);
         }

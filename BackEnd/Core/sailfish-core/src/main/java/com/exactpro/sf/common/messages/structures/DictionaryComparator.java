@@ -15,12 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.google.common.collect.Iterables.get;
+import static com.google.common.collect.Iterables.indexOf;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -100,25 +103,25 @@ public class DictionaryComparator {
 
         Iterable<? extends IFieldStructure> iterable;
         if (checkByFirst) {
-            iterable = one.getMessageStructures();
+            iterable = one.getMessages().values();
         } else {
-            iterable = Iterables.concat(one.getMessageStructures(), two.getMessageStructures());
+            iterable = Iterables.concat(one.getMessages().values(), two.getMessages().values());
         }
         Set<String> names = getNames(iterable);
         for (String name : names) {
-            compare(listener, one.getMessageStructure(name), two.getMessageStructure(name), new DictionaryPath(path).setMessage(name),
+            compare(listener, one.getMessages().get(name), two.getMessages().get(name), new DictionaryPath(path).setMessage(name),
                     compareOrder, checkByFirst, deepCheck, EntityCheckType.ALL);
 
         }
 
         if (checkByFirst) {
-            iterable = one.getFieldStructures();
+            iterable = one.getFields().values();
         } else {
-            iterable = Iterables.concat(one.getFieldStructures(), two.getFieldStructures());
+            iterable = Iterables.concat(one.getFields().values(), two.getFields().values());
         }
         names = getNames(iterable);
         for (String name : names) {
-            compare(listener, one.getFieldStructure(name), two.getFieldStructure(name), new DictionaryPath(path).setField(name),
+            compare(listener, one.getFields().get(name), two.getFields().get(name), new DictionaryPath(path).setField(name),
                     compareOrder, checkByFirst, deepCheck, EntityCheckType.ALL);
         }
     }
@@ -144,12 +147,12 @@ public class DictionaryComparator {
         equal(listener, one.isEnum(), two.isEnum(), path, DistinctionType.IsEnum);
 
         Set<String> names = new TreeSet<>();
-        names.addAll(ObjectUtils.defaultIfNull(one.getAttributeNames(), Collections.emptyList()));
+        names.addAll(one.getAttributes().keySet());
         if (!checkByFirst) {
-            names.addAll(ObjectUtils.defaultIfNull(two.getAttributeNames(), Collections.emptyList()));
+            names.addAll(two.getAttributes().keySet());
         }
         for (String name : names) {
-            equal(listener, one.getAttributeValueByName(name), two.getAttributeValueByName(name), new DictionaryPath(path).setAttribute(name), DistinctionType.AttributeValue);
+            equal(listener, getAttributeValue(one, name), getAttributeValue(two, name), new DictionaryPath(path).setAttribute(name), DistinctionType.AttributeValue);
         }
 
         names.clear();
@@ -255,7 +258,7 @@ public class DictionaryComparator {
 
     private IFieldStructure safeField(IFieldStructure fieldStructure, String subFiledName) {
         try {
-            return fieldStructure.getField(subFiledName);
+            return fieldStructure.getFields().get(subFiledName);
         } catch (UnsupportedOperationException e) {
             return null;
         }
@@ -263,17 +266,17 @@ public class DictionaryComparator {
 
     private String safeField(IFieldStructure fieldStructure, int subFieldIndex){
         try {
-            return fieldStructure.getFieldNames().get(subFieldIndex);
+            return get(fieldStructure.getFields().keySet(), subFieldIndex);
         } catch (UnsupportedOperationException | IndexOutOfBoundsException e) {
             return null;
         }
     }
 
-    private int safeFieldIndex(IFieldStructure fieldStructureOne, IFieldStructure fieldStructureTwo, String subFiledName){
+    private int safeFieldIndex(IFieldStructure fieldStructureOne, IFieldStructure fieldStructureTwo, String subFieldName) {
         try {
-            int result = fieldStructureOne.getFieldNames().indexOf(subFiledName);
+            int result = indexOf(fieldStructureOne.getFields().keySet(), subFieldName::equals);
             if(result == -1){
-                result = fieldStructureTwo.getFieldNames().indexOf(subFiledName);
+                result = indexOf(fieldStructureTwo.getFields().keySet(), subFieldName::equals);
             }
             return result;
         } catch (UnsupportedOperationException e) {
@@ -289,11 +292,11 @@ public class DictionaryComparator {
         }
     }
 
-    private List<String> safeFieldNames(IFieldStructure fieldStructure) {
+    private Set<String> safeFieldNames(IFieldStructure fieldStructure) {
         try {
-            return ObjectUtils.defaultIfNull(fieldStructure.getFieldNames(), Collections.<String>emptyList());
+            return fieldStructure.getFields().keySet();
         } catch (UnsupportedOperationException e) {
-            return Collections.emptyList();
+            return Collections.emptySet();
         }
     }
 

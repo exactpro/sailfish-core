@@ -22,7 +22,6 @@ import com.exactpro.sf.common.messages.structures.IAttributeStructure;
  * This structure should be immutable
  */
 public class AttributeStructure implements IAttributeStructure {
-	
 	private final String name;
 	
 	private final String value;
@@ -49,8 +48,8 @@ public class AttributeStructure implements IAttributeStructure {
 	}
 
 	@Override
-	public Object getCastValue() {
-		return castValue;
+    public <T> T getCastValue() {
+        return (T)castValue;
 	}
 
 	@Override

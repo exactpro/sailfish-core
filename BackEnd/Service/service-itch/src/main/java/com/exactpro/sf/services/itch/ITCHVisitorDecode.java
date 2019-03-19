@@ -15,6 +15,24 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.CharacterCodingException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageStructureWriter;
@@ -23,21 +41,6 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.primitives.UnsignedLong;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeParseException;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.charset.CharacterCodingException;
-import java.util.LinkedList;
-import java.util.List;
 
 public class ITCHVisitorDecode extends ITCHVisitorBase {
 
@@ -57,10 +60,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Integer value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
-		
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.UINT16) {
@@ -86,10 +89,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Long value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.UINT32) {
@@ -117,10 +120,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Short value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.UINT8 || type == ProtocolType.BYTE) {
@@ -144,10 +147,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Byte value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.BYTE) {
@@ -167,15 +170,15 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.ALPHA || type == ProtocolType.DATE || type == ProtocolType.TIME) { 
 			// if you edit this lines, please edit ALPHA_NOTRIM too
-			byte[] array = new byte[(Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE)];
+            byte[] array = new byte[(Integer)getAttributeValue(fldStruct, LENGTH_ATTRIBUTE)];
 
 			buffer.get(array); // FIXME: slice?
 
@@ -186,7 +189,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 			}
 
         } else if (type == ProtocolType.ALPHA_NOTRIM) {
-			byte[] array = new byte[(Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE)];
+            byte[] array = new byte[(Integer)getAttributeValue(fldStruct, LENGTH_ATTRIBUTE)];
 			buffer.get(array);
 			try {
 				msg.addField(fieldName, decoder.get().decode(ByteBuffer.wrap(array)).toString());
@@ -208,10 +211,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.SIZE || type == ProtocolType.SIZE4) {
@@ -254,7 +257,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		} else if (type == ProtocolType.UINT16) {
 			BigDecimal val = new BigDecimal(buffer.getUnsignedShort());
 
-			Integer impliedDecimals = (Integer) fldStruct.getAttributeValueByName(IMPILED_DECIMALS_ATTRIBUTE);
+            Integer impliedDecimals = getAttributeValue(fldStruct, IMPILED_DECIMALS_ATTRIBUTE);
 			if (impliedDecimals != null) {
 				for (int i = 0; i < impliedDecimals; i++) {
 					val=val.divide(BigDecimal.TEN);
@@ -274,10 +277,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, Float value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.PRICE) {
@@ -296,11 +299,11 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, BigDecimal value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-		Integer impliedDecimals = (Integer) fldStruct.getAttributeValueByName(IMPILED_DECIMALS_ATTRIBUTE);
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        Integer impliedDecimals = getAttributeValue(fldStruct, IMPILED_DECIMALS_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		if (type == ProtocolType.UINT64) {
@@ -399,10 +402,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 	@Override
 	public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
-		ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
-		
-		int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 		int pos1 = buffer.position();
 
 		
@@ -429,10 +432,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
     @Override
     public void visit(String fieldName, LocalDate value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
         logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-        int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
         int pos1 = buffer.position();
 
         if (type == ProtocolType.DAYS) {
@@ -470,10 +473,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
     @Override
     public void visit(String fieldName, LocalTime value, IFieldStructure fldStruct, boolean isDefault) {
-        ProtocolType type = ProtocolType.getEnum((String) fldStruct.getAttributeValueByName(TYPE_ATTRIBUTE));
+        ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
         logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
 
-        int length = (Integer) fldStruct.getAttributeValueByName(LENGTH_ATTRIBUTE);
+        int length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
         int pos1 = buffer.position();
 
         if (type == ProtocolType.TIME) {
@@ -506,7 +509,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 	@Override
 	public void visitMessageCollection(String fieldName, List<IMessage> message, IFieldStructure complexField, boolean isDefault) {
 		int legsCount = 0;
-		Object countField = complexField.getAttributeValueByName(COUNT_ATTRIBUTE);
+        Object countField = getAttributeValue(complexField, COUNT_ATTRIBUTE);
 		if (countField instanceof Number) {
 			// hardcoded length
 			legsCount = ((Number) countField).intValue();

@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.structures;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.map.ListOrderedMap;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -27,75 +27,44 @@ import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureType;
 
 public class ModifiableMessageStructure extends ModifiableFieldStructure implements IMessageStructure {
-
-	protected List<ModifiableFieldStructure> fields;
+    protected ListOrderedMap<String, ModifiableFieldStructure> fields;
 
 	public ModifiableMessageStructure() {
-		this.fields = new ArrayList<>();
+        this.fields = new ListOrderedMap<>();
 	}
 
 	public ModifiableMessageStructure(String id, String name, String namespace, String description, Map<String, ModifiableAttributeStructure> attributes,
 			boolean isRequired, boolean isCollection, ModifiableMessageStructure reference) {
-
 		this(id, name, namespace, description, null, attributes, isRequired, isCollection, reference);
 	}
 
 	public ModifiableMessageStructure(String id, String name, String namespace, String description,
-			List<ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes) {
-
+            Map<String, ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes) {
 		this(id, name, namespace, description, fields, attributes, false, false, null);
 	}
 
 	private ModifiableMessageStructure(String id, String name, String namespace, String description,
-			List<ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes,
+            Map<String, ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes,
 			boolean isRequired, boolean isCollection, ModifiableMessageStructure reference) {
-
 		super(id, name, namespace, description, attributes, null, null, isRequired, isCollection, false, null);
 
 		if (fields != null) {
-			this.fields = fields;
+            this.fields = ListOrderedMap.listOrderedMap(fields);
 		} else {
-			this.fields = new ArrayList<>();
+            this.fields = new ListOrderedMap<>();
 		}
 
 		this.reference = reference;
 	}
 
+    @SuppressWarnings("unchecked")
 	@Override
-	public ModifiableFieldStructure getField(String name) {
-
-		if (this.fields == null) return null;
-
-		for (ModifiableFieldStructure fieldStructure : this.fields) {
-			if (fieldStructure.getName().equals(name)) {
-				return fieldStructure;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public List<String> getFieldNames() {
-
-		if (this.reference != null) {
-			return ((ModifiableMessageStructure)this.reference).getFieldNames();
-		}
-
-		return this.fields.stream()
-		        .map(IFieldStructure::getName)
-		        .collect(Collectors.toList());
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<IFieldStructure> getFields() {
-
+    public Map<String, IFieldStructure> getFields() {
 		if (this.reference != null) {
 			return ((ModifiableMessageStructure)this.reference).getFields();
 		}
 
-		return (List<IFieldStructure>)(List<?>)fields;
+        return (Map<String, IFieldStructure>)(Map<String, ?>)fields;
 	}
 
 	@Override
@@ -135,7 +104,6 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public boolean isRequired() {
-
 		if (this.reference != null) {
 			return super.isRequired();
 		}
@@ -175,7 +143,6 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     
 	@Override
 	public void setRequired(boolean req) {
-
 		if (this.reference != null) {
 			super.setRequired(req);
 			return;
@@ -186,7 +153,6 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public boolean isCollection() {
-
 		if (this.reference != null) {
 			return super.isCollection();
 		}
@@ -196,7 +162,6 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public void setCollection(boolean col) {
-
 		if (this.reference != null) {
 			super.setCollection(col);
 			return;
@@ -216,7 +181,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     }
 
 	@Override
-	public Object getDefaultValue() {
+    public <T> T getDefaultValue() {
 		throw new UnsupportedOperationException("Messages don't have a default value. Message: " + getName());
 	}
 
@@ -233,18 +198,18 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 	/** IMPL **/
 
 	public void addField(ModifiableFieldStructure field) {
-		this.fields.add(field);
+        this.fields.put(field.getName(), field);
 	}
 
     public void addField(int index, ModifiableFieldStructure field) {
-        this.fields.add(index, field);
+        this.fields.put(index, field.getName(), field);
     }
 
 	public void removeField(ModifiableFieldStructure field) {
-		this.fields.remove(field);
-	}
+        this.fields.remove(field.getName());
+    }
 
-	public List<ModifiableFieldStructure> getImplFields() {
+    public ListOrderedMap<String, ModifiableFieldStructure> getImplFields() {
 		return fields;
 	}
 }

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
@@ -170,7 +172,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         SailfishURI dictionaryName = getSettings().getDictionaryName();
         this.dictionary = dictionaryManager.getDictionary(dictionaryName);
 
-        String templateName = Objects.requireNonNull((String) dictionary.getAttributeValueByName(FASTMessageHelper.TEMPLATE_ATTRIBYTE), "'Template attribute' parameter");
+        String templateName = Objects.requireNonNull(getAttributeValue(dictionary, FASTMessageHelper.TEMPLATE_ATTRIBYTE), "'Template attribute' parameter");
         loadFastTemplates(serviceContext.getDataManager(), dictionaryName.getPluginAlias(), templateName);
 
         this.messageHelper = new FASTMessageHelper();
@@ -424,8 +426,8 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 			logger.debug("Converting FAST message");
 			iMsg = converter.convert(fastMessage);
 
-			IMessageStructure structure = dictionary.getMessageStructure(iMsg.getName());
-			Boolean isAdmin = (Boolean) structure.getAttributeValueByName("isAdmin");
+            IMessageStructure structure = dictionary.getMessages().get(iMsg.getName());
+            Boolean isAdmin = getAttributeValue(structure, "IsAdmin");
 			if (isAdmin == null) {
 				isAdmin = false;
 			}

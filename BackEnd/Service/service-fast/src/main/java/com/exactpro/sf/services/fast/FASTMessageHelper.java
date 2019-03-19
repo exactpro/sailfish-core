@@ -22,6 +22,7 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.services.MessageHelper;
 
 /**
@@ -48,7 +49,7 @@ public class FASTMessageHelper extends MessageHelper {
         templateIds.clear();
 
         if (dictionaryStructure != null) {
-            for (IMessageStructure messageStructure : dictionaryStructure.getMessageStructures()) {
+            for(IMessageStructure messageStructure : dictionaryStructure.getMessages().values()) {
                 Object messageType = getAttributeValueByName(messageStructure, MESSAGE_TYPE_FIELD, MESSAGE_TYPE_ATTR_NAME);
                 if (messageType != null) {
                     messageTypes.put(messageStructure.getName(), messageType);
@@ -74,8 +75,8 @@ public class FASTMessageHelper extends MessageHelper {
 
     private Object getAttributeValueByName(IMessageStructure structure, String fieldName, String attributeName) {
         if (structure != null) {
-            if (structure.getFieldNames().contains(fieldName)) {
-                return structure.getAttributeValueByName(attributeName);
+            if(structure.getFields().containsKey(fieldName)) {
+                return StructureUtils.getAttributeValue(structure, attributeName);
             }
         }
         return null;

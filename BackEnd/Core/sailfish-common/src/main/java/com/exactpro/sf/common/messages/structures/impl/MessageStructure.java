@@ -15,9 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures.impl;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
@@ -30,9 +28,7 @@ import com.exactpro.sf.common.messages.structures.StructureType;
  * This structure should be immutable
  */
 public class MessageStructure extends FieldStructure implements IMessageStructure {
-
-	private final List<IFieldStructure> fields;
-	private final List<String> 		    fieldNames;
+    private final Map<String, IFieldStructure> fields;
 
 	private IMessageStructure reference;
 
@@ -42,71 +38,30 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	public MessageStructure(String name, String namespace, String description, boolean isRequired, boolean isCollection,
 			Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
-
 		this(name, namespace, description, null, isRequired, isCollection, attributes, reference);
 	}
 
-	public MessageStructure(String name, String namespace, String description, List<IFieldStructure> fields,
+    public MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
 			Map<String, IAttributeStructure> attributes) {
-
 		this(name, namespace, description, fields, false, false, attributes, null);
 	}
 
-	private MessageStructure(String name, String namespace, String description, List<IFieldStructure> fields,
+    private MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
 			boolean isRequired, boolean isCollection, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
-
 		super(name, namespace, description, reference != null ? reference.getName() : null, attributes,
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
 
 		if (fields != null) {
-			this.fields = Collections.unmodifiableList(fields);
+            this.fields = Collections.unmodifiableMap(fields);
 		} else {
-			this.fields = Collections.emptyList();
+            this.fields = Collections.emptyMap();
 		}
 
-		this.fieldNames = createFieldNames();
 		this.reference = reference;
 	}
 
-	private List<String> createFieldNames() {
-		List<String> result = new ArrayList<>();
-
-		for (IFieldStructure field : this.fields) {
-			result.add(field.getName());
-		}
-
-		return Collections.unmodifiableList(result);
-	}
-
 	@Override
-	public IFieldStructure getField(String name) {
-
-		List<IFieldStructure> curFields = this.reference != null ? this.reference.getFields() : this.fields;
-
-		if (curFields == null) return null;
-
-		for (IFieldStructure fieldStructure : curFields) {
-			if (fieldStructure.getName().equals(name)) {
-				return fieldStructure;
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public List<String> getFieldNames() {
-
-		if (this.reference != null) {
-			return this.reference.getFieldNames();
-		}
-
-		return this.fieldNames;
-	}
-
-	@Override
-	public List<IFieldStructure> getFields() {
-
+    public Map<String, IFieldStructure> getFields() {
 		if (this.reference != null) {
 			return this.reference.getFields();
 		}
@@ -126,7 +81,6 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public boolean isRequired() {
-
 		if (this.reference != null) {
 			return super.isRequired();
 		}
@@ -136,7 +90,6 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public boolean isCollection() {
-
 		if (this.reference != null) {
 			return super.isCollection();
 		}
@@ -150,7 +103,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
     }
 
 	@Override
-	public Object getDefaultValue() {
+    public <T> T getDefaultValue() {
 		throw new UnsupportedOperationException("Messages don't have a default value. Message: " + getName());
 	}
 }

@@ -39,6 +39,7 @@ import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -116,36 +117,36 @@ public class ReadConfigTest extends EPSTestCase {
 
 		TestVisitor visitor = new TestVisitor();
 
-		for (IMessageStructure imstructure : dictionary.getMessageStructures()) {
+        for(IMessageStructure imstructure : dictionary.getMessages().values()) {
 
 			System.out.println(" message = " + imstructure.getName());
 			wtraverser.traverse(visitor, imstructure);
 
 		}
-		
-		IMessageStructure heartbeat = dictionary.getMessageStructure("Heartbeat");
-		IFieldStructure messageHeaderField = heartbeat.getField("MessageHeader");
+
+        IMessageStructure heartbeat = dictionary.getMessages().get("Heartbeat");
+        IFieldStructure messageHeaderField = heartbeat.getFields().get("MessageHeader");
 		Assert.assertArrayEquals(
-				new String[] { "inclusion", "length" }, 
-				messageHeaderField.getAttributeNames().toArray(new String[0]) 
+                new String[] { "inclusion", "length" },
+                messageHeaderField.getAttributes().keySet().toArray(new String[0])
 				);
-		
-		IMessageStructure messageHeader = dictionary.getMessageStructure("MessageHeader");
-		IFieldStructure messageTypeFieldStructure = messageHeader.getField("MessageType");
-		
-		IFieldStructure messageTypeFieldType = dictionary.getFieldStructure("MessageType");
+
+        IMessageStructure messageHeader = dictionary.getMessages().get("MessageHeader");
+        IFieldStructure messageTypeFieldStructure = messageHeader.getFields().get("MessageType");
+
+        IFieldStructure messageTypeFieldType = dictionary.getFields().get("MessageType");
 		
 		Assert.assertTrue(messageTypeFieldStructure.isEnum());
 		Assert.assertTrue(messageTypeFieldType.isEnum());
 		
 		Assert.assertArrayEquals(extractAlias(messageTypeFieldType.getValues()), extractAlias(messageTypeFieldStructure.getValues()));
-		
-		Assert.assertEquals(20, messageTypeFieldStructure.getAttributeValueByName("Index"));
-		
-		IMessageStructure missedMessageRequest = dictionary.getMessageStructure("MissedMessageRequest");
-		IFieldStructure appID = missedMessageRequest.getField("AppID");
-		
-		Assert.assertEquals((short)2, appID.getDefaultValue());
+
+        Assert.assertEquals(20, StructureUtils.<Object>getAttributeValue(messageTypeFieldStructure, "Index"));
+
+        IMessageStructure missedMessageRequest = dictionary.getMessages().get("MissedMessageRequest");
+        IFieldStructure appID = missedMessageRequest.getFields().get("AppID");
+
+        Assert.assertEquals((short)2, (short)appID.getDefaultValue());
 	}
 
 	@Test
@@ -159,18 +160,18 @@ public class ReadConfigTest extends EPSTestCase {
 			adopted = loader.load(in);
     	}
 
-		IMessageStructure structure = adopted.getMessageStructure("RepetitiveMandatorySubsequenceA1Linkages");
+        IMessageStructure structure = adopted.getMessages().get("RepetitiveMandatorySubsequenceA1Linkages");
 		Assert.assertNotSame(0, structure.getFields().size());
 		IFieldStructure tmp = null;
-		for(IFieldStructure fieldStructure : structure.getFields()){
+        for(IFieldStructure fieldStructure : structure.getFields().values()) {
 			if("20C".equals(fieldStructure.getName())){
 				tmp = fieldStructure;
 			}
 		}
 		Assert.assertNotNull(tmp);
 
-		for (String attributeName : tmp.getAttributes().keySet()) {
-			System.out.println(tmp.getAttributeValueByName(attributeName));
+        for(IAttributeStructure attribute : tmp.getAttributes().values()) {
+            System.out.println(attribute.<Object>getCastValue());
 		}
     }
 
@@ -184,23 +185,23 @@ public class ReadConfigTest extends EPSTestCase {
 		try (InputStream in = new FileInputStream(xmlFile)) {
 			dictionary = loader.load(in);
     	}
-		
-		IMessageStructure structure = dictionary.getMessageStructure("518");
+
+        IMessageStructure structure = dictionary.getMessages().get("518");
 		Assert.assertNotSame(0, structure.getFields().size());
 		System.out.println(structure.getFields().size());
 
 		int messageCount518 = 0;
 
-		for (IFieldStructure fieldStructure0 :  structure.getFields()) { 
+        for(IFieldStructure fieldStructure0 : structure.getFields().values()) {
 			System.out.println(fieldStructure0.getName() + " " + fieldStructure0.getStructureType());
 			if (fieldStructure0.isComplex()) {
 				messageCount518++;
 				if( fieldStructure0.getName().equals("SMandatorySequenceBConfirmationDetails") ){
 					Assert.assertEquals(3, fieldStructure0.getFields().size());
-					for (IFieldStructure fieldStructure1 : fieldStructure0.getFields()) {
+                    for(IFieldStructure fieldStructure1 : fieldStructure0.getFields().values()) {
 						System.out.println(fieldStructure1.getName() + " " + fieldStructure1.getStructureType());
 						if (fieldStructure1.isComplex()) {
-							for (IFieldStructure fieldStructure2 : fieldStructure1.getFields()) {
+                            for(IFieldStructure fieldStructure2 : fieldStructure1.getFields().values()) {
 								System.out.println(fieldStructure2.getName() + " " + fieldStructure2.getStructureType());
 							}
 						}
@@ -257,9 +258,7 @@ public class ReadConfigTest extends EPSTestCase {
 
 		private void visitField(String fieldName, String type, IFieldStructure fldStruct, String value) {
 			System.out.println(fieldName + "  " + type + " " + value);
-			for (String aname : fldStruct.getAttributes().keySet()) {
-				System.out.println(aname + " " + fldStruct.getAttributeValueByName(aname));
-			}
+            fldStruct.getAttributes().forEach((name, attribute) -> System.out.println(name + " " + attribute.getCastValue()));
 		}
 
 		@Override
