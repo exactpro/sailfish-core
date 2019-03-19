@@ -194,7 +194,7 @@
 	</class>
 
     <class name="StoredVariableSet" table="VARIABLE_SETS">
-        <id name="id" column="ID">
+        <id name="id" column="ID" length="128">
             <generator class="assigned"/>
         </id>
         <version name="version" column="VERSION" unsaved-value="null"/>
