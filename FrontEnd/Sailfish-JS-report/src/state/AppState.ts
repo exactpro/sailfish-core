@@ -27,6 +27,7 @@ export default interface AppState {
     currentTestCasePath: string;
     testCase: TestCase;
     checkpointActions: Action[];
+    actionsMap: Map<number, Action>;
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
     selected: SelectedState;

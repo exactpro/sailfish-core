@@ -205,7 +205,7 @@ export const MessagesCardList = connect(
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         selectedStatus: state.selected.status,
         adminMessagesEnabled: state.adminMessagesEnabled,
-        actionsMap: generateActionsMap(getActions(state.testCase.actions))
+        actionsMap: state.actionsMap
     }),
     dispatch => ({}),
     null,

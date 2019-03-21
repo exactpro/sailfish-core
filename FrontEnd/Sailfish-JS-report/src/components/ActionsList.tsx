@@ -21,7 +21,7 @@ import Action from '../models/Action';
 import { ActionTree } from './ActionTree';
 import { StatusType } from '../models/Status';
 import AppState from '../state/AppState';
-import { selectAction, selectMessages, selectCheckpoint } from '../actions/actionCreators';
+import { selectAction, selectCheckpoint, selectVerification } from '../actions/actionCreators';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { actionsHeatmap } from '../helpers/heatmapCreator';
 import { getActions } from '../helpers/actionType';
@@ -113,7 +113,7 @@ export const ActionsList = connect((state: AppState) => ({
     }),
     dispatch => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),
-        onMessageSelect: (id: number, status: StatusType) => dispatch(selectMessages([id], status)),
+        onMessageSelect: (id: number, status: StatusType) => dispatch(selectVerification(id, status)),
         setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpoint(checkpointAction))
     }),
     null,

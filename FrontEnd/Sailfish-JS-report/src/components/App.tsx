@@ -22,8 +22,7 @@ import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'preact-redux';
 import AppState from "../state/AppState";
-import { setTestCase, setReport, setTestCasePath, selectActionById } from "../actions/actionCreators";
-import { selectMessages } from '../actions/actionCreators';
+import { setTestCase, setReport, setTestCasePath, selectActionById, selectVerification } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,
@@ -159,7 +158,7 @@ export const App = connect(
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
         updateTestCasePath: (testCasePath: string) => dispatch(setTestCasePath(testCasePath)),
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
-        selectMessage: (messageId: number) => dispatch(selectMessages([messageId])),
+        selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
         updateReport: (report: Report) => dispatch(setReport(report))
     })
 )(AppBase)

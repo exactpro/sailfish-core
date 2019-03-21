@@ -19,6 +19,7 @@ import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from '../models/Report';
 import { Panel } from "../helpers/Panel";
+import Message from "../models/Message";
 
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
@@ -29,7 +30,8 @@ export enum StateActionTypes {
     RESET_TEST_CASE= 'RESET_TEST_CASE',
     SELECT_ACTION = 'SELECT_ACTION',
     SELECT_ACTION_BY_ID = 'SELECT_ACTION_BY_ID',
-    SELECT_MESSAGES = 'SELECT_MESSAGES',
+    SELECT_MESSAGE = 'SELECT_MESSAGE',
+    SELECT_VERIFICATION = 'SELECT_VERIFICATION',
     SELECT_CHECKPOINT = 'SELECT_CHECKPOINT',
     SELECT_REJECTED_MESSAGE = 'SELECT_REJECTED_MESSAGE',
     SET_ADMIN_MSG_ENABLED = 'SET_ADMIN_MSG_ENABLED',
@@ -64,9 +66,15 @@ export interface ActionSelectByIdStateAction {
     actionId: number;
 }
 
-export interface MessagesSelectStateAction {
-    type: StateActionTypes.SELECT_MESSAGES;
-    messagesId: number[];
+export interface MessageSelectStateAction {
+    type: StateActionTypes.SELECT_MESSAGE;
+    message: Message;
+    status: StatusType;
+}
+
+export interface VerificationSelectStateAction {
+    type: StateActionTypes.SELECT_VERIFICATION;
+    messageId: number;
     status: StatusType;
 }
 
@@ -127,7 +135,8 @@ export type StateActionType = SetReportStateAction |
     ResetTestCaseStateAction |
     ActionSelectStateAction |
     ActionSelectByIdStateAction |
-    MessagesSelectStateAction | 
+    MessageSelectStateAction | 
+    VerificationSelectStateAction |
     CheckpointSelectStateAction |
     RejectedMessageSelectStateAction |
     NextTestCaseStateAction |

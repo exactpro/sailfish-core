@@ -19,6 +19,8 @@ import { StateActionType, StateActionTypes } from '../actions/stateActions';
 import AppState from '../state/AppState';
 import { Panel } from '../helpers/Panel';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
+import { generateActionsMap } from '../helpers/mapGenerator';
+import { getActions } from '../helpers/actionType';
 
 export function appReducer(state: AppState = initialAppState, stateAction: StateActionType): AppState {
     switch (stateAction.type) {
@@ -27,7 +29,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 report: stateAction.report,
-                testCase: null,
+                testCase: initialAppState.testCase,
                 currentTestCasePath: ""
             }
         }
@@ -55,12 +57,28 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             }
         }
 
-        case StateActionTypes.SELECT_MESSAGES: {
+        case StateActionTypes.SELECT_MESSAGE: {
+
+            const relatedActions = stateAction.message.relatedActions
+                .filter(actionId => !stateAction.status || (state.actionsMap.get(actionId) && state.actionsMap.get(actionId).status.status == stateAction.status));
+
             return {
                 ...state,
                 selected: {
                     ...state.selected,
-                    messagesId: stateAction.messagesId,
+                    messagesId: [stateAction.message.id],
+                    status: stateAction.status,
+                    actionsId: relatedActions
+                }
+            }
+        }
+
+        case StateActionTypes.SELECT_VERIFICATION: {
+            return {
+                ...state,
+                selected: {
+                    ...state.selected,
+                    messagesId: [stateAction.messageId],
                     status: stateAction.status,
                     actionsId: initialSelectedState.actionsId
                 }
@@ -120,14 +138,15 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: stateAction.testCase,
-                checkpointActions: getCheckpointActions(stateAction.testCase.actions)
+                checkpointActions: getCheckpointActions(stateAction.testCase.actions),
+                actionsMap: generateActionsMap(getActions(stateAction.testCase.actions))
             }
         }
 
         case StateActionTypes.RESET_TEST_CASE: {
             return {
                 ...state,
-                testCase: null,
+                testCase: initialAppState.testCase,
                 currentTestCasePath: "",
                 selected: initialSelectedState
             }
@@ -138,7 +157,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
 
             return {
                 ...state,
-                testCase: null,
+                testCase: initialAppState.testCase,
                 selected: initialSelectedState,
                 currentTestCasePath: state.report.metadata[nextTestCaseIndex] ? 
                     state.report.metadata[nextTestCaseIndex].jsonpFileName : state.report.metadata[0].jsonpFileName
@@ -150,7 +169,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
 
             return {
                 ...state,
-                testCase: null,
+                testCase: initialAppState.testCase,
                 selected: initialSelectedState,
                 currentTestCasePath: state.report.metadata[prevTestCaseIndex] ? 
                     state.report.metadata[prevTestCaseIndex].jsonpFileName : state.report.metadata[state.report.metadata.length - 1].jsonpFileName
@@ -160,7 +179,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
         case StateActionTypes.SET_TEST_CASE_PATH: {
             return {
                 ...state,
-                testCase: null,
+                testCase: initialAppState.testCase,
                 currentTestCasePath: stateAction.testCasePath
             }
         }
