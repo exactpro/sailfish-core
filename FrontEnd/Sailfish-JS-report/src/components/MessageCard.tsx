@@ -32,6 +32,7 @@ export interface MessageCardProps {
     actions: Action[];
     status?: StatusType;
     rejectedMessagesCount?: number;
+    selectHandler: (message: Message, status?: StatusType) => any;
 }
 
 interface MessageCardState {
@@ -64,7 +65,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
         });
     }
 
-    render({ message, isSelected, actions, status, rejectedMessagesCount }: MessageCardProps, { showRaw }: MessageCardState) {
+    render({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler }: MessageCardProps, { showRaw }: MessageCardState) {
         const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
         const hueValue = this.calculateHueValue(from, to),
@@ -91,7 +92,9 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     {this.renderMessageTypeLabels(message)}
                 </div>
                 <div class="message-card">
-                    <div class="message-card-header" data-lb-count={labelsCount}>
+                    <div class="message-card-header" 
+                        data-lb-count={labelsCount}
+                        onClick={() => selectHandler(message)}>
                         <div class="message-card-header-action">
                             {
                                 rejectedMessagesCount && actions.length == 0 ?
@@ -103,7 +106,8 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                                     : (
                                         <MessageCardActionChips
                                             actions={actions}
-                                            selectedStatus={status} />
+                                            selectedStatus={status}
+                                            selectHandler={status => selectHandler(message, status)} />
                                     )
                             }
                         </div>

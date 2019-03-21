@@ -20,26 +20,31 @@ import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import "../styles/messages.scss";
 
+type SelectHandler = (status: StatusType) => any;
+
 interface ActionChipsProps {
     actions: Action[];
     selectedStatus?: StatusType;
+    selectHandler: SelectHandler;
 }
 
-export const MessageCardActionChips = ({ actions, selectedStatus }: ActionChipsProps) => {
+export const MessageCardActionChips = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
     return (
         <div class="message-card-header-action">
             {
                 statusValues.map(status => renderChip(
-                    status, 
-                    actions.filter(action => action.status.status == status), 
-                    selectedStatus)
+                        status, 
+                        actions.filter(action => action.status.status == status), 
+                        selectedStatus,
+                        selectHandler
+                    )
                 )
             }
         </div>
     )
 }
 
-function renderChip(status: StatusType, statusActions: Action[], selectedStatus: StatusType): JSX.Element {
+function renderChip(status: StatusType, statusActions: Action[], selectedStatus: StatusType, selectHandeler: SelectHandler): JSX.Element {
 
     if (!statusActions || statusActions.length == 0) {
         return null;
@@ -49,6 +54,10 @@ function renderChip(status: StatusType, statusActions: Action[], selectedStatus:
         <Chip
             count={statusActions.length}
             status={status}
-            isSelected={status == selectedStatus} />
+            isSelected={status == selectedStatus} 
+            clickHandler={e => { 
+                selectHandeler(status);
+                e.cancelBubble = true;
+            }}/>
     )
 }

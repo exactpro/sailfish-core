@@ -38,5 +38,5 @@ export function getStatusChipDescription(status: StatusType): string {
     const statusFormatted = status.toLowerCase().replace('_', ' '),
         statusCapitalized = statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1);
 
-    return `${statusCapitalized} actions count.`;
+    return `${statusCapitalized} actions count. Click to select related ${statusFormatted} actions.`;
 }

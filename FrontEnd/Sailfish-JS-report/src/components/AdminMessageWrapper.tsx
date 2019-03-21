@@ -19,6 +19,7 @@ import "../styles/messages.scss";
 import { MessageCardProps, MessageCard } from "./MessageCard";
 import Message from '../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
+import { StatusType } from "../models/Status";
 
 interface WrapperProps extends MessageCardProps {
     isExpanded: boolean;
@@ -70,7 +71,8 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
         ].join(' ');
 
         return (
-            <div class={rootClass}>
+            <div class={rootClass}
+                onClick={() => props.selectHandler(props.message)}>
                 <div class="message-label">
                     {this.renderMessageTypeLabels(props.message)}
                 </div>
@@ -78,7 +80,8 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
                     <div class="message-wrapper-actionschips">
                         <MessageCardActionChips
                             actions={props.actions}
-                            selectedStatus={props.status}/>
+                            selectedStatus={props.status}
+                            selectHandler={status => props.selectHandler(props.message, status)}/>
                     </div>
                     <div class="message-wrapper-name">Name</div>
                     <div class="message-wrapper-name-value">{props.message.msgName}</div>

@@ -61,6 +61,7 @@ $buttonDisabledBackground: #E0E0E0;
 
 $defaultCardBorderColor: #666666;
 $defaultCardBackground: #E0E0E0;
+$defaultSelectedCardBackground: #e0e0e033;
 
 $messageCardBackgroundColor: #F2F2F2;
 $messageCardRawHoverBackground: rgba(102, 102, 102, 0.15);
@@ -134,6 +135,7 @@ $splitterColor: #C4C4C4;
 @mixin selectable-card {
     &.selected {
         border-color: $defaultCardBorderColor;
+        background-color: $defaultSelectedCardBackground;
     }
 
     &.passed {

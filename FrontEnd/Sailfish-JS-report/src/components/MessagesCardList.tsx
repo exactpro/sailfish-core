@@ -29,10 +29,11 @@ import { getActions } from '../helpers/actionType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { messagesHeatmap } from '../helpers/heatmapCreator';
+import { selectMessage } from '../actions/actionCreators';
 
 const MIN_CONTROL_BUTTONS_WIDTH = 880;
 
-interface MessagesListProps {
+interface MessagesListStateProps {
     messages: Message[];
     checkpoints: Message[];
     rejectedMessages: Message[];
@@ -44,6 +45,12 @@ interface MessagesListProps {
     selectedStatus: StatusType;
     panelWidth?: number;
 }
+
+interface MessagesListDispatchProps {
+    messageSelectHandler: (message: Message, status: StatusType) => any;
+}
+
+interface MessagesListProps extends MessagesListStateProps ,MessagesListDispatchProps {}
 
 export class MessagesCardListBase extends Component<MessagesListProps> {
 
@@ -122,7 +129,7 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
 
     private renderMessage(message: Message) {
 
-        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled } = this.props;
+        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled, messageSelectHandler } = this.props;
         const isSelected = selectedMessages.includes(message.id);
 
         if (isCheckpoint(message)) {
@@ -145,6 +152,7 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                 status={isSelected ? selectedStatus : null}
                 key={message.id}
                 actions={this.getMessageActions(message)}
+                selectHandler={messageSelectHandler}
             />
         );
     }
@@ -175,7 +183,8 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                 key={message.id}
                 actions={this.getMessageActions(message)}
                 rejectedMessagesCount={rejectedCount} 
-                status={isSelected ? selectedStatus : null}/>
+                status={isSelected ? selectedStatus : null}
+                selectHandler={this.props.messageSelectHandler}/>
         )
     }
 
@@ -190,13 +199,14 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                 actions={this.getMessageActions(message)}
                 isExpanded={adminMessagesEnabled}
                 isSelected={isSelected || isRejectedSelected}
-                status={isSelected ? selectedStatus : null} />
+                status={isSelected ? selectedStatus : null} 
+                selectHandler={this.props.messageSelectHandler}/>
         )
     }
 }
 
 export const MessagesCardList = connect(
-    (state: AppState) => ({
+    (state: AppState): MessagesListStateProps => ({
         messages: state.testCase.messages,
         checkpoints: state.testCase.messages.filter(isCheckpoint),
         rejectedMessages: state.testCase.messages.filter(isRejected),
@@ -207,7 +217,9 @@ export const MessagesCardList = connect(
         adminMessagesEnabled: state.adminMessagesEnabled,
         actionsMap: state.actionsMap
     }),
-    dispatch => ({}),
+    (dispatch): MessagesListDispatchProps => ({
+        messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))
+    }),
     null,
     {
         withRef: true

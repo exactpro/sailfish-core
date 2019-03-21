@@ -120,6 +120,10 @@ body {
         color: white;
     }
 
+    &.clickable {
+        cursor: pointer;
+    }
+
     &.passed {
         border-color: $passedHeaderColor;
 

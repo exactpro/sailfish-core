@@ -23,20 +23,24 @@ interface ChipProps {
     count: number;
     status?: StatusType;
     isSelected?: boolean;
+    clickHandler?: (e: MouseEvent) => any;
 }
 
-export const Chip = ({ status, count, isSelected }: ChipProps) => {
+export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => {
 
     const rootClass = [
         "chip",
         (status || "").toLowerCase(),
-        isSelected ? "selected" : ""
+        isSelected ? "selected" : "",
+        clickHandler ? "clickable" : ""
     ].join(' ');
 
     const description = status ? getStatusChipDescription(status) : "";
 
     return (
-        <div class={rootClass} title={description}>
+        <div class={rootClass} 
+            title={description}
+            onClick={e => clickHandler && clickHandler(e)}>
             <p>{count}</p>
         </div>
     )
