@@ -21,6 +21,7 @@ import { Panel } from '../helpers/Panel';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/actionType';
+import { findPrevCyclicItem, findNextCyclicItem, nextCyclicItem } from '../helpers/array';
 
 export function appReducer(state: AppState = initialAppState, stateAction: StateActionType): AppState {
     switch (stateAction.type) {
@@ -153,26 +154,24 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
         }
 
         case StateActionTypes.NEXT_TEST_CASE: {
-            const nextTestCaseIndex = state.report.metadata.findIndex(metadata => metadata.jsonpFileName === state.currentTestCasePath) + 1;
+            const nextTestCase = findNextCyclicItem(state.report.metadata, metadata => metadata.jsonpFileName === state.currentTestCasePath);
 
             return {
                 ...state,
                 testCase: initialAppState.testCase,
                 selected: initialSelectedState,
-                currentTestCasePath: state.report.metadata[nextTestCaseIndex] ? 
-                    state.report.metadata[nextTestCaseIndex].jsonpFileName : state.report.metadata[0].jsonpFileName
+                currentTestCasePath: nextTestCase ? nextTestCase.jsonpFileName : ""
             }
         }
 
         case StateActionTypes.PREV_TEST_CASE: {
-            const prevTestCaseIndex = state.report.metadata.findIndex(metadata => metadata.jsonpFileName === state.currentTestCasePath) - 1;
+            const prevTestCase = findPrevCyclicItem(state.report.metadata, metadata => metadata.jsonpFileName === state.currentTestCasePath);
 
             return {
                 ...state,
                 testCase: initialAppState.testCase,
                 selected: initialSelectedState,
-                currentTestCasePath: state.report.metadata[prevTestCaseIndex] ? 
-                    state.report.metadata[prevTestCaseIndex].jsonpFileName : state.report.metadata[state.report.metadata.length - 1].jsonpFileName
+                currentTestCasePath: prevTestCase ? prevTestCase.jsonpFileName : ""
             }
         }
 

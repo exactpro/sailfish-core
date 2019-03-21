@@ -25,6 +25,7 @@ import AppState from '../state/AppState';
 import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPane';
 import { ActionsListBase } from './ActionsList';
+import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 
 interface LeftPanelProps {
     panel: Panel;
@@ -134,13 +135,11 @@ class LeftPanelBase extends Component<LeftPanelProps> {
     }
 
     private nextCpHandler (currentCpIndex: number) {
-        const idx = (currentCpIndex + 1) % this.props.checkpointActions.length;
-        this.props.setSelectedCheckpoint(this.props.checkpointActions[idx]);
+        this.props.setSelectedCheckpoint(nextCyclicItemByIndex(this.props.checkpointActions, currentCpIndex));
     }
 
     private prevCpHandler (currentCpIndex: number) {
-        const idx = (this.props.checkpointActions.length + currentCpIndex - 1) % this.props.checkpointActions.length;
-        this.props.setSelectedCheckpoint(this.props.checkpointActions[idx]);
+        this.props.setSelectedCheckpoint(prevCyclicItemByIndex(this.props.checkpointActions, currentCpIndex));
     }
 }
 

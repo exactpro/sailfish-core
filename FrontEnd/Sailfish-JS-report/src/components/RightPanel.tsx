@@ -26,6 +26,7 @@ import AppState from '../state/AppState';
 import { isAdmin } from '../helpers/messageType';
 import { isRejected } from '../helpers/messageType';
 import { setRightPane, selectRejectedMessageId, setAdminMsgEnabled } from '../actions/actionCreators';
+import { prevCyclicItemByIndex, nextCyclicItemByIndex } from '../helpers/array';
 
 interface RightPanelStateProps {
     panel: Panel;
@@ -196,13 +197,11 @@ class RightPanelBase extends Component<RightPanelProps> {
     }
 
     private nextRejectedHandler(messageIdx: number) {
-        const idx = (messageIdx + 1) % this.props.rejectedMessages.length;
-        this.props.selectRejectedMessageHandler(this.props.rejectedMessages[idx].id);
+        this.props.selectRejectedMessageHandler(nextCyclicItemByIndex(this.props.rejectedMessages, messageIdx).id);
     }
 
     private prevRejectedHandler(messageIdx: number) {
-        const idx = (this.props.rejectedMessages.length + messageIdx - 1) % this.props.rejectedMessages.length;
-        this.props.selectRejectedMessageHandler(this.props.rejectedMessages[idx].id);
+        this.props.selectRejectedMessageHandler(prevCyclicItemByIndex(this.props.rejectedMessages, messageIdx).id);
     }
 }
 
