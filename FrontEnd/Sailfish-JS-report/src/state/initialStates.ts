@@ -22,7 +22,9 @@ import Action from '../models/Action';
 
 export const initialSelectedState: SelectedState = {
     actionsId: [],
+    scrolledActionId: null,
     messagesId: [],
+    scrolledMessageId: null,
     status: 'NA',
     checkpointMessageId: null,
     checkpointActionId: null,

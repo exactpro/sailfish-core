@@ -30,6 +30,7 @@ interface ListProps {
     actions: Array<Action>;
     checkpointActions: Array<Action>;
     selectedActionId: number[];
+    scrolledActionId: number;
     selectedMessageId: number;
     selectedCheckpointId: number;
     actionsFilter: StatusType[];
@@ -74,7 +75,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
             nextProps.selectedMessageId !== this.props.selectedMessageId;
     }
 
-    render({ actions, selectedCheckpointId, selectedActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
+    render({ actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
 
         return (
             <div class="actions">
@@ -88,6 +89,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
                                 selectedActionsId={selectedActionId}
                                 selectedMessageId={selectedMessageId}
                                 selectedCheckpointId={selectedCheckpointId}
+                                scrolledActionId={scrolledActionId}
                                 actionSelectHandler={onSelect}
                                 messageSelectHandler={onMessageSelect}
                                 actionsFilter={actionsFilter}
@@ -105,6 +107,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
 export const ActionsList = connect((state: AppState) => ({
         actions: state.testCase.actions,
         selectedActionId: state.selected.actionsId,
+        scrolledActionId: state.selected.scrolledActionId,
         selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
         selectedCheckpointId: state.selected.checkpointActionId,
         actionsFilter: state.actionsFilter,

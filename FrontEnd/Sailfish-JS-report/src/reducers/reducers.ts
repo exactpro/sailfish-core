@@ -36,13 +36,20 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
         }
 
         case StateActionTypes.SELECT_ACTION: {
+
+            const scrolledMessageId = stateAction.action.relatedMessages.includes(state.selected.scrolledMessageId) ? 
+                nextCyclicItem(stateAction.action.relatedMessages, state.selected.scrolledMessageId) : 
+                stateAction.action.relatedMessages[0]
+
             return {
                 ...state,
                 selected: {
                     ...state.selected,
                     actionsId: [stateAction.action.id],
                     status: stateAction.action.status.status,
-                    messagesId: stateAction.action.relatedMessages
+                    messagesId: stateAction.action.relatedMessages,
+                    scrolledActionId: initialSelectedState.scrolledActionId,
+                    scrolledMessageId: scrolledMessageId
                 }
             } 
         }
@@ -53,7 +60,8 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 selected: {
                     ...state.selected,
                     actionsId: [stateAction.actionId],
-                    status: initialSelectedState.status
+                    status: initialSelectedState.status,
+                    scrolledActionId: stateAction.actionId
                 }
             }
         }
@@ -63,13 +71,20 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             const relatedActions = stateAction.message.relatedActions
                 .filter(actionId => !stateAction.status || (state.actionsMap.get(actionId) && state.actionsMap.get(actionId).status.status == stateAction.status));
 
+            // re-select handling
+            const scrolledAction = relatedActions.includes(state.selected.scrolledActionId) ?
+                nextCyclicItem(relatedActions, state.selected.scrolledActionId) : 
+                relatedActions[0];
+
             return {
                 ...state,
                 selected: {
                     ...state.selected,
                     messagesId: [stateAction.message.id],
                     status: stateAction.status,
-                    actionsId: relatedActions
+                    actionsId: relatedActions,
+                    scrolledActionId: scrolledAction,
+                    scrolledMessageId: initialSelectedState.scrolledMessageId
                 }
             }
         }
@@ -81,18 +96,24 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                     ...state.selected,
                     messagesId: [stateAction.messageId],
                     status: stateAction.status,
-                    actionsId: initialSelectedState.actionsId
+                    actionsId: initialSelectedState.actionsId,
+                    scrolledMessageId: stateAction.messageId
                 }
             }
         }
 
         case StateActionTypes.SELECT_CHECKPOINT: {
+
+            const checkpointMessageId = stateAction.checkpointAction.relatedMessages[0] || null;
+
             return {
                 ...state,
                 selected: {
                     ...state.selected,
-                    checkpointMessageId: stateAction.checkpointAction.relatedMessages[0] || null,
-                    checkpointActionId: stateAction.checkpointAction.id
+                    checkpointMessageId: checkpointMessageId,
+                    scrolledMessageId: checkpointMessageId,
+                    checkpointActionId: stateAction.checkpointAction.id,
+                    scrolledActionId: stateAction.checkpointAction.id
                 }
             }
         }
@@ -102,7 +123,8 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 selected: {
                     ...state.selected,
-                    rejectedMessageId: stateAction.messageId
+                    rejectedMessageId: stateAction.messageId,
+                    scrolledMessageId: stateAction.messageId
                 }
             }
         }

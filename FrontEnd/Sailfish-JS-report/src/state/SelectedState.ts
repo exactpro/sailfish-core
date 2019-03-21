@@ -18,7 +18,9 @@ import { StatusType } from "../models/Status";
 
 export default interface SelectedState {
     actionsId: number[];
+    scrolledActionId: number;
     messagesId: number[];
+    scrolledMessageId: number;
     checkpointMessageId: number;
     checkpointActionId: number;
     rejectedMessageId: number;
