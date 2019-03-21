@@ -35,7 +35,7 @@ const MIN_CONTROL_BUTTONS_WIDTH = 880;
 
 interface MessagesListStateProps {
     messages: Message[];
-    scrolledMessageId: number;
+    scrolledMessageId: Number;
     checkpoints: Message[];
     rejectedMessages: Message[];
     adminMessagesEnabled: boolean;
@@ -69,9 +69,9 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             if (this.props.scrolledMessageId == this.props.selectedCheckpointId) {
                 // [Chrome] smooth behavior doesn't work in chrome with multimple elements
                 // https://chromium.googlesource.com/chromium/src.git/+/bbf870d971d95af7ae1ee688a7ed100e3787d02b
-                this.scrollToMessage(this.props.scrolledMessageId, false);
+                this.scrollToMessage(+this.props.scrolledMessageId, false);
             } else {
-                this.scrollToMessage(this.props.scrolledMessageId);
+                this.scrollToMessage(+this.props.scrolledMessageId);
             }
         }
     }

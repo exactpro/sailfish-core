@@ -37,8 +37,12 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
 
         case StateActionTypes.SELECT_ACTION: {
 
-            const scrolledMessageId = stateAction.action.relatedMessages.includes(state.selected.scrolledMessageId) ? 
-                nextCyclicItem(stateAction.action.relatedMessages, state.selected.scrolledMessageId) : 
+            // We must use Number object to handle situation when some message was selected by different actions 
+            // and Messages list component can't understand that message was selected again, therefore scroll doesn't work.
+            // Using reference comparison with Number objects, component can understand that message with the same id was selected again
+
+            const scrolledMessageId = stateAction.action.relatedMessages.includes(+state.selected.scrolledMessageId) ? 
+                nextCyclicItem(stateAction.action.relatedMessages, +state.selected.scrolledMessageId) : 
                 stateAction.action.relatedMessages[0]
 
             return {
@@ -49,7 +53,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                     status: stateAction.action.status.status,
                     messagesId: stateAction.action.relatedMessages,
                     scrolledActionId: initialSelectedState.scrolledActionId,
-                    scrolledMessageId: scrolledMessageId
+                    scrolledMessageId: new Number(scrolledMessageId)
                 }
             } 
         }
@@ -61,19 +65,23 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                     ...state.selected,
                     actionsId: [stateAction.actionId],
                     status: initialSelectedState.status,
-                    scrolledActionId: stateAction.actionId
+                    scrolledActionId: new Number(stateAction.actionId)
                 }
             }
         }
 
         case StateActionTypes.SELECT_MESSAGE: {
 
+            // We must use Number object to handle situation when some action was selected by different messages 
+            // and Actions list component can't understand that action was selected again, therefore scroll doesn't work.
+            // Using reference comparison with Number objects, component can understand that action with the same id was selected again.
+
             const relatedActions = stateAction.message.relatedActions
                 .filter(actionId => !stateAction.status || (state.actionsMap.get(actionId) && state.actionsMap.get(actionId).status.status == stateAction.status));
 
             // re-select handling
-            const scrolledAction = relatedActions.includes(state.selected.scrolledActionId) ?
-                nextCyclicItem(relatedActions, state.selected.scrolledActionId) : 
+            const scrolledAction = relatedActions.includes(+state.selected.scrolledActionId) ?
+                nextCyclicItem(relatedActions, +state.selected.scrolledActionId) : 
                 relatedActions[0];
 
             return {
@@ -83,7 +91,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                     messagesId: [stateAction.message.id],
                     status: stateAction.status,
                     actionsId: relatedActions,
-                    scrolledActionId: scrolledAction,
+                    scrolledActionId: new Number(scrolledAction),
                     scrolledMessageId: initialSelectedState.scrolledMessageId
                 }
             }
@@ -97,7 +105,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                     messagesId: [stateAction.messageId],
                     status: stateAction.status,
                     actionsId: initialSelectedState.actionsId,
-                    scrolledMessageId: stateAction.messageId
+                    scrolledMessageId: new Number(stateAction.messageId)
                 }
             }
         }
@@ -111,9 +119,9 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 selected: {
                     ...state.selected,
                     checkpointMessageId: checkpointMessageId,
-                    scrolledMessageId: checkpointMessageId,
+                    scrolledMessageId: new Number(checkpointMessageId),
                     checkpointActionId: stateAction.checkpointAction.id,
-                    scrolledActionId: stateAction.checkpointAction.id
+                    scrolledActionId: new Number(stateAction.checkpointAction.id)
                 }
             }
         }
@@ -124,7 +132,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 selected: {
                     ...state.selected,
                     rejectedMessageId: stateAction.messageId,
-                    scrolledMessageId: stateAction.messageId
+                    scrolledMessageId: new Number(stateAction.messageId)
                 }
             }
         }

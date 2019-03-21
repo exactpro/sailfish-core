@@ -30,7 +30,7 @@ interface ListProps {
     actions: Array<Action>;
     checkpointActions: Array<Action>;
     selectedActionId: number[];
-    scrolledActionId: number;
+    scrolledActionId: Number;
     selectedMessageId: number;
     selectedCheckpointId: number;
     actionsFilter: StatusType[];

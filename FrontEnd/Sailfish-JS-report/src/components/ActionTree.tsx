@@ -39,7 +39,7 @@ export interface ActionTreeProps {
     checkpointSelectHandler: (action: Action) => any;
     selectedMessageId: number;
     selectedActionsId: number[];
-    scrolledActionId: number;
+    scrolledActionId: Number;
     selectedCheckpointId: number;
     checkpoints: Action[];
     actionsFilter: StatusType[];
@@ -57,7 +57,7 @@ export class ActionTree extends Component<ActionTreeProps> {
 
     // scrolling to action, selected by url sharing
     componentDidMount() {
-        if (!this.treeElements[this.props.scrolledActionId]) {
+        if (!this.treeElements[+this.props.scrolledActionId]) {
             return;
         }
 
@@ -68,7 +68,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         // Second callback will be called when DOM is fully rendered.
         window.requestAnimationFrame(() => {
             window.requestAnimationFrame(() => {
-                this.scrollToAction(this.props.scrolledActionId);
+                this.scrollToAction(+this.props.scrolledActionId);
             });
         });
     }
@@ -84,7 +84,7 @@ export class ActionTree extends Component<ActionTreeProps> {
 
     componentDidUpdate(prevProps: ActionTreeProps) {
         if (prevProps.scrolledActionId != this.props.scrolledActionId) {
-            this.scrollToAction(this.props.scrolledActionId);
+            this.scrollToAction(+this.props.scrolledActionId);
         }
     }
 
