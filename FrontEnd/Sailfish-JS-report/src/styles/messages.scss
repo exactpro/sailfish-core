@@ -157,6 +157,7 @@
             &-session, &-name {
                 padding-top: 3px;
                 font-size: 10px;
+                color: $secondaryTextColor;
             }
 
             &-name {
@@ -219,11 +220,18 @@
                 display: flex;
                 align-items: center;
 
-                &-rejected {
+                &.rejected {
                     font-weight: bold;
                     font-size: 13px;
                     padding-left: 6px;
                     color: $primaryTextColor;
+                }
+
+                &.empty {
+                    @include unselectable;
+                    padding-left: 6px;
+                    font-size: 10px;
+                    color: $secondaryTextColor;
                 }
             }
 

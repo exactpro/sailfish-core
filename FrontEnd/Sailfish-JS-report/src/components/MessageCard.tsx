@@ -95,22 +95,20 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     <div class="message-card-header" 
                         data-lb-count={labelsCount}
                         onClick={() => selectHandler(message)}>
-                        <div class="message-card-header-action">
-                            {
-                                rejectedMessagesCount && actions.length == 0 ?
-                                    (
-                                        <div class="message-card-header-action-rejected">
-                                            <p>Rejected {rejectedMessagesCount}</p>
-                                        </div>
-                                    )
-                                    : (
-                                        <MessageCardActionChips
-                                            actions={actions}
-                                            selectedStatus={status}
-                                            selectHandler={status => selectHandler(message, status)} />
-                                    )
-                            }
-                        </div>
+                        {
+                            rejectedMessagesCount && actions.length == 0 ?
+                                (
+                                    <div class="message-card-header-action rejected">
+                                        <p>Rejected {rejectedMessagesCount}</p>
+                                    </div>
+                                )
+                                : (
+                                    <MessageCardActionChips
+                                        actions={actions}
+                                        selectedStatus={status}
+                                        selectHandler={status => selectHandler(message, status)} />
+                                )
+                        }
                         <div class="message-card-header-timestamp-value">
                             <p>{formatTime(timestamp)}</p>
                         </div>

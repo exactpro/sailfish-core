@@ -29,16 +29,24 @@ interface ActionChipsProps {
 }
 
 export const MessageCardActionChips = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
+
+    const className = [
+        "message-card-header-action",
+        actions.length ? "" : "empty"
+    ].join(' ');
+
     return (
-        <div class="message-card-header-action">
+        <div class={className}>
             {
+                actions.length ? 
                 statusValues.map(status => renderChip(
                         status, 
                         actions.filter(action => action.status.status == status), 
                         selectedStatus,
                         selectHandler
                     )
-                )
+                ) : 
+                <p>Not related to any actions</p>
             }
         </div>
     )
