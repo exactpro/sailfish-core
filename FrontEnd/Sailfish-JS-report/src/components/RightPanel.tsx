@@ -123,7 +123,9 @@ class RightPanelBase extends Component<RightPanelProps> {
                         </div>
                         <div class={rejectedRootClass}>
                             <div class="layout-body-panel-controls-right-rejected-icon"
-                                title="Scroll to current rejected message"/>
+                                onClick={() => this.currentRejectedHandler(currentRejectedIndex)}
+                                style={{ cursor: rejectedEnabled ? 'pointer' : 'unset' }}
+                                title={ rejectedEnabled ? "Scroll to current rejected message" : null }/>
                             <div class="layout-body-panel-controls-right-rejected-title">
                                 {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
                             </div>
@@ -202,6 +204,14 @@ class RightPanelBase extends Component<RightPanelProps> {
 
     private prevRejectedHandler(messageIdx: number) {
         this.props.selectRejectedMessageHandler(prevCyclicItemByIndex(this.props.rejectedMessages, messageIdx).id);
+    }
+
+    private currentRejectedHandler(messageIdx: number) {
+        const message = this.props.rejectedMessages[messageIdx];
+
+        if (message) {
+            this.props.selectRejectedMessageHandler(message.id);
+        }
     }
 }
 

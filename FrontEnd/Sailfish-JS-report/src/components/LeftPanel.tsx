@@ -76,7 +76,10 @@ class LeftPanelBase extends Component<LeftPanelProps> {
                     <div class="layout-body-panel-controls-left">
                         <div class="layout-body-panel-controls-left-checkpoints">
                             <div class={cpRootClass}>
-                                <div class="layout-body-panel-controls-left-checkpoints-icon"/>
+                                <div class="layout-body-panel-controls-left-checkpoints-icon"
+                                    onClick={() => this.currentCpHandler(cpIndex)}
+                                    style={{ cursor: cpEnabled ? 'pointer' : 'unset' }}
+                                    title={ cpEnabled ? "Scroll to current checkpoint" : null }/>
                                 <div class="layout-body-panel-controls-left-checkpoints-title">
                                     <p>{cpEnabled ? "" : "No "}Checkpoints</p>
                                 </div>
@@ -134,12 +137,20 @@ class LeftPanelBase extends Component<LeftPanelProps> {
         }
     }
 
-    private nextCpHandler (currentCpIndex: number) {
+    private nextCpHandler(currentCpIndex: number) {
         this.props.setSelectedCheckpoint(nextCyclicItemByIndex(this.props.checkpointActions, currentCpIndex));
     }
 
-    private prevCpHandler (currentCpIndex: number) {
+    private prevCpHandler(currentCpIndex: number) {
         this.props.setSelectedCheckpoint(prevCyclicItemByIndex(this.props.checkpointActions, currentCpIndex));
+    }
+
+    private currentCpHandler(cpIndex: number) {
+        const cp = this.props.checkpointActions[cpIndex];
+
+        if (cp) {
+            this.props.setSelectedCheckpoint(cp);
+        }
     }
 }
 

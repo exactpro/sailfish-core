@@ -58,6 +58,11 @@ export class ActionsListBase extends Component<ListProps, {}> {
     }
 
     shouldComponentUpdate(nextProps: ListProps) {
+
+        if (nextProps.scrolledActionId !== this.props.scrolledActionId) {
+            return true;
+        }
+
         if (nextProps.filterFields !== this.props.filterFields) {
             return true;
         }

@@ -83,6 +83,7 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     componentDidUpdate(prevProps: ActionTreeProps) {
+        // reference comparison works here because scrolledActionId is a Number object 
         if (prevProps.scrolledActionId != this.props.scrolledActionId) {
             this.scrollToAction(+this.props.scrolledActionId);
         }
@@ -109,6 +110,12 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps): boolean {
+
+        // hadnling scrolled action change
+        if (nextProps.scrolledActionId != prevProps.scrolledActionId && action.id === +nextProps.scrolledActionId) {
+            return true;
+        }
+
         // the first condition - current action is selected and we should update to show it
         // the second condition - current action was selected and we should disable selection
         if (nextProps.selectedActionsId != prevProps.selectedActionsId && (
