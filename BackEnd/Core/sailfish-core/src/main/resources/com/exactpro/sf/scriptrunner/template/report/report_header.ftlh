@@ -1,10 +1,16 @@
-<table id="header" style="position: fixed; top: 0;">
+<table id="header" style="table-layout: fixed; position: fixed; top: 0; height:40px">
     <tr>
-        <td>
-            <strong class="shead" style="width:50%; display: inline-block; word-wrap: break-word; position: relative">Test script: ${name}</strong>
+        <td style="width:33%">
+            <div>
+                <a href="index.html"> new report available </a>
+            </div>
         </td>
-        <td>
-            <div class="menu report-menu">
+
+        <td style="width:33%">
+            <strong class="shead" >Test script: ${name}</strong>
+        </td>
+        <td style="width:33%">
+            <div class="menu">
                 <input type="checkbox" id="menu-fake-checkbox">
                 <label for="menu-fake-checkbox" id="menu-label">View</label>
                 <ul class="submenu">

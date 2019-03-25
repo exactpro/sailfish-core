@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
+    <title>Icons/ar2 Copy</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <path d="M71,0 L9,0 C3.83928571,0 0,3.83928571 0,9 L0,71 C0,76.1607143 3.83928571,80 9,80 L71,80 C76.1607143,80 80,76.1607143 80,71 L80,9 C80,3.83928571 76.1607143,0 71,0 Z M71,72 L10,72 C9.48323864,72 9,71.5167614 9,71 L9,10 C9,9.48323864 9.48323864,9 10,9 L71,9 C71.5167614,9 72,9.48323864 72,10 L72,71 C72,71.5167614 71.5167614,72 71,72 Z" id="path-1"></path>
+    </defs>
+    <g id="Icons/ar2-Copy" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <use id="Mask" fill="#000000" fill-rule="nonzero" xlink:href="#path-1"></use>
+    </g>
+</svg>

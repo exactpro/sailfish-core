@@ -1,3 +1,6 @@
+import java.util.stream.Collectors
+import java.util.stream.Stream
+
 // 'id' ignores local artifactory
 
 //plugins {
@@ -19,27 +22,18 @@ defaultTasks 'build'
 
 // Define properties
 ext {
-    dictionaryDir		= file("${mainWorkspaceDir}/cfg/dictionaries")
-    dataMessageDir = file("${mainResDir}/com/exactpro/sf/configuration/dictionaries")
-    etcDir				= file("${mainDir}/etc")
-    xsdDir				= file("${mainDir}/xsd")
-    htmlResourcesDir = file("${genResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
-	templatesDir    	= file("${mainDir}/templates")
+    dictionaryDir		     = file("${mainWorkspaceDir}/cfg/dictionaries")
+    dataMessageDir           = file("${mainResDir}/com/exactpro/sf/configuration/dictionaries")
+    etcDir				     = file("${mainDir}/etc")
+    xsdDir				     = file("${mainDir}/xsd")
+    htmlResourcesProvidedDir = file("${providedResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
+    htmlResourcesGenDir      = file("${genResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
+    htmlResourcesMainDir     = file("${mainResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
+	templatesDir    	     = file("${mainDir}/templates")
+    jqueryUiResourcesDir     = file("${htmlResourcesProvidedDir}/resources")
 }
 
 archivesBaseName = 'sailfish-core'
-
-// Change default project layout
-sourceSets {
-    main {
-        java {
-            srcDir genJavaDir
-        }
-        resources {
-            srcDir genResDir
-        }
-    }    
-}
 
 eclipse.classpath {
     plusConfigurations += [ configurations.jmh ]
@@ -48,6 +42,7 @@ eclipse.classpath {
 configurations {
 	jamon
     jaxb
+    js_report
 }
 
 dependencies {
@@ -57,6 +52,8 @@ dependencies {
     jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
     jaxb 'javax.xml:jsr173:1.0'
     jaxb 'javax.activation:activation:1.1.1'
+
+    js_report "com.exactpro.sf:sailfish-js-report:${artifactCoreVersion}:data@zip"
 	
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}"
@@ -150,16 +147,21 @@ dependencies {
             }
 
         }
-        installDir = "${htmlResourcesDir}"
+        installDir = jqueryUiResourcesDir
     }
 }
+
 
 task createDir {
     doLast {
 		genJavaDir.mkdirs()
 		genResDir.mkdirs()
+        htmlResourcesGenDir.mkdirs()
+        jqueryUiResourcesDir.mkdirs()
 	}
 }
+
+clientInstall.dependsOn("createDir")
 
 task generateJavaFromXsd (dependsOn: 'createDir') {
 
@@ -307,6 +309,35 @@ task generateService_Dictionaries{
     }
 }
 
+
+// FIXME: update gradle-plugin for delayed write support ( e.g. doLast{} )
+// FIXME: extract file enumeration logic into 'local plugin'
+task writeReportResourceContents() {
+    dependsOn.add('copyJsReportData')
+
+    doLast{
+        String contents = Stream.concat(
+                fileTree(htmlResourcesMainDir).getFiles().stream()
+                        .map { f -> htmlResourcesMainDir.toPath().relativize(f.toPath()) },
+
+                fileTree(htmlResourcesProvidedDir).getFiles().stream()
+                        .map { f -> htmlResourcesProvidedDir.toPath().relativize(f.toPath()) })
+
+                .collect(Collectors.toSet())
+                .join("\n")
+
+        contents = contents.concat("\n")
+
+        new File("${htmlResourcesGenDir}/contents").write(contents)
+    }
+}
+
+task copyJsReportData (type: Copy) {
+    into htmlResourcesProvidedDir
+
+    from { configurations.js_report.collect { zipTree(it) } }
+}
+
 compileJava {
     dependsOn.add("generateJavaFromXsd")
     dependsOn.add("jamonGenerate")
@@ -314,6 +345,7 @@ compileJava {
     dependsOn.add("generateService_Dictionaries")
     dependsOn.add('generateVersionClass')
     dependsOn.add('clientInstall')
+    dependsOn.add("writeReportResourceContents")
 }
 
 test {
@@ -351,7 +383,7 @@ checkCompatibility {
 
 clientInstall {
     doLast {
-        htmlResourcesDir.eachDir { //remove empty dirs
+        jqueryUiResourcesDir.eachDir { //remove empty dirs
             it.deleteDir()
         }
     }

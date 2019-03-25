@@ -11,6 +11,18 @@ subprojects {
     	testCompile "org.slf4j:slf4j-log4j12:${version_slf4j}"
    	}
 
+    sourceSets {
+        main {
+            java {
+                srcDir genJavaDir
+            }
+            resources {
+                srcDir genResDir
+                srcDir providedResDir
+            }
+        }
+    }
+
     writeBuildInfo.dependsOn.add('assemble')
     build.dependsOn.add('writeBuildInfo')
 
