@@ -711,6 +711,10 @@ public final class DefaultConnectionManager implements IConnectionManager {
             List<ServiceName> names = new ArrayList<>();
 
             services.forEach((name, container) -> {
+                if(!name.getEnvironment().equals(environmentName)) {
+                    return;
+                }
+
                 ServiceStatus status = container.getService().getStatus();
 
                 if(status == ServiceStatus.STARTED || status == ServiceStatus.WARNING) {
