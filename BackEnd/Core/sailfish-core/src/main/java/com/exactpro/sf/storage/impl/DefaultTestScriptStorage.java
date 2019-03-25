@@ -156,8 +156,10 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
     protected TestScriptDescription convertToTestScriptDescription(String workFolder, ReportRoot reportRoot) throws SailfishURIException {
         ReportProperties properties = reportRoot.getReportProperties();
 
-        TestScriptDescription testScriptDescription = new TestScriptDescription(scriptRunListener,
-                new Date(properties.getTimestamp()), workFolder,
+        TestScriptDescription testScriptDescription = new TestScriptDescription(
+                scriptRunListener,
+                new Date(properties.getTimestamp()),
+                workFolder,
                 String.valueOf(properties.getMatrixFile()),
                 properties.getRange(),
                 properties.getAutostart(),
@@ -245,7 +247,7 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
                     }
                 }
             }
-        } catch (IOException | SailfishURIException | JAXBException e) {
+        } catch (Exception e) {
             logger.error(String.format("Unable to parse report '%s'", reportRootPath), e);
             return null;
         }
