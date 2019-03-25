@@ -76,8 +76,10 @@ $filterButtonTextColor: #FFFFFF;
 
 $notificationBackground: #d9d9d9;
 
-$reportHeaderBackground: #E0E0E0;
+$reportHeaderBackground: #5EDAE1;
 $reportInfoShadowColor: #e2e2e2;
+$reportBorderColor: #D6D6D6;
+$reportTitleTextColor: #7b7b7b;
 
 $scrollbarThumbBackground: #C4C4C4;
 $scrollbarTrackBackground: #F2F2F2;
@@ -108,27 +110,19 @@ $splitterColor: #C4C4C4;
 
 @mixin status-text {
     &.passed {
-        h3 {
-            color: $passedTextColor;
-        }
+        color: $passedTextColor;    
     }
 
     &.failed {
-        h3 {
-            color: $failedTextColor;
-        }
+        color: $failedTextColor;
     }
 
     &.conditionally_passed {
-        h3 {
-            color: $conditionallyTextColor;
-        }
+        color: $conditionallyTextColor;
     }
 
     &.conditionally_failed {
-        h3 {
-            color: $conditionallyFailedTextColor;
-        }
+        color: $conditionallyFailedTextColor;
     }
 }
 

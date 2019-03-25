@@ -113,7 +113,7 @@ body {
     min-width: 20px;
     margin: 0 5px;
     color: $primaryTextColor;
-    border-color: $reportHeaderBackground;
+    border-color: $defaultCardBackground;
 
     &.selected {
         font-weight: bold;

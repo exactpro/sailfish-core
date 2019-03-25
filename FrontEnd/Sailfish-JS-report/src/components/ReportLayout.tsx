@@ -16,13 +16,13 @@
 
 import { h } from 'preact';
 import Report from '../models/Report';
-import TestCase from '../models/TestCase';
 import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { setTestCasePath } from '../actions/actionCreators';
-import "../styles/report.scss";
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { ReportMetadata } from '../models/ReportMetadata';
+import "../styles/report.scss";
+import { StatusType, statusValues } from '../models/Status';
 
 interface ReportLayoutProps {
     report: Report;
@@ -31,97 +31,98 @@ interface ReportLayoutProps {
 
 const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
 
-    const executionTime = getSecondsPeriod(report.startTime, report.finishTime);
-    
-    const passedCount = report.metadata.filter(metadata => metadata.status.status === "PASSED").length,
-        failedCount = report.metadata.filter(metadata => metadata.status.status === "FAILED").length,
-        conditionallyCount = report.metadata.filter(metadata => metadata.status.status === "CONDITIONALLY_PASSED").length;
+    const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
+        plugins = report.plugins ? Object.entries(report.plugins) : [];
 
     return (
         <div class="report">
-            <div class="report-header">
-                <p>Report script: {report.name}</p>
-            </div>
-            <div class="report-info">
-                <div class="report-info-logo"></div>
-                <div class="report-info-table">
-                    <table>
-                        <thead>
-                            <th class="report-info-table-name" />
-                            <th class="report-info-table-value" />
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="report-info-table-name">Host:</td>
-                                <td>{report.hostName}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">User:</td>
-                                <td>{report.userName}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">Execution time:</td>
-                                <td>{executionTime}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">ScriptRun Id:</td>
-                                <td>{report.scriptRunId}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">Date:</td>
-                                <td>{formatTime(report.startTime)}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">Version:</td>
-                                <td>{report.version}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">Plugins:</td>
-                                <td>
-                                    {
-                                        Object.entries(report.plugins).map(([name, version]) => (
-                                            <p>{name}: {version}</p>
-                                        ))
-                                    }
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">Test cases:</td>
-                                <td>{report.metadata.length}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">PASSED:</td>
-                                <td>{passedCount}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">FAILED:</td>
-                                <td>{failedCount}</td>
-                            </tr>
-                            <tr>
-                                <td class="report-info-table-name">CONDITIONALLY PASSED:</td>
-                                <td>{conditionallyCount}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <div class="header">
+                <div class="title">
+                    <p>{report.name}</p>
                 </div>
             </div>
-            <div class="report-testcases">
-                <div class="report-testcases-list">
-                    {report.metadata.map(metadata => renderTestCaseItem(metadata, onTestCaseSelect))}
+            <div class="summary-title">
+                <p>Report Summary</p>
+            </div>
+            <div class="controls">
+                <div class="title">Test Cases</div>
+            </div>
+            <div class="summary">
+                <div class="card">
+                    <div class="logo" />
+                    <div class="info-list">
+                        <div class="item">
+                            <div class="title">Version</div>
+                            <div class="value">{report.version}</div>
+                        </div>
+                        <div class="divider" />
+                        <div class="item">
+                            <div class="title">Host</div>
+                            <div class="value">{report.hostName}</div>
+                        </div>
+                        <div class="item">
+                            <div class="title">User</div>
+                            <div class="value">{report.userName}</div>
+                        </div>
+                        <div class="divider"/>
+                        <div class="item">
+                            <div class="title">ScriptRun ID</div>
+                            <div class="value">{report.scriptRunId}</div>
+                        </div>
+                        <div class="item">
+                            <div class="title">Report Date</div>
+                            <div class="value">{formatTime(report.startTime)}</div>
+                        </div>
+                        <div class="item">
+                            <div class="title">Execution time</div>
+                            <div class="value">{executionTime}</div>
+                        </div>
+                        <div class="divider" />
+                        <div class="item">
+                            <div class="title">Test Cases</div>
+                            <div class="value">{report.metadata.length}</div>
+                        </div>
+                        {
+                            statusValues.map(statusValue => renderStatusInfo(statusValue, report.metadata))
+                        }
+                        <div class="divider" />
+                        {
+                            plugins.length ?
+                                (
+                                    <div class="item">
+                                        <div class="title">Plugins</div>
+                                        <div class="value">
+                                            {plugins.map(([name, version]) => <p>{name}: {version}</p>)}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div class="item">
+                                        <div class="title">No plugins</div>
+                                    </div>
+                                )
+                        }
+                    </div>
                 </div>
             </div>
         </div>
     )
 }
 
-const renderTestCaseItem = (metadata: ReportMetadata, onSelect: Function) => {
-    const className = ["report-testcases-list-item", metadata.status.status.toLowerCase()].join(' ');
+function renderStatusInfo(status: StatusType, metadata: ReportMetadata[]): JSX.Element {
+    const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
+        valueClassName = [
+            "value",
+            status.toLowerCase()
+        ].join(' ');
 
-    const executionTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
+    if (!testCasesCount) {
+        return null;
+    }
 
     return (
-        <div class={className} onClick={() => onSelect(metadata.jsonpFileName)}>
-            {metadata.name} ({metadata.status.status}) [{executionTime}]
+        <div class="item bold">
+            <div class={valueClassName}>{status.toUpperCase()}</div>
+            <div class={valueClassName}>{testCasesCount}</div>
         </div>
     )
 }
