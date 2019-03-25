@@ -39,10 +39,14 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * DailyMaxRollingFileAppender extends {@link FileAppender} so that the
@@ -183,6 +187,11 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     private String scheduledFilename;
 
     /**
+     * The folder where old files will stored
+     */
+    private String rollingFilesFolder;
+
+    /**
      * The next time we estimate a rollover should occur.
      */
     private long nextCheck = System.currentTimeMillis() - 1;
@@ -248,6 +257,22 @@ public class DailyMaxRollingFileAppender extends FileAppender {
         return maxBackupIndex;
     }
 
+    /**
+     * Returns the value of the <b>OldFilesFolder</b> option.
+     * @return
+     */
+    public String getRollingFilesFolder() {
+        return rollingFilesFolder;
+    }
+
+    /**
+     * Sets folder where old files will be stored
+     * @param rollingFilesFolder folder for backup files. If it's empty then backup files won't be moved
+     */
+    public void setRollingFilesFolder(String rollingFilesFolder) {
+        this.rollingFilesFolder = rollingFilesFolder;
+    }
+
     @Override
     public void activateOptions() {
         super.activateOptions();
@@ -261,7 +286,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
             printPeriodicity(type);
             rpc.setType(type);
             File file = new File(fileName);
-            scheduledFilename = fileName + sdf.format(new Date(file.lastModified()));
+            scheduledFilename = getScheduledFilename(new Date(file.lastModified()));
         } else {
             LogLog.error("Either File or DatePattern options are not set for appender [" + name + "].");
         }
@@ -270,7 +295,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     void printPeriodicity(int type) {
         switch (type) {
             case TOP_OF_MINUTE:
-                LogLog.debug("Appender [[+name+]] to be rolled every minute.");
+                LogLog.debug("Appender [" + name + "] to be rolled every minute.");
                 break;
             case TOP_OF_HOUR:
                 LogLog.debug("Appender [" + name + "] to be rolled on top of every hour.");
@@ -288,7 +313,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
                 LogLog.debug("Appender [" + name + "] to be rolled at start of every month.");
                 break;
             default:
-                LogLog.warn("Unknown periodicity for appender [[+name+]].");
+                LogLog.warn("Unknown periodicity for appender [" + name + "].");
         }
     }
 
@@ -335,7 +360,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
             return;
         }
 
-        String datedFilename = fileName + sdf.format(now);
+        String datedFilename = getScheduledFilename(now);
         // It is too early to roll over because we are still within the
         // bounds of the current interval. Rollover will occur once the
         // next interval is reached.
@@ -346,31 +371,44 @@ public class DailyMaxRollingFileAppender extends FileAppender {
         // close current file, and rename it to datedFilename
         this.closeFile();
 
-        File target = new File(scheduledFilename);
-        if (target.exists()) {
-            target.delete();
-        }
-
         File file = new File(fileName);
 
-        boolean result = file.renameTo(target);
-        if (result) {
-            LogLog.debug(fileName + " -> " + scheduledFilename);
+        // If maxBackups <= 0, then there is no file renaming to be done.
+        if (maxBackupIndex > 0) {
+            File target = new File(scheduledFilename);
+            if (target.exists()) {
+                target.delete();
+            }
 
-            // If maxBackups <= 0, then there is no file renaming to be done.
-            if (maxBackupIndex > 0) {
+            boolean result = file.renameTo(target);
+            if (result) {
+                LogLog.debug(fileName + " -> " + scheduledFilename);
+
+                if (isNotEmpty(rollingFilesFolder)) {
+                    LogLog.debug("Move " + scheduledFilename + " to " + rollingFilesFolder);
+                    File destFile = new File(rollingFilesFolder, target.getName());
+                    FileUtils.moveFile(target, destFile);
+                }
+
                 // Delete the oldest file, to keep Windows happy.
-                file = new File(fileName + dateBefore());
+                if (isEmpty(rollingFilesFolder)) {
+                    file = new File(fileName + dateBefore());
+                } else {
+                    file = new File(rollingFilesFolder, file.getName() + dateBefore());
+                }
 
                 if (file.exists())
                     file.delete();
 
                 // this function invocation has been added to original file
                 deleteOldFiles();
-
+            } else {
+                LogLog.error("Failed to rename [" + fileName + "] to [" + scheduledFilename + "].");
             }
         } else {
-            LogLog.error("Failed to rename [[+fileName+]] to [[+scheduledFilename+]].");
+            if (!file.delete()) {
+                LogLog.error("Can't delete current file: " + fileName);
+            }
         }
 
         try {
@@ -386,7 +424,13 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     // this function has been added to original file
     private void deleteOldFiles() {
         File file = new File(fileName);
-        File parent = file.getParentFile();
+
+        File parent;
+        if (isEmpty(rollingFilesFolder)) {
+            parent = file.getParentFile();
+        } else {
+            parent = new File(rollingFilesFolder);
+        }
 
         String simpleFileName = file.getName();
         File[] nestedFiles = parent.listFiles();
@@ -400,8 +444,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
                         && elemSimpleName.length() == (datePattern.length() - 2 + simpleFileName.length())) {
 
                     SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
-                    String dateSuffix = elemSimpleName.substring(
-                            elemSimpleName.length() - datePattern.length() + 2, elemSimpleName.length());
+                    String dateSuffix = elemSimpleName.substring(elemSimpleName.length() - datePattern.length() + 2);
                     try {
                         Date elemDate = dateFormat.parse(dateSuffix);
                         if(oldestTimeInMillis > elemDate.getTime()) {
@@ -451,10 +494,14 @@ public class DailyMaxRollingFileAppender extends FileAppender {
         super.subAppend(event);
     }
 
+    private String getScheduledFilename(Date date) {
+        return fileName + sdf.format(date);
+    }
+
     /*
      * DEBUG
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         DailyMaxRollingFileAppender dmrfa = new DailyMaxRollingFileAppender();
 
         dmrfa.setDatePattern("'.'yyyy-MM-dd-HH-mm");
