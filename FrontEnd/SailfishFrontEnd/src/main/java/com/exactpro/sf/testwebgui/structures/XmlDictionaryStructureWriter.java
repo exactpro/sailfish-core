@@ -101,8 +101,8 @@ public class XmlDictionaryStructureWriter {
 			addAttributes(messageStructure, message);
 			
 			structureMessageMap.put(messageStructure, message);
-			
-			for (ModifiableFieldStructure fieldStructure : messageStructure.getImplFields()) {
+
+            for(ModifiableFieldStructure fieldStructure : messageStructure.getImplFields().values()) {
 				
 				Field field = createFieldFromStructure(fieldStructure, false);
 				addAttributes(fieldStructure, field);

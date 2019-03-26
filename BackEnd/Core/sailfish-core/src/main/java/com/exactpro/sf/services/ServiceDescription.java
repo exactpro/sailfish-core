@@ -15,7 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.convertMapToServiceSettings;
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.convertServiceSettingsToMap;
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.copySettings;
+
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -26,6 +32,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
 
@@ -41,9 +52,12 @@ import com.exactpro.sf.configuration.suri.SailfishURIAdapter;
     "name",
     "serviceHandlerClassName",
     "environment",
-    "settings"
+        "settings",
+        "variables"
 })
 public class ServiceDescription implements Cloneable, Serializable {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceDescription.class);
+
 	@XmlElement(name="type")
 	@XmlJavaTypeAdapter(SailfishURIAdapter.class)
 	private SailfishURI type;
@@ -55,6 +69,8 @@ public class ServiceDescription implements Cloneable, Serializable {
 	private String environment;
 	@XmlAnyElement(lax=true)
 	private IServiceSettings settings;
+    @XmlElement(name = "variables")
+    private Map<String, String> variables = new HashMap<>();
 
 	public ServiceDescription()
 	{
@@ -107,7 +123,48 @@ public class ServiceDescription implements Cloneable, Serializable {
 		this.environment = environment;
 	}
 
-	@Override
+    public Map<String, String> getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Map<String, String> variables) {
+        this.variables = variables;
+    }
+
+    public ServiceName getServiceName() {
+        return new ServiceName(environment, name);
+    }
+
+    public IServiceSettings applyVariableSet(Map<String, String> variableSet) {
+        LOGGER.debug("Applying variable set '{}' to service '{}@{}'", variableSet, environment, name);
+
+        try {
+            Map<String, String> properties = new HashMap<>();
+            IServiceSettings result = settings.getClass().newInstance();
+
+            convertServiceSettingsToMap(properties, settings);
+
+            variables.forEach((property, variable) -> {
+                LOGGER.debug("Trying to apply variable '{}' to property '{}'", variable, property);
+                String variableValue = variableSet.get(variable);
+
+                if(variableValue == null) {
+                    LOGGER.debug("Variable '{}' does not exist in variable set: {}", variable, variableSet);
+                } else {
+                    String propertyValue = properties.put(property, variableValue);
+                    LOGGER.debug("Changed value of property '{}' from '{}' to '{}'", property, propertyValue, variableValue);
+                }
+            });
+
+            convertMapToServiceSettings(result, properties);
+
+            return result;
+        } catch(InstantiationException | IllegalAccessException e) {
+            throw new EPSCommonException(e);
+        }
+    }
+
+    @Override
 	public ServiceDescription clone() {
 		ServiceDescription cloned = new ServiceDescription(type);
 
@@ -115,9 +172,15 @@ public class ServiceDescription implements Cloneable, Serializable {
 		cloned.setName(name);
 		cloned.setType(type);
 		cloned.setServiceHandlerClassName(serviceHandlerClassName);
-		cloned.setSettings(settings);
+
+        if(settings != null) {
+            cloned.setSettings(copySettings(settings));
+        }
+
+        if(variables != null) {
+            cloned.setVariables(new HashMap<>(variables));
+        }
 
 		return cloned;
 	}
-
 }

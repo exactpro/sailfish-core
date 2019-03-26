@@ -125,9 +125,9 @@ public class TestCodeGenerator extends EPSTestCase {
                 
                 name = FilenameUtils.getBaseName(name);
                 if (isField) {
-                    Assert.assertNotNull(testName + ": check filed '" + name + "'", dictionary.getFieldStructure(name));
+                    Assert.assertNotNull(testName + ": check filed '" + name + "'", dictionary.getFields().get(name));
                 } else {
-                    Assert.assertNotNull(testName + ": check message '" + name + "'", dictionary.getMessageStructure(name));
+                    Assert.assertNotNull(testName + ": check message '" + name + "'", dictionary.getMessages().get(name));
                     
                     String className = sourceFolder.relativize(path).toString();
                     className = className.substring(0, className.length() - ".java".length()).replace(File.separatorChar, '.');

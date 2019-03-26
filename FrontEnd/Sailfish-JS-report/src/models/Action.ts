@@ -18,16 +18,23 @@ import ActionParameter from "./ActionParameter";
 import Status from './Status';
 import Verification from './Verification';
 import Exception from './Exception';
-import MessageAction from './MessageAction';
+import UserMessage from './UserMessage';
 import Link from './Link';
+import UserTable from "./UserTable";
 
-export type ActionType = 'action' | 'verification' | 'message' | 'link';
+export enum ActionNodeType {
+    ACTION = "action",
+    VERIFICATION = "verification",
+    CUSTOM_MESSAGE = "customMessage",
+    LINK = "link",
+    TABLE = "table"
+}
 
-export type ActionNode = Action | MessageAction | Verification | Link;
+export type ActionNode = Action | UserMessage | Verification | Link | UserTable;
 
 export default interface Action {
     id?: number;
-    actionNodeType: ActionType;
+    actionNodeType: ActionNodeType;
     bugs: any[];
     name: string;
     description: string;

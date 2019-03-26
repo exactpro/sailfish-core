@@ -112,7 +112,7 @@ dependencies {
     //poi
 	compile 'org.apache.poi:poi-ooxml:4.0.0'
 	
-	compile 'org.flywaydb:flyway-core:5.2.1'
+	compile 'org.flywaydb:flyway-core:4.2.0'
 
     compile 'org.freemarker:freemarker:2.3.28'
 
@@ -125,6 +125,8 @@ dependencies {
     compile 'org.mockito:mockito-core:2.23.4'
 
     compile 'org.apache.commons:commons-collections4:4.2'
+
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.7'
 
     runtimeOnly 'commons-collections:commons-collections:3.2.2' // for commons-configuration
 
@@ -165,8 +167,6 @@ clientInstall.dependsOn("createDir")
 
 task generateJavaFromXsd (dependsOn: 'createDir') {
 
-	inputs.file file("${etcDir}/functional_report.xjb")
-	inputs.file file("${etcDir}/functional_report.xsd")
 	inputs.file file("${dataMessageDir}/datamessage.xsd")
 	inputs.file file("${xsdDir}/rules.xsd")
 	inputs.file file("${xsdDir}/actions.xsd")
@@ -185,13 +185,6 @@ task generateJavaFromXsd (dependsOn: 'createDir') {
 
 	doLast {
 	    ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
-
-	    ant.xjc(schema: "${etcDir}/functional_report.xsd", binding: "${etcDir}/functional_report.xjb",
-                destdir: "${genJavaDir}", package: 'com.exactpro.sf.scriptrunner.reporting.xml',
-	        removeOldOutput: 'yes')
-	    {
-            produces(dir: "${genJavaDir}/com/exactpro/sf/scriptrunner/reporting/xml", includes: '*')
-	    }
 
 	    ant.xjc(schema: "${dataMessageDir}/datamessage.xsd", destdir: "${genJavaDir}",
                 package: 'com.exactpro.sf.storage.xml', removeOldOutput: 'yes')
@@ -374,6 +367,7 @@ clean {
 
 generateVersionClass {
 	alias 		= 'core'
+	artifactName = 'core'
 }
 
 checkCompatibility {

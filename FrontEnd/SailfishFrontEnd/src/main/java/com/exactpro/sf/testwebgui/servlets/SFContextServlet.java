@@ -36,6 +36,10 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
+import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.storage.impl.ObjectFlusher;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -192,6 +196,8 @@ public class SFContextServlet implements Servlet {
             }
 
             initEmailService(sFcontext, allStoredOptions);
+
+            initUpdateService(sFcontext, allStoredOptions);
 	    } catch(Throwable t) {
             logger.error("Init options failed", t);
             throw new SFException("Problem during reading settings for embedded services", t);
@@ -209,6 +215,19 @@ public class SFContextServlet implements Servlet {
 
         } catch(Throwable t) {
             logger.error("Init of email service failed", t);
+        }
+    }
+
+    private void initUpdateService(ISFContext context, Map<String, String> allStoredOptions) {
+        try {
+            UpdateServiceSettings settings = new UpdateServiceSettings();
+            settings.fillFromMap(allStoredOptions);
+
+            UpdateService updateService = context.getUpdateService();
+            updateService.setSettings(settings);
+            updateService.init();
+        } catch (Throwable t) {
+            logger.error("Init update service failed", t);
         }
     }
 
@@ -355,7 +374,8 @@ public class SFContextServlet implements Servlet {
 
     		try {
     		    sfLocalContext = SFLocalContext.createContext(wd, sfContextSettings);
-                BigDecimal comparisonPrecision = sfLocalContext.getEnvironmentManager().getEnvironmentSettings().getComparisonPrecision();
+                EnvironmentSettings environmentSettings = sfLocalContext.getEnvironmentManager().getEnvironmentSettings();
+                BigDecimal comparisonPrecision = environmentSettings.getComparisonPrecision();
                 MathProcessor.COMPARISON_PRECISION = comparisonPrecision;
                 MessageComparator.COMPARISON_PRECISION = comparisonPrecision.doubleValue();
     		} catch (Throwable ex) {

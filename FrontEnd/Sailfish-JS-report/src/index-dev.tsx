@@ -17,7 +17,7 @@
 import { h, render } from "preact";
 import { App } from "./components/App-dev";
 import { Provider } from 'preact-redux';
-import { createAppStore } from './store/store';
+import { createAppStore } from './store/store-dev';
 import { testReport } from './test/testReport';
 // enable react-devtools compatibility, APP WORKNIG SLOW WITH THIS
 //import 'preact/devtools';

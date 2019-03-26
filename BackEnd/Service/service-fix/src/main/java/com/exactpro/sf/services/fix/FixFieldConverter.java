@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,8 +89,8 @@ public class FixFieldConverter implements IFieldConverter {
         this.fieldToTag.clear();
         this.tagToField.clear();
 
-        for (IFieldStructure fieldType : dictionary.getFieldStructures()) {
-            String tag = fieldType.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG).toString();
+        for(IFieldStructure fieldType : dictionary.getFields().values()) {
+            String tag = getAttributeValue(fieldType, FixMessageHelper.ATTRIBUTE_TAG).toString();
 
             this.tagToField.put(tag, fieldType.getName());
             this.fieldToTag.put(fieldType.getName(), tag);

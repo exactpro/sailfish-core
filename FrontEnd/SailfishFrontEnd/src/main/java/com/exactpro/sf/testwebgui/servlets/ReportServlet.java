@@ -16,6 +16,7 @@
 package com.exactpro.sf.testwebgui.servlets;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
@@ -67,7 +68,10 @@ public class ReportServlet extends HttpServlet{
 
 		req.setAttribute(ASYNC_SUP, true);
 		AsyncContext ctx = req.startAsync(req, resp);
-//		ctx.addListener(new RequestAsyncListener());
+
+		String contentType = req.getServletContext().getMimeType(Paths.get(req.getRequestURI()).getFileName().toString());
+		resp.setContentType(contentType);
+
 		ctx.setTimeout(contextTimeout);
 		logger.trace("Create new async context for request {}{}, session {}", req.getRequestURL(), req.getQueryString(), req.getSession().getId());
 	    this.executor.execute(new ReportTask(ctx, SFLocalContext.getDefault()));

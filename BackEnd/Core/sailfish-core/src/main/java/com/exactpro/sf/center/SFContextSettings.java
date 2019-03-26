@@ -20,6 +20,7 @@ import org.apache.commons.configuration.HierarchicalConfiguration;
 public class SFContextSettings {
     private static final String ENVIRONMENT_KEY = "Environment";
     private static final String LOGGING_KEY = "Logging";
+    private static final String UPDATER_KEY = "Update";
 
     private HierarchicalConfiguration config;
 	private String compilerClassPath;
@@ -40,6 +41,13 @@ public class SFContextSettings {
             config.getRootNode().addChild(new HierarchicalConfiguration.Node(LOGGING_KEY));
         }
         return config.configurationAt(LOGGING_KEY);
+    }
+
+    public HierarchicalConfiguration getUpdateServiceConfiguration() {
+        if (config.configurationsAt(UPDATER_KEY).isEmpty()) {
+            config.getRootNode().addChild(new HierarchicalConfiguration.Node(UPDATER_KEY));
+        }
+        return config.configurationAt(UPDATER_KEY);
     }
 
     public void setConfig(HierarchicalConfiguration config) {

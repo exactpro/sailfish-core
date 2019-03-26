@@ -23,7 +23,7 @@ import { MessageRaw } from './MessageRaw';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
 import { getHashCode } from '../helpers/stringHash';
-import { getMessageType, MessageType, getRejectReason } from '../helpers/messageType';
+import { formatTime } from '../helpers/dateFormatter';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -70,7 +70,8 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
 
         const actions = [...actionsMap.values()],
             hueValue = this.calculateHueValue(from, to),
-            rejectedTitle = message.isRejected ? getRejectReason(message) : null;
+            rejectedTitle = message.content.rejectReason,
+            labelsCount = this.getLabelsCount(message);
 
         const rootClass = [
                 "message",
@@ -92,7 +93,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                     { this.renderMessageTypeLabels(message) }
                 </div>
                 <div class="message-card">
-                    <div class="message-card-header">
+                    <div class="message-card-header" data-lb-count={labelsCount}>
                         <div class="message-card-header-action">
                             {
                                 rejectedMessagesCount ? 
@@ -105,7 +106,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                             }
                         </div>
                         <div class="message-card-header-timestamp-value">
-                            <p>{timestamp}</p>
+                            <p>{formatTime(timestamp)}</p>
                         </div>
                         <div class="message-card-header-name-value">
                             <p>{msgName}</p>
@@ -130,14 +131,14 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                         }
                         {/* DISABLED */}
                         <div class="message-card-header-prediction"
-                            title="Not implemeted">
+                            title="Not implemented">
                             <div class="message-card-header-prediction-icon"
                                 onClick={() => alert("Not implemented...")} />
                         </div>
                     </div>
                     <div class={contentClass}>
                         {
-                            message.isRejected ? 
+                            (message.content.rejectReason !== null) ?
                             (
                                 <div class="message-card-content-title">
                                     <p>{rejectedTitle}</p>
@@ -197,17 +198,9 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
     }
 
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
-        const labels = [];
+        let labels = [];
 
-        if (message.isAdmin) {
-            labels.push(
-                <div class="message-label-admin">
-                    <div class="message-label-admin-icon"/>
-                </div>
-            )
-        }
-
-        if (message.isRejected) {
+        if (message.content.rejectReason !== null) {
             labels.push(
                 <div class="message-label-rejected">
                     <div class="message-label-rejected-icon"/>
@@ -215,7 +208,29 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
             );
         }
 
+        if (message.content.admin) {
+            labels.push(
+                <div class="message-label-admin">
+                    <div class="message-label-admin-icon"/>
+                </div>
+            )
+        }
+
         return labels;
+    }
+
+    private getLabelsCount(message: Message) {
+        let count = 0;
+        
+        if (message.content.rejectReason != null) {
+            count++;
+        }
+
+        if (message.content.admin) {
+            count++;
+        }
+
+        return count;
     }
 
     private copyToClipboard(text: string) {

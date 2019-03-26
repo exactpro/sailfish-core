@@ -16,10 +16,10 @@
 
 import Status from './Status';
 import Entry from './Entry';
-import { ActionType } from './Action';
+import { ActionNodeType } from './Action';
 
 export default interface Verification {
-    actionNodeType: ActionType;
+    actionNodeType: ActionNodeType;
     messageId: number;
     name: string;
     description: string;

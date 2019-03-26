@@ -16,8 +16,6 @@
 
 export default interface Message {
     actionNodeType: string;
-    isAdmin: boolean;
-    isRejected: boolean;
     id: number;
     checkPoint?: any;
     raw: string;

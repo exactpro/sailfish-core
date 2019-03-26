@@ -22,6 +22,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,11 +45,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAccessor;
 
 import com.exactpro.sf.aml.CommonColumn;
 import com.exactpro.sf.aml.CommonColumns;
@@ -438,6 +438,19 @@ public class CommonActions extends AbstractCaller {
 	public String GetEnvironmentName(IActionContext actionContext) {
 		return actionContext.getEnvironmentName();
 	}
+
+    @Description("Returns latency between client and server (client time - server time) in milliseconds.<br>"
+            + "Server time is retrieved from 'timestamp' (e.g. SendingTime, TransactTime, etc.) fields of received messages.<br>"
+            + "Latency is updated on every received message which contains server time.<br>"
+            + "Action execution result will be placed in <b>Latency</b> field.")
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
+    @ActionMethod
+    public HashMap<?, ?> getLatency(IActionContext actionContext) {
+        IInitiatorService service = ActionUtil.getService(actionContext, IInitiatorService.class);
+        return new HashMap<String, Long>() {{
+            put("Latency", service.getLatency());
+        }};
+    }
 
     /**
 	 * Runs a script

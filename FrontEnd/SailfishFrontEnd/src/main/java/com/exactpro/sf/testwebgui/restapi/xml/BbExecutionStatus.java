@@ -30,7 +30,9 @@ public class BbExecutionStatus {
 	
 	private int progress;
 
-	public String getStatus() {
+	private List<BBNodeStatus> slaveStatuses;
+
+    public String getStatus() {
 		return status;
 	}
 
@@ -61,5 +63,12 @@ public class BbExecutionStatus {
 	public void setProgress(int progress) {
 		this.progress = progress;
 	}
-	
+
+    public List<BBNodeStatus> getSlaveStatuses() {
+        return slaveStatuses;
+    }
+
+    public void setSlaveStatuses(List<BBNodeStatus> slaveStatuses) {
+        this.slaveStatuses = slaveStatuses;
+    }
 }

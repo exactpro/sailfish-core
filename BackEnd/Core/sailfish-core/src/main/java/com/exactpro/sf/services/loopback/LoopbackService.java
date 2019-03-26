@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.script.actions.WaitAction;
+import com.exactpro.sf.common.messages.AttributeNotFoundException;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
@@ -35,7 +36,8 @@ import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ISession;
-import com.exactpro.sf.services.ServiceHandlerException;
+import com.exactpro.sf.services.MessageHelper;
+import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.storage.IMessageStorage;
@@ -48,50 +50,49 @@ public class LoopbackService implements IInitiatorService {
 	private IServiceHandler handler;
 	private LoopbackServiceSettings settings;
 	private IMessageStorage storage;
-
+	private IServiceContext context;
+	private ServiceInfo serviceInfo;
 	private ILoggingConfigurator logConfigurator;
 
 	private volatile ServiceStatus status = ServiceStatus.CREATED;
 	private volatile LoopbackSession session = null;
 
-	private ServiceInfo serviceInfo;
 
 	@Override
 	public void init(
-			final IServiceContext serviceContext,
+	        final IServiceContext serviceContext,
 			final IServiceMonitor serviceMonitor,
 			final IServiceHandler handler,
 			final IServiceSettings settings,
 			final ServiceName name) {
+
 		this.serviceName = name;
 		this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
 		this.settings = (LoopbackServiceSettings) settings;
 		this.storage = Objects.requireNonNull(serviceContext.getMessageStorage(), "'Message storage' parameter");
 		this.logConfigurator = Objects.requireNonNull(serviceContext.getLoggingConfigurator(), "'Logging configurator' parameter");
-
+        this.context = serviceContext;
         this.serviceInfo = serviceContext.lookupService(name);
-		status = ServiceStatus.INITIALIZED;
 
+		status = ServiceStatus.INITIALIZED;
 	}
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
-		this.session = new LoopbackSession();
+        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
+		session = new LoopbackSession();
 		status = ServiceStatus.STARTED;
 	}
 
 	@Override
 	public void dispose() {
 		session = null;
-		status = ServiceStatus.DISPOSED;
-
-		if(logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
+		if (logConfigurator != null) {
+            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
 		}
-	}
+        status = ServiceStatus.DISPOSED;
+
+    }
 
 	@Override
 	public IServiceHandler getServiceHandler() {
@@ -131,37 +132,48 @@ public class LoopbackService implements IInitiatorService {
 		}
 
 		@Override
-		public IMessage send(Object message) throws InterruptedException {
+		public IMessage send(Object message) {
 			if (!(message instanceof IMessage)) {
 				throw new EPSCommonException("Unsupported message type: " + message.getClass().getCanonicalName());
             }
 
-			IMessage iMsg = (IMessage) message;
-
+			IMessage received = (IMessage) message;
+			boolean isAdmin = false;
 			try {
-				if (iMsg.getMetaData().isAdmin()) {
-					getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.TO_ADMIN, iMsg);
-				} else {
-					getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.TO_APP, iMsg);
-				}
-			} catch (Exception e) {
-				logger.warn("serviceHandler thrown exception",e);
+				isAdmin = MessageHelper.isAdmin(context.getDictionaryManager().getDictionary(((IMessage) message).getMetaData().getDictionaryURI())
+                        .getMessages().get(((IMessage)message).getName()));
+
+			} catch (AttributeNotFoundException e) {
+				throw new ServiceException("Unable to get message attribute", e);
 			}
 
-			logger.debug("message passed to ServericeHandler");
+			MsgMetaData metaData = received.getMetaData();
+            metaData.setServiceInfo(serviceInfo);
+            metaData.setAdmin(isAdmin);
+            metaData.setFromService(getName());
+            metaData.setToService(getName());
 
-			iMsg.getMetaData().setServiceInfo(serviceInfo);
+            try {
+                getServiceHandler().putMessage(session, isAdmin ? ServiceHandlerRoute.TO_ADMIN : ServiceHandlerRoute.TO_APP, received);
+                storage.storeMessage(received);
 
-			logger.debug("message passed to msgStorage");
-            storage.storeMessage(iMsg);
-			LoopbackService.this.handlerReceivedMessage(iMsg);
-			return iMsg;
+                IMessage sent = received.cloneMessage();
+
+                getServiceHandler().putMessage(session, isAdmin ? ServiceHandlerRoute.FROM_ADMIN : ServiceHandlerRoute.FROM_APP, sent);
+                storage.storeMessage(sent);
+
+            } catch (Exception e) {
+                logger.error("Unable to process message: '{}')", received, e);
+                getServiceHandler().exceptionCaught(session, e);
+            }
+
+			return received;
 		}
 
 
 		@Override
-		public IMessage sendDirty(Object message) throws InterruptedException {
-			logger.error("This service not support send dirty message. Message will be send usual method");
+		public IMessage sendDirty(Object message) {
+			logger.warn("This service does not support dirty messages - falling back to send().");
 			return send(message);
 		}
 
@@ -176,40 +188,7 @@ public class LoopbackService implements IInitiatorService {
 
 		@Override
 		public boolean isLoggedOn() {
-            return LoopbackService.this.getStatus() == ServiceStatus.STARTED;
-		}
-	}
-
-	public void handlerReceivedMessage(IMessage iMsg) {
-		logger.debug("handleReceivedMessage");
-		try {
-			MsgMetaData metaData = iMsg.getMetaData();
-
-			metaData.setFromService(getName());
-			metaData.setToService(getName());
-			logger.debug("passing message to ServericeHandler");
-			if (iMsg.getMetaData().isAdmin()) {
-				metaData.setAdmin(true);
-				getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.FROM_ADMIN, iMsg);
-			} else {
-				metaData.setAdmin(false);
-				getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.FROM_APP, iMsg);
-			}
-			logger.debug("message passed to ServericeHandler");
-
-			metaData.setServiceInfo(serviceInfo);
-
-			logger.debug("message passed to msgStorage");
-            storage.storeMessage(iMsg);
-
-			logger.debug("message stored");
-
-		} catch (ServiceHandlerException e) {
-			logger.info("Execute service handler failed\nmsg: {})", e.getSfMessage(), e);
-			getServiceHandler().exceptionCaught(e.getSession(), e);
-		} catch (Exception e) {
-			logger.info("Caught exception while executin fromApp or fromAdmin methods of service handler\nIMessage: {})", iMsg, e);
-			getServiceHandler().exceptionCaught(getSession(), e);
+            return status == ServiceStatus.STARTED;
 		}
 	}
 
@@ -224,10 +203,8 @@ public class LoopbackService implements IInitiatorService {
 	}
 
 	@Override
-	public void connect() throws Exception
-	{
-	}
-
+	public void connect() {
+    }
 
 	@Override
     public IMessage receive(IActionContext actionContext, IMessage msg) throws InterruptedException {

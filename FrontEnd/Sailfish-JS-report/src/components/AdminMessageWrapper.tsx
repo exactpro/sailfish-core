@@ -46,10 +46,16 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
     render(props: WrapperProps, {isExpanded}: WrapperState) {
 
         if (isExpanded) {
+
+            const expandButtonClass = [
+                "message-expand",
+                props.message.content.rejectReason !== null ? "rejected" : ""
+            ].join(' ');
+
             return (
                 <div style={{position: "relative"}}>
                     <MessageCard {...props}/>
-                    <div class="message-expand">
+                    <div class={expandButtonClass}>
                         <div class="message-expand-icon" onClick={this.expandButtonHandler}/>
                     </div>
                 </div>
@@ -79,22 +85,22 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
     }
 
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
-        const labels = [];
+        let labels = [];
 
-        if (message.isAdmin) {
-            labels.push(
-                <div class="message-label-admin">
-                    <div class="message-label-admin-icon" style={{marginTop: "10px"}}/>
-                </div>
-            )
-        }
-
-        if (message.isRejected) {
+        if (message.content.rejectReason !== null) {
             labels.push(
                 <div class="message-label-rejected">
                     <div class="message-label-rejected-icon" style={{marginTop: "10px"}}/>
                 </div>
             );
+        }
+
+        if (message.content.admin) {
+            labels.push(
+                <div class="message-label-admin">
+                    <div class="message-label-admin-icon" style={{marginTop: "10px"}}/>
+                </div>
+            )
         }
 
         return labels;

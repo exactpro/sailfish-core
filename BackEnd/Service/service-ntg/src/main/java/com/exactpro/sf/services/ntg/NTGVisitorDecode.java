@@ -15,6 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageStructureWriter;
@@ -22,13 +32,6 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.GenericConverter;
 import com.exactpro.sf.services.ntg.exceptions.UnknownNTGMessageTypeException;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 final class NTGVisitorDecode extends NTGVisitorBase {
     private static final Logger logger = LoggerFactory.getLogger(NTGVisitorDecode.class);
@@ -50,10 +53,8 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 			logger.debug("   Decode visiting IMessage field [{}]" , fieldName);
 		}
 
-		int length = (Integer)complexField.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)complexField.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(complexField, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(complexField, NTGProtocolAttribute.Offset.toString());
 
 		validateOffset(fieldName, accumulatedLength, offset);
 		IMessage msg = msgFactory.createMessage(complexField.getName(), complexField.getNamespace());
@@ -71,12 +72,9 @@ final class NTGVisitorDecode extends NTGVisitorBase {
     {
         validateAttributesMap(fieldName, String.class, fldStruct);
 
-        int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-        int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
-        String format = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Format.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
+        String format = getAttributeValue(fldStruct, NTGProtocolAttribute.Format.toString());
 
         validateOffset(fieldName, accumulatedLength, offset);
 
@@ -110,10 +108,8 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
 	    validateAttributesMap(fieldName, LocalDateTime.class, fldStruct);
 
-        int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-        int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
         validateLength(fieldName, lengthLong, length);
         validateOffset(fieldName, accumulatedLength, offset);
@@ -138,13 +134,10 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	{
 		validateAttributesMap(fieldName, Double.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
-		String type = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Type.toString());
+        String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
 		double divisor = "Price4".equals(type) ? 10000.0D : 100000000.0D;
 
@@ -167,10 +160,8 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	{
 		validateAttributesMap(fieldName, Float.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 		validateLength(fieldName, lengthFloat, length);
 		validateOffset(fieldName, accumulatedLength, offset);
@@ -191,12 +182,9 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	{
 		validateAttributesMap(fieldName, Long.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
-        String type = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Type.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
+        String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
         ProtocolType protocolType = type != null ? ProtocolType.parse(type) : null;
 
@@ -224,10 +212,8 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	{
 		validateAttributesMap(fieldName, Integer.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 		validateOffset(fieldName, accumulatedLength, offset);
 
@@ -265,10 +251,8 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	{
 		validateAttributesMap(fieldName, Byte.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
 		validateLength(fieldName, lengthByte, length);
 		validateOffset(fieldName, accumulatedLength, offset);
@@ -287,12 +271,9 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 	{
 		validateAttributesMap(fieldName, BigDecimal.class, fldStruct);
 
-		int length = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Length.toString());
-		int offset = (Integer)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Offset.toString());
-		String type = (String)fldStruct.getAttributeValueByName(
-                NTGProtocolAttribute.Type.toString());
+        int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+        int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
+        String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
 		validateLength(fieldName, lengthBigDecimal, length);
 		validateOffset(fieldName, accumulatedLength, offset);

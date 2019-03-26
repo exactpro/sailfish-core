@@ -70,6 +70,29 @@
 		            	</div>
 						
 					</div>
+
+                    <h:panelGrid columns="3" cellpadding="4" styleClass="top-aligned-table">
+                        <p:outputLabel for="from" value="From" />
+                        <p:outputLabel for="to" value="To" />
+                        <p:outputLabel for="sfInstancesMenu" value="SF Instances" />
+
+                        <p:calendar id="from" value="#{tgReportBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="false"
+                                    timeZone="UTC"/>
+
+
+                        <p:calendar id="to" value="#{tgReportBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="false"
+                                    timeZone="UTC"/>
+
+
+                        <p:selectCheckboxMenu id="sfInstancesMenu" value="#{tgReportBean.selectedSfInstances}" label="Select"
+                                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
+                                              required="false">
+                            <f:selectItems value="#{statReportingBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
+                        </p:selectCheckboxMenu>
+
+                    </h:panelGrid>
 					
 					<div class="eps-params-separator"></div>
 					

@@ -15,17 +15,23 @@
  *******************************************************************************/
 package com.exactpro.sf.embedded.statistics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.BiFunction;
 
 import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
+import com.exactpro.sf.embedded.statistics.entities.TagGroup;
 import com.exactpro.sf.embedded.statistics.handlers.StatisticsReportHandlerLoader;
+import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
 import com.exactpro.sf.util.DateTimeUtility;
 
 import com.google.common.collect.Sets;
@@ -54,10 +60,16 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.util.BugDescription;
+import java.time.LocalDateTime;
 
 public class StatisticsService extends StatisticsReportHandlerLoader implements IEmbeddedService{
 
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsService.class);
+
+    public static final String OPTIONAL_TAG_NAME = "Sailfish_Optional";
+    public static final String INTERNAL_GROUP_NAME = "Sailfish";
+    public static final int CACHE_SIZE  = 100;
+    public static final float CACHE_LOAD_FACTOR  = 0.75f;
 
 	private BatchInsertWorker insertWorker;
 
@@ -86,6 +98,15 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 	private final StatisticsFlywayWrapper statisticsFlywayWrapper = new StatisticsFlywayWrapper();
 
 	private volatile boolean exceptionEncountered = false;
+
+    private final Map<String, Tag> tagCache = new LinkedHashMap<String, Tag>(CACHE_SIZE, CACHE_LOAD_FACTOR, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, Tag> eldest) {
+            return size() > CACHE_SIZE;
+        }
+    };
+
+    private TagGroup sailfishGroup;
 
 	private SchemaVersionChecker schemaChecker;
 
@@ -214,6 +235,8 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			setStatus(ServiceStatus.Connected);
 
+            initSailfishTag();
+
 			logger.info("Statistics service initialized");
 
 		} else {
@@ -279,8 +302,8 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	}
 
-	public void matrixStarted(String matrixName, String reportFolder, long sfRunId, String environmentName, String userName,
-			List<Tag> tags, long scriptDescriptionId) {
+	public synchronized void  matrixStarted(String matrixName, String reportFolder, long sfRunId, String environmentName, String userName,
+                              List<Tag> tags, long scriptDescriptionId) {
 
 		if(!this.status.equals(ServiceStatus.Connected)) {
 			return;
@@ -298,9 +321,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 			matrixRun.setEnvironment(this.storage.getEnvironmentEntity(environmentName));
 			matrixRun.setUser(this.storage.getUserEntity(userName));
 			matrixRun.setReportFolder(reportFolder);
-			if(tags != null) {
-				matrixRun.setTags(new HashSet<>(tags));
-			}
+            if(tags != null) {
+                matrixRun.setTags(new HashSet<>(tags));
+            }
 
 			openMatrixRun(matrixRun, scriptDescriptionId);
 
@@ -392,7 +415,8 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	}
 
-	public void testCaseStarted(String matrixName, String tcId, String reportFile, String description, long rank, int tcHash) {
+	public synchronized void testCaseStarted(String matrixName, String tcId, String reportFile, String description, long rank,
+                                int tcHash, Set<String> tags) {
 
 		if(!this.status.equals(ServiceStatus.Connected)) {
 			return;
@@ -406,7 +430,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			tcRun.setReportFile(reportFile);
 			tcRun.setDescription(StringEscapeUtils.escapeEcmaScript(description));
-			tcRun.setStartTime(DateTimeUtility.nowLocalDateTime());
+            LocalDateTime now= DateTimeUtility.nowLocalDateTime();
+            tcRun.setStartTime(now);
+            tcRun.setFinishTime(now);
 			tcRun.setRank(rank);
 			tcRun.setHash(tcHash);
 
@@ -419,6 +445,10 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 				tcRun.setTestCase(this.unknownTc);
 
 			}
+
+            if (tags != null && !tags.isEmpty()) {
+                tcRun.addTags(loadTags(tags), false);
+            }
 
 			tcRun.setMatrixRun(this.runningMatrices.get(matrixName));
 
@@ -534,8 +564,8 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	}
 
-    public void actionVerification(String matrixName, ComparisonResult result) {
-        if (result != null) {
+    public void addKnownBugsToActionRun(String matrixName, ComparisonResult result) {
+        if (result != null && ComparisonUtil.getStatusType(result) != StatusType.FAILED) {
             Set<BugDescription> allKnownBugs = result.getAllKnownBugs();
             if (!allKnownBugs.isEmpty()) {
                 Set<BugDescription> reproducedBugs = result.getReproducedBugs();
@@ -783,4 +813,67 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
         return thisSfInstance;
     }
 
+    public void manageTagToRows(List<AggregatedReportRow> rows, BiFunction<TestCaseRun, List<Tag>, Boolean> targetAction,
+                                List<Tag> tags) {
+        List<Object> testCaseRuns = new ArrayList<>();
+        manageTagToRows(rows, targetAction, tags, testCaseRuns);
+        if (!testCaseRuns.isEmpty()) {
+            storage.update(testCaseRuns);
+        }
+    }
+
+    private void manageTagToRows(List<AggregatedReportRow> rows, BiFunction<TestCaseRun, List<Tag>, Boolean> targetAction,
+                                 List<Tag> tags, List<Object> toUpdate) {
+        for (AggregatedReportRow row : rows) {
+            if (row.isMatrixRow()) {
+                manageTagToRows(row.getTestCaseRows(), targetAction, tags, toUpdate);
+                continue;
+            }
+            TestCaseRun testCaseRun = storage.getTestCaseRunById(row.getTestCaseRunId());
+            if (targetAction.apply(testCaseRun, tags)) {
+                toUpdate.add(testCaseRun);
+            }
+        }
+    }
+
+    private void initSailfishTag() {
+        Tag optionalTag = this.storage.getTagByName(OPTIONAL_TAG_NAME);
+        if (optionalTag == null) {
+            optionalTag = new Tag();
+            optionalTag.setName(OPTIONAL_TAG_NAME);
+            sailfishGroup = this.storage.getGroupByName(INTERNAL_GROUP_NAME);
+            if (sailfishGroup == null) {
+                sailfishGroup = new TagGroup();
+                sailfishGroup.setName(INTERNAL_GROUP_NAME);
+                this.storage.add(sailfishGroup);
+            }
+            optionalTag.setGroup(sailfishGroup);
+            this.storage.add(optionalTag);
+        }
+        this.tagCache.put(OPTIONAL_TAG_NAME, optionalTag);
+    }
+
+    private List<Tag> loadTags(Set<String> tagNames) {
+        List<Tag> tags = new ArrayList<>();
+        for (String tagName : tagNames) {
+            Tag tag = getTag(tagName);
+            tags.add(tag);
+        }
+        return tags;
+    }
+
+    private Tag getTag(String tagName) {
+        return tagCache.computeIfAbsent(tagName, name -> {
+            Tag tag = storage.getTagByName(name);
+
+            if(tag == null) {
+                tag = new Tag();
+                tag.setName(name);
+                tag.setGroup(sailfishGroup);
+                storage.add(tag);
+            }
+
+            return tag;
+        });
+    }
 }

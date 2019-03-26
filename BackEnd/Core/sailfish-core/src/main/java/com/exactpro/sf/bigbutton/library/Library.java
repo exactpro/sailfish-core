@@ -16,6 +16,7 @@
 package com.exactpro.sf.bigbutton.library;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.text.StringSubstitutor;
-import java.time.LocalDateTime;
 
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.util.DateTimeUtility;
@@ -49,6 +49,8 @@ public class Library implements Serializable /*extends AbstractLibraryItem*/ {
 	private String rootFolder = ""; // library root
 
 	private String reportsFolder;
+
+    private String variableSetsFile;
 
 	private SfApiOptions defaultApiOptions;
 
@@ -149,7 +151,15 @@ public class Library implements Serializable /*extends AbstractLibraryItem*/ {
 		this.reportsFolder = reportsFolder;
 	}
 
-	public String getDescriptorFileName() {
+    public String getVariableSetsFile() {
+        return variableSetsFile;
+    }
+
+    public void setVariableSetsFile(String variableSetsFile) {
+        this.variableSetsFile = variableSetsFile;
+    }
+
+    public String getDescriptorFileName() {
 		return descriptorFileName;
 	}
 

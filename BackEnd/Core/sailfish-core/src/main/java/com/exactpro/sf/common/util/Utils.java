@@ -37,7 +37,10 @@ public class Utils
 	private static final Logger logger = LoggerFactory.getLogger(Utils.class);
 	private static final boolean isDebugged = logger.isDebugEnabled();
 
-	public enum CompType
+    private static final String[] TAG_COLOR_CLASSES = {"turquoise", "preaver", "amethyst", "green-sea",
+                    "belize-hole", "wisteria", "sun-flower", "carrot", "clouds", "orange", "silver"};
+
+    public enum CompType
 	{
 		TIME,
 		NAME,
@@ -800,5 +803,11 @@ public class Utils
 		}
 	}
 
+    public static String getTagColorClass(String name) {
+        if(name != null) {
+            return TAG_COLOR_CLASSES[Math.abs(name.hashCode()) % TAG_COLOR_CLASSES.length];
+        }
 
+        return TAG_COLOR_CLASSES[0];
+    }
 }

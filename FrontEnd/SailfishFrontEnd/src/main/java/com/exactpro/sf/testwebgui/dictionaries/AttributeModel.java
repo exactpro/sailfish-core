@@ -16,6 +16,8 @@
 package com.exactpro.sf.testwebgui.dictionaries;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.structures.ModifiableAttributeStructure;
@@ -35,6 +37,17 @@ public class AttributeModel implements Serializable {
 	private boolean overrides = false;
 
 	private boolean attribute; // attribute/value
+
+    public static List<ModifiableAttributeStructure> cloneAttributes(List<ModifiableAttributeStructure> toClone) {
+        List<ModifiableAttributeStructure> result = new ArrayList<>();
+
+        for (ModifiableAttributeStructure attributeStructure:
+             toClone) {
+            result.add(cloneAttribute(attributeStructure));
+        }
+
+        return result;
+    }
 
 	public static ModifiableAttributeStructure cloneAttribute(ModifiableAttributeStructure toClone) {
 

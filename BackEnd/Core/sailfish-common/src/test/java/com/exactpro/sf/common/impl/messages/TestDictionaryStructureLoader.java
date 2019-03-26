@@ -58,8 +58,8 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
 		System.out.println(dictionary.getNamespace());
 		Assert.assertEquals(dictionary.getNamespace(), "Example");
 
-		Assert.assertEquals(dictionary.getFieldStructures().size(), 2);
-		Assert.assertEquals(dictionary.getMessageStructures().size(), 6);
+        Assert.assertEquals(dictionary.getFields().size(), 2);
+        Assert.assertEquals(dictionary.getMessages().size(), 6);
 		
 		List<String> fields = new ArrayList<>();
 		fields.add("ReceivedSequenceNumberType");
@@ -78,14 +78,14 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
 		
 		System.out.println("Fields:");
 
-		for (IFieldStructure fieldStructure : dictionary.getFieldStructures()) {
+        for(IFieldStructure fieldStructure : dictionary.getFields().values()) {
 			System.out.println("\t" + fieldStructure.getName());
 			Assert.assertTrue(fields.contains(fieldStructure.getName()));
 		}
 
 		System.out.println("Messages:");
 
-		for (IMessageStructure msgStruct : dictionary.getMessageStructures()) {
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
 			System.out.println("\t" + msgStruct.getName());
 			Assert.assertTrue(messages.contains(msgStruct.getName()));
 		}
@@ -118,18 +118,18 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
 		System.out.println(dictionary.getNamespace());
 		Assert.assertEquals("native1", dictionary.getNamespace());
 
-		Assert.assertEquals(8, dictionary.getFieldStructures().size());
-		Assert.assertEquals(3, dictionary.getMessageStructures().size());
+        Assert.assertEquals(8, dictionary.getFields().size());
+        Assert.assertEquals(3, dictionary.getMessages().size());
 		
 		System.out.println("Fields:");
 
-		for (IFieldStructure fieldStructure : dictionary.getFieldStructures()) {
+        for(IFieldStructure fieldStructure : dictionary.getFields().values()) {
 			System.out.println("\t" + fieldStructure.getName());
 		}
 
 		System.out.println("Messages:");
 
-		for (IMessageStructure msgStruct : dictionary.getMessageStructures()) {
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
 			System.out.println("\t" + msgStruct.getName());
 		}
 
@@ -164,11 +164,11 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
         System.out.println(dictionary.getNamespace());
         Assert.assertEquals(dictionary.getNamespace(), "native1");
 
-        Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getMessageStructure("MessageHeader").getField("enum").getJavaType());
-        Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getMessageStructure("MessageHeader").getField("MessageLength").getJavaType());
-        Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getFieldStructure("enum").getJavaType());
-        Assert.assertEquals(true, dictionary.getFieldStructure("enum").isEnum());
-        Assert.assertEquals(2, dictionary.getFieldStructure("enum").getValues().size());
+        Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getMessages().get("MessageHeader").getFields().get("enum").getJavaType());
+        Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getMessages().get("MessageHeader").getFields().get("MessageLength").getJavaType());
+        Assert.assertEquals(JavaType.JAVA_LANG_INTEGER, dictionary.getFields().get("enum").getJavaType());
+        Assert.assertEquals(true, dictionary.getFields().get("enum").isEnum());
+        Assert.assertEquals(2, dictionary.getFields().get("enum").getValues().size());
         
     }
     

@@ -25,6 +25,10 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.impl.HibernateStorage;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public abstract class AbstractHibernateStorage implements IHibernateStorage {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractHibernateStorage.class);
@@ -42,7 +46,8 @@ public abstract class AbstractHibernateStorage implements IHibernateStorage {
         .setProperty("hibernate.connection.pool_size", "1")
         
         .setProperty("hibernate.hbm2ddl.auto", "none")
-        
+        .setProperty("hibernate.globally_quoted_identifiers", "true")
+
         .setProperty("show_sql", "false")
         .setProperty("format_sql", "false")
         
@@ -83,7 +88,16 @@ public abstract class AbstractHibernateStorage implements IHibernateStorage {
         this.storage.update(entity);
         
     }
-    
+
+    @Override
+    public void update(List<Object> entities) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Try to batch update entities to statistic db:{}", entities.stream().map(Object::toString)
+                    .collect(Collectors.joining(", ")));
+        }
+        this.storage.batchUpdate(entities);
+    }
+
     public synchronized void tearDown() {
         if (storage.getSessionFactory() != null) {
             storage.getSessionFactory().close();

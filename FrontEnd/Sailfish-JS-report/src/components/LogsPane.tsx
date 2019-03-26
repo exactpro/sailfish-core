@@ -18,7 +18,7 @@ import {h} from 'preact';
 import Log from '../models/Log';
 
 interface LogsPaneProps {
-    logs: Log[];
+    logs?: Log[];
 }
 
 export const LogsPane = ({logs}: LogsPaneProps) => {

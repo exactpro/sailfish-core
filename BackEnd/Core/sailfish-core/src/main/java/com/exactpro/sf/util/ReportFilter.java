@@ -24,8 +24,10 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.FilenameUtils;
 
-import com.exactpro.sf.scriptrunner.PropertiesReport;
 import com.exactpro.sf.scriptrunner.ZipReport;
+
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.ROOT_JSON_REPORT_FILE;
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.XML_PROPERTIES_FILE;
 
 public class ReportFilter implements FileFilter {
 
@@ -42,19 +44,21 @@ public class ReportFilter implements FileFilter {
         if(FilenameUtils.isExtension(name, ZipReport.ZIP_EXTENSION)) {
             String baseName = FilenameUtils.getBaseName(name);
 
-            if(new File(file.getParentFile(), PropertiesReport.PROPERTIES_FILE_NAME).exists()) {
+
+            if(new File(file.getParentFile(), ROOT_JSON_REPORT_FILE).exists() || new File(file.getParentFile(), XML_PROPERTIES_FILE).exists()) {
                 return false;
             }
 
             try(ZipFile zipFile = new ZipFile(file)) {
-                ZipEntry entry = zipFile.getEntry(baseName + "/" + PropertiesReport.PROPERTIES_FILE_NAME);
-                return entry != null;
+                ZipEntry json = zipFile.getEntry(baseName + '/' + ROOT_JSON_REPORT_FILE );
+                ZipEntry xml = zipFile.getEntry(baseName + '/' + XML_PROPERTIES_FILE );
+                return json != null || xml != null;
             } catch(IOException e) {
                 return false;
             }
         }
 
-        return file.isDirectory() && new File(file, PropertiesReport.PROPERTIES_FILE_NAME).exists();
+        return file.isDirectory() && (new File(file, ROOT_JSON_REPORT_FILE).exists() || new File(file, XML_PROPERTIES_FILE).exists());
     }
 
 }

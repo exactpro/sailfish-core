@@ -24,6 +24,9 @@ import javax.servlet.http.HttpSession;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.util.StringUtil;
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.embedded.statistics.storage.CommonReportRow;
 import com.exactpro.sf.storage.auth.User;
 import com.exactpro.sf.testwebgui.configuration.ConfigBean;
 import com.exactpro.sf.testwebgui.context.ContextBean;
@@ -33,7 +36,9 @@ import com.exactpro.sf.testwebgui.help.HelpContentHolder;
 import com.exactpro.sf.testwebgui.restapi.RESTUtil;
 import com.exactpro.sf.testwebgui.scriptruns.MatrixHolder;
 import com.exactpro.sf.testwebgui.scriptruns.ScriptRunsBean;
+import com.exactpro.sf.testwebgui.servlets.ReportServlet;
 import com.exactpro.sf.testwebgui.servlets.SessionModelsMapper;
+import org.apache.commons.lang3.StringUtils;
 
 public class BeanUtil {
 
@@ -181,5 +186,65 @@ public class BeanUtil {
             result = type.value().substring(index);
         }
         return result;
+    }
+
+    public static String getContextPath(String customReportsPath, boolean button) {
+        return StringUtils.isEmpty(customReportsPath) ? (button ? StringUtils.EMPTY : FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath())
+                : customReportsPath.substring(0, customReportsPath.lastIndexOf("/"));
+    }
+
+    public static String getReportRequest(String customReportsPath, CommonReportRow row, boolean button) {
+        StringBuilder sb = new StringBuilder(getContextPath(customReportsPath, button));
+
+        sb.append("/report.xhtml?report=");
+        sb.append(buildReportUrl(customReportsPath, row, true));
+
+        return sb.toString();
+    }
+
+    public static String getZipReport(String customReportsPath, CommonReportRow row, boolean button) {
+        StringBuilder sb = new StringBuilder(getContextPath(customReportsPath, button));
+
+        sb.append("/report/");
+        sb.append(row.getReportFolder());
+        sb.append("?action=simplezip");
+
+        return sb.toString();
+    }
+
+    public static String buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) {
+
+        StringBuilder sb = new StringBuilder();
+
+        if(StringUtils.isNotEmpty(customReportsPath)) {
+            sb.append(customReportsPath).append("/");
+        } else {
+            SfInstance instance = row.getSfCurrentInstance();
+            if (instance == null) {
+                instance = row.getSfInstance();
+            }
+            sb.append("http://");
+            sb.append(instance.getHost())
+                    .append(":")
+                    .append(instance.getPort())
+                    .append(instance.getName())
+                    .append("/");
+            sb.append(ReportServlet.REPORT_URL_PREFIX + "/"); // see web.xml > servlet-mapping
+        }
+
+        sb.append(StringUtil.escapeURL(row.getReportFolder())).append("/");
+
+        if(report) {
+
+            sb.append(row.getReportFile()).append(".html");
+
+        } else {
+
+            sb.append(StringUtil.escapeURL(row.getMatrixName()));
+
+        }
+
+        return sb.toString();
+
     }
 }

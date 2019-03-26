@@ -18,6 +18,8 @@ import { h, Component } from "preact";
 import ActionParameter from "../models/ActionParameter";
 import '../styles/tables.scss';
 
+const PADDING_LEVEL_VALUE = 10;
+
 export interface IParamTableProps {
     params: Array<ActionParameter>;
     name: string;
@@ -28,8 +30,8 @@ interface IParamTableState {
 }
 
 interface TableNode extends ActionParameter {
-    // is subnodes hidden
-    isCollapsed?: boolean;
+    // is subnodes visible
+    isExpanded?: boolean;
 }
 
 export default class ParamsTable extends Component<IParamTableProps, IParamTableState> {
@@ -45,44 +47,15 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
         return (root.subParameters ? {
             ...root,
             subParameters: root.subParameters.map(parameter => this.paramsToNodes(parameter)),
-            isCollapsed: false
+            isExpanded: true
         } : root)
     }
 
     tooglerClick(root: TableNode) {
-        root.isCollapsed = !root.isCollapsed;
+        root.isExpanded = !root.isExpanded;
         this.setState(this.state);
-    }
-
-    renderParams(root: TableNode, padding: number = 1) {
-
-        return (root.subParameters && root.subParameters.length !== 0 ? ([
-            <tr class="params-table-row-toogler">
-                <td onClick={() => this.tooglerClick(root)}
-                    colSpan={2}>
-                    <p style={{ marginLeft: 10 * padding }}>
-                        {(root.isCollapsed ? "+  " : "-  ") + root.name}
-                    </p>
-                </td>
-            </tr>,
-            root.isCollapsed ? null :
-                root.subParameters.map(
-                    (param) => this.renderParams(param, padding + 1) as Element)
-        ]
-        ) : (
-                <tr class="params-table-row-value">
-                    <td style={{ paddingLeft: 10 * padding }}> 
-                        {root.name}
-                    </td>
-                    <td style={{ paddingLeft: 10 * padding }}>
-                        {root.value}
-                    </td>
-                </tr>
-            )
-        )
-    }
-
-
+    }    
+    
     render({ name }: IParamTableProps, { collapseParams }: IParamTableState) {
         return (<div class="params-table">
             <table>
@@ -90,9 +63,64 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
                     <tr>
                         <th colSpan={2}>{name}</th>
                     </tr>
-                    {collapseParams.map((param) => this.renderParams(param))}
+                    {collapseParams.map((param) => this.renderNodes(param))}
                 </tbody>
             </table>
         </div>);
+    }
+
+    private renderNodes(node: TableNode, paddingLevel: number = 1) : JSX.Element[] {
+        if (node.subParameters && node.subParameters.length !== 0) {
+            const subNodes = node.isExpanded ? 
+                node.subParameters.reduce((list, node) => list.concat(this.renderNodes(node, paddingLevel + 1)), []) : 
+                [];
+
+            return [
+                this.renderTooglerNode(node, paddingLevel),
+                ...subNodes
+            ]
+        } else {
+            return [this.renderValueNode(node.name, node.value, paddingLevel)];
+        }
+    }
+
+    private renderValueNode(name: string, value: string, paddingLevel: number) : JSX.Element {
+
+        const cellStyle = {
+            paddingLeft: PADDING_LEVEL_VALUE * paddingLevel
+        };
+
+        return (
+            <tr class="params-table-row-value">
+                <td style={cellStyle}> 
+                    {name}
+                </td>
+                <td style={cellStyle}>
+                    {value}
+                </td>
+            </tr>
+        )
+    }
+
+    private renderTooglerNode(node: TableNode, paddingLevel: number) : JSX.Element {
+
+        const rootClass = [
+                "params-table-row-toogler",
+                node.isExpanded ? "expanded" : "collapsed"
+            ].join(' '),
+            nameStyle = {
+                paddingLeft: PADDING_LEVEL_VALUE * paddingLevel
+            };
+
+        return (
+            <tr class={rootClass}>
+                <td onClick={() => this.tooglerClick(node)}
+                    colSpan={2}>
+                    <p style={nameStyle}>
+                        {node.name}
+                    </p>
+                </td>
+            </tr>
+        )
     }
 }

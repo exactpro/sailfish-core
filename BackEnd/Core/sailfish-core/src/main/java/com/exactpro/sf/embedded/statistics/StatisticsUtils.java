@@ -72,11 +72,11 @@ public class StatisticsUtils {
     private static final ObjectReader LIST_JSON_READER = OBJECT_MAPPER.reader().forType(List.class);
     private static final BugCategoriesComparator CATEGORIES_COMPARATOR = new BugCategoriesComparator();
 
-    public static TagGroupReportParameters createTagGroupReportParameters(List<TagGroupDimension> sourceDimensions) {
-        TagGroupReportParameters params = new TagGroupReportParameters();
-
+    public static TagGroupReportParameters setDimensionParameters(List<TagGroupDimension> sourceDimensions,
+                                                                  TagGroupReportParameters params) {
         Set<Long> tags = new HashSet<>();
         List<TagGroupDimension> selectedDimensions = new ArrayList<>();
+        int numberOfGroups = 0;
 
         for (TagGroupDimension tagGroupDimension : sourceDimensions) {
             if (tagGroupDimension.isTag()) {
@@ -84,10 +84,14 @@ public class StatisticsUtils {
                 if (!tags.add(tagGroupDimension.getId())) {
                     throw new StatisticsException("Error", "Tag '" + tagGroupDimension.getName() + "' previously indicated");
                 }
+                if (tagGroupDimension.hasGroup()) {
+                    numberOfGroups++;
+                }
             } else {
                 List<TagGroupDimension> listSubTags = tagGroupDimension.getSelectedSubTags();
                 if (!listSubTags.isEmpty()) {
                     selectedDimensions.add(tagGroupDimension);
+                    numberOfGroups++;
                     for (TagGroupDimension tag : listSubTags) {
                         if (!tags.add(tag.getId())) {
                             throw new StatisticsException("Error",
@@ -104,14 +108,15 @@ public class StatisticsUtils {
 
         params.setTags(tags);
         params.setDimensions(selectedDimensions);
-        params.setNumberOfGroups(selectedDimensions.size());
+        params.setNumberOfGroups(numberOfGroups);
 
         return params;
     }
 
     public static List<TagGroupReportResult> generateTagGroupReportResults(StatisticsService statisticsService,
-                                                                           List<TagGroupDimension> dimensions) {
-        TagGroupReportParameters params = createTagGroupReportParameters(dimensions);
+                                                                           List<TagGroupDimension> dimensions,
+                                                                           TagGroupReportParameters params) {
+        setDimensionParameters(dimensions, params);
         List<TagGroupReportResult> results = new ArrayList<>();
         for(int i =0; i < dimensions.size(); i++) {
             params.setLoadForLevel(i);

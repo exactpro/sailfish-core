@@ -32,6 +32,14 @@
 	    				</p:commandLink>
 	    				
 	    				<p:overlayPanel id="optionsPanel" for="optionsToggler" hideEffect="fade" dismissable="false">
+
+                            <h:panelGrid columns="1" cellpadding="5" style="text-align: left;">
+
+                                <h:outputLabel for="customLinkPath" value="Custom path to reports" />
+
+                                <p:inputText id="customLinkPath" value="#{taggedSetsBean.customReportsPath}" style="width: 300px;" placeholder="http://localhost:8080/sfgui/report"/>
+
+                            </h:panelGrid>
 	    				
 	    					<h:panelGrid columns="2" cellpadding="5" style="text-align: left;">
 	    						
@@ -45,8 +53,9 @@
 					        </h:panelGrid>
 					        
 					        <p:separator style="border: 0px none;"/>
-					        
-					        <p:commandButton value="Apply" update=":msgForm:messages :results-form"/>
+					        <div class="eps-report-parameters-custom-path-apply-button">
+					        	<p:commandButton value="Apply" update=":msgForm:messages :results-form"/>
+							</div>
 					        
 					    </p:overlayPanel>
 	    				
@@ -160,7 +169,17 @@
 	    				
 	    				<p:column headerText="Matrix" styleClass="eps-f-set-column" 
 	    					rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
-	    					<h:outputText value="#{row.firstMatrixName}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Matrix')}"/>
+                            <ui:fragment rendered="#{taggedSetsBean.isColumnSelected('Matrix')  and row.firstSet.testCaseId ne null}">
+                            <a href="#{taggedSetsBean.getReportRequest(row.firstSet)}" target="_blank"
+                               title="View report">
+                                <h:outputText value="#{row.firstMatrixName}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Matrix')}"/>
+                            </a>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{taggedSetsBean.isColumnSelected('Matrix')  and row.firstSet.testCaseId ne null}">
+                                <a href="#{taggedSetsBean.buildReportUrl(row.firstSet, false)}" target="_blank" download="#{row.firstMatrixName}"
+                                   class="ui-icon ui-icon-circle-arrow-s" title="Download script"
+                                   style="display: inline-block; vertical-align: middle;"/>
+                            </ui:fragment>
 	    				</p:column>
 	    				<p:column headerText="Status" styleClass="eps-f-set-column" 
 	    					rendered="#{taggedSetsBean.isColumnSelected('Status')}">
@@ -214,7 +233,17 @@
 	    				
 	    				<p:column headerText="Matrix" styleClass="eps-s-set-column"
 	    					rendered="#{taggedSetsBean.isColumnSelected('Matrix')}">
-	    					<h:outputText value="#{row.secondMatrixName}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Matrix')}"/>
+                            <ui:fragment rendered="#{taggedSetsBean.isColumnSelected('Matrix') and row.secondSet.testCaseId ne null}">
+                                <a href="#{taggedSetsBean.getReportRequest(row.secondSet)}" target="_blank"
+                                   title="View report">
+                                    <h:outputText value="#{row.secondMatrixName}" styleClass="#{taggedSetsBean.getHighlightStyle(row.testCaseId, 'Matrix')}"/>
+                                </a>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{taggedSetsBean.isColumnSelected('Matrix') and row.secondSet.testCaseId ne null}">
+                                <a href="#{taggedSetsBean.buildReportUrl(row.secondSet, false)}" target="_blank" download="#{row.secondMatrixName}"
+                                   class="ui-icon ui-icon-circle-arrow-s" title="Download script"
+                                   style="display: inline-block; vertical-align: middle;"/>
+                            </ui:fragment>
 	    				</p:column>
 	    				<p:column headerText="Status" styleClass="eps-s-set-column"
 	    					rendered="#{taggedSetsBean.isColumnSelected('Status')}">

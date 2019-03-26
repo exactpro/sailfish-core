@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl;
 
+import static com.exactpro.sf.storage.util.ServiceStorageHelper.copySettings;
+import static java.lang.String.format;
+import static java.util.Arrays.stream;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +36,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +56,7 @@ import com.exactpro.sf.scriptrunner.IEnvironmentListener;
 import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
 import com.exactpro.sf.scriptrunner.services.IServiceFactory;
 import com.exactpro.sf.services.ChangeEnvironmentEvent;
+import com.exactpro.sf.services.CollectorServiceHandler;
 import com.exactpro.sf.services.DefaultServiceContext;
 import com.exactpro.sf.services.EnvironmentEvent;
 import com.exactpro.sf.services.FilterServiceHandlerWrapper;
@@ -70,6 +76,7 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IEnvironmentStorage;
 import com.exactpro.sf.storage.IServiceStorage;
+import com.exactpro.sf.storage.IVariableSetStorage;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.impl.FakeMessageStorage;
 import com.exactpro.sf.storage.impl.FilterMessageStorageWrapper;
@@ -86,6 +93,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
 	private final IServiceStorage storage;
 	private final IEnvironmentStorage envStorage;
+    private final IVariableSetStorage variableSetStorage;
 	private final List<IEnvironmentListener> eventListeners;
 	/**
      * Operations with this map should be locked
@@ -103,6 +111,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 			final IServiceFactory staticServiceFactory,
 			final IServiceStorage storage,
 			final IEnvironmentStorage envStorage,
+            final IVariableSetStorage variableSetStorage,
 			final IServiceContext serviceContext) {
 
 		this.staticServiceFactory = Objects.requireNonNull(staticServiceFactory, "'Static service factory' parameter");
@@ -115,9 +124,11 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
         this.serviceExecutor = Executors.newFixedThreadPool(5, new ThreadFactoryBuilder().setNameFormat("connection-manager-%d").build());
 
-        this.envStorage = envStorage;
+        this.envStorage = Objects.requireNonNull(envStorage, "envStorage cannot be null");
 
-		this.eventListeners = new CopyOnWriteArrayList<>();
+        this.variableSetStorage = Objects.requireNonNull(variableSetStorage, "variableSetStorage cannot be null");
+
+        this.eventListeners = new CopyOnWriteArrayList<>();
 
 		this.environmentMonitor = new DefaultEnvironmentMonitor(this, storage);
 
@@ -192,54 +203,45 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	}
 
 	@Override
-    public Future<?> addService(final ServiceName serviceName, final SailfishURI uri, final IServiceSettings settings,
-            final IServiceNotifyListener notifyListener) {
-
-        return serviceExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                addServiceWithoutNewThread(serviceName, uri, settings, notifyListener);
-            }
-
-        });
+    public Future<?> addService(final ServiceDescription serviceDescription, final IServiceNotifyListener notifyListener) {
+        return serviceExecutor.submit(() -> addServiceWithoutNewThread(serviceDescription.clone(), notifyListener));
     }
 
 	/**
-	 * @param serviceName
-	 * @param type
-	 * @param settings
+     * @param serviceDescription
 	 * @param notifyListener
 	 */
-	private void addServiceWithoutNewThread(final ServiceName serviceName, final SailfishURI uri, final IServiceSettings settings,
-	        final IServiceNotifyListener notifyListener) {
-	    try {
-	        lock.writeLock().lock();
+    private void addServiceWithoutNewThread(ServiceDescription serviceDescription, final IServiceNotifyListener notifyListener) {
+        ServiceName serviceName = serviceDescription.getServiceName();
+
+        try {
+            lock.writeLock().lock();
             logger.info("Start adding service: {}", serviceName);
 
             if (services.containsKey(serviceName)) {
 	            throw new StorageException("Service " + serviceName + " already exists");
 	        }
 
-	        IServiceSettings resultSettings = null;
+            IServiceSettings settings = serviceDescription.getSettings();
+            SailfishURI uri = serviceDescription.getType();
 
 	        if (settings == null) {
-	            resultSettings = staticServiceFactory.createServiceSettings(uri);
-	        } else {
-	            resultSettings = settings;
+                settings = staticServiceFactory.createServiceSettings(uri);
+                serviceDescription.setSettings(settings);
 	        }
 
-	        IService service = staticServiceFactory.createService(uri);
+            serviceDescription.setEnvironment(serviceName.getEnvironment());
 
-	        ServiceDescription desc = new ServiceDescription(uri);
-	        desc.setEnvironment(serviceName.getEnvironment());
-	        desc.setName(serviceName.getServiceName());
-	        desc.setSettings(resultSettings);
-            desc.setServiceHandlerClassName(com.exactpro.sf.services.CollectorServiceHandler.class.getCanonicalName());
+            IService service = staticServiceFactory.createService(uri);
 
-            ServiceContainer current = new ServiceContainer(service, desc);
+            if(serviceDescription.getServiceHandlerClassName() == null) {
+                serviceDescription.setServiceHandlerClassName(CollectorServiceHandler.class.getCanonicalName());
+            }
+
+            ServiceContainer current = new ServiceContainer(service, serviceDescription);
 
             logger.info("Start adding service to storage: {}", serviceName);
-            this.storage.addServiceDescription(desc);
+            this.storage.addServiceDescription(serviceDescription);
             logger.info("Service was successfully  added to storage: {}", serviceName);
 
             logger.info("Start adding ServiceContainer: {}", serviceName);
@@ -275,7 +277,6 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	}
 
 	protected void removeServiceWithoutNewThread(ServiceName serviceName, IServiceNotifyListener notifyListener) {
-
         try {
             lock.writeLock().lock();
             logger.info("Start delete service: {}", serviceName);
@@ -314,13 +315,14 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	}
 
     @Override
-	public Future<?> updateService(final ServiceName serviceName, final IServiceSettings settings, final IServiceNotifyListener notifyListener) {
-
-		return serviceExecutor.submit(new Runnable() {
+    public Future<?> updateService(final ServiceDescription serviceDescription, final IServiceNotifyListener notifyListener) {
+        return serviceExecutor.submit(new Runnable() {
 			@Override
 			public void run() {
-			    try {
-			        lock.writeLock().lock();
+                ServiceName serviceName = serviceDescription.getServiceName();
+
+                try {
+                    lock.writeLock().lock();
                     final ServiceContainer serviceContainer = services.get(serviceName);
 
                     if (serviceContainer == null) {
@@ -328,10 +330,10 @@ public final class DefaultConnectionManager implements IConnectionManager {
 			        }
 
                     ServiceDescription description = serviceContainer.getServiceDescription();
-			        description.setSettings(settings);
+                    description.setSettings(copySettings(serviceDescription.getSettings()));
+                    description.setVariables(new HashMap<>(serviceDescription.getVariables()));
 			        storage.updateServiceDescription(description);
                     messageNotify(notifyListener, serviceName + " updated");
-
 			    } catch (Exception e) {
 			        ServiceException exception = new ServiceException("Could not update service " + serviceName, e);
 			        exceptionNotify(notifyListener, exception);
@@ -341,7 +343,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 			    }
 			}
 		});
-	}
+    }
 
 	@Override
 	public Future<?> initService(final ServiceName serviceName, final IServiceNotifyListener notifyListener) {
@@ -436,8 +438,20 @@ public final class DefaultConnectionManager implements IConnectionManager {
                     }
                 }
 
+                IServiceSettings settings = description.getSettings();
+                String environmentVariableSet = envStorage.getVariableSet(serviceName.getEnvironment());
+
+                if(environmentVariableSet != null) {
+                    Map<String, String> variableSet = variableSetStorage.get(environmentVariableSet);
+
+                    if(variableSet != null) {
+                        logger.debug("Applying variable set '{}' to service '{}'", environmentVariableSet, serviceName);
+                        settings = description.applyVariableSet(variableSet);
+                    }
+                }
+
                 synchronized (service) {
-                    service.init(serviceContext, environmentMonitor, serviceContainer.getHandlerWrapper(), description.getSettings(), serviceName);
+                    service.init(serviceContext, environmentMonitor, serviceContainer.getHandlerWrapper(), settings, serviceName);
                 }
             } else {
                 logger.debug("Service {} is starting or already started", serviceName);
@@ -647,7 +661,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
                     for(ServiceDescription description : removedServices) {
                         description.setEnvironment(newEnvName);
-                        addServiceWithoutNewThread(new ServiceName(newEnvName, description.getName()), description.getType(), description.getSettings(), notifyListener);
+                        addServiceWithoutNewThread(description, notifyListener);
                     }
 
                     ChangeEnvironmentEvent event = new ChangeEnvironmentEvent(oldEnvName, "Environment was renamed", ChangeEnvironmentEvent.Status.RENAMED);
@@ -692,7 +706,23 @@ public final class DefaultConnectionManager implements IConnectionManager {
         }
 	}
 
-	/**
+    private List<ServiceName> getStartedServices(String environmentName) {
+        return withReadLock(() -> {
+            List<ServiceName> names = new ArrayList<>();
+
+            services.forEach((name, container) -> {
+                ServiceStatus status = container.getService().getStatus();
+
+                if(status == ServiceStatus.STARTED || status == ServiceStatus.WARNING) {
+                    names.add(name);
+                }
+            });
+
+            return names;
+        });
+    }
+
+    /**
 	 * Remove all sent and received messages from memory
 	 * before and after each test case.
 	 */
@@ -739,7 +769,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
             List<ServiceDescription> descriptions = new ArrayList<>();
 
             for (final ServiceContainer serviceContainer : this.services.values()) {
-                descriptions.add(serviceContainer.getServiceDescription());
+                descriptions.add(serviceContainer.getServiceDescription().clone());
             }
 
             return descriptions.toArray(new ServiceDescription[descriptions.size()]);
@@ -754,8 +784,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	    try {
 	        this.lock.readLock().lock();
             final ServiceContainer serviceContainer = services.get(serviceName);
-
-            return serviceContainer != null ? serviceContainer.getServiceDescription() : null;
+            return serviceContainer != null ? serviceContainer.getServiceDescription().clone() : null;
 	    } finally {
 	        this.lock.readLock().unlock();
 	    }
@@ -842,7 +871,6 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
 	@Override
 	public Future<?> copyService(final ServiceName from, final ServiceName to, final IServiceNotifyListener notifyListener) {
-
         return serviceExecutor.submit(new Runnable() {
             @Override
             public void run() {
@@ -857,23 +885,18 @@ public final class DefaultConnectionManager implements IConnectionManager {
                         throw new ServiceException("Could not find " + from + " ServiceContainer");
                     }
 
-                    final ServiceDescription description = serviceContainer.getServiceDescription();
+                    ServiceDescription description = serviceContainer.getServiceDescription();
 
                     if (description == null) {
                         throw new ServiceException("Could not find " + from + " ServiceDescription");
+                    } else {
+                        description = description.clone();
                     }
 
-                    final SailfishURI serviceURI = description.getType();
+                    description.setName(to.getServiceName());
+                    description.setEnvironment(to.getEnvironment());
 
-                    final IServiceSettings settings = staticServiceFactory.createServiceSettings(serviceURI);
-
-                    if (settings == null) {
-                        ServiceException exception = new ServiceException("Service with URI " + serviceURI + " can not be created. Service settings class was not found");
-                        exceptionNotify(notifyListener, exception);
-                    }
-
-                    BeanConfigurator.copyBean(description.getSettings(), settings);
-                    addServiceWithoutNewThread(to, serviceURI, settings, notifyListener);
+                    addServiceWithoutNewThread(description, notifyListener);
                 } catch (StorageException e) {
                     throw e;
                 } catch (Exception e) {
@@ -911,8 +934,103 @@ public final class DefaultConnectionManager implements IConnectionManager {
         }
 	}
 
+    @Override
+    public Map<String, String> getVariableSet(String name) {
+        logger.debug("Getting variable set: {}", name);
+        return withReadLock(() -> variableSetStorage.get(name));
+    }
+
+    private <T> void updateVariableSet(String name, Supplier<T> updater) {
+        withWriteLock(() -> {
+            List<ServiceName> services = new ArrayList<>();
+
+            for(String environmentName : getEnvironmentList()) {
+                String environmentVariableSet = getEnvironmentVariableSet(environmentName);
+
+                if(name.equalsIgnoreCase(environmentVariableSet)) {
+                    for(ServiceName serviceName : getStartedServices(environmentName)) {
+                        services.add(serviceName);
+                    }
+                }
+            }
+
+            if(!services.isEmpty()) {
+                throw new StorageException(format("Cannot update variable set '%s' because it is currently used by following services: %s", name, services));
+            }
+
+            return updater.get();
+        });
+    }
+
+    @Override
+    public void putVariableSet(String name, Map<String, String> variableSet) {
+        logger.debug("Putting variable set '{}': {}", name, variableSet);
+        updateVariableSet(name, () -> {
+            variableSetStorage.put(name, variableSet);
+            return this;
+        });
+    }
+
+    @Override
+    public void removeVariableSet(String name) {
+        logger.debug("Removing variable set: {}", name);
+        updateVariableSet(name, () -> {
+            variableSetStorage.remove(name);
+
+            for(String environmentName : getEnvironmentList()) {
+                if(name.equalsIgnoreCase(getEnvironmentVariableSet(environmentName))) {
+                    setEnvironmentVariableSet(environmentName, null);
+                }
+            }
+
+            return this;
+        });
+    }
+
+    @Override
+    public boolean isVariableSetExists(String name) {
+        logger.debug("Checking existence of variable set: {}", name);
+        return withReadLock(() -> variableSetStorage.exists(name));
+    }
+
+    @Override
+    public Set<String> getVariableSets() {
+        logger.debug("Getting list of all variable sets");
+        return withReadLock(variableSetStorage::list);
+    }
+
+    @Override
+    public void setEnvironmentVariableSet(String environmentName, String variableSetName) {
+        if(variableSetName == null) {
+            logger.debug("Removing variable set from environment: {}", environmentName);
+        } else {
+            logger.debug("Setting variable set for environment '{}' to '{}'", environmentName, variableSetName);
+        }
+
+
+        withWriteLock(() -> {
+            if(variableSetName != null && !variableSetStorage.exists(variableSetName)) {
+                throw new StorageException("Variable set does not exist: " + variableSetName);
+            }
+
+            List<ServiceName> services = getStartedServices(environmentName);
+
+            if(!services.isEmpty()) {
+                throw new StorageException(format("Cannot change variable set for environment '%s' because it has running services: %s", environmentName, services));
+            }
+
+            envStorage.setVariableSet(environmentName, variableSetName);
+            return this;
+        });
+    }
+
+    @Override
+    public String getEnvironmentVariableSet(String environmentName) {
+        logger.debug("Getting variable set for environment: {}", environmentName);
+        return withReadLock(() -> envStorage.getVariableSet(environmentName));
+    }
+
     /**
-     * @param serviceName
      * @param service
      */
     private void disposeService(IService service) {
@@ -943,7 +1061,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
         String value = description.getSettings().getStoredMessageTypes();
         if (StringUtils.isNotBlank(value)) {
             value = ServiceUtil.loadStringFromAlias(this.serviceContext.getDataManager(), value, ",");
-            return Arrays.stream(value.split(","))
+            return stream(value.split(","))
                     .map(type -> type.trim())
                     .filter(StringUtils::isNoneEmpty)
                     .collect(Collectors.toSet());
@@ -976,6 +1094,24 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
         void setOriginServiceHandler(IServiceHandler serviceHandler) {
             this.handlerWrapper.setOriginServiceHandler(serviceHandler);
+        }
+    }
+
+    private <T> T withReadLock(Supplier<T> supplier) {
+        try {
+            lock.readLock().lock();
+            return supplier.get();
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    private <T> T withWriteLock(Supplier<T> supplier) {
+        try {
+            lock.writeLock().lock();
+            return supplier.get();
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 }

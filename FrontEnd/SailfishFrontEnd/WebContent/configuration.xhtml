@@ -56,13 +56,22 @@
 </h:form>
 
 <h:form prependId="false" id="commandForm">
-	<p:remoteCommand name="changeSection" action="#{configBean.changeSection}" />
+    <p:remoteCommand name="changeSection" action="#{configBean.changeSection}" />
     <p:remoteCommand name="onPageLoad" action="#{configBean.onPageLoad}" />
 </h:form>
 
 <div class="eps-content-panel">
 <div class="eps-config-navigation">
     <ul>
+        <div onclick="changeSection([{name:'section', value:'update'}])" class="eps-dot">
+            <li id="updateNavItem">Update Version<span>
+                    <h:graphicImage id="update_require_logo" library="sf"
+                                    styleClass="eps-cfg-update-logo"
+                                    name="images/updates/update_require.png"
+                                    rendered="#{updateBean.needsUpdate}"/>
+                </span>
+            </li>
+        </div>
         <div onclick="changeSection([{name:'section', value:'database'}])" class="eps-dot"> <li id="databaseNavItem"> Database</li> </div>
         <div onclick="changeSection([{name:'section', value:'logging'}])" class="eps-dot"><li id="loggingNavItem">  Logging </li></div>
         <div onclick="changeSection([{name:'section', value:'workspace'}])" class="eps-dot"> <li id="workspaceNavItem">      Workspace  </li></div>
@@ -70,7 +79,6 @@
         <div onclick="changeSection([{name:'section', value:'statistics'}])" class="eps-dot"> <li id="statisticsNavItem">      Statistics DB  </li></div>
         <div onclick="changeSection([{name:'section', value:'flight_recorder'}])" class="eps-dot"> <li id="flight_recorderNavItem">Flight Recorder</li></div>
         <div onclick="changeSection([{name:'section', value:'net_dumper'}])" class="eps-dot"> <li id="net_dumperNavItem">NetDumper</li></div>
-        <div onclick="changeSection([{name:'section', value:'tomcat_manager'}])" class="eps-dot"> <li id="tomcat_managerNavItem">Tomcat Manager</li></div>
         <div onclick="changeSection([{name:'section', value:'ml'}])" class="eps-dot"> <li id="mlNavItem">Machine Learning</li></div>
         <div onclick="changeSection([{name:'section', value:'email'}])" class="eps-dot"> <li id="emailNavItem">EMail Notification</li></div>
         <div onclick="changeSection([{name:'section', value:'cleanup'}])" class="eps-dot"> <li id="cleanupNavItem">Cleanup</li></div>
@@ -91,6 +99,10 @@
 
 <div class="eps-config-content-wrapper">
 <div class="eps-config-content-inner">
+    <div id="updateConfig" class="eps-config-container">
+        <h2>Update version</h2>
+        <ui:include src="/template/update_configuration.xhtml"/>
+    </div>
 
     <div id="databaseConfig" class="eps-config-container">
     
@@ -109,7 +121,7 @@
 	        				  			  rendered="#{configBean.conStatus eq 'Error'}" />
         				</td>
         				<td>
-        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{configBean.conErrorText}" /> 
+        					<h:outputText styleClass="eps-configuration-error-message" value="#{configBean.conErrorText}" />
         				</td>
         			</tr>
         		</table>
@@ -451,18 +463,6 @@
         <p:commandButton value="Apply settings" icon="ui-icon-circle-check" actionListener="#{configBean.onApplyEnvParams()}"/>
     </h:form>
 
-    <h:form prependId="false">
-        <h2>Sailfish components</h2>
-        <p:dataTable id="buildNumbers" var="sfComponent" value="#{configBean.componentsBuildNumbers}" style="width:800px" styleClass="eps-environment-component-table">
-            <p:column headerText="Name" style="width:35%;background-color:#ffffff">
-                <h:outputText value="#{sfComponent.name}"/>
-            </p:column>
-            <p:column headerText="Version" style="width:15%;background-color:#ffffff">
-                <h:outputText value="#{sfComponent.version}"/>
-            </p:column>
-        </p:dataTable>
-    </h:form>
-
 </div>
 
 <div id="user_eventsConfig" class="eps-config-container">
@@ -519,7 +519,7 @@
         					<h:outputText value="#{statConfigBean.currentStatus}" styleClass="eps-status-label eps-status-label-Error" />
         				</td>
         				<td>
-        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{statConfigBean.errorText}"
+        					<h:outputText styleClass="eps-configuration-error-message" value="#{statConfigBean.errorText}"
         								  rendered="#{statConfigBean.currentStatus eq 'Error'}" /> 
         				</td>
         			</tr>
@@ -687,7 +687,7 @@
         					<h:outputText value="#{mlConfigBean.currentStatus}" styleClass="eps-status-label eps-status-label-Error" />
         				</td>
         				<td>
-        					<h:outputText style="color: #E74C3C; font-weight: bold" value="#{mlConfigBean.errorText}"
+        					<h:outputText styleClass="eps-configuration-error-message" value="#{mlConfigBean.errorText}"
         								  rendered="#{mlConfigBean.currentStatus eq 'Error'}" />
         				</td>
         			</tr>
@@ -765,7 +765,7 @@
                         <h:outputText value="#{emailBean.status}" styleClass="eps-status-label eps-status-label-Error"/>
                     </td>
                     <td>
-                        <h:outputText style="color: #E74C3C; font-weight: bold" value="#{emailBean.errorText}"
+                        <h:outputText styleClass="eps-configuration-error-message" value="#{emailBean.errorText}"
                                       rendered="#{emailBean.status eq 'Error'}"  />
                     </td>
                 </tr>
@@ -894,181 +894,6 @@
 <div id="bbConfig" class="eps-config-container">
         <h2>Big Button</h2>
     <ui:include src="/template/bb_configuration.xhtml"/>
-</div>
-<div id="tomcat_managerConfig" class="eps-config-container">
-	<TABLE>
-		<tr>
-		    <td>
-                <H2>Tomcat Manager</H2>     
-            </td>
-			<td>
-				<h:panelGroup id="infoicon" styleClass="ui-icon ui-icon-help"/>			
-			</td>
-		</tr>
-	</TABLE>
-	
-	<span class="eps-status-label eps-status-label-#{tomcatControlBean.tomcatSpan}">
-			#{tomcatControlBean.tomcatControlFound?"TomcatControl found":"TomcatControl not found"}
-	</span>
-	<p:tooltip for="infoicon">
-	   <h:outputText value="This is simple interface helps to reload / stop / update Sailfish in Tomcat."/>
-	   <br/>
-	   <h:outputText value="'Manager Application' should be installed and tomcat-users.xml should be configured."/>
-	   <br/>
-	   <h:outputText value="User should have manager-gui and manager-script roles."/>
-	</p:tooltip>
-	<h:form id="tomcatManagerSettings">		
-		<div class="eps-content-block">
-			<h3>Tomcat control settings</h3>
-			<table>
-				<tr>
-					<td>
-				       	<h:outputLabel for="username" value="Username" />
-				   	</td>
-				   	<td class="eps-table-divider-min">
-				       	<p:inputText id="username" value="#{tomcatControlBean.user}" required="true" styleClass="eps-input">
-				       		<p:ajax event="blur"/>
-				       	</p:inputText>
-				   	</td>
-				   	<td class="eps-table-divider">&nbsp;</td>
-				   	<td >
-				   		<h:outputLabel for="password" value="Password" />
-				   	</td>
-				   	<td class="eps-table-divider-min">
-				       	<p:password id="password" value="#{tomcatControlBean.pwd}" required="true" styleClass="eps-input" redisplay="true">
-				       		<p:ajax event="blur"/>
-				       	</p:password>
-					</td>
-					<td class="eps-table-divider-min">
-						<p:commandButton id="testLogPass" value="Test" actionListener="#{tomcatControlBean.testLogPass()}"/>
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<h:outputLabel for="temporaryDirectory" value="Temporary directory"/>
-					</td>
-					<td class="eps-table-divider-min">
-						<p:inputText id="temporaryDirectory" required="true" value="#{tomcatControlBean.tmpDir}">
-							<p:ajax event="blur"/>
-						</p:inputText>
-					</td>
-					<td class="eps-table-divider">&nbsp;</td>
-					<td>
-						<h:outputLabel for="backupDirectory" value="Backup directory"/>
-					</td>
-					<td class="eps-table-divider-min">
-						<p:inputText id="backupDirectory" required="true" value="#{tomcatControlBean.backupDir}">
-							<p:ajax event="blur"/>
-						</p:inputText>
-					</td>
-					<td class="eps-table-divider-min">
-						<p:commandButton id="testAllDirs" value="Test" actionListener="#{tomcatControlBean.testAllDirs()}"/>
-					</td>					
-				</tr>
-				<!-- <tr>
-					<td>
-						<h:outputLabel for="testTempDir" value="Test temporary directory is writable"/>
-					</td>
-					<td class="eps-table-divider-min">
-						<p:commandButton id="testTempDir" value="Test" actionListener="#{tomcatControlBean.testTmpDir()}"/>
-					</td>
-					<td class="eps-table-divider">&nbsp;</td>
-					<td>
-						<h:outputLabel for="testBackupDir" value=" Test backup directory is writable"/>
-					</td>
-					<td class="eps-table-divider-min">
-						<p:commandButton id="testBackupDir" value="Test" actionListener="#{tomcatControlBean.testBackupDir()}"/>
-					</td>
-				</tr> -->
-			</table>		    
- 		</div>
- 		
- 		<p:separator/>		
-	</h:form>
-	<div class="eps-content-block">
-		<H3>Manager application</H3>
-		<h:form>
-			<table>
-				<tr>
-					<td><h:outputLabel value="Reload application" /></td>
-					<td class="eps-table-divider-min"><p:commandButton
-							value="Reload" ajax="false"
-							actionListener="#{tomcatControlBean.reloadApplication}" style="width:70px" /></td>
-				</tr>
-				<tr>
-					<td><p:outputLabel value="Stop application" /></td>
-					<td class="eps-table-divider-min"><p:commandButton
-							value="Stop" ajax="false"
-							actionListener="#{tomcatControlBean.stopApplication}" style="width:70px" /></td>
-				</tr>
-				<tr>
-					<td><p:outputLabel value="Make application backup" /></td>
-					<td class="eps-table-divider-min"><p:commandButton
-							value="Backup"
-							actionListener="#{tomcatControlBean.makeBackup}" style="width:70px" /></td>
-				</tr>
-			</table>
-		</h:form>
-		<h:form prependId="false" id="fileUploadForm" enctype="multipart/form-data">
-			<table>
-				<tr>
-					<td>
-						<p:outputLabel value="Choose WAR file"/>
-					</td>
-					<td class="eps-table-divider">
-						<p:fileUpload style="margin-top:20px" fileUploadListener="#{tomcatControlBean.handleFileUpload}" mode="advanced" skinSimple="true" allowTypes="/(\.|\/)(war|zip)$/" multiple="false" showButtons="false" auto="true"/>
-					</td>
-					<td class="eps-table-divider">&nbsp;</td>
-					<td>
-						<h:outputLabel value="Update application" />
-					</td>
-					<td class="eps-table-divider">&nbsp;</td>
-					<td>
-						<p:commandButton value="Update" ajax="false" actionListener="#{tomcatControlBean.handle}" disabled="#{!tomcatControlBean.tomcatControlFound}" style="width:70px"/>
-					</td>
-				</tr>
-			</table>            
-		</h:form>
-		<p:separator />
-		
-		<h:form>
-			<table>
-				<tr>
-					<td><h:outputLabel for="catalinaURL" value="RESTCatalina daemon URL"/></td>
-					<td class="eps-table-divider"><p:inputText id="catalinaURL" required="true" value="#{catalinaBean.catalinaURL}">
-							<p:ajax event="blur"/>
-						</p:inputText>
-					</td>
-				</tr>
-			</table>
-		</h:form>
-		
-		<h:form rendered="#{catalinaBean.ready}">
-			<table>
-				<tr>
-					<td class="eps-table-divider"><h:outputLabel for="catalinaRestart" value="Restart server"/></td>
-					<td><p:commandButton id="catalinaRestart" value="Restart server" ajax="true" actionListener="#{catalinaBean.restart}"/></td>
-				</tr>
-				<tr>
-					<td class="eps-table-divider"><h:outputLabel for="catalinaDeploy" value="Deploy new app"/></td>
-					<td><p:commandButton id="catalinaDeploy" value="Deploy" ajax="true" actionListener="#{catalinaBean.deploy}" style="width:70px"/></td>
-				</tr>
-			</table>
-		</h:form>
-		
-		<h:form prependId="false" id="warUploadForm" enctype="multipart/form-data" rendered="#{catalinaBean.ready}">
-			<table>
-				<tr>
-					<td>
-						<p:outputLabel value="Choose WAR file"/>
-					</td>
-					<td class="eps-table-divider">
-						<p:fileUpload style="margin-top:20px" fileUploadListener="#{catalinaBean.handleFileUpload}" mode="advanced" skinSimple="true" allowTypes="/(\.|\/)(war|zip)$/" multiple="false" showButtons="false" auto="true"/>
-					</td>
-				</tr>
-			</table>            
-		</h:form>
-	</div>
 </div>
 
 <div id="cleanupConfig" class="eps-config-container">

@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.Serializable;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -29,28 +31,35 @@ public class EnvironmentDescription implements Cloneable, Serializable {
 	
 	@XmlElement(name="name")
 	private String name;
+
+    @XmlElement(name = "variableSet")
+    private String variableSet;
 	
 	public EnvironmentDescription() {}
 
-	public EnvironmentDescription(final String name) {
-		if (name == null) {
-			throw new NullPointerException("'name' parameter");
-		}
-
-		this.name = name;
+    public EnvironmentDescription(String name, String variableSet) {
+        this.name = requireNonNull(name, "name cannot be null");
+        this.variableSet = variableSet;
 	}
 	
 	public void setName(String name) {
-		this.name = name;
+        this.name = requireNonNull(name, "name cannot be null");
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	@Override
+    public String getVariableSet() {
+        return variableSet;
+    }
+
+    public void setVariableSet(String variableSet) {
+        this.variableSet = variableSet;
+    }
+
+    @Override
 	public EnvironmentDescription clone() {
-		EnvironmentDescription cloned = new EnvironmentDescription(name);
-		return cloned;
+        return new EnvironmentDescription(name, variableSet);
 	}
 }

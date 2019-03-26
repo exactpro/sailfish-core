@@ -24,16 +24,16 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
  * Contains useful routines which are called from generating code templates 
  *
  */
-public class CodeGenUtils 
+public class CodeGenUtils
 {
 	public static final String COMPONENTS_SUB_PACKAGE = "components";
-	
+
 	public static String getPackage(IFieldStructure fieldStructure, String[] packageName, boolean underscoreAsPackageSeparator) {
 	    String[] classPath = getClassPath(fieldStructure, packageName, true, underscoreAsPackageSeparator);
 	    classPath = ArrayUtils.remove(classPath, classPath.length - 1);
 	    return String.join(".", classPath);
     }
-	
+
 	public static String getShortClass(IFieldStructure fieldStructure, boolean underscoreAsPackageSeparator) {
         String className = fieldStructure.getName();
         if (underscoreAsPackageSeparator) {
@@ -42,7 +42,7 @@ public class CodeGenUtils
         }
         return className;
     }
-	
+
     public static String getTypeName(IFieldStructure fieldStructure, String[] packageName, boolean underscoreAsPackageSeparator) {
         if (fieldStructure.isComplex() || fieldStructure.isEnum()) {
             String[] classPath = getClassPath(fieldStructure, packageName, false, underscoreAsPackageSeparator);
@@ -56,7 +56,7 @@ public class CodeGenUtils
             return convertSimpleFieldTypeToJavaObjectType(fieldStructure.getJavaType());
         }
     }
-	
+
 	public static String getEnumValueTypeName(IFieldStructure fieldStructure) {
 		if (fieldStructure.isEnum()) {
 			JavaType type = fieldStructure.getJavaType();
@@ -64,16 +64,16 @@ public class CodeGenUtils
 		}
 		return "dirty_surrogate";
 	}
-	
+
 	public static String convertSimpleFieldTypeToJavaType(JavaType fldType) {
-		
+
 		if (fldType == null) return null;
-		
+
 		switch ( fldType )
 		{
-		case JAVA_LANG_BOOLEAN: 
+		case JAVA_LANG_BOOLEAN:
 			return "boolean";
-		case JAVA_LANG_BYTE: 
+		case JAVA_LANG_BYTE:
 			return "byte";
 		case JAVA_LANG_CHARACTER:
 			return "char";
@@ -100,20 +100,20 @@ public class CodeGenUtils
 		default:
 			break;
 		}
-		
+
 		return null;
 	}
-	
-	
+
+
 	public static String convertSimpleFieldTypeToJavaObjectType(JavaType fldType) {
-		
+
 		if (fldType == null) return null;
-		
+
 		switch ( fldType )
 		{
-		case JAVA_LANG_BOOLEAN: 
+		case JAVA_LANG_BOOLEAN:
 			return "Boolean";
-		case JAVA_LANG_BYTE: 
+		case JAVA_LANG_BYTE:
 			return "Byte";
 		case JAVA_LANG_CHARACTER:
 			return "Character";
@@ -140,19 +140,19 @@ public class CodeGenUtils
 		default:
 			break;
 		}
-		
+
 		return null;
 	}
-	
-	
+
+
 	public static boolean isPrimitive(JavaType fldType) {
-		
+
 		if (fldType == null) return false;
-		
+
 		switch ( fldType )
 		{
-		case JAVA_LANG_BOOLEAN: 
-		case JAVA_LANG_BYTE: 
+		case JAVA_LANG_BOOLEAN:
+		case JAVA_LANG_BYTE:
 		case JAVA_LANG_CHARACTER:
 		case JAVA_LANG_DOUBLE:
 		case JAVA_LANG_FLOAT:
@@ -169,10 +169,35 @@ public class CodeGenUtils
 		default:
 			break;
 		}
-		
+
 		return false;
 	}
-	
+
+    public static String getStringValueView(JavaType javaType, Object value) {
+
+        if (javaType == null || value == null) return "null";
+
+        switch (javaType) {
+            case JAVA_LANG_BOOLEAN:
+            case JAVA_LANG_SHORT:
+            case JAVA_LANG_INTEGER:
+            case JAVA_LANG_BYTE:
+            case JAVA_LANG_FLOAT:
+            case JAVA_LANG_DOUBLE:
+                return value.toString();
+            case JAVA_LANG_LONG:
+                return value.toString() + "L";
+            case JAVA_LANG_CHARACTER:
+                return "'" + value + "'";
+            case JAVA_LANG_STRING:
+                return "\"" + value + "\"";
+            case JAVA_MATH_BIG_DECIMAL:
+                return "new BigDecimal(\"" + value + "\")";
+            default:
+                throw new IllegalArgumentException("Can't get string value view for " + javaType.name());
+        }
+    }
+
     private static String[] getClassPath(IFieldStructure fieldStructure, String[] packageName, boolean useFieldName, boolean underscoreAsPackageSeparator) {
         String[] result = packageName;
         result = ArrayUtils.add(result, fieldStructure.getNamespace().toLowerCase());

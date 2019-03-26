@@ -16,6 +16,8 @@
 
 import Message from '../models/Message';
 
+const CHECKPOINT_NAME = 'checkpoint';
+
 export enum MessageType {
     MESSAGE = '',
     CHECKPOINT = 'checkpoint',
@@ -23,14 +25,22 @@ export enum MessageType {
     ADMIN = 'admin'
 }
 
-// FIXME : function should look at the message name in content, not on the session
 export function isCheckpoint(message: Message) : boolean {
-    return !message.from && !message.to;
+    const name = message.content['name'] as string;
+
+    if (!name) {
+        return false;
+    }
+
+    return name.toLowerCase() == CHECKPOINT_NAME;
 }
 
-export function getRejectReason(message: Message) : string {
-    const content = JSON.parse(message.content);
-    return content['rejectReason'];
+export function isRejected(message: Message) : boolean {
+    return message.content.rejectReason !== null;
+}
+
+export function isAdmin(message: Message) : boolean {
+    return message.content.admin !== false;
 }
 
 export function getMessageType(message: Message) : MessageType {
@@ -38,7 +48,7 @@ export function getMessageType(message: Message) : MessageType {
         return MessageType.CHECKPOINT;
     }
 
-    if (message.isRejected) {
+    if (message.content.rejectReason !== null) {
         return MessageType.REJECTED;
     }
 

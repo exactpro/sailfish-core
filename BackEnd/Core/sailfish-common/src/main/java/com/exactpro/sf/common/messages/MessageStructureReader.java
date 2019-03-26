@@ -16,13 +16,14 @@
 package com.exactpro.sf.common.messages;
 
 import java.math.BigDecimal;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -31,7 +32,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 public class MessageStructureReader {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final static Logger LOGGER = LoggerFactory.getLogger(MessageStructureReader.class);
 
     public MessageStructureReader() {
     }
@@ -60,16 +61,12 @@ public class MessageStructureReader {
 
 
 	public void traverse(IMessageStructureVisitor msgStrVisitor,
-			List<IFieldStructure> fields,
+            Map<String, IFieldStructure> fields,
 			IMessage message,
 			IMessageStructureReaderHandler handler)
 	{
 
-		for (IFieldStructure curField :  fields )
-		{
-
-			String fieldName = curField.getName();
-
+        fields.forEach((fieldName, curField) -> {
 			if (message == null) throw new NullPointerException("message is null for field "+fieldName);
 
 			Object value = message.getField(fieldName);
@@ -79,8 +76,7 @@ public class MessageStructureReader {
 			} catch (RuntimeException e) {
 			    throw new EPSCommonException("Travers problem for FieldName = " + fieldName + ", FieldValue = " + message.getField(fieldName), e);
 			}
-		}
-
+        });
 	}
 
 
@@ -104,7 +100,7 @@ public class MessageStructureReader {
                     value = curFieldDefaultValue;
                     isDefault = true;
                 } else {
-                    logger.warn("Incorrect default value for [{}] field", fieldName);
+                    LOGGER.warn("Incorrect default value for [{}] field", fieldName);
                 }
             }
 

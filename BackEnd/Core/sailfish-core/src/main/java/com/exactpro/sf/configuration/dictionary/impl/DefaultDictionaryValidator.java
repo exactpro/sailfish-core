@@ -58,11 +58,11 @@ public class DefaultDictionaryValidator extends AbstractDictionaryValidator {
         checkDictionaryNamespace(errors, dictionary);
 
 		if (fieldsOnly == null || fieldsOnly) {
-			ValidationHelper.checkDuplicates(null, dictionary.getFieldStructures(), errors, false, DictionaryValidationErrorLevel.DICTIONARY);
+            ValidationHelper.checkDuplicates(null, dictionary.getFields().values(), errors, false, DictionaryValidationErrorLevel.DICTIONARY);
 		}
 
 		if (fieldsOnly == null || !fieldsOnly) {
-			ValidationHelper.checkDuplicates(null, dictionary.getMessageStructures(), errors, true, DictionaryValidationErrorLevel.DICTIONARY);
+            ValidationHelper.checkDuplicates(null, dictionary.getMessages().values(), errors, true, DictionaryValidationErrorLevel.DICTIONARY);
 		}
 
 		return errors;
@@ -114,7 +114,7 @@ public class DefaultDictionaryValidator extends AbstractDictionaryValidator {
         checkMessageName(errors, message);
 
 		// Check duplicates
-		ValidationHelper.checkDuplicates(message, message.getFields(), errors, false, DictionaryValidationErrorLevel.MESSAGE);
+        ValidationHelper.checkDuplicates(message, message.getFields().values(), errors, false, DictionaryValidationErrorLevel.MESSAGE);
 
 		// Check attributes types
 		for (IAttributeStructure attr : message.getAttributes().values()) {

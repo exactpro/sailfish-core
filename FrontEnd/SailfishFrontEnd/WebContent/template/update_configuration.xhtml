@@ -1,0 +1,139 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<div class="eps-content-block">
+    <h:form id="updateConnectionStatusForm" prependId="false">
+        <h:outputText value="Connected" styleClass="eps-status-label eps-status-label-Connected"
+                      rendered="#{updateBean.serviceStatus eq 'Connected'}"/>
+        <p:outputPanel rendered="#{updateBean.serviceStatus eq 'Error'}">
+            <table class="eps-transparent-table" style="margin-bottom:0">
+                <tr>
+                    <td>
+                        <h:outputText value="Error" styleClass="eps-status-label eps-status-label-Error"
+                                      rendered="#{updateBean.serviceStatus eq 'Error'}"/>
+                    </td>
+                    <td>
+                        <h:outputText styleClass="eps-configuration-error-message" value="#{updateBean.errorMessage}"/>
+                    </td>
+                </tr>
+            </table>
+        </p:outputPanel>
+
+        <p:outputPanel rendered="#{updateBean.serviceStatus eq 'Checking'}">
+            <table class="eps-transparent-table" style="margin-bottom:0">
+                <tr>
+                    <td>
+                        <h:graphicImage library="sf" name="images/ajaxloader.gif" style="width: 60%"/>
+                    </td>
+                    <td>
+                        <h:outputText styleClass="eps-status-label eps-status-label-Disconnected"
+                                      value="Connecting..."/>
+                    </td>
+                </tr>
+            </table>
+        </p:outputPanel>
+        <span><h:outputText value="Last check time: #{updateBean.lastCheckTime}"/></span>
+        <div><h:outputText styleClass="eps-configuration-error-message" value="#{updateBean.updateErrorMessage}"/></div>
+    </h:form>
+
+    <h:form id="updateCommands">
+        <div class="eps-content-block">
+            <h:panelGrid columns="3" cellpadding="5">
+                <p:commandButton value="Check" action="#{updateBean.checkUpdate()}" title="Check for updates"
+                                 disabled="#{updateBean.serviceStatus eq 'Error'}"
+                                 update="@(.eps-cfg-update-logo :sailfishComponentForm :updateForm :updateCommands :updateLogoForm :updateConnectionStatusForm)">
+                </p:commandButton>
+                <p:commandButton value="Update" onclick="PF('updateSailfishConfirmation').show()"
+                                 title="Update Sailfish"
+                                 disabled="#{(updateBean.serviceStatus eq 'Error') or (not updateBean.needsUpdate) or updateBean.updating}"/>
+                <p:commandButton value="Restart" action="#{updateBean.restart()}" title="Restart update service"
+                                 rendered="#{updateBean.serviceStatus eq 'Error' and (not updateBean.criticalError)}"
+                                 update="@(.eps-cfg-update-logo :sailfishComponentForm :updateForm :updateCommands :updateLogoForm :updateConnectionStatusForm)"/>
+            </h:panelGrid>
+        </div>
+    </h:form>
+
+    <h:form id="updateSailfishConfirmationForm">
+        <p:confirmDialog id="updateSailfishConfirmDialog" message="Sailfish will be updated. Continue?"
+                         header="Update Sailfish" severity="alert" widgetVar="updateSailfishConfirmation">
+            <div style="text-align: center;">
+                <p:commandButton id="confirm" value="Yes" oncomplete="PF('updateSailfishConfirmation').hide()"
+                                 actionListener="#{updateBean.update()}"
+                                 update="@(:sailfishComponentForm :updateForm :updateCommands :updateLogoForm :updateConnectionStatusForm)"/>
+                <p:commandButton id="decline" value="No" onclick="PF('updateSailfishConfirmation').hide()"
+                                 type="button"/>
+            </div>
+        </p:confirmDialog>
+    </h:form>
+
+    <h:form id="updateParameters">
+        <div class="eps-content-block">
+            <h3>Update settings</h3>
+
+            <table class="eps-transparent-table" style="margin-bottom:0">
+                <tr>
+                    <td>
+                        <h:outputLabel for="server-url" value="Host" title="Update Server host name"/>
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:inputText id="server-url" styleClass="eps-input" value="#{updateBean.settings.host}"
+                                     required="true"
+                                     disabled="#{updateBean.criticalError}"/>
+                    </td>
+                    <td class="eps-table-divider">
+                        <h:outputLabel for="update-port" value="Port" title="Update Server port"/>
+                    </td>
+                    <td>
+                        <p:spinner id="update-port" value="#{updateBean.settings.port}" min="0" styleClass="eps-input"
+                                   disabled="#{updateBean.criticalError}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <h:outputLabel for="check-timeout" value="Update check interval"
+                                       title="Time period between checking for update"/>
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:spinner id="check-timeout" value="#{updateBean.settings.checkUpdateTimeout}" min="1"
+                                   styleClass="eps-input"
+                                   disabled="#{updateBean.serviceStatus eq 'Error'}"/>
+                    </td>
+                    <td class="eps-table-divider">
+                        <h:outputLabel for="time-unit" value="Time unit" title="Use to define update period time"/>
+                    </td>
+                    <td class="eps-table-divider-min">
+                        <p:selectOneMenu id="time-unit" value="#{updateBean.settings.timeUnit}" styleClass="eps-input"
+                                         style="width: 90px" disabled="#{updateBean.serviceStatus eq 'Error'}">
+                            <f:selectItems value="#{updateBean.availableTimeUnits}"/>
+                        </p:selectOneMenu>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="eps-content-block">
+            <p:commandButton value="Apply" action="#{updateBean.applySettings()}" title="Apply settings"
+                             icon="ui-icon-circle-check"
+                             update=":updateConnectionStatusForm :updateCommands :updateParameters"
+                             disabled="#{updateBean.criticalError}"/>
+        </div>
+    </h:form>
+
+    <h:form id="sailfishComponentForm">
+        <h2>Sailfish components</h2>
+        <p:dataTable id="buildNumbers" var="sfComponent" value="#{updateBean.componentVersions}" style="width:800px"
+                     styleClass="eps-environment-component-table" rowIndexVar="rowIndex"
+                     rowStyleClass="#{(rowIndex mod 2) eq 0 ? 'ue-table-even' : 'ue-table-odd'}">
+            <p:column headerText="Name" style="width:25%">
+                <h:outputText value="#{sfComponent.name}"/>
+            </p:column>
+            <p:column headerText="Version" style="width:15%">
+                <h:outputText value="#{sfComponent.currentVersion}"/>
+            </p:column>
+            <p:column headerText="New version" style="width:15%">
+                <h:outputText value="#{sfComponent.newVersion}"/>
+            </p:column>
+        </p:dataTable>
+    </h:form>
+</div>
+</html>

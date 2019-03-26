@@ -17,7 +17,8 @@
 import { initialSelectedState, initialAppState } from '../state/initialStates';
 import { StateActionType, StateActionTypes } from '../actions/stateActions';
 import AppState from '../state/AppState';
-import { Pane } from '../helpers/Pane';
+import { Panel } from '../helpers/Panel';
+import { getCheckpointActions } from '../helpers/checkpointFilter';
 
 export function appReducer(state: AppState = initialAppState, stateAction: StateActionType): AppState {
     switch (stateAction.type) {
@@ -43,6 +44,17 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             } 
         }
 
+        case StateActionTypes.SELECT_ACTION_BY_ID: {
+            return {
+                ...state,
+                selected: {
+                    ...state.selected,
+                    actionId: stateAction.actionId,
+                    status: initialSelectedState.status
+                }
+            }
+        }
+
         case StateActionTypes.SELECT_MESSAGES: {
             return {
                 ...state,
@@ -60,7 +72,8 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 selected: {
                     ...state.selected,
-                    checkpointMessageId: stateAction.checkpointId
+                    checkpointMessageId: stateAction.checkpointAction.relatedMessages[0] || null,
+                    checkpointActionId: stateAction.checkpointAction.id
                 }
             }
         }
@@ -107,7 +120,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: stateAction.testCase,
-                selected: initialSelectedState
+                checkpointActions: getCheckpointActions(stateAction.testCase.actions)
             }
         }
 
@@ -126,6 +139,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: null,
+                selected: initialSelectedState,
                 currentTestCasePath: state.report.metadata[nextTestCaseIndex] ? 
                     state.report.metadata[nextTestCaseIndex].jsonpFileName : state.report.metadata[0].jsonpFileName
             }
@@ -137,6 +151,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 testCase: null,
+                selected: initialSelectedState,
                 currentTestCasePath: state.report.metadata[prevTestCaseIndex] ? 
                     state.report.metadata[prevTestCaseIndex].jsonpFileName : state.report.metadata[state.report.metadata.length - 1].jsonpFileName
             }
@@ -147,6 +162,13 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 testCase: null,
                 currentTestCasePath: stateAction.testCasePath
+            }
+        }
+
+        case StateActionTypes.SET_ADMIN_MSG_ENABLED: {
+            return {
+                ...state,
+                adminMessagesEnabled: stateAction.adminEnabled
             }
         }
 
@@ -161,14 +183,7 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
             return {
                 ...state,
                 splitMode: true,
-                leftPane: Pane.Actions
-            }
-        }
-
-        case StateActionTypes.SHOW_FILTER: {
-            return {
-                ...state,
-                showFilter: !state.showFilter
+                leftPane: Panel.Actions
             }
         }
 

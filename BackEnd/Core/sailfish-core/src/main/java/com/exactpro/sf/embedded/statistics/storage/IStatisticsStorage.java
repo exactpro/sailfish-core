@@ -21,12 +21,14 @@ import com.exactpro.sf.embedded.statistics.entities.Action;
 import com.exactpro.sf.embedded.statistics.entities.Environment;
 import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.embedded.statistics.entities.Matrix;
+import com.exactpro.sf.embedded.statistics.entities.MatrixRun;
 import com.exactpro.sf.embedded.statistics.entities.MessageType;
 import com.exactpro.sf.embedded.statistics.entities.Service;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.entities.TagGroup;
 import com.exactpro.sf.embedded.statistics.entities.TestCase;
+import com.exactpro.sf.embedded.statistics.entities.TestCaseRun;
 import com.exactpro.sf.embedded.statistics.entities.TestCaseRunStatus;
 import com.exactpro.sf.embedded.statistics.entities.User;
 import com.exactpro.sf.embedded.storage.IHibernateStorage;
@@ -62,7 +64,11 @@ public interface IStatisticsStorage extends IHibernateStorage {
 	List<TestCase> getAllTestCases();
 	
 	TestCase getTestCaseById(long id);
-	
+
+    MatrixRun getMatrixRunById(long id);
+
+    TestCaseRun getTestCaseRunById(long id);
+
 	List<Tag> getAllTags();
 	
 	Tag getTagByName(String name);

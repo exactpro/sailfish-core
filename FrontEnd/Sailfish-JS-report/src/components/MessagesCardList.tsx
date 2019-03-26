@@ -15,46 +15,43 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
+import '../styles/messages.scss';
 import Message from '../models/Message';
 import { MessageCard } from './MessageCard';
-import '../styles/messages.scss';
-import Action from '../models/Action';
+import Action, { ActionNodeType } from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import { connect } from 'preact-redux';
 import AppState from '../state/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
-import { isCheckpoint, getRejectReason } from '../helpers/messageType';
-import { selectRejectedMessageId } from '../actions/actionCreators';
+import { isCheckpoint, isRejected, isAdmin } from '../helpers/messageType';
+import { getActions } from '../helpers/actionType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
+import { HeatmapScrollbar } from './HeatmapScrollbar';
+import { messagesHeatmap } from '../helpers/heatmapCreator';
+
+const MIN_CONTROL_BUTTONS_WIDTH = 880;
 
 interface MessagesListProps {
     messages: Message[];
     checkpoints: Message[];
     rejectedMessages: Message[];
-    adminMessages: Message[];
+    adminMessagesEnabled: boolean;
     selectedMessages: number[];
     selectedCheckpointId: number;
     selectedRejectedMessageId: number;
     actionsMap: Map<number, Action>;
     selectedStatus: StatusType;
-    selectRejectedMessage: (messageId: number) => any;
+    panelWidth?: number;
 }
 
-interface MessagesListState {
-    adminFilter: boolean;
-}
-
-export class MessagesCardListBase extends Component<MessagesListProps, MessagesListState> {
+export class MessagesCardListBase extends Component<MessagesListProps> {
 
     private elements: MessageCard[] = [];
+    private scrollbar: HeatmapScrollbar;
 
     constructor(props: MessagesListProps) {
         super(props);
-
-        this.state = {
-            adminFilter: false
-        }
     }
 
     componentDidUpdate(prevProps: MessagesListProps) {
@@ -63,7 +60,9 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
         }
 
         if (prevProps.selectedCheckpointId !== this.props.selectedCheckpointId) {
-            this.scrollToMessage(this.props.selectedCheckpointId);
+            // [Chrome] smooth behavior doesn't work in chrome with multimple elements
+            // https://chromium.googlesource.com/chromium/src.git/+/bbf870d971d95af7ae1ee688a7ed100e3787d02b
+            this.scrollToMessage(this.props.selectedCheckpointId, false);
         }
 
         if (prevProps.selectedRejectedMessageId !== this.props.selectedRejectedMessageId) {
@@ -71,69 +70,51 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
         }
     }
 
-    scrollToMessage(messageId: number) {
+    componentDidMount() {
+        const selectedMessageId = this.props.selectedMessages[0];
+
+        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
+        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
+        // At this point React passed components tree to DOM, however it still could be not redered.
+        // First callback will be called before actual render
+        // Second callback will be called when DOM is fully rendered.
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                // smooth behavior doesn't work here because render is not complete yet
+                this.scrollToMessage(selectedMessageId, false);
+            });
+        });
+    }
+
+    scrollToMessage(messageId: number, isSmooth: boolean = true) {
         if (this.elements[messageId]) {
-            this.elements[messageId].base.scrollIntoView({block: 'center', behavior: 'smooth', inline: 'nearest'});
+            this.elements[messageId].base.scrollIntoView({ 
+                block: 'center', 
+                behavior: isSmooth ? 'smooth' : 'auto',
+                inline: 'nearest' 
+            });
         }
     }
 
-    getMessageActions(message: Message) : Map<number, Action> {
-        return new Map<number, Action>(message.relatedActions.map(
-            (actionId) : [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
+    scrollToTop() {
+        this.scrollbar && this.scrollbar.scrollToTop();
     }
 
-    render({ messages, rejectedMessages, adminMessages, selectedRejectedMessageId, selectRejectedMessage }: MessagesListProps, { adminFilter }: MessagesListState) {
+    getMessageActions(message: Message): Map<number, Action> {
+        return new Map<number, Action>(message.relatedActions.map(
+            (actionId): [number, Action] => [actionId, this.props.actionsMap.get(actionId)]));
+    }
 
-        const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId);
-
-        const adminIconClass = [
-                "messages-controls-admin-icon",
-                adminFilter ? "active" : ""
-            ].join(' '),
-            adminTitleClass = [
-                "messages-controls-admin-title",
-                adminFilter ? "active" : ""
-            ].join(' ');
+    render({ messages,selectedMessages, selectedStatus }: MessagesListProps) {
 
         return (
             <div class="messages">
-                <div class="messages-controls">
-                    {
-                        rejectedMessages && rejectedMessages.length ?
-                        (
-                            <div class="messages-controls-rejected">
-                                <div class="messages-controls-rejected-icon"
-                                    onClick={() => this.scrollToMessage(selectedRejectedMessageId)}/>
-                                <div class="messages-controls-rejected-title">
-                                    <p>Rejected</p>
-                                </div>
-                                <div class="messages-controls-rejected-btn prev"
-                                    onClick={this.prevRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
-                                <div class="messages-controls-rejected-count">
-                                    <p>{currentRejectedIndex === -1 ? 0 : currentRejectedIndex + 1} of {rejectedMessages.length}</p>
-                                </div>
-                                <div class="messages-controls-rejected-btn next"
-                                    onClick={this.nextRejectedHandler(rejectedMessages, currentRejectedIndex, selectRejectedMessage)}/>
-                            </div>
-                        )
-                        : null
-                    }
-                    {
-                        adminMessages && adminMessages.length ? 
-                        (
-                            <div class="messages-controls-admin"
-                                onClick={this.adminFilterHandler}>
-                                <div class={adminIconClass}/>
-                                <div class={adminTitleClass}>
-                                    <p>Admin Messages</p>
-                                </div>
-                            </div>
-                        )
-                        : null
-                    }
-                </div>
                 <div class="messages-list">
-                    {messages.map(message => this.renderMessage(message))}
+                    <HeatmapScrollbar
+                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
+                        ref={ref => this.scrollbar = ref}>
+                        {messages.map(message => this.renderMessage(message))}
+                    </HeatmapScrollbar>
                 </div>
             </div>
         );
@@ -141,25 +122,25 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
 
     private renderMessage(message: Message) {
 
-        const {selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectRejectedMessage, selectedRejectedMessageId} = this.props;
+        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled } = this.props;
 
-        if (checkpoints.includes(message)) {
+        if (isCheckpoint(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
         }
 
-        if (message.isAdmin) {
+        if (isAdmin(message)) {
             return (
                 <AdminMessageWrapper
                     ref={ref => this.elements[message.id] = ref}
                     message={message}
                     key={message.id}
                     actionsMap={this.getMessageActions(message)}
-                    isExpanded={this.state.adminFilter}
-                    isSelected={selectedRejectedMessageId === message.id}/>
+                    isExpanded={adminMessagesEnabled}
+                    isSelected={selectedRejectedMessageId === message.id} />
             )
         }
 
-        if (rejectedMessages.includes(message)) {
+        if (isRejected(message)) {
             return this.renderRejected(message, rejectedMessages, selectedRejectedMessageId);
         }
 
@@ -171,20 +152,23 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                 message={message}
                 isSelected={isSelected}
                 status={isSelected ? selectedStatus : null}
-                key={message.id} 
+                key={message.id}
                 actionsMap={this.getMessageActions(message)}
-                />);
+            />
+        );
     }
 
     private renderCheckpoint(message: Message, checkpoints: Message[], selectedCheckpointId: number) {
         const isSelected = message.id === selectedCheckpointId,
-            checkpointCount = checkpoints.indexOf(message) + 1;
+            checkpointCount = checkpoints.indexOf(message) + 1,
+            description = message.content["message"] ? message.content["message"]["Description"] : "";
 
         return (
             <Checkpoint name={message.msgName}
                 count={checkpointCount}
                 isSelected={isSelected}
-                ref={ref => this.elements[message.id] = ref}/>
+                description={description}
+                ref={ref => this.elements[message.id] = ref} />
         )
     }
 
@@ -197,36 +181,10 @@ export class MessagesCardListBase extends Component<MessagesListProps, MessagesL
                 ref={element => this.elements[message.id] = element}
                 message={message}
                 isSelected={isSelected}
-                key={message.id} 
+                key={message.id}
                 actionsMap={this.getMessageActions(message)}
-                rejectedMessagesCount={rejectedCount}/>
+                rejectedMessagesCount={rejectedCount} />
         )
-    }
-
-    private nextRejectedHandler = (rejectedMessages: Message[], currentRejectedIndex: number, selectRejectedHandler: (id: number) => any) => {
-        return () => {
-            if (currentRejectedIndex === -1) {
-                selectRejectedHandler(rejectedMessages[0].id);
-            } else {
-                selectRejectedHandler((rejectedMessages[currentRejectedIndex + 1] || rejectedMessages[0]).id)
-            }
-        }
-    }
-
-    private prevRejectedHandler = (rejectedMessages: Message[], currentRejectedIndex: number, selectRejectedMessage: (id: number) => any) => {
-        return () => {
-            if (currentRejectedIndex === -1) {
-                selectRejectedMessage(rejectedMessages[rejectedMessages.length - 1].id);
-            } else {
-                selectRejectedMessage((rejectedMessages[currentRejectedIndex - 1] || rejectedMessages[rejectedMessages.length - 1]).id)
-            }
-        }
-    }
-
-    private adminFilterHandler = () => {
-        this.setState({
-            adminFilter: !this.state.adminFilter
-        })
     }
 }
 
@@ -234,15 +192,17 @@ export const MessagesCardList = connect(
     (state: AppState) => ({
         messages: state.testCase.messages,
         checkpoints: state.testCase.messages.filter(isCheckpoint),
-        rejectedMessages: state.testCase.messages.filter(message => message.isRejected),
-        adminMessages: state.testCase.messages.filter(message => message.isAdmin),
+        rejectedMessages: state.testCase.messages.filter(isRejected),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         selectedStatus: state.selected.status,
-        actionsMap: generateActionsMap(state.testCase.actions)
+        adminMessagesEnabled: state.adminMessagesEnabled,
+        actionsMap: generateActionsMap(getActions(state.testCase.actions))
     }),
-    dispatch => ({
-        selectRejectedMessage: (messageId: number) => dispatch(selectRejectedMessageId(messageId))
-    })
-)(MessagesCardListBase as any);
+    dispatch => ({}),
+    null,
+    {
+        withRef: true
+    }
+)(MessagesCardListBase);

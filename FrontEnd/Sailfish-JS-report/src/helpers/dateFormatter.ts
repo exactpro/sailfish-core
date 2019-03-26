@@ -20,7 +20,14 @@ export function getSecondsPeriod(startTime: string, finishTime: string) {
         return '';
     }
 
-    const date =  new Date(new Date(finishTime).getTime() - new Date(startTime).getTime());
+    const diffDate =  new Date(new Date(finishTime).getTime() - new Date(startTime).getTime()),
+        seconds = diffDate.getSeconds().toString(),
+        miliseconds = diffDate.getMilliseconds().toString(),
+        milisecondsFormatted = miliseconds !== '0' ? miliseconds.padStart(3, '0') : miliseconds;
 
-    return `${date.getSeconds()}.${date.getMilliseconds()}s`;
+    return `${seconds}.${milisecondsFormatted}s`;
+}
+
+export function formatTime(time: string) {
+    return new Date(time).toISOString().replace('T', ' ').replace('Z', '');
 }

@@ -92,7 +92,7 @@
         grid-area: message-card;
 
         display: grid;
-        grid-template: 35px / 200px 40px auto 1fr 40px;
+        grid-template: 35px / 210px 40px auto 1fr 40px;
         grid-template-areas: "actions-chips name name-value empty expand-icon";
 
         &-name, &-name-value {
@@ -127,8 +127,8 @@
             align-items: center;
 
             &-icon {
-                height: 18px;
-                width: 18px;
+                height: 19px;
+                width: 19px;
                 background-image: url(../../resources/icons/arr4-down.svg);
                 background-size: 100%;
                 cursor: pointer;
@@ -140,12 +140,14 @@
         grid-area: message-card;
 
         &-header {
+            // lb-count - number of displaying labels - to make offset for name and session 
+            --lb-count: 0;
             min-height: 45px;
             padding: 7px 5px 9px 10px;
             position: relative;
             display: grid;
             grid-template-rows: auto auto;
-            grid-template-columns: 200px 40px auto 40px 1fr 40px;
+            grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
             grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
                                 "timestamp-value session from-value session-icon to-value prediction-icon";
 
@@ -280,11 +282,15 @@
             }
         }
 
+        // lb-count variable assgnment through the custom html property
+        [data-lb-count="0"] { --lb-count: 0; }
+        [data-lb-count="1"] { --lb-count: 1; }
+        [data-lb-count="2"] { --lb-count: 2; }
+
         &-content {
-            grid: message-card-body;
+            grid-area: message-card-body;
             position: relative;
             padding: 7px 10px 10px 15px;
-            height: 100%;
 
             &.passed {
                 background-color: $passedBackgroundColor;
@@ -424,14 +430,18 @@
 
     &-expand {
         position: absolute;
-        top: 56px;
-        right: 8px;
+        top: 67px;
+        right: 12px;
         padding-right: 5px;
         background-color: white;
 
+        &.rejected {
+            top: 80px;
+        }
+
         &-icon {
-            height: 18px;
-            width: 18px;
+            height: 19px;
+            width: 19px;
             background-image: url(../../resources/icons/arr4-up.svg);
             background-size: 100%;
             cursor: pointer;
@@ -443,90 +453,8 @@
 
     height: 100%;
 
-    &-controls {
-        height: 50px;
-        display: flex;
-        flex-direction: row-reverse;
-        align-items: flex-end;
-        padding-right: 20px;
-
-        &-rejected {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            padding: 7px 7px 10px 7px;
-            
-            &-icon {
-                height: 20px;
-                width: 20px;
-                background-image: url(../../resources/icons/rejected-icon.svg);
-                background-size: 100%;
-                cursor: pointer;
-            }
-
-            &-title, &-count {
-                font-size: 15px;
-                font-weight: bold;
-                padding: 0 10px;
-                color: $primaryTextColor;
-            }
-
-            &-btn {
-                height: 20px;
-                width: 20px;
-                background-size: 100%;
-                filter: opacity(0.7);
-                cursor: pointer;
-
-                &.prev {
-                    background-image: url(../../resources/icons/arr1-left.svg);
-                }
-
-                &.next {
-                    background-image: url(../../resources/icons/arr1-right.svg)
-                }
-            }
-        }
-
-        &-admin {
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 7px;
-            cursor: pointer;
-
-            &-title {
-                @include unselectable;
-                font-size: 15px;
-                font-weight: bold;
-                padding-left: 8px;
-                padding-right: 5px;
-                color: $primaryTextColor;
-
-                &.active {
-                    color: $adminMessageLabelBackground;
-                }
-            }
-
-            &-icon {
-                height: 20px;
-                width: 20px;
-                background-image: url(../../resources/icons/admin-icon.svg);
-                background-size: 100%;
-                filter: opacity(0.5);
-
-                &.active {
-                    background-image: url(../../resources/icons/admin-icon-active.svg)
-                }
-            }
-        }
-    }
-
     &-list {
-        @include scrollbar;
-        overflow-y: scroll;
-        height: calc(100% - 50px);
+        height: 100%;
         padding: 0 5px;
         word-wrap: break-word;
     }

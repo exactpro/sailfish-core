@@ -22,7 +22,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -166,7 +168,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 			findUsedServices(result);
 
-			addTags(result);
+            loadAndAddAllTags(result);
 
             loadKnownBugInfo(result);
 
@@ -268,7 +270,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         if(!result.isEmpty()) {
             loadFailedActions(result);
             findUsedServices(result);
-            addTags(result);
+            loadAndAddAllTags(result);
         }
         return result;
 
@@ -306,72 +308,20 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 	}
 
-	private void addTags(List<AggregatedReportRow> rows) {
-
-		Map<Long, List<AggregatedReportRow>> matrixRunToRow = new HashMap<>();
-
+	private void loadAndAddAllTags(List<AggregatedReportRow> rows) {
+		Map<Long, List<AggregatedReportRow>> matrixRows = new HashMap<>();
+		Map<Long, AggregatedReportRow> testCaseRows = new HashMap<>();
 		for(AggregatedReportRow row : rows) {
-
-			if(!matrixRunToRow.containsKey(row.getMatrixRunId())) {
-
-				List<AggregatedReportRow> matrixRows = new ArrayList<>();
-
-				matrixRows.add(row);
-
-				matrixRunToRow.put(row.getMatrixRunId(), matrixRows);
-
-			} else {
-
-				matrixRunToRow.get(row.getMatrixRunId()).add(row);
-
+			if(row.getTestCaseRunId() != null) {
+                testCaseRows.put(row.getTestCaseRunId(), row);
 			}
-
-		}
-
-		String queryString = "select distinct "
-				+ "MR.id, "
-				+ "T.name, "
-				+ "G.name "
-				+ "from MatrixRun as MR "
-				+ "join MR.tags as T "
-				+ "left join T.group as G "
-				+ "where MR.id in (:ids) "
-				+ "order by MR.id, T.name";
-
-		Session session = null;
-
-		try {
-
-			session = this.sessionFactory.openSession();
-			Query query = session.createQuery(queryString);
-
-			query.setParameterList("ids", matrixRunToRow.keySet());
-
-			@SuppressWarnings("unchecked")
-			List<Object[]> resultSet = query.list();
-
-			Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet);
-
-			for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
-
-				List<AggregatedReportRow> mrRows = matrixRunToRow.get(entry.getKey());
-
-				for(AggregatedReportRow row : mrRows) {
-
-					row.setTags(entry.getValue());
-
-				}
-
-			}
-
-		} finally {
-
-			if(session != null) {
-				session.close();
-			}
-
-		}
-
+            List<AggregatedReportRow> reportRows = matrixRows.computeIfAbsent(row.getMatrixRunId(), l -> new ArrayList<>());
+			reportRows.add(row);
+        }
+        loadAndAddMatrixTags(matrixRows);
+        if (!testCaseRows.isEmpty()) {
+            loadAndAddTestCaseTags(testCaseRows);
+        }
 	}
 
 	private void findUsedServices(List<AggregatedReportRow> rows) {
@@ -564,27 +514,32 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 	}
 
-	private Map<Long, List<Tag>> readTagsResultSet(List<Object[]> resultSet) {
+	private Map<Long, List<Tag>> readTagsResultSet(List<Object[]> resultSet, BiConsumer<Tag, Object[]> customSetter,
+                                                   boolean matrixTag) {
 
 		Map<Long, List<Tag>> result = new HashMap<>();
 
 		for(Object[] rsRow : resultSet) {
 
-			Long mrId = (Long)rsRow[0];
-			String tagName = (String)rsRow[1];
-			String groupName = (String)rsRow[2];
+			Long id = (Long)rsRow[0];
+            Long tagId = (Long)rsRow[1];
+			String tagName = (String)rsRow[2];
+			String groupName = (String)rsRow[3];
 
-			if(!result.containsKey(mrId)) {
+			if(!result.containsKey(id)) {
 
 				List<Tag> tags = new ArrayList<>();
 
-				result.put(mrId, tags);
+				result.put(id, tags);
 
 			}
 
 			Tag tag = new Tag();
 
+			tag.setId(tagId);
 			tag.setName(tagName);
+			customSetter.accept(tag, rsRow);
+			tag.setForAllTestCaseRuns(matrixTag);
 
             if (groupName != null) {
                 TagGroup tagGroup = new TagGroup();
@@ -592,7 +547,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 tag.setGroup(tagGroup);
             }
 
-			result.get(mrId).add(tag);
+			result.get(id).add(tag);
 
 		}
 
@@ -600,22 +555,29 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 	}
 
-
-    public List<Long> getMatrixRunIDs(AggregateReportParameters params) {
+    public SortedMap<Long, List<Long>> getMatrixRunAndTestCaseRunIDs(AggregateReportParameters params) {
         boolean tagsFilter = params.getTags() != null && !params.getTags().isEmpty();
 
-        String queryString = "select MR.id "
-                + "from MatrixRun as MR "
+        String queryString = "select MR.id, TCR.id "
+                + "from TestCaseRun as TCR "
+                + "right join TCR.matrixRun as MR "
                 + "join MR.sfInstance as SF "
                 + "where MR.startTime >= :from and MR.finishTime <= :to and SF.id in (:ids) ";
 
         if (tagsFilter) {
-            queryString += "and exists (select MR2.id from "
+            queryString += "and (exists (select MR2.id from "
                     + "MatrixRun as MR2 "
                     + "join MR2.tags as T "
                     + "where MR2.id = MR.id "
-                    + "and T.id in (:tags) "
-                    + "group by MR2.id ) ";
+                    + "and T.id in (:mrTags) "
+                    + "group by MR2.id ) "
+                    + "or "
+                    + "exists (select TCR2.id from "
+                    + "TestCaseRun as TCR2 "
+                    + "join TCR2.tags as TCRT "
+                    + "where TCR2.id = TCR.id "
+                    + "and TCRT.tag.id in (:tcrTags) "
+                    + "group by TCR2.id )) ";
         }
         queryString += "order by MR.startTime, MR.id";
 
@@ -627,11 +589,22 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             query.setParameterList("ids", toIds(params.getSfInstances()));
 
             if (tagsFilter) {
-                query.setParameterList("tags", tagsToIds(params.getTags()));
+                Object[] tagsIds = tagsToIds(params.getTags());
+                query.setParameterList("mrTags", tagsIds);
+                query.setParameterList("tcrTags", tagsIds);
             }
             @SuppressWarnings("unchecked")
-            List<Long> matrixIDs = query.list();
-            return matrixIDs;
+            List<Object[]>  matrixAndTestCaseIDs = query.list();
+            TreeMap<Long, List<Long>> result = new TreeMap<>();
+            for (Object[] ids : matrixAndTestCaseIDs) {
+                Long matrixId = (Long) ids[0];
+                Long testCaseId = (Long) ids[1];
+                List<Long> testCaseIds = result.computeIfAbsent(matrixId, l -> new ArrayList<>());
+                if (testCaseId != null) {
+                    testCaseIds.add(testCaseId);
+                }
+            }
+            return result;
         } catch (Exception e) {
             throw new EPSCommonException(e);
         }
@@ -682,7 +655,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 				+ "join MR.environment as E "
 				+ "join TCR.testCase as T "
 				+ "left join TCR.runStatus AS S "
-				+ "where MR.id in (:mrId) "
+				+ "where (MR.id in (:mrId) or TCR.id in (:tcrId))"
 				+ "order by MR.startTime, TCR.rank";
 
 		Session session = null;
@@ -693,6 +666,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 			Query query = session.createQuery(queryString);
 
 			query.setParameterList("mrId", params.getMatrixRunIds());
+			query.setParameterList("tcrId", params.getTestCaseRunIds());
 
             return parseAggregatedReportResult(query.list());
 
@@ -761,15 +735,18 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         }
 
         if(params.getTags() != null && !params.getTags().isEmpty()) {
-
             sb.append(
-                    "and exists (select MR2.id from "
+                    "and :numTags <= " +
+                            "(select count(distinct TCRT.tag.id) from "
+                            + "TestCaseRun as TCR2 "
+                            + "join TCR2.tags as TCRT "
+                            + "where TCR2.id = TCR.id "
+                            + "and TCRT.tag.id in (:tcrTags)) + " +
+                            "(select count(distinct T.id) from "
                             + "MatrixRun as MR2 "
                             + "join MR2.tags as T "
                             + "where MR2.id = MR.id "
-                            + "and T.id in (:tags) "
-                            + "group by MR2.id "
-                            + "having count(*) >= :numTags) ");
+                            + "and T.id in (:mrTags)) ");
 
         }
 
@@ -790,7 +767,9 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             }
 
             if(params.getTags() != null && !params.getTags().isEmpty()) {
-                query.setParameterList("tags", tagsToIds(params.getTags()));
+                Object[] tagIds = tagsToIds(params.getTags());
+                query.setParameterList("tcrTags", tagIds);
+                query.setParameterList("mrTags", tagIds);
                 if(params.isAllTags()) {
                     query.setParameter("numTags", (long)params.getTags().size());
                 } else {
@@ -881,15 +860,18 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 		}
 
 		if(params.getTags() != null && !params.getTags().isEmpty()) {
-
 			sb.append(
-					"and exists (select MR2.id from "
-					+ "MatrixRun as MR2 "
-					+ "join MR2.tags as T "
-					+ "where MR2.id = MR.id "
-					+ "and T.id in (:tags) "
-					+ "group by MR2.id "
-					+ "having count(*) >= :numTags) ");
+                    "and :numTags <= " +
+                    "(select count(distinct TCRT.tag.id) from "
+                    + "TestCaseRun as TCR2 "
+                    + "join TCR2.tags as TCRT "
+                    + "where TCR2.id = TCR.id "
+                    + "and TCRT.tag.id in (:tcrTags)) + " +
+                    "(select count(distinct T.id) from "
+                    + "MatrixRun as MR2 "
+                    + "join MR2.tags as T "
+                    + "where MR2.id = MR.id "
+                    + "and T.id in (:mrTags)) ");
 
 		}
 
@@ -936,8 +918,9 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 			query.setParameterList("ids", toIds(params.getSfInstances()));
 
 			if(params.getTags() != null && !params.getTags().isEmpty()) {
-
-				query.setParameterList("tags", tagsToIds(params.getTags()));
+                Object[] ids = tagsToIds(params.getTags());
+                query.setParameterList("tcrTags", ids);
+                query.setParameterList("mrTags", ids);
 
 				if(params.isAllTags()) {
 					query.setParameter("numTags", (long)params.getTags().size());
@@ -1358,6 +1341,21 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         row.setFinishTime(rsRow[11] != null ? DateTimeUtility.toLocalDateTime((Timestamp) rsRow[11]) : null);
         row.setRawTags((String) rsRow[12]);
         row.setRawHash((Integer) rsRow[13]);
+
+        SfInstance sfInstance = new SfInstance();
+        sfInstance.setHost((String) rsRow[14]);
+        sfInstance.setName((String) rsRow[15]);
+        sfInstance.setPort(rsRow[16] != null ? (Integer) rsRow[16] : 0);
+        row.setSfInstance(sfInstance);
+
+        SfInstance sfCurrentInstance = new SfInstance();
+        sfCurrentInstance.setHost((String) rsRow[17]);
+        sfCurrentInstance.setName((String) rsRow[18]);
+        sfCurrentInstance.setPort(rsRow[19] != null ? (Integer) rsRow[19] : 0);
+        row.setSfCurrentInstance(sfCurrentInstance);
+
+        row.setReportFolder((String) rsRow[20]);
+        row.setReportFile((String) rsRow[21]);
     }
 
 	private Map<Long, String> exctractFailedActionsMap(String dbString) {
@@ -1472,12 +1470,17 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "where MR.startTime >= :from and MR.finishTime <= :to ";
 
         if (params.getTags() != null && !params.getTags().isEmpty()) {
-            queryString += "and exists (select MR2.id from "
+            queryString += "and 1 <= " +
+                            "(select count(distinct TCRT.tag.id) from "
+                            + "TestCaseRun as TCR2 "
+                            + "join TCR2.tags as TCRT "
+                            + "where TCR2.id = TCR.id "
+                            + "and TCRT.tag.id in (:tcrTags)) + " +
+                            "(select count(distinct T.id) from "
                             + "MatrixRun as MR2 "
                             + "join MR2.tags as T "
                             + "where MR2.id = MR.id "
-                            + "and T.id in (:tags) "
-                            + "group by MR2.id )";
+                            + "and T.id in (:mrTags)) ";
         }
 
         Session session = null;
@@ -1489,10 +1492,78 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             query.setParameter("to", params.getTo());
 
             if(params.getTags() != null && !params.getTags().isEmpty()) {
-                query.setParameterList("tags", tagsToIds(params.getTags()));
+                Object[] ids = tagsToIds(params.getTags());
+                query.setParameterList("tcrTags", ids);
+                query.setParameterList("mrTags", ids);
             }
 
             return parseAggregatedTaggedReportResult(query.list());
+        } finally {
+            if(session != null) {
+                session.close();
+            }
+        }
+    }
+
+    private void loadAndAddMatrixTags(Map<Long, List<AggregatedReportRow>> matrixRows) {
+        String queryString = "select distinct "
+                + "MR.id, "
+                + "T.id, "
+                + "T.name, "
+                + "G.name "
+                + "from MatrixRun as MR "
+                + "join MR.tags as T "
+                + "left join T.group as G "
+                + "where MR.id in (:ids) "
+                + "order by MR.id, T.name";
+        Session session = null;
+        try {
+            session = this.sessionFactory.openSession();
+            Query query = session.createQuery(queryString);
+            query.setParameterList("ids", matrixRows.keySet());
+            @SuppressWarnings("unchecked")
+            List<Object[]> resultSet = query.list();
+            Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, (t, row) -> t.setCustom(false), true);
+            for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
+                List<AggregatedReportRow> rows = matrixRows.get(entry.getKey());
+                rows.forEach(r -> r.setTags(new ArrayList<>(entry.getValue())));
+            }
+        } finally {
+            if(session != null) {
+                session.close();
+            }
+        }
+    }
+
+    private void loadAndAddTestCaseTags(Map<Long, AggregatedReportRow> rows) {
+        String queryString = "select distinct "
+                + "TCR.id, "
+                + "TCRT.tag.id, "
+                + "TCRT.tag.name, "
+                + "G.name, "
+                + "TCRT.custom "
+                + "from TestCaseRun as TCR "
+                + "join TCR.tags as TCRT "
+                + "left join TCRT.tag.group as G "
+                + "where TCR.id in (:ids) "
+                + "order by TCR.id, TCRT.tag.name";
+        Session session = null;
+        try {
+            session = this.sessionFactory.openSession();
+            Query query = session.createQuery(queryString);
+            query.setParameterList("ids", rows.keySet());
+            @SuppressWarnings("unchecked")
+            List<Object[]> resultSet = query.list();
+            Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, (t, row) -> t.setCustom((Boolean)row[4]), false);
+            for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
+                AggregatedReportRow row = rows.get(entry.getKey());
+                List<Tag> tags = row.getTags();
+                if (tags == null) {
+                    tags = new ArrayList<>();
+                    row.setTags(tags);
+                }
+                tags.addAll(entry.getValue());
+            }
         } finally {
             if(session != null) {
                 session.close();

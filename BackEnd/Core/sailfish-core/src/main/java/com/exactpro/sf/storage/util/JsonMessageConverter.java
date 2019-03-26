@@ -17,6 +17,12 @@ package com.exactpro.sf.storage.util;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,12 +32,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
@@ -58,6 +58,7 @@ public class JsonMessageConverter {
     public static final String JSON_MESSAGE_TIMESTAMP = "timestamp";
     public static final String JSON_MESSAGE_ID = "id";
     public static final String JSON_MESSAGE_RR = "rejectReason";
+    public static final String JSON_MESSAGE_ADMIN = "admin";
 
     private static final Map<Class<?>, DateTimeFormatter> CLASS_TO_FORMATTER = new HashMap<>();
 
@@ -85,7 +86,7 @@ public class JsonMessageConverter {
     }
 
     public static String toJson(IMessage message, IDictionaryStructure dictionary, boolean compact) {
-        IMessageStructure structure = dictionary != null ? dictionary.getMessageStructure(message.getName()) : null;
+        IMessageStructure structure = dictionary != null ? dictionary.getMessages().get(message.getName()) : null;
         JsonFactory factory = new JsonFactory();
 
         try(StringWriter writer = new StringWriter(4096);
@@ -99,7 +100,8 @@ public class JsonMessageConverter {
             generator.writeStringField(JSON_MESSAGE_NAMESPACE, metaData.getMsgNamespace());
             generator.writeStringField(JSON_MESSAGE_DICTIONARY_URI, Objects.toString(metaData.getDictionaryURI(), StringUtils.EMPTY));
             generator.writeStringField(JSON_MESSAGE_PROTOCOL, StringUtils.defaultString(metaData.getProtocol()));
-            generator.writeStringField(JSON_MESSAGE_DIRTY, Objects.toString(metaData.isDirty(), StringUtils.EMPTY));
+            generator.writeBooleanField(JSON_MESSAGE_DIRTY, metaData.isDirty());
+            generator.writeBooleanField(JSON_MESSAGE_ADMIN, metaData.isAdmin());
             generator.writeStringField(JSON_MESSAGE_RR, metaData.getRejectReason());
             generator.writeFieldName(JSON_MESSAGE);
 
@@ -156,7 +158,7 @@ public class JsonMessageConverter {
 
         for(String fieldName : fieldNames) {
             generator.writeFieldName(fieldName);
-            IFieldStructure subStructure = structure != null && structure.isComplex() ? structure.getField(fieldName) : null;
+            IFieldStructure subStructure = structure != null && structure.isComplex() ? structure.getFields().get(fieldName) : null;
             handleCompactValue(message.getField(fieldName), subStructure, generator);
         }
 
@@ -169,7 +171,7 @@ public class JsonMessageConverter {
         generator.writeStartObject();
 
         for(String fieldName : fieldNames) {
-            IFieldStructure subStructure = structure != null && structure.isComplex() ? structure.getField(fieldName) : null;
+            IFieldStructure subStructure = structure != null && structure.isComplex() ? structure.getFields().get(fieldName) : null;
             Object value = message.getField(fieldName);
 
             if(value == null) {
@@ -257,7 +259,7 @@ public class JsonMessageConverter {
         Set<String> fieldNames = new LinkedHashSet<>();
 
         if(structure != null && structure.isComplex()) {
-            fieldNames.addAll(structure.getFieldNames());
+            fieldNames.addAll(structure.getFields().keySet());
         }
 
         fieldNames.addAll(message.getFieldNames());
@@ -267,7 +269,7 @@ public class JsonMessageConverter {
 
     private static Set<String> getFieldNamesRetain(IMessage message, IFieldStructure structure) {
         if(structure != null && structure.isComplex()) {
-            Set<String> fieldNames = new LinkedHashSet<>(structure.getFieldNames());
+            Set<String> fieldNames = new LinkedHashSet<>(structure.getFields().keySet());
             fieldNames.retainAll(message.getFieldNames());
             return fieldNames;
         }

@@ -149,6 +149,9 @@ public class FixSessionFactory implements SessionFactory {
             boolean ignoreAbsenceOf141tag = getSetting(settings, sessionID,
                     Session.IGNORE_ABSENCE_OF_141_TAG, false);
 
+            boolean validateFieldsOutOfRange = getSetting(settings, sessionID,
+                    Session.SETTING_VALIDATE_FIELDS_OUT_OF_RANGE, true);
+
             int logonTimeout = getSetting(settings, sessionID, Session.SETTING_LOGON_TIMEOUT, 10);
             int logoutTimeout = getSetting(settings, sessionID, Session.SETTING_LOGOUT_TIMEOUT, 2);
 
@@ -191,6 +194,7 @@ public class FixSessionFactory implements SessionFactory {
             session.setLogonTimeout(logonTimeout);
             session.setLogoutTimeout(logoutTimeout);
             session.setReceiveLimit(receiveLimit);
+            session.setValidateFieldsOutOfRange(validateFieldsOutOfRange);
 
             //
             // Session registration and creation callback is done here instead of in

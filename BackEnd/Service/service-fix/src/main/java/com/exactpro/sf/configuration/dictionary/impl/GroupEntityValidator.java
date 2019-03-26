@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.impl;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.util.List;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
@@ -53,8 +55,8 @@ public class GroupEntityValidator extends EntityValidator {
             }
             Integer castValue = (Integer) value;
             boolean existence = false;
-            for (IFieldStructure field : dictionary.getFieldStructures()) {
-                Object tag = field.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG);
+            for(IFieldStructure field : dictionary.getFields().values()) {
+                Object tag = getAttributeValue(field, FixMessageHelper.ATTRIBUTE_TAG);
                 if (castValue.equals(tag)) {
                     existence = true;
                     break;

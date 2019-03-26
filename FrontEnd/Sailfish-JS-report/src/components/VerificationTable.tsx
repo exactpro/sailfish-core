@@ -22,9 +22,12 @@ import { VerificationTableProps } from './VerificationTable';
 import { connect } from 'preact-redux';
 import AppState from "../state/AppState";
 
+const PADDING_LEVEL_VALUE = 15;
+
 export interface VerificationTableProps {
     params: Entry[];
     fieldsFilter: StatusType[];
+    status: StatusType;
 }
 
 interface VerificationTableState {
@@ -32,8 +35,8 @@ interface VerificationTableState {
 }
 
 interface TableNode extends Entry {
-    //is subnodes hidden
-    isCollapsed?: boolean;
+    //is subnodes visible
+    isExpanded?: boolean;
 }
 
 class VerificationTableBase extends Component<VerificationTableProps, VerificationTableState> {
@@ -49,87 +52,53 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
         return root.subEntries ? {
             ...root,
             subEntries: root.subEntries.map((param) => this.paramsToNodes(param)),
-            isCollapsed: false
+            isExpanded: true
         } : root;
     }
 
-    renderParams(node: TableNode, fieldsFilter: StatusType[], padding: number = 1) {
-
-        const { subEntries, isCollapsed, expected, name, status, actual } = node;
-
-        if (subEntries) {
-            return ([
-                <tr class="ver-table-row-toggler">
-                    <td onClick={() => this.tooglerClick(node)}
-                        colSpan={4}>
-                        <p style={{ marginLeft: 10 * (padding - 1) }}>
-                            {(isCollapsed ? "+  " : "-  ") + name}
-                        </p>
-                    </td>
-                </tr>,
-                isCollapsed ? null :
-                    subEntries.map(
-                        (param) => this.renderParams(param, fieldsFilter, padding + 1) as Element)
-            ]
-            );
-        } else {
-            const className = ["ver-table-row-value", !fieldsFilter.includes(status) ? "transparent" : ""].join(" ").toLowerCase();
-            return (
-                <tr class={className}>
-                    <td style={{ paddingLeft: 10 * padding }}>
-                        {name}
-                    </td>
-                    <td>
-                        {expected}
-                    </td>
-                    <td>
-                        {actual}
-                    </td>
-                    <td class={"ver-table-row-value-status " + (status || "").toLowerCase()}>
-                        {status}
-                    </td>
-                </tr>
-            );
-        }
-    }
-
     tooglerClick(root: TableNode) {
-        root.isCollapsed = !root.isCollapsed;
+        root.isExpanded = !root.isExpanded;
         this.setState(this.state);
     }
 
-    setCollapseStatus(isCollapsed: boolean) {
+    setExpandStatus(isCollapsed: boolean) {
         this.setState({
             nodes: this.state.nodes.map(
-                node => node.subEntries ? this.setNodeCollapseStatus(node, isCollapsed) : node)
+                node => node.subEntries ? this.setNodeExpandStatus(node, isCollapsed) : node)
         });
     }
 
-    setNodeCollapseStatus(node: TableNode, isCollapsed: boolean): TableNode {
+    setNodeExpandStatus(node: TableNode, isExpanded: boolean): TableNode {
         return {
             ...node,
-            isCollapsed: isCollapsed,
+            isExpanded: isExpanded,
             subEntries: node.subEntries ? node.subEntries.map(
-                subNode => subNode.subEntries ? this.setNodeCollapseStatus(subNode, isCollapsed) : 
-                subNode) : null
+                subNode => subNode.subEntries ? this.setNodeExpandStatus(subNode, isExpanded) :
+                    subNode) : null
         }
     }
 
-    render({ fieldsFilter }: VerificationTableProps, { nodes }: VerificationTableState) {
+    render({ fieldsFilter, status }: VerificationTableProps, { nodes }: VerificationTableState) {
+
+        const rootClass = [
+            "ver-table",
+            status.toLowerCase()
+        ].join(' ');
+
         return (
-            <div class="ver-table">
+            <div class={rootClass}>
                 <div class="ver-table-header">
                     <div class="ver-table-header-name">
                         <h5>Comparison Table</h5>
                     </div>
                     <div class="ver-table-header-control">
                         <span class="ver-table-header-control-button"
-                            onClick={() => this.setCollapseStatus(true)}>
+                            onClick={() => this.setExpandStatus(false)}>
                             Collapse
                         </span>
                         <span> | </span>
                         <span class="ver-table-header-control-button"
-                            onClick={() => this.setCollapseStatus(false)}>
+                            onClick={() => this.setExpandStatus(true)}>
                             Expand
                         </span>
                         <span> all groups</span>
@@ -143,10 +112,72 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
                         <th>Status</th>
                     </thead>
                     <tbody>
-                        {nodes.map((param) => this.renderParams(param, fieldsFilter))}
+                        {nodes.map((param) => this.renderTableNodes(param, fieldsFilter))}
                     </tbody>
                 </table>
             </div>
+        )
+    }
+
+    private renderTableNodes(node: TableNode, fieldsFilter: StatusType[], paddingLevel: number = 1) : JSX.Element[] {
+
+        if (node.subEntries) {
+
+            const subNodes = node.isExpanded ? 
+                node.subEntries.reduce((lsit, node) => lsit.concat(this.renderTableNodes(node, fieldsFilter, paddingLevel + 1)), []) :
+                [];
+
+            return [this.renderTooglerNode(node, paddingLevel), ...subNodes];
+        } else {
+            return [this.renderValueNode(node, fieldsFilter, paddingLevel)];
+        }
+    }
+
+    private renderValueNode({ name, expected, actual, status }: TableNode, fieldsFilter: StatusType[], paddingLevel: number): JSX.Element {
+
+        const rootClassName = [
+                "ver-table-row-value",
+                !fieldsFilter.includes(status) ? "transparent" : ""
+            ].join(" ").toLowerCase(),
+            statusClassName = [
+                "ver-table-row-value-status",
+                status || ""
+            ].join(" ").toLowerCase();
+
+        return (
+            <tr class={rootClassName}>
+                <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
+                    {name}
+                </td>
+                <td class="ver-table-row-value-expected">
+                    {expected}
+                </td>
+                <td class="ver-table-row-value-actual">
+                    {actual}
+                </td>
+                <td class={statusClassName}>
+                    {status}
+                </td>
+            </tr>
+        );
+    }
+
+    private renderTooglerNode(node: TableNode, paddingLevel: number): JSX.Element {
+
+        const className = [
+            "ver-table-row-toggler",
+            node.isExpanded ? "expanded" : "collapsed"
+        ].join(' ');
+
+        return (
+            <tr class={className}>
+                <td onClick={() => this.tooglerClick(node)}
+                    colSpan={4}>
+                    <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
+                        {node.name}
+                    </p>
+                </td>
+            </tr>
         )
     }
 }

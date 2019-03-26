@@ -18,6 +18,8 @@ package com.exactpro.sf.embedded.statistics.storage.reporting;
 import java.io.Serializable;
 import java.util.Map;
 
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.embedded.statistics.storage.CommonReportRow;
 import com.exactpro.sf.scriptrunner.StatusType;
 import java.time.LocalDateTime;
 
@@ -272,7 +274,39 @@ public class TaggedComparisonRow implements Serializable {
         this.secondSet.setDescription(secondDescription);
     }
 
-    public static class TaggedComparisonSet {
+    public SfInstance getFirstSfInstance() {
+        return firstSet.getSfInstance();
+    }
+
+    public SfInstance getFirstSfCurrentInstance() {
+        return firstSet.getSfCurrentInstance();
+    }
+
+    public SfInstance getSecondSfInstance() {
+        return secondSet.getSfInstance();
+    }
+
+    public SfInstance getSecondSfCurrentInstance() {
+        return secondSet.getSfCurrentInstance();
+    }
+
+    public String getFirstReportFolder() {
+        return firstSet.getReportFolder();
+    }
+
+    public String getFirstReportFile() {
+        return firstSet.getReportFile();
+    }
+
+    public String getSecondReportFolder() {
+        return secondSet.getReportFolder();
+    }
+
+    public String getSecondReportFile() {
+        return secondSet.getReportFile();
+    }
+
+    public static class TaggedComparisonSet extends CommonReportRow {
 
         private Long testCaseId;
 
@@ -301,6 +335,24 @@ public class TaggedComparisonRow implements Serializable {
         private Integer rawHash;
 
         private String description;
+
+        private SfInstance instance;
+
+        private SfInstance currentInstance;
+
+        private String reportFolder;
+
+        private String reportFile;
+
+        @Override
+        public SfInstance getSfCurrentInstance() {
+            return currentInstance;
+        }
+
+        @Override
+        public SfInstance getSfInstance() {
+            return instance;
+        }
 
         public Long getTestCaseId() {
             return testCaseId;
@@ -334,6 +386,7 @@ public class TaggedComparisonRow implements Serializable {
             this.status = status;
         }
 
+        @Override
         public String getMatrixName() {
             return matrixName;
         }
@@ -412,6 +465,29 @@ public class TaggedComparisonRow implements Serializable {
 
         public void setDescription(String description) {
             this.description = description;
+        }
+        public String getReportFolder() {
+            return reportFolder;
+        }
+
+        public void setReportFolder(String reportFolder) {
+            this.reportFolder = reportFolder;
+        }
+
+        public String getReportFile() {
+            return reportFile;
+        }
+
+        public void setReportFile(String reportFile) {
+            this.reportFile = reportFile;
+        }
+
+        public void setSfInstance(SfInstance instance) {
+            this.instance = instance;
+        }
+
+        public void setSfCurrentInstance(SfInstance currentInstance) {
+            this.currentInstance = currentInstance;
         }
     }
 }

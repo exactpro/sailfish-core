@@ -39,6 +39,16 @@
             <h:graphicImage id="open_env" library="sf" name="images/envelope_open_20.png" styleClass="eps-envelope" style="display: none;"/>
         </h:form>
 
+        <h:form id="updateForm" prependId="false">
+            <h:link outcome="/configuration">
+                <f:param name="section" value="update"/>
+                <h:graphicImage id="update_require" library="sf"
+                                title="Go to Update Version page to update components"
+                                name="images/updates/update_require.png" styleClass="eps-update"
+                                rendered="#{updateBean.needsUpdate}"/>
+            </h:link>
+        </h:form>
+
     </div>
 
     <ui:insert name="auth">

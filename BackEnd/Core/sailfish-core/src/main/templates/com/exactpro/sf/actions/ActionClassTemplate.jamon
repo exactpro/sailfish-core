@@ -1,6 +1,6 @@
 <%escape #n>
 <%import>
-java.util.List;
+java.util.Collection;
 com.exactpro.sf.common.messages.structures.*;
 </%import>
 
@@ -8,7 +8,7 @@ com.exactpro.sf.common.messages.structures.*;
   String packageName;
   String namespaceName;
   String messagePackageName;
-  List<IMessageStructure> messages;
+  Collection<IMessageStructure> messages;
   String uncheckedFields;
 </%args>
 
@@ -42,12 +42,16 @@ public class <% namespaceName.toUpperCase() + "_SndRcvMatrixActions" %> extends 
 	<%for IMessageStructure message: messages %>
 	<%java>
 		String messageClassName = message.getName();
-		Boolean isAdmin = (Boolean) message.getAttributeValueByName("IsAdmin");
+		IAttributeStructure adminAttribute = message.getAttributes().get("IsAdmin");
+		Boolean isAdmin = adminAttribute != null ? adminAttribute.getCastValue() : null;
+
 		if (isAdmin == null) {
 			isAdmin = false;
 		}
 
-		Boolean generateAction = (Boolean) message.getAttributeValueByName("generateAction");
+        IAttributeStructure generateActionAttribute = message.getAttributes().get("generateAction");
+		Boolean generateAction = generateActionAttribute != null ? generateActionAttribute.getCastValue() : null;
+
 		if (generateAction != null && !generateAction) {
 			continue;
 		}
@@ -58,14 +62,18 @@ public class <% namespaceName.toUpperCase() + "_SndRcvMatrixActions" %> extends 
         @CommonColumn(value = Column.ServiceName, required = true),
         @CommonColumn(Column.Timeout)
     })
-    @CustomColumns({<%java>boolean first = true;</%java><%if message.getFields() != null %><%for IFieldStructure field: message.getFields() %><%java>
-            if (field.isComplex() || field.getDefaultValue() != null || !field.isRequired())
+    @CustomColumns({<%java>boolean first = true;</%java><%for IFieldStructure field: message.getFields().values() %><%java>
+            if (field.isComplex() || field.getDefaultValue() != null || !field.isRequired()) {
                 continue;
-            Boolean autoFilled = (Boolean) field.getAttributeValueByName("autoFilled");
+            }
+
+            IAttributeStructure autoFilledAttribute = field.getAttributes().get("autoFilled");
+            Boolean autoFilled = autoFilledAttribute != null ? autoFilledAttribute.getCastValue() : null;
+
             if (autoFilled != null && autoFilled) {
                 continue;
             }
-	</%java><%if !first %>, <%else><%java>first=false;</%java></%if>@CustomColumn(value = "<% field.getName() %>", required = true)</%for></%if>})
+	</%java><%if !first %>, <%else><%java>first=false;</%java></%if>@CustomColumn(value = "<% field.getName() %>", required = true)</%for>})
 	@ActionMethod
 	public <% messageClassName %> <% namespaceName.toUpperCase() + "_Send" + messageClassName %> (
 		IActionContext actionContext, 

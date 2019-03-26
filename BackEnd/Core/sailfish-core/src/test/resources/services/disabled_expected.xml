@@ -15,4 +15,5 @@
         <storedMessageTypes>Message1, Message2</storedMessageTypes>
         <waitingTimeBeforeStarting>777</waitingTimeBeforeStarting>
     </disabledServiceSettings>
+    <variables/>
 </serviceDescription>

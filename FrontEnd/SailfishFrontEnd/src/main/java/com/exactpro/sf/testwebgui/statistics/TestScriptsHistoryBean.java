@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import javax.faces.context.FacesContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.primefaces.context.RequestContext;
+import org.primefaces.event.SelectEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ManagedBean(name="mrHistBean")
 @ViewScoped
 @SuppressWarnings("serial")
-public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Serializable {
+public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestScriptsHistoryBean.class);
 
@@ -86,6 +88,16 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 	private AggregatedReportRow selectedRow;
 
 	private AggregatedReportRow selected;
+
+    private List<AggregatedReportRow> selectedRows;
+
+    private List<Tag> allCustomerTags;
+
+    private List<Tag> customerTags = new ArrayList<>();
+
+    private Tag customTagToAdd;
+
+    private Action action = Action.ADD;
 
 	private List<TestCaseRunStatus> allRunStatuses;
 
@@ -215,6 +227,8 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 	public void init() {
         super.init();
 
+        this.allCustomerTags = new ArrayList<>(this.allTags);
+
 		this.statisticsDbAvailable = BeanUtil.getSfContext().getStatisticsService().isConnected();
 
 		if(this.statisticsDbAvailable) {
@@ -306,6 +320,14 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 		} else {
 			this.manualyToggled.add(id);
 		}
+
+	}
+
+	public void onRowSelect(SelectEvent event) {
+		if (this.selectedRows != null) {
+            Object row = event.getObject();
+            this.selectedRows.remove(row);
+        }
 
 	}
 
@@ -406,26 +428,15 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 	}
 
     public String getReportRequest(AggregatedReportRow row) {
-        StringBuilder sb = new StringBuilder(getContextPath(false));
-
-        sb.append("/report.xhtml?report=");
-        sb.append(buildReportUrl(row, true));
-
-        return sb.toString();
+        return BeanUtil.getReportRequest(this.customReportsPath, row, false);
     }
 
     public String getZipReport(AggregatedReportRow row) {
-        StringBuilder sb = new StringBuilder(getContextPath(false));
-
-        sb.append("/report/");
-        sb.append(row.getReportFolder());
-        sb.append("?action=simplezip");
-
-        return sb.toString();
+        return BeanUtil.getZipReport(this.customReportsPath, row, false);
     }
 
     public String getLastResultZipReports() {
-        StringBuilder sb = new StringBuilder(getContextPath(true));
+        StringBuilder sb = new StringBuilder(BeanUtil.getContextPath(this.customReportsPath, true));
 
         sb.append("/report/reports?reports=");
         sb.append(this.lastResultReportNamesJson);
@@ -433,54 +444,8 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
         return sb.toString();
     }
 
-    private String getContextPath(boolean button) {
-        return StringUtils.isEmpty(this.customReportsPath) ? (button ? StringUtils.EMPTY : FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath())
-                : customReportsPath.substring(0, customReportsPath.lastIndexOf("/"));
-    }
-
 	public String buildReportUrl(AggregatedReportRow row, boolean report) {
-
-		StringBuilder sb = new StringBuilder();
-
-        if(StringUtils.isNotEmpty(this.customReportsPath)) {
-            sb.append(this.customReportsPath).append("/");
-        } else {
-            String host;
-            Integer port;
-            String name;
-            if (row.getSfCurrentInstance() != null) {
-                SfInstance sfCurrentInstance = row.getSfCurrentInstance();
-                host = sfCurrentInstance.getHost();
-                port = sfCurrentInstance.getPort();
-                name = sfCurrentInstance.getName();
-            } else {
-                host = row.getHost();
-                port = row.getPort();
-                name = row.getSfName();
-            }
-            sb.append("http://");
-            sb.append(host)
-                    .append(":")
-                    .append(port)
-                    .append(name)
-                    .append("/");
-            sb.append(ReportServlet.REPORT_URL_PREFIX + "/"); // see web.xml > servlet-mapping
-        }
-
-		sb.append(StringUtil.escapeURL(row.getReportFolder())).append("/");
-
-		if(report) {
-
-			sb.append(row.getReportFile()).append(".html");
-
-		} else {
-
-			sb.append(StringUtil.escapeURL(row.getMatrixName()));
-
-		}
-
-		return sb.toString();
-
+        return BeanUtil.buildReportUrl(this.customReportsPath, row, report);
 	}
 
     @PreDestroy
@@ -581,7 +546,37 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 
 	}
 
-	public Date getFrom() {
+    public void applyAction() {
+        logger.debug("applyAction {} - {};", this.customerTags, this.action);
+
+        if(this.selectedRows == null || this.selectedRows.isEmpty()) {
+            BeanUtil.addErrorMessage("There are no selected rows", "");
+            return;
+        }
+        if(this.customerTags == null || this.customerTags.isEmpty()) {
+            BeanUtil.addErrorMessage("There are no selected customer tags)", "");
+            return;
+        }
+
+        if (this.action == Action.REMOVE) {
+            RequestContext.getCurrentInstance().execute("PF('tagConfirmation').show()");
+        } else {
+            confirmAction();
+        }
+    }
+
+    public void confirmAction() {
+        manageTagForRows(this.selectedRows, this.action, this.customerTags);
+        generateReport();
+    }
+
+    public void removeTagFromResult(AggregatedReportRow row, Tag tag) {
+        logger.debug("removeTagFromResult {};", tag);
+        manageTagForRows(Collections.singletonList(row), Action.REMOVE, Collections.singletonList(tag));
+        generateReport();
+    }
+
+    public Date getFrom() {
 		return from;
 	}
 
@@ -787,5 +782,78 @@ public class TestScriptsHistoryBean extends AbstractStatisticsBean implements Se
 
     public void setIncludeExecutedInFromToRange(boolean includeExecutedInFromToRange) {
         this.includeExecutedInFromToRange = includeExecutedInFromToRange;
+    }
+
+    public List<AggregatedReportRow> getSelectedRows() {
+        return selectedRows;
+    }
+
+    public void setSelectedRows(List<AggregatedReportRow> selectedRows) {
+        this.selectedRows = selectedRows;
+    }
+
+    public List<Tag> getCustomerTags() {
+        return customerTags;
+    }
+
+    public void setCustomerTags(List<Tag> customerTags) {
+        this.customerTags = customerTags;
+    }
+
+    public Tag getCustomTagToAdd() {
+        return customTagToAdd;
+    }
+
+    public void setCustomTagToAdd(Tag customTagToAdd) {
+        this.customTagToAdd = customTagToAdd;
+    }
+
+    public Action getAction() {
+        return action;
+    }
+
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
+    public Action[] getActions() {
+       return Action.values();
+    }
+
+    public List<Tag> getAllCustomerTags() {
+        return allCustomerTags;
+    }
+
+    public void onCustomTagSelect() {
+        logger.debug("Custom tag select invoked");
+
+        this.customerTags.add(customTagToAdd);
+        this.customTagToAdd = null;
+        this.allCustomerTags.removeAll(customerTags);
+    }
+
+    public void removeCustomTag(Tag tag) {
+        this.customerTags.remove(tag);
+        this.allCustomerTags.add(tag);
+    }
+
+    public List<Tag> completeCustomTag(String query) {
+	    return completeTag(query, this.allCustomerTags);
+    }
+
+    private void manageTagForRows(List<AggregatedReportRow> rows, Action action, List<Tag> tags) {
+        try {
+            List<AggregatedReportRow> filteredRows = new ArrayList<>(rows);
+            for (AggregatedReportRow row : rows) {
+                if (row.isMatrixRow()) {
+                    filteredRows.removeAll(row.getTestCaseRows());
+                }
+            }
+            BeanUtil.getSfContext().getStatisticsService().manageTagToRows(filteredRows, action.getTargetAction(), tags);
+            BeanUtil.addInfoMessage("Action applied", "");
+        } catch(Throwable e) {
+            logger.error(e.getMessage(), e);
+            BeanUtil.addErrorMessage(e.getMessage(), "");
+        }
     }
 }

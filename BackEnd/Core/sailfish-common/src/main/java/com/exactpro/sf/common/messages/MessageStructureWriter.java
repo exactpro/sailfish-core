@@ -16,11 +16,11 @@
 package com.exactpro.sf.common.messages;
 
 import java.math.BigDecimal;
-import java.util.List;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -48,16 +48,10 @@ public class MessageStructureWriter
 					msgStructure.getName() + "]", e); 
 		}
 	}
-	
-	public void traverse(IMessageStructureVisitor msgStrVisitor, 
-			List<IFieldStructure> fields)
-	{
-		
-		for ( IFieldStructure curField : fields )
-		{
-			
-		    String fieldName = curField.getName();
-			
+
+    public void traverse(IMessageStructureVisitor msgStrVisitor,
+            Map<String, IFieldStructure> fields) {
+        fields.forEach((fieldName, curField) -> {
 			try {
 				if ( !curField.isComplex() )
 				{
@@ -165,8 +159,7 @@ public class MessageStructureWriter
 				builder.append(". in field name = [").append(fieldName).append("]");
 				throw new EPSCommonException(builder.toString(), e);
 			}
-						
-		}
+        });
 		
 	}
 }

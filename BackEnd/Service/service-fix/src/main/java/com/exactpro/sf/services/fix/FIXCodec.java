@@ -15,9 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,13 +30,13 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import com.exactpro.sf.messages.service.ErrorMessage;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.quickfixj.CharsetSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +51,7 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.ICommonSettings;
+import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
@@ -96,6 +98,8 @@ public class FIXCodec extends AbstractCodec {
 
 		this.settings = (TCPIPSettings)settings;
 
+		FixPropertiesReader.loadAndSetCharset(serviceContext);
+
         this.msgFactory = msgFactory;
 		this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
 		this.fieldConverter = new FixFieldConverter();
@@ -105,13 +109,12 @@ public class FIXCodec extends AbstractCodec {
 
         messagesWithXmlField.clear();
 
-		for(IMessageStructure messageStructure : dictionary.getMessageStructures()) {
-            String msgType = (String)messageStructure.getAttributeValueByName(FixMessageHelper.MESSAGE_TYPE_ATTR_NAME);
+        for(IMessageStructure messageStructure : dictionary.getMessages().values()) {
+            String msgType = getAttributeValue(messageStructure, FixMessageHelper.MESSAGE_TYPE_ATTR_NAME);
             if(msgType != null) {
                 msgStructures.put(msgType, messageStructure);
 
-                Boolean hasXmlFields = (Boolean) messageStructure
-                        .getAttributeValueByName(FixMessageHelper.HAS_XML_FIELDS_ATTR_NAME);
+                Boolean hasXmlFields = getAttributeValue(messageStructure, FixMessageHelper.HAS_XML_FIELDS_ATTR_NAME);
                 if (Boolean.TRUE.equals(hasXmlFields)) {
                     this.messagesWithXmlField.add(msgType);
                 }
@@ -130,7 +133,7 @@ public class FIXCodec extends AbstractCodec {
 
         in.get(buffer);
 
-        String out = new String(buffer, 0, buffer.length, Charset.forName("ISO-8859-1"));
+        String out = new String(buffer, 0, buffer.length, Charset.forName(CharsetSupport.getCharset()));
 
         int beginStringIdx = out.indexOf("8=FIX");
 
@@ -246,7 +249,7 @@ public class FIXCodec extends AbstractCodec {
                 errorMessage.setCause(exMessage.replace('\001', '|'));
 
                 message = errorMessage.getMessage();
-                message.getMetaData().setRawMessage(fixString.getBytes(StandardCharsets.ISO_8859_1));
+                message.getMetaData().setRawMessage(fixString.getBytes(CharsetSupport.getCharset()));
             }
 
             logger.debug("doDecode: IMessage = {}", message);
@@ -416,29 +419,29 @@ public class FIXCodec extends AbstractCodec {
 
         IMessageStructure messageStructure =
                 getMessageStructure(message.getHeader().getString(MsgType.FIELD));
-        IMessageStructure headerStructure = dictionary.getMessageStructure(FixMessageHelper.HEADER);
-        IMessageStructure trailerStructure = dictionary.getMessageStructure(FixMessageHelper.TRAILER);
+        IMessageStructure headerStructure = dictionary.getMessages().get(FixMessageHelper.HEADER);
+        IMessageStructure trailerStructure = dictionary.getMessages().get(FixMessageHelper.TRAILER);
 
         copyFields(message, iMessage, messageStructure);
         copyFields(message.getHeader(), header, headerStructure);
         copyFields(message.getTrailer(), trailer, trailerStructure);
 
         iMessage.getMetaData().setAdmin(message.isAdmin());
-        iMessage.getMetaData().setRawMessage(message.toString().getBytes());
+        iMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
 
         return iMessage;
     }
 
     private void copyFields(FieldMap message, IMessage iMessageTo, IFieldStructure messageStructure) throws Exception {
 
-        for (IFieldStructure fieldStructure : messageStructure.getFields()) {
+        for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
 
             if (fieldStructure.isComplex()) {
-                String entType = (String) fieldStructure.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE);
+                String entType = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE);
 
                 if (entType.equals(FixMessageHelper.GROUP_ENTITY)) {
 
-                    Integer groupTag = (Integer)fieldStructure.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG);
+                    Integer groupTag = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG);
                     List<Group> groups = message.getGroups(groupTag);
 
                     if(groups.size() != 0) {
@@ -452,7 +455,7 @@ public class FIXCodec extends AbstractCodec {
                     IMessage iMessageComponent =
                             msgFactory.createMessage(fieldStructure.getName(), messageStructure.getNamespace());
 
-                    IMessageStructure componentStructure = dictionary.getMessageStructure(fieldStructure.getReferenceName());
+                    IMessageStructure componentStructure = dictionary.getMessages().get(fieldStructure.getReferenceName());
 
                     copyFields(message, iMessageComponent, componentStructure);
                     if(iMessageComponent.getFieldNames().size() != 0) {
@@ -461,7 +464,7 @@ public class FIXCodec extends AbstractCodec {
 
                 }
             } else {
-                Integer tag = (Integer)fieldStructure.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_TAG);
+                Integer tag = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG);
                 if(tag != null && message.isSetField(tag)) {
                     if(this.settings.isRemoveTrailingZeros()) {
                         try {
@@ -498,9 +501,8 @@ public class FIXCodec extends AbstractCodec {
        if (msgType != null && messagesWithXmlField.contains(msgType)) {
             IMessageStructure msgStructure = this.msgStructures.get(msgType);
             if (msgStructure != null) {
-                for (IFieldStructure fieldStructure : msgStructure.getFields()) {
-                    String entityType = (String) fieldStructure
-                            .getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE);
+                for(IFieldStructure fieldStructure : msgStructure.getFields().values()) {
+                    String entityType = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE);
                     if (FixMessageHelper.XML_FIELD_TYPE.equals(entityType)) {
                         IMessage xmlSubMessage = msgFactory.createMessage(
                                 fieldStructure.getName(), fieldStructure.getNamespace());
@@ -528,7 +530,7 @@ public class FIXCodec extends AbstractCodec {
 
         @Override
         public String extractXmlField(IFieldStructure fieldStructure) throws Exception {
-            Integer tag = (Integer) fieldStructure.getAttributeValueByName(FixMessageHelper.FIX_TAG);
+            Integer tag = getAttributeValue(fieldStructure, FixMessageHelper.FIX_TAG);
             return message.getString(tag);
         }
     }

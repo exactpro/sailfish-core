@@ -18,9 +18,11 @@ package com.exactpro.sf.storage;
 import java.util.List;
 
 public interface IEnvironmentStorage {
-    public void add(String name);
-    public void remove(String name);
-    public boolean exists(String name);
-    public void rename(String oldName, String newName);
-    public List<String> list();
+    void add(String name);
+    void remove(String name);
+    boolean exists(String name);
+    void rename(String oldName, String newName);
+    List<String> list();
+    String getVariableSet(String name);
+    void setVariableSet(String name, String variableSet);
 }

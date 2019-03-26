@@ -29,6 +29,13 @@
 .eps-sf-up-bar .eps-envelope {
     position: absolute;
     bottom: 14px;
+    right: 30px;
+    cursor: pointer;
+}
+
+.eps-sf-up-bar .eps-update {
+    position: absolute;
+    bottom: 12px;
     right: 0px;
     cursor: pointer;
 }
@@ -36,7 +43,7 @@
 .eps-sf-up-bar .eps-top-menu {
     float:right;
     height: 100%;
-    margin-right: 40px;
+    margin-right: 80px;
 }
 
 .eps-sf-up-bar .eps-faces-msg-table {

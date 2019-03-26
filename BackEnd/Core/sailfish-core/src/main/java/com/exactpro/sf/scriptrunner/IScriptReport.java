@@ -17,6 +17,7 @@ package com.exactpro.sf.scriptrunner;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
@@ -26,6 +27,7 @@ import com.exactpro.sf.scriptrunner.impl.BroadcastScriptReport;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 // TODO: split ScriptReport and listening functionality
 public interface IScriptReport
@@ -52,10 +54,11 @@ public interface IScriptReport
 
 	void flush();
 
-    void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type);
+    void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type, Set<String> tags);
 
 	void closeTestCase(StatusDescription status);
 
+	@JsonIgnore
     default boolean isTestCaseCreated() {
         throw new UnsupportedOperationException("Only " + BroadcastScriptReport.class.getSimpleName() + " should implement this method");
     }

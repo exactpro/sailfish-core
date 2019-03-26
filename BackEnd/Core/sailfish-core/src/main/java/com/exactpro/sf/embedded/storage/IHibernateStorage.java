@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.storage;
 
+import java.util.List;
+
 public interface IHibernateStorage {
     
     void tearDown();
@@ -22,4 +24,6 @@ public interface IHibernateStorage {
     void add(Object Entity);
     
     void update(Object entity);
+
+    void update(List<Object> entity);
 }

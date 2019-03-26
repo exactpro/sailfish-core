@@ -10612,13 +10612,6 @@
             <field name="EncodedText" reference="field-EncodedText" required="false"/>
             <field name="trailer" reference="trailer" required="true"/>
         </message>
-        <message name="IOI">
-            <attribute name="entity_type" type="java.lang.String">Message</attribute>
-            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
-            <attribute name="MessageType" type="java.lang.String">6</attribute>
-            <field name="header" reference="header" required="true"/>
-            <field name="trailer" reference="trailer" required="true"/>
-        </message>
         <message id="component-Instrument" name="Instrument">
             <attribute name="entity_type" type="java.lang.String">Component</attribute>
             <field name="Symbol" reference="field-Symbol" required="true"/>

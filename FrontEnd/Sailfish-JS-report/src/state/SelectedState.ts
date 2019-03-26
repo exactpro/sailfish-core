@@ -20,6 +20,7 @@ export default interface SelectedState {
     actionId: number;
     messagesId: number[];
     checkpointMessageId: number;
+    checkpointActionId: number;
     rejectedMessageId: number;
     status: StatusType;
 }

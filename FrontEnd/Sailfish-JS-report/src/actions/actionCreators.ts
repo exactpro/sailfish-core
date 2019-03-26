@@ -28,16 +28,17 @@ import {
     SwitchSplitModeStateAction,
     SwitchActionFilterStateAction,
     SwitchFieldsFilterStateAction,
-    ShowFilterStateAction,
     SetLeftPaneStateActions,
     SetRightPaneStateAction,
     CheckpointSelectStateAction,
-    RejectedMessageSelectStateAction
+    RejectedMessageSelectStateAction,
+    ActionSelectByIdStateAction,
+    SetAdminMessageEnabledStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
-import { Pane } from "../helpers/Pane";
+import { Panel } from "../helpers/Panel";
 
 export const setReport = (report: Report): SetReportStateAction => ({
     type: StateActionTypes.SET_REPORT,
@@ -58,15 +59,20 @@ export const selectAction = (action: Action): ActionSelectStateAction => ({
     action: action
 })
 
+export const selectActionById = (actionId: number): ActionSelectByIdStateAction => ({
+    type: StateActionTypes.SELECT_ACTION_BY_ID,
+    actionId: actionId
+})
+
 export const selectMessages = (messages: number[], status: StatusType = 'NA'): MessagesSelectStateAction => ({
     type: StateActionTypes.SELECT_MESSAGES,
     messagesId: messages,
     status: status
 })
 
-export const selectCheckpoint = (checkpointId: number): CheckpointSelectStateAction => ({
+export const selectCheckpoint = (checkpointAction: Action): CheckpointSelectStateAction => ({
     type: StateActionTypes.SELECT_CHECKPOINT,
-    checkpointId: checkpointId
+    checkpointAction: checkpointAction
 })
 
 export const selectRejectedMessageId = (messageId: number): RejectedMessageSelectStateAction => ({
@@ -101,16 +107,17 @@ export const switchSplitMode = (): SwitchSplitModeStateAction => ({
     type: StateActionTypes.SWITCH_SPLIT_MODE
 })
 
-export const showFilter = (): ShowFilterStateAction => ({
-    type: StateActionTypes.SHOW_FILTER
+export const setAdminMsgEnabled = (isEnabled: boolean) : SetAdminMessageEnabledStateAction => ({
+    type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
+    adminEnabled: isEnabled
 })
 
-export const setLeftPane = (pane: Pane): SetLeftPaneStateActions => ({
+export const setLeftPane = (pane: Panel): SetLeftPaneStateActions => ({
     type: StateActionTypes.SET_LEFT_PANE,
     pane: pane
 })
 
-export const setRightPane = (pane: Pane): SetRightPaneStateAction => ({
+export const setRightPane = (pane: Panel): SetRightPaneStateAction => ({
     type: StateActionTypes.SET_RIGHT_PANE,
     pane: pane
 })

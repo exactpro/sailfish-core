@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -72,12 +73,10 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.impl.BroadcastScriptReport;
 import com.exactpro.sf.scriptrunner.impl.ScriptReportWithLogs;
 import com.exactpro.sf.scriptrunner.impl.StatisticScriptReport;
-import com.exactpro.sf.scriptrunner.impl.XmlStreamReport;
 import com.exactpro.sf.scriptrunner.impl.htmlreport.HtmlReport;
 import com.exactpro.sf.scriptrunner.junit40.SFJUnitRunner;
 import com.exactpro.sf.scriptrunner.languagemanager.ILanguageFactory;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
-import com.exactpro.sf.scriptrunner.reportbuilder.DefaultReportWriter;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.storage.ITestScriptStorage;
@@ -244,14 +243,10 @@ public abstract class AbstractScriptRunner implements IDisposable {
 							scriptDescription.getTags()));
 
             List<IScriptReport> aggregateReportListeners = new ArrayList<>();
-            // Write Report:
-            File reportFile = workspaceDispatcher.createFile(FolderType.REPORT, true, reportFolder, "report.xml");
-            // New xml report
-            aggregateReportListeners.add(new XmlStreamReport(reportFile.getAbsolutePath()));
+			// json report
+            aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher, scriptDescription));
             // html report
             aggregateReportListeners.add(new HtmlReport(reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
-            // properties for gui
-            aggregateReportListeners.add(new PropertiesReport(reportFolder, workspaceDispatcher, scriptDescription));
 
             BroadcastScriptReport aggregateReport = new BroadcastScriptReport(aggregateReportListeners);
 
@@ -400,7 +395,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     public void resumeScript(long id) {
         TestScriptDescription descr = testScripts.get(id);
-        if (descr != null) {
+        if (descr != null && descr.isLocked()) {
             descr.getContext().getDebugController().resumeScript();
         }
     }
@@ -503,16 +498,6 @@ public abstract class AbstractScriptRunner implements IDisposable {
         }
     }
 
-    protected void writeCSVReport(List<TestScriptDescription> descrs, File reportFile) throws Exception {
-
-        DefaultReportWriter writer = new DefaultReportWriter(workspaceDispatcher);
-
-        ReportWriterOptions options = new ReportWriterOptions();
-        options.setWriteDetails(true);
-
-        writer.write(reportFile, descrs, options);
-    }
-
     public List<TestScriptDescription> getDescriptions() {
         List<TestScriptDescription> result = new ArrayList<>(testScripts.values());
         Collections.sort(result, new TimestampComparator());
@@ -537,7 +522,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
             logger.error(e.getMessage(), e);
         }
 
-        descr.unlock(); // unlock ability to remove report
+        descr.unlock(); // unlock report (report is complete; writing is finished)
+        fireEvent(descr); // update script run status after report is complete
     }
 
 	protected GeneratedScript generateJavaSourcesFromMatrix(final TestScriptDescription description) throws ScriptRunException, IOException {

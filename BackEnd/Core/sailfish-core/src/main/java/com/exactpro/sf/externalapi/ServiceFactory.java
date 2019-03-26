@@ -273,6 +273,11 @@ public class ServiceFactory implements IServiceFactory {
     }
 
     @Override
+    public IDictionaryStructure getDictionary(SailfishURI uri) {
+        return this.dictionaryManager.getDictionary(uri);
+    }
+
+    @Override
     public IMessageFactoryProxy getMessageFactory(SailfishURI serviceType) {
         if (!serviceTypes.contains(serviceType)) {
             throw new IllegalArgumentException("Unknown service type " + serviceType);
@@ -387,7 +392,7 @@ public class ServiceFactory implements IServiceFactory {
             }
 
             IDictionaryStructure structure = dictionaryManager.getDictionary(dictionary);
-            IMessageStructure messageStructure = structure.getMessageStructure(name);
+            IMessageStructure messageStructure = structure.getMessages().get(name);
             
             if (messageStructure == null) {
                 throw new EPSCommonException(String.format("Message %s not found in dictionary %s", name, dictionary.getResourceName()));

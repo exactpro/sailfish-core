@@ -26,7 +26,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   entry: path.resolve("./src/index.tsx"),
-  mode: process.env.NODE_ENV || 'development',
+  mode: process.env.NODE_ENV || 'production',
   module: {
     rules: [
       { 
@@ -60,5 +60,8 @@ module.exports = {
       title: "Sailfish reports",
       template: "src/index.html"
     })
-  ]
+  ],
+  optimization: {
+    usedExports: true
+  }
 };

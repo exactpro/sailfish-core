@@ -16,6 +16,7 @@
 package com.exactpro.sf.storage.util;
 
 import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE;
+import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_ADMIN;
 import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_DICTIONARY_URI;
 import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_DIRTY;
 import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_ID;
@@ -27,6 +28,10 @@ import static com.exactpro.sf.storage.util.JsonMessageConverter.JSON_MESSAGE_TIM
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,10 +42,6 @@ import java.util.Objects;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
@@ -104,10 +105,12 @@ public abstract class JsonMessageDecoder <T> {
             checkFieldName(parser, parser.getCurrentToken(), JSON_MESSAGE);
             parser.nextToken();
             boolean dirty = BooleanUtils.toBoolean(optionalTokens.get(JSON_MESSAGE_DIRTY));
+            boolean admin = BooleanUtils.toBoolean(optionalTokens.get(JSON_MESSAGE_ADMIN));
             T message = parse(parser, protocol, dictionaryURI, namespace, name, compact, dirty);
             if (message instanceof IMessage) {
                 ((IMessage)message).getMetaData().setRejectReason(optionalTokens.get(JSON_MESSAGE_RR));
                 ((IMessage)message).getMetaData().setDirty(dirty);
+                ((IMessage)message).getMetaData().setAdmin(admin);
             }
 
     //        IMessage message = messageFactory.createMessage(name, namespace);
@@ -126,7 +129,7 @@ public abstract class JsonMessageDecoder <T> {
                 dictionaryManager != null && dictionaryURI != null
                 ? dictionaryManager.getDictionary(dictionaryURI)
                 : null;
-        IFieldStructure fieldStructure = dictionaryStructure != null ? dictionaryStructure.getMessageStructure(name) : null;
+        IFieldStructure fieldStructure = dictionaryStructure != null ? dictionaryStructure.getMessages().get(name) : null;
         if (compact) {
             return getMessageCompact(parser, fieldStructure, name, dirty);
         } else {
@@ -144,7 +147,7 @@ public abstract class JsonMessageDecoder <T> {
             T message = createMessage(messageName);
             while (JsonToken.END_OBJECT != parser.nextToken()) {
                 String fieldName = parser.getCurrentName();
-                IFieldStructure subFieldStructure = fieldStructure != null ? fieldStructure.getField(fieldName) : null;
+                IFieldStructure subFieldStructure = fieldStructure != null ? fieldStructure.getFields().get(fieldName) : null;
                 parser.nextToken();
                 FieldInfo fieldInfo = getValueCompact(parser, subFieldStructure, dirty);
                 handleField(message, fieldName, fieldInfo);
@@ -162,7 +165,7 @@ public abstract class JsonMessageDecoder <T> {
             T message = createMessage(messageName);
             while (JsonToken.FIELD_NAME == parser.nextToken()) {
                 String fieldName = parser.getCurrentName();
-                IFieldStructure subFieldStructure = fieldStructure != null ? fieldStructure.getField(fieldName) : null;
+                IFieldStructure subFieldStructure = fieldStructure != null ? fieldStructure.getFields().get(fieldName) : null;
                 parser.nextToken();
                 FieldInfo fieldInfo = getValueFull(parser, subFieldStructure, dirty);
                 handleField(message, fieldName, fieldInfo);

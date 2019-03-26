@@ -15,18 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.library;
 
-import com.exactpro.sf.bigbutton.execution.ListExecutionStatistics;
-import com.exactpro.sf.bigbutton.importing.ImportError;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.util.EMailUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.bigbutton.execution.ListExecutionStatistics;
+import com.exactpro.sf.bigbutton.importing.ImportError;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.util.EMailUtil;
 
 @SuppressWarnings("serial")
 public class ScriptList extends AbstractLibraryItem implements Comparable<ScriptList>, IBBActionExecutor {
@@ -52,6 +53,8 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
 
 	private final String executor;
 
+    private final String variableSet;
+
 	private volatile Script currentScript;
 
     private ImportError rejectCause;
@@ -74,7 +77,7 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
     }
 
 	public ScriptList(String name, String executor, Set<String> serviceLists,
-            SfApiOptions apiOptions, long priority, long lineNumber) {
+            SfApiOptions apiOptions, long priority, long lineNumber, String variableSet) {
 		super();
 		this.executor = executor;
 		this.name = name;
@@ -83,6 +86,7 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
 		this.priority = priority;
         this.lineNumber = lineNumber;
         this.uiName = this.executor != null ? (this.name + " > " + this.executor) : this.name;
+        this.variableSet = variableSet;
 	}
 
 	@Override
@@ -104,7 +108,11 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
         return executor;
     }
 
-	public List<Script> getScripts() {
+    public String getVariableSet() {
+        return variableSet;
+    }
+
+    public List<Script> getScripts() {
 		return scripts;
 	}
 

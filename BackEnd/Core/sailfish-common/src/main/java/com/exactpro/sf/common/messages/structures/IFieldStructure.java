@@ -15,39 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 
 public interface IFieldStructure {
-
-    /**
-     * Looks for field in own collection by name.
-     */
-	IFieldStructure getField(String name);
-
-	/**
-	 * Returns field names from own collection.
-	 */
-	List<String> getFieldNames();
-
-	/**
-	 * Looks for attribute in own and inherit collection by name.
-	 */
-	Object getAttributeValueByName(String name);
-
-	/**
-     * Looking for attribute in own and inherit collection by name, ignoring case considerations.
-     */
-	Object getAttributeValueIgnoreCase(String name);
-
-	/**
-     * Returns attribute names from own and inherit collection.
-	 */
-	Set<String> getAttributeNames();
-
 	/**
 	 * Returns {@code true} if, and only if, instance contains fields and doesn't contain values.
 	 */
@@ -76,7 +48,7 @@ public interface IFieldStructure {
 	/**
      * Returns fields from own collection.
      */
-	List<IFieldStructure> getFields();
+    Map<String, IFieldStructure> getFields();
 
 	/**
      * Returns attributes from own and inherit collection.
@@ -116,7 +88,7 @@ public interface IFieldStructure {
 	/**
      * Returns own or inherit default value.
      */
-	Object getDefaultValue();
+    <T> T getDefaultValue();
 
 	/**
      * Returns dictionary's namespace.

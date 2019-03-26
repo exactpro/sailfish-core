@@ -20,14 +20,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -54,14 +56,11 @@ import com.exactpro.sf.embedded.mail.configuration.EMailServiceSettings;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.scriptrunner.IScriptReport;
 import com.exactpro.sf.scriptrunner.IServiceNotifyListener;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions;
-import com.exactpro.sf.scriptrunner.ReportWriterOptions.Duration;
-import com.exactpro.sf.scriptrunner.TestScriptDescription;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportType;
-import com.exactpro.sf.scriptrunner.reportbuilder.ReportWriterException;
 import com.exactpro.sf.services.EnvironmentDescription;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
@@ -77,12 +76,18 @@ import com.exactpro.sf.storage.IOptionsStorage;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.util.PropertiesSettingsReaderSerializer;
 import com.exactpro.sf.testwebgui.servlets.ReportTask;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class TestToolsAPI {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestToolsAPI.class);
 
 	private static TestToolsAPI instance = null;
+
+    private static ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
 
 	private final ISFContext context;
 
@@ -120,26 +125,6 @@ public class TestToolsAPI {
 		return matrix;
 	}
 
-	public File createAggrigateReport(String name, Date startDate, Date endDate, boolean details, Duration duration, ReportType reportType) throws ReportWriterException, IOException {
-	    ReportWriterOptions options = new ReportWriterOptions();
-	    options.setCustomStart(startDate);
-	    options.setCustomEnd(endDate);
-	    options.setWriteDetails(details);
-	    options.setSelectedDuration(duration);
-	    options.setSelectedReportType(reportType);
-
-        return createAggrigateReport(name, options);
-	}
-
-	public File createAggrigateReport(String name, ReportWriterOptions reportWriterOptions) throws ReportWriterException, IOException {
-        File reportFile = File.createTempFile(name, ".csv");
-
-        List<TestScriptDescription> descrs = this.context.getScriptRunner().getDescriptions();
-        this.context.getReportWriter().write(reportFile, descrs, reportWriterOptions);
-
-        return reportFile;
-    }
-
 	public void stopScriptRun(long id){
 	    logger.info("stopScript() invoked: {}", id);
 	    context.getScriptRunner().stopScript(id);
@@ -162,11 +147,11 @@ public class TestToolsAPI {
         return this.context.getMatrixConverterManager().getMatrixConverters();
 		}
 
-    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri) throws FileNotFoundException, WorkspaceSecurityException, WorkspaceStructureException {
+    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
         return prepareConverterSettings(matrixId, environment, converterUri, null);
     }
 
-    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri, String newMatrixName) throws FileNotFoundException, WorkspaceSecurityException, WorkspaceStructureException {
+    public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri, String newMatrixName) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
 	    IMatrixConverterSettings settings = getMatrixConverterSettings(converterUri);
 	    IMatrixStorage matrixStorage = this.context.getMatrixStorage();
         IMatrix matrix = matrixStorage.getMatrixById(matrixId);
@@ -182,7 +167,9 @@ public class TestToolsAPI {
         if (newMatrixName == null) {
             newMatrixName = converterUri.getResourceName() + "_" + matrix.getName();
         }
-        File outMatrixFilePath = wd.createFile(FolderType.MATRIX, true, matrixFilePath.getParentFile().getName(), newMatrixName);
+
+        File outMatrixFilePath = null;
+        outMatrixFilePath = new File(Files.createTempDirectory(UUID.randomUUID().toString()).toFile(), newMatrixName);
 
         settings.setEnvironment(environment);
         settings.setInputFile(matrixFilePath);
@@ -242,6 +229,10 @@ public class TestToolsAPI {
             try (InputStream matrixInputStream = new FileInputStream(newMatrixFile)) {
 				IMatrix aml3matrix = uploadMatrix(matrixInputStream, newName, null, "Converter", SailfishURI.unsafeParse("AML_v3"), null, null);
                 return aml3matrix.getId();
+            } finally {
+                if (!newMatrixFile.delete()) {
+                    logger.error("can't remove matrix converter temp file {}", newMatrixFile);
+                }
             }
         } else {
             throw new IllegalStateException(newMatrixFile + " didn't exists");
@@ -349,9 +340,9 @@ public class TestToolsAPI {
         }
     }
 
-    public void addService(ServiceName serviceName, SailfishURI serviceURI, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
+    public void addService(ServiceDescription serviceDescription, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
     	IConnectionManager conManager = context.getConnectionManager();
-    	conManager.addService(serviceName, serviceURI, null, notifyListener).get();
+        conManager.addService(serviceDescription, notifyListener).get();
 	}
 
     public void copyService(String oldServiceName, String oldEnv, String newServiceName, String newEnv, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
@@ -468,6 +459,55 @@ public class TestToolsAPI {
     	conManager.addEnvironment(envName, null).get();
     }
 
+    public void removeVariableSet(String name) {
+        logger.debug("Removing variable set: {}", name);
+        context.getConnectionManager().removeVariableSet(name);
+    }
+
+    public Set<String> getVariableSets() {
+        logger.debug("Getting list of all variable sets");
+        return context.getConnectionManager().getVariableSets();
+    }
+
+    public void setEnvironmentVariableSet(String environmentName, String variableSetName) {
+        if(variableSetName == null) {
+            logger.debug("Removing variable set from environment: {}", environmentName);
+        } else {
+            logger.debug("Setting variable set for environment '{}' to '{}'", environmentName, variableSetName);
+        }
+
+        context.getConnectionManager().setEnvironmentVariableSet(environmentName, variableSetName);
+    }
+
+    public String getEnvironmentVariableSet(String environmentName) {
+        logger.debug("Getting variable set for environment: {}", environmentName);
+        return context.getConnectionManager().getEnvironmentVariableSet(environmentName);
+    }
+
+    public Set<String> importVariableSets(InputStream stream, boolean replace) throws IOException {
+        logger.debug("Importing variable sets with replace existing set to: {}", replace);
+
+        IConnectionManager connectionManager = context.getConnectionManager();
+        Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(stream);
+        Set<String> importedSets = new HashSet<>();
+
+        variableSets.forEach((name, variableSet) -> {
+            logger.debug("Loaded variable set '{}': {}", name, variableSet);
+
+            if(connectionManager.isVariableSetExists(name) && !replace) {
+                logger.debug("Skipping variable set '{}' because replace existing is disabled", name);
+                return;
+            }
+
+            connectionManager.putVariableSet(name, variableSet);
+            importedSets.add(name);
+        });
+
+        logger.debug("Successfully imported variables sets: {}", importedSets);
+
+        return importedSets;
+    }
+
     public ImportServicesResult importServices(InputStream inputStream, boolean isZip, String environment, boolean replace,
     		boolean skip, boolean skipEnvDescFile, IServiceNotifyListener notifyListener) throws FileNotFoundException {
 
@@ -548,8 +588,7 @@ public class TestToolsAPI {
                 }
 
                 descr.setEnvironment(environment);
-                conManager.addService(new ServiceName(descr.getEnvironment(), descr.getName()), descr.getType(), descr.getSettings(), notifyListener)
-                        .get();
+                conManager.addService(descr, notifyListener).get();
                 importedCount++;
                 lastImported = descr.getName();
                 importStatus = new ImportStatus(descr.getName(), ImportStatus.OK);
@@ -639,6 +678,16 @@ public class TestToolsAPI {
         RegressionRunner runner = this.context.getRegressionRunner();
 
         runner.setSettings(settings);
+
+        saveSettings(settings, false, null);
+    }
+
+    public void setUpdateServiceSettings(UpdateServiceSettings settings) throws Exception {
+        UpdateService updateService = this.context.getUpdateService();
+        updateService.tearDown();
+
+        updateService.setSettings(settings);
+        updateService.init();
 
         saveSettings(settings, false, null);
     }

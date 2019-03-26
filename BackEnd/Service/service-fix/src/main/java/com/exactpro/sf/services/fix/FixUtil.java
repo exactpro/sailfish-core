@@ -19,6 +19,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,9 +31,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import org.quickfixj.CharsetSupport;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -323,9 +324,9 @@ public class FixUtil {
                 if (StringUtils.isNotEmpty(fieldName) && StringUtils.isNotEmpty(fieldValue)) {
                     if (parseFieldsByDictionary) {
 
-                        IFieldStructure fieldStructure = messageStructure.getField(fieldName);
+                        IFieldStructure fieldStructure = messageStructure.getFields().get(fieldName);
                         if (fieldStructure == null) {
-                            fieldStructure = dictionary.getFieldStructure(fieldName);
+                            fieldStructure = dictionary.getFields().get(fieldName);
                         }
 
                         if (fieldStructure != null && !fieldStructure.isComplex()) {
@@ -410,5 +411,11 @@ public class FixUtil {
                 throw new EPSCommonException(FixMessageHelper.MSG_SEQ_NUM_FIELD + " is not a number", e);
             }
         }
+    }
+
+    public static byte[] getRawMessage(Message message) {
+        return (message.getMessageData() != null) ?
+                message.getMessageData().getBytes(CharsetSupport.getCharsetInstance()) :
+                message.toString().getBytes(CharsetSupport.getCharsetInstance());
     }
 }

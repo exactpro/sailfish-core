@@ -14,9 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {ActionType} from './Action';
+import {ActionNodeType} from './Action';
 
 export default interface Link {
-    actionNodeType: ActionType;
+    actionNodeType: ActionNodeType;
     link: string;
 }

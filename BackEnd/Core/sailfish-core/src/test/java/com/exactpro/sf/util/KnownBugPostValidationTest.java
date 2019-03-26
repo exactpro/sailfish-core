@@ -135,8 +135,8 @@ public class KnownBugPostValidationTest extends AbstractTest {
         IMessage iFilter = mesageFactory.createMessage("name", "namespace");
         IMessage iMessage = iFilter.cloneMessage();
 
-        iFilter.addField("ClOrdID", new KnownBugBuilder(true).bug("1", "1").build(true));
-        iFilter.addField("SecurityIDSource", new KnownBugBuilder(false).bugEmpty("1").build(true));
+        iFilter.addField("ClOrdID", new KnownBugBuilder(true, false).bug("1", "1").build(true));
+        iFilter.addField("SecurityIDSource", new KnownBugBuilder(false, false).bugEmpty("1").build(true));
 
         iMessage.addField("SecurityIDSource", 0);
 
@@ -238,8 +238,8 @@ public class KnownBugPostValidationTest extends AbstractTest {
         IMessage iFilter = mesageFactory.createMessage("name", "namespace");
         IMessage iMessage = iFilter.cloneMessage();
 
-        iFilter.addField("ClOrdID", new KnownBugBuilder(true).bugAny("1").build(true));
-        iFilter.addField("SecurityIDSource", new KnownBugBuilder(false).bugEmpty("1").build(true));
+        iFilter.addField("ClOrdID", new KnownBugBuilder(true, false).bugAny("1").build(true));
+        iFilter.addField("SecurityIDSource", new KnownBugBuilder(false, false).bugEmpty("1").build(true));
 
         iMessage.addField("ClOrdID", 1);
 
@@ -697,7 +697,7 @@ public class KnownBugPostValidationTest extends AbstractTest {
         IMessage iFilter = mesageFactory.createMessage("name", "namespace");
         IMessage iMessage = iFilter.cloneMessage();
 
-        iFilter.addField("ClOrdID", new KnownBugBuilder(true).bug("1", "1").build(false));
+        iFilter.addField("ClOrdID", new KnownBugBuilder(true, false).bug("1", "1").build(false));
         iFilter.addField("SecurityIDSource", new KnownBugBuilder("0").bugEmpty("1").build(false));
 
         ComparisonResult result = compare(iFilter, iMessage);
@@ -825,7 +825,7 @@ public class KnownBugPostValidationTest extends AbstractTest {
         IMessage iSubMessage = mesageFactory.createMessage("sub", "namespace");
         iSubMessage.addField("ClOrdID", 0);
 
-        iFilter.addField("List", new KnownBugBuilder("[ref]").bug("1", "[ref, ref]").build(true, "ref", iSubMessage));
+        iFilter.addField("List", new KnownBugBuilder("[ref]", true).bug("1", "[ref, ref]").build(true, "ref", iSubMessage));
         iMessage.addField("List", ImmutableList.of(iSubMessage));
 
         ComparisonResult result = compare(iFilter, iMessage);
@@ -841,7 +841,7 @@ public class KnownBugPostValidationTest extends AbstractTest {
         IMessage iSubMessage = mesageFactory.createMessage("sub", "namespace");
         iSubMessage.addField("ClOrdID", 0);
 
-        iFilter.addField("List", new KnownBugBuilder("[ref]").bug("1", "[ref, ref]").build(true, "ref", iSubMessage));
+        iFilter.addField("List", new KnownBugBuilder("[ref]", true).bug("1", "[ref, ref]").build(true, "ref", iSubMessage));
         iMessage.addField("List", ImmutableList.of(iSubMessage, iSubMessage));
 
         ComparisonResult result = compare(iFilter, iMessage);
@@ -858,7 +858,7 @@ public class KnownBugPostValidationTest extends AbstractTest {
         IMessage iSubMessage = mesageFactory.createMessage("sub", "namespace");
         iSubMessage.addField("ClOrdID", 0);
 
-        iFilter.addField("List", new KnownBugBuilder("[ref]").bug("1", "[ref, ref]").build(true, "ref", iSubMessage));
+        iFilter.addField("List", new KnownBugBuilder("[ref]", true).bug("1", "[ref, ref]").build(true, "ref", iSubMessage));
 
         ComparisonResult result = compare(iFilter, iMessage);
 
@@ -877,7 +877,7 @@ public class KnownBugPostValidationTest extends AbstractTest {
         iSubFilter.addField("ClOrdID", new KnownBugBuilder("1").bug("1", "0").build(true));
         iSubMessage.addField("ClOrdID", 0);
 
-        iFilter.addField("List", new KnownBugBuilder("[ref]").bug("1", "[ref, ref]").build(true, "ref", iSubFilter));
+        iFilter.addField("List", new KnownBugBuilder("[ref]", true).bug("1", "[ref, ref]").build(true, "ref", iSubFilter));
         iMessage.addField("List", ImmutableList.of(iSubMessage, iSubMessage));
 
         ComparisonResult result = compare(iFilter, iMessage);
@@ -902,10 +902,10 @@ public class KnownBugPostValidationTest extends AbstractTest {
         iSubMessageA.addField("ClOrdIDA", 1);
         iSubMessageB.addField("ClOrdIDB", 0);
 
-        iFilter.addField("ListA", new KnownBugBuilder("[ref]").bug(bugA, "[ref, ref]").build(true, "ref", iSubFilterA));
+        iFilter.addField("ListA", new KnownBugBuilder("[ref]", true).bug(bugA, "[ref, ref]").build(true, "ref", iSubFilterA));
         iMessage.addField("ListA", ImmutableList.of(iSubMessageA, iSubMessageA));
 
-        iFilter.addField("ListB", new KnownBugBuilder("[ref]").bug(bugB, "[ref, ref]").build(true, "ref", iSubFilterB));
+        iFilter.addField("ListB", new KnownBugBuilder("[ref]", true).bug(bugB, "[ref, ref]").build(true, "ref", iSubFilterB));
         iMessage.addField("ListB", ImmutableList.of(iSubMessageB));
 
         ComparisonResult result = compare(iFilter, iMessage);
@@ -925,6 +925,26 @@ public class KnownBugPostValidationTest extends AbstractTest {
                 });
     }
 
+    @Test
+    public void testPassedAnyEmptyList() {
+        IMessage iFilter = mesageFactory.createMessage("name", "namespace");
+        IMessage iMessage = iFilter.cloneMessage();
+
+        IMessage iSubMessage = mesageFactory.createMessage("sub", "namespace");
+        iSubMessage.addField("ClOrdID", 0);
+
+        iFilter.addField("ListAny", new KnownBugBuilder(false, true).bugEmpty("1").build(true, "ref", iSubMessage));
+        iFilter.addField("ListEmpty", new KnownBugBuilder(true, true).bugAny("1").build(true, "ref", iSubMessage));
+
+        iMessage.addField("ListAny", ImmutableList.of(iSubMessage));
+
+        ComparisonResult result = compare(iFilter, iMessage);
+
+        System.out.println(result);
+
+        Assert.assertEquals("Count of status", 2, ComparisonUtil.getResultCount(result, StatusType.PASSED));
+    }
+
     private String appendOriginReason(String message, String originReason) {
         return message + System.lineSeparator() + "PASSED: " + originReason;
     }
@@ -942,15 +962,29 @@ public class KnownBugPostValidationTest extends AbstractTest {
         private final StringBuilder builder = new StringBuilder("um.call(SailfishURI.parse(\"General:BugsUtils.Expected");
 
         public KnownBugBuilder(String expectedValue) {
+            this(expectedValue, false);
+        }
+
+        public KnownBugBuilder(String expectedValue, boolean list) {
+            if(list) {
+                this.builder.append("List");
+            }
+
             this.builder.append("\"), ").append(expectedValue).append(" )");
         }
 
-        public KnownBugBuilder(boolean empty) {
+        public KnownBugBuilder(boolean empty, boolean list) {
             if (empty) {
-                this.builder.append("Empty\"))");
+                this.builder.append("Empty");
             } else {
-                this.builder.append("Any\"))");
+                this.builder.append("Any");
             }
+
+            if (list) {
+                this.builder.append("List");
+            }
+
+            this.builder.append("\"))");
         }
 
         public KnownBugBuilder bug(String description, String value, String... categories) {

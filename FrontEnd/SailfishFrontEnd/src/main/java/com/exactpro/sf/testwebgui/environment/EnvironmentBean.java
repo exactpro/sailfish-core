@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.environment;
 
+import static com.google.common.collect.ImmutableList.copyOf;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,6 +34,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.el.ELContext;
@@ -92,12 +99,14 @@ public class EnvironmentBean implements Serializable {
 
 	private boolean replaceExistingServices;
 	private boolean skipExistingServices;
+    private boolean replaceExistingVariableSets;
 
 	private SailfishURI selectedType;    		// For new
 	private String newServName = "";			// service
 	private String oldServName = "";			// service
 
 	private List<IService> services;
+    private List<String> variables = emptyList();
 
     private ServiceNodeLazyModel<EnvironmentNode> lazyModel;
 
@@ -110,8 +119,10 @@ public class EnvironmentBean implements Serializable {
 	// To remove when environments implemented
 	private final boolean ENVIRONMENTS_ENABLED = true;
 	private String currentEnvironment = ServiceName.DEFAULT_ENVIRONMENT;
+    private String currentVariableSet = null;
 	private String newEnvName = "";
 	private String selectedEnvironment;
+    private String selectedVariableSet;
 	private IServiceNotifyListener notifyListener;
 
 	private String currentEnvironmentForCopy = ServiceName.DEFAULT_ENVIRONMENT;
@@ -254,7 +265,10 @@ public class EnvironmentBean implements Serializable {
 			if (sameName) {
 				throw new StorageException("Environment '" + this.currentEnvironment + "' has service with name '" + this.newServName.trim() + "' already");
 			}
-            TestToolsAPI.getInstance().addService(new ServiceName(this.currentEnvironment, newServName.trim()), this.selectedType, notifyListener);
+            ServiceDescription serviceDescription = new ServiceDescription(this.selectedType);
+            serviceDescription.setEnvironment(this.currentEnvironment);
+            serviceDescription.setName(newServName.trim());
+            TestToolsAPI.getInstance().addService(serviceDescription, notifyListener);
 			BeanUtil.showMessage(FacesMessage.SEVERITY_INFO, "Success", "Service '" + newServName.trim() + "' with type '" + selectedType + "' has been created");
 		} catch(Exception ex) {
 			logger.error("Failed to add new service.", ex);
@@ -677,8 +691,7 @@ public class EnvironmentBean implements Serializable {
 			List<ServiceDescription> descriptions = new ArrayList<>();
 
 			for (final EnvironmentNode node : this.selectedNodes) {
-                descriptions.add(connManager.getServiceDescription(new ServiceName(node.getEnvironment(), node.getName()))
-                        .clone());
+                descriptions.add(connManager.getServiceDescription(new ServiceName(node.getEnvironment(), node.getName())));
 			}
 
 			for (ServiceDescription sd : descriptions) {
@@ -763,7 +776,7 @@ public class EnvironmentBean implements Serializable {
 
 		String envDescFilename = "environment_description.xml";
 
-		File envDescFile = marshalManager.exportEnvironmentDescription(envDescFilename, new EnvironmentDescription(this.selectedEnvironment));
+        File envDescFile = marshalManager.exportEnvironmentDescription(envDescFilename, new EnvironmentDescription(this.selectedEnvironment, manager.getEnvironmentVariableSet(this.selectedEnvironment)));
 		fileMap.put(envDescFilename, envDescFile);
 
 		return fileMap;
@@ -918,7 +931,16 @@ public class EnvironmentBean implements Serializable {
 		if(replaceExistingServices) skipExistingServices = false;
 	}
 
-	public boolean isEnvironmentsEnabled() {
+    public boolean isReplaceExistingVariableSets() {
+        return replaceExistingVariableSets;
+    }
+
+    public void setReplaceExistingVariableSets(boolean replaceExistingVariableSets) {
+        logger.info("setReplaceExistingVariableSets invoked {} replaceExistingVariableSets[{}]", getUser(), replaceExistingVariableSets);
+        this.replaceExistingVariableSets = replaceExistingVariableSets;
+    }
+
+    public boolean isEnvironmentsEnabled() {
 		return ENVIRONMENTS_ENABLED;
 	}
 
@@ -936,6 +958,10 @@ public class EnvironmentBean implements Serializable {
                 .getEnvironmentList();
 	}
 
+    public Set<String> getVariableSetList() {
+        return BeanUtil.getSfContext().getConnectionManager().getVariableSets();
+    }
+
 	public String getSelectedEnvironment() {
 		return selectedEnvironment;
 	}
@@ -945,7 +971,21 @@ public class EnvironmentBean implements Serializable {
 		this.selectedEnvironment = selectedEnvironment;
 	}
 
-	public String getCurrentEnvironment() {
+    public String getSelectedVariableSet() {
+        return selectedVariableSet;
+    }
+
+    public void setSelectedVariableSet(String selectedVariableSet) {
+        logger.info("setSelectedVariableSet invoked {} selectedVariableSet[{}]", getUser(), selectedVariableSet);
+        this.selectedVariableSet = selectedVariableSet;
+    }
+
+    public String getCurrentEnvironment() {
+        // hotfix for a case when environment was deleted not from GUI (e.g. by REST API)
+        if(!BeanUtil.getSfContext().getConnectionManager().getEnvironmentList().contains(currentEnvironment)) {
+            setCurrentEnvironment(ServiceName.DEFAULT_ENVIRONMENT);
+        }
+
 		return currentEnvironment;
 	}
 
@@ -956,6 +996,31 @@ public class EnvironmentBean implements Serializable {
 		this.selectedNodes = null;
 	}
 
+    public String getCurrentVariableSet() {
+        this.currentVariableSet = BeanUtil.getSfContext().getConnectionManager().getEnvironmentVariableSet(getCurrentEnvironment());
+        return currentVariableSet;
+    }
+
+    public void setCurrentVariableSet(String currentVariableSet) {
+        logger.info("setCurrentVariableSet invoked {} currentVariableSet[{}]", getUser(), currentVariableSet);
+        this.currentVariableSet = StringUtils.stripToNull(currentVariableSet);
+
+        if(this.currentVariableSet == null) {
+            this.variables = emptyList();
+        } else {
+            this.variables = copyOf(BeanUtil.getSfContext().getConnectionManager().getVariableSet(currentVariableSet).keySet());
+        }
+    }
+
+    public void changeVariableSet() {
+        try {
+            BeanUtil.getSfContext().getConnectionManager().setEnvironmentVariableSet(currentEnvironment, currentVariableSet);
+        } catch(Throwable t) {
+            logger.error("Failed to change variable set to: {}", currentVariableSet, t);
+            BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to change variable set to: " + currentVariableSet, t.getMessage());
+        }
+    }
+
 	public String getCurrentEnvironmentForCopy() {
 		return currentEnvironmentForCopy;
 	}
@@ -964,6 +1029,47 @@ public class EnvironmentBean implements Serializable {
 		logger.info("setCurrentEnvironment invoked {} currentEnvironmentForCopy[{}]", getUser(), currentEnvironmentForCopy);
 		this.currentEnvironmentForCopy = currentEnvironmentForCopy;
 	}
+
+    public void preVariableSetDelete() {
+        if(this.selectedVariableSet == null) {
+            BeanUtil.addWarningMessage("Warning", "Select a variable set");
+            return;
+        }
+
+        RequestContext.getCurrentInstance().execute("PF('variableSetDeletionConfirmation').show()");
+    }
+
+    public void deleteVariableSet() {
+        logger.info("deleteVariableSet invoked {} selectedVariableSet[{}]", getUser(), selectedVariableSet);
+
+        if(selectedVariableSet == null) {
+            return;
+        }
+
+        try {
+            TestToolsAPI.getInstance().removeVariableSet(selectedVariableSet);
+        } catch(Exception e) {
+            BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage());
+        }
+
+        selectedVariableSet = null;
+    }
+
+    public synchronized void handleVariableSetsImport(FileUploadEvent event) throws FileNotFoundException {
+        logger.info("handleVariableSetsImport invoked {}", getUser());
+
+        try {
+            TestToolsAPI.getInstance().importVariableSets(event.getFile().getInputstream(), replaceExistingVariableSets);
+        } catch(Exception e) {
+            logger.error("Failed to import variable sets", e);
+            BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "", e.getMessage());
+            return;
+        }
+
+        RequestContext.getCurrentInstance().update("form");
+
+        logger.info("Import finished");
+    }
 
 	protected String getUser(){
 		return System.getProperty("user.name");
@@ -1048,7 +1154,18 @@ public class EnvironmentBean implements Serializable {
 	public void setShowDisabled(boolean showDisabled) {
 		this.lazyModel.setShowDisabled(showDisabled);
 	}
-	public boolean isShowDisabled() {
+
+    public boolean isShowDisabled() {
 		return this.lazyModel.isShowDisabled();
 	}
+
+    public List<String> completeVariableName(String name) {
+        if(isBlank(name)) {
+            return variables;
+        }
+
+        return variables.stream()
+                .filter(variable -> containsIgnoreCase(variable, name))
+                .collect(toList());
+    }
 }

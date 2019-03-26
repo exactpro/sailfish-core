@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action from "./Action";
+import Action, { ActionNode } from "./Action";
 import Message from "./Message";
 import Log from "./Log";
 import Status from './Status';
@@ -22,7 +22,7 @@ import Status from './Status';
 export default interface TestCase {
     actionNodeType: string;
     name?: string;
-    actions: Action[];
+    actions: ActionNode[];
     logs: Log[];
     messages: Message[];
     bugs: any[];

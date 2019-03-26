@@ -71,6 +71,11 @@ if "%VAR%" neq "" (
     goto :readArgs
 )
 
+if not exist "%POSTGRESQL%\psql.exe" (
+    echo Can't find '%POSTGRESQL%\psql.exe'
+    exit /b 1
+)
+
 set "QUERY_FILE=%tmp%\bat~%RANDOM%.tmp"
 set "TEST_QUERY_FILE=%tmp%\bat~%RANDOM%.tmp"
 

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 import static com.exactpro.sf.scriptrunner.StatusType.FAILED;
 import static java.util.Comparator.comparingLong;
 
@@ -42,7 +43,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -108,6 +108,7 @@ import com.exactpro.sf.util.EnumReplacer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.MultimapBuilder.SortedSetMultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import com.google.common.collect.Sets;
@@ -233,7 +234,8 @@ public class HtmlReport implements IScriptReport {
     }
 
     @Override
-    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash, AMLBlockType type) {
+    public void createTestCase(String reference, String description, int order, int matrixOrder, String tcId, int tcHash,
+                               AMLBlockType type, Set<String> tags) {
         logger.debug("createTestCase - reference: {}, description: {}, order: {}, matrixOrder: {}, id: {}, hash: {}, type: {}", reference, description, order, matrixOrder, tcId, tcHash, type);
 
         checkContext(ContextType.REPORT);
@@ -248,6 +250,9 @@ public class HtmlReport implements IScriptReport {
         testCase.setStartTime(new Date());
         testCase.setHash(tcHash);
         testCase.setId(tcId);
+        if (tags != null) {
+            testCase.setTags(tags);
+        }
 
         testCaseWriter = createWriter(testCase.getName().replaceAll("\\W", "_") + ".html");
 
@@ -320,6 +325,7 @@ public class HtmlReport implements IScriptReport {
             testCaseSummaryTemplate.setData("finish_time", testCase.getFinishTime());
             testCaseSummaryTemplate.setData("hash", testCase.getHash());
             testCaseSummaryTemplate.setData("id", testCase.getId());
+            testCaseSummaryTemplate.setData("tags", testCase.getTags());
             testCaseSummaryTemplate.write(testCaseWriter, 4);
 
             writeLine(testCaseWriter, "</div>", 3);
@@ -384,7 +390,7 @@ public class HtmlReport implements IScriptReport {
 
             ComparisonResult result = getInitialComparisonResult((IMessage) inputParameters);
             addMachineLearningData(null, result, false);
-    }
+        }
 
     }
 
@@ -401,15 +407,15 @@ public class HtmlReport implements IScriptReport {
     }
 
 
-
     @Override
     public boolean isActionCreated() throws UnsupportedOperationException {
         return currentContext == ContextType.ACTION;
     }
 
     @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
+    public void createAction(String name, String serviceName, String action, String msg, String description,
+            List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
+
         logger.debug("createAction - name: {}, service: {}, action: {}, message: {}, description: {}, parameters: {}, tag: {}", name, serviceName, action, msg, description, inputParameters, tag);
 
         checkContext(ContextType.TESTCASE);
@@ -732,8 +738,7 @@ public class HtmlReport implements IScriptReport {
         closeNode(writer, indentSize);
     }
 
-    private void writeTable(Writer writer, StatusType status, ReportTable table, int indentSize)
-            throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    private void writeTable(Writer writer, StatusType status, ReportTable table, int indentSize) throws IOException, TemplateException {
         logger.debug("writeTables - context: {}", currentContext);
 
         createNode(writer, "Table: " + table.getName(), NodeType.INFO, status, MessageLevel.INFO, indentSize);
@@ -746,7 +751,7 @@ public class HtmlReport implements IScriptReport {
         closeNode(writer, indentSize);
     }
 
-    private void writeHeader(Writer writer, String title, boolean withWrapper) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    private void writeHeader(Writer writer, String title, boolean withWrapper) throws IOException, TemplateException {
         logger.debug("writeHeader - context: {}, title: {}, withWrapper: {}", currentContext, title, withWrapper);
 
         TemplateWrapper headerTemplate = templateWrapperFactory.createWrapper("header.ftlh");
@@ -756,7 +761,7 @@ public class HtmlReport implements IScriptReport {
         headerTemplate.write(writer);
     }
 
-    private void writeFooter(Writer writer, boolean withWrapper) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
+    private void writeFooter(Writer writer, boolean withWrapper) throws IOException, TemplateException {
         logger.debug("writeFooter - context: {}, withWrapper: {}", currentContext, withWrapper);
 
         TemplateWrapper footerTemplate = templateWrapperFactory.createWrapper("footer.ftlh");
@@ -1395,7 +1400,7 @@ public class HtmlReport implements IScriptReport {
             return null;
         }
 
-        return dictionaryStructure.getMessageStructure(metaData.getMsgName());
+        return dictionaryStructure.getMessages().get(metaData.getMsgName());
     }
 
     private List<VerificationParameter> convert(ComparisonResult result, String parentRaw, int counter, int nestingLevel) {
@@ -1455,8 +1460,8 @@ public class HtmlReport implements IScriptReport {
 
         IMessage message = (IMessage)returnedValue;
         IMessageStructure messageStructure = Optional.ofNullable(message.getMetaData().getDictionaryURI())
-                .map(x -> dictionaryManager.getDictionary(x))
-                .map(x -> x.getMessageStructure(message.getName())).orElse(null);
+                .map(dictionaryManager::getDictionary)
+                .map(x -> x.getMessages().get(message.getName())).orElse(null);
 
         if(messageStructure == null) {
             return originalDescription;
@@ -1464,12 +1469,12 @@ public class HtmlReport implements IScriptReport {
 
         StringBuilder generatedDescription = new StringBuilder();
 
-        for(IFieldStructure field : messageStructure.getFields()) {
+        for(IFieldStructure field : messageStructure.getFields().values()) {
             if(field.isComplex()) {
                 continue;
             }
 
-            String descriptionPrefix = (String)field.getAttributeValueByName(MessageHelper.ATTRIBUTE_DESCRIPTION_PREFIX);
+            String descriptionPrefix = getAttributeValue(field, MessageHelper.ATTRIBUTE_DESCRIPTION_PREFIX);
 
             if(descriptionPrefix == null) {
                 continue;
@@ -1678,6 +1683,7 @@ public class HtmlReport implements IScriptReport {
                 reportTestCaseLinkTemplate.setData("description", this.testcase.getDescription());
                 reportTestCaseLinkTemplate.setData("status", status);
                 reportTestCaseLinkTemplate.setData("duration", duration);
+                reportTestCaseLinkTemplate.setData("tags", this.testcase.getTags());
                 reportTestCaseLinkTemplate.write(writer, 5);
 
             } catch (TemplateException | IOException e) {

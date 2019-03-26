@@ -17,10 +17,12 @@ package com.exactpro.sf.storage.entities;
 
 import java.util.Date;
 
+import com.exactpro.sf.storage.IMeasurable;
+import com.exactpro.sf.storage.util.StorageMeasureUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-
-public class StoredServiceEvent {
+public class StoredServiceEvent implements IMeasurable {
 	
 	private Long id;
 	
@@ -99,5 +101,13 @@ public class StoredServiceEvent {
 				append("id", id).
 				toString();
 	}
-	
+
+    @Override
+    @JsonIgnore
+    public long getSize() {
+        return StorageMeasureUtils.getSize(serviceId) + StorageMeasureUtils.getSize(message) + StorageMeasureUtils.getSize(details) + StorageMeasureUtils
+                .getSize(type) +
+                StorageMeasureUtils.getSize(level) + 16 + 32 ; //id + occured
+
+    }
 }

@@ -18,18 +18,20 @@ import TestCase from "../models/TestCase";
 import { StatusType } from "../models/Status";
 import SelectedState from './SelectedState';
 import Report from '../models/Report';
-import { Pane } from "../helpers/Pane";
+import { Panel } from "../helpers/Panel";
+import Action from '../models/Action';
 
 
 export default interface AppState {
     report: Report;
     currentTestCasePath: string;
     testCase: TestCase;
+    checkpointActions: Action[];
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
     selected: SelectedState;
+    adminMessagesEnabled: boolean;
     splitMode: boolean;
-    showFilter: boolean;
-    leftPane: Pane;
-    rightPane: Pane;
+    leftPane: Panel;
+    rightPane: Panel;
 }

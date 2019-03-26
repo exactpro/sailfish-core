@@ -17,6 +17,7 @@ package com.exactpro.sf.storage.impl;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.storage.IObjectFlusher;
+import com.exactpro.sf.storage.IMeasurable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +29,10 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.*;
 
-public class ObjectFlusher<T> implements IObjectFlusher<T> {
+public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
+
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final static Logger USER_EVENTS_LOG = LoggerFactory.getLogger("USER_EVENTS_LOG");
 
     private static final long JOIN_TIMEOUT = 2000;
 
@@ -38,6 +41,15 @@ public class ObjectFlusher<T> implements IObjectFlusher<T> {
     private final Condition needFlush = monitor.newCondition();
     private final IFlushProvider<T> provider;
     private final int bufferSize;
+
+    private final long maxStorageQueueSize;
+
+    private long storageProviderQueueSize = 0;
+    private long lastThrottleNotification = 0;
+    private static final long NOTIFY_COOLDOWN = 1000*30;
+    private static final String STORE_OBJECT_LIMIT_EXCEEDED = "Can't store object, limit exceeded";
+    private static final long DEFAULT_STORAGE_QUEUE = (1024L * 1024L * 32L);
+
 
     private List<T> objects;
     private FlushTask flushTask;
@@ -82,9 +94,14 @@ public class ObjectFlusher<T> implements IObjectFlusher<T> {
     }
     
     public ObjectFlusher(IFlushProvider<T> provider, int bufferSize) {
+        this(provider, bufferSize, DEFAULT_STORAGE_QUEUE);
+    }
+
+    public ObjectFlusher(IFlushProvider<T> provider, int bufferSize, long maxStorageQueueSize) {
         this.provider = Objects.requireNonNull(provider, "provider cannot be null");
         this.bufferSize = bufferSize;
         this.objects = new ArrayList<>(bufferSize + 1);
+        this.maxStorageQueueSize = maxStorageQueueSize;
     }
 
     @Override
@@ -147,6 +164,12 @@ public class ObjectFlusher<T> implements IObjectFlusher<T> {
                 logger.debug("Try lock monitor");
                 monitor.lock();
                 logger.debug("monitor locked");
+
+                if (!checkQueueLimit(object)) {
+                    notifyAboutThrottle();
+                    return;
+                }
+
                 objects.add(object);
                 logger.debug("Added object: {}", object);
     
@@ -234,6 +257,7 @@ public class ObjectFlusher<T> implements IObjectFlusher<T> {
 
                     temp = objects;
                     objects = new ArrayList<>(bufferSize + 1);
+                    storageProviderQueueSize = 0L;
                 } finally {
                     monitor.unlock();
                     logger.debug("monitor unlocked");
@@ -251,6 +275,26 @@ public class ObjectFlusher<T> implements IObjectFlusher<T> {
                 }
             }
 
+        }
+    }
+
+    private boolean checkQueueLimit(T o) {
+
+        long currentSize = storageProviderQueueSize + o.getSize();
+        if (currentSize <= maxStorageQueueSize) {
+            storageProviderQueueSize = currentSize;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void notifyAboutThrottle() {
+
+        if ((System.currentTimeMillis() - lastThrottleNotification) > NOTIFY_COOLDOWN) {
+            lastThrottleNotification = System.currentTimeMillis();
+            logger.warn(STORE_OBJECT_LIMIT_EXCEEDED);
+            USER_EVENTS_LOG.warn(STORE_OBJECT_LIMIT_EXCEEDED);
         }
     }
 }

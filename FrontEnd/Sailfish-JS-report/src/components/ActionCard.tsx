@@ -20,6 +20,7 @@ import ParamsTable from "./ParamsTable";
 import ExpandablePanel from "./ExpandablePanel";
 import "../styles/action.scss";
 import { getSecondsPeriod } from "../helpers/dateFormatter";
+import { ExceptionChain } from "./ExceptionChain";
 
 interface CardProps {
     action: Action;
@@ -28,9 +29,11 @@ interface CardProps {
     isSelected?: boolean;
     isRoot?: boolean;
     isTransaparent?: boolean;
+    isExpanded?: boolean;
+    ref?: Function;
 }
 
-export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent }: CardProps) => {
+export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded }: CardProps) => {
     const {
         name,
         status,
@@ -58,16 +61,19 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
 
     const time = getSecondsPeriod(startTime, finishTime);
 
+    const clickHandler = e => {
+        if (!onSelect) return;
+        onSelect(action);
+        // here we cancel handling by parent divs
+        e.cancelBubble = true;
+    };
+
     return (
         <div class={rootClassName}
-            onClick={e => {
-                if (!onSelect) return;
-                onSelect(action);
-                // here we cancel handling by parent divs
-                e.cancelBubble = true;
-            }}
+            onClick={clickHandler}
             key={action.id}>
-            <ExpandablePanel>
+            <ExpandablePanel
+                isExpanded={isExpanded}>
                 <div class={headerClassName}>
                     <div class="action-card-header-name">
                         <h3>{name}</h3>
@@ -91,6 +97,12 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         // rendering inner actions
                         {children}
                     }
+                    <div class="action-card-status">
+                        <ExpandablePanel>
+                            <h4>Status</h4>
+                            <ExceptionChain exception = {action.status.cause}/>
+                        </ExpandablePanel>
+                    </div>
                 </div>
             </ExpandablePanel>
         </div>)

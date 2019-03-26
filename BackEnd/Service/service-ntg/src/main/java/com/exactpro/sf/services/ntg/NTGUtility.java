@@ -15,16 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
-import com.exactpro.sf.actions.DateUtil;
-import com.exactpro.sf.services.ntg.exceptions.UnknownMina2SessionIdleStatusException;
-import com.exactpro.sf.util.DateTimeUtility;
-import com.exactpro.sf.common.util.StringUtil;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -32,8 +22,19 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Random;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.actions.DateUtil;
+import com.exactpro.sf.common.util.StringUtil;
+import com.exactpro.sf.services.ntg.exceptions.UnknownMina2SessionIdleStatusException;
+import com.exactpro.sf.util.DateTimeUtility;
 
 public final class NTGUtility {
     private static final Logger logger = LoggerFactory.getLogger(NTGUtility.class);
@@ -306,7 +307,19 @@ public final class NTGUtility {
 		
         return DateTimeUtility.toLocalDateTime(seconds * 1000, (int) microseconds * 1_000);
 	}
-	
+
+    public static LocalDateTime getTransactTimeAsDate(String time) {
+        int year = Integer.parseInt(time.substring(0, 4));
+        int month = Integer.parseInt(time.substring(4, 6));
+        int day = Integer.parseInt(time.substring(6, 8));
+        int hour = Integer.parseInt(time.substring(9, 11));
+        int minute = Integer.parseInt(time.substring(12, 14));
+        int second = Integer.parseInt(time.substring(15, 17));
+        int microseconds = Integer.parseInt(time.substring(18, 24));
+
+        return LocalDateTime.of(year, month, day, hour, minute, second).withNano(microseconds * 1_000);
+    }
+
 	public static String getTransactTime(long time)
     {
         long microseconds = extarctMicroseconds(time);
@@ -318,7 +331,7 @@ public final class NTGUtility {
 
     /**
      * Extract microseconds from ntg time
-     * 
+     *
      * @return
      */
     private static long extarctMicroseconds(long ntgTime) {
@@ -327,7 +340,7 @@ public final class NTGUtility {
 
     /**
      * Extract seconds from ntg time
-     * 
+     *
      * @return
      */
     private static long extarctSeconds(long ntgTime) {
@@ -339,17 +352,9 @@ public final class NTGUtility {
 		if (time == null) {
 			throw new NullPointerException("TransactTime argument is null.");
 		}
-		int year = Integer.parseInt(time.substring(0, 4));
-        int month = Integer.parseInt(time.substring(4, 6));
-		int day = Integer.parseInt(time.substring(6, 8));
-		int hour = Integer.parseInt(time.substring(9, 11));
-		int minute = Integer.parseInt(time.substring(12, 14));
-		int second = Integer.parseInt(time.substring(15, 17));
-        int microseconds = Integer.parseInt(time.substring(18, 24));
 
-        LocalDateTime localDateTime = LocalDateTime.of(year, month, day, hour, minute, second).withNano(microseconds * 1_000);
-        return getTransactTime(localDateTime);
-	}
+        return getTransactTime(getTransactTimeAsDate(time));
+    }
 
     public static long getTransactTime(LocalDateTime localDateTime) {
         long microseconds = localDateTime.getNano() / 1_000;

@@ -15,33 +15,82 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
-import Action, { ActionNode } from '../models/Action';
+import Action, { ActionNode, ActionNodeType } from '../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
 import { VerificationTable } from "./VerificationTable";
-import MessageAction from '../models/MessageAction';
+import UserMessage from '../models/UserMessage';
 import Verification from '../models/Verification'
 import '../styles/action.scss';
 import ExpandablePanel from './ExpandablePanel';
 import Link from '../models/Link';
 import { StatusType } from '../models/Status';
+import { Checkpoint } from './Checkpoint';
+import UserTable from '../models/UserTable';
+import { CustomTable } from './CustomTable';
+import { CustomMessage } from './CustomMessage';
 
 
 export interface ActionTreeProps {
     action: ActionNode;
-    actionSelectHandler: (action: Action) => void;
-    messageSelectHandler: (id: number, status: StatusType) => void;
+    actionSelectHandler: (action: Action) => any;
+    messageSelectHandler: (id: number, status: StatusType) => any;
+    checkpointSelectHandler: (action: Action) => any;
     selectedMessageId: number;
     selectedActionId: number;
+    selectedCheckpointId: number;
+    checkpoints: Action[];
     actionsFilter: StatusType[];
     filterFields: StatusType[];
 }
 
-export class ActionTree extends Component<ActionTreeProps, any> {
+export class ActionTree extends Component<ActionTreeProps> {
+
+    private expandedTreePath = null;
+    private treeElements: Component[] = [];
+
+    componentWillMount() {
+        if (this.props.action.actionNodeType == "action") {
+            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        }
+    }
+
+    // scrolling to action, selected by url sharing
+    componentDidMount() {
+        if (!this.treeElements[this.props.selectedActionId]) {
+            return;
+        }
+
+        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
+        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
+        // At this point React passed components tree to DOM, however it still could be not redered.
+        // First callback will be called before actual render
+        // Second callback will be called when DOM is fully rendered.
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                this.scrollToAction(this.props.selectedActionId);
+            });
+        });
+    }
+
+    componentWillReceiveProps(nextProps: ActionTreeProps) {
+        // handling action change to update expand tree
+        if (this.props.action !== nextProps.action && nextProps.action.actionNodeType == "action") {
+            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        } else {
+            this.expandedTreePath = null
+        }
+    }
+
+    componentDidUpdate(prevProps: ActionTreeProps) {
+        if (prevProps.selectedCheckpointId != this.props.selectedCheckpointId) {
+            this.scrollToAction(this.props.selectedCheckpointId);
+        }
+    }
 
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
-        
+
         if (nextProps.action.actionNodeType === "action") {
             const nextAction = nextProps.action as Action;
 
@@ -59,65 +108,129 @@ export class ActionTree extends Component<ActionTreeProps, any> {
         }
     }
 
-    shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps) : boolean {
-        // the first condition - current action is selected and we should update to show id
+    shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps): boolean {
+        // the first condition - current action is selected and we should update to show it
         // the second condition - current action was selected and we should disable selection
         if (nextProps.selectedActionId === action.id || prevProps.selectedActionId === action.id) {
             return true;
         }
 
         // here we check verification selection
-        if (nextProps.selectedMessageId !== prevProps.selectedMessageId && 
-            action.relatedMessages && 
+        if (nextProps.selectedMessageId !== prevProps.selectedMessageId &&
+            action.relatedMessages &&
             (action.relatedMessages.some(msgId => msgId == nextProps.selectedMessageId || msgId == prevProps.selectedMessageId))) {
-                return true;
+            return true;
+        }
+
+        // same as first if statement, but with checkpoint
+        if (nextProps.checkpoints.includes(action) && nextProps.selectedCheckpointId !== prevProps.selectedCheckpointId &&
+            (nextProps.selectedCheckpointId === action.id || prevProps.selectedCheckpointId === action.id)) {
+            return true;
         }
 
         if (action.subNodes) {
             // if at least one of the subactions needs an update, we update the whole action
             return action.subNodes.some(action => {
-                    if (action.actionNodeType === "action") {
-                        return this.shouldActionUpdate(action as Action, nextProps, prevProps)
-                    } else {
-                        return false;
-                    }
-                });
+                if (action.actionNodeType === "action") {
+                    return this.shouldActionUpdate(action as Action, nextProps, prevProps)
+                } else {
+                    return false;
+                }
+            });
         }
 
         return false;
     }
 
-    render(props: ActionTreeProps): JSX.Element {
-        return this.renderNode(props, true);
+    updateTreePath() {
+        if (this.props.action.actionNodeType == "action") {
+            this.expandedTreePath = this.getExpandedTreePath(this.props.action as Action, [], this.props.selectedActionId);
+        } else {
+            this.expandedTreePath = [];
+        }
     }
 
-    renderNode(props: ActionTreeProps, isRoot = false): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, actionsFilter, filterFields } = props;
+    getExpandedTreePath(action: Action, treePath: number[], targetActionId: number): number[] {
+
+        const actionTreePath = [...treePath, action.id];
+
+        if (action.id == targetActionId) {
+            return actionTreePath;
+        }
+
+        if (action.subNodes) {
+            for (let i = 0; i < action.subNodes.length; i++) {
+                const subNode = action.subNodes[i];
+
+                if (subNode.actionNodeType == "action") {
+                    const subNodePath = this.getExpandedTreePath(subNode as Action, actionTreePath, targetActionId);
+
+                    if (subNodePath.includes(targetActionId)) {
+                        // target action found in one of subNodes
+                        return subNodePath;
+                    }
+                }
+            }
+        }
+
+        // we did't find any sub node with the given action id
+        return treePath;
+    }
+
+    scrollToAction(actionId: number) {
+        if (this.treeElements[actionId]) {
+            this.treeElements[actionId].base.scrollIntoView({ block: 'center' });
+        }
+    }
+
+    render(props: ActionTreeProps): JSX.Element {
+        return this.renderNode(props, true, this.expandedTreePath);
+    }
+
+    renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: number[] = null): JSX.Element {
+        const { actionSelectHandler, messageSelectHandler, selectedActionId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
 
         switch (props.action.actionNodeType) {
-            case 'action': {
+            case ActionNodeType.ACTION: {
                 const action = props.action as Action;
+
+                if (checkpoints.includes(action)) {
+                    return this.renderCheckpoint(props, action);
+                }
+
+                const isExpanded = expandTreePath ? expandTreePath[0] == action.id : null,
+                    newTreePath = expandTreePath ? expandTreePath.slice(1) : null;
+
                 return (
                     <ActionCard action={action}
                         isSelected={action.id === selectedActionId}
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={actionSelectHandler}
-                        isRoot={isRoot}>
+                        isRoot={isRoot}
+                        isExpanded={isExpanded}
+                        ref={ref => this.treeElements[action.id] = ref}>
                         {
                             action.subNodes ? action.subNodes.map(
-                                action => this.renderNode({...props, action: action})) : null
+                                action => this.renderNode({ ...props, action: action }, false, newTreePath)) : null
                         }
                     </ActionCard>
                 );
             }
 
-            case 'message': {
-                const messageAction = props.action as MessageAction;
+            case ActionNodeType.CUSTOM_MESSAGE: {
+                const messageAction = props.action as UserMessage;
 
-                return this.renderMessageAction(messageAction);
+                if (!messageAction.message && !messageAction.exception) {
+                    return <div/>;
+                }
+
+                return (
+                    <CustomMessage
+                        userMessage={messageAction}/>
+                );
             }
 
-            case 'verification': {
+            case ActionNodeType.VERIFICATION: {
                 const verification = props.action as Verification;
                 const isSelected = verification.messageId === selectedMessageId;
                 const isTransparent = !actionsFilter.includes(verification.status.status);
@@ -125,7 +238,7 @@ export class ActionTree extends Component<ActionTreeProps, any> {
                 return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, filterFields)
             }
 
-            case 'link': {
+            case ActionNodeType.LINK: {
                 const { link } = props.action as Link;
 
                 return (
@@ -135,25 +248,34 @@ export class ActionTree extends Component<ActionTreeProps, any> {
                 );
             }
 
+            case ActionNodeType.TABLE: {
+                const table = props.action as UserTable;
+
+                return this.renderUserTable(table);
+            }
+
             default: {
-                return null;
+                console.error("WARNING: unknown action node type");
+                return <div></div>;
             }
         }
     }
 
-    renderMessageAction({ message, level, exception, color, style }: MessageAction) {
+    renderMessageAction({ message, level, exception, color, style }: UserMessage) {
+        // italic style value - only for fontStyle css property
+        //bold style value - only for fontWeight css property
+        const messageStyle = {
+            color: (color || "").toLowerCase(),
+            fontStyle: (style || "").toLowerCase(),
+            fontWeight: (style || "").toLowerCase()
+        };
+
         if (exception) {
             return (
                 <div class="action-card">
                     <ExpandablePanel>
                         <div class="action-card-header">
-                            {/* italic style value - only for fontStyle css property
-                            bold style value - only for fontWeight css property */}
-                            <h3 style={{
-                                color: (color || "").toLowerCase(),
-                                fontStyle: (style || "").toLowerCase(),
-                                fontWeight: (style || "").toLowerCase()
-                            }}>{message} - {level}</h3>
+                            <h3 style={messageStyle}>{message} - {level}</h3>
                         </div>
                         <div class="action-card-body">
                             <pre>{exception && exception.stacktrace}</pre>
@@ -165,13 +287,7 @@ export class ActionTree extends Component<ActionTreeProps, any> {
             return (
                 <div class="action-card">
                     <div class="action-card-header">
-                        {/* italic style value - only for fontStyle css property
-                        bold style value - only for fontWeight css property */}
-                        <h3 style={{
-                            color: (color || "").toLowerCase(),
-                            fontStyle: (style || "").toLowerCase(),
-                            fontWeight: (style || "").toLowerCase()
-                        }}>{message} - {level}</h3>
+                        <h3 style={messageStyle}>{message} - {level}</h3>
                     </div>
                 </div>
             );
@@ -196,10 +312,39 @@ export class ActionTree extends Component<ActionTreeProps, any> {
                     }}>
                     <ExpandablePanel>
                         <h4>{"Verification — " + name + " — " + status.status}</h4>
-                        <VerificationTable params={entries} />
+                        <VerificationTable 
+                            params={entries} 
+                            status={status.status}/>
                     </ExpandablePanel>
                 </div>
             </div>
+        )
+    }
+
+    renderUserTable(table: UserTable) {
+        return (
+            <div class="action-card-body-table">
+                <ExpandablePanel>
+                    <h4>{table.name || "Custom table"}</h4>
+                    <CustomTable
+                        content={table.content} />
+                </ExpandablePanel>
+            </div>
+        )
+    }
+
+    renderCheckpoint({ checkpoints, selectedCheckpointId, checkpointSelectHandler }: ActionTreeProps, action: Action) {
+        const checkpointIndex = checkpoints.indexOf(action) + 1,
+            isSelected = selectedCheckpointId == action.id;
+
+        return (
+            <Checkpoint
+                name={action.name}
+                count={checkpointIndex}
+                isSelected={isSelected}
+                description={action.description}
+                clickHandler={() => checkpointSelectHandler(action)}
+                ref={ref => this.treeElements[action.id] = ref} />
         )
     }
 }

@@ -15,17 +15,29 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.embedded.statistics.DimensionMap;
+import com.exactpro.sf.embedded.statistics.MatrixInfo;
+import com.exactpro.sf.embedded.statistics.StatisticsService;
+import com.exactpro.sf.embedded.statistics.StatisticsUtils;
+import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
+import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.statistics.entities.TagGroup;
+import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
+import com.exactpro.sf.embedded.statistics.storage.IStatisticsStorage;
+import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportParameters;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
+import com.exactpro.sf.testwebgui.api.TestToolsAPI;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticStatusResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticsDBSettings;
+import com.exactpro.sf.util.DateTimeUtility;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
@@ -43,30 +55,18 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-
-import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.embedded.statistics.DimensionMap;
-import com.exactpro.sf.embedded.statistics.MatrixInfo;
-import com.exactpro.sf.embedded.statistics.StatisticsService;
-import com.exactpro.sf.embedded.statistics.StatisticsUtils;
-import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
-import com.exactpro.sf.embedded.statistics.entities.Tag;
-import com.exactpro.sf.embedded.statistics.entities.TagGroup;
-import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
-import com.exactpro.sf.embedded.statistics.storage.IStatisticsStorage;
-import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
-import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
-import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
-import com.exactpro.sf.testwebgui.api.TestToolsAPI;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticsDBSettings;
-import com.exactpro.sf.util.DateTimeUtility;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Path("statistics")
 public class StatisticsResource {
@@ -492,7 +492,7 @@ public class StatisticsResource {
     @Produces(MediaType.APPLICATION_XML)
 	public Response status() {
 		
-		XmlResponse xmlResponse = new XmlResponse();
+		XmlStatisticStatusResponse xmlResponse = new XmlStatisticStatusResponse();
 		Response.Status status = Response.Status.OK;
 		
 		try {
@@ -514,6 +514,9 @@ public class StatisticsResource {
 				}
 				
 			}
+
+            xmlResponse.setMigrationRequired(service.isMigrationRequired());
+            xmlResponse.setSailfishUpdateRequired(service.isSfUpdateRequired());
 			
 		} catch (Throwable t) {
 			
@@ -644,7 +647,7 @@ public class StatisticsResource {
 
     private Response generateStatsPerTags(List<TagGroupDimension> selectedDimensions) {
         List<TagGroupReportResult> tagGroupReportResults = StatisticsUtils.generateTagGroupReportResults(
-                getStatisticsService(), selectedDimensions);
+                getStatisticsService(), selectedDimensions, new TagGroupReportParameters());
         String reportName = StatisticsUtils.createStatsPerTagsName();
         StreamingOutput stream;
         stream = out -> {

@@ -160,7 +160,7 @@ public class ActionReport implements IActionReport {
     public IActionReport createEmbeddedReport(String name, String description) {
         checkEmbeddedReport();
         report.openGroup(name, description);
-        child = new ActionReport(report, description, updateStatus, workspaceDispatcher);
+        child = new ActionReport(report, reportFolder, updateStatus, workspaceDispatcher);
         child.parent = this;
         return child;
     }
