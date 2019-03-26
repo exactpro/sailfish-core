@@ -39,10 +39,10 @@ import org.apache.log4j.PropertyConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.Utils;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.SFException;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.Utils;
 import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.LoadableManagerContext;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -55,6 +55,7 @@ import com.exactpro.sf.matrixhandlers.LocalMatrixProviderFactory;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.scriptrunner.PreprocessorLoader;
 import com.exactpro.sf.scriptrunner.ValidatorLoader;
+import com.exactpro.sf.scriptrunner.services.PluginServiceLoader;
 import com.exactpro.sf.util.DirectoryFilter;
 import com.google.common.collect.Iterables;
 
@@ -74,6 +75,7 @@ public class PluginLoader {
 	protected static final String ADAPTERS_XML_FILE_NAME = "adapters.xml";
 	protected static final String DATA_XML_FILE_NAME = "data.xml";
 	protected static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
+    protected static final String SERVICES_FOLDER_NAME = "services";
 
 	private final IWorkspaceDispatcher wd;
 
@@ -99,6 +101,8 @@ public class PluginLoader {
 
     private final ILoadableManager statisticsReportsLoader;
 
+    private final PluginServiceLoader pluginServiceLoader;
+
     private final IVersion coreVersion;
 
     private final List<IVersion> pluginVersions;
@@ -116,6 +120,7 @@ public class PluginLoader {
 			final MatrixProviderHolder matrixProviderHolder,
             final ILoadableManager matrixConverterManager,
             final ILoadableManager statisticsReportsLoader,
+            final PluginServiceLoader pluginServiceLoader,
             final IVersion coreVersion) {
 		if (wd == null) {
 		    throw new NullPointerException("IWorkspaceDispatcher can't be null");
@@ -133,6 +138,7 @@ public class PluginLoader {
 		this.matrixProviderHolder = matrixProviderHolder;
 		this.matrixConverterManager = matrixConverterManager;
         this.statisticsReportsLoader = statisticsReportsLoader;
+        this.pluginServiceLoader = pluginServiceLoader;
         this.coreVersion = coreVersion;
 
 		this.pluginVersions = new ArrayList<>();
@@ -498,7 +504,27 @@ public class PluginLoader {
             logger.info("Ignore statistic reports [No StatisticsReportsLoader]. Plugin: {}", pluginPath);
         }
 
-		return classLoader;
+        // Collect service description files
+        if(pluginServiceLoader != null) {
+            try {
+                logger.info("Collecting service descriptions from: {{}}/{}/{}", folderType, pluginPath, SERVICES_FOLDER_NAME);
+
+                if(wd.exists(folderType, pluginPath, SERVICES_FOLDER_NAME)) {
+                    Set<String> fileNames = wd.listFiles(null, folderType, pluginPath, SERVICES_FOLDER_NAME);
+
+                    for(String fileName : fileNames) {
+                        File file = wd.getFile(folderType, pluginPath, SERVICES_FOLDER_NAME, fileName);
+                        pluginServiceLoader.addDescription(file);
+                    }
+                }
+            } catch(Throwable t) {
+                throw new EPSCommonException("Failed to collect service descriptions from: {" + folderType + "}/" + pluginPath + "/" + SERVICES_FOLDER_NAME, t);
+            }
+        } else {
+            logger.info("Ignore plugin service descriptions [No PluginServiceLoader]. Plugin: {}", pluginPath);
+        }
+
+        return classLoader;
 	}
 
     private void loadCustomDictionaries() {

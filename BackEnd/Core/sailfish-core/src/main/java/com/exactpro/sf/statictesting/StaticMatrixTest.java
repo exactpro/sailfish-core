@@ -377,6 +377,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         }
 
         for (ServiceDescription service : services) {
+            service.setEnvironment(DEFAULT_ENVIRONMENT);
             connectionManager.addService(service, null).get();
         }
     }
