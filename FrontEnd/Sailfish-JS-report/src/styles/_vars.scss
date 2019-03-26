@@ -108,6 +108,43 @@ $splitterColor: #C4C4C4;
     }
 }
 
+@mixin status-card {
+    &.passed {
+        // we can't symply assign scss variable to css variable because sass doesn't know css varible type,
+        // so we use #{ ... } syntax to tell sass that we use variable as color
+        // https://github.com/sass/libsass/issues/2621
+        --status-primary-color: #{$passedTextColor};
+        --status-secondary-color: #{$passedSecondaryTextColor};
+        --status-border-color: #{$passedBorderColor};
+        --status-secondary-border-color: #{$passedBorderColorSecondary};
+        --status-background-color: #{$passedBackgroundColor};
+    }
+
+    &.failed {
+        --status-primary-color: #{$failedTextColor};
+        --status-secondary-color: #{$failedSecondaryTextColor};
+        --status-border-color: #{$failedBorderColor};
+        --status-secondary-border-color: #{$failedBorderColorSecondary};
+        --status-background-color: #{$failedBackgroundColor};
+    }
+    
+    &.conditionally_passed {
+        --status-primary-color: #{$conditionallyTextColor};
+        --status-secondary-color: #{$conditionallySecondaryTextColor};
+        --status-border-color: #{$conditionallyBorderColor};
+        --status-secondary-border-color: #{$conditionallyBorderColorSecondary};
+        --status-background-color: #{$conditionallyBackgroundColor};
+    }
+
+    &.conditionally_failed {
+        --status-primary-color: #{$conditionallyFailedTextColor};
+        --status-secondary-color: #{$conditionallyFailedSecondaryTextColor};
+        --status-border-color: #{$conditionallyFailedBorderColor};
+        --status-secondary-border-color: #{$conditionallyFailedBorderColorSecondary};
+        --status-background-color: #{$conditionallyFailedBackgroundColor};
+    }
+}
+
 @mixin status-text {
     &.passed {
         color: $passedTextColor;    

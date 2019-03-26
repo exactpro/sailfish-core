@@ -87,6 +87,7 @@
         }
 
         &-header {
+            @include status-card;
             width: 100%;
             padding: 3px;
             display: grid;
@@ -98,30 +99,7 @@
             h3 {
                 margin: 0;
                 font-size: 17px;
-            }
-
-            &.passed {
-                // we can't symply assign scss variable to css variable because sass doesn't know css varible type,
-                // so we use #{ ... } syntax to tell sass that we use variable as color
-                // https://github.com/sass/libsass/issues/2621
-                --status-primary-color: #{$passedTextColor};
-                --status-secondary-color: #{$passedSecondaryTextColor};
-            }
-
-            &.failed {
-                --status-primary-color: #{$failedTextColor};
-                --status-secondary-color: #{$failedSecondaryTextColor};
-            }
-            
-            &.conditionally_passed {
-                --status-primary-color: #{$conditionallyTextColor};
-                --status-secondary-color: #{$conditionallySecondaryTextColor};
-            }
-
-            &.conditionally_failed {
-                --status-primary-color: #{$conditionallyFailedTextColor};
-                --status-secondary-color: #{$conditionallyFailedSecondaryTextColor};
-            }
+            }   
 
             &-name {
                 grid-area: action-name;
