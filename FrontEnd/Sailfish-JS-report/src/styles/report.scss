@@ -34,11 +34,25 @@
         align-items: center;
         background-color: $reportHeaderBackground;
         border-radius: 5px;
+        position: relative;
         
         .title {
             color: $primaryTextColor;
             font-size: 20px;
             font-weight: bold;
+        }
+
+        .old-report-link {
+            position: absolute;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            left: 20px;
+            top: 0;
+            color: $primaryTextColor;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
         }
     }
 

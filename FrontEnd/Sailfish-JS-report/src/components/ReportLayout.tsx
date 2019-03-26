@@ -27,6 +27,8 @@ import TestCaseCard from './TestCaseCard';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
 
+const OLD_REPORT_PATH = 'report.html';
+
 interface ReportLayoutProps {
     report: Report;
     onTestCaseSelect: (testCaseName: string) => void;
@@ -40,9 +42,10 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
     return (
         <div class="report">
             <div class="header">
-                <div class="title">
-                    <p>{report.name}</p>
-                </div>
+                <div class="title">{report.name}</div>
+                <a href={OLD_REPORT_PATH} class="old-report-link">
+                    <p>Old Version Report</p>
+                </a>
             </div>
             <div class="summary-title">
                 <p>Report Summary</p>
