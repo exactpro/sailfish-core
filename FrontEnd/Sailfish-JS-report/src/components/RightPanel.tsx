@@ -91,26 +91,18 @@ class RightPanelBase extends Component<RightPanelProps> {
                     <div class="layout-body-panel-controls-panels">
                         <ToggleButton
                             isToggled={panel == Panel.Messages}
-                            click={() => this.selectPanel(Panel.Messages)}
+                            onClick={() => this.selectPanel(Panel.Messages)}
                             text="Messages" />
-                        <div style={{filter: "opacity(0.4)"}} title="Not implemeted">
-                            <ToggleButton
-                                isToggled={false}
-                                text="Logs"
-                                click={() => {}}/>
-                        </div>
-                        <div style={{filter: "opacity(0.4)"}} title="Not implemeted">
-                            <ToggleButton
-                                isToggled={false}
-                                text="Known bugs"
-                                click={() => {}}/>
-                        </div>
-
-                        {/* <ToggleButton
-                            isToggled={leftPane == Pane.Logs ||
-                                (rightPane == Pane.Logs && splitMode)}
-                            click={() => splitMode ? rightPaneHandler(Pane.Logs) : leftPaneHandler(Pane.Logs)}
-                            text="Logs" /> */}
+                        <ToggleButton
+                            isToggled={false}
+                            isDisabled={true}
+                            title="Not implemeted"
+                            text="Logs"/>
+                        <ToggleButton
+                            isToggled={false}
+                            isDisabled={true}
+                            title="Not implemeted"
+                            text="Known bugs"/>
                     </div>
                     <div class="layout-body-panel-controls-right">
                         <div class={adminRootClass}

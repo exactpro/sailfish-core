@@ -65,6 +65,11 @@ body {
     &.toggled {
         border-radius: 7px;
     }
+
+    &.disabled {
+        filter: opacity(0.4);
+        cursor: unset;
+    }
     
     p {
         margin: 0 20px;

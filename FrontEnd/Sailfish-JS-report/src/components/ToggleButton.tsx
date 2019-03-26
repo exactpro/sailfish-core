@@ -18,16 +18,25 @@ import {h} from 'preact';
 import '../styles/styles.scss';
 
 interface ButtonProps {
-    click: Function;
-    isToggled: boolean;
+    onClick?: Function;
+    isToggled?: boolean;
+    isDisabled?: boolean;
     text: string;
+    title?: string;
     theme?: string;
 }
 
-export const ToggleButton = ({click, isToggled, text, theme}: ButtonProps) => {
-    const className = ["button-root", (theme || "default"), (isToggled ? "toggled" : "")].join(' ');
+export const ToggleButton = ({ onClick, isToggled, text, theme, isDisabled, title }: ButtonProps) => {
+    const className = [
+        "button-root", 
+        (theme || "default"), 
+        (isDisabled ? "disabled" : ""),
+        (isToggled ? "toggled" : "")
+    ].join(' ');
 
-    return (<div class={className} onClick={e => click(text)}>
-        <p>{text}</p>
-    </div>)
+    return (
+        <div class={className} onClick={e => onClick && onClick(text)} title={title}>
+            <p>{text}</p>
+        </div>
+    )
 }

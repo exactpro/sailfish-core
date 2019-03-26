@@ -33,34 +33,34 @@ export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsF
                 <h5>Actions</h5>
                 <ToggleButton text="Passed"
                     isToggled={actionsFilters.includes("PASSED")}
-                    click={() => actionFilterHandler("PASSED")}
+                    onClick={() => actionFilterHandler("PASSED")}
                     theme="green" />
                 <ToggleButton text="Failed"
                     isToggled={actionsFilters.includes("FAILED")}
-                    click={() => actionFilterHandler("FAILED")}
+                    onClick={() => actionFilterHandler("FAILED")}
                     theme="green" />
                 <ToggleButton text="Conditioanlly passed"
                     isToggled={actionsFilters.includes("CONDITIONALLY_PASSED")}
-                    click={() => actionFilterHandler("CONDITIONALLY_PASSED")}
+                    onClick={() => actionFilterHandler("CONDITIONALLY_PASSED")}
                     theme="green" />
             </div>
             <div class="header-filter-togglers">
                 <h5>Fields</h5>
                 <ToggleButton text="Passed"
                     isToggled={fieldsFilters.includes("PASSED")}
-                    click={() => fieldsFilterHandler("PASSED")}
+                    onClick={() => fieldsFilterHandler("PASSED")}
                     theme="green" />
                 <ToggleButton text="Failed"
                     isToggled={fieldsFilters.includes("FAILED")}
-                    click={() => fieldsFilterHandler("FAILED")}
+                    onClick={() => fieldsFilterHandler("FAILED")}
                     theme="green" />
                 <ToggleButton text="Conditioanlly passed"
                     isToggled={fieldsFilters.includes("CONDITIONALLY_PASSED")}
-                    click={() => fieldsFilterHandler("CONDITIONALLY_PASSED")}
+                    onClick={() => fieldsFilterHandler("CONDITIONALLY_PASSED")}
                     theme="green" />
                 <ToggleButton text="N/A"
                     isToggled={fieldsFilters.includes("NA")}
-                    click={() => fieldsFilterHandler("NA")}
+                    onClick={() => fieldsFilterHandler("NA")}
                     theme="green" />
             </div>
         </div>

@@ -31,6 +31,7 @@ interface LeftPanelProps {
     panel: Panel;
     checkpointActions: Action[]
     selectedCheckpointId: number;
+    statusEnabled: boolean;
     panelSelectHandler: (panel: Panel) => any;
     setSelectedCheckpoint: (checkpointAciton: Action) => any;
 }
@@ -51,7 +52,7 @@ class LeftPanelBase extends Component<LeftPanelProps> {
         }
     }
 
-    render({panel, checkpointActions, selectedCheckpointId}: LeftPanelProps) {
+    render({ panel, checkpointActions, selectedCheckpointId, statusEnabled }: LeftPanelProps) {
 
         const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
             cpEnabled = checkpointActions.length != 0,
@@ -66,12 +67,14 @@ class LeftPanelBase extends Component<LeftPanelProps> {
                     <div class="layout-body-panel-controls-panels">
                         <ToggleButton
                             isToggled={panel == Panel.Actions}
-                            click={() => this.selectPanel(Panel.Actions)}
+                            onClick={() => this.selectPanel(Panel.Actions)}
                             text="Actions" />
                         <ToggleButton
                             isToggled={panel == Panel.Status}
-                            click={() => this.selectPanel(Panel.Status)}
-                            text="Status" />
+                            isDisabled={!statusEnabled}
+                            onClick={statusEnabled && (() => this.selectPanel(Panel.Status))}
+                            text="Status" 
+                            title={statusEnabled ? null : "No status info"}/>
                     </div>
                     <div class="layout-body-panel-controls-left">
                         <div class="layout-body-panel-controls-left-checkpoints">
@@ -158,7 +161,8 @@ export const LeftPanel = connect(
     (state: AppState) => ({
         panel: state.leftPane,
         selectedCheckpointId: state.selected.checkpointActionId,
-        checkpointActions: state.checkpointActions
+        checkpointActions: state.checkpointActions,
+        statusEnabled: !!state.testCase.status.cause
     }),
     dispatch => ({
         panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),

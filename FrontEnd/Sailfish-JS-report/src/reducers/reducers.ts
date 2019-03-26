@@ -170,7 +170,10 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 testCase: stateAction.testCase,
                 checkpointActions: getCheckpointActions(stateAction.testCase.actions),
-                actionsMap: generateActionsMap(getActions(stateAction.testCase.actions))
+                actionsMap: generateActionsMap(getActions(stateAction.testCase.actions)),
+
+                // reset active panel to default when there is no status info to show
+                leftPane: stateAction.testCase.status.cause ? state.leftPane : initialAppState.leftPane
             }
         }
 
@@ -179,7 +182,9 @@ export function appReducer(state: AppState = initialAppState, stateAction: State
                 ...state,
                 testCase: initialAppState.testCase,
                 currentTestCasePath: "",
-                selected: initialSelectedState
+                selected: initialSelectedState,
+                leftPane: initialAppState.leftPane,
+                rightPane: initialAppState.rightPane
             }
         }
 
