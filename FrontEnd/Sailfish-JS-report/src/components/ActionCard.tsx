@@ -77,11 +77,13 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
             <ExpandablePanel
                 isExpanded={isExpanded}>
                 <div class={headerClassName}>
-                    <div class="action-card-header-name">
-                        <h3>{action.name}</h3>
-                    </div>
-                    <div class="action-card-header-description">
-                        <h3>{action.description}</h3>
+                    <div class="action-card-header-title">
+                        <div class="action-card-header-title-name">
+                            <h3>{action.name}</h3>
+                        </div>
+                        <div class="action-card-header-title-description">
+                            <h3>{action.description}</h3>
+                        </div>
                     </div>
                     <div class="action-card-header-time-start">
                         <span>Start</span>

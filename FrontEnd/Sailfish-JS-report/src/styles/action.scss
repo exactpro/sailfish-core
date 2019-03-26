@@ -92,32 +92,35 @@
             padding: 3px;
             display: grid;
             grid-template-columns: 1fr 180px 70px;
-            grid-template-rows: auto auto;
-            grid-template-areas: "action-name action-controls action-controls"
-                                 "action-description action-start-time action-elapsed-time";
+            grid-template-rows: auto 1fr;
+            grid-template-areas: "action-title action-controls action-controls"
+                                 "action-title action-start-time action-elapsed-time";
 
             h3 {
                 margin: 0;
                 font-size: 17px;
             }   
 
-            &-name {
-                grid-area: action-name;
+            &-title {
+                grid-area: action-title;
                 display: flex;
                 flex-direction: column;
-                justify-content: flex-start;
-                width: 100%;
 
-                color: var(--status-primary-color);
-            }
-            
-            &-description {
-                grid-area: action-description;
-                display: flex;
-                flex-direction: row;
-                align-items: center;
+                &-name {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-start;
 
-                color: var(--status-secondary-color);
+                    color: var(--status-primary-color);
+                }
+                
+                &-description {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+
+                    color: var(--status-secondary-color);
+                }
             }
 
             &-name, &-description {
