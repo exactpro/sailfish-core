@@ -24,6 +24,8 @@ import { ReportMetadata } from '../models/ReportMetadata';
 import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
 import TestCaseCard from './TestCaseCard';
+import { HeatmapScrollbar } from './HeatmapScrollbar';
+import { testCasesHeatmap } from '../helpers/heatmapCreator';
 
 interface ReportLayoutProps {
     report: Report;
@@ -107,16 +109,19 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
             </div>
             <div class="testcases">
                 <div class="list">  
-                    {
-                        report.metadata.map((metadata, index) => (
-                            <div class="item">
-                                <TestCaseCard
-                                    metadata={metadata}
-                                    index={index + 1}
-                                    selectHandler={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
-                            </div>
-                        ))
-                    }
+                    <HeatmapScrollbar
+                        selectedElements={testCasesHeatmap(report.metadata)}>
+                        {
+                            report.metadata.map((metadata, index) => (
+                                <div class="item">
+                                    <TestCaseCard
+                                        metadata={metadata}
+                                        index={index + 1}
+                                        selectHandler={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
+                                </div>
+                            ))
+                        }
+                    </HeatmapScrollbar>
                 </div>
             </div>
         </div>
