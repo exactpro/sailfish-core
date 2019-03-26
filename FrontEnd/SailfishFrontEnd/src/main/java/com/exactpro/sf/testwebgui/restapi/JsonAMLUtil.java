@@ -52,8 +52,8 @@ public class JsonAMLUtil {
 		return action == JavaStatement.BEGIN_ELIF || action == JavaStatement.BEGIN_ELSE
 				|| action == JavaStatement.BEGIN_IF || action == JavaStatement.BEGIN_LOOP;
 	}
-	
-	private final static long[] NO_PATH = new long[0];
+
+    private static final long[] NO_PATH = new long[0];
 	public static List<JsonAMLError> getErrors(MatrixWithHistory matrix) {
 		Collection<Alert> errors = matrix.getErrors();
 
@@ -116,8 +116,8 @@ public class JsonAMLUtil {
 	private static long[] buildPath(List<Long> path) {
 		return Longs.toArray(path);
 	}
-	
-	private final static class JsonAMLVisitor implements IAMLElementVisitor {
+
+    private static final class JsonAMLVisitor implements IAMLElementVisitor {
 		
 		private final MatrixWithHistory matrix;
 		private JsonMatrixLine line;
@@ -128,8 +128,8 @@ public class JsonAMLUtil {
 
 		@Override
 		public void visit(AMLElement element) throws AMLException {
-			final Map<String, String> actionValues = getActionValues(element);
-			final Map<String, String> actionMetadata = getActionMetaData(element);
+            Map<String, String> actionValues = getActionValues(element);
+            Map<String, String> actionMetadata = getActionMetaData(element);
 			
 			if (matrix != null && !matrix.getErrors().isEmpty()) {
 				Collection<Alert> errors = matrix.getErrors();
@@ -146,7 +146,7 @@ public class JsonAMLUtil {
 		}
 
 		private Map<String, String> getActionValues(AMLElement element) {
-			final Map<String, String> actionValues = new HashMap<String, String>();
+            Map<String, String> actionValues = new HashMap<String, String>();
 			for (Entry<String, SimpleCell> entry : element.getCells().entrySet()) {
 				String value = (entry.getValue() != null) ? entry.getValue().getValue(): null;
 				if (StringUtils.isNotEmpty(value)) {
@@ -162,13 +162,13 @@ public class JsonAMLUtil {
 
 		@Override
 		public void visit(AMLBlock block) throws AMLException {
-			final Map<String, String> actionValues = getActionValues(block);
-			final Map<String, String> actionMetadata = getActionMetaData(block);
+            Map<String, String> actionValues = getActionValues(block);
+            Map<String, String> actionMetadata = getActionMetaData(block);
 			
 			List<JsonMatrixLine> items = new LinkedList<JsonMatrixLine>();
 			for (AMLElement inAction : block.getElements()) {
 				inAction.accept(this);
-				JsonMatrixLine line = this.getLine();
+                JsonMatrixLine line = getLine();
 				items.add(line);
 			}
 			
@@ -186,7 +186,7 @@ public class JsonAMLUtil {
 		}
 
 		private Map<String, String> getActionMetaData(AMLElement element) {
-			final Map<String, String> actionMetadata = new HashMap<String, String>();
+            Map<String, String> actionMetadata = new HashMap<String, String>();
 			actionMetadata.put("dictionary", element.getValue(Column.Dictionary));
 			return actionMetadata;
 		}

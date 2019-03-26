@@ -18,6 +18,7 @@ package com.exactpro.sf.testwebgui.notifications.messages;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.exactpro.sf.services.ChangeEnvironmentEvent;
+import com.exactpro.sf.services.ChangeEnvironmentEvent.Status;
 import com.exactprosystems.webchannels.messages.AbstractMessage;
 import com.exactprosystems.webchannels.messages.ChannelsMessage;
 
@@ -27,11 +28,7 @@ public class EnvironmentUpdateResponse extends AbstractMessage {
     private String requestId;
     private String envName;
     private String newEnvName;
-    private ChangeEnvironmentEvent.Status status;
-
-    public EnvironmentUpdateResponse() {
-        super();
-    }
+    private Status status;
 
     public String getRequestId() {
         return requestId;
@@ -56,11 +53,11 @@ public class EnvironmentUpdateResponse extends AbstractMessage {
         this.envName = envName;
     }
 
-    public ChangeEnvironmentEvent.Status getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(ChangeEnvironmentEvent.Status status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

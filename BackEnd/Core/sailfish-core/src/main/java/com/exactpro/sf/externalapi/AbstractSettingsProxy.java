@@ -41,30 +41,26 @@ public class AbstractSettingsProxy implements ISettingsProxy {
         this.descriptors = new HashMap<>();
         for (PropertyDescriptor propertyDescriptor : array) {
             if (propertyDescriptor.getReadMethod() != null && propertyDescriptor.getWriteMethod() != null) {
-                this.descriptors.put(propertyDescriptor.getName(), propertyDescriptor);
+                descriptors.put(propertyDescriptor.getName(), propertyDescriptor);
             }
         }
     }
 
     @Override
     public Set<String> getParameterNames() {
-        return this.descriptors.keySet();
+        return descriptors.keySet();
     }
 
     @Override
     public Class<?> getParameterType(String name) {
-        PropertyDescriptor descriptor = this.descriptors.get(name);
-        if (descriptor != null) {
-            return descriptor.getPropertyType();
-        }
-
-        return null;
+        PropertyDescriptor descriptor = descriptors.get(name);
+        return descriptor != null ? descriptor.getPropertyType() : null;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> T getParameterValue(String name) {
-        PropertyDescriptor descriptor = this.descriptors.get(name);
+        PropertyDescriptor descriptor = descriptors.get(name);
         if (descriptor != null) {
             try {
                 return (T) descriptor.getReadMethod().invoke(settings);
@@ -78,7 +74,7 @@ public class AbstractSettingsProxy implements ISettingsProxy {
 
     @Override
     public void setParameterValue(String name, Object value) {
-        PropertyDescriptor descriptor = this.descriptors.get(name);
+        PropertyDescriptor descriptor = descriptors.get(name);
         if (descriptor != null) {
             try {
                 descriptor.getWriteMethod().invoke(settings, value);

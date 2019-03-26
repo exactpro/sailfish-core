@@ -26,7 +26,7 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
 
 public class TestMessageUtil {
-    private MessageUtil messageUtil = new MessageUtil();
+    private final MessageUtil messageUtil = new MessageUtil();
 
     @Test
     public void testFindGroup() {

@@ -46,9 +46,12 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.util.DateTimeUtility;
 
+import quickfix.BooleanField;
+import quickfix.CharField;
 import quickfix.DataDictionary;
 import quickfix.DataDictionaryProvider;
 import quickfix.DefaultDataDictionaryProvider;
+import quickfix.DoubleField;
 import quickfix.Field;
 import quickfix.FieldConvertError;
 import quickfix.FieldException;
@@ -56,8 +59,10 @@ import quickfix.FieldMap;
 import quickfix.FieldNotFound;
 import quickfix.FixVersions;
 import quickfix.Group;
+import quickfix.IntField;
 import quickfix.InvalidMessage;
 import quickfix.Message;
+import quickfix.StringField;
 import quickfix.field.BeginString;
 import quickfix.field.converter.BooleanConverter;
 import quickfix.field.converter.UtcDateOnlyConverter;
@@ -72,8 +77,7 @@ import quickfix.field.converter.UtcTimestampConverter;
  */
 public class FixUtil {
 
-
-	private static DefaultDataDictionaryProvider provider = new DefaultDataDictionaryProvider();
+    private static final DefaultDataDictionaryProvider provider = new DefaultDataDictionaryProvider();
 
 	private FixUtil()
 	{
@@ -233,7 +237,7 @@ public class FixUtil {
 		index2 = message.indexOf("\001", index1);
 		String msgType = message.substring(index1+3, index2);
 		boolean isApp = isApp(msgType);
-		DataDictionary dd = FixUtil.getDictionary(beginString, isApp);
+        DataDictionary dd = getDictionary(beginString, isApp);
 		Message msg = new Message();
 		msg.fromString(message, dd, true);
 		return msg;
@@ -252,11 +256,11 @@ public class FixUtil {
 
 	private static long nextID = 1;
 	public static synchronized String generateClorID() {
-		return String.valueOf(System.currentTimeMillis()+(nextID++));
+        return String.valueOf(System.currentTimeMillis() + nextID++);
 	}
 
 	public static synchronized String generateClorIDSpecLng(int length) {
-		return String.valueOf(RandomStringUtils.random(length, "0123456789"));
+        return RandomStringUtils.random(length, "0123456789");
 	}
 
 	public static String asString(Object obj) throws IllegalArgumentException, IllegalAccessException
@@ -269,29 +273,24 @@ public class FixUtil {
 					&& ((modifyers & Modifier.STATIC) == Modifier.STATIC)
 					&& ((modifyers & Modifier.PUBLIC) == Modifier.PUBLIC))
 			{
-				if (quickfix.IntField.class.isAssignableFrom(cls)
-						|| quickfix.StringField.class.isAssignableFrom(cls)
-						|| quickfix.CharField.class.isAssignableFrom(cls)
-						|| quickfix.DoubleField.class.isAssignableFrom(cls)
-						|| quickfix.BooleanField.class.isAssignableFrom(cls)) {
-					if (((quickfix.Field<?>)obj).getObject().equals(constant.get(obj))) {
+                if(IntField.class.isAssignableFrom(cls)
+                        || StringField.class.isAssignableFrom(cls)
+                        || CharField.class.isAssignableFrom(cls)
+                        || DoubleField.class.isAssignableFrom(cls)
+                        || BooleanField.class.isAssignableFrom(cls)) {
+                    if(((Field<?>)obj).getObject().equals(constant.get(obj))) {
 						return constant.getName();
 					}
 				}
 			}
 		}
 
-		if (quickfix.Field.class.isAssignableFrom(cls))
-			return String.valueOf(((quickfix.Field<?>)obj).getObject());
-		return obj.toString();
-	}
+        return Field.class.isAssignableFrom(cls) ? String.valueOf(((Field<?>)obj).getObject()) : obj.toString();
+    }
 
 	public static boolean isAdmin(String msgType) {
-		if (msgType != null && false == msgType.equals("")) {
-			return msgType.length() == 1 && "0A12345".indexOf(msgType.charAt(0)) != -1;
-		}
-		return false;
-	}
+        return msgType != null && msgType.length() == 1 && "0A12345".contains(msgType);
+    }
 
 	public static boolean isApp(String msgType) {
 		return !isAdmin(msgType);

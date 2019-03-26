@@ -15,13 +15,22 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.services.IInitiatorService;
@@ -38,20 +47,12 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by alexey.zarovny on 11/18/14.
  */
 public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorService {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private volatile ServiceStatus curStatus;
     private ServiceName serviceName;
@@ -76,16 +77,17 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
     @Override
     public void init(
     		IServiceContext serviceContext,
-    		final IServiceMonitor serviceMonitor,
-    		final IServiceHandler handler,
-    		final IServiceSettings settings,
-    		final ServiceName name) {
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            ServiceName name) {
 
         try {
             this.serviceName = name;
 
-            if (settings == null)
+            if(settings == null) {
                 throw new NullPointerException("'settings' parameter is null");
+            }
 
             this.settings = (ITCHMulticastSettings) settings;
 
@@ -99,8 +101,9 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             this.logConfigurator = Objects.requireNonNull(this.serviceContext.getLoggingConfigurator(), "'Logging configurator' parameter is null");
 
             if (!((this.settings.getPrimaryAddress() != null && this.settings.getPrimaryPort() != 0)
-                    || (this.settings.getSecondaryAddress() != null && this.settings.getSecondaryPort() != 0)))
+                    || (this.settings.getSecondaryAddress() != null && this.settings.getSecondaryPort() != 0))) {
                 throw new NullPointerException("At least one of address/port pairs must be set");
+            }
 
 
             this.msgFactory = this.serviceContext.getDictionaryManager().getMessageFactory(this.settings.getDictionaryName());
@@ -110,7 +113,7 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             Objects.requireNonNull(dictionary, "'Dictionary' parameter");
 
             itchHandler = new ITCHMessageHelper();
-            itchHandler.init(this.msgFactory, this.dictionary);
+            itchHandler.init(msgFactory, dictionary);
 
             this.udpSession = new ITCHMulticastUDPSession(this.serviceContext, serviceName + "UDP",
                     settings.getDictionaryName(), this.settings.getMarketDataGroup(), this, itchHandler, msgFactory);
@@ -120,11 +123,11 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
 
             logger.info("Initiliazing service {} ... done", this);
-            this.changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
+            changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
         } catch (Throwable t) {
-            logger.error("Exception during service [{}] initializing", this.serviceName, t);
-            this.changeStatus(ServiceStatus.ERROR, "", t);
-            throw new ServiceException("Problem during service [" + this.serviceName + "] initializing", t);
+            logger.error("Exception during service [{}] initializing", serviceName, t);
+            changeStatus(ServiceStatus.ERROR, "", t);
+            throw new ServiceException("Problem during service [" + serviceName + "] initializing", t);
         }
     }
 
@@ -141,18 +144,18 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
 
     @Override
     public void start() {
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
         try {
             cache = new ITCHMulticastCache(settings.getCacheSize());
             udpSession.open(settings.getPrimaryPort(), settings.getPrimaryAddress(), settings.getSecondaryPort(), settings.getSecondaryAddress(), cache);
             tcpSession.open(settings.getTcpPort(), cache);
-            this.changeStatus(ServiceStatus.STARTED, "Service started", null);
+            changeStatus(ServiceStatus.STARTED, "Service started", null);
 
         } catch (IOException e) {
-            logger.error("Exception during service [{}] starting", this.serviceName, e);
-            this.changeStatus(ServiceStatus.ERROR, "", e);
-            throw new ServiceException("Problem during service [" + this.serviceName + "] starting", e);
+            logger.error("Exception during service [{}] starting", serviceName, e);
+            changeStatus(ServiceStatus.ERROR, "", e);
+            throw new ServiceException("Problem during service [" + serviceName + "] starting", e);
         }
     }
 
@@ -165,13 +168,13 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             if(tcpSession != null){
                 tcpSession.close();
             }
-            this.changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
+            changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
         } catch (Exception e) {
-            logger.error("Exception during service [{}] disposing", this.serviceName, e);
-            this.changeStatus(ServiceStatus.ERROR, "", e);
-            throw new ServiceException("Problem during service [" + this.serviceName + "] disposing", e);
+            logger.error("Exception during service [{}] disposing", serviceName, e);
+            changeStatus(ServiceStatus.ERROR, "", e);
+            throw new ServiceException("Problem during service [" + serviceName + "] disposing", e);
         } finally {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                     serviceName);
         }
     }
@@ -224,24 +227,20 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             MsgMetaData metaData = msg.getMetaData();
 
             if (isFrom) {
-                metaData.setToService(this.serviceName.toString());
+                metaData.setToService(serviceName.toString());
                 metaData.setFromService(remoteName);
             } else {
-                metaData.setFromService(this.serviceName.toString());
+                metaData.setFromService(serviceName.toString());
                 metaData.setToService(remoteName);
             }
 
             metaData.setServiceInfo(serviceInfo);
 
             if (settings.isStoreMessages()) {
-                this.msgStorage.storeMessage(msg);
+                msgStorage.storeMessage(msg);
             }
-            
-            if (isFrom) {
-                logger.debug("Message received: {} ", msg);
-            } else {
-                logger.debug("Message sent: {} ", msg);
-            }
+
+            logger.debug(isFrom ? "Message received: {} " : "Message sent: {} ", msg);
 
             try {
                 if (isAdmin && isFrom) {
@@ -250,10 +249,10 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
                 } else if (!isAdmin && isFrom) {
                     logger.debug("Add fromApp: {}", msg.getName());
                     handler.putMessage(iSession, ServiceHandlerRoute.FROM_APP, msg);
-                } else if (!isAdmin && !isFrom) {
+                } else if(!isAdmin) {
                     logger.debug("Add toApp: {}", msg.getName());
                     handler.putMessage(iSession, ServiceHandlerRoute.TO_APP, msg);
-                } else if (!isAdmin && !isFrom) {
+                } else {
                     logger.debug("Add toAdmin: {}", msg.getName());
                     handler.putMessage(iSession, ServiceHandlerRoute.TO_ADMIN, msg);
                 }

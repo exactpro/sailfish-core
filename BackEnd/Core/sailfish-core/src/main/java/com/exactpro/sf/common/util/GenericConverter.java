@@ -23,16 +23,11 @@ import java.util.Arrays;
 
 public final class GenericConverter
 {
-	private static Charset charsetISO_8859 = Charset.forName("ISO-8859-1");
+    private static final Charset charsetISO_8859 = Charset.forName("ISO-8859-1");
 	//private static CharsetDecoder charsetDecoder = charsetISO_8859.newDecoder();
 	//private static CharsetEncoder charsetEncoder = charsetISO_8859.newEncoder();
 
-	public GenericConverter()
-	{
-	}
-
-
-	/**
+    /**
 	 * Convert String to byte array.
 	 * Characters in result byte array will be <b>left aligned</b>.
 	 * Missed characters will be filled by ' '(space).
@@ -44,11 +39,7 @@ public final class GenericConverter
 	public static byte[] convertStringToArray(int length, String value)
 	{
 		byte[] byteArray = String.format( "%-" + length + "s", value == null ? "" : value ).getBytes(charsetISO_8859);
-
-		if (byteArray.length != length)
-			return Arrays.copyOf(byteArray, length); // truncate array
-		else
-			return byteArray;
+        return byteArray.length != length ? Arrays.copyOf(byteArray, length) : byteArray; // truncate array
 	}
 
 	public static <T extends Number> byte[] convertSignedNumericToArray(int length, T value )
@@ -59,9 +50,8 @@ public final class GenericConverter
 
 	public static <T extends Number> byte[] convertSignedNumericToArray(int length, T value, int precision )
 	{
-		byte[] byteArray = new byte[length];
 
-		// Pattern for fractional part
+        // Pattern for fractional part
 		char[] arrFractional = new char[precision];
 		Arrays.fill(arrFractional, '0');
 
@@ -77,8 +67,7 @@ public final class GenericConverter
 		String formattedValue = formatter.format(value);
 		DecimalFormatSymbols decimalFormatSymbol = formatter.getDecimalFormatSymbols();
 		formattedValue = formattedValue.replace(String.valueOf(decimalFormatSymbol.getDecimalSeparator()), "");
-		byteArray = formattedValue.getBytes(charsetISO_8859);
-		return byteArray;
+        return formattedValue.getBytes(charsetISO_8859);
 	}
 
 
@@ -90,9 +79,8 @@ public final class GenericConverter
 
 	public static <T extends Number> byte[] convertUnsignedNumericToArray(int length, T value, int precision )
 	{
-		byte[] byteArray = new byte[length];
 
-		// Pattern for fractional part
+        // Pattern for fractional part
 		char[] arrFractional = new char[precision];
 		Arrays.fill(arrFractional, '0');
 
@@ -108,8 +96,7 @@ public final class GenericConverter
 		String formattedValue = formatter.format(value);
 		DecimalFormatSymbols decimalFormatSymbol = formatter.getDecimalFormatSymbols();
 		formattedValue = formattedValue.replace(String.valueOf(decimalFormatSymbol.getDecimalSeparator()), "");
-		byteArray = formattedValue.getBytes(charsetISO_8859);
-		return byteArray;
+        return formattedValue.getBytes(charsetISO_8859);
 	}
 
 
@@ -155,9 +142,9 @@ public final class GenericConverter
 	{
 		String stringValue = convertByteArrayToString( length, byteArray );
 
-		if(0 != precision)
+        if(precision != 0)
 		{
-			stringValue = ((new StringBuffer(stringValue )).insert(length - precision, ".")).toString();
+            stringValue = new StringBuilder(stringValue).insert(length - precision, ".").toString();
 		}
 		return Double.parseDouble( stringValue );
 	}
@@ -166,9 +153,9 @@ public final class GenericConverter
 	{
 		String stringValue = convertByteArrayToString( length, byteArray );
 
-		if(0 != precision)
+        if(precision != 0)
 		{
-			stringValue = ((new StringBuffer(stringValue )).insert(length - precision, ".")).toString();
+            stringValue = new StringBuilder(stringValue).insert(length - precision, ".").toString();
 		}
 		return new BigDecimal( stringValue );
 	}

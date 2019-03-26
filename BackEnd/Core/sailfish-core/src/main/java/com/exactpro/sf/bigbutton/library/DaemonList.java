@@ -25,8 +25,8 @@ public class DaemonList extends AbstractLibraryItem implements Serializable {
 private final List<Daemon> daemons = new ArrayList<>();
 	
 	public void addNested(Daemon item) {
-		
-		this.daemons.add(item);
+
+        daemons.add(item);
 		
 	}
 	

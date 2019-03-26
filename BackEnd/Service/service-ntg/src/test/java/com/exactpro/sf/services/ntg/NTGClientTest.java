@@ -39,7 +39,7 @@ public final class NTGClientTest
 	private ClientStrategy strategy = ClientStrategy.SessionOnly;
 
 	@SuppressWarnings("unused")
-    private List<MessageType> msgs = new ArrayList<MessageType>();
+    private List<MessageType> msgs = new ArrayList<>();
 
     private final NTGClient ntgClient = null;
 
@@ -48,7 +48,7 @@ public final class NTGClientTest
 	{
 		IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
 
-		try (InputStream in = new FileInputStream((((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir")))
+		try (InputStream in = new FileInputStream(((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir"))
                 + File.separator + "dictionaries" + File.separator + "ntg.xml")) {
 			loader.load(in);
     	}
@@ -69,8 +69,8 @@ public final class NTGClientTest
 
 		LogonOnly,
 
-		Normal;
-	}
+		Normal
+    }
 
     public NTGClient getClient() {
         return ntgClient;

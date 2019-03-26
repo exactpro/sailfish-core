@@ -15,12 +15,23 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.machinelearning.entities;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.io.Serializable;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.*;
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"id", "explanation", "message"})
 @Entity
@@ -75,8 +86,8 @@ public class MessageParticipant implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", this.id)
-                .append("explanation", this.explanation)
-                .append("message", this.message).toString();
+                .append("id", id)
+                .append("explanation", explanation)
+                .append("message", message).toString();
     }
 }

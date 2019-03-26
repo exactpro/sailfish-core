@@ -15,18 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 import com.exactpro.sf.services.ntg.NTGUtility;
 import com.exactpro.sf.util.DateTimeUtility;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 /**
  * Collection of matrix utilities for NTG protocol.
@@ -34,7 +36,7 @@ import java.time.temporal.TemporalUnit;
  *
  */
 @MatrixUtils
-@ResourceAliases({"NTGMatrixUtil"})
+@ResourceAliases("NTGMatrixUtil")
 public class NTGMatrixUtil extends AbstractCaller {
 
     private static final Logger logger = LoggerFactory.getLogger(NTGMatrixUtil.class);
@@ -53,7 +55,7 @@ public class NTGMatrixUtil extends AbstractCaller {
 			+ " will return:<br>"
 			+ "000000000000000002_xxxxx<br>")
 	@UtilityMethod
-	public final String ShortClOrdID(final String userKey)
+	public final String ShortClOrdID(String userKey)
 	{
         return NTGUtility.getNewShortClOrdID(userKey);
 	}
@@ -86,7 +88,7 @@ public class NTGMatrixUtil extends AbstractCaller {
 	@UtilityMethod
 	public final String ClOrdID(int length)
 	{
-		return String.valueOf(RandomStringUtils.random(length, "0123456789"));
+		return RandomStringUtils.random(length, "0123456789");
 	}
 
 	@Description("Generate TransactTime according specification.<br>" +
@@ -250,13 +252,13 @@ public class NTGMatrixUtil extends AbstractCaller {
 	
 	protected static long modifyDateTime(LocalDateTime localDateTime, String timeUnit, String value) throws Exception {
 
-		if(null == timeUnit || timeUnit.isEmpty())
+        if(timeUnit == null || timeUnit.isEmpty())
 		{
 			logger.error("datePart is empty. Return default expire date time value.");
             return System.currentTimeMillis();
 		}
 
-		if(null == value || value.isEmpty())
+        if(value == null || value.isEmpty())
 		{
 			logger.error("datePart is empty. Return default expire date time value.");
             return System.currentTimeMillis();
@@ -300,7 +302,7 @@ public class NTGMatrixUtil extends AbstractCaller {
 
         private final TemporalUnit temporalUnit;
 
-        private TimeUnit(TemporalUnit temporalUnit) {
+        TimeUnit(TemporalUnit temporalUnit) {
             this.temporalUnit = temporalUnit;
         }
 	}

@@ -48,7 +48,7 @@ public class MLFileStorage {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
-    private ObjectWriter jsonWriter = new ObjectMapper().writer();
+    private final ObjectWriter jsonWriter = new ObjectMapper().writer();
     private final IWorkspaceDispatcher workspaceDispatcher;
 
     public MLFileStorage(IWorkspaceDispatcher workspaceDispatcher) throws  IOException {
@@ -85,7 +85,7 @@ public class MLFileStorage {
 
     public List<File> getDocuments() throws FileNotFoundException {
 
-        Function<String, File> supplier = (file) -> {
+        Function<String, File> supplier = file -> {
             try {
                 return workspaceDispatcher.getFile(FolderType.ML, file);
             } catch (FileNotFoundException e) {

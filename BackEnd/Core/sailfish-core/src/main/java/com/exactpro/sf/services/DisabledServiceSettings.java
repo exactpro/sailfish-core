@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -97,7 +98,7 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     public void setSettings(Map<String, String> settings) {
-        this.entries.clear();
+        entries.clear();
         convertMapToElementList(settings);
     }
 
@@ -107,7 +108,7 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     private void convertMapToElementList(Map<String, String> settings) {
-        for (Map.Entry<String, String> entry : settings.entrySet()) {
+        for(Entry<String, String> entry : settings.entrySet()) {
             DOMElement domElement = new DOMElement(new QName(entry.getKey()));
             domElement.setText(entry.getValue());
             entries.add(domElement);

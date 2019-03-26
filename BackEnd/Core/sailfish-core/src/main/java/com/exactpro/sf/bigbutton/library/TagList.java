@@ -24,7 +24,7 @@ public class TagList extends AbstractLibraryItem {
 
 	@Override
     public void addNested(Tag item) {
-		this.tags.add(item);
+        tags.add(item);
 	}
 
 	public List<Tag> getTags() {

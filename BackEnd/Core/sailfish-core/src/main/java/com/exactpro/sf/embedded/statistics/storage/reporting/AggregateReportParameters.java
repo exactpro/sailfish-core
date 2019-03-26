@@ -51,7 +51,7 @@ public class AggregateReportParameters {
 
 	private boolean allTags; // All or at least one
 
-	private boolean emptyCommentOnly = false;
+	private boolean emptyCommentOnly;
 
 	private String sortBy;
 

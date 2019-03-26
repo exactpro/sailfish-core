@@ -19,7 +19,7 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 
 public class EmptyMessageStructureReaderHandler implements IMessageStructureReaderHandler {
 
-    private static EmptyMessageStructureReaderHandler instance = new EmptyMessageStructureReaderHandler();
+    private static final EmptyMessageStructureReaderHandler instance = new EmptyMessageStructureReaderHandler();
 
     private EmptyMessageStructureReaderHandler() {
     }

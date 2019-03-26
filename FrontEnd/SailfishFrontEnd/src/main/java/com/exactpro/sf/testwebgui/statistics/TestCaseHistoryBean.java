@@ -16,6 +16,7 @@
 package com.exactpro.sf.testwebgui.statistics;
 
 import java.io.Serializable;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,7 +27,6 @@ import javax.faces.bean.ViewScoped;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.temporal.ChronoUnit;
 
 import com.exactpro.sf.embedded.statistics.entities.TestCase;
 import com.exactpro.sf.embedded.statistics.storage.TestCaseHistoryRow;
@@ -59,16 +59,16 @@ public class TestCaseHistoryBean implements Serializable {
 	private long avgDuration;
 	
 	private void initDurations() {
-		
-		if(this.lastResult == null) {
+
+        if(lastResult == null) {
 			return;
 		}
 		
 		long totalRuns = 0l;
 		
 		long sumDuration = 0l;
-		
-		for(TestCaseHistoryRow row : this.lastResult) {
+
+        for(TestCaseHistoryRow row : lastResult) {
 			
 			if(row.getFinished() != null) {
 				
@@ -119,14 +119,14 @@ public class TestCaseHistoryBean implements Serializable {
 	}
 	
 	public String getDurationClass(long duration) {
-		
-		long onePercent = this.avgDuration / 100l;
-				
-		long delta = Math.abs(this.avgDuration - duration);
-				
-		if(duration < this.avgDuration) { 
-			
-			if( delta > onePercent * GOOD_DURATION_PERCENT ) {
+
+        long onePercent = avgDuration / 100l;
+
+        long delta = Math.abs(avgDuration - duration);
+
+        if(duration < avgDuration) {
+
+            if( delta > onePercent * GOOD_DURATION_PERCENT ) {
 				return "good";
 			}
 			
@@ -153,12 +153,12 @@ public class TestCaseHistoryBean implements Serializable {
 		try {
 		
 			AggregateReportParameters params = new AggregateReportParameters();
-			
-			params.setTestCaseId(this.selectedTestCase.getId());
+
+            params.setTestCaseId(selectedTestCase.getId());
 			
 			this.lastResult = BeanUtil.getSfContext().getStatisticsService().getReportingStorage().generateTestCaseHistoryReport(params);
-			
-			this.lastTestCase = this.selectedTestCase;
+
+            this.lastTestCase = selectedTestCase;
 			
 			initDurations();
 

@@ -17,14 +17,13 @@ package com.exactpro.sf.testwebgui.restapi.json;
 
 public class JsonError {
 
-	public final static Object NO_ERROR = new JsonError("Success", "");
+    public static final Object NO_ERROR = new JsonError("Success", "");
 	
 	private final String message;
 	private final String rootCause;
 
 	public JsonError(String message, String rootCause) {
-		super();
-		this.message = message;
+        this.message = message;
 		this.rootCause = rootCause;
 	}
 

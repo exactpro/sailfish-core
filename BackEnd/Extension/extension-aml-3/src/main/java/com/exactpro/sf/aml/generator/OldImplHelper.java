@@ -139,7 +139,7 @@ public class OldImplHelper {
 
 		String var = value.getValue().substring(index+BEGIN_REFERENCE.length(), index2);
 
-		if (var.length() == 0)
+		if (var.isEmpty())
 		{
 			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference is empty in column '"+column+"'."));
 			return -1;
@@ -160,7 +160,7 @@ public class OldImplHelper {
 
 		String lineRef = arr[0].trim(); // reference to message
 
-		if (lineRef.length() == 0)
+		if (lineRef.isEmpty())
 		{
 			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to row is missed in column '"+column+"': '"+value.getOrigValue()+"'."));
 			return -1;
@@ -217,16 +217,15 @@ public class OldImplHelper {
 			targ.append(".").append(columnRef);
 		}
 		value.addParameter(new RefParameter(paramName, CodeGenerator_new.MAP_NAME + ".get(\"" + lineRef + "\")"));
-		String v = value.getValue().replaceFirst(Pattern.quote(src), " " + targ.toString() + " ");
+		String v = value.getValue().replaceFirst(Pattern.quote(src), " " + targ + " ");
 		value.setValue(v);
 		value.setReference(true);
 
 		// search for the next reference
 
-		index = value.getValue().indexOf(BEGIN_REFERENCE);
+        return value.getValue().indexOf(BEGIN_REFERENCE);
 
-		return index;
-	}
+    }
 
 
 	private static boolean verifyMessageColumns(
@@ -256,27 +255,25 @@ public class OldImplHelper {
 
 				for (int i = 0; i < columns.length; i++) {
                     String columnRef = columns[i];
-                    boolean itLastField = (i + 1 == columns.length);
+                    boolean itLastField = i + 1 == columns.length;
 					boolean collectionRequired = false;
-					{
-						int idx = columnRef.indexOf('[');
-						if (idx != -1) {
-							//FIXME: need gramma parser
-							String dimensions = columnRef.substring(idx+1);
-							if (dimensions.charAt(dimensions.length()-1) != ']') {
-								alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "No trailing ']' in the column " +
-										"reference " + columnRef +
-										"column '"+column+"': '"+value.getOrigValue()+"'."
-										));
-							}
-							dimensions = dimensions.substring(0, dimensions.length()-1);
-							columnRef = columnRef.substring(0, idx);
-							collectionRequired = true;
+                    int idx = columnRef.indexOf('[');
+                    if (idx != -1) {
+                        //FIXME: need gramma parser
+                        String dimensions = columnRef.substring(idx+1);
+                        if (dimensions.charAt(dimensions.length()-1) != ']') {
+                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "No trailing ']' in the column " +
+                                    "reference " + columnRef +
+                                    "column '"+column+"': '"+value.getOrigValue()+"'."
+                                    ));
+                        }
+                        dimensions = dimensions.substring(0, dimensions.length()-1);
+                        columnRef = columnRef.substring(0, idx);
+                        collectionRequired = true;
 
-						}
-					}
+                    }
 
-					IFieldStructure fld = null;
+                    IFieldStructure fld = null;
                     if (!fldType.isComplex()) {
                         alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Type " + fldType.getName() + " is not complex in the column " +
                                 "reference " + columnRef +
@@ -325,7 +322,7 @@ public class OldImplHelper {
 
 		for (String columnRef : columns) {
 
-			if (columnRef.length() == 0)
+			if (columnRef.isEmpty())
 			{
 				alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to column is missed in column '"+column+"': '"+value.getOrigValue()+"'."));
 				return false;
@@ -373,7 +370,7 @@ public class OldImplHelper {
 		// get reference to previous message and field name
 
 		String val = value.getValue().substring(index+2, index2);
-		if (val.length() == 0)
+		if (val.isEmpty())
 		{
 			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference is empty in column '"+column+"'."));
 			return -1;
@@ -389,7 +386,7 @@ public class OldImplHelper {
 
         String lineRef = arr[0].trim(); // reference to message
 
-        if (lineRef.length() == 0)
+        if (lineRef.isEmpty())
         {
             alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to row is missed in column '"+column+"': '"+value.getOrigValue()+"'."));
 			return -1;
@@ -453,10 +450,9 @@ public class OldImplHelper {
 
 		// search for the next reference
 
-		index = value.getValue().indexOf(BEGIN_STATIC);
+        return value.getValue().indexOf(BEGIN_STATIC);
 
-		return index;
-	}
+    }
 
 	private static int expandUtilityFunction(AMLAction action,
 			String column, Value value, int index, AlertCollector alertCollector, IDictionaryManager dictionaryManager, IActionManager actionManager, IUtilityManager utilityManager)
@@ -474,7 +470,7 @@ public class OldImplHelper {
 
 		String var = stringValue.substring(index+2, index2);
 
-		if (var.length() == 0)
+		if (var.isEmpty())
 		{
 			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Utility function name is empty in column '"+column+"'."));
 			return -1;
@@ -541,8 +537,7 @@ public class OldImplHelper {
 
         // search next function
 
-        index = value.getValue().indexOf(BEGIN_FUNCTION);
+        return value.getValue().indexOf(BEGIN_FUNCTION);
 
-        return index;
-	}
+    }
 }

@@ -17,7 +17,7 @@ package com.exactpro.sf.scriptrunner;
 
 public interface IPauseListener {
 
-	public void onScriptPaused(long id, String reason, long timeout);
-	public void onScriptResumed(long id);
+	void onScriptPaused(long id, String reason, long timeout);
+	void onScriptResumed(long id);
 
 }

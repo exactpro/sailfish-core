@@ -50,7 +50,7 @@ public class TagGroupDimension implements Serializable {
 		this.name = name;
 		this.possibleSubTags = subTags;
 		if (subTags != null) {
-		    this.selectedSubTags = new ArrayList<>(this.possibleSubTags);
+            this.selectedSubTags = new ArrayList<>(possibleSubTags);
 		}
         this.hasGroup = hasGroup;
 	}	
@@ -103,7 +103,7 @@ public class TagGroupDimension implements Serializable {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+        int prime = 31;
 		int result = 1;
 		result = prime * result + (int) (id ^ (id >>> 32));
 		result = prime * result + (isTag() ? 1231 : 1237);
@@ -112,17 +112,22 @@ public class TagGroupDimension implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		TagGroupDimension other = (TagGroupDimension) obj;
-		if (id != other.id)
-			return false;
-		if (isTag() != other.isTag())
-			return false;
+        if(id != other.id) {
+            return false;
+        }
+        if(isTag() != other.isTag()) {
+            return false;
+        }
 		return true;
 	}
 	

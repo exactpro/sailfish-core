@@ -27,7 +27,7 @@ import javax.faces.context.ExceptionHandlerFactory;
  */
 public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
 
-	private ExceptionHandlerFactory parent;
+	private final ExceptionHandlerFactory parent;
 	
 	public CustomExceptionHandlerFactory(ExceptionHandlerFactory parent) {
 		this.parent = parent;
@@ -35,8 +35,7 @@ public class CustomExceptionHandlerFactory extends ExceptionHandlerFactory {
 	
 	@Override
 	public ExceptionHandler getExceptionHandler() {
-		CustomExceptionHandler handler = new CustomExceptionHandler(parent.getExceptionHandler());
-		return handler;
+        return new CustomExceptionHandler(parent.getExceptionHandler());
 	}
 
 }

@@ -120,9 +120,9 @@ public class Alert extends AbstractAlert {
 
         Alert that = (Alert)o;
         EqualsBuilder builder = new EqualsBuilder();
-        
-        builder.append(this.line, that.line);
-        builder.append(this.reference, that.reference);
+
+        builder.append(line, that.line);
+        builder.append(reference, that.reference);
 
         return builder.isEquals();
     }
@@ -132,25 +132,25 @@ public class Alert extends AbstractAlert {
         HashCodeBuilder builder = new HashCodeBuilder();
         
         builder.append(super.hashCode());
-        builder.append(this.line);
-        builder.append(this.reference);
+        builder.append(line);
+        builder.append(reference);
         
         return builder.toHashCode();
     }
 
 	@Override
 	public String toString() {
-	    StringBuilder builder = new StringBuilder(this.type.getCapitalized());
-	    if (this.line != -1) {
-	        builder.append(" in line ").append(this.line);
+        StringBuilder builder = new StringBuilder(type.getCapitalized());
+        if(line != -1) {
+            builder.append(" in line ").append(line);
 	    }
-	    if (StringUtils.isNotBlank(this.reference)) {
-            builder.append(" reference '").append(this.reference).append('\'');
+        if(StringUtils.isNotBlank(reference)) {
+            builder.append(" reference '").append(reference).append('\'');
         }
-	    if (StringUtils.isNotBlank(this.column)) {
-	        builder.append(" column '").append(this.column).append('\'');
+        if(StringUtils.isNotBlank(column)) {
+            builder.append(" column '").append(column).append('\'');
 	    }
-	    builder.append(": ").append(this.message);
+        builder.append(": ").append(message);
 	    return builder.toString();
 	}
 

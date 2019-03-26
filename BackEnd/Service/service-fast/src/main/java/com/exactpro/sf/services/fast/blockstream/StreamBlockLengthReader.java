@@ -17,14 +17,14 @@ package com.exactpro.sf.services.fast.blockstream;
 
 import java.io.InputStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openfast.Message;
 import org.openfast.MessageBlockReader;
 import org.openfast.template.type.codec.TypeCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StreamBlockLengthReader implements MessageBlockReader {
-	private final static Logger logger = LoggerFactory.getLogger(StreamBlockLengthReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(StreamBlockLengthReader.class);
 
 	@Override
 	public void messageRead(InputStream arg0, Message arg1) {
@@ -32,7 +32,7 @@ public class StreamBlockLengthReader implements MessageBlockReader {
 
 	@Override
 	public boolean readBlock(InputStream stream) {
-		int n = (TypeCodec.UINT.decode(stream)).toInt();
+		int n = TypeCodec.UINT.decode(stream).toInt();
 		logger.trace("Read message length:{}", n);
 		return true;
 	}

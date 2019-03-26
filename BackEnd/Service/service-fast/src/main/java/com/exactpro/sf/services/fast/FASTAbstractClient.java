@@ -69,11 +69,11 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 public abstract class FASTAbstractClient implements IInitiatorService {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	private volatile ServiceStatus curStatus;
 
-	private ISession session = null;
+    private ISession session;
 
 	private final AtomicBoolean sessionClosed = new AtomicBoolean(true);
 
@@ -91,15 +91,15 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 	protected MessageHelper messageHelper;
 	protected IFastMessageFilter messageFilter;
 
-	private TemplateRegistry registry = null;
+    private TemplateRegistry registry;
 
 	private FastToIMessageConverter converter;
 
-	protected Connection connection = null;
+    protected Connection connection;
 
 	protected FASTMessageInputStream msgInStream;
 
-	private Thread thread = null;
+    private Thread thread;
 
 	private RecordingInputStream recordingInputStream;
 
@@ -110,15 +110,15 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 	@Override
 	public void init(
 			IServiceContext serviceContext,
-			final IServiceMonitor serviceMonitor,
-			final IServiceHandler handler,
-			final IServiceSettings settings,
-			final ServiceName name) {
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            ServiceName name) {
 
 		logger.debug("Initializing AbstractFastClient {}", this);
 
 		try {
-		    this.changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
+            changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
             logger.info("Initializing service {} ...", this);
 
             this.serviceName = Objects.requireNonNull(name, "'Service name' parameter");
@@ -127,21 +127,21 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 
             internalInit(name, handler, settings, serviceMonitor, serviceContext);
 
-			this.changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
+            changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
 			logger.debug("Abstract client initialized");
 
 		} catch ( RuntimeException e ) {
-			logger.error("Exception during service [{}] initializing", this.serviceName, e);
-			this.changeStatus(ServiceStatus.ERROR, "", e);
+            logger.error("Exception during service [{}] initializing", serviceName, e);
+            changeStatus(ServiceStatus.ERROR, "", e);
 			throw new ServiceException(e);
 		}
 	}
 
 	protected void internalInit(
-            final ServiceName name,
-            final IServiceHandler handler,
-            final IServiceSettings settings,
-            final IServiceMonitor serviceMonitor,
+            ServiceName name,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            IServiceMonitor serviceMonitor,
             IServiceContext serviceContext) {
 
         this.monitor = Objects.requireNonNull(serviceMonitor, "'Service monitor' parameter");
@@ -151,13 +151,13 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         if (settings == null) {
             throw new NullPointerException("'settings' parameter");
         }
-        this.setSettings((FASTClientSettings) settings);
+        setSettings((FASTClientSettings)settings);
 
         this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
 
         this.dictionaryManager = Objects.requireNonNull(serviceContext.getDictionaryManager(), "'Dictionary manager' parameter");
 
-        if (this.getSettings().getDictionaryName() == null) {
+        if(getSettings().getDictionaryName() == null) {
             throw new NullPointerException("settings.dictionaryName is null");
         }
 
@@ -166,7 +166,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         this.logConfigurator = Objects.requireNonNull(this.serviceContext.getLoggingConfigurator(), "'Logging configurator' parameter");
         this.serviceInfo = serviceContext.lookupService(serviceName);
 
-        logger.info("Initializing service [{}] ... done", this.serviceName);
+        logger.info("Initializing service [{}] ... done", serviceName);
 
         this.messageFilter = configureMessageFilter();
         SailfishURI dictionaryName = getSettings().getDictionaryName();
@@ -176,21 +176,18 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         loadFastTemplates(serviceContext.getDataManager(), dictionaryName.getPluginAlias(), templateName);
 
         this.messageHelper = new FASTMessageHelper();
-        this.messageHelper.init(this.dictionaryManager.getMessageFactory(dictionaryName), this.dictionary);
+        messageHelper.init(dictionaryManager.getMessageFactory(dictionaryName), dictionary);
     }
 
 	private IFastMessageFilter configureMessageFilter() {
 		FASTClientSettings settigns = getSettings();
 		String requiredValues = settigns.getMessageFilterExpression();
-		if (requiredValues == null) {
-			return new SimpleMessageFilter();
-		}
-		return new SimpleMessageFilter(requiredValues);
-	}
+        return requiredValues == null ? new SimpleMessageFilter() : new SimpleMessageFilter(requiredValues);
+    }
 
 
 	protected FastToIMessageConverter createConverter() {
-		if (this.converter == null) {
+        if(converter == null) {
 			FastToIMessageConverter converter = new FastToIMessageConverter(
 					dictionaryManager.getMessageFactory(getSettings().getDictionaryName()),
 					dictionary.getNamespace()
@@ -200,7 +197,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 		return converter;
 	}
 
-	private void loadFastTemplates(final IDataManager dataManager, String pluginAlias, String templateName) {
+    private void loadFastTemplates(IDataManager dataManager, String pluginAlias, String templateName) {
 		XMLMessageTemplateLoader loader = new XMLMessageTemplateLoader();
 		loader.setLoadTemplateIdFromAuxId(true);
 
@@ -221,17 +218,17 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 
 	@Override
 	public IServiceHandler getServiceHandler() {
-		return this.handler;
+        return handler;
 	}
 
 	@Override
 	public void dispose() {
-		this.changeStatus(ServiceStatus.DISPOSING, "Service is disposing", null);
+        changeStatus(ServiceStatus.DISPOSING, "Service is disposing", null);
 		doDispose();
-		this.changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
+        changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 
 		if(logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                     serviceName);
 		}
 	}
@@ -252,11 +249,11 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
             serviceName);
-		this.changeStatus(ServiceStatus.STARTING, "Service is starting", null);
+        changeStatus(ServiceStatus.STARTING, "Service is starting", null);
 		doStart();
-		this.changeStatus(ServiceStatus.STARTED, "Service is started", null);
+        changeStatus(ServiceStatus.STARTED, "Service is started", null);
 	}
 
 	protected abstract void doStart();
@@ -276,7 +273,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 	}
 
     protected ISession createSession() {
-        return new FASTSession(this, this.messageHelper);
+        return new FASTSession(this, messageHelper);
     }
 
 	protected Context createFastContext() {
@@ -324,7 +321,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 
 		try {
 			this.connection = getConnection(remoteAddr, port, interfaceAddress);
-			this.sessionClosed.set(false);
+            sessionClosed.set(false);
 		} catch (FastConnectionException e) {
 			closeSession();
 			logger.error("Failed to connect to {}:{}", remoteAddr, port, e);
@@ -471,7 +468,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
     }
 
     protected synchronized void closeSession() {
-        if (this.sessionClosed.compareAndSet(false, true)) {
+        if(sessionClosed.compareAndSet(false, true)) {
             logger.debug("Closing session");
             if (thread != null) {
                 thread.interrupt();
@@ -518,12 +515,12 @@ public abstract class FASTAbstractClient implements IInitiatorService {
     }
 
     public boolean isSessionClosed() {
-        return this.sessionClosed.get();
+        return sessionClosed.get();
     }
 
 	@Override
     public IMessage receive(IActionContext actionContext, IMessage msg) throws InterruptedException {
-        msg = this.messageHelper.prepareMessageToEncode(msg, null);
+        msg = messageHelper.prepareMessageToEncode(msg, null);
 		return WaitAction.waitForMessage(actionContext, msg, !msg.getMetaData().isAdmin());
     }
 }

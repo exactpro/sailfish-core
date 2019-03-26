@@ -27,7 +27,7 @@ public class SailFishAction {
      * Create MetaContainer for AML 2 action 
      */
     protected static MetaContainer createMetaContainer(MetaContainer parent, String name, String failUnexpected, String doublePrecision, String systemPrecision) {
-        MetaContainer result = new com.exactpro.sf.aml.script.MetaContainer();
+        MetaContainer result = new MetaContainer();
         if (parent != null) {
             parent.add(name, result);
             if (failUnexpected == null) {

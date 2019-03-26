@@ -89,28 +89,24 @@ import com.exactpro.sf.util.DateTimeUtility;
 import com.google.common.collect.ImmutableSet;
 
 @MatrixActions
-@ResourceAliases({"TestActions"})
+@ResourceAliases("TestActions")
 public class TestActions extends AbstractCaller {
     private static final Logger logger = LoggerFactory.getLogger(TestActions.class);
     private static final String FROM_TIMESTAMP = "#from_timestamp";
     private static final String TO_TIMESTAMP = "#to_timestamp";
     private static final String FORCE = "#force";
 
-    private final String MESSAGES_SEPARATOR = ",";
-    private final long MIN_TIMEOUT = 2000l;
-    private final String SCRIPT_URIS_COLUMN = "#script_uris";
-    private final String CONTEXT_COLUMN = "#context";
-    private final List<Class<?>> SUPPORTED_TYPES;
-
-    {
-        SUPPORTED_TYPES = Arrays.stream(JavaType.values()).map(x -> {
-            try {
-                return Class.forName(x.value());
-            } catch(ClassNotFoundException e) {
-                throw new EPSCommonException(e);
-            }
-        }).collect(Collectors.toList());
-    }
+    private static final String MESSAGES_SEPARATOR = ",";
+    private static final long MIN_TIMEOUT = 2000l;
+    private static final String SCRIPT_URIS_COLUMN = "#script_uris";
+    private static final String CONTEXT_COLUMN = "#context";
+    private static final List<Class<?>> SUPPORTED_TYPES = Arrays.stream(JavaType.values()).map(x -> {
+        try {
+            return Class.forName(x.value());
+        } catch(ClassNotFoundException e) {
+            throw new EPSCommonException(e);
+        }
+    }).collect(Collectors.toList());
 
     private final Map<String, ScriptEngineManager> pluginAliasToEngineManager = new HashMap<>();
 
@@ -136,9 +132,7 @@ public class TestActions extends AbstractCaller {
 	}
 
     @MessageDirection(direction=Direction.SENDDIRTY)
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public IMessage sendDirty(IActionContext actionContext, IMessage msg) throws InterruptedException {
 	    String serviceName = actionContext.getServiceName();
@@ -157,9 +151,7 @@ public class TestActions extends AbstractCaller {
     }
 
 	@MessageDirection(direction=Direction.RECEIVE)
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public IMessage receive(IActionContext actionContext, IMessage msg) throws InterruptedException
 	{
@@ -178,7 +170,7 @@ public class TestActions extends AbstractCaller {
             @CustomColumn(value = TO_TIMESTAMP, type = LocalDateTime.class)
     })
     @ActionMethod
-    public IMessage retrieve(final IActionContext actionContext, IMessage message) throws InterruptedException {
+    public IMessage retrieve(IActionContext actionContext, IMessage message) throws InterruptedException {
         IService service = ActionUtil.getService(actionContext, IService.class);
         IActionReport report = actionContext.getReport();
 
@@ -203,7 +195,7 @@ public class TestActions extends AbstractCaller {
             @CustomColumn(value = TO_TIMESTAMP, type = LocalDateTime.class)
     })
     @ActionMethod
-    public void countStored(final IActionContext actionContext, IMessage message) throws InterruptedException {
+    public void countStored(IActionContext actionContext, IMessage message) throws InterruptedException {
         IService service = ActionUtil.getService(actionContext, IService.class);
         ICSHIterator<IMessage> iterator = new JsonMessageIterator(actionContext, service, message);
         ComparatorSettings compSettings = WaitAction.createCompareSettings(actionContext, null, message);
@@ -247,7 +239,7 @@ public class TestActions extends AbstractCaller {
     }
 
 	@CommonColumns({
-	    @CommonColumn(value = Column.Timeout),
+            @CommonColumn(Column.Timeout),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
 	@ActionMethod
@@ -278,12 +270,10 @@ public class TestActions extends AbstractCaller {
             "Use the '" + FORCE + "' column to control disconnect logic: if 'true' then no logout message will be sent." +
             "The default value is 'false'.<br>")
 	@CommonColumns({
-	    @CommonColumn(value = Column.Timeout),
+            @CommonColumn(Column.Timeout),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
-    @CustomColumns({
-            @CustomColumn(value = FORCE, type = Boolean.class)
-    })
+    @CustomColumns(@CustomColumn(value = FORCE, type = Boolean.class))
 	@ActionMethod
     public void disconnectService(IActionContext actionContext)
 	{
@@ -311,7 +301,7 @@ public class TestActions extends AbstractCaller {
 	}
 
     @CommonColumns({
-        @CommonColumn(value = Column.Timeout),
+            @CommonColumn(Column.Timeout),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
     @ActionMethod
@@ -341,7 +331,7 @@ public class TestActions extends AbstractCaller {
 
 
     @CommonColumns({
-        @CommonColumn(value = Column.Timeout),
+            @CommonColumn(Column.Timeout),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
 	@ActionMethod
@@ -357,7 +347,7 @@ public class TestActions extends AbstractCaller {
 	}
 
 	@CommonColumns({
-	    @CommonColumn(value = Column.Timeout),
+            @CommonColumn(Column.Timeout),
         @CommonColumn(value = Column.ServiceName, required = true)
     })
 	@ActionMethod
@@ -433,9 +423,7 @@ public class TestActions extends AbstractCaller {
 		report.createMessage(StatusType.PASSED, MessageLevel.INFO, "Marks the matrix as AML3");
     }
 
-	@CommonColumns({
-			@CommonColumn(value = Column.ServiceName, required = true)
-	})
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
 	public void CheckActiveClients (IActionContext actionContext)
 	{
@@ -537,7 +525,7 @@ public class TestActions extends AbstractCaller {
         }
 
         Set<String> errors = new HashSet<>();
-        Class<? extends Object> valueClass = value.getClass();
+        Class<?> valueClass = value.getClass();
 
         if(value instanceof List) {
             List<?> list = (List<?>)value;
@@ -581,7 +569,7 @@ public class TestActions extends AbstractCaller {
 
         do {
             session = initiatorService.getSession();
-            isConnected = null != session && !session.isClosed();
+            isConnected = session != null && !session.isClosed();
         } while(!isConnected && waitUntil > System.currentTimeMillis());
 
         IActionReport report = actionContext.getReport();
@@ -637,7 +625,7 @@ public class TestActions extends AbstractCaller {
 
         @Override
         public boolean hasNext() {
-            return System.currentTimeMillis() < this.endTime && this.iterator.hasNext();
+            return System.currentTimeMillis() < endTime && iterator.hasNext();
         }
 
         @Override

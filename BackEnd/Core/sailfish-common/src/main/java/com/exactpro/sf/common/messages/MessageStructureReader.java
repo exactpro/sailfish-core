@@ -32,20 +32,16 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 public class MessageStructureReader {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MessageStructureReader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageStructureReader.class);
 
-    public MessageStructureReader() {
-    }
-
-
-	public void traverse(IMessageStructureVisitor msgStrVisitor,
+    public void traverse(IMessageStructureVisitor msgStrVisitor,
 			IMessageStructure msgStructure,
 			IMessage message,
 			IMessageStructureReaderHandler handler)
 	{
 		try
 		{
-			this.traverse(msgStrVisitor, msgStructure.getFields(), message, handler);
+            traverse(msgStrVisitor, msgStructure.getFields(), message, handler);
 		}
 		catch ( Exception e )
 		{
@@ -67,7 +63,9 @@ public class MessageStructureReader {
 	{
 
         fields.forEach((fieldName, curField) -> {
-			if (message == null) throw new NullPointerException("message is null for field "+fieldName);
+            if(message == null) {
+                throw new NullPointerException("message is null for field " + fieldName);
+            }
 
 			Object value = message.getField(fieldName);
 
@@ -119,154 +117,167 @@ public class MessageStructureReader {
             switch ( javaType )
             {
                 case JAVA_LANG_BOOLEAN :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(fieldName, (Boolean)value, curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitBooleanCollection(fieldName, (List<Boolean>)value, curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_SHORT :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (Short)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitShortCollection(
                                 fieldName,
                                 (List<Short>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_INTEGER :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (Integer)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitIntCollection(
                                 fieldName,
                                 (List<Integer>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_LONG :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (Long)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitLongCollection(
                                 fieldName,
                                 (List<Long>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_BYTE :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 curField.getName(),
                                 (Byte)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitByteCollection(
                                 fieldName,
                                 (List<Byte>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_FLOAT :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (Float)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitFloatCollection(
                                 fieldName,
                                 (List<Float>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_DOUBLE :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (Double)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitDoubleCollection(
                                 fieldName,
                                 (List<Double>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_STRING :
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (String)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitStringCollection(
                                 fieldName,
                                 (List<String>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_TIME_LOCAL_DATE_TIME:
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (LocalDateTime) value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitDateTimeCollection(
                                 fieldName,
                                 (List<LocalDateTime>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_TIME_LOCAL_DATE:
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (LocalDate) value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitDateCollection(
                                 fieldName,
                                 (List<LocalDate>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_TIME_LOCAL_TIME:
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (LocalTime) value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitTimeCollection(
                                 fieldName,
                                 (List<LocalTime>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_LANG_CHARACTER:
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (Character)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitCharCollection(
                                 fieldName,
                                 (List<Character>)value,
                                 curField, isDefault);
+                    }
                     break;
                 case JAVA_MATH_BIG_DECIMAL:
-                    if ( !curField.isCollection() )
+                    if(!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
                                 (BigDecimal)value,
                                 curField, isDefault);
-                    else
+                    } else {
                         msgStrVisitor.visitBigDecimalCollection(
                                 fieldName,
                                 (List<BigDecimal>)value,
                                 curField, isDefault);
+                    }
                     break;
                 default:
                     throw new EPSCommonException("Unknown FieldType = [" +

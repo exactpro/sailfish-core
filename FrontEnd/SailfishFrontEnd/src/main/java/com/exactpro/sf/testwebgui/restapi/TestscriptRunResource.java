@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
+import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_DATA_DIR;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -41,26 +43,25 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.FolderType;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IScriptProgress;
+import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlFailedAction;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
@@ -68,8 +69,8 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestCaseDescription;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestSciptrunList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
-
-import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.REPORT_DATA_DIR;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Path("testscriptruns")
 public class TestscriptRunResource {
@@ -114,16 +115,16 @@ public class TestscriptRunResource {
 					XmlTestscriptRunDescription xmlDescr = convertTestScriptDescription(testScriptRun);
 
 					return Response.
-			                status(Response.Status.OK).
+                            status(Status.OK).
 			                entity(xmlDescr).
 			                build();
-				} else if ( actionName.equals("report")) {
+                } else if("report".equals(actionName)) {
 
 					try {
                         if (testScriptRun.isLocked()) {
                             return getLockedReportResponse();
                         }
-                        final File reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_DATA_DIR);
+                        File reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_DATA_DIR);
                         File zipFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
 
                         try (ZipOutputStream archive = new ZipOutputStream(new FileOutputStream(zipFile))) {
@@ -140,13 +141,11 @@ public class TestscriptRunResource {
                             Files.walk(reportFolder.toPath()).filter(path -> path.toFile().isFile()).forEach(reportZipper);
                         }
 
-						StreamingOutput stream = null;
-
-						stream = out -> {
+                        StreamingOutput stream = out -> {
 
                             try {
                                 Files.copy(zipFile.toPath(), out);
-                            } catch (Exception e) {
+                            } catch(Exception e) {
                                 logger.error(e.getMessage(), e);
                                 throw new WebApplicationException(e);
                             }
@@ -161,15 +160,13 @@ public class TestscriptRunResource {
 					    logger.error(e.getMessage(), e);
 						errorMessage = "report doesn't exists";
 					}
-				}
-                else if (actionName.equals("shortreport")) {
+                } else if("shortreport".equals(actionName)) {
                     XmlTestScriptShortReport xmlProp = createShortReport(testScriptRun);
 
-                    return Response.status(Response.Status.OK)
+                    return Response.status(Status.OK)
                             .entity(xmlProp)
                             .build();
-                }
-				else if ( actionName.equals("reportzip")) {
+                } else if("reportzip".equals(actionName)) {
 
 					try {
                         if (testScriptRun.isLocked()) {
@@ -177,28 +174,26 @@ public class TestscriptRunResource {
                         }
 					    File reportFile = TestToolsAPI.getInstance().getTestScriptRunZip(testScriptRunId);
 
-						final InputStream zipInput = new FileInputStream(reportFile);
+                        InputStream zipInput = new FileInputStream(reportFile);
 
-						StreamingOutput stream = null;
+                        StreamingOutput stream = new StreamingOutput() {
+                            @Override
+                            public void write(OutputStream out)
+                                    throws IOException, WebApplicationException {
 
-						stream = new StreamingOutput() {
-							@Override
-							public void write(OutputStream out)
-									throws IOException, WebApplicationException {
+                                try(InputStream in = zipInput) {
+                                    int read = 0;
+                                    byte[] bytes = new byte[1024];
 
-								try (InputStream in = zipInput) {
-									int read = 0;
-									byte[] bytes = new byte[1024];
-
-									while ((read = in.read(bytes)) != -1) {
-										out.write(bytes, 0, read);
-									}
-								} catch (Exception e) {
-								    logger.error(e.getMessage(), e);
-									throw new WebApplicationException(e);
-								}
-							}
-						};
+                                    while((read = in.read(bytes)) != -1) {
+                                        out.write(bytes, 0, read);
+                                    }
+                                } catch(Exception e) {
+                                    logger.error(e.getMessage(), e);
+                                    throw new WebApplicationException(e);
+                                }
+                            }
+                        };
 
 						return Response
 								.ok(stream)
@@ -209,7 +204,7 @@ public class TestscriptRunResource {
 					    logger.error(e.getMessage(), e);
 						errorMessage = "report doesn't exists";
 					}
-				} else if ( actionName.equals("stop") ) {
+                } else if("stop".equals(actionName)) {
                     try {
                         TestToolsAPI.getInstance().stopScriptRun(testScriptRunId);
                     } catch (Exception e) {
@@ -218,14 +213,14 @@ public class TestscriptRunResource {
 
                         xmlResponse.setMessage(e.getMessage());
                         xmlResponse.setRootCause(e.getCause().getMessage());
-                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(xmlResponse).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(xmlResponse).build();
                     }
                     XmlResponse xmlResponse = new XmlResponse();
 
                     xmlResponse.setMessage("Testscripts " + testScriptRunId + " stoped succesfully");
                     xmlResponse.setRootCause(rootCause);
-                    return Response.status(Response.Status.OK).entity(xmlResponse).build();
-				} else if( actionName.equals("compileScript") ) {
+                    return Response.status(Status.OK).entity(xmlResponse).build();
+                } else if("compileScript".equals(actionName)) {
 					try{
 						SFLocalContext.getDefault().getScriptRunner().compileScript(testScriptRunId);
 					}catch(Exception e){
@@ -234,14 +229,14 @@ public class TestscriptRunResource {
 
                         xmlResponse.setMessage(e.getMessage());
                         xmlResponse.setRootCause(e.getCause().getMessage());
-                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(xmlResponse).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(xmlResponse).build();
 					}
 					XmlResponse xmlResponse = new XmlResponse();
 
                     xmlResponse.setMessage("Testscripts " + testScriptRunId + " compiled succesfully");
                     xmlResponse.setRootCause(rootCause);
-                    return Response.status(Response.Status.OK).entity(xmlResponse).build();
-				} else if( actionName.equals("runCompileScript") ) {
+                    return Response.status(Status.OK).entity(xmlResponse).build();
+                } else if("runCompileScript".equals(actionName)) {
 					try{
 						SFLocalContext.getDefault().getScriptRunner().runCompiledScript(testScriptRunId);
 					}catch(Exception e){
@@ -249,13 +244,13 @@ public class TestscriptRunResource {
 
                         xmlResponse.setMessage(e.getMessage());
                         xmlResponse.setRootCause(e.getCause().getMessage());
-                        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(xmlResponse).build();
+                        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(xmlResponse).build();
 					}
 					XmlResponse xmlResponse = new XmlResponse();
 
                     xmlResponse.setMessage("Testscripts " + testScriptRunId + " run compiled script succesfully");
                     xmlResponse.setRootCause(rootCause);
-                    return Response.status(Response.Status.OK).entity(xmlResponse).build();
+                    return Response.status(Status.OK).entity(xmlResponse).build();
                 } else {
                     errorMessage = "unknown action";
                 }
@@ -279,7 +274,7 @@ public class TestscriptRunResource {
         xmlResponse.setMessage(errorMessage);
         xmlResponse.setRootCause(rootCause);
 
-        return Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+        return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
 
 
 
@@ -310,7 +305,7 @@ public class TestscriptRunResource {
                             SFLocalContext.getDefault().getScriptRunner().removeTestScripts(deleteOnDisk, Arrays.asList(testScriptRunId));
                             XmlResponse xmlResponse = new XmlResponse();
                             xmlResponse.setMessage("Script report " + testScriptRunId + " was successfully deleted.");
-                            return Response.status(Response.Status.OK).entity(xmlResponse).build();
+                            return Response.status(Status.OK).entity(xmlResponse).build();
                         }
                     }
 
@@ -321,7 +316,7 @@ public class TestscriptRunResource {
                 SFLocalContext.getDefault().getScriptRunner().removeAllTestScripts(deleteOnDisk);
                 XmlResponse xmlResponse = new XmlResponse();
                 xmlResponse.setMessage("All script report was successfully deleted.");
-                return Response.status(Response.Status.OK).entity(xmlResponse).build();
+                return Response.status(Status.OK).entity(xmlResponse).build();
             }
         }
         catch ( Throwable e ) {
@@ -338,7 +333,7 @@ public class TestscriptRunResource {
             xmlResponse.setRootCause(rootCause);
 
             return Response.
-                    status(Response.Status.BAD_REQUEST).
+                    status(Status.BAD_REQUEST).
                     entity(xmlResponse).
                     build();
         }
@@ -369,7 +364,7 @@ public class TestscriptRunResource {
                 xmlResponse.setMessage(stringBuilder.toString());
             }
 
-            return Response.status(Response.Status.OK).entity(xmlResponse).build();
+            return Response.status(Status.OK).entity(xmlResponse).build();
         }
         catch ( Throwable e ) {
             logger.error(e.getMessage(), e);
@@ -385,7 +380,7 @@ public class TestscriptRunResource {
             xmlResponse.setRootCause(rootCause);
 
             return Response.
-                    status(Response.Status.BAD_REQUEST).
+                    status(Status.BAD_REQUEST).
                     entity(xmlResponse).
                     build();
         }
@@ -398,13 +393,13 @@ public class TestscriptRunResource {
     public Response updateTestScriptRun(@PathParam("testscriptrunid") long testScriptRunId,
                                         @QueryParam("sfCurrentID") long sfCurrentID) {
         XmlResponse xmlResponse = new XmlResponse();
-        Response.Status status = Response.Status.OK;
+        Status status = Status.OK;
         String message;
 
         try {
             TestScriptDescription testScriptRun = SFLocalContext.getDefault().getScriptRunner().getTestScriptDescription(testScriptRunId);
             if (testScriptRun == null) {
-                status = Response.Status.BAD_REQUEST;
+                status = Status.BAD_REQUEST;
                 message = String.format(
                         "Could not update test script run - TestScriptDescription with [%s] id is missed", testScriptRunId);
             } else {
@@ -417,7 +412,7 @@ public class TestscriptRunResource {
             String rootCause = ( e.getCause() != null ) ?  e.getCause().getMessage() : null;
             message = e.getMessage();
             xmlResponse.setRootCause(rootCause);
-            status = Response.Status.INTERNAL_SERVER_ERROR;
+            status = Status.INTERNAL_SERVER_ERROR;
         }
 
         xmlResponse.setMessage(message);
@@ -463,7 +458,7 @@ public class TestscriptRunResource {
         xmlDescr.setProblem(testScriptDescr.getProblem());
         xmlDescr.setCause(testScriptDescr.getCauseMessage());
 
-        if (ScriptState.FINISHED == testScriptDescr.getState()) {
+        if(testScriptDescr.getState() == ScriptState.FINISHED) {
             try {
 
                 IWorkspaceDispatcher workspaceDispatcher = SFLocalContext.getDefault().getWorkspaceDispatcher();
@@ -489,16 +484,15 @@ public class TestscriptRunResource {
                             testCase.getStatus().getStatus();
                     xmlTestCaseDescription.setStatus(statusType.toString());
 
-
-                    if (statusType.equals(StatusType.FAILED)
-                            || statusType.equals(StatusType.CONDITIONALLY_FAILED)) {
+                    if(statusType == StatusType.FAILED
+                            || statusType == StatusType.CONDITIONALLY_FAILED) {
                         List<?> actions = testCase.getActions();
                         for (int i = 0; i < actions.size(); i++) {
                             Action action = (Action) actions.get(i);
                             if (action != null) {
                                 StatusType actionStatusType = action.getStatus().getStatus();
-                                if (StatusType.FAILED.equals(actionStatusType)
-                                        || StatusType.CONDITIONALLY_FAILED.equals(actionStatusType)) {
+                                if(actionStatusType == StatusType.FAILED
+                                        || actionStatusType == StatusType.CONDITIONALLY_FAILED) {
                                     XmlFailedAction failedAction = new XmlFailedAction();
                                     failedAction.setActionNumber(i++);
                                     failedAction.setActionName(action.getName());
@@ -562,14 +556,11 @@ public class TestscriptRunResource {
         xmlResponse.setMessage(message);
         xmlResponse.setRootCause(rootCause);
 
-        return Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+        return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
     }
 
     private String getRootCause(Throwable e) {
-        if (e.getCause() != null) {
-            return getRootCause(e.getCause());
-        }
-        return e.getMessage();
+        return e.getCause() != null ? getRootCause(e.getCause()) : e.getMessage();
     }
 
     private Response getLockedReportResponse() {
@@ -579,7 +570,7 @@ public class TestscriptRunResource {
         xmlResponse.setRootCause(null);
 
         return Response
-                .status(Response.Status.BAD_REQUEST)
+                .status(Status.BAD_REQUEST)
                 .entity(xmlResponse)
                 .build();
     }

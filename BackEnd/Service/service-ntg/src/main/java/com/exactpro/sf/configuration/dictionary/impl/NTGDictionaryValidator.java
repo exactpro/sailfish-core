@@ -58,7 +58,6 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     protected static final int lengthLong = 8;
 
     public NTGDictionaryValidator() {
-        super();
     }
 
     public NTGDictionaryValidator(IDictionaryValidator parentValidator) {

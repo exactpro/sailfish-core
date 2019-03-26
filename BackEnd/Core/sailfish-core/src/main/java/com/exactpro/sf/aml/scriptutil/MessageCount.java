@@ -54,15 +54,15 @@ public class MessageCount {
 		less("<"),
 		lessOrEquals("<=");
 
-		private String value;
+        private final String value;
 
-		private Operation(String s)
+        Operation(String s)
 		{
 			this.value = s;
 		}
 
 		public String getValue() {
-			return this.value;
+            return value;
 		}
 
 	}
@@ -88,12 +88,24 @@ public class MessageCount {
 
 		MessageCount mc;
 
-		if ((mc = parse(value, Operation.equals)) != null) return mc;
-		if ((mc = parse(value, Operation.notEquals)) != null) return mc;
-		if ((mc = parse(value, Operation.greaterOrEquals)) != null) return mc;
-		if ((mc = parse(value, Operation.greater)) != null) return mc;
-		if ((mc = parse(value, Operation.lessOrEquals)) != null) return mc;
-		if ((mc = parse(value, Operation.less)) != null) return mc;
+        if((mc = parse(value, Operation.equals)) != null) {
+            return mc;
+        }
+        if((mc = parse(value, Operation.notEquals)) != null) {
+            return mc;
+        }
+        if((mc = parse(value, Operation.greaterOrEquals)) != null) {
+            return mc;
+        }
+        if((mc = parse(value, Operation.greater)) != null) {
+            return mc;
+        }
+        if((mc = parse(value, Operation.lessOrEquals)) != null) {
+            return mc;
+        }
+        if((mc = parse(value, Operation.less)) != null) {
+            return mc;
+        }
         if (isInterval(value)){
             Range range = Range.newInstance(value);
             return new MessageCount(range);
@@ -101,7 +113,7 @@ public class MessageCount {
 		try {
 			int i = Integer.parseInt(value);
 			if(i >= 0) {
-				mc = new MessageCount(i, Operation.equals);
+                return new MessageCount(i, Operation.equals);
 			}
 		} catch (NumberFormatException ignore){}
 
@@ -145,11 +157,11 @@ public class MessageCount {
      * @return count or 0, if input value is interval
      */
 	public int getCount() {
-		return this.count;
+        return count;
 	}
 
 	public Operation getOperation() {
-		return this.operation;
+        return operation;
 	}
 
 	/**
@@ -160,19 +172,19 @@ public class MessageCount {
 	public boolean checkInt(int i)
 	{
 		if(range == null) {
-            switch (this.operation) {
+            switch(operation) {
                 case equals:
-                    return i == this.count;
+                    return i == count;
                 case greater:
-                    return i > this.count;
+                    return i > count;
                 case greaterOrEquals:
-                    return i >= this.count;
+                    return i >= count;
                 case less:
-                    return i < this.count;
+                    return i < count;
                 case lessOrEquals:
-                    return i <= this.count;
+                    return i <= count;
                 case notEquals:
-                    return i != this.count;
+                    return i != count;
                 default:
                     return false;
             }
@@ -184,10 +196,6 @@ public class MessageCount {
 
 	@Override
 	public String toString() {
-		if(range == null){
-            return (this.operation != Operation.equals ? operation.getValue() : "") + this.count;
-        } else{
-            return range.toString();
-        }
+        return range == null ? (operation != Operation.equals ? operation.getValue() : "") + count : range.toString();
 	}
 }

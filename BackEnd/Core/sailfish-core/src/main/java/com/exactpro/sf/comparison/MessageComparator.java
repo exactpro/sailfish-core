@@ -467,21 +467,12 @@ public class MessageComparator {
     }
 
     private static List<MetaContainer> getMetaContainers(List<MetaContainer> metaContainers, int index) {
-        if(index < metaContainers.size()) {
-            return Collections.singletonList(metaContainers.get(index));
-        }
-
-        return metaContainers;
+        return index < metaContainers.size() ? Collections.singletonList(metaContainers.get(index)) : metaContainers;
     }
 
     private static List<MetaContainer> getMetaContainers(List<MetaContainer> metaContainers, String name) {
         List<MetaContainer> subMetaContainers = metaContainers.get(0).get(name);
-
-        if(subMetaContainers != null) {
-            return subMetaContainers;
-        }
-
-        return metaContainers;
+        return subMetaContainers != null ? subMetaContainers : metaContainers;
     }
 
     private static boolean checkTypes(Object actual, Object expected, Class<?> clazz, IFieldStructure structure) throws Exception {
@@ -532,10 +523,7 @@ public class MessageComparator {
     }
 
     private static List<?> getExpectedList(Object expected, List<?> embeddedListFilter) {
-        if (expected instanceof IFilter && embeddedListFilter != null) {
-            return embeddedListFilter;
-        }
-        return (List<?>)expected;
+        return expected instanceof IFilter && embeddedListFilter != null ? embeddedListFilter : (List<?>)expected;
     }
     
     private static Object getValue(Object wrapper) {

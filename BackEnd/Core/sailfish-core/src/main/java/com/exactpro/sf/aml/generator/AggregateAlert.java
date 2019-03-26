@@ -43,7 +43,7 @@ public class AggregateAlert extends AbstractAlert {
     }
 
     public String joinLines() {
-        return join(this.lines.stream());
+        return join(lines.stream());
     }
     
     public Set<Long> getLines() {
@@ -57,17 +57,17 @@ public class AggregateAlert extends AbstractAlert {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        if (this.lines.size() > 1) {
+        if(lines.size() > 1) {
             builder.append("Multiple ")
-                    .append(this.type.getCapitalized())
+                    .append(type.getCapitalized())
                     .append(" in lines '").append(joinLines()).append('\'');
 
         } else {
-            builder.append(this.type.getCapitalized())
+            builder.append(type.getCapitalized())
                     .append(" in line ").append(joinLines());
         }
-        builder.append(" column '").append(this.column).append('\'')
-                .append(": ").append(this.message);
+        builder.append(" column '").append(column).append('\'')
+                .append(": ").append(message);
         return builder.toString();
     }
     
@@ -95,18 +95,18 @@ public class AggregateAlert extends AbstractAlert {
         }
         
         public AlertBuilder process(AbstractAlert alert) {
-            return this.setColumn(alert.column)
+            return setColumn(alert.column)
              .setMessage(alert.message)
              .setType(alert.type);    
         }
         
         public AlertBuilder addLine(Long line) {
-            this.lines.add(Objects.requireNonNull(line, "Line number can't be empty"));
+            lines.add(Objects.requireNonNull(line, "Line number can't be empty"));
             return this;
         }
         
         public AlertBuilder addUid(Long uid) {
-            this.uids.add(Objects.requireNonNull(uid, "Unique identifier can't be empty"));
+            uids.add(Objects.requireNonNull(uid, "Unique identifier can't be empty"));
             return this;
         }
         
@@ -127,7 +127,7 @@ public class AggregateAlert extends AbstractAlert {
         }
         
         public AlertBuilder setType(AlertType type) {
-            if (this.type != null && !this.type.equals(type)) {
+            if(this.type != null && this.type != type) {
                 throw new IllegalArgumentException("New value '" + type + "' is not equals with current '" + this.type + "'");
             }
             this.type = type;

@@ -36,8 +36,7 @@ import javax.persistence.UniqueConstraint;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name="sttags",
-uniqueConstraints = {@UniqueConstraint(columnNames={"name"})})
+@Table(name = "sttags", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @SequenceGenerator(name="sttags_generator", sequenceName="sttags_sequence")
 public class Tag implements Serializable {
 	
@@ -113,7 +112,7 @@ public class Tag implements Serializable {
 
     @Override
 	public int hashCode() {
-		final int prime = 31;
+        int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
@@ -121,18 +120,23 @@ public class Tag implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		Tag other = (Tag) obj;
 		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
+            if(other.id != null) {
+                return false;
+            }
+        } else if(!id.equals(other.id)) {
+            return false;
+        }
 		return true;
 	}
 

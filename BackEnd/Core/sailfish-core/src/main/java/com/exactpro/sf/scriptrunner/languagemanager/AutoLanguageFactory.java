@@ -67,6 +67,6 @@ public class AutoLanguageFactory implements ILanguageFactory {
 
     @Override
     public ClassLoader createClassLoader(URL binFolder, ClassLoader parent) {
-        return new URLClassLoader(new URL[] { binFolder }, this.getClass().getClassLoader());
+        return new URLClassLoader(new URL[] { binFolder }, getClass().getClassLoader());
     }
 }

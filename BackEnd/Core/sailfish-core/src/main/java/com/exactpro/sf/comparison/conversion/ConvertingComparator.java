@@ -16,16 +16,15 @@
 package com.exactpro.sf.comparison.conversion;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
 public class ConvertingComparator implements Comparator<Object> {
-    private final static List<Class<?>> PRIORITIES = new ArrayList<>();
+    private static final List<Class<?>> PRIORITIES = new ArrayList<>();
 
     static {
         PRIORITIES.add(String.class);

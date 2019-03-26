@@ -15,8 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages;
 
-
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +29,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.FieldMetaData;
@@ -46,8 +45,8 @@ public class MapMessage implements IMessage
 {
 	private static final Logger logger = LoggerFactory.getLogger(MapMessage.class );
 
-	private Map<String, Object> fieldsMap = new HashMap<>();
-	private Map<String, FieldMetaData> fieldsMetaData = new HashMap<>();
+    private final Map<String, Object> fieldsMap = new HashMap<>();
+    private final Map<String, FieldMetaData> fieldsMetaData = new HashMap<>();
 	private MsgMetaData msgMetaData;
 	private String namespace;
 	private String name;
@@ -95,7 +94,7 @@ public class MapMessage implements IMessage
 		return resultFieldsMap;
 	}
 
-	@JsonSetter(value = "fieldsMap")
+    @JsonSetter("fieldsMap")
 	public void addFieldsMap(Map<String, Object> fieldsMap){
 		this.fieldsMap.putAll(fieldsMap);
 	}
@@ -112,7 +111,7 @@ public class MapMessage implements IMessage
 		{
 			throw new IllegalArgumentException("[name] could not be null");
 		}
-		return (T)this.fieldsMap.get(name);
+        return (T)fieldsMap.get(name);
 	}
 
 	@Override
@@ -145,21 +144,20 @@ public class MapMessage implements IMessage
 	@Override
 	public Object removeField(String name)
 	{
-		if ( null == name )
+        if(name == null)
 		{
 			throw new IllegalArgumentException("[name] could not be null");
 		}
-		return this.fieldsMap.remove(name);
+        return fieldsMap.remove(name);
 	}
 
 	@Override
 	public MapMessage cloneMessage()
 	{
-		MapMessage cloned = new MapMessage( this.namespace, this.name );
+        MapMessage cloned = new MapMessage(namespace, name);
 
-		for( String fldName : this.fieldsMap.keySet())
-		{
-			cloned.addField(fldName, clone(this.fieldsMap.get(fldName)));
+        for(String fldName : fieldsMap.keySet()) {
+            cloned.addField(fldName, clone(fieldsMap.get(fldName)));
 		}
 
 		cloned.msgMetaData = msgMetaData.clone();
@@ -169,8 +167,9 @@ public class MapMessage implements IMessage
 
 	private Object clone (Object o)
 	{
-		if (o instanceof IMessage)
-			return ((IMessage) o).cloneMessage();
+        if(o instanceof IMessage) {
+            return ((IMessage)o).cloneMessage();
+        }
 		if (o instanceof List)
 		{
 			List<Object> list = new ArrayList<>();
@@ -199,78 +198,76 @@ public class MapMessage implements IMessage
 
 		boolean equal = true;
 
-		if(!this.namespace.equals( message.getNamespace()))
+        if(!namespace.equals(message.getNamespace()))
 		{
 			equal = false;
 
 			logger.debug("Comparision failed. Message name [{}]. Namespaces mismatch: this [{}], other [{}].",
-					this.name, this.namespace, message.getNamespace());
-		}
-		else if (! this.name.equals(message.getName()))
+                    name, namespace, message.getNamespace());
+        } else if(!name.equals(message.getName()))
 		{
 			equal = false;
 
 			logger.debug("Comparision failed. Message name [{}]. Names mismatch: this [{}], other [{}].",
-					this.name, this.name, message.getName());
+                    name, name, message.getName());
 		}
 		else
 		{
-			for( String fldName : this.getFieldNames() )
+            for(String fldName : getFieldNames())
 			{
 				if( ! message.getFieldNames().contains(fldName))
 				{
 					equal = false;
 
 					logger.debug("Comparision failed. Message name [{}]. Other message does not contain field: [{}].",
-							this.name, fldName );
+                            name, fldName);
 
-					break;
+                    return equal;
 				}
 				else
 				{
-					if(( this.getField( fldName ) instanceof MapMessage)
-						|| (this.getField( fldName ) instanceof MapMessage[])
+                    if((getField(fldName) instanceof MapMessage)
+                            || (getField(fldName) instanceof MapMessage[])
 						|| ( message.getField( fldName ) instanceof MapMessage)
 						|| (message.getField( fldName ) instanceof MapMessage[]))
 					{
-						if(! ((( this.getField( fldName ) instanceof MapMessage[]) &&
+                        if(!(((getField(fldName) instanceof MapMessage[]) &&
 								( message.getField( fldName ) instanceof MapMessage[] ))
-							||(( this.getField( fldName ) instanceof MapMessage) &&
+                                || ((getField(fldName) instanceof MapMessage) &&
 									( message.getField( fldName ) instanceof MapMessage ))))
 						{
 							equal = false;
 
 							logger.debug("Comparision failed. Message name [{}]. Field name: [{}]. Types mismatch. Class this: [{}], class other: [{}].",
-									this.name, fldName,
-									this.getField( fldName ).getClass(),
+                                    name, fldName,
+                                    getField(fldName).getClass(),
 									message.getField( fldName ).getClass());
 
-							break;
+                            return equal;
 						}
 						else
 						{
-							if( this.getField( fldName ) instanceof IMessage )
+                            if(getField(fldName) instanceof IMessage)
 							{
-								equal = ((IMessage)this.getField( fldName ))
+                                equal = ((IMessage)getField(fldName))
 									.compare((IMessage) message.getField( fldName ));
 
 								if(! equal )
 								{
-									break;
+                                    return equal;
 								}
 							}
 							else
 							{
-								IMessage[] thisArr = (IMessage[]) this.getField( fldName );
+                                IMessage[] thisArr = (IMessage[])getField(fldName);
 								IMessage[] thatArr = (IMessage[]) message.getField( fldName );
 
 								if(thisArr.length != thatArr.length)
 								{
 									logger.debug("Comparision failed. Message name [{}]. Field name: [{}]. Arrays lengths are not equal. this: [{}], other: [{}].",
-											this.name, fldName, thisArr.length, thatArr.length);
-									equal = false;
-									break;
-								}
+                                            name, fldName, thisArr.length, thatArr.length);
+                                    return false;
+                                }
 
 								for( int i = 0 ; i < thisArr.length; i++ )
 								{
@@ -279,33 +276,33 @@ public class MapMessage implements IMessage
 									if(! equal )
 									{
 										logger.debug("Comparision failed. Message name [{}]. Field name: [{}]. Sub messages at index [{}] are not equal.",
-												this.name, fldName, i );
+                                                name, fldName, i);
 
 										break;
 									}
 								}
 								if(! equal )
 								{
-									break;
+                                    return equal;
 								}
 							}
 						}
 					}
 					else
 					{
-						if( this.getFieldType(fldName) != ((MapMessage)message).getFieldType(fldName))
+                        if(getFieldType(fldName) != ((MapMessage)message).getFieldType(fldName))
 						{
 							equal = false;
 
 							logger.debug("Comparision failed. Message name [{}]. Field name: [{}]. FieldType mismatch. this: [{}], other: [{}].",
-									this.name, fldName,
-									this.getFieldType(fldName),
+                                    name, fldName,
+                                    getFieldType(fldName),
 									((MapMessage)message).getFieldType(fldName));
-							break;
+                            return equal;
 						}
 						else
 						{
-							Object valueThis = this.getField( fldName );
+                            Object valueThis = getField(fldName);
 							Object valueThat = message.getField( fldName );
 
 							if(! compareValues(fldName, valueThis, valueThat))
@@ -315,11 +312,11 @@ public class MapMessage implements IMessage
 								equal = false;
 
                                 logger.debug("Comparision failed. Message name [{}]. Field name: [{}]. Values mismatch. this: [{}], other: [{}].",
-                                        this.name, fldName,
+                                        name, fldName,
                                         valueThis,
                                         valueThat);
 
-								break;
+                                return equal;
 							}
 						}
 					}
@@ -331,9 +328,8 @@ public class MapMessage implements IMessage
 
 	private boolean compareValues(String fieldname, Object valueThis, Object valueThat)
 	{
-		boolean equal = false;
 
-		Class<?> clazzThis = valueThis.getClass();
+        Class<?> clazzThis = valueThis.getClass();
 		Class<?> clazzThat = valueThat.getClass();
 
 		if(clazzThis == clazzThat)
@@ -341,7 +337,7 @@ public class MapMessage implements IMessage
 			Object castedThis = clazzThis.cast(valueThis);
 			Object castedThat = clazzThis.cast(valueThat);
 
-			if(BigDecimal.class == clazzThis)
+            if(clazzThis == BigDecimal.class)
 			{
 				BigDecimal bigDecimalThis = (BigDecimal)castedThis;
 				BigDecimal bigDecimalThat = (BigDecimal)castedThat;
@@ -349,23 +345,23 @@ public class MapMessage implements IMessage
 
 				if(subtract.doubleValue() == 0.0 )
 				{
-					equal = true;
+                    return true;
 				}
 			}
 			else if(castedThis.equals( castedThat))
 			{
-				equal = true;
+                return true;
 			}
 		}
 		else
 		{
             logger.debug("Comparision failed. Message name [{}]. Field name: [{}]. Types mismatch. this: [{}], other: [{}].",
-                    this.name, fieldname,
+                    name, fieldname,
                     clazzThis,
                     clazzThat);
 
 		}
-		return equal;
+        return false;
 	}
 
 	@Override
@@ -383,39 +379,35 @@ public class MapMessage implements IMessage
 
 	public JavaType getFieldType(String name)
 	{
-		if ( null == name )
+        if(name == null)
 		{
 			throw new IllegalArgumentException("[name] could not be null");
 		}
 
-		JavaType fieldType = null;
-
-		if (this.fieldsMap.containsKey(name))
-		{
-			Object field = this.fieldsMap.get(name);
-			fieldType = JavaType.fromValue(field.getClass().getCanonicalName());
+        if(fieldsMap.containsKey(name)) {
+            Object field = fieldsMap.get(name);
+            return JavaType.fromValue(field.getClass().getCanonicalName());
 		}
 		else
 		{
 			throw new EPSCommonException(
 					String.format( "Field [%s] is not defined in the message. " +
 							"Details: namespace [%s], message name [%s].",
-									name, this.namespace, this.name ));
-		}
-		return fieldType;
-	}
+                            name, namespace, this.name));
+        }
+    }
 
 	@Override
     public String toString() {
         StringBuilder toString = new StringBuilder(1024);
 
-        for(String fldName : this.getFieldNames()) {
+        for(String fldName : getFieldNames()) {
             if(toString.length() > 0) {
                 toString.append('|');
             }
 
-            if(this.getField(fldName) instanceof IMessage) {
-                toString.append(((MapMessage)this.getField(fldName)).toString());
+            if(getField(fldName) instanceof IMessage) {
+                toString.append((MapMessage)getField(fldName));
             } else {
                 toString.append(fldName);
                 toString.append('=');
@@ -430,11 +422,8 @@ public class MapMessage implements IMessage
 	@Override
 	public IFieldInfo getFieldInfo(String name)
 	{
-		if ( this.fieldsMap.containsKey(name) )
-			return new MapFieldInfo(name, this.fieldsMap.get(name));
-
-		return null;
-	}
+        return fieldsMap.containsKey(name) ? new MapFieldInfo(name, fieldsMap.get(name)) : null;
+    }
 
 	public void setNamespace(String namespace) {
 		this.namespace = namespace;
@@ -447,8 +436,8 @@ public class MapMessage implements IMessage
 
 	private class MapFieldInfo implements IFieldInfo
 	{
-		private String fldName;
-		private Object value;
+        private final String fldName;
+        private final Object value;
 
 
 		private MapFieldInfo(String name, Object value)
@@ -467,7 +456,7 @@ public class MapMessage implements IMessage
 		@Override
 		public String getName()
 		{
-			return this.fldName;
+            return fldName;
 		}
 
 
@@ -507,50 +496,65 @@ public class MapMessage implements IMessage
 
 		private FieldType convert(Object value)
 		{
-			if ( value == null )
-				throw new NullPointerException("value");
+            if(value == null) {
+                throw new NullPointerException("value");
+            }
 
-			if ( value instanceof IMessage )
-				return FieldType.SUBMESSAGE;
+            if(value instanceof IMessage) {
+                return FieldType.SUBMESSAGE;
+            }
 
-			if ( value instanceof Boolean || value instanceof boolean[] )
-				return FieldType.BOOLEAN;
+            if(value instanceof Boolean || value instanceof boolean[]) {
+                return FieldType.BOOLEAN;
+            }
 
-			if ( value instanceof Short || value instanceof short[] )
-				return FieldType.SHORT;
+            if(value instanceof Short || value instanceof short[]) {
+                return FieldType.SHORT;
+            }
 
-			if ( value instanceof Integer || value instanceof int[] )
-				return FieldType.INT;
+            if(value instanceof Integer || value instanceof int[]) {
+                return FieldType.INT;
+            }
 
-			if ( value instanceof Long || value instanceof long[] )
-				return FieldType.LONG;
+            if(value instanceof Long || value instanceof long[]) {
+                return FieldType.LONG;
+            }
 
-			if ( value instanceof Byte || value instanceof byte[] )
-				return FieldType.BYTE;
+            if(value instanceof Byte || value instanceof byte[]) {
+                return FieldType.BYTE;
+            }
 
-			if ( value instanceof Float || value instanceof float[] )
-				return FieldType.FLOAT;
+            if(value instanceof Float || value instanceof float[]) {
+                return FieldType.FLOAT;
+            }
 
-			if ( value instanceof Double || value instanceof double[] )
-				return FieldType.DOUBLE;
+            if(value instanceof Double || value instanceof double[]) {
+                return FieldType.DOUBLE;
+            }
 
-			if ( value instanceof String || value instanceof String[] )
-				return FieldType.STRING;
+            if(value instanceof String || value instanceof String[]) {
+                return FieldType.STRING;
+            }
 
-            if ( value instanceof LocalDateTime || value instanceof LocalDateTime[] )
+            if(value instanceof LocalDateTime || value instanceof LocalDateTime[]) {
                 return FieldType.DATE_TIME;
+            }
 
-            if ( value instanceof LocalDate || value instanceof LocalDate[] )
+            if(value instanceof LocalDate || value instanceof LocalDate[]) {
                 return FieldType.DATE;
+            }
 
-            if ( value instanceof LocalTime || value instanceof LocalTime[] )
+            if(value instanceof LocalTime || value instanceof LocalTime[]) {
                 return FieldType.TIME;
+            }
 
-			if ( value instanceof Character || value instanceof char[] )
-				return FieldType.CHAR;
+            if(value instanceof Character || value instanceof char[]) {
+                return FieldType.CHAR;
+            }
 
-			if ( value instanceof BigDecimal || value instanceof BigDecimal[] )
-				return FieldType.DECIMAL;
+            if(value instanceof BigDecimal || value instanceof BigDecimal[]) {
+                return FieldType.DECIMAL;
+            }
 
 			throw new EPSCommonException("Cannot associate  [" + value.getClass().getCanonicalName() + "] with FieldType" );
 		}
@@ -580,11 +584,11 @@ public class MapMessage implements IMessage
         MapMessage that = (MapMessage)obj;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.name, that.name);
-        builder.append(this.namespace, that.namespace);
-        builder.append(this.msgMetaData, that.msgMetaData);
-        builder.append(this.fieldsMap, that.fieldsMap);
-        builder.append(this.fieldsMetaData, that.fieldsMetaData);
+        builder.append(name, that.name);
+        builder.append(namespace, that.namespace);
+        builder.append(msgMetaData, that.msgMetaData);
+        builder.append(fieldsMap, that.fieldsMap);
+        builder.append(fieldsMetaData, that.fieldsMetaData);
 
         return builder.isEquals();
 	}
@@ -593,11 +597,11 @@ public class MapMessage implements IMessage
     public int hashCode() {
         HashCodeBuilder builder = new HashCodeBuilder();
 
-        builder.append(this.name);
-        builder.append(this.namespace);
-        builder.append(this.msgMetaData);
-        builder.append(this.fieldsMap);
-        builder.append(this.fieldsMetaData);
+        builder.append(name);
+        builder.append(namespace);
+        builder.append(msgMetaData);
+        builder.append(fieldsMap);
+        builder.append(fieldsMetaData);
 
         return builder.toHashCode();
     }

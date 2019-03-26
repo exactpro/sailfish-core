@@ -56,18 +56,18 @@ public class DictionariesBean implements Serializable {
 
         this.uploadFile = event.getFile();
 
-        if (!getModel().handleFileUpload(this.uploadFile)) {
+        if(!getModel().handleFileUpload(uploadFile)) {
             this.uploadFile = null;
         }
     }
 
     public void handleFileUpload() {
-        getModel().handleFileUploadProcess(this.uploadFile);
+        getModel().handleFileUploadProcess(uploadFile);
     }
 
     public void uploadDialogClose(CloseEvent event) {
         this.uploadFile = null;
-        this.model.uploadDialogClose();
+        model.uploadDialogClose();
     }
 
     public DictionaryEditorModel getModel() {
@@ -82,6 +82,6 @@ public class DictionariesBean implements Serializable {
     
     @PreDestroy
     public void preDestroy() {
-        BeanUtil.getSessionModelsMapper().destroyModel(this.model);
+        BeanUtil.getSessionModelsMapper().destroyModel(model);
     }
 }

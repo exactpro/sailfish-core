@@ -16,11 +16,10 @@
 package com.exactpro.sf.comparison;
 
 import java.math.BigDecimal;
-import java.util.List;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.common.messages.IMessage;
@@ -86,7 +85,7 @@ public class Convention {
 			return "\""+CONV_PRESENT_STRING+"\"";
 		}
 		if (type.equals(Byte.class) || type.equals(byte.class)) {
-            return "(byte)" + String.valueOf(CONV_PRESENT_BYTE);
+            return "(byte)" + CONV_PRESENT_BYTE;
         }
 		if (type.equals(Integer.class) || type.equals(int.class)) {
 			return String.valueOf(CONV_PRESENT_INTEGER);
@@ -98,7 +97,7 @@ public class Convention {
 			return String.valueOf(CONV_PRESENT_DOUBLE);
 		}
 		if (type.equals(Float.class) || type.equals(float.class)) {
-			return String.valueOf(CONV_PRESENT_FLOAT)+"f";
+			return CONV_PRESENT_FLOAT +"f";
 		}
 		if (type.equals(Character.class) || type.equals(char.class)) {
 			return "'\\u0000'";
@@ -127,7 +126,7 @@ public class Convention {
 			return "\""+CONV_MISSED_STRING+"\"";
 		}
 		if (type.equals(Byte.class) || type.equals(byte.class)) {
-            return "(byte)" + String.valueOf(CONV_MISSED_BYTE);
+            return "(byte)" + CONV_MISSED_BYTE;
         }
 		if (type.equals(Integer.class) || type.equals(int.class)) {
 			return String.valueOf(CONV_MISSED_INTEGER);
@@ -139,7 +138,7 @@ public class Convention {
 			return String.valueOf(CONV_MISSED_DOUBLE);
 		}
 		if (type.equals(Float.class) || type.equals(float.class)) {
-			return String.valueOf(CONV_MISSED_FLOAT)+"f";
+			return CONV_MISSED_FLOAT +"f";
 		}
 		if (type.equals(Character.class) || type.equals(char.class)) {
 			return "'\\u0001'";
@@ -205,13 +204,13 @@ public class Convention {
 
 	public static final boolean isConventionedValuePresent(Object value)
 	{
-		Class<? extends Object> type = value.getClass();
+        Class<?> type = value.getClass();
 		if (type.equals(String.class)) {
 			return value.equals(CONV_PRESENT_STRING)
-			|| value.equals(Convention.CONV_PRESENT_DATE_FIX_STRING)
-			|| value.equals(Convention.CONV_PRESENT_DATEONLY_FIX_STRING)
-			|| value.equals(Convention.CONV_PRESENT_TIMEONLY_FIX_STRING)
-			|| value.equals(Convention.CONV_PRESENT_CHAR_FIX_STRING);
+                    || value.equals(CONV_PRESENT_DATE_FIX_STRING)
+                    || value.equals(CONV_PRESENT_DATEONLY_FIX_STRING)
+                    || value.equals(CONV_PRESENT_TIMEONLY_FIX_STRING)
+                    || value.equals(CONV_PRESENT_CHAR_FIX_STRING);
 		} else if (type.equals(Integer.class)) {
 			return value.equals(CONV_PRESENT_INTEGER);
 		} else if (type.equals(Long.class)) {
@@ -235,20 +234,20 @@ public class Convention {
 		} else if (type.equals(Byte.class)){
 			return value.equals(CONV_PRESENT_BYTE);
 		} else if (value instanceof Enum) {
-			return (value.toString().equals(CONV_PRESENT_ENUM));
+			return value.toString().equals(CONV_PRESENT_ENUM);
 		}
 		return false;
 	}
 
 	public static final boolean isConventionedValueMissed(Object value)
 	{
-		Class<? extends Object> type = value.getClass();
+        Class<?> type = value.getClass();
 		if (type.equals(String.class)) {
 			return value.equals(CONV_MISSED_STRING)
-			|| value.equals(Convention.CONV_MISSED_DATE_FIX_STRING)
-                    || value.equals(Convention.CONV_MISSED_DATEONLY_FIX_STRING)
-			|| value.equals(Convention.CONV_MISSED_TIMEONLY_FIX_STRING)
-			|| value.equals(Convention.CONV_MISSED_CHAR_FIX_STRING);
+                    || value.equals(CONV_MISSED_DATE_FIX_STRING)
+                    || value.equals(CONV_MISSED_DATEONLY_FIX_STRING)
+                    || value.equals(CONV_MISSED_TIMEONLY_FIX_STRING)
+                    || value.equals(CONV_MISSED_CHAR_FIX_STRING);
 		} else if (type.equals(Integer.class)) {
 			return value.equals(CONV_MISSED_INTEGER);
 		} else if (type.equals(Long.class)) {
@@ -270,7 +269,7 @@ public class Convention {
 		} else if (type.equals(Byte.class)){
 			return value.equals(CONV_MISSED_BYTE);
 		} else if (value instanceof Enum) {
-			return (value.toString().equals(CONV_MISSED_ENUM));
+			return value.toString().equals(CONV_MISSED_ENUM);
 		}
 		return false;
 	}

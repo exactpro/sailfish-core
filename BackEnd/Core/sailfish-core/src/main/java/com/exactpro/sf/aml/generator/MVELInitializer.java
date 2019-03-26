@@ -26,10 +26,15 @@ import org.mvel2.integration.PropertyHandlerFactory;
 import org.mvel2.math.MathProcessor;
 import org.mvel2.optimizers.OptimizerFactory;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
+import java.util.Objects;
 
 public class MVELInitializer {
-    private ParserContext ctx;
+    private final ParserContext ctx;
 	private static volatile MVELInitializer singleton;
 
 	private MVELInitializer() {
@@ -40,12 +45,12 @@ public class MVELInitializer {
 		PropertyHandlerFactory.registerPropertyHandler(Map.class, new MapPropertyHandler());
 
 		ctx = new ParserContext();
-		ctx.addImport(java.time.LocalDateTime.class);
-		ctx.addImport(java.time.LocalDate.class);
-		ctx.addImport(java.time.LocalTime.class);
-		ctx.addImport(java.math.BigDecimal.class);
+		ctx.addImport(LocalDateTime.class);
+		ctx.addImport(LocalDate.class);
+		ctx.addImport(LocalTime.class);
+		ctx.addImport(BigDecimal.class);
 		ctx.addImport(SailfishURI.class);
-		ctx.addImport(java.util.Objects.class);
+		ctx.addImport(Objects.class);
 	}
 
 	@Override

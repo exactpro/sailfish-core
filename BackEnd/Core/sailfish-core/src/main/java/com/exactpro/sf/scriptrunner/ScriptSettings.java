@@ -42,7 +42,7 @@ public class ScriptSettings implements ICommonSettings
 	private String fileLayout;
 	private boolean addMessagetoReport;
 	private String scriptFolder;
-	private Map<String, String> properties;
+    private final Map<String, String> properties;
 	
 	public ScriptSettings() 
 	{
@@ -52,7 +52,7 @@ public class ScriptSettings implements ICommonSettings
 
 	public String getTestScriptClassName()
 	{
-		return this.testScriptClassName;
+        return testScriptClassName;
 	}
 	
 	
@@ -64,7 +64,7 @@ public class ScriptSettings implements ICommonSettings
 	
 	public boolean isAddMessagesToReport()
 	{
-		return this.addMessagetoReport;
+        return addMessagetoReport;
 	}
 	
 	
@@ -76,7 +76,7 @@ public class ScriptSettings implements ICommonSettings
 	
 	public IScriptReport getScriptReport()
 	{
-		return this.scriptReport;
+        return scriptReport;
 	}
 	
 	public void setScriptReport(IScriptReport scriptReport)
@@ -87,19 +87,19 @@ public class ScriptSettings implements ICommonSettings
 	
 	public String getProperty(String name)
 	{
-		return this.properties.get(name);		
-	}
+        return properties.get(name);
+    }
 	
 	
 	public Set<String> getPropertiesKeys()
 	{
-		return this.properties.keySet();
+        return properties.keySet();
 	}
 	
 	
 	public String getScriptName()
 	{
-		return this.scriptName;
+        return scriptName;
 	}
 	
 	
@@ -160,20 +160,24 @@ public class ScriptSettings implements ICommonSettings
 		HierarchicalConfiguration testScriptConfig = config.configurationAt(TESTSCRIPT_KEY);
 		
 		String scriptNamePar = config.getString("TestScript[@name]");
-		
-		if ( scriptNamePar == null )
-			throw new ScriptRunException("There is no \"name\" attribute at \"TestScript\" element in the script configuration file");
+
+        if(scriptNamePar == null) {
+            throw new ScriptRunException("There is no \"name\" attribute at \"TestScript\" element in the script configuration file");
+        }
 		
 		this.scriptName = scriptNamePar;
-		
-		if ( !(testScriptConfig.configurationsAt(PROPERTIES_KEY).isEmpty()) )
-			loadProperties(testScriptConfig.configurationAt(PROPERTIES_KEY));
-		
-		if ( !(testScriptConfig.configurationsAt(LOGGING_KEY).isEmpty()) )
-			loadLoggingProperties(testScriptConfig.configurationAt(LOGGING_KEY));
-		
-		if ( !(testScriptConfig.configurationsAt(TESTREPORT_KEY).isEmpty()) )
-			loadTestReportProperties(testScriptConfig.configurationAt(TESTREPORT_KEY));
+
+        if(!testScriptConfig.configurationsAt(PROPERTIES_KEY).isEmpty()) {
+            loadProperties(testScriptConfig.configurationAt(PROPERTIES_KEY));
+        }
+
+        if(!testScriptConfig.configurationsAt(LOGGING_KEY).isEmpty()) {
+            loadLoggingProperties(testScriptConfig.configurationAt(LOGGING_KEY));
+        }
+
+        if(!testScriptConfig.configurationsAt(TESTREPORT_KEY).isEmpty()) {
+            loadTestReportProperties(testScriptConfig.configurationAt(TESTREPORT_KEY));
+        }
 	}
 	
 	

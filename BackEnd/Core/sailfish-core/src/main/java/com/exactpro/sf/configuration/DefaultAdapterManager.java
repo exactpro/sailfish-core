@@ -183,15 +183,17 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 	 */
 	private void addFactoriesFor(Class<?> type, Map<Class<?>, IAdapterFactory> table) {
 		List<IAdapterFactory> factoryList = getFactories().get(type);
-		if (factoryList == null)
-			return;
+        if(factoryList == null) {
+            return;
+        }
 		for (int i = 0, imax = factoryList.size(); i < imax; i++) {
 			IAdapterFactory factory = factoryList.get(i);
 
 			Class<?>[] adapters = factory.getAdapterList();
 			for (int j = 0; j < adapters.length; j++) {
-				if (table.get(adapters[j]) == null)
-					table.put(adapters[j], factory);
+                if(table.get(adapters[j]) == null) {
+                    table.put(adapters[j], factory);
+                }
 			}
 		}
 	}
@@ -214,15 +216,17 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 	private Map<Class<?>, IAdapterFactory> getFactories(Class<?> adaptable) {
 		//cache reference to lookup to protect against concurrent flush
 		Map<Class<?>, Map<Class<?>, IAdapterFactory>> lookup = adapterLookup;
-		if (lookup == null)
-			adapterLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Map<Class<?>, IAdapterFactory>>(30));
+        if(lookup == null) {
+            adapterLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Map<Class<?>, IAdapterFactory>>(30));
+        }
 		Map<Class<?>, IAdapterFactory> table = lookup.get(adaptable);
 		if (table == null) {
 			// calculate adapters for the class
 			table = new HashMap<>(4);
 			Class<?>[] classes = computeClassOrder(adaptable);
-			for (int i = 0; i < classes.length; i++)
-				addFactoriesFor(classes[i], table);
+            for(int i = 0; i < classes.length; i++) {
+                addFactoriesFor(classes[i], table);
+            }
 			// cache the table
 			lookup.put(adaptable, table);
 		}
@@ -238,10 +242,11 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 		Class<?>[] classes = null;
 		//cache reference to lookup to protect against concurrent flush
 		Map<Class<?>, Class<?>[]> lookup = classSearchOrderLookup;
-		if (lookup == null)
-			classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Class<?>[]>());
-		else
-			classes = lookup.get(adaptable);
+        if(lookup == null) {
+            classSearchOrderLookup = lookup = Collections.synchronizedMap(new HashMap<Class<?>, Class<?>[]>());
+        } else {
+            classes = lookup.get(adaptable);
+        }
 		// compute class order only if it hasn't been cached before
 		if (classes == null) {
 			classes = doComputeClassOrder(adaptable);
@@ -265,8 +270,9 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 		}
 		//now traverse interface hierarchy for each class
 		Class<?>[] classHierarchy = classes.toArray(new Class<?>[classes.size()]);
-		for (int i = 0; i < classHierarchy.length; i++)
-			computeInterfaceOrder(classHierarchy[i].getInterfaces(), classes, seen);
+        for(int i = 0; i < classHierarchy.length; i++) {
+            computeInterfaceOrder(classHierarchy[i].getInterfaces(), classes, seen);
+        }
 		return classes.toArray(new Class<?>[classes.size()]);
 	}
 
@@ -280,8 +286,9 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 				newInterfaces.add(interfac);
 			}
 		}
-		for (Iterator<Class<?>> it = newInterfaces.iterator(); it.hasNext();)
-			computeInterfaceOrder(it.next().getInterfaces(), classes, seen);
+        for(Iterator<Class<?>> it = newInterfaces.iterator(); it.hasNext(); ) {
+            computeInterfaceOrder(it.next().getInterfaces(), classes, seen);
+        }
 	}
 
 	/**
@@ -302,12 +309,8 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
     public Object getAdapter(Class<?> clazz, Class<?> adapterType)
 	{
 		IAdapterFactory factory = getFactories(clazz).get(adapterType);
-		Object result = null;
-		if (factory != null)
-			result = factory.getAdapter(null, adapterType);
-		return result;
-
-	}
+        return factory != null ? factory.getAdapter(null, adapterType) : null;
+    }
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.runtime.IAdapterManager#getAdapter(java.lang.Object, java.lang.Class)
@@ -316,12 +319,11 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
     public Object getAdapter(Object adaptable, Class<?> adapterType) {
 		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterType);
 		Object result = null;
-		if (factory != null)
-			result = factory.getAdapter(adaptable, adapterType);
-		if (result == null && adapterType.isInstance(adaptable))
-			return adaptable;
-		return result;
-	}
+        if(factory != null) {
+            result = factory.getAdapter(adaptable, adapterType);
+        }
+        return result == null && adapterType.isInstance(adaptable) ? adaptable : result;
+    }
 
 	@Override
     public boolean hasAdapter(Object adaptable, Class<?> adapterType) {
@@ -334,11 +336,8 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 	@Override
     public int queryAdapter(Object adaptable, Class<?> adapterType) {
 		IAdapterFactory factory = getFactories(adaptable.getClass()).get(adapterType);
-		if (factory == null)
-			return NONE;
-
-		return LOADED;
-	}
+        return factory == null ? NONE : LOADED;
+    }
 
 	/*
 	 * @see IAdapterManager#registerAdapters
@@ -366,8 +365,9 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 	 */
 	@Override
     public synchronized void unregisterAdapters(IAdapterFactory factory) {
-		for (Iterator<List<IAdapterFactory>> it = factories.values().iterator(); it.hasNext();)
-			it.next().remove(factory);
+        for(Iterator<List<IAdapterFactory>> it = factories.values().iterator(); it.hasNext(); ) {
+            it.next().remove(factory);
+        }
 		flushLookup();
 	}
 
@@ -377,8 +377,9 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 	@Override
     public synchronized void unregisterAdapters(IAdapterFactory factory, Class<?> adaptable) {
 		List<IAdapterFactory> factoryList = factories.get(adaptable);
-		if (factoryList == null)
-			return;
+        if(factoryList == null) {
+            return;
+        }
 		factoryList.remove(factory);
 		flushLookup();
 	}

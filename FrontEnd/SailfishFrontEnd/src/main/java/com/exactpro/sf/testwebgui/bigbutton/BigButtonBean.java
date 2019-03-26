@@ -15,6 +15,35 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.bigbutton;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.net.URI;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+
+import javax.annotation.PostConstruct;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.primefaces.event.NodeCollapseEvent;
+import org.primefaces.event.NodeExpandEvent;
+import org.primefaces.model.DefaultStreamedContent;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.StreamedContent;
+import org.primefaces.model.TreeNode;
+import org.primefaces.model.UploadedFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.SFAPIClient;
 import com.exactpro.sf.bigbutton.BigButtonSettings;
 import com.exactpro.sf.bigbutton.RegressionRunner;
@@ -32,32 +61,6 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
-import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.primefaces.event.NodeCollapseEvent;
-import org.primefaces.event.NodeExpandEvent;
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.StreamedContent;
-import org.primefaces.model.TreeNode;
-import org.primefaces.model.UploadedFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.net.URI;
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
 
 @ManagedBean(name="bbBean")
 @SessionScoped
@@ -89,9 +92,9 @@ public class BigButtonBean implements Serializable {
 
     private boolean collapseRejectedQueue = true;
 
-    private boolean collapseWarnings = false;
+    private boolean collapseWarnings;
 
-    private boolean inCleaning = false;
+    private boolean inCleaning;
 
     private int cleaningProgress;
 
@@ -127,7 +130,7 @@ public class BigButtonBean implements Serializable {
 
                 runner.reset();
 
-                runner.prepare(this.libraryImportResult);
+                runner.prepare(libraryImportResult);
             }
 		} catch(Throwable e) {
             BeanUtil.addErrorMessage("Upload failed", e.getMessage());
@@ -197,20 +200,14 @@ public class BigButtonBean implements Serializable {
     }
 
 	public int getExecutorsCount() {
-
-		if(this.progressView == null) {
-			return 0;
-		}
-
-		return this.progressView.getAllExecutors().size();
-
-	}
+        return progressView == null ? 0 : progressView.getAllExecutors().size();
+    }
 
 	public StreamedContent getReportFile() {
 
         try {
 
-			return new DefaultStreamedContent(new FileInputStream(this.progressView.getReportFile()),
+            return new DefaultStreamedContent(new FileInputStream(progressView.getReportFile()),
 					"text/csv",
 					"SF_Big_Button_results.csv");
 
@@ -283,7 +280,7 @@ public class BigButtonBean implements Serializable {
 	}
 
     public TreeNode getSelectedListTreeNode() {
-        return this.selectedListTreeNode;
+        return selectedListTreeNode;
     }
 
     public void collapsingORexpanding(String nodeName) {
@@ -342,7 +339,7 @@ public class BigButtonBean implements Serializable {
     }
 
     private void collapsingORexpanding(TreeNode node, boolean option) {
-        if (node.getChildren().size() == 0) {
+        if(node.getChildren().isEmpty()) {
             node.setSelected(false);
         } else {
             for (TreeNode child : node.getChildren()) {
@@ -371,8 +368,8 @@ public class BigButtonBean implements Serializable {
     }
 
     public void collapseAllNodesOnDialogClose() {
-        if (this.errorNodes != null) {
-            for (Map.Entry<ErrorType, TreeNode> entry : this.errorNodes.entrySet()) {
+        if(errorNodes != null) {
+            for(Entry<ErrorType, TreeNode> entry : errorNodes.entrySet()) {
                 collapsingORexpanding(entry.getValue(), false);
             }
         }
@@ -394,14 +391,14 @@ public class BigButtonBean implements Serializable {
     }
 
     public String errorColor(String errorType) {
-        return (errorType.equals("COMMON") || errorType.equals("GLOBALS")) ? "red" : "none";
+        return ("COMMON".equals(errorType) || "GLOBALS".equals(errorType)) ? "red" : "none";
     }
 
     public Map<ErrorType, TreeNode> getErrorNodes() {
-        if (this.errorNodes == null) {
-            if (this.progressView.getImportErrors() != null) {
+        if(errorNodes == null) {
+            if(progressView.getImportErrors() != null) {
                 this.errorNodes = new TreeMap<>();
-                for (Map.Entry<ErrorType, Set<ImportError>> entry : this.progressView.getImportErrors().entrySet()) {
+                for(Entry<ErrorType, Set<ImportError>> entry : progressView.getImportErrors().entrySet()) {
                 if (entry.getValue().isEmpty()) {
                         continue;
                     }
@@ -409,11 +406,11 @@ public class BigButtonBean implements Serializable {
                     for (ImportError error : entry.getValue()) {
                         node.getChildren().add(fillErrorNode(error));
                     }
-                    this.errorNodes.put(entry.getKey(), node);
+                    errorNodes.put(entry.getKey(), node);
                 }
             }
         }
-        return this.errorNodes;
+        return errorNodes;
     }
 
     public void prepareToClean() {

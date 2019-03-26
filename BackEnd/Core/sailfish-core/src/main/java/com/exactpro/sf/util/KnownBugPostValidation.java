@@ -24,14 +24,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.exactpro.sf.aml.scriptutil.ExpressionResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.aml.scriptutil.ExpressionResult;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
@@ -44,7 +44,7 @@ import com.exactpro.sf.scriptrunner.StatusType;
  */
 public class KnownBugPostValidation extends AbstractPostValidation {
 
-    private static Logger logger = LoggerFactory.getLogger(KnownBugPostValidation.class);
+    private static final Logger logger = LoggerFactory.getLogger(KnownBugPostValidation.class);
 
     public KnownBugPostValidation(IPostValidation parentValidator, IMessage filter) {
         super(parentValidator);
@@ -157,11 +157,7 @@ public class KnownBugPostValidation extends AbstractPostValidation {
         StringBuilder reasonBuilder = new StringBuilder(mainReason);
         if (!expressionResult.hasKnownBugsInfo()) {
             reasonBuilder.append(System.lineSeparator()).append(comparisonResult.getStatus()).append(": ");
-            if (expressionResult.getCause() != null) {
-                reasonBuilder.append(expressionResult.getCause().getMessage());
-            } else {
-                reasonBuilder.append(expressionResult.getDescription());
-            }
+            reasonBuilder.append(expressionResult.getCause() != null ? expressionResult.getCause().getMessage() : expressionResult.getDescription());
         }
         return reasonBuilder.toString();
     }
@@ -171,7 +167,7 @@ public class KnownBugPostValidation extends AbstractPostValidation {
         comparisonResult.setException(message != null ? new KnownBugException(message) : null);
     }
 
-    private static enum Status {
+    private enum Status {
         PASSED(StatusType.PASSED, 0),
         CONDITIONALLY_PASSED(StatusType.CONDITIONALLY_PASSED, 1),
         FAILED(StatusType.FAILED, 2);
@@ -179,16 +175,13 @@ public class KnownBugPostValidation extends AbstractPostValidation {
         private final StatusType statusType;
         private final int priority;
 
-        private Status(StatusType statusType, int priority) {
+        Status(StatusType statusType, int priority) {
             this.statusType = statusType;
             this.priority = priority;
         }
 
         public Status compareAndGetMax(Status status) {
-            if (this.priority < status.priority) {
-                return status;
-            }
-            return this;
+            return priority < status.priority ? status : this;
         }
     }
 
@@ -231,7 +224,7 @@ public class KnownBugPostValidation extends AbstractPostValidation {
                     Set<BugDescription> descriptions = expressionResult.getActualDescriptions();
                     comparisonResult.setException(new FieldKnownBugException("It's part of bug(s): " + descriptions, descriptions));
                     for (BugDescription description : descriptions) {
-                        this.map.get(description).increment();
+                        map.get(description).increment();
                     }
                 } else {
                     Throwable cause = expressionResult.getCause();
@@ -245,7 +238,7 @@ public class KnownBugPostValidation extends AbstractPostValidation {
         }
 
         public Set<Collection<BugDescription>> getIntersections() {
-            return this.intersections;
+            return intersections;
         }
 
         public Set<BugDescription> getDescriptions() {
@@ -262,7 +255,7 @@ public class KnownBugPostValidation extends AbstractPostValidation {
             }
             Set<BugDescription> result = new HashSet<>();
 
-            for (Entry<BugDescription, KnownBugInfo> entry : this.map.entrySet()) {
+            for(Entry<BugDescription, KnownBugInfo> entry : map.entrySet()) {
                 if (entry.getValue().getStatus() != KnownBugStatus.NOT_REPRODUCE) {
                     result.add(entry.getKey());
                 }
@@ -272,23 +265,23 @@ public class KnownBugPostValidation extends AbstractPostValidation {
         }
 
         public KnownBugInfo get(BugDescription description) {
-            return this.map.get(description);
+            return map.get(description);
         }
 
         public boolean isEmpty() {
-            return this.map.isEmpty();
+            return map.isEmpty();
         }
 
         private void add(ComparisonResult comparisonResult, ExpressionResult expressionResult) {
             Set<BugDescription> descriptions = expressionResult.getPotentialDescriptions();
             if (descriptions.size() > 1) {
-                this.intersections.add(descriptions);
+                intersections.add(descriptions);
             }
             for (BugDescription description : descriptions) {
-                KnownBugInfo knownBugInfo = this.map.get(description);
+                KnownBugInfo knownBugInfo = map.get(description);
                 if (knownBugInfo == null) {
                     knownBugInfo = new KnownBugInfo(description);
-                    this.map.put(description, knownBugInfo);
+                    map.put(description, knownBugInfo);
                 }
                 knownBugInfo.add(comparisonResult, expressionResult);
             }
@@ -296,12 +289,12 @@ public class KnownBugPostValidation extends AbstractPostValidation {
 
         @Override
         public String toString() {
-            if (!this.map.isEmpty()) {
+            if(!map.isEmpty()) {
                 StringBuilder stringBuilder = new StringBuilder();
-                if (!this.intersections.isEmpty()) {
-                    stringBuilder.append("intersections: ").append(this.intersections).append(' ');
+                if(!intersections.isEmpty()) {
+                    stringBuilder.append("intersections: ").append(intersections).append(' ');
                 }
-                stringBuilder.append("bugs: ").append(this.map.values());
+                stringBuilder.append("bugs: ").append(map.values());
                 return stringBuilder.toString();
             }
 
@@ -312,14 +305,14 @@ public class KnownBugPostValidation extends AbstractPostValidation {
     private static class KnownBugInfo {
         private final Map<ComparisonResult, ExpressionResult> comparisonResults = new IdentityHashMap<>() ;
         private final BugDescription description;
-        private int count = 0;
+        private int count;
 
         public KnownBugInfo(BugDescription description) {
             this.description = description;
         }
 
         public void add(ComparisonResult comparisonResult, ExpressionResult expressionResult) {
-            this.comparisonResults.put(comparisonResult, expressionResult);
+            comparisonResults.put(comparisonResult, expressionResult);
         }
 
         public void increment() {
@@ -327,14 +320,14 @@ public class KnownBugPostValidation extends AbstractPostValidation {
         }
 
         public KnownBugStatus getStatus() {
-            if (this.count == 0) {
+            if(count == 0) {
                 return KnownBugStatus.NOT_REPRODUCE;
-            } else if (this.count < this.comparisonResults.size()) {
+            } else if(count < comparisonResults.size()) {
                 return KnownBugStatus.PART_REPRODUCE;
-            } else if (this.count == this.comparisonResults.size()) {
+            } else if(count == comparisonResults.size()) {
                 return KnownBugStatus.FULL_REPRODUCE;
             }
-            throw new EPSCommonException("Internal error, description for bug description " + this.description);
+            throw new EPSCommonException("Internal error, description for bug description " + description);
         }
 
         public BugDescription getDescription() {
@@ -347,14 +340,14 @@ public class KnownBugPostValidation extends AbstractPostValidation {
 
         @Override
         public String toString() {
-            return new StringBuilder("'").append(this.description).append("'-(").append(this.count).append('/').append(this.comparisonResults.size())
+            return new StringBuilder("'").append(description).append("'-(").append(count).append('/').append(comparisonResults.size())
                     .append(')').toString();
         }
     }
 
-    private static enum KnownBugStatus {
+    private enum KnownBugStatus {
         NOT_REPRODUCE,
         PART_REPRODUCE,
-        FULL_REPRODUCE;
+        FULL_REPRODUCE
     }
 }

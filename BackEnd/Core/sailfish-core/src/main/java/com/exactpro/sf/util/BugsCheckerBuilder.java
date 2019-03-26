@@ -23,12 +23,9 @@ import java.util.Set;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.aml.scriptutil.ExpressionResult;
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IKnownBug;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.comparison.Convention;
 import com.exactpro.sf.comparison.conversion.MultiConverter;
@@ -49,8 +46,8 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     private final SetMultimap<Object, BugDescription> alternativeValues = LinkedHashMultimap.create();
     private Object actualValue = BugsCheckerBuilder.class; //default value, because real actual value may be null
     private final Function<Object, Object> defaultActualMapFunction = value ->
-            this.actualValue != BugsCheckerBuilder.class
-            ? this.actualValue
+            actualValue != BugsCheckerBuilder.class
+                    ? actualValue
             : ObjectUtils.defaultIfNull(value, Convention.CONV_MISSED_OBJECT);
     private Function<Object, Object> actualMapFumction = defaultActualMapFunction;
 
@@ -69,7 +66,7 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
                     "Alternative value " + alternativeValue + " with description " + bugDescription + " are equal to origin value " + originValue);
         }
         try {
-            this.alternativeValues.put(alternativeValue, bugDescription);
+            alternativeValues.put(alternativeValue, bugDescription);
         } catch (IllegalArgumentException e) {
             throw new EPSCommonException("Alternative values map already contains " + alternativeValue, e);
         }
@@ -78,8 +75,8 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
 
     @Override
     public BugsCheckerBuilder BugAny(String subject, String... categories) {
-        if (this.originValue != Convention.CONV_MISSED_OBJECT) {
-            throw new EPSCommonException("Expected value '" + this.originValue + "' is not empty");
+        if(originValue != Convention.CONV_MISSED_OBJECT) {
+            throw new EPSCommonException("Expected value '" + originValue + "' is not empty");
         }
         return Bug(subject, Convention.CONV_PRESENT_OBJECT, categories);
     }
@@ -103,7 +100,7 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     public ExpressionResult validate(Object actualValue) throws KnownBugException {
         actualValue = actualMapFumction.apply(actualValue);
 
-        if (this.originValue == Convention.CONV_PRESENT_OBJECT && actualValue != Convention.CONV_MISSED_OBJECT) {
+        if(originValue == Convention.CONV_PRESENT_OBJECT && actualValue != Convention.CONV_MISSED_OBJECT) {
             return new ExpressionResult(false, ORIGIN_VALUE_MESSAGE, null, null, getDescriptions());
         }
 
@@ -160,7 +157,7 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     @Override
     public String getCondition() {
         StringBuilder stringBuilder = new StringBuilder()
-                .append("Expected: ").append(formatValue(this.originValue)).append(", Bugs: [");
+                .append("Expected: ").append(formatValue(originValue)).append(", Bugs: [");
         for (Object alternativeValue : alternativeValues.keySet()) {
             stringBuilder
                 .append("'").append(alternativeValues.get(alternativeValue)).append("'")
@@ -180,7 +177,7 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     }
 
     private Set<BugDescription> getDescriptions() {
-        return Collections.unmodifiableSet(new HashSet<>(this.alternativeValues.values()));
+        return Collections.unmodifiableSet(new HashSet<>(alternativeValues.values()));
     }
 
     private static ExpressionResult createExpressionResult(BugsCheckerBuilder bugsCheckerBuilder, Set<BugDescription> descriptions) {
@@ -188,10 +185,10 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
     }
 
     private boolean isActualEmpty() {
-        if (this.actualMapFumction != defaultActualMapFunction) {
+        if(actualMapFumction != defaultActualMapFunction) {
             throw new EPSCommonException("Actual map fumction already set");
-        } else if (this.actualValue != BugsCheckerBuilder.class) {
-            throw new EPSCommonException("Actual already set '" + this.actualValue + "'");
+        } else if(actualValue != BugsCheckerBuilder.class) {
+            throw new EPSCommonException("Actual already set '" + actualValue + "'");
         }
 
         return true;

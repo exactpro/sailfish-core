@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ServiceEvent {
 
-	private static long prevTimestamp = 0;
+    private static long prevTimestamp;
 
 	public enum Level {
 
@@ -54,7 +54,7 @@ public class ServiceEvent {
 
 		public static Type convert(ServiceStatus status)
 		{
-			return Type.valueOf(status.toString());
+            return valueOf(status.toString());
 		}
 
 	}

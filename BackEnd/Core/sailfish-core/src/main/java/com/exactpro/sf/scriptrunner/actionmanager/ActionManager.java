@@ -77,7 +77,7 @@ public class ActionManager implements IActionManager, ILoadableManager {
         @Override
         protected Map<Class<? extends IActionCaller>, IActionCaller> initialValue() {
             return new HashMap<>();
-        };
+        }
     };
 
     private class PluginComponent {

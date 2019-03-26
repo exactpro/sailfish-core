@@ -30,5 +30,5 @@ public interface ICommonSettings
 	 *  
 	 * @param config - source of settings
 	 */
-	public void load(final HierarchicalConfiguration config);
+    void load(HierarchicalConfiguration config);
 }

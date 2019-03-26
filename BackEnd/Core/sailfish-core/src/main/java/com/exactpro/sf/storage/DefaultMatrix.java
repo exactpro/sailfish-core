@@ -67,29 +67,11 @@ public class DefaultMatrix implements IMatrix, Serializable {
 		this.id = id;
 		this.name = name;
 		this.date = date;
-		if (creator != null) {
-			this.creator = creator;
-		} else {
-			this.creator = "Unknown creator";
-		}
-		if (description != null) {
-			this.description = description;
-		} else {
-			this.description = "";
-		}
-        if (link != null) {
-			this.link = link;
-		} else {
-			this.link = "";
-		}
-
+        this.creator = creator != null ? creator : "Unknown creator";
+        this.description = description != null ? description : "";
+        this.link = link != null ? link : "";
         this.providerURI = providerURI;
-
-        if (languageURI != null) {
-			this.languageURI = languageURI;
-		} else {
-			this.languageURI = AutoLanguageFactory.URI;
-		}
+        this.languageURI = languageURI != null ? languageURI : AutoLanguageFactory.URI;
 		this.filePath = filePath;
 	}
 
@@ -126,7 +108,7 @@ public class DefaultMatrix implements IMatrix, Serializable {
 	@Override
 	public InputStream readStream(IWorkspaceDispatcher workspaceDispatcher) {
 	    try {
-            File target = workspaceDispatcher.getFile(FolderType.MATRIX, this.filePath);
+            File target = workspaceDispatcher.getFile(FolderType.MATRIX, filePath);
             return new FileInputStream(target);
         } catch (Exception e) {
             throw new StorageException("Can't open stored matrix", e);
@@ -204,7 +186,7 @@ public class DefaultMatrix implements IMatrix, Serializable {
     @JsonIgnore
     @Override
     public boolean getReloadEnabled() {
-        return link != null && !link.equals("");
+        return link != null && !"".equals(link);
     }
 
     @Override
@@ -219,12 +201,18 @@ public class DefaultMatrix implements IMatrix, Serializable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
 		DefaultMatrix that = (DefaultMatrix) o;
 
-		if (!id.equals(that.id)) return false;
+        if(!id.equals(that.id)) {
+            return false;
+        }
 
 		return true;
 	}

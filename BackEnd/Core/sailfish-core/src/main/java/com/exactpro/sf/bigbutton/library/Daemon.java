@@ -24,17 +24,12 @@ public class Daemon {
 	private int timeout;
 	
 	public String getHttpUrl() {
-		
-		String result = this.path;
-		
-		if(!result.startsWith("http")) {
-			
-			result = "http://" + result;
-			
-		}
-		
-		return result;
-	}
+
+        String result = path;
+
+        return !result.startsWith("http") ? "http://" + result : result;
+
+    }
 	
 	public String getName() {
 		return name;

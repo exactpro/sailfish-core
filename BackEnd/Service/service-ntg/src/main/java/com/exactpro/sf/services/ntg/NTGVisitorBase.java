@@ -41,14 +41,14 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 	protected static final int lengthLong = 8;
 	protected final char STRING_TERMINATOR = '\0';
 
-	protected int accumulatedLength = 0;
-	protected IoBuffer buffer = null;
+    protected int accumulatedLength;
+    protected IoBuffer buffer;
 
     protected NTGVisitorBase()
 	{
 		this.buffer = IoBuffer.wrap(new byte[0]);
-		this.buffer.setAutoExpand(true);
-		this.buffer.order(ByteOrder.LITTLE_ENDIAN);
+        buffer.setAutoExpand(true);
+        buffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
     protected NTGVisitorBase(IoBuffer buffer)
@@ -57,7 +57,7 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 		this.buffer.order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	protected void validateAttributesMap(String fieldName, Class<?> clazz, final IFieldStructure fldStruct)
+    protected void validateAttributesMap(String fieldName, Class<?> clazz, IFieldStructure fldStruct)
 	throws EPSCommonException
 	{
 		StringBuffer errMessage = new StringBuffer();
@@ -163,7 +163,7 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 
         private final String type;
 
-        private ProtocolType(String type) {
+        ProtocolType(String type) {
             this.type = type;
         }
 

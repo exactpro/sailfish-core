@@ -40,7 +40,7 @@ public class HibernateFactory {
 
 	private static final Object lock = new Object();
 
-	private Map<File, SessionFactory> sessionFactories;
+	private final Map<File, SessionFactory> sessionFactories;
 
 	private HibernateFactory () {
 		this.sessionFactories = new HashMap<>();

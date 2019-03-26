@@ -32,8 +32,7 @@ public class AMLException extends Exception {
 
 	public AMLException()
 	{
-		super();
-	}
+    }
 
 	public AMLException(String message)
 	{
@@ -61,6 +60,6 @@ public class AMLException extends Exception {
     }
 
 	public AlertCollector getAlertCollector() {
-		return this.alertCollector;
+        return alertCollector;
 	}
 }

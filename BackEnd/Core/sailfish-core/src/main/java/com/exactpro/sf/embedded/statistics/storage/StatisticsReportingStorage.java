@@ -17,11 +17,13 @@ package com.exactpro.sf.embedded.statistics.storage;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
@@ -34,7 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.embedded.statistics.entities.KnownBug;
@@ -65,9 +66,9 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 	private static final String FAILED_ACTION_SPLITTER = "FACTSPLITTER";
 	private static final String ACTION_RANK_FREASON_SPLITTER = "ARFRSPLITTER";
 
-	private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
 
-	private HibernateStorageSettings settings;
+    private final HibernateStorageSettings settings;
 
 	public StatisticsReportingStorage(SessionFactory sessionFactory, HibernateStorageSettings settings) {
 
@@ -203,7 +204,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "where TCR.id in (:ids) "
                 + "group by TCR.id, ARKB.reproduced";
 
-        Session session = this.sessionFactory.openSession();
+        Session session = sessionFactory.openSession();
         try (AutoCloseable ignore = session::close) {
             Query query = session.createQuery(querySting);
             query.setParameterList("ids", ids);
@@ -259,7 +260,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             i++;
 
             if(row[i] != null) {
-                parsedRow.setFailReason(((String)row[i]));
+                parsedRow.setFailReason((String)row[i]);
             }
             i++;
 
@@ -362,7 +363,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(queryString);
 
 			query.setParameterList("ids", matrixRunToRow.keySet());
@@ -372,7 +373,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 			Map<Long, StringBuilder> servicesUsed = readServicesUsedResultSet(resultSet);
 
-			for(Map.Entry<Long, StringBuilder> entry: servicesUsed.entrySet()) {
+            for(Entry<Long, StringBuilder> entry : servicesUsed.entrySet()) {
 
 				List<AggregatedReportRow> mrRows = matrixRunToRow.get(entry.getKey());
 
@@ -434,7 +435,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(queryString);
 
 			query.setParameterList("ids", failedTcRunIds);
@@ -444,7 +445,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 			Map<Long, StringBuilder> failedActions = readFailedActionsResultSet(resultSet);
 
-			for(Map.Entry<Long, StringBuilder> entry: failedActions.entrySet()) {
+            for(Entry<Long, StringBuilder> entry : failedActions.entrySet()) {
 
 				failedTestCaseRunRows.get(entry.getKey()).setFailedActions(entry.getValue().toString());
 
@@ -477,7 +478,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 			} else {
 
-				result.get(tcrId).append(", ").append(Long.toString(actionRank));
+                result.get(tcrId).append(", ").append(actionRank);
 
 			}
 
@@ -662,7 +663,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(queryString);
 
 			query.setParameterList("mrId", params.getMatrixRunIds());
@@ -695,7 +696,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(queryString);
 
 			query.setParameter("tcId", params.getTestCaseId());
@@ -755,7 +756,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(sb.toString());
 
 			query.setParameter("from", params.getFrom());
@@ -770,11 +771,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 Object[] tagIds = tagsToIds(params.getTags());
                 query.setParameterList("tcrTags", tagIds);
                 query.setParameterList("mrTags", tagIds);
-                if(params.isAllTags()) {
-                    query.setParameter("numTags", (long)params.getTags().size());
-                } else {
-                    query.setParameter("numTags", 1l);
-                }
+                query.setParameter("numTags", params.isAllTags() ? (long)params.getTags().size() : 1l);
             }
 
 			query.setMaxResults(10);
@@ -875,7 +872,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		}
 
-		if(TestCasesDisplayMode.FailedOnly.equals(params.getTcDisplayMode())) {
+        if(params.getTcDisplayMode() == TestCasesDisplayMode.FailedOnly) {
 			sb.append("and (TCR.status = 0 or MR.failReason is not null or MR.failReason <> '') ");
 
 		}
@@ -889,15 +886,15 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		sb.append(params.isSortAsc() ? " asc " : " desc ");
 
-		if(TestCasesDisplayMode.FailedOnly.equals(params.getTcDisplayMode())) {
+        if(params.getTcDisplayMode() == TestCasesDisplayMode.FailedOnly) {
 			sb.append(", TCR.rank");
 		}
 
-		if(TestCasesDisplayMode.AllNatural.equals(params.getTcDisplayMode())) {
+        if(params.getTcDisplayMode() == TestCasesDisplayMode.AllNatural) {
 			sb.append(", TCR.rank");
 		}
 
-		if(TestCasesDisplayMode.AllFailedFirst.equals(params.getTcDisplayMode())) {
+        if(params.getTcDisplayMode() == TestCasesDisplayMode.AllFailedFirst) {
 			sb.append(", TCR.status, TCR.rank");
 		}
 
@@ -905,7 +902,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(sb.toString());
 
 			query.setParameter("from", params.getFrom());
@@ -921,12 +918,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 Object[] ids = tagsToIds(params.getTags());
                 query.setParameterList("tcrTags", ids);
                 query.setParameterList("mrTags", ids);
-
-				if(params.isAllTags()) {
-					query.setParameter("numTags", (long)params.getTags().size());
-				} else {
-					query.setParameter("numTags", 1l);
-				}
+                query.setParameter("numTags", params.isAllTags() ? (long)params.getTags().size() : 1l);
 
 			}
 
@@ -961,7 +953,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(queryString);
 
 			query.setParameter("tcrId", params.getTestCaseRunId());
@@ -1006,7 +998,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
                 + "where TCR.id in (:tcrIds) and AR.status = 0 "
                 + "order by AR.rank";
-        Session session = this.sessionFactory.openSession();
+        Session session = sessionFactory.openSession();
         try (AutoCloseable ignore = session::close) {
             Query query = session.createQuery(queryString);
             query.setParameterList("ids", params.getTestCaseRunIds());
@@ -1051,7 +1043,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         Session session = null;
 
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             Query query = session.createQuery(queryString);
             query.setParameter("tcrId", params.getTestCaseRunId());
             List<ActionInfoRow> list = query.list();
@@ -1075,7 +1067,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "join AR.actionRunKnownBugs as ARKB "
                 + "join ARKB.id.knownBug as KB "
                 + "where TCR.id = :tcrId";
-        Session session = this.sessionFactory.openSession();
+        Session session = sessionFactory.openSession();
         try (AutoCloseable ignore = session::close) {
             Query query = session.createQuery(queryString);
             query.setParameter("tcrId", params.getTestCaseRunId());
@@ -1099,7 +1091,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "join AR.actionRunKnownBugs as ARKB "
                 + "where TCR.id in (:ids)";
 
-        Session session = this.sessionFactory.openSession();
+        Session session = sessionFactory.openSession();
         try (AutoCloseable ignore = session::close) {
             Query query = session.createQuery(queryString);
             query.setParameterList("ids", params.getTestCaseRunIds());
@@ -1141,7 +1133,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
         Session session = null;
 
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             Query query = session.createQuery(queryString);
             query.setParameter("tcrId", params.getTestCaseRunId());
 
@@ -1190,7 +1182,10 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
     }
 
     private List<ActionInfoRow> escapeDesription(List<ActionInfoRow> list) {
-        list.forEach(item -> item.setDescription(StringEscapeUtils.escapeEcmaScript(item.getDescription())));
+        for(ActionInfoRow item : list) {
+            item.setDescription(StringEscapeUtils.escapeEcmaScript(item.getDescription()));
+        }
+
         return list;
     }
 
@@ -1264,7 +1259,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			Query query = session.createQuery(lastScriptsQuery);
 
 			//query.setParameterValue("tcrId", params.getTestCaseRunId());
@@ -1288,8 +1283,8 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 				}
 			}
 
-
-		} finally {
+            return result;
+        } finally {
 
 			if(session != null) {
 				session.close();
@@ -1297,9 +1292,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		}
 
-		return result;
-
-	}
+    }
 
 	private List<TaggedComparisonRow> readTaggedSetsComparisonResultSet(List<Object[]> rs) {
 
@@ -1406,7 +1399,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 
 			result.setRows(
 					readTaggedSetsComparisonResultSet(
@@ -1434,7 +1427,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 
 			return nativeOps.generateTagGroupReport(session, params);
 
@@ -1485,7 +1478,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
         Session session = null;
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             Query query = session.createQuery(queryString);
 
             query.setParameter("from", params.getFrom());
@@ -1518,15 +1511,17 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "order by MR.id, T.name";
         Session session = null;
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             Query query = session.createQuery(queryString);
             query.setParameterList("ids", matrixRows.keySet());
             @SuppressWarnings("unchecked")
             List<Object[]> resultSet = query.list();
             Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, (t, row) -> t.setCustom(false), true);
-            for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
+            for(Entry<Long, List<Tag>> entry : tagsUsed.entrySet()) {
                 List<AggregatedReportRow> rows = matrixRows.get(entry.getKey());
-                rows.forEach(r -> r.setTags(new ArrayList<>(entry.getValue())));
+                for(AggregatedReportRow r : rows) {
+                    r.setTags(new ArrayList<>(entry.getValue()));
+                }
             }
         } finally {
             if(session != null) {
@@ -1549,13 +1544,13 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "order by TCR.id, TCRT.tag.name";
         Session session = null;
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             Query query = session.createQuery(queryString);
             query.setParameterList("ids", rows.keySet());
             @SuppressWarnings("unchecked")
             List<Object[]> resultSet = query.list();
             Map<Long, List<Tag>> tagsUsed = readTagsResultSet(resultSet, (t, row) -> t.setCustom((Boolean)row[4]), false);
-            for(Map.Entry<Long, List<Tag>> entry: tagsUsed.entrySet()) {
+            for(Entry<Long, List<Tag>> entry : tagsUsed.entrySet()) {
                 AggregatedReportRow row = rows.get(entry.getKey());
                 List<Tag> tags = row.getTags();
                 if (tags == null) {

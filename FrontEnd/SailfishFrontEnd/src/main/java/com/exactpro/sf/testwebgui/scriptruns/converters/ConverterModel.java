@@ -29,7 +29,7 @@ import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 
 public class ConverterModel {
 
-    private Map<SailfishURI, ConverterNode> settings;
+    private final Map<SailfishURI, ConverterNode> settings;
 
     public ConverterModel(Set<SailfishURI> converters){
         settings = new HashMap<>();

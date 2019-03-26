@@ -30,7 +30,7 @@ public class CustomExceptionHandler extends ExceptionHandlerWrapper {
 
 	private static final Logger logger = LoggerFactory.getLogger(CustomExceptionHandler.class);
 	
-	private ExceptionHandler wrapped;
+	private final ExceptionHandler wrapped;
 	
 	public CustomExceptionHandler(ExceptionHandler wrapped) {
 		this.wrapped = wrapped;

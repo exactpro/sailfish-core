@@ -17,16 +17,14 @@ package com.exactpro.sf.aml;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.exactpro.sf.common.util.StringUtil;
-import com.exactpro.sf.aml.reader.struct.ExecutionMode;
-import com.exactpro.sf.embedded.statistics.StatisticsService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.commons.lang3.StringUtils;
+
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
+import com.exactpro.sf.embedded.statistics.StatisticsService;
 
 /**
  * Represent a single test case from matrix.
@@ -36,27 +34,23 @@ import org.apache.commons.lang3.StringUtils;
 @SuppressWarnings("serial")
 public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 
-	private List<AMLAction> actions;
+    private final List<AMLAction> actions = new ArrayList<>();
     private String reference;
 	private long line;
 	private String id;
-	private ExecutionMode executionMode;
+    private ExecutionMode executionMode = ExecutionMode.EXECUTABLE;
 	private String description = "";
 	private int execOrder;
 	private int matrixOrder;
-	private boolean failOnUnexpectedMessage = false;
+    private boolean failOnUnexpectedMessage;
     private boolean addToReport = true;
-    private AMLBlockType blockType;
+    private AMLBlockType blockType = AMLBlockType.TestCase;
 	private final long uid;
 	private final int hash;
 
 	public AMLTestCase(String id, long uid, int hash) {
 		this.id = id;
-		this.actions = new ArrayList<>();
-		// good defaults:
-		this.executionMode = ExecutionMode.EXECUTABLE;
-        this.blockType = AMLBlockType.TestCase;
-		this.uid = uid;
+        this.uid = uid;
 		this.hash = hash;
 	}
 
@@ -80,17 +74,17 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
                 }
     	    }
 	    } finally {
-	        this.actions.add(index, action);
+            actions.add(index, action);
 	    }
 	}
 
 	public void addAction(AMLAction action) throws AMLException{
-		addAction(this.actions.size(), action);
+        addAction(actions.size(), action);
 	}
 
 	@Override
     public List<AMLAction> getActions() {
-		return this.actions;
+        return actions;
 	}
 
     @Override
@@ -110,11 +104,11 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 
 	@Override
     public AMLAction getAction(int i) {
-		return this.actions.get(i);
+        return actions.get(i);
 	}
 
 	public void removeAction(int i) {
-		this.actions.remove(i);
+        actions.remove(i);
 	}
 
 	public void addAllActions(int i, List<AMLAction> actions) {
@@ -122,7 +116,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 	}
 
 	public long getLine() {
-		return this.line;
+        return line;
 	}
 
 	public void setLine(long line) {
@@ -131,7 +125,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 
 	@Override
     public String getDescription() {
-		return this.description;
+        return description;
 	}
 
 	@Override
@@ -147,7 +141,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 	@Override
     public AMLAction findActionByRef(String lineRef)
 	{
-        for(AMLAction action : this.actions) {
+        for(AMLAction action : actions) {
             if((action.getExecutionMode() == ExecutionMode.EXECUTABLE || action.getExecutionMode() == ExecutionMode.OPTIONAL)
                     && (lineRef.equals(action.getReference())
                     || lineRef.equals(action.getReferenceToFilter()))) {
@@ -175,11 +169,11 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
 
 	@Override
     public ExecutionMode getExecutionMode() {
-		return this.executionMode;
+        return executionMode;
 	}
 
 	public boolean isEmpty() {
-		return this.actions.size() == 0;
+        return actions.isEmpty();
 	}
 
 	public void setExecOrder(int order) {
@@ -199,7 +193,7 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
     }
 
     public void clear() {
-		for (AMLAction a : this.actions) {
+        for(AMLAction a : actions) {
 			a.clear();
 		}
 	}
@@ -259,19 +253,19 @@ public class AMLTestCase implements ITestCase, Cloneable, Serializable {
     @Override
 	public AMLTestCase clone() {
 
-		AMLTestCase that = new AMLTestCase(this.id, this.uid, this.hash);
+        AMLTestCase that = new AMLTestCase(id, uid, hash);
 
-		for (AMLAction a : this.actions) {
+        for(AMLAction a : actions) {
 			that.actions.add(a.clone());
 		}
-        that.reference = this.reference;
-		that.line = this.line;
-		that.description = this.description;
-		that.executionMode = this.executionMode;
-		that.execOrder = this.execOrder;
-		that.matrixOrder = this.matrixOrder;
-        that.blockType = this.blockType;
-        that.addToReport = this.addToReport;
+        that.reference = reference;
+        that.line = line;
+        that.description = description;
+        that.executionMode = executionMode;
+        that.execOrder = execOrder;
+        that.matrixOrder = matrixOrder;
+        that.blockType = blockType;
+        that.addToReport = addToReport;
 
 		return that;
 	}

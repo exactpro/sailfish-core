@@ -17,21 +17,16 @@ package com.exactpro.sf.scriptrunner.utilitymanager;
 
 import java.util.Arrays;
 
-import com.exactpro.sf.scriptrunner.AbstractInfo;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.scriptrunner.AbstractInfo;
 
 public class UtilityInfo extends AbstractInfo implements Cloneable {
     private String[] parameterNames;
     private Class<?>[] parameterTypes;
-
-    public UtilityInfo() {
-        // TODO Auto-generated constructor stub
-    }
 
     public String[] getParameterNames() {
         return Arrays.copyOf(parameterNames, parameterNames.length);
@@ -53,11 +48,11 @@ public class UtilityInfo extends AbstractInfo implements Cloneable {
     public UtilityInfo clone() {
         UtilityInfo that = new UtilityInfo();
 
-        that.setURI(this.uri);
+        that.setURI(uri);
         that.setParameterNames(getParameterNames());
         that.setParameterTypes(getParameterTypes());
-        that.setReturnType(this.returnType);
-        that.setDescription(this.description);
+        that.setReturnType(returnType);
+        that.setDescription(description);
 
         return that;
     }
@@ -75,11 +70,11 @@ public class UtilityInfo extends AbstractInfo implements Cloneable {
         UtilityInfo that = (UtilityInfo)o;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.uri, that.uri);
-        builder.append(this.parameterNames, that.parameterNames);
-        builder.append(this.parameterTypes, that.parameterTypes);
-        builder.append(this.returnType, that.returnType);
-        builder.append(this.description, that.description);
+        builder.append(uri, that.uri);
+        builder.append(parameterNames, that.parameterNames);
+        builder.append(parameterTypes, that.parameterTypes);
+        builder.append(returnType, that.returnType);
+        builder.append(description, that.description);
 
         return builder.isEquals();
     }

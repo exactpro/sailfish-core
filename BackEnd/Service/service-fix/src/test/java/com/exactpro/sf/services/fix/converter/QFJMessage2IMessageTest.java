@@ -61,13 +61,14 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         fixMessageSrc.fromString(
                 "8=FIXT.1.19=14635=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169",
                 dataDict, true);
-        if (fixMessageSrc.getException() != null)
+        if(fixMessageSrc.getException() != null) {
             throw fixMessageSrc.getException();
+        }
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
         QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
         IMessage iMessage = converter.convert(fixMessageSrc);
 
-        quickfix.Message fixMessageTarget = converter.convert(iMessage, true);
+        Message fixMessageTarget = converter.convert(iMessage, true);
         Assert.assertEquals(
                 "8=FIXT.1.19=15535=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169",
                 fixMessageTarget.toString());
@@ -98,8 +99,9 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Message fixMessageSrc = new Message();
         DataDictionary dataDict = getFixDictionary("FIX50.xml");
         fixMessageSrc.fromString(rawMessage, dataDict, true);
-        if (fixMessageSrc.getException() != null)
+        if(fixMessageSrc.getException() != null) {
             throw fixMessageSrc.getException();
+        }
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
         QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
@@ -124,8 +126,9 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Message fixMessageSrc = new Message();
         DataDictionary dataDict = getFixDictionary("FIX50.xml");
         fixMessageSrc.fromString(rawMessage, a, true);
-        if (fixMessageSrc.getException() != null)
+        if(fixMessageSrc.getException() != null) {
             throw fixMessageSrc.getException();
+        }
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
         QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
@@ -149,7 +152,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
         IMessage iMessage = converter.convert(fixMessageSrc);
 
-        quickfix.Message fixMessageTarget = converter.convert(iMessage, true);
+        Message fixMessageTarget = converter.convert(iMessage, true);
         String fixMessageString = fixMessageTarget.toString();
 
         Assert.assertTrue("With millisecond", fixMessageString.contains("52=20150707-09:05:21.580"));
@@ -193,7 +196,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
                 "8=FIXT.1.19=17035=X34=78943=Y49=Sender52=20160630-10:37:21.00156=Target262=SomeReqID268=1279=0270=876.543271=123.5272=20160630273=10:37:21.003278=SomeEntryID711=1311=ABC10=090",
                 dataDictionary);
 
-        System.out.println(message.toString());
+        System.out.println(message);
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
         QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
@@ -201,8 +204,8 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         IMessage iMessage = converter.convert(message);
         Message newMessage = converter.convert(iMessage, true);
 
-        System.out.println(iMessage.toString());
-        System.out.println(newMessage.toString());
+        System.out.println(iMessage);
+        System.out.println(newMessage);
 
         Assert.assertEquals(message.toString(), newMessage.toString());
     }
@@ -263,7 +266,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Message fixMessage = converter.convert(message, true);
         IMessage newMessage = converter.convert(fixMessage);
 
-        System.out.println(fixMessage.toString());
+        System.out.println(fixMessage);
 
         ComparisonResult comparisonResult = MessageComparator.compare(message, newMessage, new ComparatorSettings());
 
@@ -311,13 +314,13 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         Message fixMessage = converter.convert(message, true);
 
-        System.out.println(fixMessage.toString());
+        System.out.println(fixMessage);
 
         Group group = fixMessage.getGroup(1, 268);
 
         Assert.assertTrue(group.getDecimal(270).equals(new BigDecimal("123.5")));
         Assert.assertTrue(group.getDouble(271) == 124.5);
-        Assert.assertTrue(group.getString(278).equals("S"));
+        Assert.assertTrue("S".equals(group.getString(278)));
     }
 
     @SuppressWarnings("serial")

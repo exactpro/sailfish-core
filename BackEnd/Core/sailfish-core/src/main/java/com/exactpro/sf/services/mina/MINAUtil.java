@@ -44,19 +44,13 @@ import com.exactpro.sf.common.util.StringUtil;
 
 public class MINAUtil {
 
-    public static String getHexdumpAdv(final IoBuffer in, int lengthLimit) {
+    public static String getHexdumpAdv(IoBuffer in, int lengthLimit) {
         if (lengthLimit == 0) {
             throw new IllegalArgumentException("lengthLimit: " + lengthLimit + " (expected: 1+)");
         }
 
         boolean truncate = in.remaining() > lengthLimit;
-        int size;
-
-        if (truncate) {
-            size = lengthLimit;
-        } else {
-            size = in.remaining();
-        }
+        int size = truncate ? lengthLimit : in.remaining();
 
         if (size == 0) {
             return "empty";
@@ -84,9 +78,9 @@ public class MINAUtil {
             CertificateException, UnrecoverableKeyException, KeyManagementException {
 
         SSLContext sslContext = SSLContext.getInstance(protocol);
-        TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+        TrustManager[] trustAllCerts = { new X509TrustManager() {
             @Override
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            public X509Certificate[] getAcceptedIssuers() {
                 return new X509Certificate[0];
             }
 
@@ -130,7 +124,7 @@ public class MINAUtil {
         KeyStore ks = KeyStore.getInstance(keyStoreType);
         try (InputStream is = new FileInputStream(new File(keyStore))) {
             ks.load(is, keyStorePassword);
+            return ks;
         }
-        return ks;
     }
 }

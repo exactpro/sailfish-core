@@ -49,7 +49,7 @@ public class TestNTGUtility {
     }
 
     /**
-     * Test method for {@link NTGUtility#getTransactTime(java.lang.String)}.
+     * Test method for {@link NTGUtility#getTransactTime(String)}.
      */
     @Test
     public void testGetTransactTimeString() {
@@ -58,7 +58,7 @@ public class TestNTGUtility {
     }
 
     /**
-     * Test method for {@link NTGUtility#getExpireDateTime(java.lang.String)}.
+     * Test method for {@link NTGUtility#getExpireDateTime(String)}.
      */
     @Test
     public void testGetExpireDateTimeString() {

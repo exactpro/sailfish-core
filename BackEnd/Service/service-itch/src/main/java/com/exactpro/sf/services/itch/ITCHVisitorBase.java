@@ -39,13 +39,13 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
     public static final String ISADMIN = "IsAdmin";
     public static final String IMPILED_DECIMALS_ATTRIBUTE = "ImpliedDecimals";
 
-    public static final UnsignedLong SIZE_DEVIDER = UnsignedLong.valueOf(100000000L);
-    public static final UnsignedLong SIZE4_DEVIDER = UnsignedLong.valueOf(10000L);
+    public static final UnsignedLong SIZE_DEVIDER = UnsignedLong.valueOf(100_000_000L);
+    public static final UnsignedLong SIZE4_DEVIDER = UnsignedLong.valueOf(10_000L);
 
-    public static final BigDecimal BD_SIZE_DEVIDER = new BigDecimal(100000000L);
-    public static final BigDecimal BD_PRICE_DEVIDER = new BigDecimal(100000000L);
-    public static final BigDecimal BD_UDT_DEVIDER = new BigDecimal(1000000000L);
-    public static final BigDecimal UDT_DEVIDER = new BigDecimal(1000000L);
+    public static final BigDecimal BD_SIZE_DEVIDER = new BigDecimal(100_000_000L);
+    public static final BigDecimal BD_PRICE_DEVIDER = new BigDecimal(100_000_000L);
+    public static final BigDecimal BD_UDT_DEVIDER = new BigDecimal(1_000_000_000L);
+    public static final BigDecimal UDT_DEVIDER = new BigDecimal(1_000_000L);
 
     protected static final String charsetName = "ISO-8859-1";
 	
@@ -91,7 +91,7 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
 		INT32("Int32"),
 		INT64("Int64");
 
-		private ProtocolType(String type) {
+		ProtocolType(String type) {
 		}
 
 		public static ProtocolType getEnum(String type) {

@@ -26,12 +26,12 @@ import com.exactpro.sf.storage.impl.ObjectFlusher;
 
 public class TestObjectFlusher {
 
-    private static long timeToRun = 1000 * 10;
+    private static final long timeToRun = 1000 * 10;
 
     @Test
     public void testOOM() throws Exception {
 
-        ObjectFlusher<OmNomNom> objectFlusher = new ObjectFlusher<>((o) -> {
+        ObjectFlusher<OmNomNom> objectFlusher = new ObjectFlusher<>(o -> {
             System.out.println("try to flush objects " + o.size());
             Assert.assertEquals(32, o.size());//check that limit is not exceeded
             System.out.println("objects flushed");

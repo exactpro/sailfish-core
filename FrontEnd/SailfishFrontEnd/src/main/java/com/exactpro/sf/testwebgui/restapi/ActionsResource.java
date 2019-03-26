@@ -33,6 +33,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -156,21 +157,18 @@ public class ActionsResource {
 					JavaStatement.END_IF.getValue())
 			);
 
-			return Response.status(Response.Status.OK).entity(new JsonActions(actions, statements, utils) ).build();
+			return Response.status(Status.OK).entity(new JsonActions(actions, statements, utils) ).build();
 		} catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not retrive actions list", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
     private String extractClassName(BaseClass cls) {
         String fullName = cls.getClassName();
         int idx = fullName.lastIndexOf(".");
-        if (idx >= 0) {
-            return fullName.substring(idx);
-        }
-        return fullName;
+        return idx >= 0 ? fullName.substring(idx) : fullName;
     }
 
 }

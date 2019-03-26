@@ -95,7 +95,7 @@ public class AMLPrivateActions {
             StringBuilder builder = new StringBuilder();
             for (Object msg:unexpectedMessages){
                 builder.append("Message=[");
-                builder.append(msg.toString());
+                builder.append(msg);
                 builder.append("]");
                 builder.append("\t");
             }
@@ -108,11 +108,7 @@ public class AMLPrivateActions {
     private static Set<Object> prepare(Set<Object> receivedFromWaitActions) {
         Set<Object> preparedMessage = new HashSet<>();
         for(Object o:receivedFromWaitActions){
-            if(o instanceof BaseMessage){
-                preparedMessage.add(((BaseMessage) o).getMessage());
-            } else {
-                preparedMessage.add(o);
-            }
+            preparedMessage.add(o instanceof BaseMessage ? ((BaseMessage)o).getMessage() : o);
         }
         return preparedMessage;
     }

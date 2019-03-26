@@ -204,7 +204,7 @@ public class RedmineLoader {
         while(iterator.hasNext()) {
             WikiPageDetail pd = iterator.next();
             if(isPagesNamesEquals(pd.getTitle(), rootPage)) {
-                pd.setTitle(pd.getTitle().concat("_root"));
+                pd.setTitle(pd.getTitle() + "_root");
                 iterator.set(pd);
                 break;
             }
@@ -212,26 +212,26 @@ public class RedmineLoader {
     }
 
     private static boolean validationParamFailed(String uri, int timeout, String projectName) {
-        if(uri.trim().length() == 0) {
+        if(uri.trim().isEmpty()) {
             System.err.println(" Redmine server is empty. ");
             return true;
         }
         if(timeout < 0) {
             return true;
         }
-        if(apiAccessKey.trim().length() == 0) {
+        if(apiAccessKey.trim().isEmpty()) {
             System.err.println(" Redmine API key is empty. ");
             return true;
         }
-        if(projectName.trim().length() == 0) {
+        if(projectName.trim().isEmpty()) {
             System.err.println(" Redmine project is empty. ");
             return true;
         }
-        if(rootPage.trim().length() == 0) {
+        if(rootPage.trim().isEmpty()) {
             System.err.println(" Redmine root page is empty. ");
             return true;
         }
-        if(folder.trim().length() == 0) {
+        if(folder.trim().isEmpty()) {
             return true;
         }
         return false;

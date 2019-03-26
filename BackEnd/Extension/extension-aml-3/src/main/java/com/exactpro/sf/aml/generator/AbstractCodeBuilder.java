@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -27,11 +30,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import com.exactpro.sf.aml.Tags;
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import org.apache.log4j.Logger;
 
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.AML;
@@ -47,6 +47,7 @@ import com.exactpro.sf.aml.ExecutionSequence;
 import com.exactpro.sf.aml.Hash;
 import com.exactpro.sf.aml.Id;
 import com.exactpro.sf.aml.Reference;
+import com.exactpro.sf.aml.Tags;
 import com.exactpro.sf.aml.Type;
 import com.exactpro.sf.aml.script.AMLHashMap;
 import com.exactpro.sf.aml.script.CheckPoint;
@@ -130,7 +131,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(IScriptReport.class.getCanonicalName());
         imports.add(Map.class.getCanonicalName());
         imports.add(Outcome.class.getCanonicalName());
-        imports.add(Outcome.Status.class.getCanonicalName());
+        imports.add(Status.class.getCanonicalName());
         imports.add(SailFishAction.class.getCanonicalName());
         imports.add(SailFishTestCase.class.getCanonicalName());
         imports.add(ScriptContext.class.getCanonicalName());
@@ -183,7 +184,7 @@ public abstract class AbstractCodeBuilder {
     public abstract void writeActionClassDefinition(TextOutputStream stream, String className) throws IOException;
 
     public void writeLogger(TextOutputStream stream, String loggerName, boolean isStatic) throws IOException {
-        String loggerClass = org.apache.log4j.Logger.class.getCanonicalName();
+        String loggerClass = Logger.class.getCanonicalName();
         String varPrefix = isStatic ? "static " : "";
 
         stream.writeLine(1, "%s%s %s = %2$s.getLogger(\"TimeStamps\");", varPrefix, loggerClass, loggerName);

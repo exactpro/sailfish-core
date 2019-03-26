@@ -30,17 +30,17 @@ public class XmlRunReference {
     private List<SetOption> multiItemOption = new ArrayList<>();
 
     public XmlRunReference addSwitchOption(SwitchOption switchOption) {
-        this.switchOptions.add(switchOption);
+        switchOptions.add(switchOption);
         return this;
     }
     
     public XmlRunReference addOneItemOption(SetOption setOption) {
-        this.oneItemOption.add(setOption);
+        oneItemOption.add(setOption);
         return this;
     }
     
     public XmlRunReference addMultiItemOption(SetOption setOption) {
-        this.multiItemOption.add(setOption);
+        multiItemOption.add(setOption);
         return this;
     }
     
@@ -68,7 +68,7 @@ public class XmlRunReference {
         this.multiItemOption = multiItemOption;
     }
 
-    public static abstract class AbstractOption {
+    public abstract static class AbstractOption {
         
         private String name;
 

@@ -59,13 +59,13 @@ public class ScriptContext
 
     private final String userName;
 
-    private boolean conditionallyPassed = false;
+    private boolean conditionallyPassed;
     private final Set<BugDescription> knownBugs = new HashSet<>();
 	private String actionName;
-	private Exception exception = null;
-	private boolean interrupt = false;
+    private Exception exception;
+    private boolean interrupt;
 	private ScriptRun scriptRun;
-	private Set<Object> unexpectedMessage;
+    private final Set<Object> unexpectedMessage;
 	private CheckPoint tCStartCheckPoint;
 	private long scriptStartTime;
 	private String testCaseName;
@@ -114,12 +114,12 @@ public class ScriptContext
 	public void reset() {
 		this.actionName = null;
 		this.exception = null;
-		this.outcomes.clear();
-		this.receivedMessages.clear();
-        this.unexpectedMessage.clear();
+        outcomes.clear();
+        receivedMessages.clear();
+        unexpectedMessage.clear();
 		this.tCStartCheckPoint = null;
         this.conditionallyPassed = false;
-        this.knownBugs.clear();
+        knownBugs.clear();
 	}
 
     public String getUserName() {
@@ -139,7 +139,9 @@ public class ScriptContext
 	}
 
 	public void setException(Exception exception) {
-		if (this.exception == null) this.exception = exception;
+        if(this.exception == null) {
+            this.exception = exception;
+        }
 	}
 
 	public boolean isInterrupt() {
@@ -167,32 +169,32 @@ public class ScriptContext
 	}
 
 	public OutcomeCollector getOutcomeCollector() {
-		return this.outcomes;
+        return outcomes;
 	}
 
 	public void onOutcomeComplete(String group, String name) {
-		this.outcomes.onOutcomeComplete(group, name);
+        outcomes.onOutcomeComplete(group, name);
 	}
 
 	public void onGroupComplete(String group) {
-        this.outcomes.onGroupComplete(group);
+        outcomes.onGroupComplete(group);
 	}
 
 	public void storeOutcome(Outcome outcome) {
-		this.outcomes.storeOutcome(outcome);
+        outcomes.storeOutcome(outcome);
 	}
 
     public Status getOutcomeStatus(String group, String name) {
-		return this.outcomes.getOutcomeStatus(group, name);
+        return outcomes.getOutcomeStatus(group, name);
 	}
 
     public Status getOutcomeGroupStatus(String group) {
-		return this.outcomes.getGroupStatus(group);
+        return outcomes.getGroupStatus(group);
 	}
 
 	public IScriptProgress getScriptProgress()
 	{
-		return this.scriptProgress;
+        return scriptProgress;
 	}
 
 	public ScriptRun getScriptRun() {
@@ -213,7 +215,7 @@ public class ScriptContext
     }
 
     public void addUnexpectedMessages(Set<Object> setUnexpectedMessages){
-        this.unexpectedMessage.addAll(setUnexpectedMessages);
+        unexpectedMessage.addAll(setUnexpectedMessages);
     }
 
 	public CheckPoint getTCStartCheckPoint() {
@@ -225,7 +227,7 @@ public class ScriptContext
 	}
 
 	public long getScriptStartTime() {
-		return this.scriptStartTime;
+        return scriptStartTime;
 	}
 
 	public void setScriptStartTime(long time) {
@@ -233,7 +235,7 @@ public class ScriptContext
 	}
 
 	public String getTestCaseName() {
-		return this.testCaseName;
+        return testCaseName;
 	}
 
 	public void setTestCaseName(String testCaseName) {

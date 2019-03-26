@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.transform.Transformer;
@@ -34,7 +35,7 @@ import org.w3c.dom.NodeList;
 public class Service {
 
     // TODO: this enum duplicate com.exactpro.sf.services.ServiceStatus in core
-	public static enum Status {
+	public enum Status {
 		OK, // NOTE: this status use in ServiceImportResult (import result can be OK or ERROR)
 		CREATING,
 		CREATED,
@@ -47,20 +48,16 @@ public class Service {
 		WARNING,
 		ERROR
 	}
-	
-	private final Map<String, String> settings;
+
+    private final Map<String, String> settings = new HashMap<>();
 	private String name;
 	private Status status;
 	private String type;
 	
 	private String serviceHandlerClassName;
 	private String settingsTag;
-	
-	public Service() {
-		settings = new HashMap<String, String>();
-	}
-	
-	public String getName() {
+
+    public String getName() {
 		return name;
 	}
 	
@@ -126,7 +123,7 @@ public class Service {
 		root.appendChild(ch);
 		
 		ch = doc.createElement(settingsTag);
-		for (Map.Entry<String, String> e : settings.entrySet()) {
+		for (Entry<String, String> e : settings.entrySet()) {
 			Element el = doc.createElement(e.getKey());
 			el.setTextContent(e.getValue());
 			ch.appendChild(el);
@@ -146,7 +143,7 @@ public class Service {
 		Service svc = new Service();
 		svc.setName(Util.getTextContent(el, "serviceName"));
 		svc.setType(Util.getTextContent(el, "type"));
-		svc.setStatus(Enum.valueOf(Service.Status.class, Util.getTextContent(el, "status")));
+		svc.setStatus(Enum.valueOf(Status.class, Util.getTextContent(el, "status")));
 		NodeList settings = el.getElementsByTagName("settings").item(0).getChildNodes();
 		for (int j = 0; j < settings.getLength(); j++) {
 			Node z = settings.item(j);

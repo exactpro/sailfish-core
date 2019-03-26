@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +50,7 @@ import com.exactpro.sf.messages.impl.templates.MessageStructureTemplate;
  */
 public class CodeGenerator {
 	
-    public void generate(String path, String[] distPackagePath, final IDictionaryStructure dictStructure, boolean adminOnly,
+    public void generate(String path, String[] distPackagePath, IDictionaryStructure dictStructure, boolean adminOnly,
             boolean underscoreAsPackageSeparator) throws IOException {
 
         Set<IMessageStructure> filteredMessages = filterMessages(dictStructure, adminOnly);
@@ -160,8 +159,9 @@ public class CodeGenerator {
     private void writeFile(String path, String className, String contents, String fullPackage) throws IOException {
         File file = Paths.get(path, fullPackage.replace('.', File.separatorChar), className + ".java").toFile();
 
-        if (!file.getParentFile().exists() && !file.getParentFile().mkdirs())
+        if(!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
             throw new EPSCommonException("Could not create \"" + file.getParentFile().getAbsolutePath() + "\" folder");
+        }
 
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(contents);

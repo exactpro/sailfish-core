@@ -70,8 +70,8 @@ public class MatrixConverterLoader implements ILoadableManager {
 
                 for (String alias : classAliases) {
                     SailfishURI converterURI = new SailfishURI(version.getAlias(), null, alias);
-                    this.uriToClass.put(converterURI, converterClass);
-                    this.uriToSettingsClass.put(converterURI, settingsClass);
+                    uriToClass.put(converterURI, converterClass);
+                    uriToSettingsClass.put(converterURI, settingsClass);
                 }
 
                 logger.info("MatrixConverter {} has been loaded", converterClass.getCanonicalName());
@@ -85,7 +85,7 @@ public class MatrixConverterLoader implements ILoadableManager {
     public void finalize(ILoadableManagerContext context) throws Exception { }
 
     public MatrixConverterManager create(IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, IConnectionManager connectionManager) {
-        return new MatrixConverterManager(workspaceDispatcher, dictionaryManager, connectionManager, this.uriToClass, this.uriToSettingsClass);
+        return new MatrixConverterManager(workspaceDispatcher, dictionaryManager, connectionManager, uriToClass, uriToSettingsClass);
     }
 
 }

@@ -17,12 +17,12 @@ package com.exactpro.sf.storage.impl;
 
 public interface PersistentObject 
 {
-	public String getId();
+	String getId();
 
-	public void setId(String id);
+	void setId(String id);
 
-	public Integer getVersion();
+	Integer getVersion();
 
-	public void setVersion(Integer version);
+	void setVersion(Integer version);
 
 }

@@ -62,7 +62,7 @@ public class RESTDumperClient {
                 .append(".")
                 .append(host)
                 .append("_")
-                .append(String.valueOf(port))
+                .append(port)
                 .append(".tcpdump");
 
         return builder.toString();
@@ -72,15 +72,15 @@ public class RESTDumperClient {
 
         StringBuilder builder = new StringBuilder();
 
-        builder.append(this.rdRoot)
+        builder.append(rdRoot)
                 .append("/start?host=")
-                .append(this.host)
+                .append(host)
                 .append("&port=")
-                .append(String.valueOf(this.port));
+                .append(port);
 
-        if (this.iface != null) {
+        if(iface != null) {
             builder.append("&iface=")
-                    .append(this.iface);
+                    .append(iface);
         }
 
         HttpGet req = new HttpGet(builder.toString());
@@ -110,9 +110,9 @@ public class RESTDumperClient {
 
         StringBuilder builder = new StringBuilder();
 
-        builder.append(this.rdRoot)
+        builder.append(rdRoot)
                 .append("/stop?id=")
-                .append(this.index);
+                .append(index);
 
         HttpGet req = new HttpGet(builder.toString());
 		HttpResponse resp = http.execute(req);

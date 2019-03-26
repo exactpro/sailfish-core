@@ -37,9 +37,6 @@ public class TCPIPMessageHelper extends MessageHelper {
     
     @Override
     public boolean isAdmin(IMessage message) throws MessageNotFoundException, AttributeNotFoundException {
-        if (!depersonalizationIncomingMessages) {
-            return super.isAdmin(message);
-        }
-        return false;
+        return !depersonalizationIncomingMessages && super.isAdmin(message);
     }
 }

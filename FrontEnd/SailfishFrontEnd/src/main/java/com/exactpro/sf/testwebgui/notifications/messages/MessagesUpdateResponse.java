@@ -26,10 +26,6 @@ public class MessagesUpdateResponse extends AbstractMessage {
     private String requestId;
     private MessagesUpdateEvent messagesUpdateEvent;
 
-    public MessagesUpdateResponse() {
-        super();
-    }
-
     public String getRequestId() {
         return requestId;
     }

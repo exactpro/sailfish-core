@@ -32,7 +32,7 @@ import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 
 @MatrixUtils
-@ResourceAliases({"ConvertUtil"})
+@ResourceAliases("ConvertUtil")
 public class ConvertUtil extends AbstractCaller {
     @UtilityMethod
     @Description("Converts a Number value with zero precision to BigDecimal.<br/>"
@@ -40,11 +40,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toBigDecimal(5.444)} returns 5.444")
     public BigDecimal toBigDecimal(Number value) {
-        if(value == null) {
-            return null;
-        }
-
-        return toBigDecimal(value.toString(), 0);
+        return value == null ? null : toBigDecimal(value.toString(), 0);
     }
 
     @UtilityMethod
@@ -54,11 +50,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toBigDecimal(5.444, 3)} returns 5.44")
     public BigDecimal toBigDecimal(Number value, int presision) {
-        if(value == null) {
-            return null;
-        }
-
-        return toBigDecimal(value.toString(), presision);
+        return value == null ? null : toBigDecimal(value.toString(), presision);
     }
 
     @UtilityMethod
@@ -67,11 +59,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toBigDecimal(\"5.0\")} returns 5.0")
     public BigDecimal toBigDecimal(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return new BigDecimal(value);
+        return value == null ? null : new BigDecimal(value);
     }
 
     @UtilityMethod
@@ -95,11 +83,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toDouble(5)} returns 5.0")
     public Double toDouble(Number value) {
-        if(value == null) {
-            return null;
-        }
-
-        return value.doubleValue();
+        return value == null ? null : value.doubleValue();
     }
 
     @UtilityMethod
@@ -108,11 +92,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toDouble(\"5\")} returns 5.0")
     public Double toDouble(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return Double.valueOf(value);
+        return value == null ? null : Double.valueOf(value);
     }
 
     @UtilityMethod
@@ -121,11 +101,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toInteger(5.0)} returns 5")
     public Integer toInteger(Number value) {
-        if(value == null) {
-            return null;
-        }
-
-        return value.intValue();
+        return value == null ? null : value.intValue();
     }
 
     @UtilityMethod
@@ -134,11 +110,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toInteger(\"5\")} returns 5")
     public Integer toInteger(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return Integer.valueOf(value);
+        return value == null ? null : Integer.valueOf(value);
     }
 
     @UtilityMethod
@@ -147,11 +119,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toByte(5)} returns 5")
     public Byte toByte(Number value) {
-        if(value == null) {
-            return null;
-        }
-
-        return value.byteValue();
+        return value == null ? null : value.byteValue();
     }
 
     @UtilityMethod
@@ -160,11 +128,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toByte(\"5\")} returns 5")
     public Byte toByte(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return Byte.valueOf(value);
+        return value == null ? null : Byte.valueOf(value);
     }
 
     @UtilityMethod
@@ -173,11 +137,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toShort(5)} returns 5")
     public Short toShort(Number value) {
-        if(value == null) {
-            return null;
-        }
-
-        return value.shortValue();
+        return value == null ? null : value.shortValue();
     }
 
     @UtilityMethod
@@ -186,11 +146,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toShort(\"5\")} returns 5")
     public Short toShort(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return Short.valueOf(value);
+        return value == null ? null : Short.valueOf(value);
     }
 
     @UtilityMethod
@@ -199,11 +155,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toFloat(5)} returns 5.0")
     public Float toFloat(Number value) {
-        if(value == null) {
-            return null;
-        }
-
-        return value.floatValue();
+        return value == null ? null : value.floatValue();
     }
 
     @UtilityMethod
@@ -212,11 +164,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toFloat(\"5\")} returns 5.0")
     public Float toFloat(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return Float.valueOf(value);
+        return value == null ? null : Float.valueOf(value);
     }
 
     @UtilityMethod
@@ -238,11 +186,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toLong(\"5\")} returns 5")
     public Long toLong(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return Long.valueOf(value);
+        return value == null ? null : Long.valueOf(value);
     }
 
     @UtilityMethod
@@ -251,10 +195,7 @@ public class ConvertUtil extends AbstractCaller {
             + "Considering the above said, the final syntax is:<br/>"
             + "#{toString(value)}")
     public String toString(Object value) {
-        if (value != null) {
-            return value.toString();
-        }
-        return null;
+        return value != null ? value.toString() : null;
     }
 
     @UtilityMethod
@@ -408,10 +349,7 @@ public class ConvertUtil extends AbstractCaller {
             throw new IllegalArgumentException("No action for value type [" + value.getClass().getCanonicalName() + "]");
         }
 
-        if (Boolean.TRUE.equals(isDigit)) {
-            return (char) (charValue + '0');
-        }
-        return charValue;
+        return Boolean.TRUE.equals(isDigit) ? (char)(charValue + '0') : charValue;
     }
 
     @UtilityMethod
@@ -459,18 +397,11 @@ public class ConvertUtil extends AbstractCaller {
             + "Example:<br/>"
             + "#{toList(\"Text\", \"example!\")} returns [Test, example]")
     public List<Object> toList(Object... values) {
-        if(values == null) {
-            return null;
-        }
-
-        return Arrays.asList(values);
+        return values == null ? null : Arrays.asList(values);
     }
     
     protected Object extractValue(Object value) {
-        if (value instanceof IBaseEnumField) {
-            value = ((IBaseEnumField)value).getObjectValue();
-        }
-        return value;
+        return value instanceof IBaseEnumField ? ((IBaseEnumField)value).getObjectValue() : value;
     }
 
     @UtilityMethod
@@ -480,11 +411,6 @@ public class ConvertUtil extends AbstractCaller {
             + "#{toRegex(\"Text example!\")} returns \\QText example!\\E")
     public String toRegex(Object value) {
         String stringValue = toString(value);
-
-        if(stringValue == null) {
-            return null;
-        }
-
-        return Pattern.quote(stringValue);
+        return stringValue == null ? null : Pattern.quote(stringValue);
     }
 }

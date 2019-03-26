@@ -34,7 +34,7 @@ import javax.persistence.Table;
 public class ActionRunKnownBug {
 
     @EmbeddedId
-    private ActionRunKnownBugId id = new ActionRunKnownBugId();
+    private final ActionRunKnownBugId id = new ActionRunKnownBugId();
 
     private Boolean reproduced;
 

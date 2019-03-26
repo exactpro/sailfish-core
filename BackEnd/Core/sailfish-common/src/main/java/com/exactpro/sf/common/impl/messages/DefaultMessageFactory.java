@@ -21,7 +21,7 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 
 public class DefaultMessageFactory extends AbstractMessageFactory
 {
-	private static IMessageFactory factory = null;
+	private static IMessageFactory factory;
 
 	private DefaultMessageFactory() {}
 
@@ -29,8 +29,9 @@ public class DefaultMessageFactory extends AbstractMessageFactory
 	{
 		synchronized (DefaultMessageFactory.class)
 		{
-			if ( factory == null )
-				factory = new DefaultMessageFactory();
+            if(factory == null) {
+                factory = new DefaultMessageFactory();
+            }
 		}
 
 		return factory;

@@ -58,7 +58,7 @@ public class CodecMessageFilter {
         messageSpecialField = new HashMap<>();
         filterValues = parseFilterValues(filterValuesString);
 
-        logger.info("Filter values: {}", this.filterValues);
+        logger.info("Filter values: {}", filterValues);
 
     }
 
@@ -89,12 +89,12 @@ public class CodecMessageFilter {
 
         private final String attribut;
 
-        private SpecialAttribute(String attribut) {
+        SpecialAttribute(String attribut) {
             this.attribut = attribut;
         }
 
         public String getAttribut() {
-            return this.attribut;
+            return attribut;
         }
     }
 

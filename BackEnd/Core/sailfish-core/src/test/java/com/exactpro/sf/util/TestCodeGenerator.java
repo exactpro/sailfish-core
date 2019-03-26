@@ -50,7 +50,7 @@ import com.exactpro.sf.common.util.CodeGenerator;
 
 public class TestCodeGenerator extends EPSTestCase {
 
-    private final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.java");;
+    private final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.java");
     private final List<String> baseOption = Arrays.asList("-g", "-classpath", System.getProperty("java.class.path"), "-d");
     private final Path basePath = BASE_DIR.resolve("build").resolve("generated");
     private final CodeGenerator codeGenerator = new CodeGenerator();
@@ -109,7 +109,7 @@ public class TestCodeGenerator extends EPSTestCase {
 
         StringWriter writer = new StringWriter();
         try (PrintWriter printWriter = new PrintWriter(writer)) {
-            Assert.assertTrue(testName + ": " + writer.toString(), compiler.getTask(printWriter, fileManager,null, option, null, units).call());
+            Assert.assertTrue(testName + ": " + writer, compiler.getTask(printWriter, fileManager,null, option, null, units).call());
         }
         
         try (URLClassLoader classLoader = new URLClassLoader(new URL[] { compileFolder.toUri().toURL() }, getClass().getClassLoader())) {
@@ -119,7 +119,7 @@ public class TestCodeGenerator extends EPSTestCase {
                 String name = path.getFileName().toString();
                 boolean isField = CodeGenUtils.COMPONENTS_SUB_PACKAGE.equals(path.getParent().getFileName().toString());
                 if (underscoreAsPackageSeparator) {
-                    name = path.getParent().getFileName().toString() + "_" + path.getFileName().toString();
+                    name = path.getParent().getFileName() + "_" + path.getFileName();
                     isField = CodeGenUtils.COMPONENTS_SUB_PACKAGE.equals(path.getParent().getParent().getFileName().toString());
                 }
                 

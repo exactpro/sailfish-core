@@ -52,8 +52,8 @@ public class ServiceInfo {
         ServiceInfo that = (ServiceInfo)obj;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.id, that.id);
-        builder.append(this.name, that.name);
+        builder.append(id, that.id);
+        builder.append(name, that.name);
 
         return builder.isEquals();
     }
@@ -62,8 +62,8 @@ public class ServiceInfo {
     public int hashCode() {
         HashCodeBuilder builder = new HashCodeBuilder();
 
-        builder.append(this.id);
-        builder.append(this.name);
+        builder.append(id);
+        builder.append(name);
 
         return builder.toHashCode();
     }

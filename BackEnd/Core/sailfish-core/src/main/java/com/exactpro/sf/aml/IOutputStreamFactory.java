@@ -28,7 +28,7 @@ public interface IOutputStreamFactory {
 	OutputStream createOutputStream(String streamName) throws IOException; /* file name */
 	OutputStream createOutputStream(File file) throws IOException;
 	
-	public static class DefaultOutputStreamFactory implements IOutputStreamFactory {
+	class DefaultOutputStreamFactory implements IOutputStreamFactory {
 
 		@Override
 		public OutputStream createOutputStream(String fileName) throws IOException {
@@ -42,7 +42,7 @@ public interface IOutputStreamFactory {
 		
 	}
 	
-	public static class NullOutputStreamFactory implements IOutputStreamFactory {
+	class NullOutputStreamFactory implements IOutputStreamFactory {
 
 		@Override
 		public OutputStream createOutputStream(String streamName) {

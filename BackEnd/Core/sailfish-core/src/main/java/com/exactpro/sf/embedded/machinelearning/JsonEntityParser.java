@@ -16,6 +16,17 @@
 
 package com.exactpro.sf.embedded.machinelearning;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -32,16 +43,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.ObjectUtils;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class JsonEntityParser {
 
@@ -58,7 +59,7 @@ public class JsonEntityParser {
         FailedAction failedAction = new FailedAction();
         checkToken(parser, JsonToken.START_OBJECT, parser.nextToken());
         Map<String, String> rootFields = new HashMap<>();
-        while (JsonToken.END_OBJECT != parser.nextToken()) {
+        while(parser.nextToken() != JsonToken.END_OBJECT) {
             switch (parser.getCurrentToken()) {
             case FIELD_NAME:
                 if(!collectField(parser, rootFields, "expected", "actuals", "user")) {
@@ -73,7 +74,7 @@ public class JsonEntityParser {
                             checkToken(parser, JsonToken.START_OBJECT, parser.getCurrentToken());
                             Map<String, String> messageFields = new HashMap<>();
                             Message message = null;
-                            while (JsonToken.END_OBJECT != parser.nextToken()) {
+                            while(parser.nextToken() != JsonToken.END_OBJECT) {
                                 if (!collectField(parser, messageFields, JsonMessageConverter.JSON_MESSAGE)) {
                                     message = parseMessage(dictionaryManager, parser, messageFields, true);
                                 }
@@ -85,7 +86,7 @@ public class JsonEntityParser {
                                 messageParticipant.setId(participantId);
                             }
                             failedAction.addParticipant(messageParticipant);
-                        } while (JsonToken.END_ARRAY != parser.nextToken());
+                        } while(parser.nextToken() != JsonToken.END_ARRAY);
                         break;
                     case "user":
                         parser.nextToken();

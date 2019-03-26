@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Field {
-    private String name;
+    private final String name;
     private String value;
     private int index;
     private Field counter;
@@ -117,9 +117,9 @@ public class Field {
         int length = 0;
 
         if(isSimple()) {
-            length = data.getBytes(charset).length;
+            return data.getBytes(charset).length;
         } else if(isComponent()) {
-            length = fields.getLength(charset);
+            return fields.getLength(charset);
         } else if(isGroup()) {
             if(counter != null) {
                 length += counter.getLength(charset);

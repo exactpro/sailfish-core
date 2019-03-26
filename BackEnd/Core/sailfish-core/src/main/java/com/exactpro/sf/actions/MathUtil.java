@@ -29,7 +29,7 @@ import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 
 @MatrixUtils
-@ResourceAliases({"MathUtil"})
+@ResourceAliases("MathUtil")
 public class MathUtil extends AbstractCaller {
 
     private static final String ROUNDING_MODES = "Rounding Modes:<br/>" +
@@ -46,9 +46,7 @@ public class MathUtil extends AbstractCaller {
         "<b>FLOOR</b> - Rounding mode to round towards negative infinity.<br/>" +
             "If the value is positive, behave as for DOWN; if negative, behave as for UP.<br/>";
 
-    public MathUtil() {}
-
-	@Description("Returns the smallest (closest to negative infinity) double value that is greater than or equal to the argument and is equal to a mathematical integer.<br/>"
+    @Description("Returns the smallest (closest to negative infinity) double value that is greater than or equal to the argument and is equal to a mathematical integer.<br/>"
             + "Special cases:<br/>"
 			+ "If the argument value is already equal to a mathematical integer, then the result is the same as the argument.<br/>"
 			+ "If the argument is NaN or an infinity or positive zero or negative zero, then the result is the same as the argument.<br/>"
@@ -301,15 +299,15 @@ public class MathUtil extends AbstractCaller {
     }
 
     private static long round(long num, int multiplier) {
-        return ((int) (((num / (double) multiplier) - num / multiplier) * 10) >= 5 ? roundUp(num, multiplier)
-                : roundDown(num, multiplier));
+        return (int) (((num / (double) multiplier) - num / multiplier) * 10) >= 5 ? roundUp(num, multiplier)
+                : roundDown(num, multiplier);
     }
 
     private static long roundUp(long num, int multiplier) {
-        return ((num / multiplier) * multiplier + multiplier);
+        return (num / multiplier) * multiplier + multiplier;
     }
 
     private static long roundDown(long num, int multiplier) {
-        return ((num / multiplier) * multiplier);
+        return (num / multiplier) * multiplier;
     }
 }

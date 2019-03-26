@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.exactpro.sf.aml.CommonColumn;
 import com.exactpro.sf.aml.CommonColumns;
 import com.exactpro.sf.aml.generator.matrix.Column;
@@ -30,7 +32,7 @@ import com.exactpro.sf.services.IInitiatorService;
 import com.exactpro.sf.services.fast.FASTAbstractTCPClient;
 
 @MatrixActions
-@ResourceAliases({"FastMatrixActions"})
+@ResourceAliases("FastMatrixActions")
 public class FastMatrixActions extends AbstractCaller {
 	@CommonColumns({
         @CommonColumn(Column.CheckPoint),
@@ -51,9 +53,7 @@ public class FastMatrixActions extends AbstractCaller {
 		fClient.connect();
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void FAST_Disconnect(IActionContext actionContext)
 	throws Exception {
@@ -65,9 +65,7 @@ public class FastMatrixActions extends AbstractCaller {
 		fClient.disconnect();
 	}
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void FAST_isDisconnected(IActionContext actionContext)
 	throws Exception {
@@ -77,7 +75,9 @@ public class FastMatrixActions extends AbstractCaller {
 		}
         FASTAbstractTCPClient fClient = (FASTAbstractTCPClient) client;
         String actionId = actionContext.getId();
-        if (actionId != null && !actionId.equals("")) actionId += " ";
+        if(StringUtils.isNotEmpty(actionId)) {
+            actionId += " ";
+        }
         IActionReport report = actionContext.getReport();
         String verificationName = actionId + String.format("Checking whether the service [%s] is disconnected", client.getName());
         ComparisonResult cr = new ComparisonResult("FAST_isDisconnected");
@@ -102,9 +102,7 @@ public class FastMatrixActions extends AbstractCaller {
 	}
 
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void FAST_isConnected(IActionContext actionContext)
 	throws Exception {
@@ -114,7 +112,9 @@ public class FastMatrixActions extends AbstractCaller {
 		}
         FASTAbstractTCPClient fClient = (FASTAbstractTCPClient) client;
         String actionId = actionContext.getId();
-        if (actionId != null && !actionId.equals("")) actionId += " ";
+        if(StringUtils.isNotEmpty(actionId)) {
+            actionId += " ";
+        }
         IActionReport report = actionContext.getReport();
         String verificationName = actionId + String.format("Checking whether the session [%s] is connected", client.getName());
         ComparisonResult cr = new ComparisonResult("FAST_isConnected");

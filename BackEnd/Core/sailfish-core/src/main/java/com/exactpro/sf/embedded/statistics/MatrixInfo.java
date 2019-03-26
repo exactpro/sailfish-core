@@ -16,16 +16,17 @@
 
 package com.exactpro.sf.embedded.statistics;
 
-import com.exactpro.sf.embedded.statistics.entities.Tag;
-import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
-import com.exactpro.sf.scriptrunner.StatusType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+
+import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
+import com.exactpro.sf.scriptrunner.StatusType;
 
 public class MatrixInfo {
     private final long allMatricesPassed;
@@ -212,7 +213,7 @@ public class MatrixInfo {
 
     private static void separateTagsAndSetTestCasesToMatrixRows(Map<Long, List<AggregatedReportRow>> testCaseRunRows,
                          Map<Long, AggregatedReportRow> matrixRows) {
-        for (Map.Entry<Long, List<AggregatedReportRow>> testCaseRunEntry : testCaseRunRows.entrySet()) {
+        for(Entry<Long, List<AggregatedReportRow>> testCaseRunEntry : testCaseRunRows.entrySet()) {
             List<AggregatedReportRow> testCaseRows = testCaseRunEntry.getValue();
             if (!testCaseRows.isEmpty()) {
                 Set<Tag> matrixTags = new HashSet<>();
@@ -229,7 +230,9 @@ public class MatrixInfo {
                         allTags.addAll(testCaseTags);
                     }
                 }
-                matrixTags.forEach(tag -> tag.setForAllTestCaseRuns(true));
+                for(Tag tag : matrixTags) {
+                    tag.setForAllTestCaseRuns(true);
+                }
                 AggregatedReportRow matrixRow = matrixRows.get(testCaseRunEntry.getKey());
                 matrixRow.setTags(new ArrayList<>(allTags));
                 for (AggregatedReportRow testCaseRow : testCaseRows) {

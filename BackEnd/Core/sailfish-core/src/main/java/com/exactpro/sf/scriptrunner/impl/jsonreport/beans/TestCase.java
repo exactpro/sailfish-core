@@ -16,14 +16,14 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
-import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 
 public class TestCase implements IJsonReportNode {
     private final List<IJsonReportNode> actions;
@@ -58,23 +58,23 @@ public class TestCase implements IJsonReportNode {
     @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
         for (IJsonReportNode child : nodes) {
             if (child instanceof Action || child instanceof CustomMessage) {
-                this.actions.add(child);
+                actions.add(child);
             } else if (child instanceof Message) {
-                this.messages.add((Message) child);
+                messages.add((Message)child);
             } else if (child instanceof Bug) {
-                this.bugs.add((Bug) child);
+                bugs.add((Bug)child);
             } else if (child instanceof LogEntry) {
-                this.logs.add((LogEntry) child);
+                logs.add((LogEntry)child);
             } else if (child instanceof Verification) {
-                this.verifications.add((Verification) child);
+                verifications.add((Verification)child);
             } else {
-                throw new IllegalArgumentException("unsupported child node type: " + child.getClass().toString());
+                throw new IllegalArgumentException("unsupported child node type: " + child.getClass());
             }
         }
     }
 
     @Override public void addException(Throwable t) {
-        if (this.status == null) {
+        if(status == null) {
             this.status = new Status(t);
         }
     }

@@ -21,9 +21,9 @@ import org.hibernate.Session;
 import java.util.Iterator;
 
 public class MessageLoader implements Iterator<StoredMessage> {
-    private ScrollableResults results;
-    private Session session;
-    private int numberOfRecords;
+    private final ScrollableResults results;
+    private final Session session;
+    private final int numberOfRecords;
 
     public MessageLoader(ScrollableResults results, Session session) {
         this.results = results;

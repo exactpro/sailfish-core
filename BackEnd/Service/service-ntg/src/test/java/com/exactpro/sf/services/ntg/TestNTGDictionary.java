@@ -44,7 +44,7 @@ public final class TestNTGDictionary extends AbstractTest {
 			IDictionaryStructure dictionary;
 			
 			try (InputStream in = new FileInputStream(String.format( "%s%s%s%s%s%s%s",
-					(new File(".")), File.separator, "src", File.separator,
+                    new File("."), File.separator, "src", File.separator,
 					"test/plugin/cfg/dictionaries",
                     File.separator, "ntg.xml"))) {
 				

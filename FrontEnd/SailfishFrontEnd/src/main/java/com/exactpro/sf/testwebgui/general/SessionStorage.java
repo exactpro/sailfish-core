@@ -36,7 +36,7 @@ public class SessionStorage implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(SessionStorage.class);
 
-	private Map<String, Object> storage = new ConcurrentHashMap<String, Object>();
+    private final Map<String, Object> storage = new ConcurrentHashMap<String, Object>();
 
 	private Object cloneBySerialization(Serializable value) {
 
@@ -46,11 +46,11 @@ public class SessionStorage implements Serializable {
 
 	public void put(String key, Object value) {
 
-		this.storage.put(key, value);
+        storage.put(key, value);
 
 	}
 
-	public <E extends Object> E get(String key, Class<E> clazz) {
+    public <E> E get(String key, Class<E> clazz) {
 
 		return clazz.cast(storage.get(key));
 
@@ -80,10 +80,10 @@ public class SessionStorage implements Serializable {
 						String storageKey = className + "." + fieldName;
 
 						if(!ssAnotation.cloneBySerialization()) {
-							this.storage.put(storageKey, value);
+                            storage.put(storageKey, value);
 						} else {
 							logger.debug("Cloned");
-							this.storage.put(storageKey, cloneBySerialization((Serializable)value));
+                            storage.put(storageKey, cloneBySerialization((Serializable)value));
 						}
 
 						logger.debug("Value stored {}", storageKey);
@@ -116,7 +116,7 @@ public class SessionStorage implements Serializable {
 
 					String storageKey = className + "." + fieldName;
 
-					Object value = this.storage.get(storageKey);//f.get(bean);
+                    Object value = storage.get(storageKey);//f.get(bean);
 
 					if(value != null) {
 

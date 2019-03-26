@@ -36,10 +36,6 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
-import com.exactpro.sf.embedded.updater.UpdateService;
-import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
-import com.exactpro.sf.scriptrunner.EnvironmentSettings;
-import com.exactpro.sf.storage.impl.ObjectFlusher;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -68,6 +64,9 @@ import com.exactpro.sf.embedded.mail.EMailService;
 import com.exactpro.sf.embedded.mail.configuration.EMailServiceSettings;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
+import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
+import com.exactpro.sf.scriptrunner.EnvironmentSettings;
 import com.exactpro.sf.scriptrunner.IEnvironmentListener;
 import com.exactpro.sf.scriptrunner.IScriptRunListener;
 import com.exactpro.sf.storage.IAuthStorage;
@@ -114,8 +113,9 @@ public class SFContextServlet implements Servlet {
 
 		for (int i = 0; i < files.length; i++) {
 			cp.append(files[i].getAbsolutePath());
-			if (i != files.length - 1)
-				cp.append(separator);
+            if(i != files.length - 1) {
+                cp.append(separator);
+            }
 		}
 
 		return cp.toString();
@@ -142,7 +142,7 @@ public class SFContextServlet implements Servlet {
 	            StandardEngine engine = (StandardEngine) c;
 	            for (Connector connector : engine.getService().findConnectors()) {
 
-	            	if(connector.getProtocol().startsWith("HTTP")); {
+                    if(connector.getProtocol().startsWith("HTTP")) {
 	            		return connector.getPort();
 	            	}
 
@@ -455,7 +455,7 @@ public class SFContextServlet implements Servlet {
 		builder.addWorkspaceLayer(new File(getWorkFolder()), DefaultWorkspaceLayout.getInstance());
 
 		for (String workspacePath : workspaces) {
-			if (workspacePath.trim().equals(".")) {
+            if(".".equals(workspacePath.trim())) {
 				workspacePath = getWorkFolder();
 			}
 			System.out.println("Add workspace layer " + workspacePath);
@@ -490,7 +490,7 @@ public class SFContextServlet implements Servlet {
 
 	@Override
 	public ServletConfig getServletConfig() {
-		return this.config;
+        return config;
 	}
 
 	@Override

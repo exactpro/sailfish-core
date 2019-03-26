@@ -26,16 +26,16 @@ import com.exactpro.sf.services.IServiceSettings;
 
 public interface IActionServiceManager {
     // from IConnectionManager
-    public <Service extends IService> Service getService(ServiceName serviceName);
-    public ServiceName[] getServiceNames();
-    public IService[] getStartedServices();
-    public IServiceSettings getServiceSettings(ServiceName serviceName);
-    public Future<?> addService(ServiceName serviceName, SailfishURI uri, IServiceSettings settings, IServiceNotifyListener exceptionListener);
-    public Future<?> updateService(ServiceName serviceName, IServiceSettings settings, IServiceNotifyListener exceptionListener);
-    public Future<?> initService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
-    public Future<?> disposeService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
-    public Future<?> removeService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
-    public Future<?> startService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
+    <Service extends IService> Service getService(ServiceName serviceName);
+    ServiceName[] getServiceNames();
+    IService[] getStartedServices();
+    IServiceSettings getServiceSettings(ServiceName serviceName);
+    Future<?> addService(ServiceName serviceName, SailfishURI uri, IServiceSettings settings, IServiceNotifyListener exceptionListener);
+    Future<?> updateService(ServiceName serviceName, IServiceSettings settings, IServiceNotifyListener exceptionListener);
+    Future<?> initService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
+    Future<?> disposeService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
+    Future<?> removeService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
+    Future<?> startService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
 
-    public ServiceInfo getServiceInfo(ServiceName serviceName);
+    ServiceInfo getServiceInfo(ServiceName serviceName);
 }

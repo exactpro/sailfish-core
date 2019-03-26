@@ -39,7 +39,7 @@ public class DummyDictionaryManager implements IDictionaryManager {
 
     public DummyDictionaryManager(IDictionaryStructure dictionaryStructure, SailfishURI dictionaryURI) {
         this.uriToDictionary = new HashMap<>();
-        this.uriToDictionary.put(dictionaryURI.getResourceName(), dictionaryStructure);
+        uriToDictionary.put(dictionaryURI.getResourceName(), dictionaryStructure);
     }
     
     @Override

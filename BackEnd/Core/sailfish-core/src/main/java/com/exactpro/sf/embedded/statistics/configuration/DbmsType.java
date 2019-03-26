@@ -38,7 +38,7 @@ public enum DbmsType {
 	
 	private final String value;
 	
-	private DbmsType(final String value) {
+	DbmsType(String value) {
 		this.value = value;
 	}
 

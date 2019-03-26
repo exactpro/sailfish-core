@@ -20,6 +20,6 @@ import com.exactpro.sf.aml.reader.struct.AMLBlock;
 import com.exactpro.sf.aml.reader.struct.AMLElement;
 
 public interface IAMLElementVisitor {
-    public void visit(AMLElement element) throws AMLException;
-    public void visit(AMLBlock block) throws AMLException;
+    void visit(AMLElement element) throws AMLException;
+    void visit(AMLBlock block) throws AMLException;
 }

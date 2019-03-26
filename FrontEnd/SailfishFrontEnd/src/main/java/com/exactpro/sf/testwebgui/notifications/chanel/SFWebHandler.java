@@ -51,7 +51,7 @@ public class SFWebHandler implements IChannelHandler{
 	private static final Logger logger = LoggerFactory.getLogger(SFWebHandler.class);
 	private final String id;
 	private AbstractChannel channel;
-	private Map<IUpdateRetriever, List<IUpdateRequestListener>> subscribers;
+	private final Map<IUpdateRetriever, List<IUpdateRequestListener>> subscribers;
 	
 	public SFWebHandler(String id) {
 		

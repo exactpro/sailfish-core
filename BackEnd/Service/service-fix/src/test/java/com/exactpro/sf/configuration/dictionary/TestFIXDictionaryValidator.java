@@ -29,11 +29,7 @@ import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.util.AbstractTest;
 
 public class TestFIXDictionaryValidator extends AbstractTest {
-    private IDictionaryValidator dictionaryValidator;
-
-    {
-        dictionaryValidator = new FIXDictionaryValidatorFactory().createDictionaryValidator();
-    }
+    private final IDictionaryValidator dictionaryValidator = new FIXDictionaryValidatorFactory().createDictionaryValidator();
 
     @Test
     public void testFIXDictionaryValidatorPositive() throws IOException {
@@ -60,7 +56,7 @@ public class TestFIXDictionaryValidator extends AbstractTest {
         for (DictionaryValidationError error : errors) {
             System.err.println(error.getError());
         }
-        String[] errorMessages = new String[] {
+        String[] errorMessages = {
                 "Field  <strong>\"FieldWithIncorrectFixType\"</strong>  contains  incorrect value <strong>\"INCORRECTTYPE\"</strong> for <strong>\"fixtype\"</strong> attribute",
                 "Message  <strong>\"UndSecAltIDGrp_NoUnderlyingSecurityAltID\"</strong> doesn't contain fixtype attribute",
                 "Field [1534] is missing in <fields> section for [CMRiskInstrumentScopesGrp_NoRiskInstrumentScopes] group",

@@ -37,8 +37,6 @@ public class LanguageManager implements ILoadableManager {
     @SuppressWarnings("serial")
     private final Map<SailfishURI, ILanguageFactory> uriToFactory = new TreeMap<SailfishURI, ILanguageFactory>() {{ put(AutoLanguageFactory.URI, AUTO); }};
 
-    public LanguageManager() {}
-
     @Override
     public void load(ILoadableManagerContext context) {
         ClassLoader classLoader = context.getClassLoaders()[0];

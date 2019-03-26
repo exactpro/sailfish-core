@@ -145,7 +145,7 @@ public class CollectorServiceHandler implements IServiceHandler {
             logger.debug("clean: {}", (Object) routes);
 
             for (ServiceHandlerRoute route : routes) {
-                this.routeToMessages.get(route).clear();
+                routeToMessages.get(route).clear();
             }
 	    }
     }

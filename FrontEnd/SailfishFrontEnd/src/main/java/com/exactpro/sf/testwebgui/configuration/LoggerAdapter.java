@@ -15,24 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.configuration;
 
-import org.apache.log4j.Level;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.Level;
+
 @SuppressWarnings("serial")
 public class LoggerAdapter implements Serializable {
 
-    private String level;
-    private String name;
-    private List<String> appenders;
-
-    public LoggerAdapter() {
-        this.name = "";
-        this.level = Level.INFO.toString();
-        this.appenders = new ArrayList<String>();
-    }
+    private String level = Level.INFO.toString();
+    private String name = "";
+    private List<String> appenders = new ArrayList<>();
 
     public String getAppendersList() {
         StringBuilder sb = new StringBuilder();
@@ -50,7 +44,7 @@ public class LoggerAdapter implements Serializable {
     }
 
     public void setLevel(String level) {
-        if(!level.equals("")) {
+        if(!"".equals(level)) {
             this.level = level;
         }
     }

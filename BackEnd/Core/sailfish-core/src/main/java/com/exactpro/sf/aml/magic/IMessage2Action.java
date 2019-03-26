@@ -26,7 +26,7 @@ import com.exactpro.sf.common.messages.IMessage;
 
 public class IMessage2Action {
 
-	public static List<AMLElement> convert(final IMessage message) {
+	public static List<AMLElement> convert(IMessage message) {
 		// dumb implementation:
 		List<AMLElement> result = convertImessageFields(message);
 
@@ -43,7 +43,7 @@ public class IMessage2Action {
 		return result;
 	}
 
-	private static List<AMLElement> convertImessageFields(final IMessage message) {
+	private static List<AMLElement> convertImessageFields(IMessage message) {
 		List<AMLElement> result = new ArrayList<>();
 
 		AMLElement action = new AMLElement();

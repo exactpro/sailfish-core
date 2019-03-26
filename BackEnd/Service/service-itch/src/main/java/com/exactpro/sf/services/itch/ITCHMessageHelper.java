@@ -52,7 +52,7 @@ public class ITCHMessageHelper extends MessageHelper {
     public static final String SUBMESSAGES_FIELD_NAME = "IncludedMessages";
     public static final String MESSAGELIST_NAME = "MessagesList";
     public static final String MESSAGELIST_NAMESPACE = "ITCH";
-    public static final Short  UNITHEADERMSGTYPE = new Short((short)256);
+    public static final Short UNITHEADERMSGTYPE = (short)256;
     public static final String FIELD_MARKET_DATA_GROUP_NAME = "MarketDataGroup";
     public static final String FIELD_LENGTH_NAME = "Length";
     public static final String ATTRIBUTE_LENGTH_NAME = FIELD_LENGTH_NAME;
@@ -166,7 +166,7 @@ public class ITCHMessageHelper extends MessageHelper {
 
     public static List<IMessage> extractSubmessages(Object message) {
         if(message instanceof IMessage) {
-            return ((IMessage) message).<List<IMessage>>getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            return ((IMessage)message).<List<IMessage>>getField(SUBMESSAGES_FIELD_NAME);
         }
 
         throw new EPSCommonException("Sent message is not an " + IMessage.class.getSimpleName());

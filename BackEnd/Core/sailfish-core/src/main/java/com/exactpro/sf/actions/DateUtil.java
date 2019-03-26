@@ -15,12 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
-
-import java.util.List;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,11 +25,16 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
+import java.util.List;
+import java.util.Objects;
 
-import com.exactpro.sf.common.util.EPSCommonException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.actions.data.DateComponent;
 import com.exactpro.sf.actions.data.DateModificator;
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
@@ -47,9 +46,9 @@ import com.exactpro.sf.util.DateTimeUtility;
  *
  */
 @MatrixUtils
-@ResourceAliases({"DateUtil"})
+@ResourceAliases("DateUtil")
 public class DateUtil extends AbstractCaller {
-    private static Logger logger = LoggerFactory.getLogger(DateUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(DateUtil.class);
 
     private static final String DATE_COMPONENTS =
         "    <tr bgcolor=\"#eeeeff\"><td><code>Y</code><td>Year" +
@@ -221,10 +220,10 @@ public class DateUtil extends AbstractCaller {
             DayOfWeek dayOfWeek = modifiedDate.getDayOfWeek();
             long currentMillis = DateTimeUtility.getMillisecond(nowDate);
             long modifiedMillis = DateTimeUtility.getMillisecond(modifiedDate);
-            if (DayOfWeek.SATURDAY.equals(dayOfWeek)) {
+            if(dayOfWeek == DayOfWeek.SATURDAY) {
                 int shift = modifiedMillis - currentMillis >= 0 ? 2 : -1;
                 return  modifiedDate.plusDays(shift);
-            } else if (DayOfWeek.SUNDAY.equals(dayOfWeek)) {
+            } else if(dayOfWeek == DayOfWeek.SUNDAY) {
                 int shift = modifiedMillis - currentMillis >= 0 ? 1 : -2;
                 return modifiedDate.plusDays(shift);
             }
@@ -388,21 +387,21 @@ public class DateUtil extends AbstractCaller {
         StringBuilder builder = new StringBuilder();
 
         switch (source.length()) {
-        case (29):
+        case 29:
             builder.insert(0, " Z");
-        case (23):
+        case 23:
             builder.insert(0, ".SSS");
-        case (19):
+        case 19:
             builder.insert(0, ":ss");
-        case (16):
+        case 16:
             builder.insert(0, ":mm");
-        case (13):
+        case 13:
             builder.insert(0, " HH");
-        case (10):
+        case 10:
             builder.insert(0, "-dd");
-        case (7):
+        case 7:
             builder.insert(0, "-MM");
-        case (4):
+        case 4:
             builder.insert(0, "yyyy");
             break;
         default:
@@ -683,7 +682,7 @@ public class DateUtil extends AbstractCaller {
         while (past ? !iter.toLocalDate().isBefore(after.toLocalDate()) : !iter.toLocalDate().isAfter(after.toLocalDate())) {
 
             DayOfWeek dayOfWeek = iter.getDayOfWeek();
-            if (dayOfWeek.equals(DayOfWeek.SATURDAY) || dayOfWeek.equals(DayOfWeek.SUNDAY)) {
+            if(dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
                 after = after.plusDays(counter);
             }
 

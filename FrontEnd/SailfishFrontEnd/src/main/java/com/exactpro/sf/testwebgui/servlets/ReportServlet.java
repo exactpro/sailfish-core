@@ -46,7 +46,7 @@ public class ReportServlet extends HttpServlet{
 
 	private static final String ASYNC_SUP = "org.apache.catalina.ASYNC_SUPPORTED";
 
-	private long contextTimeout = 60000;
+    private final long contextTimeout = 60000;
 
 	private ExecutorService executor;
 
@@ -74,7 +74,7 @@ public class ReportServlet extends HttpServlet{
 
 		ctx.setTimeout(contextTimeout);
 		logger.trace("Create new async context for request {}{}, session {}", req.getRequestURL(), req.getQueryString(), req.getSession().getId());
-	    this.executor.execute(new ReportTask(ctx, SFLocalContext.getDefault()));
+        executor.execute(new ReportTask(ctx, SFLocalContext.getDefault()));
 	}
 
 
@@ -82,7 +82,7 @@ public class ReportServlet extends HttpServlet{
 	@Override
 	public void destroy() {
 
-		this.executor.shutdown();
+        executor.shutdown();
 		super.destroy();
 
 	}

@@ -58,7 +58,7 @@ public abstract class AbstractVersion implements IVersion {
     
     @Override
     public boolean isGeneral() {
-        return GENERAL.equals(this.getAlias());
+        return GENERAL.equals(getAlias());
     }
 
     @Override
@@ -98,11 +98,11 @@ public abstract class AbstractVersion implements IVersion {
 
         AbstractVersion that = (AbstractVersion) o;
         return new EqualsBuilder()
-                .append(this.getMajor(), that.getMajor())
-                .append(this.getMinor(), that.getMinor())
-                .append(this.getMaintenance(), that.getMaintenance())
-                .append(this.getBuild(), that.getBuild())
-                .append(this.getAlias(), that.getAlias()).isEquals();
+                .append(getMajor(), that.getMajor())
+                .append(getMinor(), that.getMinor())
+                .append(getMaintenance(), that.getMaintenance())
+                .append(getBuild(), that.getBuild())
+                .append(getAlias(), that.getAlias()).isEquals();
     }
 
     @Override

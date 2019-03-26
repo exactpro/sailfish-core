@@ -27,7 +27,7 @@ import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
 public class FieldList {
     private static final List<String> LENGTH_EXCLUDED_FIELDS = Arrays.asList(FieldConst.BEGIN_STRING, FieldConst.BODY_LENGTH, FieldConst.CHECKSUM);
 
-    private List<Field> fields;
+    private final List<Field> fields;
     private List<String> order;
 
     public FieldList() {
@@ -62,9 +62,9 @@ public class FieldList {
     }
 
     public void ensureOrder() {
-        Collections.sort(this.fields, new FieldComparator(this.order));
-        
-        for (Field field : this.fields) {
+        Collections.sort(fields, new FieldComparator(order));
+
+        for(Field field : fields) {
             field.ensureOrder();
         }
     }

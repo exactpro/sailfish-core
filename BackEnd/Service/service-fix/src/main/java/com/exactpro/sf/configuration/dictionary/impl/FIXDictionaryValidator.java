@@ -147,7 +147,6 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     public FIXDictionaryValidator() {
-        super();
     }
 
     public FIXDictionaryValidator(IDictionaryValidator parentValidator) {
@@ -257,7 +256,7 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
         for(IMessageStructure message : dictionary.getMessages().values()) {
             String entity_type = getAttributeValue(message, ATTRIBUTE_ENTITY_TYPE);
 
-            if(entity_type != null && entity_type.equals(MESSAGE_ENTITY)) {
+            if(MESSAGE_ENTITY.equals(entity_type)) {
                 Object messageTypeAttribute = getAttributeValue(message, MESSAGE_TYPE_ATTR_NAME);
 
                 if(messageTypeAttribute != null) {
@@ -380,8 +379,8 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     private static class FieldHolder {
-        private String messageName;
-        private String fieldName;
+        private final String messageName;
+        private final String fieldName;
 
         public FieldHolder(String messageName, String fieldName) {
             this.messageName = messageName;

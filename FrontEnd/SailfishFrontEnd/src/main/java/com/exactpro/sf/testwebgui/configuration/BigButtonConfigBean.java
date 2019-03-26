@@ -41,7 +41,7 @@ public class BigButtonConfigBean {
 
     public void applySettings() {
         try {
-            logger.info("Apply bb settings [{}]", this.settings);
+            logger.info("Apply bb settings [{}]", settings);
             TestToolsAPI.getInstance().setRegressionRunnerSettings(settings);
             BeanUtil.addInfoMessage("Options applied", "");
         } catch (Exception e) {

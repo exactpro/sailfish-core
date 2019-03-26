@@ -46,9 +46,9 @@ public class FixFieldConverter implements IFieldConverter {
         Object targetValue = null;
         for (String fieldName : message.getFieldNames()) {
             if (fieldName.matches("\\d+") && toHumanReadable) {
-                targetName = this.tagToField.get(fieldName);
+                targetName = tagToField.get(fieldName);
             } else if (!fieldName.matches("\\d+") && !toHumanReadable) {
-                targetName = this.fieldToTag.get(fieldName);
+                targetName = fieldToTag.get(fieldName);
             } else {
                 targetName = fieldName;
             }
@@ -61,11 +61,7 @@ public class FixFieldConverter implements IFieldConverter {
                 List<Object> list = new ArrayList<>();
 
                 for (Object element : (List<?>) targetValue) {
-                    if (element instanceof IMessage) {
-                        list.add(convertFields((IMessage) element, messageFactory, toHumanReadable));
-                    } else {
-                        list.add(element);
-                    }
+                    list.add(element instanceof IMessage ? convertFields((IMessage)element, messageFactory, toHumanReadable) : element);
                 }
 
                 targetValue = list;
@@ -86,30 +82,22 @@ public class FixFieldConverter implements IFieldConverter {
 
     @Override
     public void init(IDictionaryStructure dictionary, String namespace) {
-        this.fieldToTag.clear();
-        this.tagToField.clear();
+        fieldToTag.clear();
+        tagToField.clear();
 
         for(IFieldStructure fieldType : dictionary.getFields().values()) {
             String tag = getAttributeValue(fieldType, FixMessageHelper.ATTRIBUTE_TAG).toString();
 
-            this.tagToField.put(tag, fieldType.getName());
-            this.fieldToTag.put(fieldType.getName(), tag);
+            tagToField.put(tag, fieldType.getName());
+            fieldToTag.put(fieldType.getName(), tag);
         }
     }
 
     public String convertToTag(String value) {
-        if(value.matches("\\d+")) {
-            return value;
-        }
-
-        return fieldToTag.get(value);
+        return value.matches("\\d+") ? value : fieldToTag.get(value);
     }
 
     public String convertToName(String value) {
-        if(value.matches("\\d+")) {
-            return tagToField.get(value);
-        }
-
-        return value;
+        return value.matches("\\d+") ? tagToField.get(value) : value;
     }
 }

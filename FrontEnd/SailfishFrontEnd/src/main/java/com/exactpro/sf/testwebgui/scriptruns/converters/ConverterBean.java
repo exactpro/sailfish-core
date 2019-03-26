@@ -18,7 +18,6 @@ package com.exactpro.sf.testwebgui.scriptruns.converters;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -49,7 +48,6 @@ import com.exactpro.sf.aml.converter.IMatrixConverter;
 import com.exactpro.sf.aml.converter.IMatrixConverterSettings;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import com.exactpro.sf.testwebgui.scriptruns.MatrixConverterFeature;
@@ -64,9 +62,9 @@ public class ConverterBean implements Serializable {
 
     private Long matrixId;
 
-    private List<String> envNames;
+    private final List<String> envNames;
 
-    private ServiceName[] serviceNames; // All service names, for converter dialog
+    private final ServiceName[] serviceNames; // All service names, for converter dialog
 
     private List<String> envServices;
 
@@ -78,7 +76,7 @@ public class ConverterBean implements Serializable {
 
     private String defaultPrefix = "";
 
-    private ConverterModel model;
+    private final ConverterModel model;
 
     private ConverterNode currentSettings;
 
@@ -95,7 +93,7 @@ public class ConverterBean implements Serializable {
         model = new ConverterModel(testToolsAPI.getMatrixConverters());
         this.envNames = testToolsAPI.getEnvNames();
 
-        Arrays.sort(this.serviceNames);
+        Arrays.sort(serviceNames);
     }
 
     public void addToMapping(ConverterFormMapAdapter adapter) {
@@ -139,7 +137,7 @@ public class ConverterBean implements Serializable {
 
         @Override
         public Boolean call() throws Exception {
-            return this.converter.convert(settings, monitor);
+            return converter.convert(settings, monitor);
         }
 
     }
@@ -174,10 +172,7 @@ public class ConverterBean implements Serializable {
 
     public Integer getProgress() {
         if (task != null) {
-            if (task.getFuture().isDone()) {
-                return 100;
-            }
-            return task.getProgress();
+            return task.getFuture().isDone() ? 100 : task.getProgress();
         } else {
             return 0;
         }
@@ -209,7 +204,7 @@ public class ConverterBean implements Serializable {
             for (String errorMessage : errors) {
                 BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, errorMessage, "");
             }
-            File newMatrixFile = this.task.getOutputFile();
+            File newMatrixFile = task.getOutputFile();
             if (newMatrixFile.exists()) {
                 String newName = newMatrixFile.getName();
                 try (InputStream matrixInputStream = new FileInputStream(newMatrixFile)) {

@@ -18,9 +18,9 @@ package com.exactpro.sf.actions.tools;
 import java.util.Objects;
 import java.util.function.Function;
 
-import com.exactpro.sf.aml.scriptutil.ExpressionResult;
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.exactpro.sf.aml.scriptutil.ExpressionResult;
 import com.exactpro.sf.aml.scriptutil.MvelException;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
@@ -119,7 +119,7 @@ public class Filters {
         @SuppressWarnings("unchecked")
         @Override
         public ExpressionResult validate(Object value) {
-            return ExpressionResult.create(this.function.apply((T)value));
+            return ExpressionResult.create(function.apply((T)value));
         }
 
         @Override
@@ -134,10 +134,10 @@ public class Filters {
 
         @Override
         public Object getValue() throws MvelException {
-            if (this.value == NOT_PRESENT) {
-                throw new MvelException(line, column, "Cannot get value from " + this.getClass().getSimpleName());
+            if(value == NOT_PRESENT) {
+                throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
             }
-            return this.value;
+            return value;
         }
         
         @Override

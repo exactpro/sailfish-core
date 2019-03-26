@@ -33,10 +33,6 @@ public class TagGroupDimensionListWrapper {
     @XmlElement(name = "dimension")
     private List<TagGroupDimension> selectedDemensions;
 
-    public TagGroupDimensionListWrapper() {
-
-    }
-
     public List<TagGroupDimension> getSelectedDemensions() {
         return selectedDemensions;
     }

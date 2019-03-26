@@ -21,25 +21,25 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class ITCHTCPClientSettings extends ITCHClientSettings {
     private static final long serialVersionUID = -5299816885595794380L;
 
-    private boolean doLiteLoginOnStart = false;
+    private boolean doLiteLoginOnStart;
 
-	private byte flag1 = 0;
+	private byte flag1;
 
-	private boolean sendHeartBeats = false;
+	private boolean sendHeartBeats;
 
 	private int heartbeatTimeout = 5;
 
 	private String username;
 
-	private boolean compressionUsed = false;
+	private boolean compressionUsed;
 
 	private int compressedChunkDelimeter = 57005;
 
-	private boolean doLoginOnStart = false;
+	private boolean doLoginOnStart;
 
-	private boolean reconnecting = false;
+	private boolean reconnecting;
 
-	private boolean disposeWhenSessionClosed = false;
+	private boolean disposeWhenSessionClosed;
 
     private int reconnectingTimeout = 5000;
 

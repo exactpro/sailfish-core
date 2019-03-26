@@ -27,10 +27,6 @@ import com.exactpro.sf.scriptrunner.languagemanager.ICompatibilityChecker;
 
 public class AML3Checker implements ICompatibilityChecker {
 
-    public AML3Checker() {
-        // TODO Auto-generated constructor stub
-    }
-
     @Override
     public boolean isCompatible(Method method) {
         int modifiers = method.getModifiers();

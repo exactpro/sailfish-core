@@ -16,6 +16,7 @@
 package com.exactpro.sf.center;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.HierarchicalConfiguration.Node;
 
 public class SFContextSettings {
     private static final String ENVIRONMENT_KEY = "Environment";
@@ -31,21 +32,21 @@ public class SFContextSettings {
 
     public HierarchicalConfiguration getEnvironmentConfig() {
         if (config.configurationsAt(ENVIRONMENT_KEY).isEmpty()) {
-            config.getRootNode().addChild(new HierarchicalConfiguration.Node(ENVIRONMENT_KEY));
+            config.getRootNode().addChild(new Node(ENVIRONMENT_KEY));
         }
         return config.configurationAt(ENVIRONMENT_KEY);
     }
 
     public HierarchicalConfiguration getLoggingConfig() {
         if (config.configurationsAt(LOGGING_KEY).isEmpty()) {
-            config.getRootNode().addChild(new HierarchicalConfiguration.Node(LOGGING_KEY));
+            config.getRootNode().addChild(new Node(LOGGING_KEY));
         }
         return config.configurationAt(LOGGING_KEY);
     }
 
     public HierarchicalConfiguration getUpdateServiceConfiguration() {
         if (config.configurationsAt(UPDATER_KEY).isEmpty()) {
-            config.getRootNode().addChild(new HierarchicalConfiguration.Node(UPDATER_KEY));
+            config.getRootNode().addChild(new Node(UPDATER_KEY));
         }
         return config.configurationAt(UPDATER_KEY);
     }

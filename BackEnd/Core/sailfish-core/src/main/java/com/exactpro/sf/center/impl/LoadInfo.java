@@ -26,8 +26,8 @@ import java.util.Set;
  */
 public class LoadInfo {
 
-    private StringBuilder classPath = new StringBuilder();
-    private Set<ClassLoader> classLoaders = new HashSet<>();
+    private final StringBuilder classPath = new StringBuilder();
+    private final Set<ClassLoader> classLoaders = new HashSet<>();
 
     public String getClassPath() {
         return classPath.toString();

@@ -50,30 +50,26 @@ public class SfApiOptions implements Serializable {
 
     private Set<BigButtonAction> onFailed = new LinkedHashSet<>();
 
-	public SfApiOptions() {
-		
-	}
-	
-	public SfApiOptions mergeOptions(SfApiOptions child) {
+    public SfApiOptions mergeOptions(SfApiOptions child) {
 		
 		SfApiOptions result = new SfApiOptions();
-		
-		result.continueIfFailed = (child.continueIfFailed != null ? child.continueIfFailed : this.continueIfFailed);
-		result.language = (child.language != null ? child.language : this.language );
-		result.range = (child.range != null ? child.range : this.range );
-		result.autoStart = (child.autoStart != null ? child.autoStart : this.autoStart );
-		result.ignoreAskForContinue = (child.ignoreAskForContinue != null ? child.ignoreAskForContinue : this.ignoreAskForContinue);
-		result.runNetDumper = (child.runNetDumper != null ? child.runNetDumper : this.runNetDumper);
-        result.skipOptional = (child.skipOptional != null ? child.skipOptional : this.skipOptional);
 
-		result.staticVariables.putAll(this.staticVariables);
+        result.continueIfFailed = child.continueIfFailed != null ? child.continueIfFailed : continueIfFailed;
+        result.language = child.language != null ? child.language : language;
+        result.range = child.range != null ? child.range : range;
+        result.autoStart = child.autoStart != null ? child.autoStart : autoStart;
+        result.ignoreAskForContinue = child.ignoreAskForContinue != null ? child.ignoreAskForContinue : ignoreAskForContinue;
+        result.runNetDumper = child.runNetDumper != null ? child.runNetDumper : runNetDumper;
+        result.skipOptional = child.skipOptional != null ? child.skipOptional : skipOptional;
+
+        result.staticVariables.putAll(staticVariables);
 		result.staticVariables.putAll(child.staticVariables);
 
 		result.setOnPassed(child.onPassed); // BigButtonActions not inherited
 		result.setOnFailed(child.onFailed);
         result.setOnCondPassed(child.onCondPassed);
 
-		result.tags.addAll(this.tags);
+        result.tags.addAll(tags);
 		result.tags.addAll(child.tags);
 		
 		return result;

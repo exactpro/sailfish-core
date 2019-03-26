@@ -34,12 +34,13 @@ public class TestDefaultAdapterManager extends AbstractTest
 
 	public class FileLabelProvider implements ILabelProvider
 	{
-		private File file;
+		private final File file;
 
 		public FileLabelProvider(File file)
 		{
-			if ( file == null )
-				throw new NullPointerException("file");
+            if(file == null) {
+                throw new NullPointerException("file");
+            }
 
 			this.file = file;
 		}

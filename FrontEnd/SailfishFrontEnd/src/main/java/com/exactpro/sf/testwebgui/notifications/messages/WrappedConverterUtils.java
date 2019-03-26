@@ -27,15 +27,13 @@ public class WrappedConverterUtils extends ConvertUtilsBean {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object convert(String value, Class clazz) {
 		if (clazz.isEnum()){
-			Object result = null;
-			try {
-				result = Enum.valueOf(clazz, value);
+            try {
+                return Enum.valueOf(clazz, value);
 			} catch (IllegalArgumentException e) {
 				logger.error("Can't convert {}", value, e);
 				throw new RuntimeException(e);
 			}
-			return result;
-		} else {
+        } else {
             return super.convert(value, clazz);
 		}
 	}
@@ -44,15 +42,13 @@ public class WrappedConverterUtils extends ConvertUtilsBean {
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public Object convert(Object value, Class clazz) {
 		if (clazz.isEnum()){
-			Object result = null;
-			try {
-				result = Enum.valueOf(clazz, (String) value);
+            try {
+                return Enum.valueOf(clazz, (String) value);
 			} catch (IllegalArgumentException e) {
 				logger.error("Can't convert {}", value, e);
 				throw new RuntimeException(e);
 			}
-			return result;
-		} else {
+        } else {
             return super.convert(value, clazz);
 		}
 	}

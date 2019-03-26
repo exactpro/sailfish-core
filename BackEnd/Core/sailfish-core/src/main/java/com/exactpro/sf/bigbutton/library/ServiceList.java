@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.library;
 
-import com.exactpro.sf.bigbutton.importing.ImportError;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.exactpro.sf.bigbutton.importing.ImportError;
 
 @SuppressWarnings("serial")
 public class ServiceList extends AbstractLibraryItem implements Serializable {
@@ -35,18 +35,18 @@ public class ServiceList extends AbstractLibraryItem implements Serializable {
     private ImportError rejectCause;
 
 	private List<Service> services = new ArrayList<>();
-    private Set<String> serviceNames = new LinkedHashSet<>();
+    private final Set<String> serviceNames = new LinkedHashSet<>();
 
     @Override
 	public void addNested(Service item) {
         if ( !serviceNames.add(item.getName())) {
             if (!isRejected()) {
-                this.rejectCause = new ImportError(this.lineNumber, String.format("Service List \"%s\" error", this.name));
+                this.rejectCause = new ImportError(lineNumber, String.format("Service List \"%s\" error", name));
             }
             addRejectCause(new ImportError(item.getRecordNumber(), "Duplicate service with [" + item.getName() + "] name"));
         }
 
-        this.services.add(item);
+        services.add(item);
 	}
 
 	public String getName() {
@@ -82,11 +82,11 @@ public class ServiceList extends AbstractLibraryItem implements Serializable {
     }
 
     public boolean isRejected() {
-        return this.rejectCause != null;
+        return rejectCause != null;
     }
 
     public void addRejectCause(ImportError error) {
-        this.rejectCause.addCause(error);
+        rejectCause.addCause(error);
     }
 
     public ImportError getRejectCause() {

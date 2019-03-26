@@ -16,6 +16,8 @@
 package com.exactpro.sf.actions;
 
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +29,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.script.MetaContainer;
@@ -52,6 +52,8 @@ import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
 import com.exactpro.sf.util.DateTimeUtility;
 
 import quickfix.FixVersions;
+import quickfix.Message;
+import quickfix.field.MsgSeqNum;
 
 /**
  * Collection of matrix utilities for FIX protocol.
@@ -59,10 +61,10 @@ import quickfix.FixVersions;
  *
  */
 @MatrixUtils
-@ResourceAliases({"FIXMatrixUtil"})
+@ResourceAliases("FIXMatrixUtil")
 public class FIXMatrixUtil extends AbstractCaller {
 
-	private static Logger logger = LoggerFactory.getLogger(FIXMatrixUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(FIXMatrixUtil.class);
 
     private static final String FIX_DATE_FORMAT = "yyyyMMdd";
     private static final String FIX_DATE_TIME_FORMAT = FIX_DATE_FORMAT + "-HH:mm:ss";
@@ -318,16 +320,14 @@ public class FIXMatrixUtil extends AbstractCaller {
 	@UtilityMethod
 	public char ITCHSideToFIXSide(Short side)
 	{
-		char fixSide;
-		if(side == 66) {
-			fixSide = '1';
+        if(side == 66) {
+            return '1';
 		} else if(side == 83) {
-			fixSide = '2';
+            return '2';
 		} else {
-			fixSide = '3';
-		}
-		return fixSide;
-	}
+            return '3';
+        }
+    }
 
 	@Description("Wraps SeqNum to prepare it for writing to a file")
 	@UtilityMethod
@@ -481,10 +481,10 @@ public class FIXMatrixUtil extends AbstractCaller {
 	/*
 	 * Common send method
 	 */
-	static quickfix.Message send(IActionContext actionContext,
-			quickfix.Message message) throws Exception {
+	static Message send(IActionContext actionContext,
+			Message message) throws Exception {
 		String serviceName = actionContext.getServiceName();
-		IInitiatorService service = FIXMatrixUtil.getClient(actionContext);
+        IInitiatorService service = getClient(actionContext);
 
 		boolean performance = false;
 		if (service instanceof FIXClient) {
@@ -497,10 +497,10 @@ public class FIXMatrixUtil extends AbstractCaller {
             logger.info("[{}] {}", serviceName, FixUtil.toString(message, FixUtil.getDictionary(message)));
         }
 
-		if (message.getHeader().isSetField(quickfix.field.MsgSeqNum.FIELD)) {
+		if (message.getHeader().isSetField(MsgSeqNum.FIELD)) {
 			int seqnum = message.getHeader().getInt(
-					quickfix.field.MsgSeqNum.FIELD);
-			((FIXSession) (service.getSession())).addExpectedSenderNum(seqnum);
+					MsgSeqNum.FIELD);
+			((FIXSession)service.getSession()).addExpectedSenderNum(seqnum);
 		}
 
 		Thread.sleep(actionContext.getTimeout());
@@ -514,10 +514,10 @@ public class FIXMatrixUtil extends AbstractCaller {
 		return message;
 	}
 
-	static quickfix.Message receive(IActionContext actionContext, quickfix.Message messageFilter) throws Exception
+	static Message receive(IActionContext actionContext, Message messageFilter) throws Exception
 	{
 		boolean isApp = messageFilter.isApp();
-		FIXClient service = FIXMatrixUtil.getClient(actionContext);
+        FIXClient service = getClient(actionContext);
 		IServiceSettings serviceSettings = service.getSettings();
 		if(serviceSettings instanceof FIXClientSettings) {
 			FIXClientSettings fixClientSettings = (FIXClientSettings) serviceSettings;
@@ -537,9 +537,9 @@ public class FIXMatrixUtil extends AbstractCaller {
 		}
 	}
 
-	static void countMessages(IActionContext actionContext, quickfix.Message message) throws Exception {
+	static void countMessages(IActionContext actionContext, Message message) throws Exception {
 		boolean isApp = message.isApp();
-		FIXClient service = FIXMatrixUtil.getClient(actionContext);
+        FIXClient service = getClient(actionContext);
 		QFJIMessageConverter converter = service.getConverter();
 		IMessage newMessageFilter = converter.convert(message, null, Boolean.TRUE);// convert to AML3 format
 		ActionContextWrapper actionContextWrapper = new ActionContextWrapper(actionContext);

@@ -19,12 +19,10 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -81,7 +79,7 @@ public class StatisticsReportingBean implements Serializable {
 	private IStatisticsReportHandler statisticsReportHandler;
 
     @SessionStored
-    private List<Tag> tags = new ArrayList<>();
+    private final List<Tag> tags = new ArrayList<>();
 
     private Tag tagToAdd;
     private List<Tag> allTags;
@@ -96,16 +94,16 @@ public class StatisticsReportingBean implements Serializable {
         StatisticsService statisticsService = BeanUtil.getSfContext().getStatisticsService();
 
         this.statisticsDbAvailable = statisticsService.isConnected();
-		
-		if(this.statisticsDbAvailable) {
+
+        if(statisticsDbAvailable) {
 		
 			this.from = DateUtils.truncate( new Date(), Calendar.DATE );
 			
 			this.to = new Date();
 			
 			this.allSfInstances = statisticsService.getStorage().getAllSfInstances();
-			
-			this.selectedSfInstances.addAll(this.allSfInstances);
+
+            selectedSfInstances.addAll(allSfInstances);
 
             this.allTags = statisticsService.getStorage().getAllTags();
 
@@ -128,8 +126,8 @@ public class StatisticsReportingBean implements Serializable {
     }
 	
 	public void generateReport() {
-		
-		logger.debug("Generate {} - {}; {}", this.from, this.to, this.selectedSfInstances);
+
+        logger.debug("Generate {} - {}; {}", from, to, selectedSfInstances);
 
         AggregateReportParameters params = getAggregateReportParameters();
 
@@ -143,7 +141,7 @@ public class StatisticsReportingBean implements Serializable {
                 List<List<Long>> testCaseRunIds = new ArrayList<>(matrixToTestCaseIds.values());
                 while (limit < matrixIds.size()) {
                     List<Long> batchMatrixIds = matrixIds.subList(
-                            limit, Math.min((limit + LOADING_MATRIX_LIMIT), matrixIds.size()));
+                            limit, Math.min(limit + LOADING_MATRIX_LIMIT, matrixIds.size()));
                     List<Long> batchTestCaseIds = testCaseRunIds.subList(
                             limit, Math.min(limit += LOADING_MATRIX_LIMIT, matrixToTestCaseIds.size()))
                             .stream()
@@ -206,20 +204,20 @@ public class StatisticsReportingBean implements Serializable {
     public void onTagSelect() {
         logger.debug("Tag select invoked");
 
-        this.tags.add(tagToAdd);
+        tags.add(tagToAdd);
         this.tagToAdd = null;
-        this.allTags.removeAll(tags);
+        allTags.removeAll(tags);
     }
 
     public void removeTag(Tag tag) {
-        this.tags.remove(tag);
-        this.allTags.add(tag);
+        tags.remove(tag);
+        allTags.add(tag);
     }
 
     public List<Tag> completeTag(String query) {
         List<Tag> result = new ArrayList<>();
         String loweredQuery = query.toLowerCase();
-        for(Tag tag : this.allTags) {
+        for(Tag tag : allTags) {
             if(tag.getName().toLowerCase().contains(loweredQuery)) {
                 result.add(tag);
             }

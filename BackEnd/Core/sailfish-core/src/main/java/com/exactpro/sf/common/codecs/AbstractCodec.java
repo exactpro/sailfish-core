@@ -25,6 +25,6 @@ import com.exactpro.sf.services.IServiceContext;
 
 public abstract class AbstractCodec extends CumulativeProtocolDecoder implements ProtocolEncoder 
 {
-	public abstract void init(IServiceContext serviceContext, ICommonSettings settings, final IMessageFactory msgFactory, final IDictionaryStructure dictionary);
+	public abstract void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary);
 	
 }

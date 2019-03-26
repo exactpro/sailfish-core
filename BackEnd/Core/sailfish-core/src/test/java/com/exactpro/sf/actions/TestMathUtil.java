@@ -25,7 +25,7 @@ import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityNotFoundExc
 
 public class TestMathUtil {
 
-    private MathUtil mathUtil = new MathUtil();
+    private final MathUtil mathUtil = new MathUtil();
 
     @Test
     public void TestMin() throws UtilityCallException, UtilityNotFoundException, InterruptedException {

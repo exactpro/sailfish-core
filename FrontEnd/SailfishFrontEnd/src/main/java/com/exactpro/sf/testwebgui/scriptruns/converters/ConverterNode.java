@@ -16,14 +16,15 @@
 
 package com.exactpro.sf.testwebgui.scriptruns.converters;
 
+import static com.exactpro.sf.comparison.conversion.MultiConverter.convert;
+import static org.apache.commons.lang3.ClassUtils.primitiveToWrapper;
+
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.comparison.conversion.MultiConverter;
 import com.exactpro.sf.testwebgui.GuiUtil;
 
 public class ConverterNode {
@@ -78,11 +79,7 @@ public class ConverterNode {
 
     @SuppressWarnings("unchecked")
     public void setValue(Object value) {
-        if(paramClassType.equals(Map.class)) {
-            this.value = value;
-        } else {
-            this.value = MultiConverter.convert(value, ClassUtils.primitiveToWrapper(paramClassType));
-        }
+        this.value = paramClassType.equals(Map.class) ? value : convert(value, primitiveToWrapper(paramClassType));
     }
 
 	public String getReadableName() {

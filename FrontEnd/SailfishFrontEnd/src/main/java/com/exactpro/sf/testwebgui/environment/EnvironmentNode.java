@@ -19,9 +19,10 @@ import static org.apache.commons.lang3.StringUtils.stripToNull;
 import static org.apache.commons.lang3.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 
@@ -36,9 +37,8 @@ import org.apache.commons.beanutils.converters.IntegerConverter;
 import org.apache.commons.beanutils.converters.LongConverter;
 import org.apache.commons.beanutils.converters.ShortConverter;
 import org.apache.commons.beanutils.converters.StringConverter;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.QueryTimeoutException;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.primefaces.context.RequestContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +54,11 @@ import com.exactpro.sf.testwebgui.GuiUtil;
 
 public class EnvironmentNode implements Serializable, Comparable<Object> {
 
-	private final static long serialVersionUID = 7408809506587055016L;
+    private static final long serialVersionUID = 7408809506587055016L;
 
-	private final static Logger logger = LoggerFactory.getLogger(EnvironmentNode.class);
-	
-	private final static ConvertUtilsBean converter; // not serializable
+    private static final Logger logger = LoggerFactory.getLogger(EnvironmentNode.class);
+
+    private static final ConvertUtilsBean converter; // not serializable
 
 	private final String id;
     private final String description;
@@ -74,15 +74,15 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     
 	private Object value;
     private String variable;
-    private Map<String, String> variableSet;
-    private String name;
-    private String environment;
+    private final Map<String, String> variableSet;
+    private final String name;
+    private final String environment;
 	private ServiceStatus status;
 	
     private String serviceParamRenderComponent = "defaultTextbox";
-	
-	private boolean differentValues = false; // for several services editing
-    private boolean differentVariables = false;
+
+    private boolean differentValues; // for several services editing
+    private boolean differentVariables;
 	
 	static {
 		
@@ -146,20 +146,20 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
         this.description = description == null ? null : description.trim();
         this.enumeratedValues = enumeratedValues;
 
-        this.id = Type.SERVICE.equals(type) ? parent.toString() : parent.toString() + name;
+        this.id = type == Type.SERVICE ? parent.toString() : parent + name;
 
-        if (Type.PARAMETER.equals(type)) {
-			if(name.equals("dictionaryName")) {
+        if(type == Type.PARAMETER) {
+            if("dictionaryName".equals(name)) {
 				serviceParamRenderComponent = "dictionaryNameSelect";
-			} else if(name.equals("amlVersion")) {
+            } else if("amlVersion".equals(name)) {
 				serviceParamRenderComponent = "amlVersionSelect";
 			} else if(paramClassType.equals(boolean.class)) {
 				serviceParamRenderComponent = "booleanCheckbox";
 			} else if(paramClassType.equals(int.class) || paramClassType.equals(long.class) || paramClassType.equals(Integer.class)) {
 				serviceParamRenderComponent = "integerTextbox";
 			}
-        } else if (Type.DESCRIPTION.equals(type)) {
-			if(name.equals("HandlerClassName")) {
+        } else if(type == Type.DESCRIPTION) {
+            if("HandlerClassName".equals(name)) {
 				serviceParamRenderComponent = "handlerClassNameSelect";
 			}
 		}
@@ -211,7 +211,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 	}
 	
 	public String getName() {
-		return this.name;
+        return name;
 	}
 
 	public String getReadableName() {
@@ -219,7 +219,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 	}
 
 	public String getValue() {
-		return convert(this.value);
+        return convert(value);
 	}
 
 	public void setValue(String val) {
@@ -261,21 +261,13 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 	}
 	
 	private synchronized Object convert(String value, Class<?> targetType) {
-		if (value == null || (value.isEmpty() && !String.class.equals(targetType))) {
-			return null;
-		}
-		return converter.convert(value, paramClassType);
-	}
+        return (value == null || (value.isEmpty() && !String.class.equals(targetType))) ? null : converter.convert(value, paramClassType);
+    }
 	
 	public void updateParentProperty(ServiceDescription parent) throws Exception {
 
 		if ( type == Type.PARAMETER ) {
-			Object convertedValue = null;
-			if(value == null || value.toString().trim().isEmpty()) {
-				convertedValue = null;
-			} else {
-				convertedValue = convert(this.value, paramClassType);
-			}
+            Object convertedValue = (value == null || value.toString().trim().isEmpty()) ? null : convert(value, paramClassType);
 			BeanUtils.setProperty(parent.getSettings(), name, convertedValue);
 
             if(variable == null) {
@@ -284,44 +276,47 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
                 parent.getVariables().put(name, variable);
             }
 		} else if ( type == Type.DESCRIPTION ) {
-			parent.setServiceHandlerClassName(this.value.toString());
+            parent.setServiceHandlerClassName(value.toString());
 		}
 	}
 
 	public SailfishURI getServiceType() {
-		return this.parentType;
+        return parentType;
 	}
 
 	public List<EnvironmentNode> getNodeChildren() {
-		return this.nodes;
+        return nodes;
 	}
 
 	public boolean getNodeHasChildren() {
-		return this.nodes != null;
+        return nodes != null;
 	}
 
 	public String getId() {
-		return this.id;
+        return id;
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-		final EnvironmentNode node = (EnvironmentNode) o;
+        EnvironmentNode node = (EnvironmentNode)o;
 
-		if (id != null ? !id.equals(node.id) : node.id != null)
-			return false;
+        if(id != null ? !id.equals(node.id) : node.id != null) {
+            return false;
+        }
 
 		return true;
 	}
 
 	@Override
 	public int hashCode() {
-		return (id != null ? id.hashCode() : 0);
+        return id != null ? id.hashCode() : 0;
 	}
 
 	public final Type getType() {
@@ -333,8 +328,9 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 	}
 
 	public final String getStatus() {
-		if ( this.type == Type.SERVICE )
-			return this.status == null ? "NULL" : this.status.toString();
+        if(type == Type.SERVICE) {
+            return status == null ? "NULL" : status.toString();
+        }
 		return "";
 	}
 
@@ -350,17 +346,19 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 
 		StringBuilder result = new StringBuilder();
 
-		if (paramClassType != null)
-			result.append("Type: ").append(paramClassType.getSimpleName()).append("<br />");
-		if (description != null && !description.isEmpty())
-			result.append("Description: ").append(description.replace("\n", "<br />"));
+        if(paramClassType != null) {
+            result.append("Type: ").append(paramClassType.getSimpleName()).append("<br />");
+        }
+        if(description != null && !description.isEmpty()) {
+            result.append("Description: ").append(description.replace("\n", "<br />"));
+        }
 
 		return result.toString();
 	}
 
 	@Override
 	public int compareTo(Object o) {
-		return ((EnvironmentNode) o).getName().compareToIgnoreCase(this.name);
+        return ((EnvironmentNode)o).getName().compareToIgnoreCase(name);
 	}
 
 	public boolean isServiceParamRequired() {
@@ -400,11 +398,7 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
     }
 
     public String getFinalValue() {
-        if(environment != null && variableSet != null && variable != null) {
-            return variableSet.getOrDefault(variable, getValue());
-        }
-
-        return getValue();
+        return environment != null && variableSet != null && variable != null ? variableSet.getOrDefault(variable, getValue()) : getValue();
     }
 
     public List<String> getEnumeratedValues() {

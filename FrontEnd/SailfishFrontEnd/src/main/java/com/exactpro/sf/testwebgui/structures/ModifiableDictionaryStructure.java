@@ -65,18 +65,18 @@ public class ModifiableDictionaryStructure implements IDictionaryStructure {
 	@SuppressWarnings("unchecked")
 	@Override
     public Map<String, IMessageStructure> getMessages() {
-        return (Map<String, IMessageStructure>)(Map<String, ?>)this.msgStructures;
+        return (Map<String, IMessageStructure>)(Map<String, ?>)msgStructures;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
     public Map<String, IFieldStructure> getFields() {
-        return (Map<String, IFieldStructure>)(Map<String, ?>)this.fieldStructures;
+        return (Map<String, IFieldStructure>)(Map<String, ?>)fieldStructures;
 	}
 	
 	@Override
 	public String getNamespace() {
-		return this.namespace;
+        return namespace;
 	}
 	
 	@Override
@@ -87,27 +87,27 @@ public class ModifiableDictionaryStructure implements IDictionaryStructure {
 	/** IMPL **/
 
 	public List<ModifiableMessageStructure> getImplMessageStructures() {
-		return new ArrayList<>(this.msgStructures.values());
+        return new ArrayList<>(msgStructures.values());
 	}
 	
 	public List<ModifiableFieldStructure> getImplFieldStructures() {
-		return new ArrayList<>(this.fieldStructures.values());
+        return new ArrayList<>(fieldStructures.values());
 	}
 	
 	public void addMessageStructure(ModifiableMessageStructure structure) {
-		this.msgStructures.put(structure.getName(), structure);
+        msgStructures.put(structure.getName(), structure);
 	}
 	
 	public void addFieldStructure(ModifiableFieldStructure structure) {
-		this.fieldStructures.put(structure.getName(), structure);
+        fieldStructures.put(structure.getName(), structure);
 	}
 	
 	public void removeMessageStructure(String name) {
-		this.msgStructures.remove(name);
+        msgStructures.remove(name);
 	}
 	
 	public void removeFieldStructure(String name) {
-		this.fieldStructures.remove(name);
+        fieldStructures.remove(name);
 	}
 
 	public void setNamespace(String namespace) {

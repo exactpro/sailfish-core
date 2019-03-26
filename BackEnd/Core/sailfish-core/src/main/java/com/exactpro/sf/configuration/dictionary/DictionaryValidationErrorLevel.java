@@ -19,6 +19,6 @@ public enum DictionaryValidationErrorLevel {
 	
 	DICTIONARY,
 	MESSAGE,
-	FIELD;
+	FIELD
 
 }

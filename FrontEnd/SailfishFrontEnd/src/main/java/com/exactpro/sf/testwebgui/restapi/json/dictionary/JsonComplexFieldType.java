@@ -33,6 +33,6 @@ public class JsonComplexFieldType extends JsonField {
 	}
 
 	public LinkedHashMap<String, JsonField> getFields() {
-		return this.fields;
+        return fields;
 	}
 }

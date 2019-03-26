@@ -158,12 +158,12 @@ public class QFJIMessageConverter
 		return convert(message, null, null, false);
 	}
 
-    public IMessage convert(final Message message, final Boolean verifyTagsOverride, final Boolean skipTagsOverride) throws MessageConvertException {
+    public IMessage convert(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride) throws MessageConvertException {
         return convert(message, verifyTagsOverride, skipTagsOverride, false);
     }
 
-    public IMessage convert(final Message message, final Boolean verifyTagsOverride, final Boolean skipTagsOverride,
-                            final boolean ignoreFieldType) throws MessageConvertException {
+    public IMessage convert(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
+            boolean ignoreFieldType) throws MessageConvertException {
 		if(message == null) {
 		    return null;
 		}
@@ -207,9 +207,9 @@ public class QFJIMessageConverter
 		return resultMessage;
 	}
 
-    protected void traverseMessage(final IMessage resultMessage, final FieldMap message, final IMessageFactory factory,
-                                   final IMessage rootMessage, final boolean verifyTags,
-                                   final boolean skipTags, final boolean ignoreFieldType) throws MessageConvertException {
+    protected void traverseMessage(IMessage resultMessage, FieldMap message, IMessageFactory factory,
+            IMessage rootMessage, boolean verifyTags,
+            boolean skipTags, boolean ignoreFieldType) throws MessageConvertException {
 		String messageName = rootMessage.getName();
 		Iterator<Field<?>> it = message.iterator();
 
@@ -374,15 +374,15 @@ public class QFJIMessageConverter
     }
 
     protected Message createInstance(String messageName, Class<? extends Message> messageClass) throws InstantiationException, IllegalAccessException {
-        if (this.orderingFields && Message.class == messageClass) {
+        if(orderingFields && messageClass == Message.class) {
             IMessageStructure messageStructure = dictionary.getMessages().get(messageName);
             int[] fieldOrder = getFieldOrderPrimitive(messageStructure);
-            return new SailfishQuickfixMessage(fieldOrder, this.fieldOrderHeader, this.fieldOrderTrailer);
+            return new SailfishQuickfixMessage(fieldOrder, fieldOrderHeader, fieldOrderTrailer);
         }
         return messageClass.newInstance();
     }
-	
-    protected void traverseIMessage(final FieldMap resultMessage, final IMessage message) throws MessageConvertException {
+
+    protected void traverseIMessage(FieldMap resultMessage, IMessage message) throws MessageConvertException {
         IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
 
         for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
@@ -394,7 +394,7 @@ public class QFJIMessageConverter
             }
 
             if(fieldName.equals(FixMessageHelper.HEADER)) {
-                FieldMap header = ((quickfix.Message)resultMessage).getHeader();
+                FieldMap header = ((Message)resultMessage).getHeader();
                 IMessage iHeader = message.getField(fieldName);
 
                 traverseIMessage(header, iHeader);
@@ -403,7 +403,7 @@ public class QFJIMessageConverter
             }
 
             if(fieldName.equals(FixMessageHelper.TRAILER)) {
-                FieldMap trailer = ((quickfix.Message)resultMessage).getTrailer();
+                FieldMap trailer = ((Message)resultMessage).getTrailer();
                 IMessage iTrailer = message.getField(fieldName);
 
                 traverseIMessage(trailer, iTrailer);
@@ -446,7 +446,7 @@ public class QFJIMessageConverter
                     resultMessage.setBoolean(fieldTag, (Boolean)fieldValue);
                     continue;
                 case JAVA_LANG_CHARACTER:
-                    resultMessage.setString(fieldTag, (fieldValue.toString()));
+                    resultMessage.setString(fieldTag, fieldValue.toString());
                     continue;
                 case JAVA_LANG_DOUBLE:
                     if(fieldValue instanceof BigDecimal) {

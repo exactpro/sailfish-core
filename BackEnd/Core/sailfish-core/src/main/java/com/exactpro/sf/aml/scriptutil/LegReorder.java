@@ -30,7 +30,7 @@ import com.exactpro.sf.scriptrunner.StatusType;
 
 public class LegReorder {
 
-	private static Logger logger = LoggerFactory.getLogger(LegReorder.class);
+	private static final Logger logger = LoggerFactory.getLogger(LegReorder.class);
 
 	private LegReorder() {
 		// hide constructor
@@ -38,28 +38,28 @@ public class LegReorder {
 
 	// 1) message matches filter
 	// 2) message is IMessage (so it mainly for AML3)
-    public static IMessage reorder(final IMessage message, final IMessage filter, ComparatorSettings settings) {
+    public static IMessage reorder(IMessage message, IMessage filter, ComparatorSettings settings) {
 		logger.debug("start reorder legs");
 		logger.debug("message: {}", message);
 		logger.debug("filter: {}", filter);
 
 		for (String fieldName : message.getFieldNames()) {
-			final Object message_field = message.getField(fieldName);
-			final Object filter_field = filter.getField(fieldName);
+			Object message_field = message.getField(fieldName);
+			Object filter_field = filter.getField(fieldName);
 
 			if (message_field == null || filter_field == null) {
 				continue;
 			}
 
 			if (message_field instanceof List && filter_field instanceof List) {
-				@SuppressWarnings("unchecked")
-				final List<IMessage> message_legs = (List<IMessage>) message_field;
+                @SuppressWarnings("unchecked")
+                List<IMessage> message_legs = (List<IMessage>)message_field;
 
-				@SuppressWarnings("unchecked")
-				final List<IMessage> filter_legs = (List<IMessage>) filter_field;
+                @SuppressWarnings("unchecked")
+                List<IMessage> filter_legs = (List<IMessage>)filter_field;
 
-				final int m_size = message_legs.size();
-				final int f_size = filter_legs.size();
+				int m_size = message_legs.size();
+				int f_size = filter_legs.size();
 
 				if (m_size == 0 || f_size == 0) {
 					continue;
@@ -73,10 +73,10 @@ public class LegReorder {
 					sb.append("\n");
 					sb.append("FILTER: ").append(filter_field);
 					sb.append("\n");
-					throw new IllegalArgumentException("Failed to found correct order of legs: " + sb.toString());
+					throw new IllegalArgumentException("Failed to found correct order of legs: " + sb);
 				}
 
-				final List<IMessage> new_legs = new ArrayList<>(message_legs.size());
+				List<IMessage> new_legs = new ArrayList<>(message_legs.size());
 
 				for (int i = 0; i < order.length; i++) {
 					IMessage msg = message_legs.get(order[i]);
@@ -96,12 +96,12 @@ public class LegReorder {
 		return message;
 	}
 
-    private static int[] findPermute(final List<IMessage> message_legs, final List<IMessage> filter_legs, final ComparatorSettings settings) {
-		final int m_size = message_legs.size();
-		final int f_size = filter_legs.size();
+    private static int[] findPermute(List<IMessage> message_legs, List<IMessage> filter_legs, ComparatorSettings settings) {
+		int m_size = message_legs.size();
+		int f_size = filter_legs.size();
 
 		// cache for compare(msg[i], filter[j])
-		final Boolean[][] equality = new Boolean[m_size][f_size];
+		Boolean[][] equality = new Boolean[m_size][f_size];
 
 		// Mapping of legs: order[i]-th leg should be i-th in resulting list
 		int[] permute = new int[m_size];

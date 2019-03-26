@@ -19,10 +19,10 @@ import java.io.IOException;
 
 public interface IMatrixReader extends AutoCloseable {
 
-    public SimpleCell[] readCells() throws IOException;
+    SimpleCell[] readCells() throws IOException;
 
-    public String[] read() throws IOException;
+    String[] read() throws IOException;
     
-    public boolean hasNext();
+    boolean hasNext();
 
 }

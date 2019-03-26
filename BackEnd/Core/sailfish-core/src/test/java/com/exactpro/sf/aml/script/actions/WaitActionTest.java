@@ -52,7 +52,7 @@ public class WaitActionTest extends AbstractTest {
 	@Test
 	public void TestWaitForApplicationMessage() throws Exception
 	{
-		IMessage mInstrumentDirectoryDerivatives = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage mInstrumentDirectoryDerivatives = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		mInstrumentDirectoryDerivatives.addField("InstrumentClassId", "AAA");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -62,7 +62,7 @@ public class WaitActionTest extends AbstractTest {
 
         IServiceHandler handler = new CollectorServiceHandler();
 		ISession isession = new FakeSession(null);
-		IMessage m = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m.addField("InstrumentClassId", "AAA");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m);
 
@@ -73,7 +73,7 @@ public class WaitActionTest extends AbstractTest {
 	@Test
 	public void TestWaitForAdministrationMessage() throws Exception
 	{
-		IMessage mLogout = this.messageFactory.createMessage("Logout", "namespace");
+        IMessage mLogout = messageFactory.createMessage("Logout", "namespace");
 		mLogout.addField("userid", "AAA");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -83,7 +83,7 @@ public class WaitActionTest extends AbstractTest {
 
         IServiceHandler handler = new CollectorServiceHandler();
 		ISession isession = new FakeSession(null);
-		IMessage m = this.messageFactory.createMessage("Logout", "namespace");
+        IMessage m = messageFactory.createMessage("Logout", "namespace");
 		m.addField("userid", "AAA");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_ADMIN, m);
 
@@ -94,13 +94,13 @@ public class WaitActionTest extends AbstractTest {
 	@Test
 	public void TestWaitForMessageWithUpdatedCheckPointValid() throws Exception
 	{
-		IMessage f1 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f1 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f1.addField("InstrumentClassId", "AAA");
-		IMessage f2 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f2 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f2.addField("InstrumentClassId", "BBB");
-		IMessage f3 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f3 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f3.addField("InstrumentClassId", "CCC");
-		IMessage f4 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f4 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f4.addField("InstrumentClassId", "DDD");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -113,19 +113,19 @@ public class WaitActionTest extends AbstractTest {
         CheckPoint checkPoint = new CheckPoint(true);
         handler.registerCheckPoint(isession, ServiceHandlerRoute.FROM_APP, checkPoint);
 
-		IMessage m1 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m1 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m1.addField("InstrumentClassId", "AAA");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m1);
 
-		IMessage m2 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m2 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m2.addField("InstrumentClassId", "BBB");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m2);
 
-		IMessage m3 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m3 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m3.addField("InstrumentClassId", "CCC");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m3);
 
-		IMessage m4 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m4 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m4.addField("InstrumentClassId", "DDD");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m4);
 
@@ -154,13 +154,13 @@ public class WaitActionTest extends AbstractTest {
 	public void TestWaitForMessageWithUpdatedCheckPointInvalid() throws Exception
 	{
 		// create filters
-		IMessage f1 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f1 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f1.addField("InstrumentClassId", "AAA");
-		IMessage f2 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f2 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f2.addField("InstrumentClassId", "BBB");
-		IMessage f3 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f3 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f3.addField("InstrumentClassId", "CCC");
-		IMessage f4 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f4 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f4.addField("InstrumentClassId", "DDD");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -174,19 +174,19 @@ public class WaitActionTest extends AbstractTest {
 		CheckPoint checkPoint = new CheckPoint(true);
         handler.registerCheckPoint(isession, ServiceHandlerRoute.FROM_APP, checkPoint);
 
-		IMessage m1 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m1 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m1.addField("InstrumentClassId", "AAA");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m1);
 
-		IMessage m2 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m2 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m2.addField("InstrumentClassId", "BBB");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m2);
 
-		IMessage m3 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m3 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m3.addField("InstrumentClassId", "CCC");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m3);
 
-		IMessage m4 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m4 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m4.addField("InstrumentClassId", "DDD");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m4);
 
@@ -215,13 +215,13 @@ public class WaitActionTest extends AbstractTest {
 	@Test
 	public void TestWaitForMessageWithUpdatedCheckPointInvalid2() throws Exception
 	{
-		IMessage f1 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f1 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f1.addField("InstrumentClassId", "AAA");
-		IMessage f2 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f2 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f2.addField("InstrumentClassId", "BBB");
-		IMessage f3 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f3 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f3.addField("InstrumentClassId", "CCC");
-		IMessage f4 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage f4 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		f4.addField("InstrumentClassId", "DDD");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -231,22 +231,22 @@ public class WaitActionTest extends AbstractTest {
 
 		CollectorServiceHandler handler = new CollectorServiceHandler();
 		ISession isession = new FakeSession(null);
-		IMessage m1 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m1 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m1.addField("InstrumentClassId", "AAA");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m1);
 
 		CheckPoint checkPoint = new CheckPoint(true);
         handler.registerCheckPoint(isession, ServiceHandlerRoute.FROM_APP, checkPoint);
 
-		IMessage m2 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m2 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m2.addField("InstrumentClassId", "BBB");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m2);
 
-		IMessage m3 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m3 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m3.addField("InstrumentClassId", "CCC");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m3);
 
-		IMessage m4 = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m4 = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m4.addField("InstrumentClassId", "DDD");
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, m4);
 
@@ -270,7 +270,7 @@ public class WaitActionTest extends AbstractTest {
 	@Test
 	public void TestCountApplicationMessages() throws Exception
 	{
-		IMessage mInstrumentDirectoryDerivatives = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage mInstrumentDirectoryDerivatives = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		mInstrumentDirectoryDerivatives.addField("InstrumentClassId", "PRY");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -280,10 +280,10 @@ public class WaitActionTest extends AbstractTest {
 
         IServiceHandler handler = new CollectorServiceHandler();
 		ISession isession = new FakeSession(null);
-		IMessage m = this.messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
+        IMessage m = messageFactory.createMessage("InstrumentDirectoryDerivatives", "namespace");
 		m.addField("InstrumentClassId", "PRY");
 
-		IMessage addOrder = this.messageFactory.createMessage("AddOrder", "namespace");
+        IMessage addOrder = messageFactory.createMessage("AddOrder", "namespace");
 		addOrder.addField("Instrument", 1);
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, addOrder);
 
@@ -292,7 +292,7 @@ public class WaitActionTest extends AbstractTest {
 			handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, addOrder.cloneMessage());
 		}
 
-		addOrder = this.messageFactory.createMessage("AddOrder", "namespace");
+        addOrder = messageFactory.createMessage("AddOrder", "namespace");
 		addOrder.addField("Instrument", 2);
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_APP, addOrder);
 
@@ -304,7 +304,7 @@ public class WaitActionTest extends AbstractTest {
 	@Test
 	public void TestCountAdministrationMessages() throws Exception
 	{
-		IMessage mLogout = this.messageFactory.createMessage("Logout", "namespace");
+        IMessage mLogout = messageFactory.createMessage("Logout", "namespace");
 		mLogout.addField("userid", "AAA");
 
 		MetaContainer metaContainer = new MetaContainer();
@@ -314,10 +314,10 @@ public class WaitActionTest extends AbstractTest {
 
         IServiceHandler handler = new CollectorServiceHandler();
 		ISession isession = new FakeSession(null);
-		IMessage m = this.messageFactory.createMessage("Logout", "namespace");
+        IMessage m = messageFactory.createMessage("Logout", "namespace");
 		m.addField("userid", "AAA");
 
-		IMessage addOrder = this.messageFactory.createMessage("AddOrder", "namespace");
+        IMessage addOrder = messageFactory.createMessage("AddOrder", "namespace");
 		addOrder.addField("Instrument", 1);
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_ADMIN, addOrder);
 
@@ -326,7 +326,7 @@ public class WaitActionTest extends AbstractTest {
 			handler.putMessage(isession, ServiceHandlerRoute.FROM_ADMIN, addOrder.cloneMessage());
 		}
 
-		addOrder = this.messageFactory.createMessage("AddOrder", "namespace");
+        addOrder = messageFactory.createMessage("AddOrder", "namespace");
 		addOrder.addField("Instrument", 2);
 		handler.putMessage(isession, ServiceHandlerRoute.FROM_ADMIN, addOrder);
 

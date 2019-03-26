@@ -20,9 +20,9 @@ public interface IActionReport extends IGroupReport {
      * @deprecated Please use {@link #createEmbeddedReport(String, String)}
      */
     @Deprecated
-    default public IGroupReport createActionGroup(String name, String description) {
+    default IGroupReport createActionGroup(String name, String description) {
         return createEmbeddedReport(name, description);
     }
 
-    public IActionReport createEmbeddedReport(String name, String description);
+    IActionReport createEmbeddedReport(String name, String description);
 }

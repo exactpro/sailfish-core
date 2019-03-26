@@ -36,16 +36,16 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 
 public class ConverterVisitor implements IMessageStructureVisitor {
 
-	private static Logger logger = LoggerFactory.getLogger(ConverterVisitor.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConverterVisitor.class);
 
-	private static int COUNTER = 0;
+	private static int COUNTER;
 
-	synchronized public static int getId() {
+    public static synchronized int getId() {
 		return COUNTER++;
 	}
 
-	private Message xmlMessage;
-	private Dictionary dictionary;
+    private final Message xmlMessage;
+    private final Dictionary dictionary;
 
 	public ConverterVisitor(Message xmlMessage, Dictionary dictionary) {
 		this.xmlMessage = xmlMessage;
@@ -79,10 +79,9 @@ public class ConverterVisitor implements IMessageStructureVisitor {
         });
 
 		if (fldStruct.isEnum()) {
-			Field enumXmlField;
 
-			enumXmlField = XmlDictionaryUtils.getDictionaryField(dictionary,
-					fldStruct.getName());
+            Field enumXmlField = XmlDictionaryUtils.getDictionaryField(dictionary,
+                    fldStruct.getName());
 
 			if (enumXmlField == null) {
 				enumXmlField = new Field();

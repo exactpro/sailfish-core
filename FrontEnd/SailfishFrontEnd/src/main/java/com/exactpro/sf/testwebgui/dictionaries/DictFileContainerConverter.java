@@ -47,9 +47,6 @@ public class DictFileContainerConverter implements Converter {
 
 	@Override
 	public String getAsString(FacesContext arg0, UIComponent arg1, Object arg2) {
-
-		if (arg2 instanceof String) return (String)arg2;
-
-		return ((DictFileContainer) arg2).getURI().toString();
-	}
+        return arg2 instanceof String ? (String)arg2 : ((DictFileContainer)arg2).getURI().toString();
+    }
 }

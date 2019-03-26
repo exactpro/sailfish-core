@@ -31,6 +31,7 @@ import org.hibernate.criterion.Restrictions;
 
 import com.exactpro.sf.common.impl.messages.xml.XMLTransmitter;
 import com.exactpro.sf.storage.FilterCriterion;
+import com.exactpro.sf.storage.FilterCriterion.Operation;
 import com.exactpro.sf.storage.SortCriterion;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.xml.DataMessage;
@@ -40,19 +41,13 @@ import com.exactpro.sf.storage.xml.XmlDataMessage;
 @SuppressWarnings("deprecation")
 public class DBPersister implements DataMessagePersister {
 
-	private static SessionFactory factory;
+    private static final SessionFactory factory = new Configuration()
+            .configure("/com/exactpro/sf/configuration/hibernate.cfg.xml")
+            .buildSessionFactory();
 
-	private static XMLTransmitter transmitter;
+    private static final XMLTransmitter transmitter = XMLTransmitter.getTransmitter();
 
-	static {
-		factory = new Configuration()
-				.configure(
-                        "/com/exactpro/sf/configuration/hibernate.cfg.xml")
-				.buildSessionFactory();
-		transmitter = XMLTransmitter.getTransmitter();
-	}
-
-	@Override
+    @Override
 	public DataMessage getDataMessage(List<FilterCriterion> filterCriterions,
 			List<SortCriterion> sortCriterions) throws StorageException {
 		return deserialize(retriveUnique(filterCriterions, sortCriterions));
@@ -124,7 +119,7 @@ public class DBPersister implements DataMessagePersister {
     		Criteria criteria = session.createCriteria(XmlDataMessage.class);
     		if (filterCriterions != null) {
     			for (FilterCriterion criterion : filterCriterions) {
-    				if (criterion.getOper() != FilterCriterion.Operation.LIKE) {
+    				if (criterion.getOper() != Operation.LIKE) {
     					continue;
     				}
     				criteria.add(Restrictions.like(XmlDataMessage.RAW_DATA,
@@ -133,11 +128,7 @@ public class DBPersister implements DataMessagePersister {
     		}
     		if (sortCriterions != null) {
     			for (SortCriterion criterion : sortCriterions) {
-    				if (criterion.isSortAscending()) {
-    					criteria.addOrder(Order.asc(criterion.getName()));
-    				} else {
-    					criteria.addOrder(Order.desc(criterion.getName()));
-    				}
+                    criteria.addOrder(criterion.isSortAscending() ? Order.asc(criterion.getName()) : Order.desc(criterion.getName()));
     			}
     		}
     		return criteria;

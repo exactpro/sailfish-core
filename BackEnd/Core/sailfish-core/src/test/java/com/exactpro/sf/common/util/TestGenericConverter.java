@@ -36,11 +36,11 @@ import junit.framework.AssertionFailedError;
 public final class TestGenericConverter extends  EPSTestCase
 {
 	private static final Logger logger = LoggerFactory.getLogger(TestGenericConverter.class);
-	private static Charset charsetISO_8859 = Charset.forName("ISO-8859-1");
+	private static final Charset charsetISO_8859 = Charset.forName("ISO-8859-1");
 
 	@SuppressWarnings("unused")
-	private static CharsetDecoder charsetDecoder = charsetISO_8859.newDecoder();
-	private static CharsetEncoder charsetEncoder = charsetISO_8859.newEncoder();
+	private static final CharsetDecoder charsetDecoder = charsetISO_8859.newDecoder();
+	private static final CharsetEncoder charsetEncoder = charsetISO_8859.newEncoder();
 
 	@Test
 	public void testConvertStringToArray() throws Exception
@@ -705,7 +705,7 @@ public final class TestGenericConverter extends  EPSTestCase
 			byte[] encoded = GenericConverter.convertUnsignedNumericToArray(length, model, precision);
 
 			BigDecimal fromByteArray = GenericConverter.convertByteArrayToAnyDecimal(length, encoded, precision );
-			Assert.assertTrue( "Unsigned BigDecimal values does not equal.", 0 == model.compareTo( fromByteArray ));
+            Assert.assertTrue("Unsigned BigDecimal values does not equal.", model.compareTo(fromByteArray) == 0);
 
 			model = new BigDecimal( "12344321.9876" );
 			encoded = GenericConverter.convertSignedNumericToArray(length, model, precision);
@@ -713,7 +713,7 @@ public final class TestGenericConverter extends  EPSTestCase
 
 			BigDecimal zero = new BigDecimal( "0.0" );
 			BigDecimal substr = model.subtract( fromByteArray );
-			boolean zeroResult = ( 0 == substr.compareTo( zero ));
+            boolean zeroResult = substr.compareTo(zero) == 0;
 			Assert.assertTrue( "Positive Signed BigDecimal values does not equal.", zeroResult );
 
 			model = new BigDecimal( "-2344321.9876" );
@@ -722,7 +722,7 @@ public final class TestGenericConverter extends  EPSTestCase
 
 			zero = new BigDecimal( "0.0" );
 			substr = model.subtract( fromByteArray );
-			zeroResult = ( 0 == substr.compareTo( zero ));
+            zeroResult = substr.compareTo(zero) == 0;
 			Assert.assertTrue( "Negative Signed BigDecimal values does not equal.", zeroResult );
 
 			logger.info("Test of GenericConverter.FromByteArrayToAnyDecimal(): PASSED.");

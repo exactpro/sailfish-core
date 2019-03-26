@@ -42,8 +42,7 @@ public class ActionInfoRow implements Serializable {
 
 	public ActionInfoRow(long rank, String description, String failReason, String action, String msgType,
                          String service, String tag, int status, int hash) {
-		super();
-		this.rank = rank;
+        this.rank = rank;
 		this.description = description;
 		this.failReason = failReason;
 		this.action = action;

@@ -20,7 +20,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Date;
 
 import org.hibernate.HibernateException;
@@ -29,7 +31,6 @@ import org.hibernate.type.StringType;
 import org.hibernate.usertype.UserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.Instant;
 
 public class TimestampToString implements UserType, Serializable{
 
@@ -47,7 +48,9 @@ public class TimestampToString implements UserType, Serializable{
 
 	@Override
 	public Object deepCopy(Object obj) throws HibernateException {
-		if (obj == null) return null;
+        if(obj == null) {
+            return null;
+        }
 		Date orig = (Date) obj;
 		return new Timestamp(orig.getTime());
 	}
@@ -82,20 +85,13 @@ public class TimestampToString implements UserType, Serializable{
 		} catch (ParseException e) {
 			logger.error(e.getMessage(), e);
 		}
-		if (time != null)
-			return new Timestamp(time.getTime());
-		else
-			return null;
+        return time != null ? new Timestamp(time.getTime()) : null;
 	}
 
 	@Override
 	public void nullSafeSet(PreparedStatement ps, Object value, int index, SessionImplementor s)
 			throws HibernateException, SQLException {
-		 if (value == null)
-			 StringType.INSTANCE.set(ps, "", index, s);
-		 else
-            StringType.INSTANCE.set(ps, dateToString((Date)value), index, s);
-
+        StringType.INSTANCE.set(ps, value == null ? "" : dateToString((Date)value), index, s);
 	}
 
     public static String dateToString(Date value) {
@@ -118,7 +114,7 @@ public class TimestampToString implements UserType, Serializable{
 
 	@Override
 	public int[] sqlTypes() {
-		return new int[] { java.sql.Types.VARCHAR };
+		return new int[] { Types.VARCHAR };
 	}
 
 }

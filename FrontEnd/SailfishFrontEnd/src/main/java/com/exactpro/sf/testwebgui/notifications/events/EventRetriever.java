@@ -32,9 +32,9 @@ public class EventRetriever implements IUpdateRetriever, LogSubscriber{
 
 	private static final Logger logger = LoggerFactory.getLogger(EventRetriever.class);
 
-	private List<IUpdateRequestListener> listeners;
+	private final List<IUpdateRequestListener> listeners;
 
-	private Queue<LoggingEvent> eventQueue;
+	private final Queue<LoggingEvent> eventQueue;
 
 	public EventRetriever() {
 		listeners = new ArrayList<>();

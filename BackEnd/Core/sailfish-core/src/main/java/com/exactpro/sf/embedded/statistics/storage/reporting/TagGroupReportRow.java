@@ -49,13 +49,7 @@ public class TagGroupReportRow implements Serializable {
 	private String formattedExecTime;
 
 	public String getPathEnd() {
-
-		if(this.dimensionsPath != null) {
-			return this.dimensionsPath[dimensionsPath.length-1];
-		} else {
-			return null;
-		}
-
+        return dimensionsPath != null ? dimensionsPath[dimensionsPath.length - 1] : null;
 	}
 
 	public String[] getDimensionsPath() {

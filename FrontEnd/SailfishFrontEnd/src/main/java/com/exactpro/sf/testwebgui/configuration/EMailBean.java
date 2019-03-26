@@ -31,7 +31,7 @@ public class EMailBean {
     public void applySettings() {
         if (isChangesMade()) {
             try {
-                logger.info("Apply mail settings [{}]", this.settings);
+                logger.info("Apply mail settings [{}]", settings);
                 TestToolsAPI.getInstance().setEMailServiceSettings(settings);
                 BeanUtil.addInfoMessage("Options applied", "");
             } catch (Exception e) {
@@ -59,8 +59,8 @@ public class EMailBean {
         EMailService service = BeanUtil.getSfContext().getEMailService();
         EMailServiceSettings currentSettings = service.getSettings();
 
-        return !Objects.equals(currentSettings, this.settings) || service.getStatus().equals(ServiceStatus.Error)
-                || service.getStatus().equals(ServiceStatus.Checking);
+        return !Objects.equals(currentSettings, settings) || service.getStatus() == ServiceStatus.Error
+                || service.getStatus() == ServiceStatus.Checking;
     }
 
     public EMailServiceSettings getSettings() {

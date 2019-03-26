@@ -30,10 +30,10 @@ import java.util.TimeZone;
 
 public class TestITCHMessageCreator {
 	
-	private IMessageFactory msgFactory;
-	private String namespace;
-    private ITCHMessageHelper messageHelper;
-	private BigDecimal orderId= new BigDecimal("1");
+	private final IMessageFactory msgFactory;
+	private final String namespace;
+    private final ITCHMessageHelper messageHelper;
+	private final BigDecimal orderId= new BigDecimal("1");
 
     public TestITCHMessageCreator(IMessageFactory msgFactory, String namespace, ITCHMessageHelper messageHelper) {
 		this.msgFactory=msgFactory;

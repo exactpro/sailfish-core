@@ -25,12 +25,8 @@ public class ServiceUpdateResponse extends AbstractMessage {
 
 	private String requestId;
 	private String envName;
-	
-	public ServiceUpdateResponse() {
-		super();
-	}
 
-	public String getRequestId() {
+    public String getRequestId() {
 		return requestId;
 	}
 

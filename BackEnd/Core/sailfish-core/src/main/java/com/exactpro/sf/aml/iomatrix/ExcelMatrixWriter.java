@@ -33,11 +33,11 @@ public class ExcelMatrixWriter implements IMatrixWriter {
 
     private final Workbook workbook;
     private final Sheet sheet;
-    private OutputStream fileStream;
-    private int row = 0;
-    private int column = 0;
-    
-    private Map<CellStyle, CellStyle> stylesCashe;
+    private final OutputStream fileStream;
+    private int row;
+    private int column;
+
+    private final Map<CellStyle, CellStyle> stylesCashe = new HashMap<>();
 
     public ExcelMatrixWriter(String fileName, boolean useXlsx) throws IOException {
 
@@ -61,8 +61,6 @@ public class ExcelMatrixWriter implements IMatrixWriter {
         this.workbook = useXlsx ? new XSSFWorkbook() : new HSSFWorkbook();
 
         sheet = workbook.createSheet(sheetName);
-        
-        stylesCashe = new HashMap<>();
     }
 
     @Override

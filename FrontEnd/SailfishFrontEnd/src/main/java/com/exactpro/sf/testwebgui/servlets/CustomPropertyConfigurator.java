@@ -39,7 +39,7 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
 
     private static class CustomPropertyWatchdog extends FileWatchdog {
 
-        private volatile boolean customInterrupted = false;
+        private volatile boolean customInterrupted;
 
         public CustomPropertyWatchdog(String configFileName) {
             super(configFileName);

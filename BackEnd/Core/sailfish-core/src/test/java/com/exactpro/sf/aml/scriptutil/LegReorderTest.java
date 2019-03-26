@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableList;
 
 public class LegReorderTest extends AbstractTest {
 
-	private final static String NS = "namespace";
+    private static final String NS = "namespace";
 
 	@SuppressWarnings("unchecked")
 	@Test
@@ -178,7 +178,7 @@ public class LegReorderTest extends AbstractTest {
 		MapMessage result = new MapMessage(NS, name);
 
 		if (str != null) {
-			while (str.length() != 0) {
+			while (!str.isEmpty()) {
 				List<String> pair = pareseKV(str);
 
 				String key = pair.get(0);

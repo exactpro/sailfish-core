@@ -49,8 +49,8 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
         List<DictionaryValidationError> errors = new ArrayList<>();
 
-        if (this.parentValidator != null) {
-            errors.addAll(this.parentValidator.validate(dictionary, false, null));
+        if(parentValidator != null) {
+            errors.addAll(parentValidator.validate(dictionary, false, null));
         }
 
         if (full) {
@@ -71,8 +71,8 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
     public List<DictionaryValidationError> validate(IDictionaryStructure dictionary, IMessageStructure message, boolean full) {
         List<DictionaryValidationError> errors = new ArrayList<>();
 
-        if (this.parentValidator != null) {
-            errors.addAll(this.parentValidator.validate(dictionary, message, false));
+        if(parentValidator != null) {
+            errors.addAll(parentValidator.validate(dictionary, message, false));
         }
         
         if (full) {
@@ -87,8 +87,8 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
         List<DictionaryValidationError> errors = new ArrayList<>();
 
-        if (this.parentValidator != null) {
-            errors.addAll(this.parentValidator.validate(message, field));
+        if(parentValidator != null) {
+            errors.addAll(parentValidator.validate(message, field));
         }
 
         return errors;
@@ -98,7 +98,7 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
         for(IMessageStructure message : dictionary.getMessages().values()) {
 
-            errors.addAll(this.validate(dictionary, message, full));
+            errors.addAll(validate(dictionary, message, full));
         }
     }
 
@@ -106,7 +106,7 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
         for (IFieldStructure field : fields) {
 
-            errors.addAll(this.validate(null, field));
+            errors.addAll(validate(null, field));
         }
     }
 
@@ -114,7 +114,7 @@ public abstract class AbstractDictionaryValidator implements IDictionaryValidato
 
         for(IFieldStructure field : message.getFields().values()) {
 
-            errors.addAll(this.validate(message, field));
+            errors.addAll(validate(message, field));
         }
     }
 }

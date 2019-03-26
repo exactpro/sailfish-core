@@ -32,25 +32,22 @@ public class ClassNameConverter implements Converter {
 	@Override
 	public Object getAsObject(FacesContext context, UIComponent component, String value) {
 
-		if (StringUtils.isEmpty(value)) return null;
+        if(StringUtils.isEmpty(value)) {
+            return null;
+        }
 
-		Class<?> result = null;
-
-		try {
-			result = Class.forName(value);
+        try {
+            return Class.forName(value);
 		} catch (ClassNotFoundException e) {
 			logger.error("Class {} not found", value, e);
 		}
 
-		return result;
+        return null;
 	}
 
 	@Override
 	public String getAsString(FacesContext context, UIComponent component, Object value) {
-
-		if (!(value instanceof Class<?>)) return null;
-
-		return ((Class<?>) value).getName();
-	}
+        return !(value instanceof Class<?>) ? null : ((Class<?>)value).getName();
+    }
 
 }

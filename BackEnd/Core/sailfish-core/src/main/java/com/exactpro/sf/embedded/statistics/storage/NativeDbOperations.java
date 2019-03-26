@@ -24,8 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ObjectArrays;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.hibernate.Query;
@@ -47,6 +45,8 @@ import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResul
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportRow;
 import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
 import com.exactpro.sf.scriptrunner.StatusType;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ObjectArrays;
 
 public class NativeDbOperations {
 
@@ -61,7 +61,7 @@ public class NativeDbOperations {
 
 	private static final String FILTERED_NAME = "filtered";
 
-	private HibernateStorageSettings settings;
+    private final HibernateStorageSettings settings;
 
 	public NativeDbOperations(HibernateStorageSettings settings) {
 		this.settings = settings;
@@ -69,13 +69,13 @@ public class NativeDbOperations {
 
 	private boolean isMysql() {
 
-		return this.settings.getDbms().equals(DbmsType.MySql.getValue());
+        return settings.getDbms().equals(DbmsType.MySql.getValue());
 
 	}
 
 	private boolean isPostgreSql() {
 
-		return this.settings.getDbms().equals(DbmsType.PostgreSQL.getValue());
+        return settings.getDbms().equals(DbmsType.PostgreSQL.getValue());
 
 	}
 
@@ -200,7 +200,7 @@ public class NativeDbOperations {
 
 		}
 
-		throw new UnsupportedOperationException("Unsupported DBMS " + this.settings.getDbms());
+        throw new UnsupportedOperationException("Unsupported DBMS " + settings.getDbms());
 
 	}
 

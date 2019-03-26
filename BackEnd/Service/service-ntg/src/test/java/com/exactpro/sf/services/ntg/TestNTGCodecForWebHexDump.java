@@ -42,38 +42,35 @@ public class TestNTGCodecForWebHexDump extends AbstractTest {
 	@Test
 	public void testhexDump1()
 	{
-		{
-			byte[] bytes1 = new byte[hexString1.length() / 2 ];
-			Integer messageLength1 = 0;
+        byte[] bytes1 = new byte[hexString1.length() / 2 ];
+        Integer messageLength1 = 0;
 
-			for( int i = 0 ; i < hexString1.length() ; i += 2 )
-			{
-				String hexDigit  = hexString1.substring( i , i + 2 );
-				bytes1[i / 2] = (byte) Integer.parseInt( hexDigit, 16 );
+        for( int i = 0 ; i < hexString1.length() ; i += 2 )
+        {
+            String hexDigit  = hexString1.substring( i , i + 2 );
+            bytes1[i / 2] = (byte) Integer.parseInt( hexDigit, 16 );
 
-				if( i == 10 )
-				{
-					messageLength1 = Integer.parseInt( hexDigit, 16 );
-				}
-			}
+            if( i == 10 )
+            {
+                messageLength1 = Integer.parseInt( hexDigit, 16 );
+            }
+        }
 
-			logger.info( "messageLength1 = {}", messageLength1  );
+        logger.info( "messageLength1 = {}", messageLength1  );
 
-			IoBuffer ioBuf = IoBuffer.wrap( bytes1 );
-			ioBuf.position( messageLength1 + 5 );
+        IoBuffer ioBuf = IoBuffer.wrap( bytes1 );
+        ioBuf.position( messageLength1 + 5 );
 
-			String hexDumpValue11 = HexDumper.getHexdump(ioBuf.array());
-			logger.info( "hexDumpValue11 = \r\n{}", hexDumpValue11  );
+        String hexDumpValue11 = HexDumper.getHexdump(ioBuf.array());
+        logger.info( "hexDumpValue11 = \r\n{}", hexDumpValue11  );
 
-			byte[] rawMsg = new byte[ messageLength1 + 5 ];
-			System.arraycopy( ioBuf.array(), 0, rawMsg, 0, ioBuf.position() );
+        byte[] rawMsg = new byte[ messageLength1 + 5 ];
+        System.arraycopy( ioBuf.array(), 0, rawMsg, 0, ioBuf.position() );
 
-			String hexDumpValue12 = HexDumper.getHexdump(ioBuf.array());
-			logger.info( "hexDumpValue12 = \r\n{}", hexDumpValue12 );
+        String hexDumpValue12 = HexDumper.getHexdump(ioBuf.array());
+        logger.info( "hexDumpValue12 = \r\n{}", hexDumpValue12 );
 
-		}
-
-		{
+        {
 			byte[] bytes2 = new byte[hexString2.length() / 2 ];
 			Integer messageLength2 = 0;
 
@@ -102,33 +99,31 @@ public class TestNTGCodecForWebHexDump extends AbstractTest {
 			logger.info( "hexDumpValue22 = \r\n{}", hexDumpValue22 );
 		}
 
-		{
-			byte[] bytes3 = new byte[hexString2.length() / 2 ];
-			Integer messageLength3 = 0;
+        byte[] bytes3 = new byte[hexString2.length() / 2 ];
+        Integer messageLength3 = 0;
 
-			for( int i = 0 ; i < hexString2.length() ; i += 2 )
-			{
-				String hexDigit3  = hexString2.substring( i , i + 2 );
-				bytes3[i / 2] = (byte) Integer.parseInt( hexDigit3, 16 );
+        for( int i = 0 ; i < hexString2.length() ; i += 2 )
+        {
+            String hexDigit3  = hexString2.substring( i , i + 2 );
+            bytes3[i / 2] = (byte) Integer.parseInt( hexDigit3, 16 );
 
-				if( i == 10 )
-				{
-					messageLength3 = Integer.parseInt( hexDigit3, 16 );
-				}
-			}
-			logger.info( "messageLength3 = {}", messageLength3  );
+            if( i == 10 )
+            {
+                messageLength3 = Integer.parseInt( hexDigit3, 16 );
+            }
+        }
+        logger.info( "messageLength3 = {}", messageLength3  );
 
-			IoBuffer ioBuf3 = IoBuffer.wrap( bytes3 );
-			ioBuf3.position( messageLength3 + 5 );
+        IoBuffer ioBuf3 = IoBuffer.wrap( bytes3 );
+        ioBuf3.position( messageLength3 + 5 );
 
-			String hexDumpValue31 = HexDumper.getHexdump(ioBuf3.array());
-			logger.info( "hexDumpValue31 = \r\n{}", hexDumpValue31  );
+        String hexDumpValue31 = HexDumper.getHexdump(ioBuf3.array());
+        logger.info( "hexDumpValue31 = \r\n{}", hexDumpValue31  );
 
-			byte[] rawMsg2 = new byte[ messageLength3 + 5 ];
-			System.arraycopy( ioBuf3.array(), 0, rawMsg2, 0, ioBuf3.position() );
+        byte[] rawMsg2 = new byte[ messageLength3 + 5 ];
+        System.arraycopy( ioBuf3.array(), 0, rawMsg2, 0, ioBuf3.position() );
 
-			String hexDumpValue32 = HexDumper.getHexdump(ioBuf3.array());
-			logger.info( "hexDumpValue32 = \r\n{}", hexDumpValue32 );
-		}
-	}
+        String hexDumpValue32 = HexDumper.getHexdump(ioBuf3.array());
+        logger.info( "hexDumpValue32 = \r\n{}", hexDumpValue32 );
+    }
 }

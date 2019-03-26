@@ -40,5 +40,5 @@ public enum NTGProtocolAttribute
 	/**
 	 * Defines key for the specifying value of data type protocol attribute.
 	 */
-	Type;
+	Type
 }

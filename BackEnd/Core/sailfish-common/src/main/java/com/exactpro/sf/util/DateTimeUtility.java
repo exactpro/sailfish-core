@@ -16,8 +16,6 @@
 package com.exactpro.sf.util;
 
 import java.sql.Timestamp;
-import java.util.Date;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +28,7 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.time.temporal.TemporalField;
 import java.time.temporal.TemporalQueries;
+import java.util.Date;
 
 public class DateTimeUtility {
 
@@ -388,10 +387,7 @@ public class DateTimeUtility {
     }
 
     private static int getOrDefault(TemporalAccessor temporalAccessor, TemporalField field, int defaultValue) {
-        if (temporalAccessor.isSupported(field)) {
-            return temporalAccessor.get(field);
-        }
-        return defaultValue;
+        return temporalAccessor.isSupported(field) ? temporalAccessor.get(field) : defaultValue;
     }
 
     private static ZoneId getZoneId(TemporalAccessor temporalAccessor) {

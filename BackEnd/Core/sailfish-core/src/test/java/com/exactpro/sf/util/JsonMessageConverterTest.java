@@ -194,7 +194,7 @@ public class JsonMessageConverterTest extends AbstractTest {
         message.addField("FBoolean", new Object() { //Markers for special actions
             public String toString() {
                 return "excluded field";
-            };
+            }
         });
         message.addField("FakeMessage", map);
         message.addField("FakeMessages", Lists.newArrayList(map));

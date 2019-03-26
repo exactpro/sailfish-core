@@ -26,8 +26,8 @@ public class StructureBuilder {
 	
 	private final Map<String, IMessageStructure> msgStructures;
 	private final Map<String, IFieldStructure> fieldStructures;
-	
-	private String namespace;
+
+    private final String namespace;
 	
 	public StructureBuilder(String namespace) {
         this(namespace, new HashMap<>(), new HashMap<>());
@@ -47,11 +47,11 @@ public class StructureBuilder {
 			throw new IllegalArgumentException("name parameter is null");
 		}
 
-		if (this.msgStructures.containsKey(name)) {
-			throw new EPSCommonException("There is another message with \"" + name + "\" name in \"" + this.namespace + "\"");
+        if(msgStructures.containsKey(name)) {
+            throw new EPSCommonException("There is another message with \"" + name + "\" name in \"" + namespace + "\"");
 		}
 
-		this.msgStructures.put(name, msgStructure);
+        msgStructures.put(name, msgStructure);
 	}
 	
 	public void addFieldStructure(IFieldStructure fieldStructure) {
@@ -61,12 +61,12 @@ public class StructureBuilder {
 		if (name == null) {
 			throw new IllegalArgumentException("name parameter is null");
 		}
-		
-		if (this.fieldStructures.containsKey(name)) {
-			throw new EPSCommonException("There is another field with \"" + name + "\" name in \"" + this.namespace + "\"");
-		}
-		
-		this.fieldStructures.put(name, fieldStructure);
+
+        if(fieldStructures.containsKey(name)) {
+            throw new EPSCommonException("There is another field with \"" + name + "\" name in \"" + namespace + "\"");
+        }
+
+        fieldStructures.put(name, fieldStructure);
 	}
 	
 	public IMessageStructure getMessageStructure(String name) {
@@ -74,7 +74,7 @@ public class StructureBuilder {
 	}
 	
 	public IFieldStructure getFieldStructure(String name) {
-		return this.fieldStructures.get(name);
+        return fieldStructures.get(name);
 	}
 	
 	public List<IMessageStructure> getMsgStructures() {

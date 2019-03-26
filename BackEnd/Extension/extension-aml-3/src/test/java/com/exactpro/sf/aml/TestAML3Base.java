@@ -38,7 +38,7 @@ import com.exactpro.sf.util.AML3PluginTest;
  */
 public abstract class TestAML3Base extends AML3PluginTest {
 
-    private final static Logger logger = LoggerFactory.getLogger(TestAML3Base.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestAML3Base.class);
 
     protected abstract AMLSettings createSettings();
 

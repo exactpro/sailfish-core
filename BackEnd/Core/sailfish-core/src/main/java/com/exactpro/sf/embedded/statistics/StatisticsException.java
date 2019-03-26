@@ -16,7 +16,7 @@
 package com.exactpro.sf.embedded.statistics;
 
 public class StatisticsException extends RuntimeException {
-    private String summary;
+    private final String summary;
 
     public StatisticsException(String summary, String message) {
         super(message);

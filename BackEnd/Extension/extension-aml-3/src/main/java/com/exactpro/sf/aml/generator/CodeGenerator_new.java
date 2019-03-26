@@ -49,7 +49,6 @@ import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.AMLLangConst;
 import com.exactpro.sf.aml.AMLLangUtil;
-import com.exactpro.sf.aml.AMLList;
 import com.exactpro.sf.aml.AMLPrivateActions;
 import com.exactpro.sf.aml.AMLSettings;
 import com.exactpro.sf.aml.AMLTestCase;
@@ -105,7 +104,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 
 	private static final Logger logger = LoggerFactory.getLogger(CodeGenerator_new.class);
 
-	protected final static String EOL = System.getProperty("line.separator");
+    protected static final String EOL = System.getProperty("line.separator");
 
 	private final Set<String> imports = new HashSet<>();
 	public static final String MAP_NAME = "messages";
@@ -121,10 +120,10 @@ public class CodeGenerator_new implements ICodeGenerator {
 
 	private final AlertCollector alertCollector;
 	private Set<String> definedReferences; // references defined in the current test case
-	private Map<String, String> definedServiceNames = new HashMap<>();
+    private final Map<String, String> definedServiceNames = new HashMap<>();
 	private final Set<String> resolvedServiceNames = new HashSet<>();
 
-	private int cycleCount = 0;
+    private int cycleCount;
 
 	public static final String TAB1 = "\t";
 	public static final String TAB2 = "\t\t";
@@ -135,23 +134,7 @@ public class CodeGenerator_new implements ICodeGenerator {
     public static final String ERROR_HOOK = "line:uid:reference:column:value";
     public static final int MAX_SETTERS_PER_CLASS = 10000;
 
-	/**
-	 * Value starts with this string should interpreted as java code
-	 * and will be used without transformation.
-	 * Before insertion it should be checked via compilation.
-	 */
-	private static final String TAG_INTERPRET_AS_JAVA = "java:";
-
-	private static final String BEGIN_REFERENCE = "${";
-	private static final String END_REFERENCE = "}";
-
-	private static final String BEGIN_STATIC = "%{";
-	private static final String END_STATIC = "}";
-
-	private static final String BEGIN_FUNCTION = "#{";
-	private static final String END_FUNCTION = "}";
-
-	private boolean autoStart;
+    private boolean autoStart;
 
 	private AMLSettings amlSettings;
 
@@ -162,13 +145,13 @@ public class CodeGenerator_new implements ICodeGenerator {
 	private int loadedTestCases;
 	private int totalActions;
 
-	OldImpl impl;
-	NewImpl newImpl;
+    private OldImpl impl;
+    private NewImpl newImpl;
 
 	private ScriptContext scriptContext;
 
-	private final static int CAPACITY_4K = 4096;
-    private final static int CAPACITY_128K = 131072;
+    private static final int CAPACITY_4K = 4096;
+    private static final int CAPACITY_128K = 131072;
 
     private final TestCaseCodeBuilder tcCodeBuilder;
 
@@ -215,8 +198,8 @@ public class CodeGenerator_new implements ICodeGenerator {
 
         setAutoStart(amlSettings.getAutoStart());
         this.amlSettings = amlSettings;
-        this.impl.setContinueOnFailed(amlSettings.getContinueOnFailed());
-        this.newImpl.setContinueOnFailed(amlSettings.getContinueOnFailed());
+        impl.setContinueOnFailed(amlSettings.getContinueOnFailed());
+        newImpl.setContinueOnFailed(amlSettings.getContinueOnFailed());
 	}
 
 	protected void setAutoStart(boolean b) {
@@ -224,12 +207,12 @@ public class CodeGenerator_new implements ICodeGenerator {
 	}
 
 	protected boolean getAutoStart() {
-		return this.autoStart;
+        return autoStart;
 	}
 
     @Override
     public ScriptContext getScriptContext() {
-        return this.scriptContext;
+        return scriptContext;
     }
 
     /* (non-Javadoc)
@@ -263,13 +246,13 @@ public class CodeGenerator_new implements ICodeGenerator {
 	}
 
 	private File createOutputDirectory() throws AMLException, WorkspaceStructureException {
-        String srcDir = this.amlSettings.getSrcDir();
+        String srcDir = amlSettings.getSrcDir();
 
         if (srcDir == null) {
             srcDir = "";
         }
 
-        return workspaceDispatcher.createFolder(FolderType.REPORT, this.amlSettings.getBaseDir(), srcDir, AML.PACKAGE_PATH);
+        return workspaceDispatcher.createFolder(FolderType.REPORT, amlSettings.getBaseDir(), srcDir, AML.PACKAGE_PATH);
     }
 
 	private void writeJavaClass(List<AMLTestCase> testCases, List<AMLTestCase> beforeTCBlocks, List<AMLTestCase> afterTCBlocks, TextOutputStream mainClass, GeneratedScript script) throws AMLException, IOException, InterruptedException
@@ -285,7 +268,7 @@ public class CodeGenerator_new implements ICodeGenerator {
         writeTestCases(beforeTCBlocks, mainClass, script);
 
 	    scriptContext.getServiceList().addAll(resolvedServiceNames);
-		final String servNames = tcCodeBuilder.getServiceNamesArray(resolvedServiceNames);
+        String servNames = tcCodeBuilder.getServiceNamesArray(resolvedServiceNames);
 
         tcCodeBuilder.writeBeforeMatrixPreparations(mainClass, servNames, getAutoStart());
         tcCodeBuilder.writeBeforeTestCasePreparations(mainClass, servNames, LOGGER_NAME, CONTEXT_NAME, amlSettings.isRunNetDumper(),
@@ -308,7 +291,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	        try {
                 AMLTestCase tc = testCases.get(i);
 
-                if(tc.getActions().size() == 0) {
+                if(tc.getActions().isEmpty()) {
                     continue;
                 }
 
@@ -319,7 +302,7 @@ public class CodeGenerator_new implements ICodeGenerator {
                 }
 
                 String actionClassName = String.format("%s_Actions_%s", type.name(), i + 1);
-                File file = new File(this.dir, actionClassName + ".java");
+                File file = new File(dir, actionClassName + ".java");
                 actionClass = new TextOutputStream(new FileOutputStream(file));
 
                 script.addFile(file);
@@ -394,7 +377,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 			            line = writeServiceNameDefinition(action);
 			            break;
                     default:
-                        this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Java statement not implemented: " + statement));
+                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Java statement not implemented: " + statement));
                         break;
 			        }
 
@@ -424,13 +407,13 @@ public class CodeGenerator_new implements ICodeGenerator {
 
                     if (methodBody == null) {
                         if(!action.isStaticAction()) {
-                            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Action already generated [generation path: " + action.getGenerationPath() + "] or another error occured..."));
+                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Action already generated [generation path: " + action.getGenerationPath() + "] or another error occured..."));
                         }
 
                         continue;
                     }
 
-				    if (methodBody.length() != 0) {
+                    if(!methodBody.isEmpty()) {
 		                String methodName = String.format("Action_%s_%s", ++actionNumber, action.getActionURI().getResourceName());
 
 				        mainClass.writeLine(3, "%s.%s(%s, %s);", actionClassName, methodName, MAP_NAME, CONTEXT_NAME);
@@ -481,16 +464,16 @@ public class CodeGenerator_new implements ICodeGenerator {
 		actionClass.writeLine("}");
         actionClass.close();
 
-        if (this.alertCollector.getCount(AlertType.ERROR) != 0) {
-            String s = StringUtil.getSSuffix(this.alertCollector.getCount(AlertType.ERROR));
+        if(alertCollector.getCount(AlertType.ERROR) != 0) {
+            String s = StringUtil.getSSuffix(alertCollector.getCount(AlertType.ERROR));
 
             if (logger.isErrorEnabled()) {
-                for (Alert alert : this.alertCollector.getAlerts(AlertType.ERROR)) {
+                for(Alert alert : alertCollector.getAlerts(AlertType.ERROR)) {
                     logger.error(alert.toString());
                 }
             }
 
-            throw new AMLException("Error" + s + " in matrix", this.alertCollector);
+            throw new AMLException("Error" + s + " in matrix", alertCollector);
         }
 	}
 
@@ -501,7 +484,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 		}
 
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
 			return null;
 		}
 
@@ -521,7 +504,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 			try {
 				newValue = TypeHelper.convertValue(action.getStaticType(), newValue);
 			} catch (AMLException e) {
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.StaticType.getName(),  e.getMessage()));
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.StaticType.getName(), e.getMessage()));
 				return null;
 			}
 		} else {
@@ -552,7 +535,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 		switch (word)
 		{
 		case BEGIN_LOOP:
-			String in = "i"+(cycleCount++);
+            String in = "i" + cycleCount++;
             String column = Column.MessageCount.getName();
             Value count = new Value(action.getMessageCount());
 
@@ -591,7 +574,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 		case END_IF:
 		    return TAB3+"}"+EOL;
 		default:
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Java statement not implemented: "+word));
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Java statement not implemented: " + word));
 			return null;
 
 		}
@@ -711,20 +694,22 @@ public class CodeGenerator_new implements ICodeGenerator {
 		getMethod(alertCollector, DefaultSettings.class, "setMetaContainer", action, null, MetaContainer.class);
 		sb.append(TAB2+varName+".setMetaContainer(metaContainer);"+EOL);
 
-		if (false == action.getFailUnexpected().equals(""))
+        if(!"".equals(action.getFailUnexpected()))
 		{
 			getMethod(alertCollector, DefaultSettings.class, "setFailUnexpected", action, Column.FailUnexpected.getName(), String.class);
 			String s = action.getFailUnexpected();
-			if (s.equalsIgnoreCase("Y") || s.equalsIgnoreCase("A"))
-				sb.append(TAB2+varName+".setFailUnexpected(\""+s+"\");"+EOL);
+            if("Y".equalsIgnoreCase(s) || "A".equalsIgnoreCase(s)) {
+                sb.append(TAB2 + varName + ".setFailUnexpected(\"" + s + "\");" + EOL);
+            }
 		} else {
 			getMethod(alertCollector, DefaultSettings.class, "setFailUnexpected", action, Column.FailUnexpected.getName(), String.class);
 			String s = environmentManager.getEnvironmentSettings().getFailUnexpected();
-			if (s.equalsIgnoreCase("Y") || s.equalsIgnoreCase("A"))
-				sb.append(TAB2+varName+".setFailUnexpected(\""+s+"\");"+EOL);
+            if("Y".equalsIgnoreCase(s) || "A".equalsIgnoreCase(s)) {
+                sb.append(TAB2 + varName + ".setFailUnexpected(\"" + s + "\");" + EOL);
+            }
 		}
 
-		if (false == action.getDescrption().equals(""))
+        if(!"".equals(action.getDescrption()))
 		{
             getMethod(alertCollector, DefaultSettings.class, "setDescription", action, Column.Description.getName(), String.class);
 
@@ -871,406 +856,18 @@ public class CodeGenerator_new implements ICodeGenerator {
 		{
 			sb.delete(sb.length()-2, sb.length());
 		}
-		alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot find setting method '"+methodName+"("+sb.toString()+")' for column "+column+" in class '"+clazz.getCanonicalName()+"'"));
+        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot find setting method '" + methodName + "(" + sb + ")' for column " + column + " in class '" + clazz.getCanonicalName() + "'"));
 		return null;
 	}
 
-	static Method getMethod(AMLList<String> errors, Class<?> clazz, String methodName, AMLAction action, String column)
-	{
-		String ref = action.getReference() == null ? "" : action.getReference();
-		if (clazz == null) {
-			errors.add("Error in line "+action.getLine()+" ["+ref+"]: Class cannot be null.");
-			return null;
-		}
-
-		if (methodName == null) {
-			errors.add("Error in line "+action.getLine()+" ["+ref+"]: Setting method name cannot be null.");
-			return null;
-		}
-
-		if ("".equals(methodName))
-		{
-			errors.add("Error in line "+action.getLine()+" ["+ref+"]: Setting method name cannot be empty.");
-			return null;
-		}
-
-		Class<?> tempClass = clazz;
-		while (tempClass != null)
-		{
-			Method[] methods = tempClass.getDeclaredMethods();
-			for (Method method : methods)
-			{
-				if (method.getName().equals(methodName))
-					return method;
-			}
-			tempClass = tempClass.getSuperclass();
-		}
-		errors.add("Error in line "+action.getLine()+" ["+ref+"]: can not find setting method '"+methodName+"' for column "+column+" in class '"+clazz.getCanonicalName()+"'");
-		return null;
-	}
-
-	public void substituteReference(AMLTestCase tc, AMLAction action, AlertCollector alertCollector, String column, Value value)
-	{
-		logger.debug("substituteReference: column: {}; Value: {}", column ,value);
-		if (column == null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Key is null"));
-			return;
-		}
-
-		if (value.getValue() == null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Value is null for parameter '"+column+"'"));
-			return;
-		}
-
-		if ("".equals(value.getValue()))
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Empty value found for parameter '"+column+"'"));
-			return;
-		}
-
-		// value is java code
-
-		if (value.getValue().toLowerCase().startsWith(TAG_INTERPRET_AS_JAVA))
-		{
-			String v = value.getValue().substring(TAG_INTERPRET_AS_JAVA.length()).trim();
-			value.setValue(v);
-			value.setReference(true);
-		}
-
-		if (value.getValue().contains(BEGIN_REFERENCE))
-		{
-			// expand complex value
-
-			int index1 = value.getValue().indexOf(BEGIN_REFERENCE);
-			while (index1 != -1)
-			{
-				index1 = expandReferenceValue(tc, action, column, value, index1, alertCollector);
-			}
-		}
-
-		if (value.getValue().contains(BEGIN_STATIC))
-		{
-			// expand static value
-
-			int index1 = value.getValue().indexOf(BEGIN_STATIC);
-			while (index1 != -1)
-			{
-				index1 = expandStaticValue(tc, action, column, value, index1, alertCollector);
-			}
-		}
-
-		if (value.getValue().contains(BEGIN_FUNCTION))
-		{
-			// expand function
-
-			int index1 = value.getValue().indexOf(BEGIN_FUNCTION);
-			while (index1 != -1)
-			{
-				index1 = expandUtilityFunction(action, column, value, index1, alertCollector);
-			}
-		}
-	}
-
-	private int expandReferenceValue(AMLTestCase tc, AMLAction action,
-			String column, Value value, int index, AlertCollector alertCollector)
-	{
-
-		int index2 = value.getValue().indexOf(END_REFERENCE, index);
-		if (index2 == -1)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Unbalansed brackets found in column '"+column+"'."));
-			return -1;
-		}
-
-		// get reference to previous message and field name
-
-		String var = value.getValue().substring(index+BEGIN_REFERENCE.length(), index2);
-		String lineRef;
-		String columnRef;
-
-		if (var.length() == 0)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference is empty column '"+column+"'."));
-			return -1;
-		}
-
-		String[] arr = StringUtil.split(var, ":");
-		if (arr.length == 0 || arr.length > 2)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Invalid reference format in column '"+column+"': '"+var+"'. "
-					+"Expected format: ${reference:column} or ${reference}."));
-			return -1;
-		}
-
-		lineRef = arr[0].trim(); // reference to message
-		columnRef = (arr.length == 2) ? arr[1].trim() : column; // reference to field
-
-		if (lineRef.length() == 0)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to row is missed in column '"+column+"': '"+value.getOrigValue()+"'."));
-			return -1;
-		}
-		if (columnRef.length() == 0)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to column is missed in column '"+column+"': '"+value.getOrigValue()+"'."));
-			return -1;
-		}
-
-		// find action by reference
-
-		AMLAction refAction = tc.findActionByRef(lineRef);
-
-		if (refAction == null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to unknown action '"+lineRef
-					+"' is found in column '"+column+"': '"+value.getOrigValue()+"'."));
-			return -1;
-		}
-
-		// ${ref:field} linked to submessage we should not be expanded immediately
-		// because type of the submessage is not yet defined until it expanded
-		if (!definedReferences.contains(lineRef))
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference '"+lineRef+"' is not yet defined in column '"
-					+column+"': '"+value.getOrigValue()+"'."));
-			return -1;
-		}
-
-        Class<?> messageType = refAction.getActionInfo().getReturnType();
-
-        if(messageType == void.class)
-		{
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot refer to action."));
-            return -1;
-		}
-
-		// check field in referred message
-
-		boolean columnExist = action.getHeaders().contains(columnRef);
-		boolean getterExist = false;
-		if (columnExist == false)
-		{
-			Method[] methods = messageType.getMethods();
-			for (Method method : methods)
-			{
-				if (method.getName().equalsIgnoreCase("get"+columnRef)) {
-					getterExist = true;
-					break;
-				}
-			}
-		}
-
-
-		if (false == (getterExist || columnExist))
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference to unknown column '"
-					+columnRef+"' is found in column '"+column+"': '"+value.getOrigValue()+"'."));
-			return -1;
-		}
-
-		// replace reference
-
-		IGetterSetterGenerator gs = (IGetterSetterGenerator)adapterManager.getAdapter(messageType, IGetterSetterGenerator.class);
-		if (gs == null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference error in column '"+column+"': "
-					+"No getter/setter factory registered for class '"+messageType
-					+"' in line "+refAction.getLine()+" ["+lineRef+"]"));
-			return -1;
-		}
-
-		String getter = "";
-        String source = "(("+messageType.getCanonicalName()+")"+CodeGenerator_new.MAP_NAME+".get(\""+lineRef+"\"))";
-		try {
-			getter = gs.getGetter(messageType, columnRef, source);
-		} catch (AMLException e) {
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '"+column+"': "+e.getMessage()));
-			return -1;
-		}
-
-		if (getter == null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference error in column '"+column+"': "+
-					"Cannot extract value '"+columnRef+"' from message '"
-					+messageType.getCanonicalName()+"' in line "
-					+refAction.getLine()+"["+lineRef+"]."));
-			return -1;
-		}
-
-		String src = BEGIN_REFERENCE+var+END_REFERENCE;
-		String v = value.getValue().replaceFirst(Pattern.quote(src), getter);
-		value.setValue(v);
-		value.setReference(true);
-
-		// search for the next reference
-
-		index = value.getValue().indexOf(BEGIN_REFERENCE);
-
-		return index;
-	}
-
-	private int expandStaticValue(AMLTestCase tc, AMLAction action,
-			String column, Value value, int index, AlertCollector alertCollector)
-	{
-
-		int index2 = value.getValue().indexOf(END_STATIC, index);
-
-		if (index == -1)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Unbalansed brackets found in column '"+column+"'."));
-			return -1;
-		}
-
-		// get reference to previous message and field name
-
-		String val = value.getValue().substring(index+2, index2);
-		if (val.length() == 0)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Reference is empty in column '"+column+"'."));
-			return -1;
-		}
-
-		if (val.contains(":"))
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Invalid reference format to static variable in column '"+column+"': '"+val+"'. "
-					+"Expected format: %{reference}."));
-			return -1;
-		}
-
-		// find action by reference
-
-		AMLAction refAction = tc.findActionByRef(val);
-
-		if (refAction == null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Undefined reference ["+val
-					+"] is found column '"
-					+column+"': '"+value.getOrigValue()+"'."));
-			return -1;
-		}
-
-
-		// replace reference
-
-		String var = value.getValue().substring(index, index2+1);
-		String targ = "("+refAction.getStaticType()+")("+CodeGenerator_new.STATIC_MAP_NAME+".get(\""+val+"\"))";
-		String v = value.getValue().replaceFirst(Pattern.quote(var), targ);
-		value.setValue(v);
-		value.setReference(true);
-
-		// search for the next reference
-
-		index = value.getValue().indexOf(BEGIN_STATIC);
-
-		return index;
-	}
-
-	private int expandUtilityFunction(AMLAction action,
-			String column, Value value, int index, AlertCollector alertCollector)
-	throws SecurityException
-	{
-
-		int index2 = CodeGenerator_new.indexOfCloseBracket(value.getValue(), BEGIN_FUNCTION, END_FUNCTION, index);
-		if (index2 == -1)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Unbalansed brackets in column '"+column+"'."));
-			return -1;
-		}
-
-		// get name of the static method declared in action class
-		// with @UtilFunction annotation
-
-		String var = value.getValue().substring(index+2, index2);
-
-		if (var.length() == 0)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Utility function name is empty in column '"+column+"'."));
-			return -1;
-		}
-
-		int openSpaceIndex = var.indexOf("(");
-
-		if (openSpaceIndex == -1) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Syntaxis error in column '"+column+"': missed close bracket ')'."));
-            return -1;
-        }
-
-		int closeSpaceIndex = CodeGenerator_new.indexOfCloseBracket(var, "(", ")", openSpaceIndex);
-
-        if (closeSpaceIndex == -1) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Syntaxis error in column '"+column+"': missed close bracket ')'."));
-            return -1;
-        }
-
-		SailfishURI utilityURI;
-
-		try {
-            utilityURI = SailfishURI.parse(var.substring(0, openSpaceIndex).trim());
-        } catch(SailfishURIException e) {
-            alertCollector.add(new Alert(action.getLine(),  action.getUID(), action.getReference(), column, e.getMessage()));
-            return -1;
-        }
-
-        StringBuilder utilityArgs = new StringBuilder(var.substring(openSpaceIndex + 1, closeSpaceIndex).trim());
-
-        if(utilityArgs.length() > 0) {
-            utilityArgs.insert(0, ", ");
-        }
-        utilityArgs.append(')').append(var.substring(closeSpaceIndex + 1).trim());
-
-		if (action.getStaticType() != null)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Invalid use of function in static variable definition: "+var));
-			return -1;
-		}
-
-		if (action.getActionInfo() == null)
-		{
-			throw new NullPointerException("action.getActionInfo()");
-		}
-
-		ActionInfo actionInfo = action.getActionInfo();
-		UtilityInfo utilityInfo;
-
-		try {
-            utilityInfo = actionManager.getUtilityInfo(actionInfo.getURI(), utilityURI);
-        } catch(SailfishURIException e) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, e.getMessage()));
-            return -1;
-        }
-
-		if(utilityInfo == null) {
-		    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Unable to resolve utility function: " + utilityURI));
-		    return -1;
-		}
-
-		String src = BEGIN_FUNCTION+var+END_FUNCTION;
-        String targ = String.format("%s(%s.parse(\"%s\")%s", UTILITY_MANAGER_CALL, SailfishURI.class.getSimpleName(), utilityInfo.getURI(), utilityArgs);
-        targ = targ.replace("\\", "\\\\").replace("$", "\\$");
-
-        String v = value.getValue().replaceFirst(Pattern.quote(src), targ);
-        value.setValue(v);
-        value.setReference(true);
-        value.addParameter(new RefParameter(CodeGenerator_new.UTILITY_MANAGER_VARIABLE, CodeGenerator_new.UTILITY_MANAGER));
-
-        // search next function
-
-        index = value.getValue().indexOf(BEGIN_FUNCTION);
-
-        return index;
-	}
-
-	/**
+    /**
 	 * Compile simple class to check whether value valid.
 	 * If compilation failed appropriate message will be stored in ErrorStore.
 	 * @throws AMLException
 	 */
     protected final String compileTest(File javaFile, File classFile) throws AMLException
 	{
-		String status = null;
-		try {
+        try {
 			List<String> args = new LinkedList<>();
 			args.add("-classpath");
 			args.add(compilerClassPath);
@@ -1300,11 +897,11 @@ public class CodeGenerator_new implements ICodeGenerator {
 				classFile.delete();
 			}
 
-		} catch (IOException e) {
+            return null;
+        } catch(IOException e) {
 			throw new AMLException("Failed write to file '"+javaFile+"':"+e.getLocalizedMessage(), e);
 		}
-		return status;
-	}
+    }
 
     private void testCode(List<AMLTestCase> testCases) throws WorkspaceSecurityException, AMLException, FileNotFoundException, IOException {
         progressChanged(60);
@@ -1368,13 +965,13 @@ public class CodeGenerator_new implements ICodeGenerator {
 					String value = new String(bytes);
 					error = "Invalid value in column '"+vals[3]+"': "+value;
 					if (!alertCollector.contains(AlertType.ERROR, error)) {
-						this.alertCollector.add(new Alert(Long.parseLong(vals[0]), Long.parseLong(vals[1]), vals[2], vals[3], error));
+                        alertCollector.add(new Alert(Long.parseLong(vals[0]), Long.parseLong(vals[1]), vals[2], vals[3], error));
 					}
 				}
 			}
 			return;
 		}
-		this.alertCollector.add(new Alert(error));
+        alertCollector.add(new Alert(error));
 
 	}
 
@@ -1383,7 +980,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	 */
 	@Override
 	public AlertCollector getAlertCollector() {
-		return this.alertCollector;
+        return alertCollector;
 	}
 
 	/* (non-Javadoc)
@@ -1399,14 +996,14 @@ public class CodeGenerator_new implements ICodeGenerator {
         definedServiceNames.clear();
         resolvedServiceNames.clear();
 
-        if(this.imports != null) {
-			this.imports.clear();
+        if(imports != null) {
+            imports.clear();
         }
 	}
 
 	private void progressChanged(int progress)
 	{
-		for (IProgressListener listener : this.progressListeners)
+        for(IProgressListener listener : progressListeners)
 		{
 			listener.onProgressChanged(progress);
 		}

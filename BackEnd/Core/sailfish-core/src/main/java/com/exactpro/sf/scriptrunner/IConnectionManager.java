@@ -44,9 +44,9 @@ public interface IConnectionManager extends IDisposable
 
     Future<?> removeEnvironment(String envName, IServiceNotifyListener notifyListener);
 
-    Future<?> addEnvironment(final String envName, final IServiceNotifyListener notifyListener);
+    Future<?> addEnvironment(String envName, IServiceNotifyListener notifyListener);
 
-    Future<?> renameEnvironment(final String oldEnvName, final String newEnvName, final IServiceNotifyListener notifyListener);
+    Future<?> renameEnvironment(String oldEnvName, String newEnvName, IServiceNotifyListener notifyListener);
 
     List<String> getEnvironmentList();
 

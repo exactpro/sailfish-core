@@ -15,25 +15,26 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.library;
 
-import com.exactpro.sf.bigbutton.execution.ScriptExecutionStatistics;
-import com.exactpro.sf.bigbutton.importing.ImportError;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.util.EMailUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.bigbutton.execution.ScriptExecutionStatistics;
+import com.exactpro.sf.bigbutton.importing.ImportError;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.util.EMailUtil;
 
 @SuppressWarnings("serial")
 public class Script implements Serializable, IBBActionExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(Script.class);
 
-    public final static String UNCLOSED_TABLE_HEADER = "<table border=\"1\"><tr><th>Script</th><th>Status</th><th style=\"color:green;\">Passed</th><th style=\"color:orange;\">Conditionally Passed</th><th style=\" color:red; \">Failed</th>";
-    public final static String OPTIONAL_TABLE_HEADER = "<th style=\" color:red; \">Cause</th>";
+    public static final String UNCLOSED_TABLE_HEADER = "<table border=\"1\"><tr><th>Script</th><th>Status</th><th style=\"color:green;\">Passed</th><th style=\"color:orange;\">Conditionally Passed</th><th style=\" color:red; \">Failed</th>";
+    public static final String OPTIONAL_TABLE_HEADER = "<th style=\" color:red; \">Cause</th>";
     private long lineNumber;
 
 	private String path;
@@ -46,7 +47,7 @@ public class Script implements Serializable, IBBActionExecutor {
 	
     private ImportError rejectCause;
 
-	private boolean finished = false;
+    private boolean finished;
 	
     private final ScriptExecutionStatistics statistics = new ScriptExecutionStatistics();
 
@@ -120,9 +121,9 @@ public class Script implements Serializable, IBBActionExecutor {
 
     public void addRejectCause(ImportError cause) {
         if (!isRejected()) {
-            setRejectCause(new ImportError(this.lineNumber, String.format("Script  \"%s\" : error", this.shortName)));
+            setRejectCause(new ImportError(lineNumber, String.format("Script  \"%s\" : error", shortName)));
         }
-        this.rejectCause.addCause(cause);
+        rejectCause.addCause(cause);
     }
 
     public void addRejectCause(Collection<ImportError> errors) {
@@ -131,9 +132,9 @@ public class Script implements Serializable, IBBActionExecutor {
         }
 
         if (!isRejected()) {
-            setRejectCause(new ImportError(this.lineNumber, String.format("Script List  \"%s\" : error", this.shortName)));
+            setRejectCause(new ImportError(lineNumber, String.format("Script List  \"%s\" : error", shortName)));
         }
-        this.rejectCause.addCause(errors);
+        rejectCause.addCause(errors);
     }
 
     public long getLineNumber() {
@@ -161,21 +162,19 @@ public class Script implements Serializable, IBBActionExecutor {
         case FAILED:
             actions = originalApiOptions.getOnFailed();
             logger.info("Use failed script actions {}", actions);
-            break;
+            return actions;
         case CONDITIONALLY_PASSED:
             actions = originalApiOptions.getOnCondPassed();
             logger.info("Use conditionally passed script actions {}", actions);
-            break;
+            return actions;
         case PASSED:
             actions = originalApiOptions.getOnPassed();
             logger.info("Use passed script actions {}", actions);
-            break;
+            return actions;
         default:
-            actions = Collections.emptySet();
-            break;
+            return Collections.emptySet();
         }
 
-        return  actions;
     }
 
     public StatusType getStatusType() {

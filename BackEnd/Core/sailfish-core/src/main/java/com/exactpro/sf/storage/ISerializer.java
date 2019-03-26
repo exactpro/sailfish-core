@@ -20,8 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public interface ISerializer<T> {
-    public T deserialize(File input) throws Exception;
-    public T deserialize(InputStream input) throws Exception;
-    public void serialize(T object, File output) throws Exception;
-    public void serialize(T object, OutputStream output) throws Exception;
+    T deserialize(File input) throws Exception;
+    T deserialize(InputStream input) throws Exception;
+    void serialize(T object, File output) throws Exception;
+    void serialize(T object, OutputStream output) throws Exception;
 }

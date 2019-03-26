@@ -27,16 +27,16 @@ import com.exactpro.sf.testwebgui.BeanUtil;
 
 public class EnvironmentTrackingBean implements IEnvironmentListener {
 
-	private List<String> environmentList;
+    private final List<String> environmentList;
 
 	public EnvironmentTrackingBean() {
 		this.environmentList = new CopyOnWriteArrayList<>();
-        this.environmentList.addAll(BeanUtil.getSfContext().getConnectionManager().getEnvironmentList());
+        environmentList.addAll(BeanUtil.getSfContext().getConnectionManager().getEnvironmentList());
         BeanUtil.getSfContext().getConnectionManager().subscribeForEvents(this);
 	}
 
 	public List<String> getEnvironmentList() {
-		return Collections.unmodifiableList(this.environmentList);
+        return Collections.unmodifiableList(environmentList);
 	}
 
 	@Override
@@ -54,19 +54,19 @@ public class EnvironmentTrackingBean implements IEnvironmentListener {
 		switch (event.getStatus()) {
 			case ADDED :
 
-				this.environmentList.add(event.getName());
+                environmentList.add(event.getName());
 				break;
 
 			case DELETED :
 
-				this.environmentList.remove(event.getName());
+                environmentList.remove(event.getName());
 				break;
 
 			case RENAMED :
 
-				for (int i = 0; i < this.environmentList.size(); i++) {
-					if (this.environmentList.get(i).equals(event.getName())) {
-						this.environmentList.set(i, event.getNewEnvName());
+                for(int i = 0; i < environmentList.size(); i++) {
+                    if(environmentList.get(i).equals(event.getName())) {
+                        environmentList.set(i, event.getNewEnvName());
 						break;
 					}
 				}

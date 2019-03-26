@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -130,11 +129,7 @@ public abstract class JsonMessageDecoder <T> {
                 ? dictionaryManager.getDictionary(dictionaryURI)
                 : null;
         IFieldStructure fieldStructure = dictionaryStructure != null ? dictionaryStructure.getMessages().get(name) : null;
-        if (compact) {
-            return getMessageCompact(parser, fieldStructure, name, dirty);
-        } else {
-            return getMessageFull(parser, fieldStructure, name, dirty);
-        }
+        return compact ? getMessageCompact(parser, fieldStructure, name, dirty) : getMessageFull(parser, fieldStructure, name, dirty);
     }
     
     protected abstract T createMessage(String messageName);
@@ -145,7 +140,7 @@ public abstract class JsonMessageDecoder <T> {
         try {
             checkToken(parser, JsonToken.START_OBJECT, parser.getCurrentToken());
             T message = createMessage(messageName);
-            while (JsonToken.END_OBJECT != parser.nextToken()) {
+            while(parser.nextToken() != JsonToken.END_OBJECT) {
                 String fieldName = parser.getCurrentName();
                 IFieldStructure subFieldStructure = fieldStructure != null ? fieldStructure.getFields().get(fieldName) : null;
                 parser.nextToken();
@@ -163,7 +158,7 @@ public abstract class JsonMessageDecoder <T> {
         try {
             checkToken(parser, JsonToken.START_OBJECT, parser.getCurrentToken());
             T message = createMessage(messageName);
-            while (JsonToken.FIELD_NAME == parser.nextToken()) {
+            while(parser.nextToken() == JsonToken.FIELD_NAME) {
                 String fieldName = parser.getCurrentName();
                 IFieldStructure subFieldStructure = fieldStructure != null ? fieldStructure.getFields().get(fieldName) : null;
                 parser.nextToken();
@@ -188,14 +183,14 @@ public abstract class JsonMessageDecoder <T> {
                 parser.getCurrentName();
                 isMessage = parser.getCurrentToken() == JsonToken.START_OBJECT;
                 List<Object> list = new ArrayList<>();
-                while (JsonToken.END_ARRAY != currentToken) {
+                while(currentToken != JsonToken.END_ARRAY) {
                     list.add(getValueCompact(parser, fieldStructure, dirty).getValue());
                     currentToken = parser.nextToken();
                     currentName = parser.getCurrentName();
                 }
                 Type type = isMessage ?
                         Type.IMESSAGE :
-                        !dirty && (fieldStructure != null && !fieldStructure.isComplex()) ? Type.parse(fieldStructure.getJavaType()) : Type.STRING;
+                        !dirty && fieldStructure != null && !fieldStructure.isComplex() ? Type.parse(fieldStructure.getJavaType()) : Type.STRING;
 
                 return new FieldInfo(list, type, isColection, null, fieldStructure);
             } else {
@@ -230,7 +225,7 @@ public abstract class JsonMessageDecoder <T> {
                 JsonToken currentToken = parser.nextToken();
                 currentFieldName = parser.getCurrentName();
                 List<Object> list = new ArrayList<>();
-                while (JsonToken.END_ARRAY != currentToken) {
+                while(currentToken != JsonToken.END_ARRAY) {
                     list.add(getValueFull(parser, fieldStructure, dirty).getValue());
                     currentToken = parser.nextToken();
                     parser.getCurrentName();
@@ -240,7 +235,7 @@ public abstract class JsonMessageDecoder <T> {
             } else {
                 Object value = getValue(parser, fieldStructure, "value", type, dirty);
                 Map<String, String> properties = new HashMap<>();
-                while (JsonToken.END_OBJECT != parser.nextToken()) {
+                while(parser.nextToken() != JsonToken.END_OBJECT) {
                     checkFieldName(parser, JsonToken.FIELD_NAME, null);
                     parser.nextToken();
                     currentFieldName = parser.getCurrentName();
@@ -271,60 +266,44 @@ public abstract class JsonMessageDecoder <T> {
     }
 
     protected Object parseValueFull(JsonParser parser, IFieldStructure fieldStructure, String name, Type type, boolean dirty) throws IOException {
-        Object result = null;
         switch (type) {
             case BOOLEAN:
-                result = Boolean.valueOf(parser.getBooleanValue());
-                break;
-            case SHORT:
-                result = Short.valueOf(parser.getShortValue());
-                break;
-            case INTEGER:
-                result = Integer.valueOf(parser.getIntValue());
-                break;
-            case LONG:
-                result = Long.valueOf(parser.getLongValue());
-                break;
-            case BYTE:
-                result = Byte.valueOf(parser.getByteValue());
-                break;
-            case FLOAT:
-                result = Float.valueOf(parser.getFloatValue());
-                break;
-            case DOUBLE:
-                result = Double.valueOf(parser.getDoubleValue());
-                break;
-            case NOTNULLFILTER:
+                return Boolean.valueOf(parser.getBooleanValue());
+        case SHORT:
+            return Short.valueOf(parser.getShortValue());
+        case INTEGER:
+            return Integer.valueOf(parser.getIntValue());
+        case LONG:
+            return Long.valueOf(parser.getLongValue());
+        case BYTE:
+            return Byte.valueOf(parser.getByteValue());
+        case FLOAT:
+            return Float.valueOf(parser.getFloatValue());
+        case DOUBLE:
+            return Double.valueOf(parser.getDoubleValue());
+        case NOTNULLFILTER:
             case NULLFILTER:
             case MVELFILTER:
             case REGEXMVELFILTER:
             case SIMPLEMVELFILTER:
             case KNOWNBUGFILTER:
             case STRING:
-                result = parser.getValueAsString();
-                break;
-            case LOCALDATETIME:
-                    result = LocalDateTime.parse(parser.getValueAsString(), DateTimeFormatter.ISO_DATE_TIME);
-                break;
-            case LOCALDATE:
-                result = LocalDate.parse(parser.getValueAsString(), DateTimeFormatter.ISO_DATE);
-                break;
-            case LOCALTIME:
-                result = LocalTime.parse(parser.getValueAsString(), DateTimeFormatter.ISO_TIME);
-                break;
-            case CHARACTER:
-                result = Character.valueOf(parser.getValueAsString().charAt(0));
-                break;
-            case BIGDECIMAL:
-                result = new BigDecimal(parser.getValueAsString());
-                break;
-            case IMESSAGE:
-                result = getMessageFull(parser, fieldStructure, name, dirty);
-                break;
-            default:
+                return parser.getValueAsString();
+        case LOCALDATETIME:
+            return LocalDateTime.parse(parser.getValueAsString(), DateTimeFormatter.ISO_DATE_TIME);
+        case LOCALDATE:
+            return LocalDate.parse(parser.getValueAsString(), DateTimeFormatter.ISO_DATE);
+        case LOCALTIME:
+            return LocalTime.parse(parser.getValueAsString(), DateTimeFormatter.ISO_TIME);
+        case CHARACTER:
+            return Character.valueOf(parser.getValueAsString().charAt(0));
+        case BIGDECIMAL:
+            return new BigDecimal(parser.getValueAsString());
+        case IMESSAGE:
+            return getMessageFull(parser, fieldStructure, name, dirty);
+        default:
                 throw new JsonParseException("Unsupported type " + type, parser.getCurrentLocation());
         }
-        return result;
     }
 
     protected Object parseValueCompact(JsonParser parser, IFieldStructure fieldStructure, JavaType javaType, boolean dirty) throws IOException {
@@ -337,7 +316,7 @@ public abstract class JsonMessageDecoder <T> {
     }
     
     protected static void checkFieldName(JsonParser parser, JsonToken jsonToken, String name) throws IOException, JsonParseException {
-        if (JsonToken.FIELD_NAME != jsonToken || (name != null && !name.equals(parser.getCurrentName()))) {
+        if(jsonToken != JsonToken.FIELD_NAME || (name != null && !name.equals(parser.getCurrentName()))) {
             throw new JsonParseException("Missing expected '" + name + "' field", parser.getCurrentLocation());
         }
     }
@@ -358,7 +337,6 @@ public abstract class JsonMessageDecoder <T> {
         private final IFieldStructure fieldStructure;
         
         public FieldInfo(Object value, Type type, boolean isCollection, Map<String, String> properties, IFieldStructure fieldStructure) {
-            super();
             this.value = value;
             this.type = type;
             this.isCollection = isCollection;
@@ -387,7 +365,7 @@ public abstract class JsonMessageDecoder <T> {
         }
     }
     
-    protected static enum Type {
+    protected enum Type {
         IMESSAGE(null, "IMessage"),
         BOOLEAN(JavaType.JAVA_LANG_BOOLEAN, "Boolean"),
         SHORT(JavaType.JAVA_LANG_SHORT, "Short"),
@@ -451,7 +429,7 @@ public abstract class JsonMessageDecoder <T> {
         
         static Type parse(JavaType javaType) {
             for (Type type : Type.values()) {
-                if (Objects.equals(type.javaType, javaType)) {
+                if(type.javaType == javaType) {
                     return type;
                 }
             }

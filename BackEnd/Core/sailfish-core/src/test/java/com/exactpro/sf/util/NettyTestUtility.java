@@ -30,7 +30,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 
 public class NettyTestUtility {
 
-    public static ByteBuf encode(IMessage msg, final Logger logger, ChannelHandler... handlers) throws IOException {
+    public static ByteBuf encode(IMessage msg, Logger logger, ChannelHandler... handlers) throws IOException {
         EmbeddedChannel encodeChannel = getEmbeddedChannel(logger, handlers);
         encodeChannel.writeOutbound(msg);
         ByteBuf buf = (ByteBuf) encodeChannel.outboundMessages().poll();
@@ -38,13 +38,13 @@ public class NettyTestUtility {
         return buf;
     }
 
-    public static IMessage decode(ByteBuf buf, final Logger logger, ChannelHandler... handlers) {
+    public static IMessage decode(ByteBuf buf, Logger logger, ChannelHandler... handlers) {
         EmbeddedChannel decodeChannel = getEmbeddedChannel(logger, handlers);
         decodeChannel.writeInbound(buf);
         return (IMessage) decodeChannel.inboundMessages().poll();
     }
 
-    public static EmbeddedChannel getEmbeddedChannel(final Logger logger, ChannelHandler... handlers) {
+    public static EmbeddedChannel getEmbeddedChannel(Logger logger, ChannelHandler... handlers) {
         EmbeddedChannel channel = new EmbeddedChannel(handlers);
         channel.pipeline().addLast(
                 new ChannelInboundHandlerAdapter() {
@@ -60,7 +60,7 @@ public class NettyTestUtility {
     }
 
     public static IMessage encodeDecode(IMessage msg, ChannelHandler[] encodeHandlers,
-                                          ChannelHandler[] decodeHandlers, final Logger logger)
+                                          ChannelHandler[] decodeHandlers, Logger logger)
             throws IOException {
         try {
             ByteBuf buf = encode(msg, logger, encodeHandlers);

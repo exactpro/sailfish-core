@@ -18,5 +18,5 @@ package com.exactpro.sf.services.itch;
 public enum MessageLevelType
 {
 	Admin,
-	Application;
+	Application
 }

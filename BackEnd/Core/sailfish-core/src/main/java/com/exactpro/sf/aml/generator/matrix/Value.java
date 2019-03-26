@@ -16,6 +16,7 @@
 package com.exactpro.sf.aml.generator.matrix;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,26 +33,24 @@ import com.exactpro.sf.aml.IField;
 @SuppressWarnings("serial")
 public class Value implements IField, Cloneable, Serializable {
 
-	private boolean isReference = false;
-	private boolean isJava = false;
+    private boolean isReference;
+    private boolean isJava;
 	private String fieldName;
 	private String value;
 	private final String origValue;
 	private boolean check = true;
-	private int index = 0;
-	private List<RefParameter> parameters;
+    private int index;
+    private final List<RefParameter> parameters = new ArrayList<>();
 
 	public Value(String value) {
 		setValue(value);
 		this.origValue = value;
-		this.parameters = new LinkedList<RefParameter>();
-	}
+    }
 
 	public Value(String origValue, String newValue) {
 		setValue(newValue);
 		this.origValue = origValue;
-		this.parameters = new LinkedList<RefParameter>();
-	}
+    }
 
 	/**
 	 * Return <code>true</code> if value referred to another message.
@@ -129,7 +128,7 @@ public class Value implements IField, Cloneable, Serializable {
 	 * Return <code>true</code> if value need to be checked by precompilation.
 	 */
 	public boolean isCheck() {
-		return this.check;
+        return check;
 	}
 
 	public void setFieldName(String name) {
@@ -137,7 +136,7 @@ public class Value implements IField, Cloneable, Serializable {
 	}
 
 	public String getFieldName() {
-		return this.fieldName;
+        return fieldName;
 	}
 
 	public int nextIndex() {
@@ -145,7 +144,7 @@ public class Value implements IField, Cloneable, Serializable {
 	}
 
 	public void addParameter(RefParameter p) {
-		this.parameters.add(p);
+        parameters.add(p);
 	}
 
 	public List<RefParameter> getParameters() {

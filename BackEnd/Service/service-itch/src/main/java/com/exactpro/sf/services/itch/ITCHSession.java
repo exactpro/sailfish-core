@@ -24,7 +24,7 @@ import org.apache.mina.core.session.IoSession;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ITCHSession extends MINASession {
-	private AtomicInteger seqnum = new AtomicInteger(0);
+	private final AtomicInteger seqnum = new AtomicInteger(0);
 
 	private final byte marketDataGroup;
 

@@ -38,7 +38,7 @@ public class CodeGenUtils
         String className = fieldStructure.getName();
         if (underscoreAsPackageSeparator) {
             String[] nodes = className.split("_");
-            className = nodes[nodes.length - 1];
+            return nodes[nodes.length - 1];
         }
         return className;
     }
@@ -67,7 +67,9 @@ public class CodeGenUtils
 
 	public static String convertSimpleFieldTypeToJavaType(JavaType fldType) {
 
-		if (fldType == null) return null;
+        if(fldType == null) {
+            return null;
+        }
 
 		switch ( fldType )
 		{
@@ -107,7 +109,9 @@ public class CodeGenUtils
 
 	public static String convertSimpleFieldTypeToJavaObjectType(JavaType fldType) {
 
-		if (fldType == null) return null;
+        if(fldType == null) {
+            return null;
+        }
 
 		switch ( fldType )
 		{
@@ -147,7 +151,9 @@ public class CodeGenUtils
 
 	public static boolean isPrimitive(JavaType fldType) {
 
-		if (fldType == null) return false;
+        if(fldType == null) {
+            return false;
+        }
 
 		switch ( fldType )
 		{
@@ -175,7 +181,9 @@ public class CodeGenUtils
 
     public static String getStringValueView(JavaType javaType, Object value) {
 
-        if (javaType == null || value == null) return "null";
+        if(javaType == null || value == null) {
+            return "null";
+        }
 
         switch (javaType) {
             case JAVA_LANG_BOOLEAN:
@@ -186,7 +194,7 @@ public class CodeGenUtils
             case JAVA_LANG_DOUBLE:
                 return value.toString();
             case JAVA_LANG_LONG:
-                return value.toString() + "L";
+                return value + "L";
             case JAVA_LANG_CHARACTER:
                 return "'" + value + "'";
             case JAVA_LANG_STRING:

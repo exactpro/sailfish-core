@@ -15,16 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
-import com.exactpro.sf.services.ntg.NTGServerSettings.NTGServerStrategy;
-import com.exactpro.sf.util.AbstractTest;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.configuration.XMLConfiguration;
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.exactpro.sf.services.ntg.NTGServerSettings.NTGServerStrategy;
+import com.exactpro.sf.util.AbstractTest;
 
 public class TestSettings extends AbstractTest
 {
@@ -39,7 +40,7 @@ public class TestSettings extends AbstractTest
 			+ "cfg" + File.separator
 			+ "config.xml";
 
-			if((new File(fileFQN)).exists())
+			if(new File(fileFQN).exists())
 			{
 				XMLConfiguration config = new XMLConfiguration( fileFQN );
 				config.load();
@@ -53,7 +54,7 @@ public class TestSettings extends AbstractTest
 						String key = String.format( "Environment.ConnectionManager.Services.Service(%d)[@type]", i );
 						String keyValue = config.getString(key );
 
-                        if (keyValue.equals("NTG-Server"))
+                        if("NTG-Server".equals(keyValue))
 						{
 							String instIdKey = String.format( "Environment.ConnectionManager.Services.Service(%d).strategies.strategy.instrumentID", i );
 							Object prop = config.getList(instIdKey);

@@ -27,7 +27,7 @@ public class MessagesUpdateSubscriber implements IUpdateRequestListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MessagesUpdateSubscriber.class);
     private final AbstractChannel channel;
-    private String id;
+    private final String id;
 
     public MessagesUpdateSubscriber(String id, AbstractChannel channel) {
         this.id = id;

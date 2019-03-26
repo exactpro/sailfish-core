@@ -17,6 +17,7 @@ package com.exactpro.sf.actions;
 
 import static com.exactpro.sf.services.fix.FixUtil.convertToNumber;
 
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,11 +57,13 @@ import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.tcpip.TCPIPClient;
 import com.exactpro.sf.services.tcpip.TCPIPMessageHelper;
 
+import quickfix.Message;
+
 @MatrixActions
-@ResourceAliases({"FixConnectivityActions"})
+@ResourceAliases("FixConnectivityActions")
 public class FixConnectivityActions extends AbstractCaller
 {
-	private static Logger logger = LoggerFactory.getLogger(FixConnectivityActions.class);
+    private static final Logger logger = LoggerFactory.getLogger(FixConnectivityActions.class);
 
 	private static final Character SOH = '\001';
 	private static final Character SEP = '|';
@@ -108,7 +111,7 @@ public class FixConnectivityActions extends AbstractCaller
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HH:mm:ss.SSS");
 
-	private ConnectivityActions connectivityActions;
+    private final ConnectivityActions connectivityActions;
 
     public FixConnectivityActions() {
         connectivityActions = new ConnectivityActions();
@@ -137,13 +140,13 @@ public class FixConnectivityActions extends AbstractCaller
 		for (int i=0;i<repeatCount;i++)
 		{
 			int tmp = startMSN + i;
-			String zOrder = "8=FIXT.1.1!9=10!35=D!34="+ tmp +"!49=" + inputData.get("SenderCompID").toString()+  "!52=10!56=TRADX!11=" + nameOrder + tmp + "!38=1000000!40=2!44=1!54=1!55=[N/A]!59=0!60="+dateFormat.format(new Date())+"!9303=M!48=" + instrum +"!22=101!423=6!";
+			String zOrder = "8=FIXT.1.1!9=10!35=D!34="+ tmp +"!49=" + inputData.get("SenderCompID") +  "!52=10!56=TRADX!11=" + nameOrder + tmp + "!38=1000000!40=2!44=1!54=1!55=[N/A]!59=0!60="+dateFormat.format(new Date())+"!9303=M!48=" + instrum +"!22=101!423=6!";
 
 
 			FIXPacket fpacket = new FIXPacket( "","" );
 			fpacket.fillPacketFromString2( zOrder );
 
-			String messageString = (new  String( fpacket.getInDirtyBytes(null, null), 0, fpacket.RealLen, DirtyFixUtil.charset));
+			String messageString = new  String( fpacket.getInDirtyBytes(null, null), 0, fpacket.RealLen, DirtyFixUtil.charset);
 			IMessage message = DefaultMessageFactory.getFactory().createMessage(TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE);
 
 			message.addField("RawMessage", messageString);
@@ -196,9 +199,7 @@ public class FixConnectivityActions extends AbstractCaller
         @CommonColumn(value = Column.ServiceName, required = true),
         @CommonColumn(Column.Timeout)
     })
-    @CustomColumns({
-        @CustomColumn("RawMessage")
-    })
+    @CustomColumns(@CustomColumn("RawMessage"))
 	@ActionMethod
     @SuppressWarnings("deprecation")
     public HashMap<?,?> SendRawMessage(IActionContext actionContext, HashMap<?,?> inputData) throws Exception
@@ -213,8 +214,9 @@ public class FixConnectivityActions extends AbstractCaller
             tcpipClient.connect();
         }
 
-		if (!inputData.containsKey("RawMessage"))
-			throw new Exception("RawMessage column hasn't been specified in your matrix");
+        if(!inputData.containsKey("RawMessage")) {
+            throw new Exception("RawMessage column hasn't been specified in your matrix");
+        }
 
 		String messageString = inputData.get("RawMessage").toString();
 
@@ -280,18 +282,14 @@ public class FixConnectivityActions extends AbstractCaller
         @CommonColumn(value = Column.ServiceName, required = true),
         @CommonColumn(value = Column.Timeout, required = true)
     })
-    @CustomColumns({
-        @CustomColumn("MsgType")
-    })
+    @CustomColumns(@CustomColumn("MsgType"))
 	@ActionMethod
     public void CountMessagesWithoutBeginString(IActionContext actionContext, HashMap<?,?> mapFilter) throws Exception
 	{
 	   CountMessages(actionContext, mapFilter);
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void Connect(IActionContext actionContext) throws Exception {
 		String serviceName = actionContext.getServiceName();
@@ -306,9 +304,7 @@ public class FixConnectivityActions extends AbstractCaller
 	}
 
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void Disconnect(IActionContext actionContext)
 			throws Exception
@@ -330,9 +326,7 @@ public class FixConnectivityActions extends AbstractCaller
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void CheckConnect (IActionContext actionContext)
 	{
@@ -348,9 +342,7 @@ public class FixConnectivityActions extends AbstractCaller
         throw new EPSCommonException("Service '" + serviceName + "' is not connected.");
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void CheckDisconnect (IActionContext actionContext)
 	{
@@ -358,7 +350,7 @@ public class FixConnectivityActions extends AbstractCaller
 		actionContext.getLogger().info("[{}] disconnect.", serviceName);
 
 		for (ISession session : getAllSessions(getService(actionContext))) {
-            if (false == session.isClosed()) {
+            if(!session.isClosed()) {
                 throw new EPSCommonException("Service '" + serviceName + "' is connected.");
             }
         }
@@ -400,9 +392,7 @@ public class FixConnectivityActions extends AbstractCaller
         @CommonColumn(value = Column.ServiceName, required = true),
         @CommonColumn(Column.Reference)
     })
-    @CustomColumns({
-        @CustomColumn(IS_RECEIVE_FIELD)
-    })
+    @CustomColumns(@CustomColumn(IS_RECEIVE_FIELD))
     @ActionMethod
     public int GetSeqNum(IActionContext actionContext, HashMap<?, ?> hashMap) {
         boolean isReceive = YES.equalsIgnoreCase(String.valueOf(hashMap.get(IS_RECEIVE_FIELD)));
@@ -412,9 +402,7 @@ public class FixConnectivityActions extends AbstractCaller
     }
 
     @Description("Sets sequence number for a specified service to a value.<br>" + IS_RECEIVE_DESCRIPTION)
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @CustomColumns({
         @CustomColumn(value = FixMessageHelper.MSG_SEQ_NUM_FIELD, required = true),
         @CustomColumn(IS_RECEIVE_FIELD)
@@ -431,9 +419,7 @@ public class FixConnectivityActions extends AbstractCaller
     }
 
     @Description("Adds value to a sequence number of a specified service.<br>" + IS_RECEIVE_DESCRIPTION)
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @CustomColumns({
         @CustomColumn(value = FixMessageHelper.MSG_SEQ_NUM_FIELD, required = true),
         @CustomColumn(IS_RECEIVE_FIELD)
@@ -450,9 +436,7 @@ public class FixConnectivityActions extends AbstractCaller
     }
 
     @Description("Sets message header for a specified service.<br>" + IS_RECEIVE_DESCRIPTION)
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @CustomColumns({
         @CustomColumn(IS_RECEIVE_FIELD),
         @CustomColumn(FixMessageHelper.BEGIN_STRING_FIELD),
@@ -478,9 +462,7 @@ public class FixConnectivityActions extends AbstractCaller
     }
 
     @Description("Sets message trailer for a specified service.<br>" + IS_RECEIVE_DESCRIPTION)
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @CustomColumns({
         @CustomColumn(IS_RECEIVE_FIELD),
         @CustomColumn(CHECK_SUM_FIELD)
@@ -498,15 +480,8 @@ public class FixConnectivityActions extends AbstractCaller
         Object fieldObject = sourceMap.get(fieldName);
 
         if(fieldObject == null) {
-            Map<String, Object> map = defaultMaps.get(serviceName);
-
-            if(map == null) {
-                map = new HashMap<>();
-            } else {
-                map = new HashMap<>(map);
-            }
-
-            sourceMap.put(fieldName, fieldObject = map);
+            Map<String, Object> map = defaultMaps.getOrDefault(serviceName, new HashMap<>());
+            sourceMap.put(fieldName, fieldObject = new HashMap<>(map));
         } else if(!(fieldObject instanceof Map<?, ?>)) {
             throw new EPSCommonException(fieldName + " is not a map");
         }
@@ -518,7 +493,7 @@ public class FixConnectivityActions extends AbstractCaller
         Map<String, Object> resultMap = new HashMap<>();
 
         for(String fieldName : fieldNames) {
-            Object fieldValue = sourceMap.remove(prefix != null ? prefix.concat(fieldName) : fieldName);
+            Object fieldValue = sourceMap.remove(prefix != null ? prefix + fieldName : fieldName);
 
             if(fieldValue != null) {
                 resultMap.put(fieldName, fieldValue);
@@ -564,7 +539,7 @@ public class FixConnectivityActions extends AbstractCaller
 
 	/* wait for message with tags */
 	@ActionMethod
-    public quickfix.Message UNI_WaitMessageWithTags(IActionContext actionContext, HashMap<?,?> messageFilter) throws Exception
+    public Message UNI_WaitMessageWithTags(IActionContext actionContext, HashMap<?,?> messageFilter) throws Exception
 	{
 		ArrayList<String> masWaitingTags = new ArrayList<>();
 
@@ -609,12 +584,11 @@ public class FixConnectivityActions extends AbstractCaller
 			if (list != null) {
 				for (; index < list.size(); index++)
 				{
-					Object message;
-					message = list.get(index);
+                    Object message = list.get(index);
 
 					String printString = "<font color='black'><table width='90%' border='0' cellspacing='0' cellpadding='0'";
 
-					String htmlMsg = new String( message.toString().getBytes(), "UTF8" );
+					String htmlMsg = new String( message.toString().getBytes(), StandardCharsets.UTF_8);
 
 					String tmpMsg = new String();
 					int countChars = 0;
@@ -632,8 +606,9 @@ public class FixConnectivityActions extends AbstractCaller
 								tmpMsg += "<br>";
 							}
 
-						} else
-							tmpMsg += htmlMsg.charAt(j);
+                        } else {
+                            tmpMsg += htmlMsg.charAt(j);
+                        }
 					}
 
 					htmlMsg = tmpMsg;
@@ -643,12 +618,14 @@ public class FixConnectivityActions extends AbstractCaller
 
 					// compare message
 					// **** WaitingGroupTags ****
-					if ( groupTags.size() > 0 )
+					if (!groupTags.isEmpty())
 					{
 						// remove part before start of Group
 						htmlMsg = htmlMsg.replaceAll( "<br>", "" );
 
-						if (( htmlMsg.indexOf( groupHeader + "=" )) <= 0 ) continue;
+                        if(htmlMsg.indexOf(groupHeader + "=") <= 0) {
+                            continue;
+                        }
 
 						htmlMsg = htmlMsg.substring( htmlMsg.indexOf( groupHeader + "="), htmlMsg.length() );
 						htmlMsg = htmlMsg.substring( htmlMsg.indexOf( "|")+1, htmlMsg.length() );
@@ -700,7 +677,7 @@ public class FixConnectivityActions extends AbstractCaller
 							{
                                 try (IGroupReport groupReport = report
                                         .createActionGroup("GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i)) {
-                                    printString = "<table><tr><td></td><td>group:</td><td>" + msgGroups.get(i).toString() + "</td><tr></table>";
+                                    printString = "<table><tr><td></td><td>group:</td><td>" + msgGroups.get(i) + "</td><tr></table>";
                                     groupReport.createMessage(StatusType.PASSED, MessageLevel.INFO, printString);
                                     groupReport.createVerification(StatusType.PASSED,
                                             "GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i, "", null, null);
@@ -710,7 +687,7 @@ public class FixConnectivityActions extends AbstractCaller
 							{
                                 try (IGroupReport groupReport = report
                                         .createActionGroup("GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i)) {
-                                    printString = "<table><tr><td></td><td>group:</td><td width='80%'>" + msgGroups.get(i).toString()
+                                    printString = "<table><tr><td></td><td>group:</td><td width='80%'>" + msgGroups.get(i)
                                             + "</td><tr></table>";
                                     groupReport.createMessage(StatusType.FAILED, MessageLevel.INFO, printString);
                                     groupReport.createVerification(StatusType.FAILED,
@@ -725,7 +702,7 @@ public class FixConnectivityActions extends AbstractCaller
 						}
 					}
 					// **** WaitingTags ****
-					if ( masWaitingTags.size() > 0 )
+					if (!masWaitingTags.isEmpty())
 					{
 						int passedCount = 0;
 						for ( int i = 0; i < masWaitingTags.size(); i++ )

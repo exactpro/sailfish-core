@@ -47,7 +47,7 @@ public class EnumSetContainer {
     }
 
     public Set<SailfishURI> loadDictionaries() {
-        return this.dictionaryManager.getDictionaryURIs();
+        return dictionaryManager.getDictionaryURIs();
     }
 
     private <T> Set<String> collectInheritorNames(Class<T> parent) {
@@ -83,6 +83,6 @@ public class EnumSetContainer {
     }
 
     public Set<SailfishURI> getLanguagesURIs() {
-        return this.languagesURIs;
+        return languagesURIs;
     }
 }

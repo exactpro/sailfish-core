@@ -40,7 +40,7 @@ public class MatrixRun {
 	
 	private long sfRunId;
 
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "16384")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "16384"))
 	private String failReason;
 	
 	private String reportFolder;
@@ -66,10 +66,8 @@ public class MatrixRun {
 	private Environment environment;
 	
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinTable(name = "stmrtags", joinColumns = { 
-			@JoinColumn(name = "mr_id", nullable = false, updatable = true) }, 
-			inverseJoinColumns = { @JoinColumn(name = "tag_id", 
-					nullable = false, updatable = true) })
+    @JoinTable(name = "stmrtags", joinColumns = @JoinColumn(name = "mr_id", nullable = false, updatable = true), inverseJoinColumns = @JoinColumn(name = "tag_id",
+            nullable = false, updatable = true))
 	private Set<Tag> tags; 
 
 	public Set<Tag> getTags() {

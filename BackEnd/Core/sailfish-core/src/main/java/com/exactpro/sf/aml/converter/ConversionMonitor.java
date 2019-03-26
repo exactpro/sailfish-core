@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class ConversionMonitor {
     private final Set<String> errors = new HashSet<>();
-    private volatile int progress = 0;
+    private volatile int progress;
     
     public int getProgress() {
         return progress;
@@ -33,8 +33,8 @@ public class ConversionMonitor {
     }
     
     public void addError(String error) {
-        synchronized (this.errors) {
-            this.errors.add(error);
+        synchronized(errors) {
+            errors.add(error);
         }
     }
     
@@ -45,8 +45,8 @@ public class ConversionMonitor {
     }
     
     public Set<String> getErrors() {
-        synchronized (this.errors) {
-            return Collections.unmodifiableSet(this.errors);
+        synchronized(errors) {
+            return Collections.unmodifiableSet(errors);
         }
     }
 }

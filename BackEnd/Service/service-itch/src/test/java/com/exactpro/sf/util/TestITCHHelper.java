@@ -53,30 +53,30 @@ public class TestITCHHelper extends AbstractTest {
 	
 	protected static final String SAILFISH_DICTIONARY_PATH = "cfg" + File.separator + "dictionaries" + File.separator;
 
-    private MessageHelper messageHelper = new ITCHMessageHelper();
-	private String namespace;
-	private IoSession session = new DummySession();
-	private static IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
+    private final MessageHelper messageHelper = new ITCHMessageHelper();
+    private final String namespace;
+    private final IoSession session = new DummySession();
+    private static final IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
     private TestITCHMessageCreator messageCreator;
 
     protected TestITCHHelper() {
         IDictionaryStructure dictionary = serviceContext.getDictionaryManager().createMessageDictionary(SAILFISH_DICTIONARY_PATH + "itch.xml");
         this.namespace = dictionary.getNamespace();
-        this.messageHelper.init(msgFactory, dictionary);
+        messageHelper.init(msgFactory, dictionary);
         this.messageCreator = new TestITCHMessageCreator(msgFactory, namespace, (ITCHMessageHelper) messageHelper);
     }
 
     protected TestITCHHelper(IDictionaryStructure dictionary) {
 		this.namespace = dictionary.getNamespace();
-        this.messageHelper.init(msgFactory, dictionary);
+        messageHelper.init(msgFactory, dictionary);
 	}
 	
 	protected MessageHelper getMessageHelper(){
-		return this.messageHelper;
+        return messageHelper;
 	}
 	
 	protected IoSession getSession(){
-		return this.session;
+        return session;
 	}
 	
 	protected IMessage getUnitHeader(short messageCount){
@@ -89,7 +89,7 @@ public class TestITCHHelper extends AbstractTest {
 	}
 
     protected TestITCHMessageCreator getMessageCreator() {
-		return this.messageCreator;
+        return messageCreator;
 	}
 	
 	protected static IDictionaryStructure getDictionaryWithDublicateMessages() throws IOException{
@@ -113,37 +113,39 @@ public class TestITCHHelper extends AbstractTest {
     }
 
     protected Object encode(IMessage message, ITCHCodec codec) throws Exception {
-		if(codec==null)
-            codec = (ITCHCodec) this.messageHelper.getCodec(serviceContext);
+        if(codec == null) {
+            codec = (ITCHCodec)messageHelper.getCodec(serviceContext);
+        }
 		ProtocolEncoderOutput output = new MockProtocolEncoderOutput();
 		session.write(message);
 		codec.encode(session, message, output);
 		Queue<Object> msgQueue = ((AbstractProtocolEncoderOutput)output).getMessageQueue();
 		Assert.assertNotNull("Message queue from AbstractProtocolEncoderOutput.", msgQueue);
-		Assert.assertTrue("Message queue size must be equal 1.", 1 == msgQueue.size());
+        Assert.assertTrue("Message queue size must be equal 1.", msgQueue.size() == 1);
 		Object lastMessage = msgQueue.element();
 		Assert.assertNotNull(lastMessage);
 		return lastMessage;
 	}
 
     protected IMessage decode(Object lastMessage, ITCHCodec codec) throws Exception {
-		if(codec==null)
-            codec = (ITCHCodec) this.messageHelper.getCodec(serviceContext);
+        if(codec == null) {
+            codec = (ITCHCodec)messageHelper.getCodec(serviceContext);
+        }
 		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 		IoSession decodeSession = new DummySession();
 		IoBuffer toDecode = IoBuffer.wrap( ((IoBuffer)lastMessage).array() );
 		boolean decodeResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
 		    
 		Assert.assertTrue("Decoding error.", decodeResult);
-		Assert.assertTrue( "Message queue size must not less then 1.", 1 <= decoderOutput.getMessageQueue().size());
+        Assert.assertTrue("Message queue size must not less then 1.", decoderOutput.getMessageQueue().size() >= 1);
 
 		return (IMessage) decoderOutput.getMessageQueue().element();
 	}
 
     protected static ITCHCodec getCodecWithAdditionalDictionary() throws IOException {
         ITCHCodec codec = new ITCHCodec();
+        new ITCHCodecSettings();
         ITCHCodecSettings settings = new ITCHCodecSettings();
-        settings = new ITCHCodecSettings();
         settings.setMsgLength(1);
         codec.init(serviceContext, settings,msgFactory, getAdditionalDictionary());
         return codec;
@@ -163,7 +165,6 @@ public class TestITCHHelper extends AbstractTest {
     protected static ITCHCodec getCodecWithInvalidDictionary() throws IOException {
         ITCHCodec codec = new ITCHCodec();
         ITCHCodecSettings settings = new ITCHCodecSettings();
-        settings = new ITCHCodecSettings();
         settings.setMsgLength(1);
         codec.init(serviceContext, settings,msgFactory, getInvalidDictionary());
         return codec;
@@ -171,8 +172,8 @@ public class TestITCHHelper extends AbstractTest {
 
     protected static ITCHCodec getCodecWithInvalidLengthDictionary() throws IOException {
         ITCHCodec codec = new ITCHCodec();
+        new ITCHCodecSettings();
         ITCHCodecSettings settings = new ITCHCodecSettings();
-        settings = new ITCHCodecSettings();
         settings.setMsgLength(1);
         codec.init(serviceContext, settings,msgFactory, getInvalidLengthDictionary());
         return codec;
@@ -193,8 +194,9 @@ public class TestITCHHelper extends AbstractTest {
 		@SuppressWarnings("unchecked")
         IMessage result = ((List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME)).get(1);
 		Set<String> names=result.getFieldNames();
-		if(names.size()!=1)
-			Assert.fail("Too many fields");
+        if(names.size() != 1) {
+            Assert.fail("Too many fields");
+        }
 		String fieldName=names.iterator().next();
 		Object fieldValue=result.getField(fieldName);
 		String errorExpected="Travers problem for FieldName = "+fieldName+", FieldValue = "+fieldValue+"."

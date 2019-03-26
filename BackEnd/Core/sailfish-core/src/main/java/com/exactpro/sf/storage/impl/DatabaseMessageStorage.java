@@ -17,6 +17,7 @@ package com.exactpro.sf.storage.impl;
 
 import java.io.FileNotFoundException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
-import com.exactpro.sf.storage.DBStorageSettings;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hibernate.Criteria;
@@ -35,7 +35,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import java.time.Instant;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
@@ -43,9 +42,8 @@ import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.util.HexDumper;
-import com.exactpro.sf.configuration.DictionaryManager;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
+import com.exactpro.sf.storage.DBStorageSettings;
 import com.exactpro.sf.storage.IObjectFlusher;
 import com.exactpro.sf.storage.MessageFilter;
 import com.exactpro.sf.storage.MessageRow;
@@ -58,7 +56,7 @@ import com.exactpro.sf.util.CHMInterner;
 import com.exactpro.sf.util.Interner;
 
 public class DatabaseMessageStorage extends AbstractMessageStorage {
-    private final static int REMOVE_BATCH_SIZE = 5000;
+    private static final int REMOVE_BATCH_SIZE = 5000;
 
 	private final SessionFactory sessionFactory;
 	private final Interner<String> interner;
@@ -75,10 +73,10 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 		 * We must create this run to make sure that messagestorage could store
 		 * messages during Service initialisation phase
 		 */
-		this.openScriptRun("Initialisation", "Initialisation of services");
+        openScriptRun("Initialisation", "Initialisation of services");
 
-        this.flusher = new ObjectFlusher<StoredMessage>(new HibernateFlushProvider<StoredMessage>(this.sessionFactory), BUFFER_SIZE, dbStorageSettings.getEnvironmentSettings().getMaxStorageQueueSize());
-        this.flusher.start();
+        this.flusher = new ObjectFlusher<StoredMessage>(new HibernateFlushProvider<StoredMessage>(sessionFactory), BUFFER_SIZE, dbStorageSettings.getEnvironmentSettings().getMaxStorageQueueSize());
+        flusher.start();
 	}
 
 
@@ -126,21 +124,23 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			session.save(storedScriptRun);
 			tx.commit();
 
 		} catch (RuntimeException e) {
 
-			if (tx != null)
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
 
 			logger.error("Could not create script run", e);
 
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 
         scriptRun.setId(storedScriptRun.getId());
@@ -156,7 +156,7 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
             StoredScriptRun storedScriptRun = new StoredScriptRun();
 
@@ -174,22 +174,24 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 
 		} catch (RuntimeException e) {
 
-			if (tx != null)
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
 
 			logger.error("Could not close script run", e);
 
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 	}
 
 	@Override
 	public void dispose() {
-		this.flusher.stop();
+        flusher.stop();
 
-		this.sessionFactory.close();
+        sessionFactory.close();
 	}
 
 	// FIXME: it does not work properly in case of multiple scripts running(it
@@ -213,12 +215,13 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 				return new ArrayList<>();
 			}
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 
 			String strQuery = "from StoredMessage msg ";
 
-			if (!where.isEmpty())
-				strQuery += " where " + where;
+            if(!where.isEmpty()) {
+                strQuery += " where " + where;
+            }
 			strQuery += " order by msg.id desc, msg.arrived desc ";
 
 			Query query = session.createQuery(strQuery);
@@ -227,8 +230,9 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 
 			query.setFirstResult(offset);
 
-			if (count != -1)
-				query.setMaxResults(count);
+            if(count != -1) {
+                query.setMaxResults(count);
+            }
 
 			List<MessageRow> result = new ArrayList<>();
 
@@ -268,7 +272,7 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
         row.setJson(interner.intern(message.getJsonMessage()));
         row.setContent(interner.intern(message.getHumanMessage()));
         row.setMetaDataID(interner.intern(String.valueOf(message.getStoredId())));
-        row.setRejectReason(interner.intern((message.getRejectReason())));
+        row.setRejectReason(interner.intern(message.getRejectReason()));
 
         if(message.getRawMessage() != null) {
             if(hex) {
@@ -287,16 +291,19 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 
 	@Override
     public void removeMessages(Instant olderThan) {
+        //noinspection ControlFlowStatementWithoutBraces
         while(removeMessages(olderThan, null, REMOVE_BATCH_SIZE));
 	}
 
     @Override
     public void removeMessages(String serviceID) {
+        //noinspection ControlFlowStatementWithoutBraces
         while(removeMessages(null, serviceID, REMOVE_BATCH_SIZE));
     }
 
     @Override
     public void clear() {
+        //noinspection ControlFlowStatementWithoutBraces
         while(removeMessages(null, null, REMOVE_BATCH_SIZE));
     }
 
@@ -332,6 +339,7 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
 
             successful = query.executeUpdate() > 0;
             tx.commit();
+            return successful;
         } catch(HibernateException e) {
             if(tx != null) {
                 tx.rollback();
@@ -344,7 +352,6 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
             }
         }
 
-        return successful;
     }
 
     private long getFirstMessageID(Session session, String serviceID) {

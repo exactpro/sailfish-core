@@ -31,7 +31,7 @@ import javax.servlet.ServletException;
 @SuppressWarnings("serial")
 public class ErrorBean implements Serializable {
 	
-	private Map<String, Object> request;
+	private final Map<String, Object> request;
 	
 	public ErrorBean() {
 		

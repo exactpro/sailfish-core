@@ -38,7 +38,7 @@ import com.exactpro.sf.configuration.suri.SailfishURIUtils;
 import com.exactpro.sf.embedded.statistics.handlers.impl.DefaultStatisticsHandlerFactory;
 
 public class StatisticsReportHandlerLoader implements ILoadableManager {
-    private final static Logger logger = LoggerFactory.getLogger(StatisticsReportHandlerLoader.class);
+    private static final Logger logger = LoggerFactory.getLogger(StatisticsReportHandlerLoader.class);
 
     private final Map<SailfishURI, IStatisticsReportHandlerFactory> uriToClass = new ConcurrentHashMap<>();
 

@@ -53,12 +53,8 @@ public class HashMapGetterSetterGeneratorImpl implements IGetterSetterGenerator 
 	@Override
 	public Class<?> getSubmessageClass(Class<?> type, String childClassName, Class<?> paramClass)
 	{
-	    if(paramClass == IMessage.class) {
-	        return IMessage.class;
-	    }
-
-		return HashMap.class;
-	}
+        return paramClass == IMessage.class ? IMessage.class : HashMap.class;
+    }
 
 	//@Override
 	//private Method getGetterMethod(Class<?> type, String parameterName)

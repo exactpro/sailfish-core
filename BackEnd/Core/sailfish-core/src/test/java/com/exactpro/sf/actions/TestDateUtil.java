@@ -20,17 +20,29 @@ import static org.junit.Assert.assertEquals;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.time.DateTimeException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 
 import com.exactpro.sf.actions.data.DateComponent;
 import com.exactpro.sf.util.DateTimeUtility;
@@ -220,8 +232,8 @@ public class TestDateUtil {
                         ":m=" + (30 - minutsDiff))
                         .minusSeconds(defaultOffsetSeconds);
                 LocalDateTime dateTimeByZoneId = dateUtil.getDateTimeByZoneId("Y=2018:M=3:D=7:h=12:m=30:s=10:ns=123456789", signedOffset);
-                
-                Assert.assertEquals("Diff hours = " + hoursDiff + ", minuts = " + minutsDiff, dateTime, dateTimeByZoneId);
+
+                assertEquals("Diff hours = " + hoursDiff + ", minuts = " + minutsDiff, dateTime, dateTimeByZoneId);
             }
         }
         
@@ -309,7 +321,7 @@ public class TestDateUtil {
     public void testModifyWithTimezone() {
 	    //no DST adjusting
         TimeZone withoutDst = Arrays.stream(TimeZone.getAvailableIDs()).map(TimeZone::getTimeZone)
-                .filter((z) -> !z.useDaylightTime() && z.getRawOffset() != 0)
+                .filter(z -> !z.useDaylightTime() && z.getRawOffset() != 0)
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("no time zone without dst support was found"));
 
         LocalDateTime base = LocalDate.now().atTime(12, 0);
@@ -321,7 +333,7 @@ public class TestDateUtil {
 
         //with DST adjusting
         TimeZone withDst = Arrays.stream(TimeZone.getAvailableIDs()).map(TimeZone::getTimeZone)
-                .filter((z) -> z.useDaylightTime() && z.getRawOffset() != 0)
+                .filter(z -> z.useDaylightTime() && z.getRawOffset() != 0)
                 .findFirst().orElseThrow(() -> new IllegalArgumentException("no time zone with dst support was found"));
 
         compareTo = dateUtil.modifyDateTimeByZoneId(base, "M=1", withDst.getID()).toLocalTime();
@@ -401,64 +413,64 @@ public class TestDateUtil {
         // getLocalDate
         LocalDate date = dateUtil.getDate("Y=2025:M=2:D=13:h=8:m=24:s=5:ns=111222333");
         String dateString = dateUtil.formatDate(date, "yyyyMMdd");
-        Assert.assertEquals("20250213", dateString);
+        assertEquals("20250213", dateString);
 
         // getLocalTime
         LocalTime time = dateUtil.getTime("Y=2025:M=2:D=13:h=8:m=24:s=5:ns=111222333");
         dateString = dateUtil.formatTime(time, "HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("08:24:05.111222333", dateString);
+        assertEquals("08:24:05.111222333", dateString);
 
         // toLocalDate with modification
         date = dateUtil.toDate(dateTime, "Y+1:M-1:D+3:h-1:m=30:s=11:ms=777:mc=666:ns+222");
         dateString = dateUtil.formatDate(date, "yyyyMMdd");
-        Assert.assertEquals("20260116", dateString);
+        assertEquals("20260116", dateString);
 
         // toLocalDate without modification
         date = dateUtil.toDate(dateTime);
         dateString = dateUtil.formatDate(date, "yyyyMMdd");
-        Assert.assertEquals("20250213", dateString);
+        assertEquals("20250213", dateString);
 
         // toLocalTime with modification
         time = dateUtil.toTime(dateTime, "Y+1:M-1:D+3:h-1:m=30:s=11:ns=777666555");
         dateString = dateUtil.formatTime(time, "HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("07:30:11.777666555", dateString);
+        assertEquals("07:30:11.777666555", dateString);
 
         // toLocalTime without modification
         time = dateUtil.toTime(dateTime);
         dateString = dateUtil.formatTime(time, "HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("08:24:05.111222333", dateString);
+        assertEquals("08:24:05.111222333", dateString);
 
         // toLocalDateTime by merging a LocalDate and LocalTime (with modification)
         LocalDateTime modifiedDateTime =
                 dateUtil.mergeDateTime(date, time, "Y+1:M-1:D+3:h-1:m=30:s=11:ns=777666555");
         dateString =
                 dateUtil.formatDateTime(modifiedDateTime, "yyyyMMdd-HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("20260116-07:30:11.777666555", dateString);
+        assertEquals("20260116-07:30:11.777666555", dateString);
 
         // toLocalDateTime by merging a LocalDate and LocalTime (without modification)
         modifiedDateTime = dateUtil.mergeDateTime(date, time);
         dateString = dateUtil.formatDateTime(modifiedDateTime, "yyyyMMdd-HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("20250213-08:24:05.111222333", dateString);
+        assertEquals("20250213-08:24:05.111222333", dateString);
 
         // toLocalDateTime from LocalDate with modification
         modifiedDateTime = dateUtil.toDateTime(date, "Y+1:M-1:D+3:h+1:m=30:s=11:ns=777666555");
         dateString = dateUtil.formatDateTime(modifiedDateTime, "yyyyMMdd-HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("20260116-01:30:11.777666555", dateString);
+        assertEquals("20260116-01:30:11.777666555", dateString);
 
         // toLocalDateTime from LocalDate without modification
         modifiedDateTime = dateUtil.toDateTime(date);
         dateString = dateUtil.formatDateTime(modifiedDateTime, "yyyyMMdd-HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("20250213-00:00:00.000000000", dateString);
+        assertEquals("20250213-00:00:00.000000000", dateString);
 
         // toLocalDateTime from LocalTime with modification
         modifiedDateTime = dateUtil.toDateTime(time, "Y+1:M+1:D+3:h+1:m=30:s=11:ns=777666555");
         dateString = dateUtil.formatDateTime(modifiedDateTime, "yyyyMMdd-HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("19710204-09:30:11.777666555", dateString);
+        assertEquals("19710204-09:30:11.777666555", dateString);
 
         // toLocalDateTime from LocalTime without modification
         modifiedDateTime = dateUtil.toDateTime(time);
         dateString = dateUtil.formatDateTime(modifiedDateTime, "yyyyMMdd-HH:mm:ss.SSSSSSSSS");
-        Assert.assertEquals("19700101-08:24:05.111222333", dateString);
+        assertEquals("19700101-08:24:05.111222333", dateString);
     }
 
     @Test
@@ -466,24 +478,24 @@ public class TestDateUtil {
         LocalDateTime dateTime = dateUtil.getDateTime("Y=2025:M=2:D=13:h=8:m=24:s=5:ns=111222333");
 
         LocalDateTime modifiedDateTime = dateUtil.modifyDateTime(dateTime, "D+3" );
-        Assert.assertEquals(3, dateUtil.diffDateTime(modifiedDateTime, dateTime, "D"));
+        assertEquals(3, dateUtil.diffDateTime(modifiedDateTime, dateTime, "D"));
 
         modifiedDateTime = dateUtil.modifyDateTime(dateTime, "h+3" );
-        Assert.assertEquals(3, dateUtil.diffDateTime(modifiedDateTime, dateTime, "h"));
+        assertEquals(3, dateUtil.diffDateTime(modifiedDateTime, dateTime, "h"));
 
         modifiedDateTime = dateUtil.modifyDateTime(dateTime, "h+1:m+1" );
-        Assert.assertEquals(61, dateUtil.diffDateTime(modifiedDateTime, dateTime, "m"));
+        assertEquals(61, dateUtil.diffDateTime(modifiedDateTime, dateTime, "m"));
 
         modifiedDateTime = dateUtil.modifyDateTime(dateTime, "m+1:s+1" );
-        Assert.assertEquals(61, dateUtil.diffDateTime(modifiedDateTime, dateTime, "s"));
+        assertEquals(61, dateUtil.diffDateTime(modifiedDateTime, dateTime, "s"));
 
         modifiedDateTime = dateUtil.modifyDateTime(dateTime, "s+1:ms+1" );
-        Assert.assertEquals(1001, dateUtil.diffDateTime(modifiedDateTime, dateTime, "ms"));
+        assertEquals(1001, dateUtil.diffDateTime(modifiedDateTime, dateTime, "ms"));
     }
 
     @Test
     public void testDifferenceBetweenTwoZonedDates() {
-        String[] dates = new String[] {
+        String[] dates = {
                 "2011-12-03T10:15:30.123456789+01:00[Europe/Paris]",
                 "2011-12-03T11:15:30.123456789+02:00",
                 "2011-12-03T11:45:30.123456789+02:30",
@@ -494,14 +506,14 @@ public class TestDateUtil {
             for (String subtrahend : dates) {
                 if ( minuend != subtrahend) {
                     for (DateComponent dateComponent : DateComponent.values()) {
-                        Assert.assertEquals("Minuend = " + minuend + " subtrahend = " + subtrahend + " date component = " + dateComponent,
+                        assertEquals("Minuend = " + minuend + " subtrahend = " + subtrahend + " date component = " + dateComponent,
                                 0, dateUtil.diffDateTimeISO(minuend, subtrahend, dateComponent.toString()));
                     }
                 }
             }
         }
 
-        Assert.assertEquals(1001, dateUtil.diffDateTimeISO("2011-12-03T11:45:30.123456789+02:30", "2011-12-03T10:15:30.122455789+01:00[Europe/Paris]", "mc"));
+        assertEquals(1001, dateUtil.diffDateTimeISO("2011-12-03T11:45:30.123456789+02:30", "2011-12-03T10:15:30.122455789+01:00[Europe/Paris]", "mc"));
     }
 
     @Test
@@ -518,19 +530,19 @@ public class TestDateUtil {
 
         // LocalDateTime + LocalDate
         LocalDateTime modifiedDateTime = dateUtil.mergeDateTime(dateTime, time);
-        Assert.assertEquals(expectedFromDateTime, modifiedDateTime);
+        assertEquals(expectedFromDateTime, modifiedDateTime);
 
         // LocalDateTime + LocalDateTime
         modifiedDateTime = dateUtil.mergeDateTime(dateTime, dateUtil.toDateTime(time));
-        Assert.assertEquals(expectedFromDateTime, modifiedDateTime);
+        assertEquals(expectedFromDateTime, modifiedDateTime);
 
         // LocalDate + LocalTime
         modifiedDateTime = dateUtil.mergeDateTime(date, time);
-        Assert.assertEquals(expectedFromDate, modifiedDateTime);
+        assertEquals(expectedFromDate, modifiedDateTime);
 
         // LocalDate + LocalDateTime
         modifiedDateTime = dateUtil.mergeDateTime(date, dateUtil.toDateTime(time));
-        Assert.assertEquals(expectedFromDate, modifiedDateTime);
+        assertEquals(expectedFromDate, modifiedDateTime);
     }
 
     @Test
@@ -593,7 +605,7 @@ public class TestDateUtil {
     @Test
     public void testNullPointerException() {
         thrown.expect(NullPointerException.class);
-        thrown.expectMessage(("Date argument is null"));
+        thrown.expectMessage("Date argument is null");
         dateUtil.toDateTime((String)null);
     }
 

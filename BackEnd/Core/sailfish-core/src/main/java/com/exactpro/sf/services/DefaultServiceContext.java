@@ -64,7 +64,7 @@ public class DefaultServiceContext implements IServiceContext {
      */
     @Override
     public IDictionaryManager getDictionaryManager() {
-        return this.dictionaryManager;
+        return dictionaryManager;
     }
 
     /* (non-Javadoc)
@@ -72,7 +72,7 @@ public class DefaultServiceContext implements IServiceContext {
      */
     @Override
     public IMessageStorage getMessageStorage() {
-        return this.messageStorage;
+        return messageStorage;
     }
 
     @Override
@@ -85,7 +85,7 @@ public class DefaultServiceContext implements IServiceContext {
      */
     @Override
     public ILoggingConfigurator getLoggingConfigurator() {
-        return this.loggingConfigurator;
+        return loggingConfigurator;
     }
 
     /* (non-Javadoc)
@@ -93,7 +93,7 @@ public class DefaultServiceContext implements IServiceContext {
      */
     @Override
     public ITaskExecutor getTaskExecutor() {
-        return this.taskExecutor;
+        return taskExecutor;
     }
 
     /* (non-Javadoc)
@@ -101,7 +101,7 @@ public class DefaultServiceContext implements IServiceContext {
      */
     @Override
     public IDataManager getDataManager() {
-        return this.dataManager;
+        return dataManager;
     }
 
     /* (non-Javadoc)
@@ -109,7 +109,7 @@ public class DefaultServiceContext implements IServiceContext {
      */
     @Override
     public IWorkspaceDispatcher getWorkspaceDispatcher() {
-        return this.workspaceDispatcher;
+        return workspaceDispatcher;
     }
 
 }

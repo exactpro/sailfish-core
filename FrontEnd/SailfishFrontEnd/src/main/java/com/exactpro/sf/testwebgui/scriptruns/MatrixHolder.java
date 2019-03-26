@@ -41,7 +41,7 @@ public class MatrixHolder implements IMatrixListener {
 	private final IMatrixStorage matrixStorage;
 	private final MatrixProviderHolder matrixProviderHolder;
 
-	private List<IMatrix> matrices;
+    private final List<IMatrix> matrices;
 
 	public MatrixHolder(IWorkspaceDispatcher wd, IMatrixStorage matrixStorage, MatrixProviderHolder matrixProviderHolder) throws FileNotFoundException {
 		this.wd = wd;
@@ -57,12 +57,12 @@ public class MatrixHolder implements IMatrixListener {
 
 	@Override
 	public void addMatrix(IMatrix matrix) {
-		this.matrices.add(0, matrix);
+        matrices.add(0, matrix);
 	}
 
 	@Override
 	public void removeMatrix(IMatrix matrix) {
-		this.matrices.remove(matrix);
+        matrices.remove(matrix);
 	}
 
 	public IMatrix getMatrixById(long id) {

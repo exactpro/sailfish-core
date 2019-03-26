@@ -35,7 +35,7 @@ public class ComparisonResult implements Iterable<ComparisonResult> {
     private StatusType status;
     private ExpressionResult expressionResult;
     private Throwable exception;
-    private Map<String, ComparisonResult> results = new LinkedHashMap<>();
+    private final Map<String, ComparisonResult> results = new LinkedHashMap<>();
     private Set<BugDescription> allKnownBugs = Collections.emptySet();
     private Set<BugDescription> reproducedBugs = Collections.emptySet();
     private ComparisonResult parent;

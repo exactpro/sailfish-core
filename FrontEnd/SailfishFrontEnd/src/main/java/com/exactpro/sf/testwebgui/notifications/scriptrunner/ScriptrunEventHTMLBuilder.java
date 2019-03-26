@@ -18,32 +18,32 @@ package com.exactpro.sf.testwebgui.notifications.scriptrunner;
 import static org.apache.commons.text.StringEscapeUtils.escapeHtml4;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.format.DateTimeFormatter;
 
-import com.exactpro.sf.common.util.ErrorUtil;
-import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.impl.GuiVersion;
+import com.exactpro.sf.common.util.ErrorUtil;
+import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.scriptrunner.EnvironmentSettings.ReportOutputFormat;
 import com.exactpro.sf.scriptrunner.IScriptProgress;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.ZipReport;
-import com.exactpro.sf.util.DateTimeUtility;
 import com.exactpro.sf.testwebgui.servlets.ReportServlet;
+import com.exactpro.sf.util.DateTimeUtility;
 
 public class ScriptrunEventHTMLBuilder {
 
@@ -66,9 +66,9 @@ public class ScriptrunEventHTMLBuilder {
                  "<p> No test scripts have been run </p>" +
             "</div>";
 
-	private static DateTimeFormatter dateFormat = DateTimeUtility.createFormatter("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter dateFormat = DateTimeUtility.createFormatter("yyyy-MM-dd HH:mm:ss");
 
-    private static String resourceFolderName = GuiVersion.BUILD + "_0";
+    private static final String resourceFolderName = GuiVersion.BUILD + "_0";
 
 	private ScriptrunEventHTMLBuilder() {
 
@@ -97,7 +97,7 @@ public class ScriptrunEventHTMLBuilder {
 		if (tw != null) {
 			if (tw instanceof ScriptRunException) {
 				if (tw.getCause() != null && tw.getCause() instanceof AMLException) {
-					AMLException e = (AMLException) (tw.getCause());
+                    AMLException e = (AMLException)tw.getCause();
 					StringBuilder sb = new StringBuilder();
 
 					if(e.getAlertCollector().getCount(AlertType.ERROR) > 0) {
@@ -108,7 +108,7 @@ public class ScriptrunEventHTMLBuilder {
 
 					return sb.toString();
 				} else if(tw.getCause() != null && tw.getCause() instanceof InvocationTargetException){
-					InvocationTargetException e = (InvocationTargetException) (tw.getCause());
+                    InvocationTargetException e = (InvocationTargetException)tw.getCause();
 					Throwable target = e.getTargetException();
 					if(target.getCause() != null){
 						return "Found error during running script: <li>" + escapeHtml4(target.getCause().getMessage());
@@ -117,7 +117,7 @@ public class ScriptrunEventHTMLBuilder {
 					}
 				}
 			}
-			String eText = escapeHtml4(tw.toString() + ErrorUtil.formatException(tw));
+            String eText = escapeHtml4(tw + ErrorUtil.formatException(tw));
 			return "<pre>" + eText + "</pre>";
 		}
 		return "";
@@ -200,8 +200,7 @@ public class ScriptrunEventHTMLBuilder {
             String link = folderName + "/" + folderName + ZipReport.ZIP;
 
             link =  context.getWorkspaceDispatcher().exists(FolderType.REPORT, link) ||
-                    context.getEnvironmentManager().getEnvironmentSettings().getReportOutputFormat().equals(
-                    EnvironmentSettings.ReportOutputFormat.FILES) ?
+                    context.getEnvironmentManager().getEnvironmentSettings().getReportOutputFormat() == ReportOutputFormat.FILES ?
                     ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(link) + "?action=zip&script_id=" + descr.getId() :
                     ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(folderName) + ZipReport.ZIP + "?action=zip&script_id=" + descr.getId();
 
@@ -262,14 +261,17 @@ public class ScriptrunEventHTMLBuilder {
 	}
 
 	private static String getBlockClassPostfix(TestScriptDescription descr) {
-		if(descr.getStatus() == ScriptStatus.INIT_FAILED || descr.getStatus() == ScriptStatus.RUN_FAILED)
-			return FAILED_CLASS_POSTFIX;
+        if(descr.getStatus() == ScriptStatus.INIT_FAILED || descr.getStatus() == ScriptStatus.RUN_FAILED) {
+            return FAILED_CLASS_POSTFIX;
+        }
 
 		if(descr.getStatus() == ScriptStatus.EXECUTED || descr.getStatus() == ScriptStatus.INTERRUPTED) {
-			if(descr.getContext().getScriptProgress().getFailed() != 0)
-				return SOME_FAILES_CLASS_POSTFIX;
-            if (descr.getContext().getScriptProgress().getConditionallyPassed() != 0)
+            if(descr.getContext().getScriptProgress().getFailed() != 0) {
+                return SOME_FAILES_CLASS_POSTFIX;
+            }
+            if(descr.getContext().getScriptProgress().getConditionallyPassed() != 0) {
                 return SOME_CONDTIONALLY_PASSED_CLASS_POSTFIX;
+            }
 			return EXECUTED_CLASS_POSTFIX;
 		}
 		return IN_PROGRESS_CLASS_POSTFIX;
@@ -317,7 +319,7 @@ public class ScriptrunEventHTMLBuilder {
 
 		String environmentName = descr.getContext().getEnvironmentName();
 		String language = Objects.toString(descr.getLanguageURI(), "");
-		String range = descr.getRange() == null || descr.getRange().length() == 0 ? "&infin;" : descr.getRange();
+        String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
 
         StringBuilder sb = new StringBuilder();
@@ -367,7 +369,7 @@ public class ScriptrunEventHTMLBuilder {
 
 		String environmentName = descr.getContext().getEnvironmentName();
 		String language = Objects.toString(descr.getLanguageURI(), "");
-		String range = descr.getRange() == null || descr.getRange().length() == 0 ? "&infin;" : descr.getRange();
+        String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
 
 		StringBuilder sb = new StringBuilder();
@@ -409,7 +411,7 @@ public class ScriptrunEventHTMLBuilder {
 
 		String environmentName = descr.getContext().getEnvironmentName();
 		String language = Objects.toString(descr.getLanguageURI(), "");
-		String range = descr.getRange() == null || descr.getRange().length() == 0 ? "&infin;" : descr.getRange();
+        String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
 
 		StringBuilder sb = new StringBuilder();
@@ -629,15 +631,13 @@ public class ScriptrunEventHTMLBuilder {
 
 		StringBuilder sb = new StringBuilder();
 		try {
-			String progressBlock;
-			String progressText;
-			int finishedCount = descr.getContext().getScriptProgress().getExecutedTC();
+            int finishedCount = descr.getContext().getScriptProgress().getExecutedTC();
 			int loadedTC = descr.getContext().getScriptProgress().getLoaded();
 			int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
-			progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
+            String progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
 			String report = ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(descr.getWorkFolder()) + "/report.html";
-			progressBlock ="<a href=\"report.xhtml?report="+ report +"\">" + formatProgressBar(progress, progressText) + "</a>";
+            String progressBlock = "<a href=\"report.xhtml?report=" + report + "\">" + formatProgressBar(progress, progressText) + "</a>";
 
 			String postfix = descr.getPauseTimeout() == 0 ? PERMANENT_PAUSED_CLASS_POSTFIX : TIME_PAUSED_CLASS_POSTFIX;
 

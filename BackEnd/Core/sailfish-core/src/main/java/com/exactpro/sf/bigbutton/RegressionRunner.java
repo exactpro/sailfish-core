@@ -19,8 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
-import com.exactpro.sf.embedded.statistics.StatisticsService;
-import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +37,8 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.embedded.mail.EMailService;
+import com.exactpro.sf.embedded.statistics.StatisticsService;
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.services.ITaskExecutor;
 import com.exactpro.sf.storage.IOptionsStorage;
 
@@ -54,19 +54,19 @@ public class RegressionRunner implements AutoCloseable {
 
 	private volatile ExecutionProgressMonitor monitor;
 
-	private final static Semaphore lock = new Semaphore(1, true);
+    private static final Semaphore lock = new Semaphore(1, true);
 
 	private volatile boolean free = true;
 
-    private volatile boolean pause = false;
+    private volatile boolean pause;
 
 	private volatile Library library;
 
-    private volatile EMailService mailService;
+    private final EMailService mailService;
 
-    private volatile StatisticsService statisticsService;
+    private final StatisticsService statisticsService;
 
-    private BigButtonSettings settings;
+    private BigButtonSettings settings = new BigButtonSettings();
 
 
     public RegressionRunner(ITaskExecutor taskExecutor, IWorkspaceDispatcher workspaceDispatcher, EMailService mailService,
@@ -75,10 +75,9 @@ public class RegressionRunner implements AutoCloseable {
 		this.taskExecutor = taskExecutor;
 		this.mailService = mailService;
         this.statisticsService = statisticsService;
-		this.settings = new BigButtonSettings();
 
         try {
-            this.settings.fillFromMap(optionsStorage.getAllOptions());
+            settings.fillFromMap(optionsStorage.getAllOptions());
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
@@ -100,9 +99,9 @@ public class RegressionRunner implements AutoCloseable {
 
 	private void cleanup() {
 
-		if(this.executorClients != null) {
+        if(executorClients != null) {
 
-			for(ExecutorClient client : this.executorClients) {
+            for(ExecutorClient client : executorClients) {
                 client.cleanExecutorEnvironment();
                 client.tearDown();
 			}
@@ -115,7 +114,7 @@ public class RegressionRunner implements AutoCloseable {
 
 		RunInitTask task = new RunInitTask(library);
 
-		this.taskExecutor.addTask(task);
+        taskExecutor.addTask(task);
 	}
 
 	private void fillQueue(CombineQueue<ScriptList> listsQueue) {
@@ -142,7 +141,7 @@ public class RegressionRunner implements AutoCloseable {
 
 			try {
 
-				if(!this.free) {
+                if(!free) {
 					throw new IllegalStateException("Reset not allowed in this state");
 				}
 
@@ -169,7 +168,7 @@ public class RegressionRunner implements AutoCloseable {
 
 			try {
 
-				if(!free || this.library != null) {
+                if(!free || library != null) {
 					throw new IllegalStateException("Prepare not allowed in this state");
 				}
 
@@ -228,14 +227,14 @@ public class RegressionRunner implements AutoCloseable {
 				if(!free) {
 					throw new IllegalStateException("Runner is already busy");
 				}
-				
-				if(this.library == null) {
+
+                if(library == null) {
 					throw new IllegalStateException("Library was not prepared");
 				}
 			
 				this.free = false;
-				
-				this.monitor.preparing();
+
+                monitor.preparing();
 				
 				startInitThread(library);
 			
@@ -250,13 +249,13 @@ public class RegressionRunner implements AutoCloseable {
 	}
 	
 	public ProgressView getProgressView(int inQueueLimit, int outQueueLimit) {
-		
-		return this.monitor.getCurrentProgressView(inQueueLimit, outQueueLimit);
+
+        return monitor.getCurrentProgressView(inQueueLimit, outQueueLimit);
 		
 	}
 
     public void interrupt(String message) {
-        this.monitor.interrupt(message);
+        monitor.interrupt(message);
     }
 
 	public boolean isFree() {
@@ -282,33 +281,33 @@ public class RegressionRunner implements AutoCloseable {
     }
 
 	private class RunInitTask implements Runnable {
-		
-		private Library library;
+
+        private final Library library;
 		
 		public RunInitTask(Library library) {
 			this.library = library;
 		}
 		
 		private void checkReportsFolder() {
-			
-			if(this.library.getReportsFolder() == null) {
+
+            if(library.getReportsFolder() == null) {
 				return;
 			}
 			
             try {
-                RegressionRunner.this.workspaceDispatcher.createFolder(FolderType.REPORT, this.library.getReportsFolder());
+                workspaceDispatcher.createFolder(FolderType.REPORT, library.getReportsFolder());
             } catch (WorkspaceStructureException | WorkspaceSecurityException e) {
                 throw new RuntimeException("Reports directory not created", e);
             }
 		}
 		
         private boolean registerTags(List<ExecutorClient> clients) {
-			
-			if(this.library.getTagList() == null) {
+
+            if(library.getTagList() == null) {
                 return true;
 			}
-			
-			List<Tag> tags = this.library.getTagList().getTags();
+
+            List<Tag> tags = library.getTagList().getTags();
 			
             if (tags.isEmpty()) {
                 return true;
@@ -385,7 +384,7 @@ public class RegressionRunner implements AutoCloseable {
     }
 
     public SfInstance getCurrentSfInstance() {
-        return this.statisticsService.getThisSfInstance();
+        return statisticsService.getThisSfInstance();
     }
 
 }

@@ -119,14 +119,14 @@ public class EnvironmentBean implements Serializable {
 	// To remove when environments implemented
 	private final boolean ENVIRONMENTS_ENABLED = true;
 	private String currentEnvironment = ServiceName.DEFAULT_ENVIRONMENT;
-    private String currentVariableSet = null;
+    private String currentVariableSet;
 	private String newEnvName = "";
 	private String selectedEnvironment;
     private String selectedVariableSet;
 	private IServiceNotifyListener notifyListener;
 
 	private String currentEnvironmentForCopy = ServiceName.DEFAULT_ENVIRONMENT;
-	private boolean respectFileName = false;
+    private boolean respectFileName;
 
 	 //refresh state after deserialization
     private Object readResolve()  {
@@ -170,13 +170,13 @@ public class EnvironmentBean implements Serializable {
 		StringBuilder builder = new StringBuilder();
 
 		int i = 0;
-		for (EnvironmentNode node : this.selectedNodes) {
+        for(EnvironmentNode node : selectedNodes) {
             if(node.getServiceStatus() != ServiceStatus.DISABLED) {
                 selectedWithoutDisabled.add(node);
 
                 builder.append(node.getName());
 
-                if (++i < this.selectedNodes.length) {
+                if(++i < selectedNodes.length) {
                     builder.append(", ");
                 }
             }
@@ -232,7 +232,7 @@ public class EnvironmentBean implements Serializable {
 	public void addService()
 	{
 		logger.debug("addService() executed. Selected type: [{}]; Name: [{}].", selectedType, newServName);
-		final RequestContext context = RequestContext.getCurrentInstance();
+        RequestContext context = RequestContext.getCurrentInstance();
 
 		if (selectedType == null) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to add new service", "Service type was not selected");
@@ -240,7 +240,7 @@ public class EnvironmentBean implements Serializable {
 			return;
 		}
 
-		if (newServName.trim().equals("")) {
+        if("".equals(newServName.trim())) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to add new service", "Service name was not set");
 			context.addCallbackParam("validationFailed", true);
 			return;
@@ -260,13 +260,13 @@ public class EnvironmentBean implements Serializable {
 
 		try {
 
-			boolean sameName = checkServiceDuplicates(this.currentEnvironment, this.newServName.trim());
+            boolean sameName = checkServiceDuplicates(currentEnvironment, newServName.trim());
 
 			if (sameName) {
-				throw new StorageException("Environment '" + this.currentEnvironment + "' has service with name '" + this.newServName.trim() + "' already");
+                throw new StorageException("Environment '" + currentEnvironment + "' has service with name '" + newServName.trim() + "' already");
 			}
-            ServiceDescription serviceDescription = new ServiceDescription(this.selectedType);
-            serviceDescription.setEnvironment(this.currentEnvironment);
+            ServiceDescription serviceDescription = new ServiceDescription(selectedType);
+            serviceDescription.setEnvironment(currentEnvironment);
             serviceDescription.setName(newServName.trim());
             TestToolsAPI.getInstance().addService(serviceDescription, notifyListener);
 			BeanUtil.showMessage(FacesMessage.SEVERITY_INFO, "Success", "Service '" + newServName.trim() + "' with type '" + selectedType + "' has been created");
@@ -291,7 +291,7 @@ public class EnvironmentBean implements Serializable {
         String name = map.get("name");
 		logger.info("retriveLastName invoked {} name[{}]", getUser(), name);
 
-        if( name == null || name.equals("") ) {
+        if(name == null || "".equals(name)) {
             logger.error("Name is not defined");
             throw new NullPointerException("Name is not defined");
         }
@@ -303,29 +303,29 @@ public class EnvironmentBean implements Serializable {
 
 	public void renameService() {
 		logger.debug("renameServices() executed.");
-		final RequestContext context = RequestContext.getCurrentInstance();
+        RequestContext context = RequestContext.getCurrentInstance();
 
-		if (this.newServName.trim().equals("")) {
+        if("".equals(newServName.trim())) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to add new service", "Service name was not set");
 			context.addCallbackParam("validationFailed", true);
 			return;
 		}
 
-		if (!this.newServName.trim().matches("[a-zA-Z][\\w]*")) {
+        if(!newServName.trim().matches("[a-zA-Z][\\w]*")) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to add new service", "Service name is incorrect");
 			context.addCallbackParam("validationFailed", true);
 			return;
 		}
 
-        if(this.newServName.trim().equals(oldServName)) {
+        if(newServName.trim().equals(oldServName)) {
             return;
         }
 
         try {
-            boolean sameName = checkServiceDuplicates(this.currentEnvironment, this.newServName.trim());
+            boolean sameName = checkServiceDuplicates(currentEnvironment, newServName.trim());
 
             if (sameName) {
-                throw new StorageException("Environment '"+this.currentEnvironment+"' have service with name '"+this.newServName.trim()+"' already");
+                throw new StorageException("Environment '" + currentEnvironment + "' have service with name '" + newServName.trim() + "' already");
             }
             TestToolsAPI.getInstance().copyService(oldServName, currentEnvironment, newServName.trim(), currentEnvironment, notifyListener);
             TestToolsAPI.getInstance().removeService(currentEnvironment, oldServName, notifyListener);
@@ -348,7 +348,7 @@ public class EnvironmentBean implements Serializable {
 			return;
 		}
 
-		for (EnvironmentNode node : this.selectedNodes) {
+        for(EnvironmentNode node : selectedNodes) {
             deleteService(currentEnvironment, node.getName());
 		}
 
@@ -368,19 +368,19 @@ public class EnvironmentBean implements Serializable {
 	{
 		logger.info("copyServices invoked {} selectedNodes[{}]", getUser(), selectedNodes);
 
-		if(this.selectedNodes == null){
+        if(selectedNodes == null) {
 			return;
 		}
 
-		final RequestContext context = RequestContext.getCurrentInstance();
+        RequestContext context = RequestContext.getCurrentInstance();
 
-		if (this.newServName.trim().equals("")) {
+        if("".equals(newServName.trim())) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to copy service", "Service name was not set");
 			context.addCallbackParam("validationFailed", true);
 			return;
 		}
 
-		if (!this.newServName.matches("[a-zA-Z][\\w]*")) {
+        if(!newServName.matches("[a-zA-Z][\\w]*")) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to add new service", "Service name is incorrect");
 			context.addCallbackParam("validationFailed", true);
 			return;
@@ -391,14 +391,14 @@ public class EnvironmentBean implements Serializable {
 		for(EnvironmentNode node : selectedNodes)
 		{
 			try {
-				sameName = checkServiceDuplicates(this.currentEnvironmentForCopy, this.newServName.trim());
+                sameName = checkServiceDuplicates(currentEnvironmentForCopy, newServName.trim());
 
 				if (sameName) {
 					context.addCallbackParam("validationFailed", true);
-					throw new StorageException("Environment '"+this.currentEnvironmentForCopy+"' have service with name '"+this.newServName.trim()+"' already");
+                    throw new StorageException("Environment '" + currentEnvironmentForCopy + "' have service with name '" + newServName.trim() + "' already");
 				}
                 TestToolsAPI.getInstance().copyService(node.getName(), currentEnvironment, newServName.trim(), currentEnvironmentForCopy, notifyListener);
-				this.currentEnvironment = this.currentEnvironmentForCopy;
+                this.currentEnvironment = currentEnvironmentForCopy;
 			} catch(Exception ex) {
 				logger.error("Failed to copy service.", ex);
 				BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to copy service", ex.getMessage());
@@ -416,7 +416,7 @@ public class EnvironmentBean implements Serializable {
 		logger.info("addEnvironment invoked {} Name[{}]", getUser(), newEnvName);
 		RequestContext context = RequestContext.getCurrentInstance();
 
-		if (null == newEnvName || newEnvName.trim().equals("")) {
+        if(newEnvName == null || "".equals(newEnvName.trim())) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to add new environment", "Environment name was not set");
 			context.addCallbackParam("validationFailed", true);
 			return;
@@ -447,7 +447,7 @@ public class EnvironmentBean implements Serializable {
 
 	private boolean checkEnvironmentExisting(String envName) {
 		for (String key : getEnvironmentList()) {
-			if (key.equalsIgnoreCase(this.newEnvName)) {
+            if(key.equalsIgnoreCase(newEnvName)) {
 				return true;
 			}
 		}
@@ -457,12 +457,12 @@ public class EnvironmentBean implements Serializable {
 
 	public void preEnvRename() {
 
-		if (this.selectedEnvironment == null) {
+        if(selectedEnvironment == null) {
 			BeanUtil.addWarningMessage("Warning", "Select the environment");
 			return;
 		}
 
-		if (this.selectedEnvironment.equals(ServiceName.DEFAULT_ENVIRONMENT)) {
+        if(selectedEnvironment.equals(ServiceName.DEFAULT_ENVIRONMENT)) {
 			BeanUtil.addWarningMessage("Warning", "You can't rename the default environment");
 			return;
 		}
@@ -480,32 +480,32 @@ public class EnvironmentBean implements Serializable {
 		logger.info("retriveLastEnvName invoked {}", getUser());
 		RequestContext context = RequestContext.getCurrentInstance();
 
-		if (this.selectedEnvironment == null){
+        if(selectedEnvironment == null) {
 			return;
 		}
 
-        this.newEnvName = this.newEnvName.trim();
+        this.newEnvName = newEnvName.trim();
 
-        if (StringUtils.isEmpty(this.newEnvName)) {
+        if(StringUtils.isEmpty(newEnvName)) {
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Failed to rename environment", "Environment name was not set");
             context.addCallbackParam("validationFailed", true);
             return;
         }
 
         try {
-            TestToolsAPI.getInstance().renameEnvironment(this.selectedEnvironment, this.newEnvName);
+            TestToolsAPI.getInstance().renameEnvironment(selectedEnvironment, newEnvName);
         } catch (Exception e){
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage());
             context.addCallbackParam("validationFailed", true);
             return;
 		}
 
-        if (this.currentEnvironment.equals(this.selectedEnvironment)) {
-        	this.currentEnvironment = this.newEnvName;
+        if(currentEnvironment.equals(selectedEnvironment)) {
+            this.currentEnvironment = newEnvName;
             changeEnvironment();
         }
 
-        this.selectedEnvironment = this.newEnvName;
+        this.selectedEnvironment = newEnvName;
 		this.newEnvName = "";
 
 		BeanUtil.showMessage(FacesMessage.SEVERITY_INFO, "Info", "Environment has been renamed");
@@ -513,12 +513,12 @@ public class EnvironmentBean implements Serializable {
 
 	public void preEnvDelete() {
 
-		if (this.selectedEnvironment == null) {
+        if(selectedEnvironment == null) {
 			BeanUtil.addWarningMessage("Warning", "Select the environment");
 			return;
 		}
 
-		if (this.selectedEnvironment.equals(ServiceName.DEFAULT_ENVIRONMENT)) {
+        if(selectedEnvironment.equals(ServiceName.DEFAULT_ENVIRONMENT)) {
 			BeanUtil.addWarningMessage("Warning", "You can't remove the default environment");
 			return;
 		}
@@ -545,7 +545,7 @@ public class EnvironmentBean implements Serializable {
 	}
 
 	public void changeEnvironment() {
-		logger.info("Environment changed to '{}'", this.currentEnvironment);
+        logger.info("Environment changed to '{}'", currentEnvironment);
 		lazyModel.setCurrentEnvironment(currentEnvironment);
 	}
 
@@ -630,7 +630,7 @@ public class EnvironmentBean implements Serializable {
 
 	public void loadNewName() {
 		logger.info("loadNewName invoked {} currentEnvironment[{}]", getUser(), currentEnvironment);
-		this.currentEnvironmentForCopy = this.currentEnvironment;
+        this.currentEnvironmentForCopy = currentEnvironment;
 
         if(selectedNodes.length != 1)
         {
@@ -642,11 +642,8 @@ public class EnvironmentBean implements Serializable {
 	}
 
 	public boolean isNotOneServiceSelected() {
-		if(selectedNodes == null ) {
-			return true;
-		}
-		return selectedNodes.length != 1;
-	}
+        return selectedNodes == null || selectedNodes.length != 1;
+    }
 
     public boolean isNotOneServiceSelectedAndNotDisabled() {
         if(selectedNodes != null &&  selectedNodes.length == 1) {
@@ -672,7 +669,7 @@ public class EnvironmentBean implements Serializable {
     public boolean isNotSelectedDisabledOnly() {
         if(selectedNodes != null && selectedNodes.length != 0) {
             for (EnvironmentNode envNode : selectedNodes) {
-                if (!envNode.getServiceStatus().equals(ServiceStatus.DISABLED)) {
+                if(envNode.getServiceStatus() != ServiceStatus.DISABLED) {
                     return false;
                 }
             }
@@ -687,10 +684,10 @@ public class EnvironmentBean implements Serializable {
 
 		IConnectionManager connManager = BeanUtil.getSfContext().getConnectionManager();
 
-		if (this.selectedNodes.length > 0) {
+        if(selectedNodes.length > 0) {
 			List<ServiceDescription> descriptions = new ArrayList<>();
 
-			for (final EnvironmentNode node : this.selectedNodes) {
+            for(EnvironmentNode node : selectedNodes) {
                 descriptions.add(connManager.getServiceDescription(new ServiceName(node.getEnvironment(), node.getName())));
 			}
 
@@ -754,7 +751,7 @@ public class EnvironmentBean implements Serializable {
 
 	private Map<String, File> exportEnvironment() throws NullPointerException{
 
-		if(this.selectedEnvironment == null || this.selectedEnvironment.isEmpty()) {
+        if(selectedEnvironment == null || selectedEnvironment.isEmpty()) {
 			String errorMessage = "No selected environment to export";
 			logger.error(errorMessage);
 			throw new NullPointerException(errorMessage);
@@ -776,7 +773,7 @@ public class EnvironmentBean implements Serializable {
 
 		String envDescFilename = "environment_description.xml";
 
-        File envDescFile = marshalManager.exportEnvironmentDescription(envDescFilename, new EnvironmentDescription(this.selectedEnvironment, manager.getEnvironmentVariableSet(this.selectedEnvironment)));
+        File envDescFile = marshalManager.exportEnvironmentDescription(envDescFilename, new EnvironmentDescription(selectedEnvironment, manager.getEnvironmentVariableSet(selectedEnvironment)));
 		fileMap.put(envDescFilename, envDescFile);
 
 		return fileMap;
@@ -834,9 +831,9 @@ public class EnvironmentBean implements Serializable {
 		String column = map.get("filterColumn");
 		String value = map.get("filterValue");
 
-		if(column.equals("name")) {
+        if("name".equals(column)) {
 			nameFilter = value;
-		} else if(column.equals("type")) {
+        } else if("type".equals(column)) {
 			typeFilter = value;
 		}
 	}
@@ -851,17 +848,17 @@ public class EnvironmentBean implements Serializable {
 
 		DataTable dataTable = (DataTable) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:table");
 
-		if(this.sortField == null || this.sortField.equals("")) {
+        if(sortField == null || "".equals(sortField)) {
 			dataTable.setValueExpression("sortBy", null);
 			return;
 		}
 
 		String elRaw = null;
-		if(this.sortField.equals("table:nameColumn")) {
+        if("table:nameColumn".equals(sortField)) {
 			elRaw = "#{service.name}";
-		} else if(this.sortField.equals("table:typeColumn")) {
+        } else if("table:typeColumn".equals(sortField)) {
 			elRaw = "#{service.type}";
-		} else if(this.sortField.equals("table:statusColumn")) {
+        } else if("table:statusColumn".equals(sortField)) {
 			elRaw = "#{service.status}";
 		}
 
@@ -870,7 +867,7 @@ public class EnvironmentBean implements Serializable {
 		ExpressionFactory elFactory = facesContext.getApplication().getExpressionFactory();
 		ValueExpression valueExpresion = elFactory.createValueExpression(elContext, elRaw, Date.class);
 
-		dataTable.setSortOrder(this.sortOrder);
+        dataTable.setSortOrder(sortOrder);
 		dataTable.setValueExpression("sortBy", valueExpresion);
 	}
 
@@ -928,7 +925,9 @@ public class EnvironmentBean implements Serializable {
 	public void setReplaceExistingServices(boolean replaceExistingServices) {
 		logger.info("setReplaceExistingServices invoked {} replaceExistingServices[{}]", getUser(), replaceExistingServices);
 		this.replaceExistingServices = replaceExistingServices;
-		if(replaceExistingServices) skipExistingServices = false;
+        if(replaceExistingServices) {
+            skipExistingServices = false;
+        }
 	}
 
     public boolean isReplaceExistingVariableSets() {
@@ -1031,7 +1030,7 @@ public class EnvironmentBean implements Serializable {
 	}
 
     public void preVariableSetDelete() {
-        if(this.selectedVariableSet == null) {
+        if(selectedVariableSet == null) {
             BeanUtil.addWarningMessage("Warning", "Select a variable set");
             return;
         }
@@ -1108,7 +1107,9 @@ public class EnvironmentBean implements Serializable {
 
 	public void setSkipExistingServices(boolean skipExistingServices) {
 		this.skipExistingServices = skipExistingServices;
-		if(skipExistingServices) replaceExistingServices = false;
+        if(skipExistingServices) {
+            replaceExistingServices = false;
+        }
 	}
 
 	public String getNameFilter() {
@@ -1152,11 +1153,11 @@ public class EnvironmentBean implements Serializable {
 	}
 
 	public void setShowDisabled(boolean showDisabled) {
-		this.lazyModel.setShowDisabled(showDisabled);
+        lazyModel.setShowDisabled(showDisabled);
 	}
 
     public boolean isShowDisabled() {
-		return this.lazyModel.isShowDisabled();
+        return lazyModel.isShowDisabled();
 	}
 
     public List<String> completeVariableName(String name) {

@@ -36,11 +36,11 @@ import com.exactpro.sf.testwebgui.notifications.messages.MessagesUpdateRetriever
  */
 public class ScrollWrapper implements Runnable {
     private MessageLoader messageLoader;
-    private List<MessageAdapter> messages;
-    private MessagesUpdateRetriever messagesUpdateRetriever;
-    private String guiSessionId;
+    private final List<MessageAdapter> messages;
+    private final MessagesUpdateRetriever messagesUpdateRetriever;
+    private final String guiSessionId;
     private final String formatString;
-    private ITaskExecutor taskExecutor;
+    private final ITaskExecutor taskExecutor;
     private Future<?> loadFuture;
     private boolean isNotNotifyGUI;
 
@@ -68,11 +68,7 @@ public class ScrollWrapper implements Runnable {
     }
 
     public boolean isLoaded(){
-        if(loadFuture == null){
-            return true;
-        } else{
-            return loadFuture.isDone();
-        }
+        return loadFuture == null || loadFuture.isDone();
     }
 
     @Override

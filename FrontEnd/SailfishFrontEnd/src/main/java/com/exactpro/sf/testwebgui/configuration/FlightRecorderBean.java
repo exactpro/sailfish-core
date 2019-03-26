@@ -45,8 +45,8 @@ public class FlightRecorderBean implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(FlightRecorderBean.class);
 	
 	private long duration = 300;
-	
-	private boolean continiously = false;
+
+    private boolean continiously;
 	
 	private FlightRecorderOptions settings;
 	
@@ -64,8 +64,8 @@ public class FlightRecorderBean implements Serializable {
 		this.settings = new FlightRecorderOptions();
 		
 		try {
-			
-			this.settings.fillFromMap(actualSettings.toMap());
+
+            settings.fillFromMap(actualSettings.toMap());
 			
 		} catch (Exception e) {
 			
@@ -91,9 +91,11 @@ public class FlightRecorderBean implements Serializable {
 	public String formatFileSize(long bytes) {
 		
 		int unit = 1024;
-	    if (bytes < unit) return bytes + " B";
+        if(bytes < unit) {
+            return bytes + " B";
+        }
 	    int exp = (int) (Math.log(bytes) / Math.log(unit));
-	    char pre = ("KMGTPE").charAt(exp-1);
+        char pre = "KMGTPE".charAt(exp - 1);
 	    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
 		
 	}
@@ -134,8 +136,8 @@ public class FlightRecorderBean implements Serializable {
 	public void startRecording() {
 		
 		try {
-			
-			if(this.continiously) {
+
+            if(continiously) {
 				
 				BeanUtil.getSfContext().getFlightRecorderService().startContiniousRecording(duration);
 				

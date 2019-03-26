@@ -56,7 +56,7 @@ public interface IGetterSetterGenerator {
 	 * @param source for getting.
 	 * @return generated code for extracting value
 	 */
-	public String getGetter(Class<?> type, String parameterName, String source) throws AMLException;
+    String getGetter(Class<?> type, String parameterName, String source) throws AMLException;
 
 	///**
 	// * Find getter method in <code>type</code> class for parameter with
@@ -103,7 +103,7 @@ public interface IGetterSetterGenerator {
 	 * <code>false</code> otherwise
 	 * @return generated code for setting value
 	 */
-	public String getSetter(Class<?> type, String parameterName, String value, boolean isReference) throws AMLException;
+    String getSetter(Class<?> type, String parameterName, String value, boolean isReference) throws AMLException;
 
 	///**
 	// * Find setter method in <code>type</code> class for parameter with
@@ -131,7 +131,7 @@ public interface IGetterSetterGenerator {
 	 * @param paramClass parameter class (optional)
 	 * @return generated code for adding submessage or {@code null} if submessage not exists
 	 */
-	public String addSubmessage(Class<?> type, String parameterName, String value, Class<?> paramClass) throws AMLException;
+    String addSubmessage(Class<?> type, String parameterName, String value, Class<?> paramClass) throws AMLException;
 
 	/**
 	 * Find submessage class with name <code>childClassName</code>
@@ -141,7 +141,7 @@ public interface IGetterSetterGenerator {
 	 * @param paramClass parameter class (optional)
 	 * @return submessage class or {@code null} if submessage not exists
 	 */
-	public Class<?> getSubmessageClass (Class<?> type, String childClassName, Class<?> paramClass) throws AMLException;
+    Class<?> getSubmessageClass(Class<?> type, String childClassName, Class<?> paramClass) throws AMLException;
 
 	// /**
 	// * Find setter method in message class.
@@ -159,5 +159,5 @@ public interface IGetterSetterGenerator {
 	 * for converting to tree using SimpleTreeEntity.
 	 * @return
 	 */
-	public String getMethodForExtractingTreeEntity() throws AMLException;
+    String getMethodForExtractingTreeEntity() throws AMLException;
 }

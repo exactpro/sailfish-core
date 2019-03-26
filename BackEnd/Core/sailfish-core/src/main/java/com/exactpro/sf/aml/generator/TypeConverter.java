@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static org.apache.commons.lang3.StringUtils.appendIfMissingIgnoreCase;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +41,7 @@ import com.exactpro.sf.aml.AMLException;
  */
 public class TypeConverter {
 
-	private static Logger logger = LoggerFactory.getLogger(TypeConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(TypeConverter.class);
     private static final Pattern CAST_PATTERN = Pattern.compile("\\(\\s*\\w+(\\.\\w+\\s*)*\\)(?<value>.+)");
 
 	private TypeConverter()
@@ -80,7 +82,7 @@ public class TypeConverter {
 			{
 				if (constant.toString().equals(value))
 				{
-					return type.getCanonicalName()+"."+constant.toString();
+                    return type.getCanonicalName() + "." + constant;
 				}
 			}
 			return null;
@@ -95,8 +97,9 @@ public class TypeConverter {
 					&& ((constant.getModifiers() & Modifier.STATIC) == Modifier.STATIC)
 					&& ((constant.getModifiers() & Modifier.FINAL) == Modifier.FINAL))
 			{
-				if (constType != null && constType.get() == null)
-					constType.set(constant.getType());
+                if(constType != null && constType.get() == null) {
+                    constType.set(constant.getType());
+                }
 				return type.getCanonicalName()+"."+constant.getName();
 			}
 		}
@@ -120,8 +123,7 @@ public class TypeConverter {
 		try {
 			if (type.isEnum())
 			{
-				Method getValueMethod = null;
-				getValueMethod = type.getMethod("getValue", new Class<?>[0]);
+                Method getValueMethod = type.getMethod("getValue", new Class<?>[0]);
 
 				for (Object constant : type.getEnumConstants())
 				{
@@ -171,15 +173,14 @@ public class TypeConverter {
 	 * otherwise - false
 	 */
 	public static boolean convert(Class<?> type, AtomicReference<String> value) {
-		boolean isConverted = false;
-		if (value!=null && value.get()!=null) {
+        if(value != null && value.get() != null) {
 			String convertedValue = convert(type, value.get());
 			if (convertedValue != null) {
 				value.set(convertedValue);
-				isConverted = true;
+                return true;
 			}
 		}
-		return isConverted;
+        return false;
 	}
 
 	/**
@@ -218,18 +219,18 @@ public class TypeConverter {
 
 		if (type.equals(boolean.class) || type.equals(Boolean.class))
 		{
-			if (value.equalsIgnoreCase("y")
-					|| value.equalsIgnoreCase("yes")
-					|| value.equalsIgnoreCase("t")
-					|| value.equalsIgnoreCase("true")
-					|| value.equalsIgnoreCase("1")) {
+            if("y".equalsIgnoreCase(value)
+                    || "yes".equalsIgnoreCase(value)
+                    || "t".equalsIgnoreCase(value)
+                    || "true".equalsIgnoreCase(value)
+                    || "1".equalsIgnoreCase(value)) {
 				return "true";
 			}
-			if (value.equalsIgnoreCase("n")
-					|| value.equalsIgnoreCase("no")
-					|| value.equalsIgnoreCase("f")
-					|| value.equalsIgnoreCase("false")
-					|| value.equalsIgnoreCase("0")) {
+            if("n".equalsIgnoreCase(value)
+                    || "no".equalsIgnoreCase(value)
+                    || "f".equalsIgnoreCase(value)
+                    || "false".equalsIgnoreCase(value)
+                    || "0".equalsIgnoreCase(value)) {
 				return "false";
 			}
 		}
@@ -237,34 +238,30 @@ public class TypeConverter {
 		if (type.equals(long.class) || type.equals(Long.class))
 		{
 			value = value.trim();
-
-			// backward capability:
-			if (value.startsWith("(")) // backward capability: (long) value
-				return value;
-
-			if (value.endsWith("l") || value.endsWith("L"))
-				return "(long) " + value;
-			else
-				return "(long) " + value + "L";
-		}
+            // backward capability: (long) value
+            return value.startsWith("(") ? value : appendIfMissingIgnoreCase(value, "L");
+        }
 
 		if (type.equals(double.class) || type.equals(Double.class)) {
 			value = value.trim();
 
 			// backward capability:
 			if (value.startsWith("(")) // backward capability: (float) value
-				return value;
+            {
+                return value;
+            }
 
-			if (value.endsWith("d") || value.endsWith("D"))
-				return "(double) " + value;
-			else if (value.equalsIgnoreCase("NaN"))
-				return "Double.NaN";
-			else if (value.equalsIgnoreCase("NEGATIVE_INFINITY"))
-				return "Double.NEGATIVE_INFINITY";
-			else if (value.equalsIgnoreCase("POSITIVE_INFINITY"))
-				return "Double.POSITIVE_INFINITY";
-			else
-			    return "(double) " + value + "D";
+            if(value.endsWith("d") || value.endsWith("D")) {
+                return "(double) " + value;
+            } else if("NaN".equalsIgnoreCase(value)) {
+                return "Double.NaN";
+            } else if("NEGATIVE_INFINITY".equalsIgnoreCase(value)) {
+                return "Double.NEGATIVE_INFINITY";
+            } else if("POSITIVE_INFINITY".equalsIgnoreCase(value)) {
+                return "Double.POSITIVE_INFINITY";
+            } else {
+                return "(double) " + value + "D";
+            }
 		}
 
 		if (type.equals(float.class) || type.equals(Float.class)) {
@@ -272,38 +269,36 @@ public class TypeConverter {
 
 			// backward capability:
 			if (value.startsWith("(")) // backward capability: (float) value
-				return value;
+            {
+                return value;
+            }
 
-			if (value.endsWith("f") || value.endsWith("F"))
-				return "(float) " + value;
-			else if (value.equalsIgnoreCase("NaN"))
-				return "Float.NaN";
-			else if (value.equalsIgnoreCase("NEGATIVE_INFINITY"))
-				return "Float.NEGATIVE_INFINITY";
-			else if (value.equalsIgnoreCase("POSITIVE_INFINITY"))
-				return "Float.POSITIVE_INFINITY";
-			else
-				return "(float) " + value + "F";
+            if(value.endsWith("f") || value.endsWith("F")) {
+                return "(float) " + value;
+            } else if("NaN".equalsIgnoreCase(value)) {
+                return "Float.NaN";
+            } else if("NEGATIVE_INFINITY".equalsIgnoreCase(value)) {
+                return "Float.NEGATIVE_INFINITY";
+            } else if("POSITIVE_INFINITY".equalsIgnoreCase(value)) {
+                return "Float.POSITIVE_INFINITY";
+            } else {
+                return "(float) " + value + "F";
+            }
 		}
 
 		if (type.equals(byte.class) || type.equals(Byte.class)) {
 			value = value.trim();
 
-			// backward capability:
-			if (value.startsWith("(")) // backward capability: (byte) value
-				return value;
-
-			return "(byte) "+value;
-		}
+            // backward capability: (byte) value
+            return value.startsWith("(") ? value : "(byte) " + value;
+        }
 
 		if (type.equals(short.class) || type.equals(Short.class))
 		{
 			value = value.trim();
 
-			if (value.startsWith("(")) // backward capability: (short) value
-				return value;
-			else
-				return "(short) " + value;
+            // backward capability: (short) value
+            return value.startsWith("(") ? value : "(short) " + value;
 		}
 
 		if (type.equals(BigInteger.class))
@@ -311,7 +306,9 @@ public class TypeConverter {
 			value = value.trim();
 
 			if (value.endsWith("L") || value.endsWith("l")) // Testers adds 'L' to the number because Excel cut off all numbers bigger than 10^15
-				value = value.substring(0,  value.length()-1);
+            {
+                value = value.substring(0, value.length() - 1);
+            }
 
 			return "new java.math.BigInteger(\"" + value + "\")";
 		}
@@ -320,7 +317,9 @@ public class TypeConverter {
             value = value.trim();
 
             if (value.endsWith("B")) // Testers adds 'B' to the number because Excel cut off all numbers bigger than 10^15
+            {
                 value = value.substring(0,  value.length()-1);
+            }
 
             return "new java.math.BigDecimal(\"" + value + "\")";
         }
@@ -364,7 +363,7 @@ public class TypeConverter {
 			Method[] methods = type.getDeclaredMethods();
 			for (Method method : methods)
 			{
-				if (method.getName().equals("getEnumValue")) {
+                if("getEnumValue".equals(method.getName())) {
 					if (method.getParameterTypes().length == 1)
 					{
                         Matcher matcher = CAST_PATTERN.matcher(value);
@@ -373,7 +372,7 @@ public class TypeConverter {
 						}
 						Object objArg = convertToObject(method.getParameterTypes()[0], value);
 						Object objVal = method.invoke(null, objArg);
-						return type.getCanonicalName()+"."+objVal.toString();
+                        return type.getCanonicalName() + "." + objVal;
 					}
 				}
 			}
@@ -381,7 +380,7 @@ public class TypeConverter {
 			{
 				if (constant.toString().equals(value))
 				{
-					return type.getCanonicalName()+"."+constant.toString();
+                    return type.getCanonicalName() + "." + constant;
 				}
 			}
 			return null;
@@ -468,8 +467,9 @@ public class TypeConverter {
 		Constructor<?>[] constructors = type.getConstructors();
 		for (Constructor<?> constructor : constructors) {
 			Class<?>[] parameterTypes = constructor.getParameterTypes();
-			if (parameterTypes.length == 1 && parameterTypes[0].equals(parameterType))
-				return constructor;
+            if(parameterTypes.length == 1 && parameterTypes[0].equals(parameterType)) {
+                return constructor;
+            }
 		}
 		return null;
 	}
@@ -482,9 +482,10 @@ public class TypeConverter {
 	 * if the class does not have any constructor.
 	 */
 	public static Constructor<?> inferConstructor(Class<?> type) {
-		if (type.equals(String.class))
-			return null;
-		if (type.equals(BigDecimal.class) || type.equals((BigInteger.class))) {
+        if(type.equals(String.class)) {
+            return null;
+        }
+        if(type.equals(BigDecimal.class) || type.equals(BigInteger.class)) {
 			try {
 				return type.getConstructor(String.class);
 			} catch (Exception e) {
@@ -494,8 +495,9 @@ public class TypeConverter {
 			Constructor<?>[] constructors = type.getConstructors();
 			for (Constructor<?> constructor : constructors) {
 				Class<?>[] parameterTypes = constructor.getParameterTypes();
-				if (parameterTypes.length == 1 && parameterTypes[0].equals(ClassUtils.wrapperToPrimitive(type)))
-					return constructor;
+                if(parameterTypes.length == 1 && parameterTypes[0].equals(ClassUtils.wrapperToPrimitive(type))) {
+                    return constructor;
+                }
 			}
 			return null;
 		}

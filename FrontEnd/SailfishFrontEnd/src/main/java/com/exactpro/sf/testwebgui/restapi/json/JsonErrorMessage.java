@@ -24,7 +24,7 @@ public class JsonErrorMessage implements WithJsonAMLError {
 
 	public JsonErrorMessage(JsonAMLError error) {
 		this.errors = new ArrayList<JsonAMLError>(1);
-		this.errors.add(error);
+        errors.add(error);
 	}
 
 	public JsonErrorMessage(List<JsonAMLError> errors) {

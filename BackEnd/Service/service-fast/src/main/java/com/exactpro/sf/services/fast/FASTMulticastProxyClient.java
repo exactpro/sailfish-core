@@ -16,8 +16,6 @@
 
 package com.exactpro.sf.services.fast;
 
-import com.exactpro.sf.services.fast.blockstream.IPacketHandler;
-import com.exactpro.sf.services.fast.blockstream.MulticastProxyConnection;
 import org.openfast.Context;
 import org.openfast.MessageBlockReader;
 import org.openfast.session.Connection;
@@ -25,8 +23,11 @@ import org.openfast.session.FastConnectionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.services.fast.blockstream.IPacketHandler;
+import com.exactpro.sf.services.fast.blockstream.MulticastProxyConnection;
+
 public class FASTMulticastProxyClient extends FASTTcpClient {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
     private MulticastProxyConnection connection;
 
 
@@ -50,10 +51,7 @@ public class FASTMulticastProxyClient extends FASTTcpClient {
 
     @Override
     protected MessageBlockReader getBlockReader() {
-        if (getSettings().isStreamBlockEncoded()) {
-            return connection.getBlockReader();
-        }
-        return MessageBlockReader.NULL;
+        return getSettings().isStreamBlockEncoded() ? connection.getBlockReader() : MessageBlockReader.NULL;
     }
 
     private Context getReceiveContext() {

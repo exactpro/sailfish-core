@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 // TODO: split ScriptReport and listening functionality
 public interface IScriptReport
 {
-	public static final String NO_DESCRIPTION = "No description";
+	String NO_DESCRIPTION = "No description";
 
 	/*
 	 * Start of Matrix execution

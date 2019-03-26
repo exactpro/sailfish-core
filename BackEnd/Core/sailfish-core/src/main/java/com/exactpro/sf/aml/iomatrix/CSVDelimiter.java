@@ -21,11 +21,11 @@ public enum CSVDelimiter {
     COMMA(',', "\\,", ","),
     SEMICOLON(';', ";", ";");
 
-    private char charValue;
-    private String escaped;
-    private String stringValue;
+    private final char charValue;
+    private final String escaped;
+    private final String stringValue;
 
-    private CSVDelimiter(char charValue, String escaped, String stringValue) {
+    CSVDelimiter(char charValue, String escaped, String stringValue) {
         this.charValue = charValue;
         this.escaped = escaped;
         this.stringValue = stringValue;
@@ -45,14 +45,14 @@ public enum CSVDelimiter {
     }
 
     public char getCharValue() {
-        return this.charValue;
+        return charValue;
     }
 
     public String getEscaped() {
-        return this.escaped;
+        return escaped;
     }
 
     public String getStringValue() {
-        return this.stringValue;
+        return stringValue;
     }
 }

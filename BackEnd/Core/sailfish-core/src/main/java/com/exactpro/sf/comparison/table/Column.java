@@ -17,7 +17,7 @@ package com.exactpro.sf.comparison.table;
 
 public class Column {
 
-	private String cell;
+    private final String cell;
 	private int offset;
 
 	public Column(String s) {
@@ -46,13 +46,13 @@ public class Column {
 		}
 
 		if (cell != null) {
-			sb.append(this.cell);
+            sb.append(cell);
 		}
 		return sb.toString();
 	}
 
 	public String getValue() {
-		return this.cell;
+        return cell;
 	}
 
 }

@@ -16,6 +16,7 @@
 package com.exactpro.sf;
 
 import static java.lang.String.valueOf;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,9 +136,9 @@ public class SFAPIClient implements AutoCloseable {
     private final CloseableHttpClient http;
 	private final String rootUrl;
 	private final DocumentBuilder docBuilder;
-    private Map<Class<?>, Unmarshaller> unmarshallers = new HashMap<Class<?>, Unmarshaller>();
+    private final Map<Class<?>, Unmarshaller> unmarshallers = new HashMap<>();
 
-    private String defaultServiceHandlerClassName = "com.exactpro.sf.services.CollectorServiceHandler";
+    private final String defaultServiceHandlerClassName = "com.exactpro.sf.services.CollectorServiceHandler";
 
 	/**
 	 * Creates an instance of SFAPI client
@@ -189,7 +190,7 @@ public class SFAPIClient implements AutoCloseable {
 		String url =SERVICES
 				.replaceFirst("!env", envName);
 		Document doc = getDocument(url);
-		Map<String, Service> map = new HashMap<String, Service>();
+        Map<String, Service> map = new HashMap<>();
 		
 		NodeList nodes = doc.getDocumentElement().getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -388,7 +389,7 @@ public class SFAPIClient implements AutoCloseable {
 			Document doc = docBuilder.parse(res.getEntity().getContent());
 			Element root = doc.getDocumentElement();
 
-			List<ServiceImportResult> svcs = new ArrayList<ServiceImportResult>();
+            List<ServiceImportResult> svcs = new ArrayList<>();
 			NodeList children = root.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
 				svcs.add(ServiceImportResult.fromXml(children.item(i)));
@@ -429,17 +430,10 @@ public class SFAPIClient implements AutoCloseable {
 
 			HttpPost req = new HttpPost(url);
 			req.setEntity(mpb.build());
-			CloseableHttpResponse res = http.execute(req);
-			checkHttpResponse(res);
-			XmlResponse xmlResponse=null;
-			try {
-				xmlResponse = unmarshall(XmlResponse.class, res);
-				res.close();
-			} catch (Exception e) {
-				throw new APICallException(e);
-			}
-			res.close();
-			return xmlResponse;
+            try (CloseableHttpResponse res = http.execute(req)) {
+                checkHttpResponse(res);
+                return unmarshall(XmlResponse.class, res);
+            }
 		} catch (APIResponseException e) {
 			throw new APIResponseException("URL: "+url,e);
 		} catch (Exception e) {
@@ -455,18 +449,12 @@ public class SFAPIClient implements AutoCloseable {
 
 			HttpPost req = new HttpPost(url);
 			req.setEntity(mpb.build());
-			CloseableHttpResponse res = http.execute(req);
-			checkHttpResponse(res);
-			XmlMatrixUploadResponse xmlResponse=null;
-			try {
-				xmlResponse = unmarshall(XmlMatrixUploadResponse.class, res);
-				res.close();
-			} catch (Exception e) {
-				throw new APICallException(e);
-			}
-			res.close();
-			return xmlResponse;		
-		} catch (APIResponseException e) {
+
+            try (CloseableHttpResponse res = http.execute(req)) {
+                checkHttpResponse(res);
+                return unmarshall(XmlMatrixUploadResponse.class, res);
+            }
+        } catch (APIResponseException e) {
 			throw new APIResponseException("URL: "+url,e);
 		} catch (Exception e) {
 			throw new APICallException(e);
@@ -490,17 +478,10 @@ public class SFAPIClient implements AutoCloseable {
             throws APIResponseException, APICallException {
         try {
             HttpPost req = new HttpPost(url);
-            CloseableHttpResponse res = http.execute(req);
-            checkHttpResponse(res);
-            XmlMatrixLinkUploadResponse xmlResponse;
-            try {
-                xmlResponse = unmarshall(XmlMatrixLinkUploadResponse.class, res);
-                res.close();
-            } catch (Exception e) {
-                throw new APICallException(e);
+            try (CloseableHttpResponse res = http.execute(req)) {
+                checkHttpResponse(res);
+                return unmarshall(XmlMatrixLinkUploadResponse.class, res);
             }
-            res.close();
-            return xmlResponse;
         } catch (APIResponseException e) {
             throw new APIResponseException("URL: " + url, e);
         } catch (Exception e) {
@@ -563,7 +544,7 @@ public class SFAPIClient implements AutoCloseable {
 		paramsBuilder.append("action=");
 		paramsBuilder.append(actionName);
 
-		if(rangeParam != null && !rangeParam.equals("")) {
+        if(rangeParam != null && !"".equals(rangeParam)) {
 			paramsBuilder.append("&");
 			paramsBuilder.append("range=");
 			paramsBuilder.append(rangeParam);
@@ -572,20 +553,12 @@ public class SFAPIClient implements AutoCloseable {
 		paramsBuilder.append("&");
 		paramsBuilder.append("environment=");
 
-		if(environmentParam == null || environmentParam.equals("")) {
-			paramsBuilder.append("default");
-		} else {
-			paramsBuilder.append(environmentParam);
-		}
+        paramsBuilder.append(defaultIfEmpty(environmentParam, "default"));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("encoding=");
 
-		if(fileEncodingParam == null || fileEncodingParam.equals("")) {
-			paramsBuilder.append("ISO-8859-1");
-		} else {
-			paramsBuilder.append(fileEncodingParam);
-		}
+        paramsBuilder.append(defaultIfEmpty(fileEncodingParam, "ISO-8859-1"));
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("aml=");
@@ -593,27 +566,27 @@ public class SFAPIClient implements AutoCloseable {
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("continueonfailed=");
-        paramsBuilder.append(valueOf(continueOnFailed));
+        paramsBuilder.append(continueOnFailed);
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("autostart=");
-        paramsBuilder.append(valueOf(autoStart));
+        paramsBuilder.append(autoStart);
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("autorun=");
-        paramsBuilder.append(valueOf(autoRun));
+        paramsBuilder.append(autoRun);
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("ignoreaskforcontinue=");
-        paramsBuilder.append(valueOf(ignoreAskForContinue));
+        paramsBuilder.append(ignoreAskForContinue);
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("runnetdumper=");
-        paramsBuilder.append(valueOf(runNetDumper));
+        paramsBuilder.append(runNetDumper);
 
 		paramsBuilder.append("&");
 		paramsBuilder.append("skipoptional=");
-        paramsBuilder.append(valueOf(skipOptional));
+        paramsBuilder.append(skipOptional);
 
 		if(tags != null) {
 			for(String tag : tags) {
@@ -623,18 +596,18 @@ public class SFAPIClient implements AutoCloseable {
 			}
 		}
 
-		if(staticVariables != null && !staticVariables.equals("")) {
+        if(staticVariables != null && !"".equals(staticVariables)) {
 			paramsBuilder.append("&");
 			paramsBuilder.append("staticvariables=");
 			paramsBuilder.append(staticVariables);
 		}
-		if(subFolder != null && !subFolder.equals("")) {
+        if(subFolder != null && !"".equals(subFolder)) {
 			paramsBuilder.append("&");
 			paramsBuilder.append("subfolder=");
 			paramsBuilder.append(subFolder);
 		}
-		
-		if(language != null && !language.equals("")) {
+
+        if(language != null && !"".equals(language)) {
 			paramsBuilder.append("&");
 			paramsBuilder.append("language=");
 			paramsBuilder.append(language);
@@ -801,8 +774,8 @@ public class SFAPIClient implements AutoCloseable {
 		Document doc = getDocument(MATRIX_RUN + "all?action=start");
 		Element root = doc.getDocumentElement();
 		NodeList children = root.getChildNodes();
-		
-		List<TestScriptRun> list = new ArrayList<TestScriptRun>();
+
+        List<TestScriptRun> list = new ArrayList<>();
 		for (int i = 0; i < children.getLength(); i++) {
 			list.add(TestScriptRun.fromXml(children.item(i)));
 		}
@@ -862,7 +835,7 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public List<TestScriptRun> getTestScriptRunList() throws APICallException, APIResponseException {
 		Document doc = getDocument(TEST_SCRIPT_RUNS);
-		List<TestScriptRun> list = new ArrayList<TestScriptRun>();
+        List<TestScriptRun> list = new ArrayList<>();
 		
 		NodeList nodes = doc.getDocumentElement().getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -978,7 +951,7 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public List<String> getEnvironmentList() throws APICallException, APIResponseException {
 		Document doc = getDocument(ENVIRONMENTS);
-		List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 		
 		NodeList nodes = doc.getDocumentElement().getChildNodes();
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -1086,10 +1059,10 @@ public class SFAPIClient implements AutoCloseable {
             checkHttpResponse(res);
             xmlResponse = unmarshall(XmlResponse.class, res);
             res.close();
+            return xmlResponse;
         } catch (Exception e) {
             throw new APICallException(e);
         }
-        return xmlResponse;
     }
 
     // Resources
@@ -1107,10 +1080,10 @@ public class SFAPIClient implements AutoCloseable {
             checkHttpResponse(res);
             xmlResponse = unmarshall(XmlResponse.class, res);
             res.close();
+            return xmlResponse;
         } catch (Exception e) {
             throw new APICallException(e);
         }
-        return xmlResponse;
     }
 
     public XmlResponse cleanResources(String... targets) throws APICallException, APIResponseException {
@@ -1123,10 +1096,10 @@ public class SFAPIClient implements AutoCloseable {
             checkHttpResponse(res);
             xmlResponse = unmarshall(XmlResponse.class, res);
             res.close();
+            return xmlResponse;
         } catch (Exception e) {
             throw new APICallException(e);
         }
-        return xmlResponse;
     }
 
     public XmlResponse cleanResources(Instant olderthan) throws APICallException, APIResponseException {
@@ -1139,10 +1112,10 @@ public class SFAPIClient implements AutoCloseable {
             checkHttpResponse(res);
             xmlResponse = unmarshall(XmlResponse.class, res);
             res.close();
+            return xmlResponse;
         } catch (Exception e) {
             throw new APICallException(e);
         }
-        return xmlResponse;
     }
 
 
@@ -1194,17 +1167,17 @@ public class SFAPIClient implements AutoCloseable {
 		}	
 	}
 	
-	private <T extends Object> T getResponse (String url, Class<T> clazz) throws APICallException, APIResponseException {
+	private <T> T getResponse (String url, Class<T> clazz) throws APICallException, APIResponseException {
 		CloseableHttpResponse response=getHttpResponse(url);
 		T xmlResponse;
 		try {
 			xmlResponse = unmarshall(clazz, response);
 			response.close();
-		} catch (Exception e) {
+            return xmlResponse;
+        } catch (Exception e) {
 			throw new APICallException(e);
 		}
-		return xmlResponse;
-	}
+    }
 	private XmlResponse getXmlResponse(String url) throws APICallException, APIResponseException {
 		XmlResponse xmlResponse= getResponse(url, XmlResponse.class);
 		if(xmlResponse==null){
@@ -1227,13 +1200,12 @@ public class SFAPIClient implements AutoCloseable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends Object> T unmarshall(Class<T> clazz, HttpResponse response) throws JAXBException, IOException {
-		T entity = null;
-		if (response != null) {
+	private <T> T unmarshall(Class<T> clazz, HttpResponse response) throws JAXBException, IOException {
+        if (response != null) {
 			Unmarshaller unmarshaller = getUnmarshaller(clazz);
-			entity = (T) unmarshaller.unmarshal(response.getEntity().getContent());			
+            return (T) unmarshaller.unmarshal(response.getEntity().getContent());
 		}
-		return entity;
+		return null;
 	}
 	
 	private Document getDocument(String relativeUrl) throws APICallException, APIResponseException{

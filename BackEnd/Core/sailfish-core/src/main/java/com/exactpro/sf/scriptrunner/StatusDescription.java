@@ -75,11 +75,7 @@ public class StatusDescription
 
 		this.updateTestCaseStatus = updateTestCaseStatus;
 
-        if (knownBugs == null) {
-            this.knownBugs = Collections.emptySet();
-        } else {
-            this.knownBugs = Collections.unmodifiableSet(knownBugs);
-        }
+        this.knownBugs = knownBugs == null ? Collections.emptySet() : Collections.unmodifiableSet(knownBugs);
 	}
 
     public StatusDescription(StatusType status, String description, Throwable cause, boolean updateTestCaseStatus, Set<BugDescription> knownBugs)
@@ -92,11 +88,7 @@ public class StatusDescription
 
 		this.updateTestCaseStatus = updateTestCaseStatus;
 
-        if (knownBugs == null) {
-            this.knownBugs = Collections.emptySet();
-        } else {
-            this.knownBugs = Collections.unmodifiableSet(knownBugs);
-        }
+        this.knownBugs = knownBugs == null ? Collections.emptySet() : Collections.unmodifiableSet(knownBugs);
 	}
 
 	public StatusType getStatus() {

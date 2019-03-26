@@ -15,35 +15,50 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.script.actions;
 
+import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
+import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.actions.ActionUtil;
+import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.aml.scriptutil.ExpressionResult;
+import com.exactpro.sf.aml.scriptutil.LegReorder;
+import com.exactpro.sf.aml.scriptutil.MessageCount;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.Pair;
-import com.exactpro.sf.actions.ActionUtil;
-import com.exactpro.sf.aml.script.CheckPoint;
-import com.exactpro.sf.aml.scriptutil.LegReorder;
-import com.exactpro.sf.aml.scriptutil.MessageCount;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.comparison.*;
+import com.exactpro.sf.comparison.ComparatorSettings;
+import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.ComparisonUtil;
+import com.exactpro.sf.comparison.Formatter;
+import com.exactpro.sf.comparison.IPostValidation;
+import com.exactpro.sf.comparison.MessageComparator;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IGroupReport;
-import com.exactpro.sf.services.*;
+import com.exactpro.sf.services.CSHIterator;
+import com.exactpro.sf.services.ICSHIterator;
+import com.exactpro.sf.services.IInitiatorService;
+import com.exactpro.sf.services.IService;
+import com.exactpro.sf.services.IServiceHandler;
+import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.util.KnownBugException;
 import com.exactpro.sf.util.KnownBugPostValidation;
 import com.exactpro.sf.util.MessageKnownBugException;
-import com.exactpro.sf.aml.scriptutil.ExpressionResult;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class WaitAction {
 
@@ -139,14 +154,10 @@ public class WaitAction {
 
 		List<Pair<IMessage, ComparisonResult>> results = null;
 
-		logger.debug("[{}]  start wait for message in {} queue", serviceName, ((fromApp) ? "application" : "admin"));
+		logger.debug("[{}]  start wait for message in {} queue", serviceName, fromApp ? "application" : "admin");
 
 		try {
-			if (fromApp) {
-                results = waitMessage(handler, isession, ServiceHandlerRoute.FROM_APP, checkPoint, waitTime, messageFilter, settings);
-			} else {
-                results = waitMessage(handler, isession, ServiceHandlerRoute.FROM_ADMIN, checkPoint, waitTime, messageFilter, settings);
-			}
+            results = waitMessage(handler, isession, fromApp ? FROM_APP : FROM_ADMIN, checkPoint, waitTime, messageFilter, settings);
 		} catch (InterruptedException e) {
 			logger.error("[{}]  InterruptedException:{}", serviceName, e.getMessage(), e);
 			throw e;
@@ -267,12 +278,12 @@ public class WaitAction {
 		long waitUntil = System.currentTimeMillis() + actionContext.getTimeout();
 
 		List<IMessage> reportMessages = new ArrayList<>();
-		CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, ServiceHandlerRoute.FROM_ADMIN, actionContext.getCheckPoint());
+        CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, FROM_ADMIN, actionContext.getCheckPoint());
 
 		while(messagesIterator.hasNext(waitUntil - System.currentTimeMillis())) {
 			IMessage msg = messagesIterator.next();
 
-			if(!msg.getName().equals("UnitHeader")){
+            if(!"UnitHeader".equals(msg.getName())) {
 				reportMessages.add(msg);
 			}
 		}
@@ -356,9 +367,9 @@ public class WaitAction {
         }
 
 		if (message != null) {
-			WaitAction.countMessages(actionContext.getReport(), serviceName, message, messageCount, handler, isession, actionContext.getCheckPoint(), isApp, compSettings, description);
+            countMessages(actionContext.getReport(), serviceName, message, messageCount, handler, isession, actionContext.getCheckPoint(), isApp, compSettings, description);
 		} else {
-			WaitAction.countMessages(actionContext.getReport(), serviceName, messageCount, handler, isession, actionContext.getCheckPoint(), isApp, description);
+            countMessages(actionContext.getReport(), serviceName, messageCount, handler, isession, actionContext.getCheckPoint(), isApp, description);
 		}
 	}
 
@@ -412,15 +423,12 @@ public class WaitAction {
         log.debug("countMessages 1");
 
         List<Pair<IMessage, ComparisonResult>> allResults = new ArrayList<>();
-        CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, fromApp
-                                                                               ? ServiceHandlerRoute.FROM_APP
-                                                                               : ServiceHandlerRoute.FROM_ADMIN,
-                                                                     checkPoint);
+        CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, fromApp ? FROM_APP : FROM_ADMIN, checkPoint);
 
-        WaitAction.countMessages(messageFilter, messagesIterator, settings, allResults);
+        countMessages(messageFilter, messagesIterator, settings, allResults);
 
         int messageCount = allResults.size();
-        WaitAction.addResultToReport(report, expectedMessageCount, description, allResults, messageCount, true);
+        addResultToReport(report, expectedMessageCount, description, allResults, messageCount, true);
 
         return messageCount;
     }
@@ -439,7 +447,7 @@ public class WaitAction {
 
             int i = 1;
             for (Pair<IMessage, ComparisonResult> result : allResults) {
-                report.createVerification(status, "Message " + (i++), "", "", result.getSecond(), null);
+                report.createVerification(status, "Message " + i++, "", "", result.getSecond(), null);
             }
 
             if(status == StatusType.CONDITIONALLY_PASSED) {
@@ -453,7 +461,7 @@ public class WaitAction {
 
             int i = 1;
             for (Pair<IMessage, ComparisonResult> result : allResults) {
-                report.createVerification(StatusType.PASSED, "Message " + (i++), description, "", result.getSecond(), null);
+                report.createVerification(StatusType.PASSED, "Message " + i++, description, "", result.getSecond(), null);
             }
             if(exceptionOnFail) { // was !=
                 throw new EPSCommonException("Expected messages quantity did not match actual messages quantity."
@@ -479,12 +487,8 @@ public class WaitAction {
                                            CheckPoint checkPoint, boolean fromApp, ComparatorSettings settings,
                                            List<Pair<IMessage, ComparisonResult>> allResults) {
 
-        CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, fromApp
-                                                                               ? ServiceHandlerRoute.FROM_APP
-                                                                               : ServiceHandlerRoute.FROM_ADMIN,
-                                                                     checkPoint);
-        WaitAction.countMessages(messageFilter, messagesIterator, settings, allResults);
-
+        CSHIterator<IMessage> messagesIterator = handler.getIterator(isession, fromApp ? FROM_APP : FROM_ADMIN, checkPoint);
+        countMessages(messageFilter, messagesIterator, settings, allResults);
     }
 
     public static void countMessages(IMessage messageFilter, ICSHIterator<IMessage> messagesIterator,
@@ -542,7 +546,7 @@ public class WaitAction {
             String serviceName, Object mc,
             IServiceHandler handler, ISession isession, CheckPoint checkPoint, boolean fromApp, String description)
 	{
-	    List<IMessage> messages = handler.getMessages(isession, fromApp ? ServiceHandlerRoute.FROM_APP : ServiceHandlerRoute.FROM_ADMIN, checkPoint);
+        List<IMessage> messages = handler.getMessages(isession, fromApp ? FROM_APP : FROM_ADMIN, checkPoint);
 
 		// add status to report
 		int receivedMessages = messages.size();
@@ -584,7 +588,7 @@ public class WaitAction {
         IServiceHandler handler = getServiceHandler(service);
         ISession session = getSession(service);
 
-        List<IMessage> messages = handler.getMessages(session, isApp ? ServiceHandlerRoute.FROM_APP : ServiceHandlerRoute.FROM_ADMIN, checkPoint);
+        List<IMessage> messages = handler.getMessages(session, isApp ? FROM_APP : FROM_ADMIN, checkPoint);
         Iterator<IMessage> it = messages.iterator();
 
         while(it.hasNext()) {

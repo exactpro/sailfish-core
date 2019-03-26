@@ -26,7 +26,6 @@ public class MessageConvertException extends Exception {
     private final Object sfMessage;
     
     public MessageConvertException(Object sfMessage) {
-        super();
         this.sfMessage = sfMessage;
     }
     

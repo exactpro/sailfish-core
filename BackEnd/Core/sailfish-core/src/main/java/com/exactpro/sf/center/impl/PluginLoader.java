@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.SFException;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.Utils;
+import com.exactpro.sf.common.util.Utils.FileExtensionFilter;
 import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.LoadableManagerContext;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -108,20 +108,20 @@ public class PluginLoader {
     private final List<IVersion> pluginVersions;
 
 	public PluginLoader(
-			final IWorkspaceDispatcher wd,
-            final ILoadableManager staticServiceManager,
-            final ILoadableManager actionManager,
-            final ILoadableManager dictionaryManager,
-			final PreprocessorLoader preprocessorLoader,
-			final ValidatorLoader validatorLoader,
-            final ILoadableManager adapterManager,
-            final ILoadableManager dataManager,
-            final ILoadableManager languageManager,
-			final MatrixProviderHolder matrixProviderHolder,
-            final ILoadableManager matrixConverterManager,
-            final ILoadableManager statisticsReportsLoader,
-            final PluginServiceLoader pluginServiceLoader,
-            final IVersion coreVersion) {
+            IWorkspaceDispatcher wd,
+            ILoadableManager staticServiceManager,
+            ILoadableManager actionManager,
+            ILoadableManager dictionaryManager,
+            PreprocessorLoader preprocessorLoader,
+            ValidatorLoader validatorLoader,
+            ILoadableManager adapterManager,
+            ILoadableManager dataManager,
+            ILoadableManager languageManager,
+            MatrixProviderHolder matrixProviderHolder,
+            ILoadableManager matrixConverterManager,
+            ILoadableManager statisticsReportsLoader,
+            PluginServiceLoader pluginServiceLoader,
+            IVersion coreVersion) {
 		if (wd == null) {
 		    throw new NullPointerException("IWorkspaceDispatcher can't be null");
 		}
@@ -215,7 +215,7 @@ public class PluginLoader {
 			try {
                 StringBuilder classPath = new StringBuilder();
 
-                Set<String> libs = wd.listFiles(new Utils.FileExtensionFilter("jar"), folderType, pluginPath, "libs");
+                Set<String> libs = wd.listFiles(new FileExtensionFilter("jar"), folderType, pluginPath, "libs");
                 URL[] urls = new URL[libs.size()];
                 Iterator<String> libsIterator = libs.iterator();
                 for (int i=0; i<libs.size(); i++) {
@@ -245,9 +245,9 @@ public class PluginLoader {
                             version.getMajor(), version.getMinor(), coreVersion.getMajor(), coreVersion.getMinor()));
 			    }
 
-                if (version.getMinCoreRevision() > this.coreVersion.getMaintenance()) {
+                if(version.getMinCoreRevision() > coreVersion.getMaintenance()) {
                     throw new SFException(String.format("Plugin '%s' need newer core revision: %s.%s.%s (expected: %s.%s.%s or higher)", pluginPath,
-                            this.coreVersion.getMajor(), this.coreVersion.getMinor(), this.coreVersion.getMaintenance(),
+                            coreVersion.getMajor(), coreVersion.getMinor(), coreVersion.getMaintenance(),
                             version.getMajor(), version.getMinor(), version.getMaintenance()));
                 }
 
@@ -256,8 +256,8 @@ public class PluginLoader {
 			    logger.error("Failed to load version file '{{}}/{}/{}': ", folderType, pluginPath, VERSION_FILE_NAME, e);
             }
 		} else {
-            version = this.coreVersion;
-            this.pluginVersions.add(version);
+            version = coreVersion;
+            pluginVersions.add(version);
 		}
 		
 		if (version == null) {
@@ -268,7 +268,7 @@ public class PluginLoader {
 		logger.info("Loading {}", version);
 		
 		// root = {resolved folderType} / {pluginPath}
-		final String root = new File(DefaultWorkspaceLayout.getInstance().getPath(new File("."), folderType), pluginPath).getPath();
+        String root = new File(DefaultWorkspaceLayout.getInstance().getPath(new File("."), folderType), pluginPath).getPath();
 
 		//
 		// Load log.properties
@@ -277,7 +277,7 @@ public class PluginLoader {
 		    File file = wd.getFile(folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    logger.info("Loading logger configuration: {{}}/{}/{}", folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    try {
-		    	(new PropertyConfigurator()).doConfigure(file.getPath(), LogManager.getLoggerRepository());
+                new PropertyConfigurator().doConfigure(file.getPath(), LogManager.getLoggerRepository());
 		    } catch (Throwable e) {
 		        throw new EPSCommonException("Failed to configure logger. {" + folderType + "}/" + pluginPath + "/" + LOG4J_PROPERTIES_FILE_NAME, e);
 		    }
@@ -289,13 +289,11 @@ public class PluginLoader {
 		// LoadableContext
 		//
 		LoadableManagerContext loadableContext = new LoadableManagerContext();
-        {
-            loadableContext.setResourceFolder(root);
-            loadableContext.setVersion(version);
-            loadableContext.setClassLoaders(classLoader);
-        }        
+        loadableContext.setResourceFolder(root);
+        loadableContext.setVersion(version);
+        loadableContext.setClassLoaders(classLoader);
 
-		//
+        //
 		// load services (Services + ServiceSettings)
 		//
         if (staticServiceManager != null) {
@@ -533,7 +531,7 @@ public class PluginLoader {
             logger.info("Loading dictionaries: {{}}/{}/cfg/{}", FolderType.ROOT, ",", CUSTOM_DICTIONARIES_XML);
             String pathToDictionaries = Paths.get("././.", "cfg", "dictionaries").toString();
             try (InputStream stream = new FileInputStream(file)) {
-                LoadableManagerContext context = new LoadableManagerContext(this.coreVersion, pathToDictionaries, stream, PluginLoader.class.getClassLoader());
+                LoadableManagerContext context = new LoadableManagerContext(coreVersion, pathToDictionaries, stream, PluginLoader.class.getClassLoader());
                 dictionaryManager.load(context);
             } catch (Exception e) {
                 throw new EPSCommonException(

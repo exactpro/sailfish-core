@@ -19,6 +19,6 @@ import com.exactpro.sf.common.messages.IMessage;
 
 public interface IPostValidation {
 
-    public void doValidate(IMessage message, IMessage filter, ComparatorSettings settings, ComparisonResult result);
+    void doValidate(IMessage message, IMessage filter, ComparatorSettings settings, ComparisonResult result);
 
 }

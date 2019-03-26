@@ -118,7 +118,7 @@ public class SFLocalContext implements ISFContext {
 
     private static final Logger logger = LoggerFactory.getLogger(SFLocalContext.class);
 
-	private static volatile SFLocalContext context = null;
+    private static volatile SFLocalContext context;
 
 	private final IWorkspaceDispatcher workspaceDispatcher;
 
@@ -149,14 +149,14 @@ public class SFLocalContext implements ISFContext {
 	private final StatisticsService statisticsService;
 	private final MachineLearningService machineLearningService;
 	private final UpdateService updateService;
-	private EMailService mailService;
-	private RegressionRunner regressionRunner;
+    private final EMailService mailService;
+    private final RegressionRunner regressionRunner;
 
 	private final Queue<IEmbeddedService> embeddedServices = new LinkedList<>();
 
-	private FlightRecorderService flightRecorderService;
+    private final FlightRecorderService flightRecorderService;
 
-	private NetDumperService netDumperService;
+    private final NetDumperService netDumperService;
 
 	// Other:
 	private final EnvironmentManager environmentManager;
@@ -230,7 +230,7 @@ public class SFLocalContext implements ISFContext {
         IStorage storage = null;
 
         if(envSettings.getStorageType() == StorageType.DB) {
-            sessionFactory = HibernateFactory.getInstance().getSessionFactory(this.workspaceDispatcher);
+            sessionFactory = HibernateFactory.getInstance().getSessionFactory(workspaceDispatcher);
             Session session = null;
 
             try {
@@ -259,7 +259,7 @@ public class SFLocalContext implements ISFContext {
 		optionsStorage = createOptionsStorage(envSettings, storage, workspaceDispatcher);
 
         taskExecutor = new TaskExecutor();
-		this.disposables.add(taskExecutor);
+        disposables.add(taskExecutor);
 
 		loggingConfigurator = new LoggingConfigurator(wd, loggingConfiguration);
 
@@ -283,10 +283,10 @@ public class SFLocalContext implements ISFContext {
 		ValidatorLoader validatorLoader = new ValidatorLoader();
 
         this.statisticsService = new StatisticsService();
-        this.embeddedServices.add(statisticsService);
+        embeddedServices.add(statisticsService);
 
         this.updateService = new UpdateService(workspaceDispatcher, settings.getUpdateServiceConfiguration(), taskExecutor);
-        this.embeddedServices.add(updateService);
+        embeddedServices.add(updateService);
 
         PluginServiceLoader pluginServiceLoader = new PluginServiceLoader();
 
@@ -305,17 +305,17 @@ public class SFLocalContext implements ISFContext {
                 matrixConverterLoader,
                 statisticsService,
                 pluginServiceLoader,
-                this.version);
+                version);
 
         LoadInfo loadInfo = pluginLoader.load();
         loadInfo.appendClassPath(compilerClassPath);
         compilerClassPath = loadInfo.getClassPath();
 
         messageStorage = createMessageStorage(envSettings, sessionFactory, dictionaryManager);
-        this.disposables.add(this.messageStorage);
+        disposables.add(messageStorage);
 
         serviceStorage = createServiceStorage(envSettings, sessionFactory, workspaceDispatcher, staticServiceManager, dictionaryManager, messageStorage);
-        this.disposables.add(serviceStorage);
+        disposables.add(serviceStorage);
 
         this.serviceContext = new DefaultServiceContext(dictionaryManager, messageStorage, serviceStorage, loggingConfigurator, taskExecutor, dataManager, wd);
 
@@ -325,8 +325,8 @@ public class SFLocalContext implements ISFContext {
         		serviceStorage,
         		createEnvironmentStorage(envSettings, storage, workspaceDispatcher),
                 createVariableSetStorage(envSettings, storage, workspaceDispatcher),
-        		this.serviceContext);
-        this.disposables.add(this.connectionManager);
+                serviceContext);
+        disposables.add(connectionManager);
 
         pluginServiceLoader.load(connectionManager, new ServiceMarshalManager(staticServiceManager, dictionaryManager));
 
@@ -344,19 +344,19 @@ public class SFLocalContext implements ISFContext {
 		this.scriptRunner = envSettings.isAsyncRunMatrix()
 				? new AsyncScriptRunner(workspaceDispatcher, dictionaryManager, actionManager, utilityManager, languageManager, preprocessorLoader, validatorLoader, runnerSettings, statisticsService, environmentManager, testScriptStorage, adapterManager, staticServiceManager, compilerClassPath)
 				: new SyncScriptRunner(workspaceDispatcher, dictionaryManager, actionManager, utilityManager, languageManager, preprocessorLoader, validatorLoader, runnerSettings, statisticsService, environmentManager, testScriptStorage, adapterManager, staticServiceManager, compilerClassPath);
-		this.disposables.add(this.scriptRunner);
+        disposables.add(scriptRunner);
 
         this.mailService = new EMailService();
-        this.embeddedServices.add(mailService);
+        embeddedServices.add(mailService);
 
-		this.flightRecorderService = new FlightRecorderService(taskExecutor, this.optionsStorage);
+        this.flightRecorderService = new FlightRecorderService(taskExecutor, optionsStorage);
 
 		this.netDumperService = new NetDumperService(connectionManager, workspaceDispatcher, optionsStorage);
-		this.netDumperService.init();
+        netDumperService.init();
 
         this.regressionRunner = new RegressionRunner(taskExecutor, workspaceDispatcher, mailService, optionsStorage, statisticsService);
 
-		this.regressionRunner.init();
+        regressionRunner.init();
 
 		this.validators = Collections.unmodifiableList(validatorLoader.getValidators());
 		this.pluginToValidators = validatorLoader.getPluginToValidatorsMap();
@@ -366,7 +366,7 @@ public class SFLocalContext implements ISFContext {
         this.pluginClassLoaders = pluginVersions.stream().collect(Collectors.collectingAndThen(Collectors.toMap(IVersion::getAlias, x -> x.getClass().getClassLoader()), Collections::unmodifiableMap));
 
         this.machineLearningService = new MachineLearningService(workspaceDispatcher, dictionaryManager, dataManager, pluginClassLoaders);
-        this.embeddedServices.add(machineLearningService);
+        embeddedServices.add(machineLearningService);
     }
 
 	private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
@@ -460,7 +460,7 @@ public class SFLocalContext implements ISFContext {
 
 	@Override
 	public IConnectionManager getConnectionManager() {
-		return this.connectionManager;
+        return connectionManager;
 	}
 
 	@Override
@@ -470,17 +470,17 @@ public class SFLocalContext implements ISFContext {
 
 	@Override
 	public IMessageStorage getMessageStorage() {
-		return this.messageStorage;
+        return messageStorage;
 	}
 
 	@Override
 	public IWorkspaceDispatcher getWorkspaceDispatcher() {
-	    return this.workspaceDispatcher;
+        return workspaceDispatcher;
 	}
 
 	@Override
 	public IMatrixStorage getMatrixStorage() {
-		return this.matrixStorage;
+        return matrixStorage;
 	}
 
 	@Override
@@ -490,7 +490,7 @@ public class SFLocalContext implements ISFContext {
 
 	@Override
     public IAuthStorage getAuthStorage() {
-        return this.authStorage;
+        return authStorage;
 	}
 
     @Override
@@ -505,17 +505,17 @@ public class SFLocalContext implements ISFContext {
 
 	@Override
 	public void dispose() {
-	    while (!this.disposables.isEmpty()) {
+        while(!disposables.isEmpty()) {
 	        try {
-	            this.disposables.remove().dispose();
+                disposables.remove().dispose();
 	        } catch (RuntimeException e) {
 	            logger.error(e.getMessage(), e);
             }
         }
 
-        while (!this.embeddedServices.isEmpty()) {
+        while(!embeddedServices.isEmpty()) {
             try {
-                this.embeddedServices.remove().tearDown();
+                embeddedServices.remove().tearDown();
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
             }
@@ -624,17 +624,17 @@ public class SFLocalContext implements ISFContext {
 
     @Override
     public ListMultimap<IVersion, IValidator> getPluginToValidatorsMap() {
-        return this.pluginToValidators;
+        return pluginToValidators;
     }
 
     @Override
     public ListMultimap<IVersion, PreprocessorDefinition> getPluginToPreprocessorsMap() {
-        return this.pluginToPreprocessors;
+        return pluginToPreprocessors;
     }
 
     @Override
     public Map<String, ClassLoader> getPluginClassLoaders() {
-        return this.pluginClassLoaders;
+        return pluginClassLoaders;
     }
 
     @Override

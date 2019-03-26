@@ -103,7 +103,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
             return null;
         }
 
-        IMessage resultMessage = super.convert(message, verifyTagsOverride, skipTagsOverride, ignoreFieldType);
+        IMessage resultMessage = convert(message, verifyTagsOverride, skipTagsOverride, ignoreFieldType);
 
         if(inlineHeaderAndTrailer) {
             inlineMessage(resultMessage, FieldConst.HEADER);
@@ -319,7 +319,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                             resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, includeMillis, includeMicros)));
                             break;
                         case JAVA_TIME_LOCAL_TIME:
-                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, this.includeMilliseconds, this.includeMicroseconds)));
+                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, includeMilliseconds, includeMicroseconds)));
                             break;
                         case JAVA_TIME_LOCAL_DATE:
                             resultMessage.addField(new Field(fieldName, UtcDateOnlyConverter.convert(timestamp)));
@@ -331,9 +331,9 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
                         if (fieldValue instanceof LocalDate) {
                             resultMessage.addField(new Field(fieldName, UtcDateOnlyConverter.convert(timestamp)));
                         } else if (fieldValue instanceof LocalTime) {
-                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, this.includeMilliseconds, this.includeMicroseconds)));
+                            resultMessage.addField(new Field(fieldName, UtcTimeOnlyConverter.convert(timestamp, includeMilliseconds, includeMicroseconds)));
                         } else {
-                            resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, this.includeMilliseconds, this.includeMicroseconds)));
+                            resultMessage.addField(new Field(fieldName, UtcTimestampConverter.convert(timestamp, includeMilliseconds, includeMicroseconds)));
                         }
                     }
                 }  else if (fieldValue instanceof Boolean) {
@@ -356,12 +356,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
 
         for(IFieldStructure fieldStructure : messageStructure.getFields().values()) {
             Integer fieldTag = getAttributeValue(fieldStructure, ATTRIBUTE_TAG);
-
-            if(fieldTag != null) {
-                fieldOrder.add(fieldTag.toString());
-            } else {
-                fieldOrder.add(fieldStructure.getName());
-            }
+            fieldOrder.add(fieldTag != null ? fieldTag.toString() : fieldStructure.getName());
         }
 
         // to ensure that comparator will place them at the start and the end accordingly
@@ -373,10 +368,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
 
     private IFieldStructure getFieldStructure(String name, IFieldStructure messageStructure) {
         if(messageStructure == null) {
-            if (FieldConst.HEADER.equals(name) || FieldConst.TRAILER.equals(name)) {
-                return this.dictionary.getMessages().get(name);
-            }
-            return null;
+            return FieldConst.HEADER.equals(name) || FieldConst.TRAILER.equals(name) ? dictionary.getMessages().get(name) : null;
         }
 
         if (!messageStructure.isComplex()) {
@@ -461,7 +453,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
 
         String sendingTimeValue =  UtcTimestampConverter.convert(
                 DateTimeUtility.toTimestamp(DateTimeUtility.nowLocalDateTime()),
-                this.includeMilliseconds, this.includeMicroseconds);
+                includeMilliseconds, includeMicroseconds);
 
         replaceIfNotExist(header, FieldConst.SENDING_TIME, sendingTimeValue);
     }
@@ -474,7 +466,7 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
      * @return
      */
     private Object extractComponent(String fieldName, Object fieldValue, IFieldStructure fieldStructure) {
-        if(fieldValue instanceof List<?> && (fieldStructure != null && fieldStructure.isComplex() && !fieldStructure.isCollection())) {
+        if(fieldValue instanceof List<?> && fieldStructure != null && fieldStructure.isComplex() && !fieldStructure.isCollection()) {
             return extractComponent(fieldValue);
         }
 

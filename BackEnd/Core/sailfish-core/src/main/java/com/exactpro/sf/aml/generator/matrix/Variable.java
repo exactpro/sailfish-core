@@ -27,8 +27,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
  */
 public class Variable {
 
-	private String name;
-	private Class<?> type;
+    private final String name;
+    private final Class<?> type;
 	
 	public Variable(String name, Class<?> type) {
 		this.name = name;
@@ -53,15 +53,16 @@ public class Variable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null)
-			return false;
+        if(o == null) {
+            return false;
+        }
 		if (o instanceof Variable) {
 			Variable that = (Variable)o;
 			List<Object> arr1 = new ArrayList<Object>();
 			List<Object> arr2 = new ArrayList<Object>();
-			arr1.add(this.name);
+            arr1.add(name);
 			arr2.add(that.name);
-			arr1.add(this.type);
+            arr1.add(type);
 			arr2.add(that.type);
 			return arr1.equals(arr2);
 		}
@@ -70,7 +71,7 @@ public class Variable {
 
 	@Override
 	public int hashCode() {
-		return (this.name+this.type).hashCode();
+        return (name + type).hashCode();
 	}
 	
 	@Override

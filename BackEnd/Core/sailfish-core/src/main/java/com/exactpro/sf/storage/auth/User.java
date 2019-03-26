@@ -29,7 +29,7 @@ public class User {
     private String email;
     private Date registered;
     private Set<String> roles = new HashSet<>();
-    private boolean guest = false;
+    private boolean guest;
 
     public String getName() {
         return name;
@@ -80,7 +80,7 @@ public class User {
     }
 
     public Set<String> getRoles() {
-        return this.roles;
+        return roles;
     }
 
     public void setRoles(Set<String> roles) {

@@ -16,6 +16,7 @@
 package com.exactpro.sf.storage.auth;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -37,26 +38,22 @@ public class PasswordHasher {
 
 		try {
 			messageDigest = MessageDigest.getInstance("MD5");
-			messageDigest.update((toHash + SALT).getBytes("UTF-8"));
+			messageDigest.update((toHash + SALT).getBytes(StandardCharsets.UTF_8));
 
 		} catch (NoSuchAlgorithmException e) {
 
 			logger.error("Could not get hash!", e);
 			return null;
 
-		} catch (UnsupportedEncodingException e) {
-
-			logger.error("Could not get hash!", e);
-			return null;
 		}
 
-		return encodeHex(messageDigest.digest());
+        return encodeHex(messageDigest.digest());
 	}
 
-	protected static String encodeHex(final byte[] data) {
+	protected static String encodeHex(byte[] data) {
 
-		final int l = data.length;
-		final char[] out = new char[l << 1];
+		int l = data.length;
+		char[] out = new char[l << 1];
 
 		// two characters form the hex value.
 

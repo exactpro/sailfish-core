@@ -36,7 +36,7 @@ public class MatrixNameValidator implements Validator{
 
         MatrixFileTypes type = MatrixFileTypes.detectFileType(value.toString());
 
-        if(type.equals(MatrixFileTypes.UNKNOWN) || type.equals(MatrixFileTypes.JSON)) {
+        if(type == MatrixFileTypes.UNKNOWN || type == MatrixFileTypes.JSON) {
             throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", "Invalid matrix file type. Only csv|xls|xlsx file allowed"));
         }
 

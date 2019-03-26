@@ -68,13 +68,13 @@ public class TestNTGCodecNegative extends AbstractTest {
 			Assert.assertNotNull("Message structure is null.", msgStruct);
             NTGCodec encodeCodec = new NTGCodec();
 			encodeCodec.init(serviceContext, null, DefaultMessageFactory.getFactory(), dictionary);
-            ProtocolEncoderOutput output = (new TestNTGHelper()).new MockProtocolEncoderOutput();
+            ProtocolEncoderOutput output = new TestNTGHelper().new MockProtocolEncoderOutput();
 	 		encodeCodec.encode(new DummySession(), message, output);
 
 			Queue<Object> msgQueue = ((AbstractProtocolEncoderOutput) output).getMessageQueue();
 
 			Assert.assertNotNull("Message queue from AbstractProtocolEncoderOutput.", msgQueue);
-			Assert.assertTrue("Message queue size must be equal 1.", 1 == msgQueue.size());
+            Assert.assertTrue("Message queue size must be equal 1.", msgQueue.size() == 1);
 
 			Object lastMessage = msgQueue.element();
 
@@ -161,7 +161,7 @@ public class TestNTGCodecNegative extends AbstractTest {
 	    try{
             NTGCodec encodeCodec = new NTGCodec();
             encodeCodec.init(serviceContext, null, DefaultMessageFactory.getFactory(), TestNTGHelper.getDictionary());
-            ProtocolEncoderOutput output = (new TestNTGHelper()).new MockProtocolEncoderOutput();
+            ProtocolEncoderOutput output = new TestNTGHelper().new MockProtocolEncoderOutput();
 			encodeCodec.encode(new DummySession(), null, output);
 			Assert.fail("There is no exception was threw");
 	    }catch(IllegalArgumentException e){
@@ -181,7 +181,7 @@ public class TestNTGCodecNegative extends AbstractTest {
             NTGCodec encodeCodec = new NTGCodec();
 			IMessage message = DefaultMessageFactory.getFactory().createMessage("invalid", "invalid");
             encodeCodec.init(serviceContext, null, DefaultMessageFactory.getFactory(), TestNTGHelper.getDictionary());
-            ProtocolEncoderOutput output = (new TestNTGHelper()).new MockProtocolEncoderOutput();
+            ProtocolEncoderOutput output = new TestNTGHelper().new MockProtocolEncoderOutput();
 			encodeCodec.encode(new DummySession(), message, output);
 			Assert.fail("There is no exception was threw");
 	    }catch(NullPointerException e){

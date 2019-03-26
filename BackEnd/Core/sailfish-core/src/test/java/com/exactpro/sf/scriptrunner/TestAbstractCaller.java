@@ -23,7 +23,7 @@ import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityCallExcepti
 import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityNotFoundException;
 
 public class TestAbstractCaller {
-    private UtilityClass util = new UtilityClass();
+    private final UtilityClass util = new UtilityClass();
 
     @Test
     public void testIntFunc() throws UtilityCallException, UtilityNotFoundException, InterruptedException {

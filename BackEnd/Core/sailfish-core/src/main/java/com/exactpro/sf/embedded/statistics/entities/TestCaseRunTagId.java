@@ -15,10 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.entities;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
+
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
 
 @Embeddable
 public class TestCaseRunTagId implements Serializable {
@@ -54,8 +55,12 @@ public class TestCaseRunTagId implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TestCaseRunTagId that = (TestCaseRunTagId) o;
         return Objects.equals(tcrId, that.tcrId) &&
                 Objects.equals(tagId, that.tagId);

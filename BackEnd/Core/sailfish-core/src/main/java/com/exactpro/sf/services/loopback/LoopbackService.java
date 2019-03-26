@@ -44,7 +44,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 public class LoopbackService implements IInitiatorService {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	private ServiceName serviceName;
 	private IServiceHandler handler;
@@ -55,16 +55,16 @@ public class LoopbackService implements IInitiatorService {
 	private ILoggingConfigurator logConfigurator;
 
 	private volatile ServiceStatus status = ServiceStatus.CREATED;
-	private volatile LoopbackSession session = null;
+    private volatile LoopbackSession session;
 
 
 	@Override
 	public void init(
-	        final IServiceContext serviceContext,
-			final IServiceMonitor serviceMonitor,
-			final IServiceHandler handler,
-			final IServiceSettings settings,
-			final ServiceName name) {
+            IServiceContext serviceContext,
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            ServiceName name) {
 
 		this.serviceName = name;
 		this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
@@ -79,7 +79,7 @@ public class LoopbackService implements IInitiatorService {
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
 		session = new LoopbackSession();
 		status = ServiceStatus.STARTED;
 	}
@@ -88,7 +88,7 @@ public class LoopbackService implements IInitiatorService {
 	public void dispose() {
 		session = null;
 		if (logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
+            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
 		}
         status = ServiceStatus.DISPOSED;
 

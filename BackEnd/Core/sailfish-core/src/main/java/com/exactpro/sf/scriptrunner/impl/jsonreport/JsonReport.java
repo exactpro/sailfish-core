@@ -15,6 +15,28 @@
 ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.jsonreport;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
@@ -25,33 +47,49 @@ import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
-import com.exactpro.sf.scriptrunner.*;
+import com.exactpro.sf.scriptrunner.IReportStats;
+import com.exactpro.sf.scriptrunner.IScriptProgress;
+import com.exactpro.sf.scriptrunner.IScriptReport;
+import com.exactpro.sf.scriptrunner.LoggerRow;
+import com.exactpro.sf.scriptrunner.MessageLevel;
+import com.exactpro.sf.scriptrunner.OutcomeCollector;
+import com.exactpro.sf.scriptrunner.ReportEntity;
+import com.exactpro.sf.scriptrunner.ReportUtils;
+import com.exactpro.sf.scriptrunner.ScriptContext;
+import com.exactpro.sf.scriptrunner.ScriptRunException;
+import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.impl.ReportStats;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.*;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Alert;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Bug;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportException;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Status;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection, unused, FieldCanBeLocal")
 public class JsonReport implements IScriptReport {
@@ -59,15 +97,15 @@ public class JsonReport implements IScriptReport {
     private static final ObjectMapper mapper;
     private static final String REPORT_ROOT_FILE_NAME = "report";
 
-    private static long actionIdCounter = 0;
+    private static long actionIdCounter;
 
     private ScriptContext scriptContext;
     private Context context;
     private IReportStats reportStats;
     private boolean isActionCreated;
-    private Map<Long, Set<Long>> messageToActionIdMap;
-    private IWorkspaceDispatcher dispatcher;
-    private String reportRootDirectoryPath;
+    private final Map<Long, Set<Long>> messageToActionIdMap;
+    private final IWorkspaceDispatcher dispatcher;
+    private final String reportRootDirectoryPath;
     private final TestScriptDescription testScriptDescription;
 
     //Main bean of report
@@ -75,9 +113,9 @@ public class JsonReport implements IScriptReport {
 
     static {
         mapper = new ObjectMapper();
-        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withCreatorVisibility(JsonAutoDetect.Visibility.NONE).withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE).withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        mapper.setVisibility(mapper.getSerializationConfig().getDefaultVisibilityChecker().withFieldVisibility(Visibility.ANY)
+                .withCreatorVisibility(Visibility.NONE).withSetterVisibility(Visibility.NONE)
+                .withGetterVisibility(Visibility.NONE).withIsGetterVisibility(Visibility.NONE));
         mapper.registerModule(new JavaTimeModule());
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
     }
@@ -95,19 +133,19 @@ public class JsonReport implements IScriptReport {
     }
 
     private void assertState(ContextType... states) {
-        if (Arrays.stream(states).noneMatch(i -> this.context.cur.equals(i))) {
-            throw new RuntimeException(String.format("Incorrect report state '%s' ('%s' expected)", this.context.cur, Arrays.toString(states)));
+        if(Arrays.stream(states).noneMatch(i -> context.cur == i)) {
+            throw new RuntimeException(String.format("Incorrect report state '%s' ('%s' expected)", context.cur, Arrays.toString(states)));
         }
     }
 
     private File getFile(String fileName, String extension) {
         fileName = fileName.replaceAll("\\W", "_");
         if (!fileName.endsWith(extension)) {
-            fileName = fileName.concat(extension);
+            fileName = fileName + extension;
         }
 
         try {
-            return this.dispatcher.createFile(FolderType.REPORT, true, reportRootDirectoryPath, "reportData", fileName);
+            return dispatcher.createFile(FolderType.REPORT, true, reportRootDirectoryPath, "reportData", fileName);
         } catch (WorkspaceStructureException e) {
             throw new ScriptRunException("unable to create report file", e);
         }
@@ -129,7 +167,7 @@ public class JsonReport implements IScriptReport {
         }
 
         if (data instanceof TestCase) {
-            this.reportRoot.getMetadata().add(new TestCaseMetadata(((TestCase) data), jsonpFile, jsonFile));
+            reportRoot.getMetadata().add(new TestCaseMetadata((TestCase)data, jsonpFile, jsonFile));
         }
     }
 
@@ -157,7 +195,7 @@ public class JsonReport implements IScriptReport {
             cause = SerializeUtil.serializeToBase64(testScriptDescription.getCause());
         }
 
-        this.reportRoot.setReportProperties(
+        reportRoot.setReportProperties(
                 new ReportProperties(state, status, matrixFile, timestamp, environmentNameAttr, languageURI, workFolder, passed, conditionallyPassed,
                         failed, total, services, range, autostart, cause));
     }
@@ -172,31 +210,31 @@ public class JsonReport implements IScriptReport {
 
     @SuppressWarnings("unchecked")
     private <T extends IJsonReportNode> T getCurrentContextNode() {
-        return (T) this.context.node;
+        return (T)context.node;
     }
 
     public void createReport(ScriptContext scriptContext, String name, String description, long scriptRunId, String environmentName,
             String userName) {
 
         this.scriptContext = scriptContext;
-        this.reportRoot.setStartTime(Instant.now());
+        reportRoot.setStartTime(Instant.now());
 
         try {
-            this.reportRoot.setHostName(InetAddress.getLocalHost().getHostName());
+            reportRoot.setHostName(InetAddress.getLocalHost().getHostName());
         } catch (UnknownHostException e) {
-            this.reportRoot.setHostName("n/a");
+            reportRoot.setHostName("n/a");
         }
 
-        this.reportRoot.setName(name);
-        this.reportRoot.setUserName(userName);
-        this.reportRoot.setScriptRunId(scriptRunId);
-        this.reportRoot.setVersion(SFLocalContext.getDefault().getVersion());
-        this.reportRoot.setBranchName(SFLocalContext.getDefault().getBranchName());
+        reportRoot.setName(name);
+        reportRoot.setUserName(userName);
+        reportRoot.setScriptRunId(scriptRunId);
+        reportRoot.setVersion(SFLocalContext.getDefault().getVersion());
+        reportRoot.setBranchName(SFLocalContext.getDefault().getBranchName());
 
-        this.reportRoot.setPlugins(SFLocalContext.getDefault().getPluginVersions().stream().filter(i -> !i.isGeneral())
+        reportRoot.setPlugins(SFLocalContext.getDefault().getPluginVersions().stream().filter(i -> !i.isGeneral())
                 .collect(Collectors.toMap(IVersion::getAlias, IVersion::buildVersion)));
 
-        this.reportRoot.setDescription(description);
+        reportRoot.setDescription(description);
 
         setContext(ContextType.SCRIPT, null);
     }
@@ -235,13 +273,13 @@ public class JsonReport implements IScriptReport {
         TestCase curTestCase = getCurrentContextNode();
         curTestCase.setStatus(new Status(status));
         curTestCase.setFinishTime(Instant.now());
-        this.reportRoot.getBugs().addAll(curTestCase.getBugs());
+        reportRoot.getBugs().addAll(curTestCase.getBugs());
 
         exportToFile(curTestCase, curTestCase.getName());
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
 
         revertContext();
-        this.reportStats.updateTestCaseStatus(status.getStatus());
+        reportStats.updateTestCaseStatus(status.getStatus());
     }
 
     public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters,
@@ -279,7 +317,7 @@ public class JsonReport implements IScriptReport {
         curAction.setFinishTime(Instant.now());
 
         if (status.isUpdateTestCaseStatus()) {
-            this.reportStats.updateActions(status.getStatus());
+            reportStats.updateActions(status.getStatus());
         }
 
         isActionCreated = false;
@@ -296,7 +334,7 @@ public class JsonReport implements IScriptReport {
 
         for (Long id : curAction.getRelatedMessages()) {
             //noinspection ConstantConditions
-            this.messageToActionIdMap.computeIfAbsent(id, k -> new HashSet<>()).add(curAction.getId());
+            messageToActionIdMap.computeIfAbsent(id, k -> new HashSet<>()).add(curAction.getId());
         }
     }
 
@@ -385,8 +423,8 @@ public class JsonReport implements IScriptReport {
             if (getCurrentContextNode() != null) {
                 getCurrentContextNode().addException(cause);
             } else {
-                if (this.reportRoot.getException() == null) {
-                    this.reportRoot.setException(new ReportException(cause));
+                if(reportRoot.getException() == null) {
+                    reportRoot.setException(new ReportException(cause));
                 }
             }
         }
@@ -397,20 +435,20 @@ public class JsonReport implements IScriptReport {
 
         IJsonReportNode currentNode = getCurrentContextNode();
 
-        if (table.getName().equals("Messages")) {
+        if("Messages".equals(table.getName())) {
             List<Message> messages = table.getRows().stream().map(Message::new).collect(Collectors.toList());
 
             if (currentNode instanceof Action) {
                 long actionId = ((Action) currentNode).getId();
 
                 for (Message message : messages) {
-                    this.messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()).add(actionId);
+                    messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()).add(actionId);
                 }
             }
 
             if (currentNode instanceof TestCase) {
                 for (Message message : messages) {
-                    message.setRelatedActions(this.messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
+                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
                 }
             }
             currentNode.addSubNodes(messages);
@@ -445,7 +483,7 @@ public class JsonReport implements IScriptReport {
 
     public void closeReport() {
         assertState(null, ContextType.SCRIPT);
-        this.reportRoot.setFinishTime(Instant.now());
+        reportRoot.setFinishTime(Instant.now());
         initProperties();
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
     }

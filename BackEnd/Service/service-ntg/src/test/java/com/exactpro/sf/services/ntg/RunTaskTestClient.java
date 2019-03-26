@@ -15,14 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
-import com.exactpro.sf.services.ntg.NTGClientTest.ClientStrategy;
-import com.exactpro.sf.services.ntg.NTGServerTest.MessageType;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+
+import com.exactpro.sf.services.ntg.NTGClientTest.ClientStrategy;
+import com.exactpro.sf.services.ntg.NTGServerTest.MessageType;
 
 @SuppressWarnings("unused")
 public final class RunTaskTestClient implements Runnable
@@ -34,12 +34,9 @@ public final class RunTaskTestClient implements Runnable
 	String name;
 	String password;
 	ClientStrategy strategy = ClientStrategy.SessionOnly;
-    List<MessageType> msgs = new ArrayList<MessageType>();
-    NTGClientTest testClient = null;
-
-	CountDownLatch latch = null;
-
-	private boolean passed = false;
+    List<MessageType> msgs = new ArrayList<>();
+    NTGClientTest testClient;
+    CountDownLatch latch;
 
 	public RunTaskTestClient( CountDownLatch latch, int clientID, String directoryXSD, String IP, int port,
 			String name, String password )
@@ -71,7 +68,7 @@ public final class RunTaskTestClient implements Runnable
 					String.format("  RunTaskTestClient.run() Client [%d]: Is wating for countdown.",
 							clientID ));
 
-			this.latch.await();
+            latch.await();
 
 			System.out.println( getTimeStamp() +
 					String.format("  RunTaskTestClient.run() Client [%d]: Is running.",
@@ -122,10 +119,7 @@ public final class RunTaskTestClient implements Runnable
 		{
 			ex.printStackTrace();
 		}
-		finally
-		{
-		}
-	}
+    }
 
 	public void ShutdownClient()
 	{

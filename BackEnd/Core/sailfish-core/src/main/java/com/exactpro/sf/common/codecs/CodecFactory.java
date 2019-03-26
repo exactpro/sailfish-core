@@ -38,7 +38,7 @@ public class CodecFactory implements ProtocolCodecFactory {
 	private final ICommonSettings codecSettings;
 	private final ConcurrentMap<IoSession, AbstractCodec> codecs = new ConcurrentHashMap<>();
 
-	public CodecFactory(IServiceContext serviceContext, final IMessageFactory msgFactory, final IDictionaryStructure dictionary, Class<? extends AbstractCodec> codecClass, ICommonSettings codecSettings) {
+    public CodecFactory(IServiceContext serviceContext, IMessageFactory msgFactory, IDictionaryStructure dictionary, Class<? extends AbstractCodec> codecClass, ICommonSettings codecSettings) {
 	    
 	    this.serviceContext = Objects.requireNonNull(serviceContext, "Service context is not specified");
 
@@ -61,7 +61,7 @@ public class CodecFactory implements ProtocolCodecFactory {
 		}
 		
 		codec = codecClass.newInstance();
-		codec.init(this.serviceContext, this.codecSettings, this.msgFactory, this.msgDictionary);
+        codec.init(serviceContext, codecSettings, msgFactory, msgDictionary);
 		codecs.putIfAbsent(session, codec);
 		return codecs.get(session);
 			
@@ -77,7 +77,7 @@ public class CodecFactory implements ProtocolCodecFactory {
 		}
 		
 		codec = codecClass.newInstance();
-		codec.init(this.serviceContext, this.codecSettings, this.msgFactory, this.msgDictionary);
+        codec.init(serviceContext, codecSettings, msgFactory, msgDictionary);
 		codecs.putIfAbsent(session, codec);
 		return codecs.get(session);
 			

@@ -19,7 +19,7 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -60,12 +60,12 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 		try {
 			changeStatus(ServiceStatus.STARTING, "Starting service " + serviceName, null);
 
-            logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                     serviceName);
 
 			nettySession = new NettySession(this, logConfigurator);
 
-			this.initChannelHandlers(this.serviceContext);
+            initChannelHandlers(serviceContext);
 
 			connect();
 
@@ -78,7 +78,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 
 	@Override
 	public void connect() throws Exception {
-		final LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
+        LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
 		String localIP = getSettings().getLocalIP();
 		String bindIp = (getSettings().getBindIp() == null) ? getSettings().getMulticastIp() : getSettings().getBindIp();
@@ -106,7 +106,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 		cb.handler(new ChannelInitializer<Channel>() {
 			@Override
 			protected void initChannel(Channel ch) throws Exception {
-				for (Map.Entry<String, ChannelHandler> entry : handlers.entrySet()) {
+                for(Entry<String, ChannelHandler> entry : handlers.entrySet()) {
 					ch.pipeline().addLast(entry.getKey(), entry.getValue());
 				}
 				// add exception handler for inbound messages
@@ -128,7 +128,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 						// TODO: heartbeat loss detection
 
 						ChannelFuture future;
-						String sourceIP = NettyMulticastClientService.this.getSettings().getSourceIp();
+                        String sourceIP = getSettings().getSourceIp();
 						if (sourceIP == null) {
 							future = channel.joinGroup(multicastGroup, localNetworkInterface);
 						}
@@ -150,9 +150,9 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 
 	@Override
 	public void dispose() {
-		this.changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
+        changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
 
-		NettySession session = this.nettySession;
+        NettySession session = nettySession;
 		if (session != null) {
 		    nettySession = null;
 		    session.close();
@@ -164,9 +164,9 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 			localChannel.close().syncUninterruptibly();
 		}
 
-		this.changeStatus(ServiceStatus.DISPOSED, "Service disposed", null); // FIXME: the same called from closeFuture.listen
+        changeStatus(ServiceStatus.DISPOSED, "Service disposed", null); // FIXME: the same called from closeFuture.listen
 
-        logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
 	}
 
@@ -202,13 +202,15 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 
 	@Override
 	protected void initService(IDictionaryManager dictionaryManager, IServiceSettings settings) {
-        if ( settings.getDictionaryName() == null )
+        if(settings.getDictionaryName() == null) {
             throw new IllegalArgumentException("'dictionaryName' parameter incorrect");
+        }
 
         this.dictionary = dictionaryManager.getDictionary(settings.getDictionaryName());
 
-        if ( this.dictionary == null )
+        if(dictionary == null) {
             throw new ServiceException("can't create dictionary");
+        }
 	}
 
 	@Override

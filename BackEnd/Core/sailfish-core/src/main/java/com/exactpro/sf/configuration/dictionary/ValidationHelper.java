@@ -21,6 +21,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,8 +54,8 @@ public class ValidationHelper {
 					
 					errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(), 
 							   "Duplicated field <strong>\"" + field.getName() + "\"</strong>", level, DictionaryValidationErrorType.ERR_DUPLICATE_NAME));
-					
-					logger.error("[{}{}] Duplicated field", (message != null ? message.getName() + "/" : ""), field.getName());
+
+                    logger.error("[{}{}] Duplicated field", message != null ? message.getName() + "/" : "", field.getName());
 				}
 				
 			}
@@ -174,7 +176,7 @@ public class ValidationHelper {
 
 		IAttributeStructure messageTypeStructure = message.getAttributes().get(attributeName);
 
-		return ValidationHelper.checkAttributeType(errors, messageTypeStructure, message, null,
+        return checkAttributeType(errors, messageTypeStructure, message, null,
 											attributeName, expectedJavaType, possibleValues);
 	}
 
@@ -184,7 +186,7 @@ public class ValidationHelper {
 
 		IAttributeStructure messageTypeStructure = field.getAttributes().get(attributeName);
 
-		return ValidationHelper.checkAttributeType(errors, messageTypeStructure, null, field,
+        return checkAttributeType(errors, messageTypeStructure, null, field,
 											attributeName, expectedJavaType, possibleValues);
 	}
 
@@ -208,7 +210,7 @@ public class ValidationHelper {
 			return false;
 		}
 
-		if(!messageTypeStructure.getType().equals(expectedJavaType)) {
+        if(messageTypeStructure.getType() != expectedJavaType) {
 			errors.add(new DictionaryValidationError(messageName, fieldName,
 					type + "  <strong>\"" + name
 							+ "\"</strong> contain " + attributeName +  " attribute"
@@ -242,64 +244,80 @@ public class ValidationHelper {
 		String value = null;
 		
 		try {
-			
-			if (objValue == null) return true;
-			
-			if (type == null) return true;
-		
-			if (!(objValue instanceof String)) {
-				return true;
-			}
-			
-			value = (String) objValue;
-			
-			if (value.isEmpty()) return true;
+
+            if(objValue == null || type == null || !(objValue instanceof String)) {
+                return true;
+            }
+
+            value = (String)objValue;
+
+            if(value.isEmpty()) {
+                return true;
+            }
 			
 			switch (type) {
-			
-				case JAVA_LANG_BOOLEAN : 
-					
-					if (null == boolValueOf(value)) throw new ClassCastException();
+
+            case JAVA_LANG_BOOLEAN:
+
+                if(boolValueOf(value) == null) {
+                    throw new ClassCastException();
+                }
 					break;
 			
 				case JAVA_LANG_BYTE :
-					
-					if (null == Byte.valueOf(value)) throw new ClassCastException();
+
+                    if(Byte.valueOf(value) == null) {
+                        throw new ClassCastException();
+                    }
 					break;	
 			
 				case JAVA_LANG_SHORT :
-				
-					if (null == Short.valueOf(value)) throw new ClassCastException();
+
+                    if(Short.valueOf(value) == null) {
+                        throw new ClassCastException();
+                    }
 					break;
 					
 				case JAVA_LANG_INTEGER :
-					
-					if (null == Integer.valueOf(value)) throw new ClassCastException();
+
+                    if(Integer.valueOf(value) == null) {
+                        throw new ClassCastException();
+                    }
 					break;
 					
 				case JAVA_LANG_LONG :
-					
-					if (null == Long.valueOf(value)) throw new ClassCastException();
+
+                    if(Long.valueOf(value) == null) {
+                        throw new ClassCastException();
+                    }
 					break;
 					
 				case JAVA_LANG_FLOAT :
-					
-					if (null == Float.valueOf(value)) throw new ClassCastException();
+
+                    if(Float.valueOf(value) == null) {
+                        throw new ClassCastException();
+                    }
 					break;
 					
 				case JAVA_LANG_DOUBLE :
-					
-					if (null == Double.valueOf(value)) throw new ClassCastException();
+
+                    if(Double.valueOf(value) == null) {
+                        throw new ClassCastException();
+                    }
 					break;
 			
 				case JAVA_LANG_CHARACTER :
-					
-					if (value.length() > 1) throw new ClassCastException();
+
+                    if(value.length() > 1) {
+                        throw new ClassCastException();
+                    }
 					break;
 					
 				case JAVA_MATH_BIG_DECIMAL :
-					
-					if (null == BigDecimal.valueOf(Double.valueOf(value))) throw new ClassCastException();
+
+                    if(BigDecimal.valueOf(Double.valueOf(value)) == null) {
+                        throw new ClassCastException();
+                    }
 					break;
 					
 				default: break;
@@ -317,24 +335,27 @@ public class ValidationHelper {
 	}
 	
 	private static Boolean boolValueOf(String value) {
-		
-	    if ("Y".equals(value)) return true;
-	    
-        if ("N".equals(value)) return false;
-		
-		if (Boolean.valueOf(value)) return true;
-		
-		if (!value.equalsIgnoreCase("false")) return null;
+
+        if("Y".equals(value)) {
+            return true;
+        }
+
+        if("N".equals(value)) {
+            return false;
+        }
+
+        if(Boolean.valueOf(value)) {
+            return true;
+        }
+
+        if(!"false".equalsIgnoreCase(value)) {
+            return null;
+        }
 		
 		return false;
 	}
 	
 	private static String getJavaTypeLabel(JavaType type) {
-		int index = type.value().lastIndexOf(".") + 1;
-		String result = type.value();
-		if (index != 0) {
-			result = type.value().substring(index);
-		}
-		return result;
-	}
+        return ClassUtils.getShortClassName(type.value());
+    }
 }

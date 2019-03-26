@@ -34,49 +34,49 @@ import com.exactpro.sf.storage.MessageRow;
 import com.exactpro.sf.util.KnownBugException;
 
 public interface IActionContext {
-    public CheckPoint getCheckPoint();
-    public String getDescription();
-    public SailfishURI getDictionaryURI();
-    public String getId();
-    public long getLine();
-    public Object getMessage(String reference);
+    CheckPoint getCheckPoint();
+    String getDescription();
+    SailfishURI getDictionaryURI();
+    String getId();
+    long getLine();
+    Object getMessage(String reference);
 
     /**
      * @deprecated Used in AML 2 only
      */
     @Deprecated
-    public MessageCount getMessageCount();
-    public IFilter getMessageCountFilter();
-    public MetaContainer getMetaContainer();
+    MessageCount getMessageCount();
+    IFilter getMessageCountFilter();
+    MetaContainer getMetaContainer();
     /**
      * @deprecated Used in AML 2 only
      */
     @Deprecated
-    public Map<String, Boolean> getNegativeMap();
-    public String getReference();
-    public IActionReport getReport();
-    public IActionServiceManager getServiceManager();
+    Map<String, Boolean> getNegativeMap();
+    String getReference();
+    IActionReport getReport();
+    IActionServiceManager getServiceManager();
     // from ScriptContext
-    public String getEnvironmentName();
-    public long getScriptStartTime();
-    public String getTestCaseName();
+    String getEnvironmentName();
+    long getScriptStartTime();
+    String getTestCaseName();
     // from DebugController
-    public void pauseScript(long timeout, String reason) throws InterruptedException;
+    void pauseScript(long timeout, String reason) throws InterruptedException;
     // from IScriptConfig
-    public Logger getLogger();
+    Logger getLogger();
     // from IDictionaryManager
     IDictionaryStructure getDictionary(SailfishURI dictionaryURI) throws RuntimeException;
     // from IMessageStorage
-    public Iterable<MessageRow> loadMessages(int count, MessageFilter filter);
-    public void storeMessage(IMessage message);
+    Iterable<MessageRow> loadMessages(int count, MessageFilter filter);
+    void storeMessage(IMessage message);
 
-    public String getServiceName();
+    String getServiceName();
     // from ScriptContext
-    public Set<String> getServicesNames();
-    public long getTimeout();
-    public boolean isAddToReport();
-    public boolean isCheckGroupsOrder();
-    public boolean isReorderGroups();
+    Set<String> getServicesNames();
+    long getTimeout();
+    boolean isAddToReport();
+    boolean isCheckGroupsOrder();
+    boolean isReorderGroups();
 
     /**
      * @deprecated
@@ -85,9 +85,9 @@ public interface IActionContext {
      * {@link MetaContainer} can be obtained by calling {@link #getMetaContainer()} method.
      */
     @Deprecated
-    public <T> T getSystemColumn(String name);
+    <T> T getSystemColumn(String name);
 
-    public IDataManager getDataManager();
+    IDataManager getDataManager();
 
     Set<String> getUncheckedFields();
     ClassLoader getPluginClassLoader(String pluginAlias);

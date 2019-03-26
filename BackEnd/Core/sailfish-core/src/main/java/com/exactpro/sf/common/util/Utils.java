@@ -24,8 +24,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +47,8 @@ public class Utils
 		TIME,
 		NAME,
 		END_NAME,
-		TIME_END_NAME;
-	}
+        TIME_END_NAME
+    }
 
 	public static long determineStartSecFromParsedFile(String parsedFileName) throws IOException
 	{
@@ -68,8 +70,8 @@ public class Utils
 
 	public static class FileSpecialComparator implements Comparator<File>
 	{
-		private boolean first;
-		private boolean excludeExt;
+        private final boolean first;
+        private final boolean excludeExt;
 
 		public FileSpecialComparator(boolean first, boolean excludeExt)
 		{
@@ -143,24 +145,17 @@ public class Utils
 			}
 
 			long l2 = Long.parseLong(o2.getName().substring(start_index + 1, end_index));
-
-			if ( l1 == l2 )
-				return 0;
-
-			if ( l1 > l2 )
-				return 1;
-			else
-				return -1;
-		}
+            return Long.compare(l1, l2);
+        }
 	}
 
 
 
 	public static class FileComparator implements Comparator<File>
 	{
-		private CompType type;
-		private String prefix;
-		private boolean extension;
+        private final CompType type;
+        private final String prefix;
+        private final boolean extension;
 
 		public FileComparator(CompType type, String prefix, boolean extension)
 		{
@@ -175,12 +170,7 @@ public class Utils
 		{
 			if ( type == CompType.TIME )
 			{
-				if ( o1.lastModified() < o2.lastModified() )
-					return -1;
-				else if ( o1.lastModified() > o2.lastModified() )
-					return 1;
-
-				return 0;
+                return Long.compare(o1.lastModified(), o2.lastModified());
 			}
 			else if ( type == CompType.NAME )
 			{
@@ -190,71 +180,73 @@ public class Utils
 			{
 				String os1 = null;
 
-				if ( o1.getName().length() == this.prefix.length() )
-					os1 = "0";
-				else
+                if(o1.getName().length() == prefix.length()) {
+                    os1 = "0";
+                } else
 				{
-					if ( !this.extension )
-						os1 = o1.getName().substring(this.prefix.length());
-					else
-						os1 = getFileNameWithoutExt(o1.getName()).substring(this.prefix.length());
+                    if(!extension) {
+                        os1 = o1.getName().substring(prefix.length());
+                    } else {
+                        os1 = getFileNameWithoutExt(o1.getName()).substring(prefix.length());
+                    }
 				}
 
 				String os2 = null;
 
-				if ( o2.getName().length() == this.prefix.length() )
-					os2 = "0";
-				else
+                if(o2.getName().length() == prefix.length()) {
+                    os2 = "0";
+                } else
 				{
-					if ( !this.extension )
-						os2 = o2.getName().substring(this.prefix.length());
-					else
-						os2 = getFileNameWithoutExt(o2.getName()).substring(this.prefix.length());
+                    if(!extension) {
+                        os2 = o2.getName().substring(prefix.length());
+                    } else {
+                        os2 = getFileNameWithoutExt(o2.getName()).substring(prefix.length());
+                    }
 				}
 
 				return Integer.parseInt(os1) - Integer.parseInt(os2);
 			}
 			else if ( type == CompType.TIME_END_NAME )
 			{
-				if ( o1.lastModified() < o2.lastModified() )
-					return -1;
-				else if ( o1.lastModified() > o2.lastModified() )
-					return 1;
+                if(o1.lastModified() < o2.lastModified()) {
+                    return -1;
+                } else if(o1.lastModified() > o2.lastModified()) {
+                    return 1;
+                }
 
 				String os1 = null;
 
-				if ( o1.getName().length() == this.prefix.length() )
-					os1 = "0";
-				else
+                if(o1.getName().length() == prefix.length()) {
+                    os1 = "0";
+                } else
 				{
-					if ( !this.extension )
-						os1 = o1.getName().substring(this.prefix.length());
-					else
-						os1 = getFileNameWithoutExt(o1.getName()).substring(this.prefix.length());
+                    if(!extension) {
+                        os1 = o1.getName().substring(prefix.length());
+                    } else {
+                        os1 = getFileNameWithoutExt(o1.getName()).substring(prefix.length());
+                    }
 				}
 
 				String os2 = null;
 
-				if ( o2.getName().length() == this.prefix.length() )
-					os2 = "0";
-				else
+                if(o2.getName().length() == prefix.length()) {
+                    os2 = "0";
+                } else
 				{
-					if ( !this.extension )
-						os2 = o2.getName().substring(this.prefix.length());
-					else
-						os2 = getFileNameWithoutExt(o2.getName()).substring(this.prefix.length());
+                    os2 = !extension ? o2.getName().substring(prefix.length()) : getFileNameWithoutExt(o2.getName()).substring(prefix.length());
 				}
 
 				return Integer.parseInt(os1) - Integer.parseInt(os2);
 
-			}
-			else throw new IllegalArgumentException("Unknown CompType = [" + type + "]");
+            } else {
+                throw new IllegalArgumentException("Unknown CompType = [" + type + "]");
+            }
 		}
 	}
 
 	public static class FileExtensionFilter implements FileFilter{
 
-		private String ext;
+        private final String ext;
 
 		public FileExtensionFilter(String ext){
 			this.ext = ext;
@@ -271,8 +263,7 @@ public class Utils
 	{
 		private final String fileNamePrefix;
 
-
-		public FileNameFilter(final String fileNamePrefix)
+        public FileNameFilter(String fileNamePrefix)
 		{
 			this.fileNamePrefix = fileNamePrefix;
 		}
@@ -281,11 +272,8 @@ public class Utils
 		@Override
 		public boolean accept(File file)
 		{
-			if ( file.getName().startsWith(this.fileNamePrefix) )
-				return true;
-
-			return false;
-		}
+            return file.getName().startsWith(fileNamePrefix);
+        }
 	}
 
 
@@ -293,46 +281,39 @@ public class Utils
 
 	public static String getFileNameWithoutExt(String fileName)
 	{
-		int pos = fileName.lastIndexOf(".");
-
-		if ( pos != -1 )
-			fileName = fileName.substring(0, pos);
-
-		return fileName;
-	}
+        return FilenameUtils.removeExtension(fileName);
+    }
 
 
 	public static long retrieveStartTimeForCalculating(File latencyFolder, File inputFolder, File outputFolder, long maxLatencyWindow)
 	{
 		File[] files = latencyFolder.listFiles();
 
-		Arrays.sort(files, new Utils.FileSpecialComparator(true, false));
+        Arrays.sort(files, new FileSpecialComparator(true, false));
 
 		if ( files.length > 0 )
 		{
-			int i = 0;
 
-			boolean calculate = false;
+            boolean calculate = false;
 
 			long startInterval = 0;
 
-			int startFileIndex = 0;
-
-			File lastLatFile = files[files.length - 1];
+            File lastLatFile = files[files.length - 1];
 
 			File[] inputFiles = inputFolder.listFiles();
 
-			Arrays.sort(inputFiles, new Utils.FileSpecialComparator(true, false));
+            Arrays.sort(inputFiles, new FileSpecialComparator(true, false));
 
-			i = 0;
+            int i = 0;
 
 			for ( ; i < inputFiles.length; ++i )
 			{
-				if ( FileUtils.isFileOlder(inputFiles[inputFiles.length - 1 - i], lastLatFile) )
-					break;
+                if(FileUtils.isFileOlder(inputFiles[inputFiles.length - 1 - i], lastLatFile)) {
+                    break;
+                }
 			}
 
-			startFileIndex = inputFiles.length - i;
+            int startFileIndex = inputFiles.length - i;
 
 			if ( startFileIndex < inputFiles.length )
 			{
@@ -345,14 +326,15 @@ public class Utils
 
 			File[] outputFiles = outputFolder.listFiles();
 
-			Arrays.sort(outputFiles, new Utils.FileSpecialComparator(true, false));
+            Arrays.sort(outputFiles, new FileSpecialComparator(true, false));
 
 			i = 0;
 
 			for ( ; i < outputFiles.length; ++i )
 			{
-				if ( FileUtils.isFileOlder(outputFiles[outputFiles.length - 1 - i], lastLatFile) )
-					break;
+                if(FileUtils.isFileOlder(outputFiles[outputFiles.length - 1 - i], lastLatFile)) {
+                    break;
+                }
 			}
 
 			startFileIndex = outputFiles.length - i;
@@ -365,8 +347,9 @@ public class Utils
 
 				if ( calculate )
 				{
-					if ( startInterval > tempStartInterval )
-						startInterval = tempStartInterval;
+                    if(startInterval > tempStartInterval) {
+                        startInterval = tempStartInterval;
+                    }
 				}
 				else
 				{
@@ -375,10 +358,7 @@ public class Utils
 				}
 			}
 
-			if ( calculate )
-				return maxLatencyWindow*startInterval;
-			else
-				return -1;
+            return calculate ? maxLatencyWindow * startInterval : -1;
 		}
 
 		return 0;
@@ -394,15 +374,13 @@ public class Utils
 		{
 			File[] files = latencyFolder.listFiles();
 
-			Arrays.sort(files, new Utils.FileComparator(CompType.TIME, "", false));
+            Arrays.sort(files, new FileComparator(CompType.TIME, "", false));
 
-			if ( files.length == 0 || files.length == 1 )
-				return 0;
+            return files.length == 0 || files.length == 1 ? 0 : maxLatencyWindow * (files.length - 2);
 
-			return maxLatencyWindow*(files.length - 2);
-		}
-		else
-			throw new EPSCommonException("Could not find [" + latencyFolderName + "] folder with latency files");
+        } else {
+            throw new EPSCommonException("Could not find [" + latencyFolderName + "] folder with latency files");
+        }
 	}
 
 
@@ -414,22 +392,25 @@ public class Utils
 		{
 			File[] files = folder.listFiles();
 
-			Arrays.sort(files, new Utils.FileSpecialComparator(true, false));
+            Arrays.sort(files, new FileSpecialComparator(true, false));
 
-			if ( files.length == 0 )
-				return;
+            if(files.length == 0) {
+                return;
+            }
 
-			int index = ( files.length - 1 );
+            int index = files.length - 1;
 			for ( ; index >= 0; --index )
 			{
 				long startInterval = determineStartInterval(files[index].getName());
 
-				if ( startInterval < startTimeInSec*1000000 )
-					break;
+                if(startInterval < startTimeInSec * 1000000) {
+                    break;
+                }
 			}
 
-			if ( index < 0 )
-				index = 0;
+            if(index < 0) {
+                index = 0;
+            }
 
 
 
@@ -457,27 +438,22 @@ public class Utils
 				{
 					long timestamp = Long.parseLong(reader.getValues()[0]);
 
-					if ( timestamp >= startTimeInSec*1000000 && ( timestamp < finishTimeInSec*1000000 || finishTimeInSec == Long.MAX_VALUE ))
-					{
-						writer.write(reader.getRawRecord());
-						writer.newLine();
-					}
-					else if ( timestamp < startTimeInSec*1000000 )
-					{
-					}
-					else
-						break;
-
-				}
+                    if(timestamp >= startTimeInSec * 1000000 && (timestamp < finishTimeInSec * 1000000 || finishTimeInSec == Long.MAX_VALUE)) {
+                        writer.write(reader.getRawRecord());
+                        writer.newLine();
+                    } else if(timestamp >= startTimeInSec * 1000000) {
+                        break;
+                    }
+                }
 
 				reader.close();
 			}
 
 			writer.close();
 
-		}
-		else
-			throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        } else {
+            throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        }
 	}
 
 
@@ -489,22 +465,25 @@ public class Utils
 		{
 			File[] files = folder.listFiles();
 
-			Arrays.sort(files, new Utils.FileSpecialComparator(true, false));
+            Arrays.sort(files, new FileSpecialComparator(true, false));
 
-			if ( files.length == 0 )
-				return;
+            if(files.length == 0) {
+                return;
+            }
 
-			int index = ( files.length - 1 );
+            int index = files.length - 1;
 			for ( ; index >= 0; --index )
 			{
 				long startInterval = determineStartInterval(files[index].getName());
 
-				if ( startInterval < startTimeInSec*1000000 )
-					break;
+                if(startInterval < startTimeInSec * 1000000) {
+                    break;
+                }
 			}
 
-			if ( index < 0 )
-				index = 0;
+            if(index < 0) {
+                index = 0;
+            }
 
 
             try(BufferedWriter writer = new BufferedWriter(new FileWriter(generatingFile))) {
@@ -533,13 +512,15 @@ public class Utils
 
                         writer.write("Timestamp,Latency");
 
-                        for(int j = 3; j < headers.length; ++j)
+                        for(int j = 3; j < headers.length; ++j) {
                             writer.write("," + headers[j]);
+                        }
 
                         writer.newLine();
 
-                        if(fieldIndex == -1)
+                        if(fieldIndex == -1) {
                             throw new IllegalArgumentException("Could not find fieldName = [" + analyzedField + "] in inputFile = [" + files[i].getName() + "]");
+                        }
                     }
 
                     while(reader.readRecord()) {
@@ -555,27 +536,26 @@ public class Utils
 
                                 sendingTimestamp = (sendingTimestamp - startSec * 1000) * 1000;
 
-                                writer.write(values[0] + "," + Long.toString(timestamp - sendingTimestamp));
+                                writer.write(values[0] + ',' + (timestamp - sendingTimestamp));
 
-                                for(int j = 3; j < values.length; ++j)
+                                for(int j = 3; j < values.length; ++j) {
                                     writer.write("," + values[j]);
+                                }
 
                                 writer.newLine();
                             } catch(ParseException e) {
                             }
-
-                        } else if(timestamp < startTimeInSec * 1000000) {
-                        } else
+                        } else if(timestamp >= startTimeInSec * 1000000) {
                             break;
-
+                        }
                     }
 
                     reader.close();
                 }
 			}
-		}
-		else
-			throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        } else {
+            throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        }
 	}
 
 
@@ -592,22 +572,25 @@ public class Utils
 		{
 			File[] files = folder.listFiles();
 
-			Arrays.sort(files, new Utils.FileSpecialComparator(true, false));
+            Arrays.sort(files, new FileSpecialComparator(true, false));
 
-			if ( files.length == 0 )
-				return;
+            if(files.length == 0) {
+                return;
+            }
 
-			int index = ( files.length - 1 );
+            int index = files.length - 1;
 			for ( ; index >= 0; --index )
 			{
 				long startInterval = determineStartInterval(files[index].getName());
 
-				if ( startInterval < startTimeInSec*1000000 )
-					break;
+                if(startInterval < startTimeInSec * 1000000) {
+                    break;
+                }
 			}
 
-			if ( index < 0 )
-				index = 0;
+            if(index < 0) {
+                index = 0;
+            }
 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(generatingFile));
 
@@ -645,18 +628,14 @@ public class Utils
 
 						if ( !firstRecordWritten )
 						{
-							if ( timestamp >= startTimeInSec*1000000 && ( timestamp < finishTimeInSec*1000000 || finishTimeInSec == Long.MAX_VALUE ))
-							{
-								writer.write(reader.getRawRecord());
-								writer.newLine();
-								firstRecordWritten = true;
-							}
-							else if ( timestamp < startTimeInSec*1000000 )
-							{
-							}
-							else
-								break;
-						}
+                            if(timestamp >= startTimeInSec * 1000000 && (timestamp < finishTimeInSec * 1000000 || finishTimeInSec == Long.MAX_VALUE)) {
+                                writer.write(reader.getRawRecord());
+                                writer.newLine();
+                                firstRecordWritten = true;
+                            } else if(timestamp >= startTimeInSec * 1000000) {
+                                break;
+                            }
+                        }
 					}
 
 					writer.write(lastRecord);
@@ -667,9 +646,9 @@ public class Utils
 
 			writer.close();
 
-		}
-		else
-			throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        } else {
+            throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        }
 	}
 
 
@@ -692,7 +671,7 @@ public class Utils
 
 	public static long determineFinishInterval(String fileName)
 	{
-		long finishTime = Long.parseLong(Utils.getFileNameWithoutExt(fileName).substring(Utils.getFileNameWithoutExt(fileName).lastIndexOf("_") + 1));
+        long finishTime = Long.parseLong(getFileNameWithoutExt(fileName).substring(getFileNameWithoutExt(fileName).lastIndexOf("_") + 1));
 
 		return finishTime;
 	}
@@ -702,8 +681,9 @@ public class Utils
 	{
 		int lastIndex = fileName.lastIndexOf("_");
 
-		if ( lastIndex == -1 )
-			throw new EPSCommonException("Incorrect file name = [" + fileName + "]");
+        if(lastIndex == -1) {
+            throw new EPSCommonException("Incorrect file name = [" + fileName + "]");
+        }
 
 		int prevIndex = fileName.lastIndexOf("_", lastIndex - 1);
 
@@ -721,10 +701,11 @@ public class Utils
 		{
 			File[] files = folder.listFiles();
 
-			Arrays.sort(files, new Utils.FileComparator(CompType.TIME, "", false));
+            Arrays.sort(files, new FileComparator(CompType.TIME, "", false));
 
-			if ( files.length == 0 )
-				return;
+            if(files.length == 0) {
+                return;
+            }
 
 			BufferedWriter writer = new BufferedWriter(new FileWriter(generatingFile));
 
@@ -752,9 +733,9 @@ public class Utils
 
 			writer.close();
 
-		}
-		else
-			throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        } else {
+            throw new EPSCommonException("Could not find [" + folderName + "] folder with files");
+        }
 	}
 
 
@@ -804,10 +785,6 @@ public class Utils
 	}
 
     public static String getTagColorClass(String name) {
-        if(name != null) {
-            return TAG_COLOR_CLASSES[Math.abs(name.hashCode()) % TAG_COLOR_CLASSES.length];
-        }
-
-        return TAG_COLOR_CLASSES[0];
+        return TAG_COLOR_CLASSES[Math.abs(Objects.hashCode(name)) % TAG_COLOR_CLASSES.length];
     }
 }

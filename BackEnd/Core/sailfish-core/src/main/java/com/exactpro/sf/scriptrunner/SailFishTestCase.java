@@ -24,23 +24,23 @@ public class SailFishTestCase
 {
 	static final Logger logger = LoggerFactory.getLogger(SailFishTestCase.class);
 
-	private IScriptReport report = null;
-	private ScriptRun scriptRun = null;
-	protected ScriptContext context = null;
+    private IScriptReport report;
+    private ScriptRun scriptRun;
+    protected ScriptContext context;
 
 	protected IScriptReport getReport()
 	{
-		return this.report;
+        return report;
 	}
 
 	protected ScriptRun getScriptRun()
 	{
-		return this.scriptRun;
+        return scriptRun;
 	}
 
 	protected ScriptContext getContext()
 	{
-		return this.context;
+        return context;
 	}
 
 	public void setReport(IScriptReport report)

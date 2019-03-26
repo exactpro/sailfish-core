@@ -65,7 +65,7 @@ public class FIXSession implements ISession {
 		this.storage = storage;
 		this.converter = converter;
 		this.messageHelper = messageHelper;
-		this.logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+        this.logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 	}
 
 	@Override
@@ -78,18 +78,14 @@ public class FIXSession implements ISession {
         try {
             lookupSession().disconnect("Disconnect without logout", true);
         } catch (IOException e) {
-            throw new ServiceException("Can not force close session for service " + this.name, e);
+            throw new ServiceException("Can not force close session for service " + name, e);
         }
     }
 
 	@Override
 	public boolean isClosed() {
 		Session session = Session.lookupSession(sessionId);
-		if(session != null){
-			return !session.isLoggedOn();
-		} else {
-			return true;
-		}
+        return session == null || !session.isLoggedOn();
 	}
 
 	@Override
@@ -102,28 +98,27 @@ public class FIXSession implements ISession {
 		} else if (message instanceof IMessage) {
 			Session session = lookupSession();
 			IMessage imsg = (IMessage) message;
-			if (this.messageHelper != null) {
-			    imsg = this.messageHelper.prepareMessageToEncode(imsg, null);
+            if(messageHelper != null) {
+                imsg = messageHelper.prepareMessageToEncode(imsg, null);
 			} else {
-			    throw new ServiceException("Service '" + this.name + "' is configured incorrectly");
+                throw new ServiceException("Service '" + name + "' is configured incorrectly");
 			}
 
             try {
-                if (this.converter != null) {
-                    Message fmsg = this.converter.convert(imsg, session.getSessionID().isFIXT());
+                if(converter != null) {
+                    Message fmsg = converter.convert(imsg, session.getSessionID().isFIXT());
                     isSendSuccess = session.send(fmsg);
                     if (!isSendSuccess) {
                         throw new SendMessageFailedException("Send message " + imsg.getName() + " failed");
                     }
-                    imsg = this.converter.convert(fmsg);
+                    return converter.convert(fmsg);
                 } else {
-                    throw new ServiceException("Service '" + this.name + "' is configured incorrectly");
+                    throw new ServiceException("Service '" + name + "' is configured incorrectly");
                 }
             } catch (MessageConvertException e) {
                 throw new ServiceException(new StringBuilder("Send message ").append(imsg.getName()).append(" failed").toString(), e);
             }
-			return imsg;
-		} else {
+        } else {
 			throw new EPSCommonException("Unknown type of message: " + message.getClass().getCanonicalName());
 		}
         if (!isSendSuccess) {
@@ -146,7 +141,7 @@ public class FIXSession implements ISession {
             lockSenderMsgSeqNum();
 
             try {
-                RawMessage convertedMessage = this.converter.convertDirty(iMessage, iMessage.getName(), true, getBeginString(), getExpectedSenderNum(), getSenderCompID(), getTargetCompID());
+                RawMessage convertedMessage = converter.convertDirty(iMessage, iMessage.getName(), true, getBeginString(), getExpectedSenderNum(), getSenderCompID(), getTargetCompID());
                 String messageString = convertedMessage.toString();
 
                 sendRawMessage(getExpectedSenderNum(), messageString);
@@ -166,7 +161,7 @@ public class FIXSession implements ISession {
 
 	@Override
 	public String getName() {
-		return this.name;
+        return name;
 	}
 
 	@Override
@@ -221,8 +216,8 @@ public class FIXSession implements ISession {
         MsgMetaData metaData = message.getMetaData();
 
         metaData.setAdmin(false);
-        metaData.setFromService(this.getSenderCompID());
-        metaData.setToService(this.getTargetCompID());
+        metaData.setFromService(getSenderCompID());
+        metaData.setToService(getTargetCompID());
         metaData.setRawMessage(messageString.getBytes(CharsetSupport.getCharsetInstance()));
         metaData.setServiceInfo(serviceInfo);
 
@@ -252,13 +247,13 @@ public class FIXSession implements ISession {
 
 		try {
 			state.getMessageStore().setNextSenderMsgSeqNum(seq);
-		} catch (IOException e) {
+            return seq;
+        } catch(IOException e) {
 			session.getLog().onEvent(
 					"setNextSenderMsgSeqNum failed: " + e.getMessage());
 			return -1;
 		}
-		return seq;
-	}
+    }
 
 	public int addExpectedSenderNum(int seq) {
 		int oldSeq = getExpectedSenderNum();
@@ -286,7 +281,7 @@ public class FIXSession implements ISession {
 	}
 
 	public SessionID getSessionID() {
-		return this.sessionId;
+        return sessionId;
 	}
 
 	public ServiceInfo getServiceInfo() {
@@ -309,8 +304,6 @@ public class FIXSession implements ISession {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o == null) return false;
-		if (!(o instanceof FIXSession)) return false;
-		return getName().equals(((ISession)o).getName());
-	}
+        return o instanceof FIXSession && getName().equals(((ISession)o).getName());
+    }
 }

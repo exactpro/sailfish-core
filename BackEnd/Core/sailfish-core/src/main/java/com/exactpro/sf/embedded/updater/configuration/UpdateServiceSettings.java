@@ -19,6 +19,7 @@ package com.exactpro.sf.embedded.updater.configuration;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -75,7 +76,7 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
 
     @Override
     public void fillFromMap(Map<String, String> options) throws Exception {
-        for(Map.Entry<String, String> entry : options.entrySet()) {
+        for(Entry<String, String> entry : options.entrySet()) {
             if(entry.getKey().startsWith(STORAGE_PREFIX)) {
                 BeanUtils.setProperty(this, entry.getKey().replace(STORAGE_PREFIX, ""), entry.getValue());
             }
@@ -88,7 +89,7 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
         Map<String, String> description = BeanUtils.describe(this);
 
         Map<String, String> result = new HashMap<>();
-        for(Map.Entry<String, String> entry : description.entrySet()) {
+        for(Entry<String, String> entry : description.entrySet()) {
             result.put(STORAGE_PREFIX + entry.getKey(), entry.getValue());
         }
         return result;
@@ -96,17 +97,21 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
 
     public UpdateServiceSettings clone() {
         UpdateServiceSettings clone = new UpdateServiceSettings();
-        clone.host = this.host;
-        clone.port = this.port;
-        clone.checkUpdateTimeout = this.checkUpdateTimeout;
-        clone.timeUnit = this.timeUnit;
+        clone.host = host;
+        clone.port = port;
+        clone.checkUpdateTimeout = checkUpdateTimeout;
+        clone.timeUnit = timeUnit;
         return clone;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UpdateServiceSettings that = (UpdateServiceSettings) o;
         return new EqualsBuilder()
                 .append(host, that.host)

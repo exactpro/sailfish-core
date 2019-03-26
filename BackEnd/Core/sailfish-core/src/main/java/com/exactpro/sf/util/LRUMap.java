@@ -24,9 +24,8 @@ public class LRUMap<K, V> extends LinkedHashMap<K, V> {
 
 	private final int maxSize;
 
-	public LRUMap(final int maxSize) {
-		super();
-		this.maxSize = maxSize;
+	public LRUMap(int maxSize) {
+        this.maxSize = maxSize;
 	}
 
 	public LRUMap(int maxSize, int initialCapacity, float loadFactor, boolean accessOrder) {

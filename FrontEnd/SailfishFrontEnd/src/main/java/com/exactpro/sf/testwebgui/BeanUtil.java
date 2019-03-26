@@ -18,9 +18,12 @@ package com.exactpro.sf.testwebgui;
 import java.util.Map;
 
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
@@ -38,19 +41,18 @@ import com.exactpro.sf.testwebgui.scriptruns.MatrixHolder;
 import com.exactpro.sf.testwebgui.scriptruns.ScriptRunsBean;
 import com.exactpro.sf.testwebgui.servlets.ReportServlet;
 import com.exactpro.sf.testwebgui.servlets.SessionModelsMapper;
-import org.apache.commons.lang3.StringUtils;
 
 public class BeanUtil {
 
-	public final static String WORKSPACE_DISPATCHER = "workspaceDispatcher";
-    public final static String KEY_USER = "user";
-    public final static String DEFAULT_USER = "guest";
-    public final static String ENUM_SET_CONTAINER = "enumSetContainer";
-    public final static String MATRIX_HOLDER = "matrixHolder";
-    public final static String MATRIX_PROVIDER_HOLDER = "matrixProviderHolder";
-    public final static String HELP_CONTENT_HOLDER = "helpContentHolder";
-    public final static String SESSION_MODELS_MAPPER = "sessionModelsMapper";
-    public final static String ENVIRONMENT_TRACKING_BEAN = "environmentTrackingBean";
+    public static final String WORKSPACE_DISPATCHER = "workspaceDispatcher";
+    public static final String KEY_USER = "user";
+    public static final String DEFAULT_USER = "guest";
+    public static final String ENUM_SET_CONTAINER = "enumSetContainer";
+    public static final String MATRIX_HOLDER = "matrixHolder";
+    public static final String MATRIX_PROVIDER_HOLDER = "matrixProviderHolder";
+    public static final String HELP_CONTENT_HOLDER = "helpContentHolder";
+    public static final String SESSION_MODELS_MAPPER = "sessionModelsMapper";
+    public static final String ENVIRONMENT_TRACKING_BEAN = "environmentTrackingBean";
 
     private static ServletContext servletContext;
 
@@ -60,9 +62,9 @@ public class BeanUtil {
         }
     }
 
-    private final static Long GROWL_LIFE = 6000L;
+    private static final Long GROWL_LIFE = 6000L;
 
-    public static void showMessage(FacesMessage.Severity severity, String message, String details) {
+    public static void showMessage(Severity severity, String message, String details) {
 
         FacesMessage msg = new FacesMessage(severity, message, details);
         FacesContext context = FacesContext.getCurrentInstance();
@@ -75,15 +77,15 @@ public class BeanUtil {
         }
     }
 
-    public static void addErrorMessage(final String summary, final String details) {
+    public static void addErrorMessage(String summary, String details) {
 	showMessage(FacesMessage.SEVERITY_ERROR, summary, details);
     }
 
-    public static void addInfoMessage(final String summary, final String details) {
+    public static void addInfoMessage(String summary, String details) {
 	showMessage(FacesMessage.SEVERITY_INFO, summary, details);
     }
 
-    public static void addWarningMessage(final String summary, final String details) {
+    public static void addWarningMessage(String summary, String details) {
 	showMessage(FacesMessage.SEVERITY_WARN, summary, details);
     }
 
@@ -94,10 +96,7 @@ public class BeanUtil {
 
     public static <T> T getObject(String name, Class<T> classType) {
         Object value = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get(name);
-        if (classType.isInstance(value)) {
-            return classType.cast(value);
-        }
-        return null;
+        return classType.isInstance(value) ? classType.cast(value) : null;
     }
 
     public static HttpSession getCurrentSession() {
@@ -169,10 +168,7 @@ public class BeanUtil {
 
     public static String getSfUser() {
         User user = getObject(KEY_USER, User.class);
-        if (user != null && !user.isGuest()) {
-            return user.getFirstName() + " " + user.getLastName();
-        }
-        return null;
+        return user != null && !user.isGuest() ? user.getFirstName() + " " + user.getLastName() : null;
     }
 
     public static String getUser(String prefixName) {
@@ -182,14 +178,11 @@ public class BeanUtil {
     public static String getJavaTypeLabel(JavaType type) {
         int index = type.value().lastIndexOf(".") + 1;
         String result = type.value();
-        if (index != 0) {
-            result = type.value().substring(index);
-        }
-        return result;
+        return index != 0 ? type.value().substring(index) : result;
     }
 
     public static String getContextPath(String customReportsPath, boolean button) {
-        return StringUtils.isEmpty(customReportsPath) ? (button ? StringUtils.EMPTY : FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath())
+        return StringUtils.isEmpty(customReportsPath) ? button ? StringUtils.EMPTY : FacesContext.getCurrentInstance().getExternalContext().getRequestContextPath()
                 : customReportsPath.substring(0, customReportsPath.lastIndexOf("/"));
     }
 

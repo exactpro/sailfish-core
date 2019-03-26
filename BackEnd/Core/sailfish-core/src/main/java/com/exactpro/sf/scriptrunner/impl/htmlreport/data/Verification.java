@@ -15,16 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
-import com.exactpro.sf.scriptrunner.StatusDescription;
-import com.exactpro.sf.scriptrunner.impl.htmlreport.HtmlReport.ContextType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.impl.htmlreport.HtmlReport.ContextType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 public class Verification extends BaseEntity {
     private static final Logger logger = LoggerFactory.getLogger(Verification.class);
@@ -42,10 +43,6 @@ public class Verification extends BaseEntity {
         SimpleModule module = new SimpleModule();
         module.addSerializer(Verification.class, new VerificationSerializer(Verification.class));
         mapper.registerModule(module);
-    }
-
-    public Verification() {
-        super();
     }
 
     public int getId() {

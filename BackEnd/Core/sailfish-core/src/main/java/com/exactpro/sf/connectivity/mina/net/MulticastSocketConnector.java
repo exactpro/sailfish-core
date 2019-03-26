@@ -38,7 +38,7 @@ import org.apache.mina.util.ExceptionMonitor;
 public class MulticastSocketConnector extends AbstractIoConnector 
 {
 	// object used for checking session idle
-    private IdleStatusChecker idleChecker;
+    private final IdleStatusChecker idleChecker;
     
     private final IoProcessor<MulticastSocketSession> processor;
     private final boolean createdProcessor;
@@ -91,20 +91,17 @@ public class MulticastSocketConnector extends AbstractIoConnector
         try 
         {
         	InetSocketAddress address = (InetSocketAddress)remoteAddress;
-        	
-        	if (SystemUtils.IS_OS_WINDOWS) {
-        		socket = new MulticastSocket(address.getPort());
-        	} else {
-        		socket = new MulticastSocket(address);
-        	}
-        	
-        	if (networkInterface != null)
-        		socket.setInterface(networkInterface.getInterfaceAddresses().get(0).getAddress());
+
+            socket = SystemUtils.IS_OS_WINDOWS ? new MulticastSocket(address.getPort()) : new MulticastSocket(address);
+
+            if(networkInterface != null) {
+                socket.setInterface(networkInterface.getInterfaceAddresses().get(0).getAddress());
+            }
         	
         	socket.joinGroup(address.getAddress());
         	
             ConnectFuture future = new DefaultConnectFuture();
-            MulticastSocketSession session = new MulticastSocketSession(this, socket, this.processor);
+            MulticastSocketSession session = new MulticastSocketSession(this, socket, processor);
             session.getConfig().setAll(getSessionConfig());
             
             initSession(session, future, sessionInitializer);

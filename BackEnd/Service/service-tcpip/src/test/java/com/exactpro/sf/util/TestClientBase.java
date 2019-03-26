@@ -68,11 +68,11 @@ public abstract class TestClientBase extends AbstractTest {
     protected static IMessageStorage mockedStorage;
     protected static IEnvironmentMonitor mockedMonitor;
     protected static String host = "localhost";
-    private static CheckPoint cp = new CheckPoint();
+    private static final CheckPoint cp = new CheckPoint();
     private static IActionReport mockedReport;
 
-    private static int sleepTimeout = 100;
-    private static int timeout = 1000;
+    private static final int sleepTimeout = 100;
+    private static final int timeout = 1000;
 
     private static final Logger logger = LoggerFactory.getLogger(TestClientBase.class);
 
@@ -100,41 +100,24 @@ public abstract class TestClientBase extends AbstractTest {
         }
     }
 
-    protected static boolean available(int port) throws InterruptedException, SocketException, IOException {
+    protected static boolean available(int port) throws InterruptedException, IOException {
         if (port < 0 || port > 65535) {
             throw new IllegalArgumentException("Invalid start port: " + port);
         }
-        boolean connected = false;
         long time = System.currentTimeMillis() + timeout;
         while (System.currentTimeMillis() < time) {
-            ServerSocket ss = null;
-            try {
-                Thread.sleep(sleepTimeout);
-                ss = new ServerSocket(port);
+            Thread.sleep(sleepTimeout);
+            try (ServerSocket ss = new ServerSocket(port)) {
                 ss.setReuseAddress(true);
-                connected = true;
-                break;
+                return true;
             } catch (IOException e) {
                 if (System.currentTimeMillis() == time) {
                     logger.error(e.getMessage(), e);
                     throw e;
-                } else
-                    continue;
-            } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
-                throw e;
-            } finally {
-                if (ss != null) {
-                    try {
-                        ss.close();
-                    } catch (IOException e) {
-                        logger.error(e.getMessage(), e);
-                        throw e;
-                    }
                 }
             }
         }
-        return connected;
+        return false;
     }
 
 
@@ -143,7 +126,7 @@ public abstract class TestClientBase extends AbstractTest {
         server = initializedServer(port, dictionaryName, settings);
         server.start();
         long time = System.currentTimeMillis() + 3000;
-        while (System.currentTimeMillis() < time && !ServiceStatus.STARTED.equals(server.getStatus())) {
+        while(System.currentTimeMillis() < time && server.getStatus() != ServiceStatus.STARTED) {
             Thread.sleep(sleepTimeout);
         }
         Assert.assertEquals(ServiceStatus.STARTED, server.getStatus());
@@ -182,7 +165,7 @@ public abstract class TestClientBase extends AbstractTest {
             while (time > System.currentTimeMillis()) {
                 result = WaitAction.countMessages(mockedReport, serviceName, messageFilter, count, handler, session, cp, !prov.isAdmin(), getCompareSettings(dictionaryName));
                 if (messageNumber == result) {
-                    break;
+                    return result;
                 }
                 Thread.sleep(sleepTimeout);
             }
@@ -197,14 +180,10 @@ public abstract class TestClientBase extends AbstractTest {
         Pair<IMessage, ComparisonResult> result = new Pair<>(null, null);
         try {
             List<Pair<IMessage, ComparisonResult>> list = WaitAction.waitMessage(handler, session, prov, cp, timeout, messageFilter, getCompareSettings(dictionaryName));
-            if (list.size() != 0) {
+            if(!list.isEmpty()) {
                 IMessage resultMessage = list.get(list.size() - 1).getFirst();
                 ComparisonResult comparision = list.get(list.size() - 1).getSecond();
-                if (ComparisonUtil.getResultCount(comparision, StatusType.FAILED) == 0) {
-                    comparision.setStatus(StatusType.PASSED);
-                } else {
-                    comparision.setStatus(StatusType.FAILED);
-                }
+                comparision.setStatus(ComparisonUtil.getResultCount(comparision, StatusType.FAILED) == 0 ? StatusType.PASSED : StatusType.FAILED);
                 result.setFirst(resultMessage);
                 result.setSecond(comparision);
             }

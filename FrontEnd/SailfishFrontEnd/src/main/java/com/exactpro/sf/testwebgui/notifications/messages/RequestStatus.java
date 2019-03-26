@@ -15,9 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.notifications.messages;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.exactprosystems.webchannels.messages.AbstractMessage;
 import com.exactprosystems.webchannels.messages.ChannelsMessage;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @ChannelsMessage
 public class RequestStatus extends AbstractMessage {
@@ -25,12 +26,8 @@ public class RequestStatus extends AbstractMessage {
 	private Boolean success;
 	private String error;
 	private String requestId;
-	
-	public RequestStatus() {
-		super();
-	}
 
-	public Boolean getSuccess() {
+    public Boolean getSuccess() {
 		return success;
 	}
 

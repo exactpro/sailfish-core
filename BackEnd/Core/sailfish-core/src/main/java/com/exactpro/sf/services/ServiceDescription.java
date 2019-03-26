@@ -83,7 +83,7 @@ public class ServiceDescription implements Cloneable, Serializable {
 
 	public IServiceSettings getSettings()
 	{
-		return this.settings;
+        return settings;
 	}
 
 	public void setSettings(IServiceSettings settings)

@@ -29,9 +29,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MsgMetaData implements Cloneable {
     // unique (during SailFish run time). Mapped to 'StoredId' in StoredMessage
     private final long id = MessageUtil.generateId();
-    private Date msgTimestamp;
-	private String msgNamespace;
-	private String msgName;
+    private final Date msgTimestamp;
+    private final String msgNamespace;
+    private final String msgName;
 
 	private String fromService;
 	private String toService;
@@ -52,7 +52,7 @@ public class MsgMetaData implements Cloneable {
 	    this.msgTimestamp = msgTimestamp;
 	}
 
-	public MsgMetaData(final String namespace, final String name) {
+    public MsgMetaData(String namespace, String name) {
 		this(namespace, name, new Date());
 	}
 
@@ -117,7 +117,7 @@ public class MsgMetaData implements Cloneable {
 	}
 
 	public byte[] getRawMessage() {
-		return this.rawMessage;
+        return rawMessage;
 	}
 
 	public void setRawMessage(byte[] value) {
@@ -182,18 +182,18 @@ public class MsgMetaData implements Cloneable {
         MsgMetaData that = (MsgMetaData)obj;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.msgName, that.msgName);
-        builder.append(this.msgNamespace, that.msgNamespace);
-        builder.append(this.msgTimestamp, that.msgTimestamp);
-        builder.append(this.fromService, that.fromService);
-        builder.append(this.toService, that.toService);
-        builder.append(this.isAdmin, that.isAdmin);
-        builder.append(this.isRejected, that.isRejected);
-        builder.append(this.isDirty, that.isDirty);
-        builder.append(this.rawMessage, that.rawMessage);
-        builder.append(this.serviceInfo, that.serviceInfo);
-        builder.append(this.dictionaryURI, that.dictionaryURI);
-        builder.append(this.rejectReason, that.rejectReason);
+        builder.append(msgName, that.msgName);
+        builder.append(msgNamespace, that.msgNamespace);
+        builder.append(msgTimestamp, that.msgTimestamp);
+        builder.append(fromService, that.fromService);
+        builder.append(toService, that.toService);
+        builder.append(isAdmin, that.isAdmin);
+        builder.append(isRejected, that.isRejected);
+        builder.append(isDirty, that.isDirty);
+        builder.append(rawMessage, that.rawMessage);
+        builder.append(serviceInfo, that.serviceInfo);
+        builder.append(dictionaryURI, that.dictionaryURI);
+        builder.append(rejectReason, that.rejectReason);
 
 
         return builder.isEquals();
@@ -203,18 +203,18 @@ public class MsgMetaData implements Cloneable {
     public int hashCode() {
         HashCodeBuilder builder = new HashCodeBuilder();
 
-        builder.append(this.msgName);
-        builder.append(this.msgNamespace);
-        builder.append(this.msgTimestamp);
-        builder.append(this.fromService);
-        builder.append(this.toService);
-        builder.append(this.isAdmin);
-        builder.append(this.isRejected);
-        builder.append(this.isDirty);
-        builder.append(this.rawMessage);
-        builder.append(this.serviceInfo);
-        builder.append(this.dictionaryURI);
-        builder.append(this.rejectReason);
+        builder.append(msgName);
+        builder.append(msgNamespace);
+        builder.append(msgTimestamp);
+        builder.append(fromService);
+        builder.append(toService);
+        builder.append(isAdmin);
+        builder.append(isRejected);
+        builder.append(isDirty);
+        builder.append(rawMessage);
+        builder.append(serviceInfo);
+        builder.append(dictionaryURI);
+        builder.append(rejectReason);
 
         return builder.toHashCode();
     }

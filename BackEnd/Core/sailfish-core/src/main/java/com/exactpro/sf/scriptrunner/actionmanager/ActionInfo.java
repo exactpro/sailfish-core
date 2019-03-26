@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.exactpro.sf.scriptrunner.AbstractInfo;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -34,6 +33,7 @@ import com.exactpro.sf.aml.CustomColumn;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIRule;
 import com.exactpro.sf.configuration.suri.SailfishURIUtils;
+import com.exactpro.sf.scriptrunner.AbstractInfo;
 import com.google.common.collect.ImmutableMap;
 
 @SuppressWarnings("serial")
@@ -45,10 +45,6 @@ public class ActionInfo extends AbstractInfo implements Cloneable, Serializable 
     private Map<String, CustomColumn> customColumns = Collections.emptyMap();
     private Map<String, CommonColumn> commonColumns = Collections.emptyMap();
     private String[] allowedMessageTypes;
-
-    public ActionInfo() {
-        // TODO Auto-generated constructor stub
-    }
 
     public String getActionName() {
         return uri.getResourceName();
@@ -150,15 +146,15 @@ public class ActionInfo extends AbstractInfo implements Cloneable, Serializable 
     public ActionInfo clone() {
         ActionInfo that = new ActionInfo();
 
-        that.setURI(this.uri);
-        that.compatibleLanguageURIs.addAll(this.compatibleLanguageURIs);
-        that.setAnnotations(this.annotations);
-        that.setCustomColumns(this.customColumns);
-        that.setCommonColumns(this.commonColumns);
-        that.setMessageType(this.messageType);
-        that.setRequirements(this.requirements);
-        that.setReturnType(this.returnType);
-        that.setDescription(this.description);
+        that.setURI(uri);
+        that.compatibleLanguageURIs.addAll(compatibleLanguageURIs);
+        that.setAnnotations(annotations);
+        that.setCustomColumns(customColumns);
+        that.setCommonColumns(commonColumns);
+        that.setMessageType(messageType);
+        that.setRequirements(requirements);
+        that.setReturnType(returnType);
+        that.setDescription(description);
 
         return that;
     }
@@ -176,13 +172,13 @@ public class ActionInfo extends AbstractInfo implements Cloneable, Serializable 
         ActionInfo that = (ActionInfo)o;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.uri, that.uri);
-        builder.append(this.compatibleLanguageURIs, that.compatibleLanguageURIs);
-        builder.append(this.requirements, that.requirements);
-        builder.append(this.returnType, that.returnType);
-        builder.append(this.messageType, that.messageType);
-        builder.append(this.annotations, that.annotations);
-        builder.append(this.customColumns, that.customColumns);
+        builder.append(uri, that.uri);
+        builder.append(compatibleLanguageURIs, that.compatibleLanguageURIs);
+        builder.append(requirements, that.requirements);
+        builder.append(returnType, that.returnType);
+        builder.append(messageType, that.messageType);
+        builder.append(annotations, that.annotations);
+        builder.append(customColumns, that.customColumns);
 
         return builder.isEquals();
     }

@@ -33,7 +33,7 @@ public final class SailfishQuickfixMessage extends Message {
     
     @Override
     public Object clone() {
-        final SailfishQuickfixMessage message = new SailfishQuickfixMessage(getFieldOrder(), getHeader().getFieldOrder(), getTrailer().getFieldOrder());
+        SailfishQuickfixMessage message = new SailfishQuickfixMessage(getFieldOrder(), getHeader().getFieldOrder(), getTrailer().getFieldOrder());
         message.initializeFrom(this);
         message.getSailfishHeader().initializeFrom(getHeader());
         message.getSailfishTrailer().initializeFrom(getTrailer());
@@ -41,11 +41,11 @@ public final class SailfishQuickfixMessage extends Message {
     }
     
     public SailfishQuickfixHeader getSailfishHeader() {
-        return this.header;
+        return header;
     }
     
     public SailfishQuickfixTrailer getSailfishTrailer() {
-        return this.trailer;
+        return trailer;
     }
     
     private final class SailfishQuickfixHeader extends Header {

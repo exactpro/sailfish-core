@@ -15,22 +15,22 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.execution;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.csvreader.CsvWriter;
 import com.exactpro.sf.bigbutton.library.Script;
 import com.exactpro.sf.bigbutton.library.ScriptList;
 
-import java.io.File;
-import java.io.IOException;
-
 public class ExecutionReportExporter {
 
-    private static final String[] headers = new String[] { "Script List", "Status", "Num. Passed", "Num. Cond. Passed", "Num. Failed" };
+    private static final String[] headers = { "Script List", "Status", "Num. Passed", "Num. Cond. Passed", "Num. Failed" };
+
+    private final File resultFile;
+
+    private final CsvWriter writer;
 	
-	private File resultFile; 
-	
-	private CsvWriter writer;
-	
-	private boolean closed = false;
+	private boolean closed;
 	
 	public ExecutionReportExporter() throws IOException {
 		

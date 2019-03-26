@@ -41,23 +41,23 @@ import com.exactpro.sf.storage.ITestScriptStorage;
 
 public class SyncScriptRunner extends AbstractScriptRunner {
 
-	private final static Logger logger = LoggerFactory.getLogger(SyncScriptRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(SyncScriptRunner.class);
 
 	public SyncScriptRunner(
-			final IWorkspaceDispatcher wd,
-			final IDictionaryManager dictionaryManager,
-    		final IActionManager actionManager,
-    		final IUtilityManager utilityManager,
-    		final LanguageManager languageManager,
-    		final PreprocessorLoader preprocessorLoader,
-    		final ValidatorLoader validatorLoader,
-    		final ScriptRunnerSettings settings,
-    		final StatisticsService statisticsService,
-    		final IEnvironmentManager environmentManager,
-    		final ITestScriptStorage testScriptStorage,
-    		final IAdapterManager adapterManager,
-    		final IStaticServiceManager staticServiceManager,
-    		final String compilerClassPath) {
+			IWorkspaceDispatcher wd,
+			IDictionaryManager dictionaryManager,
+    		IActionManager actionManager,
+    		IUtilityManager utilityManager,
+    		LanguageManager languageManager,
+    		PreprocessorLoader preprocessorLoader,
+    		ValidatorLoader validatorLoader,
+    		ScriptRunnerSettings settings,
+    		StatisticsService statisticsService,
+    		IEnvironmentManager environmentManager,
+    		ITestScriptStorage testScriptStorage,
+    		IAdapterManager adapterManager,
+    		IStaticServiceManager staticServiceManager,
+    		String compilerClassPath) {
 		super(wd, dictionaryManager, actionManager, utilityManager, languageManager, preprocessorLoader, validatorLoader, settings, statisticsService, environmentManager, testScriptStorage, adapterManager, staticServiceManager, compilerClassPath);
 		tScriptCompiler = new Thread(new ScriptCompiler(), "ScriptCompiler");
 		tScriptExecutor = new Thread(new ScriptExecutor(), "ScriptExecutor");
@@ -84,8 +84,9 @@ public class SyncScriptRunner extends AbstractScriptRunner {
                             testScript = addedTestScripts.poll();
                         }
 
-    					if (testScript == null)
-    						continue;
+                        if(testScript == null) {
+                            continue;
+                        }
 
 
     					descr = testScripts.get(testScript);
@@ -178,8 +179,9 @@ public class SyncScriptRunner extends AbstractScriptRunner {
                                 currentTestScript = preparedTestScripts.poll();
                             }
 
-							if (currentTestScript == null)
-								continue;
+                            if(currentTestScript == null) {
+                                continue;
+                            }
 
 							TestScriptDescription descr = testScripts.get(currentTestScript);
 

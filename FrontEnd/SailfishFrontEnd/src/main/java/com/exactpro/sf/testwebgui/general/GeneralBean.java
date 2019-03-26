@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.bean.ApplicationScoped;
 import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
@@ -55,7 +56,7 @@ public class GeneralBean implements Serializable {
     }
 
 	public String getVersion() {
-	    return this.version;
+        return version;
 	}
 
 	public String getBranchName() {
@@ -96,11 +97,11 @@ public class GeneralBean implements Serializable {
 		String summary = BeanUtil.getRequestParam("Summary");
 		String detail = BeanUtil.getRequestParam("Detail");
 
-		FacesMessage.Severity severity;
+        Severity severity;
 
-		if(severityRaw.equals("WARN")) {
+        if("WARN".equals(severityRaw)) {
 			severity = FacesMessage.SEVERITY_WARN;
-		} else if(severityRaw.equals("ERROR")) {
+        } else if("ERROR".equals(severityRaw)) {
 			severity = FacesMessage.SEVERITY_ERROR;
 		} else {
 			severity = FacesMessage.SEVERITY_INFO;
@@ -110,14 +111,8 @@ public class GeneralBean implements Serializable {
 	}
 
 	public String abbreviateString(String string, int length) {
-
-		if(string == null || string.length() <= length) {
-			return string;
-		}
-
-		return string.substring(0, length - 3) + "...";
-
-	}
+        return string == null || string.length() <= length ? string : string.substring(0, length - 3) + "...";
+    }
 
 	public String getDefaultGuiDateFormat() {
 		return DEFAULT_GUI_DATE_FORMAT;

@@ -15,24 +15,29 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.storage.IObjectFlusher;
-import com.exactpro.sf.storage.IMeasurable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.storage.IMeasurable;
+import com.exactpro.sf.storage.IObjectFlusher;
 
 public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
-    private final static Logger USER_EVENTS_LOG = LoggerFactory.getLogger("USER_EVENTS_LOG");
+    private static final Logger USER_EVENTS_LOG = LoggerFactory.getLogger("USER_EVENTS_LOG");
 
     private static final long JOIN_TIMEOUT = 2000;
 
@@ -44,18 +49,18 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
 
     private final long maxStorageQueueSize;
 
-    private long storageProviderQueueSize = 0;
-    private long lastThrottleNotification = 0;
+    private long storageProviderQueueSize;
+    private long lastThrottleNotification;
     private static final long NOTIFY_COOLDOWN = 1000*30;
     private static final String STORE_OBJECT_LIMIT_EXCEEDED = "Can't store object, limit exceeded";
-    private static final long DEFAULT_STORAGE_QUEUE = (1024L * 1024L * 32L);
+    private static final long DEFAULT_STORAGE_QUEUE = 1024L * 1024L * 32L;
 
 
     private List<T> objects;
     private FlushTask flushTask;
     private Thread flushThread;
 
-    static int a = 0;
+    static int a;
     static Lock lock = new ReentrantLock(true);
     static CyclicBarrier b = new CyclicBarrier(2);
     
@@ -71,7 +76,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
                     for (int i = 0; i < 500; i++) {
                         try {
                             lock.lock();
-                            System.out.println(Thread.currentThread().getId() + " " + String.valueOf(a++));
+                            System.out.println(Thread.currentThread().getId() + " " + a++);
                         } finally {
                             lock.unlock();
                         }
@@ -107,7 +112,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     @Override
     public void start() {
         try {
-            this.sourceMonitor.writeLock().lock();
+            sourceMonitor.writeLock().lock();
             if(flushTask != null) {
                 throw new EPSCommonException("Cannot start flusher. Flusher is already started");
             }
@@ -117,7 +122,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
             flushThread.setDaemon(true);
             flushThread.start();
         } finally {
-            this.sourceMonitor.writeLock().unlock();
+            sourceMonitor.writeLock().unlock();
         }
     }
 
@@ -126,7 +131,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
         flush();
         
         try {
-            this.sourceMonitor.writeLock().lock();
+            sourceMonitor.writeLock().lock();
 
             if(flushTask == null) {
                 throw new EPSCommonException("Cannot stop flusher. Flusher is not started");
@@ -146,7 +151,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
                 flushThread = null;
             }
         } finally {
-            this.sourceMonitor.writeLock().unlock();
+            sourceMonitor.writeLock().unlock();
         }
     }
 
@@ -154,7 +159,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     public void add(T object) {
         try {
             logger.debug("Try lock sourceMonitor read");
-            this.sourceMonitor.readLock().lock();
+            sourceMonitor.readLock().lock();
             logger.debug("sourceMonitor locked");
             if(flushTask == null) {
                 throw new EPSCommonException("Cannot add object. Flusher is not started");
@@ -182,7 +187,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
                 logger.debug("monitor unlocked");
             }
         } finally {
-            this.sourceMonitor.readLock().unlock();
+            sourceMonitor.readLock().unlock();
             logger.debug("sourceMonitor read unlocked");
         }
     }
@@ -191,7 +196,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     public void flush() {
         try {
             logger.debug("Try lock sourceMonitor read");
-            this.sourceMonitor.readLock().lock();
+            sourceMonitor.readLock().lock();
             logger.debug("sourceMonitor read locked");
             if(flushTask == null) {
                 throw new EPSCommonException("Cannot request flush. Flusher is not started");
@@ -218,7 +223,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
                 }
             }
         } finally {
-            this.sourceMonitor.readLock().unlock();
+            sourceMonitor.readLock().unlock();
             logger.debug("sourceMonitor read unlocked");
         }
     }

@@ -16,16 +16,6 @@
 
 package com.exactpro.sf.services;
 
-import com.exactpro.sf.configuration.workspace.FolderType;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import org.apache.commons.lang3.ClassUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,17 +23,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.ClassUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.configuration.workspace.FolderType;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 public class FileSessionStorage {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private static final String STORAGE = "session_manager_storage.json";
     private static final ObjectReader jsonReader = new ObjectMapper().reader(new MapTypeReference());
@@ -78,7 +79,7 @@ public class FileSessionStorage {
         }
 
         tmpMap = tmpMap.entrySet().stream().filter(entry -> lifetimePredicate.test(entry.getValue().getTimestamp()))
-                .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toConcurrentMap(Entry::getKey, Entry::getValue));
 
         metadataMap = tmpMap;
     }
@@ -98,14 +99,8 @@ public class FileSessionStorage {
     }
 
     public <T> T readSessionProperty(String key) {
-
         TimestampedValue<T> tval = (TimestampedValue<T>) metadataMap.get(key);
-
-        if ((tval != null) && lifetimePredicate.test(tval.getTimestamp())) {
-            return tval.value;
-        } else {
-            return null;
-        }
+        return (tval != null) && lifetimePredicate.test(tval.getTimestamp()) ? tval.value : null;
     }
 
     public <T> void putSessionProperty(String key, T value) {
@@ -118,7 +113,7 @@ public class FileSessionStorage {
     }
 
     private boolean checkType(Class<?> clazz) {
-        return String.class == clazz || ClassUtils.isPrimitiveWrapper(clazz);
+        return clazz == String.class || ClassUtils.isPrimitiveWrapper(clazz);
     }
 
     private static class MapTypeReference extends TypeReference<Map<String, TimestampedValue<?>>> {

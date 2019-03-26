@@ -29,13 +29,12 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
 
 	// FIXME: IServiceHandler throws exceptions!
 
-	private IServiceHandler serviceHandler;
+    private final IServiceHandler serviceHandler;
 
-	private ISession session;
+    private final ISession session;
 
 	public NettyServiceHandler(IServiceHandler serviceHandler, ISession session) {
-		super();
-		this.serviceHandler = serviceHandler;
+        this.serviceHandler = serviceHandler;
 		this.session = session;
 	}
 
@@ -44,12 +43,7 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
     	if (msg instanceof IMessage) {
     		IMessage imsg = (IMessage) msg;
-    		if (imsg.getMetaData().isAdmin()) {
-    			serviceHandler.putMessage(session, ServiceHandlerRoute.TO_ADMIN, imsg);
-    		}
-    		else {
-    			serviceHandler.putMessage(session, ServiceHandlerRoute.TO_APP, imsg);
-    		}
+            serviceHandler.putMessage(session, imsg.getMetaData().isAdmin() ? ServiceHandlerRoute.TO_ADMIN : ServiceHandlerRoute.TO_APP, imsg);
     	}
     	ctx.write(msg, promise);
     }
@@ -74,12 +68,7 @@ public class NettyServiceHandler extends ChannelDuplexHandler {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     	if (msg instanceof IMessage) {
     		IMessage imsg = (IMessage) msg;
-    		if (imsg.getMetaData().isAdmin()) {
-    			serviceHandler.putMessage(session, ServiceHandlerRoute.FROM_ADMIN, imsg);
-    		}
-    		else {
-    			serviceHandler.putMessage(session, ServiceHandlerRoute.FROM_APP, imsg);
-    		}
+            serviceHandler.putMessage(session, imsg.getMetaData().isAdmin() ? ServiceHandlerRoute.FROM_ADMIN : ServiceHandlerRoute.FROM_APP, imsg);
     	}
         ctx.fireChannelRead(msg);
     }

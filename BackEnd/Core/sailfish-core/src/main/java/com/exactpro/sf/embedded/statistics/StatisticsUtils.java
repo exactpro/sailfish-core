@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
@@ -126,7 +127,7 @@ public class StatisticsUtils {
     }
 
     public static void writeTagGroupReportToCsv(OutputStream outputStream, List<TagGroupReportResult> results) throws IOException {
-        String[] header = new String[] {
+        String[] header = {
                 "Tag",
                 "Total Execution Time",
                 "Total Test Cases",
@@ -273,7 +274,7 @@ public class StatisticsUtils {
                 AggregateReportParameters parameters = new AggregateReportParameters();
                 parameters.setTestCaseRunIds(new ArrayList<>(testCasesToLoad.keySet()));
                 Map<Long, List<KnownBugRow>> testCasesKnownBugs = context.getStatisticsService().getReportingStorage().generateTestCasesKnownBugsReports(parameters);
-                for (Map.Entry<Long, List<KnownBugRow>> entry : testCasesKnownBugs.entrySet()) {
+                for(Entry<Long, List<KnownBugRow>> entry : testCasesKnownBugs.entrySet()) {
                     AggregatedReportRow row = testCasesToLoad.get(entry.getKey());
                     row.setCategorisedKnownBugs(groupKnownBugsByCategory(entry.getValue()));
                 }
@@ -319,7 +320,7 @@ public class StatisticsUtils {
                 columns.add(index + 1, "Passed");
             }
 
-            String header[] = columns.toArray(new String[columns.size()]);
+            String[] header = columns.toArray(new String[columns.size()]);
 
             writeRowsToCsv(writer, header, taggedActions, rowsToWrite, exportWithTCsInfo, exportWithActionsInfo, info);
 
@@ -418,17 +419,10 @@ public class StatisticsUtils {
                         } else {
                             String tag = headers[i].split("\\s", 3)[0];
                             List<ActionInfoRow> infoRows = taggedActions.get(row.getTestCaseRunId());
-
-                            if (infoRows != null) {
-                                toWrite = getActionDescriptionsByTag(infoRows, tag);
-                            } else {
-                                toWrite = "";
-                            }
+                            toWrite = infoRows != null ? getActionDescriptionsByTag(infoRows, tag) : "";
                         }
-                    } else if (headers[i].equals("Message Type")) {
-                        toWrite = "";
                     } else {
-                        toWrite = row.get(headers[i], "");
+                        toWrite = "Message Type".equals(headers[i]) ? "" : row.get(headers[i], "");
                     }
                 }
 
@@ -440,7 +434,7 @@ public class StatisticsUtils {
 
         boolean totalPrinted = false;
 
-        if (!headers[0].equals("Execution Time")) {
+        if(!"Execution Time".equals(headers[0])) {
             headers[0] = "TOTAL";
             totalPrinted = true;
         }
@@ -485,17 +479,9 @@ public class StatisticsUtils {
                     || (entry.getNonReproducedBugs().isEmpty() && !reproduced)) {
                 continue;
             }
-            if (StringUtils.isBlank(entry.getCategoryString())) {
-                cellText.append("No category");
-            } else {
-                cellText.append(entry.getCategoryString());
-            }
+            cellText.append(StringUtils.defaultIfBlank(entry.getCategoryString(), "No category"));
             cellText.append(categoryDelimiter);
-            if (reproduced) {
-                cellText.append(entry.getReproducedBugsString());
-            } else {
-                cellText.append(entry.getNonReproducedBugsString());
-            }
+            cellText.append(reproduced ? entry.getReproducedBugsString() : entry.getNonReproducedBugsString());
             cellText.append("\n");
         }
         return cellText.toString().trim();
@@ -520,12 +506,9 @@ public class StatisticsUtils {
 
         if (row.getMatrixFailReason() != null || row.getFailedCount() > 0) {
             return StatusType.FAILED.name();
-        } else if (row.getConditionallyPassedCount() > 0) {
-            return StatusType.CONDITIONALLY_PASSED.name();
-        } else {
-            return StatusType.PASSED.name();
         }
 
+        return row.getConditionallyPassedCount() > 0 ? StatusType.CONDITIONALLY_PASSED.name() : StatusType.PASSED.name();
     }
 
     private static String getActionDescriptionsByTag(List<ActionInfoRow> infoRows, String tag) {

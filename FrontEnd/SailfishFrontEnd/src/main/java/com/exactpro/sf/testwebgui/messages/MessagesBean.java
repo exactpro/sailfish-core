@@ -64,7 +64,7 @@ public class MessagesBean implements Serializable {
 
     private Map<String, String> options;
 
-    private Map<String, String> columns_name;
+    private final Map<String, String> columns_name;
 
     private String whereStatement;
 
@@ -92,7 +92,7 @@ public class MessagesBean implements Serializable {
     private int limitNumber;
 
     private boolean highlightEnabled = true;
-    private boolean humanSelected = false;
+    private boolean humanSelected;
 
 	public MessagesBean() {
 
@@ -124,7 +124,7 @@ public class MessagesBean implements Serializable {
 	}
 
 	public void preRenderView() {
-		if (this.messageLazyModel == null) {
+        if(messageLazyModel == null) {
 			this.messageLazyModel = new MessagesLazyModel();
 		}
 	}
@@ -146,14 +146,9 @@ public class MessagesBean implements Serializable {
 			Iterable<MessageRow> messageList = messageStorage.getMessages(0, 1, whereStatementCleared);
 			Iterator<MessageRow> messagesIterator = messageList.iterator();
 
-			String firstMsgId = null;
-			if (!messagesIterator.hasNext()) {
-				firstMsgId = String.valueOf(Long.MAX_VALUE);
-			} else {
-				firstMsgId = messagesIterator.next().getID();
-			}
+            String firstMsgId = !messagesIterator.hasNext() ? String.valueOf(Long.MAX_VALUE) : messagesIterator.next().getID();
 
-			this.messageLazyModel.reinit(firstMsgId, limitNumber, whereStatementCleared);
+            messageLazyModel.reinit(firstMsgId, limitNumber, whereStatementCleared);
 
 	    } catch (StorageException e) {
 		    BeanUtil.addErrorMessage("Query error", e.getCause().getMessage());
@@ -191,7 +186,7 @@ public class MessagesBean implements Serializable {
 			if ((endPos = cleared.indexOf("*/")) > beginPos+1) {
 				cleared = cleared.substring(0, beginPos) + cleared.substring(endPos+2);
 			} else {
-				break;
+                return cleared;
 			}
 		}
 
@@ -203,17 +198,17 @@ public class MessagesBean implements Serializable {
     public StreamedContent getResultsInCSV() {
 		logger.info("getResultsInCSV invoked {}", getUser());
 
-        if(selectedOptions.size() == 0 && !includeRawMessage) {
+        if(selectedOptions.isEmpty() && !includeRawMessage) {
             BeanUtil.addWarningMessage("No columns selected", "Select at least one column");
             return null;
         }
 
-    	if(this.messageLazyModel.getRowCount() != 0) {
+        if(messageLazyModel.getRowCount() != 0) {
 			try {
-				String fileNameCsv = "query_result_" + UUID.randomUUID().toString();
+                String fileNameCsv = "query_result_" + UUID.randomUUID();
 				File temp = File.createTempFile(fileNameCsv, ".csv");
 				CsvMessageWriter writer = new CsvMessageWriter(selectedOptions, includeRawMessage);
-				writer.writeAndClose(temp, this.messageLazyModel.load(0, this.messageLazyModel.getRowCount()));
+                writer.writeAndClose(temp, messageLazyModel.load(0, messageLazyModel.getRowCount()));
 
 				File zipFile = new File(temp.getParent(), "messages.zip");
 				AppZip appZip = new AppZip();
@@ -260,15 +255,15 @@ public class MessagesBean implements Serializable {
         String column = (String) map.get("filterColumn");
         String value = (String) map.get("filterValue");
 
-        if(column.equals("time")) {
+        if("time".equals(column)) {
             timeFilter = value;
-        } else if(column.equals("name")) {
+        } else if("name".equals(column)) {
             nameFilter = value;
-        } else if(column.equals("from")) {
+        } else if("from".equals(column)) {
             fromFilter = value;
-        } else if(column.equals("to")) {
+        } else if("to".equals(column)) {
             toFilter = value;
-        } else if(column.equals("content")) {
+        } else if("content".equals(column)) {
             contentFilter = value;
         }
 
@@ -284,21 +279,21 @@ public class MessagesBean implements Serializable {
 
         DataTable dataTable = (DataTable) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:table");
 
-        if(this.sortField == null || this.sortField.equals("")) {
+        if(sortField == null || "".equals(sortField)) {
             dataTable.setValueExpression("sortBy", null);
             return;
         }
 
         String elRaw = null;
-        if(this.sortField.equals("table:name")) {
+        if("table:name".equals(sortField)) {
             elRaw = "#{message.name}";
-        } else if(this.sortField.equals("table:from")) {
+        } else if("table:from".equals(sortField)) {
             elRaw = "#{message.from}";
-        } else if(this.sortField.equals("table:to")) {
+        } else if("table:to".equals(sortField)) {
             elRaw = "#{message.to}";
-        } else if(this.sortField.equals("table:content")) {
+        } else if("table:content".equals(sortField)) {
             elRaw = "#{message.content}";
-        } else if(this.sortField.equals("table:timestamp")) {
+        } else if("table:timestamp".equals(sortField)) {
             elRaw = "#{message.timestamp}";
         }
 
@@ -307,7 +302,7 @@ public class MessagesBean implements Serializable {
         ExpressionFactory elFactory = facesContext.getApplication().getExpressionFactory();
         ValueExpression valueExpresion = elFactory.createValueExpression(elContext, elRaw, Date.class);
 
-        dataTable.setSortOrder(this.sortOrder);
+        dataTable.setSortOrder(sortOrder);
         dataTable.setValueExpression("sortBy", valueExpresion);
     }
 
@@ -322,14 +317,11 @@ public class MessagesBean implements Serializable {
 
     public void queriesToList(ValueChangeEvent event){
         queries = (String) event.getNewValue();
-        if (queries.length() == 0)
-            storedQueries = Collections.emptyList();
-        else
-            storedQueries = Arrays.asList(queries.split(";"));
+        storedQueries = queries.isEmpty() ? Collections.emptyList() : Arrays.asList(queries.split(";"));
     }
 
     public List<String> completeText(String query) {
-        if(query.length() == 0){
+        if(query.isEmpty()) {
             return new ArrayList<>(storedQueries);
         }
         List<String> results = new ArrayList<>();

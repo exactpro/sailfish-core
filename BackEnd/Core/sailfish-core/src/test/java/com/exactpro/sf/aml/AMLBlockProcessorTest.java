@@ -15,6 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.aml;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Mockito;
+
 import com.exactpro.sf.aml.generator.Alert;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.aml.iomatrix.AdvancedMatrixReader;
@@ -26,20 +35,12 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionManager;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionRequirements;
 import com.exactpro.sf.util.AbstractTest;
 import com.google.common.collect.ListMultimap;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.List;
 
 public class AMLBlockProcessorTest extends AbstractTest {
-    private static AMLSettings settings = new AMLSettings();
-    private static ActionRequirements actionRequirements = Mockito.mock(ActionRequirements.class);
-    private static ActionInfo actionInfo = Mockito.mock(ActionInfo.class);
-    private static ActionManager actionManager = Mockito.mock(ActionManager.class);
+    private static final AMLSettings settings = new AMLSettings();
+    private static final ActionRequirements actionRequirements = Mockito.mock(ActionRequirements.class);
+    private static final ActionInfo actionInfo = Mockito.mock(ActionInfo.class);
+    private static final ActionManager actionManager = Mockito.mock(ActionManager.class);
 
     @BeforeClass
     public static void init() {

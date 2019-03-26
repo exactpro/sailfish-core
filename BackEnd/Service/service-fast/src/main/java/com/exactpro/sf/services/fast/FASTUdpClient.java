@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.openfast.Context;
 import org.openfast.Message;
@@ -48,10 +49,10 @@ public class FASTUdpClient extends FASTAbstractClient {
 	@Override
 	public void init(
 			IServiceContext serviceContext,
-			final IServiceMonitor serviceMonitor,
-			final IServiceHandler handler,
-			final IServiceSettings settings,
-			final ServiceName name) {
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            ServiceName name) {
 		super.init(serviceContext, serviceMonitor, handler, settings, name);
 		this.resetContext = getSettings().isResetContextAfterEachUdpPacket();
 	}
@@ -67,7 +68,7 @@ public class FASTUdpClient extends FASTAbstractClient {
 
 		try {
 			NetworkInterface netIface = null;
-			if (interfaceAddress != null && !interfaceAddress.equals("")){
+            if(StringUtils.isNotEmpty(interfaceAddress)) {
 				if (interfaceAddress.matches("([0-9]{1,3}\\.){3}[0-9]{1,3}")) {
 					netIface = NetworkInterface.getByInetAddress(InetAddress.getByName(interfaceAddress));
 				} else {
@@ -75,14 +76,7 @@ public class FASTUdpClient extends FASTAbstractClient {
 				}
 			}
 
-			MulticastSocket socket;
-//			if (interfaceAddress == null || interfaceAddress.equals("")) {
-				socket = new MulticastSocket(port);
-//			} else {
-//				SocketAddress saddr = new InetSocketAddress(interfaceAddress, port);
-//				socket = new MulticastSocket(saddr);
-//			}
-
+            MulticastSocket socket = new MulticastSocket(port);
 			InetAddress groupAddress = InetAddress.getByName(remoteAddr);
 
 			if (netIface == null){
@@ -108,7 +102,7 @@ public class FASTUdpClient extends FASTAbstractClient {
 						}
 					}
 			);
-			return this.datagramConnection;
+            return datagramConnection;
 		} catch (IOException e) {
 			FastConnectionException expt = new FastConnectionException(
 					"Failed to create connection"
@@ -134,8 +128,9 @@ public class FASTUdpClient extends FASTAbstractClient {
 
 	@Override
 	protected synchronized void closeSession() {
-		if (connection != null)
-			connection.close();
+        if(connection != null) {
+            connection.close();
+        }
 		connection = null;
 	}
 
@@ -147,7 +142,7 @@ public class FASTUdpClient extends FASTAbstractClient {
 
 	@Override
 	protected boolean recoverFromInputError(InputStream underlyingStream) {
-		this.datagramConnection.getInputStream().clearBuffer();
+        datagramConnection.getInputStream().clearBuffer();
 		return true;
 	}
 

@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
-
-import com.exactpro.sf.services.IServiceContext;
-import com.exactpro.sf.services.MessageHelper;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
+
+import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.MessageHelper;
 
 /**
  * Created by alexey.zarovny on 11/29/14.
@@ -38,11 +38,11 @@ public class ITCHCodecFactory implements ProtocolCodecFactory {
 
     @Override
     public ProtocolEncoder getEncoder(IoSession ioSession) throws Exception {
-        return itchHandler.getCodec(this.serviceContext);
+        return itchHandler.getCodec(serviceContext);
     }
 
     @Override
     public ProtocolDecoder getDecoder(IoSession ioSession) throws Exception {
-        return itchHandler.getCodec(this.serviceContext);
+        return itchHandler.getCodec(serviceContext);
     }
 }
