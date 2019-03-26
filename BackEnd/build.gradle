@@ -28,6 +28,7 @@ subprojects {
 		        line ("revision: ${revision}")
 		        line ("git_hash: ${git_hash}")
                 line ('group: sailfish')
+                line ("branch: ${project.branch}")
                 line ("name: ${project.archivesBaseName}")
                 line ("version: ${sailfish_version_major}.${sailfish_version_minor}.${revision}.${build_number}")
 	        }
