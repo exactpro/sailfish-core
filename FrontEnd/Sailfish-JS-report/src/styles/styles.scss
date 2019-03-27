@@ -108,65 +108,29 @@ body {
 
 .chip {
     @include unselectable;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    @include status-card;
     border: 2px solid transparent;
     border-radius: 10px;
     height: 20px;
     width: auto;
     min-width: 20px;
     margin: 0 5px;
-    color: $primaryTextColor;
-    border-color: $defaultCardBackground;
+    color: $chipTextColor;
+    border-color: var(--status-secondary-border-color);
 
     &.selected {
         font-weight: bold;
         color: white;
+        border-color: var(--status-border-color);
+        background-color: var(--status-border-color);
     }
 
     &.clickable {
         cursor: pointer;
     }
 
-    &.passed {
-        border-color: $passedHeaderColor;
-
-        &.selected {
-            border-color: $passedBorderColor;
-            background-color: $passedBorderColor;
-        }
-    }
-
-    &.failed {
-        border-color: $failedHederColor;
-
-        &.selected {
-            border-color: $failedBorderColor;
-            background-color: $failedBorderColor;
-        }
-    }
-
-    &.conditionally_passed {
-        border-color: $conditionallyHeaderColor;
-
-        &.selected {
-            border-color: $conditionallyBorderColor;
-            background-color: $conditionallyBorderColor;
-        }
-    }
-
-    &.conditionally_failed {
-        border-color: $conditionallyHeaderColor;
-
-        &.selected {
-            border-color: $conditionallyFailedBorderColor;
-            background-color: $conditionallyFailedBorderColor;
-        }
-    }
-
     p {
-        font-size: 10px;
+        font-size: 11px;
         padding: 0 5px;
     }
 }

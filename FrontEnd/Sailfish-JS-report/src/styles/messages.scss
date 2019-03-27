@@ -145,8 +145,8 @@
                 color: $primaryTextColor;
             }
 
-            &-timestamp-value, &-name-value, &-from-value, &-to-value {
-                padding-left: 5px;
+            &-name-value, &-from-value, &-to-value {
+                padding-left: 8px;
             }
 
             &-name-value, &-from-value, &-to-value {
@@ -155,7 +155,7 @@
             }
 
             &-session, &-name {
-                padding-top: 3px;
+                padding-top: 5px;
                 font-size: 10px;
                 color: $secondaryTextColor;
             }
@@ -175,6 +175,7 @@
             &-timestamp-value {
                 grid-area: timestamp-value;
                 font-size: 13px;
+                padding-left: 5px;
             }
 
             &-from-value {

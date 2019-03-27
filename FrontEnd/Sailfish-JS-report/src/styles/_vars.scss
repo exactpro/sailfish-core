@@ -86,6 +86,7 @@ $scrollbarTrackBackground: #F2F2F2;
 
 $splitterColor: #C4C4C4;
 
+$chipTextColor: #808080;
 
 @mixin scrollbar {
     &::-webkit-scrollbar {
@@ -109,6 +110,9 @@ $splitterColor: #C4C4C4;
 }
 
 @mixin status-card {
+
+    --status-secondary-border-color: #{$defaultCardBackground};
+
     &.passed {
         // we can't symply assign scss variable to css variable because sass doesn't know css varible type,
         // so we use #{ ... } syntax to tell sass that we use variable as color

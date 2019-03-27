@@ -42,74 +42,81 @@
             &-controls {
                 height: 50px;
                 width: 100%;
-                position: relative;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
 
                 &-panels {
                     display: inline-flex;
                     justify-content: flex-start;
-                    align-items: center;
-                    grid-area: left;
-                    position: absolute;
-                    top: 6px;
-                    left: 4px;
+                    align-items: center;                    
                     background-color: #ffffff;
                     z-index: 4;
                 }
 
-                &-left, &-right {
-                    position: absolute;
-                    right: 10px;
-                    top: 4px;
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    padding: 7px 7px 10px 7px;
-                }
+                // &-left, &-right {
+                //     position: absolute;
+                //     right: 10px;
+                //     top: 4px;
+                //     display: flex;
+                //     flex-direction: row;
+                //     align-items: center;
+                //     padding: 7px 7px 10px 7px;
+                // }
 
-                &-left-checkpoints {
+                &-left {
                     display: flex;
-                    flex-direction: row;
+                    justify-content: flex-end;
                     align-items: center;
-                    padding: 5px 7px 0px 7px;
-        
-                    &.disabled {
-                        filter: opacity(0.5);
-                        cursor: default;
-                    }
-                    
-                    &-icon {
-                        height: 20px;
-                        width: 20px;
-                        background-image: url(../../resources/icons/checkpoint.svg);
-                        background-size: 100%;
-                    }
-        
-                    &-title, &-count {
-                        font-size: 15px;
-                        font-weight: bold;
-                        padding: 0 10px;
-                        color: $primaryTextColor;
-                        min-width: 60px;
-                    }
-        
-                    &-btn {
-                        height: 20px;
-                        width: 20px;
-                        background-size: 100%;
-                        filter: opacity(0.7);
-                        cursor: pointer;
-        
-                        &.prev {
-                            background-image: url(../../resources/icons/arr1-left.svg);
+
+                    &-checkpoints {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: center;
+                        //padding: 5px 7px 0px 7px;
+            
+                        &.disabled {
+                            filter: opacity(0.5);
+                            cursor: default;
                         }
-        
-                        &.next {
-                            background-image: url(../../resources/icons/arr1-right.svg)
+                        
+                        &-icon {
+                            height: 20px;
+                            width: 20px;
+                            background-image: url(../../resources/icons/checkpoint.svg);
+                            background-size: 100%;
+                        }
+            
+                        &-title, &-count {
+                            font-size: 15px;
+                            font-weight: bold;
+                            padding: 0 10px;
+                            color: $primaryTextColor;
+                            min-width: 60px;
+                        }
+            
+                        &-btn {
+                            height: 20px;
+                            width: 20px;
+                            background-size: 100%;
+                            filter: opacity(0.7);
+                            cursor: pointer;
+            
+                            &.prev {
+                                background-image: url(../../resources/icons/arr1-left.svg);
+                            }
+            
+                            &.next {
+                                background-image: url(../../resources/icons/arr1-right.svg)
+                            }
                         }
                     }
                 }
 
                 &-right {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
                     
                     &-rejected {
                         display: flex;
