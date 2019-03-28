@@ -111,7 +111,12 @@ $chipTextColor: #808080;
 
 @mixin status-card {
 
+    --status-primary-color: #{$primaryTextColor};
+    --status-secondary-color: #{$secondaryTextColor};
+    --status-primary-border-color: #{$defaultCardBorderColor};
     --status-secondary-border-color: #{$defaultCardBackground};
+    --status-primary-background-color: #{$defaultCardBorderColor};
+    --status-secondary-background-color: #{$defaultCardBackground};
 
     &.passed {
         // we can't symply assign scss variable to css variable because sass doesn't know css varible type,
@@ -119,33 +124,37 @@ $chipTextColor: #808080;
         // https://github.com/sass/libsass/issues/2621
         --status-primary-color: #{$passedTextColor};
         --status-secondary-color: #{$passedSecondaryTextColor};
-        --status-border-color: #{$passedBorderColor};
+        --status-primary-border-color: #{$passedBorderColor};
         --status-secondary-border-color: #{$passedBorderColorSecondary};
-        --status-background-color: #{$passedBackgroundColor};
+        --status-primary-background-color: #{$passedBorderColor};
+        --status-secondary-background-color: #{$passedBackgroundColor};
     }
 
     &.failed {
         --status-primary-color: #{$failedTextColor};
         --status-secondary-color: #{$failedSecondaryTextColor};
-        --status-border-color: #{$failedBorderColor};
+        --status-primary-border-color: #{$failedBorderColor};
         --status-secondary-border-color: #{$failedBorderColorSecondary};
-        --status-background-color: #{$failedBackgroundColor};
+        --status-primary-background-color: #{$failedBorderColor};
+        --status-secondary-background-color: #{$failedBackgroundColor};
     }
     
     &.conditionally_passed {
         --status-primary-color: #{$conditionallyPassedTextColor};
         --status-secondary-color: #{$conditionallyPassedSecondaryTextColor};
-        --status-border-color: #{$conditionallyPassedBorderColor};
+        --status-primary-border-color: #{$conditionallyPassedBorderColor};
         --status-secondary-border-color: #{$conditionallyPassedBorderColorSecondary};
-        --status-background-color: #{$conditionallyPassedBackgroundColor};
+        --status-primary-background-color: #{$conditionallyPassedBorderColor};
+        --status-secondary-background-color: #{$conditionallyPassedBackgroundColor};
     }
 
     &.conditionally_failed {
         --status-primary-color: #{$conditionallyFailedTextColor};
         --status-secondary-color: #{$conditionallyFailedSecondaryTextColor};
-        --status-border-color: #{$conditionallyFailedBorderColor};
+        --status-primary-border-color: #{$conditionallyFailedBorderColor};
         --status-secondary-border-color: #{$conditionallyFailedBorderColorSecondary};
-        --status-background-color: #{$conditionallyFailedBackgroundColor};
+        --status-primary-background-color: #{$conditionallyFailedBorderColor};
+        --status-secondary-background-color: #{$conditionallyFailedBackgroundColor};
     }
 }
 

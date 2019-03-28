@@ -121,8 +121,8 @@ body {
     &.selected {
         font-weight: bold;
         color: white;
-        border-color: var(--status-border-color);
-        background-color: var(--status-border-color);
+        border-color: var(--status-primary-border-color);
+        background-color: var(--status-primary-background-color);
     }
 
     &.clickable {
