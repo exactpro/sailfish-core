@@ -30,13 +30,13 @@ $passedBackgroundColor: #EDF6FF;
 $passedHeaderSecondaryBackground: #D9ECFF;
 $passedSecondaryTextColor: #76ABE3;
 
-$conditionallyTextColor: #ff822a;
-$conditionallyBorderColor: #FFCDA8;
-$conditionallyBorderColorSecondary: #FFD2B3;
-$conditionallyHeaderColor: #FFD2B3;
-$conditionallyBackgroundColor: #FFF0E6;
-$conditionallyHeaderSecondaryBackground: #FFE1CC;
-$conditionallySecondaryTextColor: #FF8E3E;
+$conditionallyPassedTextColor: #ff822a;
+$conditionallyPassedBorderColor: #FFCDA8;
+$conditionallyPassedBorderColorSecondary: #FFD2B3;
+$conditionallyPassedHeaderColor: #FFD2B3;
+$conditionallyPassedBackgroundColor: #FFF0E6;
+$conditionallyPassedHeaderSecondaryBackground: #FFE1CC;
+$conditionallyPassedSecondaryTextColor: #FF8E3E;
 
 $conditionallyFailedTextColor: #EDBD36;
 $conditionallyFailedBorderColor: #EDBD36;
@@ -133,11 +133,11 @@ $chipTextColor: #808080;
     }
     
     &.conditionally_passed {
-        --status-primary-color: #{$conditionallyTextColor};
-        --status-secondary-color: #{$conditionallySecondaryTextColor};
-        --status-border-color: #{$conditionallyBorderColor};
-        --status-secondary-border-color: #{$conditionallyBorderColorSecondary};
-        --status-background-color: #{$conditionallyBackgroundColor};
+        --status-primary-color: #{$conditionallyPassedTextColor};
+        --status-secondary-color: #{$conditionallyPassedSecondaryTextColor};
+        --status-border-color: #{$conditionallyPassedBorderColor};
+        --status-secondary-border-color: #{$conditionallyPassedBorderColorSecondary};
+        --status-background-color: #{$conditionallyPassedBackgroundColor};
     }
 
     &.conditionally_failed {
@@ -159,7 +159,7 @@ $chipTextColor: #808080;
     }
 
     &.conditionally_passed {
-        color: $conditionallyTextColor;
+        color: $conditionallyPassedTextColor;
     }
 
     &.conditionally_failed {
@@ -184,8 +184,8 @@ $chipTextColor: #808080;
     }
 
     &.conditionally_passed {
-        background-color: $conditionallyBackgroundColor;
-        border-color: $conditionallyBorderColor;
+        background-color: $conditionallyPassedBackgroundColor;
+        border-color: $conditionallyPassedBorderColor;
     }
 
     &.conditionally_failed {

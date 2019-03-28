@@ -267,7 +267,7 @@
             }
         
             &.conditionaly_passed {
-                background-color: $conditionallyBackgroundColor;
+                background-color: $conditionallyPassedBackgroundColor;
             }
 
             &.conditionally_failed {

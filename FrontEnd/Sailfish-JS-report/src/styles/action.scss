@@ -48,12 +48,12 @@
 
     &.conditionally_passed {
         &.selected {
-            background-color: $conditionallyBackgroundColor;
-            border-color: $conditionallyBorderColor;
+            background-color: $conditionallyPassedBackgroundColor;
+            border-color: $conditionallyPassedBorderColor;
         }
 
         &.root {
-            border-color: $conditionallyBorderColorSecondary;
+            border-color: $conditionallyPassedBorderColorSecondary;
         }
     }
 
@@ -228,7 +228,7 @@
 
                 &.conditionally_passed {
                     h4 {
-                        color: $conditionallyTextColor;
+                        color: $conditionallyPassedTextColor;
                     }
                 }
 

@@ -58,9 +58,9 @@
         }
 
         &.conditionally_passed {
-            background-color: $conditionallyHeaderColor;
+            background-color: $conditionallyPassedHeaderColor;
             h1 {
-                color: $conditionallyTextColor;
+                color: $conditionallyPassedTextColor;
             }
         }
 
@@ -174,9 +174,9 @@
         }
 
         &.conditionally_passed {
-            background-color: $conditionallyHeaderSecondaryBackground;
+            background-color: $conditionallyPassedHeaderSecondaryBackground;
             h2 {
-                color: $conditionallySecondaryTextColor;
+                color: $conditionallyPassedSecondaryTextColor;
             }
         }
 

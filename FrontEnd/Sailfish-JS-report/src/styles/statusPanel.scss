@@ -52,8 +52,8 @@
         }
 
         &.conditionally_passed {
-            border-color: $conditionallyBorderColor;
-            background-color: $conditionallyBackgroundColor;
+            border-color: $conditionallyPassedBorderColor;
+            background-color: $conditionallyPassedBackgroundColor;
         }
 
         &.conditionally_failed {

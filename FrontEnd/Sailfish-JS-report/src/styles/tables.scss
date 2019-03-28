@@ -99,7 +99,7 @@
                 }
 
                 &.conditionally_passed {
-                    color: $conditionallyTextColor;
+                    color: $conditionallyPassedTextColor;
                 }
 
                 &.conditionally_failed {
