@@ -22,10 +22,10 @@ import '../styles/report.scss';
 interface TestCaseCardProps {
     metadata: ReportMetadata;
     index: number;
-    selectHandler: (metadata: ReportMetadata) => any;
+    handleClick: (metadata: ReportMetadata) => any;
 }
 
-const TestCaseCard = ({ metadata, selectHandler, index }: TestCaseCardProps) => {
+const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
 
     const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
 
@@ -38,12 +38,12 @@ const TestCaseCard = ({ metadata, selectHandler, index }: TestCaseCardProps) => 
         <div class={rootClass}
             onClick={() => {
 
-                // preventing select handling when user just selecting some text on card
+                // Don't trigger 'click' event when user selects text
                 if (window.getSelection().type == 'Range') {
                     return;
                 }
                 
-                selectHandler(metadata)
+                handleClick(metadata)
             }}>
             <div class="index">{index}</div>
             <div class="title">
