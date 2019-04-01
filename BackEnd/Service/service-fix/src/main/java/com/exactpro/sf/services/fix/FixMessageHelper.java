@@ -15,7 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
+
+import java.time.LocalDateTime;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.messages.IMessage;
@@ -30,6 +37,7 @@ import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
  *
  */
 public class FixMessageHelper extends MessageHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FixMessageHelper.class);
     
     public static final String ATTRIBUTE_TAG = "tag";
     public static final String HEADER = FieldConst.HEADER;
@@ -101,11 +109,11 @@ public class FixMessageHelper extends MessageHelper {
         message.addField(HEADER, subMessage);
         
         if (!subMessage.isFieldSet(MSG_TYPE_FIELD)) {
-            IMessageStructure structure = getDictionaryStructure().getMessageStructure(message.getName());
+            IMessageStructure structure = getDictionaryStructure().getMessages().get(message.getName());
             if (structure == null) {
                 throw new EPSCommonException("Message " + message.getName() + " not found in dictionary " + getNamespace());
             }
-            subMessage.addField(MSG_TYPE_FIELD, structure.getAttributeValueByName(MESSAGE_TYPE_ATTR_NAME));
+            subMessage.addField(MSG_TYPE_FIELD, getAttributeValue(structure, MESSAGE_TYPE_ATTR_NAME));
         }
         
         if (message.isFieldSet(TRAILER)) {
@@ -114,10 +122,19 @@ public class FixMessageHelper extends MessageHelper {
             subMessage = getMessageFactory().createMessage(TRAILER, getNamespace());
         }
         message.addField(TRAILER, subMessage);
-        
-        if (!subMessage.isFieldSet(CHECK_SUM)) {
-            subMessage.addField(CHECK_SUM, null); //Set default value for TreeComparer
-        }
+
         return message;
+    }
+
+    @Override
+    public long getSenderTime(IMessage message) {
+        try {
+            LocalDateTime sendingTime = message.<IMessage>getField(HEADER).getField(SENDING_TIME_FIELD);
+            return getMillisecond(sendingTime);
+        } catch(Throwable t) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        }
+
+        return super.getSenderTime(message);
     }
 }

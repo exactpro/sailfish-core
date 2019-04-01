@@ -230,7 +230,9 @@ public final class DefaultConnectionManager implements IConnectionManager {
                 serviceDescription.setSettings(settings);
 	        }
 
-	        IService service = staticServiceFactory.createService(uri);
+            serviceDescription.setEnvironment(serviceName.getEnvironment());
+
+            IService service = staticServiceFactory.createService(uri);
 
             if(serviceDescription.getServiceHandlerClassName() == null) {
                 serviceDescription.setServiceHandlerClassName(CollectorServiceHandler.class.getCanonicalName());
@@ -709,6 +711,10 @@ public final class DefaultConnectionManager implements IConnectionManager {
             List<ServiceName> names = new ArrayList<>();
 
             services.forEach((name, container) -> {
+                if(!name.getEnvironment().equals(environmentName)) {
+                    return;
+                }
+
                 ServiceStatus status = container.getService().getStatus();
 
                 if(status == ServiceStatus.STARTED || status == ServiceStatus.WARNING) {

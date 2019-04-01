@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.storage.reporting;
 
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +30,12 @@ public class TagGroupReportParameters {
 	private int loadForLevel;
 
 	private int numberOfGroups;
+
+    private Date from;
+
+    private Date to;
+
+    private List<SfInstance> selectedSfInstances;
 
 	public Set<Long> getTagIds() {
         return tagIds;
@@ -59,5 +68,28 @@ public class TagGroupReportParameters {
     public void setNumberOfGroups(int numberOfGroups) {
         this.numberOfGroups = numberOfGroups;
     }
-	
+
+    public Date getFrom() {
+        return from;
+    }
+
+    public void setFrom(Date from) {
+        this.from = from;
+    }
+
+    public Date getTo() {
+        return to;
+    }
+
+    public void setTo(Date to) {
+        this.to = to;
+    }
+
+    public List<SfInstance> getSelectedSfInstances() {
+        return selectedSfInstances;
+    }
+
+    public void setSelectedSfInstances(List<SfInstance> selectedSfInstances) {
+        this.selectedSfInstances = selectedSfInstances;
+    }
 }

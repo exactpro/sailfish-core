@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -259,7 +260,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 	}
 
 	protected IMessageStructure createMessageStructure(Message message, String id, String name, String namespace, String description,
-			List<IFieldStructure> fields, Map<String, IAttributeStructure> attributes) {
+            Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes) {
 
 		return new MessageStructure(name, namespace, description, fields, attributes);
 	}
@@ -303,9 +304,8 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 		return null;
 	}
 
-	private List<IFieldStructure> createFieldStructures(StructureBuilder builder, Message message, String namespace) {
-
-		List<IFieldStructure> result = new ArrayList<>();
+    private Map<String, IFieldStructure> createFieldStructures(StructureBuilder builder, Message message, String namespace) {
+        Map<String, IFieldStructure> result = new LinkedHashMap<>();
 
 		for (Field field : message.getFields()) {
 
@@ -348,7 +348,9 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 				);
 			}
 
-			result.add(fieldStructure);
+            if(result.put(fieldStructure.getName(), fieldStructure) != null) {
+                throw new EPSCommonException(String.format("Duplicate field '%s' in message '%s'", field.getName(), message.getName()));
+            }
 		}
 
 		return result;
@@ -410,7 +412,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
             Object value = getAttributeValue(attribute, javaType);
 
             result.put(attribute.getName(),
-                    createAttributeStructure(attribute.getName(), attribute.getValue(), value, isValues ? javaType : attribute.getType()));
+                    createAttributeStructure(attribute.getName(), attribute.getValue(), value, isValues ? javaType : defaultIfNull(attribute.getType(), JavaType.JAVA_LANG_STRING)));
         }
         return result;
     }

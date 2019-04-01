@@ -288,7 +288,7 @@ public class WaitAction {
 
         try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " of " + expected,
                 description)) {
-            groupReport.createMessage(status, MessageLevel.INFO, result.getException(), description, String.format("Received messages: %s of %s", receivedMessages, expected));
+            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : reportMessages) {
                 groupReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
@@ -435,7 +435,7 @@ public class WaitAction {
         String expected = Formatter.formatExpected(comparisonResult);
 
         if(status == StatusType.PASSED || status == StatusType.CONDITIONALLY_PASSED) { // was ==
-            report.createMessage(status, MessageLevel.INFO, comparisonResult.getException(), description, String.format("Received messages: %s of %s", messageCount, expected));
+            report.createVerification(status, "Received messages: " + messageCount + " from " + expected, description, "", comparisonResult, comparisonResult.getException());
 
             int i = 1;
             for (Pair<IMessage, ComparisonResult> result : allResults) {
@@ -448,7 +448,8 @@ public class WaitAction {
 
             return true;
         } else {
-            report.createMessage(status, MessageLevel.INFO, comparisonResult.getException(), description, String.format("Received messages: %s of %s", messageCount, expected));
+            report.createVerification(status, "Received messages: " + messageCount + " from " + expected, description, "",
+                    comparisonResult, comparisonResult.getException());
 
             int i = 1;
             for (Pair<IMessage, ComparisonResult> result : allResults) {
@@ -550,7 +551,7 @@ public class WaitAction {
         String expected = Formatter.formatExpected(result);
 
         try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected, description)) {
-            groupReport.createMessage(status, MessageLevel.INFO, result.getException(), description, String.format("Received messages: %s of %s", result, expected));
+            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : messages) {
                 groupReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
@@ -602,7 +603,7 @@ public class WaitAction {
         String expected = Formatter.formatExpected(result);
 
         try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + actualCount + " from " + expected, description)) {
-            groupReport.createMessage(status, MessageLevel.INFO, result.getException(), description, String.format("Received messages: %s of %s", result, expected));
+            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : messages) {
                 groupReport.createMessage(status, MessageLevel.INFO, message.toString());
             }

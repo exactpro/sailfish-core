@@ -55,6 +55,7 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
     protected IMessageFactory messageFactory;
     protected IDictionaryStructure dictionary;
     protected MessageHelper messageHelper;
+    protected long latency;
 
     public AbstractInitiatorService() {
         status = ServiceStatus.CREATED;
@@ -107,6 +108,7 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
             
             changeStatus(ServiceStatus.STARTING, "Staring service");
             loggingConfigurator.createIndividualAppender(logger.getName(), getServiceName());
+            latency = 0;
             internalStart();
             changeStatus(ServiceStatus.STARTED, "Staring service");
         } catch(Throwable e) {
@@ -173,10 +175,15 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
     }
 
     @Override
+    public long getLatency() {
+        return latency;
+    }
+
+    @Override
     public IMessage receive(IActionContext actionContext, IMessage message) throws InterruptedException {
         return WaitAction.waitForMessage(actionContext, message, !isAdminMessage(message));
     }
-    
+
     protected void changeStatus(Predicate<ServiceStatus> predicate, ServiceStatus status, String message) {
         if (predicate.test(this.status)) {
             changeStatus(status, message);
@@ -196,7 +203,7 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
     }
 
     protected String getHumanReadable(IMessage message) {
-        IMessageStructure messageStructure = dictionary.getMessageStructure(message.getName());
+        IMessageStructure messageStructure = dictionary.getMessages().get(message.getName());
 
         if(messageStructure == null) {
             throw new ServiceException("Unknown message: " + message.getName());
@@ -244,6 +251,11 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
         logger.debug("Saving message received from {} (admin: {}): {}", endpointName, admin, message);
         saveMessage(admin, message, endpointName, getName());
         getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.get(true, admin), message);
+        long senderTime = getMessageHelper().getSenderTime(message);
+
+        if(senderTime != 0) {
+            latency = System.currentTimeMillis() - senderTime;
+        }
     }
 
     protected void onMessageSent(IMessage message) throws Exception {

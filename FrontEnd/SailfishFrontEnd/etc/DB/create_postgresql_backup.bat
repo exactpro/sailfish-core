@@ -76,6 +76,11 @@ if "%VAR%" neq "" (
     goto :readArgs
 )
 
+if not exist "%POSTGRESQL%\pg_dump.exe" (
+    echo Can't find '%POSTGRESQL%\pg_dump.exe'
+    exit /b 1
+)
+
 if "%DATABASE%" eq "" (
     echo Database name has not been set
     exit /b 1

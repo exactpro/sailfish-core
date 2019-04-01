@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.exactpro.sf.embedded.statistics.StatisticsService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,39 +48,27 @@ public abstract class AbstractStatisticsBean {
     protected String matrixNamePattern;
 
     @SessionStored
-    protected List<Tag> tags = new ArrayList<>();
-
-    protected List<Tag> allTags;
-
-    protected Tag tagToAdd;
-
-    @SessionStored
     protected List<SfInstance> selectedSfInstances = new ArrayList<>();
 
     protected List<SfInstance> allSfInstances;
-
-    @SessionStored
-    protected boolean anyTag = false;
 
     protected void init() {
 
         if (BeanUtil.getSfContext().getStatisticsService().isConnected()) {
 
             this.from = DateUtils.truncate(new Date(), Calendar.DATE);
-
             this.to = new Date();
-
-            this.allSfInstances = BeanUtil.getSfContext().getStatisticsService().getStorage().getAllSfInstances();
-
-            this.selectedSfInstances.addAll(this.allSfInstances);
-
-            this.allTags = BeanUtil.getSfContext().getStatisticsService().getStorage().getAllTags();
-
+            initByStatistics(BeanUtil.getSfContext().getStatisticsService());
         }
 
         BeanUtil.findBean("sessionStorage", SessionStorage.class).restoreStateOfAnnotatedBean(this);
 
         logger.debug("{} [{}] constructed", this.getClass().getSimpleName(), hashCode());
+    }
+
+    protected void initByStatistics(StatisticsService statisticsService) {
+        this.allSfInstances = statisticsService.getStorage().getAllSfInstances();
+        this.selectedSfInstances.addAll(this.allSfInstances);
     }
 
     public List<SfInstance> getSelectedSfInstances() {
@@ -118,78 +107,6 @@ public abstract class AbstractStatisticsBean {
         this.matrixNamePattern = matrixNamePattern;
     }
 
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
-
-    public void onTagSelect() {
-
-        logger.debug("Tag select invoked");
-
-        this.tags.add(tagToAdd);
-
-        this.tagToAdd = null;
-
-        this.allTags.removeAll(tags);
-
-    }
-
-    public void removeTag(Tag tag) {
-
-        this.tags.remove(tag);
-
-        this.allTags.add(tag);
-
-    }
-
-    protected List<Tag> completeTag(String query, List<Tag> allTags) {
-
-        List<Tag> result = new ArrayList<>();
-
-        String loweredQuery = query.toLowerCase();
-
-        for (Tag tag : allTags) {
-
-            if (tag.getName().toLowerCase().contains(loweredQuery)) {
-
-                result.add(tag);
-
-            }
-
-        }
-
-        return result;
-
-    }
-
-    public List<Tag> completeTag(String query) {
-        return completeTag(query, this.allTags);
-    }
-
-    public Tag getTagToAdd() {
-        return tagToAdd;
-    }
-
-    public void setTagToAdd(Tag tagToAdd) {
-        this.tagToAdd = tagToAdd;
-    }
-
-    public boolean isAnyTag() {
-        return anyTag;
-    }
-
-    public void setAnyTag(boolean anyTag) {
-        this.anyTag = anyTag;
-    }
-
-    public List<Tag> getAllTags() {
-        return allTags;
-    }
-
     protected AggregateReportParameters getDefaultParams() {
         AggregateReportParameters params = new AggregateReportParameters();
 
@@ -197,8 +114,6 @@ public abstract class AbstractStatisticsBean {
         params.setTo(to);
         params.setSfInstances(new ArrayList<>(selectedSfInstances));
         params.setMatrixNamePattern(matrixNamePattern);
-        params.setTags(tags);
-        params.setAllTags(!anyTag);
 
         return params;
     }

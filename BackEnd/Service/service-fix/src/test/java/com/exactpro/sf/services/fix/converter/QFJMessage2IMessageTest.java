@@ -22,25 +22,24 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exactpro.sf.common.messages.MessageUtil;
-import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import org.junit.Assert;
 import org.junit.Test;
+import org.quickfixj.CharsetSupport;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.comparison.MessageComparator;
 import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import com.exactpro.sf.util.ConverterTest;
 import com.exactpro.sf.util.DateTimeUtility;
 
-import org.quickfixj.CharsetSupport;
 import quickfix.CharField;
 import quickfix.ConfigError;
 import quickfix.DataDictionary;
@@ -109,7 +108,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertFalse(iMessage.isFieldSet("MDIncGrp"));
         Assert.assertFalse(iMessage.isFieldSet("NoMDEntries"));
 
-        System.out.println(MessageUtil.convertToIHumanMessage(messageFactory, dictionary.getMessageStructure(iMessage.getName()), iMessage));
+        System.out.println(MessageUtil.convertToIHumanMessage(messageFactory, dictionary.getMessages().get(iMessage.getName()), iMessage));
 
         //quickfix.Message fixMessageTarget = converter.convert(iMessage, true);
 
@@ -133,7 +132,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         IMessage iMessage = converter.convert(fixMessageSrc);
         Assert.assertEquals(false, iMessage.getMetaData().isRejected());
 
-        System.out.println(MessageUtil.convertToIHumanMessage(messageFactory, dictionary.getMessageStructure(iMessage.getName()), iMessage));
+        System.out.println(MessageUtil.convertToIHumanMessage(messageFactory, dictionary.getMessages().get(iMessage.getName()), iMessage));
     }
 
     @Test

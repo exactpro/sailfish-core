@@ -62,32 +62,16 @@ public class ModifiableDictionaryStructure implements IDictionaryStructure {
         return (Map<String, IAttributeStructure>) (Map<String, ?>) attributes;
     }
 
-	@Override
-    public Object getAttributeValueByName(String name) {
-        ModifiableAttributeStructure attr = attributes.get(name);
-        return (attr == null) ? null : attr.getCastValue();
-    }
-
-    @Override
-	public ModifiableMessageStructure getMessageStructure(String name) {
-		return msgStructures.get(name);
-	}
-	
-	@Override
-	public ModifiableFieldStructure getFieldStructure(String name) {
-		return this.fieldStructures.get(name);
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IMessageStructure> getMessageStructures() {
-		return (List<IMessageStructure>)(List<?>)new ArrayList<>(this.msgStructures.values());
+    public Map<String, IMessageStructure> getMessages() {
+        return (Map<String, IMessageStructure>)(Map<String, ?>)this.msgStructures;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<IFieldStructure> getFieldStructures() {
-		return (List<IFieldStructure>)(List<?>)new ArrayList<>(this.fieldStructures.values());
+    public Map<String, IFieldStructure> getFields() {
+        return (Map<String, IFieldStructure>)(Map<String, ?>)this.fieldStructures;
 	}
 	
 	@Override

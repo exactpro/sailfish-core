@@ -32,9 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.exactpro.sf.help.helpmarshaller.AbstrFieldMess;
-import com.exactpro.sf.help.helpmarshaller.Field;
-import com.exactpro.sf.help.helpmarshaller.Message;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -67,8 +64,11 @@ import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.embedded.statistics.handlers.StatisticsReportHandlerLoader;
+import com.exactpro.sf.help.helpmarshaller.AbstrFieldMess;
+import com.exactpro.sf.help.helpmarshaller.Field;
 import com.exactpro.sf.help.helpmarshaller.HelpEntityName;
 import com.exactpro.sf.help.helpmarshaller.HelpEntityType;
+import com.exactpro.sf.help.helpmarshaller.Message;
 import com.exactpro.sf.help.helpmarshaller.PluginHelpContainer;
 import com.exactpro.sf.help.helpmarshaller.describers.FieldsDescriber;
 import com.exactpro.sf.help.helpmarshaller.jsoncontainers.FieldJsonContainer;
@@ -306,7 +306,7 @@ public class HelpBuilder {
         }
 
         PluginLoader pluginLoader = new PluginLoader(wd, staticServiceManager, actionManager, dictionaryManager, preprocessorLoader, validatorLoader,
-                adapterManager, dataManager, languageManager, matrixProviderHolder, matrixConverterManager, statisticsReportLoader, version);
+                adapterManager, dataManager, languageManager, matrixProviderHolder, matrixConverterManager, statisticsReportLoader, null, version);
 
         pluginLoader.load();
 
@@ -819,7 +819,7 @@ public class HelpBuilder {
 
             }
 
-            List<IMessageStructure> messageStructures = new ArrayList<>(dictionary.getMessageStructures());
+            List<IMessageStructure> messageStructures = new ArrayList<>(dictionary.getMessages().values());
 
             Collections.sort(messageStructures, messageComparator);
 
@@ -898,7 +898,7 @@ public class HelpBuilder {
             return;
         }
 
-        for (IFieldStructure field : fields.getFields()) {
+        for(IFieldStructure field : fields.getFields().values()) {
             String fieldName = field.getName();
             boolean hasChildren = field.isCollection() || (field.isComplex());
             HelpEntityType fieldNodeType = hasChildren ? HelpEntityType.MESSAGE : HelpEntityType.FIELD;

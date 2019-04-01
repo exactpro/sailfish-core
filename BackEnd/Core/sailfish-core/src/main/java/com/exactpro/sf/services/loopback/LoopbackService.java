@@ -17,13 +17,12 @@ package com.exactpro.sf.services.loopback;
 
 import java.util.Objects;
 
-import com.exactpro.sf.common.messages.AttributeNotFoundException;
-import com.exactpro.sf.services.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.script.actions.WaitAction;
+import com.exactpro.sf.common.messages.AttributeNotFoundException;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
@@ -31,6 +30,16 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
+import com.exactpro.sf.services.IInitiatorService;
+import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.IServiceHandler;
+import com.exactpro.sf.services.IServiceMonitor;
+import com.exactpro.sf.services.IServiceSettings;
+import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.MessageHelper;
+import com.exactpro.sf.services.ServiceException;
+import com.exactpro.sf.services.ServiceHandlerRoute;
+import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.storage.IMessageStorage;
 
 public class LoopbackService implements IInitiatorService {
@@ -132,7 +141,7 @@ public class LoopbackService implements IInitiatorService {
 			boolean isAdmin = false;
 			try {
 				isAdmin = MessageHelper.isAdmin(context.getDictionaryManager().getDictionary(((IMessage) message).getMetaData().getDictionaryURI())
-						.getMessageStructure(((IMessage) message).getName()));
+                        .getMessages().get(((IMessage)message).getName()));
 
 			} catch (AttributeNotFoundException e) {
 				throw new ServiceException("Unable to get message attribute", e);

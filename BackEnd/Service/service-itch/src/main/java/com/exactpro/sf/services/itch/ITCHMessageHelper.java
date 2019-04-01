@@ -15,6 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.messages.IMessage;
@@ -27,12 +39,8 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.MessageHelper;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 public class ITCHMessageHelper extends MessageHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ITCHMessageHelper.class);
 
     //Codec constants
     public static final String FIELD_SECONDS = "Seconds";
@@ -108,17 +116,16 @@ public class ITCHMessageHelper extends MessageHelper {
     }
 
     public static Integer extractLengthSize(IDictionaryStructure dictionaryStructure) {
-        List<IMessageStructure> messages = dictionaryStructure.getMessageStructures();
-        for (IMessageStructure struct : messages) {
+        for(IMessageStructure struct : dictionaryStructure.getMessages().values()) {
         	if (MESSAGE_UNIT_HEADER_NAME.equals(struct.getName())) {
         		// Ignore UnitHeader
         		continue;
         	}
     		// We look for message with MessageType attribute and with field 'Length'
-        	if (struct.getAttributeValueByName(ATTRIBUTE_MESSAGE_TYPE) != null
-        			&& struct.getField(FIELD_LENGTH_NAME) != null) {
-                IFieldStructure lengthField = struct.getField(FIELD_LENGTH_NAME);
-                return (Integer) lengthField.getAttributeValueByName(ATTRIBUTE_LENGTH_NAME);
+            if(getAttributeValue(struct, ATTRIBUTE_MESSAGE_TYPE) != null
+                    && struct.getFields().containsKey(FIELD_LENGTH_NAME)) {
+                IFieldStructure lengthField = struct.getFields().get(FIELD_LENGTH_NAME);
+                return getAttributeValue(lengthField, ATTRIBUTE_LENGTH_NAME);
         	}
         }
         return null;
@@ -129,7 +136,7 @@ public class ITCHMessageHelper extends MessageHelper {
             headerStructure = getHeaderStructure(messageNamespace);
         }
         IMessage headerMessage = msgFactory.createMessage(headerStructure.getName(), messageNamespace);
-        for(IFieldStructure fieldStructure : headerStructure.getFields()) {
+        for(IFieldStructure fieldStructure : headerStructure.getFields().values()) {
             for(String fieldName: params.keySet()){
                 if(fieldName.equals(fieldStructure.getName())) {
                     Object value = StructureUtils.castValueToJavaType(params.get(fieldName), fieldStructure.getJavaType());
@@ -142,7 +149,7 @@ public class ITCHMessageHelper extends MessageHelper {
     }
 
     protected IMessageStructure getHeaderStructure(String messageNamespace){
-        List<IMessageStructure> messageStructures = getDictionaryStructure().getMessageStructures();
+        Collection<IMessageStructure> messageStructures = getDictionaryStructure().getMessages().values();
         IMessageStructure header = null;
         for(IMessageStructure messageStructure: messageStructures){
             if(messageStructure.getName().equals(MESSAGE_UNIT_HEADER_NAME)){
@@ -163,5 +170,20 @@ public class ITCHMessageHelper extends MessageHelper {
         }
 
         throw new EPSCommonException("Sent message is not an " + IMessage.class.getSimpleName());
+    }
+
+    @Override
+    public long getSenderTime(IMessage message) {
+        try {
+            LocalDateTime messageTime = message.getField(FAKE_FIELD_MESSAGE_TIME);
+
+            if(messageTime != null) {
+                return getMillisecond(messageTime);
+            }
+        } catch(Throwable t) {
+            LOGGER.error("Failed to retrieve timestamp from message: {}", message, t);
+        }
+
+        return super.getSenderTime(message);
     }
 }

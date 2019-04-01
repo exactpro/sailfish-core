@@ -39,7 +39,7 @@ import javax.xml.transform.TransformerException;
 import com.exactpro.sf.embedded.updater.UpdateService;
 import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings;
-import com.exactpro.sf.storage.impl.ObjectFlusher;
+import com.exactpro.sf.testwebgui.restapi.machinelearning.MLPersistenceManager;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -425,6 +425,7 @@ public class SFContextServlet implements Servlet {
     		FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put(BeanUtil.ENUM_SET_CONTAINER, enumSetContainer);
             FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put(BeanUtil.SESSION_MODELS_MAPPER, new SessionModelsMapper());
             FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put(BeanUtil.ENVIRONMENT_TRACKING_BEAN, new EnvironmentTrackingBean());
+            FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put(BeanUtil.SESSION_ML_PERSISTENCE_MAPPER, new MLPersistenceManager(wd));
 
             BeanUtil.setServletContext(config.getServletContext());
 

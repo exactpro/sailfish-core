@@ -43,6 +43,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
+import com.exactpro.sf.common.messages.IHumanMessage;
+import com.exactpro.sf.common.messages.IMessage;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -302,21 +305,22 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
     private IMessageFactory loadFactory(SailfishURI uri) {
         try {
+            IMessageFactory iMessageFactory = null;
             DictionarySettings settings = SailfishURIUtils.getMatchingValue(uri, dictSettings, SailfishURIRule.REQUIRE_RESOURCE);
 
-            if(settings == null) {
-                return null;
+            if((settings != null) && (settings.getFactoryClass() != null)) {
+                Class<? extends IMessageFactory> clazz = settings.getFactoryClass();
+                iMessageFactory = clazz.newInstance();
+            } else {
+                iMessageFactory = new AbstractMessageFactory() {
+                    @Override
+                    public String getProtocol() {
+                        return "Unknown";
+                    }
+                };
             }
 
-            Class<? extends IMessageFactory> clazz = settings.getFactoryClass();
-
-            if (clazz == null) {
-                return null;
-            }
-
-            IMessageFactory iMessageFactory = clazz.newInstance();
-            SailfishURI dictUri = settings.getURI();
-            iMessageFactory.init(getDictionary(dictUri).getNamespace(), dictUri);
+            iMessageFactory.init(getDictionary(uri).getNamespace(), uri);
 
             return iMessageFactory;
         } catch (Exception e) {

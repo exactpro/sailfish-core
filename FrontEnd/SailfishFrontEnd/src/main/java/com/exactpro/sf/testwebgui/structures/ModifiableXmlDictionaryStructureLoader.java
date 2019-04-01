@@ -60,7 +60,7 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 		ModifiableDictionaryStructure result = (ModifiableDictionaryStructure)convert(dic);
 
 		for (ModifiableFieldStructure struct : fieldReferencesMap.keySet()) {
-			struct.setReference(result.getFieldStructure(fieldReferencesMap.get(struct)));
+            struct.setReference(result.getFields().get(fieldReferencesMap.get(struct)));
 		}
 
 		this.fieldReferencesMap = null;
@@ -138,10 +138,10 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 	@SuppressWarnings("unchecked")
 	@Override
 	protected ModifiableMessageStructure createMessageStructure(Message message, String id, String name, String namespace,
-			String description, List<IFieldStructure> fields, Map<String, IAttributeStructure> attributes) {
+            String description, Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes) {
 
 		return new ModifiableMessageStructure(id, name, namespace, description,
-				(List<ModifiableFieldStructure>)(List<?>)fields,
+                (Map<String, ModifiableFieldStructure>)(Map<String, ?>)fields,
 				(Map<String, ModifiableAttributeStructure>)(Map<String, ?>)attributes);
 	}
 

@@ -16,6 +16,7 @@
 package com.exactpro.sf.configuration.dictionary;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +34,7 @@ public class ValidationHelper {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ValidationHelper.class);
 
-	public static void checkDuplicates(IMessageStructure message, List<? extends IFieldStructure> fields, 
+    public static void checkDuplicates(IMessageStructure message, Collection<? extends IFieldStructure> fields,
 			List<DictionaryValidationError> errors, boolean isMessage, DictionaryValidationErrorLevel level) {
 		
 		Set<String> names = new HashSet<>();
@@ -82,7 +83,7 @@ public class ValidationHelper {
 
 	public static void checkRequiredField(List<DictionaryValidationError> errors, IMessageStructure message,
 												  String fieldName) {
-		if(message.getField(fieldName) == null) {
+        if(message.getFields().get(fieldName) == null) {
 			errors.add(new DictionaryValidationError(message.getName(), null,
 					"Message  <strong>\"" + message.getName() + "\"</strong> doesn't contain " + fieldName +" field",
 					DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));
@@ -148,7 +149,7 @@ public class ValidationHelper {
 
 	public static void checkRequiredMessageExistence(List<DictionaryValidationError> errors,
 											   IDictionaryStructure dictionary, String messageName) {
-		if(dictionary.getMessageStructure(messageName) == null) {
+        if(dictionary.getMessages().get(messageName) == null) {
 			errors.add(new DictionaryValidationError(null, null,
 					"Message  <strong>\"" + messageName + "\"</strong> is missing in dictionary",
 					DictionaryValidationErrorLevel.DICTIONARY, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));

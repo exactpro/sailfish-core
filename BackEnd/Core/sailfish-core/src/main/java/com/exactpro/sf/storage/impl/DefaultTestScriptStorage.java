@@ -156,8 +156,10 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
     protected TestScriptDescription convertToTestScriptDescription(String workFolder, ReportRoot reportRoot) throws SailfishURIException {
         ReportProperties properties = reportRoot.getReportProperties();
 
-        TestScriptDescription testScriptDescription = new TestScriptDescription(scriptRunListener,
-                new Date(properties.getTimestamp()), workFolder,
+        TestScriptDescription testScriptDescription = new TestScriptDescription(
+                scriptRunListener,
+                new Date(properties.getTimestamp()),
+                workFolder,
                 String.valueOf(properties.getMatrixFile()),
                 properties.getRange(),
                 properties.getAutostart(),
@@ -220,13 +222,14 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
 
             if (FilenameUtils.isExtension(reportRootPath, ZipReport.ZIP_EXTENSION)) {
                 try (ZipFile zipFile = new ZipFile(reportRoot)) {
-                    ZipEntry zipJson = zipFile.getEntry(FilenameUtils.removeExtension(reportRoot.getName()) + "/" + ROOT_JSON_REPORT_FILE);
-                    if (zipJson == null) {
-                        ZipEntry zipXmlProperties = zipFile.getEntry(FilenameUtils.removeExtension(reportRoot.getName()) + "/" + XML_PROPERTIES_FILE);
+                    ZipEntry zipXmlProperties = zipFile.getEntry(FilenameUtils.removeExtension(reportRoot.getName()) + "/" + XML_PROPERTIES_FILE);
+
+                    if (zipXmlProperties != null) {
                         try (InputStream stream = zipFile.getInputStream(zipXmlProperties)) {
                             return convertToTestScriptDescription(reportRootPath, (XmlReportProperties) xmlUnmarshaller.get().unmarshal(stream));
                         }
                     } else {
+                        ZipEntry zipJson = zipFile.getEntry(FilenameUtils.removeExtension(reportRoot.getName()) + "/" + ROOT_JSON_REPORT_FILE);
                         try (InputStream stream = zipFile.getInputStream(zipJson)) {
                             return convertToTestScriptDescription(reportRootPath, jsonObjectMapper.readValue(stream, ReportRoot.class));
                         }
@@ -234,18 +237,18 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
                 }
             }
             else {
-                if (workspaceDispatcher.exists(FolderType.REPORT, reportRootPath, ROOT_JSON_REPORT_FILE)) {
-                    try (InputStream stream = new FileInputStream(workspaceDispatcher.getFile(FolderType.REPORT, reportRootPath, ROOT_JSON_REPORT_FILE))) {
-                        return convertToTestScriptDescription(reportRootPath, jsonObjectMapper.readValue(stream, ReportRoot.class));
-                    }
-                } else {
+                if (workspaceDispatcher.exists(FolderType.REPORT, reportRootPath, XML_PROPERTIES_FILE)) {
                     File xmlPropertiesFile = workspaceDispatcher.getFile(FolderType.REPORT, reportRootPath, XML_PROPERTIES_FILE);
                     try (InputStream stream = new FileInputStream(xmlPropertiesFile)) {
                         return convertToTestScriptDescription(reportRootPath, (XmlReportProperties) xmlUnmarshaller.get().unmarshal(stream));
                     }
+                } else {
+                    try (InputStream stream = new FileInputStream(workspaceDispatcher.getFile(FolderType.REPORT, reportRootPath, ROOT_JSON_REPORT_FILE))) {
+                        return convertToTestScriptDescription(reportRootPath, jsonObjectMapper.readValue(stream, ReportRoot.class));
+                    }
                 }
             }
-        } catch (IOException | SailfishURIException | JAXBException e) {
+        } catch (Exception e) {
             logger.error(String.format("Unable to parse report '%s'", reportRootPath), e);
             return null;
         }

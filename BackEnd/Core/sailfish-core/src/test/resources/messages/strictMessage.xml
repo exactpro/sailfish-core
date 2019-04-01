@@ -66,9 +66,12 @@
         <message id="ref_message" name="SomeMessage">
 			<field reference="integer" name="testField"/>
         </message>
-        <message name="TestRequedMessage">
+        <message name="TestRequiredField">
             <field reference="string" name="string" required="true" defaultvalue="def"/>
             <field reference="integer" name="integer" required="true"/>
+        </message>
+        <message name="TestRequiredSubMessage">
+            <field reference="ref_message" name="subMessage" required="true"/>
         </message>
     </messages>
 </dictionary>

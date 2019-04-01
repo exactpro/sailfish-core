@@ -15,8 +15,33 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.statistics;
 
+import com.exactpro.sf.configuration.workspace.FolderType;
+import com.exactpro.sf.embedded.statistics.StatisticsException;
+import com.exactpro.sf.embedded.statistics.StatisticsService;
+import com.exactpro.sf.embedded.statistics.StatisticsUtils;
+import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.statistics.entities.TagGroup;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportParameters;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportRow;
+import com.exactpro.sf.testwebgui.BeanUtil;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -27,38 +52,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
-import com.exactpro.sf.embedded.statistics.StatisticsException;
-import com.exactpro.sf.embedded.statistics.StatisticsService;
-import com.exactpro.sf.embedded.statistics.StatisticsUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.omnifaces.util.Utils;
-import org.primefaces.model.DefaultStreamedContent;
-import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.StreamedContent;
-import org.primefaces.model.TreeNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.exactpro.sf.configuration.workspace.FolderType;
-import com.exactpro.sf.embedded.statistics.entities.Tag;
-import com.exactpro.sf.embedded.statistics.entities.TagGroup;
-import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
-import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
-import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportRow;
-import com.exactpro.sf.testwebgui.BeanUtil;
-
 @ManagedBean(name="tgReportBean")
 @ViewScoped
 @SuppressWarnings("serial")
-public class TagGroupDimensionalReportBean implements Serializable {
+public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(TagGroupDimensionalReportBean.class);
 
@@ -129,6 +126,14 @@ public class TagGroupDimensionalReportBean implements Serializable {
 
     }
 
+    @PostConstruct
+    public void init() {
+        super.init();
+        setFrom(null);
+        setTo(null);
+        setSelectedSfInstances(allSfInstances);
+    }
+
 	public void generateReport() {
 
 		if(this.selectedDemensions.isEmpty()) {
@@ -141,8 +146,9 @@ public class TagGroupDimensionalReportBean implements Serializable {
 
 		try {
             StatisticsService statisticsService = BeanUtil.getSfContext().getStatisticsService();
+            TagGroupReportParameters params = createParameters();
             List<TagGroupReportResult> results = StatisticsUtils.generateTagGroupReportResults(
-                                statisticsService, this.selectedDemensions);
+                                statisticsService, this.selectedDemensions, params);
 			buildTreeModel(results);
             this.results = results;
 		} catch (StatisticsException e) {
@@ -360,6 +366,22 @@ public class TagGroupDimensionalReportBean implements Serializable {
 
     public boolean isSaveDialog() {
         return saveDialog;
+    }
+
+    private TagGroupReportParameters createParameters() {
+        TagGroupReportParameters params = new TagGroupReportParameters();
+        if (from != null) {
+            params.setFrom(from);
+        }
+        if (to != null) {
+            params.setTo(to);
+        }
+        if (CollectionUtils.isNotEmpty(selectedSfInstances)
+                && CollectionUtils.isNotEmpty(allSfInstances)
+                && !selectedSfInstances.containsAll(allSfInstances)) {
+            params.setSelectedSfInstances(selectedSfInstances);
+        }
+        return params;
     }
 
 }

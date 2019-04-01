@@ -112,7 +112,7 @@
 	            <p:menuitem>
 	                <p:selectOneMenu id="selectedEnvironment" value="#{environmentBean.currentEnvironment}" styleClass="eps-input eps-selected-environment">
 
-	                    <p:ajax event="change" listener="#{environmentBean.changeEnvironment}" update=":form:table :form:table:totalServiceCountSpan :form:mainMenuBar :form:rightMenuBar" />
+	                    <p:ajax event="change" listener="#{environmentBean.changeEnvironment}" update=":form:table :form:mainMenuBar :form:rightMenus" />
 
 	                    <f:selectItems value="#{environmentBean.environmentList}" />
 

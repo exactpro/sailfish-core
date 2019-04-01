@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -111,21 +113,20 @@ public class SfDictionaryConverterTest extends AbstractTest {
             List<DictionaryValidationError> errors = dictionaryValidator.validate(newSfDictionary, true, null);
             Assert.assertEquals(0, errors.size());
 
-            for (IMessageStructure message : dictionary.getMessageStructures()) {
-                if (entityTypes.contains(message.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
-                    assertEqualsMessage(message, newSfDictionary.getMessageStructure(message.getName()));
+            for(IMessageStructure message : dictionary.getMessages().values()) {
+                if(entityTypes.contains(getAttributeValue(message, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
+                    assertEqualsMessage(message, newSfDictionary.getMessages().get(message.getName()));
                 }
             }
 
-            for (IMessageStructure complexMessage : newSfDictionary.getMessageStructures()) {
-                if (!entityTypes
-                        .contains(complexMessage.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
-                    assertEqualsMessage(complexMessage, dictionary.getMessageStructure(complexMessage.getName()));
+            for(IMessageStructure complexMessage : newSfDictionary.getMessages().values()) {
+                if(!entityTypes.contains(getAttributeValue(complexMessage, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
+                    assertEqualsMessage(complexMessage, dictionary.getMessages().get(complexMessage.getName()));
                 }
             }
 
-            for (IFieldStructure field : newSfDictionary.getFieldStructures()) {
-                assertEqualsField(field, dictionary.getFieldStructure(field.getName()));
+            for(IFieldStructure field : newSfDictionary.getFields().values()) {
+                assertEqualsField(field, dictionary.getFields().get(field.getName()));
             }
         } finally {
             File del = new File(outputFolder);
@@ -143,7 +144,7 @@ public class SfDictionaryConverterTest extends AbstractTest {
 
         Assert.assertEquals(expected.getAttributes().size(), actual.getAttributes().size());
 
-        for (String attrName : expected.getAttributeNames()) {
+        for(String attrName : expected.getAttributes().keySet()) {
             Assert.assertEquals(expected.getAttributes().get(attrName).getValue(),
                     actual.getAttributes().get(attrName).getValue());
         }
@@ -165,15 +166,15 @@ public class SfDictionaryConverterTest extends AbstractTest {
         Assert.assertEquals(expected.getName(), actual.getName());
         Assert.assertEquals(expected.getAttributes().size(), actual.getAttributes().size());
 
-        for (String attrName : expected.getAttributeNames()) {
+        for(String attrName : expected.getAttributes().keySet()) {
             Assert.assertEquals(expected.getAttributes().get(attrName).getValue(),
                     actual.getAttributes().get(attrName).getValue());
         }
 
         Assert.assertEquals(expected.getFields().size(), actual.getFields().size());
 
-        for (String fieldName : expected.getFieldNames()) {
-            assertEqualsMessageField(expected.getField(fieldName), actual.getField(fieldName));
+        for(String fieldName : expected.getFields().keySet()) {
+            assertEqualsMessageField(expected.getFields().get(fieldName), actual.getFields().get(fieldName));
         }
     }
 

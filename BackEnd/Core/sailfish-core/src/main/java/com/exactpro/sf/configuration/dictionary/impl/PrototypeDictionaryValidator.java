@@ -75,7 +75,7 @@ public class PrototypeDictionaryValidator extends AbstractDictionaryValidator {
     public List<DictionaryValidationError> validate(IDictionaryStructure dictionary, IMessageStructure message, boolean full) {
         List<DictionaryValidationError> errors = super.validate(dictionary, message, full);
 
-        IMessageStructure prototypeMessageStructure = prototypeDictionary.getMessageStructure(message.getName());
+        IMessageStructure prototypeMessageStructure = prototypeDictionary.getMessages().get(message.getName());
         if (prototypeMessageStructure != null) {
             comparator.compare(
                     (DistinctionType distinctionType, Object first, Object second, DictionaryPath dictionaryPath) ->
@@ -94,12 +94,12 @@ public class PrototypeDictionaryValidator extends AbstractDictionaryValidator {
         DictionaryPath path = new DictionaryPath("");
         IFieldStructure prototypeField = null;
         if (message == null) {
-            prototypeField = prototypeDictionary.getFieldStructure(field.getName());
+            prototypeField = prototypeDictionary.getFields().get(field.getName());
         } else {
-            IMessageStructure prototypeMessage = prototypeDictionary.getMessageStructure(message.getName());
+            IMessageStructure prototypeMessage = prototypeDictionary.getMessages().get(message.getName());
             if (prototypeMessage != null) {
                 path.setMessage(prototypeMessage.getName());
-                prototypeField = prototypeMessage.getField(field.getName());
+                prototypeField = prototypeMessage.getFields().get(field.getName());
             }
         }
 

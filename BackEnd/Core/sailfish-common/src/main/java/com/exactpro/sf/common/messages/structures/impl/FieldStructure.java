@@ -16,9 +16,7 @@
 package com.exactpro.sf.common.messages.structures.impl;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -31,7 +29,6 @@ import com.exactpro.sf.common.util.EPSCommonException;
  * This structure should be immutable
  */
 public class FieldStructure implements IFieldStructure {
-
 	protected final String name;
 	protected final String namespace;
 	protected final String description;
@@ -53,7 +50,6 @@ public class FieldStructure implements IFieldStructure {
 	public FieldStructure(String name, String namespace, String description, String referenceName,
 			  Map<String, IAttributeStructure> attributes, Map<String, IAttributeStructure> values,
 			  JavaType javaType, boolean isRequired, boolean isCollection, boolean isServiceName, String defaultValue) throws EPSCommonException {
-
 		this(name, namespace, description, referenceName, attributes, values, javaType,
 				isRequired, isCollection, isServiceName, defaultValue, null);
 	}
@@ -61,7 +57,6 @@ public class FieldStructure implements IFieldStructure {
 	protected FieldStructure(String name, String namespace, String description, String referenceName,
 			  Map<String, IAttributeStructure> attributes, Map<String, IAttributeStructure> values, JavaType javaType, boolean isRequired,
 			  boolean isCollection, boolean isServiceName, String defaultValue, StructureType structureType) throws EPSCommonException {
-
 		this.name = name;
 		this.namespace = namespace;
 		this.description = description;
@@ -70,8 +65,6 @@ public class FieldStructure implements IFieldStructure {
 		this.collection = isCollection;
 		this.serviceName = isServiceName;
 		this.defaultValue = StructureUtils.castValueToJavaType(defaultValue, javaType);
-
-		StructureType tempStructureType = structureType != null ? structureType : null;
 
 		if (attributes != null) {
 			this.attributes = Collections.unmodifiableMap(attributes);
@@ -85,44 +78,16 @@ public class FieldStructure implements IFieldStructure {
 			this.values = Collections.emptyMap();
 		}
 
-		if (tempStructureType == null && !this.values.isEmpty()) {
-			tempStructureType = StructureType.ENUM;
+        if(structureType == null && !this.values.isEmpty()) {
+            structureType = StructureType.ENUM;
 		}
 
-		if (tempStructureType == null) {
-			tempStructureType = StructureType.SIMPLE;
+        if(structureType == null) {
+            structureType = StructureType.SIMPLE;
 		}
 
-		this.structureType = tempStructureType;
-
+        this.structureType = structureType;
 		this.referenceName = referenceName;
-	}
-
-	@Override
-	public Object getAttributeValueByName(String name) {
-		if (this.attributes == null) return null;
-		IAttributeStructure attr = this.attributes.get(name);
-		return attr == null ? null : attr.getCastValue();
-	}
-
-	@Override
-	public Object getAttributeValueIgnoreCase(String name) {
-
-		if (this.attributes == null) return null;
-
-		for (String attrName : attributes.keySet()) {
-			if (attrName.equalsIgnoreCase(name)) {
-				return attributes.get(attrName).getCastValue();
-			}
-		}
-
-		return null;
-	}
-
-	@Override
-	public Set<String> getAttributeNames() {
-		if (this.attributes == null) return null;
-		return this.attributes.keySet();
 	}
 
 	@Override
@@ -186,8 +151,8 @@ public class FieldStructure implements IFieldStructure {
     }
 
     @Override
-	public Object getDefaultValue() {
-		return defaultValue;
+    public <T> T getDefaultValue() {
+        return (T)defaultValue;
 	}
 
 	@Override
@@ -201,17 +166,7 @@ public class FieldStructure implements IFieldStructure {
 	}
 
 	@Override
-	public IFieldStructure getField(String name) {
-		throw new UnsupportedOperationException("Field '" + this.name + "' don't have another fields");
-	}
-
-	@Override
-	public List<String> getFieldNames() {
-		throw new UnsupportedOperationException("Field '" + this.name + "' don't have another fields");
-	}
-
-	@Override
-	public List<IFieldStructure> getFields() {
+    public Map<String, IFieldStructure> getFields() {
         throw new UnsupportedOperationException("Field '" + this.name + "' don't have another fields");
 	}
 }

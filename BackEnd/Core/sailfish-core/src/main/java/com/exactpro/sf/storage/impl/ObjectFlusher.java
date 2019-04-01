@@ -281,7 +281,12 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     private boolean checkQueueLimit(T o) {
 
         long currentSize = storageProviderQueueSize + o.getSize();
-        return currentSize <= maxStorageQueueSize;
+        if (currentSize <= maxStorageQueueSize) {
+            storageProviderQueueSize = currentSize;
+            return true;
+        }
+
+        return false;
     }
 
     private void notifyAboutThrottle() {

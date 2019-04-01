@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures;
 
-import java.util.LinkedHashMap;
+import java.util.TreeMap;
 
 /**
  * @author sergey.smirnov
@@ -27,7 +27,7 @@ public class ModifiableStructureBuilder extends StructureBuilder {
      * @param namespace
      */
     public ModifiableStructureBuilder(String namespace) {
-        super(namespace, new LinkedHashMap<String, IMessageStructure>(), new LinkedHashMap<String, IFieldStructure>());
+        super(namespace, new TreeMap<>(), new TreeMap<>());
     }
 
 }

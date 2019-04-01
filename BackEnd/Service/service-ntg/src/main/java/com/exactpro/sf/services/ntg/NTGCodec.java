@@ -15,16 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.messages.MessageStructureReader;
-import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
-import com.exactpro.sf.common.messages.MessageStructureWriter;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
@@ -33,6 +30,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MessageStructureReader;
+import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
+import com.exactpro.sf.common.messages.MessageStructureWriter;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
@@ -97,13 +99,12 @@ public final class NTGCodec extends AbstractCodec {
 		Map<Byte, IMessageStructure> map = null;
 		IMessageStructure curStructure = null;
 
-		for ( IMessageStructure msgStruct : dictionary.getMessageStructures() )
-		{
-			Byte msgType = (Byte)msgStruct.getAttributeValueByName(ATTRIBUTE_MESSAGE_TYPE);
+        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
+            Byte msgType = getAttributeValue(msgStruct, ATTRIBUTE_MESSAGE_TYPE);
 
 			if (msgType != null) {
 
-			    Boolean isInput = (Boolean)msgStruct.getAttributeValueByName(ATTRIBUTE_IS_INPUT_MESSAGE);
+                Boolean isInput = getAttributeValue(msgStruct, ATTRIBUTE_IS_INPUT_MESSAGE);
 
 			    map = Boolean.TRUE.equals(isInput) ? inputMap : outputMap;
 
@@ -123,12 +124,13 @@ public final class NTGCodec extends AbstractCodec {
 
             int msgLength = 0;
 
-            for (IFieldStructure fldStruct : entry.getValue().getFields()) {
-                if (fldStruct.getAttributeValueByName(NTGProtocolAttribute.Length.toString()) == null) {
+            for(IFieldStructure fldStruct : entry.getValue().getFields().values()) {
+                Integer fldLength = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
+
+                if(fldLength == null) {
                     throw new ServiceException("Attribute [" + NTGProtocolAttribute.Length.toString() + "] missed in definition field "
                             + fldStruct.getName() + " in message " + entry.getValue().getName());
                 }
-                int fldLength = (Integer) fldStruct.getAttributeValueByName(NTGProtocolAttribute.Length.toString());
 
                 msgLength += fldLength;
             }
@@ -265,7 +267,7 @@ public final class NTGCodec extends AbstractCodec {
 
         NTGVisitorEncode visitorNTG = new NTGVisitorEncode();
 
-		IMessageStructure msgStructure = dictionary.getMessageStructure(message.getName());
+        IMessageStructure msgStructure = dictionary.getMessages().get(message.getName());
 
 		if (msgStructure == null) {
 			throw new NullPointerException("MsgStructure is null. Namespace="

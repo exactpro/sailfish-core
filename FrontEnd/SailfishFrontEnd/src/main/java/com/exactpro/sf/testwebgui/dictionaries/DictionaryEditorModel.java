@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,10 +34,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 
+import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.omnifaces.model.tree.ListTreeModel;
@@ -262,12 +263,12 @@ public class DictionaryEditorModel {
         TreeModel<FieldEditorModel> added = parent.addChild(fieldModel);
 
         ModifiableFieldStructure field = fieldModel.getField();
-        List<ModifiableFieldStructure> fieldStructures = Collections.emptyList();
+        Collection<ModifiableFieldStructure> fieldStructures = Collections.emptyList();
         
         if (field.isMessage()) {
-            fieldStructures = ((ModifiableMessageStructure) field).getImplFields();
+            fieldStructures = ((ModifiableMessageStructure)field).getImplFields().values();
         } else if (field.isSubMessage()) {
-            fieldStructures = ((ModifiableMessageStructure) field.getReference()).getImplFields();
+            fieldStructures = ((ModifiableMessageStructure)field.getReference()).getImplFields().values();
         }
         
         for (ModifiableFieldStructure childField : fieldStructures) {
@@ -483,7 +484,7 @@ public class DictionaryEditorModel {
                 return true;
             }
 
-            for (ModifiableFieldStructure field : referenced.getImplFields()) {
+            for(ModifiableFieldStructure field : referenced.getImplFields().values()) {
                 if (existsInTree(toFind, field)) {
                     return true;
                 }
@@ -499,7 +500,7 @@ public class DictionaryEditorModel {
             return false;
         }
 
-        for (ModifiableFieldStructure field : message.getImplFields()) {
+        for(ModifiableFieldStructure field : message.getImplFields().values()) {
             if (field.getName().equals(fieldName)) {
                 return true;
             }
@@ -1090,7 +1091,7 @@ public class DictionaryEditorModel {
 
         if (this.cloneDialog) {
 
-            for (ModifiableFieldStructure field : ((ModifiableMessageStructure) this.selectedLeftField.getField()).getImplFields()) {
+            for(ModifiableFieldStructure field : ((ModifiableMessageStructure)this.selectedLeftField.getField()).getImplFields().values()) {
                 ((ModifiableMessageStructure) this.newField).addField(cloneField(field));
             }
         }
@@ -1505,13 +1506,13 @@ public class DictionaryEditorModel {
         return this.fieldEditorModel.getField().getImplAttributes();
     }
 
-    public List<ModifiableFieldStructure> getSelectedMessageFields() {
+    public Collection<ModifiableFieldStructure> getSelectedMessageFields() {
 
         if (this.selectedLeftField == null || !(this.selectedLeftField.getField().isMessage())) {
             return new ArrayList<>();
         }
 
-        return ((ModifiableMessageStructure) this.selectedLeftField.getField()).getImplFields();
+        return ((ModifiableMessageStructure)this.selectedLeftField.getField()).getImplFields().values();
     }
 
     public void doAddFromPage() {
@@ -1968,11 +1969,11 @@ public class DictionaryEditorModel {
 
             FieldEditorModel msgModel = parent.getData();
 
-            List<ModifiableFieldStructure> fields;
+            ListOrderedMap<String, ModifiableFieldStructure> fields;
 
             if (msgModel.getField().isMessage()) {
 
-                fields = ((ModifiableMessageStructure) msgModel.getField()).getImplFields();
+                fields = ((ModifiableMessageStructure)msgModel.getField()).getImplFields();
 
             } else {
 
@@ -1984,7 +1985,7 @@ public class DictionaryEditorModel {
                     RequestContext.getCurrentInstance().update("tree:" + refNode.getData().getIndex() + ":inside");
                 }
 
-                fields = ((ModifiableMessageStructure) msgModel.getField().getReference()).getImplFields();
+                fields = ((ModifiableMessageStructure)msgModel.getField().getReference()).getImplFields();
             }
 
             // Switch nodes in sub messages
@@ -2005,7 +2006,7 @@ public class DictionaryEditorModel {
             int index = fields.indexOf(this.selectedLeftField.getField());
 
             ModifiableFieldStructure toMove = fields.remove(index);
-            fields.add(index + (down ? 1 : -1), toMove);
+            fields.put(index + (down ? 1 : -1), toMove.getName(), toMove);
 
             switchTreeModels(parent, curIndex, down);
         }

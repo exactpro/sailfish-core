@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.dictionary.converter;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -58,6 +60,7 @@ import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.messages.structures.StructureUtils;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -275,8 +278,8 @@ public class SailfishDictionaryToQuckfixjConverter {
         Element header, trailer;
 
         if (mode != Mode.APP) {
-            header = (Element) createHeader(sailfishDictionary.getMessageStructure(FixMessageHelper.HEADER), doc);
-            trailer = (Element) createTrailer(sailfishDictionary.getMessageStructure(FixMessageHelper.TRAILER), doc);
+            header = (Element)createHeader(sailfishDictionary.getMessages().get(FixMessageHelper.HEADER), doc);
+            trailer = (Element)createTrailer(sailfishDictionary.getMessages().get(FixMessageHelper.TRAILER), doc);
         } else {
             header = (Element) createHeader(null, doc);
             trailer = (Element) createTrailer(null, doc);
@@ -284,10 +287,10 @@ public class SailfishDictionaryToQuckfixjConverter {
 
         Element messages = doc.createElement("messages");
         accumulateList.clear();
-        for (IMessageStructure message : sailfishDictionary.getMessageStructures()) {
+        for(IMessageStructure message : sailfishDictionary.getMessages().values()) {
             if (FixMessageHelper.MESSAGE_ENTITY
-                    .equals(message.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
-                if (mode == Mode.ALL || !((boolean) message.getAttributeValueByName(IS_ADMIN) ^ (mode == Mode.ADMIN))) {
+                    .equals(getAttributeValue(message, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
+                if(mode == Mode.ALL || StructureUtils.<Boolean>getAttributeValue(message, IS_ADMIN) == (mode == Mode.ADMIN)) {
                     accumulateList.add((Element) createMessageElement(message, doc));
                 }
             }
@@ -304,7 +307,7 @@ public class SailfishDictionaryToQuckfixjConverter {
             accumulateList.clear();
             for (String id : componentNames) {
                 accumulateList.add(
-                        (Element) createComponent(Objects.requireNonNull(sailfishDictionary.getMessageStructure(id),
+                        (Element)createComponent(Objects.requireNonNull(sailfishDictionary.getMessages().get(id),
                                 "Component with id '" + id + "' not found"), doc));
             }
 
@@ -317,7 +320,7 @@ public class SailfishDictionaryToQuckfixjConverter {
         Element fields = doc.createElement("fields");
         accumulateList.clear();
         for (String id : fieldNames) {
-            accumulateList.add((Element) createField(Objects.requireNonNull(sailfishDictionary.getFieldStructure(id),
+            accumulateList.add((Element)createField(Objects.requireNonNull(sailfishDictionary.getFields().get(id),
                     "Field with id '" + id + "' not found"), doc));
         }
 
@@ -398,7 +401,7 @@ public class SailfishDictionaryToQuckfixjConverter {
             throws DOMException, EPSCommonException, MessageNotFoundException {
         Element component = doc.createElement("component");
         component.setAttribute(NAME, messageStructure.getName());
-        for (IFieldStructure field : messageStructure.getFields()) {
+        for(IFieldStructure field : messageStructure.getFields().values()) {
             component.appendChild(createMessageFieldElement(field, doc, false));
         }
         return component;
@@ -418,7 +421,7 @@ public class SailfishDictionaryToQuckfixjConverter {
             throws DOMException, EPSCommonException, MessageNotFoundException {
         Element header = doc.createElement(FixMessageHelper.HEADER);
         if (messageStructure != null) {
-            for (IFieldStructure field : messageStructure.getFields()) {
+            for(IFieldStructure field : messageStructure.getFields().values()) {
                 header.appendChild(createMessageFieldElement(field, doc, true));
             }
         }
@@ -439,7 +442,7 @@ public class SailfishDictionaryToQuckfixjConverter {
             throws DOMException, EPSCommonException, MessageNotFoundException {
         Element trailer = doc.createElement(FixMessageHelper.TRAILER);
         if (messageStructure != null) {
-            for (IFieldStructure field : messageStructure.getFields()) {
+            for(IFieldStructure field : messageStructure.getFields().values()) {
                 trailer.appendChild(createMessageFieldElement(field, doc, true));
             }
         }
@@ -461,15 +464,15 @@ public class SailfishDictionaryToQuckfixjConverter {
         Element tempElement = doc.createElement("message");
         tempElement.setAttribute(NAME, messageStructure.getName());
         tempElement.setAttribute("msgtype",
-                messageStructure.getAttributeValueByName(FixMessageHelper.MESSAGE_TYPE_ATTR_NAME).toString());
-        if ((boolean) messageStructure.getAttributeValueByName(IS_ADMIN)) {
+                getAttributeValue(messageStructure, FixMessageHelper.MESSAGE_TYPE_ATTR_NAME).toString());
+        if(StructureUtils.<Boolean>getAttributeValue(messageStructure, IS_ADMIN)) {
             tempElement.setAttribute("msgcat", "admin");
         } else {
             tempElement.setAttribute("msgcat", "app");
         }
 
         boolean isEmpty = true;
-        for (IFieldStructure field : messageStructure.getFields()) {
+        for(IFieldStructure field : messageStructure.getFields().values()) {
             if (!FixMessageHelper.HEADER.equals(field.getReferenceName())
                     && !FixMessageHelper.TRAILER.equals(field.getReferenceName())) {
                 tempElement.appendChild(createMessageFieldElement(field, doc, true));
@@ -496,16 +499,16 @@ public class SailfishDictionaryToQuckfixjConverter {
     private Node createMessageFieldElement(IFieldStructure field, Document doc, boolean addToSet)
             throws EPSCommonException, MessageNotFoundException {
         if (FixMessageHelper.GROUP_ENTITY
-                .equals(field.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
+                .equals(getAttributeValue(field, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
             return createGroupElement(field, doc, addToSet);
         }
         if (FixMessageHelper.COMPONENT_ENTITY
-                .equals(field.getAttributeValueByName(FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
+                .equals(getAttributeValue(field, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE))) {
             return createMessageComponentElement(field, doc, addToSet);
         }
 
         Element fieldEl = doc.createElement("field");
-        String name = sailfishDictionary.getFieldStructure(field.getReferenceName()).getName();
+        String name = sailfishDictionary.getFields().get(field.getReferenceName()).getName();
         if (name != null) {
             fieldEl.setAttribute(NAME, name);
         } else {
@@ -534,7 +537,7 @@ public class SailfishDictionaryToQuckfixjConverter {
     private Node createMessageComponentElement(IFieldStructure component, Document doc, boolean addToSet)
             throws MessageNotFoundException {
         Element componentEl = doc.createElement("component");
-        String name = sailfishDictionary.getMessageStructure(component.getReferenceName()).getName();
+        String name = sailfishDictionary.getMessages().get(component.getReferenceName()).getName();
         if (name != null) {
             componentEl.setAttribute(NAME, name);
         } else {
@@ -561,7 +564,7 @@ public class SailfishDictionaryToQuckfixjConverter {
         if (element.isComplex()) {
             if (element.isCollection()) {
                 fieldNames.add(element.getName());
-                for (IFieldStructure subfield : element.getFields()) {
+                for(IFieldStructure subfield : element.getFields().values()) {
                     addAllNecessaryReference(subfield);
                 }
             } else {
@@ -569,8 +572,7 @@ public class SailfishDictionaryToQuckfixjConverter {
                     return;
                 }
             }
-            for (IFieldStructure field : sailfishDictionary.getMessageStructure(element.getReferenceName())
-                    .getFields()) {
+            for(IFieldStructure field : sailfishDictionary.getMessages().get(element.getReferenceName()).getFields().values()) {
                 addAllNecessaryReference(field);
             }
         } else {
@@ -593,7 +595,7 @@ public class SailfishDictionaryToQuckfixjConverter {
     private Node createGroupElement(IFieldStructure group, Document doc, boolean addToSet)
             throws MessageNotFoundException, DOMException, EPSCommonException {
         Element groupEl = doc.createElement("group");
-        IMessageStructure gropStructure = sailfishDictionary.getMessageStructure(group.getReferenceName());
+        IMessageStructure gropStructure = sailfishDictionary.getMessages().get(group.getReferenceName());
         if (gropStructure != null) {
             groupEl.setAttribute(NAME, group.getName());
         } else {
@@ -607,7 +609,7 @@ public class SailfishDictionaryToQuckfixjConverter {
             addAllNecessaryReference(group);
         }
 
-        for (IFieldStructure field : gropStructure.getFields()) {
+        for(IFieldStructure field : gropStructure.getFields().values()) {
             groupEl.appendChild(createMessageFieldElement(field, doc, addToSet));
         }
         return groupEl;

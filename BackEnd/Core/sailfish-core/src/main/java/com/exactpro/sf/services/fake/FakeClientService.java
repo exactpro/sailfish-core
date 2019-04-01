@@ -79,9 +79,9 @@ public class FakeClientService extends AbstractInitiatorService {
 
 	public void removeFilters(IMessage message)
 	{
-		IMessageStructure msgStruct = dictionary.getMessageStructure(message.getName());
+        IMessageStructure msgStruct = dictionary.getMessages().get(message.getName());
 
-		for (IFieldStructure fldStruct : msgStruct.getFields()) {
+        for(IFieldStructure fldStruct : msgStruct.getFields().values()) {
 
 			Object field = message.getField(fldStruct.getName());
 

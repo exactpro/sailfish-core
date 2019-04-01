@@ -16,15 +16,16 @@
 package com.exactpro.sf.embedded.statistics.storage;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ObjectArrays;
-import com.google.common.primitives.Longs;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.hibernate.Query;
@@ -54,6 +55,9 @@ public class NativeDbOperations {
 	private static final String DIMENSION_NAME_POSTFIX = "__d_";
 
 	private static final String DURATION_FORMAT = "HH:mm:ss";
+
+    private static final ThreadLocal<SimpleDateFormat> TIMESTAMP_FORMAT = ThreadLocal.withInitial(
+            () -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
 	private static final String FILTERED_NAME = "filtered";
 
@@ -205,7 +209,10 @@ public class NativeDbOperations {
 	}*/
 
 	private String buildDimensionPostfix(TagGroupDimension dimension, int index) {
-		return dimension.getName() + DIMENSION_NAME_POSTFIX + index;
+        String delimiter = isPostgreSql()
+                ? "\""
+                : "`";
+		return delimiter + dimension.getName() + DIMENSION_NAME_POSTFIX + index + delimiter;
 	}
 
     private String buildDimensionTagsColumns(TagGroupReportParameters params) {
@@ -372,11 +379,15 @@ public class NativeDbOperations {
                 .append("   LEFT JOIN sttaggroups MG ON MT.group_id = MG.id ")
                 .append("   LEFT JOIN sttags AS TCT ON TCRTS.tag_id = TCT.id ")
                 .append("   LEFT JOIN sttaggroups TCG ON TCT.group_id = TCG.id ")
-                .append("   WHERE (MRTS.tag_id IN ")
+                .append("   WHERE ( (MRTS.tag_id IN ")
                 .append(tagIds)
                 .append("   OR TCRTS.tag_id IN  ")
                 .append(tagIds)
-                .append(")   GROUP BY 1,2 ")
+                .append(") ");
+
+            applyTimestampAndSfInstances(params, queryBuilder, "MR");
+
+            queryBuilder.append(")   GROUP BY 1,2 ")
                 .append("   HAVING COUNT(DISTINCT(CASE WHEN TCRTS.tag_id IN ")
                 .append(tagIds)
                 .append(" THEN TCG.id ELSE NULL END)) + COUNT(DISTINCT(CASE WHEN MRTS.tag_id IN ")
@@ -423,6 +434,43 @@ public class NativeDbOperations {
 	}
 
     private boolean isDimensionsExist(TagGroupReportParameters params) {
-        return params.getNumberOfGroups() > 0 && CollectionUtils.isNotEmpty(params.getTagIds());
+        return CollectionUtils.isNotEmpty(params.getTagIds());
+    }
+
+    private void applyTimestampAndSfInstances(TagGroupReportParameters parameters,
+                                              StringBuilder queryBuilder, String tableName) {
+        if (parameters.getFrom() != null) {
+            addTimestamp(queryBuilder, parameters.getFrom(), "starttime", ">=");
+        }
+        if (parameters.getTo() != null) {
+            addTimestamp(queryBuilder, parameters.getTo(), "finishtime", "<=");
+        }
+        if (CollectionUtils.isNotEmpty(parameters.getSelectedSfInstances())) {
+            String sfIds = toMysqlSet(
+                parameters.getSelectedSfInstances().stream()
+                    .map(sfInstance -> sfInstance.getId())
+                    .collect(Collectors.toList())
+            );
+            queryBuilder.append(" AND ")
+                    .append(tableName)
+                    .append(".sf_id IN (")
+                    .append(sfIds)
+                    .append(") ");
+        }
+    }
+
+    private void addTimestamp(StringBuilder queryBuilder, Date timestamp, String fieldName, String operation) {
+        String value = TIMESTAMP_FORMAT.get().format(timestamp);
+        queryBuilder.append(" AND MR.")
+            .append(fieldName)
+            .append(" ")
+            .append(operation)
+            .append(" ");
+        if (isPostgreSql()) {
+            queryBuilder.append(" timestamp ");
+        }
+        queryBuilder.append(" '")
+                .append(value)
+                .append("' ");
     }
 }

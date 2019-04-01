@@ -45,7 +45,7 @@ import com.exactpro.sf.testwebgui.general.SessionStored;
 @ManagedBean(name="statHomeBean")
 @ViewScoped
 @SuppressWarnings("serial")
-public class StatisticsHomeBean extends AbstractStatisticsBean implements Serializable {
+public class StatisticsHomeBean extends AbstractTagsStatisticsBean implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsHomeBean.class);
 

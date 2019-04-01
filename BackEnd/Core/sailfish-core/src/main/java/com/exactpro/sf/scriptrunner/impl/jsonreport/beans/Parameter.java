@@ -16,10 +16,12 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.scriptrunner.ReportEntity;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.ClassUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +30,9 @@ import java.util.stream.Collectors;
 public class Parameter {
     private String name;
     private String value;
+    private String type;
     private List<Parameter> subParameters;
+    private MsgMetaData msgMetadata;
 
     public Parameter() {
 
@@ -38,6 +42,10 @@ public class Parameter {
         this.name = e.getName();
         this.value = Objects.toString(e.getValue());
         this.subParameters = e.getFields().stream().map(Parameter::new).collect(Collectors.toList());
+        if (e.getValue() instanceof IMessage) {
+            msgMetadata = ((IMessage) e.getValue()).getMetaData();
+        }
+        this.type = getClassName(e.getValue());
     }
 
     public String getName() {
@@ -62,5 +70,41 @@ public class Parameter {
 
     public void setSubParameters(List<Parameter> subParameters) {
         this.subParameters = subParameters;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    private String getClassName(Object o) {
+
+        String possibleType = ClassUtils.getSimpleName(o, null);
+
+        if(o instanceof IFilter) {
+            IFilter filter = (IFilter) o;
+
+            if (filter.hasValue()) {
+                possibleType = ClassUtils.getSimpleName(filter.getValue(), null);
+            }
+        }
+
+        if (o instanceof IMessage) {
+            possibleType = IMessage.class.getSimpleName();
+        }
+
+        if (o instanceof List) {
+            List<?> list = (List<?>) o;
+            possibleType = List.class.getSimpleName() + "<" + getClassName(Iterables.get(list, 0, null)) + ">";
+        }
+
+        return possibleType;
+    }
+
+    public MsgMetaData getMsgMetadata() {
+        return msgMetadata;
     }
 }

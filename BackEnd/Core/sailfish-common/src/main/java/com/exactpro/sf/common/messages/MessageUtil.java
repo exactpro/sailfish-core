@@ -17,16 +17,15 @@ package com.exactpro.sf.common.messages;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IFieldInfo.FieldType;
@@ -175,7 +174,7 @@ public class MessageUtil
 		if ( dict == null )
 			throw new NullPointerException("dict");
 
-		IMessageStructure msgStruct = dict.getMessageStructure(msg.getName());
+        IMessageStructure msgStruct = dict.getMessages().get(msg.getName());
 
 		if ( msgStruct == null )
 			return null;

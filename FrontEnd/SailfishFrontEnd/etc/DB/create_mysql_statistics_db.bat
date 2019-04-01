@@ -72,6 +72,11 @@ if "%VAR%" neq "" (
     goto :readArgs
 )
 
+if not exist "%MYSQL%\mysql.exe" (
+    echo Can't find '%MYSQL%\mysql.exe'
+    exit /b 1
+)
+
 call :checkDatabaseAvailability %USER% %PASSWORD%
 
 if /I "!errorlevel!" NEQ "0" (

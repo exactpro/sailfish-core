@@ -73,4 +73,14 @@ public class StructureUtils {
 		
 	    return null;
 	}
+
+    public static <T> T getAttributeValue(IFieldStructure structure, String name) {
+        IAttributeStructure attribute = structure.getAttributes().get(name);
+        return attribute != null ? attribute.getCastValue() : null;
+    }
+
+    public static <T> T getAttributeValue(IDictionaryStructure structure, String name) {
+        IAttributeStructure attribute = structure.getAttributes().get(name);
+        return attribute != null ? attribute.getCastValue() : null;
+    }
 }

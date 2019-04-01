@@ -23,10 +23,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-import com.exactpro.sf.embedded.IEmbeddedService;
-import com.exactpro.sf.embedded.updater.UpdateService;
-import com.exactpro.sf.storage.BaseStorageSettings;
-import com.exactpro.sf.storage.DBStorageSettings;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -58,9 +54,11 @@ import com.exactpro.sf.configuration.netdumper.NetDumperService;
 import com.exactpro.sf.configuration.recorder.FlightRecorderService;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
+import com.exactpro.sf.embedded.IEmbeddedService;
 import com.exactpro.sf.embedded.machinelearning.MachineLearningService;
 import com.exactpro.sf.embedded.mail.EMailService;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
+import com.exactpro.sf.embedded.updater.UpdateService;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.AsyncScriptRunner;
@@ -77,12 +75,16 @@ import com.exactpro.sf.scriptrunner.impl.DefaultConnectionManager;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
 import com.exactpro.sf.scriptrunner.services.DefaultStaticServiceManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
+import com.exactpro.sf.scriptrunner.services.PluginServiceLoader;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityManager;
 import com.exactpro.sf.services.DefaultServiceContext;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.ITaskExecutor;
+import com.exactpro.sf.services.ServiceMarshalManager;
 import com.exactpro.sf.services.TaskExecutor;
+import com.exactpro.sf.storage.BaseStorageSettings;
+import com.exactpro.sf.storage.DBStorageSettings;
 import com.exactpro.sf.storage.IAuthStorage;
 import com.exactpro.sf.storage.IEnvironmentStorage;
 import com.exactpro.sf.storage.IMatrixStorage;
@@ -286,6 +288,8 @@ public class SFLocalContext implements ISFContext {
         this.updateService = new UpdateService(workspaceDispatcher, settings.getUpdateServiceConfiguration(), taskExecutor);
         this.embeddedServices.add(updateService);
 
+        PluginServiceLoader pluginServiceLoader = new PluginServiceLoader();
+
         // 5) Load core & plugins
         PluginLoader pluginLoader = new PluginLoader(
         		workspaceDispatcher,
@@ -300,6 +304,7 @@ public class SFLocalContext implements ISFContext {
 				matrixProviderHolder,
                 matrixConverterLoader,
                 statisticsService,
+                pluginServiceLoader,
                 this.version);
 
         LoadInfo loadInfo = pluginLoader.load();
@@ -322,6 +327,8 @@ public class SFLocalContext implements ISFContext {
                 createVariableSetStorage(envSettings, storage, workspaceDispatcher),
         		this.serviceContext);
         this.disposables.add(this.connectionManager);
+
+        pluginServiceLoader.load(connectionManager, new ServiceMarshalManager(staticServiceManager, dictionaryManager));
 
         this.matrixConverterManager = matrixConverterLoader.create(workspaceDispatcher, dictionaryManager, connectionManager);
 

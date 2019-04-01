@@ -249,7 +249,7 @@ public class OldImplHelper {
 				return false;
 			}
 			String msgType = refAction.getMessageTypeColumn();
-			IFieldStructure messageStruct = dict.getMessageStructure(msgType);
+            IFieldStructure messageStruct = dict.getMessages().get(msgType);
 			if (messageStruct != null) {
 				boolean columnExists = true;
 				IFieldStructure fldType = messageStruct;
@@ -283,7 +283,7 @@ public class OldImplHelper {
                                 "column '"+column+"': '"+value.getOrigValue()+"'."
                                 ));
                     } else {
-                        fld = fldType.getField(columnRef);
+                        fld = fldType.getFields().get(columnRef);
                     }
 					if (fld == null) {
 						columnExists = false;

@@ -192,7 +192,7 @@ public class ServiceFactory implements IServiceFactory {
         IVersion coreVersion = new CoreVersion();
         PluginLoader pluginLoader = new PluginLoader(wd, staticServiceManager, null,
                 dictionaryManager, null, null, null, dataManager, null, null, null, null,
-                coreVersion);
+                null, coreVersion);
         pluginLoader.load();
 
         this.marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
@@ -270,6 +270,11 @@ public class ServiceFactory implements IServiceFactory {
     @Override
     public Set<SailfishURI> getDictionaries() {
         return this.dictionaryManager.getDictionaryURIs();
+    }
+
+    @Override
+    public IDictionaryStructure getDictionary(SailfishURI uri) {
+        return this.dictionaryManager.getDictionary(uri);
     }
 
     @Override
@@ -387,7 +392,7 @@ public class ServiceFactory implements IServiceFactory {
             }
 
             IDictionaryStructure structure = dictionaryManager.getDictionary(dictionary);
-            IMessageStructure messageStructure = structure.getMessageStructure(name);
+            IMessageStructure messageStructure = structure.getMessages().get(name);
             
             if (messageStructure == null) {
                 throw new EPSCommonException(String.format("Message %s not found in dictionary %s", name, dictionary.getResourceName()));
