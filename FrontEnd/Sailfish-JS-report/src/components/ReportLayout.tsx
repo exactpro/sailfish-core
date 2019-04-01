@@ -120,7 +120,7 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
                                     <TestCaseCard
                                         metadata={metadata}
                                         index={index + 1}
-                                        selectHandler={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
+                                        handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
                                 </div>
                             ))
                         }
