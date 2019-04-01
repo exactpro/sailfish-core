@@ -16,63 +16,10 @@
 
 @import "vars";
 
-@mixin selectable {
-    &.selected {
-        transition: border-color 0.5s, background-color 0.5s;
-        -webkit-transition: border-color 0.5s, background-color 0.5s;
-        background-color: $defaultCardBackground;
-        border-color: $defaultCardBorderColor;
-    }
-
-    &.passed {
-        &.selected {
-            background-color: $passedBackgroundColor;
-            border-color: $passedBorderColor;           
-        }
-
-        &.root {
-            border-color: $passedBorderColorSecondary;
-        }
-    }
-
-    &.failed {
-        &.selected {
-            background-color: $failedBackgroundColor;
-            border-color: $failedBorderColor;
-        }
-
-        &.root {
-            border-color: $failedBorderColorSecondary;
-        }
-    }
-
-    &.conditionally_passed {
-        &.selected {
-            background-color: $conditionallyPassedBackgroundColor;
-            border-color: $conditionallyPassedBorderColor;
-        }
-
-        &.root {
-            border-color: $conditionallyPassedBorderColorSecondary;
-        }
-    }
-
-    &.conditionally_failed {
-        &.selected {
-            background-color: $conditionallyFailedBackgroundColor;
-            border-color: $conditionallyFailedBorderColor;
-        }
-
-        &.root {
-            border-color: $conditionallyFailedBorderColorSecondary;
-        }
-    }
-}
-
 .action {
 
     &-card {
-        @include selectable;
+        @include status-card;
         display: block;
         box-sizing: border-box;
         width: 100%;
@@ -82,12 +29,16 @@
         padding: 5px;
         margin: 5px 0;
 
-        h4 {
-            margin: 0px;
+        &.root {
+            border-color: var(--status-secondary-border-color);
+        }
+
+        &.selected {
+            background-color: var(--status-secondary-background-color);
+            border-color: var(--status-primary-border-color);
         }
 
         &-header {
-            @include status-card;
             width: 100%;
             padding: 3px;
             display: grid;
@@ -209,37 +160,24 @@
             }
 
             &-verification {
-                @include selectable();
+                @include status-card;
                 border: 2px solid transparent;
                 border-radius: 5px;
                 padding-bottom: 5px;
-
-                &.passed {
-                    h4 {
-                        color: $passedTextColor;
-                    }
-                }
-
-                &.failed {
-                    h4 {
-                        color: $failedTextColor;
-                    }
-                }
-
-                &.conditionally_passed {
-                    h4 {
-                        color: $conditionallyPassedTextColor;
-                    }
-                }
-
-                &.conditionally_failed {
-                    h4 {
-                        color: $conditionallyFailedTextColor;
-                    }
+                
+                &.selected {
+                    background-color: var(--status-secondary-background-color);
+                    border-color: var(--status-primary-border-color);
                 }
 
                 &.transparent {
                     opacity: 0.3;
+                }
+                
+                &-title {
+                    color: var(--status-primary-color);
+                    font-weight: bold;
+                    font-size: 17px;
                 }
             }
         }

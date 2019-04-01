@@ -324,7 +324,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                         e.cancelBubble = true;
                     }}>
                     <ExpandablePanel>
-                        <h4>{"Verification — " + name + " — " + status.status}</h4>
+                        <div class="action-card-body-verification-title">{"Verification — " + name + " — " + status.status}</div>
                         <VerificationTable 
                             params={entries} 
                             status={status.status}/>
