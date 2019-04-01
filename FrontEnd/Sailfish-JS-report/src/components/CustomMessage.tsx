@@ -19,6 +19,7 @@ import UserMessage from '../models/UserMessage';
 import '../styles/action.scss';
 import ExpandablePanel from './ExpandablePanel';
 import ExceptionCard from './ExceptionCard';
+import { createSelector } from '../helpers/styleCreators';
 
 interface CustomMessageProps {
     userMessage: UserMessage;
@@ -36,10 +37,10 @@ export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
         fontWeight: (style || "").toLowerCase()
     };
 
-    const rootClass = [
+    const rootClass = createSelector(
         "action-custom-msg",
-        (level || "").toLowerCase()
-    ].join(' ');
+        level
+    );
 
     if (exception) {
         return (

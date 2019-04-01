@@ -17,6 +17,7 @@
 import { h, Component } from "preact";
 import ActionParameter from "../models/ActionParameter";
 import '../styles/tables.scss';
+import { createSelector } from '../helpers/styleCreators';
 
 const PADDING_LEVEL_VALUE = 10;
 
@@ -104,10 +105,10 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
 
     private renderTooglerNode(node: TableNode, paddingLevel: number) : JSX.Element {
 
-        const rootClass = [
+        const rootClass = createSelector(
                 "params-table-row-toogler",
                 node.isExpanded ? "expanded" : "collapsed"
-            ].join(' '),
+            ),
             nameStyle = {
                 paddingLeft: PADDING_LEVEL_VALUE * paddingLevel
             };

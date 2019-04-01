@@ -27,6 +27,7 @@ import { isAdmin } from '../helpers/messageType';
 import { isRejected } from '../helpers/messageType';
 import { setRightPane, selectRejectedMessageId, setAdminMsgEnabled } from '../actions/actionCreators';
 import { prevCyclicItemByIndex, nextCyclicItemByIndex } from '../helpers/array';
+import { createSelector } from '../helpers/styleCreators';
 
 interface RightPanelStateProps {
     panel: Panel;
@@ -68,22 +69,22 @@ class RightPanelBase extends Component<RightPanelProps> {
             adminControlEnabled = adminMessages.length != 0,
             controlShowTitles = true;
 
-        const adminRootClass = [
+        const adminRootClass = createSelector(
                 "layout-body-panel-controls-right-admin",
                 adminControlEnabled ? "" : "disabled"
-            ].join(' '),
-            adminIconClass = [
+            ),
+            adminIconClass = createSelector(
                 "layout-body-panel-controls-right-admin-icon",
                 adminMessagesEnabled ? "active" : ""
-            ].join(' '),
-            adminTitleClass = [
+            ),
+            adminTitleClass = createSelector(
                 "layout-body-panel-controls-right-admin-title",
                 adminMessagesEnabled ? "active" : ""
-            ].join(' '),
-            rejectedRootClass = [
+            ),
+            rejectedRootClass = createSelector(
                 "layout-body-panel-controls-right-rejected",
                 rejectedEnabled ? "" : "disabled"
-            ].join(' ');
+            );
 
         return (
             <div class="layout-body-panel">
@@ -155,18 +156,18 @@ class RightPanelBase extends Component<RightPanelProps> {
     }
 
     private renderPanels(selectedPanel: Panel): JSX.Element[] {
-        const messagesRootClass = [
+        const messagesRootClass = createSelector(
                 "layout-body-panel-content-wrapper",
                 selectedPanel == Panel.Messages ? "" : "disabled"
-            ].join(' '), 
-            knownBugsRootClass = [
+            ), 
+            knownBugsRootClass = createSelector(
                 "layout-body-panel-content-wrapper",
                 selectedPanel == Panel.KnownBugs ? "" : "disabled"
-            ].join(' '),
-            logsRootClass = [
+            ),
+            logsRootClass = createSelector(
                 "layout-body-panel-content-wrapper",
                 selectedPanel == Panel.Logs ? "" : "disabled"
-            ].join(' ');
+            );
     
         return [
             <div class={messagesRootClass}>

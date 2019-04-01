@@ -19,6 +19,7 @@ import { Chip } from './Chip';
 import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import "../styles/messages.scss";
+import { createSelector } from '../helpers/styleCreators';
 
 type SelectHandler = (status: StatusType) => any;
 
@@ -30,10 +31,10 @@ interface ActionChipsProps {
 
 export const MessageCardActionChips = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
 
-    const className = [
+    const className = createSelector(
         "message-card-header-action",
-        actions.length ? "" : "empty"
-    ].join(' ');
+        actions.length ? null : "empty"
+    );
 
     return (
         <div class={className}>

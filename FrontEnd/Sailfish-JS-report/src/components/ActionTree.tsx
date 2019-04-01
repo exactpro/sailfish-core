@@ -30,6 +30,7 @@ import UserTable from '../models/UserTable';
 import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode } from '../models/util/Tree';
+import { createSelector } from '../helpers/styleCreators';
 
 
 export interface ActionTreeProps {
@@ -310,10 +311,12 @@ export class ActionTree extends Component<ActionTreeProps> {
     renderVerification({ name, status, entries, messageId }: Verification,
         selectHandelr: Function, isSelected: boolean, isTransaparent, filterFields: StatusType[]) {
 
-        const className = ["action-card-body-verification",
-            (status ? status.status : ""),
-            (isSelected ? "selected" : ""),
-            (isTransaparent && !isSelected ? "transparent" : "")].join(' ').toLowerCase();
+        const className = createSelector(
+            "action-card-body-verification",
+            status && status.status,
+            isSelected ? "selected" : null,
+            isTransaparent && !isSelected ? "transparent" : null
+        );
 
         return (
             <div class="action-card">

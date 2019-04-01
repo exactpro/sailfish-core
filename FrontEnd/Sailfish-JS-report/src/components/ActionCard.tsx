@@ -23,6 +23,7 @@ import "../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../helpers/dateFormatter";
 import { ExceptionChain } from "./ExceptionChain";
 import { Chip } from "./Chip";
+import { createSelector } from '../helpers/styleCreators';
 
 interface CardProps {
     action: Action;
@@ -44,21 +45,19 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         startTime,
         finishTime
     } = action;
-    const rootClassName = [
+    const rootClassName = createSelector(
         "action-card",
         status.status,
-        (isRoot && !isSelected ? "root" : null),
-        (isSelected ? "selected" : null)
-    ].join(' ').toLowerCase(),
-        headerClassName = [
-            "action-card-header",
-            status.status,
-            (isTransaparent && !isSelected ? "transparent" : null)
-        ].join(' ').toLowerCase(),
-        inputParametersClassName = [
-            "action-card-body-params",
-            (isTransaparent && !isSelected ? "transparent" : null)
-        ].join(' ').toLowerCase();
+        isRoot && !isSelected ? "root" : null,
+        isSelected ? "selected" : null
+    ), headerClassName = createSelector(
+        "action-card-header",
+        status.status,
+        isTransaparent && !isSelected ? "transparent" : null
+    ), inputParametersClassName = createSelector(
+        "action-card-body-params",
+        isTransaparent && !isSelected ? "transparent" : null
+    );
 
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
@@ -79,10 +78,10 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 <div class={headerClassName}>
                     <div class="action-card-header-title">
                         <div class="action-card-header-title-name">
-                            <h3>{action.name}</h3>
+                            <h3>{name}</h3>
                         </div>
                         <div class="action-card-header-title-description">
-                            <h3>{action.description}</h3>
+                            <h3>{description}</h3>
                         </div>
                     </div>
                     <div class="action-card-header-time-start">

@@ -14,30 +14,16 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
-import '../styles/styles.scss';
-import { createSelector } from '../helpers/styleCreators';
+/**
+ * This funciton can be used to create css selector with the list of modifiers.
+ * @param className Name of css selector
+ * @param modifiers List of css modifiers
+ */
+export function createSelector(className: string, ...modifiers: string[]): string {
+    // we filter out empty modifiers to create selector without insignificant spaces
 
-interface ButtonProps {
-    onClick?: Function;
-    isToggled?: boolean;
-    isDisabled?: boolean;
-    text: string;
-    title?: string;
-    theme?: string;
-}
-
-export const ToggleButton = ({ onClick, isToggled, text, theme, isDisabled, title }: ButtonProps) => {
-    const className = createSelector(
-        "button-root", 
-        theme || "default", 
-        isDisabled ? "disabled" : null,
-        isToggled ? "toggled" : null
-    );
-
-    return (
-        <div class={className} onClick={e => onClick && onClick(text)} title={title}>
-            <p>{text}</p>
-        </div>
-    )
+    return [
+        className,
+        ...modifiers.filter(Boolean).map(modifier => modifier.toLowerCase())
+    ].join(' ');
 }

@@ -18,6 +18,7 @@ import { h } from 'preact';
 import { ReportMetadata } from '../models/ReportMetadata';
 import { formatTime, getSecondsPeriod } from '../helpers/dateFormatter';
 import '../styles/report.scss';
+import { createSelector } from '../helpers/styleCreators';
 
 interface TestCaseCardProps {
     metadata: ReportMetadata;
@@ -29,10 +30,10 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
 
     const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
 
-    const rootClass = [
+    const rootClass = createSelector(
         "tc-card",
         metadata.status.status
-    ].join(' ').toLowerCase();
+    );
 
     return (
         <div class={rootClass}

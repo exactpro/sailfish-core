@@ -30,6 +30,7 @@ import {
     switchFieldsFilter
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
+import { createSelector } from '../helpers/styleCreators';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -77,10 +78,25 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
             description,
         } = testCase;
 
-        const mainClass = ["header-main", status.status.toLowerCase()].join(' '),
-            infoClass = ["header-info", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
-            prevButtonClass = ["header-main-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
-            nextButtonClass = ["header-main-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
+        const mainClass = createSelector(
+                "header-main", 
+                status.status
+            ),
+            infoClass = createSelector(
+                "header-info", 
+                status.status, 
+                showFilter ? "filter" : null
+            ),
+            prevButtonClass = createSelector(
+                "header-main-name-icon",
+                "left", 
+                prevTestCaseHandler ? "enabled" : "disabled"
+            ),
+            nextButtonClass = createSelector(
+                "header-main-name-icon",
+                "right", 
+                nextTestCaseHandler ? "enabled" : "disabled"
+            );
 
         const period = getSecondsPeriod(startTime, finishTime);
 

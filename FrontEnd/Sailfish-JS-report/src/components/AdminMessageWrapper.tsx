@@ -20,6 +20,7 @@ import { MessageCardProps, MessageCard } from "./MessageCard";
 import Message from '../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
 import { StatusType } from "../models/Status";
+import { createSelector } from '../helpers/styleCreators';
 
 interface WrapperProps extends MessageCardProps {
     isExpanded: boolean;
@@ -49,10 +50,10 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
 
         if (isExpanded) {
 
-            const expandButtonClass = [
-                "message-expand",
-                props.message.content.rejectReason !== null ? "rejected" : ""
-            ].join(' ');
+            const expandButtonClass = createSelector(
+                "message-expand", 
+                props.message.content.rejectReason != null ? "rejected" : null
+            );
 
             return (
                 <div style={{position: "relative"}}>
@@ -64,11 +65,11 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
             );
         }
 
-        const rootClass = [
+        const rootClass = createSelector(
             "message",
-            (props.status || "").toLowerCase(),
-            (props.isSelected ? "selected" : "")
-        ].join(' ');
+            props.status,
+            props.isSelected ? "selected" : null
+        );
 
         return (
             <div class={rootClass}

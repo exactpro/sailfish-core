@@ -26,6 +26,7 @@ import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPane';
 import { ActionsListBase } from './ActionsList';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
+import { createSelector } from '../helpers/styleCreators';
 
 interface LeftPanelProps {
     panel: Panel;
@@ -56,10 +57,10 @@ class LeftPanelBase extends Component<LeftPanelProps> {
 
         const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
             cpEnabled = checkpointActions.length != 0,
-            cpRootClass = [
+            cpRootClass = createSelector(
                 "layout-body-panel-controls-left-checkpoints",
-                cpEnabled ? "" : "disabled"
-            ].join(' ');
+                cpEnabled ? null : "disabled"
+            );
 
         return (
             <div class="layout-body-panel">
@@ -112,14 +113,14 @@ class LeftPanelBase extends Component<LeftPanelProps> {
     }
 
     private renderPanels(selectedPanel: Panel): JSX.Element[] {
-        const actionRootClass = [
+        const actionRootClass = createSelector(
                 "layout-body-panel-content-wrapper",
-                selectedPanel == Panel.Actions ? "" : "disabled"
-            ].join(' '),
-            statusRootClass = [
+                selectedPanel == Panel.Actions ? null : "disabled"
+            ),
+            statusRootClass = createSelector(
                 "layout-body-panel-content-wrapper",
                 selectedPanel == Panel.Status ? "" : "disabled"
-            ].join(' ');
+            );
     
         return [
             <div class={actionRootClass}>

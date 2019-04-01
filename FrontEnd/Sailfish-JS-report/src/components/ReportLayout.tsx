@@ -26,6 +26,7 @@ import { StatusType, statusValues } from '../models/Status';
 import TestCaseCard from './TestCaseCard';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
+import { createSelector } from '../helpers/styleCreators';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -133,10 +134,10 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
 
 function renderStatusInfo(status: StatusType, metadata: ReportMetadata[]): JSX.Element {
     const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
-        valueClassName = [
+        valueClassName = createSelector(
             "value",
             status.toLowerCase()
-        ].join(' ');
+        );
 
     if (!testCasesCount) {
         return null;

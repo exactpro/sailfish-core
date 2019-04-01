@@ -23,6 +23,7 @@ import { getHashCode } from '../helpers/stringHash';
 import { formatTime } from '../helpers/dateFormatter';
 import { MessageCardActionChips } from './MessageCardActionChips';
 import '../styles/messages.scss';
+import { createSelector } from '../helpers/styleCreators';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -72,19 +73,9 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
             rejectedTitle = message.content.rejectReason,
             labelsCount = this.getLabelsCount(message);
 
-        const rootClass = [
-            "message",
-            (status || "").toLowerCase(),
-            (isSelected ? "selected" : "")
-        ].join(" "),
-            contentClass = [
-                "message-card-content",
-                (status || "").toLowerCase()
-            ].join(" "),
-            showRawClass = [
-                "message-card-content-human-showraw-icon",
-                (showRaw ? "expanded" : "hidden")
-            ].join(" ");
+        const rootClass = createSelector("message", status, isSelected ? "selected" : null), 
+            contentClass = createSelector("message-card-content", status), 
+            showRawClass = createSelector("message-card-content-human-showraw-icon", showRaw ? "expanded" : "hidden");
 
         return (
             <div class={rootClass}>
