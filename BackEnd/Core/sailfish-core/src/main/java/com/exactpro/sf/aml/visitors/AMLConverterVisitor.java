@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,6 +49,7 @@ import com.exactpro.sf.aml.generator.matrix.TypeHelper;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.reader.struct.AMLBlock;
 import com.exactpro.sf.aml.reader.struct.AMLElement;
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -203,7 +203,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
                         // hack to support old namespaces for FIX messages
                         if(cellValue.startsWith("quickfix.fix")) {
-                            cellValue = "com.exactpro." + cellValue;
+                            cellValue = "com.exactpro.sf." + cellValue;
                         }
 
                         if(actionURI == null && element.containsCell(Column.Reference)) {
