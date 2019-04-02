@@ -1,0 +1,89 @@
+/******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+$failedTextColor: #CC2929;  
+$failedBorderColor: #CC2929;
+$failedBorderColorSecondary: #FFCCCC;
+$failedBackgroundColor: #FFF2F2;
+$failedHederColor: #FFCCCC;
+$failedHeaderSecondaryBackground: #FFE6E6;
+$failedSecondaryTextColor: #DF4759;
+
+$passedTextColor: #4189D2;
+$passedBorderColor: #4189D2;
+$passedBorderColorSecondary: #C0E0FF;
+$passedHeaderColor: #C0E0FF;
+$passedBackgroundColor: #EDF6FF;
+$passedHeaderSecondaryBackground: #D9ECFF;
+$passedSecondaryTextColor: #76ABE3;
+
+$conditionallyPassedTextColor: #ff822a;
+$conditionallyPassedBorderColor: #FFCDA8;
+$conditionallyPassedBorderColorSecondary: #FFD2B3;
+$conditionallyPassedHeaderColor: #FFD2B3;
+$conditionallyPassedBackgroundColor: #FFF0E6;
+$conditionallyPassedHeaderSecondaryBackground: #FFE1CC;
+$conditionallyPassedSecondaryTextColor: #FF8E3E;
+
+$conditionallyFailedTextColor: #EDBD36;
+$conditionallyFailedBorderColor: #EDBD36;
+$conditionallyFailedBorderColorSecondary: rgba(237, 188, 54, 0.7);
+$conditionallyFailedHeaderColor: #FFEBB3;
+$conditionallyFailedBackgroundColor: #FFEBB3;
+$conditionallyFailedHeaderSecondaryBackground: #FFF2CC;
+$conditionallyFailedSecondaryTextColor: #F5D77C;
+
+$checkpointBorderColor: #59B368;
+$checkpointBackground: #effff1;
+
+$primaryTextColor: #4A4A4A;
+$secondaryTextColor: #999999;
+
+$tableHeaderBackground: #B7B3BB;
+$tableHeaderCellBorderColor: #7c7c7c;
+$tableCellBorderColor: #B3B3B3;
+$tableBodyBackground: rgba(255, 255, 255, 0.7);
+
+$buttonDisabledBackground: #E0E0E0;
+
+$defaultCardBorderColor: #666666;
+$defaultCardBackground: #E0E0E0;
+$defaultSelectedCardBackground: #e0e0e033;
+
+$messageCardBackgroundColor: #F2F2F2;
+$messageCardRawHoverBackground: rgba(102, 102, 102, 0.15);
+
+$rejectedMessageLabelBackground: #FFE699;
+$adminMessageLabelBackground: #7ACCCC;
+
+$filterBackground: #A3D9A3;
+$filterButtonEnabled: #3D994D;
+$filterButtonDisabled: #79BF80;
+$filterButtonTextColor: #FFFFFF;
+
+$notificationBackground: #d9d9d9;
+
+$reportHeaderBackground: #5EDAE1;
+$reportInfoShadowColor: #e2e2e2;
+$reportBorderColor: #D6D6D6;
+$reportTitleTextColor: #7b7b7b;
+
+$scrollbarThumbBackground: #C4C4C4;
+$scrollbarTrackBackground: #F2F2F2;
+
+$splitterColor: #C4C4C4;
+
+$chipTextColor: #808080;
