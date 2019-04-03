@@ -20,7 +20,7 @@ import { MessageCardProps, MessageCard } from "./MessageCard";
 import Message from '../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
 import { StatusType } from "../models/Status";
-import { createSelector } from '../helpers/styleCreators';
+import { createSelector, createBemBlock } from '../helpers/styleCreators';
 
 interface WrapperProps extends MessageCardProps {
     isExpanded: boolean;
@@ -50,8 +50,8 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
 
         if (isExpanded) {
 
-            const expandButtonClass = createSelector(
-                "message-expand", 
+            const expandButtonClass = createBemBlock(
+                "mc-expand-btn", 
                 props.message.content.rejectReason != null ? "rejected" : null
             );
 
@@ -59,14 +59,14 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
                 <div style={{position: "relative"}}>
                     <MessageCard {...props}/>
                     <div class={expandButtonClass}>
-                        <div class="message-expand-icon" onClick={this.expandButtonHandler}/>
+                        <div class="mc-expand-btn__icon" onClick={this.expandButtonHandler}/>
                     </div>
                 </div>
             );
         }
 
-        const rootClass = createSelector(
-            "message",
+        const rootClass = createBemBlock(
+            "message-card",
             props.status,
             props.isSelected ? "selected" : null
         );
@@ -74,20 +74,21 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
         return (
             <div class={rootClass}
                 onClick={() => props.selectHandler(props.message)}>
-                <div class="message-label">
+                <div class="message-card__labels">
                     {this.renderMessageTypeLabels(props.message)}
                 </div>
-                <div class="message-wrapper">
-                    <div class="message-wrapper-actionschips">
+                <div class="message-card__header   mc-header small"
+                    data-lb-count={this.getLabelsCount(props.message)}>
+                    <div class="mc-header__info">
                         <MessageCardActionChips
                             actions={props.actions}
                             selectedStatus={props.status}
                             selectHandler={status => props.selectHandler(props.message, status)}/>
                     </div>
-                    <div class="message-wrapper-name">Name</div>
-                    <div class="message-wrapper-name-value">{props.message.msgName}</div>
-                    <div class="message-wrapper-expand">
-                        <div class="message-wrapper-expand-icon" onClick={this.expandButtonHandler}/>
+                    <div class="mc-header__name">Name</div>
+                    <div class="mc-header__name-value">{props.message.msgName}</div>
+                    <div class="mc-header__expand">
+                        <div class="mc-header__expand-icon" onClick={this.expandButtonHandler}/>
                     </div>
                 </div>
             </div>
@@ -99,21 +100,35 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
 
         if (message.content.rejectReason !== null) {
             labels.push(
-                <div class="message-label-rejected">
-                    <div class="message-label-rejected-icon" style={{marginTop: "10px"}}/>
+                <div class="mc-label rejected">
+                    <div class="mc-label__icon rejected" style={{marginTop: "10px"}}/>
                 </div>
             );
         }
 
         if (message.content.admin) {
             labels.push(
-                <div class="message-label-admin">
-                    <div class="message-label-admin-icon" style={{marginTop: "10px"}}/>
+                <div class="mc-label admin">
+                    <div class="mc-label__icon admin" style={{marginTop: "10px"}}/>
                 </div>
             )
         }
 
         return labels;
+    }
+
+    private getLabelsCount(message: Message) {
+        let count = 0;
+
+        if (message.content.rejectReason != null) {
+            count++;
+        }
+
+        if (message.content.admin) {
+            count++;
+        }
+
+        return count;
     }
 
     private expandButtonHandler = () => {

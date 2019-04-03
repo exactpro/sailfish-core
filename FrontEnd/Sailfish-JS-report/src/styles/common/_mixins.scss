@@ -42,7 +42,7 @@
     --status-primary-border-color: #{$defaultCardBorderColor};
     --status-secondary-border-color: #{$defaultCardBackground};
     --status-primary-background-color: #{$defaultCardBorderColor};
-    --status-secondary-background-color: #{$defaultCardBackground};
+    --status-secondary-background-color: #{$defaultSelectedCardBackground};
 
     &.passed {
         // we can't symply assign scss variable to css variable because sass doesn't know css varible type,

@@ -31,31 +31,31 @@ export const MessageRaw = ({ rawContent }: MessageRawProps) => {
     const [offset, hexadecimal, humanReadable] = splitRawContent(rawContent);
 
     return (
-        <div class="message-card-content-raw">
-            <div class="message-card-content-raw-header">
-                <div class="message-card-content-raw-header-title">Raw message</div>
-                <div class="message-card-content-raw-header-copy-all"
+        <div class="mc-raw">
+            <div class="mc-raw">
+                <div class="mc-raw__title">Raw message</div>
+                <div class="mc-raw__copy-all"
                     onClick={() => copyHandler(rawContent)}
                     title="Copy all raw content to clipboard">
-                    <div class="message-card-content-raw-header-copy-all-icon" />
-                    <div class="message-card-content-raw-header-copy-all-title">
+                    <div class="mc-raw__copy-icon" />
+                    <div class="mc-raw__copy-title">
                         <span>Copy All</span>
                     </div>
                 </div>
             </div>
-            <div class="message-card-content-raw-content">
-                <div class="message-card-content-raw-content-numbers">
+            <div class="mc-raw__content">
+                <div class="mc-raw__column secondary">
                     <pre>{offset}</pre>
                 </div>
-                <div class="message-card-content-raw-content-symbols">
+                <div class="mc-raw__column primary">
                     <pre>{hexadecimal}</pre>
-                    <div class="message-card-content-raw-content-copy-btn"
+                    <div class="mc-raw__copy-btn   mc-raw__copy-icon"
                         onClick={() => copyHandler(hexadecimal)}
                         title="Copy to clipboard" />
                 </div>
-                <div class="message-card-content-raw-content-string">
+                <div class="mc-raw__column primary">
                     <pre>{humanReadable}</pre>
-                    <div class="message-card-content-raw-content-copy-btn"
+                    <div class="mc-raw__copy-btn   mc-raw__copy-icon"
                         onClick={() => copyHandler(humanReadable)}
                         title="Copy to clipboard" />
                 </div>

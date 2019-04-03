@@ -16,415 +16,385 @@
 
 @import "./common/vars";
 
-.message {
-    @include selectable-card;
-    width: 100%;
-    border: 2px solid transparent;
-    border-radius: 5px;
-    margin: 5px 0;
-    border-color: $defaultCardBackground;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-areas: "message-label message-card";
+.message-card {
+    @include status-card;
     position: relative;
+    margin: 5px 0;
+    border-radius: 5px;
+    display: grid;
+    grid-template: auto auto / auto 1fr;
+    grid-template-areas: "mc-labels mc-header"
+                         "mc-labels mc-body";
+    width: 100%;
 
-    &-label {
-        grid-area: message-label;
+    border: 2px solid var(--status-secondary-border-color);
+    border-radius: $defaultCardBorderRadius;
+
+    &.selected {
+        border-color: var(--status-primary-border-color);
+        background-color: var(--status-secondary-background-color);
+    }
+
+    &__labels {
+        grid-area: mc-labels;
         display: flex;
+        justify-content: flex-start;
 
         div:first-of-type {
             border-top-left-radius: 3px;
             border-bottom-left-radius: 3px;
         }
+    }
 
-        &-rejected, &-admin {
-            width: 20px;
-            height: 100%;
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
+    &__header {
+        grid-area: mc-header;
+    }
+
+    &__body {
+        grid-area: mc-body;
+    }
+}
+
+.mc-label {
+    width: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+
+    &__icon {
+        height: 14px;
+        width: 14px;
+        margin-top: 20px;
+        background-size: 100%;
+        filter: opacity(0.4);
+
+        &.rejected {
+            background-image: url(../../resources/icons/rejected-label.svg);
         }
 
-        &-rejected {
-            background-color: $rejectedMessageLabelBackground;
-
-            &-icon {
-                background-image: url(../../resources/icons/rejected-label.svg);
-            }
-        }
-
-        &-admin {
-            background-color: $adminMessageLabelBackground;
-
-            &-icon {
-                background-image: url(../../resources/icons/admin-icon.svg)
-            }
-        }
-
-        &-rejected-icon, &-admin-icon {
-            height: 14px;
-            width: 14px;
-            margin-top: 20px;
-            background-size: 100%;
-            filter: opacity(0.4);
+        &.admin {
+            background-image: url(../../resources/icons/admin-icon.svg)
         }
     }
 
-    &-wrapper {
-        @include selectable-card;
-        grid-area: message-card;
+    &.rejected {
+        background-color: $rejectedMessageLabelBackground;
+    }
 
+    &.admin {
+        background-color: $adminMessageLabelBackground;
+    }
+}
+
+.mc-header {
+    grid-area: mc-header;
+
+    // lb-count - number of displaying labels - to make offset for name and session 
+    --lb-count: 0;
+    // lb-count variable assgnment through the custom html property
+    &[data-lb-count="0"] { --lb-count: 0; }
+    &[data-lb-count="1"] { --lb-count: 1; }
+    &[data-lb-count="2"] { --lb-count: 2; }
+
+    &.default {
         display: grid;
-        grid-template: 35px / 210px 40px auto 1fr 40px;
-        grid-template-areas: "actions-chips name name-value empty expand-icon";
+        padding: 7px 5px 9px 10px;
+        position: relative;
+        display: grid;
+        grid-template-rows: auto auto;
+        grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
+        grid-template-areas: "info name name-value name-value name-value prediction"
+                             "timestamp session from session-icon to prediction";
 
-        &-name, &-name-value {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 3px;
+        &::after {
+            border-bottom: 2px solid $defaultCardBackground;
+            padding: 0 20px;
+            content: '';
+            position: absolute;
+            bottom: 0px;
+            left: 10px;
+            right: 10px;
+        }
+    }
+
+    &.small {
+        display: grid;
+        grid-template: 35px / calc(230px - (var(--lb-count) * 20px)) 40px auto 1fr 40px;
+        grid-template-areas: "info name name-value empty expand-icon";
+    }
+
+    &__info {
+        grid-area: info;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;  
+        
+        &.rejected {
+            font-weight: bold;
+            font-size: 13px;
+            padding-left: 6px;
             color: $primaryTextColor;
         }
 
-        &-name {
-            grid-area: name;
-            padding-top: 3px;
+        &.empty {
+            @include unselectable;
+            padding-left: 6px;
             font-size: 10px;
+            color: $secondaryTextColor;
         }
-
-        &-name-value {
-            grid-area: name-value;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        &-actionschips {
-            grid-area: actions-chips;
-            display: flex;
-            padding-left: 7px;
-        }
-
-        &-expand {
-            grid-area: expand-icon;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            &-icon {
-                height: 19px;
-                width: 19px;
-                background-image: url(../../resources/icons/arr4-down.svg);
-                background-size: 100%;
-                cursor: pointer;
-            }
-       }
+    }
+    
+    &__name {
+        grid-area: name;
     }
 
-    &-card {
-        grid-area: message-card;
+    &__name-value {
+        grid-area: name-value;
+    }
 
-        &-header {
-            // lb-count - number of displaying labels - to make offset for name and session 
-            --lb-count: 0;
-            min-height: 45px;
-            padding: 7px 5px 9px 10px;
-            position: relative;
-            display: grid;
-            grid-template-rows: auto auto;
-            grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
-            grid-template-areas: "action-chips name name-value name-value name-value prediction-icon"
-                                "timestamp-value session from-value session-icon to-value prediction-icon";
+    &__prediction {
+        grid-area: prediction;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-            &-session, &-name, &-timestamp-value, &-name-value, &-from-value, &-to-value {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: flex-start;
-                padding: 3px;
-                color: $primaryTextColor;
-            }
-
-            &-name-value, &-from-value, &-to-value {
-                padding-left: 8px;
-            }
-
-            &-name-value, &-from-value, &-to-value {
-                font-size: 13px;
-                font-weight: bold;
-            }
-
-            &-session, &-name {
-                padding-top: 5px;
-                font-size: 10px;
-                color: $secondaryTextColor;
-            }
-
-            &-name {
-                grid-area: name;
-            }
-
-            &-session {
-                grid-area: session;
-            }
-
-            &-session-icon {
-                grid-area: session-icon;
-            }
-
-            &-timestamp-value {
-                grid-area: timestamp-value;
-                font-size: 13px;
-                padding-left: 5px;
-            }
-
-            &-from-value {
-                grid-area: from-value;
-                margin-right: 25px;
-            }
-
-            &-to-value {
-                grid-area: to-value;
-            }
-
-            &-name-value {
-                grid-area: name-value;
-            }
-
-            &-session-icon {
-                grid-area: session-icon;
-                background-image: url('../../resources/icons/session-icon.svg');
-                height: 25px;
-                width: 25px;
-                background-size: 100%;
-            }
-
-            &-prediction {
-                grid-area: prediction-icon;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-
-                &-icon {
-                    background-image: url(../../resources/icons/ml-message.svg);
-                    background-size: 100%;
-                    width: 22px;
-                    height: 22px;
-                    // TODO - DISABLED
-                    filter: opacity(0.2);
-                    cursor: not-allowed;
-                }
-            }
-
-            &-action {
-                grid-area: action-chips;
-                display: flex;
-                align-items: center;
-
-                &.rejected {
-                    font-weight: bold;
-                    font-size: 13px;
-                    padding-left: 6px;
-                    color: $primaryTextColor;
-                }
-
-                &.empty {
-                    @include unselectable;
-                    padding-left: 6px;
-                    font-size: 10px;
-                    color: $secondaryTextColor;
-                }
-            }
-
-            &::after {
-                border-bottom: 2px solid $defaultCardBackground;
-                padding: 0 20px;
-                content: '';
-                position: absolute;
-                bottom: 0px;
-                left: 10px;
-                right: 10px;
-            }
-        }
-
-        // lb-count variable assgnment through the custom html property
-        [data-lb-count="0"] { --lb-count: 0; }
-        [data-lb-count="1"] { --lb-count: 1; }
-        [data-lb-count="2"] { --lb-count: 2; }
-
-        &-content {
-            grid-area: message-card-body;
-            position: relative;
-            padding: 7px 10px 10px 15px;
-            border-radius: 5px;
-
-            &.passed {
-                background-color: $passedBackgroundColor;
-            }
-        
-            &.failed {
-                background-color: $failedBackgroundColor;
-            }
-        
-            &.conditionaly_passed {
-                background-color: $conditionallyPassedBackgroundColor;
-            }
-
-            &.conditionally_failed {
-                background-color: $conditionallyFailedBackgroundColor;
-            }
-
-            &-title {
-                color: $primaryTextColor;
-                font-size: 14px;
-                font-weight: bold;
-                padding-bottom: 2px;
-                padding-top: 5px;
-            }
-
-            &-human {
-                padding-top: 5px;
-
-                &-showraw {
-                    @include unselectable;
-                    float: right;
-                    display: flex;
-                    align-items: center;
-                    cursor: pointer;
-                    font-size: 13px;
-                    color: $primaryTextColor;
-
-                    &-title {
-                        font-weight: bold;
-                    }
-
-                    &-icon {
-                        height: 14px;
-                        width: 14px;
-                        background-size: 100%;
-                        margin-left: 5px;
-                        
-                        &.expanded {
-                            background-image: url(../../resources/icons/arr4-up.svg);
-                        }
-
-                        &.hidden {
-                            background-image: url(../../resources/icons/arr4-down.svg);
-                        }
-                    }
-                }
-
-                p {
-                    word-break: break-word;
-                    line-height: 21px;
-                    margin: 0px;
-                    font-size: 13px;    
-                }
-            }
-
-            &-raw {
-                &-header {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    width: 100%;
-                    padding-top: 10px;
-    
-                    &-title {
-                        @include unselectable;
-                        font-size: 13px;
-                        color: $primaryTextColor;
-                        font-weight: bold;
-                    }
-    
-                    &-copy-all {
-                        @include unselectable;
-                        display: inline-flex;
-                        align-items: center;
-                        margin-left: 10px;
-                        padding: 2px;
-                        cursor: pointer;
-    
-                        &-icon {
-                            height: 13px;
-                            width: 13px;
-                            background-image: url('../../resources/icons/clipboard.svg');
-                            background-size: 100%;
-                            filter: opacity(0.6);
-                        }
-    
-                        &-title {
-                            font-size: 12px;
-                            color: $primaryTextColor;
-                            padding-left: 5px;
-                        }
-    
-                        &:hover {
-                            background: $messageCardRawHoverBackground;
-                        }
-                    }
-                }
-
-                &-content {
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: flex-start;
-                    margin-top: 10px;
-                    font-family: monospace;
-                    line-height: 18px;
-                    letter-spacing: 0.5px;
-                    font-size: 11px;
-
-                    &-numbers {
-                        color: $secondaryTextColor;
-                    }
-
-                    &-symbols, &-string {
-                        color: $primaryTextColor;
-                        padding-left: 5px;
-                        display: flex;
-
-                        &:hover {
-                            background: $messageCardRawHoverBackground;
-                        }
-                    }
-
-                    &-copy-btn {
-                        display: inline-block;
-                        margin: 4px 4px 4px 10px;
-                        height: 13px;
-                        width: 13px;
-                        background-image: url('../../resources/icons/clipboard.svg');
-                        background-size: 100%;
-                        filter: opacity(0.6);
-                        cursor: pointer;
-
-                        &:hover {
-                            filter: opacity(1);
-                        }
-                    }
-                }
-            }
+        &-icon {
+            background-image: url(../../resources/icons/ml-message.svg);
+            background-size: 100%;
+            width: 22px;
+            height: 22px;
+            // TODO - DISABLED
+            filter: opacity(0.2);
+            cursor: not-allowed;
         }
     }
 
-    &-expand {
-        position: absolute;
-        top: 67px;
-        right: 12px;
-        padding-right: 5px;
+    &__timestamp {
+        grid-area: timestamp;
+        font-size: 13px;
+        padding-left: 5px;
+    }
 
-        &.rejected {
-            top: 80px;
-        }
+    &__session {
+        grid-area: session;
+    }
+
+    &__from {
+        grid-area: from;
+        margin-right: 20px;
+    }
+
+    &__to {
+        grid-area: to;
+    }
+
+    &__session-icon {
+        grid-area: session-icon;
+        background-image: url('../../resources/icons/session-icon.svg');
+        height: 25px;
+        width: 25px;
+        background-size: 100%;
+    }
+
+    &__session, &__name, &__timestamp, &__name-value, &__from, &__to {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 3px;
+        color: $primaryTextColor;
+    }
+    
+    &__name-value, &__from, &__to {
+        padding-left: 8px;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    &__session, &__name {
+        @include unselectable;
+        padding-top: 5px;
+        font-size: 10px;
+        color: $secondaryTextColor;
+    }
+
+    &__expand {
+        grid-area: expand-icon;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
         &-icon {
             height: 19px;
             width: 19px;
-            background-image: url(../../resources/icons/arr4-up.svg);
+            background-image: url(../../resources/icons/arr4-down.svg);
             background-size: 100%;
             cursor: pointer;
         }
+    }
+}
+
+.mc-body {
+    position: relative;
+    padding: 7px 10px 10px 15px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    
+    
+    &__title {
+        color: $primaryTextColor;
+        font-size: 14px;
+        font-weight: bold;
+        padding-bottom: 2px;
+        padding-top: 5px;
+    }
+    
+    &__human {
+        padding-top: 5px;
+        word-break: break-word;
+        line-height: 21px;
+        margin: 0px;
+        font-size: 13px;    
+    }
+    
+    &__raw {
+        width: 100%
+    }
+}
+
+.mc-show-raw {
+    @include unselectable;
+    float: right;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: $primaryTextColor;
+
+    &__title {
+        font-weight: bold;
+    }
+
+    &__icon {
+        height: 14px;
+        width: 14px;
+        background-size: 100%;
+        margin-left: 5px;
+        
+        &.expanded {
+            background-image: url(../../resources/icons/arr4-up.svg);
+        }
+
+        &.hidden {
+            background-image: url(../../resources/icons/arr4-down.svg);
+        }
+    }
+}
+
+.mc-raw {
+
+    &__header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        padding-top: 10px;
+    }
+
+    &__title {
+        display: inline-block;
+        @include unselectable;
+        font-size: 13px;
+        color: $primaryTextColor;
+        font-weight: bold;
+    }
+
+    &__content {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        margin-top: 10px;
+        font-family: monospace;
+        line-height: 18px;
+        letter-spacing: 0.5px;
+        font-size: 11px;
+    }
+
+    &__column {
+        display: flex;
+        padding-left: 5px;
+
+        &.primary {
+            color: $primaryTextColor;
+
+            &:hover {
+                background: $messageCardRawHoverBackground;
+            }
+        }
+
+        &.secondary {
+            color: $secondaryTextColor;
+        }
+    }
+
+    &__copy-btn {
+        display: inline-block;
+        margin: 4px 4px 4px 10px;
+        cursor: pointer;
+        
+        &:hover {
+            filter: opacity(1);
+        }
+    }
+
+    &__copy-icon {
+        margin: 4px 4px 4px 10px;
+        height: 13px;
+        width: 13px;
+        background-image: url('../../resources/icons/clipboard.svg');
+        background-size: 100%;
+        filter: opacity(0.6);
+    }
+
+    &__copy-title {
+        @include unselectable;
+        font-size: 12px;
+        color: $primaryTextColor;
+        padding-left: 5px;
+    }
+
+    &__copy-all {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 10px;
+        padding: 2px;
+        cursor: pointer;
+
+        &:hover {
+            background: $messageCardRawHoverBackground;
+        }
+    }
+}
+
+.mc-expand-btn {
+    position: absolute;
+    top: 67px;
+    right: 12px;
+    padding-right: 5px;
+
+    &.rejected {
+        top: 80px;
+    }
+
+    &__icon {
+        height: 19px;
+        width: 19px;
+        background-image: url(../../resources/icons/arr4-up.svg);
+        background-size: 100%;
+        cursor: pointer;
     }
 }
 

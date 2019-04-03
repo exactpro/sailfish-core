@@ -27,3 +27,18 @@ export function createSelector(className: string, ...modifiers: string[]): strin
         ...modifiers.filter(Boolean).map(modifier => modifier.toLowerCase())
     ].join(' ');
 }
+
+export function joinModifiers(...modifiers: string[]): string {
+    return modifiers
+        .filter(modifier => !!modifier)
+        .map(modifier => ' ' + modifier.toLowerCase())
+        .join('');
+}
+
+export function createBemBlock(name: string, ...modifiers: string[]): string {
+    return name + joinModifiers(...modifiers);
+} 
+
+export function createBemElement(blockName: string, elementName: string, ...modifiers: string[]): string {
+    return `${blockName}__${elementName}${joinModifiers(...modifiers)}`;
+}

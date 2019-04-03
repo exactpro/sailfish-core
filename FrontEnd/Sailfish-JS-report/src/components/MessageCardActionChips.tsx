@@ -32,7 +32,7 @@ interface ActionChipsProps {
 export const MessageCardActionChips = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
 
     const className = createSelector(
-        "message-card-header-action",
+        "mc-header__info",
         actions.length ? null : "empty"
     );
 
