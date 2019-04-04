@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import { splitRawContent } from '../helpers/rawFormatter';
+import { splitRawContent, getUnformattedContent } from '../helpers/rawFormatter';
 import '../styles/messages.scss';
 import { copyTextToClipboard } from '../helpers/copyHandler';
 import { showNotification } from '../helpers/showNotification';
@@ -56,7 +56,7 @@ export const MessageRaw = ({ rawContent }: MessageRawProps) => {
                 <div class="mc-raw__column primary">
                     <pre>{humanReadable}</pre>
                     <div class="mc-raw__copy-btn   mc-raw__copy-icon"
-                        onClick={() => copyHandler(humanReadable)}
+                        onClick={() => copyHandler(getUnformattedContent(humanReadable))}
                         title="Copy to clipboard" />
                 </div>
             </div>

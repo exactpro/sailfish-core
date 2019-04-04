@@ -326,6 +326,7 @@
     &__column {
         display: flex;
         padding-left: 5px;
+        margin-left: 10px;
 
         &.primary {
             color: $primaryTextColor;
