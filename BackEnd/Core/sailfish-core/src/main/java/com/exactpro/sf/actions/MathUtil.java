@@ -173,6 +173,27 @@ public class MathUtil extends AbstractCaller {
         return numbers[0];
     }
 
+    @Description("Returns the maximum of the values <br/>" +
+            "<b>numbers</b> - values for comparison. Must be of the same type<br/>" +
+            "Example:<br/>" +
+            "#{max(5, 4, 3)} returns 5")
+    @UtilityMethod
+    public Object max(Object ... numbers){
+
+        try {
+            Arrays.sort(numbers);
+        } catch (ClassCastException e) {
+            StringBuilder builder = new StringBuilder("Input params have different types:");
+            for (Object o:numbers) {
+                builder.append(o.getClass().getSimpleName());
+                builder.append(", ");
+            }
+            throw new EPSCommonException(builder.toString());
+        }
+
+        return numbers[numbers.length - 1];
+    }
+
     @Description("Returns the minimum of the int values<br/>" +
             "<b>numbers</b> - integer values for comparison<br/>" +
             "Example:<br/>" +
@@ -181,6 +202,16 @@ public class MathUtil extends AbstractCaller {
     public int minInt(int ... numbers){
         Arrays.sort(numbers);
         return numbers[0];
+    }
+
+    @Description("Returns the maximum of the int values<br/>" +
+            "<b>numbers</b> - integer values for comparison<br/>" +
+            "Example:<br/>" +
+            "#{maxInt(5, 4, 3)} returns 5")
+    @UtilityMethod
+    public int maxInt(int ... numbers){
+        Arrays.sort(numbers);
+        return numbers[numbers.length - 1];
     }
 
     @Description("Returns the minimum of the long values<br/>" +
@@ -193,6 +224,16 @@ public class MathUtil extends AbstractCaller {
         return numbers[0];
     }
 
+    @Description("Returns the maximum of the long values<br/>" +
+            "<b>numbers</b> - long integer values for comparison<br/>" +
+            "Example:<br/>" +
+            "#{maxLong(55555555555l, 44444444444l, 33333333333l)} returns 55555555555")
+    @UtilityMethod
+    public long maxLong(long ... numbers){
+        Arrays.sort(numbers);
+        return numbers[numbers.length - 1];
+    }
+
     @Description("Returns the minimum of the char values <br/>" +
             "<b>numbers</b> - char values for comparison<br/>" +
             "Example:<br/>" +
@@ -203,14 +244,34 @@ public class MathUtil extends AbstractCaller {
         return numbers[0];
     }
 
+    @Description("Returns the maximum of the char values <br/>" +
+            "<b>numbers</b> - char values for comparison<br/>" +
+            "Example:<br/>" +
+            "#{minChar('1', '0', '2')} returns '2'")
+    @UtilityMethod
+    public char maxChar(char ... numbers){
+        Arrays.sort(numbers);
+        return numbers[numbers.length - 1];
+    }
+
     @Description("Returns the minimum of the double values<br/>" +
-            "<b>numbers</b> - decimal values for comparison<br/>" +
+            "<b>numbers</b> - double values for comparison<br/>" +
             "Example:<br/>" +
             "#{minDouble(5.0, 4.0, 3.0)} returns 3.0")
     @UtilityMethod
     public double minDouble(double ... numbers){
         Arrays.sort(numbers);
         return numbers[0];
+    }
+
+    @Description("Returns the maximum of the double values<br/>" +
+            "<b>numbers</b> - double values for comparison<br/>" +
+            "Example:<br/>" +
+            "#{minDouble(5.0, 4.0, 3.0)} returns 5.0")
+    @UtilityMethod
+    public double maxDouble(double ... numbers){
+        Arrays.sort(numbers);
+        return numbers[numbers.length - 1];
     }
 
     @Description("Returns the minimum of the BigDecimal values <br/>" +
@@ -221,6 +282,16 @@ public class MathUtil extends AbstractCaller {
     public BigDecimal minBigDecimal(BigDecimal... numbers){
         Arrays.sort(numbers);
         return numbers[0];
+    }
+
+    @Description("Returns the maximum of the BigDecimal values <br/>" +
+            "<b>numbers</b> - BigDecimal values for comparison<br/>" +
+            "Example:<br/>" +
+            "#{maxBigDecimal(5.0B, 4.0B, 3.0B)} returns 5.0")
+    @UtilityMethod
+    public BigDecimal maxBigDecimal(BigDecimal... numbers){
+        Arrays.sort(numbers);
+        return numbers[numbers.length - 1];
     }
 
     @Description("Rounds <b>d</b> with specified <b>precision</b><br/>"

@@ -29,57 +29,87 @@ public class TestMathUtil {
 
     @Test
     public void TestMin() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("min", 11d, 10d, 13d), mathUtil.min(11d, 10d, 13d));
+        Assert.assertEquals(10d, mathUtil.min(11d, 10d, 13d));
+    }
+
+    @Test
+    public void TestMax() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
+        Assert.assertEquals(13d, mathUtil.max(11d, 10d, 13d));
     }
 
     @Test
     public void TestAbs() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("abs", -11d), (Double)mathUtil.abs(-11d));
+        Assert.assertEquals(new Double(11), (Double)mathUtil.abs(-11d));
     }
 
     @Test
     public void TestFloor() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("floor", -11d), (Double)mathUtil.floor(-11d));
+        Assert.assertEquals(new Double(-11), (Double)mathUtil.floor(-11d));
     }
 
     @Test
     public void TestMinDouble() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("minDouble", -11d, -10d, -20d), (Double)mathUtil.minDouble(-11d, -10d, -20d));
+        Assert.assertEquals(new Double(-20), (Double)mathUtil.minDouble(-11d, -10d, -20d));
+    }
+
+    @Test
+    public void TestMaxDouble() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
+        Assert.assertEquals(new Double(-10), (Double)mathUtil.maxDouble(-11d, -10d, -20d));
     }
 
     @Test
     public void TestCeil() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("ceil", -11d), (Double)mathUtil.ceil(-11d));
+        Assert.assertEquals(new Double(-11d), (Double)mathUtil.ceil(-11d));
     }
 
     @Test
     public void TestMinBigDecimal() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("minBigDecimal", new BigDecimal(10), new BigDecimal(20)), mathUtil.minBigDecimal(new BigDecimal(10), new BigDecimal(20)));
+        Assert.assertEquals(new BigDecimal(10), mathUtil.minBigDecimal(new BigDecimal(10), new BigDecimal(20)));
+    }
+
+    @Test
+    public void TestMaxBigDecimal() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
+        Assert.assertEquals(new BigDecimal(20), mathUtil.maxBigDecimal(new BigDecimal(10), new BigDecimal(20)));
     }
 
     @Test
     public void TestRoundZero() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("roundZero", -11d, 1, 1), (Double)mathUtil.roundZero(-11d, 1, 1));
+        Assert.assertEquals(new Double(0), (Double)mathUtil.roundZero(-11d, 1, 1));
     }
 
     @Test
     public void TestMinLong() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("minLong", -11l, -10l, -20l), (Long)mathUtil.minLong(-11l, -10l, -20l));
+        Assert.assertEquals(new Long(-20L), (Long)mathUtil.minLong(-11l, -10l, -20l));
+    }
+
+    @Test
+    public void TestMaxLong() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
+        Assert.assertEquals(new Long(-10L), (Long)mathUtil.maxLong(-11l, -10l, -20l));
     }
 
     @Test
     public void TestMinInt() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("minInt", -11, -10, -20), (Integer)mathUtil.minInt(-11, -10, -20));
+        Assert.assertEquals(new Integer(-20), (Integer)mathUtil.minInt(-11, -10, -20));
+    }
+
+    @Test
+    public void TestMaxInt() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
+        Assert.assertEquals(new Integer(-10), (Integer)mathUtil.maxInt(-11, -10, -20));
     }
 
     @Test
     public void TestNextUp() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("nextUp", -11d), (Double)mathUtil.nextUp(-11d));
+        Assert.assertEquals(new Double(-10.999999999999999), (Double)mathUtil.nextUp(-11d));
     }
 
     @Test
     public void TestMinChar() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
-        Assert.assertEquals(mathUtil.call("minChar", '1', '0', '2'), (Character)mathUtil.minChar('1', '0', '2'));
+        Assert.assertEquals(new Character('0'), (Character)mathUtil.minChar('1', '0', '2'));
+    }
+
+    @Test
+    public void TestMaxChar() throws UtilityCallException, UtilityNotFoundException, InterruptedException {
+        Assert.assertEquals(new Character('2'), (Character)mathUtil.maxChar('1', '0', '2'));
     }
 
     @Test
