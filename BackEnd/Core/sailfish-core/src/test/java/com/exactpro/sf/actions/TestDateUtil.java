@@ -351,12 +351,6 @@ public class TestDateUtil {
     }
 
     @Test
-    public void testFormatDateTimeByZoneId2(){
-        String resultTime = "20190314-09:51:44.000";
-        Assert.assertTrue(resultTime.equals(dateUtil.formatDateTimeByZoneId("yyyyMMdd-HH:mm:ss.SSS", "D=14:h=9:m=51:s=44:ms=0", "Europe/London")));
-    }
-
-    @Test
     public void testModifyDateTimeByZoneId(){
         Assert.assertTrue("20190311-14:05:23".equals(dateUtil.modifyDateTimeByZoneId("2019-03-11 14:05:23.000", "yyyyMMdd-HH:mm:ss", "h+0", "Europe/London")));
         Assert.assertTrue("20190331-14:05:23".equals(dateUtil.modifyDateTimeByZoneId("2019-03-31 14:05:23.000", "yyyyMMdd-HH:mm:ss", "h+0", "Europe/London")));
