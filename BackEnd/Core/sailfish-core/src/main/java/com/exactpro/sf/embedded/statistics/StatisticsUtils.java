@@ -117,12 +117,7 @@ public class StatisticsUtils {
                                                                            List<TagGroupDimension> dimensions,
                                                                            TagGroupReportParameters params) {
         setDimensionParameters(dimensions, params);
-        List<TagGroupReportResult> results = new ArrayList<>();
-        for(int i =0; i < dimensions.size(); i++) {
-            params.setLoadForLevel(i);
-            results.add(statisticsService.getReportingStorage().generateTagGroupReport(params));
-        }
-        return results;
+        return statisticsService.getReportingStorage().generateTagGroupReport(params, dimensions);
     }
 
     public static void writeTagGroupReportToCsv(OutputStream outputStream, List<TagGroupReportResult> results) throws IOException {

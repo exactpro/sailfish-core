@@ -26,10 +26,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
+import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hibernate.Query;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -1426,27 +1428,41 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 
 	}
 
-	public TagGroupReportResult generateTagGroupReport(TagGroupReportParameters params) {
+	public List<TagGroupReportResult> generateTagGroupReport(TagGroupReportParameters params, List<TagGroupDimension> dimensions) {
 
-		Session session = null;
+        Session session = null;
 
-		NativeDbOperations nativeOps = new NativeDbOperations(settings);
+        NativeDbOperations nativeOps = new NativeDbOperations(settings);
 
-		try {
+        try {
 
-			session = this.sessionFactory.openSession();
+            session = this.sessionFactory.openSession();
 
-			return nativeOps.generateTagGroupReport(session, params);
+            AbstractTagGroupQueryBuilder queryBuilder = NativeQueryUtil.isMysql(settings.getDbms())
+                    ? new MySqlTagGroupQueryBuilder()
+                    : new PostgresTagGroupQueryBuilder();
 
-		} finally {
+            nativeOps.createTagGroupTempTable(session, params.getTagIds());
 
-			if(session != null) {
-				session.close();
-			}
+            queryBuilder.setJoinType(nativeOps.recognizeJoinType(session));
 
-		}
+            List<TagGroupReportResult> results = new ArrayList<>();
 
-	}
+            for(int i = 0; i < dimensions.size(); i++) {
+                params.setLoadForLevel(i);
+                results.add(nativeOps.generateTagGroupReport(session, params, queryBuilder.clone()));
+            }
+
+            return results;
+        } finally {
+
+            if(session != null) {
+                session.close();
+            }
+
+        }
+
+    }
 
     @SuppressWarnings("unchecked")
     public List<AggregatedReportRow> generateAggregatedTaggedReport(AggregateReportParameters params) {
@@ -1570,4 +1586,5 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             }
         }
     }
+
 }
