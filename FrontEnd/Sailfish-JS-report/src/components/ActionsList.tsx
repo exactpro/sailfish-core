@@ -84,7 +84,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
         return (
             <div class="actions">
-                <div class="actions-list">
+                <div class="actions__list">
                     <HeatmapScrollbar
                         selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}
                         ref={ref => this.scrollbar = ref}>

@@ -16,174 +16,22 @@
 
 @import "./common/vars";
 
-.action {
+.action-card {
+    @include status-card;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: auto;
+    border: 2px solid transparent;
+    border-radius: $defaultCardBorderRadius;
+    padding: 5px;
+    margin: 5px 0;
 
-    &-card {
-        @include status-card;
-        display: block;
-        box-sizing: border-box;
-        width: 100%;
-        height: auto;
-        border: 2px solid transparent;
-        border-radius: 5px;
-        padding: 5px;
-        margin: 5px 0;
-
-        &.root {
-            border-color: var(--status-secondary-border-color);
-        }
-
-        &.selected {
-            background-color: var(--status-secondary-background-color);
-            border-color: var(--status-primary-border-color);
-        }
-
-        &-header {
-            width: 100%;
-            padding: 3px;
-            display: grid;
-            grid-template-columns: 1fr 180px 70px;
-            grid-template-rows: auto 1fr;
-            grid-template-areas: "action-title action-controls action-controls"
-                                 "action-title action-start-time action-elapsed-time";
-
-            h3 {
-                margin: 0;
-                font-size: 17px;
-            }   
-
-            &-title {
-                grid-area: action-title;
-                display: flex;
-                flex-direction: column;
-
-                &-name {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: flex-start;
-
-                    color: var(--status-primary-color);
-                }
-                
-                &-description {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-
-                    color: var(--status-secondary-color);
-                }
-            }
-
-            &-name, &-description {
-                padding-right: 8px;
-            }
-
-            &-time {
-                &-elapsed {
-                    grid-area: action-elapsed-time;
-                    color: var(--status-primary-color);
-                    display: flex;
-                    flex-direction: row-reverse
-                }
-
-                &-start {
-                    grid-area: action-start-time;
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: flex-end;
-                    align-items: flex-start;
-                    padding-right: 8px;
-                    padding-top: 4px;
-
-                    p {
-                        font-size: 12px;
-                        color: $secondaryTextColor;
-                        white-space: nowrap;
-                    }
-
-                    span {
-                        font-size: 11px;
-                        color: $secondaryTextColor;
-                        padding-right: 10px;
-                        padding-top: 1px;
-                    }
-                }
-            }
-
-            &-controls {
-                grid-area: action-controls;
-                display: flex;
-                flex-direction: row-reverse;
-                justify-content: start;
-                align-items: center;
-
-                &-status {
-                    color: var(--status-primary-color);
-                }
-
-                &-chips {
-                    padding-right: 8px;
-                }
-            }
-
-            &.transparent {
-                opacity: 0.3;
-            }
-        }
-
-        &-status {
-            padding-left: 10px;
-        }
-
-        &-body {
-            display: block;
-            box-sizing: border-box;
-
-            p {
-                word-break: break-all;
-            }
-
-            pre {
-                overflow-x: scroll;
-            }
-
-            &-params {
-                padding-left: 10px;
-
-                &.transparent {
-                    opacity: 0.3;
-                }
-            }
-
-            &-table {
-                padding-left: 10px;
-            }
-
-            &-verification {
-                @include status-card;
-                border: 2px solid transparent;
-                border-radius: 5px;
-                padding-bottom: 5px;
-                
-                &.selected {
-                    background-color: var(--status-secondary-background-color);
-                    border-color: var(--status-primary-border-color);
-                }
-
-                &.transparent {
-                    opacity: 0.3;
-                }
-                
-                &-title {
-                    color: var(--status-primary-color);
-                    font-weight: bold;
-                    font-size: 17px;
-                }
-            }
-        }
+    &__status {
+        padding-left: 10px;
     }
 
-    &-custom-msg {
+    &__custom-msg {
         color: $primaryTextColor;
         padding-left: 10px;
 
@@ -207,12 +55,162 @@
             color: red;
         }
     }
+
+    &.root {
+        border-color: var(--status-secondary-border-color);
+    }
+
+    &.selected {
+        background-color: var(--status-secondary-background-color);
+        border-color: var(--status-primary-border-color);
+    }
+}
+
+.ac-header {
+    width: 100%;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: 1fr 180px 70px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "action-title action-controls action-controls"
+                            "action-title action-start-time action-elapsed-time";
+
+    &.transparent {
+        opacity: 0.3;
+    }
+
+    h3 {
+        margin: 0;
+        font-size: 17px;
+    }   
+
+    &__title {
+        grid-area: action-title;
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__name {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        color: var(--status-primary-color);
+    }
+
+    &__description {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        color: var(--status-secondary-color);
+    }
+
+    &__name, &__description {
+        padding-right: 8px;
+    }
+
+    &__elapsed-time {
+        grid-area: action-elapsed-time;
+        color: var(--status-primary-color);
+        display: flex;
+        flex-direction: row-reverse
+    }
+
+    &__start-time {
+        grid-area: action-start-time;
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: flex-start;
+        padding-right: 8px;
+        padding-top: 4px;
+
+        p {
+            font-size: 12px;
+            color: $secondaryTextColor;
+            white-space: nowrap;
+        }
+
+        span {
+            font-size: 11px;
+            color: $secondaryTextColor;
+            padding-right: 10px;
+            padding-top: 1px;
+        }
+    }
+
+    &__controls {
+        grid-area: action-controls;
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-start;
+        align-items: center;
+    }
+    
+    &__status {
+        color: var(--status-primary-color);
+    }
+    
+    &__chips {
+        padding-right: 8px;
+    }
+}
+
+.ac-body {
+    display: block;
+    box-sizing: border-box;
+    word-break: break-all;
+
+    pre {
+        overflow-x: scroll;
+    }
+
+    &__input-params {
+        padding-left: 10px;
+
+        &.transparent {
+            opacity: 0.3;
+        }
+    }
+
+    &__table {
+        padding-left: 10px;
+    }
+
+    &__verification {
+        @include status-card;
+        border: 2px solid transparent;
+        border-radius: $defaultCardBorderRadius;
+        padding-bottom: 5px;
+        
+        &.selected {
+            background-color: var(--status-secondary-background-color);
+            border-color: var(--status-primary-border-color);
+        }
+
+        &.transparent {
+            opacity: 0.3;
+        }
+    }
+
+    &__verification-title {
+        color: var(--status-primary-color);
+        font-weight: bold;
+        font-size: 17px;
+    }
+    
+    &__verification-table {
+        color: var(--status-primary-color);
+        font-weight: bold;
+        font-size: 17px;
+    }
 }
 
 .actions {
     height: 100%;
 
-    &-list {
+    &__list {
         height: 100%;
         padding: 0 5px;
         overflow: hidden;

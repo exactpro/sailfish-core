@@ -51,11 +51,11 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         isRoot && !isSelected ? "root" : null,
         isSelected ? "selected" : null
     ), headerClassName = createSelector(
-        "action-card-header",
+        "ac-header",
         status.status,
         isTransaparent && !isSelected ? "transparent" : null
     ), inputParametersClassName = createSelector(
-        "action-card-body-params",
+        "ac-body__input-params",
         isTransaparent && !isSelected ? "transparent" : null
     );
 
@@ -76,28 +76,28 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
             <ExpandablePanel
                 isExpanded={isExpanded}>
                 <div class={headerClassName}>
-                    <div class="action-card-header-title">
-                        <div class="action-card-header-title-name">
+                    <div class="ac-header__title">
+                        <div class="ac-header__name">
                             <h3>{name}</h3>
                         </div>
-                        <div class="action-card-header-title-description">
+                        <div class="ac-header__description">
                             <h3>{description}</h3>
                         </div>
                     </div>
-                    <div class="action-card-header-time-start">
+                    <div class="ac-header__start-time">
                         <span>Start</span>
                         <p>{formatTime(action.startTime)}</p>
                     </div>
-                    <div class="action-card-header-time-elapsed">
+                    <div class="ac-header__elapsed-time">
                         <h3>{elapsedTime}</h3>
                     </div>
-                    <div class="action-card-header-controls">
-                        <div class="action-card-header-controls-status">
+                    <div class="ac-header__controls">
+                        <div class="ac-header__status">
                             <h3>{action.status.status.toUpperCase()}</h3>
                         </div>
                         {
                             action.relatedMessages.length > 0 ? (
-                                <div class="action-card-header-controls-chips">
+                                <div class="ac-header__chips">
                                     <Chip
                                         count={action.relatedMessages.length}/>
                                 </div>
@@ -105,7 +105,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         }
                     </div>
                 </div>
-                <div class="action-card-body">
+                <div class="ac-body">
                     <div class={inputParametersClassName}>
                         <ExpandablePanel>
                             <h4>Input parameters</h4>

@@ -38,7 +38,7 @@ export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
     };
 
     const rootClass = createSelector(
-        "action-custom-msg",
+        "action-card__custom-msg",
         level
     );
 
@@ -46,12 +46,12 @@ export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
         return (
             <div class="action-card">
                 <ExpandablePanel>
-                    <div class="action-card-header">
+                    <div class="ac-header">
                         <div class={rootClass}>
                             <h3 style={messageStyle}>{message}</h3>
                         </div>
                     </div>
-                    <div class="action-card-body">
+                    <div class="ac-body">
                         <ExceptionCard
                             exception={exception}
                             drawDivider={false}/>
@@ -63,7 +63,7 @@ export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
 
     return (
         <div class="action-card">
-            <div class="action-card-header">
+            <div class="ac-header">
                 <div class={rootClass}>
                     <h3 style={messageStyle}>{message}</h3>
                 </div>

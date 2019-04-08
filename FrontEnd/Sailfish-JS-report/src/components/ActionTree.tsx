@@ -288,10 +288,10 @@ export class ActionTree extends Component<ActionTreeProps> {
             return (
                 <div class="action-card">
                     <ExpandablePanel>
-                        <div class="action-card-header">
+                        <div class="ac-header">
                             <h3 style={messageStyle}>{message} - {level}</h3>
                         </div>
-                        <div class="action-card-body">
+                        <div class="ac-body">
                             <pre>{exception && exception.stacktrace}</pre>
                         </div>
                     </ExpandablePanel>
@@ -300,7 +300,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         } else {
             return (
                 <div class="action-card">
-                    <div class="action-card-header">
+                    <div class="ac-header">
                         <h3 style={messageStyle}>{message} - {level}</h3>
                     </div>
                 </div>
@@ -312,7 +312,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         selectHandelr: Function, isSelected: boolean, isTransaparent, filterFields: StatusType[]) {
 
         const className = createSelector(
-            "action-card-body-verification",
+            "ac-body__verification",
             status && status.status,
             isSelected ? "selected" : null,
             isTransaparent && !isSelected ? "transparent" : null
@@ -327,7 +327,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                         e.cancelBubble = true;
                     }}>
                     <ExpandablePanel>
-                        <div class="action-card-body-verification-title">{"Verification — " + name + " — " + status.status}</div>
+                        <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
                         <VerificationTable 
                             params={entries} 
                             status={status.status}/>
@@ -339,7 +339,7 @@ export class ActionTree extends Component<ActionTreeProps> {
 
     renderUserTable(table: UserTable) {
         return (
-            <div class="action-card-body-table">
+            <div class="ac-body__table">
                 <ExpandablePanel>
                     <h4>{table.name || "Custom table"}</h4>
                     <CustomTable
