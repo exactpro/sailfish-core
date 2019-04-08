@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import { h, Component } from "preact";
-import "../styles/styles.scss";
+import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import ReportLayout from './ReportLayout';
 import TestCase from "../models/TestCase";

@@ -14,32 +14,23 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
-import '../styles/buttons.scss';
-import { createSelector } from '../helpers/styleCreators';
+@import './common/vars';
 
-interface ButtonProps {
-    onClick?: Function;
-    isToggled?: boolean;
-    isDisabled?: boolean;
-    text: string;
-    title?: string;
-    theme?: string;
-}
+.notification {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 19px;
+    padding: 10px;
+    color: $primaryTextColor;
+    background-color: $notificationBackground;
+    border-radius: 5px;
+    font-family: Open sans;
 
-export const ToggleButton = ({ onClick, isToggled, text, theme, isDisabled, title }: ButtonProps) => {
-    const className = createSelector(
-        "toggle-button", 
-        theme || "default", 
-        isDisabled ? "disabled" : null,
-        isToggled ? "toggled" : null
-    );
-
-    return (
-        <div class={className} onClick={e => onClick && onClick(text)} title={title}>
-            <div class="toggle-button__title">
-                <p>{text}</p>
-            </div>
-        </div>
-    )
+    p {
+        margin: 0;
+    }
 }

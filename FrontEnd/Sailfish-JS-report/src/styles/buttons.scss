@@ -14,33 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "./common/vars";
+@import './common/vars';
 
-body {
-    margin: 0;
-}
-
-.root {
-    font-family: Open sans;
-    display: block;
-    box-sizing: border-box;
-    width: 100vw;
-    height: 100vh;
-    padding: 8px;
-
-    div {
-        box-sizing: border-box;
-    }
-
-    p, span, h1, h2, h3, h4, h5, pre {
-        margin: 0;
-        padding: 0;
-        border: 0;
-        vertical-align: baseline;
-    }
-}
-
-.button-root {
+.toggle-button {
     @include unselectable;
     display: inline-flex;
     height: 38px;
@@ -49,7 +25,12 @@ body {
     margin: 0 3px;
     border: 1.5px solid transparent;
     border-radius: 7px;
+    font-size: 16px;
     cursor: pointer;
+
+    &__title {
+        margin: 0 20px;
+    }
 
     &.toggled {
         border-radius: 7px;
@@ -60,85 +41,28 @@ body {
         cursor: unset;
     }
     
-    p {
-        margin: 0 20px;
-    }
 
     // themes for button
     &.green {
         background: $filterButtonDisabled;
         border-color: $filterButtonDisabled;
         height: 30px;
+        color: $filterButtonTextColor;
+        font-size: 14px;
 
         &.toggled {
             background: $filterButtonEnabled;
             border-color: $filterButtonEnabled;
         }
-
-        p {
-            color: $filterButtonTextColor;
-            font-size: 14px;
-        }
     }
 
     &.default {
         background: $buttonDisabledBackground;
+        color: $primaryTextColor;
 
         &.toggled {
             border-color: black;
             background: transparent;
         }
-
-        p {
-            color: $primaryTextColor;
-        }
-    }
-}
-
-.chip {
-    @include unselectable;
-    @include status-card;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    height: 20px;
-    width: auto;
-    min-width: 20px;
-    margin: 0 5px;
-    color: $chipTextColor;
-    border-color: var(--status-secondary-border-color);
-
-    &.selected {
-        font-weight: bold;
-        color: white;
-        border-color: var(--status-primary-border-color);
-        background-color: var(--status-primary-background-color);
-    }
-
-    &.clickable {
-        cursor: pointer;
-    }
-
-    p {
-        font-size: 11px;
-        padding: 0 5px;
-    }
-}
-
-.notification {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 19px;
-    padding: 10px;
-    color: $primaryTextColor;
-    background-color: $notificationBackground;
-    border-radius: 5px;
-    font-family: Open sans;
-    
-    p {
-        margin: 0;
     }
 }
