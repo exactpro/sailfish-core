@@ -15,22 +15,74 @@
 ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.jsonreport;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
-import com.exactpro.sf.scriptrunner.*;
+import com.exactpro.sf.scriptrunner.IReportStats;
+import com.exactpro.sf.scriptrunner.IScriptProgress;
+import com.exactpro.sf.scriptrunner.IScriptReport;
+import com.exactpro.sf.scriptrunner.LoggerRow;
+import com.exactpro.sf.scriptrunner.MessageLevel;
+import com.exactpro.sf.scriptrunner.OutcomeCollector;
+import com.exactpro.sf.scriptrunner.ReportEntity;
+import com.exactpro.sf.scriptrunner.ReportUtils;
+import com.exactpro.sf.scriptrunner.ScriptContext;
+import com.exactpro.sf.scriptrunner.ScriptRunException;
+import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.impl.ReportStats;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.*;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Alert;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Bug;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportException;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Status;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
@@ -39,19 +91,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection, unused, FieldCanBeLocal")
 public class JsonReport implements IScriptReport {
@@ -244,28 +283,25 @@ public class JsonReport implements IScriptReport {
         this.reportStats.updateTestCaseStatus(status.getStatus());
     }
 
-    public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters,
-            CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters,
+            CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder, String outcome) {
 
-        createAction(name, serviceName, action, msg, description, Collections.singletonList(inputParameters), checkPoint, tag, hash,
-                verificationsOrder);
-    }
-
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters,
-            CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
-
-        assertState(ContextType.TESTCASE, ContextType.ACTION);
+        assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
 
         Action curAction = new Action();
         getCurrentContextNode().addSubNodes(curAction);
 
         curAction.setId(actionIdCounter++);
+        curAction.setMatrixId(id);
+        curAction.setServiceName(serviceName);
         curAction.setStartTime(Instant.now());
         curAction.setName(name);
+        curAction.setMessageType(messageType);
         curAction.setDescription(description);
         curAction.setCheckPointId(checkPoint != null ? checkPoint.getId() : null);
-        if (inputParameters != null) {
-            curAction.setParameters(inputParameters.stream().map(p -> new Parameter(new ReportEntity("Parameter", p))).collect(Collectors.toList()));
+        curAction.setOutcome(outcome);
+        if(parameters != null) {
+            curAction.setParameters(Collections.singletonList(new Parameter(new ReportEntity("Parameter", parameters))));
         }
         setContext(ContextType.ACTION, curAction);
         isActionCreated = true;

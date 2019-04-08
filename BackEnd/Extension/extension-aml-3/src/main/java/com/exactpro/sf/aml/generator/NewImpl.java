@@ -17,11 +17,12 @@ package com.exactpro.sf.aml.generator;
 
 import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 import static java.lang.String.format;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -42,7 +43,7 @@ import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
-import com.exactpro.sf.aml.script.DefaultSettings;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
@@ -215,7 +216,7 @@ public class NewImpl {
 			Variable inputVariable) {
 		StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
-        Variable settings = getVariable(DefaultSettings.class, "settings");
+        Variable settings = getVariable(ActionContext.class, "actionContext");
         String s = codeGenerator.createFillSettings(tc, action, action.getMessageTypeColumn(), settings, alertCollector);
         sb.append(s);
 
@@ -232,13 +233,11 @@ public class NewImpl {
 		if (action.isAddToReport())
 		{
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
-			if (action.getOutcome() != null) {
-			    description = "\""+action.getOutcome()+" \"+"+description;
-			}
+
 			if (inputVariable != null)
 			{
 				sb.append(TAB2+REPORT_NAME+".createAction(\""
-						+id+serviceName+action.getActionURI()+messageType+"\", "
+                        + id + "\", "
 
 						+ "\""+ serviceName.trim() + "\", "
 						+ "\""+ action.getActionURI() + "\", "
@@ -249,7 +248,7 @@ public class NewImpl {
 			else
 			{
 				sb.append(TAB2+REPORT_NAME+".createAction(\""
-						+id+serviceName+action.getActionURI()+messageType+"\", "
+                        + id + "\", "
 
 						+ "\""+ serviceName.trim() + "\", "
 						+ "\""+ action.getActionURI() + "\", "
@@ -263,7 +262,7 @@ public class NewImpl {
             sb.append(".getCheckPoint(), ");
 
             if(action.hasTag()) {
-                sb.append(StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"'));
+                sb.append(enclose(toJavaString(action.getTag()), '"'));
             } else {
                 sb.append("null");
             }
@@ -275,7 +274,13 @@ public class NewImpl {
             String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
             sb.append("Arrays.asList(");
             sb.append(verificationsOrder);
-            sb.append(")");
+            sb.append("), ");
+
+            if(action.hasOutcome()) {
+                sb.append(enclose(toJavaString(action.getOutcome())));
+            } else {
+                sb.append("null");
+            }
 
             sb.append(");");
             sb.append(EOL);
@@ -312,7 +317,7 @@ public class NewImpl {
 
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB2);
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -398,7 +403,7 @@ public class NewImpl {
             sb.append(")");
             sb.append(CodeGenerator_new.MAP_NAME);
             sb.append(".get(");
-            sb.append(StringUtil.enclose(template, '"'));
+            sb.append(enclose(template, '"'));
             sb.append(")).cloneMessage();");
             sb.append(EOL);
         } else {
@@ -615,7 +620,7 @@ public class NewImpl {
                     return;
                 }
 
-                elements[i] = StringUtil.enclose(service.getServiceName().getServiceName());
+                elements[i] = enclose(service.getServiceName().getServiceName());
             }
 
             valueString = "Arrays.asList(" + StringUtils.join(elements, ", ") + ")";
@@ -631,13 +636,13 @@ public class NewImpl {
                 return;
             }
 
-            valueString = StringUtil.enclose(service.getServiceName().getServiceName());
+            valueString = enclose(service.getServiceName().getServiceName());
         }
 
         sb.append(TAB2);
         sb.append(inputVariable.getName());
         sb.append(".addField(");
-        sb.append(StringUtil.enclose(fieldName));
+        sb.append(enclose(fieldName));
         sb.append(", ");
         sb.append(valueString);
         sb.append(");//service name field");
@@ -708,7 +713,8 @@ public class NewImpl {
 		case JAVA_LANG_FLOAT:		return "(float)("+object+")";
 		case JAVA_LANG_DOUBLE:	return "(double)("+object+")";
 		case JAVA_MATH_BIG_DECIMAL:	return "new java.math.BigDecimal(\""+object+"\")";
-		case JAVA_LANG_STRING:	return "\""+StringUtil.toJavaString(object.toString())+"\"";
+        case JAVA_LANG_STRING:
+            return "\"" + toJavaString(object.toString()) + "\"";
 		default: return null;
 		}
 	}
@@ -757,7 +763,8 @@ public class NewImpl {
 		        return "" + object+"";
 		    }
 		}
-		case JAVA_LANG_STRING:	return "\""+StringUtil.toJavaString(object.toString())+"\"";
+        case JAVA_LANG_STRING:
+            return "\"" + toJavaString(object.toString()) + "\"";
 		default: return null;
 		}
 	}
@@ -911,7 +918,7 @@ public class NewImpl {
 			Variable inputVariable) {
 		StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
-        Variable settings = getVariable(DefaultSettings.class, "settings");
+        Variable settings = getVariable(ActionContext.class, "actionContext");
         String s = codeGenerator.createFillSettings(tc, action, action.getMessageTypeColumn(), settings, alertCollector);
         sb.append(s);
 
@@ -927,11 +934,9 @@ public class NewImpl {
 		if (action.isAddToReport())
 		{
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
-			if (action.getOutcome() != null) {
-				description = "\""+action.getOutcome()+" \"+"+description;
-			}
-			sb.append(TAB2+REPORT_NAME+".createAction(\""
-					+id+serviceName+action.getActionURI()+messageType+"\", "
+
+            sb.append(TAB2 + REPORT_NAME + ".createAction(\""
+                    + id + "\", "
 
 					+ "\""+ serviceName.trim() + "\", "
 					+ "\""+ action.getActionURI() + "\", "
@@ -944,7 +949,7 @@ public class NewImpl {
             sb.append(".getCheckPoint(), ");
 
             if(action.hasTag()) {
-                sb.append(StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"'));
+                sb.append(enclose(toJavaString(action.getTag()), '"'));
             } else {
                 sb.append("null");
             }
@@ -956,7 +961,13 @@ public class NewImpl {
             String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
             sb.append("Arrays.asList(");
             sb.append(verificationsOrder);
-            sb.append(")");
+            sb.append("), ");
+
+            if(action.hasOutcome()) {
+                sb.append(enclose(toJavaString(action.getOutcome())));
+            } else {
+                sb.append("null");
+            }
 
             sb.append(");");
             sb.append(EOL);
@@ -980,7 +991,7 @@ public class NewImpl {
 
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB2);
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -1018,7 +1029,7 @@ public class NewImpl {
         sb.append(TAB3 + "}" + EOL);
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB4);
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -1037,7 +1048,7 @@ public class NewImpl {
 		sb.append(TAB3+LOGGER_NAME+".warn(e);"+EOL);
 		sb.append(TAB3+CONTEXT_NAME+".setInterrupt(e instanceof InterruptedException);"+EOL);
 
-		if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB3);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -1052,7 +1063,7 @@ public class NewImpl {
 
         addFailedActionToReport(tc, action, sb, id, serviceName, messageType, description);
 
-		if(continueOnFailed || action.getOutcome() != null) {
+        if(continueOnFailed || action.hasOutcome()) {
             sb.append(TAB3+"if (e instanceof InterruptedException) {"+EOL);
 			sb.append(TAB4+"throw e;"+EOL);
             sb.append(TAB3+"}"+EOL);
@@ -1075,7 +1086,7 @@ public class NewImpl {
         sb.append(".createTestCase(");
 
         if(tc.hasReference()) {
-            sb.append(StringUtil.enclose(tc.getReference()));
+            sb.append(enclose(tc.getReference()));
         } else {
             sb.append("null");
         }
@@ -1085,7 +1096,7 @@ public class NewImpl {
         String description = tc.getDescription();
 
         if(StringUtils.isNotBlank(description)) {
-            sb.append(StringUtil.enclose(StringUtil.toJavaString(description)));
+            sb.append(enclose(toJavaString(description)));
             sb.append(", ");
         } else {
             sb.append("null, ");
@@ -1100,7 +1111,7 @@ public class NewImpl {
         String id = tc.getId();
 
         if(StringUtils.isNotBlank(id)) {
-            sb.append(StringUtil.enclose(StringUtil.toJavaString(id)));
+            sb.append(enclose(toJavaString(id)));
             sb.append(", ");
         } else {
             sb.append("null, ");
@@ -1128,16 +1139,17 @@ public class NewImpl {
         String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
 
         sb.append(TAB3 + "if (!" + REPORT_NAME + ".isActionCreated()) {" + EOL);
-        sb.append(TAB4 + REPORT_NAME + ".createAction(\"" + id + serviceName + action.getActionURI() + messageType + "\", "
+        sb.append(TAB4 + REPORT_NAME + ".createAction(\"" + id + "\", "
 
                 + "\"" + serviceName.trim() + "\", "
                 + "\"" + action.getActionURI() + "\", "
                 + "\"" + messageType.trim() + "\", "
 
                 + description + " , null, null, "
-                + (action.hasTag() ? StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"') : "null") + ", "
+                + (action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null") + ", "
                 + action.getHash() + ", "
-                + "Arrays.asList( " + verificationsOrder + ")"
+                + "Arrays.asList( " + verificationsOrder + "), "
+                + (action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null")
                 +");" + EOL);
         sb.append(TAB3 + "}" + EOL);
     }
@@ -1171,7 +1183,7 @@ public class NewImpl {
 
         sb.append(TAB3 + REPORT_NAME + ".closeAction(new StatusDescription(StatusType.FAILED, e.getMessage(), e");
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(", false");
         }
 
@@ -1549,7 +1561,7 @@ public class NewImpl {
 
             return sb.toString();
         } else {
-            return "\"" + StringUtil.toJavaString(input) + "\"";
+            return "\"" + toJavaString(input) + "\"";
         }
 	}
 
@@ -1559,15 +1571,15 @@ public class NewImpl {
         sb.append("eval(");
         sb.append(line);
         sb.append(", ");
-        sb.append(StringUtil.enclose(column));
+        sb.append(enclose(column));
         sb.append(", ");
-        sb.append(StringUtil.enclose(StringUtil.toJavaString(value.getValue())));
+        sb.append(enclose(toJavaString(value.getValue())));
 
         for(RefParameter p : value.getParameters()) {
             sb.append(EOL);
             sb.append(indent);
             sb.append(", ");
-            sb.append(StringUtil.enclose(p.getName()));
+            sb.append(enclose(p.getName()));
             sb.append(", ");
             sb.append(p.getValue());
         }
@@ -1583,7 +1595,7 @@ public class NewImpl {
     }
 
     public static String generateFilter(long line, String column, Value value, String indent, String type) {
-	    String v = StringUtil.toJavaString(value.getValue());
+        String v = toJavaString(value.getValue());
 
         if("regexFilter".equals(type)) {
 	        v = getRegex(value.getValue());
@@ -1594,15 +1606,15 @@ public class NewImpl {
 	    sb.append("(");
 	    sb.append(line);
 	    sb.append(", ");
-	    sb.append(StringUtil.enclose(column));
+        sb.append(enclose(column));
 	    sb.append(", ");
-	    sb.append(StringUtil.enclose(v));
+        sb.append(enclose(v));
 
 	    for(RefParameter p : value.getParameters()) {
 	        sb.append(EOL);
             sb.append(indent);
             sb.append(", ");
-            sb.append(StringUtil.enclose(p.getName()));
+            sb.append(enclose(p.getName()));
             sb.append(", ");
             sb.append(p.getValue());
         }
@@ -1626,20 +1638,20 @@ public class NewImpl {
 		String v = origValue;
 
 		if (origValue.equals(CONV_VALUE_PRESENT)) {
-			return "notNullFilter(" + line + ", " + StringUtil.enclose(column) + ")";
+            return "notNullFilter(" + line + ", " + enclose(column) + ")";
 		} else if (origValue.equals(CONV_VALUE_MISSING)) {
-			return "nullFilter(" + line + ", " + StringUtil.enclose(column) + ")";
+            return "nullFilter(" + line + ", " + enclose(column) + ")";
 		} else if (checkValue(origValue)) {
 			if (JavaType.JAVA_LANG_BOOLEAN.equals(fType.getJavaType())){
 				v = v.replace("TRUE", "true"); // TODO: add parameter TRUE and FALSE
 				v = v.replace("FALSE", "false"); // TODO: add parameter TRUE and FALSE
 			} else if (JavaType.JAVA_LANG_STRING.equals(fType.getJavaType())){
-				v = StringUtil.toJavaString(v);
+                v = toJavaString(v);
 			}
-			return "filter(" + line + ", " + StringUtil.enclose(column) + ", " + StringUtil.enclose(v) +")";
+            return "filter(" + line + ", " + enclose(column) + ", " + enclose(v) + ")";
 		} else if (isRegex(origValue)) {
             String regexp = getRegex(origValue);
-            return "regexFilter(" + line + ", " + StringUtil.enclose(column) + ", " + StringUtil.enclose(regexp) + ")";
+            return "regexFilter(" + line + ", " + enclose(column) + ", " + enclose(regexp) + ")";
         }
 
 //		v = "x == "+v;
@@ -1652,9 +1664,9 @@ public class NewImpl {
 //		return "filter(\""+v+"\")";
 
 		v = castReceiveValue(v, fType.getJavaType(), alertCollector, line, uid, column);
-		v = StringUtil.toJavaString(v);
+        v = toJavaString(v);
 
-		return "simpleFilter(" + line + ", " + StringUtil.enclose(column) + ", " + StringUtil.enclose(v) + ")";
+        return "simpleFilter(" + line + ", " + enclose(column) + ", " + enclose(v) + ")";
 	}
 
 	/*
@@ -1731,7 +1743,7 @@ public class NewImpl {
 	}
 
     private static String getRegex(String regex) {
-		return StringUtil.toJavaString(regex.substring(regex.indexOf("[")+1, regex.lastIndexOf(REGEX_VALUE_SUFFIX)));
+        return toJavaString(regex.substring(regex.indexOf("[") + 1, regex.lastIndexOf(REGEX_VALUE_SUFFIX)));
 	}
 
     /**

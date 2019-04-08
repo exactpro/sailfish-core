@@ -15,10 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
@@ -27,11 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import com.exactpro.sf.aml.Tags;
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.AML;
@@ -47,12 +49,14 @@ import com.exactpro.sf.aml.ExecutionSequence;
 import com.exactpro.sf.aml.Hash;
 import com.exactpro.sf.aml.Id;
 import com.exactpro.sf.aml.Reference;
+import com.exactpro.sf.aml.Tags;
 import com.exactpro.sf.aml.Type;
 import com.exactpro.sf.aml.script.AMLHashMap;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.common.util.TextOutputStream;
 import com.exactpro.sf.comparison.conversion.MultiConverter;
@@ -152,6 +156,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(AMLBlockType.class.getCanonicalName());
         imports.add(Type.class.getCanonicalName());
         imports.add(Reference.class.getCanonicalName());
+        imports.add(MessageUtil.class.getCanonicalName());
 
         for (String imp : imports) {
             stream.writeLine("import %s;", imp);
@@ -223,25 +228,21 @@ public abstract class AbstractCodeBuilder {
     public void writeOutcome(TextOutputStream stream, AMLAction action, String contextName, String reportName) throws IOException {
         stream.writeLine(2, "if(%s.isTestCaseCreated() && %s.getOutcomeStatus(\"%s\", \"%s\")==Status.FAILED) {", reportName, contextName, action.getOutcomeGroup(), action.getOutcomeName());
 
-        String id = (action.getId() == null) ? "" : action.getId() + " ";
+        String id = StringUtils.trimToEmpty(action.getId());
         String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
         String messageType = (action.getMessageTypeColumn() == null) ? "" : " " + action.getMessageTypeColumn();
-        String description = StringUtil.toJavaString(action.getDescrption());
-        String name = id + serviceName + action.getActionURI() + messageType;
-        String tag = StringUtil.toJavaString(action.getTag());
+        String description = toJavaString(action.getDescrption());
+        String tag = toJavaString(action.getTag());
         String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
-
-        if (action.getOutcome() != null) {
-            description = action.getOutcome() + " " + description;
-        }
+        String outcome = toJavaString(action.getOutcome());
 
         if(tag != null) {
-            tag = StringUtil.enclose(tag, '"');
+            tag = enclose(tag, '"');
         }
 
-        stream.writeLine(3, "%s.createAction(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"\", null, %s, %d, Arrays.asList(%s));",
-                         reportName, name, serviceName, action.getActionURI(), messageType, description, tag,
-                         action.getHash(), verificationsOrder);
+        stream.writeLine(3, "%s.createAction(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", null, null, %s, %d, Arrays.asList(%s), \"%s\");",
+                reportName, id, serviceName, action.getActionURI(), messageType, description, tag,
+                action.getHash(), verificationsOrder, outcome);
         stream.writeLine(3, "%s.closeAction(new StatusDescription(StatusType.NA, \"Action skipped\"), null);", reportName);
         stream.writeLine();
         stream.writeLine(3, "return;");
@@ -284,7 +285,7 @@ public abstract class AbstractCodeBuilder {
     public void writeInterruptedCheck(TextOutputStream stream, String contextName) throws IOException {
         stream.writeLine(2, "if(%s.isInterrupt()) {", contextName);
         stream.writeLine(3, "if(getReport().isTestCaseCreated()) {");
-        stream.writeLine(4, "getReport().createAction(\"Test interrupted\", null, null, null, \"Test interrupted\", null, null, null, 0, Collections.emptyList());");
+        stream.writeLine(4, "getReport().createAction(\"Test interrupted\", null, null, null, \"Test interrupted\", null, null, null, 0, Collections.emptyList(), null);");
         stream.writeLine(3, "}");
         stream.writeLine();
         stream.writeLine(3, "throw new InterruptedException(\"Test interrupted\");");
@@ -299,20 +300,18 @@ public abstract class AbstractCodeBuilder {
         String id = (action.getId() == null) ? "" : action.getId() + " ";
         String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
         String messageType = (action.getMessageTypeColumn() == null) ? "" : " " + action.getMessageTypeColumn();
-        String description = StringUtil.toJavaString(action.getDescrption());
+        String description = toJavaString(action.getDescrption());
         String name = id + serviceName + action.getActionURI() + messageType;
-        String tag = StringUtil.toJavaString(action.getTag());
+        String tag = toJavaString(action.getTag());
         String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
-
-        if (action.getOutcome() != null) {
-            description = action.getOutcome() + " " + description;
-        }
+        String outcome = action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null";
 
         if(tag != null) {
-            tag = StringUtil.enclose(tag, '"');
+            tag = enclose(tag, '"');
         }
 
-        stream.writeLine(3, "%s.createAction(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"\", null, %s, Arrays.asList(%s));", reportName, name, serviceName, action.getActionURI(), messageType, description, tag, verificationsOrder);
+        stream.writeLine(3, "%s.createAction(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\", \"\", null, %s, Arrays.asList(%s), %s);", reportName, name, serviceName, action.getActionURI(), messageType, description, tag, verificationsOrder,
+                outcome);
         stream.writeLine(3, "%s.closeAction(new StatusDescription(StatusType.FAILED, \"Skipped due to failed dependencies\"), null);", reportName);
         stream.writeLine();
         stream.writeLine(3, "return;");

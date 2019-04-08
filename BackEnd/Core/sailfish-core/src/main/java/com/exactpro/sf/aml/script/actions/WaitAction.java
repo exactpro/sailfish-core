@@ -15,35 +15,46 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.script.actions;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.Pair;
-import com.exactpro.sf.actions.ActionUtil;
-import com.exactpro.sf.aml.script.CheckPoint;
-import com.exactpro.sf.aml.scriptutil.LegReorder;
-import com.exactpro.sf.aml.scriptutil.MessageCount;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.comparison.*;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.scriptrunner.MessageLevel;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
-import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
-import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IGroupReport;
-import com.exactpro.sf.services.*;
-import com.exactpro.sf.util.KnownBugException;
-import com.exactpro.sf.util.KnownBugPostValidation;
-import com.exactpro.sf.util.MessageKnownBugException;
-import com.exactpro.sf.aml.scriptutil.ExpressionResult;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.exactpro.sf.actions.ActionUtil;
+import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.aml.scriptutil.ExpressionResult;
+import com.exactpro.sf.aml.scriptutil.LegReorder;
+import com.exactpro.sf.aml.scriptutil.MessageCount;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.Pair;
+import com.exactpro.sf.comparison.ComparatorSettings;
+import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.ComparisonUtil;
+import com.exactpro.sf.comparison.Formatter;
+import com.exactpro.sf.comparison.IPostValidation;
+import com.exactpro.sf.comparison.MessageComparator;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.scriptrunner.MessageLevel;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
+import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
+import com.exactpro.sf.services.CSHIterator;
+import com.exactpro.sf.services.ICSHIterator;
+import com.exactpro.sf.services.IInitiatorService;
+import com.exactpro.sf.services.IService;
+import com.exactpro.sf.services.IServiceHandler;
+import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.ServiceHandlerRoute;
+import com.exactpro.sf.util.KnownBugException;
+import com.exactpro.sf.util.KnownBugPostValidation;
+import com.exactpro.sf.util.MessageKnownBugException;
 
 public class WaitAction {
 
@@ -127,7 +138,7 @@ public class WaitAction {
             IServiceHandler handler,
             ISession isession,
             CheckPoint checkPoint,
-            IGroupReport report,
+            IActionReport report,
             long waitTime,
             boolean returnExactOnly,
             boolean addToReport,
@@ -286,11 +297,11 @@ public class WaitAction {
 		IActionReport report = actionContext.getReport();
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " of " + expected,
+        try(IActionReport embeddedReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " of " + expected,
                 description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+            embeddedReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : reportMessages) {
-                groupReport.createMessage(status, MessageLevel.INFO, message.toString());
+                embeddedReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
         } catch (Exception e) {
             throw new EPSCommonException("Failed to close ActionGroupReport", e);
@@ -425,7 +436,7 @@ public class WaitAction {
         return messageCount;
     }
 
-    public static boolean addResultToReport(IGroupReport report,
+    public static boolean addResultToReport(IActionReport report,
             Object expectedMessageCount,
             String description,
             List<Pair<IMessage, ComparisonResult>> allResults, int messageCount, boolean exceptionOnFail)
@@ -550,10 +561,10 @@ public class WaitAction {
         StatusType status = ComparisonUtil.getStatusType(result);
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected, description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+        try(IActionReport embeddedReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected, description)) {
+            embeddedReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : messages) {
-                groupReport.createMessage(status, MessageLevel.INFO, message.toString());
+                embeddedReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
         } catch (Exception e) {
             throw new EPSCommonException("Failed to close ActionGroupReport", e);
@@ -602,10 +613,10 @@ public class WaitAction {
         IActionReport report = actionContext.getReport();
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + actualCount + " from " + expected, description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+        try(IActionReport embeddedReport = report.createEmbeddedReport("Received messages: " + actualCount + " from " + expected, description)) {
+            embeddedReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : messages) {
-                groupReport.createMessage(status, MessageLevel.INFO, message.toString());
+                embeddedReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
         } catch (Exception e) {
             throw new EPSCommonException("Failed to close ActionGroupReport", e);
@@ -633,7 +644,7 @@ public class WaitAction {
         return compSettings;
     }
 
-    public static IMessage processResults(IGroupReport report, ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> results, IMessage messageFilter,
+    public static IMessage processResults(IActionReport report, ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> results, IMessage messageFilter,
             String serviceName, boolean returnExactOnly, boolean addToReport, String description) {
         if (results.size() == 1)
     	{
@@ -685,7 +696,7 @@ public class WaitAction {
         throw new EPSCommonException("Timeout");
     }
 
-    public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IGroupReport report,
+    public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IActionReport report,
                                      String serviceName, String description, boolean addToReport) {
         int iMessage = 0;
         int countFailed = 0;

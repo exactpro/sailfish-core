@@ -29,4 +29,20 @@ public interface IActionCaller {
     public <T> T call(String actionName, IActionContext actionContext, BaseMessage baseMessage) throws ActionCallException, ActionNotFoundException, InterruptedException;
     public <T> T call(String actionName, IActionContext actionContext, Object message) throws ActionCallException, ActionNotFoundException, InterruptedException;
     public <T> T call(String actionName, IActionContext actionContext, HashMap<?,?> hashMap) throws ActionCallException, ActionNotFoundException, InterruptedException;
+
+    interface ConsumerAction<T extends IActionCaller> {
+        void accept(T actionClass, IActionContext actionContext) throws Exception;
+    }
+
+    interface FunctionAction<T extends IActionCaller, R> {
+        R apply(T actionClass, IActionContext actionContext) throws Exception;
+    }
+
+    interface ConsumerActionWithParameters<T extends IActionCaller, P> {
+        void accept(T actionClass, IActionContext actionContext, P parameters) throws Exception;
+    }
+
+    interface FunctionActionWithParameters<T extends IActionCaller, P, R> {
+        R apply(T actionClass, IActionContext actionContext, P parameters) throws Exception;
+    }
 }

@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -33,6 +32,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.exactpro.sf.aml.generator.AMLGenerateStatus;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.Value;
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
@@ -504,7 +504,12 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		this.outcome = cell;
 	}
 
-	public String getOutcomeGroup() {
+    @Override
+    public boolean hasOutcome() {
+        return StringUtils.isNotEmpty(outcome);
+    }
+
+    public String getOutcomeGroup() {
 		return outcomeGroup;
 	}
 

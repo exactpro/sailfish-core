@@ -47,7 +47,6 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionMethod;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
-import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IGroupReport;
 import com.exactpro.sf.services.IAcceptorService;
 import com.exactpro.sf.services.IInitiatorService;
 import com.exactpro.sf.services.IService;
@@ -655,9 +654,9 @@ public class FixConnectivityActions extends AbstractCaller
 
 						if ( htmlMsg.indexOf( groupDelimiter ) != 0 )
 						{
-                            try (IGroupReport groupReport = report.createActionGroup("Wait for message", tmpMsg)) {
-                                groupReport.createMessage(StatusType.FAILED, MessageLevel.INFO, "Have not needed group. in:<br> " + tmpMsg);
-                                groupReport.createVerification(StatusType.FAILED, "Wait for message", tmpMsg, "");
+                            try(IActionReport embeddedReport = report.createEmbeddedReport("Wait for message", tmpMsg)) {
+                                embeddedReport.createMessage(StatusType.FAILED, MessageLevel.INFO, "Have not needed group. in:<br> " + tmpMsg);
+                                embeddedReport.createVerification(StatusType.FAILED, "Wait for message", tmpMsg, "");
                             }
 							continue;
 						}
@@ -698,22 +697,22 @@ public class FixConnectivityActions extends AbstractCaller
 							}
 							if ( passedCountForGroup == groupTags.size() )
 							{
-                                try (IGroupReport groupReport = report
-                                        .createActionGroup("GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i)) {
+                                try(IActionReport embeddedReport = report
+                                        .createEmbeddedReport("GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i)) {
                                     printString = "<table><tr><td></td><td>group:</td><td>" + msgGroups.get(i).toString() + "</td><tr></table>";
-                                    groupReport.createMessage(StatusType.PASSED, MessageLevel.INFO, printString);
-                                    groupReport.createVerification(StatusType.PASSED,
+                                    embeddedReport.createMessage(StatusType.PASSED, MessageLevel.INFO, printString);
+                                    embeddedReport.createVerification(StatusType.PASSED,
                                             "GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i, "", null, null);
                                 }
 								checkedRight = true;
 							} else
 							{
-                                try (IGroupReport groupReport = report
-                                        .createActionGroup("GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i)) {
+                                try(IActionReport embeddedReport = report
+                                        .createEmbeddedReport("GROUP: " + passedCountForGroup + " passed from " + groupTags.size(), "#" + i)) {
                                     printString = "<table><tr><td></td><td>group:</td><td width='80%'>" + msgGroups.get(i).toString()
                                             + "</td><tr></table>";
-                                    groupReport.createMessage(StatusType.FAILED, MessageLevel.INFO, printString);
-                                    groupReport.createVerification(StatusType.FAILED,
+                                    embeddedReport.createMessage(StatusType.FAILED, MessageLevel.INFO, printString);
+                                    embeddedReport.createVerification(StatusType.FAILED,
                                             "GROUP: " + passedCountForGroup + " passed from " + groupTags.size(),
                                             "#" + i, "", null, null);
                                 }
@@ -745,17 +744,17 @@ public class FixConnectivityActions extends AbstractCaller
 						}
 						if ( passedCount == masWaitingTags.size() )
 						{
-                            try (IGroupReport groupReport = report.createActionGroup("Wait for message", "")) {
+                            try(IActionReport embeddedReport = report.createEmbeddedReport("Wait for message", "")) {
                                 printString += "<tr><td></td><td>Found in message:</td><td>" + htmlMsg + "</td><tr></table>";
-                                groupReport.createMessage(StatusType.PASSED, MessageLevel.INFO, printString);
-                                groupReport.createVerification(StatusType.PASSED, "Wait for message", "", "", null, null);
+                                embeddedReport.createMessage(StatusType.PASSED, MessageLevel.INFO, printString);
+                                embeddedReport.createVerification(StatusType.PASSED, "Wait for message", "", "", null, null);
                             }
 
 							return null;
 						}
-                        try (IGroupReport groupReport = report.createActionGroup("Wait for message", "")) {
+                        try(IActionReport embeddedReport = report.createEmbeddedReport("Wait for message", "")) {
                             printString += "<tr><td></td><td>Found in message:</td><td width='80%'>" + htmlMsg + "</td><tr></table>";
-                            groupReport.createMessage(StatusType.FAILED, MessageLevel.INFO, printString);
+                            embeddedReport.createMessage(StatusType.FAILED, MessageLevel.INFO, printString);
                             report.createVerification(StatusType.FAILED, "Wait for message", "", "", null, null);
                         }
 

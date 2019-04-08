@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -35,10 +38,11 @@ import com.exactpro.sf.aml.generator.matrix.JavaStatement;
 import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
-import com.exactpro.sf.aml.script.DefaultSettings;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -160,7 +164,7 @@ public class OldImpl {
 				return sb.toString();
 			}
 
-			Variable settings = getVariable(DefaultSettings.class, "settings");
+            Variable settings = getVariable(ActionContext.class, "actionContext");
 			String s = codeGenerator.createFillSettings(tc, action, null, settings, this.alertCollector);
 			sb.append(s);
 			sb.append(TAB2+LOGGER_NAME+".debug(\"start action: "+action.getActionURI()+", line:"+action.getLine()+"\");"+EOL);
@@ -185,7 +189,7 @@ public class OldImpl {
 
             CodeGenerator_new.addExecutedActionReferences(sb, action, TAB3);
 
-            if(action.getOutcome() != null) {
+            if(action.hasOutcome()) {
                 sb.append(TAB3 + CONTEXT_NAME + ".getOutcomeCollector().storeOutcome(settings.getOutcome());" + EOL);
             }
 
@@ -236,18 +240,6 @@ public class OldImpl {
 
         return sb.toString();
     }
-
-	private String getReturnTypeName(AMLAction action) {
-
-		String msgType = null;
-
-		if(action.getActionInfo() != null && action.getActionInfo().getReturnType() != null) {
-			msgType = action.getActionInfo().getReturnType().getSimpleName();
-		}
-
-		return msgType;
-
-	}
 
 	private Variable getVariable(Class<?> type, String varNameOrig)
 	{
@@ -430,15 +422,15 @@ public class OldImpl {
 		        eval.append("eval(");
 		        eval.append(action.getLine());
 		        eval.append(", ");
-		        eval.append(StringUtil.enclose(column));
+                eval.append(enclose(column));
 		        eval.append(", ");
-	            eval.append(StringUtil.enclose(StringUtils.join(refSplit, '.')));
+                eval.append(enclose(StringUtils.join(refSplit, '.')));
 	            eval.append(", ");
-	            eval.append(StringUtil.enclose("v0"));
+                eval.append(enclose("v0"));
 	            eval.append(", ");
 	            eval.append(STATIC_MAP_NAME);
 	            eval.append(".get(");
-	            eval.append(StringUtil.enclose(ref));
+                eval.append(enclose(ref));
 	            eval.append("))");
 
 	            setter.append(TAB2 + subListVariable.getName() + ".add(" + eval.toString() + ");" + EOL);
@@ -525,15 +517,15 @@ public class OldImpl {
 			eval.append("eval(");
 	        eval.append(action.getLine());
 	        eval.append(", ");
-	        eval.append(StringUtil.enclose(column));
+            eval.append(enclose(column));
 	        eval.append(", ");
-            eval.append(StringUtil.enclose(StringUtils.join(refSplit, '.')));
+            eval.append(enclose(StringUtils.join(refSplit, '.')));
             eval.append(", ");
-            eval.append(StringUtil.enclose("v0"));
+            eval.append(enclose("v0"));
             eval.append(", ");
             eval.append(MAP_NAME);
             eval.append(".get(");
-            eval.append(StringUtil.enclose(reference));
+            eval.append(enclose(reference));
             eval.append("))");
 
 			setter.append(TAB2 + subListVariable.getName() + ".add(" + eval.toString() + ");" + EOL);
@@ -599,22 +591,22 @@ public class OldImpl {
 		        }
 			}
 
-			String description = StringUtil.toJavaString(action.getDescrption());
-			if (action.getOutcome() != null) {
-				description = action.getOutcome()+" "+description;
-			}
-			sb.append(TAB2+REPORT_NAME+".createAction(\""
-					+id+serviceName+action.getActionURI()+"\", "
+            String description = toJavaString(action.getDescrption());
+
+            sb.append(TAB2 + REPORT_NAME + ".createAction(\""
+                    + id + "\", "
 
 					+ "\""+ serviceName + "\", "
 					+ "\""+ action.getActionURI() + "\", "
-					+ "\""+ getReturnTypeName(action) + "\", "
-
-					+ "\""+description+"\", ");
+                    + "\"\", "
+                    + "\""+description+"\", ");
 
 			if(inputVariable != null) {
+                sb.append(MessageUtil.class.getSimpleName());
+                sb.append(".convertToIMessage(");
 			    sb.append(inputVariable.getName());
 			    sb.append(method);
+                sb.append(", null, \"Namespace\", \"Message\")");
 			} else {
 			    sb.append("null");
 			}
@@ -624,7 +616,7 @@ public class OldImpl {
             sb.append(".getCheckPoint(), ");
 
             if(action.hasTag()) {
-                sb.append(StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"'));
+                sb.append(enclose(toJavaString(action.getTag()), '"'));
             } else {
                 sb.append("null");
             }
@@ -636,7 +628,13 @@ public class OldImpl {
             String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
             sb.append("Arrays.asList(");
             sb.append(verificationsOrder);
-            sb.append(")");
+            sb.append("), ");
+
+            if(action.hasOutcome()) {
+                sb.append(enclose(toJavaString(action.getOutcome())));
+            } else {
+                sb.append("null");
+            }
 
             sb.append(");");
             sb.append(EOL);
@@ -661,7 +659,7 @@ public class OldImpl {
 
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB2);
 
-		if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -688,7 +686,7 @@ public class OldImpl {
 		sb.append(TAB3+LOGGER_NAME+".warn(e);"+EOL);
 		sb.append(TAB3+CONTEXT_NAME+".setInterrupt(e instanceof InterruptedException);"+EOL);
 
-		if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB3);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -703,25 +701,21 @@ public class OldImpl {
 
         String id = (action.getId() == null) ? "" : action.getId() + " ";
         String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
-        String description = StringUtil.toJavaString(action.getDescrption());
-
-        if(action.getOutcome() != null) {
-            description = action.getOutcome() + " " + description;
-        }
+        String description = toJavaString(action.getDescrption());
 
         NewImpl.writeCreateTestCase(tc, sb);
         writeCreateAction(action, sb, id, serviceName, description);
 
         sb.append(TAB3 + REPORT_NAME + ".closeAction(new StatusDescription(StatusType.FAILED, e.getMessage(), e");
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(", false");
         }
 
         sb.append("), null);");
         sb.append(EOL);
 
-        if(continueOnFailed || action.getOutcome() != null) {
+        if(continueOnFailed || action.hasOutcome()) {
             sb.append(TAB3+"if (e instanceof InterruptedException) {"+EOL);
             sb.append(TAB4+"throw e;"+EOL);
             sb.append(TAB3+"}"+EOL);
@@ -735,7 +729,7 @@ public class OldImpl {
     private void writeCreateAction(AMLAction action, StringBuilder sb) {
         String id = (action.getId() == null) ? "" : action.getId() + " ";
         String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
-        String description = StringUtil.toJavaString(action.getDescrption());
+        String description = toJavaString(action.getDescrption());
         writeCreateAction(action, sb, id, serviceName, description);
     }
 
@@ -744,16 +738,17 @@ public class OldImpl {
 
         sb.append(TAB3 + "if (!" + REPORT_NAME + ".isActionCreated()) {" + EOL);
         sb.append(TAB4 + REPORT_NAME + ".createAction(\""
-                + id + serviceName + action.getActionURI() + "\", "
+                + id + "\", "
 
                 + "\"" + serviceName + "\", "
                 + "\"" + action.getActionURI() + "\", "
-                + "\"" + getReturnTypeName(action) + "\", "
+                + "\"\", "
 
                 + "\"" + description + "\" , null, null, "
-                + (action.hasTag() ? StringUtil.enclose( StringUtil.toJavaString(action.getTag()), '"') : "null") + ", "
+                + (action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null") + ", "
                 + action.getHash()  + ", "
-                + "Arrays.asList( " + verificationsOrder + ")"
+                + "Arrays.asList( " + verificationsOrder + "), "
+                + (action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null")
                 + ");" + EOL);
         sb.append(TAB3 + "}" + EOL);
     }

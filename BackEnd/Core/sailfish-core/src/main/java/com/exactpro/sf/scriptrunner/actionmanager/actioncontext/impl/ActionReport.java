@@ -17,12 +17,15 @@ package com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.workspace.FolderType;
@@ -106,9 +109,9 @@ public class ActionReport implements IActionReport {
     }
 
     @Override
-    public void createParametersTable(String messageName, Object message) {
+    public void createParametersTable(IMessage message) {
         checkEmbeddedReport();
-        report.createParametersTable(messageName, message);
+        report.createParametersTable(message);
     }
 
     @Override
@@ -170,6 +173,23 @@ public class ActionReport implements IActionReport {
         checkEmbeddedReport();
         elementStats.add(StatusType.FAILED);
         report.createException(cause);
+    }
+
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder, String outcome) {
+        checkEmbeddedReport();
+        report.createAction(id, serviceName, name, messageType, description, parameters, checkPoint, tag, hash, verificationsOrder, outcome);
+    }
+
+    public void closeAction(StatusDescription status, Object actionResult) {
+        checkEmbeddedReport();
+        elementStats.add(status.getStatus());
+        report.closeAction(status, actionResult);
+    }
+
+    public ActionReport getLastChild() {
+        ActionReport child;
+        for (child = this; child.child != null; child = child.child);
+        return child;
     }
 
     private void checkEmbeddedReport() {

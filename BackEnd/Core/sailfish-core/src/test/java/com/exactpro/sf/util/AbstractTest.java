@@ -32,15 +32,15 @@ import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.aml.script.ActionContext;
+import com.exactpro.sf.center.SFContextSettings;
+import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.aml.script.DefaultSettings;
-import com.exactpro.sf.center.SFContextSettings;
-import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
@@ -188,7 +188,7 @@ public class AbstractTest {
 	}
 
     /**
-     * Creates {@link ScriptContext} mock suitable to be used for {@link DefaultSettings} init
+     * Creates {@link ScriptContext} mock suitable to be used for {@link ActionContext} init
      */
     protected ScriptContext getScriptContext() {
         ScriptContext scriptContext = Mockito.mock(ScriptContext.class);

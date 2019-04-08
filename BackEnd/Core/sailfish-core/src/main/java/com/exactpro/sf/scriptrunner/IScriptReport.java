@@ -22,6 +22,7 @@ import java.util.Set;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.scriptrunner.impl.BroadcastScriptReport;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
@@ -63,9 +64,6 @@ public interface IScriptReport
         throw new UnsupportedOperationException("Only " + BroadcastScriptReport.class.getSimpleName() + " should implement this method");
     }
 
-    void createAction(String name, String serviceName, String action, String msg, String description,
-                      Object inputParameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder);
-
 	/**
 	 *
 	 * @return
@@ -73,8 +71,8 @@ public interface IScriptReport
 	 */
 	boolean isActionCreated() throws UnsupportedOperationException;
 
-    void createAction(String name, String serviceName, String action, String msg, String description,
-                      List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder);
+    void createAction(String id, String serviceName, String name, String messageType, String description,
+            IMessage parameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder, String outcome);
 
     void closeAction(StatusDescription status, Object actionResult);
 
@@ -109,7 +107,7 @@ public interface IScriptReport
 
 	void createLogTable(List<String> header, List<LoggerRow> rows);
 
-    default void createParametersTable(String messageName, Object message) {
+    default void createParametersTable(IMessage message) {
     }
 
 	void setOutcomes(OutcomeCollector outcomes);

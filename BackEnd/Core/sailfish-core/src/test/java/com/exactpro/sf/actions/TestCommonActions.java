@@ -22,18 +22,18 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.exactpro.sf.aml.script.DefaultSettings;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.util.AbstractTest;
 import com.exactpro.sf.util.DateTimeUtility;
 
 public class TestCommonActions extends AbstractTest {
-    private DefaultSettings settings;
+    private ActionContext settings;
     private CommonActions commonActions;
 
     @Before
     public void init(){
-        settings = new DefaultSettings(getScriptContext(), true);
+        settings = new ActionContext(getScriptContext(), true);
         commonActions = new CommonActions();
     }
 
