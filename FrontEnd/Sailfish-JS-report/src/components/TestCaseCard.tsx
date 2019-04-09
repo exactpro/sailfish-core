@@ -46,37 +46,37 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
                 
                 handleClick(metadata)
             }}>
-            <div class="index">{index}</div>
-            <div class="title">
-                <div class="name">{metadata.name}</div>
+            <div class="tc-card__index">{index}</div>
+            <div class="tc-card__title">
+                <div class="tc-card__name">{metadata.name}</div>
                 {
                     metadata.description ?
-                        <div class="description"> — {metadata.description}</div> :
+                        <div class="tc-card__description"> — {metadata.description}</div> :
                         null
                 }
             </div>
-            <div class="status">
+            <div class="tc-card__status">
                 {metadata.status.status.toUpperCase()}
             </div>
-            <div class="info">  
-                <div class="item">
-                    <div class="title">Start</div>
-                    <div class="value">{formatTime(metadata.startTime)}</div>
+            <div class="tc-card__info">  
+                <div class="tc-card__info-element">
+                    <div class="tc-card__info-title">Start</div>
+                    <div class="tc-card__info-value">{formatTime(metadata.startTime)}</div>
                 </div>  
-                <div class="item">
-                    <div class="title">Finish</div>
-                    <div class="value">{formatTime(metadata.finishTime)}</div>
+                <div class="tc-card__info-element">
+                    <div class="tc-card__info-title">Finish</div>
+                    <div class="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
                 </div>  
-                <div class="item">
-                    <div class="title">ID</div>
-                    <div class="value">{metadata.id}</div>
+                <div class="tc-card__info-element">
+                    <div class="tc-card__info-title">ID</div>
+                    <div class="tc-card__info-value">{metadata.id}</div>
                 </div>  
-                <div class="item">
-                    <div class="title">Hash</div>
-                    <div class="value">{metadata.hash}</div>
+                <div class="tc-card__info-element">
+                    <div class="tc-card__info-title">Hash</div>
+                    <div class="tc-card__info-value">{metadata.hash}</div>
                 </div>
             </div>
-            <div class="elapsed-time">{elapsedTime}</div>
+            <div class="tc-card__elapsed-time">{elapsedTime}</div>
         </div>
     )
 }
