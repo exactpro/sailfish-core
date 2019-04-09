@@ -362,7 +362,7 @@
                     </p:autoComplete>
                 </p:column>
 
-                <p:column headerText="Final value" rendered="#{environmentBean.currentVariableSet != null}">
+                <p:column headerText="Final value" style="max-width: 350px; text-overflow: ellipsis" rendered="#{environmentBean.currentVariableSet != null}">
                     <h:outputText value="#{paramNode.finalValue}" rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}"/>
                 </p:column>
 
