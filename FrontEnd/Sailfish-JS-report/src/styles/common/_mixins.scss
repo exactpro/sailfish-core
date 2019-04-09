@@ -43,6 +43,8 @@
     --status-secondary-border-color: #{$defaultCardBackground};
     --status-primary-background-color: #{$defaultCardBorderColor};
     --status-secondary-background-color: #{$defaultSelectedCardBackground};
+    --status-primary-header-background-color: #{$defaultCardBorderColor};
+    --status-secondary-header-background-color: #{$defaultSelectedCardBackground};
 
     &.passed {
         // we can't symply assign scss variable to css variable because sass doesn't know css varible type,
@@ -54,6 +56,8 @@
         --status-secondary-border-color: #{$passedBorderColorSecondary};
         --status-primary-background-color: #{$passedBorderColor};
         --status-secondary-background-color: #{$passedBackgroundColor};
+        --status-primary-header-background-color: #{$passedHeaderColor};
+        --status-secondary-header-background-color: #{$passedHeaderSecondaryBackground};
     }
 
     &.failed {
@@ -63,6 +67,8 @@
         --status-secondary-border-color: #{$failedBorderColorSecondary};
         --status-primary-background-color: #{$failedBorderColor};
         --status-secondary-background-color: #{$failedBackgroundColor};
+        --status-primary-header-background-color: #{$failedHeaderColor};
+        --status-secondary-header-background-color: #{$failedHeaderSecondaryBackground};
     }
     
     &.conditionally_passed {
@@ -72,6 +78,8 @@
         --status-secondary-border-color: #{$conditionallyPassedBorderColorSecondary};
         --status-primary-background-color: #{$conditionallyPassedBorderColor};
         --status-secondary-background-color: #{$conditionallyPassedBackgroundColor};
+        --status-primary-header-background-color: #{$conditionallyPassedHeaderColor};
+        --status-secondary-header-background-color: #{$conditionallyPassedHeaderSecondaryBackground};
     }
 
     &.conditionally_failed {
@@ -81,6 +89,8 @@
         --status-secondary-border-color: #{$conditionallyFailedBorderColorSecondary};
         --status-primary-background-color: #{$conditionallyFailedBorderColor};
         --status-secondary-background-color: #{$conditionallyFailedBackgroundColor};
+        --status-primary-header-background-color: #{$conditionallyFailedHeaderColor};
+        --status-secondary-header-background-color: #{$conditionallyFailedHeaderSecondaryBackground};
     }
 }
 
