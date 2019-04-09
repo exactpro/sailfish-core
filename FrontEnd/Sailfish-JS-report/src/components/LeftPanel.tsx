@@ -58,14 +58,14 @@ class LeftPanelBase extends Component<LeftPanelProps> {
         const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
             cpEnabled = checkpointActions.length != 0,
             cpRootClass = createSelector(
-                "layout-body-panel-controls-left-checkpoints",
+                "layout-control",
                 cpEnabled ? null : "disabled"
             );
 
         return (
-            <div class="layout-body-panel">
-                <div class="layout-body-panel-controls">
-                    <div class="layout-body-panel-controls-panels">
+            <div class="layout-panel">
+                <div class="layout-panel__controls">
+                    <div class="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.Actions}
                             onClick={() => this.selectPanel(Panel.Actions)}
@@ -77,35 +77,31 @@ class LeftPanelBase extends Component<LeftPanelProps> {
                             text="Status" 
                             title={statusEnabled ? null : "No status info"}/>
                     </div>
-                    <div class="layout-body-panel-controls-left">
-                        <div class="layout-body-panel-controls-left-checkpoints">
-                            <div class={cpRootClass}>
-                                <div class="layout-body-panel-controls-left-checkpoints-icon"
-                                    onClick={() => this.currentCpHandler(cpIndex)}
-                                    style={{ cursor: cpEnabled ? 'pointer' : 'unset' }}
-                                    title={ cpEnabled ? "Scroll to current checkpoint" : null }/>
-                                <div class="layout-body-panel-controls-left-checkpoints-title">
-                                    <p>{cpEnabled ? "" : "No "}Checkpoints</p>
-                                </div>
-                                {
-                                    cpEnabled ? 
-                                    (
-                                        [
-                                            <div class="layout-body-panel-controls-left-checkpoints-btn prev"
-                                                onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>,
-                                            <div class="layout-body-panel-controls-left-checkpoints-count">
-                                                <p>{cpIndex + 1} of {checkpointActions.length}</p>
-                                            </div>,
-                                            <div class="layout-body-panel-controls-left-checkpoints-btn next"
-                                                onClick={cpEnabled && (() => this.nextCpHandler(cpIndex))}/>
-                                        ]
-                                    ) : null
-                                }
-                            </div>
+                    <div class={cpRootClass}>
+                        <div class="layout-control__icon cp"
+                            onClick={() => this.currentCpHandler(cpIndex)}
+                            style={{ cursor: cpEnabled ? 'pointer' : 'unset' }}
+                            title={ cpEnabled ? "Scroll to current checkpoint" : null }/>
+                        <div class="layout-control__title">
+                            <p>{cpEnabled ? "" : "No "}Checkpoints</p>
                         </div>
+                        {
+                            cpEnabled ? 
+                            (
+                                [
+                                    <div class="layout-control__icon prev"
+                                        onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>,
+                                    <div class="layout-control__counter">
+                                        <p>{cpIndex + 1} of {checkpointActions.length}</p>
+                                    </div>,
+                                    <div class="layout-control__icon next"
+                                        onClick={cpEnabled && (() => this.nextCpHandler(cpIndex))}/>
+                                ]
+                            ) : null
+                        }
                     </div>
                 </div>
-                <div class="layout-body-panel-content">
+                <div class="layout-panel__content">
                     {this.renderPanels(panel)}
                 </div>
             </div>
@@ -114,12 +110,12 @@ class LeftPanelBase extends Component<LeftPanelProps> {
 
     private renderPanels(selectedPanel: Panel): JSX.Element[] {
         const actionRootClass = createSelector(
-                "layout-body-panel-content-wrapper",
+                "layout-panel__content-wrapper",
                 selectedPanel == Panel.Actions ? null : "disabled"
             ),
             statusRootClass = createSelector(
-                "layout-body-panel-content-wrapper",
-                selectedPanel == Panel.Status ? "" : "disabled"
+                "layout-panel__content-wrapper",
+                selectedPanel == Panel.Status ? null : "disabled"
             );
     
         return [
