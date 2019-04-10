@@ -8,15 +8,6 @@ ext {
     xsdDir			= "${mainResDir}/xsd"
 }
 
-// Change default project layout
-sourceSets {
-    main {
-        java {
-            srcDir genJavaDir
-        }
-    }
-}
-
 configurations {
     jamon
     jaxb
@@ -67,4 +58,4 @@ task templates {
     }
 }
 
-compileJava.dependsOn.add("templates")
+compileKotlin.dependsOn.add("templates")

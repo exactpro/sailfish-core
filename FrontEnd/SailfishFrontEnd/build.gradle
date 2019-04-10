@@ -51,15 +51,6 @@ if(project.hasProperty('rmTimeout')) {
     ext.redmimeParams.timeout = project.property('rmTimeout')
 }
 
-// Change default project layout
-sourceSets {
-    main {
-        java {
-            srcDir genJavaDir
-        }
-    }
-}
-
 tasks.eclipse.dependsOn('copyFromData')
 
 eclipse {
@@ -413,7 +404,7 @@ clean {
     delete webContentGen
 }
 
-compileJava.dependsOn.add('generateVersionClass')
+compileKotlin.dependsOn.add('generateVersionClass')
 
 def formatVersionFolderName() {
     def version = new StringBuffer(build_number)

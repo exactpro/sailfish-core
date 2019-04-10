@@ -28,14 +28,6 @@ ext {
     xsdDir = file("${mainDir}/xsd")
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir genJavaDir
-        }
-    }
-}
-
 task createDir {
     doLast {
 	   genJavaDir.mkdirs()
@@ -70,6 +62,6 @@ test {
 
 }
 
-compileJava {
+compileKotlin {
     dependsOn.add("generateJavaFromXsd")
 }

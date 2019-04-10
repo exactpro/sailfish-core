@@ -17,17 +17,6 @@ subprojects {
         FIX_VALIDATOR = 'com.exactpro.sf.configuration.dictionary.FIXDictionaryValidatorFactory'
 	}
 
-	sourceSets {
-	    main {
-	        java {
-	            srcDir "${genJavaDir}"
-	        }
-	        resources {
-	            srcDir "${genResDir}"
-	        }
-	    }
-	}
-
     dependencies {
 	    if (incremental_build) {
             compileOnly "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"

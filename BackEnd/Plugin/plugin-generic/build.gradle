@@ -33,7 +33,7 @@ generateVersionClass {
 	alias 	= plugin_alias
 }
 
-compileJava.dependsOn.add('generateVersionClass')
+compileKotlin.dependsOn.add('generateVersionClass')
 
 validateDictionary {
     validate(NTG_VALIDATOR, 'NTG_GENERIC.xml')

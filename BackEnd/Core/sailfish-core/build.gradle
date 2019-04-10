@@ -340,7 +340,7 @@ task writeReportResourceContents() {
     }
 }
 
-compileJava {
+compileKotlin {
     dependsOn.add("generateJavaFromXsd")
     dependsOn.add("jamonGenerate")
     dependsOn.add("generateTest_aml_Dictionaries")
