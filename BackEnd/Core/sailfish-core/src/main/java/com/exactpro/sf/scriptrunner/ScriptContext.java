@@ -70,6 +70,7 @@ public class ScriptContext
 	private long scriptStartTime;
 	private String testCaseName;
 	private final String environmentName;
+    private final String environmentVariableSet;
 	private IScriptConfig scriptConfig;
 	private final IActionManager actionManager;
 	private final IUtilityManager utilityManager;
@@ -107,6 +108,7 @@ public class ScriptContext
         this.dataManager = context.getDataManager();
         this.pluginClassLoaders = context.getPluginClassLoaders();
         this.environmentName = environmentName;
+        this.environmentVariableSet = context.getConnectionManager().getEnvironmentVariableSet(environmentName);
 
 		reset();
 	}
@@ -244,7 +246,11 @@ public class ScriptContext
 		return environmentName;
 	}
 
-	public IScriptReport getReport() {
+    public String getEnvironmentVariableSet() {
+        return environmentVariableSet;
+    }
+
+    public IScriptReport getReport() {
 		return report;
 	}
 
