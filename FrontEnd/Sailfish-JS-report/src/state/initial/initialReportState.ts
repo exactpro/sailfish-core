@@ -14,31 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
-import Status from '../models/Status';
-import { ExceptionChain } from './ExceptionChain';
-import '../styles/statusPanel.scss';
-import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
+import ReportState from '../models/ReportState';
 
-interface StatusPaneProps {
-    status: Status;
-}
+const initialReportState : ReportState = {
+    report: null,
+    currentTestCasePath: ""
+} 
 
-const StatusPanelBase = ({status}: StatusPaneProps) => {
-
-    return (
-        <div class="status">
-            <div class="status-container">
-                <ExceptionChain exception = {status.cause}/>
-            </div>
-        </div>
-    );
-}
-
-export const StatusPanel = connect(
-    (state: AppState) => ({
-        status: state.selected.testCase.status
-    }),
-    dispatch => ({})
-)(StatusPanelBase);
+export default initialReportState;

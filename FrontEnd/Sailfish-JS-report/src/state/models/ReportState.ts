@@ -14,19 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from "../models/Status";
+import Report from '../../models/Report';
 
-export default interface SelectedState {
-    actionsId: number[];
-    messagesId: number[];
-    checkpointMessageId: number;
-    checkpointActionId: number;
-    rejectedMessageId: number;
-    status: StatusType;
-    
-    // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
-    // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
-    // Objects and reference comparison is the only way to handle numbers changing in this case.
-    scrolledActionId: Number;
-    scrolledMessageId: Number;
+export default interface ReportState {
+    report: Report;
+    currentTestCasePath: string;
 }

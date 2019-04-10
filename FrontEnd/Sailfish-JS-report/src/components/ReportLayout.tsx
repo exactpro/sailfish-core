@@ -17,7 +17,7 @@
 import { h } from 'preact';
 import Report from '../models/Report';
 import { connect } from 'preact-redux';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { setTestCasePath } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { ReportMetadata } from '../models/ReportMetadata';
@@ -148,7 +148,7 @@ function renderStatusInfo(status: StatusType, metadata: ReportMetadata[]): JSX.E
 
 const ReportLayout = connect(
     (state: AppState) => ({
-        report: state.report
+        report: state.report.report
     }),
     dispatch => ({
         onTestCaseSelect: (testCaseLink: string) => dispatch(setTestCasePath(testCaseLink))

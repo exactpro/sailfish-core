@@ -20,7 +20,7 @@ import '../styles/action.scss';
 import Action from '../models/Action';
 import { ActionTree } from './ActionTree';
 import { StatusType } from '../models/Status';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { selectAction, selectCheckpoint, selectVerification } from '../actions/actionCreators';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { actionsHeatmap } from '../helpers/heatmapCreator';
@@ -110,14 +110,14 @@ export class ActionsListBase extends Component<ListProps, {}> {
 }   
 
 export const ActionsList = connect((state: AppState) => ({
-        actions: state.testCase.actions,
+        actions: state.selected.testCase.actions,
         selectedActionId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
         selectedCheckpointId: state.selected.checkpointActionId,
-        actionsFilter: state.actionsFilter,
-        filterFields: state.fieldsFilter,
-        checkpointActions: state.checkpointActions
+        actionsFilter: state.filter.actionsFilter,
+        filterFields: state.filter.fieldsFilter,
+        checkpointActions: state.selected.checkpointActions
     }),
     dispatch => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),

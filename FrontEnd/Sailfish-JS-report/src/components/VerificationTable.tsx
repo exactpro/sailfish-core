@@ -20,7 +20,7 @@ import { StatusType } from "../models/Status";
 import "../styles/tables.scss";
 import { VerificationTableProps } from './VerificationTable';
 import { connect } from 'preact-redux';
-import AppState from "../state/AppState";
+import AppState from "../state/models/AppState";
 import { createSelector } from '../helpers/styleCreators';
 
 const PADDING_LEVEL_VALUE = 15;
@@ -179,7 +179,7 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
 
 export const VerificationTable = connect(
     (state: AppState) => ({
-        fieldsFilter: state.fieldsFilter
+        fieldsFilter: state.filter.fieldsFilter
     }),
     dispatch => ({})
 )(VerificationTableBase);

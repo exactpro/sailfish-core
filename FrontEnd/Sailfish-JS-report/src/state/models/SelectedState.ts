@@ -14,25 +14,24 @@
  * limitations under the License.
  ******************************************************************************/
 
-import TestCase from "../models/TestCase";
-import { StatusType } from "../models/Status";
-import SelectedState from './SelectedState';
-import Report from '../models/Report';
-import { Panel } from "../helpers/Panel";
-import Action from '../models/Action';
+import { StatusType } from "../../models/Status";
+import TestCase from '../../models/TestCase';
+import Action from "../../models/Action";
 
-
-export default interface AppState {
-    report: Report;
-    currentTestCasePath: string;
+export default interface SelectedState {
     testCase: TestCase;
-    checkpointActions: Action[];
+    actionsId: number[];
+    messagesId: number[];
+    checkpointMessageId: number;
+    checkpointActionId: number;
+    rejectedMessageId: number;
+    status: StatusType;
     actionsMap: Map<number, Action>;
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
-    selected: SelectedState;
-    adminMessagesEnabled: boolean;
-    splitMode: boolean;
-    leftPane: Panel;
-    rightPane: Panel;
+    checkpointActions: Action[];
+    
+    // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
+    // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
+    // Objects and reference comparison is the only way to handle numbers changing in this case.
+    scrolledActionId: Number;
+    scrolledMessageId: Number;
 }

@@ -21,7 +21,7 @@ import ReportLayout from './ReportLayout';
 import TestCase from "../models/TestCase";
 import Report from "../models/Report";
 import { connect } from 'preact-redux';
-import AppState from "../state/AppState";
+import AppState from "../state/models/AppState";
 import { setTestCase, setTestCasePath, selectVerification, selectActionById } from "../actions/actionCreators";
 import { 
     ACTION_PARAM_KEY,
@@ -104,9 +104,9 @@ class AppBase extends Component<AppProps> {
 
 export const App = connect(
     (state: AppState) => ({
-        report: state.report,
-        testCase: state.testCase,
-        testCaseFilePath: state.currentTestCasePath
+        report: state.report.report,
+        testCase: state.selected.testCase,
+        testCaseFilePath: state.report.currentTestCasePath
     }),
     dispatch => ({
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),

@@ -20,7 +20,7 @@ import '../styles/header.scss';
 import { StatusType } from '../models/Status';
 import { FilterPanel } from './FilterPanel';
 import { connect } from 'preact-redux';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import {
     nextTestCase,
     prevTestCase,
@@ -172,10 +172,10 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
 
 export const Header = connect(
     (state: AppState) => ({
-        testCase: state.testCase,
-        splitMode: state.splitMode,
-        actionsFilter: state.actionsFilter,
-        fieldsFilter: state.fieldsFilter
+        testCase: state.selected.testCase,
+        splitMode: state.view.splitMode,
+        actionsFilter: state.filter.actionsFilter,
+        fieldsFilter: state.filter.fieldsFilter
     }),
     dispatch => ({
         nextTestCaseHandler: () => dispatch(nextTestCase()),

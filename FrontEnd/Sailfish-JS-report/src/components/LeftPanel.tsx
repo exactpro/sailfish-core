@@ -21,7 +21,7 @@ import { Panel } from '../helpers/Panel';
 import { ToggleButton } from './ToggleButton';
 import Action from '../models/Action';
 import { ActionsList } from './ActionsList';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPane';
 import { ActionsListBase } from './ActionsList';
@@ -156,10 +156,10 @@ class LeftPanelBase extends Component<LeftPanelProps> {
 
 export const LeftPanel = connect(
     (state: AppState) => ({
-        panel: state.leftPane,
+        panel: state.view.leftPanel,
         selectedCheckpointId: state.selected.checkpointActionId,
-        checkpointActions: state.checkpointActions,
-        statusEnabled: !!state.testCase.status.cause
+        checkpointActions: state.selected.checkpointActions,
+        statusEnabled: !!state.selected.testCase.status.cause
     }),
     dispatch => ({
         panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),

@@ -22,7 +22,7 @@ import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';
 import { LogsPane } from './LogsPane';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { isAdmin } from '../helpers/messageType';
 import { isRejected } from '../helpers/messageType';
 import { setRightPane, selectRejectedMessageId, setAdminMsgEnabled } from '../actions/actionCreators';
@@ -210,11 +210,11 @@ class RightPanelBase extends Component<RightPanelProps> {
 
 export const RightPanel = connect(
     (state: AppState) : RightPanelStateProps => ({
-        adminMessages: state.testCase.messages.filter(isAdmin),
-        rejectedMessages: state.testCase.messages.filter(isRejected),
-        adminMessagesEnabled: state.adminMessagesEnabled,
+        adminMessages: state.selected.testCase.messages.filter(isAdmin),
+        rejectedMessages: state.selected.testCase.messages.filter(isRejected),
+        adminMessagesEnabled: state.view.adminMessagesEnabled,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
-        panel: state.rightPane
+        panel: state.view.rightPanel
     }),
     (dispatch) : RightPanelDispatchProps => ({
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),

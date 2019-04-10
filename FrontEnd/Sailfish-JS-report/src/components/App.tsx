@@ -21,7 +21,7 @@ import Report, { isReport } from '../models/Report';
 import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'preact-redux';
-import AppState from "../state/AppState";
+import AppState from "../state/models/AppState";
 import { setTestCase, setReport, setTestCasePath, selectActionById, selectVerification } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
@@ -150,9 +150,9 @@ class AppBase extends Component<AppProps, {}> {
 
 export const App = connect(
     (state: AppState) => ({
-        report: state.report,
-        testCase: state.testCase,
-        testCaseFilePath: state.currentTestCasePath
+        report: state.report.report,
+        testCase: state.selected.testCase,
+        testCaseFilePath: state.report.currentTestCasePath
     }),
     dispatch => ({
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
