@@ -33,7 +33,6 @@
 
     &__custom-msg {
         color: $primaryTextColor;
-        padding-left: 10px;
 
         &.debug {
             color: gray;
@@ -166,16 +165,22 @@
         overflow-x: scroll;
     }
 
-    &__input-params {
-        padding-left: 10px;
+    &__item {
+        padding: 3px 7px;
+    }
 
+    &__item-title {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    &__input-params {
         &.transparent {
             opacity: 0.3;
         }
     }
 
     &__table {
-        padding-left: 10px;
     }
 
     &__verification {

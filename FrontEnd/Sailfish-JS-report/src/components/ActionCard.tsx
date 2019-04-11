@@ -108,7 +108,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 <div class="ac-body">
                     <div class={inputParametersClassName}>
                         <ExpandablePanel>
-                            <h4>Input parameters</h4>
+                            <div class="ac-body__item-title">Input parameters</div>
                             <ParamsTable
                                 params={parameters}
                                 name={name} />
@@ -122,7 +122,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         action.status.status == 'FAILED' ? (
                             <div class="action-card-status">
                                 <ExpandablePanel>
-                                    <h4>Status</h4>
+                                    <div class="ac-body__item-title">Status</div>
                                     <ExceptionChain exception={action.status.cause} />
                                 </ExpandablePanel>
                             </div>

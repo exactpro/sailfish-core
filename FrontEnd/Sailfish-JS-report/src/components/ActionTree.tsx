@@ -341,7 +341,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         return (
             <div class="ac-body__table">
                 <ExpandablePanel>
-                    <h4>{table.name || "Custom table"}</h4>
+                    <div class="ac-body__item-title">{table.name || "Custom table"}</div>
                     <CustomTable
                         content={table.content} />
                 </ExpandablePanel>
