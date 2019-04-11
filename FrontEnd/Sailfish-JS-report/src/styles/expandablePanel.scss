@@ -14,22 +14,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-.expandable-panel-root {
+.expandable-panel {
     display: block;
     box-sizing: border-box;
     width: 100%;
     height: auto;
     padding-left: 10px;
-}
 
-.expandable-panel-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 40px;
+    &__header {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        align-items: center;
+        min-height: 40px;
+    }
 
-    .expandable-panel-header-icon {
+    &__icon {
         height: 15px;
         width: 15px;
         cursor: pointer;
@@ -44,13 +44,4 @@
             background-image: url(../../resources/icons/expand-off.svg);
         }
     }
-}
-
-.expandable-panel-body {
-    display: block;
-}
-
-.expandable-panel-body-hidden {
-    @extend .expandable-panel-body;
-    display: none;
 }

@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import { h, Component } from "preact";
-import "../styles/panel.scss"
+import "../styles/expandablePanel.scss"
 import { createSelector } from '../helpers/styleCreators';
 
 interface PanelProps {
@@ -51,22 +51,22 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
 
     render({ header, body, children, expandedHeader }: PanelProps, { isExpanded }: PanelState) {
         const iconClass = createSelector(
-            "expandable-panel-header-icon", 
+            "expandable-panel__icon", 
             isExpanded ? "expanded" : "hidden"
         );
 
         return (
-            <div class="expandable-panel-root">
-                <div class="expandable-panel-header">
+            <div class="expandable-panel">
+                <div class="expandable-panel__header">
                     <div class={iconClass} 
                         onClick={e => this.expandPanel()}/>
-                    {(expandedHeader && isExpanded) || header || children[0]}
+                    { (expandedHeader && isExpanded) || header || children[0] }
                 </div>
-                {isExpanded ?
-                    <div className="expandable-panel-body">
-                            {body || children.slice(1)}
-                    </div>
-                    : null}
+                {
+                    isExpanded ? 
+                        body || children.slice(1)
+                        : null
+                }
             </div>
         )
     }
