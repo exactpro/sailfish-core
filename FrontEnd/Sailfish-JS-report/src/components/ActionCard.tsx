@@ -84,10 +84,14 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                             <h3>{description}</h3>
                         </div>
                     </div>
-                    <div class="ac-header__start-time">
-                        <span>Start</span>
-                        <p>{formatTime(action.startTime)}</p>
-                    </div>
+                    {
+                        action.startTime ? (
+                            <div class="ac-header__start-time">
+                                <span>Start</span>
+                                <p>{formatTime(action.startTime)}</p>
+                            </div>
+                        ) : null
+                    }
                     <div class="ac-header__elapsed-time">
                         <h3>{elapsedTime}</h3>
                     </div>
