@@ -57,7 +57,6 @@ interface MessagesListProps extends MessagesListStateProps ,MessagesListDispatch
 
 export class MessagesCardListBase extends Component<MessagesListProps> {
 
-    private elements: MessageCard[] = [];
     private scrollbar: HeatmapScrollbar;
 
     constructor(props: MessagesListProps) {
@@ -95,13 +94,13 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
     }
 
     scrollToMessage(messageId: number, isSmooth: boolean = true) {
-        if (this.elements[messageId]) {
-            this.elements[messageId].base.scrollIntoView({ 
-                block: 'center', 
-                behavior: isSmooth ? 'smooth' : 'auto',
-                inline: 'nearest' 
-            });
-        }
+        // if (this.elements[messageId]) {
+        //     this.elements[messageId].base.scrollIntoView({ 
+        //         block: 'center', 
+        //         behavior: isSmooth ? 'smooth' : 'auto',
+        //         inline: 'nearest' 
+        //     });
+        // }
     }
 
     scrollToTop() {
@@ -152,11 +151,9 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
 
         return (
             <MessageCard
-                ref={element => this.elements[message.id] = element}
                 message={message}
                 isSelected={isSelected}
                 status={isSelected ? selectedStatus : null}
-                key={message.id}
                 actions={this.getMessageActions(message)}
                 selectHandler={messageSelectHandler}
                 showRaw={showRaw}
@@ -174,8 +171,7 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             <Checkpoint name={message.msgName}
                 count={checkpointCount}
                 isSelected={isSelected}
-                description={description}
-                ref={ref => this.elements[message.id] = ref} />
+                description={description} />
         )
     }
 
@@ -185,10 +181,8 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
 
         return (
             <MessageCard
-                ref={element => this.elements[message.id] = element}
                 message={message}
                 isSelected={isRejectedSelected || isSelected}
-                key={message.id}
                 actions={this.getMessageActions(message)}
                 rejectedMessagesCount={rejectedCount} 
                 status={isSelected ? selectedStatus : null}
@@ -201,7 +195,6 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         
         return (
             <AdminMessageWrapper
-                ref={ref => this.elements[message.id] = ref}
                 message={message}
                 key={message.id}
                 actions={this.getMessageActions(message)}

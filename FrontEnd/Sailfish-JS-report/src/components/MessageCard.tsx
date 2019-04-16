@@ -40,178 +40,137 @@ export interface MessageCardProps {
     showRawHandler?: (showRaw: boolean) => any;
 }
 
-interface MessageCardState {
-    showRaw: boolean;
+export const MessageCard = ({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
+    const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
+
+    const rejectedTitle = message.content.rejectReason,
+        labelsCount = getLabelsCount(message);
+
+    const rootClass = createBemBlock("message-card", status, isSelected ? "selected" : null), 
+        showRawClass = createBemElement("mc-show-raw", "icon", showRaw ? "expanded" : "hidden"),
+        // session arrow color, we calculating it for each session from-to pair, based on hash 
+        sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
+
+    return (
+        <div class={rootClass}>
+            <div class="message-card__labels">
+                {renderMessageTypeLabels(message)}
+            </div>
+                <div class="mc-header default" 
+                    data-lb-count={labelsCount}
+                    onClick={() => selectHandler(message)}>
+                    {
+                        rejectedMessagesCount && actions.length == 0 ?
+                            (
+                                <div class="mc-header__info rejected">
+                                    <p>Rejected {rejectedMessagesCount}</p>
+                                </div>
+                            )
+                            : (
+                                <MessageCardActionChips
+                                    actions={actions}
+                                    selectedStatus={status}
+                                    selectHandler={status => selectHandler(message, status)} />
+                            )
+                    }
+                    <div class="mc-header__name">
+                        <span>Name</span>
+                    </div>
+                    <div class="mc-header__name-value">
+                        <p>{msgName}</p>
+                    </div>
+                    <div class="mc-header__timestamp">
+                        <p>{formatTime(timestamp)}</p>
+                    </div>
+                    <div class="mc-header__session">
+                        <span>Session</span>
+                    </div>
+                    <div class="mc-header__from">
+                        <p>{from}</p>
+                    </div>
+                    {
+                        from && to ?
+                            <div class="mc-header__session-icon"
+                                style={sessionArrowStyle} />
+                            : null
+                    }
+                    <div class="mc-header__to">
+                        <p>{to}</p>
+                    </div>
+                    <MlUploadButton messageId={message.id}/>
+                </div>
+                <div class="message-card__body   mc-body">
+                    {
+                        (message.content.rejectReason !== null) ?
+                            (
+                                <div class="mc-body__title">
+                                    <p>{rejectedTitle}</p>
+                                </div>
+                            )
+                            : null
+                    }
+                    <div class="mc-body__human">
+                        <p>
+                            {contentHumanReadable}
+                            {
+                                (raw && raw !== 'null') ? (
+                                    <div class="mc-show-raw"
+                                        onClick={e => showRawHandler && showRawHandler(!showRaw)}>
+                                        <div class="mc-show-raw__title">RAW</div>
+                                        <div class={showRawClass} />
+                                    </div>
+                                ) : null
+                            }
+                        </p>
+                    </div>
+                    {
+                        showRaw ?
+                            <MessageRaw
+                                rawContent={raw} />
+                            : null
+                    }
+                </div>
+            </div>
+    );
 }
 
-export class MessageCard extends Component<MessageCardProps, MessageCardState> {
+function renderMessageTypeLabels(message: Message): JSX.Element[] {
+    let labels = [];
 
-    constructor(props: MessageCardProps) {
-        super(props);
-        this.state = {
-            showRaw: false
-        };
-    }
-
-    shouldComponentUpdate(nextProps: MessageCardProps, nextState: MessageCardState) {
-        if (nextState !== this.state) return true;
-
-        if (nextProps.message !== this.props.message || nextProps.status !== this.props.status) {
-            return true;
-        }
-
-        return nextProps.isSelected !== this.props.isSelected;
-    }
-
-    showRaw() {
-        this.setState({
-            ...this.state,
-            showRaw: !this.state.showRaw
-        });
-
-        this.props.showRawHandler && this.props.showRawHandler(this.state.showRaw);
-    }
-
-    componentWillReceiveProps(nextProps: MessageCardProps) {
-        if (nextProps.showRaw != this.state.showRaw) {
-            this.setState({
-                showRaw: nextProps.showRaw
-            });
-        }
-    }
-
-    render({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler }: MessageCardProps, { showRaw }: MessageCardState) {
-        const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
-
-        const hueValue = this.calculateHueValue(from, to),
-            rejectedTitle = message.content.rejectReason,
-            labelsCount = this.getLabelsCount(message);
-
-        const rootClass = createBemBlock("message-card", status, isSelected ? "selected" : null), 
-            contentClass = createSelector("message-card-content", status), 
-            showRawClass = createBemElement("mc-show-raw", "icon", showRaw ? "expanded" : "hidden");
-
-        return (
-            <div class={rootClass}>
-                <div class="message-card__labels">
-                    {this.renderMessageTypeLabels(message)}
-                </div>
-                    <div class="mc-header default" 
-                        data-lb-count={labelsCount}
-                        onClick={() => selectHandler(message)}>
-                        {
-                            rejectedMessagesCount && actions.length == 0 ?
-                                (
-                                    <div class="mc-header__info rejected">
-                                        <p>Rejected {rejectedMessagesCount}</p>
-                                    </div>
-                                )
-                                : (
-                                    <MessageCardActionChips
-                                        actions={actions}
-                                        selectedStatus={status}
-                                        selectHandler={status => selectHandler(message, status)} />
-                                )
-                        }
-                        <div class="mc-header__name">
-                            <span>Name</span>
-                        </div>
-                        <div class="mc-header__name-value">
-                            <p>{msgName}</p>
-                        </div>
-                        <div class="mc-header__timestamp">
-                            <p>{formatTime(timestamp)}</p>
-                        </div>
-                        <div class="mc-header__session">
-                            <span>Session</span>
-                        </div>
-                        <div class="mc-header__from">
-                            <p>{from}</p>
-                        </div>
-                        {
-                            from && to ?
-                                <div class="mc-header__session-icon"
-                                    style={{ filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)` }} />
-                                : null
-                        }
-                        <div class="mc-header__to">
-                            <p>{to}</p>
-                        </div>
-                        <MlUploadButton messageId={message.id}/>
-                    </div>
-                    <div class="message-card__body   mc-body">
-                        {
-                            (message.content.rejectReason !== null) ?
-                                (
-                                    <div class="mc-body__title">
-                                        <p>{rejectedTitle}</p>
-                                    </div>
-                                )
-                                : null
-                        }
-                        <div class="mc-body__human">
-                            <p>
-                                {contentHumanReadable}
-                                {
-                                    (raw && raw !== 'null') ? (
-                                        <div class="mc-show-raw"
-                                            onClick={e => this.showRaw()}>
-                                            <div class="mc-show-raw__title">RAW</div>
-                                            <div class={showRawClass} />
-                                        </div>
-                                    ) : null
-                                }
-                            </p>
-                        </div>
-                        {
-                            showRaw ?
-                                <MessageRaw
-                                    rawContent={raw} />
-                                : null
-                        }
-                    </div>
-                </div>
+    if (message.content.rejectReason !== null) {
+        labels.push(
+            <div class="mc-label rejected">
+                <div class="mc-label__icon rejected" />
+            </div>
         );
     }
 
-    private renderMessageTypeLabels(message: Message): JSX.Element[] {
-        let labels = [];
-
-        if (message.content.rejectReason !== null) {
-            labels.push(
-                <div class="mc-label rejected">
-                    <div class="mc-label__icon rejected" />
-                </div>
-            );
-        }
-
-        if (message.content.admin) {
-            labels.push(
-                <div class="mc-label admin">
-                    <div class="mc-label__icon admin" />
-                </div>
-            )
-        }
-
-        return labels;
+    if (message.content.admin) {
+        labels.push(
+            <div class="mc-label admin">
+                <div class="mc-label__icon admin" />
+            </div>
+        )
     }
 
-    private getLabelsCount(message: Message) {
-        let count = 0;
+    return labels;
+}
 
-        if (message.content.rejectReason != null) {
-            count++;
-        }
+function getLabelsCount(message: Message) {
+    let count = 0;
 
-        if (message.content.admin) {
-            count++;
-        }
-
-        return count;
+    if (message.content.rejectReason != null) {
+        count++;
     }
 
-    private calculateHueValue(from: string, to: string): number {
-        return (getHashCode([from, to].filter(str => str).sort((a, b) => a.localeCompare(b)).join(''))
-            % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
+    if (message.content.admin) {
+        count++;
     }
+
+    return count;
+}
+
+function calculateHueValue(from: string, to: string): number {
+    return (getHashCode([from, to].filter(str => str).sort((a, b) => a.localeCompare(b)).join(''))
+        % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
 }
