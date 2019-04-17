@@ -38,7 +38,6 @@ interface MessagesListStateProps {
     rejectedMessages: Message[];
     adminMessagesEnabled: boolean;
     selectedCheckpointId: number;
-    actionsMap: Map<number, Action>;
     selectedMessages: number[];
 }
 
@@ -94,11 +93,6 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         this.scrollbar && this.scrollbar.scrollToTop();
     }
 
-    getMessageActions(message: Message): Action[] {
-        return message.relatedActions.map(
-            actionId => this.props.actionsMap.get(actionId));
-    }
-
     render({ messages }: MessagesListProps) {
 
         return (
@@ -129,7 +123,6 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         return (
             <MessageCard
                 message={message}
-                actions={this.getMessageActions(message)}
                 showRaw={showRaw}
                 showRawHandler={showRawHandler}
             />
@@ -155,7 +148,6 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         return (
             <MessageCard
                 message={message}
-                actions={this.getMessageActions(message)}
                 rejectedMessagesCount={rejectedCount} />
         )
     }
@@ -165,7 +157,6 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             <AdminMessageWrapper
                 message={message}
                 key={message.id}
-                actions={this.getMessageActions(message)}
                 isExpanded={adminMessagesEnabled}
             />
         )
@@ -180,8 +171,7 @@ export const MessagesCardList = connect(
         rejectedMessages: state.selected.testCase.messages.filter(isRejected),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
-        adminMessagesEnabled: state.view.adminMessagesEnabled,
-        actionsMap: state.selected.actionsMap
+        adminMessagesEnabled: state.view.adminMessagesEnabled
     }),
     (dispatch): MessagesListDispatchProps => ({
         messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))

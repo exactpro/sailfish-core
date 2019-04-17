@@ -20,16 +20,29 @@ import Action from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import "../styles/messages.scss";
 import { createSelector } from '../helpers/styleCreators';
+import Message from '../models/Message';
+import { connect } from 'preact-redux';
+import AppState from '../state/models/AppState';
+import { selectMessage } from '../actions/actionCreators';
 
 type SelectHandler = (status: StatusType) => any;
 
-interface ActionChipsProps {
+interface ActionChipsOwnProps {
+    message: Message;
+}
+
+interface ActionChipsStateProps {
     actions: Action[];
     selectedStatus?: StatusType;
+}
+
+interface ActionChipsDispatchProps {
     selectHandler: SelectHandler;
 }
 
-export const MessageCardActionChips = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
+interface ActionChipsProps extends ActionChipsOwnProps, ActionChipsStateProps, ActionChipsDispatchProps {}
+
+const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
 
     const className = createSelector(
         "mc-header__info",
@@ -70,3 +83,13 @@ function renderChip(status: StatusType, statusActions: Action[], selectedStatus:
             }}/>
     )
 }
+
+export const MessageCardActionChips = connect(
+    (state: AppState, ownProps: ActionChipsOwnProps): ActionChipsStateProps => ({
+        actions: ownProps.message.relatedActions.map(actionId => state.selected.actionsMap.get(actionId)),
+        selectedStatus: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null
+    }),
+    (dispatch, ownProps: ActionChipsOwnProps): ActionChipsDispatchProps => ({
+        selectHandler: (status: StatusType) => dispatch(selectMessage(ownProps.message, status))
+    })
+)(MessageCardActionChipsBase);

@@ -34,7 +34,6 @@ const HUE_SEGMENTS_COUNT = 36;
 
 export interface MessageCardOwnProps {
     message: Message;
-    actions: Action[];
     rejectedMessagesCount?: number;
     showRaw?: boolean;
     showRawHandler?: (showRaw: boolean) => any;
@@ -51,7 +50,7 @@ interface MessageCardDispatchProps {
 
 export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps { }
 
-const MessageCardBase = ({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
+const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
     const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
@@ -71,7 +70,7 @@ const MessageCardBase = ({ message, isSelected, actions, status, rejectedMessage
                     data-lb-count={labelsCount}
                     onClick={() => selectHandler()}>
                     {
-                        rejectedMessagesCount && actions.length == 0 ?
+                        rejectedMessagesCount && message.relatedActions.length == 0 ?
                             (
                                 <div class="mc-header__info rejected">
                                     <p>Rejected {rejectedMessagesCount}</p>
@@ -79,9 +78,7 @@ const MessageCardBase = ({ message, isSelected, actions, status, rejectedMessage
                             )
                             : (
                                 <MessageCardActionChips
-                                    actions={actions}
-                                    selectedStatus={status}
-                                    selectHandler={selectHandler} />
+                                    message={message} />
                             )
                     }
                     <div class="mc-header__name">

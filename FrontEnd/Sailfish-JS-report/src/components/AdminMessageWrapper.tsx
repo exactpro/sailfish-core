@@ -81,9 +81,7 @@ class AdminMessageWrapperBase extends Component<WrapperProps, WrapperState> {
                     data-lb-count={this.getLabelsCount(props.message)}>
                     <div class="mc-header__info">
                         <MessageCardActionChips
-                            actions={props.actions}
-                            selectedStatus={props.status}
-                            selectHandler={props.selectHandler}/>
+                            message={props.message}/>
                     </div>
                     <div class="mc-header__name">Name</div>
                     <div class="mc-header__name-value">{props.message.msgName}</div>
