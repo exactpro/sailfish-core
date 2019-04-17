@@ -19,8 +19,6 @@
 .message-card {
     @include status-card;
     position: relative;
-    margin: 5px 0;
-    border-radius: 5px;
     display: grid;
     grid-template: auto auto / auto 1fr;
     grid-template-areas: "mc-labels mc-header"
@@ -98,7 +96,6 @@
     &[data-lb-count="2"] { --lb-count: 2; }
 
     &.default {
-        display: grid;
         padding: 7px 5px 9px 10px;
         position: relative;
         display: grid;

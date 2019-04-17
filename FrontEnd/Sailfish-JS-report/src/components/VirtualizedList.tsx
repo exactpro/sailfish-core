@@ -20,8 +20,8 @@ import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtuali
 interface VirtualizedListProps {
     elementRenderer: (idx: number) => JSX.Element;
     rowCount: number;
+    itemSpacing?: number;
 }
-
 
 export class VirtualizedList extends Component<VirtualizedListProps> {
     
@@ -33,11 +33,10 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
     public forceUpdateList : Function;
 
     render({ rowCount }: VirtualizedListProps) {
-    
-
         return (
             <AutoSizer>
                 {({ height, width }) => {
+                    // fixes elements overlaping, by triggerng additional row heights calculating, when they are fully rendered
                     this.measurerCache.clearAll();
                     
                     return (
@@ -64,7 +63,7 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
                 rowIndex={index}
                 parent={parent}
                 key={key}>
-                    <div style={style}>
+                    <div style={ { ...style, paddingTop: this.props.itemSpacing / 2, paddingBottom: this.props.itemSpacing / 2 }}>
                         {this.props.elementRenderer(index)}
                     </div>
             </CellMeasurer>

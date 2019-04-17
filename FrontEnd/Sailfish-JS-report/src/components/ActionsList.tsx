@@ -89,6 +89,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
                 <div class="actions__list">
                     <VirtualizedList
                         rowCount={actions.length}
+                        itemSpacing={6}
                         elementRenderer={idx => (
                             <ActionTree 
                                 action={actions[idx]}
@@ -100,24 +101,6 @@ export class ActionsListBase extends Component<ListProps, {}> {
                                 checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
                                 ref={ref => this.elements[actions[idx].id] = ref}/>
                         )}/>
-
-                    {/* <HeatmapScrollbar
-                        selectedElements={actionsHeatmap(actions, selectedActionId)}>
-                        {actions.map(action => (
-                            <ActionTree 
-                                action={action}
-                                selectedActionsId={selectedActionId}
-                                selectedMessageId={selectedMessageId}
-                                selectedCheckpointId={selectedCheckpointId}
-                                scrolledActionId={scrolledActionId}
-                                actionSelectHandler={onSelect}
-                                messageSelectHandler={onMessageSelect}
-                                actionsFilter={actionsFilter}
-                                filterFields={filterFields} 
-                                checkpoints={checkpointActions}
-                                checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
-                                ref={ref => this.elements[action.id] = ref}/>))}
-                    </HeatmapScrollbar> */}
                 </div>
             </div> 
         )

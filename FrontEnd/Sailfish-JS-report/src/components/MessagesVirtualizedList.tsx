@@ -16,7 +16,6 @@
 
 import { h, Component } from 'preact';
 import { VirtualizedList } from './VirtualizedList';
-import { CellMeasurerCache } from 'react-virtualized';
 
 interface MessagesVirtualizedListProps {
     messagesCount: number;
@@ -33,6 +32,7 @@ export class MessagesVirtualizedList extends Component<MessagesVirtualizedListPr
             <VirtualizedList
                 rowCount={messagesCount}
                 elementRenderer={this.rowRenderer}
+                itemSpacing={6}
                 ref={ref => this.list = ref}
             />
         )
