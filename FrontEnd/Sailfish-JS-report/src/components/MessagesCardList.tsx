@@ -18,11 +18,10 @@ import { h, Component } from 'preact';
 import '../styles/messages.scss';
 import Message from '../models/Message';
 import { MessageCard } from './MessageCard';
-import Action, { ActionNodeType } from '../models/Action';
-import { StatusType, statusValues } from '../models/Status';
+import Action from '../models/Action';
+import { StatusType } from '../models/Status';
 import { connect } from 'preact-redux';
 import AppState from '../state/models/AppState';
-import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
 import { isCheckpoint, isRejected, isAdmin } from '../helpers/messageType';
 import { getActions } from '../helpers/actionType';
@@ -30,10 +29,7 @@ import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { messagesHeatmap } from '../helpers/heatmapCreator';
 import { selectMessage } from '../actions/actionCreators';
-import { VirtualizedList } from './VirtualizedList';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
-
-const MIN_CONTROL_BUTTONS_WIDTH = 880;
 
 interface MessagesListStateProps {
     messages: Message[];
@@ -41,12 +37,9 @@ interface MessagesListStateProps {
     checkpoints: Message[];
     rejectedMessages: Message[];
     adminMessagesEnabled: boolean;
-    selectedMessages: number[];
     selectedCheckpointId: number;
-    selectedRejectedMessageId: number;
     actionsMap: Map<number, Action>;
-    selectedStatus: StatusType;
-    panelWidth?: number;
+    selectedMessages: number[];
 }
 
 interface MessagesListDispatchProps {
@@ -94,13 +87,7 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
     }
 
     scrollToMessage(messageId: number, isSmooth: boolean = true) {
-        // if (this.elements[messageId]) {
-        //     this.elements[messageId].base.scrollIntoView({ 
-        //         block: 'center', 
-        //         behavior: isSmooth ? 'smooth' : 'auto',
-        //         inline: 'nearest' 
-        //     });
-        // }
+        // TODO: implement scroll to feature using react-virtualized
     }
 
     scrollToTop() {
@@ -112,50 +99,37 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             actionId => this.props.actionsMap.get(actionId));
     }
 
-    render({ messages,selectedMessages, selectedStatus }: MessagesListProps) {
+    render({ messages }: MessagesListProps) {
 
         return (
-            <div class="messages">
-                <div class="messages-list">
-                    <MessagesVirtualizedList
-                        messagesCount={messages.length}
-                        messageRenderer={(index, showRaw, showRawHandler) => this.renderMessage(messages[index], showRaw, showRawHandler)}/>
-                    {/* <VirtualizedList
-                        rowCount={messages.length}
-                        elementRenderer={idx => this.renderMessage(messages[idx])}/> */}
-                    {/* <HeatmapScrollbar
-                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}>
-                        {messages.map(message => this.renderMessage(message))}
-                    </HeatmapScrollbar> */}
-                </div>
+            <div class="messages-list">
+                <MessagesVirtualizedList
+                    messagesCount={messages.length}
+                    messageRenderer={(index, showRaw, showRawHandler) => this.renderMessage(messages[index], showRaw, showRawHandler)}/>
             </div>
         );
     }
 
     private renderMessage(message: Message, showRaw: boolean, showRawHandler: (showRaw: boolean) => any) {
 
-        const { selectedMessages, selectedStatus, checkpoints, rejectedMessages, selectedCheckpointId, selectedRejectedMessageId, adminMessagesEnabled, messageSelectHandler } = this.props;
-        const isSelected = selectedMessages.includes(message.id);
+        const { checkpoints, rejectedMessages, selectedCheckpointId, adminMessagesEnabled } = this.props;
 
         if (isCheckpoint(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
         }
 
         if (isAdmin(message)) {
-            return this.renderAdmin(message, adminMessagesEnabled, selectedRejectedMessageId, isSelected, selectedStatus);
+            return this.renderAdmin(message, adminMessagesEnabled);
         }
 
         if (isRejected(message)) {
-            return this.renderRejected(message, rejectedMessages, selectedRejectedMessageId, isSelected, selectedStatus);
+            return this.renderRejected(message, rejectedMessages);
         }
 
         return (
             <MessageCard
                 message={message}
-                isSelected={isSelected}
-                status={isSelected ? selectedStatus : null}
                 actions={this.getMessageActions(message)}
-                selectHandler={messageSelectHandler}
                 showRaw={showRaw}
                 showRawHandler={showRawHandler}
             />
@@ -175,33 +149,25 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         )
     }
 
-    private renderRejected(message: Message, rejectedMessages: Message[], selectedRejectedMessageId: number, isSelected: boolean, selectedStatus: StatusType) {
-        const isRejectedSelected = message.id === selectedRejectedMessageId,
-            rejectedCount = rejectedMessages.indexOf(message) + 1;
+    private renderRejected(message: Message, rejectedMessages: Message[]) {
+        const rejectedCount = rejectedMessages.indexOf(message) + 1;
 
         return (
             <MessageCard
                 message={message}
-                isSelected={isRejectedSelected || isSelected}
                 actions={this.getMessageActions(message)}
-                rejectedMessagesCount={rejectedCount} 
-                status={isSelected ? selectedStatus : null}
-                selectHandler={this.props.messageSelectHandler}/>
+                rejectedMessagesCount={rejectedCount} />
         )
     }
 
-    private renderAdmin(message: Message, adminMessagesEnabled: boolean, selectedRejectedMessageId: number, isSelected: boolean, selectedStatus: StatusType) {
-        const isRejectedSelected = message.id == selectedRejectedMessageId;
-        
+    private renderAdmin(message: Message, adminMessagesEnabled: boolean) {        
         return (
             <AdminMessageWrapper
                 message={message}
                 key={message.id}
                 actions={this.getMessageActions(message)}
                 isExpanded={adminMessagesEnabled}
-                isSelected={isSelected || isRejectedSelected}
-                status={isSelected ? selectedStatus : null} 
-                selectHandler={this.props.messageSelectHandler}/>
+            />
         )
     }
 }
@@ -214,8 +180,6 @@ export const MessagesCardList = connect(
         rejectedMessages: state.selected.testCase.messages.filter(isRejected),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
-        selectedRejectedMessageId: state.selected.rejectedMessageId,
-        selectedStatus: state.selected.status,
         adminMessagesEnabled: state.view.adminMessagesEnabled,
         actionsMap: state.selected.actionsMap
     }),

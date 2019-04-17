@@ -26,21 +26,32 @@ import { MlUploadButton } from './MlUploadButton';
 import '../styles/messages.scss';
 import { createSelector, createBemElement } from '../helpers/styleCreators';
 import { createBemBlock } from '../helpers/styleCreators';
+import { connect } from 'preact-redux';
+import AppState from '../state/models/AppState';
+import { selectMessage } from '../actions/actionCreators';
 
 const HUE_SEGMENTS_COUNT = 36;
 
-export interface MessageCardProps {
+export interface MessageCardOwnProps {
     message: Message;
-    isSelected?: boolean;
     actions: Action[];
-    status?: StatusType;
     rejectedMessagesCount?: number;
-    selectHandler: (message: Message, status?: StatusType) => any;
     showRaw?: boolean;
     showRawHandler?: (showRaw: boolean) => any;
 }
 
-export const MessageCard = ({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
+interface MessageCardStateProps {
+    isSelected?: boolean;
+    status?: StatusType;
+}
+
+interface MessageCardDispatchProps {
+    selectHandler: (status?: StatusType) => any;
+}
+
+export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps { }
+
+const MessageCardBase = ({ message, isSelected, actions, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
     const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
@@ -58,7 +69,7 @@ export const MessageCard = ({ message, isSelected, actions, status, rejectedMess
             </div>
                 <div class="mc-header default" 
                     data-lb-count={labelsCount}
-                    onClick={() => selectHandler(message)}>
+                    onClick={() => selectHandler()}>
                     {
                         rejectedMessagesCount && actions.length == 0 ?
                             (
@@ -70,7 +81,7 @@ export const MessageCard = ({ message, isSelected, actions, status, rejectedMess
                                 <MessageCardActionChips
                                     actions={actions}
                                     selectedStatus={status}
-                                    selectHandler={status => selectHandler(message, status)} />
+                                    selectHandler={selectHandler} />
                             )
                     }
                     <div class="mc-header__name">
@@ -174,3 +185,15 @@ function calculateHueValue(from: string, to: string): number {
     return (getHashCode([from, to].filter(str => str).sort((a, b) => a.localeCompare(b)).join(''))
         % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
 }
+
+export const MessageCardContainer = connect(
+    (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
+        isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
+        status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null
+    }),
+    (dispatch, ownProps: MessageCardOwnProps) : MessageCardDispatchProps => ({
+        selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status))
+    })
+);
+
+export const MessageCard = MessageCardContainer(MessageCardBase);

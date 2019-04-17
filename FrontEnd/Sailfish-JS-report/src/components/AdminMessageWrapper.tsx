@@ -16,7 +16,7 @@
 
 import {h, Component} from "preact";
 import "../styles/messages.scss";
-import { MessageCardProps, MessageCard } from "./MessageCard";
+import { MessageCardProps, MessageCard, MessageCardContainer } from "./MessageCard";
 import Message from '../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
 import { StatusType } from "../models/Status";
@@ -30,7 +30,7 @@ interface WrapperState {
     isExpanded: boolean;
 }
 
-export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
+class AdminMessageWrapperBase extends Component<WrapperProps, WrapperState> {
 
     constructor(props: WrapperProps) {
         super(props);
@@ -73,7 +73,7 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
 
         return (
             <div class={rootClass}
-                onClick={() => props.selectHandler(props.message)}>
+                onClick={() => props.selectHandler()}>
                 <div class="message-card__labels">
                     {this.renderMessageTypeLabels(props.message)}
                 </div>
@@ -83,7 +83,7 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
                         <MessageCardActionChips
                             actions={props.actions}
                             selectedStatus={props.status}
-                            selectHandler={status => props.selectHandler(props.message, status)}/>
+                            selectHandler={props.selectHandler}/>
                     </div>
                     <div class="mc-header__name">Name</div>
                     <div class="mc-header__name-value">{props.message.msgName}</div>
@@ -137,3 +137,5 @@ export class AdminMessageWrapper extends Component<WrapperProps, WrapperState> {
         });
     }
 }
+
+export const AdminMessageWrapper = MessageCardContainer(AdminMessageWrapperBase);
