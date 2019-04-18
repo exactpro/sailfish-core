@@ -22,11 +22,12 @@ import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';
 import { LogsPane } from './LogsPane';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { isAdmin } from '../helpers/messageType';
 import { isRejected } from '../helpers/messageType';
 import { setRightPane, selectRejectedMessageId, setAdminMsgEnabled } from '../actions/actionCreators';
 import { prevCyclicItemByIndex, nextCyclicItemByIndex } from '../helpers/array';
+import { createSelector } from '../helpers/styleCreators';
 
 interface RightPanelStateProps {
     panel: Panel;
@@ -68,27 +69,29 @@ class RightPanelBase extends Component<RightPanelProps> {
             adminControlEnabled = adminMessages.length != 0,
             controlShowTitles = true;
 
-        const adminRootClass = [
-                "layout-body-panel-controls-right-admin",
-                adminControlEnabled ? "" : "disabled"
-            ].join(' '),
-            adminIconClass = [
-                "layout-body-panel-controls-right-admin-icon",
-                adminMessagesEnabled ? "active" : ""
-            ].join(' '),
-            adminTitleClass = [
-                "layout-body-panel-controls-right-admin-title",
-                adminMessagesEnabled ? "active" : ""
-            ].join(' '),
-            rejectedRootClass = [
-                "layout-body-panel-controls-right-rejected",
-                rejectedEnabled ? "" : "disabled"
-            ].join(' ');
+        const adminRootClass = createSelector(
+                "layout-control",
+                "selectable",
+                adminControlEnabled ? null : "disabled"
+            ),
+            adminIconClass = createSelector(
+                "layout-control__icon",
+                "admin",
+                adminMessagesEnabled ? "active" : null
+            ),
+            adminTitleClass = createSelector(
+                "layout-control__title",
+                adminMessagesEnabled ? "admin" : null
+            ),
+            rejectedRootClass = createSelector(
+                "layout-control",
+                rejectedEnabled ? null : "disabled"
+            );
 
         return (
-            <div class="layout-body-panel">
-                <div class="layout-body-panel-controls">
-                    <div class="layout-body-panel-controls-panels">
+            <div class="layout-panel">
+                <div class="layout-panel__controls">
+                    <div class="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.Messages}
                             onClick={() => this.selectPanel(Panel.Messages)}
@@ -104,50 +107,48 @@ class RightPanelBase extends Component<RightPanelProps> {
                             title="Not implemeted"
                             text="Known bugs"/>
                     </div>
-                    <div class="layout-body-panel-controls-right">
-                        <div class={adminRootClass}
-                            onClick={adminControlEnabled && (() => adminEnabledHandler(!adminMessagesEnabled))}
-                            title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
-                            <div class={adminIconClass} />
-                            <div class={adminTitleClass}>
-                                {controlShowTitles ? <p>{adminControlEnabled ? "" : "No"} Admin Messages</p> : null}
-                            </div>
+                    <div class={adminRootClass}
+                        onClick={adminControlEnabled && (() => adminEnabledHandler(!adminMessagesEnabled))}
+                        title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
+                        <div class={adminIconClass} />
+                        <div class={adminTitleClass}>
+                            {controlShowTitles ? <p>{adminControlEnabled ? "" : "No"} Admin Messages</p> : null}
                         </div>
-                        <div class={rejectedRootClass}>
-                            <div class="layout-body-panel-controls-right-rejected-icon"
-                                onClick={() => this.currentRejectedHandler(currentRejectedIndex)}
-                                style={{ cursor: rejectedEnabled ? 'pointer' : 'unset' }}
-                                title={ rejectedEnabled ? "Scroll to current rejected message" : null }/>
-                            <div class="layout-body-panel-controls-right-rejected-title">
-                                {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
-                            </div>
-                            {
-                                rejectedEnabled ? 
-                                (
-                                    [
-                                        <div class="layout-body-panel-controls-right-rejected-btn prev"
-                                            title="Scroll to previous rejected message"
-                                            onClick={rejectedEnabled && (() => this.prevRejectedHandler(currentRejectedIndex))} />,
-                                        <div class="layout-body-panel-controls-right-rejected-count">
-                                            <p>{currentRejectedIndex + 1} of {rejectedMessages.length}</p>
-                                        </div>,
-                                        <div class="layout-body-panel-controls-right-rejected-btn next"
-                                            title="Scroll to next rejected message"
-                                            onClick={rejectedEnabled && (() => this.nextRejectedHandler(currentRejectedIndex))} />
-                                    ]
-                                ) : null
-                            }
+                    </div>
+                    <div class={rejectedRootClass}>
+                        <div class="layout-control__icon rejected"
+                            onClick={() => this.currentRejectedHandler(currentRejectedIndex)}
+                            style={{ cursor: rejectedEnabled ? 'pointer' : 'unset' }}
+                            title={ rejectedEnabled ? "Scroll to current rejected message" : null }/>
+                        <div class="layout-control__title">
+                            {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
                         </div>
-                        <div class="layout-body-panel-controls-right-predictions"
-                            title="Show predictions (Not implemented)">
-                            <div class="layout-body-panel-controls-right-predictions-icon"/>
-                            <div class="layout-body-panel-controls-right-predictions-title">
-                                {controlShowTitles ? <p>Predictions</p> : null}
-                            </div>
+                        {
+                            rejectedEnabled ? 
+                            (
+                                [
+                                    <div class="layout-control__icon prev"
+                                        title="Scroll to previous rejected message"
+                                        onClick={rejectedEnabled && (() => this.prevRejectedHandler(currentRejectedIndex))} />,
+                                    <div class="layout-control__counter">
+                                        <p>{currentRejectedIndex + 1} of {rejectedMessages.length}</p>
+                                    </div>,
+                                    <div class="layout-control__icon next"
+                                        title="Scroll to next rejected message"
+                                        onClick={rejectedEnabled && (() => this.nextRejectedHandler(currentRejectedIndex))} />
+                                ]
+                            ) : null
+                        }
+                    </div>
+                    <div class="layout-control disabled"
+                        title="Show predictions (Not implemented)">
+                        <div class="layout-control__icon ml"/>
+                        <div class="layout-control__title">
+                            {controlShowTitles ? <p>Predictions</p> : null}
                         </div>
                     </div>
                 </div>
-                <div class="layout-body-panel-content">
+                <div class="layout-panel__content">
                     {this.renderPanels(panel)}
                 </div>
             </div>
@@ -155,18 +156,18 @@ class RightPanelBase extends Component<RightPanelProps> {
     }
 
     private renderPanels(selectedPanel: Panel): JSX.Element[] {
-        const messagesRootClass = [
-                "layout-body-panel-content-wrapper",
+        const messagesRootClass = createSelector(
+                "layout-panel__content-wrapper",
                 selectedPanel == Panel.Messages ? "" : "disabled"
-            ].join(' '), 
-            knownBugsRootClass = [
-                "layout-body-panel-content-wrapper",
+            ), 
+            knownBugsRootClass = createSelector(
+                "layout-panel__content-wrapper",
                 selectedPanel == Panel.KnownBugs ? "" : "disabled"
-            ].join(' '),
-            logsRootClass = [
-                "layout-body-panel-content-wrapper",
+            ),
+            logsRootClass = createSelector(
+                "layout-panel__content-wrapper",
                 selectedPanel == Panel.Logs ? "" : "disabled"
-            ].join(' ');
+            );
     
         return [
             <div class={messagesRootClass}>
@@ -209,11 +210,11 @@ class RightPanelBase extends Component<RightPanelProps> {
 
 export const RightPanel = connect(
     (state: AppState) : RightPanelStateProps => ({
-        adminMessages: state.testCase.messages.filter(isAdmin),
-        rejectedMessages: state.testCase.messages.filter(isRejected),
-        adminMessagesEnabled: state.adminMessagesEnabled,
+        adminMessages: state.selected.testCase.messages.filter(isAdmin),
+        rejectedMessages: state.selected.testCase.messages.filter(isRejected),
+        adminMessagesEnabled: state.view.adminMessagesEnabled,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
-        panel: state.rightPane
+        panel: state.view.rightPanel
     }),
     (dispatch) : RightPanelDispatchProps => ({
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),

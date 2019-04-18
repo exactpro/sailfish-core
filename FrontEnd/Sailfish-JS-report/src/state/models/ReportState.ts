@@ -14,25 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-import TestCase from "../models/TestCase";
-import { StatusType } from "../models/Status";
-import SelectedState from './SelectedState';
-import Report from '../models/Report';
-import { Panel } from "../helpers/Panel";
-import Action from '../models/Action';
+import Report from '../../models/Report';
 
-
-export default interface AppState {
+export default interface ReportState {
     report: Report;
     currentTestCasePath: string;
-    testCase: TestCase;
-    checkpointActions: Action[];
-    actionsMap: Map<number, Action>;
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
-    selected: SelectedState;
-    adminMessagesEnabled: boolean;
-    splitMode: boolean;
-    leftPane: Panel;
-    rightPane: Panel;
 }

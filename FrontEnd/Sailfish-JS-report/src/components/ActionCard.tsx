@@ -23,6 +23,7 @@ import "../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../helpers/dateFormatter";
 import { ExceptionChain } from "./ExceptionChain";
 import { Chip } from "./Chip";
+import { createSelector } from '../helpers/styleCreators';
 
 interface CardProps {
     action: Action;
@@ -44,21 +45,19 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         startTime,
         finishTime
     } = action;
-    const rootClassName = [
+    const rootClassName = createSelector(
         "action-card",
         status.status,
-        (isRoot && !isSelected ? "root" : null),
-        (isSelected ? "selected" : null)
-    ].join(' ').toLowerCase(),
-        headerClassName = [
-            "action-card-header",
-            status.status,
-            (isTransaparent && !isSelected ? "transparent" : null)
-        ].join(' ').toLowerCase(),
-        inputParametersClassName = [
-            "action-card-body-params",
-            (isTransaparent && !isSelected ? "transparent" : null)
-        ].join(' ').toLowerCase();
+        isRoot && !isSelected ? "root" : null,
+        isSelected ? "selected" : null
+    ), headerClassName = createSelector(
+        "ac-header",
+        status.status,
+        isTransaparent && !isSelected ? "transparent" : null
+    ), inputParametersClassName = createSelector(
+        "ac-body__input-params",
+        isTransaparent && !isSelected ? "transparent" : null
+    );
 
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
@@ -77,28 +76,32 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
             <ExpandablePanel
                 isExpanded={isExpanded}>
                 <div class={headerClassName}>
-                    <div class="action-card-header-title">
-                        <div class="action-card-header-title-name">
-                            <h3>{action.name}</h3>
+                    <div class="ac-header__title">
+                        <div class="ac-header__name">
+                            <h3>{name}</h3>
                         </div>
-                        <div class="action-card-header-title-description">
-                            <h3>{action.description}</h3>
+                        <div class="ac-header__description">
+                            <h3>{description}</h3>
                         </div>
                     </div>
-                    <div class="action-card-header-time-start">
-                        <span>Start</span>
-                        <p>{formatTime(action.startTime)}</p>
-                    </div>
-                    <div class="action-card-header-time-elapsed">
+                    {
+                        action.startTime ? (
+                            <div class="ac-header__start-time">
+                                <span>Start</span>
+                                <p>{formatTime(action.startTime)}</p>
+                            </div>
+                        ) : null
+                    }
+                    <div class="ac-header__elapsed-time">
                         <h3>{elapsedTime}</h3>
                     </div>
-                    <div class="action-card-header-controls">
-                        <div class="action-card-header-controls-status">
+                    <div class="ac-header__controls">
+                        <div class="ac-header__status">
                             <h3>{action.status.status.toUpperCase()}</h3>
                         </div>
                         {
                             action.relatedMessages.length > 0 ? (
-                                <div class="action-card-header-controls-chips">
+                                <div class="ac-header__chips">
                                     <Chip
                                         count={action.relatedMessages.length}/>
                                 </div>
@@ -106,10 +109,10 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         }
                     </div>
                 </div>
-                <div class="action-card-body">
+                <div class="ac-body">
                     <div class={inputParametersClassName}>
                         <ExpandablePanel>
-                            <h4>Input parameters</h4>
+                            <div class="ac-body__item-title">Input parameters</div>
                             <ParamsTable
                                 params={parameters}
                                 name={name} />
@@ -123,7 +126,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         action.status.status == 'FAILED' ? (
                             <div class="action-card-status">
                                 <ExpandablePanel>
-                                    <h4>Status</h4>
+                                    <div class="ac-body__item-title">Status</div>
                                     <ExceptionChain exception={action.status.cause} />
                                 </ExpandablePanel>
                             </div>

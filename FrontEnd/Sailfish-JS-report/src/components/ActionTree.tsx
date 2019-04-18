@@ -30,6 +30,7 @@ import UserTable from '../models/UserTable';
 import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode } from '../models/util/Tree';
+import { createSelector } from '../helpers/styleCreators';
 
 
 export interface ActionTreeProps {
@@ -287,10 +288,10 @@ export class ActionTree extends Component<ActionTreeProps> {
             return (
                 <div class="action-card">
                     <ExpandablePanel>
-                        <div class="action-card-header">
+                        <div class="ac-header">
                             <h3 style={messageStyle}>{message} - {level}</h3>
                         </div>
-                        <div class="action-card-body">
+                        <div class="ac-body">
                             <pre>{exception && exception.stacktrace}</pre>
                         </div>
                     </ExpandablePanel>
@@ -299,7 +300,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         } else {
             return (
                 <div class="action-card">
-                    <div class="action-card-header">
+                    <div class="ac-header">
                         <h3 style={messageStyle}>{message} - {level}</h3>
                     </div>
                 </div>
@@ -310,10 +311,12 @@ export class ActionTree extends Component<ActionTreeProps> {
     renderVerification({ name, status, entries, messageId }: Verification,
         selectHandelr: Function, isSelected: boolean, isTransaparent, filterFields: StatusType[]) {
 
-        const className = ["action-card-body-verification",
-            (status ? status.status : ""),
-            (isSelected ? "selected" : ""),
-            (isTransaparent && !isSelected ? "transparent" : "")].join(' ').toLowerCase();
+        const className = createSelector(
+            "ac-body__verification",
+            status && status.status,
+            isSelected ? "selected" : null,
+            isTransaparent && !isSelected ? "transparent" : null
+        );
 
         return (
             <div class="action-card">
@@ -324,7 +327,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                         e.cancelBubble = true;
                     }}>
                     <ExpandablePanel>
-                        <h4>{"Verification — " + name + " — " + status.status}</h4>
+                        <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
                         <VerificationTable 
                             params={entries} 
                             status={status.status}/>
@@ -336,9 +339,9 @@ export class ActionTree extends Component<ActionTreeProps> {
 
     renderUserTable(table: UserTable) {
         return (
-            <div class="action-card-body-table">
+            <div class="ac-body__table">
                 <ExpandablePanel>
-                    <h4>{table.name || "Custom table"}</h4>
+                    <div class="ac-body__item-title">{table.name || "Custom table"}</div>
                     <CustomTable
                         content={table.content} />
                 </ExpandablePanel>

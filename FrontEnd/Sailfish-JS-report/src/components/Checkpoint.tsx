@@ -16,6 +16,7 @@
 
 import { h, Component } from "preact";
 import "../styles/checkpoint.scss";
+import { createSelector } from '../helpers/styleCreators';
 
 interface CheckpointProps {
     name: string;
@@ -29,7 +30,10 @@ export class Checkpoint extends Component<CheckpointProps> {
 
     render({ name, count, isSelected, clickHandler, description }: CheckpointProps) {
 
-        const rootClassName = ["checkpoint", (isSelected ? "selected" : "")].join(' ')
+        const rootClassName = createSelector(
+            "checkpoint", 
+            isSelected ? "selected" : ""
+        );
 
         return (
             <div class={rootClassName}

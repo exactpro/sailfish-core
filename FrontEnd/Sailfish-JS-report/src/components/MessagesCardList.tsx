@@ -21,7 +21,7 @@ import { MessageCard } from './MessageCard';
 import Action, { ActionNodeType } from '../models/Action';
 import { StatusType, statusValues } from '../models/Status';
 import { connect } from 'preact-redux';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { Checkpoint } from './Checkpoint';
 import { isCheckpoint, isRejected, isAdmin } from '../helpers/messageType';
@@ -206,16 +206,16 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
 
 export const MessagesCardList = connect(
     (state: AppState): MessagesListStateProps => ({
-        messages: state.testCase.messages,
+        messages: state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
-        checkpoints: state.testCase.messages.filter(isCheckpoint),
-        rejectedMessages: state.testCase.messages.filter(isRejected),
+        checkpoints: state.selected.testCase.messages.filter(isCheckpoint),
+        rejectedMessages: state.selected.testCase.messages.filter(isRejected),
         selectedMessages: state.selected.messagesId,
         selectedCheckpointId: state.selected.checkpointMessageId,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         selectedStatus: state.selected.status,
-        adminMessagesEnabled: state.adminMessagesEnabled,
-        actionsMap: state.actionsMap
+        adminMessagesEnabled: state.view.adminMessagesEnabled,
+        actionsMap: state.selected.actionsMap
     }),
     (dispatch): MessagesListDispatchProps => ({
         messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))

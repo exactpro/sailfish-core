@@ -17,7 +17,8 @@
 import { h } from 'preact';
 import { StatusType, } from '../models/Status';
 import { getStatusChipDescription } from '../helpers/actionType';
-import '../styles/styles.scss';
+import '../styles/chip.scss';
+import { createSelector } from '../helpers/styleCreators';
 
 interface ChipProps {
     count: number;
@@ -28,12 +29,12 @@ interface ChipProps {
 
 export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => {
 
-    const rootClass = [
+    const rootClass = createSelector(
         "chip",
-        (status || "").toLowerCase(),
-        isSelected ? "selected" : "",
-        clickHandler ? "clickable" : ""
-    ].join(' ');
+        status,
+        isSelected ? "selected" : null,
+        clickHandler ? "clickable" : null
+    );
 
     const description = status ? getStatusChipDescription(status) : "";
 
@@ -41,7 +42,9 @@ export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => 
         <div class={rootClass} 
             title={description}
             onClick={e => clickHandler && clickHandler(e)}>
-            <p>{count}</p>
+            <div class="chip__title">
+                <p>{count}</p>
+            </div>
         </div>
     )
 }

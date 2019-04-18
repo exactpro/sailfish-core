@@ -14,13 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import AppState from "./AppState";
-import { statusValues } from "../models/Status";
-import SelectedState from './SelectedState';
-import { Panel } from "../helpers/Panel";
-import Action from '../models/Action';
+import SelectedState from '../models/SelectedState';
+import Action from '../../models/Action';
 
 export const initialSelectedState: SelectedState = {
+    testCase: null,
     actionsId: [],
     scrolledActionId: null,
     messagesId: [],
@@ -28,20 +26,7 @@ export const initialSelectedState: SelectedState = {
     status: 'NA',
     checkpointMessageId: null,
     checkpointActionId: null,
-    rejectedMessageId: null
-}
-
-export const initialAppState: AppState = {
-    report: null,
-    currentTestCasePath: "",
-    actionsFilter: statusValues,
-    fieldsFilter: statusValues,
-    testCase: null,
-    checkpointActions: [],
+    rejectedMessageId: null,
     actionsMap: new Map<number, Action>(),
-    selected: initialSelectedState,
-    adminMessagesEnabled: false,
-    splitMode: true,
-    leftPane: Panel.Actions,
-    rightPane: Panel.Messages
+    checkpointActions: []
 }

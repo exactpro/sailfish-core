@@ -15,7 +15,8 @@
  ******************************************************************************/
 
 import {h} from 'preact';
-import '../styles/styles.scss';
+import '../styles/buttons.scss';
+import { createSelector } from '../helpers/styleCreators';
 
 interface ButtonProps {
     onClick?: Function;
@@ -27,16 +28,18 @@ interface ButtonProps {
 }
 
 export const ToggleButton = ({ onClick, isToggled, text, theme, isDisabled, title }: ButtonProps) => {
-    const className = [
-        "button-root", 
-        (theme || "default"), 
-        (isDisabled ? "disabled" : ""),
-        (isToggled ? "toggled" : "")
-    ].join(' ');
+    const className = createSelector(
+        "toggle-button", 
+        theme || "default", 
+        isDisabled ? "disabled" : null,
+        isToggled ? "toggled" : null
+    );
 
     return (
         <div class={className} onClick={e => onClick && onClick(text)} title={title}>
-            <p>{text}</p>
+            <div class="toggle-button__title">
+                <p>{text}</p>
+            </div>
         </div>
     )
 }

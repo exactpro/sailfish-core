@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import AppState from "../state/AppState";
+import AppState from "../state/models/AppState";
 import { StateActionType } from "../actions/stateActions";
 
 export const TEST_CASE_PARAM_KEY = 'tc',
@@ -50,7 +50,7 @@ function hadnleStateUpdate(prevState : AppState, nextState : AppState) {
 
     if (prevState.selected.actionsId == nextState.selected.actionsId && 
         prevState.selected.messagesId == nextState.selected.messagesId && 
-        prevState.testCase == nextState.testCase) {
+        prevState.selected.testCase == nextState.selected.testCase) {
 
         return;
     }
@@ -65,9 +65,9 @@ function hadnleStateUpdate(prevState : AppState, nextState : AppState) {
 
 // returns new search params, based on state change
 function getNextSearchParams(searchParams : URLSearchParams, prevState : AppState, nextState : AppState) : URLSearchParams {
-    if (prevState.testCase != nextState.testCase) {
-        if (nextState.testCase) {
-            searchParams.set(TEST_CASE_PARAM_KEY, nextState.testCase.id);
+    if (prevState.selected.testCase != nextState.selected.testCase) {
+        if (nextState.selected.testCase) {
+            searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.id);
         } else {
             searchParams.delete(TEST_CASE_PARAM_KEY);
         }

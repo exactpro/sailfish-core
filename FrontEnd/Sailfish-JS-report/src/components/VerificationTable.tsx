@@ -20,7 +20,8 @@ import { StatusType } from "../models/Status";
 import "../styles/tables.scss";
 import { VerificationTableProps } from './VerificationTable';
 import { connect } from 'preact-redux';
-import AppState from "../state/AppState";
+import AppState from "../state/models/AppState";
+import { createSelector } from '../helpers/styleCreators';
 
 const PADDING_LEVEL_VALUE = 15;
 
@@ -80,10 +81,7 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
 
     render({ fieldsFilter, status }: VerificationTableProps, { nodes }: VerificationTableState) {
 
-        const rootClass = [
-            "ver-table",
-            status.toLowerCase()
-        ].join(' ');
+        const rootClass = createSelector("ver-table", status);
 
         return (
             <div class={rootClass}>
@@ -135,14 +133,11 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
 
     private renderValueNode({ name, expected, actual, status }: TableNode, fieldsFilter: StatusType[], paddingLevel: number): JSX.Element {
 
-        const rootClassName = [
+        const rootClassName = createSelector(
                 "ver-table-row-value",
-                !fieldsFilter.includes(status) ? "transparent" : ""
-            ].join(" ").toLowerCase(),
-            statusClassName = [
-                "ver-table-row-value-status",
-                status || ""
-            ].join(" ").toLowerCase();
+                !fieldsFilter.includes(status) ? "transparent" : null
+            ),
+            statusClassName = createSelector("ver-table-row-value-status", status);
 
         return (
             <tr class={rootClassName}>
@@ -164,10 +159,10 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
 
     private renderTooglerNode(node: TableNode, paddingLevel: number): JSX.Element {
 
-        const className = [
+        const className = createSelector(
             "ver-table-row-toggler",
             node.isExpanded ? "expanded" : "collapsed"
-        ].join(' ');
+        );
 
         return (
             <tr class={className}>
@@ -184,7 +179,7 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
 
 export const VerificationTable = connect(
     (state: AppState) => ({
-        fieldsFilter: state.fieldsFilter
+        fieldsFilter: state.filter.fieldsFilter
     }),
     dispatch => ({})
 )(VerificationTableBase);

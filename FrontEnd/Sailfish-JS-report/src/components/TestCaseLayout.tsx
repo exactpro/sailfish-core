@@ -23,16 +23,16 @@ import '../styles/layout.scss';
 
 const TestCaseLayout = () =>  (
     <div class="layout">
-        <div class="layout-header">
+        <div class="layout__header">
             <Header/>
         </div>
-            <div class="layout-body">
-                <SplitView
-                    minPanelPercentageWidth={30}>
-                    <LeftPanel/>
-                    <RightPanel/>
-                </SplitView>
-            </div>
+        <div class="layout__body">
+            <SplitView
+                minPanelPercentageWidth={30}>
+                <LeftPanel/>
+                <RightPanel/>
+            </SplitView>
+        </div>
     </div>
 )
 

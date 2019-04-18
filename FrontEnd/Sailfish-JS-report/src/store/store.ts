@@ -14,17 +14,30 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { appReducer } from '../reducers/reducers';
 import { createStore, applyMiddleware } from 'redux';
-import { initialAppState } from '../state/initialStates';
+import { initialAppState } from '../state/initial/initialAppState';
 import Report from '../models/Report';
 import { urlHandler } from '../middleware/urlHandler';
+import initialReportState from '../state/initial/initialReportState';
+import { combineReducers } from 'redux';
+import { reportReducer } from '../reducers/reportReducer';
+import { selectedReducer } from '../reducers/selectedReducer';
+import { viewReducer } from '../reducers/viewReducer';
+import { filterReducer } from '../reducers/filterReducer';
 
 export const createAppStore = (report: Report) => createStore(
-    appReducer,
+    combineReducers({
+        report: reportReducer,
+        selected: selectedReducer,
+        view: viewReducer,
+        filter: filterReducer
+    }),
     {
         ...initialAppState,
-        report: report
+        report: {
+            ...initialReportState,
+            report: report
+        }
     },
     applyMiddleware(urlHandler)
 )

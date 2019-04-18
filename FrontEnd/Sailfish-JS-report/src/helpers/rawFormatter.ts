@@ -14,8 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-const OFFSET_END = 10,
-      HEXADECIMAL_END = 50;
+const OFFSET_END = 9,
+      HEXADECIMAL_START = 10,
+      HEXADECIMAL_END = 49,
+      CONTENT_START = 52;
  
 /**
  * Splits a raw content into 3 lines : offset, hexadecimal representation and human-readable string.
@@ -27,10 +29,18 @@ export function splitRawContent(raw: string): string[] {
     const ret : string[] = ['', '', ''];
 
     raw.split('\r\n').forEach(row => {
-        ret[0] += row.substring(0, OFFSET_END) + '\r\n';
-        ret[1] += row.substring(OFFSET_END, HEXADECIMAL_END) + '\r\n';
-        ret[2] += row.substring(HEXADECIMAL_END, row.length) + '\r\n';
+        ret[0] += row.substring(0, OFFSET_END) + '\n';
+        ret[1] += row.substring(HEXADECIMAL_START, HEXADECIMAL_END) + '\n';
+        ret[2] += row.substring(CONTENT_START, row.length) + '\n';
     })
 
     return ret;
+}
+
+/**
+ * Removes all '\r' and '\n' symbols from string.
+ * @param content content string
+ */
+export function getUnformattedContent(content: string): string {
+    return content.replace(/\r|\n/g, '');
 }

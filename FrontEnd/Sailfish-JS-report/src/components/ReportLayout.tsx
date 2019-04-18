@@ -17,7 +17,7 @@
 import { h } from 'preact';
 import Report from '../models/Report';
 import { connect } from 'preact-redux';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import { setTestCasePath } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { ReportMetadata } from '../models/ReportMetadata';
@@ -26,6 +26,7 @@ import { StatusType, statusValues } from '../models/Status';
 import TestCaseCard from './TestCaseCard';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
+import { createSelector } from '../helpers/styleCreators';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -41,91 +42,85 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
 
     return (
         <div class="report">
-            <div class="header">
-                <div class="title">{report.name}</div>
-                <a href={OLD_REPORT_PATH} class="old-report-link">
+            <div class="report__header   report-header">
+                <div class="report-header__title">{report.name}</div>
+                <a class="report-header__old-report-link" href={OLD_REPORT_PATH}>
                     <p>Old Version Report</p>
                 </a>
             </div>
-            <div class="summary-title">
+            <div class="report__summary-title   report__title">
                 <p>Report Summary</p>
             </div>
-            <div class="controls">
-                <div class="title">Test Cases</div>
+            <div class="report__controls">
+                <div class="report__title">Test Cases</div>
             </div>
-            <div class="summary">
-                <div class="card">
-                    <div class="logo" />
-                    <div class="info-list">
-                        <div class="item">
-                            <div class="title">Version</div>
-                            <div class="value">{report.version}</div>
-                        </div>
-                        <div class="divider" />
-                        <div class="item">
-                            <div class="title">Host</div>
-                            <div class="value">{report.hostName}</div>
-                        </div>
-                        <div class="item">
-                            <div class="title">User</div>
-                            <div class="value">{report.userName}</div>
-                        </div>
-                        <div class="divider"/>
-                        <div class="item">
-                            <div class="title">ScriptRun ID</div>
-                            <div class="value">{report.scriptRunId}</div>
-                        </div>
-                        <div class="item">
-                            <div class="title">Report Date</div>
-                            <div class="value">{formatTime(report.startTime)}</div>
-                        </div>
-                        <div class="item">
-                            <div class="title">Execution time</div>
-                            <div class="value">{executionTime}</div>
-                        </div>
-                        <div class="divider" />
-                        <div class="item">
-                            <div class="title">Test Cases</div>
-                            <div class="value">{report.metadata.length}</div>
-                        </div>
-                        {
-                            statusValues.map(statusValue => renderStatusInfo(statusValue, report.metadata))
-                        }
-                        <div class="divider" />
-                        {
-                            plugins.length ?
-                                (
-                                    <div class="item">
-                                        <div class="title">Plugins</div>
-                                        <div class="value">
-                                            {plugins.map(([name, version]) => <p>{name}: {version}</p>)}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div class="item">
-                                        <div class="title">No plugins</div>
-                                    </div>
-                                )
-                        }
+            <div class="report__summary   report-summary">
+                <div class="report-summary__card">
+                    <div class="report-summary__logo" />
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">Version</div>
+                        <div class="report-summary__element-value">{report.version}</div>
                     </div>
+                    <div class="report-summary__divider" />
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">Host</div>
+                        <div class="report-summary__element-value">{report.hostName}</div>
+                    </div>
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">User</div>
+                        <div class="report-summary__element-value">{report.userName}</div>
+                    </div>
+                    <div class="report-summary__divider"/>
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">ScriptRun ID</div>
+                        <div class="report-summary__element-value">{report.scriptRunId}</div>
+                    </div>
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">Report Date</div>
+                        <div class="report-summary__element-value">{formatTime(report.startTime)}</div>
+                    </div>
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">Execution time</div>
+                        <div class="report-summary__element-value">{executionTime}</div>
+                    </div>
+                    <div class="report-summary__divider" />
+                    <div class="report-summary__element">
+                        <div class="report-summary__element-title">Test Cases</div>
+                        <div class="report-summary__element-value">{report.metadata.length}</div>
+                    </div>
+                    {
+                        statusValues.map(statusValue => renderStatusInfo(statusValue, report.metadata))
+                    }
+                    <div class="report-summary__divider" />
+                    {
+                        plugins.length ?
+                            (
+                                <div class="report-summary__element">
+                                    <div class="report-summary__element-title">Plugins</div>
+                                    <div class="report-summary__element-value">
+                                        {plugins.map(([name, version]) => <p>{name}: {version}</p>)}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div class="report-summary__element">
+                                    <div class="report-summary__element-title">No plugins</div>
+                                </div>
+                            )
+                    }
                 </div>
             </div>
-            <div class="testcases">
-                <div class="list">  
-                    <HeatmapScrollbar
-                        selectedElements={testCasesHeatmap(report.metadata)}>
-                        {
-                            report.metadata.map((metadata, index) => (
-                                <div class="item">
-                                    <TestCaseCard
-                                        metadata={metadata}
-                                        index={index + 1}
-                                        handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
-                                </div>
-                            ))
-                        }
-                    </HeatmapScrollbar>
-                </div>
+            <div class="report__testcases">
+                <HeatmapScrollbar
+                    selectedElements={testCasesHeatmap(report.metadata)}>
+                    {
+                        report.metadata.map((metadata, index) => (
+                            <TestCaseCard
+                                metadata={metadata}
+                                index={index + 1}
+                                handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
+                        ))
+                    }
+                </HeatmapScrollbar>
             </div>
         </div>
     )
@@ -133,17 +128,18 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
 
 function renderStatusInfo(status: StatusType, metadata: ReportMetadata[]): JSX.Element {
     const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
-        valueClassName = [
-            "value",
+        valueClassName = createSelector(
+            "report-summary__element-value",
+            "bold",
             status.toLowerCase()
-        ].join(' ');
+        );
 
     if (!testCasesCount) {
         return null;
     }
 
     return (
-        <div class="item bold">
+        <div class="report-summary__element">
             <div class={valueClassName}>{status.toUpperCase()}</div>
             <div class={valueClassName}>{testCasesCount}</div>
         </div>
@@ -152,7 +148,7 @@ function renderStatusInfo(status: StatusType, metadata: ReportMetadata[]): JSX.E
 
 const ReportLayout = connect(
     (state: AppState) => ({
-        report: state.report
+        report: state.report.report
     }),
     dispatch => ({
         onTestCaseSelect: (testCaseLink: string) => dispatch(setTestCasePath(testCaseLink))

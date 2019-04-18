@@ -20,7 +20,7 @@ import '../styles/header.scss';
 import { StatusType } from '../models/Status';
 import { FilterPanel } from './FilterPanel';
 import { connect } from 'preact-redux';
-import AppState from '../state/AppState';
+import AppState from '../state/models/AppState';
 import {
     nextTestCase,
     prevTestCase,
@@ -30,6 +30,7 @@ import {
     switchFieldsFilter
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
+import { createSelector } from '../helpers/styleCreators';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -77,50 +78,74 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
             description,
         } = testCase;
 
-        const mainClass = ["header-main", status.status.toLowerCase()].join(' '),
-            infoClass = ["header-info", status.status.toLowerCase(), (showFilter ? "filter" : "")].join(' '),
-            prevButtonClass = ["header-main-name-icon", "left", (prevTestCaseHandler ? "enabled" : "disabled")].join(' '),
-            nextButtonClass = ["header-main-name-icon", "right", (nextTestCaseHandler ? "enabled" : "disabled")].join(' ');
+        const rootClass = createSelector(
+                "header",
+                status.status
+            ), 
+            mainClass = createSelector(
+                "header-main", 
+                status.status
+            ),
+            infoClass = createSelector(
+                "header__info", 
+                showFilter ? "filter-enabled" : null
+            ),
+            prevButtonClass = createSelector(
+                "header-main-name-icon",
+                "left", 
+                prevTestCaseHandler ? "enabled" : "disabled"
+            ),
+            nextButtonClass = createSelector(
+                "header-main-name-icon",
+                "right", 
+                nextTestCaseHandler ? "enabled" : "disabled"
+            );
 
         const period = getSecondsPeriod(startTime, finishTime);
 
         return (
-            <div class="header">
-                <div class={mainClass}>
-                    <div class="header-main-button"
+            <div class={rootClass}>
+                <div class="header__main   header-main">
+                    <div class="header-button   header-main__contol-button"
                         onClick={backToListHandler}>
-                        <div class="header-main-button-icon list" />
-                        <h3>Back to list</h3>
+                        <div class="header-button__icon go-back" />
+                        <div class="header-button__title">Back to list</div>
                     </div>
-                    <div class="header-main-name">
-                        <div class={prevButtonClass}
-                            onClick={prevTestCaseHandler} />
-                        <h1>{(name || 'Test Case')} — {status.status} — {period}</h1>
-                        <div class={nextButtonClass}
-                            onClick={nextTestCaseHandler} />
+                    <div class="header-main__name ">
+                        <div class="header-button"
+                            onClick={prevTestCaseHandler}>
+                            <div class="header-button__icon left"/>
+                        </div>
+                        <div class="header-main__title">
+                            {(name || 'Test Case')} — {status.status} — {period}
+                        </div>
+                        <div class="header-button"
+                            onClick={nextTestCaseHandler}>
+                            <div class="header-button__icon right"/>
+                        </div>
                     </div>
-                    <div class="header-main-button" onClick={() => this.switchFilter()}>
-                        <div class="header-main-button-icon filter" />
-                        <h3>{showFilter ? "Hide filter" : "Show filter"}</h3>
+                    <div class="header-button   header-main__contol-button" onClick={() => this.switchFilter()}>
+                        <div class="header-button__icon filter" />
+                        <div class="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
                     </div>
                 </div>
                 <div class={infoClass}>
-                    <div class="header-info-start">
+                    <div class="header__info-element">
                         <span>Start:</span>
                         <p>{formatTime(startTime)}</p>
                     </div>
-                    <div class="header-info-finish">
+                    <div class="header__info-element">
                         <span>Finish:</span>
                         <p>{formatTime(finishTime)}</p>
                     </div>
-                    <div class="header-info-description">
-                        <h2>{description}</h2>
+                    <div class="header__description">
+                        {description}
                     </div>
-                    <div class="header-info-id">
+                    <div class="header__info-element">
                         <span>ID:</span>
                         <p>{id}</p>
                     </div>
-                    <div class="header-info-hash">
+                    <div class="header__info-element">
                         <span>Hash:</span>
                         <p>{hash}</p>
                     </div>
@@ -147,10 +172,10 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
 
 export const Header = connect(
     (state: AppState) => ({
-        testCase: state.testCase,
-        splitMode: state.splitMode,
-        actionsFilter: state.actionsFilter,
-        fieldsFilter: state.fieldsFilter
+        testCase: state.selected.testCase,
+        splitMode: state.view.splitMode,
+        actionsFilter: state.filter.actionsFilter,
+        fieldsFilter: state.filter.fieldsFilter
     }),
     dispatch => ({
         nextTestCaseHandler: () => dispatch(nextTestCase()),

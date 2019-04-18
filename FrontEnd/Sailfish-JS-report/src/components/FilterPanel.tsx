@@ -29,8 +29,8 @@ interface FilterPanelProps {
 export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsFilters, fieldsFilters }: FilterPanelProps) => {
     return (
         <div class="header-filter">
-            <div class="header-filter-togglers">
-                <h5>Actions</h5>
+            <div class="header-filter__togglers">
+                <div class="header-filter__togglers-title">Actions</div>
                 <ToggleButton text="Passed"
                     isToggled={actionsFilters.includes("PASSED")}
                     onClick={() => actionFilterHandler("PASSED")}
@@ -44,8 +44,8 @@ export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsF
                     onClick={() => actionFilterHandler("CONDITIONALLY_PASSED")}
                     theme="green" />
             </div>
-            <div class="header-filter-togglers">
-                <h5>Fields</h5>
+            <div class="header-filter__togglers">
+                <div class="header-filter__togglers-title">Fields</div>
                 <ToggleButton text="Passed"
                     isToggled={fieldsFilters.includes("PASSED")}
                     onClick={() => fieldsFilterHandler("PASSED")}
