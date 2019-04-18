@@ -16,16 +16,46 @@
 
 import { h, Component } from 'preact';
 import { VirtualizedList } from './VirtualizedList';
+import MessageCardExpandState from '../models/view/MessageCardExpandState';
+import { connect } from 'preact-redux';
+import AppState from '../state/models/AppState';
 
-interface MessagesVirtualizedListProps {
+interface MessagesVirtualizedListOwnProps {
     messagesCount: number;
-    messageRenderer: (index: number, isExpanded: boolean, expandHandler: (isExpanded: boolean) => any) => JSX.Element;
+    messageRenderer: (
+        index: number, 
+        messageState: MessageCardExpandState,
+        messageStateHandler: (nextState: MessageCardExpandState) => any
+    ) => JSX.Element;
 }
 
-export class MessagesVirtualizedList extends Component<MessagesVirtualizedListProps> {
+interface MessagesVirtualizedListStateProps {
+    adminMessagesEnabled: boolean;
+}
 
-    private expanedeStates : boolean[] = [];
-    private list : VirtualizedList
+interface MessagesVirtualizedListProps extends MessagesVirtualizedListOwnProps, MessagesVirtualizedListStateProps {}
+
+class MessagesVirtualizedListBase extends Component<MessagesVirtualizedListProps> {
+
+    private messagesCardStates : MessageCardExpandState[] = [];
+    private list : VirtualizedList;
+
+    componentWillMount() {
+        this.updateMessagesStates(this.props.messagesCount);
+    }
+
+    componentWillReceiveProps(nextProps: MessagesVirtualizedListProps) {
+        // TODO: we will need it in the future, when we select other testcase, and we need to reset all messages card expand states
+        // if (nextProps.messageRenderer !== this.props.messageRenderer) {
+        //     this.updateMessagesStates(nextProps.messagesCount);
+        // } 
+
+        if (nextProps.adminMessagesEnabled !== this.props.adminMessagesEnabled) {
+            this.messagesCardStates = this.messagesCardStates.map(state => ({...state, adminExpanded: nextProps.adminMessagesEnabled }));
+            this.list.measurerCache.clearAll();
+            this.list.forceUpdateList();
+        }
+    }
 
     render({messagesCount}: MessagesVirtualizedListProps) {
         return (
@@ -39,19 +69,34 @@ export class MessagesVirtualizedList extends Component<MessagesVirtualizedListPr
     }
 
     private rowRenderer = (index: number): JSX.Element => {
-        const isExpanded = this.expanedeStates[index];
+        const state = this.messagesCardStates[index];
 
         return this.props.messageRenderer(
             index,
-            isExpanded,
-            (newIsExpanded: boolean) => this.expandHandler(newIsExpanded, index)
-        )
+            state,
+            (nextState: MessageCardExpandState) => this.messageCardStateHandler(nextState, index)
+        );
     }
 
-    private expandHandler(isExpanded: boolean, elementIndex: number) {
-        this.expanedeStates[elementIndex] = isExpanded;
-        this.list.measurerCache.clear(elementIndex);
+    private updateMessagesStates(messagesCount: number) {
+        // init message cards states 
+        this.messagesCardStates = new Array<MessageCardExpandState>(messagesCount).fill({});
+    }
+
+    private measureElement(index: number) {
+        this.list.measurerCache.clear(index);
         this.list.forceUpdateList();
+    }
+
+    private messageCardStateHandler(nextState: MessageCardExpandState, elementIndex: number) {
+        this.messagesCardStates[elementIndex] = nextState;
+        this.measureElement(elementIndex);
     }
 }
 
+export const MessagesVirtualizedList = connect(
+    (state: AppState): MessagesVirtualizedListStateProps => ({
+        adminMessagesEnabled: state.view.adminMessagesEnabled
+    }),
+    dispatch => ({})
+)(MessagesVirtualizedListBase);

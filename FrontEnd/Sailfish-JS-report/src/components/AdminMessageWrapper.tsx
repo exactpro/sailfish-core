@@ -16,7 +16,7 @@
 
 import {h, Component} from "preact";
 import "../styles/messages.scss";
-import { MessageCardProps, MessageCard, MessageCardContainer } from "./MessageCard";
+import { MessageCardProps, MessageCardContainer, MessageCardBase } from "./MessageCard";
 import Message from '../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
 import { StatusType } from "../models/Status";
@@ -24,116 +24,91 @@ import { createSelector, createBemBlock } from '../helpers/styleCreators';
 
 interface WrapperProps extends MessageCardProps {
     isExpanded: boolean;
+    expandHandler: (isExpanded: boolean) => any;
 }
 
-interface WrapperState {
-    isExpanded: boolean;
-}
+const AdminMessageWrapperBase = (props: WrapperProps) => {
 
-class AdminMessageWrapperBase extends Component<WrapperProps, WrapperState> {
+    if (props.isExpanded) {
 
-    constructor(props: WrapperProps) {
-        super(props);
-
-        this.state = {
-            isExpanded: props.isExpanded
-        }
-    }
-
-    componentWillReceiveProps(nextProps: WrapperProps) {
-        if (this.props.isExpanded !== nextProps.isExpanded) {
-            this.setState({isExpanded: nextProps.isExpanded})
-        }
-    }
-
-    render(props: WrapperProps, {isExpanded}: WrapperState) {
-
-        if (isExpanded) {
-
-            const expandButtonClass = createBemBlock(
-                "mc-expand-btn", 
-                props.message.content.rejectReason != null ? "rejected" : null
-            );
-
-            return (
-                <div style={{position: "relative"}}>
-                    <MessageCard {...props}/>
-                    <div class={expandButtonClass}>
-                        <div class="mc-expand-btn__icon" onClick={this.expandButtonHandler}/>
-                    </div>
-                </div>
-            );
-        }
-
-        const rootClass = createBemBlock(
-            "message-card",
-            props.status,
-            props.isSelected ? "selected" : null
+        const expandButtonClass = createBemBlock(
+            "mc-expand-btn", 
+            props.message.content.rejectReason != null ? "rejected" : null
         );
 
         return (
-            <div class={rootClass}
-                onClick={() => props.selectHandler()}>
-                <div class="message-card__labels">
-                    {this.renderMessageTypeLabels(props.message)}
-                </div>
-                <div class="message-card__header   mc-header small"
-                    data-lb-count={this.getLabelsCount(props.message)}>
-                    <div class="mc-header__info">
-                        <MessageCardActionChips
-                            message={props.message}/>
-                    </div>
-                    <div class="mc-header__name">Name</div>
-                    <div class="mc-header__name-value">{props.message.msgName}</div>
-                    <div class="mc-header__expand">
-                        <div class="mc-header__expand-icon" onClick={this.expandButtonHandler}/>
-                    </div>
+            <div style={{position: "relative"}}>
+                <MessageCardBase {...props}/>
+                <div class={expandButtonClass}>
+                    <div class="mc-expand-btn__icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
                 </div>
             </div>
         );
     }
 
-    private renderMessageTypeLabels(message: Message): JSX.Element[] {
-        let labels = [];
+    const rootClass = createBemBlock(
+        "message-card",
+        props.status,
+        props.isSelected ? "selected" : null
+    );
 
-        if (message.content.rejectReason !== null) {
-            labels.push(
-                <div class="mc-label rejected">
-                    <div class="mc-label__icon rejected" style={{marginTop: "10px"}}/>
+    return (
+        <div class={rootClass}
+            onClick={() => props.selectHandler()}>
+            <div class="message-card__labels">
+                {renderMessageTypeLabels(props.message)}
+            </div>
+            <div class="message-card__header   mc-header small"
+                data-lb-count={getLabelsCount(props.message)}>
+                <div class="mc-header__info">
+                    <MessageCardActionChips
+                        message={props.message}/>
                 </div>
-            );
-        }
-
-        if (message.content.admin) {
-            labels.push(
-                <div class="mc-label admin">
-                    <div class="mc-label__icon admin" style={{marginTop: "10px"}}/>
+                <div class="mc-header__name">Name</div>
+                <div class="mc-header__name-value">{props.message.msgName}</div>
+                <div class="mc-header__expand">
+                    <div class="mc-header__expand-icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
                 </div>
-            )
-        }
-
-        return labels;
-    }
-
-    private getLabelsCount(message: Message) {
-        let count = 0;
-
-        if (message.content.rejectReason != null) {
-            count++;
-        }
-
-        if (message.content.admin) {
-            count++;
-        }
-
-        return count;
-    }
-
-    private expandButtonHandler = () => {
-        this.setState({
-            isExpanded: !this.state.isExpanded
-        });
-    }
+            </div>
+        </div>
+    );
 }
+
+function renderMessageTypeLabels(message: Message): JSX.Element[] {
+    let labels = [];
+
+    if (message.content.rejectReason !== null) {
+        labels.push(
+            <div class="mc-label rejected">
+                <div class="mc-label__icon rejected" style={{marginTop: "10px"}}/>
+            </div>
+        );
+    }
+
+    if (message.content.admin) {
+        labels.push(
+            <div class="mc-label admin">
+                <div class="mc-label__icon admin" style={{marginTop: "10px"}}/>
+            </div>
+        )
+    }
+
+    return labels;
+}
+
+function getLabelsCount(message: Message) {
+    let count = 0;
+
+    if (message.content.rejectReason != null) {
+        count++;
+    }
+
+    if (message.content.admin) {
+        count++;
+    }
+
+    return count;
+}
+
 
 export const AdminMessageWrapper = MessageCardContainer(AdminMessageWrapperBase);

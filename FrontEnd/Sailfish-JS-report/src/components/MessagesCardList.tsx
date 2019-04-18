@@ -30,15 +30,14 @@ import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { messagesHeatmap } from '../helpers/heatmapCreator';
 import { selectMessage } from '../actions/actionCreators';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
+import MessageCardExpandState from '../models/view/MessageCardExpandState';
 
 interface MessagesListStateProps {
     messages: Message[];
     scrolledMessageId: Number;
     checkpoints: Message[];
     rejectedMessages: Message[];
-    adminMessagesEnabled: boolean;
     selectedCheckpointId: number;
-    selectedMessages: number[];
 }
 
 interface MessagesListDispatchProps {
@@ -70,19 +69,19 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
     }
 
     componentDidMount() {
-        const selectedMessageId = this.props.selectedMessages[0];
+        //const selectedMessageId = this.props.selectedMessages[0];
 
         // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
         // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
         // At this point React passed components tree to DOM, however it still could be not redered.
         // First callback will be called before actual render
         // Second callback will be called when DOM is fully rendered.
-        window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(() => {
-                // smooth behavior doesn't work here because render is not complete yet
-                this.scrollToMessage(selectedMessageId, false);
-            });
-        });
+        // window.requestAnimationFrame(() => {
+        //     window.requestAnimationFrame(() => {
+        //         // smooth behavior doesn't work here because render is not complete yet
+        //         this.scrollToMessage(selectedMessageId, false);
+        //     });
+        // });
     }
 
     scrollToMessage(messageId: number, isSmooth: boolean = true) {
@@ -99,32 +98,32 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
             <div class="messages-list">
                 <MessagesVirtualizedList
                     messagesCount={messages.length}
-                    messageRenderer={(index, showRaw, showRawHandler) => this.renderMessage(messages[index], showRaw, showRawHandler)}/>
+                    messageRenderer={(index, ...renderProps) => this.renderMessage(messages[index], ...renderProps)}/>
             </div>
         );
     }
 
-    private renderMessage(message: Message, showRaw: boolean, showRawHandler: (showRaw: boolean) => any) {
+    private renderMessage(message: Message, expandState: MessageCardExpandState, messageStateHandler: (nextState: MessageCardExpandState) => any) {
 
-        const { checkpoints, rejectedMessages, selectedCheckpointId, adminMessagesEnabled } = this.props;
+        const { checkpoints, rejectedMessages, selectedCheckpointId } = this.props;
 
         if (isCheckpoint(message)) {
             return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
         }
 
         if (isAdmin(message)) {
-            return this.renderAdmin(message, adminMessagesEnabled);
+            return this.renderAdmin(message, expandState, messageStateHandler);
         }
 
         if (isRejected(message)) {
-            return this.renderRejected(message, rejectedMessages);
+            return this.renderRejected(message, rejectedMessages, expandState.showRaw, showRaw => messageStateHandler({ ...expandState, showRaw: showRaw }));
         }
 
         return (
             <MessageCard
                 message={message}
-                showRaw={showRaw}
-                showRawHandler={showRawHandler}
+                showRaw={expandState.showRaw}
+                showRawHandler={showRaw => messageStateHandler({ showRaw: showRaw })}
             />
         );
     }
@@ -142,22 +141,27 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
         )
     }
 
-    private renderRejected(message: Message, rejectedMessages: Message[]) {
+    private renderRejected(message: Message, rejectedMessages: Message[], showRaw: boolean, showRawHandler: (showRaw: boolean) => any) {
         const rejectedCount = rejectedMessages.indexOf(message) + 1;
 
         return (
             <MessageCard
                 message={message}
+                showRaw={showRaw}
+                showRawHandler={showRawHandler}
                 rejectedMessagesCount={rejectedCount} />
         )
     }
 
-    private renderAdmin(message: Message, adminMessagesEnabled: boolean) {        
+    private renderAdmin(message: Message, expandState: MessageCardExpandState, messageStateHandler: (nextState: MessageCardExpandState) => any) {        
         return (
             <AdminMessageWrapper
                 message={message}
                 key={message.id}
-                isExpanded={adminMessagesEnabled}
+                showRaw={expandState.showRaw}
+                showRawHandler={showRaw => messageStateHandler({ ...expandState, showRaw: showRaw })}
+                isExpanded={expandState.adminExpanded}
+                expandHandler={isExpanded => messageStateHandler({ ...expandState, adminExpanded: isExpanded })}
             />
         )
     }
@@ -169,9 +173,7 @@ export const MessagesCardList = connect(
         scrolledMessageId: state.selected.scrolledMessageId,
         checkpoints: state.selected.testCase.messages.filter(isCheckpoint),
         rejectedMessages: state.selected.testCase.messages.filter(isRejected),
-        selectedMessages: state.selected.messagesId,
-        selectedCheckpointId: state.selected.checkpointMessageId,
-        adminMessagesEnabled: state.view.adminMessagesEnabled
+        selectedCheckpointId: state.selected.checkpointMessageId
     }),
     (dispatch): MessagesListDispatchProps => ({
         messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))

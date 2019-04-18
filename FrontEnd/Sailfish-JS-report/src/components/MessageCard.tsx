@@ -34,8 +34,8 @@ const HUE_SEGMENTS_COUNT = 36;
 
 export interface MessageCardOwnProps {
     message: Message;
-    rejectedMessagesCount?: number;
     showRaw?: boolean;
+    rejectedMessagesCount?: number;
     showRawHandler?: (showRaw: boolean) => any;
 }
 
@@ -50,7 +50,7 @@ interface MessageCardDispatchProps {
 
 export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps { }
 
-const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
+export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
     const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
