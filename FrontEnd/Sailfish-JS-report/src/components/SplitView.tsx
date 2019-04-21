@@ -124,16 +124,11 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
     }
 
     render({children, minPanelPercentageWidth}: SplitViewProps, {leftPanelWidth, isDragging} : SplitState) {
-        // codition with root - first render
-        const splitterPercentageWidth = (this.root ? SPLITTER_WIDTH / this.root.offsetWidth * 100 : 50);
-
-        let percentageRightWidth = (this.root ? 
-            (this.root.offsetWidth - leftPanelWidth) / this.root.offsetWidth * 100 -  splitterPercentageWidth / 2 
-            : 50); 
-        let percentageLeftWidth = (this.root ? 
-            leftPanelWidth / this.root.offsetWidth * 100 - splitterPercentageWidth / 2
-            : 50); 
-
+        let rightWidth = (this.root ?
+            (this.root.offsetWidth - leftPanelWidth) -  SPLITTER_WIDTH / 2
+            : 50);
+        let leftWidth = leftPanelWidth -  SPLITTER_WIDTH / 2;
+/*
         if (percentageRightWidth < minPanelPercentageWidth) {
             percentageRightWidth = minPanelPercentageWidth - splitterPercentageWidth;
             percentageLeftWidth = 100 - minPanelPercentageWidth - splitterPercentageWidth;
@@ -141,7 +136,7 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
             percentageLeftWidth = minPanelPercentageWidth - splitterPercentageWidth;
             percentageRightWidth = 100 - minPanelPercentageWidth - splitterPercentageWidth;
         }
-
+*/
         const leftClassName = createSelector("splitter-pane-left", isDragging ? "dragging" : null),
               rightClassName = createSelector("splitter-pane-right", isDragging ? "dragging" : null),
               splitterClassName = createSelector("splitter-bar", isDragging ? "dragging" : null),
@@ -149,7 +144,7 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
 
         return (
             <div class={rootClassName} ref={ref => this.root = ref}
-                style={{gridTemplateColumns: `${percentageLeftWidth}% ${SPLITTER_WIDTH}px ${percentageRightWidth}%`}}>
+                style={{gridTemplateColumns: `${leftWidth}px ${SPLITTER_WIDTH}px ${rightWidth}px`}}>
                 <div class={leftClassName} 
                     ref={ref => this.leftPanel = ref}>
                     {children[0]}

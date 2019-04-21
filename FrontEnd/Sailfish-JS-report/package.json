@@ -19,7 +19,7 @@
     "icon-font-loader": "^1.5.7",
     "node-sass": "^4.9.4",
     "postcss-loader": "^3.0.0",
-    "preact": "^8.3.1",
+    "preact": "^8.4.2",
     "preact-redux": "^2.0.3",
     "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.7",
@@ -32,7 +32,7 @@
     "webpack-dev-server": "^3.1.10"
   },
   "dependencies": {
-    "preact-compat": "^3.18.4",
+    "preact-compat": "^3.18.5",
     "preact-custom-scrollbars": "^4.0.4",
     "react-virtualized": "^9.21.0"
   }
