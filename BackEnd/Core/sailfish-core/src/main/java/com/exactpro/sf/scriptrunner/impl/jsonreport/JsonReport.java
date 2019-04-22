@@ -458,10 +458,11 @@ public class JsonReport implements IScriptReport {
     }
 
     public void createLogTable(List<String> header, List<LoggerRow> rows) {
-        assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
-
-        List<IJsonReportNode> logs = rows.stream().map(LogEntry::new).collect(Collectors.toList());
-        getCurrentContextNode().addSubNodes(logs);
+//        FIXME: please rollback these changes when logs will be used on the front
+//        assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
+//
+//        List<IJsonReportNode> logs = rows.stream().map(LogEntry::new).collect(Collectors.toList());
+//        getCurrentContextNode().addSubNodes(logs);
     }
 
     public void setOutcomes(OutcomeCollector outcomes) {
