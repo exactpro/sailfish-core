@@ -17,7 +17,7 @@
 import { h, Component } from 'preact';
 import { connect } from 'preact-redux';
 import '../styles/layout.scss';
-import { Panel } from '../helpers/Panel';
+import { Panel } from '../util/Panel';
 import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';

@@ -14,11 +14,28 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from '../../util/Panel';
+import { Component } from 'preact';
 
-export default interface ViewState {
-    adminMessagesEnabled: boolean;
-    splitMode: boolean;
-    leftPanel: Panel;
-    rightPanel: Panel;
+export default abstract class PureComponent<PROPS = {}, STATE = {}> extends Component<PROPS, STATE> {
+
+    shouldComponentUpdate(nextProps: PROPS, nextState: STATE) {
+        return !(shallowEqual(nextProps, this.props) && shallowEqual(nextState, this.state));
+    }
+    
+}
+
+function shallowEqual(source: any, target: any): boolean {
+    for (let [key, value] of Object.entries(source)) {
+        if (target[key] !== value) {
+            return false;
+        }
+    }
+
+    for (let key in target) {
+        if (!(key in source)) {
+            return false;
+        }
+    }
+
+    return true;
 }

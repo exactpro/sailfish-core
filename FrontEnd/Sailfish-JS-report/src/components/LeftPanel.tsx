@@ -17,7 +17,7 @@
 import { h, Component } from 'preact';
 import { connect } from 'preact-redux';
 import '../styles/layout.scss';
-import { Panel } from '../helpers/Panel';
+import { Panel } from '../util/Panel';
 import { ToggleButton } from './ToggleButton';
 import Action from '../models/Action';
 import { ActionsList } from './ActionsList';

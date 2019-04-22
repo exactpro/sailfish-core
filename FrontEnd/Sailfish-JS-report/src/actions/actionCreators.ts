@@ -44,7 +44,7 @@ import TestCase from "../models/TestCase";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
-import { Panel } from "../helpers/Panel";
+import { Panel } from "../util/Panel";
 import Message from '../models/Message';
 import { SubmittedData } from "../models/MlServiceResponse";
 

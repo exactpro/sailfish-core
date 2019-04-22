@@ -17,7 +17,7 @@
 import ViewState from '../state/models/ViewState';
 import initialViewState from '../state/initial/initialViewState';
 import { StateActionType, StateActionTypes } from '../actions/stateActions';
-import { Panel } from '../helpers/Panel';
+import { Panel } from '../util/Panel';
 
 export function viewReducer(state : ViewState = initialViewState, stateAction: StateActionType) : ViewState {
     switch(stateAction.type) {

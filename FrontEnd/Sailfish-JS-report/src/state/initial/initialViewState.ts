@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from "../../helpers/Panel";
+import { Panel } from "../../util/Panel";
 import ViewState from '../models/ViewState';
 
 const initialViewState : ViewState = {
