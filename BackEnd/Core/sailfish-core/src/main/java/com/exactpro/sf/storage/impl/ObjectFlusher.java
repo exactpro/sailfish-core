@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import com.exactpro.sf.common.logging.CommonLoggers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +38,7 @@ import com.exactpro.sf.storage.IObjectFlusher;
 public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
-    private static final Logger USER_EVENTS_LOG = LoggerFactory.getLogger("USER_EVENTS_LOG");
+    private static final Logger USER_EVENTS_LOG = CommonLoggers.USER_EVENTS_LOGGER;
 
     private static final long JOIN_TIMEOUT = 2000;
 

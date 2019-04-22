@@ -17,6 +17,11 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
 <actions>
+    <action description="Common" title="Common">
+        <actionClassName name="com.exactpro.sf.actions.CommonActions"/>
+        <utilityClassName name="com.exactpro.sf.actions.DateUtil"/>
+        <utilityClassName name="com.exactpro.sf.actions.MathUtil"/>
+    </action>
 	<action description="New Generator" title="New Generator">
         <actionClassName name="com.exactpro.sf.actions.TestActions"/>
         <utilityClassName name="com.exactpro.sf.actions.ConvertUtil"/>
@@ -33,4 +38,5 @@
         <utilityClassName name="com.exactpro.sf.actions.MathUtil"/>
         <utilityClassName name="com.exactpro.sf.actions.MiscUtils"/>
 	</action>
+
 </actions>

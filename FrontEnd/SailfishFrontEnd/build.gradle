@@ -139,9 +139,11 @@ dependencies {
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
+        compile "com.exactpro.sf:extension-aml-3:${artifactCoreVersion}"
     } else {
         compile project(':BackEnd:Core:sailfish-core')
         compile project(':FrontEnd:Sailfish-REST-API-client')
+        compile project(':BackEnd:Extension:extension-aml-3')
     }
 
 

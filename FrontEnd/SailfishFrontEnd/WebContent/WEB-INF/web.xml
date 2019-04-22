@@ -182,6 +182,19 @@
     	<filter-name>Application errors filter</filter-name>
         <filter-class>com.exactpro.sf.testwebgui.servlets.filters.ApplicationErrorFilter</filter-class>
 	</filter>
+
+	<filter>
+		<filter-name>CorsFilter</filter-name>
+		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
+		<init-param>
+			<param-name>cors.allowed.origins</param-name>
+			<param-value>*</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.allowed.methods</param-name>
+			<param-value>GET,POST,HEAD,OPTIONS,PUT</param-value>
+		</init-param>
+	</filter>
   
 	<filter-mapping>
     	<filter-name>PrimeFaces FileUpload Filter</filter-name>
@@ -201,6 +214,11 @@
 	<filter-mapping>
     	<filter-name>Application errors filter</filter-name>
     	<servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>CorsFilter</filter-name>
+		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	
 	

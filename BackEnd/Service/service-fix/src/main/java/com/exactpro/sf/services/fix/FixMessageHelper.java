@@ -122,10 +122,7 @@ public class FixMessageHelper extends MessageHelper {
             subMessage = getMessageFactory().createMessage(TRAILER, getNamespace());
         }
         message.addField(TRAILER, subMessage);
-        
-        if (!subMessage.isFieldSet(CHECK_SUM)) {
-            subMessage.addField(CHECK_SUM, null); //Set default value for TreeComparer
-        }
+
         return message;
     }
 

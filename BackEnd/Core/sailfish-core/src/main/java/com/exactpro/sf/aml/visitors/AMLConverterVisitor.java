@@ -203,7 +203,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
                         // hack to support old namespaces for FIX messages
                         if(cellValue.startsWith("quickfix.fix")) {
-                            cellValue = "com.exactpro." + cellValue;
+                            cellValue = "com.exactpro.sf." + cellValue;
                         }
 
                         if(actionURI == null && element.containsCell(Column.Reference)) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "vars";
+@import "./common/vars";
 
 .ver-table {
     @include default-table;
@@ -99,7 +99,11 @@
                 }
 
                 &.conditionally_passed {
-                    color: $conditionallyTextColor;
+                    color: $conditionallyPassedTextColor;
+                }
+
+                &.conditionally_failed {
+                    color: $conditionallyFailedTextColor;
                 }
             }
 

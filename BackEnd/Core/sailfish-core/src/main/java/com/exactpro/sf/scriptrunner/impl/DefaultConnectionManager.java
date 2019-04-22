@@ -104,10 +104,11 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     private final ReadWriteLock lock;
 
-	/**
+    /**
 	 * Operations with this collections should be synchronized
 	 */
 	private final Set<String> usedServices;
+    private final Map<String, ServiceDescription> defaultServices;
 
 	public DefaultConnectionManager(
             IServiceFactory staticServiceFactory,
@@ -138,7 +139,9 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
 		this.usedServices = new HashSet<>();
 
-		ServiceName serviceName = null;
+        this.defaultServices = new HashMap<>();
+
+        ServiceName serviceName = null;
 		for (ServiceDescription serviceDescription : this.storage.getServiceDescriptions()) {
 		    serviceName = new ServiceName(serviceDescription.getEnvironment(), serviceDescription.getName());
 			IService service = staticServiceFactory.createService(serviceDescription.getType());
@@ -204,7 +207,54 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	    }
 	}
 
-	@Override
+    @Override
+    public void addDefaultService(ServiceDescription serviceDescription, IServiceNotifyListener exceptionListener) {
+        serviceDescription = serviceDescription.clone();
+        String serviceName = serviceDescription.getName();
+
+        try {
+            lock.writeLock().lock();
+
+            if(defaultServices.putIfAbsent(serviceName, serviceDescription) != null) {
+                throw new StorageException("Default service already exists: " + serviceName);
+            }
+
+            for(String environment : envStorage.list()) {
+                if(services.containsKey(new ServiceName(environment, serviceName))) {
+                    continue;
+                }
+
+                ServiceDescription clonedDescription = serviceDescription.clone();
+                clonedDescription.setEnvironment(environment);
+
+                addServiceWithoutNewThread(clonedDescription, exceptionListener);
+            }
+        } catch(Exception e) {
+            defaultServices.remove(serviceName);
+            exceptionNotify(exceptionListener, e);
+            throw new ServiceException(e.getMessage(), e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
+    public void removeDefaultService(String serviceName, IServiceNotifyListener exceptionListener) {
+        try {
+            lock.writeLock().lock();
+
+            if(defaultServices.remove(serviceName) == null) {
+                throw new StorageException("Default service does not exist: " + serviceName);
+            }
+        } catch(Exception e) {
+            exceptionNotify(exceptionListener, e);
+            throw new ServiceException(e.getMessage(), e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    @Override
     public Future<?> addService(ServiceDescription serviceDescription, IServiceNotifyListener notifyListener) {
         return serviceExecutor.submit(() -> addServiceWithoutNewThread(serviceDescription.clone(), notifyListener));
     }
@@ -601,6 +651,12 @@ public final class DefaultConnectionManager implements IConnectionManager {
                     envStorage.add(envName);
                     EnvironmentEvent event = new ChangeEnvironmentEvent(envName, "Environment was added", Status.ADDED);
                     environmentMonitor.onEvent(event);
+
+                    for(ServiceDescription serviceDescription : defaultServices.values()) {
+                        serviceDescription = serviceDescription.clone();
+                        serviceDescription.setEnvironment(envName);
+                        addServiceWithoutNewThread(serviceDescription, notifyListener);
+                    }
                 } catch (Exception e) {
                     exceptionNotify(notifyListener, e);
                     throw new StorageException(e.getMessage(), e);
@@ -713,6 +769,10 @@ public final class DefaultConnectionManager implements IConnectionManager {
             List<ServiceName> names = new ArrayList<>();
 
             services.forEach((name, container) -> {
+                if(!name.getEnvironment().equals(environmentName)) {
+                    return;
+                }
+
                 ServiceStatus status = container.getService().getStatus();
 
                 if(status == ServiceStatus.STARTED || status == ServiceStatus.WARNING) {

@@ -318,6 +318,7 @@ public class ScriptrunEventHTMLBuilder {
 	private static String buildExecuted(TestScriptDescription descr, ISFContext context) {
 
 		String environmentName = descr.getContext().getEnvironmentName();
+        String environmentVariableSet = descr.getContext().getEnvironmentVariableSet();
 		String language = Objects.toString(descr.getLanguageURI(), "");
         String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
@@ -341,6 +342,10 @@ public class ScriptrunEventHTMLBuilder {
                 sb.append("<div class='eps-result-environment-name' title='Environment name'> " + environmentName + " <span title='Auto start' class='isAutoStartEnabled'>" + autoStart + "</span></div>");
                 sb.append("<div class='eps-result-aml-version' title='Language'> " + language + "</div>");
 				sb.append("<div class='eps-result-range' title='Range'>" + range + "</div>");
+
+                if(environmentVariableSet != null) {
+                    sb.append("<div class='eps-result-environment-variable-set' title='Environment variable set'>" + environmentVariableSet + "</div>");
+                }
             sb.append("</div>");
 
         sb.append("</div>");
@@ -368,6 +373,7 @@ public class ScriptrunEventHTMLBuilder {
 	private static String buildCanceled(TestScriptDescription descr) {
 
 		String environmentName = descr.getContext().getEnvironmentName();
+        String environmentVariableSet = descr.getContext().getEnvironmentVariableSet();
 		String language = Objects.toString(descr.getLanguageURI(), "");
         String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
@@ -391,6 +397,10 @@ public class ScriptrunEventHTMLBuilder {
             	sb.append("<div class='eps-result-environment-name' title='Environment name'> " + environmentName + " <span title='Auto start' class='isAutoStartEnabled'>" + autoStart + "</span></div>");
                 sb.append("<div class='eps-result-aml-version' title='Language'> " + language + "</div>");
 				sb.append("<div class='eps-result-range' title='Range'>" + range + "</div>");
+
+                if(environmentVariableSet != null) {
+                    sb.append("<div class='eps-result-environment-variable-set' title='Environment variable set'>" + environmentVariableSet + "</div>");
+                }
             sb.append("</div>");
 
         sb.append("</div>");
@@ -410,6 +420,7 @@ public class ScriptrunEventHTMLBuilder {
 	private static String buildFailed(TestScriptDescription descr, ISFContext context) {
 
 		String environmentName = descr.getContext().getEnvironmentName();
+        String environmentVariableSet = descr.getContext().getEnvironmentVariableSet();
 		String language = Objects.toString(descr.getLanguageURI(), "");
         String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
@@ -433,6 +444,10 @@ public class ScriptrunEventHTMLBuilder {
                 sb.append("<div class='eps-result-environment-name' title='Environment name'> " + environmentName + " <span title='Auto start' class='isAutoStartEnabled'>" + autoStart + "</span></div>");
                 sb.append("<div class='eps-result-aml-version' title='Language'> " + language + "</div>");
 				sb.append("<div class='eps-result-range' title='Range'>" + range + "</div>");
+
+                if(environmentVariableSet != null) {
+                    sb.append("<div class='eps-result-environment-variable-set' title='Environment variable set'>" + environmentVariableSet + "</div>");
+                }
             sb.append("</div>");
 
         sb.append("</div>");
@@ -456,6 +471,7 @@ public class ScriptrunEventHTMLBuilder {
 	private static String buildInProgress(TestScriptDescription descr, ISFContext context) {
 
 		String environmentName = descr.getContext().getEnvironmentName();
+        String environmentVariableSet = descr.getContext().getEnvironmentVariableSet();
 		String language = Objects.toString(descr.getLanguageURI(), "");
 		String range = descr.getRange() == null || descr.getRange().isEmpty() ? "&infin;" : descr.getRange();
         String autoStart = descr.getAutoStart() ? "(A)" : "";
@@ -496,6 +512,10 @@ public class ScriptrunEventHTMLBuilder {
                     sb.append("<div class='eps-result-environment-name' title='Environment name'> " + environmentName + " <span title='Auto start' class='isAutoStartEnabled'>" + autoStart + "</span></div>");
                     sb.append("<div class='eps-result-aml-version' title='Language'> " + language + "</div>");
 					sb.append("<div class='eps-result-range' title='Range'>" + range + "</div>");
+
+                    if(environmentVariableSet != null) {
+                        sb.append("<div class='eps-result-environment-variable-set' title='Environment variable set'>" + environmentVariableSet + "</div>");
+                    }
                 sb.append("</div>");
 
             sb.append("</div>");
@@ -552,6 +572,7 @@ public class ScriptrunEventHTMLBuilder {
 	private static String buildPending(TestScriptDescription descr, ISFContext context) {
 
 		String environmentName = descr.getContext().getEnvironmentName();
+        String environmentVariableSet = descr.getContext().getEnvironmentVariableSet();
 		String language = Objects.toString(descr.getLanguageURI(), "");
         String autoStart = descr.getAutoStart() ? "(A)" : "";
 
@@ -590,6 +611,10 @@ public class ScriptrunEventHTMLBuilder {
                 sb.append("<div class='eps-result-group-env-aml'>");
                     sb.append("<div class='eps-result-environment-name' title='Environment name'> " + environmentName + " <span title='Auto start' class='isAutoStartEnabled'>" + autoStart + "</span></div>");
                     sb.append("<div class='eps-result-aml-version' title='Language'> " + language + "</div>");
+
+                    if(environmentVariableSet != null) {
+                        sb.append("<div class='eps-result-environment-variable-set' title='Environment variable set'>" + environmentVariableSet + "</div>");
+                    }
                 sb.append("</div>");
 
             sb.append("</div>");
@@ -626,6 +651,7 @@ public class ScriptrunEventHTMLBuilder {
 	private static String buildPaused(TestScriptDescription descr, ISFContext context) {
 
 		String environmentName = descr.getContext().getEnvironmentName();
+        String environmentVariableSet = descr.getContext().getEnvironmentVariableSet();
 		String language = Objects.toString(descr.getLanguageURI(), "");
         String autoStart = descr.getAutoStart() ? "(A)" : "";
 
@@ -662,6 +688,10 @@ public class ScriptrunEventHTMLBuilder {
                 sb.append("<div class='eps-result-group-env-aml'>");
                     sb.append("<div class='eps-result-environment-name' title='Environment name'> " + environmentName + " <span title='Auto start' class='isAutoStartEnabled'>" + autoStart + "</span></div>");
                     sb.append("<div class='eps-result-aml-version' title='Language'> " + language + "</div>");
+
+                    if(environmentVariableSet != null) {
+                        sb.append("<div class='eps-result-environment-variable-set' title='Environment variable set'>" + environmentVariableSet + "</div>");
+                    }
                 sb.append("</div>");
 
             sb.append("</div>");

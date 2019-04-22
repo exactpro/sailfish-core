@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 52.3 (67297) - http://www.bohemiancoding.com/sketch -->
     <title>Icons/split1 Copy</title>
-    <desc>Created with Sketch.</desc>
     <defs>
         <path d="M66,12 L14,12 C10.68625,12 8,14.68625 8,18 L8,62 C8,65.31375 10.68625,68 14,68 L66,68 C69.31375,68 72,65.31375 72,62 L72,18 C72,14.68625 69.31375,12 66,12 Z M64,41 L16,41 L16,28 L64,28 L64,41 Z M64,60 L16,60 L16,48 L64,48 L64,60 Z" id="path-1"></path>
     </defs>

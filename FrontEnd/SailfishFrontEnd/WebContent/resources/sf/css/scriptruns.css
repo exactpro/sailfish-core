@@ -499,6 +499,12 @@
 	margin-left: 15px;
 }
 
+.eps-result-environment-variable-set {
+	display: inline-block;
+	width: auto;
+	margin-left: 15px;
+}
+
 .eps-result-report-link {
 	display: inline-block;
 	margin-top: 15px;

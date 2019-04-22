@@ -116,7 +116,7 @@ public class JsonEntityParser {
         return false;
     }
 
-    private static Message parseMessage(IDictionaryManager dictionaryManager, JsonParser parser, Map<String, String> rootFields, boolean compact) throws JsonParseException, IOException {
+    public static Message parseMessage(IDictionaryManager dictionaryManager, JsonParser parser, Map<String, String> rootFields, boolean compact) throws JsonParseException, IOException {
         try {
             parser.nextToken();
 

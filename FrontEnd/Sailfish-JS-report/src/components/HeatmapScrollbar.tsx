@@ -27,51 +27,75 @@ interface HeatmapScrollbarProps {
     selectedElements: Map<number, StatusType>;
 }
 
-export class HeatmapScrollbar extends Component<HeatmapScrollbarProps> {
+interface HeatmapScrollbarState {
+    rootHeight: number;
+}
+
+export class HeatmapScrollbar extends Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
 
     private scrollbar: Scrollbars;
+    private root: HTMLElement;
+
+    constructor(props) {
+        super(props);
+
+        this.state = { rootHeight: 0 }
+    }
 
     scrollToTop() {
         this.scrollbar && this.scrollbar.scrollToTop();
     }
 
-    render({children, selectedElements}: HeatmapScrollbarProps) {
+    componentDidMount() {
+        // at the first mount we can't get real component height, 
+        // so we need to rerender component with new root element scroll height
+
+        this.setState({
+            rootHeight: this.root && this.root.scrollHeight
+        });
+    }
+
+    render({ children, selectedElements }: HeatmapScrollbarProps, { rootHeight }: HeatmapScrollbarState) {
         return (
-            <div class="heatmap">
+            <div class="heatmap" ref={ref => this.root = ref}>
                 <Scrollbars
-                    renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb"/>}
-                    renderTrackVertical={({style, ...props}) => 
-                        <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }}/>
+                    renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb" />}
+                    renderTrackVertical={({ style, ...props }) =>
+                        <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }} />
                     }
                     ref={ref => this.scrollbar = ref}
-                    >
+                >
                     <div class="heatmap-wrapper">
                         {children}
                     </div>
                 </Scrollbars>
                 <div class="heatmap-scrollbar">
-                    {renderHeatmap(children.length, selectedElements)}
+                    {
+                        rootHeight ? 
+                            renderHeatmap(children.length, selectedElements, rootHeight) : 
+                            null
+                    }
                 </div>
             </div>
         )
     }
 }
 
-function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): JSX.Element[] {
+function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, rootHeight: number): JSX.Element[] {
     // here we calculate how much heatmap elements we can render without overlaping
-    const maxElementsCount = document.body.scrollHeight / MIN_HEATMAP_ELEMENT_HEIGHT;
+    const maxElementsCount = rootHeight / MIN_HEATMAP_ELEMENT_HEIGHT;
 
-    return elementsCount > maxElementsCount ? 
+    return elementsCount > maxElementsCount ?
         renderBigHeatmap(elementsCount, selectedElements, Math.ceil(elementsCount / maxElementsCount)) :
         renderSmallHeatmap(elementsCount, selectedElements);
 }
 
 function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): JSX.Element[] {
-    let resultHeatmap : JSX.Element[] = [];
+    let resultHeatmap: JSX.Element[] = [];
 
     for (let i = 0; i < elementsCount; i++) {
         resultHeatmap.push(
-            <div class={"heatmap-scrollbar-item " + (selectedElements.get(i) || "").toLowerCase()}/>            
+            <div class={"heatmap-scrollbar-item " + (selectedElements.get(i) || "").toLowerCase()} />
         );
     }
 
@@ -87,12 +111,12 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
     // it will render ONLY FIRST status element in a chunk
     // In current version several selected elements can't have different statuses, so we can safely use this trick
 
-    let resultHeatmap : JSX.Element[] = [];
+    let resultHeatmap: JSX.Element[] = [];
 
     for (let i = 0; i < elementsCount; i++) {
-        if (selectedElements.get(i)) { 
+        if (selectedElements.get(i)) {
             resultHeatmap.push(
-                <div class={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()}/>            
+                <div class={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()} />
             );
 
             // after we added heatmap element to the list, we should skip other elements in chunk
@@ -100,7 +124,7 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
         } else if ((i + 1) % chunkSize == 0) {
             // no selected elements in current chunk, render empty heatmap element
             resultHeatmap.push(
-                <div class="heatmap-scrollbar-item"/>            
+                <div class="heatmap-scrollbar-item" />
             );
         }
     }

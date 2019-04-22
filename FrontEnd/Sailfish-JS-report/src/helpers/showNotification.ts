@@ -14,6 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
+import '../styles/notification.scss';
+
 const NOTIFICATION_TIMEOUT = 1500;
 
 export function showNotification(text: string) {

@@ -19,7 +19,7 @@ import {
     SetTestCaseStateAction,
     StateActionTypes,
     ActionSelectStateAction,
-    MessagesSelectStateAction,
+    MessageSelectStateAction,
     NextTestCaseStateAction,
     PrevTestCaseStateAction,
     SetTestCasePathStateAction,
@@ -33,12 +33,14 @@ import {
     CheckpointSelectStateAction,
     RejectedMessageSelectStateAction,
     ActionSelectByIdStateAction,
-    SetAdminMessageEnabledStateAction
+    SetAdminMessageEnabledStateAction,
+    VerificationSelectStateAction
 } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import { Panel } from "../helpers/Panel";
+import Message from '../models/Message';
 
 export const setReport = (report: Report): SetReportStateAction => ({
     type: StateActionTypes.SET_REPORT,
@@ -64,9 +66,15 @@ export const selectActionById = (actionId: number): ActionSelectByIdStateAction 
     actionId: actionId
 })
 
-export const selectMessages = (messages: number[], status: StatusType = 'NA'): MessagesSelectStateAction => ({
-    type: StateActionTypes.SELECT_MESSAGES,
-    messagesId: messages,
+export const selectMessage = (message: Message, status: StatusType = null): MessageSelectStateAction => ({
+    type: StateActionTypes.SELECT_MESSAGE,
+    message: message,
+    status: status
+})
+
+export const selectVerification = (messageId: number, status: StatusType = 'NA'): VerificationSelectStateAction => ({
+    type: StateActionTypes.SELECT_VERIFICATION,
+    messageId: messageId,
     status: status
 })
 
