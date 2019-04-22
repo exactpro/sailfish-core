@@ -15,6 +15,7 @@
  ******************************************************************************/
 
 import {h, Component} from 'preact';
+import { Scrollbars } from 'preact-custom-scrollbars';
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 
 interface VirtualizedListProps {
@@ -35,11 +36,7 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
     render({ rowCount }: VirtualizedListProps) {
         return (
             <AutoSizer>
-                {({ height, width }) => {
-                    // fixes elements overlaping, by triggerng additional row heights calculating, when they are fully rendered
-                    this.measurerCache.clearAll();
-                    
-                    return (
+                {({ height, width }) => (
                         <List
                             height={height}
                             width={width}
@@ -48,8 +45,7 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
                             rowHeight={this.measurerCache.rowHeight}
                             rowRenderer={this.rowRenderer}
                             ref={ref => this.forceUpdateList = ref ? ref.forceUpdateGrid.bind(ref) : null}/>
-                        )
-                    }
+                    )
                 }
             </AutoSizer>
         )
@@ -68,5 +64,23 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
                     </div>
             </CellMeasurer>
         )
+    }
+
+    componentDidMount() {
+        // We need to recalculate cells height after the DOM actual render, 
+        // because it looks like in chromium browsers element's width with 'break-word' 
+        // property calculating after react-virtualized measured row's heights.
+        // After double RAF we can be shure, that DOM is fully rendered, and react-virtaulized can measure rows correct.
+
+        // Related issue: https://github.com/bvaughn/react-virtualized/issues/896
+
+        // Besides that, it fixes bug, related with invallid rendering, when data (test case) is changed (but it looks realy bad) 
+
+        window.requestAnimationFrame(() =>{
+            window.requestAnimationFrame(() => { 
+                this.measurerCache.clearAll();
+                this.forceUpdateList();
+            });
+        });
     }
 }
