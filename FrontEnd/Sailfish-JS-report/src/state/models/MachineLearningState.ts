@@ -13,31 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+import { SubmittedData } from "../../models/MlServiceResponse"
 
-import TestCase from "./TestCase";
-import { TestcaseMetadata } from "./TestcaseMetadata";
-import { ReportProperties } from "./ReportProperties";
-
-export default interface Report {
-    alerts?: any[];
-    startTime: string;
-    finishTime: string;
-    plugins: any;
-    testCases?: TestCase[];
-    bugs: any[];
-    hostName: string;
-    userName: string;
-    name: string;
-    scriptRunId: number;
-    version: string;
-    branchName: string;
-    description: string;
-    exception?: string;
-    outcomes?: any;
-    reportProperties?: ReportProperties;
-    metadata: TestcaseMetadata[];
-}
-
-export function isReport(report: Report | TestCase): report is Report {
-    return (<Report>report).metadata !== undefined;
+export default interface MachineLearningState {
+    token: string;
+    submittedData: SubmittedData[];
 }

@@ -22,6 +22,7 @@ import { MessageRaw } from './MessageRaw';
 import { getHashCode } from '../helpers/stringHash';
 import { formatTime } from '../helpers/dateFormatter';
 import { MessageCardActionChips } from './MessageCardActionChips';
+import { MlUploadButton } from './MlUploadButton';
 import '../styles/messages.scss';
 import { createSelector, createBemElement } from '../helpers/styleCreators';
 import { createBemBlock } from '../helpers/styleCreators';
@@ -124,12 +125,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                         <div class="mc-header__to">
                             <p>{to}</p>
                         </div>
-                        {/* DISABLED */}
-                        <div class="mc-header__prediction"
-                            title="Not implemented">
-                            <div class="mc-header__prediction-icon"
-                                onClick={() => alert("Not implemented...")} />
-                        </div>
+                        <MlUploadButton messageId={message.id}/>
                     </div>
                     <div class="message-card__body   mc-body">
                         {

@@ -16,7 +16,7 @@
 import Message from '../models/Message';
 import { StatusType } from '../models/Status';
 import Action from '../models/Action';
-import { ReportMetadata } from '../models/ReportMetadata';
+import { TestcaseMetadata } from '../models/TestcaseMetadata';
 
 export function messagesHeatmap(messages: Message[], selectedMessages: number[], selectedStatus: StatusType): Map<number, StatusType> {
     const heatmap = new Map<number, StatusType>();
@@ -42,7 +42,7 @@ export function actionsHeatmap(actions: Action[], selectedActionsId: number[]): 
     return heatmap;
 }
 
-export function testCasesHeatmap(testCases: ReportMetadata[]): Map<number, StatusType> {
+export function testCasesHeatmap(testCases: TestcaseMetadata[]): Map<number, StatusType> {
     const heatmap = new Map<number, StatusType>();
 
     testCases.forEach((metadata, idx) => {

@@ -227,30 +227,24 @@ public class ReportTask implements Runnable{
                         String query = request.getParameter("action");
 
 
-			if (query == null || query.equals("view")) {
+            if (query == null || query.equals("view")) {
+                if(workspaceDispatcher.exists(FolderType.REPORT, requestUrl)) {
+                    File path = workspaceDispatcher.getFile(FolderType.REPORT, requestUrl);
+                    response.setHeader("Content-Disposition", "inline; filename=" + path.getName());
 
+                    try (OutputStream output = response.getOutputStream();
+                         InputStream input = new FileInputStream(path)) {
+                        int l = 0;
+                        byte[] buf = new byte[65535];
+                        while((l = input.read(buf)) > 0) {
+                            output.write(buf, 0, l);
+                        }
+                    }
+                } else {
+                    tryExtractFromZip(response, requestUrl);
+                }
 
-
-				if(workspaceDispatcher.exists(FolderType.REPORT, requestUrl)) {
-
-					File path = workspaceDispatcher.getFile(FolderType.REPORT, requestUrl);
-
-					try (OutputStream output = response.getOutputStream();
-						 InputStream input = new FileInputStream(path)) {
-						int l = 0;
-						byte[] buf = new byte[65535];
-						while((l = input.read(buf)) > 0) {
-							output.write(buf, 0, l);
-						}
-					}
-
-				} else {
-
-					tryExtractFromZip(response, requestUrl);
-
-				}
-
-				ctx.complete();
+                ctx.complete();
 
 			} else if (query.equals("pack")) {
                 //Used only in ReportOutputFormat.FILES mode, also report automatically wrap into zip

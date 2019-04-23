@@ -14,7 +14,6 @@
 * limitations under the License.
 ******************************************************************************/
 
-import TestCase from "../models/TestCase";
 import {
     SetTestCaseStateAction,
     StateActionTypes,
@@ -34,13 +33,20 @@ import {
     RejectedMessageSelectStateAction,
     ActionSelectByIdStateAction,
     SetAdminMessageEnabledStateAction,
-    VerificationSelectStateAction
+    VerificationSelectStateAction,
+    SetMlTokenStateAction,
+    SetSubmittedMlDataStateAction,
+    AddSubmittedMlDataStateAction,
+    RemoveSubmittedMlDataStateAction
 } from "./stateActions";
+
+import TestCase from "../models/TestCase";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import { Panel } from "../helpers/Panel";
 import Message from '../models/Message';
+import { SubmittedData } from "../models/MlServiceResponse";
 
 export const setReport = (report: Report): SetReportStateAction => ({
     type: StateActionTypes.SET_REPORT,
@@ -128,4 +134,24 @@ export const setLeftPane = (pane: Panel): SetLeftPaneStateActions => ({
 export const setRightPane = (pane: Panel): SetRightPaneStateAction => ({
     type: StateActionTypes.SET_RIGHT_PANE,
     pane: pane
+})
+
+export const setMlToken = (token: string): SetMlTokenStateAction => ({
+    type: StateActionTypes.SET_ML_TOKEN,
+    token: token
+})
+
+export const setSubmittedMlData = (data: SubmittedData[]): SetSubmittedMlDataStateAction => ({
+    type: StateActionTypes.SET_SUBMITTED_ML_DATA,
+    data: data
+})
+
+export const addSubmittedMlData = (data: SubmittedData): AddSubmittedMlDataStateAction => ({
+    type: StateActionTypes.ADD_SUBMITTED_ML_DATA,
+    data: data
+})
+
+export const removeSubmittedMlData = (data: SubmittedData): RemoveSubmittedMlDataStateAction => ({
+    type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA,
+    data: data
 })

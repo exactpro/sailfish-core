@@ -20,7 +20,7 @@ import { StatusType } from "../models/Status";
 import Report from '../models/Report';
 import { Panel } from "../helpers/Panel";
 import Message from "../models/Message";
-
+import { SubmittedData } from "../models/MlServiceResponse";
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
     NEXT_TEST_CASE = 'NEXT_TEST_CASE',
@@ -39,7 +39,11 @@ export enum StateActionTypes {
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
     SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
     SET_LEFT_PANE = 'SET_LEFT_PANE',
-    SET_RIGHT_PANE = 'SET_RIGHT_PANE'
+    SET_RIGHT_PANE = 'SET_RIGHT_PANE',
+    SET_ML_TOKEN = 'SET_ML_TOKEN',
+    SET_SUBMITTED_ML_DATA = "SET_SUBMITTED_ML_DATA",
+    ADD_SUBMITTED_ML_DATA = "ADD_SUBMITTED_ML_DATA",
+    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA"
 }
 
 export interface SetReportStateAction {
@@ -130,7 +134,28 @@ export interface SetRightPaneStateAction {
     pane: Panel;
 }
 
-export type StateActionType = SetReportStateAction |
+export interface SetMlTokenStateAction {
+    type: StateActionTypes.SET_ML_TOKEN;
+    token: string;
+}
+
+export interface SetSubmittedMlDataStateAction {
+    type: StateActionTypes.SET_SUBMITTED_ML_DATA;
+    data: SubmittedData[];
+}
+
+export interface AddSubmittedMlDataStateAction {
+    type: StateActionTypes.ADD_SUBMITTED_ML_DATA;
+    data: SubmittedData;
+}
+
+export interface RemoveSubmittedMlDataStateAction {
+    type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA;
+    data: SubmittedData;
+}
+
+export type StateActionType = 
+    SetReportStateAction |
     SetTestCaseStateAction | 
     ResetTestCaseStateAction |
     ActionSelectStateAction |
@@ -148,4 +173,8 @@ export type StateActionType = SetReportStateAction |
     SwitchActionFilterStateAction | 
     SwitchFieldsFilterStateAction | 
     SetRightPaneStateAction | 
-    SetLeftPaneStateActions;
+    SetLeftPaneStateActions |
+    SetMlTokenStateAction |
+    SetSubmittedMlDataStateAction |
+    AddSubmittedMlDataStateAction |
+    RemoveSubmittedMlDataStateAction

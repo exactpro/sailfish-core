@@ -153,20 +153,33 @@
         grid-area: name-value;
     }
 
-    &__prediction {
+    &__submit {
         grid-area: prediction;
         display: flex;
         justify-content: center;
         align-items: center;
 
         &-icon {
-            background-image: url(../../resources/icons/ml-message.svg);
             background-size: 100%;
             width: 22px;
             height: 22px;
-            // TODO - DISABLED
-            filter: opacity(0.2);
-            cursor: not-allowed;
+
+            &.inactive {
+                background-image: url(../../resources/icons/ml-message.svg);
+                filter: opacity(0.2);
+            }
+
+            &.active {
+                background-image: url(../../resources/icons/ml-message.svg);
+                cursor: pointer;
+                filter: opacity(0.8);
+            }
+
+            &.submitted {
+                background-image: url(../../resources/icons/ml-message-submitted.svg);
+                cursor: pointer;
+                filter: opacity(0.8);
+            }
         }
     }
 

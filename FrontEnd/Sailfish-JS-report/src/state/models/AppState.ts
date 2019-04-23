@@ -18,10 +18,12 @@ import SelectedState from './SelectedState';
 import ReportState from './ReportState';
 import ViewState from './ViewState';
 import FilterState from './FiltersState';
+import MachineLearningState from './MachineLearningState'
 
 export default interface AppState {
     report: ReportState;
     selected: SelectedState;
     view: ViewState;
     filter: FilterState;
+    machineLearning: MachineLearningState;
 }

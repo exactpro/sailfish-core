@@ -24,13 +24,16 @@ import { reportReducer } from '../reducers/reportReducer';
 import { selectedReducer } from '../reducers/selectedReducer';
 import { viewReducer } from '../reducers/viewReducer';
 import { filterReducer } from '../reducers/filterReducer';
+import { machineLearningReducer } from '../reducers/machineLearningReducer';
+import initialMachineLearningState from '../state/initial/initialMachineLearningState';
 
 export const createAppStore = (report: Report) => createStore(
     combineReducers({
         report: reportReducer,
         selected: selectedReducer,
         view: viewReducer,
-        filter: filterReducer
+        filter: filterReducer,
+        machineLearning: machineLearningReducer
     }),
     {
         ...initialAppState,

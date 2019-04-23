@@ -15,15 +15,15 @@
 ******************************************************************************/
 
 import { h } from 'preact';
-import { ReportMetadata } from '../models/ReportMetadata';
+import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import { formatTime, getSecondsPeriod } from '../helpers/dateFormatter';
 import '../styles/report.scss';
 import { createSelector } from '../helpers/styleCreators';
 
 interface TestCaseCardProps {
-    metadata: ReportMetadata;
+    metadata: TestcaseMetadata;
     index: number;
-    handleClick: (metadata: ReportMetadata) => any;
+    handleClick: (metadata: TestcaseMetadata) => any;
 }
 
 const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {

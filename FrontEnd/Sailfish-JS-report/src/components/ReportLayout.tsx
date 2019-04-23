@@ -20,7 +20,7 @@ import { connect } from 'preact-redux';
 import AppState from '../state/models/AppState';
 import { setTestCasePath } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
-import { ReportMetadata } from '../models/ReportMetadata';
+import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
 import TestCaseCard from './TestCaseCard';
@@ -126,7 +126,7 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
     )
 }
 
-function renderStatusInfo(status: StatusType, metadata: ReportMetadata[]): JSX.Element {
+function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): JSX.Element {
     const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
         valueClassName = createSelector(
             "report-summary__element-value",

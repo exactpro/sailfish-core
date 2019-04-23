@@ -14,30 +14,16 @@
  * limitations under the License.
  ******************************************************************************/
 
-import TestCase from "./TestCase";
-import { TestcaseMetadata } from "./TestcaseMetadata";
-import { ReportProperties } from "./ReportProperties";
+import Status from "./Status";
 
-export default interface Report {
-    alerts?: any[];
+export interface TestcaseMetadata {
     startTime: string;
     finishTime: string;
-    plugins: any;
-    testCases?: TestCase[];
-    bugs: any[];
-    hostName: string;
-    userName: string;
     name: string;
-    scriptRunId: number;
-    version: string;
-    branchName: string;
+    status: Status;
+    id: string;
+    hash: number;
     description: string;
-    exception?: string;
-    outcomes?: any;
-    reportProperties?: ReportProperties;
-    metadata: TestcaseMetadata[];
-}
-
-export function isReport(report: Report | TestCase): report is Report {
-    return (<Report>report).metadata !== undefined;
+    jsonFileName: string;
+    jsonpFileName: string;
 }
