@@ -14,21 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import Message from '../models/Message';
 import { StatusType } from '../models/Status';
-import Action from '../models/Action';
 import { MessageRaw } from './MessageRaw';
 import { getHashCode } from '../helpers/stringHash';
 import { formatTime } from '../helpers/dateFormatter';
 import { MessageCardActionChips } from './MessageCardActionChips';
 import { MlUploadButton } from './MlUploadButton';
 import '../styles/messages.scss';
-import { createSelector, createBemElement } from '../helpers/styleCreators';
+import { createBemElement } from '../helpers/styleCreators';
 import { createBemBlock } from '../helpers/styleCreators';
 import { connect } from 'preact-redux';
 import AppState from '../state/models/AppState';
 import { selectMessage } from '../actions/actionCreators';
+import { isRejected } from '../helpers/messageType';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -40,6 +40,7 @@ export interface MessageCardOwnProps {
 }
 
 interface MessageCardStateProps {
+    rejectedMessagesCount?: number;
     isSelected?: boolean;
     status?: StatusType;
 }
@@ -186,7 +187,8 @@ function calculateHueValue(from: string, to: string): number {
 export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
         isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
-        status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null
+        status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null,
+        rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null
     }),
     (dispatch, ownProps: MessageCardOwnProps) : MessageCardDispatchProps => ({
         selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status))

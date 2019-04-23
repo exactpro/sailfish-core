@@ -14,29 +14,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import '../styles/messages.scss';
 import Message from '../models/Message';
 import { MessageCard } from './MessageCard';
-import Action from '../models/Action';
 import { StatusType } from '../models/Status';
 import { connect } from 'preact-redux';
 import AppState from '../state/models/AppState';
-import { Checkpoint } from './Checkpoint';
-import { isCheckpoint, isRejected, isAdmin } from '../helpers/messageType';
-import { getActions } from '../helpers/actionType';
+import { CheckpointMessage } from './Checkpoint';
+import { isCheckpoint, isAdmin } from '../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
-import { messagesHeatmap } from '../helpers/heatmapCreator';
 import { selectMessage } from '../actions/actionCreators';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
 import MessageCardExpandState from '../models/view/MessageCardExpandState';
+import PureComponent from '../util/PureComponent';
 
 interface MessagesListStateProps {
     messages: Message[];
     scrolledMessageId: Number;
-    checkpoints: Message[];
-    rejectedMessages: Message[];
     selectedCheckpointId: number;
 }
 
@@ -46,16 +42,11 @@ interface MessagesListDispatchProps {
 
 interface MessagesListProps extends MessagesListStateProps ,MessagesListDispatchProps {}
 
-export class MessagesCardListBase extends Component<MessagesListProps> {
+export class MessagesCardListBase extends PureComponent<MessagesListProps> {
 
     private scrollbar: HeatmapScrollbar;
 
-    constructor(props: MessagesListProps) {
-        super(props);
-    }
-
     componentDidUpdate(prevProps: MessagesListProps) {
-
         if (prevProps.scrolledMessageId != this.props.scrolledMessageId) {
             // disable smooth behaviour only for checkpoint messages
             if (this.props.scrolledMessageId == this.props.selectedCheckpointId) {
@@ -85,7 +76,7 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
     }
 
     scrollToMessage(messageId: number, isSmooth: boolean = true) {
-        // TODO: implement scroll to feature using react-virtualized
+        // TODO: implement scrollto feature using react-virtualized
     }
 
     scrollToTop() {
@@ -105,18 +96,12 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
 
     private renderMessage(message: Message, expandState: MessageCardExpandState, messageStateHandler: (nextState: MessageCardExpandState) => any) {
 
-        const { checkpoints, rejectedMessages, selectedCheckpointId } = this.props;
-
         if (isCheckpoint(message)) {
-            return this.renderCheckpoint(message, checkpoints, selectedCheckpointId)
+            return <CheckpointMessage message={message}/>;
         }
 
         if (isAdmin(message)) {
             return this.renderAdmin(message, expandState, messageStateHandler);
-        }
-
-        if (isRejected(message)) {
-            return this.renderRejected(message, rejectedMessages, expandState.showRaw, showRaw => messageStateHandler({ ...expandState, showRaw: showRaw }));
         }
 
         return (
@@ -126,31 +111,6 @@ export class MessagesCardListBase extends Component<MessagesListProps> {
                 showRawHandler={showRaw => messageStateHandler({ showRaw: showRaw })}
             />
         );
-    }
-
-    private renderCheckpoint(message: Message, checkpoints: Message[], selectedCheckpointId: number) {
-        const isSelected = message.id === selectedCheckpointId,
-            checkpointCount = checkpoints.indexOf(message) + 1,
-            description = message.content["message"] ? message.content["message"]["Description"] : "";
-
-        return (
-            <Checkpoint name={message.msgName}
-                count={checkpointCount}
-                isSelected={isSelected}
-                description={description} />
-        )
-    }
-
-    private renderRejected(message: Message, rejectedMessages: Message[], showRaw: boolean, showRawHandler: (showRaw: boolean) => any) {
-        const rejectedCount = rejectedMessages.indexOf(message) + 1;
-
-        return (
-            <MessageCard
-                message={message}
-                showRaw={showRaw}
-                showRawHandler={showRawHandler}
-                rejectedMessagesCount={rejectedCount} />
-        )
     }
 
     private renderAdmin(message: Message, expandState: MessageCardExpandState, messageStateHandler: (nextState: MessageCardExpandState) => any) {        
@@ -171,8 +131,6 @@ export const MessagesCardList = connect(
     (state: AppState): MessagesListStateProps => ({
         messages: state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
-        checkpoints: state.selected.testCase.messages.filter(isCheckpoint),
-        rejectedMessages: state.selected.testCase.messages.filter(isRejected),
         selectedCheckpointId: state.selected.checkpointMessageId
     }),
     (dispatch): MessagesListDispatchProps => ({

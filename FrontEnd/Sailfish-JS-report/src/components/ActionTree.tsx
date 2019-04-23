@@ -33,26 +33,34 @@ import Tree, { createNode } from '../models/util/Tree';
 import { createSelector } from '../helpers/styleCreators';
 import { connect } from 'preact-redux';
 import AppState from '../state/models/AppState';
+import { CheckpointAction } from './Checkpoint';
+import { isCheckpoint } from '../helpers/actionType';
+import { selectAction } from '../actions/actionCreators';
+import { selectVerification } from '../actions/actionCreators';
 
-
-export interface ActionTreeProps {
+interface ActionTreeOwnProps {
     action: ActionNode;
-    actionSelectHandler: (action: Action) => any;
-    messageSelectHandler: (id: number, status: StatusType) => any;
-    checkpointSelectHandler: (action: Action) => any;
+}
+
+interface ActionTreeStateProps {
     selectedMessageId: number;
     selectedActionsId: number[];
     scrolledActionId: Number;
-    selectedCheckpointId: number;
-    checkpoints: Action[];
     actionsFilter: StatusType[];
     filterFields: StatusType[];
 }
 
+interface ActionTreeDispatchProps {
+    actionSelectHandler: (action: Action) => any;
+    messageSelectHandler: (id: number, status: StatusType) => any;
+}
+
+export interface ActionTreeProps extends ActionTreeOwnProps, ActionTreeStateProps, ActionTreeDispatchProps {}
+
 class ActionTreeBase extends Component<ActionTreeProps> {
 
     private expandedTreePath: Tree<number> = null;
-    private treeElements: Component[] = [];
+    private treeElements: JSX.Element[] = [];
 
     componentWillMount() {
         this.updateTreePath(this.props.action, this.props.selectedActionsId);
@@ -133,12 +141,6 @@ class ActionTreeBase extends Component<ActionTreeProps> {
             return true;
         }
 
-        // same as first if statement, but with checkpoint
-        if (nextProps.checkpoints.includes(action) && nextProps.selectedCheckpointId !== prevProps.selectedCheckpointId &&
-            (nextProps.selectedCheckpointId === action.id || prevProps.selectedCheckpointId === action.id)) {
-            return true;
-        }
-
         if (action.subNodes) {
             // if at least one of the subactions needs an update, we update the whole action
             return action.subNodes.some(action => {
@@ -191,7 +193,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
 
     scrollToAction(actionId: number) {
         if (this.treeElements[actionId]) {
-            this.treeElements[actionId].base.scrollIntoView({ block: 'center' });
+            //this.treeElements[actionId].base.scrollIntoView({ block: 'center' });
         }
     }
 
@@ -200,14 +202,17 @@ class ActionTreeBase extends Component<ActionTreeProps> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
+        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, actionsFilter, filterFields } = props;
 
         switch (props.action.actionNodeType) {
             case ActionNodeType.ACTION: {
                 const action = props.action as Action;
 
-                if (checkpoints.includes(action)) {
-                    return this.renderCheckpoint(props, action);
+                if (isCheckpoint(action)) {
+                    return (
+                        <CheckpointAction
+                            action={action}/>
+                    );
                 }
 
                 // we need to use undefined here to prevent closing action card when it not included in current tree path 
@@ -350,31 +355,20 @@ class ActionTreeBase extends Component<ActionTreeProps> {
             </div>
         )
     }
-
-    renderCheckpoint({ checkpoints, selectedCheckpointId, checkpointSelectHandler }: ActionTreeProps, action: Action) {
-        const checkpointIndex = checkpoints.indexOf(action) + 1,
-            isSelected = selectedCheckpointId == action.id;
-
-        return (
-            <Checkpoint
-                name={action.name}
-                count={checkpointIndex}
-                isSelected={isSelected}
-                description={action.description}
-                clickHandler={() => checkpointSelectHandler(action)}
-                ref={ref => this.treeElements[action.id] = ref} />
-        )
-    }
 }
 
 export const ActionTree = connect(
-    (state: AppState) => ({
+    (state: AppState, ownProps: ActionTreeOwnProps): ActionTreeStateProps => ({
         selectedMessageId: state.selected.messagesId[0],
         selectedActionsId: state.selected.actionsId,
-        selectedCheckpointId: state.selected.checkpointActionId,
-        scrolledActionId: state.selected.scrolledActionId
+        scrolledActionId: state.selected.scrolledActionId,
+        actionsFilter: state.filter.actionsFilter,
+        filterFields: state.filter.fieldsFilter
     }),
-    dispatch => ({}),
+    (dispatch, ownProps: ActionTreeOwnProps): ActionTreeDispatchProps => ({
+        actionSelectHandler: action => dispatch(selectAction(action)),
+        messageSelectHandler: (id, status) => dispatch(selectVerification(id, status))
+    }),
     null,
     {
         withRef: true

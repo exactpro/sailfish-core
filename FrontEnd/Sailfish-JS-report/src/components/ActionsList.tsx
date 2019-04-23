@@ -14,34 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import { connect } from 'preact-redux';
 import '../styles/action.scss';
-import Action from '../models/Action';
+import Action, { ActionNode, ActionNodeType } from '../models/Action';
 import { ActionTree } from './ActionTree';
-import { StatusType } from '../models/Status';
-import AppState from '../state/models/AppState';
-import { selectAction, selectCheckpoint, selectVerification } from '../actions/actionCreators';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
-import { actionsHeatmap } from '../helpers/heatmapCreator';
-import { getActions } from '../helpers/actionType';
 import { VirtualizedList } from './VirtualizedList';
+import PureComponent from '../util/PureComponent';
+import AppState from '../state/models/AppState';
 
 interface ListProps {
-    actions: Array<Action>;
-    checkpointActions: Array<Action>;
-    selectedActionId: number[];
-    scrolledActionId: Number;
-    selectedMessageId: number;
-    selectedCheckpointId: number;
-    actionsFilter: StatusType[];
-    filterFields: StatusType[];
-    onSelect: (messages: Action) => any;
-    onMessageSelect: (id: number, status: StatusType) => any;
-    setSelectedCheckpoint: (action: Action) => any;
+    actions: Array<ActionNode>;
 }
 
-export class ActionsListBase extends Component<ListProps, {}> {
+export class ActionsListBase extends PureComponent<ListProps> {
 
     //private elements: ActionTree[] = [];
     private scrollbar: HeatmapScrollbar;
@@ -49,6 +36,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
     scrollToTop() {
         this.scrollbar && this.scrollbar.scrollToTop();
     }
+
     private elements: any[] = [];
 
     scrollToAction(actionId: number) {
@@ -59,30 +47,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
         // }    
     }
 
-    shouldComponentUpdate(nextProps: ListProps) {
-
-        if (nextProps.scrolledActionId !== this.props.scrolledActionId) {
-            return true;
-        }
-
-        if (nextProps.filterFields !== this.props.filterFields) {
-            return true;
-        }
-
-        if (nextProps.actionsFilter !== this.props.actionsFilter) {
-            return true;
-        }
-
-        if (nextProps.selectedCheckpointId !== this.props.selectedCheckpointId) {
-            return true;
-        }
-
-        return nextProps.actions !== this.props.actions ||
-            nextProps.selectedActionId !== this.props.selectedActionId ||
-            nextProps.selectedMessageId !== this.props.selectedMessageId;
-    }
-
-    render({ actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
+    render({ actions }: ListProps) {
 
         return (
             <div class="actions">
@@ -90,38 +55,30 @@ export class ActionsListBase extends Component<ListProps, {}> {
                     <VirtualizedList
                         rowCount={actions.length}
                         itemSpacing={6}
-                        elementRenderer={idx => (
-                            <ActionTree 
-                                action={actions[idx]}
-                                actionSelectHandler={onSelect}
-                                messageSelectHandler={onMessageSelect}
-                                actionsFilter={actionsFilter}
-                                filterFields={filterFields} 
-                                checkpoints={checkpointActions}
-                                checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
-                                ref={ref => this.elements[actions[idx].id] = ref}/>
-                        )}/>
+                        elementRenderer={idx => {
+                            const action = actions[idx];
+
+                            return (
+                                <ActionTree 
+                                    action={action}
+                                    ref={ref => {
+                                        if (action.actionNodeType === ActionNodeType.ACTION) {
+                                            this.elements[(action as Action).id] = ref;
+                                        }
+                                    }}/>
+                            )
+                        }}/>
                 </div>
             </div> 
         )
     }
 }   
 
-export const ActionsList = connect((state: AppState) => ({
-        actions: state.selected.testCase.actions,
-        selectedActionId: state.selected.actionsId,
-        scrolledActionId: state.selected.scrolledActionId,
-        selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
-        selectedCheckpointId: state.selected.checkpointActionId,
-        actionsFilter: state.filter.actionsFilter,
-        filterFields: state.filter.fieldsFilter,
-        checkpointActions: state.selected.checkpointActions
+export const ActionsList = connect(
+    (state: AppState): ListProps => ({
+        actions: state.selected.testCase.actions
     }),
-    dispatch => ({
-        onSelect: (action: Action) => dispatch(selectAction(action)),
-        onMessageSelect: (id: number, status: StatusType) => dispatch(selectVerification(id, status)),
-        setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpoint(checkpointAction))
-    }),
+    dispatch => ({ }),
     null,
     {
         withRef: true
