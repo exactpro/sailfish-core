@@ -40,6 +40,7 @@ import { selectVerification } from '../actions/actionCreators';
 
 interface ActionTreeOwnProps {
     action: ActionNode;
+    onExpand: () => void;
 }
 
 interface ActionTreeStateProps {
@@ -47,7 +48,6 @@ interface ActionTreeStateProps {
     selectedActionsId: number[];
     scrolledActionId: Number;
     actionsFilter: StatusType[];
-    filterFields: StatusType[];
 }
 
 interface ActionTreeDispatchProps {
@@ -106,9 +106,6 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         if (nextProps.action.actionNodeType === ActionNodeType.ACTION) {
             const nextAction = nextProps.action as Action;
 
-            if (this.props.filterFields !== nextProps.filterFields) {
-                return true;
-            }
             if (this.props.actionsFilter !== nextProps.actionsFilter) {
                 return true;
             }
@@ -202,7 +199,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, actionsFilter, filterFields } = props;
+        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, actionsFilter, onExpand } = props;
 
         switch (props.action.actionNodeType) {
             case ActionNodeType.ACTION: {
@@ -225,6 +222,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                         onSelect={actionSelectHandler}
                         isRoot={isRoot}
                         isExpanded={isExpanded}
+                        onExpand={onExpand}
                         ref={ref => this.treeElements[action.id] = ref}>
                         {
                             action.subNodes ? action.subNodes.map(
@@ -256,7 +254,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                 const isSelected = verification.messageId === selectedMessageId;
                 const isTransparent = !actionsFilter.includes(verification.status.status);
 
-                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, filterFields)
+                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent)
             }
 
             case ActionNodeType.LINK: {
@@ -316,7 +314,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
     }
 
     renderVerification({ name, status, entries, messageId }: Verification,
-        selectHandelr: Function, isSelected: boolean, isTransaparent, filterFields: StatusType[]) {
+        selectHandelr: Function, isSelected: boolean, isTransaparent) {
 
         const className = createSelector(
             "ac-body__verification",
@@ -362,8 +360,7 @@ export const ActionTree = connect(
         selectedMessageId: state.selected.messagesId[0],
         selectedActionsId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
-        actionsFilter: state.filter.actionsFilter,
-        filterFields: state.filter.fieldsFilter
+        actionsFilter: state.filter.actionsFilter
     }),
     (dispatch, ownProps: ActionTreeOwnProps): ActionTreeDispatchProps => ({
         actionSelectHandler: action => dispatch(selectAction(action)),

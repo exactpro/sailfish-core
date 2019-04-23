@@ -17,6 +17,7 @@
 import { h, Component } from "preact";
 import "../styles/expandablePanel.scss"
 import { createSelector } from '../helpers/styleCreators';
+import StateSaver from "./util/StateSaver";
 
 interface PanelProps {
     header?: JSX.Element;
@@ -42,7 +43,6 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
 
     expandPanel() {
         this.setState({isExpanded: !this.state.isExpanded});
-        this.props.onExpand && this.props.onExpand(this.state.isExpanded);
     }
 
     componentWillReceiveProps(nextProps: PanelProps) {
@@ -62,7 +62,7 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
                 <div class="expandable-panel__header">
                     <div class={iconClass} 
                         onClick={e => this.expandPanel()}/>
-                    { (expandedHeader && isExpanded) || header || children[0] }
+                    { (isExpanded && expandedHeader) || header || children[0] }
                 </div>
                 {
                     isExpanded ? 
@@ -72,4 +72,31 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
             </div>
         )
     }
+
+    componentDidUpdate(prevProps, prevState: PanelState) {
+        if (prevState.isExpanded !== this.state.isExpanded) {
+            this.props.onExpand && this.props.onExpand(this.state.isExpanded);
+        }
+    }
 }
+
+interface RecoverablePanelProps extends PanelProps {
+    stateKey: string;
+}
+
+export const RecoverableExpandablePanel = (props: RecoverablePanelProps) => (
+    <StateSaver
+        stateKey={props.stateKey}>
+        {
+            (isExpanded: boolean, stateSaver) => (
+                <ExpandablePanel
+                    {...props}
+                    isExpanded={isExpanded}
+                    onExpand={isExpanded => {
+                        stateSaver(isExpanded);
+                        props.onExpand && props.onExpand(isExpanded)
+                    }}/>
+            )
+        }
+    </StateSaver>
+)

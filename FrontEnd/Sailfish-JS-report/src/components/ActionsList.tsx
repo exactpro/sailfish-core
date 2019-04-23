@@ -21,8 +21,9 @@ import Action, { ActionNode, ActionNodeType } from '../models/Action';
 import { ActionTree } from './ActionTree';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { VirtualizedList } from './VirtualizedList';
-import PureComponent from '../util/PureComponent';
+import PureComponent from './util/PureComponent';
 import AppState from '../state/models/AppState';
+import StateSaverProvider from './util/StateSaverProvider';
 
 interface ListProps {
     actions: Array<ActionNode>;
@@ -38,6 +39,7 @@ export class ActionsListBase extends PureComponent<ListProps> {
     }
 
     private elements: any[] = [];
+    private list: VirtualizedList;
 
     scrollToAction(actionId: number) {
         // if (this.elements[actionId]) {
@@ -52,22 +54,30 @@ export class ActionsListBase extends PureComponent<ListProps> {
         return (
             <div class="actions">
                 <div class="actions__list">
-                    <VirtualizedList
-                        rowCount={actions.length}
-                        itemSpacing={6}
-                        elementRenderer={idx => {
-                            const action = actions[idx];
+                    <StateSaverProvider>
+                        <VirtualizedList
+                            rowCount={actions.length}
+                            itemSpacing={6}
+                            ref={ref => this.list = ref}
+                            elementRenderer={idx => {
+                                const action = actions[idx];
 
-                            return (
-                                <ActionTree 
-                                    action={action}
-                                    ref={ref => {
-                                        if (action.actionNodeType === ActionNodeType.ACTION) {
-                                            this.elements[(action as Action).id] = ref;
-                                        }
-                                    }}/>
-                            )
-                        }}/>
+                                return (
+                                    <ActionTree 
+                                        action={action}
+                                        onExpand={() => {
+                                            this.list.measurerCache.clear(idx);
+                                            this.list.forceUpdateList();
+                                        }}
+                                        ref={ref => {
+                                            if (action.actionNodeType === ActionNodeType.ACTION) {
+                                                this.elements[(action as Action).id] = ref;
+                                            }
+                                        }}/>
+                                )
+                            }}
+                        />
+                    </StateSaverProvider>
                 </div>
             </div> 
         )

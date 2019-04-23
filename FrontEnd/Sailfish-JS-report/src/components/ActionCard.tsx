@@ -17,7 +17,7 @@
 import { h } from "preact";
 import Action from "../models/Action";
 import ParamsTable from "./ParamsTable";
-import ExpandablePanel from "./ExpandablePanel";
+import ExpandablePanel, { RecoverableExpandablePanel } from "./ExpandablePanel";
 import { StatusType } from "../models/Status";
 import "../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../helpers/dateFormatter";
@@ -27,16 +27,17 @@ import { createSelector } from '../helpers/styleCreators';
 
 interface CardProps {
     action: Action;
-    onSelect?: (action: Action) => void;
     children?: JSX.Element[];
     isSelected?: boolean;
     isRoot?: boolean;
     isTransaparent?: boolean;
     isExpanded?: boolean;
     ref?: Function;
+    onSelect?: (action: Action) => void;
+    onExpand: () => void;
 }
 
-export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded }: CardProps) => {
+export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onExpand }: CardProps) => {
     const {
         matrixId,
         serviceName,
@@ -77,8 +78,10 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         <div class={rootClassName}
             onClick={clickHandler}
             key={action.id}>
-            <ExpandablePanel
-                isExpanded={isExpanded}>
+            <RecoverableExpandablePanel
+                stateKey={action.id.toString()}
+                isExpanded={isExpanded}
+                onExpand={() => onExpand()}>
                 <div class={headerClassName}>
                     <div class="ac-header__title">
                         <div class="ac-header__name">
@@ -115,12 +118,14 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 </div>
                 <div class="ac-body">
                     <div class={inputParametersClassName}>
-                        <ExpandablePanel>
+                        <RecoverableExpandablePanel
+                            stateKey={action.id + '-input-params'}
+                            onExpand={onExpand}>
                             <div class="ac-body__item-title">Input parameters</div>
                             <ParamsTable
                                 params={parameters}
                                 name={name} />
-                        </ExpandablePanel>
+                        </RecoverableExpandablePanel>
                     </div>
                     {
                         // rendering inner nodes
@@ -129,14 +134,17 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                     {
                         action.status.status == 'FAILED' ? (
                             <div class="action-card-status">
-                                <ExpandablePanel>
+                                <RecoverableExpandablePanel
+                                    stateKey={action.id + '-status'}
+                                    onExpand={onExpand}>
                                     <div class="ac-body__item-title">Status</div>
                                     <ExceptionChain exception={action.status.cause} />
-                                </ExpandablePanel>
+                                </RecoverableExpandablePanel>
                             </div>
                         ) : null
                     }
                 </div>
-            </ExpandablePanel>
-        </div>)
+            </RecoverableExpandablePanel>
+        </div>
+    )
 }

@@ -28,7 +28,7 @@ import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { selectMessage } from '../actions/actionCreators';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
 import MessageCardExpandState from '../models/view/MessageCardExpandState';
-import PureComponent from '../util/PureComponent';
+import PureComponent from './util/PureComponent';
 
 interface MessagesListStateProps {
     messages: Message[];
