@@ -29,11 +29,11 @@ import java.util.TreeMap;
 import java.util.function.BiConsumer;
 
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupDimension;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
@@ -658,8 +658,12 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 				+ "join MR.environment as E "
 				+ "join TCR.testCase as T "
 				+ "left join TCR.runStatus AS S "
-				+ "where (MR.id in (:mrId) or TCR.id in (:tcrId))"
-				+ "order by MR.startTime, TCR.rank";
+				+ "where (MR.id in (:mrId)";
+
+        if (CollectionUtils.isNotEmpty(params.getTestCaseRunIds())) {
+            queryString += " or TCR.id in (:tcrId)";
+        }
+        queryString += ") order by MR.startTime, TCR.rank";
 
 		Session session = null;
 
@@ -669,7 +673,9 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 			Query query = session.createQuery(queryString);
 
 			query.setParameterList("mrId", params.getMatrixRunIds());
-			query.setParameterList("tcrId", params.getTestCaseRunIds());
+            if (CollectionUtils.isNotEmpty(params.getTestCaseRunIds())) {
+                query.setParameterList("tcrId", params.getTestCaseRunIds());
+            }
 
             return parseAggregatedReportResult(query.list());
 

@@ -133,6 +133,7 @@ public class StatisticsReportingBean implements Serializable {
 
         try {
             statisticsReportHandler.reset();
+            lastResult = Collections.emptyList();
             StatisticsReportingStorage reportingStorage = BeanUtil.getSfContext().getStatisticsService().getReportingStorage();
             SortedMap<Long, List<Long>> matrixToTestCaseIds = reportingStorage.getMatrixRunAndTestCaseRunIDs(params);
             if (!matrixToTestCaseIds.isEmpty()) {

@@ -79,6 +79,9 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		// Init hibernate
         configuration.addPackage("com.exactpro.sf.statistics.entities")
 
+        .setProperty("hibernate.query.plan_cache_max_size", "64")
+        .setProperty("hibernate.query.plan_parameter_metadata_max_size", "32")
+
         .setNamingStrategy(DefaultComponentSafeNamingStrategy.INSTANCE)
 
 	    .addAnnotatedClass(SfInstance.class)
