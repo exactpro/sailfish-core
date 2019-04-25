@@ -252,7 +252,7 @@ task generateJavaFromXsd (dependsOn: 'createDir') {
 task jamonGenerate {
 	inputs.files fileTree(templatesDir).include('**/*.jamon')
 	inputs.files.each { fileName ->
-		def shortName = "${fileName.absolutePath}".replaceAll(file(templatesDir).absolutePath, '').replaceAll('.jamon', '')
+		def shortName = "${fileName.absolutePath}".replace(file(templatesDir).absolutePath, '').replace('.jamon', '')
 		outputs.file file("${genJavaDir}${shortName}Impl.java")
 		outputs.file file("${genJavaDir}${shortName}.java")
 	}
