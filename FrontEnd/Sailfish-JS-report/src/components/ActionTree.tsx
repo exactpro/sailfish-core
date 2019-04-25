@@ -22,7 +22,7 @@ import { VerificationTable } from "./VerificationTable";
 import UserMessage from '../models/UserMessage';
 import Verification from '../models/Verification'
 import '../styles/action.scss';
-import ExpandablePanel from './ExpandablePanel';
+import ExpandablePanel, { RecoverableExpandablePanel } from './ExpandablePanel';
 import Link from '../models/Link';
 import { StatusType } from '../models/Status';
 import UserTable from '../models/UserTable';
@@ -197,7 +197,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         return this.renderNode(props, true, this.expandedTreePath);
     }
 
-    renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null): JSX.Element {
+    renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null, parentAction: Action = null): JSX.Element {
         const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedVerififcationId: selectedMessageId, actionsFilter, onExpand } = props;
 
         switch (props.action.actionNodeType) {
@@ -225,10 +225,11 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                         ref={ref => this.treeElements[action.id] = ref}>
                         {
                             action.subNodes ? action.subNodes.map(
-                                action => this.renderNode(
-                                    { ...props, action: action },
+                                childAction => this.renderNode(
+                                    { ...props, action: childAction },
                                     false, 
-                                    this.getSubTree(action, expandTreePath)
+                                    this.getSubTree(childAction, expandTreePath),
+                                    action
                                 )) : null
                         }
                     </ActionCard>
@@ -244,7 +245,9 @@ class ActionTreeBase extends Component<ActionTreeProps> {
 
                 return (
                     <CustomMessage
-                        userMessage={messageAction}/>
+                        userMessage={messageAction}
+                        parent={parentAction}
+                        onExpand={onExpand}/>
                 );
             }
 
@@ -253,7 +256,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                 const isSelected = verification.messageId === selectedMessageId;
                 const isTransparent = !actionsFilter.includes(verification.status.status);
 
-                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent)
+                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, parentAction && parentAction.id);
             }
 
             case ActionNodeType.LINK: {
@@ -269,7 +272,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
             case ActionNodeType.TABLE: {
                 const table = props.action as UserTable;
 
-                return this.renderUserTable(table);
+                return this.renderUserTable(table, parentAction);
             }
 
             default: {
@@ -312,7 +315,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         }
     }
 
-    renderVerification({ name, status, entries, messageId }: Verification, selectHandelr: Function, isSelected: boolean, isTransaparent) {
+    renderVerification({ name, status, entries, messageId }: Verification, selectHandelr: Function, isSelected: boolean, isTransaparent, parentActionId: number) {
 
         const className = createSelector(
             "ac-body__verification",
@@ -329,25 +332,33 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                         // here we cancel handling by parent divs
                         e.cancelBubble = true;
                     }}>
-                    <ExpandablePanel>
+                    <RecoverableExpandablePanel
+                        stateKey={parentActionId + '-' + messageId}
+                        onExpand={this.props.onExpand}>
                         <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
                         <VerificationTable 
                             params={entries} 
                             status={status.status}/>
-                    </ExpandablePanel>
+                    </RecoverableExpandablePanel>
                 </div>
             </div>
         )
     }
 
-    renderUserTable(table: UserTable) {
+    renderUserTable(table: UserTable, parent: Action) {
+        const stateKey = parent.id + '-user-table-' + parent.subNodes
+            .filter(node => node.actionNodeType === ActionNodeType.TABLE)
+            .indexOf(table).toString();
+
         return (
             <div class="ac-body__table">
-                <ExpandablePanel>
+                <RecoverableExpandablePanel
+                    stateKey={stateKey}
+                    onExpand={this.props.onExpand}>
                     <div class="ac-body__item-title">{table.name || "Custom table"}</div>
                     <CustomTable
                         content={table.content} />
-                </ExpandablePanel>
+                </RecoverableExpandablePanel>
             </div>
         )
     }

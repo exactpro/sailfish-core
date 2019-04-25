@@ -16,18 +16,25 @@
 
 import { h } from 'preact';
 import UserMessage from '../models/UserMessage';
-import ExpandablePanel from './ExpandablePanel';
+import ExpandablePanel, { RecoverableExpandablePanel } from './ExpandablePanel';
 import ExceptionCard from './ExceptionCard';
 import { createSelector } from '../helpers/styleCreators';
 import '../styles/action.scss';
+import Action, { ActionNodeType } from '../models/Action';
 
 interface CustomMessageProps {
     userMessage: UserMessage;
+    parent: Action; 
+    onExpand: () => void;
 }
 
-export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
+export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessageProps) => {
 
     const { message, color, style, level, exception } = userMessage;
+
+    const stateKey = parent.id + '-user-message-' + parent.subNodes && parent.subNodes
+        .filter(node => node.actionNodeType === ActionNodeType.CUSTOM_MESSAGE)
+        .indexOf(userMessage).toString();
 
     // italic style value - only for fontStyle css property
     // bold style value - only for fontWeight css property
@@ -44,14 +51,16 @@ export const CustomMessage = ({ userMessage }: CustomMessageProps) => {
 
     if (exception) {
         return (
-            <ExpandablePanel>
+            <RecoverableExpandablePanel
+                stateKey={stateKey}
+                onExpand={onExpand}>
                 <div class={rootClass}>
                     <div class="ac-body__item-title" style={messageStyle}>{message}</div>
                 </div>
                 <ExceptionCard
                     exception={exception}
                     drawDivider={false}/>
-            </ExpandablePanel>
+            </RecoverableExpandablePanel>
         )
     }
 
