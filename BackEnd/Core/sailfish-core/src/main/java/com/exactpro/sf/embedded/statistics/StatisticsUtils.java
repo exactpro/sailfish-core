@@ -64,9 +64,33 @@ public class StatisticsUtils {
             () -> new SimpleDateFormat("ddMMyyyy-HH:mm:ss"));
 
     private static final String KNOWN_BUGS_COLUMN = "Known Bugs";
-    public static final String[] availableScriptRunHistoryColumns = { "id", "Name", "Description", "Status",
-            "Failure Reason", "Failed Actions", "Start Time", "Finish Time", "Execution Time", "User Name", "SF",
-            "Environment", "Services Used", "User Status", "Comment", "Fix Revision", KNOWN_BUGS_COLUMN, "Hash", "Tagged Actions" };
+    private static final String ID_COLUMN = "id";
+    private static final String NAME_COLUMN = "Name";
+    private static final String DESCRIPTION_COLUMN = "Description";
+    private static final String STATUS_COLUMN = "Status";
+    private static final String FAILURE_REASON_COLUMN = "Failure Reason";
+    private static final String FAILED_ACTIONS_COLUMN = "Failed Actions";
+    private static final String START_TIME_COLUMN = "Start Time";
+    private static final String FINISH_TIME_COLUMN = "Finish Time";
+    private static final String EXECUTION_TIME_COLUMN = "Execution Time";
+    private static final String USER_NAME_COLUMN = "User Name";
+    private static final String SF_COLUMN = "SF";
+    private static final String ENVIRONMENT_COLUMN = "Environment";
+    private static final String SERVICES_USED_COLUMN = "Services Used";
+    private static final String USER_STATUS_COLUMN = "User Status";
+    private static final String COMMENT_COLUMN = "Comment";
+    private static final String FIX_REVISION_COLUMN = "Fix Revision";
+    private static final String HASH_COLUMN = "Hash";
+    private static final String TAGGED_ACTIONS_COLUMN = "Tagged Actions";
+    public static final String[] AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS = { ID_COLUMN, NAME_COLUMN, DESCRIPTION_COLUMN,
+            STATUS_COLUMN, FAILURE_REASON_COLUMN, FAILED_ACTIONS_COLUMN, START_TIME_COLUMN, FINISH_TIME_COLUMN,
+            EXECUTION_TIME_COLUMN, USER_NAME_COLUMN, SF_COLUMN, ENVIRONMENT_COLUMN, SERVICES_USED_COLUMN,
+            USER_STATUS_COLUMN, COMMENT_COLUMN, FIX_REVISION_COLUMN, KNOWN_BUGS_COLUMN, HASH_COLUMN,
+            TAGGED_ACTIONS_COLUMN };
+    public static final String[] DEFAULT_SCRIPT_RUN_HISTORY_COLUMNS = { ID_COLUMN, NAME_COLUMN, DESCRIPTION_COLUMN,
+            STATUS_COLUMN, FAILURE_REASON_COLUMN, START_TIME_COLUMN, FINISH_TIME_COLUMN,
+            EXECUTION_TIME_COLUMN, USER_NAME_COLUMN, SF_COLUMN, SERVICES_USED_COLUMN,
+            COMMENT_COLUMN, KNOWN_BUGS_COLUMN };
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final ObjectWriter LIST_JSON_WRITER = OBJECT_MAPPER.writer();

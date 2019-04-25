@@ -100,7 +100,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	private List<TestCaseRunStatus> allRunStatuses;
 
 	@SessionStored
-    private String[] selectedColumns = StatisticsUtils.availableScriptRunHistoryColumns;
+    private String[] selectedColumns = StatisticsUtils.DEFAULT_SCRIPT_RUN_HISTORY_COLUMNS;
 
 	@SessionStored
     private boolean renderExpaned;
@@ -647,7 +647,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
 	public String[] getAvailableColumns() {
-        return StatisticsUtils.availableScriptRunHistoryColumns;
+        return StatisticsUtils.AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS;
 	}
 
 	public boolean isRenderExpaned() {

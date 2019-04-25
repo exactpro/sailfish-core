@@ -292,9 +292,9 @@ public class StatisticsResource {
             params.setTags(tags);
 
             columns = dimension.getColumns().isEmpty() ? new ArrayList<>(
-                    Arrays.asList(StatisticsUtils.availableScriptRunHistoryColumns)) : dimension.getColumns();
+                    Arrays.asList(StatisticsUtils.AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS)) : dimension.getColumns();
         } else {
-            columns = new ArrayList<>(Arrays.asList(StatisticsUtils.availableScriptRunHistoryColumns));
+            columns = new ArrayList<>(Arrays.asList(StatisticsUtils.AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS));
         }
 
         List<AggregatedReportRow> reportRows = service.getReportingStorage().generateTestScriptsReport(params);
