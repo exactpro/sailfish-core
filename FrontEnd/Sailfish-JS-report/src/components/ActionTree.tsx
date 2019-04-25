@@ -25,7 +25,6 @@ import '../styles/action.scss';
 import ExpandablePanel from './ExpandablePanel';
 import Link from '../models/Link';
 import { StatusType } from '../models/Status';
-import { Checkpoint } from './Checkpoint';
 import UserTable from '../models/UserTable';
 import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
@@ -44,7 +43,7 @@ interface ActionTreeOwnProps {
 }
 
 interface ActionTreeStateProps {
-    selectedMessageId: number;
+    selectedVerififcationId: number;
     selectedActionsId: number[];
     scrolledActionId: Number;
     actionsFilter: StatusType[];
@@ -132,9 +131,9 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         }
 
         // here we check verification selection
-        if (nextProps.selectedMessageId !== prevProps.selectedMessageId &&
+        if (nextProps.selectedVerififcationId !== prevProps.selectedVerififcationId &&
             action.relatedMessages &&
-            (action.relatedMessages.some(msgId => msgId == nextProps.selectedMessageId || msgId == prevProps.selectedMessageId))) {
+            (action.relatedMessages.some(msgId => msgId == nextProps.selectedVerififcationId || msgId == prevProps.selectedVerififcationId))) {
             return true;
         }
 
@@ -199,7 +198,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, actionsFilter, onExpand } = props;
+        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedVerififcationId: selectedMessageId, actionsFilter, onExpand } = props;
 
         switch (props.action.actionNodeType) {
             case ActionNodeType.ACTION: {
@@ -313,8 +312,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         }
     }
 
-    renderVerification({ name, status, entries, messageId }: Verification,
-        selectHandelr: Function, isSelected: boolean, isTransaparent) {
+    renderVerification({ name, status, entries, messageId }: Verification, selectHandelr: Function, isSelected: boolean, isTransaparent) {
 
         const className = createSelector(
             "ac-body__verification",
@@ -357,7 +355,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
 
 export const ActionTree = connect(
     (state: AppState, ownProps: ActionTreeOwnProps): ActionTreeStateProps => ({
-        selectedMessageId: state.selected.messagesId[0],
+        selectedVerififcationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         actionsFilter: state.filter.actionsFilter

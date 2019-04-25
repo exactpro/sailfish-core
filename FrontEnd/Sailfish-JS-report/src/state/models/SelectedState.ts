@@ -22,6 +22,7 @@ export default interface SelectedState {
     testCase: TestCase;
     actionsId: number[];
     messagesId: number[];
+    verificationId: number;
     checkpointMessageId: number;
     checkpointActionId: number;
     rejectedMessageId: number;

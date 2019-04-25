@@ -71,6 +71,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsId: [stateAction.action.id],
                 status: stateAction.action.status.status,
                 messagesId: stateAction.action.relatedMessages,
+                verificationId: initialSelectedState.verificationId,
                 scrolledActionId: initialSelectedState.scrolledActionId,
                 scrolledMessageId: new Number(scrolledMessageId),
                 activeActionId: stateAction.action.id
@@ -106,6 +107,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 messagesId: [stateAction.message.id],
                 status: stateAction.status,
                 actionsId: relatedActions,
+                verificationId: stateAction.message.id,
                 scrolledActionId: new Number(scrolledAction),
                 scrolledMessageId: initialSelectedState.scrolledMessageId,
                 activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId
@@ -115,6 +117,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         case StateActionTypes.SELECT_VERIFICATION: {
             return {
                 ...state,
+                verificationId: stateAction.messageId,
                 messagesId: [stateAction.messageId],
                 status: stateAction.status,
                 actionsId: initialSelectedState.actionsId,
