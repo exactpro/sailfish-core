@@ -32,6 +32,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 
+import com.exactpro.sf.embedded.statistics.StatisticsUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,9 +57,6 @@ public class StatisticsReportingBean implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsReportingBean.class);
 	
 	private static final String REPORT_FILE_PREFIX = "Aggregated_report";
-
-	// average number of test cases per matrix is 100 so we decided to choose this limit for loading matrices
-	private static final int LOADING_MATRIX_LIMIT = 100;
 	
 	private boolean statisticsDbAvailable;
 	
@@ -132,30 +130,10 @@ public class StatisticsReportingBean implements Serializable {
         AggregateReportParameters params = getAggregateReportParameters();
 
         try {
-            statisticsReportHandler.reset();
-            lastResult = Collections.emptyList();
-            StatisticsReportingStorage reportingStorage = BeanUtil.getSfContext().getStatisticsService().getReportingStorage();
-            SortedMap<Long, List<Long>> matrixToTestCaseIds = reportingStorage.getMatrixRunAndTestCaseRunIDs(params);
-            if (!matrixToTestCaseIds.isEmpty()) {
-                int limit = 0;
-                List<Long> matrixIds = new ArrayList<>(matrixToTestCaseIds.keySet());
-                List<List<Long>> testCaseRunIds = new ArrayList<>(matrixToTestCaseIds.values());
-                while (limit < matrixIds.size()) {
-                    List<Long> batchMatrixIds = matrixIds.subList(
-                            limit, Math.min(limit + LOADING_MATRIX_LIMIT, matrixIds.size()));
-                    List<Long> batchTestCaseIds = testCaseRunIds.subList(
-                            limit, Math.min(limit += LOADING_MATRIX_LIMIT, matrixToTestCaseIds.size()))
-                            .stream()
-                            .flatMap(List::stream)
-                            .collect(Collectors.toList());
-                    params.setMatrixRunIds(batchMatrixIds);
-                    params.setTestCaseRunIds(batchTestCaseIds);
-                    statisticsReportHandler.handleMatrixRunTestCases(reportingStorage.generateAggregatedReport(params), reportingStorage);
-                }
-            }
-            statisticsReportHandler.finalize(reportingStorage);
+            this.lastResult = Collections.emptyList();
+            StatisticsUtils.generateAggregatedReport(BeanUtil.getSfContext().getStatisticsService(),
+                    params, statisticsReportHandler);
             this.lastResult = statisticsReportHandler.getReportRows();
-
 			
 			this.loadedFrom = from;
 			this.loadedTo = to;

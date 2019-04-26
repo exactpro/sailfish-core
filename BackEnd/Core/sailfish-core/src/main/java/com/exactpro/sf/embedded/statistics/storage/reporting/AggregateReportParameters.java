@@ -21,12 +21,17 @@ import java.util.List;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.util.DateTimeUtility;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import java.time.LocalDateTime;
 
 public class AggregateReportParameters {
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime from;
 
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime to;
 
 	private String matrixNamePattern;
@@ -59,10 +64,13 @@ public class AggregateReportParameters {
 
     private boolean includeExecutedInFromToRange;
 
+    private String reportType;
+
 	public LocalDateTime getFrom() {
 		return from;
 	}
 
+	@JsonSetter
 	public void setFrom(LocalDateTime from) {
 		this.from = from;
 	}
@@ -75,6 +83,7 @@ public class AggregateReportParameters {
 		return to;
 	}
 
+    @JsonSetter
 	public void setTo(LocalDateTime to) {
 		this.to = to;
 	}
@@ -201,5 +210,13 @@ public class AggregateReportParameters {
 
     public void setIncludeExecutedInFromToRange(boolean includeExecutedInFromToRange) {
         this.includeExecutedInFromToRange = includeExecutedInFromToRange;
+    }
+
+    public String getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(String reportType) {
+        this.reportType = reportType;
     }
 }

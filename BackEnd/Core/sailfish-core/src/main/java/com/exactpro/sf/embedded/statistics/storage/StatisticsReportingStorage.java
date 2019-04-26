@@ -559,13 +559,18 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 	}
 
     public SortedMap<Long, List<Long>> getMatrixRunAndTestCaseRunIDs(AggregateReportParameters params) {
-        boolean tagsFilter = params.getTags() != null && !params.getTags().isEmpty();
+        boolean tagsFilter = CollectionUtils.isNotEmpty(params.getTags());
+        boolean sfInstancesFilter = CollectionUtils.isNotEmpty(params.getSfInstances());
 
         String queryString = "select MR.id, TCR.id "
                 + "from TestCaseRun as TCR "
                 + "right join TCR.matrixRun as MR "
                 + "join MR.sfInstance as SF "
-                + "where MR.startTime >= :from and MR.finishTime <= :to and SF.id in (:ids) ";
+                + "where MR.startTime >= :from and MR.finishTime <= :to ";
+
+        if (sfInstancesFilter) {
+            queryString += "and SF.id in (:ids) ";
+        }
 
         if (tagsFilter) {
             queryString += "and (exists (select MR2.id from "
@@ -589,8 +594,9 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
             Query query = session.createQuery(queryString);
             query.setParameter("from", params.getFrom());
             query.setParameter("to", params.getTo());
-            query.setParameterList("ids", toIds(params.getSfInstances()));
-
+            if (sfInstancesFilter) {
+                query.setParameterList("ids", toIds(params.getSfInstances()));
+            }
             if (tagsFilter) {
                 Object[] tagsIds = tagsToIds(params.getTags());
                 query.setParameterList("mrTags", tagsIds);

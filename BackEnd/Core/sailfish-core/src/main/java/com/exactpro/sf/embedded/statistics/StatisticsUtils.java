@@ -24,18 +24,28 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
+import com.exactpro.sf.embedded.statistics.storage.IStatisticsStorage;
+import com.exactpro.sf.embedded.statistics.storage.StatisticsReportingStorage;
+import com.google.common.collect.Iterables;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -91,6 +101,9 @@ public class StatisticsUtils {
             STATUS_COLUMN, FAILURE_REASON_COLUMN, START_TIME_COLUMN, FINISH_TIME_COLUMN,
             EXECUTION_TIME_COLUMN, USER_NAME_COLUMN, SF_COLUMN, SERVICES_USED_COLUMN,
             COMMENT_COLUMN, KNOWN_BUGS_COLUMN };
+
+    // average number of test cases per matrix is 100 so we decided to choose this limit for loading matrices
+    private static final int LOADING_MATRIX_LIMIT = 100;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final ObjectWriter LIST_JSON_WRITER = OBJECT_MAPPER.writer();
@@ -170,6 +183,31 @@ public class StatisticsUtils {
                 writer.close();
             }
         }
+    }
+
+    public static void generateAggregatedReport(StatisticsService statisticsService,
+                                                AggregateReportParameters params,
+                                                IStatisticsReportHandler statisticsReportHandler) {
+        statisticsReportHandler.reset();
+        StatisticsReportingStorage reportingStorage = statisticsService.getReportingStorage();
+        SortedMap<Long, List<Long>> matrixToTestCaseIds = reportingStorage.getMatrixRunAndTestCaseRunIDs(params);
+        if (!matrixToTestCaseIds.isEmpty()) {
+            Iterator<List<Long>> matrixIdPartsIterator =
+                    Iterables.partition(matrixToTestCaseIds.keySet(), LOADING_MATRIX_LIMIT).iterator();
+            Iterator<List<List<Long>>> testCaseIdPartsIterator =
+                    Iterables.partition(matrixToTestCaseIds.values(), LOADING_MATRIX_LIMIT).iterator();
+            while (matrixIdPartsIterator.hasNext() && testCaseIdPartsIterator.hasNext()) {
+                List<Long> batchMatrixIds = matrixIdPartsIterator.next();
+                List<Long> batchTestCaseIds = testCaseIdPartsIterator.next()
+                        .stream()
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
+                params.setMatrixRunIds(batchMatrixIds);
+                params.setTestCaseRunIds(batchTestCaseIds);
+                statisticsReportHandler.handleMatrixRunTestCases(reportingStorage.generateAggregatedReport(params), reportingStorage);
+            }
+        }
+        statisticsReportHandler.finalize(reportingStorage);
     }
 
     public static String createStatsPerTagsName() {
@@ -610,6 +648,37 @@ public class StatisticsUtils {
                 matrixRunId = row.getMatrixRunId();
                 i++;
             }
+        }
+    }
+
+    public static void loadSfInstanceIdsFromDb(IStatisticsStorage statisticsStorage,
+                                               AggregateReportParameters parameters) {
+        if (CollectionUtils.isNotEmpty(parameters.getSfInstances())) {
+            for (SfInstance instance : parameters.getSfInstances()) {
+                SfInstance sfInstanceFromDb =
+                        statisticsStorage.getSfInstance(instance.getHost(), String.valueOf(instance.getPort()), instance.getName());
+                if (sfInstanceFromDb == null) {
+                    String message = String.format("Not registered SF Instance [host:%s, port:%s, name:%s] " +
+                            "in the stat db", instance.getHost(), instance.getPort(), instance.getName());
+                    throw new IllegalArgumentException(message);
+                }
+                instance.setId(sfInstanceFromDb.getId());
+            }
+
+        }
+    }
+
+    public static void loadTagIdsFromDb(IStatisticsStorage statisticsStorage, AggregateReportParameters parameters) {
+        if (CollectionUtils.isNotEmpty(parameters.getTags())) {
+            for (Tag tag : parameters.getTags()) {
+                Tag tagFromDb = statisticsStorage.getTagByName(tag.getName());
+                if (tagFromDb == null) {
+                    String message = String.format("Not registered Tag [name:%s] in the stat db", tag.getName());
+                    throw new IllegalArgumentException(message);
+                }
+                tag.setId(tagFromDb.getId());
+            }
+
         }
     }
 }

@@ -47,6 +47,10 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -617,13 +621,45 @@ public class StatisticsResource {
     @GET
     @Path("stats_per_tags")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML})
     public Response getStatsPerTagsFromJson(DimensionMap dimensionMap) {
         XmlResponse xmlResponse = new XmlResponse();
         Status status;
         try {
             List<TagGroupDimension> selectedDimensions = parseDimensions(dimensionMap);
             return generateStatsPerTags(selectedDimensions);
+        } catch (Throwable e) {
+            logger.error(e.getMessage(), e);
+            status = Status.INTERNAL_SERVER_ERROR;
+            xmlResponse.setMessage(e.getMessage());
+            xmlResponse.setRootCause((e.getCause() != null) ? e.getCause().getMessage() : null);
+        }
+        return Response.
+                status(status).
+                entity(xmlResponse).
+                build();
+    }
+
+    @GET
+    @Path("aggregated_report")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML})
+    public Response getAggregatedReport(AggregateReportParameters parameters) {
+        XmlResponse xmlResponse = new XmlResponse();
+        Status status;
+        try {
+            StatisticsService statisticsService = getStatisticsService();
+            String reportType = parameters.getReportType();
+            if (reportType == null) {
+                throw new IllegalArgumentException("ReportType is not set");
+            }
+            IStatisticsReportHandler statisticsReportHandler =
+                    statisticsService.getStatisticsReportHandler(SailfishURI.parse(reportType));
+            IStatisticsStorage statisticsStorage = statisticsService.getStorage();
+            StatisticsUtils.loadSfInstanceIdsFromDb(statisticsStorage, parameters);
+            StatisticsUtils.loadTagIdsFromDb(statisticsStorage, parameters);
+            StatisticsUtils.generateAggregatedReport(statisticsService, parameters, statisticsReportHandler);
+            return generateAggregatedReport(statisticsReportHandler, parameters);
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             status = Status.INTERNAL_SERVER_ERROR;
@@ -667,6 +703,25 @@ public class StatisticsResource {
                                 + reportName).build();
     }
 
+    private Response generateAggregatedReport(IStatisticsReportHandler statisticsReportHandler,
+                                              AggregateReportParameters parameters) {
+
+        String reportName = statisticsReportHandler.getReportName(parameters);
+        StreamingOutput stream = out -> {
+            try {
+                statisticsReportHandler.writeReport(out);
+            } catch(Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response
+                .ok(stream)
+                .header("content-disposition",
+                        "attachment; filename = "
+                                + reportName).build();
+    }
+
     private List<TagGroupDimension> parseDimensions(DimensionMap dimensions) {
         IStatisticsStorage storage = getStatisticsService().getStorage();
         List<TagGroupDimension> parsedDimensions = new ArrayList<>();
@@ -697,4 +752,6 @@ public class StatisticsResource {
         }
         return parsedDimensions;
     }
+
+
 }

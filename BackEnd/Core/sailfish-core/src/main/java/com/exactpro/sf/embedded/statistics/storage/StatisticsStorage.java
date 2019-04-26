@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.DefaultComponentSafeNamingStrategy;
@@ -111,16 +112,10 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public SfInstance loadSfInstance(String host, String port, String sfName) {
-		
-		SfInstance result;
-		
-		List<Criterion> criterions = new ArrayList<Criterion>();
-		
-		criterions.add(Restrictions.eq("host", host));
-		criterions.add(Restrictions.eq("port", Integer.parseInt( port )));
-		criterions.add(Restrictions.eq("name", sfName));
 
-        List<SfInstance> queryResults = storage.getAllEntities(SfInstance.class, criterions);
+		SfInstance result;
+
+        List<SfInstance> queryResults = loadSfInstancesBy(host, port, sfName);
 		
 		if(!queryResults.isEmpty()) {
 			
@@ -145,8 +140,17 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		return result;
 		
 	}
-	
-	@Override
+
+    @Override
+    public SfInstance getSfInstance(String host, String port, String sfName) {
+        List<SfInstance> instances = loadSfInstancesBy(host, port, sfName);
+        if (CollectionUtils.isNotEmpty(instances)) {
+            return instances.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public TestCase loadUnknownTestCase() {
 
         TestCase result = storage.getEntityByField(TestCase.class, "testCaseId", UNKNOWN_TC_ID);
@@ -538,5 +542,13 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
     @Override
     public MatrixRun getMatrixRunById(long id) {
         return (MatrixRun)storage.getEntityById(MatrixRun.class, id);
+    }
+
+    private List<SfInstance> loadSfInstancesBy(String host, String port, String sfName) {
+        List<Criterion> criterions = new ArrayList<Criterion>();
+        criterions.add(Restrictions.eq("host", host));
+        criterions.add(Restrictions.eq("port", Integer.parseInt( port )));
+        criterions.add(Restrictions.eq("name", sfName));
+        return storage.getAllEntities(SfInstance.class, criterions);
     }
 }
