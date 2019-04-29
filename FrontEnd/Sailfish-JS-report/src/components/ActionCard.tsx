@@ -16,7 +16,7 @@
 
 import { h } from "preact";
 import Action from "../models/Action";
-import ParamsTable from "./ParamsTable";
+import ParamsTable, { RecoverableParamsTable } from "./ParamsTable";
 import ExpandablePanel, { RecoverableExpandablePanel } from "./ExpandablePanel";
 import { StatusType } from "../models/Status";
 import "../styles/action.scss";
@@ -122,9 +122,11 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                             stateKey={action.id + '-input-params'}
                             onExpand={onExpand}>
                             <div class="ac-body__item-title">Input parameters</div>
-                            <ParamsTable
+                            <RecoverableParamsTable
+                                stateKey={action.id + '-input-params-nodes'}
                                 params={parameters}
-                                name={name} />
+                                name={name} 
+                                onExpand={onExpand} />
                         </RecoverableExpandablePanel>
                     </div>
                     {

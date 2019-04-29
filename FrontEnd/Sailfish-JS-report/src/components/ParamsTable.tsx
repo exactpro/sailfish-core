@@ -18,16 +18,29 @@ import { h, Component } from "preact";
 import ActionParameter from "../models/ActionParameter";
 import '../styles/tables.scss';
 import { createSelector } from '../helpers/styleCreators';
+import StateSaver from "./util/StateSaver";
 
 const PADDING_LEVEL_VALUE = 10;
 
-export interface IParamTableProps {
-    params: Array<ActionParameter>;
+interface ParamsTableOwnProps {
+    params: ActionParameter[];
     name: string;
+    onExpand: () => void;
 }
 
-interface IParamTableState {
-    collapseParams: Array<TableNode>;
+interface ParamTableProps {
+    nodes: TableNode[];
+    name: string;
+    onExpand: () => void;
+    saveState: (state: TableNode[]) => void;
+}
+
+interface ParamTableState {
+    collapseParams: TableNode[];
+}
+
+interface RecoverableTableProps extends ParamsTableOwnProps {
+    stateKey: string;
 }
 
 interface TableNode extends ActionParameter {
@@ -35,29 +48,47 @@ interface TableNode extends ActionParameter {
     isExpanded?: boolean;
 }
 
-export default class ParamsTable extends Component<IParamTableProps, IParamTableState> {
+export default class ParamsTable extends Component<ParamTableProps, ParamTableState> {
 
-    constructor(props: IParamTableProps) {
+    constructor(props: ParamTableProps) {
         super(props);
         this.state = {
-            collapseParams: props.params ? props.params.map((param) => this.paramsToNodes(param)) : []
+            collapseParams: props.nodes
         }
     }
 
-    paramsToNodes(root: ActionParameter) : TableNode {
-        return (root.subParameters ? {
-            ...root,
-            subParameters: root.subParameters.map(parameter => this.paramsToNodes(parameter)),
-            isExpanded: true
-        } : root)
+    tooglerClick(targetNode: TableNode) {
+        this.setState({
+            ...this.state,
+            collapseParams: this.state.collapseParams.map(node => this.findNode(node, targetNode))
+        });
+    }    
+
+    findNode(node: TableNode, targetNode: TableNode): TableNode {
+        if (node === targetNode) {
+            return {
+                ...targetNode,
+                isExpanded: !targetNode.isExpanded
+            };
+        }
+
+        return {
+            ...node,
+            subParameters: node.subParameters && node.subParameters.map(subNode => this.findNode(subNode, targetNode))
+        };
     }
 
-    tooglerClick(root: TableNode) {
-        root.isExpanded = !root.isExpanded;
-        this.setState(this.state);
-    }    
+    componentDidUpdate(prevProps, prevState: ParamTableState) {
+        if (prevState.collapseParams !== this.state.collapseParams) {
+            this.props.onExpand();
+        }
+    }
+
+    componentWillUnmount() {
+        this.props.saveState(this.state.collapseParams);
+    }
     
-    render({ name }: IParamTableProps, { collapseParams }: IParamTableState) {
+    render({ name }: ParamTableProps, { collapseParams }: ParamTableState) {
         return (<div class="params-table">
             <table>
                 <tbody>
@@ -124,4 +155,30 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
             </tr>
         )
     }
+}
+
+export const RecoverableParamsTable = ({ stateKey, ...props }: RecoverableTableProps) => (
+    <StateSaver
+        stateKey={stateKey}>
+        {
+            (state, stateSaver) => state ? 
+                <ParamsTable
+                    {...props}
+                    saveState={stateSaver}
+                    nodes={state as TableNode[]}/> 
+                :
+                <ParamsTable
+                    {...props}
+                    saveState={stateSaver}
+                    nodes={props.params ? props.params.map(param => paramsToNodes(param)) : []}/>
+        }
+    </StateSaver>
+)
+
+function paramsToNodes(root: ActionParameter) : TableNode {
+    return (root.subParameters ? {
+        ...root,
+        subParameters: root.subParameters.map(parameter => paramsToNodes(parameter)),
+        isExpanded: true
+    } : root)
 }
