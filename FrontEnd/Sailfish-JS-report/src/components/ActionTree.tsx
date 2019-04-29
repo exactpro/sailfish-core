@@ -338,7 +338,8 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                         <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
                         <VerificationTable 
                             params={entries} 
-                            status={status.status}/>
+                            status={status.status}
+                            onExpand={this.props.onExpand}/>
                     </RecoverableExpandablePanel>
                 </div>
             </div>

@@ -29,6 +29,7 @@ export interface VerificationTableProps {
     params: Entry[];
     fieldsFilter: StatusType[];
     status: StatusType;
+    onExpand: () => void;
 }
 
 interface VerificationTableState {
@@ -57,9 +58,25 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
         } : root;
     }
 
-    tooglerClick(root: TableNode) {
-        root.isExpanded = !root.isExpanded;
-        this.setState(this.state);
+    tooglerClick(targetNode: TableNode) {
+        this.setState({
+            ...this.state,
+            nodes: this.state.nodes.map(rootNode => this.findNode(rootNode, targetNode))
+        });
+    }
+
+    findNode(node: TableNode, targetNode: TableNode): TableNode {
+        if (node === targetNode) {
+            return {
+                ...targetNode,
+                isExpanded: !targetNode.isExpanded
+            };
+        }
+
+        return {
+            ...node,
+            subEntries: node.subEntries && node.subEntries.map(subNode => this.findNode(subNode, targetNode))
+        };
     }
 
     setExpandStatus(isCollapsed: boolean) {
@@ -76,6 +93,13 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
             subEntries: node.subEntries ? node.subEntries.map(
                 subNode => subNode.subEntries ? this.setNodeExpandStatus(subNode, isExpanded) :
                     subNode) : null
+        }
+    }
+
+    componentDidUpdate(prevProps: VerificationTableProps, prevState: VerificationTableState) {
+        // handle expand state changing to remeasure card size
+        if (this.props.params === prevProps.params && this.state.nodes !== prevState.nodes) {
+            this.props.onExpand();
         }
     }
 
