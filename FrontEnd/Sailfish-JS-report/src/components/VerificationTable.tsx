@@ -18,18 +18,29 @@ import { h, Component } from "preact";
 import Entry from "../models/Entry";
 import { StatusType } from "../models/Status";
 import "../styles/tables.scss";
-import { VerificationTableProps } from './VerificationTable';
 import { connect } from 'preact-redux';
 import AppState from "../state/models/AppState";
 import { createSelector } from '../helpers/styleCreators';
+import StateSaver from "./util/StateSaver";
 
 const PADDING_LEVEL_VALUE = 15;
 
-export interface VerificationTableProps {
+interface VerificationTableOwnProps {
     params: Entry[];
+    status: StatusType;
+    onExpand: () => void;
+}
+
+interface VerificationTableProps {
+    nodes: TableNode[];
     fieldsFilter: StatusType[];
     status: StatusType;
     onExpand: () => void;
+    stateSaver: (state: TableNode[]) => void;
+}
+
+interface RecoverableVerificationTableProps extends VerificationTableOwnProps {
+    stateKey: string;
 }
 
 interface VerificationTableState {
@@ -46,16 +57,8 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
     constructor(props: VerificationTableProps) {
         super(props);
         this.state = {
-            nodes: props.params ? props.params.map((param) => this.paramsToNodes(param)) : []
+            nodes: props.nodes
         }
-    }
-
-    paramsToNodes(root: Entry): TableNode {
-        return root.subEntries ? {
-            ...root,
-            subEntries: root.subEntries.map((param) => this.paramsToNodes(param)),
-            isExpanded: true
-        } : root;
     }
 
     tooglerClick(targetNode: TableNode) {
@@ -98,9 +101,13 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
 
     componentDidUpdate(prevProps: VerificationTableProps, prevState: VerificationTableState) {
         // handle expand state changing to remeasure card size
-        if (this.props.params === prevProps.params && this.state.nodes !== prevState.nodes) {
+        if (this.state.nodes !== prevState.nodes) {
             this.props.onExpand();
         }
+    }
+
+    componentWillUnmount() {
+        this.props.stateSaver(this.state.nodes);
     }
 
     render({ fieldsFilter, status }: VerificationTableProps, { nodes }: VerificationTableState) {
@@ -207,3 +214,31 @@ export const VerificationTable = connect(
     }),
     dispatch => ({})
 )(VerificationTableBase);
+
+export const RecoverableVerificationTable = ({ stateKey, ...props }: RecoverableVerificationTableProps) => {
+    return (
+        <StateSaver
+            stateKey={stateKey}>
+            {
+                // at first table render, we need to generate table nodes if we don't find previous table's state 
+                (state, stateHandler) => state ? 
+                    <VerificationTable
+                        {...props}
+                        nodes={state as TableNode[]}
+                        stateSaver={stateHandler}/> :
+                    <VerificationTable
+                        {...props}
+                        nodes={props.params ? props.params.map(param => paramsToNodes(param)) : []}
+                        stateSaver={stateHandler}/>
+            }
+        </StateSaver>
+    )
+}
+
+function paramsToNodes(root: Entry): TableNode {
+    return root.subEntries ? {
+        ...root,
+        subEntries: root.subEntries.map((param) => paramsToNodes(param)),
+        isExpanded: true
+    } : root;
+}

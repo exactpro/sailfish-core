@@ -18,7 +18,7 @@ import { h, Component } from 'preact';
 import Action, { ActionNode, ActionNodeType } from '../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
-import { VerificationTable } from "./VerificationTable";
+import { VerificationTable, RecoverableVerificationTable } from "./VerificationTable";
 import UserMessage from '../models/UserMessage';
 import Verification from '../models/Verification'
 import '../styles/action.scss';
@@ -336,7 +336,8 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                         stateKey={parentActionId + '-' + messageId}
                         onExpand={this.props.onExpand}>
                         <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
-                        <VerificationTable 
+                        <RecoverableVerificationTable 
+                            stateKey={parentActionId + '-' + messageId + '-nodes'}
                             params={entries} 
                             status={status.status}
                             onExpand={this.props.onExpand}/>
