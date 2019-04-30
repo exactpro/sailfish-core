@@ -47,6 +47,8 @@ public class MessageParticipant implements Serializable {
 
     private boolean explanation;
 
+    private long timestamp;
+
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "message_id", nullable = false)
     private Message message;
@@ -57,6 +59,11 @@ public class MessageParticipant implements Serializable {
     public MessageParticipant(boolean explanation, Message message) {
         this.explanation = explanation;
         this.message = message;
+    }
+
+    public MessageParticipant(boolean explanation, Message message, long messageTimestamp) {
+        this(explanation, message);
+        timestamp = messageTimestamp;
     }
 
     public long getId() {
@@ -88,6 +95,16 @@ public class MessageParticipant implements Serializable {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("id", id)
                 .append("explanation", explanation)
-                .append("message", message).toString();
+                .append("message", message)
+                .append("timestamp", timestamp)
+                .toString();
+    }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
     }
 }

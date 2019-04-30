@@ -15,11 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.machinelearning.entities;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,6 +33,11 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @JsonPropertyOrder({"id", "submittedAt", "submitter", "expectedMessage", "participants"})
 @Entity
@@ -68,6 +68,24 @@ public class FailedAction implements Serializable {
 
     @Column
     private String submitter;
+
+    @Column
+    private long periodStart;
+
+    @Column
+    private long periodEnd;
+
+    @Column
+    private String dictionaryURI;
+
+    @Column
+    private String name;
+
+    @Column
+    private String protocol;
+
+    @Column
+    private String namespace;
 
     public FailedAction() {
         this.participants = new ArrayList<>();
@@ -131,6 +149,58 @@ public class FailedAction implements Serializable {
                 .append("expectedMessage", expectedMessage)
                 .append("participants", participants)
                 .append("submittedAt", submittedAt)
-                .append("submitter", submitter).toString();
+                .append("submitter", submitter)
+                .append("periodStart", periodStart)
+                .append("periodEnd", periodEnd)
+                .append("namespace", namespace)
+                .toString();
+    }
+
+    public long getPeriodStart() {
+        return periodStart;
+    }
+
+    public void setPeriodStart(long periodStart) {
+        this.periodStart = periodStart;
+    }
+
+    public long getPeriodEnd() {
+        return periodEnd;
+    }
+
+    public void setPeriodEnd(long periodEnd) {
+        this.periodEnd = periodEnd;
+    }
+
+    public String getDictionaryURI() {
+        return dictionaryURI;
+    }
+
+    public void setDictionaryURI(String dictionaryURI) {
+        this.dictionaryURI = dictionaryURI;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 }
