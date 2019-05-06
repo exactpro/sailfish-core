@@ -31,6 +31,30 @@ public class SailfishURIUtils {
     //FIXME: use "resolve once" strategy in managers instead of matching URIs every time
     private static final Logger LOGGER = LoggerFactory.getLogger(SailfishURIUtils.class);
 
+    /**
+     * Finds an URI in the set which matches specified URI
+     *
+     *  @param  uri         URI for matching
+     *  @param  set         set with URI
+     *  @param  defaultRule default URI rule
+     *  @param  rules       array of URI rules
+     *
+     *  @return found URI or {@code null}
+     */
+    public static SailfishURI getMatchingURI(SailfishURI uri, Set<SailfishURI> set, SailfishURIRule defaultRule, SailfishURIRule... rules) {
+        Objects.requireNonNull(set, "set cannot be null");
+        checkURI(uri, defaultRule, rules);
+
+        for(SailfishURI sailfishURI : set) {
+            if(uri.matches(sailfishURI)) {
+                LOGGER.debug("Matching: {} -> {}", uri, sailfishURI);
+                return sailfishURI;
+            }
+        }
+
+        return null;
+    }
+
 	/**
      * Finds a value in multimap with key matching specified URI
      *
@@ -60,16 +84,8 @@ public class SailfishURIUtils {
      */
     public static <T> T getMatchingValue(SailfishURI uri, Map<SailfishURI, T> map, SailfishURIRule defaultRule, SailfishURIRule... rules) {
 		Objects.requireNonNull(map, "map cannot be null");
-        checkURI(uri, defaultRule, rules);
-
-        for(SailfishURI key : map.keySet()) {
-            if(uri.matches(key)) {
-                LOGGER.debug("Matching: {} -> {}", uri, key);
-                return map.get(key);
-            }
-        }
-
-        return null;
+        SailfishURI key = getMatchingURI(uri, map.keySet(), defaultRule, rules);
+        return key != null ? map.get(key) : null;
     }
 
     /**

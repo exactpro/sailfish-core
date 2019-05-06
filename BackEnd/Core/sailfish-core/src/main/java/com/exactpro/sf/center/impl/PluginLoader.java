@@ -153,7 +153,7 @@ public class PluginLoader {
         for (String pluginPath : wd.listFiles(DirectoryFilter.getInstance(), FolderType.PLUGINS)) {
             try {
                 userEventsLogger.info("Start loading {} plugin", pluginPath);
-                IVersion version = extractVersion(pluginPath);
+                IVersion version = extractVersion(wd, pluginPath);
                 ClassLoader pluginClassLoader = loadPluginFrom(FolderType.PLUGINS, pluginPath, loadInfo);
                 userEventsLogger.info("Plugin {} version {} successfully loaded", pluginPath, version.buildShortVersion());
                 if (pluginClassLoader != null) {
@@ -232,7 +232,7 @@ public class PluginLoader {
 
 		if (folderType == FolderType.PLUGINS) {
 			try {
-                version = extractVersion(pluginPath);
+                version = extractVersion(wd, pluginPath);
 
 			    if(version.getMajor() != coreVersion.getMajor() || version.getMinor() != coreVersion.getMinor()) {
                     throw new SFException(String.format("Plugin '%s' has unsupported version: %s.%s (expected: %s.%s)", pluginPath,
@@ -547,8 +547,8 @@ public class PluginLoader {
         return Collections.unmodifiableList(pluginVersions);
     }
 
-    private IVersion extractVersion(String pluginPath) throws IOException {
-        File versionFile = wd.getFile(FolderType.PLUGINS, pluginPath, VERSION_FILE_NAME);
+    public static IVersion extractVersion(IWorkspaceDispatcher dispatcher, String pluginPath) throws IOException {
+        File versionFile = dispatcher.getFile(FolderType.PLUGINS, pluginPath, VERSION_FILE_NAME);
         return Version.loadVersion(versionFile);
     }
 }
