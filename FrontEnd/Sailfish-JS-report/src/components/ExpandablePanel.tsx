@@ -17,7 +17,7 @@
 import { h, Component } from "preact";
 import "../styles/expandablePanel.scss"
 import { createSelector } from '../helpers/styleCreators';
-import StateSaver from "./util/StateSaver";
+import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
 
 interface PanelProps {
     header?: JSX.Element;
@@ -80,9 +80,7 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
     }
 }
 
-interface RecoverablePanelProps extends PanelProps {
-    stateKey: string;
-}
+interface RecoverablePanelProps extends PanelProps, RecoverableElementProps {}
 
 export const RecoverableExpandablePanel = (props: RecoverablePanelProps) => (
     <StateSaver

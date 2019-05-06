@@ -21,7 +21,7 @@ import "../../styles/tables.scss";
 import { connect } from 'preact-redux';
 import AppState from "../../state/models/AppState";
 import { createSelector } from '../../helpers/styleCreators';
-import StateSaver from "./../util/StateSaver";
+import StateSaver, { RecoverableElementProps } from "./../util/StateSaver";
 
 const PADDING_LEVEL_VALUE = 15;
 
@@ -39,9 +39,7 @@ interface VerificationTableProps {
     stateSaver: (state: TableNode[]) => void;
 }
 
-interface RecoverableVerificationTableProps extends VerificationTableOwnProps {
-    stateKey: string;
-}
+interface RecoverableVerificationTableProps extends VerificationTableOwnProps, RecoverableElementProps {}
 
 interface VerificationTableState {
     nodes: TableNode[];

@@ -18,7 +18,7 @@ import { h, Component } from "preact";
 import ActionParameter from "../../models/ActionParameter";
 import '../../styles/tables.scss';
 import { createSelector } from '../../helpers/styleCreators';
-import StateSaver from "../util/StateSaver";
+import StateSaver, { RecoverableElementProps } from "../util/StateSaver";
 
 const PADDING_LEVEL_VALUE = 10;
 
@@ -39,9 +39,7 @@ interface ParamTableState {
     collapseParams: TableNode[];
 }
 
-interface RecoverableTableProps extends ParamsTableOwnProps {
-    stateKey: string;
-}
+interface RecoverableTableProps extends ParamsTableOwnProps, RecoverableElementProps {}
 
 interface TableNode extends ActionParameter {
     // is subnodes visible

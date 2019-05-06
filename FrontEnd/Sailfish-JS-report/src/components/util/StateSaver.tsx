@@ -17,6 +17,10 @@
 import { h } from 'preact';
 import { createContext } from 'preact-context';
 
+export interface RecoverableElementProps {
+    stateKey: string;
+}
+
 export interface StatesMap {
     [key: string]: any;
 }
@@ -28,8 +32,7 @@ export interface StateSaverContext {
 
 export const { Provider, Consumer } = createContext({});
 
-export interface StateSaverProps {
-    stateKey: string;
+export interface StateSaverProps extends RecoverableElementProps {
     children: (state: any, stateHandler: (nextState: any) => any) => JSX.Element;
 }
 
