@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import '../styles/tables.scss';
+import '../../styles/tables.scss';
 
 interface CustomTableProps {
     content: any[];

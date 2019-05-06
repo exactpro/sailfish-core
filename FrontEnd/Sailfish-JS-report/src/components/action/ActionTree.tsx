@@ -15,27 +15,27 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
-import Action, { ActionNode, ActionNodeType } from '../models/Action';
+import Action, { ActionNode, ActionNodeType } from '../../models/Action';
 import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
 import { VerificationTable, RecoverableVerificationTable } from "./VerificationTable";
-import UserMessage from '../models/UserMessage';
-import Verification from '../models/Verification'
-import '../styles/action.scss';
-import ExpandablePanel, { RecoverableExpandablePanel } from './ExpandablePanel';
-import Link from '../models/Link';
-import { StatusType } from '../models/Status';
-import UserTable from '../models/UserTable';
+import UserMessage from '../../models/UserMessage';
+import Verification from '../../models/Verification'
+import '../../styles/action.scss';
+import ExpandablePanel, { RecoverableExpandablePanel } from '../ExpandablePanel';
+import Link from '../../models/Link';
+import { StatusType } from '../../models/Status';
+import UserTable from '../../models/UserTable';
 import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
-import Tree, { createNode } from '../models/util/Tree';
-import { createSelector } from '../helpers/styleCreators';
+import Tree, { createNode } from '../../models/util/Tree';
+import { createSelector } from '../../helpers/styleCreators';
 import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
-import { CheckpointAction } from './Checkpoint';
-import { isCheckpoint } from '../helpers/actionType';
-import { selectAction } from '../actions/actionCreators';
-import { selectVerification } from '../actions/actionCreators';
+import AppState from '../../state/models/AppState';
+import { CheckpointAction } from '../Checkpoint';
+import { isCheckpoint } from '../../helpers/actionType';
+import { selectAction } from '../../actions/actionCreators';
+import { selectVerification } from '../../actions/actionCreators';
 
 interface ActionTreeOwnProps {
     action: ActionNode;

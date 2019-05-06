@@ -15,10 +15,10 @@
  ******************************************************************************/
 
 import { h, Component } from "preact";
-import ActionParameter from "../models/ActionParameter";
-import '../styles/tables.scss';
-import { createSelector } from '../helpers/styleCreators';
-import StateSaver from "./util/StateSaver";
+import ActionParameter from "../../models/ActionParameter";
+import '../../styles/tables.scss';
+import { createSelector } from '../../helpers/styleCreators';
+import StateSaver from "../util/StateSaver";
 
 const PADDING_LEVEL_VALUE = 10;
 

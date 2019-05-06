@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import UserMessage from '../models/UserMessage';
-import ExpandablePanel, { RecoverableExpandablePanel } from './ExpandablePanel';
-import ExceptionCard from './ExceptionCard';
-import { createSelector } from '../helpers/styleCreators';
-import '../styles/action.scss';
-import Action, { ActionNodeType } from '../models/Action';
+import UserMessage from '../../models/UserMessage';
+import ExpandablePanel, { RecoverableExpandablePanel } from './../ExpandablePanel';
+import ExceptionCard from './../ExceptionCard';
+import { createSelector } from '../../helpers/styleCreators';
+import '../../styles/action.scss';
+import Action, { ActionNodeType } from '../../models/Action';
 
 interface CustomMessageProps {
     userMessage: UserMessage;

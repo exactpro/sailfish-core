@@ -15,13 +15,13 @@
  ******************************************************************************/
 
 import { h, Component } from "preact";
-import Entry from "../models/Entry";
-import { StatusType } from "../models/Status";
-import "../styles/tables.scss";
+import Entry from "../../models/Entry";
+import { StatusType } from "../../models/Status";
+import "../../styles/tables.scss";
 import { connect } from 'preact-redux';
-import AppState from "../state/models/AppState";
-import { createSelector } from '../helpers/styleCreators';
-import StateSaver from "./util/StateSaver";
+import AppState from "../../state/models/AppState";
+import { createSelector } from '../../helpers/styleCreators';
+import StateSaver from "./../util/StateSaver";
 
 const PADDING_LEVEL_VALUE = 15;
 

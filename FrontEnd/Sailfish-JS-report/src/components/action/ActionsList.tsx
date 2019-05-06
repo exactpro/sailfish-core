@@ -16,14 +16,14 @@
 
 import { h } from 'preact';
 import { connect } from 'preact-redux';
-import '../styles/action.scss';
-import Action, { ActionNode, ActionNodeType } from '../models/Action';
+import '../../styles/action.scss';
+import Action, { ActionNode, ActionNodeType } from '../../models/Action';
 import { ActionTree } from './ActionTree';
-import { HeatmapScrollbar } from './HeatmapScrollbar';
-import { VirtualizedList } from './VirtualizedList';
-import PureComponent from './util/PureComponent';
-import AppState from '../state/models/AppState';
-import StateSaverProvider from './util/StateSaverProvider';
+import { HeatmapScrollbar } from '../HeatmapScrollbar';
+import { VirtualizedList } from '../VirtualizedList';
+import PureComponent from '../util/PureComponent';
+import AppState from '../../state/models/AppState';
+import StateSaverProvider from '../util/StateSaverProvider';
 
 interface ListProps {
     actions: Array<ActionNode>;
@@ -38,7 +38,6 @@ export class ActionsListBase extends PureComponent<ListProps> {
         this.scrollbar && this.scrollbar.scrollToTop();
     }
 
-    private elements: any[] = [];
     private list: VirtualizedList;
 
     scrollToAction(actionId: number) {
@@ -59,27 +58,24 @@ export class ActionsListBase extends PureComponent<ListProps> {
                             rowCount={actions.length}
                             itemSpacing={6}
                             ref={ref => this.list = ref}
-                            elementRenderer={idx => {
-                                const action = actions[idx];
-
-                                return (
-                                    <ActionTree 
-                                        action={action}
-                                        onExpand={() => {
-                                            this.list.measurerCache.clear(idx);
-                                            this.list.forceUpdateList();
-                                        }}
-                                        ref={ref => {
-                                            if (action.actionNodeType === ActionNodeType.ACTION) {
-                                                this.elements[(action as Action).id] = ref;
-                                            }
-                                        }}/>
-                                )
-                            }}
+                            elementRenderer={this.renderAction}
                         />
                     </StateSaverProvider>
                 </div>
             </div> 
+        )
+    }
+
+    private renderAction = (idx: number): JSX.Element => {
+        const action = this.props.actions[idx];
+
+        return (
+            <ActionTree 
+                action={action}
+                onExpand={() => {
+                    this.list.measurerCache.clear(idx);
+                    this.list.forceUpdateList();
+                }}/>
         )
     }
 }   

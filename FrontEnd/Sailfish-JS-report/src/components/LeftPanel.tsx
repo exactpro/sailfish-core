@@ -20,11 +20,11 @@ import '../styles/layout.scss';
 import { Panel } from '../util/Panel';
 import { ToggleButton } from './ToggleButton';
 import Action from '../models/Action';
-import { ActionsList } from './ActionsList';
+import { ActionsList } from './action/ActionsList';
 import AppState from '../state/models/AppState';
 import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPane';
-import { ActionsListBase } from './ActionsList';
+import { ActionsListBase } from './action/ActionsList';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 import { createSelector } from '../helpers/styleCreators';
 

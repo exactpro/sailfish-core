@@ -15,15 +15,15 @@
 ******************************************************************************/
 
 import { h } from "preact";
-import Action from "../models/Action";
+import Action from "../../models/Action";
 import ParamsTable, { RecoverableParamsTable } from "./ParamsTable";
-import ExpandablePanel, { RecoverableExpandablePanel } from "./ExpandablePanel";
-import { StatusType } from "../models/Status";
-import "../styles/action.scss";
-import { getSecondsPeriod, formatTime } from "../helpers/dateFormatter";
-import { ExceptionChain } from "./ExceptionChain";
-import { Chip } from "./Chip";
-import { createSelector } from '../helpers/styleCreators';
+import ExpandablePanel, { RecoverableExpandablePanel } from "../ExpandablePanel";
+import { StatusType } from "../../models/Status";
+import "../../styles/action.scss";
+import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";
+import { ExceptionChain } from "../ExceptionChain";
+import { Chip } from "../Chip";
+import { createSelector } from '../../helpers/styleCreators';
 
 interface CardProps {
     action: Action;
