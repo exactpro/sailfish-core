@@ -20,7 +20,7 @@ import '../styles/layout.scss';
 import { Panel } from '../util/Panel';
 import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
-import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';
+import { MessagesCardList, MessagesCardListBase } from './message/MessagesCardList';
 import { LogsPane } from './LogsPane';
 import AppState from '../state/models/AppState';
 import { isAdmin } from '../helpers/messageType';

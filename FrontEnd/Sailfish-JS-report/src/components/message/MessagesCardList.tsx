@@ -15,20 +15,20 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import '../styles/messages.scss';
-import Message from '../models/Message';
+import '../../styles/messages.scss';
+import Message from '../../models/Message';
 import { MessageCard } from './MessageCard';
-import { StatusType } from '../models/Status';
+import { StatusType } from '../../models/Status';
 import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
-import { CheckpointMessage } from './Checkpoint';
-import { isCheckpoint, isAdmin } from '../helpers/messageType';
+import AppState from '../../state/models/AppState';
+import { CheckpointMessage } from '../Checkpoint';
+import { isCheckpoint, isAdmin } from '../../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
-import { HeatmapScrollbar } from './HeatmapScrollbar';
-import { selectMessage } from '../actions/actionCreators';
+import { HeatmapScrollbar } from '../HeatmapScrollbar';
+import { selectMessage } from '../../actions/actionCreators';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
-import MessageCardExpandState from '../models/view/MessageCardExpandState';
-import PureComponent from './util/PureComponent';
+import MessageCardExpandState from '../../models/view/MessageCardExpandState';
+import PureComponent from '../util/PureComponent';
 
 interface MessagesListStateProps {
     messages: Message[];

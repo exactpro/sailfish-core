@@ -15,10 +15,10 @@
  ******************************************************************************/
 
 import { h, Component } from 'preact';
-import { VirtualizedList } from './VirtualizedList';
-import MessageCardExpandState from '../models/view/MessageCardExpandState';
+import { VirtualizedList } from '../VirtualizedList';
+import MessageCardExpandState from '../../models/view/MessageCardExpandState';
 import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
+import AppState from '../../state/models/AppState';
 
 interface MessagesVirtualizedListOwnProps {
     messagesCount: number;

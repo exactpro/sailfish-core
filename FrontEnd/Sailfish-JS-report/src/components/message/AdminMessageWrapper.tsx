@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 import {h, Component} from "preact";
-import "../styles/messages.scss";
+import "../../styles/messages.scss";
 import { MessageCardProps, MessageCardContainer, MessageCardBase } from "./MessageCard";
-import Message from '../models/Message';
+import Message from '../../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
-import { StatusType } from "../models/Status";
-import { createSelector, createBemBlock } from '../helpers/styleCreators';
+import { StatusType } from "../../models/Status";
+import { createSelector, createBemBlock } from '../../helpers/styleCreators';
 
 interface WrapperProps extends MessageCardProps {
     isExpanded: boolean;

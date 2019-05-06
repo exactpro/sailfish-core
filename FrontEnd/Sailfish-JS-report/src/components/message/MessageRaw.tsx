@@ -15,10 +15,10 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import { splitRawContent, getUnformattedContent } from '../helpers/rawFormatter';
-import '../styles/messages.scss';
-import { copyTextToClipboard } from '../helpers/copyHandler';
-import { showNotification } from '../helpers/showNotification';
+import { splitRawContent, getUnformattedContent } from '../../helpers/rawFormatter';
+import '../../styles/messages.scss';
+import { copyTextToClipboard } from '../../helpers/copyHandler';
+import { showNotification } from '../../helpers/showNotification';
 
 const COPY_NOTIFICATION_TEXT = 'Text copied to the clipboard!';
 

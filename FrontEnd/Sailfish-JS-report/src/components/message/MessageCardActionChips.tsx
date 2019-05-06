@@ -15,15 +15,15 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import { Chip } from './Chip';
-import Action from '../models/Action';
-import { StatusType, statusValues } from '../models/Status';
-import "../styles/messages.scss";
-import { createSelector } from '../helpers/styleCreators';
-import Message from '../models/Message';
+import { Chip } from '../Chip';
+import Action from '../../models/Action';
+import { StatusType, statusValues } from '../../models/Status';
+import "../../styles/messages.scss";
+import { createSelector } from '../../helpers/styleCreators';
+import Message from '../../models/Message';
 import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
-import { selectMessage } from '../actions/actionCreators';
+import AppState from '../../state/models/AppState';
+import { selectMessage } from '../../actions/actionCreators';
 
 type SelectHandler = (status: StatusType) => any;
 

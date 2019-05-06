@@ -15,20 +15,20 @@
  ******************************************************************************/
 
 import { h } from 'preact';
-import Message from '../models/Message';
-import { StatusType } from '../models/Status';
+import Message from '../../models/Message';
+import { StatusType } from '../../models/Status';
 import { MessageRaw } from './MessageRaw';
-import { getHashCode } from '../helpers/stringHash';
-import { formatTime } from '../helpers/dateFormatter';
+import { getHashCode } from '../../helpers/stringHash';
+import { formatTime } from '../../helpers/dateFormatter';
 import { MessageCardActionChips } from './MessageCardActionChips';
 import { MlUploadButton } from './MlUploadButton';
 import '../styles/messages.scss';
 import { createBemElement } from '../helpers/styleCreators';
 import { createBemBlock } from '../helpers/styleCreators';
 import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
-import { selectMessage } from '../actions/actionCreators';
-import { isRejected } from '../helpers/messageType';
+import AppState from '../../state/models/AppState';
+import { selectMessage } from '../../actions/actionCreators';
+import { isRejected } from '../../helpers/messageType';
 
 const HUE_SEGMENTS_COUNT = 36;
 
