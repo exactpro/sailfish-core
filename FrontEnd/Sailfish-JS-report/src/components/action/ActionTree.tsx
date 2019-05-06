@@ -16,26 +16,23 @@
 
 import { h, Component } from 'preact';
 import Action, { ActionNode, ActionNodeType } from '../../models/Action';
-import { ActionTreeProps } from './ActionTree';
 import { ActionCard } from './ActionCard';
-import { VerificationTable, RecoverableVerificationTable } from "./VerificationTable";
 import UserMessage from '../../models/UserMessage';
 import Verification from '../../models/Verification'
-import '../../styles/action.scss';
-import ExpandablePanel, { RecoverableExpandablePanel } from '../ExpandablePanel';
 import Link from '../../models/Link';
 import { StatusType } from '../../models/Status';
 import UserTable from '../../models/UserTable';
-import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode } from '../../models/util/Tree';
-import { createSelector } from '../../helpers/styleCreators';
 import { connect } from 'preact-redux';
 import AppState from '../../state/models/AppState';
 import { CheckpointAction } from '../Checkpoint';
 import { isCheckpoint } from '../../helpers/actionType';
 import { selectAction } from '../../actions/actionCreators';
 import { selectVerification } from '../../actions/actionCreators';
+import VerificationCard from './VerificationCard';
+import UserTableCard from './UserTableCard';
+import '../../styles/action.scss';
 
 interface ActionTreeOwnProps {
     action: ActionNode;
@@ -54,7 +51,7 @@ interface ActionTreeDispatchProps {
     messageSelectHandler: (id: number, status: StatusType) => any;
 }
 
-export interface ActionTreeProps extends ActionTreeOwnProps, ActionTreeStateProps, ActionTreeDispatchProps {}
+interface ActionTreeProps extends ActionTreeOwnProps, ActionTreeStateProps, ActionTreeDispatchProps {}
 
 class ActionTreeBase extends Component<ActionTreeProps> {
 
@@ -256,7 +253,15 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                 const isSelected = verification.messageId === selectedMessageId;
                 const isTransparent = !actionsFilter.includes(verification.status.status);
 
-                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, parentAction && parentAction.id);
+                return (
+                    <VerificationCard
+                        verification={verification}
+                        isSelected={isSelected}
+                        isTransparent={isTransparent}
+                        onSelect={messageSelectHandler}
+                        parentActionId={parentAction && parentAction.id}
+                        onExpand={onExpand}/>
+                )
             }
 
             case ActionNodeType.LINK: {
@@ -272,97 +277,19 @@ class ActionTreeBase extends Component<ActionTreeProps> {
             case ActionNodeType.TABLE: {
                 const table = props.action as UserTable;
 
-                return this.renderUserTable(table, parentAction);
+                return (
+                    <UserTableCard
+                        table={table}
+                        parent={parentAction}
+                        onExpand={onExpand}/>
+                );
             }
 
             default: {
-                console.error("WARNING: unknown action node type");
+                console.warn("WARNING: unknown action node type");
                 return <div></div>;
             }
         }
-    }
-
-    renderMessageAction({ message, level, exception, color, style }: UserMessage) {
-        // italic style value - only for fontStyle css property
-        //bold style value - only for fontWeight css property
-        const messageStyle = {
-            color: (color || "").toLowerCase(),
-            fontStyle: (style || "").toLowerCase(),
-            fontWeight: (style || "").toLowerCase()
-        };
-
-        if (exception) {
-            return (
-                <div class="action-card">
-                    <ExpandablePanel>
-                        <div class="ac-header">
-                            <h3 style={messageStyle}>{message} - {level}</h3>
-                        </div>
-                        <div class="ac-body">
-                            <pre>{exception && exception.stacktrace}</pre>
-                        </div>
-                    </ExpandablePanel>
-                </div>
-            );
-        } else {
-            return (
-                <div class="action-card">
-                    <div class="ac-header">
-                        <h3 style={messageStyle}>{message} - {level}</h3>
-                    </div>
-                </div>
-            );
-        }
-    }
-
-    renderVerification({ name, status, entries, messageId }: Verification, selectHandelr: Function, isSelected: boolean, isTransaparent, parentActionId: number) {
-
-        const className = createSelector(
-            "ac-body__verification",
-            status && status.status,
-            isSelected ? "selected" : null,
-            isTransaparent && !isSelected ? "transparent" : null
-        );
-
-        return (
-            <div class="action-card">
-                <div class={className}
-                    onClick={e => {
-                        selectHandelr(messageId, status.status);
-                        // here we cancel handling by parent divs
-                        e.cancelBubble = true;
-                    }}>
-                    <RecoverableExpandablePanel
-                        stateKey={parentActionId + '-' + messageId}
-                        onExpand={this.props.onExpand}>
-                        <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
-                        <RecoverableVerificationTable 
-                            stateKey={parentActionId + '-' + messageId + '-nodes'}
-                            params={entries} 
-                            status={status.status}
-                            onExpand={this.props.onExpand}/>
-                    </RecoverableExpandablePanel>
-                </div>
-            </div>
-        )
-    }
-
-    renderUserTable(table: UserTable, parent: Action) {
-        const stateKey = parent.id + '-user-table-' + parent.subNodes
-            .filter(node => node.actionNodeType === ActionNodeType.TABLE)
-            .indexOf(table).toString();
-
-        return (
-            <div class="ac-body__table">
-                <RecoverableExpandablePanel
-                    stateKey={stateKey}
-                    onExpand={this.props.onExpand}>
-                    <div class="ac-body__item-title">{table.name || "Custom table"}</div>
-                    <CustomTable
-                        content={table.content} />
-                </RecoverableExpandablePanel>
-            </div>
-        )
     }
 }
 
