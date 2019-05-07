@@ -17,6 +17,7 @@
 import {h, Component} from 'preact';
 import { Scrollbars } from 'preact-custom-scrollbars';
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
+import { raf } from '../helpers/raf';
 
 interface VirtualizedListProps {
     elementRenderer: (idx: number) => JSX.Element;
@@ -105,11 +106,9 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
 
         // Besides that, it fixes bug, related with invallid rendering, when data (test case) is changed (but it looks realy bad) 
 
-        window.requestAnimationFrame(() =>{
-            window.requestAnimationFrame(() => { 
-                this.measurerCache.clearAll();
-                this.forceUpdateList();
-            });
-        });
+        raf(() => { 
+            this.measurerCache.clearAll();
+            this.forceUpdateList();
+        }, 2);
     }
 }

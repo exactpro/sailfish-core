@@ -33,6 +33,7 @@ import { selectVerification } from '../../actions/actionCreators';
 import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
 import '../../styles/action.scss';
+import { raf } from '../../helpers/raf';
 
 interface ActionTreeOwnProps {
     action: ActionNode;
@@ -73,11 +74,9 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         // At this point React passed components tree to DOM, however it still could be not redered.
         // First callback will be called before actual render
         // Second callback will be called when DOM is fully rendered.
-        window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(() => {
-                this.scrollToAction(+this.props.scrolledActionId);
-            });
-        });
+       raf(() => {
+            this.scrollToAction(+this.props.scrolledActionId);
+        }, 2);
     }
 
     componentWillReceiveProps(nextProps: ActionTreeProps) {
