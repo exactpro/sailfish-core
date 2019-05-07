@@ -42,53 +42,50 @@ interface MessagesListDispatchProps {
 
 interface MessagesListProps extends MessagesListStateProps ,MessagesListDispatchProps {}
 
-export class MessagesCardListBase extends PureComponent<MessagesListProps> {
+interface MessagesListState {
+    // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
+    // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
+    // Objects and reference comparison is the only way to handle numbers changing in this case.
+    scrolledIndex: Number;
+}
 
-    private scrollbar: HeatmapScrollbar;
+export class MessagesCardListBase extends PureComponent<MessagesListProps, MessagesListState> {
 
-    componentDidUpdate(prevProps: MessagesListProps) {
-        if (prevProps.scrolledMessageId != this.props.scrolledMessageId) {
-            // disable smooth behaviour only for checkpoint messages
-            if (this.props.scrolledMessageId == this.props.selectedCheckpointId) {
-                // [Chrome] smooth behavior doesn't work in chrome with multimple elements
-                // https://chromium.googlesource.com/chromium/src.git/+/bbf870d971d95af7ae1ee688a7ed100e3787d02b
-                this.scrollToMessage(+this.props.scrolledMessageId, false);
-            } else {
-                this.scrollToMessage(+this.props.scrolledMessageId);
-            }
+    constructor(props: MessagesListProps) {
+        super(props);
+
+        this.state = {
+            scrolledIndex: this.getScrolledIndex(props.scrolledMessageId, props.messages)
         }
     }
 
-    componentDidMount() {
-        //const selectedMessageId = this.props.selectedMessages[0];
-
-        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
-        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
-        // At this point React passed components tree to DOM, however it still could be not redered.
-        // First callback will be called before actual render
-        // Second callback will be called when DOM is fully rendered.
-        // window.requestAnimationFrame(() => {
-        //     window.requestAnimationFrame(() => {
-        //         // smooth behavior doesn't work here because render is not complete yet
-        //         this.scrollToMessage(selectedMessageId, false);
-        //     });
-        // });
-    }
-
-    scrollToMessage(messageId: number, isSmooth: boolean = true) {
-        // TODO: implement scrollto feature using react-virtualized
-    }
-
     scrollToTop() {
-        this.scrollbar && this.scrollbar.scrollToTop();
+        this.setState({
+            scrolledIndex: new Number(0)
+        });
     }
 
-    render({ messages }: MessagesListProps) {
+    componentWillReceiveProps(nextProps: MessagesListProps) {
+        if (this.props.scrolledMessageId !== nextProps.scrolledMessageId && nextProps.scrolledMessageId !== null) {
+            this.setState({ 
+                scrolledIndex: this.getScrolledIndex(nextProps.scrolledMessageId, nextProps.messages)
+            });
+        }
+    }
+
+    private getScrolledIndex(scrolledMessageId: Number, messages: Message[]): Number {
+        const scrolledIndex = messages.findIndex(message => message.id === +scrolledMessageId);
+
+        return scrolledIndex !== -1 ? new Number(scrolledIndex) : null;
+    }
+
+    render({ messages }: MessagesListProps, { scrolledIndex }: MessagesListState) {
 
         return (
             <div class="messages-list">
                 <MessagesVirtualizedList
                     messagesCount={messages.length}
+                    scrolledIndex={scrolledIndex}
                     messageRenderer={(index, ...renderProps) => this.renderMessage(messages[index], ...renderProps)}/>
             </div>
         );

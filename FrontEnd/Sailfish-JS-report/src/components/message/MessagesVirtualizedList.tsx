@@ -19,9 +19,11 @@ import { VirtualizedList } from '../VirtualizedList';
 import MessageCardExpandState from '../../models/view/MessageCardExpandState';
 import { connect } from 'preact-redux';
 import AppState from '../../state/models/AppState';
+import Message from '../../models/Message';
 
 interface MessagesVirtualizedListOwnProps {
     messagesCount: number;
+    scrolledIndex?: Number;
     messageRenderer: (
         index: number, 
         messageState: MessageCardExpandState,
@@ -45,25 +47,21 @@ class MessagesVirtualizedListBase extends Component<MessagesVirtualizedListProps
     }
 
     componentWillReceiveProps(nextProps: MessagesVirtualizedListProps) {
-        // TODO: we will need it in the future, when we select other testcase, and we need to reset all messages card expand states
-        // if (nextProps.messageRenderer !== this.props.messageRenderer) {
-        //     this.updateMessagesStates(nextProps.messagesCount);
-        // } 
-
         if (nextProps.adminMessagesEnabled !== this.props.adminMessagesEnabled) {
             this.messagesCardStates = this.messagesCardStates.map(state => ({...state, adminExpanded: nextProps.adminMessagesEnabled }));
             this.list.measurerCache.clearAll();
-            this.list.forceUpdateList();
+            this.list.updateList();
         }
     }
 
-    render({messagesCount}: MessagesVirtualizedListProps) {
+    render({ messagesCount, scrolledIndex }: MessagesVirtualizedListProps) {
         return (
             <VirtualizedList
                 rowCount={messagesCount}
                 elementRenderer={this.rowRenderer}
                 itemSpacing={6}
                 ref={ref => this.list = ref}
+                scrolledIndex={scrolledIndex}
             />
         )
     }
@@ -85,7 +83,7 @@ class MessagesVirtualizedListBase extends Component<MessagesVirtualizedListProps
 
     private measureElement(index: number) {
         this.list.measurerCache.clear(index);
-        this.list.forceUpdateList();
+        this.list.updateList();
     }
 
     private messageCardStateHandler(nextState: MessageCardExpandState, elementIndex: number) {

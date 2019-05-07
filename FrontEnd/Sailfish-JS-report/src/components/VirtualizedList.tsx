@@ -22,6 +22,11 @@ interface VirtualizedListProps {
     elementRenderer: (idx: number) => JSX.Element;
     rowCount: number;
     itemSpacing?: number;
+
+    // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
+    // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
+    // Objects and reference comparison is the only way to handle numbers changing in this case.
+    scrolledIndex?: Number;
 }
 
 export class VirtualizedList extends Component<VirtualizedListProps> {
@@ -31,20 +36,34 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
         fixedWidth: true
     });
 
-    public forceUpdateList : Function;
+    private forceUpdateList : Function;
+    private scrollToIndex: (idx: number) => any;
 
-    render({ rowCount }: VirtualizedListProps) {
+    public updateList() {
+        this.forceUpdateList && this.forceUpdateList();
+    }
+
+    render({ rowCount, scrolledIndex }: VirtualizedListProps) {
         return (
             <AutoSizer>
                 {({ height, width }) => (
-                        <List
-                            height={height}
-                            width={width}
-                            rowCount={rowCount}
-                            deferredMeasurementCache={this.measurerCache}
-                            rowHeight={this.measurerCache.rowHeight}
-                            rowRenderer={this.rowRenderer}
-                            ref={ref => this.forceUpdateList = ref ? ref.forceUpdateGrid.bind(ref) : null}/>
+                    <List
+                        height={height}
+                        width={width}
+                        rowCount={rowCount}
+                        deferredMeasurementCache={this.measurerCache}
+                        rowHeight={this.measurerCache.rowHeight}
+                        rowRenderer={this.rowRenderer}
+                        scrollToAlignment="center"
+                        scrollToIndex={scrolledIndex != null ? +scrolledIndex : undefined}
+                        ref={ref => {
+                            if (!ref) {
+                                return;
+                            }
+
+                            this.forceUpdateList = ref.forceUpdateGrid.bind(ref);
+                            this.scrollToIndex = ref.scrollToRow.bind(ref);
+                        }}/>
                     )
                 }
             </AutoSizer>
@@ -64,6 +83,16 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
                     </div>
             </CellMeasurer>
         )
+    }
+
+    componentDidUpdate(prevProps: VirtualizedListProps) {
+        // Here we handle a situation, when primitive value of Number object doesn't changed 
+        // and passing new index value in List doesn't make any effect (because it requires primitive value).
+        // So we need to scroll List manually.
+
+        if (prevProps.scrolledIndex !== this.props.scrolledIndex && +prevProps.scrolledIndex === +this.props.scrolledIndex) {
+            this.scrollToIndex(+this.props.scrolledIndex);
+        }
     }
 
     componentDidMount() {

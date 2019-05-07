@@ -27,28 +27,51 @@ import StateSaverProvider from '../util/StateSaverProvider';
 
 interface ListProps {
     actions: Array<ActionNode>;
+    scrolledActionId: Number;
 }
 
-export class ActionsListBase extends PureComponent<ListProps> {
+interface ListState {
+    // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
+    // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
+    // Objects and reference comparison is the only way to handle numbers changing in this case.
+    scrolledIndex: Number;
+}
 
-    //private elements: ActionTree[] = [];
-    private scrollbar: HeatmapScrollbar;
+export class ActionsListBase extends PureComponent<ListProps, ListState> {
+
+    constructor(props: ListProps) {
+        super(props);
+
+        this.state = {
+            scrolledIndex: this.getScrolledIndex(props.scrolledActionId, props.actions)
+        }
+    }
 
     scrollToTop() {
-        this.scrollbar && this.scrollbar.scrollToTop();
+        this.setState({
+            scrolledIndex: new Number(0)
+        });
     }
 
     private list: VirtualizedList;
 
-    scrollToAction(actionId: number) {
-        // if (this.elements[actionId]) {
-        //     // smooth behavior is disabled here
-        //     // base - get HTMLElement by ref
-        //     this.elements[actionId].base.scrollIntoView({block: 'center'});
-        // }    
+    private getScrolledIndex(scrolledActionId: Number, actions: ActionNode[]): Number {
+        const scrolledIndex = actions.findIndex(
+            action => action.actionNodeType === ActionNodeType.ACTION && (action as Action).id === +scrolledActionId
+        );
+
+        return scrolledIndex !== -1 ? new Number(scrolledIndex) : null;
     }
 
-    render({ actions }: ListProps) {
+    componentWillReceiveProps(nextProps: ListProps) {
+        if (this.props.scrolledActionId !== nextProps.scrolledActionId && nextProps.scrolledActionId != null) {
+            this.setState({
+                scrolledIndex: this.getScrolledIndex(nextProps.scrolledActionId, nextProps.actions)
+            });
+        }
+    }
+
+    render({ actions }: ListProps, { scrolledIndex }: ListState) {
 
         return (
             <div class="actions">
@@ -59,6 +82,7 @@ export class ActionsListBase extends PureComponent<ListProps> {
                             itemSpacing={6}
                             ref={ref => this.list = ref}
                             elementRenderer={this.renderAction}
+                            scrolledIndex={scrolledIndex}
                         />
                     </StateSaverProvider>
                 </div>
@@ -74,7 +98,7 @@ export class ActionsListBase extends PureComponent<ListProps> {
                 action={action}
                 onExpand={() => {
                     this.list.measurerCache.clear(idx);
-                    this.list.forceUpdateList();
+                    this.list.updateList();
                 }}/>
         )
     }
@@ -82,7 +106,8 @@ export class ActionsListBase extends PureComponent<ListProps> {
 
 export const ActionsList = connect(
     (state: AppState): ListProps => ({
-        actions: state.selected.testCase.actions
+        actions: state.selected.testCase.actions,
+        scrolledActionId: state.selected.scrolledActionId
     }),
     dispatch => ({ }),
     null,
