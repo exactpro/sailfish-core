@@ -34,6 +34,7 @@ subprojects {
 
         task pluginDictionaryWriteVersion(type: com.exactpro.sf.WriteFileTask) {
             if (project.hasProperty('plugin_alias')) {
+                line('lightweight: true')
                 line("plugin_alias: ${project.plugin_alias}_dictionary")
                 line("name: ${project.archivesBaseName}_dictionary")
             }

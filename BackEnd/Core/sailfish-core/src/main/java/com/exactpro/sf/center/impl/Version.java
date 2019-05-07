@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.center.impl;
 
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -49,8 +49,9 @@ public class Version extends AbstractVersion {
     private final String alias;
     private final String branch;
     private final String artifactName;
+    private final boolean lightweight;
 
-    protected Version(int major, int minor, int maintenance, int build, String alias, String branch, String artifactName) {
+    protected Version(int major, int minor, int maintenance, int build, String alias, String branch, String artifactName, boolean lightweight) {
         this.major = major;
         this.minor = minor;
         this.maintenance = maintenance;
@@ -58,6 +59,7 @@ public class Version extends AbstractVersion {
         this.alias = alias;
         this.branch = branch;
         this.artifactName = artifactName;
+        this.lightweight = lightweight;
     }
 
     /**
@@ -82,9 +84,15 @@ public class Version extends AbstractVersion {
                 BUILD.extractComponent(matcher),
                 Objects.requireNonNull(properties.getProperty("plugin_alias"), "'plugin_alias' property is skipped"),
                 Objects.requireNonNull(properties.getProperty("branch"), "'branch' property is skipped"),
-                Objects.requireNonNull(properties.getProperty("name"), "'name' property is skipped")
+                Objects.requireNonNull(properties.getProperty("name"), "'name' property is skipped"),
+                BooleanUtils.toBoolean(properties.getProperty("lightweight"))
             );
         }
+    }
+
+    @Override
+    public boolean isLightweight() {
+        return lightweight;
     }
 
     @Override

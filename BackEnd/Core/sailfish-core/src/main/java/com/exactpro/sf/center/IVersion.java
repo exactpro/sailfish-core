@@ -44,5 +44,10 @@ public interface IVersion {
     
     boolean isGeneral();
 
+    /** If true some of the plugin components maybe missed */
+    default boolean isLightweight() {
+        return false;
+    }
+
     String getArtifactName();
 }

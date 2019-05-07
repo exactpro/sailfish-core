@@ -106,6 +106,11 @@ public abstract class AbstractVersion implements IVersion {
     }
 
     @Override
+    public boolean isLightweight() {
+        return false;
+    }
+
+    @Override
     public int getMajor() {
         return -1;
     }
