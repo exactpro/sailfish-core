@@ -75,13 +75,9 @@
         }
     }
 
-    &-flexible {
-        //width: 50%;
-    }
-
     &-row {
         &-value {
-            p {
+            span {
                 margin: 0;
                 text-decoration: none;
                 font-size: 14px;
@@ -122,6 +118,12 @@
 
         &-toggler {
 
+            &-count {
+                font-size: small;
+                color: gray;
+                padding-left: 10px;
+            }
+
             &.collapsed {
                 p::before {
                     content: "+";
@@ -144,6 +146,7 @@
                 text-decoration: none;
                 font-weight: bold;
                 font-size: 16px;
+                display: inline-block;
             }
         
             td {
@@ -192,6 +195,13 @@
             text-decoration: none;
             font-weight: bold;
             font-size: 16px;
+            display: inline-block;
+        }
+
+        &-count {
+            font-size: small;
+            color: gray;
+            padding-left: 10px;
         }
 
         td {

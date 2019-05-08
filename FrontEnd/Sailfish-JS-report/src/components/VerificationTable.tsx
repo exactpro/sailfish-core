@@ -171,6 +171,7 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
                     <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
                         {node.name}
                     </p>
+                    <span class="ver-table-row-toggler-count">{node.subEntries.length}</span>
                 </td>
             </tr>
         )

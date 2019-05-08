@@ -32,10 +32,14 @@ body {
         box-sizing: border-box;
     }
 
-    p, span, h1, h2, h3, h4, h5, pre {
-        margin: 0;
-        padding: 0;
-        border: 0;
-        vertical-align: baseline;
+    div:focus {
+        outline: unset;
     }
+}
+
+p, h1, h2, h3, h4, h5, pre {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    vertical-align: baseline;
 }

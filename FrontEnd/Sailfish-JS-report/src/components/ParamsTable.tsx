@@ -120,6 +120,7 @@ export default class ParamsTable extends Component<IParamTableProps, IParamTable
                     <p style={nameStyle}>
                         {node.name}
                     </p>
+                    <span class="params-table-row-toogler-count">{node.subParameters.length}</span>
                 </td>
             </tr>
         )
