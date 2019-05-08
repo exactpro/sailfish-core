@@ -149,6 +149,7 @@ export default class ParamsTable extends Component<ParamTableProps, ParamTableSt
                     <p style={nameStyle}>
                         {node.name}
                     </p>
+                    <span class="params-table-row-toogler-count">{node.subParameters.length}</span>
                 </td>
             </tr>
         )
