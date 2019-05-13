@@ -18,6 +18,7 @@ package com.exactpro.sf.actions;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
@@ -72,5 +73,11 @@ public class FakeUtils extends AbstractCaller {
         sb.append(day);
 
         return sb.toString();
+    }
+
+    @Description("Returns the current date/time in the UTC time zone<br/>Example: #{getDateTime()}")
+    @UtilityMethod
+    public final LocalDateTime getDateTime() {
+        return DateTimeUtility.nowLocalDateTime();
     }
 }

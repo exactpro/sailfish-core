@@ -38,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.AMLLangConst;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.legacy.ActionDefinition;
 import com.exactpro.sf.aml.legacy.Actions;
 import com.exactpro.sf.aml.legacy.ClassName;
@@ -51,6 +52,7 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.configuration.suri.SailfishURIRule;
 import com.exactpro.sf.configuration.suri.SailfishURIUtils;
+import com.exactpro.sf.scriptrunner.ManagerUtils;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionCallException;
 import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionManagerException;
@@ -372,6 +374,21 @@ public class ActionManager implements IActionManager, ILoadableManager {
         }
 
         return null;
+    }
+
+    @Override
+    public UtilityInfo getUtilityInfo(SailfishURI classURI, SailfishURI utilityURI, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes) throws SailfishURIException {
+        if (utilityURI.isAbsolute()) {
+            return utilityManager.getUtilityInfo(utilityURI, argTypes);
+        }
+
+        Set<SailfishURI> utilityURIs = SailfishURIUtils.getMatchingValues(classURI, uriToUtilites, SailfishURIRule.REQUIRE_CLASS);
+
+        if (utilityURIs == null) {
+            return null;
+        }
+
+        return ManagerUtils.getUtilityInfo(utilityURIs, utilityManager, utilityURI, line, uid, column, alertCollector, argTypes);
     }
 
     @Override

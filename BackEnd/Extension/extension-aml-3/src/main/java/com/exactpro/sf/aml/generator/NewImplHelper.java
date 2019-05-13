@@ -453,13 +453,16 @@ public class NewImplHelper {
 
 	private static int expandUtilityFunction(AMLAction action,
 			String column, Value value, int index, AlertCollector alertCollector, IDictionaryManager dictionaryManager, IActionManager actionManager, IUtilityManager utilityManager)
-					throws SecurityException, SailfishURIException
-					{
+            throws SecurityException, SailfishURIException {
 		String stringValue = value.getValue();
 		int index2 = CodeGenerator_new.indexOfCloseBracket(stringValue, BEGIN_FUNCTION, END_FUNCTION, index);
-		if (index2 == -1)
-		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Unbalansed brackets in column '"+column+"'."));
+
+        long line = action.getLine();
+        long uid = action.getUID();
+        String reference = action.getReference();
+
+        if (index2 == -1) {
+            alertCollector.add(new Alert(line, uid, reference, column, "Unbalansed brackets in column '" + column + "'."));
 			return -1;
 		}
 
@@ -470,21 +473,21 @@ public class NewImplHelper {
 
 		if (var.isEmpty())
 		{
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Utility function name is empty in column '"+column+"'."));
+            alertCollector.add(new Alert(line, uid, reference, column, "Utility function name is empty in column '" + column + "'."));
 			return -1;
 		}
 
 		int openSpaceIndex = var.indexOf("(");
 
 		if (openSpaceIndex == -1) {
-			alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Syntaxis error in column '"+column+"': missed open bracket '('."));
+            alertCollector.add(new Alert(line, uid, reference, column, "Syntaxis error in column '" + column + "': missed open bracket '('."));
 			return -1;
 		}
 
 		int closeSpaceIndex = CodeGenerator_new.indexOfCloseBracket(var, "(", ")", openSpaceIndex);
 
 		if (closeSpaceIndex == -1) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Syntaxis error in column '"+column+"': missed close bracket ')'."));
+            alertCollector.add(new Alert(line, uid, reference, column, "Syntaxis error in column '" + column + "': missed close bracket ')'."));
             return -1;
         }
 
@@ -499,25 +502,25 @@ public class NewImplHelper {
 		UtilityInfo utilityInfo = null;
 
 		if(funcURI.isAbsolute()) {
-		    utilityInfo = utilityManager.getUtilityInfo(funcURI);
+            utilityInfo = utilityManager.getUtilityInfo(funcURI);
 		} else {
     		if(action.hasDictionaryURI()) {
-                utilityInfo = dictionaryManager.getUtilityInfo(action.getDictionaryURI(), funcURI);
+                utilityInfo = dictionaryManager.getUtilityInfo(action.getDictionaryURI(), funcURI, line, uid, column, alertCollector);
             }
 
             ActionInfo actionInfo = action.getActionInfo();
 
             if(utilityInfo == null && actionInfo != null) {
-                utilityInfo = actionManager.getUtilityInfo(actionInfo.getURI(), funcURI);
+                utilityInfo = actionManager.getUtilityInfo(actionInfo.getURI(), funcURI, line, uid, column, alertCollector);
             }
 
             if(utilityInfo == null) {
-                utilityInfo = utilityManager.getUtilityInfo(funcURI);
+                utilityInfo = utilityManager.getUtilityInfo(funcURI, line, uid, column, alertCollector);
             }
 		}
 
 		if(utilityInfo == null) {
-		    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Unable to resolve utility function: " + funcURI));
+            alertCollector.add(new Alert(line, uid, reference, "Unable to resolve utility function: " + funcURI));
 		    return -1;
 		}
 
