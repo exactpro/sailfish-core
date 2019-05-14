@@ -14,14 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import { Chip } from '../Chip';
 import Action from '../../models/Action';
 import { StatusType, statusValues } from '../../models/Status';
 import "../../styles/messages.scss";
 import { createSelector } from '../../helpers/styleCreators';
 import Message from '../../models/Message';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
 
@@ -50,7 +50,7 @@ const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: 
     );
 
     return (
-        <div class={className}>
+        <div className={className}>
             {
                 actions.length ? 
                 statusValues.map(status => renderChip(
@@ -74,12 +74,13 @@ function renderChip(status: StatusType, statusActions: Action[], selectedStatus:
 
     return (
         <Chip
+            key={status}
             count={statusActions.length}
             status={status}
             isSelected={status == selectedStatus} 
             clickHandler={e => { 
                 selectHandeler(status);
-                e.cancelBubble = true;
+                e.stopPropagation();
             }}/>
     )
 }

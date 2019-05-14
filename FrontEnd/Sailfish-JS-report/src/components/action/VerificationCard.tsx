@@ -14,7 +14,7 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from "preact";
+import * as React from 'react';
 import Verification from '../../models/Verification';
 import { StatusType } from "../../models/Status";
 import { createSelector } from '../../helpers/styleCreators';
@@ -43,17 +43,17 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
     );
 
     return (
-        <div class="action-card">
-            <div class={className}
+        <div className="action-card">
+            <div className={className}
                 onClick={e => {
                     onSelect(messageId, status.status);
                     // here we cancel handling by parent divs
-                    e.cancelBubble = true;
+                    e.stopPropagation();
                 }}>
                 <RecoverableExpandablePanel
                     stateKey={parentActionId + '-' + messageId}
                     onExpand={onExpand}>
-                    <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
+                    <div className="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
                     <RecoverableVerificationTable 
                         stateKey={parentActionId + '-' + messageId + '-nodes'}
                         params={entries} 

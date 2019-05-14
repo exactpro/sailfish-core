@@ -14,7 +14,7 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from "preact";
+import * as React from 'react';
 import Action from "../../models/Action";
 import ParamsTable, { RecoverableParamsTable } from "./ParamsTable";
 import ExpandablePanel, { RecoverableExpandablePanel } from "../ExpandablePanel";
@@ -75,40 +75,40 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
     };
 
     return (
-        <div class={rootClassName}
+        <div className={rootClassName}
             onClick={clickHandler}
             key={action.id}>
             <RecoverableExpandablePanel
                 stateKey={action.id.toString()}
                 isExpanded={isExpanded}
                 onExpand={() => onExpand()}>
-                <div class={headerClassName}>
-                    <div class="ac-header__title">
-                        <div class="ac-header__name">
+                <div className={headerClassName}>
+                    <div className="ac-header__title">
+                        <div className="ac-header__name">
                             <h3>{matrixId} {serviceName} {name} {messageType}</h3>
                         </div>
-                        <div class="ac-header__description">
+                        <div className="ac-header__description">
                             <h3>{description} {outcome}</h3>
                         </div>
                     </div>
                     {
                         action.startTime ? (
-                            <div class="ac-header__start-time">
+                            <div className="ac-header__start-time">
                                 <span>Start</span>
                                 <p>{formatTime(action.startTime)}</p>
                             </div>
                         ) : null
                     }
-                    <div class="ac-header__elapsed-time">
+                    <div className="ac-header__elapsed-time">
                         <h3>{elapsedTime}</h3>
                     </div>
-                    <div class="ac-header__controls">
-                        <div class="ac-header__status">
+                    <div className="ac-header__controls">
+                        <div className="ac-header__status">
                             <h3>{action.status.status.toUpperCase()}</h3>
                         </div>
                         {
                             action.relatedMessages.length > 0 ? (
-                                <div class="ac-header__chips">
+                                <div className="ac-header__chips">
                                     <Chip
                                         count={action.relatedMessages.length}/>
                                 </div>
@@ -116,12 +116,12 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         }
                     </div>
                 </div>
-                <div class="ac-body">
-                    <div class={inputParametersClassName}>
+                <div className="ac-body">
+                    <div className={inputParametersClassName}>
                         <RecoverableExpandablePanel
                             stateKey={action.id + '-input-params'}
                             onExpand={onExpand}>
-                            <div class="ac-body__item-title">Input parameters</div>
+                            <div className="ac-body__item-title">Input parameters</div>
                             <RecoverableParamsTable
                                 stateKey={action.id + '-input-params-nodes'}
                                 params={parameters}
@@ -135,11 +135,11 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                     }
                     {
                         action.status.status == 'FAILED' ? (
-                            <div class="action-card-status">
+                            <div className="action-card-status">
                                 <RecoverableExpandablePanel
                                     stateKey={action.id + '-status'}
                                     onExpand={onExpand}>
-                                    <div class="ac-body__item-title">Status</div>
+                                    <div className="ac-body__item-title">Status</div>
                                     <ExceptionChain exception={action.status.cause} />
                                 </RecoverableExpandablePanel>
                             </div>

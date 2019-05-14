@@ -14,12 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, render } from "preact";
-import { App } from "./components/App";
-import { Provider } from 'preact-redux';
+import *  as React from 'react';
+import * as ReactDOM from 'react-dom';
+import App from "./components/App";
+import { Provider } from 'react-redux';
 import { createAppStore } from './store/store';
 
-render(
+ReactDOM.render(
     <Provider store={createAppStore(null)}>
         <App/>
     </Provider>, 

@@ -14,13 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import ReportLayout from './ReportLayout';
 import TestCase from "../models/TestCase";
 import Report from "../models/Report";
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
 import { setTestCase, setTestCasePath, selectVerification, selectActionById } from "../actions/actionCreators";
 import { 
@@ -39,7 +39,7 @@ interface AppProps {
     selectMessage: (messageId: number) => any;
 }
 
-class AppBase extends Component<AppProps> {
+class AppBase extends React.Component<AppProps> {
 
     private searchParams: URLSearchParams;
 
@@ -76,11 +76,12 @@ class AppBase extends Component<AppProps> {
         }
     }
 
-    render({ report, testCase, testCaseFilePath, updateTestCase }: AppProps) {
+    render() {
+        const { report, testCase, testCaseFilePath, updateTestCase } = this.props;
 
         if (testCase) {
             return (
-                <div class="root">
+                <div className="root">
                     <TestCaseLayout />
                 </div>
             );
@@ -95,7 +96,7 @@ class AppBase extends Component<AppProps> {
         }
 
         return (
-            <div class="root">
+            <div className="root">
                 <ReportLayout />
             </div>
         );

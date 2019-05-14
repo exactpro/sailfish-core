@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h, Component} from "preact";
+import * as React from 'react';
 import "../../styles/messages.scss";
 import { MessageCardProps, MessageCardContainer, MessageCardBase } from "./MessageCard";
 import Message from '../../models/Message';
@@ -39,8 +39,8 @@ const AdminMessageWrapperBase = (props: WrapperProps) => {
         return (
             <div style={{position: "relative"}}>
                 <MessageCardBase {...props}/>
-                <div class={expandButtonClass}>
-                    <div class="mc-expand-btn__icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
+                <div className={expandButtonClass}>
+                    <div className="mc-expand-btn__icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
                 </div>
             </div>
         );
@@ -53,21 +53,21 @@ const AdminMessageWrapperBase = (props: WrapperProps) => {
     );
 
     return (
-        <div class={rootClass}
+        <div className={rootClass}
             onClick={() => props.selectHandler()}>
-            <div class="message-card__labels">
+            <div className="message-card__labels">
                 {renderMessageTypeLabels(props.message)}
             </div>
-            <div class="message-card__header   mc-header small"
+            <div className="message-card__header   mc-header small"
                 data-lb-count={getLabelsCount(props.message)}>
-                <div class="mc-header__info">
+                <div className="mc-header__info">
                     <MessageCardActionChips
                         message={props.message}/>
                 </div>
-                <div class="mc-header__name">Name</div>
-                <div class="mc-header__name-value">{props.message.msgName}</div>
-                <div class="mc-header__expand">
-                    <div class="mc-header__expand-icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
+                <div className="mc-header__name">Name</div>
+                <div className="mc-header__name-value">{props.message.msgName}</div>
+                <div className="mc-header__expand">
+                    <div className="mc-header__expand-icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
                 </div>
             </div>
         </div>
@@ -79,16 +79,16 @@ function renderMessageTypeLabels(message: Message): JSX.Element[] {
 
     if (message.content.rejectReason !== null) {
         labels.push(
-            <div class="mc-label rejected">
-                <div class="mc-label__icon rejected" style={{marginTop: "10px"}}/>
+            <div className="mc-label rejected" key="rejected">
+                <div className="mc-label__icon rejected" style={{marginTop: "10px"}}/>
             </div>
         );
     }
 
     if (message.content.admin) {
         labels.push(
-            <div class="mc-label admin">
-                <div class="mc-label__icon admin" style={{marginTop: "10px"}}/>
+            <div className="mc-label admin" key="admin">
+                <div className="mc-label__icon admin" style={{marginTop: "10px"}}/>
             </div>
         )
     }

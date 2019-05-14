@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import '../../styles/tables.scss';
 
 interface CustomTableProps {
@@ -30,7 +30,7 @@ export const CustomTable = ({content}: CustomTableProps) => {
     const headers = Object.keys(content[0]);
 
     return (
-        <div class="user-table">
+        <div className="user-table">
             <table>
                 <thead>
                     {headers.map(header => <th>{header}</th>)}

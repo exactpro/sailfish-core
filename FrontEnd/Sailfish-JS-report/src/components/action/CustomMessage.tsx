@@ -14,13 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import UserMessage from '../../models/UserMessage';
 import ExpandablePanel, { RecoverableExpandablePanel } from './../ExpandablePanel';
 import ExceptionCard from './../ExceptionCard';
 import { createSelector } from '../../helpers/styleCreators';
 import '../../styles/action.scss';
 import Action, { ActionNodeType } from '../../models/Action';
+import { FontWeightProperty } from 'csstype';
 
 interface CustomMessageProps {
     userMessage: UserMessage;
@@ -38,10 +39,10 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
 
     // italic style value - only for fontStyle css property
     // bold style value - only for fontWeight css property
-    const messageStyle = {
+    const messageStyle: React.CSSProperties = {
         color: (color || "").toLowerCase(),
         fontStyle: (style || "").toLowerCase(),
-        fontWeight: (style || "").toLowerCase()
+        fontWeight: (style || "").toLowerCase() as FontWeightProperty
     };
 
     const rootClass = createSelector(
@@ -54,8 +55,8 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
             <RecoverableExpandablePanel
                 stateKey={stateKey}
                 onExpand={onExpand}>
-                <div class={rootClass}>
-                    <div class="ac-body__item-title" style={messageStyle}>{message}</div>
+                <div className={rootClass}>
+                    <div className="ac-body__item-title" style={messageStyle}>{message}</div>
                 </div>
                 <ExceptionCard
                     exception={exception}
@@ -65,7 +66,7 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
     }
 
     return (
-        <div class={rootClass + "   ac-body__item"}>
+        <div className={rootClass + "   ac-body__item"}>
             <h3 style={messageStyle}>{message}</h3>
         </div>
     )

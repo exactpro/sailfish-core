@@ -14,12 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import TestCase from '../models/TestCase';
 import '../styles/header.scss';
 import { StatusType } from '../models/Status';
 import { FilterPanel } from './FilterPanel';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import {
     nextTestCase,
@@ -47,7 +47,7 @@ interface HeaderState {
     showFilter: boolean;
 }
 
-class HeaderBase extends Component<HeaderProps, HeaderState> {
+class HeaderBase extends React.Component<HeaderProps, HeaderState> {
 
     constructor(props) {
         super(props);
@@ -57,16 +57,9 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
         }
     }
 
-    render({
-        testCase,
-        actionsFilter,
-        fieldsFilter,
-        nextTestCaseHandler,
-        prevTestCaseHandler,
-        backToListHandler,
-        switchActionsFilter,
-        switchFieldsFilter
-    }: HeaderProps, { showFilter }: HeaderState) {
+    render() {
+        const { testCase, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler, switchActionsFilter, switchFieldsFilter } = this.props,
+            { showFilter } = this.state;
 
         const {
             name,
@@ -104,48 +97,48 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
         const period = getSecondsPeriod(startTime, finishTime);
 
         return (
-            <div class={rootClass}>
-                <div class="header__main   header-main">
-                    <div class="header-button   header-main__contol-button"
+            <div className={rootClass}>
+                <div className="header__main   header-main">
+                    <div className="header-button   header-main__contol-button"
                         onClick={backToListHandler}>
-                        <div class="header-button__icon go-back" />
-                        <div class="header-button__title">Back to list</div>
+                        <div className="header-button__icon go-back" />
+                        <div className="header-button__title">Back to list</div>
                     </div>
-                    <div class="header-main__name ">
-                        <div class="header-button"
+                    <div className="header-main__name ">
+                        <div className="header-button"
                             onClick={prevTestCaseHandler}>
-                            <div class="header-button__icon left"/>
+                            <div className="header-button__icon left"/>
                         </div>
-                        <div class="header-main__title">
+                        <div className="header-main__title">
                             {(name || 'Test Case')} — {status.status} — {period}
                         </div>
-                        <div class="header-button"
+                        <div className="header-button"
                             onClick={nextTestCaseHandler}>
-                            <div class="header-button__icon right"/>
+                            <div className="header-button__icon right"/>
                         </div>
                     </div>
-                    <div class="header-button   header-main__contol-button" onClick={() => this.switchFilter()}>
-                        <div class="header-button__icon filter" />
-                        <div class="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
+                    <div className="header-button   header-main__contol-button" onClick={() => this.switchFilter()}>
+                        <div className="header-button__icon filter" />
+                        <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
                     </div>
                 </div>
-                <div class={infoClass}>
-                    <div class="header__info-element">
+                <div className={infoClass}>
+                    <div className="header__info-element">
                         <span>Start:</span>
                         <p>{formatTime(startTime)}</p>
                     </div>
-                    <div class="header__info-element">
+                    <div className="header__info-element">
                         <span>Finish:</span>
                         <p>{formatTime(finishTime)}</p>
                     </div>
-                    <div class="header__description">
+                    <div className="header__description">
                         {description}
                     </div>
-                    <div class="header__info-element">
+                    <div className="header__info-element">
                         <span>ID:</span>
                         <p>{id}</p>
                     </div>
-                    <div class="header__info-element">
+                    <div className="header__info-element">
                         <span>Hash:</span>
                         <p>{hash}</p>
                     </div>

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import "../styles/expandablePanel.scss"
 import { createSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
@@ -33,7 +33,7 @@ interface PanelState {
     isExpanded: boolean;
 }
 
-export default class ExpandablePanel extends Component<PanelProps, PanelState> {
+export default class ExpandablePanel extends React.Component<PanelProps, PanelState> {
     constructor(props: PanelProps) {
         super(props);
         this.state = {
@@ -51,16 +51,19 @@ export default class ExpandablePanel extends Component<PanelProps, PanelState> {
         }
     }
 
-    render({ header, body, children, expandedHeader }: PanelProps, { isExpanded }: PanelState) {
+    render() {
+        const { header, body, children, expandedHeader } = this.props,
+            { isExpanded } = this.state;
+
         const iconClass = createSelector(
             "expandable-panel__icon", 
             isExpanded ? "expanded" : "hidden"
         );
 
         return (
-            <div class="expandable-panel">
-                <div class="expandable-panel__header">
-                    <div class={iconClass} 
+            <div className="expandable-panel">
+                <div className="expandable-panel__header">
+                    <div className={iconClass} 
                         onClick={e => this.expandPanel()}/>
                     { (isExpanded && expandedHeader) || header || children[0] }
                 </div>

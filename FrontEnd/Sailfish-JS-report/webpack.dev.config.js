@@ -28,19 +28,15 @@ module.exports = {
     port: 9001,
     host: "0.0.0.0"
   },
-  resolve: {
-    extensions: ['.ts', '.js', '.tsx', '.scss'],
-    alias: {
-        'react': 'preact-compat',
-        'react-dom': 'preact-compat'
-    }
-  },
   output: {
     path: path.resolve(__dirname, './build/dev/'),
     filename: 'bundle-dev.js'
   },
   entry: path.resolve("./src/index-dev.tsx"),
   mode: process.env.NODE_ENV || 'development',
+  resolve: {
+    extensions: ['.ts', '.tsx', '.scss', '.js', '.jsx']
+  },
   module: {
     rules: [
       { 

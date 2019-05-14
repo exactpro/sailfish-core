@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
-import { connect } from 'preact-redux';
+import * as React from 'react';
+import { connect } from 'react-redux';
 import '../styles/layout.scss';
 import { Panel } from '../util/Panel';
 import Message from '../models/Message';
@@ -45,14 +45,14 @@ interface RightPanelDispatchProps {
 
 interface RightPanelProps extends RightPanelStateProps, RightPanelDispatchProps {}
 
-class RightPanelBase extends Component<RightPanelProps> {
+class RightPanelBase extends React.Component<RightPanelProps> {
 
-    private messagesPanel: MessagesCardListBase;
+    private messagesPanel = React.createRef<MessagesCardListBase>();
 
     scrollPanelToTop(panel: Panel) {
         switch(panel) {
             case(Panel.Messages): {
-                this.messagesPanel.scrollToTop();
+                this.messagesPanel.current && this.messagesPanel.current.scrollToTop();
                 break;
             }
 
@@ -62,7 +62,8 @@ class RightPanelBase extends Component<RightPanelProps> {
         }
     }
 
-    render({panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler}: RightPanelProps) {
+    render() {
+        const {panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler} = this.props;
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
             rejectedEnabled = rejectedMessages.length != 0,
@@ -89,9 +90,9 @@ class RightPanelBase extends Component<RightPanelProps> {
             );
 
         return (
-            <div class="layout-panel">
-                <div class="layout-panel__controls">
-                    <div class="layout-panel__tabs">
+            <div className="layout-panel">
+                <div className="layout-panel__controls">
+                    <div className="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.Messages}
                             onClick={() => this.selectPanel(Panel.Messages)}
@@ -107,48 +108,48 @@ class RightPanelBase extends Component<RightPanelProps> {
                             title="Not implemeted"
                             text="Known bugs"/>
                     </div>
-                    <div class={adminRootClass}
-                        onClick={adminControlEnabled && (() => adminEnabledHandler(!adminMessagesEnabled))}
+                    <div className={adminRootClass}
+                        onClick={adminControlEnabled ? (() => adminEnabledHandler(!adminMessagesEnabled)) : undefined}
                         title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
-                        <div class={adminIconClass} />
-                        <div class={adminTitleClass}>
+                        <div className={adminIconClass} />
+                        <div className={adminTitleClass}>
                             {controlShowTitles ? <p>{adminControlEnabled ? "" : "No"} Admin Messages</p> : null}
                         </div>
                     </div>
-                    <div class={rejectedRootClass}>
-                        <div class="layout-control__icon rejected"
+                    <div className={rejectedRootClass}>
+                        <div className="layout-control__icon rejected"
                             onClick={() => this.currentRejectedHandler(currentRejectedIndex)}
                             style={{ cursor: rejectedEnabled ? 'pointer' : 'unset' }}
                             title={ rejectedEnabled ? "Scroll to current rejected message" : null }/>
-                        <div class="layout-control__title">
+                        <div className="layout-control__title">
                             {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
                         </div>
                         {
                             rejectedEnabled ? 
                             (
                                 [
-                                    <div class="layout-control__icon prev"
+                                    <div className="layout-control__icon prev"
                                         title="Scroll to previous rejected message"
                                         onClick={rejectedEnabled && (() => this.prevRejectedHandler(currentRejectedIndex))} />,
-                                    <div class="layout-control__counter">
+                                    <div className="layout-control__counter">
                                         <p>{currentRejectedIndex + 1} of {rejectedMessages.length}</p>
                                     </div>,
-                                    <div class="layout-control__icon next"
+                                    <div className="layout-control__icon next"
                                         title="Scroll to next rejected message"
                                         onClick={rejectedEnabled && (() => this.nextRejectedHandler(currentRejectedIndex))} />
                                 ]
                             ) : null
                         }
                     </div>
-                    <div class="layout-control disabled"
+                    <div className="layout-control disabled"
                         title="Show predictions (Not implemented)">
-                        <div class="layout-control__icon ml"/>
-                        <div class="layout-control__title">
+                        <div className="layout-control__icon ml"/>
+                        <div className="layout-control__title">
                             {controlShowTitles ? <p>Predictions</p> : null}
                         </div>
                     </div>
                 </div>
-                <div class="layout-panel__content">
+                <div className="layout-panel__content">
                     {this.renderPanels(panel)}
                 </div>
             </div>
@@ -170,14 +171,14 @@ class RightPanelBase extends Component<RightPanelProps> {
             );
     
         return [
-            <div class={messagesRootClass}>
+            <div className={messagesRootClass}>
                 <MessagesCardList
-                    ref={ref => this.messagesPanel = ref ? ref.wrappedInstance : null}/>
+                    ref={this.messagesPanel}/>
             </div>,
-            <div class={logsRootClass}>
+            <div className={logsRootClass}>
                 <LogsPane/>
             </div>,
-            <div class={knownBugsRootClass}>
+            <div className={knownBugsRootClass}>
                 {/* Known bugs panel */}
             </div>
         ];

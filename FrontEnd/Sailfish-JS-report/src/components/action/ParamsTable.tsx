@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import ActionParameter from "../../models/ActionParameter";
 import '../../styles/tables.scss';
 import { createSelector } from '../../helpers/styleCreators';
@@ -46,7 +46,7 @@ interface TableNode extends ActionParameter {
     isExpanded?: boolean;
 }
 
-export default class ParamsTable extends Component<ParamTableProps, ParamTableState> {
+export default class ParamsTable extends React.Component<ParamTableProps, ParamTableState> {
 
     constructor(props: ParamTableProps) {
         super(props);
@@ -86,14 +86,14 @@ export default class ParamsTable extends Component<ParamTableProps, ParamTableSt
         this.props.saveState(this.state.collapseParams);
     }
     
-    render({ name }: ParamTableProps, { collapseParams }: ParamTableState) {
-        return (<div class="params-table">
+    render() {
+        return (<div className="params-table">
             <table>
                 <tbody>
                     <tr>
-                        <th colSpan={2}>{name}</th>
+                        <th colSpan={2}>{this.props.name}</th>
                     </tr>
-                    {collapseParams.map((param) => this.renderNodes(param))}
+                    {this.state.collapseParams.map((param) => this.renderNodes(param))}
                 </tbody>
             </table>
         </div>);
@@ -121,7 +121,7 @@ export default class ParamsTable extends Component<ParamTableProps, ParamTableSt
         };
 
         return (
-            <tr class="params-table-row-value">
+            <tr className="params-table-row-value">
                 <td style={cellStyle}> 
                     {name}
                 </td>
@@ -143,13 +143,13 @@ export default class ParamsTable extends Component<ParamTableProps, ParamTableSt
             };
 
         return (
-            <tr class={rootClass}>
+            <tr className={rootClass}>
                 <td onClick={() => this.tooglerClick(node)}
                     colSpan={2}>
                     <p style={nameStyle}>
                         {node.name}
                     </p>
-                    <span class="params-table-row-toogler-count">{node.subParameters.length}</span>
+                    <span className="params-table-row-toogler-count">{node.subParameters.length}</span>
                 </td>
             </tr>
         )

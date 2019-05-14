@@ -14,13 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import Report, { isReport } from '../models/Report';
 import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
 import { setTestCase, setReport, setTestCasePath, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
 import { 
@@ -49,7 +49,7 @@ interface AppProps {
     setSubmittedMlData: (data: SubmittedData[]) => any;
 }
 
-class AppBase extends Component<AppProps, {}> {
+class AppBase extends React.Component<AppProps, {}> {
 
     private searchParams : URLSearchParams;
 
@@ -124,9 +124,11 @@ class AppBase extends Component<AppProps, {}> {
         }
     }
 
-    render({report, testCase, testCaseFilePath}: AppProps, {}: {}) {
+    render() {
+        const {report, testCase, testCaseFilePath} = this.props;
+
         if (!report) return (
-            <div class="root">
+            <div className="root">
                 <p>Loading json...</p>
                 <script src="reportData/report.js"></script>
             </div>
@@ -134,7 +136,7 @@ class AppBase extends Component<AppProps, {}> {
 
         if (testCase) {
             return (
-                <div class="root">
+                <div className="root">
                     <TestCaseLayout />
                 </div>
             )
@@ -142,14 +144,14 @@ class AppBase extends Component<AppProps, {}> {
 
         if (!testCaseFilePath) {
             return (
-                <div class="root">
+                <div className="root">
                     <ReportLayout/>
                 </div>
             );
         }
 
         return (
-            <div class="root">
+            <div className="root">
                 <p>Loading json...</p>
                 <script src={"reportData/" + testCaseFilePath}></script>
             </div>
@@ -157,7 +159,7 @@ class AppBase extends Component<AppProps, {}> {
     };
 }
 
-export const App = connect(
+const App = connect(
     (state: AppState) => ({
         report: state.report.report,
         testCase: state.selected.testCase,
@@ -175,3 +177,5 @@ export const App = connect(
         setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data))
     })
 )(AppBase)
+
+export default App;

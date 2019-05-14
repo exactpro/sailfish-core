@@ -14,10 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from "preact";
+import * as React from 'react';
 import "../styles/checkpoint.scss";
 import { createSelector } from '../helpers/styleCreators';
-import { connect } from "preact-redux";
+import { connect } from 'react-redux';
 import Message from "../models/Message";
 import AppState from '../state/models/AppState';
 import { isCheckpoint } from "../helpers/messageType";
@@ -53,12 +53,12 @@ export const Checkpoint = ({ name, count, isSelected, clickHandler, description 
     );
 
     return (
-        <div class={rootClassName}
+        <div className={rootClassName}
             onClick={() => clickHandler && clickHandler()}>
-            <div class="checkpoint-icon" />
-            <div class="checkpoint-count">Checkpoint {count}</div>
-            <div class="checkpoint-name">{name}</div>
-            <div class="checkpoint-description">{description}</div>
+            <div className="checkpoint-icon" />
+            <div className="checkpoint-count">Checkpoint {count}</div>
+            <div className="checkpoint-name">{name}</div>
+            <div className="checkpoint-description">{description}</div>
         </div>
     )
 }

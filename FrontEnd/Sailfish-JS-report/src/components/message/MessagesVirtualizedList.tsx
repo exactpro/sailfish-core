@@ -14,10 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import { VirtualizedList } from '../VirtualizedList';
 import MessageCardExpandState from '../../models/view/MessageCardExpandState';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import Message from '../../models/Message';
 
@@ -37,7 +37,7 @@ interface MessagesVirtualizedListStateProps {
 
 interface MessagesVirtualizedListProps extends MessagesVirtualizedListOwnProps, MessagesVirtualizedListStateProps {}
 
-class MessagesVirtualizedListBase extends Component<MessagesVirtualizedListProps> {
+class MessagesVirtualizedListBase extends React.Component<MessagesVirtualizedListProps> {
 
     private messagesCardStates : MessageCardExpandState[] = [];
     private list : VirtualizedList;
@@ -54,7 +54,9 @@ class MessagesVirtualizedListBase extends Component<MessagesVirtualizedListProps
         }
     }
 
-    render({ messagesCount, scrolledIndex }: MessagesVirtualizedListProps) {
+    render() {
+        const { messagesCount, scrolledIndex } = this.props;
+
         return (
             <VirtualizedList
                 rowCount={messagesCount}

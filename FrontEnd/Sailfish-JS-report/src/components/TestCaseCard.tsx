@@ -14,7 +14,7 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import { formatTime, getSecondsPeriod } from '../helpers/dateFormatter';
 import '../styles/report.scss';
@@ -36,7 +36,7 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
     );
 
     return (
-        <div class={rootClass}
+        <div className={rootClass}
             onClick={() => {
 
                 // Don't trigger 'click' event when user selects text
@@ -46,37 +46,37 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
                 
                 handleClick(metadata)
             }}>
-            <div class="tc-card__index">{index}</div>
-            <div class="tc-card__title">
-                <div class="tc-card__name">{metadata.name}</div>
+            <div className="tc-card__index">{index}</div>
+            <div className="tc-card__title">
+                <div className="tc-card__name">{metadata.name}</div>
                 {
                     metadata.description ?
-                        <div class="tc-card__description"> — {metadata.description}</div> :
+                        <div className="tc-card__description"> — {metadata.description}</div> :
                         null
                 }
             </div>
-            <div class="tc-card__status">
+            <div className="tc-card__status">
                 {metadata.status.status.toUpperCase()}
             </div>
-            <div class="tc-card__info">  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">Start</div>
-                    <div class="tc-card__info-value">{formatTime(metadata.startTime)}</div>
+            <div className="tc-card__info">  
+                <div className="tc-card__info-element">
+                    <div className="tc-card__info-title">Start</div>
+                    <div className="tc-card__info-value">{formatTime(metadata.startTime)}</div>
                 </div>  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">Finish</div>
-                    <div class="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
+                <div className="tc-card__info-element">
+                    <div className="tc-card__info-title">Finish</div>
+                    <div className="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
                 </div>  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">ID</div>
-                    <div class="tc-card__info-value">{metadata.id}</div>
+                <div className="tc-card__info-element">
+                    <div className="tc-card__info-title">ID</div>
+                    <div className="tc-card__info-value">{metadata.id}</div>
                 </div>  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">Hash</div>
-                    <div class="tc-card__info-value">{metadata.hash}</div>
+                <div className="tc-card__info-element">
+                    <div className="tc-card__info-title">Hash</div>
+                    <div className="tc-card__info-value">{metadata.hash}</div>
                 </div>
             </div>
-            <div class="tc-card__elapsed-time">{elapsedTime}</div>
+            <div className="tc-card__elapsed-time">{elapsedTime}</div>
         </div>
     )
 }

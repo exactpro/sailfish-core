@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import Action, { ActionNode, ActionNodeType } from '../../models/Action';
 import { ActionCard } from './ActionCard';
 import UserMessage from '../../models/UserMessage';
@@ -24,7 +24,7 @@ import { StatusType } from '../../models/Status';
 import UserTable from '../../models/UserTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode } from '../../models/util/Tree';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { CheckpointAction } from '../Checkpoint';
 import { isCheckpoint } from '../../helpers/actionType';
@@ -54,7 +54,7 @@ interface ActionTreeDispatchProps {
 
 interface ActionTreeProps extends ActionTreeOwnProps, ActionTreeStateProps, ActionTreeDispatchProps {}
 
-class ActionTreeBase extends Component<ActionTreeProps> {
+class ActionTreeBase extends React.Component<ActionTreeProps> {
 
     private expandedTreePath: Tree<number> = null;
     private treeElements: JSX.Element[] = [];
@@ -189,8 +189,8 @@ class ActionTreeBase extends Component<ActionTreeProps> {
         }
     }
 
-    render(props: ActionTreeProps): JSX.Element {
-        return this.renderNode(props, true, this.expandedTreePath);
+    render(): JSX.Element {
+        return this.renderNode(this.props, true, this.expandedTreePath);
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null, parentAction: Action = null): JSX.Element {
@@ -254,6 +254,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
 
                 return (
                     <VerificationCard
+                        key={verification.messageId}
                         verification={verification}
                         isSelected={isSelected}
                         isTransparent={isTransparent}
@@ -267,7 +268,7 @@ class ActionTreeBase extends Component<ActionTreeProps> {
                 const { link } = props.action as Link;
 
                 return (
-                    <div class="action-card">
+                    <div className="action-card">
                         <h3>{"Link : " + link}</h3>
                     </div>
                 );
@@ -302,9 +303,5 @@ export const ActionTree = connect(
     (dispatch, ownProps: ActionTreeOwnProps): ActionTreeDispatchProps => ({
         actionSelectHandler: action => dispatch(selectAction(action)),
         messageSelectHandler: (id, status) => dispatch(selectVerification(id, status))
-    }),
-    null,
-    {
-        withRef: true
-    }
+    })
 )(ActionTreeBase);

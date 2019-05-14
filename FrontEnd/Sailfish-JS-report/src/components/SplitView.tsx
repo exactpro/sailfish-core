@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import '../styles/splitter.scss';
 import { createSelector } from '../helpers/styleCreators';
 
@@ -45,7 +45,7 @@ interface SplitState {
     isDragging: boolean;
 }
 
-export class SplitView extends Component<SplitViewProps, SplitState> {
+export class SplitView extends React.Component<SplitViewProps, SplitState> {
 
     private rightPanel : HTMLElement;
     private leftPanel : HTMLElement;
@@ -77,7 +77,7 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
         }
     }
     
-    splitterMouseDown(e: MouseEvent) {
+    splitterMouseDown(e: React.MouseEvent) {
         this.root.addEventListener("mousemove", this.onMouseMove);
         this.root.addEventListener("mouseleave", this.onMouseUpOrLeave)
         this.root.addEventListener("mouseup", this.onMouseUpOrLeave)
@@ -123,7 +123,10 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
         this.splitter.style.left = null;
     }
 
-    render({children, minPanelPercentageWidth}: SplitViewProps, {leftPanelWidth, isDragging} : SplitState) {
+    render() {
+        const { children, minPanelPercentageWidth } = this.props,
+            { leftPanelWidth, isDragging } = this.state;
+
         let rightWidth = (this.root ?
             (this.root.offsetWidth - leftPanelWidth) -  SPLITTER_WIDTH / 2
             : 50);
@@ -143,18 +146,18 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
               rootClassName = createSelector("splitter", isDragging ? "dragging" : null);
 
         return (
-            <div class={rootClassName} ref={ref => this.root = ref}
+            <div className={rootClassName} ref={ref => this.root = ref}
                 style={{gridTemplateColumns: `${leftWidth}px ${SPLITTER_WIDTH}px ${rightWidth}px`}}>
-                <div class={leftClassName} 
+                <div className={leftClassName} 
                     ref={ref => this.leftPanel = ref}>
                     {children[0]}
                 </div>
-                <div class={rightClassName} ref={pane => this.rightPanel = pane}>
+                <div className={rightClassName} ref={pane => this.rightPanel = pane}>
                     {children[1]}
                 </div>
-                <div class={splitterClassName} onMouseDown={(e) => this.splitterMouseDown(e)}
+                <div className={splitterClassName} onMouseDown={(e) => this.splitterMouseDown(e)}
                     ref={ref => this.splitter = ref}>
-                    <div class="splitter-bar-icon"/>
+                    <div className="splitter-bar-icon"/>
                 </div>
             </div>
         )

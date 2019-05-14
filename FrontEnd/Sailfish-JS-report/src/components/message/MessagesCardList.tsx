@@ -14,12 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import '../../styles/messages.scss';
 import Message from '../../models/Message';
 import { MessageCard } from './MessageCard';
 import { StatusType } from '../../models/Status';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { CheckpointMessage } from '../Checkpoint';
 import { isCheckpoint, isAdmin } from '../../helpers/messageType';
@@ -28,7 +28,6 @@ import { HeatmapScrollbar } from '../HeatmapScrollbar';
 import { selectMessage } from '../../actions/actionCreators';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
 import MessageCardExpandState from '../../models/view/MessageCardExpandState';
-import PureComponent from '../util/PureComponent';
 
 interface MessagesListStateProps {
     messages: Message[];
@@ -49,7 +48,7 @@ interface MessagesListState {
     scrolledIndex: Number;
 }
 
-export class MessagesCardListBase extends PureComponent<MessagesListProps, MessagesListState> {
+export class MessagesCardListBase extends React.PureComponent<MessagesListProps, MessagesListState> {
 
     constructor(props: MessagesListProps) {
         super(props);
@@ -79,14 +78,14 @@ export class MessagesCardListBase extends PureComponent<MessagesListProps, Messa
         return scrolledIndex !== -1 ? new Number(scrolledIndex) : null;
     }
 
-    render({ messages }: MessagesListProps, { scrolledIndex }: MessagesListState) {
+    render() {
 
         return (
-            <div class="messages-list">
+            <div className="messages-list">
                 <MessagesVirtualizedList
-                    messagesCount={messages.length}
-                    scrolledIndex={scrolledIndex}
-                    messageRenderer={(index, ...renderProps) => this.renderMessage(messages[index], ...renderProps)}/>
+                    messagesCount={this.props.messages.length}
+                    scrolledIndex={this.state.scrolledIndex}
+                    messageRenderer={(index, ...renderProps) => this.renderMessage(this.props.messages[index], ...renderProps)}/>
             </div>
         );
     }
@@ -133,8 +132,8 @@ export const MessagesCardList = connect(
     (dispatch): MessagesListDispatchProps => ({
         messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))
     }),
-    null,
+    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),
     {
-        withRef: true
+        forwardRef: true
     }
 )(MessagesCardListBase);

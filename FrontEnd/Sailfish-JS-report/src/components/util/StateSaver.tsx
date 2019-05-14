@@ -14,8 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
-import { createContext } from 'preact-context';
+import * as React from 'react';
 
 export interface RecoverableElementProps {
     stateKey: string;
@@ -30,7 +29,7 @@ export interface StateSaverContext {
     saveState: (stateId: string, nextState: any) => any;
 }
 
-export const { Provider, Consumer } = createContext({});
+export const { Provider, Consumer } = React.createContext({});
 
 export interface StateSaverProps extends RecoverableElementProps {
     children: (state: any, stateHandler: (nextState: any) => any) => JSX.Element;
@@ -45,7 +44,7 @@ const StateSaver = ({ children, stateKey }: StateSaverProps) => (
         {
             // at preact children's always is array, so if we need to use render prop as a child, we need to get first child in childrens array
             // https://github.com/developit/preact/issues/45#issuecomment-182326000
-            ({ states, saveState }: StateSaverContext) => children[0](
+            ({ states, saveState }: StateSaverContext) => children(
                 states[stateKey], 
                 (nextState) => saveState(stateKey, nextState)
             )

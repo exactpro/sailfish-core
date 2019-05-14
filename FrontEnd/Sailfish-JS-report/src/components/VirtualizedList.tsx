@@ -14,8 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h, Component} from 'preact';
-import { Scrollbars } from 'preact-custom-scrollbars';
+import * as React from 'react';
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { raf } from '../helpers/raf';
 
@@ -30,7 +29,7 @@ interface VirtualizedListProps {
     scrolledIndex?: Number;
 }
 
-export class VirtualizedList extends Component<VirtualizedListProps> {
+export class VirtualizedList extends React.Component<VirtualizedListProps> {
     
     public readonly measurerCache = new CellMeasurerCache({
         defaultHeight: 50,
@@ -44,7 +43,9 @@ export class VirtualizedList extends Component<VirtualizedListProps> {
         this.forceUpdateList && this.forceUpdateList();
     }
 
-    render({ rowCount, scrolledIndex }: VirtualizedListProps) {
+    render() {
+        const { rowCount, scrolledIndex } = this.props;
+
         return (
             <AutoSizer>
                 {({ height, width }) => (

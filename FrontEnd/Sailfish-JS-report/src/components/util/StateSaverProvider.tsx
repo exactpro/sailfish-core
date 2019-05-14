@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import { Provider, StatesMap, StateSaverContext } from './StateSaver';
 
 interface ProviderProps {
@@ -29,7 +29,7 @@ interface ProviderState {
 /**
  * Context provider for StateSaver
  */
-export default class StateSaverProvider extends Component<ProviderProps, ProviderState> {
+export default class StateSaverProvider extends React.Component<ProviderProps, ProviderState> {
 
     constructor(props) {
         super(props);
@@ -50,10 +50,10 @@ export default class StateSaverProvider extends Component<ProviderProps, Provide
         }
     }
 
-    render({ children }: ProviderProps, { statesMap }: ProviderState) {
+    render() {
         return (
-            <Provider value={{ states: statesMap, saveState: this.stateHandler } as StateSaverContext}>
-                {children}
+            <Provider value={{ states: this.state.statesMap, saveState: this.stateHandler } as StateSaverContext}>
+                {this.props.children}
             </Provider>
         )
     }   

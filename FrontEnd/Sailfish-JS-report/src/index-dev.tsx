@@ -14,16 +14,18 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, render } from "preact";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { App } from "./components/App-dev";
-import { Provider } from 'preact-redux';
+import { Provider } from 'react-redux';
 import { createAppStore } from './store/store-dev';
 import { testReport } from './test/testReport';
 // enable react-devtools compatibility, APP WORKNIG SLOW WITH THIS
 //import 'preact/devtools';
 
-render(
+ReactDOM.render(
     <Provider store={createAppStore(testReport)}>
         <App/>
     </Provider>, 
-    document.getElementById("index"));
+    document.getElementById("index")
+);

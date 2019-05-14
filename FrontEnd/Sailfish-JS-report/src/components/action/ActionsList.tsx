@@ -14,14 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
-import { connect } from 'preact-redux';
+import * as React from 'react';
+import { connect } from 'react-redux';
 import '../../styles/action.scss';
 import Action, { ActionNode, ActionNodeType } from '../../models/Action';
 import { ActionTree } from './ActionTree';
 import { HeatmapScrollbar } from '../HeatmapScrollbar';
 import { VirtualizedList } from '../VirtualizedList';
-import PureComponent from '../util/PureComponent';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
 
@@ -37,7 +36,7 @@ interface ListState {
     scrolledIndex: Number;
 }
 
-export class ActionsListBase extends PureComponent<ListProps, ListState> {
+export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
 
     constructor(props: ListProps) {
         super(props);
@@ -71,11 +70,13 @@ export class ActionsListBase extends PureComponent<ListProps, ListState> {
         }
     }
 
-    render({ actions }: ListProps, { scrolledIndex }: ListState) {
+    render() {
+        const { actions } = this.props,
+            { scrolledIndex } = this.state;
 
         return (
-            <div class="actions">
-                <div class="actions__list">
+            <div className="actions">
+                <div className="actions__list">
                     <StateSaverProvider>
                         <VirtualizedList
                             rowCount={actions.length}
@@ -110,8 +111,8 @@ export const ActionsList = connect(
         scrolledActionId: state.selected.scrolledActionId
     }),
     dispatch => ({ }),
-    null,
+    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),
     {
-        withRef: true
-    }
+        forwardRef: true
+    } 
 )(ActionsListBase);

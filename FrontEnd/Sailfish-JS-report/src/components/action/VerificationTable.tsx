@@ -14,11 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import Entry from "../../models/Entry";
 import { StatusType } from "../../models/Status";
 import "../../styles/tables.scss";
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from "../../state/models/AppState";
 import { createSelector } from '../../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./../util/StateSaver";
@@ -50,7 +50,7 @@ interface TableNode extends Entry {
     isExpanded?: boolean;
 }
 
-class VerificationTableBase extends Component<VerificationTableProps, VerificationTableState> {
+class VerificationTableBase extends React.Component<VerificationTableProps, VerificationTableState> {
 
     constructor(props: VerificationTableProps) {
         super(props);
@@ -108,23 +108,25 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
         this.props.stateSaver(this.state.nodes);
     }
 
-    render({ fieldsFilter, status }: VerificationTableProps, { nodes }: VerificationTableState) {
+    render() {
+        const { fieldsFilter, status } = this.props,
+            { nodes } = this.state;
 
         const rootClass = createSelector("ver-table", status);
 
         return (
-            <div class={rootClass}>
-                <div class="ver-table-header">
-                    <div class="ver-table-header-name">
+            <div className={rootClass}>
+                <div className="ver-table-header">
+                    <div className="ver-table-header-name">
                         <h5>Comparison Table</h5>
                     </div>
-                    <div class="ver-table-header-control">
-                        <span class="ver-table-header-control-button"
+                    <div className="ver-table-header-control">
+                        <span className="ver-table-header-control-button"
                             onClick={() => this.setExpandStatus(false)}>
                             Collapse
                         </span>
                         <span> | </span>
-                        <span class="ver-table-header-control-button"
+                        <span className="ver-table-header-control-button"
                             onClick={() => this.setExpandStatus(true)}>
                             Expand
                         </span>
@@ -134,8 +136,8 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
                 <table>
                     <thead>
                         <th>Name</th>
-                        <th class="ver-table-flexible">Expected</th>
-                        <th class="ver-table-flexible">Actual</th>
+                        <th className="ver-table-flexible">Expected</th>
+                        <th className="ver-table-flexible">Actual</th>
                         <th>Status</th>
                     </thead>
                     <tbody>
@@ -169,17 +171,17 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
             statusClassName = createSelector("ver-table-row-value-status", status);
 
         return (
-            <tr class={rootClassName}>
+            <tr className={rootClassName}>
                 <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
                     {name}
                 </td>
-                <td class="ver-table-row-value-expected">
+                <td className="ver-table-row-value-expected">
                     {expected}
                 </td>
-                <td class="ver-table-row-value-actual">
+                <td className="ver-table-row-value-actual">
                     {actual}
                 </td>
-                <td class={statusClassName}>
+                <td className={statusClassName}>
                     {status}
                 </td>
             </tr>
@@ -194,13 +196,13 @@ class VerificationTableBase extends Component<VerificationTableProps, Verificati
         );
 
         return (
-            <tr class={className}>
+            <tr className={className}>
                 <td onClick={() => this.tooglerClick(node)}
                     colSpan={4}>
                     <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
                         {node.name}
                     </p>
-                    <span class="ver-table-row-toggler-count">{node.subEntries.length}</span>
+                    <span className="ver-table-row-toggler-count">{node.subEntries.length}</span>
                 </td>
             </tr>
         )

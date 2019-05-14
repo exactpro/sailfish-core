@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
-import { Scrollbars } from 'preact-custom-scrollbars';
+import * as React from 'react';
+import Scrollbars from 'react-custom-scrollbars';
 import { StatusType } from '../models/Status';
 import '../styles/heatmap.scss';
 
@@ -31,7 +31,7 @@ interface HeatmapScrollbarState {
     rootHeight: number;
 }
 
-export class HeatmapScrollbar extends Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
+export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
 
     private scrollbar: Scrollbars;
     private root: HTMLElement;
@@ -55,9 +55,12 @@ export class HeatmapScrollbar extends Component<HeatmapScrollbarProps, HeatmapSc
         });
     }
 
-    render({ children, selectedElements }: HeatmapScrollbarProps, { rootHeight }: HeatmapScrollbarState) {
+    render() {
+        const { children, selectedElements } = this.props, 
+            { rootHeight } = this.state;
+
         return (
-            <div class="heatmap" ref={ref => this.root = ref}>
+            <div className="heatmap" ref={ref => this.root = ref}>
                 <Scrollbars
                     renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb" />}
                     renderTrackVertical={({ style, ...props }) =>
@@ -65,11 +68,11 @@ export class HeatmapScrollbar extends Component<HeatmapScrollbarProps, HeatmapSc
                     }
                     ref={ref => this.scrollbar = ref}
                 >
-                    <div class="heatmap-wrapper">
+                    <div className="heatmap-wrapper">
                         {children}
                     </div>
                 </Scrollbars>
-                <div class="heatmap-scrollbar">
+                <div className="heatmap-scrollbar">
                     {
                         rootHeight ? 
                             renderHeatmap(children.length, selectedElements, rootHeight) : 
@@ -95,7 +98,7 @@ function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number,
 
     for (let i = 0; i < elementsCount; i++) {
         resultHeatmap.push(
-            <div class={"heatmap-scrollbar-item " + (selectedElements.get(i) || "").toLowerCase()} />
+            <div className={"heatmap-scrollbar-item " + (selectedElements.get(i) || "").toLowerCase()} />
         );
     }
 
@@ -116,7 +119,7 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
     for (let i = 0; i < elementsCount; i++) {
         if (selectedElements.get(i)) {
             resultHeatmap.push(
-                <div class={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()} />
+                <div className={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()} />
             );
 
             // after we added heatmap element to the list, we should skip other elements in chunk
@@ -124,7 +127,7 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
         } else if ((i + 1) % chunkSize == 0) {
             // no selected elements in current chunk, render empty heatmap element
             resultHeatmap.push(
-                <div class="heatmap-scrollbar-item" />
+                <div className="heatmap-scrollbar-item" />
             );
         }
     }

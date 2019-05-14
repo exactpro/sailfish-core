@@ -14,7 +14,7 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import UserTable from '../../models/UserTable';
 import Action, { ActionNodeType } from '../../models/Action';
 import { RecoverableExpandablePanel } from '../ExpandablePanel';
@@ -32,11 +32,11 @@ const UserTableCard = ({ parent, table, onExpand }: UserTableCardProps) => {
         .indexOf(table).toString();
 
     return (
-        <div class="ac-body__table">
+        <div className="ac-body__table">
             <RecoverableExpandablePanel
                 stateKey={stateKey}
                 onExpand={onExpand}>
-                <div class="ac-body__item-title">{table.name || "Custom table"}</div>
+                <div className="ac-body__item-title">{table.name || "Custom table"}</div>
                 <CustomTable
                     content={table.content} />
             </RecoverableExpandablePanel>

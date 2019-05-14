@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import { StatusType } from '../models/Status';
 import '../styles/header.scss';
 import { ToggleButton } from './ToggleButton';
@@ -28,9 +28,9 @@ interface FilterPanelProps {
 
 export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsFilters, fieldsFilters }: FilterPanelProps) => {
     return (
-        <div class="header-filter">
-            <div class="header-filter__togglers">
-                <div class="header-filter__togglers-title">Actions</div>
+        <div className="header-filter">
+            <div className="header-filter__togglers">
+                <div className="header-filter__togglers-title">Actions</div>
                 <ToggleButton text="Passed"
                     isToggled={actionsFilters.includes("PASSED")}
                     onClick={() => actionFilterHandler("PASSED")}
@@ -44,8 +44,8 @@ export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsF
                     onClick={() => actionFilterHandler("CONDITIONALLY_PASSED")}
                     theme="green" />
             </div>
-            <div class="header-filter__togglers">
-                <div class="header-filter__togglers-title">Fields</div>
+            <div className="header-filter__togglers">
+                <div className="header-filter__togglers-title">Fields</div>
                 <ToggleButton text="Passed"
                     isToggled={fieldsFilters.includes("PASSED")}
                     onClick={() => fieldsFilterHandler("PASSED")}

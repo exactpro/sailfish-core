@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import Message from '../../models/Message';
 import { StatusType } from '../../models/Status';
 import { MessageRaw } from './MessageRaw';
@@ -25,7 +25,7 @@ import { MlUploadButton } from './MlUploadButton';
 import '../styles/messages.scss';
 import { createBemElement } from '../helpers/styleCreators';
 import { createBemBlock } from '../helpers/styleCreators';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
 import { isRejected } from '../../helpers/messageType';
@@ -63,17 +63,17 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
 
     return (
-        <div class={rootClass}>
-            <div class="message-card__labels">
+        <div className={rootClass}>
+            <div className="message-card__labels">
                 {renderMessageTypeLabels(message)}
             </div>
-                <div class="mc-header default" 
+                <div className="mc-header default" 
                     data-lb-count={labelsCount}
                     onClick={() => selectHandler()}>
                     {
                         rejectedMessagesCount && message.relatedActions.length == 0 ?
                             (
-                                <div class="mc-header__info rejected">
+                                <div className="mc-header__info rejected">
                                     <p>Rejected {rejectedMessagesCount}</p>
                                 </div>
                             )
@@ -82,55 +82,55 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                                     message={message} />
                             )
                     }
-                    <div class="mc-header__name">
+                    <div className="mc-header__name">
                         <span>Name</span>
                     </div>
-                    <div class="mc-header__name-value">
+                    <div className="mc-header__name-value">
                         <p>{msgName}</p>
                     </div>
-                    <div class="mc-header__timestamp">
+                    <div className="mc-header__timestamp">
                         <p>{formatTime(timestamp)}</p>
                     </div>
-                    <div class="mc-header__session">
+                    <div className="mc-header__session">
                         <span>Session</span>
                     </div>
-                    <div class="mc-header__from">
+                    <div className="mc-header__from">
                         <p>{from}</p>
                     </div>
                     {
                         from && to ?
-                            <div class="mc-header__session-icon"
+                            <div className="mc-header__session-icon"
                                 style={sessionArrowStyle} />
                             : null
                     }
-                    <div class="mc-header__to">
+                    <div className="mc-header__to">
                         <p>{to}</p>
                     </div>
                     <MlUploadButton messageId={message.id}/>
                 </div>
-                <div class="message-card__body   mc-body">
+                <div className="message-card__body   mc-body">
                     {
                         (message.content.rejectReason !== null) ?
                             (
-                                <div class="mc-body__title">
+                                <div className="mc-body__title">
                                     <p>{rejectedTitle}</p>
                                 </div>
                             )
                             : null
                     }
-                    <div class="mc-body__human">
-                        <p>
+                    <div className="mc-body__human">
+                        <div>
                             {contentHumanReadable}
                             {
                                 (raw && raw !== 'null') ? (
-                                    <div class="mc-show-raw"
+                                    <div className="mc-show-raw"
                                         onClick={e => showRawHandler && showRawHandler(!showRaw)}>
-                                        <div class="mc-show-raw__title">RAW</div>
-                                        <div class={showRawClass} />
+                                        <div className="mc-show-raw__title">RAW</div>
+                                        <div className={showRawClass} />
                                     </div>
                                 ) : null
                             }
-                        </p>
+                        </div>
                     </div>
                     {
                         showRaw ?
@@ -148,16 +148,16 @@ function renderMessageTypeLabels(message: Message): JSX.Element[] {
 
     if (message.content.rejectReason !== null) {
         labels.push(
-            <div class="mc-label rejected">
-                <div class="mc-label__icon rejected" />
+            <div className="mc-label rejected">
+                <div className="mc-label__icon rejected" />
             </div>
         );
     }
 
     if (message.content.admin) {
         labels.push(
-            <div class="mc-label admin">
-                <div class="mc-label__icon admin" />
+            <div className="mc-label admin">
+                <div className="mc-label__icon admin" />
             </div>
         )
     }
