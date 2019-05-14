@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,6 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +134,7 @@ public class MachineLearningResource {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("get_dump")
-    public Response getDump(@DefaultValue("4") @QueryParam("compression_lvl") int compression) {
+    public Response getDump(@DefaultValue("4") @QueryParam("compression_lvl") int compression, @DefaultValue("false") @QueryParam("remove") boolean remove) {
 
         MachineLearningService mlService = getMachineLearningService();
 
@@ -140,6 +142,11 @@ public class MachineLearningResource {
 
             try (OutputStream os = outputStream) {
                 mlService.getStorage().zipDocumentsToStream(os, compression);
+                if (remove) {
+                    for (File doc : mlService.getStorage().getDocuments()) {
+                        FileUtils.deleteQuietly(doc);
+                    }
+                }
             }
         };
 
