@@ -47,12 +47,12 @@ public class ActionRun {
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="stactionruns_generator")
 	private Long id;
 
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "255"))
 	private String description;
 
 	private int status;
 
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "255"))
 	private String failReason;
 
 	private long rank;
@@ -75,7 +75,7 @@ public class ActionRun {
 	private MessageType msgType;
 
     @Column(name = "tag", nullable = true)
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "255"))
     private String tag;
 
     @OneToMany(mappedBy = "id.actionRun", cascade = CascadeType.ALL)

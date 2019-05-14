@@ -55,7 +55,7 @@ public class StaticUtilTest {
         IMessage iMessage = new MapMessage("namespace", "name");
         iMessage.addField("ref", refMessage);
 
-        StaticUtil.IFilter filter = StaticUtil.filter(0, null, "mes.ref.value + mes.ref.valu + mes.ref.val + mes.ref.va + mes.ref.v > x", "mes", iMessage);
+        IFilter filter = StaticUtil.filter(0, null, "mes.ref.value + mes.ref.valu + mes.ref.val + mes.ref.va + mes.ref.v > x", "mes", iMessage);
         String condition = filter.getCondition();
 
         Assert.assertEquals("\"1\" + \"2\" + \"3\" + \"4\" + \"5\" > x", condition);
@@ -72,7 +72,7 @@ public class StaticUtilTest {
         IMessage iMessage = new MapMessage("namespace", "name");
 		iMessage.addField("ref", lst);
 
-		StaticUtil.IFilter filter = StaticUtil.filter(0, null, "mes.ref[0].val + mes.ref[3].val > x", "mes", iMessage);
+		IFilter filter = StaticUtil.filter(0, null, "mes.ref[0].val + mes.ref[3].val > x", "mes", iMessage);
         String condition = filter.getCondition();
 
         Assert.assertEquals("0 + 3 > x", condition);
@@ -89,7 +89,7 @@ public class StaticUtilTest {
         IMessage iMessage = new MapMessage("namespace", "name");
 		iMessage.addField("ref", Arrays.asList(1, 2, 3, 4, 5));
 
-		StaticUtil.IFilter filter = StaticUtil.filter(0, null, "mes.ref[0] + mes.ref[3] > x", "mes", iMessage);
+		IFilter filter = StaticUtil.filter(0, null, "mes.ref[0] + mes.ref[3] > x", "mes", iMessage);
         String condition = filter.getCondition();
 
         Assert.assertEquals("1 + 4 > x", condition);
@@ -101,7 +101,7 @@ public class StaticUtilTest {
         IMessage refMessage = new MapMessage("namespace1", "name1");
         refMessage.addField("val", value);
         iMessage.addField("ref", refMessage);
-        StaticUtil.IFilter filter = StaticUtil.filter(0, null, "mes.ref.val", "mes", iMessage);
+        IFilter filter = StaticUtil.filter(0, null, "mes.ref.val", "mes", iMessage);
         String condition = filter.getCondition();
         Assert.assertEquals("\"" + value + "\"", condition);
     }
@@ -115,7 +115,7 @@ public class StaticUtilTest {
         ref.addField("subRef", Collections.singletonList(refMessage1));
         IMessage mes = new MapMessage("mes", "mes");
         mes.addField("ref", ref);
-        StaticUtil.IFilter filter = StaticUtil.filter(0, null, "mes.ref.subRef[0].val", "mes", mes);
+        IFilter filter = StaticUtil.filter(0, null, "mes.ref.subRef[0].val", "mes", mes);
         String condition = filter.getCondition();
         Assert.assertEquals("\"" + value + "\"", condition);
     }
@@ -128,7 +128,7 @@ public class StaticUtilTest {
         msg.addField("val", value);
         map.put("msg", msg);
 
-        StaticUtil.IFilter filter = StaticUtil.filter(0, null, "map.msg.val", "map", map);
+        IFilter filter = StaticUtil.filter(0, null, "map.msg.val", "map", map);
         String condition = filter.getCondition();
         Assert.assertEquals("\"" + value + "\"", condition);
     }
@@ -139,14 +139,13 @@ public class StaticUtilTest {
         Integer value = 123;
         IMessage request = new MapMessage("namespace", "name");
         request.addField("ReceivedMarketDepth", value);
-        StaticUtil.IFilter filter = null;
 
-        filter = StaticUtil.filter(
+        IFilter filter = StaticUtil.filter(
                 0,
                 null,
-        		"v0.ReceivedMarketDepth != '#' ? x == v1.ReceivedMarketDepth : x == null",
-        		"v0", request,
-        		"v1", request
+                "v0.ReceivedMarketDepth != '#' ? x == v1.ReceivedMarketDepth : x == null",
+                "v0", request,
+                "v1", request
         );
         Assert.assertEquals("123 != '#' ? x == 123 : x == null", filter.getCondition());
 
@@ -167,7 +166,7 @@ public class StaticUtilTest {
         IMessage request = new MapMessage("namespace", "name");
         request.addField("ReceivedMarketDepth", value);
 
-        StaticUtil.IFilter filter = StaticUtil.filter(
+        IFilter filter = StaticUtil.filter(
                 0,
                 null,
         		"v0.ReceivedMarketDepth!='v0.ReceivedMarketDepth'",
@@ -192,7 +191,7 @@ public class StaticUtilTest {
         IMessage request = new MapMessage("namespace", "name");
         request.addField("OrderQty", value);
 
-        StaticUtil.IFilter filter = StaticUtil.filter(
+        IFilter filter = StaticUtil.filter(
                 0,
                 null,
                 "com.exactpro.sf.actions.MathUtil.roundZero(Double.valueOf(s1), x, v0.OrderQty, )",
@@ -204,14 +203,14 @@ public class StaticUtilTest {
 
 	@Test
 	public void testSimpleFilter_TernaryOperator() throws Exception {
-		StaticUtil.IFilter filter = StaticUtil.simpleFilter(0, null, "2==3 ? 3 : 4");
+		IFilter filter = StaticUtil.simpleFilter(0, null, "2==3 ? 3 : 4");
 		String condition = filter.getCondition();
 		Assert.assertEquals("4", condition);
 	}
 
     @Test
     public void testFilter_IncorrectReference() throws Exception {
-        StaticUtil.IFilter filter = StaticUtil.filter(0, null, "v0.ReceivedMarketDepth != 1");
+        IFilter filter = StaticUtil.filter(0, null, "v0.ReceivedMarketDepth != 1");
         Assert.assertEquals("v0.ReceivedMarketDepth != 1", filter.getCondition());
     }
 

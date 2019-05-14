@@ -45,7 +45,7 @@ public class CustomDialog extends JDialog implements ActionListener
 	private final JButton cancelButton = new JButton("Cancel");
 	private final JButton stopButton = new JButton("Stop");
 
-	public byte doIt = 0;
+	public byte doIt;
 
 	public GridBagConstraints getRC(int gridx, int gridy)
 	{

@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class ConverterFormMapAdapter extends HashMap<String, String> {
     private static final long serialVersionUID = -8072058047161294331L;
-    private List<MappingContainer> containers;
+    private final List<MappingContainer> containers;
 
     public ConverterFormMapAdapter(){
         containers = new ArrayList<>();
@@ -33,7 +33,7 @@ public class ConverterFormMapAdapter extends HashMap<String, String> {
     public Map<String, String> toMap() {
         for(MappingContainer container : containers){
            if(!container.isEmpty()){
-               this.put(container.getFrom(), container.getTo());
+               put(container.getFrom(), container.getTo());
            }
         }
         return this;

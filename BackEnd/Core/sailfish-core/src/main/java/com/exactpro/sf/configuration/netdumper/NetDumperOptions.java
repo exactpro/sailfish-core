@@ -17,19 +17,20 @@ package com.exactpro.sf.configuration.netdumper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.BeanUtils;
 
 public class NetDumperOptions implements Cloneable {
 
-	private final static String STORAGE_PREFIX = "netdumper.";
+    private static final String STORAGE_PREFIX = "netdumper.";
 	
     private String rootHost = "0.0.0.0";
     private int rootPort = 6000;
 	private boolean enabled;
 
 	public void fillFromMap(Map<String, String> options) throws Exception {
-        for (Map.Entry<String, String> entry : options.entrySet()) {
+        for(Entry<String, String> entry : options.entrySet()) {
             if (entry.getKey().startsWith(STORAGE_PREFIX)) {
 				BeanUtils.setProperty(this, entry.getKey().replace(STORAGE_PREFIX, ""), entry.getValue());
 			}
@@ -41,9 +42,9 @@ public class NetDumperOptions implements Cloneable {
 
 		Map<String, String> description = BeanUtils.describe(this);
         Map<String, String> result = new HashMap<>();
-		
-        for (Map.Entry<String, String> entry : description.entrySet()) {
-            if (!entry.getKey().equals("class")) {
+
+        for(Entry<String, String> entry : description.entrySet()) {
+            if(!"class".equals(entry.getKey())) {
 				result.put(STORAGE_PREFIX + entry.getKey(), entry.getValue());
 			}
 		}
@@ -56,9 +57,9 @@ public class NetDumperOptions implements Cloneable {
         StringBuilder builder = new StringBuilder();
 
         builder.append("http://")
-                .append(this.rootHost)
+                .append(rootHost)
                 .append(":")
-                .append(this.rootPort);
+                .append(rootPort);
 
         return builder.toString();
 	}
@@ -67,9 +68,9 @@ public class NetDumperOptions implements Cloneable {
 
         NetDumperOptions options = new NetDumperOptions();
 
-        options.setEnabled(this.enabled);
-        options.setRootHost(this.rootHost);
-        options.setRootPort(this.rootPort);
+        options.setEnabled(enabled);
+        options.setRootHost(rootHost);
+        options.setRootPort(rootPort);
 
         return options;
     }

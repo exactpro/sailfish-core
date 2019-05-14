@@ -39,7 +39,7 @@ public class FilterMessageStorageWrapper extends MessageStorageWrapper {
 
     @Override
     public void storeMessage(IMessage message) {
-        if (this.processedMessageTypes.contains(message.getName())) {
+        if(processedMessageTypes.contains(message.getName())) {
             super.storeMessage(message);
         } else {
             logger.trace("Message {} skipped by service settings.", message.getName());

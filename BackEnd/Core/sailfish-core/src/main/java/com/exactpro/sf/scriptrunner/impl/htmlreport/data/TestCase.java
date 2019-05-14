@@ -15,17 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
-import com.exactpro.sf.common.util.Utils;
-import com.exactpro.sf.scriptrunner.StatusDescription;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.exactpro.sf.common.util.Utils;
+import com.exactpro.sf.scriptrunner.StatusDescription;
 
 public class TestCase extends BaseEntity {
     private String id;
@@ -35,10 +36,6 @@ public class TestCase extends BaseEntity {
     private int hash;
     private StatusDescription status;
     private Map<String, String> tags = Collections.emptyMap(); //maps tag name to css class
-
-    public TestCase() {
-        super();
-    }
 
     public String getId() {
         return id;

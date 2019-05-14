@@ -44,13 +44,16 @@ public class MessageUtil
 
     private static final AtomicLong counter = new AtomicLong();
     public static final String MESSAGE_REJECTED_POSTFIX = " (REJECTED)";
-    
-	public static String toString(final IMessage msg, String separator)
-	{
-		StringBuilder result = new StringBuilder(128);
 
-		result.append(( msg == null ) ? "null" : "");
-		for ( String fldName : msg.getFieldNames() )
+    public static String toString(IMessage msg, String separator)
+	{
+        if(msg == null) {
+            return "null";
+        }
+
+        StringBuilder result = new StringBuilder(128);
+
+        for(String fldName : msg.getFieldNames())
 		{
 			IFieldInfo fldInfo = msg.getFieldInfo(fldName);
 
@@ -63,12 +66,10 @@ public class MessageUtil
 				} else {
 					result.append('{');
 					for(Object o : vals) {
-						if (o == null) {
-							result.append("null");
-						} else if (o instanceof IMessage) {
+                        if(o instanceof IMessage) {
 							result.append(toString((IMessage) o, separator));
 						} else {
-							result.append(o.toString());
+                            result.append(o);
 						}
 						result.append(separator);
 					}
@@ -85,7 +86,7 @@ public class MessageUtil
 			}
 			else
 			{
-				result.append(fldInfo.getValue().toString());
+                result.append(fldInfo.getValue());
 				result.append(separator);
 			}
 		}
@@ -104,18 +105,12 @@ public class MessageUtil
                     List<Object> list = new ArrayList<>();
 
                     for (Object element : (List<?>)value) {
-                        if (element instanceof IMessage) {
-                            list.add(convertToHashMap((IMessage) element));
-                        } else {
-                            list.add(element);
-                        }
+                        list.add(element instanceof IMessage ? convertToHashMap((IMessage)element) : element);
                     }
 
                     result.put(fieldName, list);
-                } else if (value instanceof IMessage) {
-                    result.put(fieldName, convertToHashMap((IMessage) value));
                 } else {
-                    result.put(fieldName, value);
+                    result.put(fieldName, value instanceof IMessage ? convertToHashMap((IMessage)value) : value);
                 }
             }
 
@@ -134,29 +129,22 @@ public class MessageUtil
 	public static IMessage convertToIMessage(Map<?, ?> map, IMessageFactory messageFactory, String namespace, String name) {
 	    if (map != null) {
 	        messageFactory = messageFactory != null ? messageFactory : DefaultMessageFactory.getFactory();
-
     	    IMessage result = messageFactory.createMessage(name, namespace);
-    	    String key = null;
 
-    	    for (Entry<?, ?> entry : map.entrySet()) {
-	            key = String.class.cast(entry.getKey());
+            for(Entry<?, ?> entry : map.entrySet()) {
+                String key = String.class.cast(entry.getKey());
+                Object value = entry.getValue();
 
-                if (entry.getValue() instanceof List) {
+                if(value instanceof List) {
                     List<Object> list = new ArrayList<>();
 
-                    for (Object element : (List<?>)entry.getValue()) {
-                        if (element instanceof Map) {
-                            list.add(convertToIMessage(Map.class.cast(element), messageFactory, namespace, name));
-                        } else {
-                            list.add(element);
-                        }
+                    for(Object element : (List<?>)value) {
+                        list.add(element instanceof Map ? convertToIMessage((Map)element, messageFactory, namespace, name) : element);
                     }
 
                     result.addField(key, list);
-                } else if (entry.getValue() instanceof Map) {
-                    result.addField(key, convertToIMessage(Map.class.cast(entry.getValue()), messageFactory, namespace, name));
                 } else {
-                    result.addField(key, entry.getValue());
+                    result.addField(key, value instanceof Map ? convertToIMessage((Map)value, messageFactory, namespace, name) : value);
                 }
             }
 
@@ -166,18 +154,20 @@ public class MessageUtil
 	    return null;
     }
 
-	public static String convertMsgToHumanReadable(final IMessage msg, IDictionaryStructure dict)
-	{
-		if ( msg == null )
-			throw new NullPointerException("msg");
+    public static String convertMsgToHumanReadable(IMessage msg, IDictionaryStructure dict) {
+        if(msg == null) {
+            throw new NullPointerException("msg");
+        }
 
-		if ( dict == null )
-			throw new NullPointerException("dict");
+        if(dict == null) {
+            throw new NullPointerException("dict");
+        }
 
         IMessageStructure msgStruct = dict.getMessages().get(msg.getName());
 
-		if ( msgStruct == null )
-			return null;
+        if(msgStruct == null) {
+            return null;
+        }
 
 
 		MessageStructureReader msgStructReader = new MessageStructureReader();
@@ -217,9 +207,9 @@ public class MessageUtil
 		private static final String COLLECTION_END = "]; ";
 		private static final String COLLECTION_START = "=[";
 		private final StringBuilder buffer;
-		private boolean showNulls = false;
+        private final boolean showNulls = false;
 
-		private final static ThreadLocal<DecimalFormat> df = new ThreadLocal<DecimalFormat>() {
+        private static final ThreadLocal<DecimalFormat> df = new ThreadLocal<DecimalFormat>() {
 	        @Override
             protected DecimalFormat initialValue() {
 	            return new DecimalFormat("#.################");
@@ -290,7 +280,7 @@ public class MessageUtil
 				IFieldStructure fldStruct, boolean isDefault)
 		{
 			// we also can check Double.isInfinite(), but DecimalFormat works well with +-Infinity
-			convertField(buffer, fieldName, (value == null || Double.isNaN(value) ? value : df.get().format(value)), fldStruct, showNulls);
+            convertField(buffer, fieldName, value == null || Double.isNaN(value) ? value : df.get().format(value), fldStruct, showNulls);
 		}
 
 
@@ -391,8 +381,9 @@ public class MessageUtil
 			if (values == null) {
 				buffer.append("null");
 			} else {
-				for (String value : values)
-				convertField(buffer, null, value, fldStruct, showNulls);
+                for(String value : values) {
+                    convertField(buffer, null, value, fldStruct, showNulls);
+                }
 			}
 
 			buffer.append(COLLECTION_END);
@@ -414,8 +405,9 @@ public class MessageUtil
 			if (values == null) {
 				buffer.append("null");
 			} else {
-				for (Integer value : values)
-					convertField(buffer, null, value, fldStruct, showNulls);
+                for(Integer value : values) {
+                    convertField(buffer, null, value, fldStruct, showNulls);
+                }
 			}
 
 			buffer.append(COLLECTION_END);
@@ -438,8 +430,9 @@ public class MessageUtil
 			if (values == null) {
 				buffer.append("null");
 			} else {
-				for (Long value : values)
-					convertField(buffer, null, value, fldStruct, showNulls);
+                for(Long value : values) {
+                    convertField(buffer, null, value, fldStruct, showNulls);
+                }
 			}
 
 			buffer.append(COLLECTION_END);
@@ -462,8 +455,9 @@ public class MessageUtil
 			if (values == null) {
 				buffer.append("null");
 			} else {
-				for (Double value : values)
-					convertField(buffer, null, value, fldStruct, showNulls);
+                for(Double value : values) {
+                    convertField(buffer, null, value, fldStruct, showNulls);
+                }
 			}
 
 			buffer.append(COLLECTION_END);
@@ -484,8 +478,9 @@ public class MessageUtil
 			if (values == null) {
 				buffer.append("null");
 			} else {
-				for (Byte value : values)
-					convertField(buffer, null, value, fldStruct, showNulls);
+                for(Byte value : values) {
+                    convertField(buffer, null, value, fldStruct, showNulls);
+                }
 			}
 
 			buffer.append(COLLECTION_END);
@@ -508,8 +503,9 @@ public class MessageUtil
 			if (values == null) {
 				buffer.append("null");
 			} else {
-				for (Boolean value : values)
-					convertField(buffer, null, value, fldStruct, showNulls);
+                for(Boolean value : values) {
+                    convertField(buffer, null, value, fldStruct, showNulls);
+                }
 			}
 
 			buffer.append(COLLECTION_END);
@@ -532,8 +528,9 @@ public class MessageUtil
             if (values == null) {
                 buffer.append("null");
             } else {
-                for (BigDecimal value : values)
+                for(BigDecimal value : values) {
                     convertField(buffer, null, (value == null) ? value: value.toPlainString(), fldStruct, showNulls);
+                }
             }
 
             buffer.append(COLLECTION_END);
@@ -557,16 +554,13 @@ public class MessageUtil
 			{
 				String alias = getAlias(fldStruct, value);
 				buffer.append(alias);
-			}
-			else
-				buffer.append("null");
+            } else {
+                buffer.append("null");
+            }
 		}
 		else
 		{
-			if ( value != null )
-				buffer.append(value.toString());
-			else
-				buffer.append("null");
+            buffer.append(value);
 		}
 
 		buffer.append("; ");
@@ -608,8 +602,9 @@ public class MessageUtil
 	{
 		for ( String enumEl : enumFldType.getValues().keySet() )
 		{
-			if ( enumFldType.getValues().get(enumEl).getCastValue().equals(value) )
-				return enumEl;
+            if(enumFldType.getValues().get(enumEl).getCastValue().equals(value)) {
+                return enumEl;
+            }
 		}
 
 		return value.toString();

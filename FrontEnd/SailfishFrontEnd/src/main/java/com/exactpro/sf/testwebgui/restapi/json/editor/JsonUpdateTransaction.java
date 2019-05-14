@@ -27,8 +27,7 @@ public class JsonUpdateTransaction {
 	@JsonCreator
 	public JsonUpdateTransaction(
 			@JsonProperty("actions") Collection<JsonUpdateTransactionSpliceEntry> actions) {
-		super();
-		this.actions = actions;
+        this.actions = actions;
 	}
 
 	public Collection<JsonUpdateTransactionSpliceEntry> getActions() {

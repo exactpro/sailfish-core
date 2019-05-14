@@ -79,19 +79,19 @@ public class MulticastSocketSession extends AbstractIoSession
 	@Override
 	public IoHandler getHandler() 
 	{
-		return this.handler;
+        return handler;
 	}
 
 	
 	@Override
 	public SocketAddress getLocalAddress() {
-		return this.localAddress;
+        return localAddress;
 	}
 
 	
 	@Override
 	public SocketAddress getRemoteAddress() {
-		return this.remoteAddress;
+        return remoteAddress;
 	}
 
 
@@ -128,7 +128,7 @@ public class MulticastSocketSession extends AbstractIoSession
     
     public MulticastSocket getSocket()
     {
-    	return this.socket;
+        return socket;
     }
 
 

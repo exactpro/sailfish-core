@@ -39,10 +39,14 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Layout;
 import org.apache.log4j.helpers.LogLog;
 import org.apache.log4j.spi.LoggingEvent;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * DailyMaxRollingFileAppender extends {@link FileAppender} so that the
@@ -183,6 +187,11 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     private String scheduledFilename;
 
     /**
+     * The folder where old files will stored
+     */
+    private String rollingFilesFolder;
+
+    /**
      * The next time we estimate a rollover should occur.
      */
     private long nextCheck = System.currentTimeMillis() - 1;
@@ -248,6 +257,22 @@ public class DailyMaxRollingFileAppender extends FileAppender {
         return maxBackupIndex;
     }
 
+    /**
+     * Returns the value of the <b>OldFilesFolder</b> option.
+     * @return
+     */
+    public String getRollingFilesFolder() {
+        return rollingFilesFolder;
+    }
+
+    /**
+     * Sets folder where old files will be stored
+     * @param rollingFilesFolder folder for backup files. If it's empty then backup files won't be moved
+     */
+    public void setRollingFilesFolder(String rollingFilesFolder) {
+        this.rollingFilesFolder = rollingFilesFolder;
+    }
+
     @Override
     public void activateOptions() {
         super.activateOptions();
@@ -261,7 +286,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
             printPeriodicity(type);
             rpc.setType(type);
             File file = new File(fileName);
-            scheduledFilename = fileName + sdf.format(new Date(file.lastModified()));
+            scheduledFilename = getScheduledFilename(new Date(file.lastModified()));
         } else {
             LogLog.error("Either File or DatePattern options are not set for appender [" + name + "].");
         }
@@ -270,7 +295,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     void printPeriodicity(int type) {
         switch (type) {
             case TOP_OF_MINUTE:
-                LogLog.debug("Appender [[+name+]] to be rolled every minute.");
+                LogLog.debug("Appender [" + name + "] to be rolled every minute.");
                 break;
             case TOP_OF_HOUR:
                 LogLog.debug("Appender [" + name + "] to be rolled on top of every hour.");
@@ -288,7 +313,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
                 LogLog.debug("Appender [" + name + "] to be rolled at start of every month.");
                 break;
             default:
-                LogLog.warn("Unknown periodicity for appender [[+name+]].");
+                LogLog.warn("Unknown periodicity for appender [" + name + "].");
         }
     }
 
@@ -335,7 +360,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
             return;
         }
 
-        String datedFilename = fileName + sdf.format(now);
+        String datedFilename = getScheduledFilename(now);
         // It is too early to roll over because we are still within the
         // bounds of the current interval. Rollover will occur once the
         // next interval is reached.
@@ -344,39 +369,53 @@ public class DailyMaxRollingFileAppender extends FileAppender {
         }
 
         // close current file, and rename it to datedFilename
-        this.closeFile();
-
-        File target = new File(scheduledFilename);
-        if (target.exists()) {
-            target.delete();
-        }
+        closeFile();
 
         File file = new File(fileName);
 
-        boolean result = file.renameTo(target);
-        if (result) {
-            LogLog.debug(fileName + " -> " + scheduledFilename);
+        // If maxBackups <= 0, then there is no file renaming to be done.
+        if (maxBackupIndex > 0) {
+            File target = new File(scheduledFilename);
+            if (target.exists()) {
+                target.delete();
+            }
 
-            // If maxBackups <= 0, then there is no file renaming to be done.
-            if (maxBackupIndex > 0) {
+            boolean result = file.renameTo(target);
+            if (result) {
+                LogLog.debug(fileName + " -> " + scheduledFilename);
+
+                if (isNotEmpty(rollingFilesFolder)) {
+                    LogLog.debug("Move " + scheduledFilename + " to " + rollingFilesFolder);
+                    File destFile = new File(rollingFilesFolder, target.getName());
+                    FileUtils.moveFile(target, destFile);
+                }
+
                 // Delete the oldest file, to keep Windows happy.
-                file = new File(fileName + dateBefore());
+                if (isEmpty(rollingFilesFolder)) {
+                    file = new File(fileName + dateBefore());
+                } else {
+                    file = new File(rollingFilesFolder, file.getName() + dateBefore());
+                }
 
-                if (file.exists())
+                if(file.exists()) {
                     file.delete();
+                }
 
                 // this function invocation has been added to original file
                 deleteOldFiles();
-
+            } else {
+                LogLog.error("Failed to rename [" + fileName + "] to [" + scheduledFilename + "].");
             }
         } else {
-            LogLog.error("Failed to rename [[+fileName+]] to [[+scheduledFilename+]].");
+            if (!file.delete()) {
+                LogLog.error("Can't delete current file: " + fileName);
+            }
         }
 
         try {
             // This will also close the file. This is OK since multiple
             // close operations are safe.
-            this.setFile(fileName, false, this.bufferedIO, this.bufferSize);
+            setFile(fileName, false, bufferedIO, bufferSize);
         } catch (IOException e) {
             errorHandler.error("setFile(" + fileName + ", false) call failed.");
         }
@@ -386,7 +425,13 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     // this function has been added to original file
     private void deleteOldFiles() {
         File file = new File(fileName);
-        File parent = file.getParentFile();
+
+        File parent;
+        if (isEmpty(rollingFilesFolder)) {
+            parent = file.getParentFile();
+        } else {
+            parent = new File(rollingFilesFolder);
+        }
 
         String simpleFileName = file.getName();
         File[] nestedFiles = parent.listFiles();
@@ -400,8 +445,7 @@ public class DailyMaxRollingFileAppender extends FileAppender {
                         && elemSimpleName.length() == (datePattern.length() - 2 + simpleFileName.length())) {
 
                     SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
-                    String dateSuffix = elemSimpleName.substring(
-                            elemSimpleName.length() - datePattern.length() + 2, elemSimpleName.length());
+                    String dateSuffix = elemSimpleName.substring(elemSimpleName.length() - datePattern.length() + 2);
                     try {
                         Date elemDate = dateFormat.parse(dateSuffix);
                         if(oldestTimeInMillis > elemDate.getTime()) {
@@ -414,15 +458,14 @@ public class DailyMaxRollingFileAppender extends FileAppender {
     }
 
     private String dateBefore() {
-        String dataAnte = "";
 
         if (datePattern != null) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat(datePattern);
 
-            dataAnte = simpleDateFormat.format(new Date(rpc.getPastCheckMillis(new Date(), maxBackupIndex)));
+            return simpleDateFormat.format(new Date(rpc.getPastCheckMillis(new Date(), maxBackupIndex)));
         }
 
-        return dataAnte;
+        return "";
     }
 
     /**
@@ -451,10 +494,14 @@ public class DailyMaxRollingFileAppender extends FileAppender {
         super.subAppend(event);
     }
 
+    private String getScheduledFilename(Date date) {
+        return fileName + sdf.format(date);
+    }
+
     /*
      * DEBUG
      */
-    public static void main(String args[]) {
+    public static void main(String[] args) {
         DailyMaxRollingFileAppender dmrfa = new DailyMaxRollingFileAppender();
 
         dmrfa.setDatePattern("'.'yyyy-MM-dd-HH-mm");
@@ -490,7 +537,6 @@ class RollingPastCalendar extends RollingCalendar {
     private static final long serialVersionUID = -903139157006143644L;
 
     RollingPastCalendar() {
-        super();
     }
 
     RollingPastCalendar(TimeZone tz, Locale locale) {
@@ -502,63 +548,59 @@ class RollingPastCalendar extends RollingCalendar {
     }
 
     public Date getPastDate(Date now, int maxBackupIndex) {
-        this.setTime(now);
+        setTime(now);
         switch (type) {
             case DailyMaxRollingFileAppender.TOP_OF_MINUTE:
-                this.set(Calendar.SECOND, this.get(Calendar.SECOND));
-                this.set(Calendar.MILLISECOND, this.get(Calendar.MILLISECOND));
-                this.set(Calendar.MINUTE, this.get(Calendar.MINUTE)
+                set(Calendar.SECOND, get(Calendar.SECOND));
+                set(Calendar.MILLISECOND, get(Calendar.MILLISECOND));
+                set(Calendar.MINUTE, get(Calendar.MINUTE)
                         - maxBackupIndex);
                 break;
 
             case DailyMaxRollingFileAppender.TOP_OF_HOUR:
-                this.set(Calendar.MINUTE, this.get(Calendar.MINUTE));
-                this.set(Calendar.SECOND, this.get(Calendar.SECOND));
-                this.set(Calendar.MILLISECOND, this.get(Calendar.MILLISECOND));
-                this.set(Calendar.HOUR_OF_DAY, this.get(Calendar.HOUR_OF_DAY)
+                set(Calendar.MINUTE, get(Calendar.MINUTE));
+                set(Calendar.SECOND, get(Calendar.SECOND));
+                set(Calendar.MILLISECOND, get(Calendar.MILLISECOND));
+                set(Calendar.HOUR_OF_DAY, get(Calendar.HOUR_OF_DAY)
                         - maxBackupIndex);
                 break;
 
             case DailyMaxRollingFileAppender.HALF_DAY:
-                this.set(Calendar.MINUTE, this.get(Calendar.MINUTE));
-                this.set(Calendar.SECOND, this.get(Calendar.SECOND));
-                this.set(Calendar.MILLISECOND, this.get(Calendar.MILLISECOND));
+                set(Calendar.MINUTE, get(Calendar.MINUTE));
+                set(Calendar.SECOND, get(Calendar.SECOND));
+                set(Calendar.MILLISECOND, get(Calendar.MILLISECOND));
                 int hour = get(Calendar.HOUR_OF_DAY);
-                if (hour < 12) {
-                    this.set(Calendar.HOUR_OF_DAY, 12);
-                } else {
-                    this.set(Calendar.HOUR_OF_DAY, 0);
-                }
-                this.set(Calendar.DAY_OF_MONTH, this.get(Calendar.DAY_OF_MONTH)
+                set(Calendar.HOUR_OF_DAY, hour < 12 ? 12 : 0);
+                set(Calendar.DAY_OF_MONTH, get(Calendar.DAY_OF_MONTH)
                         - maxBackupIndex);
 
                 break;
 
             case DailyMaxRollingFileAppender.TOP_OF_DAY:
-                this.set(Calendar.HOUR_OF_DAY, this.get(Calendar.HOUR_OF_DAY));
-                this.set(Calendar.MINUTE, this.get(Calendar.MINUTE));
-                this.set(Calendar.SECOND, this.get(Calendar.SECOND));
-                this.set(Calendar.MILLISECOND, this.get(Calendar.MILLISECOND));
-                this.set(Calendar.DATE, this.get(Calendar.DATE) - maxBackupIndex);
+                set(Calendar.HOUR_OF_DAY, get(Calendar.HOUR_OF_DAY));
+                set(Calendar.MINUTE, get(Calendar.MINUTE));
+                set(Calendar.SECOND, get(Calendar.SECOND));
+                set(Calendar.MILLISECOND, get(Calendar.MILLISECOND));
+                set(Calendar.DATE, get(Calendar.DATE) - maxBackupIndex);
                 break;
 
             case DailyMaxRollingFileAppender.TOP_OF_WEEK:
-                this.set(Calendar.DAY_OF_WEEK, getFirstDayOfWeek());
-                this.set(Calendar.HOUR_OF_DAY, this.get(Calendar.HOUR_OF_DAY));
-                this.set(Calendar.MINUTE, this.get(Calendar.MINUTE));
-                this.set(Calendar.SECOND, this.get(Calendar.SECOND));
-                this.set(Calendar.MILLISECOND, this.get(Calendar.MILLISECOND));
-                this.set(Calendar.WEEK_OF_YEAR, this.get(Calendar.WEEK_OF_YEAR)
+                set(Calendar.DAY_OF_WEEK, getFirstDayOfWeek());
+                set(Calendar.HOUR_OF_DAY, get(Calendar.HOUR_OF_DAY));
+                set(Calendar.MINUTE, get(Calendar.MINUTE));
+                set(Calendar.SECOND, get(Calendar.SECOND));
+                set(Calendar.MILLISECOND, get(Calendar.MILLISECOND));
+                set(Calendar.WEEK_OF_YEAR, get(Calendar.WEEK_OF_YEAR)
                         - maxBackupIndex);
                 break;
 
             case DailyMaxRollingFileAppender.TOP_OF_MONTH:
-                this.set(Calendar.DATE, this.get(Calendar.DATE));
-                this.set(Calendar.HOUR_OF_DAY, this.get(Calendar.HOUR_OF_DAY));
-                this.set(Calendar.MINUTE, this.get(Calendar.MINUTE));
-                this.set(Calendar.SECOND, this.get(Calendar.SECOND));
-                this.set(Calendar.MILLISECOND, this.get(Calendar.MILLISECOND));
-                this.set(Calendar.MONTH, this.get(Calendar.MONTH) - maxBackupIndex);
+                set(Calendar.DATE, get(Calendar.DATE));
+                set(Calendar.HOUR_OF_DAY, get(Calendar.HOUR_OF_DAY));
+                set(Calendar.MINUTE, get(Calendar.MINUTE));
+                set(Calendar.SECOND, get(Calendar.SECOND));
+                set(Calendar.MILLISECOND, get(Calendar.MILLISECOND));
+                set(Calendar.MONTH, get(Calendar.MONTH) - maxBackupIndex);
                 break;
 
             default:
@@ -583,7 +625,6 @@ class RollingCalendar extends GregorianCalendar {
     int type = DailyMaxRollingFileAppender.TOP_OF_TROUBLE;
 
     RollingCalendar() {
-        super();
     }
 
     RollingCalendar(TimeZone tz, Locale locale) {
@@ -599,54 +640,54 @@ class RollingCalendar extends GregorianCalendar {
     }
 
     public Date getNextCheckDate(Date now) {
-        this.setTime(now);
+        setTime(now);
 
         switch (type) {
             case DailyMaxRollingFileAppender.TOP_OF_MINUTE:
-                this.set(Calendar.SECOND, 0);
-                this.set(Calendar.MILLISECOND, 0);
-                this.add(Calendar.MINUTE, 1);
+                set(Calendar.SECOND, 0);
+                set(Calendar.MILLISECOND, 0);
+                add(Calendar.MINUTE, 1);
                 break;
             case DailyMaxRollingFileAppender.TOP_OF_HOUR:
-                this.set(Calendar.MINUTE, 0);
-                this.set(Calendar.SECOND, 0);
-                this.set(Calendar.MILLISECOND, 0);
-                this.add(Calendar.HOUR_OF_DAY, 1);
+                set(Calendar.MINUTE, 0);
+                set(Calendar.SECOND, 0);
+                set(Calendar.MILLISECOND, 0);
+                add(Calendar.HOUR_OF_DAY, 1);
                 break;
             case DailyMaxRollingFileAppender.HALF_DAY:
-                this.set(Calendar.MINUTE, 0);
-                this.set(Calendar.SECOND, 0);
-                this.set(Calendar.MILLISECOND, 0);
+                set(Calendar.MINUTE, 0);
+                set(Calendar.SECOND, 0);
+                set(Calendar.MILLISECOND, 0);
                 int hour = get(Calendar.HOUR_OF_DAY);
                 if (hour < 12) {
-                    this.set(Calendar.HOUR_OF_DAY, 12);
+                    set(Calendar.HOUR_OF_DAY, 12);
                 } else {
-                    this.set(Calendar.HOUR_OF_DAY, 0);
-                    this.add(Calendar.DAY_OF_MONTH, 1);
+                    set(Calendar.HOUR_OF_DAY, 0);
+                    add(Calendar.DAY_OF_MONTH, 1);
                 }
                 break;
             case DailyMaxRollingFileAppender.TOP_OF_DAY:
-                this.set(Calendar.HOUR_OF_DAY, 0);
-                this.set(Calendar.MINUTE, 0);
-                this.set(Calendar.SECOND, 0);
-                this.set(Calendar.MILLISECOND, 0);
-                this.add(Calendar.DATE, 1);
+                set(Calendar.HOUR_OF_DAY, 0);
+                set(Calendar.MINUTE, 0);
+                set(Calendar.SECOND, 0);
+                set(Calendar.MILLISECOND, 0);
+                add(Calendar.DATE, 1);
                 break;
             case DailyMaxRollingFileAppender.TOP_OF_WEEK:
-                this.set(Calendar.DAY_OF_WEEK, getFirstDayOfWeek());
-                this.set(Calendar.HOUR_OF_DAY, 0);
-                this.set(Calendar.MINUTE, 0);
-                this.set(Calendar.SECOND, 0);
-                this.set(Calendar.MILLISECOND, 0);
-                this.add(Calendar.WEEK_OF_YEAR, 1);
+                set(Calendar.DAY_OF_WEEK, getFirstDayOfWeek());
+                set(Calendar.HOUR_OF_DAY, 0);
+                set(Calendar.MINUTE, 0);
+                set(Calendar.SECOND, 0);
+                set(Calendar.MILLISECOND, 0);
+                add(Calendar.WEEK_OF_YEAR, 1);
                 break;
             case DailyMaxRollingFileAppender.TOP_OF_MONTH:
-                this.set(Calendar.DATE, 1);
-                this.set(Calendar.HOUR_OF_DAY, 0);
-                this.set(Calendar.MINUTE, 0);
-                this.set(Calendar.SECOND, 0);
-                this.set(Calendar.MILLISECOND, 0);
-                this.add(Calendar.MONTH, 1);
+                set(Calendar.DATE, 1);
+                set(Calendar.HOUR_OF_DAY, 0);
+                set(Calendar.MINUTE, 0);
+                set(Calendar.SECOND, 0);
+                set(Calendar.MILLISECOND, 0);
+                add(Calendar.MONTH, 1);
                 break;
             default:
                 throw new IllegalStateException("Unknown periodicity type.");

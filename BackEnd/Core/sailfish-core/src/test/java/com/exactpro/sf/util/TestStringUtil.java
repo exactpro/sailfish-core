@@ -115,18 +115,18 @@ public class TestStringUtil extends EPSTestCase {
 	@Test
 	public void testReplaceChars()
 	{
-		final String chars = " ?#;";
-		final char replacement = '_';
+		String chars = " ?#;";
+		char replacement = '_';
 
-		final String src0 = "#123 ?(A;B).csv";
+		String src0 = "#123 ?(A;B).csv";
 		String dst0 = StringUtil.replaceChars(src0.trim(), chars, replacement);
 		Assert.assertEquals("_123__(A_B).csv", dst0);
 
-		final String src1 = "API_Auction_Negative _Testing(OrdPlecement;Replace).csv";
+		String src1 = "API_Auction_Negative _Testing(OrdPlecement;Replace).csv";
 		String dst1 = StringUtil.replaceChars(src1.trim(), chars, replacement);
 		Assert.assertEquals("API_Auction_Negative__Testing(OrdPlecement_Replace).csv", dst1);
 
-		final String src2 = "USD_Real_Real_v8 Semi betta1.csv";
+		String src2 = "USD_Real_Real_v8 Semi betta1.csv";
 		String dst2 = StringUtil.replaceChars(src2.trim(), chars, replacement);
 		Assert.assertEquals("USD_Real_Real_v8_Semi_betta1.csv", dst2);
 

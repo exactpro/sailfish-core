@@ -66,7 +66,7 @@ public class DictionaryValidator {
                 System.out.println("Validating " + dictionary.getName());
                 IDictionaryStructure structure = dictionaryLoader.load(dictionaryStream);
                 errors = validator.validate(structure, true, null);
-                if (errors.size() != 0) {
+                if (!errors.isEmpty()) {
                     hasErrors = true;
                     System.err.println("Errors detected in " + dictionary.getName());
                     for (Object o:errors) {

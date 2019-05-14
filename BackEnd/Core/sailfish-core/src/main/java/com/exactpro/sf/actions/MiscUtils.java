@@ -40,7 +40,7 @@ import com.exactpro.sf.util.FieldKnownBugException;
 import com.exactpro.sf.util.KnownBugPostValidation;
 
 @MatrixUtils
-@ResourceAliases({"MiscUtils"})
+@ResourceAliases("MiscUtils")
 public class MiscUtils extends AbstractCaller {
 
 	@Description("Returns a random element from an array of strings.<br/>"

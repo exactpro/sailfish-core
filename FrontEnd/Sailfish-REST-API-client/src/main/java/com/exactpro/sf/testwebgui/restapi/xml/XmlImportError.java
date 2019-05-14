@@ -31,7 +31,7 @@ public class XmlImportError implements Serializable {
 
     private String message;
 
-    private Set<XmlImportError> cause = new HashSet<>();
+    private final Set<XmlImportError> cause = new HashSet<>();
 
     public XmlImportError() {
 
@@ -66,11 +66,11 @@ public class XmlImportError implements Serializable {
     }
 
     public void addCause(XmlImportError error) {
-        this.cause.add(error);
+        cause.add(error);
     }
 
     public void addCause(Collection<XmlImportError> errors) {
-        this.cause.addAll(errors);
+        cause.addAll(errors);
     }
 
 }

@@ -112,26 +112,26 @@ public class StrictMessageWrapper implements IMessage {
 
         if (fieldStructure.isComplex()) {
             if (fieldStructure.isCollection()) {
-                this.message.addField(name, castValueToCollection(value, StrictMessageWrapper.class));
+                message.addField(name, castValueToCollection(value, StrictMessageWrapper.class));
             } else {
                 Object element = value;
                 if (value instanceof List<?>) {
                     element = extractValueFromCollection((List<?>)value);
                 }
-                this.message.addField(name, checkElement(requiredNotNull(element, fieldStructure), StrictMessageWrapper.class));
+                message.addField(name, checkElement(requiredNotNull(element, fieldStructure), StrictMessageWrapper.class));
             }
         } else {
             try {
-                Class<?> clazz = this.getClass().getClassLoader().loadClass(fieldStructure.getJavaType().value());
+                Class<?> clazz = getClass().getClassLoader().loadClass(fieldStructure.getJavaType().value());
 
                 if (fieldStructure.isCollection()) {
-                    this.message.addField(name, castValueToCollection(value, clazz));
+                    message.addField(name, castValueToCollection(value, clazz));
                 } else {
                     Object element = value;
                     if (value instanceof List<?>) {
                         element = extractValueFromCollection((List<?>)value);
                     }
-                    this.message.addField(name, checkElement(requiredNotNull(element, fieldStructure), clazz));
+                    message.addField(name, checkElement(requiredNotNull(element, fieldStructure), clazz));
                 }
             } catch (ClassNotFoundException e) {
                 throw new EPSCommonException("Unknown field type: " + fieldStructure.getJavaType().value(), e);
@@ -146,7 +146,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public String getName() {
-        return this.message.getName();
+        return message.getName();
     }
 
     /*
@@ -156,7 +156,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public String getNamespace() {
-        return this.message.getNamespace();
+        return message.getNamespace();
     }
 
     /*
@@ -166,7 +166,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public MsgMetaData getMetaData() {
-        return this.message.getMetaData();
+        return message.getMetaData();
     }
 
     /*
@@ -177,7 +177,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public Object removeField(String name) {
-        return this.message.removeField(name);
+        return message.removeField(name);
     }
 
     /*
@@ -187,7 +187,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public <T> T getField(String name) {
-        return this.message.getField(name);
+        return message.getField(name);
     }
 
     /*
@@ -198,7 +198,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public FieldMetaData getFieldMetaData(String name) {
-        return this.message.getFieldMetaData(name);
+        return message.getFieldMetaData(name);
     }
 
     /*
@@ -209,7 +209,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public boolean isFieldSet(String name) {
-        return this.message.isFieldSet(name);
+        return message.isFieldSet(name);
     }
 
     /*
@@ -219,7 +219,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public Set<String> getFieldNames() {
-        return this.message.getFieldNames();
+        return message.getFieldNames();
     }
 
     /*
@@ -230,7 +230,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public IFieldInfo getFieldInfo(String name) {
-        return this.message.getFieldInfo(name);
+        return message.getFieldInfo(name);
     }
 
     /*
@@ -240,7 +240,7 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public IMessage cloneMessage() {
-        return new StrictMessageWrapper(message.cloneMessage(), this.messageStructure);
+        return new StrictMessageWrapper(message.cloneMessage(), messageStructure);
     }
 
     /*
@@ -260,20 +260,20 @@ public class StrictMessageWrapper implements IMessage {
      */
     @Override
     public int getFieldCount() {
-        return this.message.getFieldCount();
+        return message.getFieldCount();
     }
 
     @Override
     public String toString() {
         StringBuilder toString = new StringBuilder(1024);
 
-        for(String fldName : this.getFieldNames()) {
+        for(String fldName : getFieldNames()) {
             if(toString.length() > 0) {
                 toString.append('|');
             }
 
-            if(this.getField(fldName) instanceof IMessage) {
-                toString.append(((StrictMessageWrapper)this.getField(fldName)).toString());
+            if(getField(fldName) instanceof IMessage) {
+                toString.append((StrictMessageWrapper)getField(fldName));
             } else {
                 toString.append(fldName);
                 toString.append('=');

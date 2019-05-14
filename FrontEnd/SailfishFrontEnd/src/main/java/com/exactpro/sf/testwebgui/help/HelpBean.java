@@ -67,7 +67,7 @@ public class HelpBean implements Serializable {
 
 	// Util-functions executor fields
 
-	private boolean showExecutor = false;
+    private boolean showExecutor;
 
 	private String functionToExec;
 
@@ -79,7 +79,7 @@ public class HelpBean implements Serializable {
 
 	// Search fields
 
-	private SearchOptions searchOptions = new SearchOptions();
+    private final SearchOptions searchOptions = new SearchOptions();
 
 	private transient List<TreeNode> searchResult;
 
@@ -109,7 +109,7 @@ public class HelpBean implements Serializable {
 
         private final int index;
 
-        private Tab(int index) {
+        Tab(int index) {
             this.index = index;
         }
 	}
@@ -123,13 +123,13 @@ public class HelpBean implements Serializable {
     @PostConstruct
 	public void initTree() {
 
-	    if (this.rootNode == null) {
+        if(rootNode == null) {
             this.rootNode = BeanUtil.getHelpContentHolder().getRootNode();
 	    }
 
 	    RequestContext.getCurrentInstance().update(Arrays.asList(new String[] { "contentForm", "mainMenuBar" }));
 
-        if (Tab.Plugins.equals(this.activeTab)) {
+        if(activeTab == Tab.Plugins) {
             RequestContext.getCurrentInstance().update("tab:tPlugins");
         }
 	}
@@ -144,22 +144,22 @@ public class HelpBean implements Serializable {
 	public void search() {
 		logger.debug("search invoked {}", getUser());
 
-		if (StringUtils.isEmpty(this.searchOptions.getSearchText())) {
+        if(StringUtils.isEmpty(searchOptions.getSearchText())) {
 			hideSearchResults();
 			return;
 		}
 
-		TreeNode startNode = this.searchOptions.isInSelection() && this.selectedNode != null ? this.selectedNode : getRoot();
+        TreeNode startNode = searchOptions.isInSelection() && selectedNode != null ? selectedNode : getRoot();
 
-		this.searchOptions.setRootNode(startNode);
+        searchOptions.setRootNode(startNode);
 
-		if (this.searchResult != null) {
-			this.searchResult.clear();
+        if(searchResult != null) {
+            searchResult.clear();
 		}
 
 		switch (activeTab) {
 			case Plugins:
-				searchResult = Search.doSearch(this.searchOptions);
+                searchResult = Search.doSearch(searchOptions);
 				setMainContent("");
 				break;
 			case Guide:
@@ -169,21 +169,21 @@ public class HelpBean implements Serializable {
 
 	public void collapseAll() {
 
-	    if (this.expandedNodes == null) {
+        if(expandedNodes == null) {
 	        return;
 	    }
 
-	    for (TreeNode node : this.expandedNodes) {
+        for(TreeNode node : expandedNodes) {
 	        node.setExpanded(false);
 	    }
 
-        if(this.selectedNode != null) {
-            this.selectedNode.setSelected(false);
+        if(selectedNode != null) {
+            selectedNode.setSelected(false);
         }
 
         this.selectedNode = null;
 
-	    this.expandedNodes.clear();
+        expandedNodes.clear();
 
         setMainContent("");
 	}
@@ -198,8 +198,8 @@ public class HelpBean implements Serializable {
         if (title.equals(Tab.Plugins.toString())) {
 
             activeTab = Tab.Plugins;
-            if (this.selectedNode != null) {
-                nodeSelected(this.selectedNode);
+            if(selectedNode != null) {
+                nodeSelected(selectedNode);
             }
 
         } else {
@@ -210,16 +210,18 @@ public class HelpBean implements Serializable {
         }
     }
 
-    public void expand(final TreeNode node) {
+    public void expand(TreeNode node) {
 
 		logger.debug("expand invoked {}", getUser());
 
-		if (node == null) return;
+        if(node == null) {
+            return;
+        }
 
 		collapseAll();
 
-		if (this.selectedNode != null) {
-		    this.selectedNode.setSelected(false);
+        if(selectedNode != null) {
+            selectedNode.setSelected(false);
 		}
 
         this.selectedNode = node;
@@ -232,7 +234,7 @@ public class HelpBean implements Serializable {
 
 	}
 
-    private void expandNode(final TreeNode node) {
+    private void expandNode(TreeNode node) {
 
 		logger.debug("expandNode invoked {}", getUser());
 
@@ -266,13 +268,7 @@ public class HelpBean implements Serializable {
 			{
 				ee = ee.getCause();
 			}
-			if (ee instanceof EPSCommonException) {
-				BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Could not execute utility function", ee.getMessage());
-			}
-			else
-			{
-				BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Could not execute utility function", "please, check function parameters");
-			}
+            BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Could not execute utility function", ee instanceof EPSCommonException ? ee.getMessage() : "please, check function parameters");
 		}
 	}
 
@@ -297,7 +293,7 @@ public class HelpBean implements Serializable {
     }
 
 	public TreeNode getRoot() {
-		return this.rootNode;
+        return rootNode;
 	}
 
 	private void fillExecutorParameters(TreeNode node) {
@@ -324,14 +320,15 @@ public class HelpBean implements Serializable {
 
 	private void nodeSelected(TreeNode node) {
 
-        if (node == null)
+        if(node == null) {
             return;
+        }
         this.showExecutor = false;
 
-        HelpJsonContainer selectedNodeData = (HelpJsonContainer) this.selectedNode.getData();
+        HelpJsonContainer selectedNodeData = (HelpJsonContainer)selectedNode.getData();
 
         setMainContent(
-                BeanUtil.getHelpContentHolder().getDescription(selectedNodeData, BeanUtil.getHelpContentHolder().getPluginName(this.selectedNode)));
+                BeanUtil.getHelpContentHolder().getDescription(selectedNodeData, BeanUtil.getHelpContentHolder().getPluginName(selectedNode)));
 
         if (selectedNodeData instanceof MethodJsonContainer) {
             if (((MethodJsonContainer) selectedNodeData).getIsUtilMethod()) {
@@ -341,12 +338,12 @@ public class HelpBean implements Serializable {
     }
 
     public void copyToClipboard() {
-        this.copyingFormat = new CopyingFormat(this.customHeader);
+        this.copyingFormat = new CopyingFormat(customHeader);
 
-        this.copyingFormat.format(this.selectedNode);
+        copyingFormat.format(selectedNode);
 
-        copyToClipboardJs(this.copyingFormat.copyNewColumns(), this.copyingFormat.copyJustHeader(), this.copyingFormat.copyToClipboard(),
-                this.copyingFormat.copyAllStructure());
+        copyToClipboardJs(copyingFormat.copyNewColumns(), copyingFormat.copyJustHeader(), copyingFormat.copyToClipboard(),
+                copyingFormat.copyAllStructure());
         RequestContext.getCurrentInstance().update("copyDialog");
         RequestContext.getCurrentInstance().execute("PF('copyDialog').show()");
     }
@@ -389,45 +386,39 @@ public class HelpBean implements Serializable {
         }
 
         public int getTabCount() {
-            return this.tabCount;
+            return tabCount;
         }
 
         public boolean isNewColumn() {
-            return this.isNew;
+            return isNew;
         }
     }
 
     public String getCustomHeaderDialogTitle() {
-
         int newColumnsCount = getNewColumnsCount();
-
-        if (newColumnsCount == 0) {
-            return "The structure will contain this column(s)";
-        } else {
-            return "Your custom header doesn't contain " + newColumnsCount + " column(s)";
-        }
+        return newColumnsCount == 0 ? "The structure will contain this column(s)" : "Your custom header doesn't contain " + newColumnsCount + " column(s)";
     }
 
     public int getNewColumnsCount() {
-        return this.copyingFormat == null ? 0 : this.copyingFormat.getNewColumnsCount();
+        return copyingFormat == null ? 0 : copyingFormat.getNewColumnsCount();
     }
 
     public List<HeaderColumn> getNewColumnList() {
 
-        if (this.copyingFormat == null || this.selectedNode == null) {
+        if(copyingFormat == null || selectedNode == null) {
             return null;
         }
 
-        List<String> newColumnStrings = new ArrayList<>(this.copyingFormat.getNewColumns());
+        List<String> newColumnStrings = new ArrayList<>(copyingFormat.getNewColumns());
 
         List<String> notUsedColumns = new ArrayList<>(newColumnStrings);
 
         List<HeaderColumn> newColumns = new ArrayList<>();
 
-        addToNewColumnList(newColumns, newColumnStrings, notUsedColumns, this.selectedNode, 0);
+        addToNewColumnList(newColumns, newColumnStrings, notUsedColumns, selectedNode, 0);
 
         // Adding the remained headers like #reference or #message_type
-        if (notUsedColumns.size() > 0) {
+        if(!notUsedColumns.isEmpty()) {
 
             List<HeaderColumn> otherColumns = new ArrayList<>();
 
@@ -493,10 +484,10 @@ public class HelpBean implements Serializable {
 
 		event.getTreeNode().setExpanded(false);
 
-		this.expandedNodes.remove(event.getTreeNode());
+        expandedNodes.remove(event.getTreeNode());
 
 		// Close childs if the parent was collapsed
-		Iterator<TreeNode> iter = this.expandedNodes.iterator();
+        Iterator<TreeNode> iter = expandedNodes.iterator();
 		while (iter.hasNext()) {
 		    TreeNode node = iter.next();
 		    if (checkNodeParent(node, event.getTreeNode())) {
@@ -509,23 +500,21 @@ public class HelpBean implements Serializable {
 	}
 
 	private void addToExpandedNodes(TreeNode node) {
-	    if (this.expandedNodes == null) {
+        if(expandedNodes == null) {
 	        this.expandedNodes = new ArrayList<>();
 	    }
-	    this.expandedNodes.add(node);
+        expandedNodes.add(node);
 	}
 
 	private boolean checkNodeParent(TreeNode child, TreeNode parent) {
-	    if (child == parent) return true;
-	    if (child.getParent() == null) return false;
-	    return checkNodeParent(child.getParent(), parent);
-	}
+        return child == parent || child.getParent() != null && checkNodeParent(child.getParent(), parent);
+    }
 
 	public String getMainContent() {
 		return mainContent;
 	}
 
-	public void setMainContent(final String mainContent) {
+    public void setMainContent(String mainContent) {
 
 		logger.debug("setMainContent invoked {} mainContent[{}]", getUser(), mainContent);
 
@@ -534,7 +523,7 @@ public class HelpBean implements Serializable {
 			return;
 		}
 
-		if (StringUtils.isEmpty(this.searchOptions.getSearchText())) {
+        if(StringUtils.isEmpty(searchOptions.getSearchText())) {
 			this.mainContent = mainContent;
 			return;
 		}
@@ -542,12 +531,12 @@ public class HelpBean implements Serializable {
 		String source;
 		String match;
 
-		if (this.searchOptions.isIgnoreCase()) {
+        if(searchOptions.isIgnoreCase()) {
 			source = mainContent.toLowerCase();
-			match = this.searchOptions.getSearchText().toLowerCase();
+            match = searchOptions.getSearchText().toLowerCase();
 		} else {
 			source = mainContent;
-			match = this.searchOptions.getSearchText();
+            match = searchOptions.getSearchText();
 		}
 
 		StringBuilder sb = new StringBuilder();
@@ -559,7 +548,7 @@ public class HelpBean implements Serializable {
 			sb.append(mainContent.substring(beginIndex, endIndex));
 			sb.append("<font class=\"highlightSearch\">");
 
-			beginIndex = endIndex+this.searchOptions.getSearchText().length();
+            beginIndex = endIndex + searchOptions.getSearchText().length();
 
 			sb.append(mainContent.subSequence(endIndex, beginIndex));
 			sb.append("</font>");
@@ -636,7 +625,7 @@ public class HelpBean implements Serializable {
     }
 
     public void loadWikiIndexText() {
-        if (this.enabledWiki) {
+        if(enabledWiki) {
         String result = BeanUtil.getHelpContentHolder().getRedmine().buildWikiPageContent();
         mainRedminePage = result;
         } else {
@@ -694,7 +683,7 @@ public class HelpBean implements Serializable {
             setWikiPageVisible(false);
         }
 
-        if (this.activeTab != Tab.Plugins) {
+        if(activeTab != Tab.Plugins) {
             setWikiPageVisible(true);
         }
     }
@@ -704,29 +693,19 @@ public class HelpBean implements Serializable {
     }
 
     public int getLoadingProgress() {
-
-        if (BeanUtil.getHelpContentHolder() == null) {
-            return 0;
-        }
-
-        return BeanUtil.getHelpContentHolder().getLoadingProgress();
+        return BeanUtil.getHelpContentHolder() == null ? 0 : BeanUtil.getHelpContentHolder().getLoadingProgress();
     }
 
     public String getLoadingStage() {
-
-        if (BeanUtil.getHelpContentHolder() == null) {
-            return null;
-        }
-
-        return BeanUtil.getHelpContentHolder().getLoadingStage();
+        return BeanUtil.getHelpContentHolder() == null ? null : BeanUtil.getHelpContentHolder().getLoadingStage();
     }
 
     public boolean isSomeNodesExpanded() {
-        return this.expandedNodes != null && this.expandedNodes.size() > 0 && this.activeTab.equals(Tab.Plugins);
+        return expandedNodes != null && !expandedNodes.isEmpty() && activeTab == Tab.Plugins;
     }
 
     public int getActiveTabIndex() {
-        return this.activeTab.index;
+        return activeTab.index;
     }
 
     public void setActiveTabIndex(int index) {
@@ -734,13 +713,8 @@ public class HelpBean implements Serializable {
     }
 
     public boolean isShowCopyButton() {
-
-        if (this.selectedNode == null) {
-            return false;
-        }
-
-        return this.selectedNode.getType().equals(HelpEntityType.MESSAGE.name()) || this.selectedNode.getType()
-                .equals(HelpEntityType.FIELD.name());
+        return selectedNode != null && (selectedNode.getType().equals(HelpEntityType.MESSAGE.name()) || selectedNode.getType()
+                .equals(HelpEntityType.FIELD.name()));
     }
 
     public String getCustomHeader() {
@@ -756,6 +730,6 @@ public class HelpBean implements Serializable {
     }
 
     public boolean getCustomHeaderWasSet() {
-        return StringUtils.isNotEmpty(this.customHeader);
+        return StringUtils.isNotEmpty(customHeader);
     }
 }

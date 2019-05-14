@@ -50,6 +50,8 @@ import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceEvent;
+import com.exactpro.sf.services.ServiceEvent.Level;
+import com.exactpro.sf.services.ServiceEvent.Type;
 import com.exactpro.sf.storage.FilterCriterion;
 import com.exactpro.sf.storage.FilterCriterion.Operation;
 import com.exactpro.sf.storage.IMessageStorage;
@@ -78,11 +80,11 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 	private final IDictionaryManager dictionaryManager;
 
-	private ConvertUtilsBean converter = new ConvertUtilsBean();
+    private final ConvertUtilsBean converter = new ConvertUtilsBean();
 
-	private IObjectFlusher<StoredServiceEvent> flusher;
+    private final IObjectFlusher<StoredServiceEvent> flusher;
 
-    private IMessageStorage messageStorage;
+    private final IMessageStorage messageStorage;
 
 	/**
 	 * Operations with this collections should be synchronized
@@ -95,7 +97,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 	 * @param cfgFolderPath
 	 * @param factory
 	 */
-    public DatabaseServiceStorage(final SessionFactory sessionFactory, final IStaticServiceManager staticServiceManager, final IDictionaryManager dictionaryManager, final IMessageStorage messageStorage) {
+    public DatabaseServiceStorage(SessionFactory sessionFactory, IStaticServiceManager staticServiceManager, IDictionaryManager dictionaryManager, IMessageStorage messageStorage) {
 
 		this.sessionFactory = Objects.requireNonNull(sessionFactory, "sessionFactory cannot be null");
 		this.staticServiceManager = Objects.requireNonNull(staticServiceManager, "staticServiceManager cannot be null");
@@ -103,7 +105,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
         this.messageStorage = Objects.requireNonNull(messageStorage, "messageStorage cannot be null");
 
 		this.flusher = new ObjectFlusher<>(new HibernateFlushProvider<StoredServiceEvent>(this.sessionFactory), BUFFER_SIZE);
-		this.flusher.start();
+        flusher.start();
 
 		loadServiceDescriptions();
 	}
@@ -111,10 +113,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 	@Override
     public ServiceInfo lookupService(ServiceName serviceName) {
         Session session = null;
-        ServiceInfo result = null;
 
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             Criteria criteria = session.createCriteria(StoredService.class);
 
             criteria.add(Restrictions.eq("name", serviceName.getServiceName()));
@@ -131,18 +132,16 @@ public class DatabaseServiceStorage implements IServiceStorage {
                 storedService = (StoredService) criteria.uniqueResult();
             }
 
-            if(storedService != null) {
-                result = new ServiceInfo(storedService.getId(), serviceName);
-            }
+            return storedService != null ? new ServiceInfo(storedService.getId(), serviceName) : null;
         } catch (RuntimeException e) {
             logger.error("Could not retrieve a service for name: {}", serviceName, e);
             throw new StorageException("Could not retrieve a service for name: " + serviceName, e);
         } finally {
-            if (session != null)
+            if(session != null) {
                 session.close();
+            }
         }
 
-        return result;
     }
 
 	@Override
@@ -154,7 +153,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		Transaction tx = null;
 
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			session.setFlushMode(FlushMode.COMMIT); // do not delete this line
 			// cause default mode is not declared and equal FlushMode.AUTO
@@ -168,24 +167,27 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		} catch (ConstraintViolationException e) {
 
-			if ( tx != null )
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
             String message = "Service with name " + description.getEnvironment() + ":" + description.getName() + " already exists";
 			logger.error(message, e);
 			throw new StorageException(message, e);
 
 		} catch ( RuntimeException e ){
 
-			if ( tx != null )
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
 
 			String message = "Could not store a service description " + description.getEnvironment() + ":" + description.getName();
 			logger.error(message, e);
 			throw new StorageException(message, e);
 
 		} finally{
-			if ( session != null )
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 
 	}
@@ -200,7 +202,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		try	{
 			synchronized (description) {
-				session = this.sessionFactory.openSession();
+                session = sessionFactory.openSession();
 				session.setFlushMode(FlushMode.COMMIT); // do not delete this line
 				// cause default mode is not declared and equal FlushMode.AUTO
 
@@ -220,8 +222,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		} catch ( RuntimeException e ) {
 
-			if ( tx != null )
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
 
 			String message = "Could not delete a service description " + description.getEnvironment() + ":" + description.getName();
 			logger.error(message, e);
@@ -251,7 +254,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		try {
 			synchronized (descriptionMap) {
-				session = this.sessionFactory.openSession();
+                session = sessionFactory.openSession();
 				tx = session.beginTransaction();
 				session.update(stored);
 				tx.commit();
@@ -261,8 +264,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		} catch (ConstraintViolationException e) {
 
-			if ( tx != null )
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
 
 			String message = "Service with name " + description.getEnvironment() + ":" + description.getName() + " already exists";
             logger.error(message, e);
@@ -270,16 +274,18 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		} catch ( RuntimeException e ) {
 
-			if ( tx != null )
-				tx.rollback();
+            if(tx != null) {
+                tx.rollback();
+            }
 
 			String message = "Could not update service description " + description.getEnvironment() + ":" + description.getName();
 			logger.error(message, e);
 			throw new StorageException(message, e);
 
 		} finally {
-			if ( session != null )
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 
 	}
@@ -301,10 +307,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 	public long getEventsCount(ServiceDescription description, StorageFilter filter) {
         flusher.flush();
 		Session session = null;
-		long result = 0;
 
-		try {
-			session = this.sessionFactory.openSession();
+        try {
+            session = sessionFactory.openSession();
 
 			StoredService storedDescription = null;
 
@@ -312,28 +317,29 @@ public class DatabaseServiceStorage implements IServiceStorage {
 				storedDescription = getStoredService(description);
 			}
 
-			if ( storedDescription == null )
-				throw new StorageException("Could not find stored description for [" + description.getName() + "] service");
+            if(storedDescription == null) {
+                throw new StorageException("Could not find stored description for [" + description.getName() + "] service");
+            }
 
-			filter.addCriterion(new FilterCriterion("serviceId", storedDescription.getId(), FilterCriterion.Operation.EQUALS));
+            filter.addCriterion(new FilterCriterion("serviceId", storedDescription.getId(), Operation.EQUALS));
 
 			String countQueryStr = "select count(msg) from StoredServiceEvent msg where ";
 
 			Query countQuery = convertFilterToQuery(session, StoredServiceEvent.class, countQueryStr, filter, null);
 
-			result = (Long)countQuery.uniqueResult();
+            return (Long)countQuery.uniqueResult();
 
 		} catch (RuntimeException e) {
 		    String message = "Could not retrive events count for service " + description.getEnvironment() + ":" + description.getName();
 			logger.error(message, e);
 			throw new StorageException(message, e);
 		} finally {
-			if ( session != null )
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 
-		return result;
-	}
+    }
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -341,16 +347,16 @@ public class DatabaseServiceStorage implements IServiceStorage {
         flusher.flush();
 		Session session = null;
 
-		StorageResult<ServiceEvent> totalResult = null;
+        try {
+            session = sessionFactory.openSession();
 
-		try {
-			session = this.sessionFactory.openSession();
+            if(sorting == null) {
+                sorting = new ArrayList<>();
+            }
 
-			if(sorting == null)
-				sorting = new ArrayList<>();
-
-			if(sorting.size() == 0)
-				sorting.add(new SortCriterion("occured", false));
+            if(sorting.isEmpty()) {
+                sorting.add(new SortCriterion("occured", false));
+            }
 
 			String strQuery = "from StoredServiceEvent msg where ";
 
@@ -360,10 +366,11 @@ public class DatabaseServiceStorage implements IServiceStorage {
 				storedDescription = getStoredService(description);
 			}
 
-			if ( storedDescription == null )
-				throw new StorageException("Could not find stored description for [" + description.getName() + "] service");
+            if(storedDescription == null) {
+                throw new StorageException("Could not find stored description for [" + description.getName() + "] service");
+            }
 
-			filter.addCriterion(new FilterCriterion("serviceId", storedDescription.getId(), FilterCriterion.Operation.EQUALS));
+            filter.addCriterion(new FilterCriterion("serviceId", storedDescription.getId(), Operation.EQUALS));
 
 			String countQueryStr = "select count(msg) from StoredServiceEvent msg where ";
 
@@ -387,20 +394,19 @@ public class DatabaseServiceStorage implements IServiceStorage {
 				result.add(serviceEvent);
 			}
 
-			totalResult = new StorageResult<>(result, recordCount);
+            return new StorageResult<>(result, recordCount);
 
 		} catch (RuntimeException e) {
 		    String message = "Could not retrive service events for " + description.getEnvironment() + ":" + description.getName();
 			logger.error(message, e);
 			throw new StorageException(message, e);
 		} finally {
-			if ( session != null )
-				session.close();
-		}
+            if(session != null) {
+                session.close();
+            }
+        }
 
-		return totalResult;
-
-	}
+    }
 
     @Override
     public void removeServiceEvents(ServiceDescription description) {
@@ -414,16 +420,19 @@ public class DatabaseServiceStorage implements IServiceStorage {
             throw new StorageException("Could not find stored description for [" + description.getName() + "] service");
         }
 
+        //noinspection ControlFlowStatementWithoutBraces
         while(removeServiceEvents(null, storedDescription.getId(), REMOVE_BATCH_SIZE));
     }
 
     @Override
     public void removeServiceEvents(Instant olderThan) {
+        //noinspection ControlFlowStatementWithoutBraces
         while(removeServiceEvents(olderThan, null, REMOVE_BATCH_SIZE));
     }
 
     @Override
     public void clearServiceEvents() {
+        //noinspection ControlFlowStatementWithoutBraces
         while(removeServiceEvents(null, null, REMOVE_BATCH_SIZE));
     }
 
@@ -459,7 +468,8 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
             successful = query.executeUpdate() > 0;
 			tx.commit();
-		} catch (HibernateException e) {
+            return successful;
+        } catch(HibernateException e) {
 			if (tx != null) {
 				tx.rollback();
 			}
@@ -471,8 +481,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
             }
 		}
 
-        return successful;
-	}
+    }
 
     private long getFirstServiceEventID(Session session, String serviceID) {
         String hql = "select event.id from StoredServiceEvent event";
@@ -492,7 +501,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 	@Override
 	public void dispose() {
-		this.flusher.stop();
+        flusher.stop();
 		if(sessionFactory != null) {
 			sessionFactory.close();
 		}
@@ -511,7 +520,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 				try {
 
-					session = this.sessionFactory.openSession();
+                    session = sessionFactory.openSession();
 
 					Criteria criteria = session.createCriteria(StoredEnvironment.class);
 					criteria.add(Restrictions.eq("name", description.getEnvironment()));
@@ -524,8 +533,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 					stored.setEnvironment(se);
 
 				} finally{
-					if ( session != null )
-						session.close();
+                    if(session != null) {
+                        session.close();
+                    }
 				}
 			}
 		}
@@ -540,15 +550,14 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		return stored;
 	}
 
-
-	private ServiceDescription convertStoredServiceDescription(final StoredService storedDescription) throws SailfishURIException {
+    private ServiceDescription convertStoredServiceDescription(StoredService storedDescription) throws SailfishURIException {
 
         ServiceDescription description = null;
 
         synchronized (descriptionMap) {
             String environment = storedDescription.getEnvironment() == null ? null : storedDescription.getEnvironment().getName();
             ServiceName serviceName = new ServiceName(environment, storedDescription.getName());
-            description = this.descriptionMap.get(serviceName);
+            description = descriptionMap.get(serviceName);
 
             if ( description == null ) {
                 SailfishURI serviceURI = SailfishURI.parse(storedDescription.getType());
@@ -556,14 +565,15 @@ public class DatabaseServiceStorage implements IServiceStorage {
                 IServiceSettings serviceSettings = staticServiceManager.createServiceSettings(serviceURI);
 
                 description.setSettings(serviceSettings);
-                this.descriptionMap.put(serviceName, description);
+                descriptionMap.put(serviceName, description);
             }
 
         }
 
 		description.setName(storedDescription.getName());
-		if (null != storedDescription.getEnvironment())
-			description.setEnvironment(storedDescription.getEnvironment().getName());
+        if(storedDescription.getEnvironment() != null) {
+            description.setEnvironment(storedDescription.getEnvironment().getName());
+        }
 		description.setServiceHandlerClassName(storedDescription.getServiceHandlerClassName());
         description.setVariables(new HashMap<>(storedDescription.getVariables()));
 
@@ -581,8 +591,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 			stored = getStoredService(descr);
 		}
 
-		if ( stored == null )
-			throw new EPSCommonException("Could not find stored description for ServiceDescription [" + descr + "]");
+        if(stored == null) {
+            throw new EPSCommonException("Could not find stored description for ServiceDescription [" + descr + "]");
+        }
 
 		StoredServiceEvent stEvent = new StoredServiceEvent();
 
@@ -607,16 +618,18 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		Map<String, Class<?>> beanMap = new HashMap<>();
         StringBuilder queryBld = new StringBuilder(queryStr);
 
-		for ( PropertyDescriptor descr : properties )
-			beanMap.put(descr.getName(), descr.getPropertyType());
+        for(PropertyDescriptor descr : properties) {
+            beanMap.put(descr.getName(), descr.getPropertyType());
+        }
 
 		List<Object> params = new ArrayList<>(list.size());
 
 		for ( int i = 0; i < list.size(); ++i ) {
 
 			FilterCriterion crit = list.get(i);
-			if ( i != 0 )
+            if(i != 0) {
                 queryBld.append(" and ");
+            }
 
             queryBld.append("msg.").append(crit.getName()).append(" ").append(convertOp(crit.getOper())).append(" :param").append(i).append(" ");
 
@@ -627,23 +640,20 @@ public class DatabaseServiceStorage implements IServiceStorage {
 			}
 		}
 
-		if ( sorting != null && sorting.size() != 0 ) {
+        if(sorting != null && !sorting.isEmpty()) {
 
             queryBld.append(" order by ");
 
 			for ( int i = 0; i < sorting.size(); ++i ) {
 
-				if ( i != 0 && i != (sorting.size() - 1) )
+                if(i != 0 && i != (sorting.size() - 1)) {
                     queryBld.append(" , ");
+                }
 
 				SortCriterion entry = sorting.get(i);
 
                 queryBld.append("msg." + entry.getName());
-
-				if ( entry.isSortAscending() )
-                    queryBld.append(" asc ");
-				else
-                    queryBld.append(" desc ");
+                queryBld.append(entry.isSortAscending() ? " asc " : " desc ");
 			}
 		}
 
@@ -659,8 +669,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 		return query;
 	}
 
-
-	private String convertOp(FilterCriterion.Operation op) {
+    private String convertOp(Operation op) {
 
 		switch (op) {
 		case EQUALS:
@@ -690,7 +699,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		//FIXME
 		//Need to change mapping to return StoredService
-		ServiceEvent serviceEvent = new ServiceEvent(null, ServiceEvent.Level.valueOf(level),	ServiceEvent.Type.valueOf(type), date, message, details);
+        ServiceEvent serviceEvent = new ServiceEvent(null, Level.valueOf(level), Type.valueOf(type), date, message, details);
 
 		return serviceEvent;
 	}
@@ -701,7 +710,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 
 			String strQuery = "select service from StoredService service left join service.environment as environment where service.name = :serviceName";
 
@@ -732,8 +741,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 			throw new StorageException("Could not retrieve StoredService", e);
 
 		} finally {
-			if ( session != null )
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 	}
 
@@ -743,7 +753,7 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 		try {
 
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 
 			String strQuery = "from StoredService";
 
@@ -763,8 +773,9 @@ public class DatabaseServiceStorage implements IServiceStorage {
 			throw new StorageException("Could not retrieve service descriptions", e);
 
 		} finally {
-			if ( session != null )
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 	}
 }

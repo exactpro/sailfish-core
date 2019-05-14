@@ -15,10 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.common.util;
 
-import org.apache.mina.core.buffer.IoBuffer;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.mina.core.buffer.IoBuffer;
 
 public class HexDumper {
 
@@ -77,19 +77,19 @@ public class HexDumper {
                 bytesColumn.append(" ");
             }
 
-            this.addresses.add(addressColumn.toString());
-            this.bytes.add(bytesColumn.toString());
-            this.printableStrings.add(printableColumn.toString());
+            addresses.add(addressColumn.toString());
+            bytes.add(bytesColumn.toString());
+            printableStrings.add(printableColumn.toString());
         }
     }
 
 	public String getHexdump() {
         StringBuilder result = new StringBuilder();
 
-        for (int i=0; i<this.addresses.size(); i++) {
-            result.append(this.addresses.get(i)).append(": ")
-                    .append(this.bytes.get(i)).append(" ")
-                    .append(this.printableStrings.get(i)).append("\r\n");
+        for(int i = 0; i < addresses.size(); i++) {
+            result.append(addresses.get(i)).append(": ")
+                    .append(bytes.get(i)).append(" ")
+                    .append(printableStrings.get(i)).append("\r\n");
         }
 
         return result.toString();
@@ -113,14 +113,9 @@ public class HexDumper {
 		}
 
 		boolean truncate = in.remaining() > lengthLimit;
-		int size;
-		if (truncate) {
-			size = lengthLimit;
-		} else {
-			size = in.remaining();
-		}
+        int size = truncate ? lengthLimit : in.remaining();
 
-		if (size == 0) {
+        if(size == 0) {
 			return new byte[0];
 		}
 

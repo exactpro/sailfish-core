@@ -44,30 +44,26 @@ import com.google.common.collect.ImmutableSet;
  *
  */
 @MatrixActions
-@ResourceAliases({"ConnectivityActions"})
+@ResourceAliases("ConnectivityActions")
 public class ConnectivityActions extends AbstractCaller {
 
-    public final static Set<String> DEFAULT_UNCHECKED_FIELDS;
-
-    static {
-        DEFAULT_UNCHECKED_FIELDS = ImmutableSet.of(
-                "header",
-                "BeginString",
-                "BodyLength",
-                "MsgSeqNum",
-                "MsgType",
-                "SenderCompID",
-                "TargetCompID",
-                "PosDupFlag",
-                "OrigSendingTime",
-                "SendingTime",
-                "CheckSum",
-                "templateId",
-                "ApplVerID",
-                "SenderSubID",
-                "trailer"
-        );
-    }
+    public static final Set<String> DEFAULT_UNCHECKED_FIELDS = ImmutableSet.of(
+            "header",
+            "BeginString",
+            "BodyLength",
+            "MsgSeqNum",
+            "MsgType",
+            "SenderCompID",
+            "TargetCompID",
+            "PosDupFlag",
+            "OrigSendingTime",
+            "SendingTime",
+            "CheckSum",
+            "templateId",
+            "ApplVerID",
+            "SenderSubID",
+            "trailer"
+    );
 
     private boolean autoConnect = true;
 
@@ -124,13 +120,12 @@ public class ConnectivityActions extends AbstractCaller {
         @CommonColumn(value = Column.ServiceName, required = true),
         @CommonColumn(Column.Timeout)
     })
-    @CustomColumns({
-        @CustomColumn("RawData")
-    })
+    @CustomColumns(@CustomColumn("RawData"))
     @ActionMethod
     public IMessage SendRawData(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
-        if (!inputData.containsKey("RawData"))
+        if(!inputData.containsKey("RawData")) {
             throw new Exception("RawData column hasn't been specified in current action");
+        }
 
         String serviceName = actionContext.getServiceName();
         actionContext.getLogger().info("[{}] started", serviceName);
@@ -147,9 +142,7 @@ public class ConnectivityActions extends AbstractCaller {
         return session.send(inputData.get("RawData"));
     }
 
-    @CustomColumns({
-        @CustomColumn(value="AutoConnect", required=true)
-    })
+    @CustomColumns(@CustomColumn(value = "AutoConnect", required = true))
     @ActionMethod
     public void Configure(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
 

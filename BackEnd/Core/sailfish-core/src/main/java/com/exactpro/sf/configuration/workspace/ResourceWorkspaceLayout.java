@@ -27,7 +27,7 @@ public class ResourceWorkspaceLayout extends AbstractWorkspaceLayout {
     
     @Override
     public String getPath(File workspaceRoot, FolderType folderType) {
-            return this.resourceFile + '/' + getFolder(folderType);
+        return resourceFile + '/' + getFolder(folderType);
     }
 
     @Override

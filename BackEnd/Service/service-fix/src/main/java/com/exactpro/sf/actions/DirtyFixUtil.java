@@ -15,16 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.Pair;
-import com.exactpro.sf.aml.AMLException;
-import com.exactpro.sf.aml.generator.TypeConverter;
-import com.exactpro.sf.services.fix.FixUtil;
-import org.slf4j.Logger;
-import quickfix.*;
-import quickfix.DataDictionary.GroupInfo;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -33,6 +23,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.slf4j.Logger;
+
+import com.exactpro.sf.aml.AMLException;
+import com.exactpro.sf.aml.generator.TypeConverter;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.Pair;
+import com.exactpro.sf.services.fix.FixUtil;
+
+import quickfix.DataDictionary;
+import quickfix.DataDictionary.GroupInfo;
+import quickfix.Field;
+import quickfix.FieldMap;
+import quickfix.FieldType;
+import quickfix.Group;
+import quickfix.Message;
+import quickfix.MessageComponent;
+import quickfix.StringField;
 
 @MatrixUtils
 public class DirtyFixUtil {
@@ -196,10 +206,9 @@ public class DirtyFixUtil {
 			admDict = appDict;
 		}
 
-
-		for (Map.Entry<?, ?> entry : inputData.entrySet()) {
-			final String tagName = entry.getKey().toString();
-			final Object tagValue = entry.getValue();
+        for(Entry<?, ?> entry : inputData.entrySet()) {
+			String tagName = entry.getKey().toString();
+			Object tagValue = entry.getValue();
 
 			int tagInt = appDict.getFieldTag(tagName);
 			String tagValueString = tagValue.toString();
@@ -208,7 +217,7 @@ public class DirtyFixUtil {
 
             if (isComponent(tagValue)) {
 				logger.debug(" -> HashMap have - do it!");
-                message = DirtyFixUtil.getFromGroup(appDict, tagName, (List<?>) tagValue, message, msgType, null, null, null);
+                message = getFromGroup(appDict, tagName, (List<?>)tagValue, message, msgType, null, null, null);
 			} else {
 				if (tagInt == -1) { // if field not found by key, it should be tag number or a reference (HashMap)
 					try {
@@ -323,10 +332,9 @@ public class DirtyFixUtil {
         // work with inner hashmap (check for have other hashmaps)
         for (Object map : tagValue) {
 
-            int tempftag = 0;
             Group localGroup = null;
             MessageComponent localComponent = null;
-            tempftag = appDict.getFieldTag(tagName);
+            int tempftag = appDict.getFieldTag(tagName);
             GroupInfo inf = null;
             if (tempftag != -1) {
                 FieldType fieldType = appDict.getFieldTypeEnum(tempftag);
@@ -352,17 +360,14 @@ public class DirtyFixUtil {
 
             for (Object tag : ((HashMap<?, ?>) map).keySet()) {
                 // have hashmap in
-                Object tempGetObject = null;
-                int iTagNum = -1;
-                String iTagName = null;
 
-                iTagName = tag.toString();
+                String iTagName = tag.toString();
                 /*
                  * if (iTagName.contains(":")) { iTagName = iTagName.split(":",
                  * 2)[0]; }
                  */
-                iTagNum = appDict.getFieldTag(iTagName);
-                tempGetObject = ((Map<?, ?>) map).get(tag);
+                int iTagNum = appDict.getFieldTag(iTagName);
+                Object tempGetObject = ((Map<?, ?>)map).get(tag);
                 if (isComponent(tempGetObject)) {
                     // go recursive
                     newMessage = getFromGroup(appDict, iTagName, (List<?>) tempGetObject, newMessage, mtype, localGroup,

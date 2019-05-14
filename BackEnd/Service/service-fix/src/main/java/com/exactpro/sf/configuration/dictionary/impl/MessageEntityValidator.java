@@ -63,11 +63,9 @@ public class MessageEntityValidator extends EntityValidator {
                             String.format("Field <strong>[%s]</strong> in <strong>[%s]</strong> message duplicated in ",
                                     fieldName, message.getName()));
                     for (Iterator<String> i = duplicates.get(fieldName).iterator(); i.hasNext();) {
-                        String name = i.next();
+                        error.append(String.format("<strong>[%s]</strong>", i.next()));
                         if (i.hasNext()) {
-                            error.append(String.format("<strong>[%s]</strong>, ", name));
-                        } else {
-                            error.append(String.format("<strong>[%s]</strong>", name));
+                            error.append(", ");
                         }
                     }
                     errors.add(new DictionaryValidationError(message.getName(), fieldName, error.toString(),

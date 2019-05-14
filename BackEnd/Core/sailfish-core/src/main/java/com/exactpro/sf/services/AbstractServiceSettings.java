@@ -37,10 +37,10 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
     protected long expectedTimeOfStarting = 2000;
 
     @Description("Waiting time before starting")
-    protected long waitingTimeBeforeStarting = 0;
+    protected long waitingTimeBeforeStarting;
 
     @Description("User comment")
-    protected String comment = null;
+    protected String comment;
 
     @Description("Network traffic will be recorded for this service's lifetime and for each test script run using it")
 	private boolean performDump;
@@ -67,7 +67,7 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
 
     @Override
     public String getComment() {
-        return this.comment;
+        return comment;
     }
 
     public void setComment(String comment) {

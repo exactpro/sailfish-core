@@ -15,6 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.junit40;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AddToReport;
 import com.exactpro.sf.aml.AfterMatrix;
@@ -37,22 +50,10 @@ import com.exactpro.sf.scriptrunner.StatusDescription;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.storage.ScriptRun;
 import com.google.common.collect.ImmutableSet;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
 
 public class SFJUnitRunner
 {
-	private static Logger logger = LoggerFactory.getLogger(SFJUnitRunner.class);
+	private static final Logger logger = LoggerFactory.getLogger(SFJUnitRunner.class);
 
 	public void run(Class<? extends SailFishTestCase> testcaseClass, ScriptContext context) throws ScriptRunException
 	{
@@ -381,10 +382,11 @@ public class SFJUnitRunner
 		@Override
         public int compare(TestCaseDescription o1, TestCaseDescription o2)
 		{
-			if ( o1.getSeqnum() < o2.getSeqnum() )
-				return -1;
-			else if ( o1.getSeqnum() > o2.getSeqnum() )
-				return 1;
+            if(o1.getSeqnum() < o2.getSeqnum()) {
+                return -1;
+            } else if(o1.getSeqnum() > o2.getSeqnum()) {
+                return 1;
+            }
 			return 0;
 		}
 	}
@@ -405,8 +407,9 @@ public class SFJUnitRunner
 		scriptContext.setScriptRun(scriptRun);
 
 		// Init Report
-		if (description == null || description.equals(""))
-			description = IScriptReport.NO_DESCRIPTION;
+        if(description == null || "".equals(description)) {
+            description = IScriptReport.NO_DESCRIPTION;
+        }
 		IScriptReport report = scriptContext.getReport();
 		report.createReport(scriptContext, scriptName, description, scriptRun.getId().longValue(), scriptContext.getEnvironmentName(), scriptContext.getUserName());
 	}

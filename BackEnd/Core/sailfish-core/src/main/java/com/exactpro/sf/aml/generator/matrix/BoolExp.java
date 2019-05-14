@@ -25,13 +25,13 @@ public enum BoolExp {
 	GreaterOrEquals(">="),
 	LessOrEquals("<=");
 
-	private String expression;
+	private final String expression;
 
-	private BoolExp(String exp) {
+	BoolExp(String exp) {
 		this.expression = exp;
 	}
 
 	public String getName() {
-		return this.expression;
+		return expression;
 	}
 }

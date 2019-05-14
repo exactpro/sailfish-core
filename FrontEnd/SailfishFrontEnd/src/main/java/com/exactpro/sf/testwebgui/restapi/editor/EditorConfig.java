@@ -24,13 +24,13 @@ public class EditorConfig implements Serializable {
 
 	private String environment;
 	
-	private boolean continueIfFailed = false;
+	private boolean continueIfFailed;
 	
-	private boolean autoStart = false;
+	private boolean autoStart;
 	
-	private boolean ignoreAskForContinue = false;
+	private boolean ignoreAskForContinue;
 	
-	private boolean showAllMessages = false;
+	private boolean showAllMessages;
 
 	public boolean isContinueIfFailed() {
 		return continueIfFailed;

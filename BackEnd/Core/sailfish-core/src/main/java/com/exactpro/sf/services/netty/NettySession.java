@@ -30,19 +30,18 @@ import io.netty.channel.ChannelFutureListener;
 public class NettySession implements ISession {
 
 	protected final Logger logger = LoggerFactory
-			.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+            .getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 	private final ILoggingConfigurator logConfigurator;
 	private final NettyClientService client;
 
-	public NettySession(final NettyClientService client, ILoggingConfigurator logConfigurator) {
-		super();
-		if (client == null) {
+    public NettySession(NettyClientService client, ILoggingConfigurator logConfigurator) {
+        if(client == null) {
 			throw new NullPointerException();
 		}
 		this.client = client;
 
 		this.logConfigurator = logConfigurator;
-		logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
 				client.getServiceName());
 	}
 
@@ -82,12 +81,13 @@ public class NettySession implements ISession {
 			logger.error("Send operation is not completed. Session: {}", this);
 			isSendSuccess = false;
 		}
-		if (future.cause() != null)
-			throw new EPSCommonException("Message sent failed. Session: " + this, future.cause());
+        if(future.cause() != null) {
+            throw new EPSCommonException("Message sent failed. Session: " + this, future.cause());
+        }
 
 		if (!isSendSuccess) {
 			throw new SendMessageFailedException(
-					"Message wasn't send during 1 second." + errorMsg.toString() + " Session: " + this);
+                    "Message wasn't send during 1 second." + errorMsg + " Session: " + this);
 		}
 
 		return msg;
@@ -106,16 +106,14 @@ public class NettySession implements ISession {
 	@Override
 	public void close() {
 		client.stop("Close session", null);
-		logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
 				client.getServiceName());
 	}
 
 	@Override
 	public boolean isClosed() {
-		if (client.getChannel() == null)
-			return true;
-		return !(client.getChannel().isActive() || client.getChannel().isOpen());
-	}
+        return client.getChannel() == null || !(client.getChannel().isActive() || client.getChannel().isOpen());
+    }
 
 	@Override
 	public boolean isLoggedOn() {

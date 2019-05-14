@@ -20,18 +20,18 @@ import java.util.Set;
 import com.exactpro.sf.storage.auth.User;
 
 public interface IAuthStorage {
-    public static final String ADMIN = "admin";
-    public static final String USER = "user";
+    String ADMIN = "admin";
+    String USER = "user";
 
-    public boolean userExists(String name);
-    public User getUser(String name);
-    public void addUser(User user);
-    public void updateUser(User user);
-    public void removeUser(String name);
-    public Set<User> getUsers();
+    boolean userExists(String name);
+    User getUser(String name);
+    void addUser(User user);
+    void updateUser(User user);
+    void removeUser(String name);
+    Set<User> getUsers();
 
-    public boolean roleExists(String name);
-    public void addRole(String name);
-    public void removeRole(String name);
-    public Set<String> getRoles();
+    boolean roleExists(String name);
+    void addRole(String name);
+    void removeRole(String name);
+    Set<String> getRoles();
 }

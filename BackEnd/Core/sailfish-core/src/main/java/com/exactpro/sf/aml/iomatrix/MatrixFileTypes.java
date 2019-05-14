@@ -19,9 +19,9 @@ public enum MatrixFileTypes {
     CSV("csv"), XLS("xls"), XLSX("xlsx"), UNKNOWN("?"), JSON("json");
     
     
-    private String fileType;
+    private final String fileType;
     
-    private MatrixFileTypes(String extension) {
+    MatrixFileTypes(String extension) {
         this.fileType = extension;
     }
     

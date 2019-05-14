@@ -48,7 +48,7 @@ public class ExcelMatrixReader implements IMatrixReader {
     private Row currentRow;
     private Cell currentCell;
     private boolean hasNext;
-    private int sheetIndex = 0;
+    private final int sheetIndex;
     private int lastRowIndex = -1;
 
     public ExcelMatrixReader(String fileName, boolean useXlsx) throws IOException {
@@ -76,7 +76,7 @@ public class ExcelMatrixReader implements IMatrixReader {
         sheet = workbook.getSheetAt(sheetIndex);
         rowIterator = sheet.iterator();
         this.dataFormatter = new DataFormatter(true);
-        this.dataFormatter.setDefaultNumberFormat(NumberFormat.getNumberInstance(Locale.US));
+        dataFormatter.setDefaultNumberFormat(NumberFormat.getNumberInstance(Locale.US));
 
         readRecord();
     }
@@ -109,7 +109,7 @@ public class ExcelMatrixReader implements IMatrixReader {
                 cells.add(new SimpleCell(""));
             }
 
-            String value = this.dataFormatter.formatCellValue(currentCell,formulaEvaluator).trim();
+            String value = dataFormatter.formatCellValue(currentCell, formulaEvaluator).trim();
 
             allEmpty &= StringUtils.isEmpty(value);
 

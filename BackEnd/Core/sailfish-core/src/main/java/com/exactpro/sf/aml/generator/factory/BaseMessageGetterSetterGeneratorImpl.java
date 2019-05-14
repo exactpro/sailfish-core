@@ -156,8 +156,11 @@ public class BaseMessageGetterSetterGeneratorImpl implements IGetterSetterGenera
 		if (isReference)
 		{
 			String methodName = null;
-			if (methodWithEnum != null) methodName = methodWithEnum.getName();
-			else if (methodWithPrimitive != null) methodName = methodWithPrimitive.getName();
+            if(methodWithEnum != null) {
+                methodName = methodWithEnum.getName();
+            } else if(methodWithPrimitive != null) {
+                methodName = methodWithPrimitive.getName();
+            }
 
 			return "."+methodName+"("+value+")";
 		}
@@ -165,9 +168,8 @@ public class BaseMessageGetterSetterGeneratorImpl implements IGetterSetterGenera
 		int flag = 0;
 		if (methodWithEnum != null)
 		{
-			String convertedValue = value;
-			Class<?> valueType = methodWithEnum.getParameterTypes()[0];
-			convertedValue = TypeConverter.findConstant(valueType, value);
+            Class<?> valueType = methodWithEnum.getParameterTypes()[0];
+            String convertedValue = TypeConverter.findConstant(valueType, value);
 			String methodName = methodWithEnum.getName();
 
 			if (Convention.CONV_PRESENT_STRING.equals(value)){
@@ -221,7 +223,7 @@ public class BaseMessageGetterSetterGeneratorImpl implements IGetterSetterGenera
 			String convertedValue = TypeConverter.findConstant(methodParameterType, value, constType);
 			if (convertedValue != null)
 			{
-				if ((TypeConverter.findConstructor(methodParameterType, constType.get()))!=null) {
+				if (TypeConverter.findConstructor(methodParameterType, constType.get()) !=null) {
 					return "." + methodName + "( new "+ methodParameterType.getCanonicalName() + "(" + convertedValue + ")" + ")";
 				} else if (constType.get().equals(methodParameterType)){
 					return "." + methodName + "(" + convertedValue + ")";

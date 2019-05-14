@@ -22,8 +22,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 @SuppressWarnings("serial")
 public class RefParameter implements Serializable {
 
-	private String name;
-	private String value;
+	private final String name;
+	private final String value;
 
 	public RefParameter(String name, String value) {
 		this.name = name;

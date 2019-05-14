@@ -74,7 +74,7 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
     private Processor processor;
 
     /** A Session queue containing the newly created sessions */
-    private MulticastSocketSession currentSession = null;
+    private MulticastSocketSession currentSession;
 
 	//Chain for writing
 	//when flush is called you need to check WriteRequest queue
@@ -98,18 +98,19 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
     @Override
     public final void add(MulticastSocketSession session) {
 
-    	if (isDisposing())
+        if(isDisposing()) {
             throw new IllegalStateException("Already disposed.");
+        }
 
         synchronized (sessionLock) {
 
-        	if (this.currentSession != null) {
+            if(currentSession != null) {
         		throw new IllegalStateException("Session already processed");
         	}
 
         	this.currentSession = session;
 
-        	this.addNow(session);
+            addNow(session);
 		}
 
         startupProcessor();
@@ -133,9 +134,9 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
 
 
     private void wakeup() {
-    	synchronized (this.sessionLock) {
+        synchronized(sessionLock) {
     	    this.wakeup = true;
-    		this.sessionLock.notify();
+            sessionLock.notify();
 		}
     }
 
@@ -246,7 +247,7 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
             {
                 // Clear the DefaultIoFilterChain.CONNECT_FUTURE attribute
                 // and call ConnectFuture.setException().
-                this.remove(session);
+                remove(session);
                 IoFilterChain filterChain = session.getFilterChain();
                 filterChain.fireExceptionCaught(e);
                 wakeup();
@@ -312,8 +313,9 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
         				if (filterVal != null) {
         					String strFilterVal = (String)filterVal;
 
-        					if (!strFilterVal.equals(packet.getAddress().getHostName()))
-        						process = false;
+                            if(!strFilterVal.equals(packet.getAddress().getHostName())) {
+                                process = false;
+                            }
         				}
 
         				String address = packet.getAddress().getHostAddress() + ":" + packet.getPort();
@@ -360,8 +362,9 @@ public class MulticastSocketProcessor implements IoProcessor<MulticastSocketSess
         	}
 
         	synchronized (sessionLock) {
-        		if (currentSession != null)
-            		removeNow(currentSession);
+                if(currentSession != null) {
+                    removeNow(currentSession);
+                }
 			}
 
             disposalFuture.setValue(true);

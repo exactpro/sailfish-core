@@ -31,7 +31,7 @@ public class ScriptExecutionStatistics implements Serializable {
 	private volatile String status;
 	
 	public boolean isExecutionFailed() {
-		return (status != null && (status.equals("INIT_FAILED") || status.equals("RUN_FAILED") || status.equals("CONNECTION_FAILED")));
+        return status != null && ("INIT_FAILED".equals(status) || "RUN_FAILED".equals(status) || "CONNECTION_FAILED".equals(status));
 	}
 
 	public long getNumPassed() {

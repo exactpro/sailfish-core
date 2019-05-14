@@ -19,7 +19,7 @@ public class StorageMeasureUtils {
 
     public static long getSize(String src) {
         int no_chars = (src == null) ? 0 : src.length();
-        return (8L * ((((no_chars) << 1) + 45) / 8)); //45bytes is representation of internal string fields
+        return 8L * (((no_chars << 1) + 45) / 8); //45bytes is representation of internal string fields
     }
 
     public static long getSize(String... src) {

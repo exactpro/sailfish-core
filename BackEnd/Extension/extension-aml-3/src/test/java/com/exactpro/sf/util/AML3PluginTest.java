@@ -53,8 +53,8 @@ public class AML3PluginTest {
 
 	protected static ISFContext context;
 
-	private static boolean isLoggingAlreadyConfigured = false;
-	private static boolean isAlreadyConfigured = false;
+    private static boolean isLoggingAlreadyConfigured;
+    private static boolean isAlreadyConfigured;
 
 	private static final String DEFAULT_CFG_FILENAME = "sf.cfg.xml";
 
@@ -72,13 +72,13 @@ public class AML3PluginTest {
             case ROOT:
                 return new StringBuilder(BASE_DIR.getAbsolutePath())
                 .append(File.separator).append("src")
-                .append(File.separator).append(this.rootFolder)
+                        .append(File.separator).append(rootFolder)
                 .append(File.separator).append("plugin")
                 .toString();
             case CFG:
                 return new StringBuilder(BASE_DIR.getAbsolutePath())
                     .append(File.separator).append("src")
-                    .append(File.separator).append(this.rootFolder)
+                        .append(File.separator).append(rootFolder)
                     .append(File.separator).append("plugin")
                     .append(File.separator).append("cfg")
                     .toString();

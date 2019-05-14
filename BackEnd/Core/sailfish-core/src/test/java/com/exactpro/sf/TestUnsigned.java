@@ -156,7 +156,7 @@ public class TestUnsigned {
 	
 	@Test
 	public void testNormalization() {
-		byte[] array = new byte[] { 0, 1, 2, 3, 4 };
+		byte[] array = { 0, 1, 2, 3, 4 };
 		
 		Assert.assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ServiceUtil.normalisate(array, 4));
 		Assert.assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ServiceUtil.normalisate(array, 5));

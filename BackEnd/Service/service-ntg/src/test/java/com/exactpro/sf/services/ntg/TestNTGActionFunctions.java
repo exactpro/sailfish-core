@@ -30,7 +30,7 @@ public class TestNTGActionFunctions //extends TestToolsProject
 
 	private static final int ERROR = 1; // 1s
 
-    private NTGMatrixUtil ntgMatrixUtil = new NTGMatrixUtil();
+    private final NTGMatrixUtil ntgMatrixUtil = new NTGMatrixUtil();
 
     @Test
 	public void testExpireDateTime() throws Exception
@@ -82,7 +82,7 @@ public class TestNTGActionFunctions //extends TestToolsProject
     @Test
 	public void testExpireDateTimePosix() throws Exception
 	{
-        List<Exception> list = new ArrayList<Exception>();
+        List<Exception> list = new ArrayList<>();
         try
 		{
             String date1 = "" + ntgMatrixUtil.ExpireDateTimePOSIX("SECOND", "1");

@@ -55,7 +55,7 @@ public class TCPIPSettings extends AbstractMINASettings
 	private int idleTimeout;
 
 	@Description("Connect on start automatically")
-	private boolean autoConnect = false;
+	private boolean autoConnect;
 
 	@Description("Pipe-separated list of markers. Used to filter incoming raw message and mark it as 'admin'.<br>"
 	        + "This functionality is used as workaround for for \"Unexpected message\" check."
@@ -63,18 +63,18 @@ public class TCPIPSettings extends AbstractMINASettings
 	private String unexpectedMessages;
 
 	@Description("If TRUE, then the message structures <br> for decoding are taken from the dictionary, <br> otherwise message structures are taken from the current matrix <br> for decoding of all fields occur only into the message body.")
-	private boolean decodeByDictionary = false;
+	private boolean decodeByDictionary;
 
 	@Description("If TRUE, then the trailing zeros of decimal values<br> will be removed by dictionary during decoding.<br>This option will be enable only if <br>'decode by dictionary' is TRUE.")
-	private boolean removeTrailingZeros = false;
+	private boolean removeTrailingZeros;
 
     @Description("Receive limit in bytes to emulate Slow Consumer")
-    private int receiveLimit = 0;
+    private int receiveLimit;
 
     @Description("Enables SSL usage for QFJ acceptor or initiator")
-    private boolean useSSL = false;
+    private boolean useSSL;
     @Description("Controls which particular protocols for secure connection are enabled for handshake. Use SSL(older) or TLS")
-    private String sslProtocol = null;
+    private String sslProtocol;
 
     @Description("KeyStore to use with SSL")
     private String sslKeyStore;

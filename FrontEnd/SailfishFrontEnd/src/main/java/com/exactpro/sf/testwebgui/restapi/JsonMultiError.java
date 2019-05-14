@@ -22,7 +22,7 @@ import com.exactpro.sf.testwebgui.restapi.json.JsonError;
 
 public class JsonMultiError extends JsonError {
 
-    private List<String> errors;
+    private final List<String> errors;
 
     public JsonMultiError(String message, List<String> messages) {
         super(message, "");

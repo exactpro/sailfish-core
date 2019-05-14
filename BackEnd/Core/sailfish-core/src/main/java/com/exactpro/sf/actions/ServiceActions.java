@@ -49,7 +49,7 @@ import com.exactpro.sf.services.IServiceSettings;
  * @author nikita.smirnov
  *
  */
-@ResourceAliases({"ServiceActions"})
+@ResourceAliases("ServiceActions")
 public class ServiceActions extends AbstractCaller {
 
     //TODO: change to service_uri someday
@@ -62,12 +62,8 @@ public class ServiceActions extends AbstractCaller {
 		}
 	};
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
-    @CustomColumns({
-        @CustomColumn(value = SERVICE_TYPE, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
+    @CustomColumns(@CustomColumn(value = SERVICE_TYPE, required = true))
 	@ActionMethod
     public void createService(IActionContext actionContext, HashMap<?, ?> message) {
 		try {
@@ -102,9 +98,7 @@ public class ServiceActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void deleteService(IActionContext actionContext) {
 		try {
@@ -115,9 +109,7 @@ public class ServiceActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void startService(IActionContext actionContext) {
 		ServiceName serviceName = ServiceName.parse(actionContext.getServiceName());
@@ -131,9 +123,7 @@ public class ServiceActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void stopService(IActionContext actionContext) {
 		ServiceName serviceName = ServiceName.parse(actionContext.getServiceName());
@@ -145,9 +135,7 @@ public class ServiceActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void initService(IActionContext actionContext, HashMap<?, ?> message) {
 		ServiceName serviceName = ServiceName.parse(actionContext.getServiceName());
@@ -186,9 +174,7 @@ public class ServiceActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public HashMap<String, String> getServiceSettings(IActionContext actionContext) {
 	    IService service = SFLocalContext.getDefault().getConnectionManager().getService(ServiceName.parse(actionContext.getServiceName()));

@@ -17,7 +17,6 @@ package com.exactpro.sf.common.util;
 
 import java.beans.PropertyDescriptor;
 
-
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
@@ -40,9 +39,10 @@ public class BeanConfigurator
 				if ( descr.getWriteMethod() != null )
 				{
 					String value = context.getString(descr.getName());
-					
-					if ( converter.lookup(descr.getPropertyType()) != null )
-						BeanUtils.setProperty(beanObject, descr.getName(), converter.convert(value, descr.getPropertyType()));
+
+                    if(converter.lookup(descr.getPropertyType()) != null) {
+                        BeanUtils.setProperty(beanObject, descr.getName(), converter.convert(value, descr.getPropertyType()));
+                    }
 				}
 			}
 		}

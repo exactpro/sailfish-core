@@ -21,11 +21,13 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.ISession;
 
-public interface IQuickfixApplication extends quickfix.Application {
+import quickfix.Application;
 
-    public void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName);
-    public List<ISession> getSessions();
-    public void startLogging();
-    public void stopLogging();
-    public default void onConnectionProblem(String reason) {}
+public interface IQuickfixApplication extends Application {
+
+    void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName);
+    List<ISession> getSessions();
+    void startLogging();
+    void stopLogging();
+    default void onConnectionProblem(String reason) {}
 }

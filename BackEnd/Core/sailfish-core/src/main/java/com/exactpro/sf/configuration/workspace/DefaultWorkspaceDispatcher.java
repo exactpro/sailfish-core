@@ -35,6 +35,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,13 +67,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         this.createDirectories = createDirectories;
 
         if(workspaceConfigs == null || workspaceConfigs.isEmpty()) {
-        	File workspaceFolder = null;
-            if (System.getProperties().containsKey("user.dir")) {
-            	workspaceFolder = new File(System.getProperty("user.dir"));
-            } else {
-            	workspaceFolder =  new File(".");
-            }
-
+            File workspaceFolder = new File(ObjectUtils.defaultIfNull(System.getProperty("user.dir"), "."));
             workspaceConfigs = new ArrayList<>(1);
             workspaceConfigs.add(new Pair<>(workspaceFolder, DefaultWorkspaceLayout.getInstance()));
         }
@@ -92,8 +87,8 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
                 }
 
                 if (!isDuplicatePath(workspaceFolder)) {
-                    this.workspaces.add(new WorkspaceLayer(workspaceFolder, config.getSecond()));
-                    logger.info("Workspace {} has been added to the layer {}", workspaceFolder, this.workspaces.size());
+                    workspaces.add(new WorkspaceLayer(workspaceFolder, config.getSecond()));
+                    logger.info("Workspace {} has been added to the layer {}", workspaceFolder, workspaces.size());
                 } else {
                 	logger.warn("Workspace {} has been skipped, because it overrides existing layers", workspaceFolder);
                 }
@@ -102,8 +97,9 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
             }
         }
 
-        if (workspaces.isEmpty())
-        	throw new IllegalArgumentException("No exisiting workspace was specified");
+        if(workspaces.isEmpty()) {
+            throw new IllegalArgumentException("No exisiting workspace was specified");
+        }
     }
 
     @Override
@@ -136,15 +132,15 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         checkFolderType(folderType);
 
         try {
-            this.workspacesLock.readLock().lock();
-            File targetDir = this.workspaces.get(this.workspaces.size() - 1).get(folderType);
+            workspacesLock.readLock().lock();
+            File targetDir = workspaces.get(workspaces.size() - 1).get(folderType);
             if (targetDir.exists() || targetDir.mkdirs()) {
                 return targetDir;
             }
 
             throw new FileNotFoundException("Folder {" + folderType + "}/" + targetDir + " can't be created");
         } finally {
-            this.workspacesLock.readLock().unlock();
+            workspacesLock.readLock().unlock();
         }
     }
 
@@ -159,14 +155,14 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         checkFolderTypeAndFileName(folderType, fileName);
 
         try {
-            this.workspacesLock.readLock().lock();
-            File targetFile = new File(this.workspaces.get(this.workspaces.size() - 1).get(folderType), toPathString(fileName));
+            workspacesLock.readLock().lock();
+            File targetFile = new File(workspaces.get(workspaces.size() - 1).get(folderType), toPathString(fileName));
 
             if (targetFile.exists()) {
                 return targetFile;
             }
 
-            WorkspaceLayer workspaceLayer = this.workspaces.get(this.workspaces.size() - 1);
+            WorkspaceLayer workspaceLayer = workspaces.get(workspaces.size() - 1);
             if (workspaceLayer.layout.isEmbedded()) {
                 throw new WorkspaceLayerException("File {" + folderType + "}/" + toPathString(fileName) + " can't be created, the last layer is embedded");
             }
@@ -183,7 +179,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
             throw new WorkspaceStructureException("File {" + folderType + "}/" + toPathString(fileName) + " can't be created");
         } finally {
-            this.workspacesLock.readLock().unlock();
+            workspacesLock.readLock().unlock();
         }
     }
 
@@ -192,8 +188,8 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         checkFolderTypeAndFileName(folderType, folderName);
 
         try {
-            this.workspacesLock.readLock().lock();
-            WorkspaceLayer workspaceLayer = this.workspaces.get(this.workspaces.size() - 1);
+            workspacesLock.readLock().lock();
+            WorkspaceLayer workspaceLayer = workspaces.get(workspaces.size() - 1);
             String path = toPathString(folderName);
             if (workspaceLayer.layout.isEmbedded()) {
                 throw new WorkspaceLayerException("Folder {" + folderType + "}/" + path + " can't be created, the last layer is embedded");
@@ -208,7 +204,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
             throw new WorkspaceStructureException("Folder {" + folderType + "}/" + targetFolder + " can't be created");
         } finally {
-            this.workspacesLock.readLock().unlock();
+            workspacesLock.readLock().unlock();
         }
     }
 
@@ -221,8 +217,8 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         checkFolderTypeAndFileName(folderType, fileName);
 
         try {
-            this.workspacesLock.readLock().lock();
-            WorkspaceLayer workspaceLayer = this.workspaces.get(this.workspaces.size() - 1);
+            workspacesLock.readLock().lock();
+            WorkspaceLayer workspaceLayer = workspaces.get(workspaces.size() - 1);
             String path = toPathString(fileName);
             if (workspaceLayer.layout.isEmbedded()) {
                 throw new WorkspaceLayerException("Folder {" + folderType + "}/" + path + " can't be created, the last layer is embedded");
@@ -254,7 +250,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
             throw new WorkspaceStructureException("File {" + folderType + "}/" + toPathString(fileName) + " can't be created");
         } finally {
-            this.workspacesLock.readLock().unlock();
+            workspacesLock.readLock().unlock();
         }
     }
 
@@ -262,13 +258,13 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
     public boolean exists(FolderType folderType, String... fileName) throws WorkspaceSecurityException {
         if (folderType != null && fileName != null) {
             try {
-                this.workspacesLock.readLock().lock();
+                workspacesLock.readLock().lock();
                 getExists(folderType, fileName);
                 return true;
             } catch (FileNotFoundException | WorkspaceSecurityException e) { // FIXME: is it ok to drop WorkspaceSecurityException ?
             	// it is normal control flow path: return false
             } finally {
-                this.workspacesLock.readLock().unlock();
+                workspacesLock.readLock().unlock();
             }
         }
         return false;
@@ -346,12 +342,12 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 		}
 
 		try {
-			this.workspacesLock.readLock().lock();
+            workspacesLock.readLock().lock();
 
 			Set<String> result = new HashSet<>();
 
-	        for (int i = 0; i < this.workspaces.size(); i++) {
-	        	File folderInWorkspace = new File(this.workspaces.get(i).get(folderType), toPathString(folderName));
+            for(int i = 0; i < workspaces.size(); i++) {
+                File folderInWorkspace = new File(workspaces.get(i).get(folderType), toPathString(folderName));
 	        	if (!folderInWorkspace.exists()) {
 	        	    continue;
 	        	}
@@ -373,7 +369,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 	        return result;
 
 		} finally {
-			this.workspacesLock.readLock().unlock();
+            workspacesLock.readLock().unlock();
 		}
 
 	}
@@ -385,16 +381,16 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
      * @return
      * @throws FileNotFoundException
      */
-    private Map.Entry<WorkspaceLayer, File> getExists(FolderType folderType, String... fileName) throws FileNotFoundException, WorkspaceSecurityException {
+    private Entry<WorkspaceLayer, File> getExists(FolderType folderType, String... fileName) throws FileNotFoundException, WorkspaceSecurityException {
         File targetFile = null;
         try {
-        	this.workspacesLock.readLock().lock();
-	        for (int i = this.workspaces.size() - 1; i >= 0; i--) {
-	            WorkspaceLayer layer = this.workspaces.get(i);
+            workspacesLock.readLock().lock();
+            for(int i = workspaces.size() - 1; i >= 0; i--) {
+                WorkspaceLayer layer = workspaces.get(i);
 	        	targetFile = new File(layer.get(folderType), toPathString(fileName));
 
 	        	Path targetPath = targetFile.toPath().normalize();
-	        	Path rootPath = this.workspaces.get(i).get(folderType).toPath().normalize();
+                Path rootPath = workspaces.get(i).get(folderType).toPath().normalize();
 	        	if (! targetPath.startsWith(rootPath)) {
 	        		throw new WorkspaceSecurityException("Access outside workspace is denied. Access file: {" + folderType + "}/" + toPathString(fileName));
 	        	}
@@ -405,7 +401,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 	            }
 	        }
         } finally {
-        	this.workspacesLock.readLock().unlock();
+            workspacesLock.readLock().unlock();
         }
 
         throw new FileNotFoundException("Workspaces doesn't contain file {" + folderType + "}/" + toPathString(fileName));
@@ -413,8 +409,8 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
     private boolean isDuplicatePath(File rootFolder) {
     	Path newPath = rootFolder.toPath();
-    	for (int i = 0; i < this.workspaces.size(); i++) {
-    		Path existing = this.workspaces.get(i).getRootFolder().toPath();
+        for(int i = 0; i < workspaces.size(); i++) {
+            Path existing = workspaces.get(i).getRootFolder().toPath();
             if (newPath.startsWith(existing) || existing.startsWith(newPath)) {
                 return true;
             }
@@ -447,7 +443,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
         }
 
         public File get(FolderType folderType) {
-            return this.paths.get(folderType);
+            return paths.get(folderType);
         }
 
         private Map<FolderType, File> createFolderMap(File rootDir, boolean createDir) {
@@ -470,15 +466,12 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof WorkspaceLayer) {
-                return this.rootFolder.equals(((WorkspaceLayer)obj).rootFolder);
-            }
-            return false;
+            return obj instanceof WorkspaceLayer && rootFolder.equals(((WorkspaceLayer)obj).rootFolder);
         }
 
         @Override
         public int hashCode() {
-            return this.rootFolder.hashCode();
+            return rootFolder.hashCode();
         }
     }
 

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.help;
 
+import static com.exactpro.sf.help.HelpBuilder.HTML;
+import static com.exactpro.sf.help.HelpBuilder.JSON;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,8 +55,8 @@ import freemarker.template.TemplateException;
 
 public class HelpContentHolder implements IDictionaryManagerListener{
 
-    private static String ROOT = "root";
-    private static String ROWKEY_SEPARATOR = "_";
+    private static final String ROOT = "root";
+    private static final String ROWKEY_SEPARATOR = "_";
 
     private static final Logger logger = LoggerFactory.getLogger(HelpContentHolder.class);
 
@@ -61,7 +64,7 @@ public class HelpContentHolder implements IDictionaryManagerListener{
 
     private LoadingProgress loadingProgress;
 
-    private volatile Map<TreeNode, Long> dictionaryModified = new ConcurrentHashMap<>();
+    private final Map<TreeNode, Long> dictionaryModified = new ConcurrentHashMap<>();
 
     private final RedminePageBuilder redmine = new RedminePageBuilder();
 
@@ -71,7 +74,7 @@ public class HelpContentHolder implements IDictionaryManagerListener{
 
     private final ReadWriteLock lock;
 
-    public HelpContentHolder(final ISFContext context) {
+    public HelpContentHolder(ISFContext context) {
 
         this.context = context;
 
@@ -145,7 +148,7 @@ public class HelpContentHolder implements IDictionaryManagerListener{
                 buildTree(childNode, node);
             }
 
-        } else if (parentJson.getFilePath().contains(HelpBuilder.JSON)) {
+        } else if(parentJson.getFilePath().contains(JSON)) {
             new DefaultTreeNode(HelpEntityType.NAMED.name(), null, node);
         }
 
@@ -296,15 +299,13 @@ public class HelpContentHolder implements IDictionaryManagerListener{
     }
 
     private File getHelpFile(String pluginName, String path) {
-        File helpFile;
         try {
             if (pluginName.equals(IVersion.GENERAL)) {
-                helpFile = context.getWorkspaceDispatcher().getFile(FolderType.ROOT, HelpBuilder.HELP, path);
+                return context.getWorkspaceDispatcher().getFile(FolderType.ROOT, HelpBuilder.HELP, path);
             } else {
-                helpFile = context.getWorkspaceDispatcher()
+                return context.getWorkspaceDispatcher()
                         .getFile(FolderType.PLUGINS, pluginName, HelpBuilder.HELP, path);
             }
-            return helpFile;
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
             return null;
@@ -312,20 +313,12 @@ public class HelpContentHolder implements IDictionaryManagerListener{
     }
     public String getHtmlPath(HelpJsonContainer nodeData)  {
         String filePath = nodeData.getFilePath();
-        if (filePath.endsWith(HelpBuilder.JSON)) {
-            return filePath.substring(0, filePath.length() - HelpBuilder.JSON.length()) + HelpBuilder.HTML;
-        } else {
-            return filePath;
-        }
+        return filePath.endsWith(JSON) ? filePath.substring(0, filePath.length() - JSON.length()) + HTML : filePath;
     }
 
     private String getJsonPath(HelpJsonContainer nodeData) {
         String filePath = nodeData.getFilePath();
-        if (filePath.endsWith(HelpBuilder.HTML)) {
-            return filePath.substring(0, filePath.length() - HelpBuilder.HTML.length()) + HelpBuilder.JSON;
-        } else {
-            return filePath;
-        }
+        return filePath.endsWith(HTML) ? filePath.substring(0, filePath.length() - HTML.length()) + JSON : filePath;
     }
 
     public String getDescription(HelpJsonContainer nodeData, String pluginName) {
@@ -364,7 +357,7 @@ public class HelpContentHolder implements IDictionaryManagerListener{
         while (!pluginNode.getParent().getData().equals(ROOT)) {
             pluginNode = pluginNode.getParent();
         }
-        return ((HelpJsonContainer) (pluginNode.getData())).getName();
+        return ((HelpJsonContainer)pluginNode.getData()).getName();
     }
 
     public TreeNode getRootNode() {
@@ -418,7 +411,7 @@ public class HelpContentHolder implements IDictionaryManagerListener{
     private TreeNode copyRoot() {
 
         TreeNode newRoot = new DefaultTreeNode(ROOT, null);
-        copyChildren(this.rootNode, newRoot);
+        copyChildren(rootNode, newRoot);
         return newRoot;
     }
 
@@ -474,7 +467,7 @@ public class HelpContentHolder implements IDictionaryManagerListener{
 
     protected class LoadingProgress {
 
-        private AtomicInteger progress = new AtomicInteger(0);
+        private final AtomicInteger progress = new AtomicInteger(0);
 
         private final int totalCount;
 
@@ -502,19 +495,19 @@ public class HelpContentHolder implements IDictionaryManagerListener{
         }
 
         public boolean isLoaded() {
-            return this.progress.get() == this.totalCount;
+            return progress.get() == totalCount;
         }
     }
 
     public int getLoadingProgress() {
-        return this.loadingProgress == null ? 0 : this.loadingProgress.getPercent();
+        return loadingProgress == null ? 0 : loadingProgress.getPercent();
     }
 
     public String getLoadingStage() {
-        return this.loadingProgress == null ? null : this.loadingProgress.getStage();
+        return loadingProgress == null ? null : loadingProgress.getStage();
     }
 
     public RedminePageBuilder getRedmine() {
-        return this.redmine;
+        return redmine;
     }
 }

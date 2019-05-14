@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,13 +101,13 @@ public final class TestNTGVisitorPositive extends AbstractTest {
 			for( int i = 0 ; i < byteArrayExpected.length; i++ )
 			{
 				logger.trace("Symbol at index [{}]. Expected [%s], got [{}].", i,
-						new String( new byte[] { ioBuffer.array()[i] }, "ISO-8859-1" ),
-						new String( new byte[] { byteArrayExpected[i] }, "ISO-8859-1" ));
+						new String( new byte[] { ioBuffer.array()[i] }, StandardCharsets.ISO_8859_1),
+						new String( new byte[] { byteArrayExpected[i] }, StandardCharsets.ISO_8859_1));
 
                 Assert.assertEquals(String.format("NTGVisitor.visit(String) failed. " +
 						"Error at index [%d]. Expected [%s], got [%s].", i,
-						new String( new byte[] { ioBuffer.array()[i] }, "ISO-8859-1" ),
-						new String( new byte[] { byteArrayExpected[i] }, "ISO-8859-1" )),
+						new String( new byte[] { ioBuffer.array()[i] }, StandardCharsets.ISO_8859_1),
+						new String( new byte[] { byteArrayExpected[i] }, StandardCharsets.ISO_8859_1)),
 						ioBuffer.array()[i], byteArrayExpected[i]);
 			}
             logger.info("Visitor: method visit(String)  PASSED.");
@@ -286,13 +287,13 @@ public final class TestNTGVisitorPositive extends AbstractTest {
 			for( int i = 0 ; i < byteArrayExpected.length; i++ )
 			{
 				logger.trace("Symbol at index [{}]. Expected [{}], got [{}].", i,
-						new String( new byte[] { ioBuffer.array()[i] }, "ISO-8859-1" ),
-						new String( new byte[] { byteArrayExpected[i] }, "ISO-8859-1" ));
+						new String( new byte[] { ioBuffer.array()[i] }, StandardCharsets.ISO_8859_1),
+						new String( new byte[] { byteArrayExpected[i] }, StandardCharsets.ISO_8859_1));
 
                 Assert.assertEquals(String.format("NTGVisitor.visit(String) failed. " +
 						"Error at index [%d]. Expected [%s], got [%s].", i,
-						new String( new byte[] { ioBuffer.array()[i] }, "ISO-8859-1" ),
-						new String( new byte[] { byteArrayExpected[i] }, "ISO-8859-1" )),
+						new String( new byte[] { ioBuffer.array()[i] }, StandardCharsets.ISO_8859_1),
+						new String( new byte[] { byteArrayExpected[i] }, StandardCharsets.ISO_8859_1)),
 						ioBuffer.array()[i], byteArrayExpected[i]);
 			}
             logger.info("Visitor: method visit(Aplha)  PASSED.");
@@ -507,7 +508,7 @@ public final class TestNTGVisitorPositive extends AbstractTest {
 			IoBuffer copy = ioBuffer.duplicate();
 			copy.order(ByteOrder.LITTLE_ENDIAN);
 			copy.flip();
-			Double restored = (copy.getLong())/Math.pow(10, 8);
+			Double restored = copy.getLong() /Math.pow(10, 8);
 
 			Assert.assertEquals( value, restored );
 
@@ -584,7 +585,7 @@ public final class TestNTGVisitorPositive extends AbstractTest {
 			IoBuffer copy = ioBuffer.duplicate();
 			copy.order(ByteOrder.LITTLE_ENDIAN);
 			copy.flip();
-			Float restored = ((float) copy.getInt() ) / 10000;
+			Float restored = (float) copy.getInt() / 10000;
 
 			Assert.assertEquals( value, restored );
 

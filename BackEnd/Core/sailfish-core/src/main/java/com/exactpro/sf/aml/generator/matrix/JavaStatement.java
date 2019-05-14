@@ -30,26 +30,26 @@ public enum JavaStatement {
 	END_IF("ENDIF"),
 	INCLUDE_BLOCK("IncludeBlock", Column.Template);
 
-	private String value;
-	private Column[] requiredColumns;
-	private SailfishURI uri;
+    private final String value;
+    private final Column[] requiredColumns;
+    private final SailfishURI uri;
 
-	private JavaStatement(String s, Column... requiredColumns) {
+    JavaStatement(String s, Column... requiredColumns) {
 		this.value = s;
 		this.requiredColumns = requiredColumns;
 		this.uri = SailfishURI.unsafeParse(s);
 	}
 
 	public String getValue() {
-		return this.value;
+        return value;
 	}
 
 	public Column[] getRequiredColumns() {
-	    return this.requiredColumns;
+        return requiredColumns;
 	}
 
 	public SailfishURI getURI() {
-	    return this.uri;
+        return uri;
 	}
 
 	public static JavaStatement value(String s) {
@@ -58,8 +58,9 @@ public enum JavaStatement {
 	    }
 
 		for (JavaStatement e : JavaStatement.values()) {
-			if (e.value.equalsIgnoreCase(s))
-				return e;
+            if(e.value.equalsIgnoreCase(s)) {
+                return e;
+            }
 		}
 
 		return null;
@@ -77,6 +78,6 @@ public enum JavaStatement {
 
 	@Override
 	public String toString() {
-	    return this.value;
+        return value;
 	}
 }

@@ -24,6 +24,8 @@ import org.junit.Test;
 
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.util.AbstractTest;
 
 public class TestScriptRunner extends AbstractTest
@@ -38,8 +40,9 @@ public class TestScriptRunner extends AbstractTest
 	{
 		File workFolder = new File(WORK_FOLDER);
 
-		if ( !workFolder.exists() )
-			workFolder.mkdir();
+        if(!workFolder.exists()) {
+            workFolder.mkdir();
+        }
 
 		runner = new SyncScriptRunner(
 				SFLocalContext.getDefault().getWorkspaceDispatcher(),
@@ -67,8 +70,9 @@ public class TestScriptRunner extends AbstractTest
 
 		long id = runner.enqueueScript(scriptSettingsPath, scriptMatrixPath, "Desc", "matrix", "", false, false, true, false, false, false, LANGUAGE, "UTF-8", "default", System.getProperty("user.name"), null, null, null, null, SFLocalContext.getDefault());
 
-		if ( id == -1 )
-			throw new RuntimeException("Script was not added to the queue");
+        if(id == -1) {
+            throw new RuntimeException("Script was not added to the queue");
+        }
 	}
 
     @Test
@@ -78,16 +82,19 @@ public class TestScriptRunner extends AbstractTest
 		String scriptMatrixPath = "matrixes" + File.separator + "test.csv";
 
         long id1 = runner.enqueueScript(scriptSettingsPath, scriptMatrixPath, "Desc1", "Matrix1", "", false, false, true, false, false, false, LANGUAGE, "UTF-8", "default", System.getProperty("user.name"), null, null, null, null, SFLocalContext.getDefault());
-		if ( id1 == -1 )
-			Assert.assertEquals(0, id1);
+        if(id1 == -1) {
+            Assert.assertEquals(0, id1);
+        }
 
 		long id2 = runner.enqueueScript(scriptSettingsPath, scriptMatrixPath, "Desc2", "Matrix2", "", false, false, true, false, false, false, LANGUAGE, "UTF-8", "default", System.getProperty("user.name"), null, null, null, null, SFLocalContext.getDefault());
-		if ( id2 == -1 )
-			Assert.assertEquals(0, id2);
+        if(id2 == -1) {
+            Assert.assertEquals(0, id2);
+        }
 
 		long id3 = runner.enqueueScript(scriptSettingsPath, scriptMatrixPath, "Desc3", "Matrix3", "", false, false, true, false, false, false, LANGUAGE, "UTF-8", "default", System.getProperty("user.name"), null, null, null, null, SFLocalContext.getDefault());
-		if ( id3 == -1 )
-			Assert.assertEquals(0, id3);
+        if(id3 == -1) {
+            Assert.assertEquals(0, id3);
+        }
 
 
 		boolean finished = false;
@@ -112,22 +119,23 @@ public class TestScriptRunner extends AbstractTest
 
 		}
 
-		Assert.assertEquals(TestScriptDescription.ScriptState.FINISHED, descr1.getState());
+		Assert.assertEquals(ScriptState.FINISHED, descr1.getState());
 
-		Assert.assertEquals(TestScriptDescription.ScriptStatus.INIT_FAILED, descr1.getStatus()); //TODO: Check possibility add custom actions for this test
+		Assert.assertEquals(ScriptStatus.INIT_FAILED, descr1.getStatus()); //TODO: Check possibility add custom actions for this test
 
-		Assert.assertEquals(TestScriptDescription.ScriptState.FINISHED, descr2.getState());
+		Assert.assertEquals(ScriptState.FINISHED, descr2.getState());
 
-		Assert.assertEquals(TestScriptDescription.ScriptStatus.INIT_FAILED, descr2.getStatus());
+		Assert.assertEquals(ScriptStatus.INIT_FAILED, descr2.getStatus());
 
-		Assert.assertEquals(TestScriptDescription.ScriptState.FINISHED, descr3.getState());
+		Assert.assertEquals(ScriptState.FINISHED, descr3.getState());
 
-		Assert.assertEquals(TestScriptDescription.ScriptStatus.INIT_FAILED, descr3.getStatus());
+		Assert.assertEquals(ScriptStatus.INIT_FAILED, descr3.getStatus());
 	}
 
 	@After
 	public void tearDown() throws Exception {
-		if ( runner != null )
-			runner.dispose();
+        if(runner != null) {
+            runner.dispose();
+        }
 	}
 }

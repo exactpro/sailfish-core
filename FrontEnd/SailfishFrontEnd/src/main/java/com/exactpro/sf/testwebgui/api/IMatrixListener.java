@@ -19,7 +19,7 @@ import com.exactpro.sf.storage.IMatrix;
 
 public interface IMatrixListener {
 	
-	public void addMatrix(IMatrix uploaded);
+	void addMatrix(IMatrix uploaded);
 	
-	public void removeMatrix(IMatrix matrixAdapter);
+	void removeMatrix(IMatrix matrixAdapter);
 }

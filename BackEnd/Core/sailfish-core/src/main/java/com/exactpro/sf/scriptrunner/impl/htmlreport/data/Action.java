@@ -15,11 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
-import com.exactpro.sf.aml.script.CheckPoint;
+import java.util.List;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.List;
+import com.exactpro.sf.aml.script.CheckPoint;
 
 public class Action extends BaseEntity {
     private static final int NEXT_AFTER_ROOT = 1;
@@ -32,10 +33,6 @@ public class Action extends BaseEntity {
     private MachineLearningData machineLearningData;
     private CheckPoint checkPoint;
     private List<String> verificationsOrder;
-
-    public Action() {
-        super();
-    }
 
     public int getId() {
         return id;

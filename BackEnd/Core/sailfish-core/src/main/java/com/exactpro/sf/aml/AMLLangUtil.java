@@ -16,7 +16,13 @@
 package com.exactpro.sf.aml;
 
 import static com.exactpro.sf.aml.AMLLangConst.BEGIN_FUNCTION;
+import static com.exactpro.sf.aml.AMLLangConst.BEGIN_REFERENCE;
+import static com.exactpro.sf.aml.AMLLangConst.BEGIN_STATIC;
 import static com.exactpro.sf.aml.AMLLangConst.END_FUNCTION;
+import static com.exactpro.sf.aml.AMLLangConst.END_REFERENCE;
+import static com.exactpro.sf.aml.AMLLangConst.END_STATIC;
+import static com.exactpro.sf.aml.AMLLangConst.NO;
+import static com.exactpro.sf.aml.AMLLangConst.OPTIONAL;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -55,11 +61,11 @@ public class AMLLangUtil {
         Deque<Integer> stack = new ArrayDeque<>();
 
         for(int i = 0; i < value.length(); i++) {
-            if(value.startsWith(AMLLangConst.BEGIN_FUNCTION, i)) {
+            if(value.startsWith(BEGIN_FUNCTION, i)) {
                 stack.push(i);
-            } else if(value.startsWith(AMLLangConst.BEGIN_REFERENCE, i)) {
+            } else if(value.startsWith(BEGIN_REFERENCE, i)) {
                 stack.push(i);
-            } else if(value.startsWith(AMLLangConst.BEGIN_STATIC, i)) {
+            } else if(value.startsWith(BEGIN_STATIC, i)) {
                 stack.push(i);
             } else if(value.charAt(i) == '}' && !stack.isEmpty()) {
                 expressions.add(value.substring(stack.pop(), i + 1));
@@ -74,8 +80,8 @@ public class AMLLangUtil {
         List<String> expressions = findExpressions(value);
 
         for(String expression : expressions) {
-            if(expression.startsWith(AMLLangConst.BEGIN_REFERENCE)) {
-                String ref = expression.substring(AMLLangConst.BEGIN_REFERENCE.length(), expression.length() - 1).replaceAll("\\[.*?\\]", "");
+            if(expression.startsWith(BEGIN_REFERENCE)) {
+                String ref = expression.substring(BEGIN_REFERENCE.length(), expression.length() - 1).replaceAll("\\[.*?\\]", "");
                 String[] refParts = ref.split("[:.]");
                 Boolean isValid = refParts.length > 0;
 
@@ -105,18 +111,15 @@ public class AMLLangUtil {
 
     public static String[] getValues(String value) {
         String body = value.substring(1, value.length() - 1).trim();
-        if (body.isEmpty()) {
-            return ArrayUtils.EMPTY_STRING_ARRAY;
-        }
-        return body.split("\\s*,\\s*");
+        return body.isEmpty() ? ArrayUtils.EMPTY_STRING_ARRAY : body.split("\\s*,\\s*");
     }
 
     public static String getReference(String value) {
-        return StringUtils.substringBetween(value, AMLLangConst.BEGIN_REFERENCE, AMLLangConst.END_REFERENCE);
+        return StringUtils.substringBetween(value, BEGIN_REFERENCE, END_REFERENCE);
     }
 
     public static String getStaticVariableName(String value) {
-        return StringUtils.substringBetween(value, AMLLangConst.BEGIN_STATIC, AMLLangConst.END_STATIC);
+        return StringUtils.substringBetween(value, BEGIN_STATIC, END_STATIC);
     }
 
     public static boolean isSubmessage(String value) {
@@ -136,11 +139,11 @@ public class AMLLangUtil {
     }
 
     public static boolean isReference(String value) {
-        return value.startsWith(AMLLangConst.BEGIN_REFERENCE) && value.endsWith(AMLLangConst.END_REFERENCE);
+        return value.startsWith(BEGIN_REFERENCE) && value.endsWith(END_REFERENCE);
     }
 
     public static boolean isStaticVariableReference(String value) {
-        return value.startsWith(AMLLangConst.BEGIN_STATIC) && value.endsWith(AMLLangConst.END_STATIC);
+        return value.startsWith(BEGIN_STATIC) && value.endsWith(END_STATIC);
     }
 
     public static boolean isFunction(String value) {
@@ -149,9 +152,6 @@ public class AMLLangUtil {
 
     public static boolean isExecutable(String value, boolean skipOptional) {
         //FIXME: validate value?
-        if (AMLLangConst.OPTIONAL.equalsIgnoreCase(value)) {
-            return !skipOptional;
-        }
-        return !AMLLangConst.NO.equalsIgnoreCase(value);
+        return OPTIONAL.equalsIgnoreCase(value) ? !skipOptional : !NO.equalsIgnoreCase(value);
     }
 }

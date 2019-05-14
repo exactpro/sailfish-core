@@ -15,15 +15,28 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.machinelearning.entities;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"id", "type", "entries"})
 @Entity
@@ -42,9 +55,11 @@ public class Message implements Serializable {
     private MessageType type;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "mlmessageentries", joinColumns = {
-            @JoinColumn(name = "parent_message_id", nullable = false, updatable = true) }, inverseJoinColumns = {
-                    @JoinColumn(name = "entry_id", nullable = false, updatable = true) })
+    @JoinTable(
+            name = "mlmessageentries",
+            joinColumns = @JoinColumn(name = "parent_message_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "entry_id", nullable = false)
+    )
     private List<MessageEntry> entries;
 
     private boolean dirty;
@@ -66,7 +81,7 @@ public class Message implements Serializable {
     }
 
     public void addEntry(MessageEntry entry) {
-        this.entries.add(entry);
+        entries.add(entry);
     }
     
     public long getId() {
@@ -96,10 +111,10 @@ public class Message implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", this.id)
-                .append("dirty", this.dirty)
-                .append("type", this.type)
-                .append("entries", this.entries).toString();
+                .append("id", id)
+                .append("dirty", dirty)
+                .append("type", type)
+                .append("entries", entries).toString();
     }
 
     public boolean isDirty() {

@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.services.util;
 
+import static com.exactpro.sf.services.ServiceEvent.Level.ERROR;
+import static com.exactpro.sf.services.ServiceEvent.Level.INFO;
+import static com.exactpro.sf.services.ServiceEvent.Type.convert;
+import static com.exactpro.sf.services.ServiceEventFactory.createStatusUpdateEvent;
+
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,7 +54,7 @@ import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceEvent;
-import com.exactpro.sf.services.ServiceEventFactory;
+import com.exactpro.sf.services.ServiceEvent.Level;
 import com.exactpro.sf.services.ServiceStatus;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
@@ -75,14 +80,10 @@ public class ServiceUtil {
     }
 
     public static void changeStatus(IService service, IServiceMonitor monitor, ServiceStatus status, String message, Throwable e) {
-
-        ServiceEvent event;
-
-        if (status != ServiceStatus.ERROR) {
-            event = ServiceEventFactory.createStatusUpdateEvent(service.getServiceName(), ServiceEvent.Level.INFO, ServiceEvent.Type.convert(status), message, "", null);
-        } else {
-            event = ServiceEventFactory.createStatusUpdateEvent(service.getServiceName(), ServiceEvent.Level.ERROR, ServiceEvent.Type.convert(status), message, "", e);
-        }
+        boolean error = status == ServiceStatus.ERROR;
+        Level level = error ? ERROR : INFO;
+        Throwable throwable = error ? e : null;
+        ServiceEvent event = createStatusUpdateEvent(service.getServiceName(), level, convert(status), message, "", throwable);
 
         if (monitor != null) {
             monitor.onEvent(event);
@@ -131,8 +132,9 @@ public class ServiceUtil {
     }
 
     public static byte[] normalisate(byte[] array, int size) {
-    	if (array == null)
-    		throw new EPSCommonException("Array is null");
+        if(array == null) {
+            throw new EPSCommonException("Array is null");
+        }
     	if (size < 0) {
     		throw new EPSCommonException("Size cannot be negative");
     	}
@@ -141,7 +143,7 @@ public class ServiceUtil {
 			int from = array.length - size;
 
 			for (int i = from - 1; i > -1; i--) {
-				if (BYTE_ZERO != array[i]) {
+                if(array[i] != BYTE_ZERO) {
 					throw new EPSCommonException("Massive compression does not execute without data loss");
 				}
 			}

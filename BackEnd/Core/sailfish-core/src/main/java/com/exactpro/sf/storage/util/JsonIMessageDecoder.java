@@ -47,7 +47,7 @@ public class JsonIMessageDecoder extends JsonMessageDecoder<IMessage> {
     
     @Override
     protected IMessage createMessage(String messageName) {
-        return this.messageFactory.createMessage(messageName);
+        return messageFactory.createMessage(messageName);
     }
     
     @Override
@@ -65,7 +65,7 @@ public class JsonIMessageDecoder extends JsonMessageDecoder<IMessage> {
 
         @Override
         public String getProtocol() {
-            return this.protocol;
+            return protocol;
         }
         
     }

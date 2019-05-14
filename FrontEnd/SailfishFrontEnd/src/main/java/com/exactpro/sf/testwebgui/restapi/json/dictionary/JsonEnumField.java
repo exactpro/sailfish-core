@@ -40,6 +40,6 @@ public class JsonEnumField extends JsonSimpleField {
 	}
 
 	public Map<String, IAttributeStructure> getValues() {
-		return this.values;
+        return values;
 	}
 }

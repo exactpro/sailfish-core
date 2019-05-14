@@ -30,8 +30,7 @@ public class LogMessage {
 	public LogMessage(@JsonProperty("message") String message, 
 			@JsonProperty("level") String level, 
 			@JsonProperty("stacktrace") String[] stacktrace) {
-		super();
-		this.message = message;
+        this.message = message;
 		this.level = level;
 		this.stacktrace = stacktrace;
 	}

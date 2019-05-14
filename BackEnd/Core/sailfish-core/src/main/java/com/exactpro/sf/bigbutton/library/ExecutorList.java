@@ -25,8 +25,8 @@ public class ExecutorList extends AbstractLibraryItem implements Serializable {
 	private final List<Executor> executors = new ArrayList<>();
 	
 	public void addNested(Executor item) {
-		
-		this.executors.add(item);
+
+        executors.add(item);
 		
 	}
 	

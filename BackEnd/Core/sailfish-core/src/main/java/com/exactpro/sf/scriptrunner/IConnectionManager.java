@@ -28,6 +28,23 @@ import com.exactpro.sf.services.ServiceDescription;
 
 public interface IConnectionManager extends IDisposable
 {
+    /**
+     * Adds default service. Default service is a service which will be added to all existing and newly created environments.
+     * Already existing services on environments will not be replaced.
+     * @param serviceDescription description of a service to add (environment will be ignored)
+     * @param exceptionListener exception listener
+     * @return
+     */
+    void addDefaultService(ServiceDescription serviceDescription, IServiceNotifyListener exceptionListener);
+
+    /**
+     * Removes default service. Services already added to environments will not be removed
+     * @param serviceName name of a service to remove (without environment)
+     * @param exceptionListener exception listener
+     * @return
+     */
+    void removeDefaultService(String serviceName, IServiceNotifyListener exceptionListener);
+
     Future<?> addService(ServiceDescription serviceDescription, IServiceNotifyListener exceptionListener);
 
 	Future<?> initService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
@@ -44,9 +61,9 @@ public interface IConnectionManager extends IDisposable
 
     Future<?> removeEnvironment(String envName, IServiceNotifyListener notifyListener);
 
-    Future<?> addEnvironment(final String envName, final IServiceNotifyListener notifyListener);
+    Future<?> addEnvironment(String envName, IServiceNotifyListener notifyListener);
 
-    Future<?> renameEnvironment(final String oldEnvName, final String newEnvName, final IServiceNotifyListener notifyListener);
+    Future<?> renameEnvironment(String oldEnvName, String newEnvName, IServiceNotifyListener notifyListener);
 
     List<String> getEnvironmentList();
 

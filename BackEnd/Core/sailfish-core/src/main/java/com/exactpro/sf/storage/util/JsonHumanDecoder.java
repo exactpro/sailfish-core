@@ -45,7 +45,7 @@ public class JsonHumanDecoder extends JsonMessageDecoder<IHumanMessage> {
 
     @Override
     protected IHumanMessage createMessage(String messageName) {
-        return this.messageFactory.createHumanMessage(messageName);
+        return messageFactory.createHumanMessage(messageName);
     }
 
     @Override

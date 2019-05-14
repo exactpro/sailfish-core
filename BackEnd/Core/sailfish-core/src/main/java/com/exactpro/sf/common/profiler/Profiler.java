@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.time.StopWatch;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class Profiler {
 
-    private static Logger logger = LoggerFactory.getLogger(Profiler.class);
+    private static final Logger logger = LoggerFactory.getLogger(Profiler.class);
 
     private static final String LINE_SEPARATOR = System.getProperty("line.separator");
     private static Profiler instance;
@@ -52,26 +53,27 @@ public class Profiler {
 
 
     public void startTrace(String... tracesNames) {
-        if (tracesNames != null)
+        if(tracesNames != null) {
             for (String traceName : tracesNames) {
-                synchronized (this.traceMap) {
-                    if (!this.traceMap.containsKey(traceName)) {
+                synchronized(traceMap) {
+                    if(!traceMap.containsKey(traceName)) {
                         Trace trace = new Trace(traceName);
                         trace.startMethod();
-                        this.traceMap.put(traceName, trace);
+                        traceMap.put(traceName, trace);
                     } else {
                         logger.debug("Trace {} already started", traceName);
                     }
                 }
             }
+        }
 
     }
 
     public void endTrace(String... tracesNames) {
-        if (tracesNames != null)
+        if(tracesNames != null) {
             for (String traceName : tracesNames) {
-                synchronized (this.traceMap) {
-                    Trace trace = this.traceMap.remove(traceName);
+                synchronized(traceMap) {
+                    Trace trace = traceMap.remove(traceName);
                     if (trace != null) {
                         trace.stop();
                         trace.stopMethod();
@@ -81,31 +83,34 @@ public class Profiler {
                     }
                 }
             }
+        }
     }
 
     public void startMethod(String... tracesNames) {
-        if (tracesNames != null)
+        if(tracesNames != null) {
             for (String traceName : tracesNames) {
-                Trace trace = this.traceMap.get(traceName);
+                Trace trace = traceMap.get(traceName);
                 if (trace != null) {
                     trace.startMethod();
                 } else {
                     logger.debug("Trace {} is absent", traceName);
                 }
             }
+        }
 
     }
 
     public void stopMethod(String... tracesNames) {
-        if (tracesNames != null)
+        if(tracesNames != null) {
             for (String traceName : tracesNames) {
-                Trace trace = this.traceMap.get(traceName);
+                Trace trace = traceMap.get(traceName);
                 if (trace != null) {
                     trace.stopMethod();
                 } else {
                     logger.debug("Trace {} is absent", traceName);
                 }
             }
+        }
     }
 
     private class Trace extends Method {
@@ -119,10 +124,10 @@ public class Profiler {
         public void startMethod() {
             synchronized (this) {
                 Thread thread = Thread.currentThread();
-                List<Method> methodList = this.methodMap.get(thread.getId());
+                List<Method> methodList = methodMap.get(thread.getId());
                 if (methodList == null) {
                     methodList = new ArrayList<>();
-                    this.methodMap.put(thread.getId(), methodList);
+                    methodMap.put(thread.getId(), methodList);
                 }
                 StackTraceElement stackTraceElement = thread.getStackTrace()[3];
                 String name = stackTraceElement.getClassName() + "." +stackTraceElement.getMethodName();
@@ -141,7 +146,7 @@ public class Profiler {
         public void stopMethod() {
             synchronized (this) {
                 Thread thread = Thread.currentThread();
-                List<Method> methodList = this.methodMap.get(thread.getId());
+                List<Method> methodList = methodMap.get(thread.getId());
                 if (methodList != null) {
                     StackTraceElement stackTraceElement = thread.getStackTrace()[3];
                     String name = stackTraceElement.getClassName() + "." +stackTraceElement.getMethodName();
@@ -163,15 +168,15 @@ public class Profiler {
         public String toString() {
             synchronized (this) {
                 StringBuilder builder = new StringBuilder("Trace : ");
-                builder.append(this.name);
+                builder.append(name);
                 builder.append(LINE_SEPARATOR);
-                for (Map.Entry<Long, List<Method>> threadList : this.methodMap.entrySet()) {
+                for(Entry<Long, List<Method>> threadList : methodMap.entrySet()) {
                     builder.append("Thread : ");
                     builder.append(threadList.getKey());
                     builder.append(LINE_SEPARATOR);
                     for (Method method : threadList.getValue()) {
                         builder.append(String.format("%" + (method.getLevel() + 1) + "s", ""));
-                        builder.append(method.toString());
+                        builder.append(method);
                         builder.append(LINE_SEPARATOR);
                     }
                 }
@@ -188,30 +193,26 @@ public class Profiler {
 
         public Method(String name, int level) {
             this.stopWatch = new StopWatch();
-            this.stopWatch.start();
+            stopWatch.start();
             this.name = name;
             this.level = level;
         }
 
         public void stop() {
-            this.stopWatch.stop();
+            stopWatch.stop();
         }
 
         public boolean isStopped() {
-            return this.stopWatch.isStopped();
+            return stopWatch.isStopped();
         }
 
         public int getLevel() {
-            return this.level;
+            return level;
         }
 
         @Override
         public String toString() {
-            if (this.stopWatch.isStopped()) {
-                return this.name + " " + this.stopWatch.getTime();
-            } else {
-                return this.name + " progress ...";
-            }
+            return name + " " + (stopWatch.isStopped() ? stopWatch.getTime() : "progress ...");
         }
     }
 }

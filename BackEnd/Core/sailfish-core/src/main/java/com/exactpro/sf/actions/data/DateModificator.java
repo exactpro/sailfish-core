@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.actions.data;
 
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import java.time.temporal.Temporal;
 
 public class DateModificator {
 
@@ -80,7 +80,7 @@ public class DateModificator {
     }
 
     public <T extends Temporal> T modify(T source) {
-        return this.strategy.modify(source, this.dateComponent, this.value);
+        return strategy.modify(source, dateComponent, value);
     }
 
     private enum Strategy {
@@ -108,7 +108,7 @@ public class DateModificator {
 
         private final char symbol;
 
-        private Strategy(char symbol) {
+        Strategy(char symbol) {
             this.symbol = symbol;
         }
 

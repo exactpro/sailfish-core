@@ -32,8 +32,8 @@ import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
 
 public class TestRawMessage {
 
-    private final String[] bodyLangthPath = new String[] { FieldConst.HEADER, FieldConst.BODY_LENGTH };
-    private final String[] checkSumPath = new String[] { FieldConst.TRAILER, FieldConst.CHECKSUM };
+    private final String[] bodyLangthPath = { FieldConst.HEADER, FieldConst.BODY_LENGTH };
+    private final String[] checkSumPath = { FieldConst.TRAILER, FieldConst.CHECKSUM };
 
     @Test
     public void testCalculation() throws UnsupportedEncodingException {
@@ -90,18 +90,16 @@ public class TestRawMessage {
     }
 
     private String getField(FieldList fieldList, String... path) {
-        String result = null;
 
         for (int i = 0; i < path.length; i++) {
             if (i == path.length - 1) {
-                result = fieldList.getField(path[i]).getValue();
-                break;
+                return fieldList.getField(path[i]).getValue();
             } else {
                 fieldList = fieldList.getField(path[i]).getFields();
             }
         }
 
-        return result;
+        return null;
     }
 
     private int checkSum(RawMessage rawMessage, Charset charset) {

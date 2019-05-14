@@ -23,11 +23,11 @@ public class ActionGroup extends BaseEntity {
 
     public ActionGroup copyWithStatus(StatusType status) {
         ActionGroup copy = new ActionGroup();
-        copy.setName(this.getName());
-        copy.setDescription(this.getDescription());
+        copy.setName(getName());
+        copy.setDescription(getDescription());
         copy.setStatus(status);
-        copy.setLinkToReport(this.linkToReport);
-        for (Object element : this.getElements()) {
+        copy.setLinkToReport(linkToReport);
+        for(Object element : getElements()) {
             copy.addElement(element);
         }
         return copy;

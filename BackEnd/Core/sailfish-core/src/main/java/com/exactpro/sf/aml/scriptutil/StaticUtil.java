@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.scriptutil;
 
+import static com.exactpro.sf.aml.scriptutil.ExpressionResult.EXPRESSION_RESULT_FALSE;
+import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -40,9 +43,6 @@ import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.comparison.Convention;
-import com.exactpro.sf.util.AbstractBugsChecker;
-import com.exactpro.sf.util.FieldKnownBugException;
-import com.exactpro.sf.util.KnownBugException;
 import com.exactpro.sf.util.LRUMap;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
@@ -258,7 +258,7 @@ public class StaticUtil {
 
 		@Override
         public ExpressionResult validate(Object value) {
-            Map<String, Object> vars = new HashMap<>(this.variables);
+            Map<String, Object> vars = new HashMap<>(variables);
             vars.put("x", value);
             try {
                 Object obj = MVEL.executeExpression(compiledCondition, vars);
@@ -266,7 +266,7 @@ public class StaticUtil {
                     IKnownBug knownBug = (IKnownBug) obj;
                     return knownBug.validate(value);
                 } else if (obj instanceof Boolean) {
-                    return ExpressionResult.create((boolean) obj);
+                    return create((boolean)obj);
                 } else if (obj instanceof ExpressionResult) {
                 	return (ExpressionResult) obj;
 				}
@@ -340,7 +340,7 @@ public class StaticUtil {
 
 		@Override
         public Object getValue() {
-	        throw new MvelException(line, column, "Cannot get value from " + this.getClass().getSimpleName());
+            throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
 
         @Override
@@ -360,7 +360,7 @@ public class StaticUtil {
 
 		@Override
 		public ExpressionResult validate(Object value) {
-			return ExpressionResult.create(value == null);
+            return create(value == null);
 		}
 
 		@Override
@@ -375,7 +375,7 @@ public class StaticUtil {
 
 		@Override
         public Object getValue() {
-		    throw new MvelException(line, column, "Cannot get value from " + this.getClass().getSimpleName());
+            throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
 
         @Override
@@ -400,7 +400,7 @@ public class StaticUtil {
 
 		@Override
 		public ExpressionResult validate(Object value) {
-			return ExpressionResult.create(value != null);
+            return create(value != null);
 		}
 
 		@Override
@@ -415,7 +415,7 @@ public class StaticUtil {
 
         @Override
         public Object getValue() {
-		    throw new MvelException(line, column, "Cannot get value from " + this.getClass().getSimpleName());
+            throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
 
 		@Override
@@ -444,7 +444,7 @@ public class StaticUtil {
         @Override
         public ExpressionResult validate(Object value) {
             try {
-                return this.knownBug.validate(value);
+                return knownBug.validate(value);
             } catch (RuntimeException e) {
                 throw new MvelException(line, column, e);
             }
@@ -452,7 +452,7 @@ public class StaticUtil {
 
         @Override
         public String getCondition() {
-            return this.knownBug.getCondition();
+            return knownBug.getCondition();
         }
 
         @Override
@@ -462,7 +462,7 @@ public class StaticUtil {
 
         @Override
         public Object getValue() throws MvelException {
-            throw new MvelException(line, column, "Cannot get value from " + this.getClass().getSimpleName());
+            throw new MvelException(line, column, "Cannot get value from " + getClass().getSimpleName());
         }
 
         @Override
@@ -487,11 +487,11 @@ public class StaticUtil {
 			this.line = line;
 			this.column = column;
 			this.value = eval(line, column, simpleCondition, variables);
-            this.condition = String.valueOf(this.value);
+            this.condition = String.valueOf(value);
 			this.variables = new HashMap<>(variables);
 
-            if((this.value instanceof Double && !Doubles.isFinite((Double)this.value))
-                    || (this.value instanceof Float && !Floats.isFinite((Float)this.value))) {
+            if((value instanceof Double && !Doubles.isFinite((Double)value))
+                    || (value instanceof Float && !Floats.isFinite((Float)value))) {
                 expression = "Objects.equals(x, {})";
             }
 
@@ -504,7 +504,7 @@ public class StaticUtil {
 
 		@Override
 		public ExpressionResult validate(Object value) {
-			Map<String, Object> vars = new HashMap<>(this.variables);
+            Map<String, Object> vars = new HashMap<>(variables);
 
 			vars.put("x", value);
 
@@ -523,7 +523,7 @@ public class StaticUtil {
 	                    logger.debug("variable: {}, value: {}, class: {}", var.getKey(), val, cls);
 	                }
 				}
-                return ExpressionResult.create(MVEL.executeExpression(compiledCondition, vars, Boolean.class));
+                return create(MVEL.executeExpression(compiledCondition, vars, Boolean.class));
             } catch(PropertyAccessException e) {
                 throw processPropertyAccessException(line, column, e);
             } catch (Exception e) {
@@ -574,11 +574,7 @@ public class StaticUtil {
 
         @Override
         public ExpressionResult validate(Object value) {
-            if(value instanceof Integer) {
-                return ExpressionResult.create(count.checkInt((int)value));
-            }
-
-            return ExpressionResult.EXPRESSION_RESULT_FALSE;
+            return value instanceof Integer ? create(count.checkInt((int)value)) : EXPRESSION_RESULT_FALSE;
         }
 
         @Override

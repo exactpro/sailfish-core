@@ -24,6 +24,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,7 +62,7 @@ public class InternalResources {
             xmlResponse.setMessage("Successfully cleaned up following targets: " + targets);
             xmlResponse.setRootCause("");
 
-            return Response.status(Response.Status.OK).entity(xmlResponse).build();
+            return Response.status(Status.OK).entity(xmlResponse).build();
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
 
@@ -69,7 +70,7 @@ public class InternalResources {
             xmlResponse.setMessage(e.getMessage());
             xmlResponse.setRootCause((e.getCause() != null) ? e.getCause().getMessage() : null);
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
         }
     }
 }

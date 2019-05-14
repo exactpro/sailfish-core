@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.testwebgui.restapi.xml.ServiceStatusList;
 
 @Provider
-@Produces({MediaType.APPLICATION_XML })
+@Produces(MediaType.APPLICATION_XML)
 public class ResponseResolver implements ContextResolver<JAXBContext> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ResponseResolver.class);
@@ -46,9 +46,6 @@ public class ResponseResolver implements ContextResolver<JAXBContext> {
     }
 
     public JAXBContext getContext(Class<?> type) {
-        if (type.equals(ServiceStatusList.class)) {
-            return ctx;
-        }
-    	return null;
+        return type.equals(ServiceStatusList.class) ? ctx : null;
     }
 }

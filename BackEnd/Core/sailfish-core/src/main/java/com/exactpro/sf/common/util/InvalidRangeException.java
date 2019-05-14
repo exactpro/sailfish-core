@@ -24,8 +24,7 @@ public class InvalidRangeException extends RuntimeException {
 
 	public InvalidRangeException()
 	{
-		super();
-	}
+    }
 
 	public InvalidRangeException(String message)
 	{

@@ -115,12 +115,7 @@ public class TestDefaultWorkspaceDispatcher {
 
             // CREATE FILE #3: use None-system separator in path
             path = "nested3" + File.separator + "test4.xml";
-            String pathOtherSys;
-            if ('/' == File.separatorChar) {
-                pathOtherSys = FilenameUtils.separatorsToWindows(path);
-            } else {
-                pathOtherSys = FilenameUtils.separatorsToUnix(path);
-            }
+            String pathOtherSys = File.separatorChar == '/' ? FilenameUtils.separatorsToWindows(path) : FilenameUtils.separatorsToUnix(path);
             expected = new File(new File(topLayer, LOGS_DIR_PATH), path);
             actual = wd.createFile(FolderType.LOGS, true, pathOtherSys);
             compareFiles(expected, actual);

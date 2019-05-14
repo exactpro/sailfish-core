@@ -37,18 +37,18 @@ public class MatrixConverterContext implements IMatrixConverterContext {
 
     @Override
     public IWorkspaceDispatcher getWorkspaceDispatcher() {
-        return this.workspaceDispatcher;
+        return workspaceDispatcher;
     }
 
     @Override
     public IDictionaryManager getDictionaryManager() {
-        return this.dictionaryManager;
+        return dictionaryManager;
     }
 
     @Override
     public boolean isServiceExists(String environment, String service) {
         ServiceName serviceName = new ServiceName(environment, service);
-        return this.connectionManager.getService(serviceName) != null;
+        return connectionManager.getService(serviceName) != null;
     }
     
     @Override

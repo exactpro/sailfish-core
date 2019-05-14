@@ -27,8 +27,8 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.common.util.EPSCommonException;
 
 public class TestCSHIterator {
-    private final static long UPDATE_INTERVAL = 100L;
-    private final static List<Integer> SOURCE = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    private static final long UPDATE_INTERVAL = 100L;
+    private static final List<Integer> SOURCE = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
 
     @Test
     public void testTimeout() throws InterruptedException {

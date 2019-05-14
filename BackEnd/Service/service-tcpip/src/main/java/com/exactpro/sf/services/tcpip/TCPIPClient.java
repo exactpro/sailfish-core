@@ -58,7 +58,7 @@ public class TCPIPClient extends AbstractMINATCPService {
 			}
         }
 
-        if(this.fieldConverter == null) {
+        if(fieldConverter == null) {
             this.fieldConverter = new DefaultFieldConverter();
         }
 
@@ -214,7 +214,7 @@ public class TCPIPClient extends AbstractMINATCPService {
     }
 
     @Override
-    protected MessageHelper createMessageHelper(final IMessageFactory messageFactory, final IDictionaryStructure dictionary) {
+    protected MessageHelper createMessageHelper(IMessageFactory messageFactory, IDictionaryStructure dictionary) {
         return new TCPIPMessageHelper(getSettings().isDepersonalizationIncomingMessages()) {{
             init(messageFactory, dictionary);
         }};

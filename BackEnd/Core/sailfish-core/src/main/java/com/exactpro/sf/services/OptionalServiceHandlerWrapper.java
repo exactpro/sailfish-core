@@ -82,6 +82,6 @@ public class OptionalServiceHandlerWrapper implements IServiceHandler {
     }
 
     public void storeMessages(boolean store) {
-        this.currentServiceHandler = store ? this.originServiceHandler : NULL_SERVICE_HANDLER;
+        this.currentServiceHandler = store ? originServiceHandler : NULL_SERVICE_HANDLER;
     }
 }

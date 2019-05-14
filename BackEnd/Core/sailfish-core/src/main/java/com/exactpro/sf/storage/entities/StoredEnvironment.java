@@ -61,7 +61,7 @@ public class StoredEnvironment implements Cloneable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
@@ -69,20 +69,30 @@ public class StoredEnvironment implements Cloneable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		StoredEnvironment other = (StoredEnvironment) obj;
 		if (id == null) {
-			if (other.id != null) return false;
-		} else if (!id.equals(other.id)) return false;
+            if(other.id != null) {
+                return false;
+            }
+        } else if(!id.equals(other.id)) {
+            return false;
+        }
 		return true;
 	}
 	
 	@Override
 	public StoredEnvironment clone() {
 		StoredEnvironment env = new StoredEnvironment();
-		env.setName(this.name);
+		env.setName(name);
         env.setVariableSet(variableSet);
 		return env;
 	}

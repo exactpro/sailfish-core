@@ -57,13 +57,13 @@ public class TCPIPSettingsServer extends AbstractServiceSettings
 	private String unexpectedMessages;
 
 	@Description("If TRUE, then the message structures <br> for encoding are taken from the dictionary, <br> otherwise message structures are taken from the current matrix <br> for encoding of all fields occur only into the message body.")
-	private boolean encodeByDictionary = false;
+	private boolean encodeByDictionary;
 
 	@Description("If TRUE, then the message structures <br> for decoding are taken from the dictionary, <br> otherwise message structures are taken from the current matrix <br> for decoding of all fields occur only into the message body.")
-	private boolean decodeByDictionary = false;
+	private boolean decodeByDictionary;
 
 	@Description("If TRUE, then the trailing zeros of decimal values<br> will be removed by dictionary during decoding.<br>This option will be enable only if <br>'decode by dictionary' is TRUE.")
-	private boolean removeTrailingZeros = false;
+	private boolean removeTrailingZeros;
 
 	public boolean isStoreMessages() {
 		return storeMessages;

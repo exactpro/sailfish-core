@@ -29,10 +29,10 @@ public class ComparatorSettings {
     @Deprecated
     private String alternateValue;
     private MetaContainer metaContainer = new MetaContainer();
-    private boolean checkGroupsOrder = false;
+    private boolean checkGroupsOrder;
     @Deprecated
     private Map<String, Boolean> negativeMap = Collections.emptyMap();
-    private boolean reorderGroups = false;
+    private boolean reorderGroups;
     private IDictionaryStructure dictionaryStructure;
     private Set<String> uncheckedFields = Collections.emptySet();
 

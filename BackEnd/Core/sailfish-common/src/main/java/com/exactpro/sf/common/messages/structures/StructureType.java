@@ -18,5 +18,5 @@ package com.exactpro.sf.common.messages.structures;
 public enum StructureType {
 	SIMPLE,
 	ENUM,
-	COMPLEX;
+	COMPLEX
 }

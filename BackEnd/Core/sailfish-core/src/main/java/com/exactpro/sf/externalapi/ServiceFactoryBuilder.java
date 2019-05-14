@@ -29,11 +29,11 @@ import com.exactpro.sf.configuration.suri.SailfishURIException;
 public class ServiceFactoryBuilder {
 
     private final File[] workspaceLayers;
-    private int minThreads = 0;
+    private int minThreads;
     private int maxThreads = 350;
     private int scheduledThreads = Runtime.getRuntime().availableProcessors() * 2;
-    private boolean useResourceLayer = false;
-    private boolean useStrictMessages = false;
+    private boolean useResourceLayer;
+    private boolean useStrictMessages;
 
     public ServiceFactoryBuilder(File... workspaceLayers) {
         this.workspaceLayers = Objects.requireNonNull(workspaceLayers, "'Workspace layers' parameter");

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast;
 
+import static com.exactpro.sf.services.ServiceHandlerRoute.TO_ADMIN;
+import static com.exactpro.sf.services.ServiceHandlerRoute.TO_APP;
+
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -36,7 +39,6 @@ import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
-import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.fast.blockstream.BlockEncodedOutputStream;
 import com.exactpro.sf.services.fast.blockstream.StreamBlockLengthReader;
@@ -45,13 +47,12 @@ import com.exactpro.sf.services.fast.converter.IMessageToFastConverter;
 
 public class FASTTcpClient extends FASTAbstractTCPClient {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 	private MessageOutputStream msgOutStream;
 	private volatile IMessageToFastConverter iMsgToFastConverter;
 
 	public FASTTcpClient() {
-		super();
-		changeStatus(ServiceStatus.CREATED, "Service created", null);
+        changeStatus(ServiceStatus.CREATED, "Service created", null);
 	}
 
 	@Override
@@ -116,11 +117,7 @@ public class FASTTcpClient extends FASTAbstractTCPClient {
         }
 
         try {
-			if (iMsg.getMetaData().isAdmin()) {
-				getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.TO_ADMIN, iMsg);
-			} else {
-				getServiceHandler().putMessage(getSession(), ServiceHandlerRoute.TO_APP, iMsg);
-			}
+            getServiceHandler().putMessage(getSession(), iMsg.getMetaData().isAdmin() ? TO_ADMIN : TO_APP, iMsg);
 		} catch (Exception e) {
             if(e instanceof InterruptedException){
                 throw (InterruptedException)e;
@@ -145,11 +142,8 @@ public class FASTTcpClient extends FASTAbstractTCPClient {
 
 	@Override
 	protected MessageBlockReader getBlockReader() {
-		if (getSettings().isStreamBlockEncoded()) {
-			return new StreamBlockLengthReader();
-		}
-		return MessageBlockReader.NULL;
-	}
+        return getSettings().isStreamBlockEncoded() ? new StreamBlockLengthReader() : MessageBlockReader.NULL;
+    }
 
 	@Override
 	public String toString() {

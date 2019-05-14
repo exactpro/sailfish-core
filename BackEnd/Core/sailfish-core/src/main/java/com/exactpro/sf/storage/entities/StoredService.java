@@ -89,7 +89,7 @@ public class StoredService extends AbstractPersistentObject {
 				append("handler", serviceHandlerClassName).
 				append("settings", parameters).
                 append("variables", variables).
-				append("environment", (null != environment) ? environment.getName() : "").
+                append("environment", (environment != null) ? environment.getName() : "").
 				toString();
 	}
 

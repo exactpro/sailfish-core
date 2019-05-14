@@ -42,8 +42,7 @@ public class TestCaseHistoryRow implements Serializable {
 
 	public TestCaseHistoryRow(String testCaseId, String matrixName,
                               LocalDateTime started, LocalDateTime finished, int status, String failReason) {
-		super();
-		this.testCaseId = testCaseId;
+        this.testCaseId = testCaseId;
 		this.matrixName = matrixName;
 		this.started = started;
 		this.finished = finished;

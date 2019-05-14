@@ -31,7 +31,7 @@ public class MessagesUpdateRetriever implements IUpdateRetriever {
 
     private static final Logger logger = LoggerFactory.getLogger(MessagesUpdateRetriever.class);
 
-    private List<IUpdateRequestListener> listeners;
+    private final List<IUpdateRequestListener> listeners;
 
     public MessagesUpdateRetriever() {
         listeners = new ArrayList<>();

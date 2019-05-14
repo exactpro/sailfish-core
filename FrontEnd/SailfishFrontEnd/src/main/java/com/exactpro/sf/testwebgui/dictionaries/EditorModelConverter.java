@@ -29,7 +29,7 @@ public class EditorModelConverter implements Converter {
 
 	@Override
 	public Object getAsObject(FacesContext fc, UIComponent uic, String value) {
-		if (value != null && value.trim().length() > 0 && models != null) {
+		if (value != null && !value.trim().isEmpty() && models != null) {
             for (FieldEditorModel model : models) {
             	if (model.getIndex().equals(value)) {
             		return model;
@@ -43,11 +43,7 @@ public class EditorModelConverter implements Converter {
 
 	@Override
 	public String getAsString(FacesContext fc, UIComponent uic, Object object) {
-		if(object != null) {
-            return String.valueOf(((FieldEditorModel) object).getIndex());
-        } else {
-            return null;
-        }
+        return object != null ? String.valueOf(((FieldEditorModel)object).getIndex()) : null;
 	}
 	
 	public static void setModels(List<FieldEditorModel> modelsList) {

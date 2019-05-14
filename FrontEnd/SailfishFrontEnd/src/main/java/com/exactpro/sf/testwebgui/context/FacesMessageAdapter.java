@@ -45,14 +45,14 @@ public class FacesMessageAdapter implements Cloneable {
     }
 
     public String getSeverity() {
-        String name = this.getMessage().getSeverity().toString();
+        String name = getMessage().getSeverity().toString();
         name = name.replaceAll("[0-9]+","");
         return name.trim();
     }
 
     public FacesMessageAdapter clone() {
-        FacesMessageAdapter that = new FacesMessageAdapter(this.message);
-        that.date = this.date;
+        FacesMessageAdapter that = new FacesMessageAdapter(message);
+        that.date = date;
 
         return that;
     }

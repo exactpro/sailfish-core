@@ -18,7 +18,7 @@ package com.exactpro.sf.testwebgui.notifications.messages;
 import com.exactprosystems.webchannels.AbstractUpdateEvent;
 
 public class MessagesUpdateEvent implements AbstractUpdateEvent {
-    private String guiSessionId;
+    private final String guiSessionId;
 
     public MessagesUpdateEvent(String guiSessionId) {
         this.guiSessionId = guiSessionId;

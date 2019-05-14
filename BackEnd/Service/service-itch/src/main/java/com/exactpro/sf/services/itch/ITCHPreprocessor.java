@@ -15,14 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.util.LRUMap;
+import java.math.BigDecimal;
+
 import org.apache.mina.core.session.IoSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.util.LRUMap;
 
 
 public class ITCHPreprocessor extends DefaultPreprocessor {
@@ -37,12 +38,12 @@ public class ITCHPreprocessor extends DefaultPreprocessor {
         // RM 25262
 		String msgName = message.getName();
 
-		if (msgName.equals("AddOrder") || msgName.equals("AddAttributedOrder")) {
+        if("AddOrder".equals(msgName) || "AddAttributedOrder".equals(msgName)) {
 			BigDecimal orderID = (BigDecimal) message.getField("OrderID");
 			Long instrumentID = (Long) message.getField("InstrumentID");
 
 			instruments.put(orderID, instrumentID);
-		} else if (msgName.equals("OrderModified") || msgName.equals("OrderExecuted") || msgName.equals("OrderExecutedWithPrice_Size")) {
+        } else if("OrderModified".equals(msgName) || "OrderExecuted".equals(msgName) || "OrderExecutedWithPrice_Size".equals(msgName)) {
 			BigDecimal orderID = (BigDecimal) message.getField("OrderID");
 			Long instrumentID = instruments.get(orderID);
 

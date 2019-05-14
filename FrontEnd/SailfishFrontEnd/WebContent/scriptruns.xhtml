@@ -61,349 +61,345 @@
     This is chanel's warning object.
 </div>
 
-<div class="eps-table-wrapper eps-matrices-wrapper">
-    <h:form id="form" styleClass="eps-scriptruns-form" prependId="false">
+<div class="eps-panel-container">
+    <div class="eps-table-wrapper eps-matrices-wrapper">
+        <h:form id="form" styleClass="eps-scriptruns-form" prependId="false">
 
-        <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true"/>
+            <p:growl sticky="false" life="6000" showDetail="true" autoUpdate="true"/>
 
-        <p:remoteCommand name="stopScript" action="#{testScriptsBean.stopScript}"/>
+            <p:remoteCommand name="stopScript" action="#{testScriptsBean.stopScript}"/>
 
-        <p:remoteCommand name="compileScript" action="#{testScriptsBean.compileScript}"/>
+            <p:remoteCommand name="compileScript" action="#{testScriptsBean.compileScript}"/>
 
-        <p:remoteCommand name="runCompiledScript" action="#{testScriptsBean.runCompiledScript}"/>
+            <p:remoteCommand name="runCompiledScript" action="#{testScriptsBean.runCompiledScript}"/>
 
-        <p:remoteCommand name="resumeScript" action="#{testScriptsBean.resumeScript}"/>
+            <p:remoteCommand name="resumeScript" action="#{testScriptsBean.resumeScript}"/>
 
-        <p:remoteCommand name="pauseScript" action="#{testScriptsBean.pauseScript}"/>
+            <p:remoteCommand name="pauseScript" action="#{testScriptsBean.pauseScript}"/>
 
-        <p:remoteCommand name="nextStep" action="#{testScriptsBean.nextStep}"/>
+            <p:remoteCommand name="nextStep" action="#{testScriptsBean.nextStep}"/>
 
-        <p:remoteCommand name="updateMatricesTable" update=":form:table :form:mainMenuBar :form:secondMenuBar" oncomplete="PF('mainTable').filter()"/>
+            <p:remoteCommand name="updateMatricesTable" update=":form:table :form:mainMenuBar :form:secondMenuBar" oncomplete="PF('mainTable').filter()"/>
 
-        <p:remoteCommand name="showAddLocalMatrixDialog" oncomplete="PF('addLocalMatrixDialog').show()" />
+            <p:remoteCommand name="showAddLocalMatrixDialog" oncomplete="PF('addLocalMatrixDialog').show()" />
 
-        <p:remoteCommand name="triggerDateFilter" oncomplete="PF('mainTable').filter()" />
+            <p:remoteCommand name="triggerDateFilter" oncomplete="PF('mainTable').filter()" />
 
-        <p:remoteCommand name="clearSelectedTestScript" action="#{testScriptsBean.clearSelectedTestScript}"/>
+            <p:remoteCommand name="clearSelectedTestScript" action="#{testScriptsBean.clearSelectedTestScript}"/>
 
-        <p:remoteCommand name="cancelConvertMatrix" action="#{converterBean.cancelConvertMatrix}"/>
+            <p:remoteCommand name="cancelConvertMatrix" action="#{converterBean.cancelConvertMatrix}"/>
 
-        <p:remoteCommand name="reloadTestScriptForm" update=":testScriptForm" oncomplete="reloadTestScriptResults()"/>
+            <p:remoteCommand name="reloadTestScriptForm" update=":testScriptForm" oncomplete="reloadTestScriptResults()"/>
 
-        <p:remoteCommand name="reloadTestScriptResults" action="#{testScriptsBean.addFilterCallback}" update=":testScriptForm:test-script-results-wrapper" oncomplete="updateFilter(args)"/>
+            <p:remoteCommand name="reloadTestScriptResults" action="#{testScriptsBean.addFilterCallback}" update=":testScriptForm:test-script-results-wrapper" oncomplete="updateFilter(args)"/>
 
-        <p:remoteCommand name="showGrowlMessage" action="#{generalBean.showGrowlMessage}"/>
+            <p:remoteCommand name="showGrowlMessage" action="#{generalBean.showGrowlMessage}"/>
 
-        <p:remoteCommand name="filterUpdateOnReload" action="#{testScriptsBean.addFilterCallback}" oncomplete="updateFilter(args)" autoRun="true"/>
+            <p:remoteCommand name="filterUpdateOnReload" action="#{testScriptsBean.addFilterCallback}" oncomplete="updateFilter(args)" autoRun="true"/>
 
-        <p:menubar id="mainMenuBar" styleClass="eps-scripts-toolbar">
-			<p:menuitem icon="eps-custom-icon eps-custom-icon-upload" id="uploadMatrixButton" value="Upload"
-                                onclick="PF('addMatrixDialog').show()"/>
-            <p:menuitem id="createButton" icon="eps-custom-icon eps-custom-icon-plus" value="Create" onclick="PF('createDialog').show()"/>
-            <p:menuitem id="runButton" icon="eps-custom-icon eps-custom-icon-play" value="Run" rendered="#{not empty testScriptsBean.selectedMatrices}" action="#{testScriptsBean.runSelected}" update=":testScriptForm"/>
-            <p:menuitem id="runAllButton" icon="eps-custom-icon eps-custom-icon-play" value="Run all" disabled="#{empty testScriptsBean.matrixAdapterList}" rendered="#{empty testScriptsBean.selectedMatrices}" action="#{testScriptsBean.runAll}" update=":testScriptForm"/>
-        </p:menubar>
+            <div class="eps-left-panel-menu-bar-container">
+                <p:menubar id="mainMenuBar" styleClass="eps-scripts-toolbar">
+                    <p:menuitem icon="eps-custom-icon eps-custom-icon-upload" id="uploadMatrixButton" value="Upload"
+                                        onclick="PF('addMatrixDialog').show()"/>
+                    <p:menuitem id="createButton" icon="eps-custom-icon eps-custom-icon-plus" value="Create" onclick="PF('createDialog').show()"/>
+                    <p:menuitem id="runButton" icon="eps-custom-icon eps-custom-icon-play" value="Run" rendered="#{not empty testScriptsBean.selectedMatrices}" action="#{testScriptsBean.runSelected}" update=":testScriptForm"/>
+                    <p:menuitem id="runAllButton" icon="eps-custom-icon eps-custom-icon-play" value="Run all" disabled="#{empty testScriptsBean.matrixAdapterList}" rendered="#{empty testScriptsBean.selectedMatrices}" action="#{testScriptsBean.runAll}" update=":testScriptForm"/>
+                </p:menubar>
 
-        <p:menubar id="secondMenuBar" styleClass="eps-scriptruns-sub-toolbar">
-            <p:menuitem id="deleteButton" icon="eps-custom-icon eps-custom-icon-delete" onclick="PF('confirmation').show()" disabled="#{empty testScriptsBean.selectedMatrices}"/>
-            <p:menuitem id="downloadButton" icon="eps-custom-icon eps-custom-icon-download" ajax="false" disabled="#{empty testScriptsBean.selectedMatrices}" onclick="PrimeFaces.monitorDownload(onDownloadStart, onDownloadFinish);">
-                <p:fileDownload id="martixDownload" value="#{testScriptsBean.matrixInZip}"/>
-            </p:menuitem>
-        </p:menubar>
+                <p:menubar id="secondMenuBar" styleClass="eps-scriptruns-sub-toolbar">
+                    <p:menuitem id="deleteButton" icon="eps-custom-icon eps-custom-icon-delete" onclick="PF('confirmation').show()" disabled="#{empty testScriptsBean.selectedMatrices}"/>
+                    <p:menuitem id="downloadButton" icon="eps-custom-icon eps-custom-icon-download" ajax="false" disabled="#{empty testScriptsBean.selectedMatrices}" onclick="PrimeFaces.monitorDownload(onDownloadStart, onDownloadFinish);">
+                        <p:fileDownload id="martixDownload" value="#{testScriptsBean.matrixInZip}"/>
+                    </p:menuitem>
+                </p:menubar>
 
-        <p:tooltip value="Select and upload matrices" for="uploadMatrixButton"/>
-        <p:tooltip value="Delete selected matrices" for="deleteButton" />
-        <p:tooltip value="Download selected matrices" for="downloadButton" />
-        <p:tooltip value="Add empty matrix" for="createButton" />
-        <p:tooltip value="Run selected matrices" for="runButton" />
+                <p:tooltip value="Select and upload matrices" for="uploadMatrixButton"/>
+                <p:tooltip value="Delete selected matrices" for="deleteButton" />
+                <p:tooltip value="Download selected matrices" for="downloadButton" />
+                <p:tooltip value="Add empty matrix" for="createButton" />
+                <p:tooltip value="Run selected matrices" for="runButton" />
+            </div>
 
-        <div style="clear:both; height: 1px;"/>
+            <p:dataTable id="table" value="#{testScriptsBean.matrixAdapterList}" var="matrixAdapter"
+                         tableStyle="table-layout: auto; display: block; height: 100%"
+                         selection="#{testScriptsBean.selectedMatrices}"
+                         filteredValue="#{testScriptsBean.filteredMatrices}"
+                         rowKey="#{matrixAdapter.matrixId}"
+                         draggableRows="true" editable="true"
+                         editMode="cell"
+                         emptyMessage="No uploaded matrices"
+                         styleClass="eps-matrix-list-table eps-main-table #{testScriptsBean.statisticsEnabled ? 'eps-statistics-enabled' : ''}"
+                         widgetVar="mainTable" rowIndexVar="rowIndex"
+                         rowStyleClass="#{matrixAdapter.reloadEnabled ? 'eps-matrix-row eps-matrix-reload-enabled' : 'eps-matrix-row'}">
 
-        <p:dataTable id="table" value="#{testScriptsBean.matrixAdapterList}" var="matrixAdapter"
-                     selection="#{testScriptsBean.selectedMatrices}" filteredValue="#{testScriptsBean.filteredMatrices}"
-                     rowKey="#{matrixAdapter.matrixId}" draggableRows="true" editable="true" editMode="cell"
-                     emptyMessage="No uploaded matrices"
-                     styleClass="eps-matrix-list-table eps-main-table #{testScriptsBean.statisticsEnabled ? 'eps-statistics-enabled' : ''}"
-                     widgetVar="mainTable" rowIndexVar="rowIndex"
-                     rowStyleClass="#{matrixAdapter.reloadEnabled ? 'eps-matrix-row eps-matrix-reload-enabled' : 'eps-matrix-row'}">
+                <p:ajax event="rowSelect" update=":form:mainMenuBar :form:secondMenuBar" />
+                <p:ajax event="rowUnselect" update=":form:mainMenuBar :form:secondMenuBar" />
+                <p:ajax event="rowSelectCheckbox" update=":form:mainMenuBar :form:secondMenuBar" />
+                <p:ajax event="rowUnselectCheckbox" update=":form:mainMenuBar :form:secondMenuBar" />
+                <p:ajax event="toggleSelect" update=":form:mainMenuBar :form:secondMenuBar" />
+                <p:ajax event="rowReorder" listener="#{testScriptsBean.onRowReorder}" update="@this" />
+                <p:ajax event="filter" oncomplete="saveFilterText()" update=":form:table" />
 
-            <p:ajax event="rowSelect" update=":form:mainMenuBar :form:secondMenuBar" />
-            <p:ajax event="rowUnselect" update=":form:mainMenuBar :form:secondMenuBar" />
-            <p:ajax event="rowSelectCheckbox" update=":form:mainMenuBar :form:secondMenuBar" />
-            <p:ajax event="rowUnselectCheckbox" update=":form:mainMenuBar :form:secondMenuBar" />
-            <p:ajax event="toggleSelect" update=":form:mainMenuBar :form:secondMenuBar" />
-            <p:ajax event="rowReorder" listener="#{testScriptsBean.onRowReorder}" update="@this" />
-            <p:ajax event="filter" oncomplete="saveFilterText()" update=":form:table" />
+                <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
 
-            <p:column selectionMode="multiple" style="width:16px;text-align:center"/>
+                <p:column id="nameColumn" filterBy="#{matrixAdapter.name}" filterMatchMode="contains" filterStyleClass="eps-matrix-name-filter eps-input" styleClass="eps-matrix-column eps-matrix-name-column">
+                    <f:facet name="header">
+                        <h:outputText value="Name"/>
+                        <p:watermark for="nameColumn" value=" Name filter " />
+                    </f:facet>
 
-            <p:column id="nameColumn" filterBy="#{matrixAdapter.name}" filterMatchMode="contains" filterStyleClass="eps-matrix-name-filter eps-input" styleClass="eps-matrix-column eps-matrix-name-column">
-                <f:facet name="header">
-                    <h:outputText value="Name"/>
-                    <p:watermark for="nameColumn" value=" Name filter " />
+                    <h:outputText value="#{matrixAdapter.name}" title="Matrix title"/>
+                    <p:graphicImage library="sf" name="images/earth2.png" styleClass="eps-reload-matrix-img" title="Matrix is linked" rendered="#{matrixAdapter.reloadEnabled}"/>
+                </p:column>
+
+                <p:column headerText="Date" styleClass="eps-matrix-column eps-matrix-date-column" filterBy="#{matrixAdapter.date}" filterFunction="#{testScriptsBean.filterByDate}">
+
+                    <f:facet name="filter">
+                        <p:calendar id="datetime" title="Filter by date" value="#{testScriptsBean.dateFilter}" pattern="yyyy-MM-dd"
+                                    onfocus="$(this).mask('9999-99-99');" showOn="button" styleClass="eps-date-matrix-filter">
+                            <p:ajax event="dateSelect" oncomplete="PF('mainTable').filter()" update=":form:table" />
+                            <p:ajax event="change" oncomplete="PF('mainTable').filter()" update=":form:table" />
+                        </p:calendar>
+                    </f:facet>
+
+                    <h:outputText value="#{matrixAdapter.date}" title="When matrix has been uploaded">
+                        <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column id="rangeColumn" headerText="Range" styleClass="eps-matrix-column eps-matrix-range-column">
+                    <p:cellEditor>
+                            <f:facet name="output">
+                                <h:outputText value="#{matrixAdapter.range}"/>
+                            </f:facet>
+                            <f:facet name="input">
+
+                                <p:inputText id="rangeInputText" styleClass="eps-input eps-table-input" value="#{matrixAdapter.range}"
+                                             onkeyup="if (event.keyCode == 13) { $('.startScriptButton#{rowIndex}').click(); }">
+                                    <p:ajax process="@this" />
+                                </p:inputText>
+
+                            </f:facet>
+                    </p:cellEditor>
+                </p:column>
+
+                <p:column headerText="Actions" styleClass="eps-matrix-column eps-matrix-actions-column">
+                    <p:commandButton style="display: none;" process="@none" update="@none" ajax="true" />
+                    <p:commandButton styleClass="startScriptButton#{rowIndex}" icon="ui-icon-play" title="Start script" actionListener="#{testScriptsBean.run(matrixAdapter)}" update=":testScriptForm"/>
+                    <p:menuButton value="&nbsp;">
+                        <p:menuitem id="renameButton" value="Rename" icon="ui-icon-pencil" action="#{testScriptsBean.loadNewFileName(matrixAdapter.matrixId)}"
+                                    oncomplete="PF('renameDialog').show()" title="Set new matrix name" update=":renameDialogForm" />
+                        <p:menuitem value="Reload" icon="ui-icon-arrowrefresh-1-s" title="Reload matrix by link" disabled="#{not matrixAdapter.reloadEnabled}"
+                                    action="#{uploadMatrixBean.setMatrixId(matrixAdapter.matrixId)}" oncomplete="PF('confirmReloadMatrix').show()">
+                            <f:param name="id" value="#{matrixAdapter.matrixId}" />
+                        </p:menuitem>
+                        <p:menuitem value="Convert matrix" icon="ui-icon-seek-next" title="Convert matrix" rendered="#{converterBean.hasMatrixConverter()}"
+                                    action="#{converterBean.setMatrixId(matrixAdapter.matrixId)}" oncomplete="PF('confirmConvertMatrix').show();">
+                            <f:param name="id" value="#{matrixAdapter.matrixId}" />
+                        </p:menuitem>
+                        <p:menuitem value="Enqueue" icon="ui-icon-clock" title="Enqueue script" action="#{testScriptsBean.queue}">
+                            <f:param name="id" value="#{matrixAdapter.matrixId}" />
+                        </p:menuitem>
+                        <p:menuitem value="Edit in grid" icon="ui-icon-calculator" action="#{testScriptsBean.goEditMatrix}" title="Edit in grid">
+                            <f:param name="id" value="#{matrixAdapter.matrixId}" />
+                        </p:menuitem>
+                        <p:menuitem value="Edit as text" icon="ui-icon-script" action="#{testScriptsBean.goEditPlainMatrix}" title="Edit as text">
+                            <f:param name="id" value="#{matrixAdapter.matrixId}" />
+                        </p:menuitem>
+                        <p:menuitem value="Graphic editor" icon="ui-icon-clipboard" action="#{testScriptsBean.goEditGuiMatrix}" title="Graphic editor">
+                            <f:param name="id" value="#{matrixAdapter.matrixId}" />
+                        </p:menuitem>
+                    </p:menuButton>
+                </p:column>
+
+                <f:facet name="footer">
+                    <h:outputText value="#{testScriptsBean.matrixCountInfo}"/>
                 </f:facet>
 
-                <h:outputText value="#{matrixAdapter.name}" title="Matrix title"/>
-                <p:graphicImage library="sf" name="images/earth2.png" styleClass="eps-reload-matrix-img" title="Matrix is linked" rendered="#{matrixAdapter.reloadEnabled}"/>
-            </p:column>
+            </p:dataTable>
 
-            <p:column headerText="Date" styleClass="eps-matrix-column eps-matrix-date-column" filterBy="#{matrixAdapter.date}" filterFunction="#{testScriptsBean.filterByDate}">
+            <div class="eps-matrices-footer">
+                    <p:outputPanel styleClass="eps-left-footer">
+                            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-continue-if-failed" id="continueIfFailedCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.continueOnFailed}">
+                                <p:ajax execute="@this" />
+                            </p:selectBooleanCheckbox>
 
-                <f:facet name="filter">
-                    <p:calendar id="datetime" title="Filter by date" value="#{testScriptsBean.dateFilter}" pattern="yyyy-MM-dd"
-                                onfocus="$(this).mask('9999-99-99');" showOn="button" styleClass="eps-date-matrix-filter">
-                        <p:ajax event="dateSelect" oncomplete="PF('mainTable').filter()" update=":form:table" />
-                        <p:ajax event="change" oncomplete="PF('mainTable').filter()" update=":form:table" />
-                    </p:calendar>
-                </f:facet>
+                            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-auto-start" id="autostartCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.autoStart}">
+                                <p:ajax execute="@this" />
+                            </p:selectBooleanCheckbox>
 
-                <h:outputText value="#{matrixAdapter.date}" title="When matrix has been uploaded">
-                    <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"/>
-                </h:outputText>
-            </p:column>
+                            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-ignore-ask" id="ignoreAskForContinueCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.ignoreAskForContinue}">
+                                <p:ajax execute="@this" />
+                            </p:selectBooleanCheckbox>
 
-            <p:column id="rangeColumn" headerText="Range" styleClass="eps-matrix-column eps-matrix-range-column">
-                <p:cellEditor>
-                        <f:facet name="output">
-                            <h:outputText value="#{matrixAdapter.range}"/>
-                        </f:facet>
-                        <f:facet name="input">
+                            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-try-reload" id="tryReloadMatrixBeforeStartCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.tryReloadBeforeStart}">
+                                <p:ajax execute="@this" />
+                            </p:selectBooleanCheckbox>
 
-                            <p:inputText id="rangeInputText" styleClass="eps-input eps-table-input" value="#{matrixAdapter.range}"
-                            			 onkeyup="if (event.keyCode == 13) { $('.startScriptButton#{rowIndex}').click(); }">
-                                <p:ajax process="@this" />
-                            </p:inputText>
+                            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-run-netdumper" id="runNetDumperCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.runNetDumper}">
+                                <p:ajax execute="@this" />
+                            </p:selectBooleanCheckbox>
 
-                        </f:facet>
-                </p:cellEditor>
-            </p:column>
+                            <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-skip-optional" id="skipOptionalCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.skipOptional}">
+                                <p:ajax execute="@this" />
+                            </p:selectBooleanCheckbox>
+                    </p:outputPanel>
 
-            <p:column headerText="Actions" styleClass="eps-matrix-column eps-matrix-actions-column">
-                <p:commandButton style="display: none;" process="@none" update="@none" ajax="true" />
-                <p:commandButton styleClass="startScriptButton#{rowIndex}" icon="ui-icon-play" title="Start script" actionListener="#{testScriptsBean.run(matrixAdapter)}" update=":testScriptForm"/>
-                <p:menuButton value="&nbsp;">
-                    <p:menuitem id="renameButton" value="Rename" icon="ui-icon-pencil" action="#{testScriptsBean.loadNewFileName(matrixAdapter.matrixId)}"
-                                oncomplete="PF('renameDialog').show()" title="Set new matrix name" update=":renameDialogForm" />
-                    <p:menuitem value="Reload" icon="ui-icon-arrowrefresh-1-s" title="Reload matrix by link" disabled="#{not matrixAdapter.reloadEnabled}"
-                                action="#{uploadMatrixBean.setMatrixId(matrixAdapter.matrixId)}" oncomplete="PF('confirmReloadMatrix').show()">
-                        <f:param name="id" value="#{matrixAdapter.matrixId}" />
-                    </p:menuitem>
-                    <p:menuitem value="Convert matrix" icon="ui-icon-seek-next" title="Convert matrix" rendered="#{converterBean.hasMatrixConverter()}"
-                                action="#{converterBean.setMatrixId(matrixAdapter.matrixId)}" oncomplete="PF('confirmConvertMatrix').show();">
-                        <f:param name="id" value="#{matrixAdapter.matrixId}" />
-                    </p:menuitem>
-                    <p:menuitem value="Enqueue" icon="ui-icon-clock" title="Enqueue script" action="#{testScriptsBean.queue}">
-                        <f:param name="id" value="#{matrixAdapter.matrixId}" />
-                    </p:menuitem>
-                    <p:menuitem value="Edit in grid" icon="ui-icon-calculator" action="#{testScriptsBean.goEditMatrix}" title="Edit in grid">
-                        <f:param name="id" value="#{matrixAdapter.matrixId}" />
-                    </p:menuitem>
-                    <p:menuitem value="Edit as text" icon="ui-icon-script" action="#{testScriptsBean.goEditPlainMatrix}" title="Edit as text">
-                        <f:param name="id" value="#{matrixAdapter.matrixId}" />
-                    </p:menuitem>
-                    <p:menuitem value="Graphic editor" icon="ui-icon-clipboard" action="#{testScriptsBean.goEditGuiMatrix}" title="Graphic editor">
-                        <f:param name="id" value="#{matrixAdapter.matrixId}" />
-                    </p:menuitem>
-                </p:menuButton>
-            </p:column>
+                    <h:panelGrid columns="3" cellpadding="5" styleClass="eps-right-footer">
 
-            <f:facet name="footer">
-                <h:outputText value="#{testScriptsBean.matrixCountInfo}"/>
-            </f:facet>
+                        <h:panelGroup>
+                            <p:selectOneMenu id="selectedEnvironment" value="#{testScriptsBean.selectedEnvironment}" var="environment" styleClass="eps-input" style="width:145px; text-align:left; margin-top: -1px;">
+                                <f:selectItems value="#{testScriptsBean.environmentValues}" />
+                                <p:ajax execute="@this" />
+                            </p:selectOneMenu>
+                            <p:tooltip value="Environments list" for="selectedEnvironment" />
+                        </h:panelGroup>
 
-        </p:dataTable>
+                        <h:panelGroup>
+                            <p:selectOneMenu id="selectedType" value="#{testScriptsBean.selectedLanguageURI}" styleClass="eps-input" style="width:90px; text-align: left;">
+                                <f:selectItems value="#{testScriptsBean.languageURIs}" var="language" itemValue="#{language}" itemLabel="#{language}" style="width:200px"/>
+                                <p:ajax execute="@this" />
+                            </p:selectOneMenu>
+                            <p:tooltip value="Language" for="selectedType" />
+                        </h:panelGroup>
 
-        <div class="eps-matrices-footer">
-        	<div class="clearfix">
-	            <p:outputPanel styleClass="eps-left-footer">
-	                <div class="eps-checkbox-wrapper">
-	                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-continue-if-failed" id="continueIfFailedCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.continueOnFailed}">
-	                        <p:ajax execute="@this" />
-	                    </p:selectBooleanCheckbox>
+                        <h:panelGroup>
+                            <p:selectOneMenu id="selectedEncoding" value="#{testScriptsBean.selectedEncoding}" var="encoding" styleClass="eps-input" style="width:90px; text-align: left;">
+                                <f:selectItems value="#{testScriptsBean.encodeValues}" var="encodeValue" itemLabel="#{encodeValue}" itemValue="#{encodeValue}" style="width:200px"/>
+                                <p:ajax execute="@this" />
+                            </p:selectOneMenu>
+                            <p:tooltip value="Encoding" for="selectedEncoding" />
+                        </h:panelGroup>
 
-	                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-auto-start" id="autostartCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.autoStart}">
-	                        <p:ajax execute="@this" />
-	                    </p:selectBooleanCheckbox>
-	                </div>
+                    </h:panelGrid>
 
-	                <div class="eps-checkbox-wrapper">
-	                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-ignore-ask" id="ignoreAskForContinueCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.ignoreAskForContinue}">
-	                        <p:ajax execute="@this" />
-	                    </p:selectBooleanCheckbox>
+                <ui:fragment rendered="#{testScriptsBean.statisticsEnabled}">
 
-	                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-try-reload" id="tryReloadMatrixBeforeStartCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.tryReloadBeforeStart}">
-	                        <p:ajax execute="@this" />
-	                    </p:selectBooleanCheckbox>
+                    <div class="eps-statistics-tags">
 
-	                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-run-netdumper" id="runNetDumperCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.runNetDumper}">
-	                        <p:ajax execute="@this" />
-	                    </p:selectBooleanCheckbox>
+                        <h:panelGroup id="selectted-tags">
+                            <ui:repeat var="tag" value="#{testScriptsBean.tags}">
+                                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
+                                    #{tag.name}
+                                    <p:commandLink action="#{testScriptsBean.removeTag(tag)}" update=":form:selectted-tags"
+                                        styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
+                                </span>
+                            </ui:repeat>
+                        </h:panelGroup>
 
-	                    <p:selectBooleanCheckbox styleClass="eps-custom-checkbox-script-param eps-checkbox-skip-optional" id="skipOptionalCheckbox" itemLabel="&nbsp;" value="#{testScriptsBean.skipOptional}">
-	                        <p:ajax execute="@this" />
-	                    </p:selectBooleanCheckbox>
-	                </div>
-	            </p:outputPanel>
+                        <p:inplace id="tags-inplace" editor="true">
+                            <f:facet name="output">
+                                <span style="font-weight: bold;">+</span> Add tag
+                            </f:facet>
+                            <f:facet name="input">
+                                <p:autoComplete id="tags-autocomplete" value="#{testScriptsBean.tagToAdd}"
+                                    completeMethod="#{testScriptsBean.completeTag}"
+                                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true"
+                                    placeholder="type to add" emptyMessage="No matching tags found">
 
-	            <h:panelGrid columns="3" cellpadding="5" styleClass="eps-right-footer">
+                                    <p:ajax event="itemSelect" listener="#{testScriptsBean.onTagSelect}" execute="@this" update="tags-autocomplete selectted-tags"/>
+                                    <o:converter converterId="omnifaces.ListConverter" list="#{testScriptsBean.allTags}" />
+                                    <p:column>
+                                        <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
+                                    </p:column>
+                                </p:autoComplete>
+                            </f:facet>
+                        </p:inplace>
 
-					<h:panelGroup>
-		                <p:selectOneMenu id="selectedEnvironment" value="#{testScriptsBean.selectedEnvironment}" var="environment" styleClass="eps-input" style="width:145px; text-align:left; margin-top: -1px;">
-		                    <f:selectItems value="#{testScriptsBean.environmentValues}" />
-		                    <p:ajax execute="@this" />
-		                </p:selectOneMenu>
-		                <p:tooltip value="Environments list" for="selectedEnvironment" />
-	                </h:panelGroup>
-
-					<h:panelGroup>
-		                <p:selectOneMenu id="selectedType" value="#{testScriptsBean.selectedLanguageURI}" styleClass="eps-input" style="width:90px; text-align: left;">
-		                    <f:selectItems value="#{testScriptsBean.languageURIs}" var="language" itemValue="#{language}" itemLabel="#{language}" style="width:200px"/>
-		                    <p:ajax execute="@this" />
-		                </p:selectOneMenu>
-		                <p:tooltip value="Language" for="selectedType" />
-					</h:panelGroup>
-
-					<h:panelGroup>
-		                <p:selectOneMenu id="selectedEncoding" value="#{testScriptsBean.selectedEncoding}" var="encoding" styleClass="eps-input" style="width:90px; text-align: left;">
-		                    <f:selectItems value="#{testScriptsBean.encodeValues}" var="encodeValue" itemLabel="#{encodeValue}" itemValue="#{encodeValue}" style="width:200px"/>
-		                    <p:ajax execute="@this" />
-		                </p:selectOneMenu>
-		                <p:tooltip value="Encoding" for="selectedEncoding" />
-					</h:panelGroup>
-
-	            </h:panelGrid>
-
-	        </div>
-
-            <ui:fragment rendered="#{testScriptsBean.statisticsEnabled}">
-
-	            <div class="eps-statistics-tags">
-
-	            	<h:panelGroup id="selectted-tags">
-		            	<ui:repeat var="tag" value="#{testScriptsBean.tags}">
-		            		<span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">
-		            			#{tag.name}
-		            			<p:commandLink action="#{testScriptsBean.removeTag(tag)}" update=":form:selectted-tags"
-		            				styleClass="ui-icon ui-icon-close" style="display: inline-block; vertical-align: middle;margin-top: -2px;"/>
-		            		</span>
-		            	</ui:repeat>
-	            	</h:panelGroup>
-
-	            	<p:inplace id="tags-inplace" editor="true">
-	            		<f:facet name="output">
-			                <span style="font-weight: bold;">+</span> Add tag
-			            </f:facet>
-			            <f:facet name="input">
-			            	<p:autoComplete id="tags-autocomplete" value="#{testScriptsBean.tagToAdd}"
-			            		completeMethod="#{testScriptsBean.completeTag}"
-			                    var="tag" itemLabel="#{tag.name}" itemValue="#{tag}" forceSelection="true"
-			                    placeholder="type to add" emptyMessage="No matching tags found">
-
-			                    <p:ajax event="itemSelect" listener="#{testScriptsBean.onTagSelect}" execute="@this" update="tags-autocomplete selectted-tags"/>
-			                    <o:converter converterId="omnifaces.ListConverter" list="#{testScriptsBean.allTags}" />
-					            <p:column>
-					                <span class="eps-statistics-tag #{tagsColorsBean.getColorClass(tag.name)}">#{tag.name}</span>
-					            </p:column>
-					        </p:autoComplete>
-				        </f:facet>
-			        </p:inplace>
-
-	            </div>
-
-            </ui:fragment>
-
-        </div>
-
-    </h:form>
-</div>
-
-
-<div class="eps-table-wrapper eps-global-result-wrapper">
-    <h:form id="testScriptForm" prependId="false" styleClass="eps-scriptruns-form">
-        <div class="eps-test-script-result-toolbar-container">
-            <div class="eps-test-script-result-toolbar-buttons-left-container">
-                <p:menubar id="mainMenuBarScriptResult" styleClass="eps-scriptruns-toolbar" style="display: inline">
-                    <p:menuitem id="resumeAllTestScriptButton" styleClass="eps-common-action" icon="eps-custom-icon eps-custom-icon-resume-all" action="#{testScriptsBean.resumeAllScript()}"/>
-                    <p:menuitem id="pauseAllTestScriptButton" styleClass="eps-common-action" icon="eps-custom-icon eps-custom-icon-pause-all" action="#{testScriptsBean.pauseAllScript()}"/>
-                    <p:menuitem id="stopAllTestScriptButton" styleClass="eps-common-action" icon="eps-custom-icon eps-custom-icon-stop-all" action="#{testScriptsBean.stopAllScript()}"/>
-                    <p:menuitem id="filterTestScriptButton" styleClass="eps-filter-testscript-button" icon="eps-custom-icon eps-custom-icon-filter" style="margin-left:25px"/>
-                </p:menubar>
-            </div>
-
-            <div class="eps-test-script-result-toolbar-buttons-middle-container">
-                <p:inputText id="filterNameResult" value="#{testScriptsBean.filterResultName}" styleClass="eps-input eps-filter-name-result">
-                    <p:ajax event="keyup" process="@this" oncomplete="reloadTestScriptResults()" />
-                </p:inputText>
-                <p:watermark for="filterNameResult" value=" Matrix name filter " />
-
-                <p:selectOneMenu id="sort-by" value="#{testScriptsBean.sortBy}" styleClass="eps-filter-status-result eps-test-script-result-toolbar-sort-by">
-                    <f:selectItems value="#{testScriptsBean.comparators.keySet()}" />
-                    <p:ajax event="change" process="@this" oncomplete="reloadTestScriptResults()"/>
-                </p:selectOneMenu>
-            </div>
-
-            <div class="eps-test-script-result-toolbar-buttons-right-container">
-                <p:menubar id="mainMenuBarScriptSelect" styleClass="eps-scriptrun-select-all" style="display: inline;">
-                    <p:submenu id="clearAllTestScriptsDropdown" icon="eps-custom-icon eps-custom-icon-delete"
-                               class="eps-clear-test-results-dropdown eps-clear-results-button-hidden" >
-                        <p:menuitem id="clearAllSafe" icon="ui-icon-document" value="Safe delete" onstart="getSelectTestscripts(false, true)" />
-                        <p:menuitem id="clearAllHard" icon="ui-icon-trash" value="Delete from disk" onstart="getSelectTestscripts(true, false)" onsuccess="if(getSelectedScriptResults().length > 0) PF('confirmClearAll').show()" />
-                    </p:submenu>
-                    <p:menuitem id="reloadAllTestScriptButton" styleClass="eps-reload-testscript-button" action="#{testScriptsBean.reloadAllTestScript()}" oncomplete="reloadTestScriptResults(); if (args.isRunningScripts) {PF('clearTestScriptsErrorDialod').show()}" icon="eps-custom-icon eps-custom-icon-refresh"/>
-                    <p:menuitem id="selectAllTestScriptButton" icon="eps-custom-icon eps-custom-icon-checkbox-round-unchecked" onclick="selectAllTestscripts()"/>
-                </p:menubar>
-            </div>
-        </div>
-
-        <div class="eps-results-filter">
-            <div style="display: inline">
-                <h:outputLabel value="Status:" class="eps-test-script-result-filter-label"/>
-                <p:selectManyMenu id="statusFilterMenu" value="#{testScriptsBean.selectedResultStatuses}"
-                                  filter="true" filterMatchMode="contains" showCheckbox="true"
-                                  styleClass="eps-filter-status-result" appendTo=":testScriptForm">
-                    <f:selectItems value="#{testScriptsBean.allResultStatuses}"/>
-                    <p:ajax event="change" process="@this" update="statusFilterMenu" oncomplete="reloadTestScriptResults()" />
-                </p:selectManyMenu>
-            </div>
-
-            <div class="eps-cals" style="display: inline; width: auto; margin-left: 20px">
-                <h:outputLabel value="Date:" class="eps-test-script-result-filter-label"/>
-                <div style="margin: 13px 5px; padding: 2px">
-                    <div>
-                        <p:outputLabel for="dateTimeResultFilterFrom" value="From " />
-                        <p:calendar id="dateTimeResultFilterFrom" value="#{testScriptsBean.dateFilterFrom}" maxdate="#{testScriptsBean.dateFilterTo}" pattern="yyyy-MM-dd" onfocus="$(this).mask('9999-99-99');" readonlyInput="true" styleClass="eps-input">
-                            <p:ajax event="dateSelect" oncomplete="reloadTestScriptResults()" update="dateTimeResultFilterTo"/>
-                        </p:calendar>
                     </div>
-                    <div>
-                        <p:outputLabel for="dateTimeResultFilterTo" value="To " />
-                        <p:calendar id="dateTimeResultFilterTo" value="#{testScriptsBean.dateFilterTo}" mindate="#{testScriptsBean.dateFilterFrom}" pattern="yyyy-MM-dd" onfocus="$(this).mask('9999-99-99');" readonlyInput="true" styleClass="eps-input">
-                            <p:ajax event="dateSelect" oncomplete="reloadTestScriptResults()" update="dateTimeResultFilterFrom"/>
-                        </p:calendar>
-                    </div>
+
+                </ui:fragment>
+
+            </div>
+
+        </h:form>
+    </div>
+
+    <div class="eps-table-wrapper eps-global-result-wrapper">
+        <h:form id="testScriptForm" prependId="false" styleClass="eps-scriptruns-form">
+            <div class="eps-test-script-result-toolbar-container">
+                <div class="eps-test-script-result-toolbar-buttons-left-container">
+                    <p:menubar id="mainMenuBarScriptResult" styleClass="eps-scriptruns-toolbar" style="display: inline">
+                        <p:menuitem id="resumeAllTestScriptButton" styleClass="eps-common-action" icon="eps-custom-icon eps-custom-icon-resume-all" action="#{testScriptsBean.resumeAllScript()}"/>
+                        <p:menuitem id="pauseAllTestScriptButton" styleClass="eps-common-action" icon="eps-custom-icon eps-custom-icon-pause-all" action="#{testScriptsBean.pauseAllScript()}"/>
+                        <p:menuitem id="stopAllTestScriptButton" styleClass="eps-common-action" icon="eps-custom-icon eps-custom-icon-stop-all" action="#{testScriptsBean.stopAllScript()}"/>
+                        <p:menuitem id="filterTestScriptButton" styleClass="eps-filter-testscript-button" icon="eps-custom-icon eps-custom-icon-filter" style="margin-left:25px"/>
+                    </p:menubar>
                 </div>
-                <p:commandButton action="#{testScriptsBean.restoreFilters()}" styleClass="eps-result-clear-filters-btn" icon="ui-icon-close" value="clear" update=":testScriptForm"  oncomplete="reloadTestScriptResults()"/>
+
+                <div class="eps-test-script-result-toolbar-buttons-middle-container">
+                    <p:inputText id="filterNameResult" value="#{testScriptsBean.filterResultName}" styleClass="eps-input eps-filter-name-result">
+                        <p:ajax event="keyup" process="@this" oncomplete="reloadTestScriptResults()" />
+                    </p:inputText>
+                    <p:watermark for="filterNameResult" value=" Matrix name filter " />
+
+                    <p:selectOneMenu id="sort-by" value="#{testScriptsBean.sortBy}" styleClass="eps-filter-status-result eps-test-script-result-toolbar-sort-by">
+                        <f:selectItems value="#{testScriptsBean.comparators.keySet()}" />
+                        <p:ajax event="change" process="@this" oncomplete="reloadTestScriptResults()"/>
+                    </p:selectOneMenu>
+                </div>
+
+                <div class="eps-test-script-result-toolbar-buttons-right-container">
+                    <p:menubar id="mainMenuBarScriptSelect" styleClass="eps-scriptrun-select-all" style="display: inline;">
+                        <p:submenu id="clearAllTestScriptsDropdown" icon="eps-custom-icon eps-custom-icon-delete"
+                                   class="eps-clear-test-results-dropdown eps-clear-results-button-hidden" >
+                            <p:menuitem id="clearAllSafe" icon="ui-icon-document" value="Safe delete" onstart="getSelectTestscripts(false, true)" />
+                            <p:menuitem id="clearAllHard" icon="ui-icon-trash" value="Delete from disk" onstart="getSelectTestscripts(true, false)" onsuccess="if(getSelectedScriptResults().length > 0) PF('confirmClearAll').show()" />
+                        </p:submenu>
+                        <p:menuitem id="reloadAllTestScriptButton" styleClass="eps-reload-testscript-button" action="#{testScriptsBean.reloadAllTestScript()}" oncomplete="reloadTestScriptResults(); if (args.isRunningScripts) {PF('clearTestScriptsErrorDialod').show()}" icon="eps-custom-icon eps-custom-icon-refresh"/>
+                        <p:menuitem id="selectAllTestScriptButton" icon="eps-custom-icon eps-custom-icon-checkbox-round-unchecked" onclick="selectAllTestscripts()"/>
+                    </p:menubar>
+                </div>
             </div>
-        </div>
 
-        <p:tooltip value="Results will restore after reload" for="clearAllSafe" />
-        <p:tooltip value="Results will be lost" for="clearAllHard" />
-        <p:tooltip value="Sort test scripts result" for="sort-by" />
-        <p:tooltip value="Remove results from list below" for="clearAllTestScriptsDropdown" />
-        <p:tooltip value="Restore results from local directory" for="reloadAllTestScriptButton" />
-        <p:tooltip value="Filter results to show" for="filterTestScriptButton" />
-        <p:tooltip value="Stop all matrix" for="stopAllTestScriptButton" />
-        <p:tooltip value="Pause all matrix" for="pauseAllTestScriptButton" />
-        <p:tooltip value="Resume all matrix" for="resumeAllTestScriptButton" />
-        <p:tooltip value="Select all matrix results" for="selectAllTestScriptButton" />
+            <div class="eps-results-filter">
+                <div style="display: inline">
+                    <h:outputLabel value="Status:" class="eps-test-script-result-filter-label"/>
+                    <p:selectManyMenu id="statusFilterMenu" value="#{testScriptsBean.selectedResultStatuses}"
+                                      filter="true" filterMatchMode="contains" showCheckbox="true"
+                                      styleClass="eps-filter-status-result" appendTo=":testScriptForm">
+                        <f:selectItems value="#{testScriptsBean.allResultStatuses}"/>
+                        <p:ajax event="change" process="@this" update="statusFilterMenu" oncomplete="reloadTestScriptResults()" />
+                    </p:selectManyMenu>
+                </div>
 
-        <p:outputPanel id="test-script-results-wrapper" class="eps-test-script-results-wrapper">
-            <h:outputText value="#{testScriptsBean.currentRunsSnapshot}" escape="false"/>
-        </p:outputPanel>
-    </h:form>
+                <div class="eps-cals" style="display: inline; width: auto; margin-left: 20px">
+                    <h:outputLabel value="Date:" class="eps-test-script-result-filter-label"/>
+                    <div style="margin: 13px 5px; padding: 2px">
+                        <div>
+                            <p:outputLabel for="dateTimeResultFilterFrom" value="From " />
+                            <p:calendar id="dateTimeResultFilterFrom" value="#{testScriptsBean.dateFilterFrom}" maxdate="#{testScriptsBean.dateFilterTo}" pattern="yyyy-MM-dd" onfocus="$(this).mask('9999-99-99');" readonlyInput="true" styleClass="eps-input">
+                                <p:ajax event="dateSelect" oncomplete="reloadTestScriptResults()" update="dateTimeResultFilterTo"/>
+                            </p:calendar>
+                        </div>
+                        <div>
+                            <p:outputLabel for="dateTimeResultFilterTo" value="To " />
+                            <p:calendar id="dateTimeResultFilterTo" value="#{testScriptsBean.dateFilterTo}" mindate="#{testScriptsBean.dateFilterFrom}" pattern="yyyy-MM-dd" onfocus="$(this).mask('9999-99-99');" readonlyInput="true" styleClass="eps-input">
+                                <p:ajax event="dateSelect" oncomplete="reloadTestScriptResults()" update="dateTimeResultFilterFrom"/>
+                            </p:calendar>
+                        </div>
+                    </div>
+                    <p:commandButton action="#{testScriptsBean.restoreFilters()}" styleClass="eps-result-clear-filters-btn" icon="ui-icon-close" value="clear" update=":testScriptForm"  oncomplete="reloadTestScriptResults()"/>
+                </div>
+            </div>
+
+            <p:tooltip value="Results will restore after reload" for="clearAllSafe" />
+            <p:tooltip value="Results will be lost" for="clearAllHard" />
+            <p:tooltip value="Sort test scripts result" for="sort-by" />
+            <p:tooltip value="Remove results from list below" for="clearAllTestScriptsDropdown" />
+            <p:tooltip value="Restore results from local directory" for="reloadAllTestScriptButton" />
+            <p:tooltip value="Filter results to show" for="filterTestScriptButton" />
+            <p:tooltip value="Stop all matrix" for="stopAllTestScriptButton" />
+            <p:tooltip value="Pause all matrix" for="pauseAllTestScriptButton" />
+            <p:tooltip value="Resume all matrix" for="resumeAllTestScriptButton" />
+            <p:tooltip value="Select all matrix results" for="selectAllTestScriptButton" />
+
+            <p:outputPanel id="test-script-results-wrapper" class="eps-test-script-results-wrapper">
+                <h:outputText value="#{testScriptsBean.currentRunsSnapshot}" escape="false"/>
+            </p:outputPanel>
+        </h:form>
+    </div>
 </div>
-
-<div style="clear:both; height: 1px;"/>
 
 <h:form enctype="multipart/form-data" id="renameDialogForm" >
     <p:dialog header="Rename matrix" resizable="false" widgetVar="renameDialog" modal="true">

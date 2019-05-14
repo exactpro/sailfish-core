@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedComparisonResult;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedComparisonRow;
+import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedComparisonRow.TaggedComparisonSet;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedSetsComparisonParameters;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.testwebgui.BeanUtil;
@@ -61,8 +62,8 @@ public class TaggedSetsComparisonBean implements Serializable {
 	private TaggedComparisonResult diffResult;
 	
 	private TaggedComparisonRow selected;
-	
-	private String[] availableColumns = new String[] {"Matrix", "Status", DESCRIPTION_COLUMN, "Fail Reason", "Failed Actions", "User Status", "Comment", "Start Time", "Finish Time", "Tags", "Hash"};
+
+    private final String[] availableColumns = { "Matrix", "Status", DESCRIPTION_COLUMN, "Fail Reason", "Failed Actions", "User Status", "Comment", "Start Time", "Finish Time", "Tags", "Hash" };
 	
 	private String[] selectedColumns = availableColumns;
 	
@@ -74,7 +75,7 @@ public class TaggedSetsComparisonBean implements Serializable {
 	
 	private SetMultimap<Long, Long> actionFailReasonDiffHighlights;
 
-    private String customReportsPath = null;
+    private String customReportsPath;
 	
 	@PostConstruct
 	public void init() {
@@ -84,13 +85,13 @@ public class TaggedSetsComparisonBean implements Serializable {
 	}
 	
 	public void generate() {
-		
-		if(this.firstSet.isEmpty()) {
+
+        if(firstSet.isEmpty()) {
 			BeanUtil.addErrorMessage("First set is empty", "");
 			return;
 		}
-		
-		if(this.secondSet.isEmpty()) {
+
+        if(secondSet.isEmpty()) {
 			BeanUtil.addErrorMessage("Second set is empty", "");
 			return;
 		}
@@ -121,56 +122,56 @@ public class TaggedSetsComparisonBean implements Serializable {
        this.diffHighlights = HashMultimap.create();
        this.actionDiffHighlights = HashMultimap.create();
        this.actionFailReasonDiffHighlights = HashMultimap.create();
-	        
-       for (TaggedComparisonRow row : this.lastResult.getRows()) {
+
+       for(TaggedComparisonRow row : lastResult.getRows()) {
            boolean toAdd = false;
         
            if (!StringUtils.equals(row.getFirstMatrixName(), row.getSecondMatrixName())) {
                toAdd = true;
-               this.diffHighlights.put(row.getTestCaseId(), "Matrix");
+               diffHighlights.put(row.getTestCaseId(), "Matrix");
            }
            if (!Objects.equals(row.getFirstRawHash(), row.getSecondRawHash())) {
                toAdd = true;
-               this.diffHighlights.put(row.getTestCaseId(), "Hash");
+               diffHighlights.put(row.getTestCaseId(), "Hash");
            }
            if (row.getFirstStatus() != row.getSecondStatus()) {
                toAdd = true;
-               this.diffHighlights.put(row.getTestCaseId(), "Status");
+               diffHighlights.put(row.getTestCaseId(), "Status");
            }
            if (row.getFirstStatus() == StatusType.FAILED && row.getSecondStatus() == StatusType.FAILED) {
                if (!StringUtils.equals(row.getFirstFailReason(), row.getSecondFailReason())) {
                    toAdd = true;
-                   this.diffHighlights.put(row.getTestCaseId(), "Fail Reason");
+                   diffHighlights.put(row.getTestCaseId(), "Fail Reason");
                }
            }
            if (!StringUtils.equals(row.getFirstDescription(), row.getSecondDescription())) {
                toAdd = true;
-               this.diffHighlights.put(row.getTestCaseId(), DESCRIPTION_COLUMN);
+               diffHighlights.put(row.getTestCaseId(), DESCRIPTION_COLUMN);
            }
            
            if (!CollectionUtils.isEqualCollection(row.getFirstFailedActions().entrySet(), row.getSecondFailedActions().entrySet())) {
                toAdd = true;
-               this.diffHighlights.put(row.getTestCaseId(), "Failed Actions");
+               diffHighlights.put(row.getTestCaseId(), "Failed Actions");
 	            
                Set<Long> actionsIntersection = new HashSet<>(row.getFirstFailedActions().keySet());
                actionsIntersection.retainAll(row.getSecondFailedActions().keySet());
 	            
                for (Long actionRank : row.getFirstFailedActions().keySet()) {
                    if (!actionsIntersection.contains(actionRank)) {
-                       this.actionDiffHighlights.put(row.getFirstTestCaseRunId(), actionRank);
+                       actionDiffHighlights.put(row.getFirstTestCaseRunId(), actionRank);
                    }
                }
 	            
                for (Long actionRank : row.getSecondFailedActions().keySet()) {
                    if (!actionsIntersection.contains(actionRank)) {
-                       this.actionDiffHighlights.put(row.getSecondTestCaseRunId(), actionRank);
+                       actionDiffHighlights.put(row.getSecondTestCaseRunId(), actionRank);
                    }
                }
                 
                for (Long actionRank : actionsIntersection) {
                    if (!StringUtils.equals(row.getFirstFailedActions().get(actionRank), row.getSecondFailedActions().get(actionRank))) {
-                       this.actionFailReasonDiffHighlights.put(row.getFirstTestCaseRunId(), actionRank);
-                       this.actionFailReasonDiffHighlights.put(row.getSecondTestCaseRunId(), actionRank);
+                       actionFailReasonDiffHighlights.put(row.getFirstTestCaseRunId(), actionRank);
+                       actionFailReasonDiffHighlights.put(row.getSecondTestCaseRunId(), actionRank);
                    }
                }
            }
@@ -186,20 +187,13 @@ public class TaggedSetsComparisonBean implements Serializable {
     }
 	
     public String getHighlightStyle(String tcId, String column) {
-        if (this.diffHighlights.containsKey(tcId) && this.diffHighlights.get(tcId).contains(column)) {
-            return "eps-diff-highlight";
-        }
-        return "";
+        return diffHighlights.containsKey(tcId) && diffHighlights.get(tcId).contains(column) ? "eps-diff-highlight" : "";
     }
     
     public String getActionHighlightStyle(Long tcRunId, Long actionRank) {
-        if (this.actionDiffHighlights != null 
-            && this.actionDiffHighlights.containsKey(tcRunId) 
-                && this.actionDiffHighlights.get(tcRunId).contains(actionRank)) {
-            
-            return "eps-diff-highlight";
-        }
-        return "";
+        return actionDiffHighlights != null
+                && actionDiffHighlights.containsKey(tcRunId)
+                && actionDiffHighlights.get(tcRunId).contains(actionRank) ? "eps-diff-highlight" : "";
     }
     
     public String getActionFailReasonHighlightStyle(Long tcRunId, Long actionRank) {
@@ -207,18 +201,14 @@ public class TaggedSetsComparisonBean implements Serializable {
         if (!StringUtils.isEmpty(style)) {
             return style;
         }
-        if (this.actionFailReasonDiffHighlights != null 
-            && this.actionFailReasonDiffHighlights.containsKey(tcRunId) 
-                && this.actionFailReasonDiffHighlights.get(tcRunId).contains(actionRank)) {
-            
-            return "eps-diff-highlight";
-        }
-        return "";
+        return actionFailReasonDiffHighlights != null
+                && actionFailReasonDiffHighlights.containsKey(tcRunId)
+                && actionFailReasonDiffHighlights.get(tcRunId).contains(actionRank) ? "eps-diff-highlight" : "";
     }
 	
 	public boolean isColumnSelected(String column) {
-		
-		for(String selected : this.selectedColumns) {
+
+        for(String selected : selectedColumns) {
 			
 			if(column.equals(selected)) {
 				
@@ -249,12 +239,12 @@ public class TaggedSetsComparisonBean implements Serializable {
     	logger.debug("Tag select invoked {}", first);
     	
     	if(first) {
-    	
-	    	this.firstSet.add(tagToAdd);
+
+            firstSet.add(tagToAdd);
     	
     	} else {
-    		
-    		this.secondSet.add(tagToAdd);
+
+            secondSet.add(tagToAdd);
     		
     	}
     	
@@ -265,23 +255,23 @@ public class TaggedSetsComparisonBean implements Serializable {
     public void removeTag(Tag tag, boolean first) {
     	
     	if(first) {
-    	
-    		this.firstSet.remove(tag);
+
+            firstSet.remove(tag);
     	
     	} else {
-    		
-    		this.secondSet.remove(tag);
+
+            secondSet.remove(tag);
     		
     	}
     	
     }
 
-    public String getReportRequest(TaggedComparisonRow.TaggedComparisonSet set) {
-        return BeanUtil.getReportRequest(this.customReportsPath, set, false);
+    public String getReportRequest(TaggedComparisonSet set) {
+        return BeanUtil.getReportRequest(customReportsPath, set, false);
     }
-    
-    public String buildReportUrl(TaggedComparisonRow.TaggedComparisonSet set, boolean report) {
-        return BeanUtil.buildReportUrl(this.customReportsPath, set, report);
+
+    public String buildReportUrl(TaggedComparisonSet set, boolean report) {
+        return BeanUtil.buildReportUrl(customReportsPath, set, report);
     }
 	
 	private List<Tag> completeTag(String query, List<Tag> alreadySelected) {
@@ -289,8 +279,8 @@ public class TaggedSetsComparisonBean implements Serializable {
     	List<Tag> result = new ArrayList<>();
     	
     	String loweredQuery = query.toLowerCase();
-    	
-    	for(Tag tag : this.allTags) {
+
+        for(Tag tag : allTags) {
     		
     		if(tag.getName().toLowerCase().contains(loweredQuery)
     				&& !alreadySelected.contains(tag)) {
@@ -322,7 +312,7 @@ public class TaggedSetsComparisonBean implements Serializable {
 	}
 
 	public TaggedComparisonResult getLastResult() {
-        return this.showDiffOnly ? this.diffResult : this.lastResult;
+        return showDiffOnly ? diffResult : lastResult;
 	}
 
 	public List<Tag> getAllTags() {

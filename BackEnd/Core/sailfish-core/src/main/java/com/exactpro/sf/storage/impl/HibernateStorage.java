@@ -15,9 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
-import com.exactpro.sf.storage.IStorage;
-import com.exactpro.sf.storage.StorageException;
-import org.hibernate.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.function.BiConsumer;
+
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -27,15 +34,14 @@ import org.hibernate.exception.SQLGrammarException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.function.BiConsumer;
+import com.exactpro.sf.storage.IStorage;
+import com.exactpro.sf.storage.StorageException;
 
 public class HibernateStorage implements IStorage {
 
 	private static final Logger logger = LoggerFactory.getLogger(HibernateStorage.class);
-	
-	private SessionFactory sessionFactory;
+
+    private final SessionFactory sessionFactory;
 
     private static final int BATCH_SIZE = 50;
 	
@@ -52,7 +58,7 @@ public class HibernateStorage implements IStorage {
 		Transaction tx = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			
 			session.save(entity);
@@ -87,8 +93,9 @@ public class HibernateStorage implements IStorage {
 			throw new StorageException("Unknown exception", e);
 			
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 		
 	}
@@ -109,7 +116,7 @@ public class HibernateStorage implements IStorage {
 		Transaction tx = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			
 			session.update(entity);
@@ -159,7 +166,7 @@ public class HibernateStorage implements IStorage {
 		Transaction tx = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			
 			session.delete(entity);
@@ -207,7 +214,7 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			
 			return session.get(entityClass, id);
 			
@@ -226,7 +233,7 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			
 			return (T) session.get(entityClass, id);
 			
@@ -245,20 +252,17 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			
-			session = this.sessionFactory.openSession();
+
+            session = sessionFactory.openSession();
 			
 			Criteria criteria = session.createCriteria(entityClass);
 			
 			criteria.add(Restrictions.eq(fieldName, value));
 			
 			List list = criteria.list();
-			
-			if (null == list || list.isEmpty()) return null;
-			
-			return (T) list.get(0);
-			
-		} finally {
+
+            return list == null || list.isEmpty() ? null : (T)list.get(0);
+        } finally {
 			if (session != null) {
 				session.close();
 			}
@@ -273,7 +277,7 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			
 			Criteria criteria = session.createCriteria(entityClass);
 			criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
@@ -281,8 +285,9 @@ public class HibernateStorage implements IStorage {
 			return criteria.list();
 			
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 		
 	}
@@ -294,13 +299,14 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			
 			return session.createQuery(String.format("from %s", className)).list();
 			
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 		
 	}
@@ -312,7 +318,7 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			
 			Criteria criteria = session.createCriteria(entityClass);
 			
@@ -323,8 +329,9 @@ public class HibernateStorage implements IStorage {
 			return criteria.list();
 			
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 		
 	}
@@ -336,27 +343,23 @@ public class HibernateStorage implements IStorage {
 		Session session = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			
 			Criteria criteria = session.createCriteria(entityClass);
 			
 			for (Criterion criterion : criterions) {
 				criteria.add(criterion);
 			}
-			
-			if(orderAsc) {
-				criteria.addOrder(Order.asc(orderField));
-			} else {
-				criteria.addOrder(Order.desc(orderField));
-			}
-			
-			criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
+            criteria.addOrder(orderAsc ? Order.asc(orderField) : Order.desc(orderField));
+            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 			
 			return criteria.list();
 			
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 		
 	}
@@ -368,7 +371,7 @@ public class HibernateStorage implements IStorage {
 		Transaction tx = null;
 		
 		try {
-			session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
 			tx = session.beginTransaction();
 			
 			Query query;
@@ -387,22 +390,23 @@ public class HibernateStorage implements IStorage {
 			
 			
 		} finally {
-			if (session != null)
-				session.close();
+            if(session != null) {
+                session.close();
+            }
 		}
 		
 	}
 	
 	@Override
 	public SessionFactory getSessionFactory() {
-		return this.sessionFactory;
+        return sessionFactory;
 	}
 
     private void batchOperation(List<Object> entities, BiConsumer<Session, Object> sessionOperation) {
         Session session = null;
         Transaction tx = null;
         try {
-            session = this.sessionFactory.openSession();
+            session = sessionFactory.openSession();
             tx = session.beginTransaction();
             Iterator<Object> iterator = entities.iterator();
             int count = 0;
@@ -436,8 +440,9 @@ public class HibernateStorage implements IStorage {
             }
             throw new StorageException("Unknown exception", e);
         } finally {
-            if (session != null)
+            if(session != null) {
                 session.close();
+            }
         }
     }
 }

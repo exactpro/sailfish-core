@@ -15,14 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
-import com.exactpro.sf.common.impl.messages.BaseMessage;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.aml.CommonColumn;
 import com.exactpro.sf.aml.CommonColumns;
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.script.actions.WaitAction;
+import com.exactpro.sf.common.impl.messages.BaseMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
@@ -42,7 +42,7 @@ import com.exactpro.sf.services.itch.multicast.ITCHMulticastUDPSession;
  * @author dmitry.guriev
  *
  */
-@ResourceAliases({"ITCHCommonActions"})
+@ResourceAliases("ITCHCommonActions")
 public class ITCHCommonActions extends AbstractCaller {
     protected final TestActions testActions;
 
@@ -52,9 +52,7 @@ public class ITCHCommonActions extends AbstractCaller {
 
     @Deprecated
     @Description("This function is deprecated, please use the reconnectService() method from TestActions.")
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void ITCH_Connect(IActionContext actionContext) throws InterruptedException {
 
@@ -73,9 +71,7 @@ public class ITCHCommonActions extends AbstractCaller {
 		actionContext.getLogger().info("[{}] Successfully connected to channel", actionContext.getServiceName());
 	}
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void ITCH_Disconnect(IActionContext actionContext) throws InterruptedException {
 
@@ -106,16 +102,16 @@ public class ITCHCommonActions extends AbstractCaller {
         report.createVerification(StatusType.PASSED, "Disconnect from ITCH server", "", "");
 	}
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void ITCH_IsConnected(IActionContext actionContext)
             throws Exception
     {
         IITCHClient client = getClient(actionContext);
         String actionId = actionContext.getId();
-        if (actionId != "") actionId += " ";
+        if(actionId != "") {
+            actionId += " ";
+        }
         IActionReport report = actionContext.getReport();
         String verificationName = actionId + String.format("Checking whether the service [%s] is connected", client.getName());
         ComparisonResult cr = new ComparisonResult("ITCH_IsConnected");
@@ -139,16 +135,16 @@ public class ITCHCommonActions extends AbstractCaller {
         }
     }
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void ITCH_IsDisconnected(IActionContext actionContext)
             throws Exception
     {
         IITCHClient client = getClient(actionContext);
         String actionId = actionContext.getId();
-        if (actionId != "") actionId += " ";
+        if(actionId != "") {
+            actionId += " ";
+        }
         IActionReport report = actionContext.getReport();
         String verificationName = actionId + String.format("Checking whether the service [%s] is disconnected", client.getName());
         ComparisonResult cr = new ComparisonResult("ITCH_IsDisconnected");
@@ -265,7 +261,8 @@ public class ITCHCommonActions extends AbstractCaller {
 		try
 		{
 			tcpClient.sendMessage( message.getMessage());
-		}
+            return message;
+        }
 		catch (Exception err)
 		{
             if(err instanceof InterruptedException){
@@ -274,16 +271,15 @@ public class ITCHCommonActions extends AbstractCaller {
 			throw new ScriptRunException( "[" + actionContext.getServiceName() +"] "
 					+ "Can't send "+message.getClass().getSimpleName()+" to channel;", err );
 		}
-		return message;
-	}
+    }
 
     protected IMessage sendMulti(IActionContext actionContext, BaseMessage message) throws InterruptedException {
-        ITCHMulticastUDPSession session;
         ITCHMulticastServer service = ActionUtil.getService(actionContext, ITCHMulticastServer.class);
-        session = (ITCHMulticastUDPSession) service.getSession();
-        if(session == null)
+        ITCHMulticastUDPSession session = (ITCHMulticastUDPSession)service.getSession();
+        if(session == null) {
             throw new ScriptRunException("[" + actionContext.getServiceName() +"] "
                     + "not runned;");
+        }
         return session.send(message.getMessage());
 
     }

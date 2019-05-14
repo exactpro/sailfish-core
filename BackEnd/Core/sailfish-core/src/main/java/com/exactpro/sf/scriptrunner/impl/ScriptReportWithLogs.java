@@ -66,7 +66,7 @@ public class ScriptReportWithLogs implements IScriptReport {
 	private long startTime;
 	private String lastTestCaseName;
 
-	public ScriptReportWithLogs(final IScriptReport report, final Set<String> excludedMessages) {
+    public ScriptReportWithLogs(IScriptReport report, Set<String> excludedMessages) {
 		this.report = report;
 		this.excludedMessages = excludedMessages.isEmpty() ? excludedMessages : excludedMessages.stream()
 		        .map(String::toLowerCase)
@@ -150,7 +150,7 @@ public class ScriptReportWithLogs implements IScriptReport {
             }
 
             // Reporting log messages:
-            if (reportAppender.getRows().size() > 0) {
+            if(!reportAppender.getRows().isEmpty()) {
                 report.createLogTable(reportAppender.getHeader(), reportAppender.getRows());
             }
         } finally {
@@ -290,7 +290,7 @@ public class ScriptReportWithLogs implements IScriptReport {
             boolean hasCheckPoints = false;
 
 			for (MessageRow msg : messages) {
-                if (this.excludedMessages.contains(StringUtils.lowerCase(msg.getMsgName()))) {
+                if(excludedMessages.contains(StringUtils.lowerCase(msg.getMsgName()))) {
 					continue;
 				}
 
@@ -333,8 +333,9 @@ public class ScriptReportWithLogs implements IScriptReport {
 	}
 
     private void markUnexpected(MessageRow message, Set<Object> unexpectedMessages) {
-        if (unexpectedMessages.isEmpty())
+        if(unexpectedMessages.isEmpty()) {
             return;
+        }
 
         Iterator<?> iter = unexpectedMessages.iterator();
         while (iter.hasNext()) {

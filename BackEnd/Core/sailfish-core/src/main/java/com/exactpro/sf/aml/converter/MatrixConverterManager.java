@@ -44,7 +44,7 @@ public class MatrixConverterManager {
         try {
             Class<? extends IMatrixConverter> clazz = SailfishURIUtils.getMatchingValue(converterURI, uriToClass, SailfishURIRule.REQUIRE_RESOURCE);
             IMatrixConverter converter = clazz.newInstance();
-            converter.init(this.context);
+            converter.init(context);
             return converter;
         } catch (InstantiationException | IllegalAccessException e) {
             throw new EPSCommonException("Failed to initialize matrix converter" + converterURI, e);
@@ -61,6 +61,6 @@ public class MatrixConverterManager {
     }
 
 	public Set<SailfishURI> getMatrixConverters() {
-		return Collections.unmodifiableSet(this.uriToClass.keySet());
+        return Collections.unmodifiableSet(uriToClass.keySet());
 	}
 }

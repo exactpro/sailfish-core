@@ -77,13 +77,13 @@ public class TaskExecutor implements ITaskExecutor
 	@Override
 	public void dispose()
 	{
-		if(!this.threadPool.isShutdown() || !this.scheduledThreadPool.isShutdown()) {
+        if(!threadPool.isShutdown() || !scheduledThreadPool.isShutdown()) {
 			logger.info("TaskExecutor disposing started...");
 			
 			try {
-				if (!this.threadPool.isShutdown()) {
-					this.threadPool.shutdownNow();
-					if (!this.threadPool.awaitTermination(5000, TimeUnit.MILLISECONDS)) {
+                if(!threadPool.isShutdown()) {
+                    threadPool.shutdownNow();
+                    if(!threadPool.awaitTermination(5000, TimeUnit.MILLISECONDS)) {
                         logger.warn("Some Threads from cachedThreadPool remained alive");
 					}
 				}
@@ -92,9 +92,9 @@ public class TaskExecutor implements ITaskExecutor
 			}
 	
 			try {
-				if (!this.scheduledThreadPool.isShutdown()) {
-					this.scheduledThreadPool.shutdownNow();
-					if (!this.scheduledThreadPool.awaitTermination(5000, TimeUnit.MILLISECONDS)) {
+                if(!scheduledThreadPool.isShutdown()) {
+                    scheduledThreadPool.shutdownNow();
+                    if(!scheduledThreadPool.awaitTermination(5000, TimeUnit.MILLISECONDS)) {
                         logger.warn("Some Threads from scheduledThreadPool remained alive");
 					}
 				}
@@ -149,22 +149,22 @@ public class TaskExecutor implements ITaskExecutor
 
 		@Override
 		public void run() {
-			long timeInQueue = System.currentTimeMillis() - this.createTime; 
-			
-			String oldName = null;
+            long timeInQueue = System.currentTimeMillis() - createTime;
+
+            String oldName = null;
             Thread currentThread = null;
-            
-            if (this.threadName != null) {
+
+            if(threadName != null) {
                 currentThread = Thread.currentThread();
                 oldName = currentThread.getName();
-            
-                setThreadName(currentThread, this.threadName);
+
+                setThreadName(currentThread, threadName);
             }
             
             try {
                 executeTask(timeInQueue);
             } finally {
-                if (currentThread != null && this.threadName != null) {
+                if(currentThread != null && threadName != null) {
                     setThreadName(currentThread, oldName);
                 }
             }
@@ -206,22 +206,22 @@ public class TaskExecutor implements ITaskExecutor
 		
 		@Override
 		public T call() throws Exception {
-		    long timeInQueue = System.currentTimeMillis() - this.createTime; 
-            
+            long timeInQueue = System.currentTimeMillis() - createTime;
+
             String oldName = null;
             Thread currentThread = null;
-            
-            if (this.threadName != null) {
+
+            if(threadName != null) {
                 currentThread = Thread.currentThread();
                 oldName = currentThread.getName();
-            
-                setThreadName(currentThread, this.threadName);
+
+                setThreadName(currentThread, threadName);
             }
             
             try {
                 return executeTask(timeInQueue);
             } finally {
-                if (currentThread != null && this.threadName != null) {
+                if(currentThread != null && threadName != null) {
                     setThreadName(currentThread, oldName);
                 }
             }
@@ -252,7 +252,7 @@ public class TaskExecutor implements ITaskExecutor
 		@Override
 		public void run() {
 			super.run();
-			this.createTime = System.currentTimeMillis() + this.delay;
+            this.createTime = System.currentTimeMillis() + delay;
 		}
 	}
 }

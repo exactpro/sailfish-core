@@ -20,7 +20,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 public class MessageStructureReaderHandlerImpl implements IMessageStructureReaderHandler {
 	
-	private static MessageStructureReaderHandlerImpl instance = new MessageStructureReaderHandlerImpl();
+	private static final MessageStructureReaderHandlerImpl instance = new MessageStructureReaderHandlerImpl();
 
 	private MessageStructureReaderHandlerImpl(){}
 

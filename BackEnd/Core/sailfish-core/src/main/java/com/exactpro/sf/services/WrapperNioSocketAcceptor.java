@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author nikita.smirnov
  */
 public class WrapperNioSocketAcceptor {
-    private final static Logger logger = LoggerFactory.getLogger(WrapperNioSocketAcceptor.class);
+    private static final Logger logger = LoggerFactory.getLogger(WrapperNioSocketAcceptor.class);
 	private final NioSocketAcceptor nioSocketAcceptor;
 	private final IoProcessor<NioSession> ioProcessor;
     private final ITaskExecutor taskExecutor;
@@ -55,30 +55,30 @@ public class WrapperNioSocketAcceptor {
 	}
 	
 	public void bind() throws IOException {
-		this.nioSocketAcceptor.bind();
+        nioSocketAcceptor.bind();
 	}
 	
 	public void bind(Iterable<? extends SocketAddress> localAddresses) throws IOException {
-		this.nioSocketAcceptor.bind(localAddresses);
+        nioSocketAcceptor.bind(localAddresses);
 	}
 	
 	public void bind(SocketAddress localAddress) throws IOException {
-		this.nioSocketAcceptor.bind(localAddress);
+        nioSocketAcceptor.bind(localAddress);
 	}
 	
 	public void unbind() {
-		this.nioSocketAcceptor.unbind();
+        nioSocketAcceptor.unbind();
 	}
 	
 	public void unbind(SocketAddress localAddress) {
-		this.nioSocketAcceptor.unbind(localAddress);
+        nioSocketAcceptor.unbind(localAddress);
 	}
 	
 	public Future<?> dispose() {
 		return dispose(false);
 	}
-	
-	public Future<?> dispose(final boolean awaitTermination) {
+
+    public Future<?> dispose(boolean awaitTermination) {
         if(taskExecutor != null){
             return taskExecutor.addTask(new Runnable() {
                 @Override
@@ -101,27 +101,27 @@ public class WrapperNioSocketAcceptor {
 	}
 	
 	public void setCloseOnDeactivation(boolean disconnectClientsOnUnbind) {
-		this.nioSocketAcceptor.setCloseOnDeactivation(disconnectClientsOnUnbind);
+        nioSocketAcceptor.setCloseOnDeactivation(disconnectClientsOnUnbind);
 	}
 	
 	public void setHandler(IoHandler handler) {
-		this.nioSocketAcceptor.setHandler(handler);
+        nioSocketAcceptor.setHandler(handler);
 	}
 	
 	public void setReuseAddress(boolean reuseAddress) {
-		this.nioSocketAcceptor.setReuseAddress(reuseAddress);
+        nioSocketAcceptor.setReuseAddress(reuseAddress);
 	}
 	
 	public void setDefaultLocalAddress(Iterable<? extends SocketAddress> localAddress) {
-		this.nioSocketAcceptor.setDefaultLocalAddresses(localAddress);
+        nioSocketAcceptor.setDefaultLocalAddresses(localAddress);
 	}
 	
 	public void setDefaultLocalAddress(SocketAddress localAddress) {
-		this.nioSocketAcceptor.setDefaultLocalAddress(localAddress);
+        nioSocketAcceptor.setDefaultLocalAddress(localAddress);
 	}
 	
 	public IoSessionConfig getSessionConfig() {
-		return this.nioSocketAcceptor.getSessionConfig();
+        return nioSocketAcceptor.getSessionConfig();
 	}
 	
 	public NioSocketAcceptor getNioSocketAcceptor() {
@@ -129,15 +129,15 @@ public class WrapperNioSocketAcceptor {
 	}
 	
 	public DefaultIoFilterChainBuilder getFilterChain() {
-		return this.nioSocketAcceptor.getFilterChain();
+        return nioSocketAcceptor.getFilterChain();
 	}
 	
 	public boolean isDisposed() {
-		return this.nioSocketAcceptor.isDisposed();
+        return nioSocketAcceptor.isDisposed();
 	}
 	
 	public boolean isActive() {
-		return this.nioSocketAcceptor.isActive();
+        return nioSocketAcceptor.isActive();
 	}
 	
 }

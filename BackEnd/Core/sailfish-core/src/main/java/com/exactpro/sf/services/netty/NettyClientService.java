@@ -16,7 +16,7 @@
 package com.exactpro.sf.services.netty;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -62,7 +62,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 public abstract class NettyClientService implements IInitiatorService {
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     protected final ChannelFutureListener SET_CHANNEL = future -> setChannel(future.channel());
 
@@ -80,13 +80,13 @@ public abstract class NettyClientService implements IInitiatorService {
 	protected volatile ServiceStatus serviceStatus = ServiceStatus.CREATED;
 
 	protected volatile NettySession nettySession; // FIXME volatile??
-	protected volatile NioEventLoopGroup nioEventLoopGroup = null;
+    protected volatile NioEventLoopGroup nioEventLoopGroup;
 
 	protected IMessageFactory msgFactory;
-	protected Future<?> hbFuture = null;
+    protected Future<?> hbFuture;
 
     private final ReadWriteLock channelLock = new ReentrantReadWriteLock();
-    private Channel channel = null;
+    private Channel channel;
 
 	// At least it should contains:
 	// * YourCodec(s)
@@ -108,7 +108,7 @@ public abstract class NettyClientService implements IInitiatorService {
 			try {
 				// FIXME: synchronize?
 				serviceHandler.sessionIdle(nettySession, IdleStatus.WRITER_IDLE);
-				NettyClientService.this.sendHeartBeat();
+                sendHeartBeat();
 			} catch (Exception e) {
 				logger.error("OnIdle", e);
 			}
@@ -117,11 +117,11 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	@Override
 	public void init(
-			final IServiceContext serviceContext,
-			final IServiceMonitor serviceMonitor,
-			final IServiceHandler handler,
-			final IServiceSettings settings,
-			final ServiceName name) {
+            IServiceContext serviceContext,
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            ServiceName name) {
 
 		try {
             changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
@@ -155,7 +155,7 @@ public abstract class NettyClientService implements IInitiatorService {
 		try {
 			changeStatus(ServiceStatus.STARTING, "Starting service " + serviceName, null);
 
-            logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
 
 			nettySession = new NettySession(this, logConfigurator);
@@ -175,9 +175,9 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	@Override
 	public void connect() throws Exception {
-	    this.initChannelHandlers(this.serviceContext);
+        initChannelHandlers(serviceContext);
 
-		final LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
+        LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
 		Bootstrap cb = new Bootstrap();
 		// Fixme: use ITaskExecutor ?
@@ -189,7 +189,7 @@ public abstract class NettyClientService implements IInitiatorService {
 		cb.handler(new ChannelInitializer<Channel>() {
 			@Override
 			protected void initChannel(Channel ch) throws Exception {
-				for (Map.Entry<String, ChannelHandler> entry : handlers.entrySet()) {
+                for(Entry<String, ChannelHandler> entry : handlers.entrySet()) {
 					ch.pipeline().addLast(entry.getKey(), entry.getValue());
 				}
 				// add exception handler for inbound messages
@@ -221,22 +221,22 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	@Override
 	public void dispose() {
-		this.changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
+        changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
 		
 		try {
-    		NettySession session = this.nettySession;
+            NettySession session = nettySession;
     		if (session != null) {
     		    nettySession = null;
     	        session.close();
     		}
 		} catch (RuntimeException e) {
-		    this.changeStatus(ServiceStatus.ERROR, "Session '"+serviceName +"'  has not been closed", e);
+            changeStatus(ServiceStatus.ERROR, "Session '" + serviceName + "'  has not been closed", e);
 		} finally {
             Channel localChannel = getChannel();
             if (localChannel != null) {
                 if (localChannel.isOpen()) {
                     if (!localChannel.close().awaitUninterruptibly(5, TimeUnit.SECONDS)) {
-                        this.changeStatus(ServiceStatus.ERROR, "Channel '" + serviceName + "' has not been closed for 5 secons", null);
+                        changeStatus(ServiceStatus.ERROR, "Channel '" + serviceName + "' has not been closed for 5 secons", null);
                     }
                 }
                 
@@ -250,7 +250,7 @@ public abstract class NettyClientService implements IInitiatorService {
             if (nioEventLoopGroup != null) {
                 if (!nioEventLoopGroup.isShutdown()) {
                     if(!nioEventLoopGroup.shutdownGracefully().awaitUninterruptibly(5, TimeUnit.SECONDS)) {
-                        this.changeStatus(ServiceStatus.ERROR, "Events executor '" + serviceName + "' has not been closed for 5 secons", null);
+                        changeStatus(ServiceStatus.ERROR, "Events executor '" + serviceName + "' has not been closed for 5 secons", null);
                     }
                 }
                 
@@ -260,13 +260,13 @@ public abstract class NettyClientService implements IInitiatorService {
             }
             
             if(logConfigurator != null){
-                logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+                logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                         serviceName);
             }
         }
 
-		if (this.serviceStatus == ServiceStatus.DISPOSING) {
-		    this.changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
+        if(serviceStatus == ServiceStatus.DISPOSING) {
+            changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 		}
 	}
 
@@ -318,10 +318,10 @@ public abstract class NettyClientService implements IInitiatorService {
 	// Used in session
 	public Channel getChannel() {
         try {
-            this.channelLock.readLock().lock();
+            channelLock.readLock().lock();
 		return channel;
         } finally {
-            this.channelLock.readLock().unlock();
+            channelLock.readLock().unlock();
         }
 	}
 
@@ -360,10 +360,10 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	private void setChannel(Channel channel) {
         try {
-            this.channelLock.writeLock().lock();
+            channelLock.writeLock().lock();
             this.channel = channel;
         } finally {
-            this.channelLock.writeLock().unlock();
+            channelLock.writeLock().unlock();
         }
     }
 }

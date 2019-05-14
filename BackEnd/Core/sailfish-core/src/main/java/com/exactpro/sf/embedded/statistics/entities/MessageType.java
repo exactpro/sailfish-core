@@ -24,8 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name="stmessagetypes",
-uniqueConstraints = {@UniqueConstraint(columnNames={"name"})})
+@Table(name = "stmessagetypes", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @SequenceGenerator(name="stmessagetypes_generator", sequenceName="stmessagetypes_sequence")
 public class MessageType {
 	

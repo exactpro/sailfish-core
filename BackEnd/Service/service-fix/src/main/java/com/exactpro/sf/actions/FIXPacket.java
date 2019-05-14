@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import com.exactpro.sf.scriptrunner.ScriptRunException;
@@ -25,16 +26,16 @@ public class FIXPacket {
 	 * @param args
 	 */
 	public int RealLen; // count of real byte
-	private ArrayList<String> elements;
+    private final ArrayList<String> elements;
 
-	private byte[] messInBytes;
+    private final byte[] messInBytes;
 
 	public FIXPacket( String mVer, String mType )
 	{
 		this.elements = new ArrayList<String>();
-		this.elements.add( "8=" + mVer );
-		this.elements.add( "9=?" );
-		this.elements.add( "35=" + mType );
+        elements.add("8=" + mVer);
+        elements.add("9=?");
+        elements.add("35=" + mType);
 		this.messInBytes = new byte[65536];
 	}
 
@@ -52,9 +53,8 @@ public class FIXPacket {
 	private int getFIXLength()
 	{
 		int allmesslen = 0;
-		for (int a = 2; a < this.elements.size(); a++)
-		{
-		   allmesslen += this.elements.get(a).toString().length();
+        for(int a = 2; a < elements.size(); a++) {
+            allmesslen += elements.get(a).toString().length();
 		   allmesslen += 1;
 		}
 		return allmesslen;
@@ -63,15 +63,17 @@ public class FIXPacket {
 	private static String getFIXCheckSum(byte[] messarray, int countbytes)
 	{
 		 int chksum = 0;
-		 for (int a = 0; a < countbytes; a++)
-		   chksum += messarray[ a ];
+        for(int a = 0; a < countbytes; a++) {
+            chksum += messarray[a];
+        }
 		 chksum = chksum % 256;
-		 String spriv;
-		 spriv = "" + chksum;
-		 if ( spriv.length() == 1 )
-		   spriv = "00" + spriv;
-		 if ( spriv.length() == 2 )
-		   spriv = "0" + spriv;
+        String spriv = "" + chksum;
+        if(spriv.length() == 1) {
+            spriv = "00" + spriv;
+        }
+        if(spriv.length() == 2) {
+            return "0" + spriv;
+        }
 		 return spriv;
 	}
 
@@ -79,8 +81,9 @@ public class FIXPacket {
 	public String getInText()
 	{
 		String tmpString = "";
-		for (int i = 0; i < elements.size(); i++ )
-			tmpString += elements.get(i) + "|";
+        for(int i = 0; i < elements.size(); i++) {
+            tmpString += elements.get(i) + "|";
+        }
 		return tmpString;
 	}
 
@@ -110,8 +113,8 @@ public class FIXPacket {
 			  {
 				elements.add( i+1, tagname + "=" + value );
 			  } else*/
-			  { elements.add( tagname + "=" + value ); }
-			  return;
+                elements.add(tagname + "=" + value);
+                return;
 			}
 		}
 		elements.add( tagname + "=" + value );
@@ -149,8 +152,7 @@ public class FIXPacket {
 	public void fillPacketFromString( String stringFIXmessage )
 	{
 		elements.clear();
-		String stringmessage[] = null;
-		stringmessage = stringFIXmessage.split("\001");
+        String[] stringmessage = stringFIXmessage.split("\001");
 		for (int i = 0; i < stringmessage.length; i++)
 		{
   		  elements.add( stringmessage[i] );
@@ -160,8 +162,7 @@ public class FIXPacket {
 	public void fillPacketFromString2( String stringFIXmessage )
 	{
 		elements.clear();
-		String stringmessage[] = null;
-		stringmessage = stringFIXmessage.split("!");
+        String[] stringmessage = stringFIXmessage.split("!");
 		for (int i = 0; i < stringmessage.length; i++)
 		{
   		  elements.add( stringmessage[i] );
@@ -173,34 +174,33 @@ public class FIXPacket {
 	{
 		try
 		  {
-			this.delTag("10");
-			this.setTag( "9", "" + getFIXLength());
+              delTag("10");
+              setTag("9", "" + getFIXLength());
 
 			String[] messarray = elements.toArray(new String[elements.size()]);
 
 	  		int a = 0;
 			for (int i = 0; i < messarray.length; i++)
 			{
-			  byte[] tmp = messarray[ i ].getBytes("US-ASCII");
+                byte[] tmp = messarray[i].getBytes(StandardCharsets.US_ASCII);
 			  for (int j = 0; j < messarray[ i ].length(); j++)
 			  {
-				  this.messInBytes[ a ] = tmp[ j ];
+                  messInBytes[a] = tmp[j];
 				  a++;
 			  }
-			  this.messInBytes[ a ] = 1;
+                messInBytes[a] = 1;
 			  a++;
 			}
-			this.setTag("10", getFIXCheckSum( this.messInBytes, a ));
-			String tmpString;
-			tmpString = "10=" + getFIXCheckSum( this.messInBytes, a );
+              setTag("10", getFIXCheckSum(messInBytes, a));
+              String tmpString = "10=" + getFIXCheckSum(messInBytes, a);
 
-			byte[] tmp = tmpString.getBytes("US-ASCII");
+              byte[] tmp = tmpString.getBytes(StandardCharsets.US_ASCII);
 			for (int j = 0; j < tmpString.length(); j++)
 			  {
-				 this.messInBytes[ a ] = tmp[ j ];
+                  messInBytes[a] = tmp[j];
 				 a++;
 			  }
-			this.messInBytes[ a ] = 1;
+              messInBytes[a] = 1;
 			this.RealLen = a + 1;
 		  }
 		  catch (Exception e)
@@ -214,52 +214,46 @@ public class FIXPacket {
 	{
 		try
 		  {
-			this.delTag("10");
-			if ( dirtyLen != null )
-			{
-				this.setTag( "9", dirtyLen );
-			} else
-			{
-				this.setTag( "9", "" + getFIXLength());
-			}
+              delTag("10");
+              setTag("9", dirtyLen != null ? dirtyLen : "" + getFIXLength());
 
 			String[] messarray = elements.toArray(new String[elements.size()]);
 
 	  		int a = 0;
 			for (int i = 0; i < messarray.length; i++)
 			{
-			  byte[] tmp = messarray[ i ].getBytes("US-ASCII");
+                byte[] tmp = messarray[i].getBytes(StandardCharsets.US_ASCII);
 			  for (int j = 0; j < messarray[ i ].length(); j++)
 			  {
-				  this.messInBytes[ a ] = tmp[ j ];
+                  messInBytes[a] = tmp[j];
 				  a++;
 			  }
-			  this.messInBytes[ a ] = 1;
+                messInBytes[a] = 1;
 			  a++;
 			}
 			String tmpString = "";
 			if ( dirtyChkSum != null )
 			{
 				// DG: do not set ChkSum(10) to message if DirtyCheckSum=no
-				if (false == "no".equalsIgnoreCase(dirtyChkSum))
+                if(!"no".equalsIgnoreCase(dirtyChkSum))
 				{
-					this.setTag("10", dirtyChkSum );
+                    setTag("10", dirtyChkSum);
 					tmpString = "10=" + dirtyChkSum;
 				}
 			}
 			else
 			{
-				this.setTag("10", getFIXCheckSum( this.messInBytes, a ));
-				tmpString = "10=" + getFIXCheckSum( this.messInBytes, a );
+                setTag("10", getFIXCheckSum(messInBytes, a));
+                tmpString = "10=" + getFIXCheckSum(messInBytes, a);
 			}
 
-			byte[] tmp = tmpString.getBytes("US-ASCII");
+              byte[] tmp = tmpString.getBytes(StandardCharsets.US_ASCII);
 			for (int j = 0; j < tmpString.length(); j++)
 			  {
-				 this.messInBytes[ a ] = tmp[ j ];
+                  messInBytes[a] = tmp[j];
 				 a++;
 			  }
-			this.messInBytes[ a ] = 1;
+              messInBytes[a] = 1;
 			this.RealLen = a + 1;
 		  }
 		  catch (Exception e)

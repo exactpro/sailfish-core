@@ -21,25 +21,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.JavaStatement;
+import com.exactpro.sf.common.util.EPSCommonException;
 
 public class AdvancedMatrixWriter implements AutoCloseable {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private final static String SYSTEM_FIELD_PREFIX = Column.getSystemPrefix();
-    private final static String ACTION_FIELD = Column.Action.getName();
-    private final static String DEFINE_HEADER = JavaStatement.DEFINE_HEADER.getValue();
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final String SYSTEM_FIELD_PREFIX = Column.getSystemPrefix();
+    private static final String ACTION_FIELD = Column.Action.getName();
+    private static final String DEFINE_HEADER = JavaStatement.DEFINE_HEADER.getValue();
     private final IMatrixWriter writer;
     private final List<SimpleCell> header;
     private final Map<String, Integer> convertedHeaders;
 
-    private boolean isHeaderWrited = false;
+    private boolean isHeaderWrited;
     private int rowNumber = 1;
 
     public static IMatrixWriter getWriter(File matrixPath) throws IOException {
@@ -81,7 +82,7 @@ public class AdvancedMatrixWriter implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.writer.close();
+        writer.close();
     }
     
     public void writeCells(Map<String, SimpleCell> line) throws IOException {
@@ -93,7 +94,7 @@ public class AdvancedMatrixWriter implements AutoCloseable {
 
         int unknownFieldsCount = 0;
 
-        for (Map.Entry<String, SimpleCell> cell : line.entrySet()) {
+        for(Entry<String, SimpleCell> cell : line.entrySet()) {
             if (!convertedHeaders.containsKey(cell.getKey())) {
                 unknownFieldsCount++;
             }
@@ -105,7 +106,7 @@ public class AdvancedMatrixWriter implements AutoCloseable {
         SimpleCell[] cells = new SimpleCell[header.size() + unknownFieldsCount];
         int additionalIndx = header.size();
 
-        for (Map.Entry<String, SimpleCell> entry : line.entrySet()) {
+        for(Entry<String, SimpleCell> entry : line.entrySet()) {
             if (!convertedHeaders.containsKey(entry.getKey())) {
                 convertedHeaders.put(entry.getKey(), additionalIndx);
                 cells[additionalIndx++] = entry.getValue();
@@ -216,7 +217,7 @@ public class AdvancedMatrixWriter implements AutoCloseable {
                 }
 
                 throw new IOException("Invalid matrix structure. Detected duplicated fields at "
-                        + letterPositions.toString() + " positions. Field name is " + headers.get(counter).getValue());
+                        + letterPositions + " positions. Field name is " + headers.get(counter).getValue());
             }            
         }
 

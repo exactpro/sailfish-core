@@ -33,11 +33,11 @@ public interface IService
 	 * @param name
 	 * 
 	 */
-	void init(final IServiceContext serviceContext,
-				final IServiceMonitor serviceMonitor,
-					final IServiceHandler handler,
-						final IServiceSettings settings,
-							final ServiceName name);
+	void init(IServiceContext serviceContext,
+				IServiceMonitor serviceMonitor,
+					IServiceHandler handler,
+						IServiceSettings settings,
+							ServiceName name);
 
 	void start();
 

@@ -42,7 +42,6 @@ import org.primefaces.event.SelectEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.embedded.statistics.MatrixInfo;
 import com.exactpro.sf.embedded.statistics.StatisticsUtils;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
@@ -57,7 +56,6 @@ import com.exactpro.sf.storage.IOptionsStorage;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.general.SessionStorage;
 import com.exactpro.sf.testwebgui.general.SessionStored;
-import com.exactpro.sf.testwebgui.servlets.ReportServlet;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -83,7 +81,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 	private List<AggregatedReportRow> lastResult = new ArrayList<>();
 
-	private String customReportsPath = null;
+    private String customReportsPath;
 
 	private AggregatedReportRow selectedRow;
 
@@ -102,15 +100,15 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	private List<TestCaseRunStatus> allRunStatuses;
 
 	@SessionStored
-    private String[] selectedColumns = StatisticsUtils.availableScriptRunHistoryColumns;
+    private String[] selectedColumns = StatisticsUtils.DEFAULT_SCRIPT_RUN_HISTORY_COLUMNS;
 
 	@SessionStored
-	private boolean renderExpaned = false;
+    private boolean renderExpaned;
 
 	private Set<Long> manualyToggled = new HashSet<>();
 
 	@SessionStored
-	private boolean emptyCommentOnly = false;
+    private boolean emptyCommentOnly;
 
 	@SessionStored
 	private String sortBy;
@@ -119,7 +117,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	private boolean sortAsc = true;
 
 	@SessionStored
-	private boolean splitByStatus = false;
+    private boolean splitByStatus;
 
 	private TestCaseRunComments userComments;
 
@@ -148,7 +146,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		List<AggregatedReportRow> currentTarget = bad;
 
-		for(AggregatedReportRow row : this.lastResult) {
+        for(AggregatedReportRow row : lastResult) {
 
 			if(row.isMatrixRow()) {
 				if(row.getPassedCount() > 0 && row.getFailedCount() > 0) {
@@ -166,12 +164,12 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		}
 
-		this.lastResult = new ArrayList<>(this.lastResult.size());
+        this.lastResult = new ArrayList<>(lastResult.size());
 
-		this.lastResult.addAll(failed);
-		this.lastResult.addAll(bad);
-		this.lastResult.addAll(casual);
-		this.lastResult.addAll(good);
+        lastResult.addAll(failed);
+        lastResult.addAll(bad);
+        lastResult.addAll(casual);
+        lastResult.addAll(good);
 
 	}
 
@@ -197,7 +195,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		List<AggregatedReportRow> result = new ArrayList<>();
 
-		int matrixRowIndex = this.lastResult.indexOf(matrixRow);
+        int matrixRowIndex = lastResult.indexOf(matrixRow);
 
 		if(matrixRowIndex < 0) {
 			return result;
@@ -205,9 +203,9 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		AggregatedReportRow row;
 
-		for(int i = matrixRowIndex + 1; i < this.lastResult.size(); i++) {
+        for(int i = matrixRowIndex + 1; i < lastResult.size(); i++) {
 
-			row = this.lastResult.get(i);
+            row = lastResult.get(i);
 
 			if(!row.getMatrixRunId().equals(matrixRow.getMatrixRunId())) {
 				break;
@@ -227,11 +225,11 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	public void init() {
         super.init();
 
-        this.allCustomerTags = new ArrayList<>(this.allTags);
+        this.allCustomerTags = new ArrayList<>(allTags);
 
 		this.statisticsDbAvailable = BeanUtil.getSfContext().getStatisticsService().isConnected();
 
-		if(this.statisticsDbAvailable) {
+        if(statisticsDbAvailable) {
 
 			this.allRunStatuses = BeanUtil.getSfContext().getStatisticsService().getStorage().getAllRunStatuses();
 
@@ -247,13 +245,13 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 	public void copyUserComments(AggregatedReportRow row) {
 
-		int rowIndex = this.lastResult.indexOf(row);
+        int rowIndex = lastResult.indexOf(row);
 
 		AggregatedReportRow otherRow;
 
 		for(int i = rowIndex -1; i > 0; i--) {
 
-			otherRow = this.lastResult.get(i);
+            otherRow = lastResult.get(i);
 
 			if(otherRow.getUserComments().getStatus() != null
 					|| StringUtils.isNotEmpty(otherRow.getUserComments().getComment())) {
@@ -272,16 +270,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
 	public void prepareUserComments() {
-
-		if(this.selectedRow.isMatrixRow()) {
-
-			this.userComments = new TestCaseRunComments();
-
-		} else {
-
-			this.userComments = new TestCaseRunComments(this.selectedRow.getUserComments());
-		}
-
+        this.userComments = selectedRow.isMatrixRow() ? new TestCaseRunComments() : new TestCaseRunComments(selectedRow.getUserComments());
 	}
 
     public void getExported() {
@@ -315,39 +304,29 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		logger.debug("toggled {}", id);
 
-		if(this.manualyToggled.contains(id)) {
-			this.manualyToggled.remove(id);
+        if(manualyToggled.contains(id)) {
+            manualyToggled.remove(id);
 		} else {
-			this.manualyToggled.add(id);
+            manualyToggled.add(id);
 		}
 
 	}
 
 	public void onRowSelect(SelectEvent event) {
-		if (this.selectedRows != null) {
+        if(selectedRows != null) {
             Object row = event.getObject();
-            this.selectedRows.remove(row);
+            selectedRows.remove(row);
         }
 
 	}
 
 	public boolean isRenderExpanded(AggregatedReportRow row) {
-
-		if(renderExpaned) {
-
-			return !this.manualyToggled.contains(row.getMatrixRunId());
-
-		} else {
-
-			return this.manualyToggled.contains(row.getMatrixRunId());
-
-		}
-
+        return renderExpaned != manualyToggled.contains(row.getMatrixRunId());
 	}
 
 	public boolean isColumnSelected(String column) {
 
-		for(String selected : this.selectedColumns) {
+        for(String selected : selectedColumns) {
 
 			if(column.equals(selected)) {
 
@@ -365,8 +344,8 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		List<AggregatedReportRow> rowsToUpdate = new ArrayList<>();
 
-		if(this.selectedRow.isMatrixRow()) {
-			rowsToUpdate = findTcRowsForMatrixRun(this.selectedRow);
+        if(selectedRow.isMatrixRow()) {
+            rowsToUpdate = findTcRowsForMatrixRun(selectedRow);
 		} else {
 			rowsToUpdate.add(selectedRow);
 		}
@@ -375,14 +354,14 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 			for(AggregatedReportRow row : rowsToUpdate) {
 
-				if(this.selectedRow.isMatrixRow() && commentOnlyFailedTcs && row.getStatus() != StatusType.FAILED) {
+                if(selectedRow.isMatrixRow() && commentOnlyFailedTcs && row.getStatus() != StatusType.FAILED) {
 					continue;
 				}
 
 				row.setUserComments(userComments);
 
 				BeanUtil.getSfContext().getStatisticsService().getStorage()
-					.updateTcrUserComments(row.getTestCaseRunId(), this.userComments);
+                        .updateTcrUserComments(row.getTestCaseRunId(), userComments);
 
 			}
 
@@ -413,7 +392,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 			IOptionsStorage optStorage = BeanUtil.getSfContext().getOptionsStorage();
 
-			optStorage.setOption(OPTIONS_STORAGE_PREFIX + "customReportsPath", this.customReportsPath);
+            optStorage.setOption(OPTIONS_STORAGE_PREFIX + "customReportsPath", customReportsPath);
 
 			BeanUtil.addInfoMessage("Applied", "But you have to generate report again");
 
@@ -428,24 +407,24 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
     public String getReportRequest(AggregatedReportRow row) {
-        return BeanUtil.getReportRequest(this.customReportsPath, row, false);
+        return BeanUtil.getReportRequest(customReportsPath, row, false);
     }
 
     public String getZipReport(AggregatedReportRow row) {
-        return BeanUtil.getZipReport(this.customReportsPath, row, false);
+        return BeanUtil.getZipReport(customReportsPath, row, false);
     }
 
     public String getLastResultZipReports() {
-        StringBuilder sb = new StringBuilder(BeanUtil.getContextPath(this.customReportsPath, true));
+        StringBuilder sb = new StringBuilder(BeanUtil.getContextPath(customReportsPath, true));
 
         sb.append("/report/reports?reports=");
-        sb.append(this.lastResultReportNamesJson);
+        sb.append(lastResultReportNamesJson);
 
         return sb.toString();
     }
 
 	public String buildReportUrl(AggregatedReportRow row, boolean report) {
-        return BeanUtil.buildReportUrl(this.customReportsPath, row, report);
+        return BeanUtil.buildReportUrl(customReportsPath, row, report);
 	}
 
     @PreDestroy
@@ -462,7 +441,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 	public String getExportFileName() {
 
-		if(this.lastResult == null || this.lastResult.isEmpty()) {
+        if(lastResult == null || lastResult.isEmpty()) {
 
 			return "";
 
@@ -474,9 +453,9 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 		sb.append(REPORT_FILE_PREFIX)
 		.append("__")
-		.append(format.format(this.loadedFrom))
+                .append(format.format(loadedFrom))
 		.append("__")
-		.append(format.format(this.loadedTo))
+                .append(format.format(loadedTo))
 		.append(".csv");
 
 		return sb.toString();
@@ -485,7 +464,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 	public void generateReport() {
 
-		logger.debug("Generate {} - {}; {}", this.from, this.to, this.selectedSfInstances);
+        logger.debug("Generate {} - {}; {}", from, to, selectedSfInstances);
 
 		BeanUtil.findBean("sessionStorage", SessionStorage.class).saveStateOfAnnotatedBean(this);
 
@@ -509,10 +488,9 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 		try {
 
 			this.lastResult = BeanUtil.getSfContext().getStatisticsService().getReportingStorage().generateTestScriptsReport(params);
-            this.matrixInfo = MatrixInfo.extractMatrixInfo(this.lastResult);
+            this.matrixInfo = MatrixInfo.extractMatrixInfo(lastResult);
 
-
-			if(this.splitByStatus) {
+            if(splitByStatus) {
 
 				doSplitByStatus();
 
@@ -523,13 +501,13 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
 			List<String> reports = new ArrayList<>();
 
-	        for (AggregatedReportRow row : this.lastResult) {
+            for(AggregatedReportRow row : lastResult) {
 	            if (row.isMatrixRow()) {
 	                reports.add(row.getReportFolder());
 	            }
 	        }
 
-	        this.lastResultReportNamesJson = this.mapper.writeValueAsString(reports);
+            this.lastResultReportNamesJson = mapper.writeValueAsString(reports);
 	        this.downloadReportsEnabled = true;
 
 		} catch(Exception e) {
@@ -547,18 +525,18 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
     public void applyAction() {
-        logger.debug("applyAction {} - {};", this.customerTags, this.action);
+        logger.debug("applyAction {} - {};", customerTags, action);
 
-        if(this.selectedRows == null || this.selectedRows.isEmpty()) {
+        if(selectedRows == null || selectedRows.isEmpty()) {
             BeanUtil.addErrorMessage("There are no selected rows", "");
             return;
         }
-        if(this.customerTags == null || this.customerTags.isEmpty()) {
+        if(customerTags == null || customerTags.isEmpty()) {
             BeanUtil.addErrorMessage("There are no selected customer tags)", "");
             return;
         }
 
-        if (this.action == Action.REMOVE) {
+        if(action == Action.REMOVE) {
             RequestContext.getCurrentInstance().execute("PF('tagConfirmation').show()");
         } else {
             confirmAction();
@@ -566,7 +544,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
     }
 
     public void confirmAction() {
-        manageTagForRows(this.selectedRows, this.action, this.customerTags);
+        manageTagForRows(selectedRows, action, customerTags);
         generateReport();
     }
 
@@ -669,7 +647,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
 	public String[] getAvailableColumns() {
-        return StatisticsUtils.availableScriptRunHistoryColumns;
+        return StatisticsUtils.AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS;
 	}
 
 	public boolean isRenderExpaned() {
@@ -827,18 +805,18 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
     public void onCustomTagSelect() {
         logger.debug("Custom tag select invoked");
 
-        this.customerTags.add(customTagToAdd);
+        customerTags.add(customTagToAdd);
         this.customTagToAdd = null;
-        this.allCustomerTags.removeAll(customerTags);
+        allCustomerTags.removeAll(customerTags);
     }
 
     public void removeCustomTag(Tag tag) {
-        this.customerTags.remove(tag);
-        this.allCustomerTags.add(tag);
+        customerTags.remove(tag);
+        allCustomerTags.add(tag);
     }
 
     public List<Tag> completeCustomTag(String query) {
-	    return completeTag(query, this.allCustomerTags);
+        return completeTag(query, allCustomerTags);
     }
 
     private void manageTagForRows(List<AggregatedReportRow> rows, Action action, List<Tag> tags) {

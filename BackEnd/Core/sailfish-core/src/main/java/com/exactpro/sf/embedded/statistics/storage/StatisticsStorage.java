@@ -21,13 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.exactpro.sf.embedded.statistics.StatisticsUtils;
-import com.exactpro.sf.embedded.statistics.entities.ActionRunKnownBug;
-import com.exactpro.sf.embedded.statistics.entities.KnownBug;
-import com.exactpro.sf.embedded.statistics.entities.TestCaseRunTag;
-import com.exactpro.sf.embedded.statistics.entities.TestCaseRunTagId;
-import com.exactpro.sf.storage.StorageException;
-
+import org.apache.commons.collections.CollectionUtils;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.DefaultComponentSafeNamingStrategy;
@@ -36,9 +30,12 @@ import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.embedded.statistics.StatisticsUtils;
 import com.exactpro.sf.embedded.statistics.entities.Action;
 import com.exactpro.sf.embedded.statistics.entities.ActionRun;
+import com.exactpro.sf.embedded.statistics.entities.ActionRunKnownBug;
 import com.exactpro.sf.embedded.statistics.entities.Environment;
+import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.embedded.statistics.entities.Matrix;
 import com.exactpro.sf.embedded.statistics.entities.MatrixRun;
 import com.exactpro.sf.embedded.statistics.entities.MessageType;
@@ -49,9 +46,11 @@ import com.exactpro.sf.embedded.statistics.entities.TagGroup;
 import com.exactpro.sf.embedded.statistics.entities.TestCase;
 import com.exactpro.sf.embedded.statistics.entities.TestCaseRun;
 import com.exactpro.sf.embedded.statistics.entities.TestCaseRunStatus;
+import com.exactpro.sf.embedded.statistics.entities.TestCaseRunTag;
 import com.exactpro.sf.embedded.statistics.entities.User;
 import com.exactpro.sf.embedded.storage.AbstractHibernateStorage;
 import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
+import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.util.LRUMap;
 
 public class StatisticsStorage extends AbstractHibernateStorage implements IStatisticsStorage {
@@ -61,16 +60,16 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	public static final String UNKNOWN_TC_ID = "_unknown_tc_";
 	
 	private StatisticsReportingStorage reportingStorage;
-	
-	private Map<String, Environment> environmentsCache = new HashMap<String, Environment>();
-	
-	private Map<String, User> usersCache = new HashMap<String, User>();
-	
-	private Map<String, Action> actionsCache = Collections.synchronizedMap(new LRUMap<String, Action>(40));
-	
-	private Map<String, MessageType> msgTypesCache = Collections.synchronizedMap(new LRUMap<String, MessageType>(40));
 
-	private Map<String, KnownBug> knownBugCache = Collections.synchronizedMap(new LRUMap<>(40));
+    private final Map<String, Environment> environmentsCache = new HashMap<String, Environment>();
+
+    private final Map<String, User> usersCache = new HashMap<String, User>();
+
+    private final Map<String, Action> actionsCache = Collections.synchronizedMap(new LRUMap<String, Action>(40));
+
+    private final Map<String, MessageType> msgTypesCache = Collections.synchronizedMap(new LRUMap<String, MessageType>(40));
+
+    private final Map<String, KnownBug> knownBugCache = Collections.synchronizedMap(new LRUMap<>(40));
 	
 	public StatisticsStorage(HibernateStorageSettings settings) {
 		super(settings);
@@ -80,6 +79,9 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	protected void configure(HibernateStorageSettings settings, Configuration configuration) {
 		// Init hibernate
         configuration.addPackage("com.exactpro.sf.statistics.entities")
+
+        .setProperty("hibernate.query.plan_cache_max_size", "64")
+        .setProperty("hibernate.query.plan_parameter_metadata_max_size", "32")
 
         .setNamingStrategy(DefaultComponentSafeNamingStrategy.INSTANCE)
 
@@ -110,16 +112,10 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public SfInstance loadSfInstance(String host, String port, String sfName) {
-		
+
 		SfInstance result;
-		
-		List<Criterion> criterions = new ArrayList<Criterion>();
-		
-		criterions.add(Restrictions.eq("host", host));
-		criterions.add(Restrictions.eq("port", Integer.parseInt( port )));
-		criterions.add(Restrictions.eq("name", sfName));
-		
-		List<SfInstance> queryResults = this.storage.getAllEntities(SfInstance.class, criterions);
+
+        List<SfInstance> queryResults = loadSfInstancesBy(host, port, sfName);
 		
 		if(!queryResults.isEmpty()) {
 			
@@ -134,8 +130,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result.setHost(host);
 			result.setPort(Integer.parseInt( port ));
 			result.setName(sfName);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
 		
@@ -144,11 +140,20 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		return result;
 		
 	}
-	
-	@Override
+
+    @Override
+    public SfInstance getSfInstance(String host, String port, String sfName) {
+        List<SfInstance> instances = loadSfInstancesBy(host, port, sfName);
+        if (CollectionUtils.isNotEmpty(instances)) {
+            return instances.get(0);
+        }
+        return null;
+    }
+
+    @Override
     public TestCase loadUnknownTestCase() {
-		
-		TestCase result = this.storage.getEntityByField(TestCase.class, "testCaseId", UNKNOWN_TC_ID);
+
+        TestCase result = storage.getEntityByField(TestCase.class, "testCaseId", UNKNOWN_TC_ID);
 		
 		if(result == null) {
 			
@@ -157,8 +162,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result = new TestCase();
 			
 			result.setTestCaseId(UNKNOWN_TC_ID);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
 		
@@ -168,14 +173,14 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public Environment getEnvironmentEntity(String name) {
-		
-		if(this.environmentsCache.containsKey(name)) {
-			
-			return this.environmentsCache.get(name);
+
+        if(environmentsCache.containsKey(name)) {
+
+            return environmentsCache.get(name);
 			
 		} else {
-			
-			Environment result = this.storage.getEntityByField(Environment.class, "name", name);
+
+            Environment result = storage.getEntityByField(Environment.class, "name", name);
 			
 			if(result == null) {
 				
@@ -184,12 +189,12 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 				result = new Environment();
 				
 				result.setName(name);
-				
-				this.storage.add(result);
+
+                storage.add(result);
 				
 			}
-			
-			this.environmentsCache.put(name, result);
+
+            environmentsCache.put(name, result);
 			
 			return result;
 			
@@ -199,14 +204,14 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public User getUserEntity(String name) {
-		
-		if(this.usersCache.containsKey(name)) {
-			
-			return this.usersCache.get(name);
+
+        if(usersCache.containsKey(name)) {
+
+            return usersCache.get(name);
 			
 		} else {
-			
-			User result = this.storage.getEntityByField(User.class, "name", name);
+
+            User result = storage.getEntityByField(User.class, "name", name);
 			
 			if(result == null) {
 				
@@ -215,12 +220,12 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 				result = new User();
 				
 				result.setName(name);
-				
-				this.storage.add(result);
+
+                storage.add(result);
 				
 			}
-			
-			this.usersCache.put(name, result);
+
+            usersCache.put(name, result);
 			
 			return result;
 			
@@ -230,8 +235,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public Service getServiceEntity(String name) {
-			
-		Service result = this.storage.getEntityByField(Service.class, "name", name);
+
+        Service result = storage.getEntityByField(Service.class, "name", name);
 		
 		if(result == null) {
 			
@@ -240,8 +245,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result = new Service();
 			
 			result.setName(name);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
 		
@@ -251,8 +256,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public Action getActionEntity(String name) {
-		
-		Action result = this.actionsCache.get(name);
+
+        Action result = actionsCache.get(name);
 		
 		if(result != null) {
 			
@@ -261,8 +266,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			return result;
 			
 		}
-		
-		result = this.storage.getEntityByField(Action.class, "name", name);
+
+        result = storage.getEntityByField(Action.class, "name", name);
 		
 		if(result == null) {
 			
@@ -271,12 +276,12 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result = new Action();
 			
 			result.setName(name);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
-		
-		this.actionsCache.put(name, result);
+
+        actionsCache.put(name, result);
 		
 		return result;
 		
@@ -284,16 +289,16 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public MessageType getMsgTypeEntity(String name) {
-		
-		MessageType result = this.msgTypesCache.get(name);
+
+        MessageType result = msgTypesCache.get(name);
 		
 		if(result != null) {
 		
 			return result;
 			
 		}
-		
-		result = this.storage.getEntityByField(MessageType.class, "name", name);
+
+        result = storage.getEntityByField(MessageType.class, "name", name);
 		
 		if(result == null) {
 			
@@ -302,12 +307,12 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result = new MessageType();
 			
 			result.setName(name);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
-		
-		this.msgTypesCache.put(name, result);
+
+        msgTypesCache.put(name, result);
 		
 		return result;
 		
@@ -315,8 +320,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public TestCase loadTestCase(String tcId) {
-		
-		TestCase result = this.storage.getEntityByField(TestCase.class, "testCaseId", tcId);
+
+        TestCase result = storage.getEntityByField(TestCase.class, "testCaseId", tcId);
 		
 		if(result == null) {
 			
@@ -325,8 +330,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result = new TestCase();
 			
 			result.setTestCaseId(tcId);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
 		
@@ -336,8 +341,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 	
 	@Override
     public Matrix loadMatrix(String name) {
-		
-		Matrix result = this.storage.getEntityByField(Matrix.class, "name", name);
+
+        Matrix result = storage.getEntityByField(Matrix.class, "name", name);
 		
 		if(result == null) {
 			
@@ -346,8 +351,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 			result = new Matrix();
 			
 			result.setName(name);
-			
-			this.storage.add(result);
+
+            storage.add(result);
 			
 		}
 		
@@ -358,21 +363,21 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
     @Override
     public KnownBug loadKnownBug(String subject, List<String> categories) {
         String knownBugJson = StatisticsUtils.buildKnownBugJson(subject, categories);
-        KnownBug result = this.knownBugCache.get(knownBugJson);
+        KnownBug result = knownBugCache.get(knownBugJson);
         if (result != null) {
             logger.info("KnownBug cache hit");
             return result;
         }
         // TODO: it's normal for single thread but for multi threads it can be reason of errors, because this logic could be executed from different threads at the same time
         // TODO: fix this logic in other methods too which loading reference information
-        result = this.storage.getEntityByField(KnownBug.class, "knownBug", knownBugJson);
+        result = storage.getEntityByField(KnownBug.class, "knownBug", knownBugJson);
         if (result == null) {
             result = new KnownBug();
             result.setKnownBug(knownBugJson);
-            this.storage.add(result);
+            storage.add(result);
         }
 
-        this.knownBugCache.put(knownBugJson, result);
+        knownBugCache.put(knownBugJson, result);
         return result;
     }
 
@@ -383,22 +388,22 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 
 	@Override
 	public List<SfInstance> getAllSfInstances() {
-		
-		return this.storage.getAllEntities(SfInstance.class);
+
+        return storage.getAllEntities(SfInstance.class);
 		
 	}
 	
 	@Override
 	public List<Tag> getAllTags() {
-		
-		return this.storage.getAllEntities(Tag.class);
+
+        return storage.getAllEntities(Tag.class);
 		
 	}
 	
 	@Override
 	public TagGroup getGroupByName(String name) {
-		
-		return this.storage.getEntityByField(TagGroup.class, "name", name);
+
+        return storage.getEntityByField(TagGroup.class, "name", name);
 		
 	}
 	
@@ -408,61 +413,61 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		List<Criterion> criterions = new ArrayList<>();
 		
 		criterions.add(Restrictions.isNull("group"));
-		
-		return this.storage.getAllEntities(Tag.class, criterions, "name", true);
+
+        return storage.getAllEntities(Tag.class, criterions, "name", true);
 		
 	}
 	
 	@Override
 	public List<TagGroup> getAllTagGroups() {
-		
-		return this.storage.getAllEntities(TagGroup.class, new ArrayList<Criterion>(), "name", true);
+
+        return storage.getAllEntities(TagGroup.class, new ArrayList<Criterion>(), "name", true);
 		
 	}
 	
 	@Override
 	public SfInstance getSfInstanceById(long id) {
-		
-		return (SfInstance)this.storage.getEntityById(SfInstance.class, id);
+
+        return (SfInstance)storage.getEntityById(SfInstance.class, id);
 		
 	}
 
 	@Override
 	public List<TestCase> getAllTestCases() {
-		
-		return this.storage.getAllEntities(TestCase.class);
+
+        return storage.getAllEntities(TestCase.class);
 	}
 
 	@Override
 	public TestCase getTestCaseById(long id) {
 
-		return (TestCase)this.storage.getEntityById(TestCase.class, id);
+        return (TestCase)storage.getEntityById(TestCase.class, id);
 	}
 
 	@Override
 	public Tag getTagByName(String name) {
-		
-		return this.storage.getEntityByField(Tag.class, "name", name);
+
+        return storage.getEntityByField(Tag.class, "name", name);
 		
 	}
 	
 	@Override
 	public List<TestCaseRunStatus> getAllRunStatuses() {
-		
-		return this.storage.getAllEntities(TestCaseRunStatus.class);
+
+        return storage.getAllEntities(TestCaseRunStatus.class);
 		
 	}
 	
 	@Override
 	public void updateTcrUserComments(long testCaseId, TestCaseRunComments comments) {
-		
-		TestCaseRun tcr = (TestCaseRun)this.storage.getEntityById(TestCaseRun.class, testCaseId);
+
+        TestCaseRun tcr = (TestCaseRun)storage.getEntityById(TestCaseRun.class, testCaseId);
 		
 		tcr.setComment(comments.getComment());
 		tcr.setFixRevision(comments.getFixedVersion());
 		tcr.setRunStatus(comments.getStatus());
-		
-		this.storage.update(tcr);
+
+        storage.update(tcr);
 		
 	}
 	
@@ -472,15 +477,15 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		
 		criterions.add(Restrictions.ilike("testCaseId", "%" + namePart + "%"));
-		
-		return this.storage.getAllEntities(TestCase.class, criterions, "testCaseId", true);
+
+        return storage.getAllEntities(TestCase.class, criterions, "testCaseId", true);
 		
 	}
 	
 	@Override
 	public TestCase getTestCaseByTcId(String id) {
-		
-		return this.storage.getEntityByField(TestCase.class, "testCaseId", id);
+
+        return storage.getEntityByField(TestCase.class, "testCaseId", id);
 		
 	}
 	
@@ -490,8 +495,8 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		
 		criterions.add(Restrictions.ilike("name", "%" + namePart + "%"));
-		
-		return this.storage.getAllEntities(Tag.class, criterions, "name", true);
+
+        return storage.getAllEntities(Tag.class, criterions, "name", true);
 		
 	}
 	
@@ -501,14 +506,14 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
 		List<Criterion> criterions = new ArrayList<Criterion>();
 		
 		criterions.add(Restrictions.ilike("name", "%" + namePart + "%"));
-		
-		return this.storage.getAllEntities(TagGroup.class, criterions, "name", true);
+
+        return storage.getAllEntities(TagGroup.class, criterions, "name", true);
 		
 	}
 
     @Override
     public void updateSfCurrentID(long matrixRunId, long sfCurrentID) {
-        MatrixRun matrixRun = (MatrixRun) this.storage.getEntityById(MatrixRun.class, matrixRunId);
+        MatrixRun matrixRun = (MatrixRun)storage.getEntityById(MatrixRun.class, matrixRunId);
         String message;
 
         if (matrixRun == null) {
@@ -526,16 +531,24 @@ public class StatisticsStorage extends AbstractHibernateStorage implements IStat
         }
 
         matrixRun.setSfCurrentInstance(currentSfInstance);
-        this.storage.update(matrixRun);
+        storage.update(matrixRun);
     }
 
     @Override
     public TestCaseRun getTestCaseRunById(long id) {
-        return (TestCaseRun)this.storage.getEntityById(TestCaseRun.class, id);
+        return (TestCaseRun)storage.getEntityById(TestCaseRun.class, id);
     }
 
     @Override
     public MatrixRun getMatrixRunById(long id) {
-        return (MatrixRun) this.storage.getEntityById(MatrixRun.class, id);
+        return (MatrixRun)storage.getEntityById(MatrixRun.class, id);
+    }
+
+    private List<SfInstance> loadSfInstancesBy(String host, String port, String sfName) {
+        List<Criterion> criterions = new ArrayList<Criterion>();
+        criterions.add(Restrictions.eq("host", host));
+        criterions.add(Restrictions.eq("port", Integer.parseInt( port )));
+        criterions.add(Restrictions.eq("name", sfName));
+        return storage.getAllEntities(SfInstance.class, criterions);
     }
 }

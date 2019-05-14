@@ -25,7 +25,7 @@ import com.exactpro.sf.testwebgui.dictionaries.DictionaryEditorModel;
 
 public class SessionModelsMapper {
 
-    private Map<HttpSession, DictionaryEditorModel> dictionaryEditorModels = new ConcurrentHashMap<>();
+    private final Map<HttpSession, DictionaryEditorModel> dictionaryEditorModels = new ConcurrentHashMap<>();
 
     public DictionaryEditorModel getDictionaryEditorModel(HttpSession session) {
 
@@ -33,26 +33,26 @@ public class SessionModelsMapper {
             return null;
         }
 
-        if (!this.dictionaryEditorModels.containsKey(session)) {
-            this.dictionaryEditorModels.put(session, new DictionaryEditorModel(BeanUtil.getSfContext()));
+        if(!dictionaryEditorModels.containsKey(session)) {
+            dictionaryEditorModels.put(session, new DictionaryEditorModel(BeanUtil.getSfContext()));
         }
 
-        return this.dictionaryEditorModels.get(session);
+        return dictionaryEditorModels.get(session);
     }
 
     public void destroyModel(DictionaryEditorModel model) {
 
         HttpSession found = null;
 
-        for (HttpSession session : this.dictionaryEditorModels.keySet()) {
-            if (this.dictionaryEditorModels.get(session) == model) {
+        for(HttpSession session : dictionaryEditorModels.keySet()) {
+            if(dictionaryEditorModels.get(session) == model) {
                 found = session;
                 break;
             }
         }
 
         if (found != null) {
-            this.dictionaryEditorModels.remove(found);
+            dictionaryEditorModels.remove(found);
         }
     }
 }

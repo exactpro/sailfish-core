@@ -28,7 +28,7 @@ public enum AMLBlockType {
     private final AMLBlockBrace openingBrace;
     private final AMLBlockBrace closingBrace;
 
-    private AMLBlockType(String name, AMLBlockBrace openingBrace, AMLBlockBrace closingBrace) {
+    AMLBlockType(String name, AMLBlockBrace openingBrace, AMLBlockBrace closingBrace) {
         this.name = name;
         this.openingBrace = openingBrace;
         this.closingBrace = closingBrace;
@@ -47,11 +47,7 @@ public enum AMLBlockType {
     }
 
     public static AMLBlockType value(String value) {
-        if(value == null) {
-            return null;
-        }
-
-        return value(AMLBlockBrace.value(value));
+        return value == null ? null : value(AMLBlockBrace.value(value));
     }
 
     public static AMLBlockType value(AMLBlockBrace blockBrace) {

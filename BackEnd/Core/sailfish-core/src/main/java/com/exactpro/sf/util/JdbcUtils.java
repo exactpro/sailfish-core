@@ -50,23 +50,11 @@ public class JdbcUtils {
 			}
 		}
 	}
-	
-	public static String buildConnectionUrl(String protocol, String subProtocol, String host, String port, String database, String query) {
-        
+
+    public static String buildConnectionUrl(String protocol, String subProtocol, String host, String port, String database, String query) {
         String hostFormat = StringUtils.isEmpty(port) ? "%s" : "%s:%s";
-        
-        String format;
-        
-        if(StringUtils.isNotEmpty(query)) {
-            
-            format = "%s:%s://" + hostFormat + "/%s?%s";
-            
-        } else {
-            
-            format = "%s:%s://" + hostFormat + "/%s";
-            
-        }
-        
+        String format = "%s:%s://" + hostFormat + (StringUtils.isNotEmpty(query) ? "/%s?%s" : "/%s");
+
         if (StringUtils.isNotEmpty(port)) {
             return String.format(format, protocol, subProtocol, host, port, database, query);
         } else {

@@ -16,12 +16,12 @@
 package com.exactpro.sf.embedded.statistics.storage.reporting;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.storage.CommonReportRow;
 import com.exactpro.sf.scriptrunner.StatusType;
-import java.time.LocalDateTime;
 
 @SuppressWarnings("serial")
 public class TaggedComparisonRow implements Serializable {
@@ -55,7 +55,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstTestCaseRunId(Long firstTestCaseRunId) {
-		this.firstSet.setTestCaseRunId(firstTestCaseRunId);
+        firstSet.setTestCaseRunId(firstTestCaseRunId);
 	}
 
 	public Long getFirstMatrixRunId() {
@@ -63,11 +63,11 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstMatrixRunId(Long firstMatrixRunId) {
-		this.firstSet.setMatrixRunId(firstMatrixRunId);
+        firstSet.setMatrixRunId(firstMatrixRunId);
 	}
 
 	public void setFirstStatus(StatusType firstStatus) {
-		this.firstSet.setStatus(firstStatus);
+        firstSet.setStatus(firstStatus);
 	}
 
 	public String getFirstMatrixName() {
@@ -75,7 +75,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstMatrixName(String firstMatrixName) {
-		this.firstSet.setMatrixName(firstMatrixName);
+        firstSet.setMatrixName(firstMatrixName);
 	}
 
 	public String getFirstFailReason() {
@@ -83,7 +83,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstFailReason(String firstFailReason) {
-		this.firstSet.setFailReason(firstFailReason);
+        firstSet.setFailReason(firstFailReason);
 	}
 
 	public Map<Long, String> getFirstFailedActions() {
@@ -91,7 +91,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstFailedActions(Map<Long, String> firstFailedActions) {
-	    this.firstSet.setFailedActions(firstFailedActions);
+        firstSet.setFailedActions(firstFailedActions);
 	}
 
 	public String getFirstUserComment() {
@@ -99,7 +99,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstUserComment(String firstUserComment) {
-		this.firstSet.setUserComment(firstUserComment);
+        firstSet.setUserComment(firstUserComment);
 	}
 
 	public String getFirstUserStatus() {
@@ -107,7 +107,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstUserStatus(String firstUserStatus) {
-		this.firstSet.setUserStatus(firstUserStatus);
+        firstSet.setUserStatus(firstUserStatus);
 	}
 
 	public LocalDateTime getFirstStartTime() {
@@ -115,7 +115,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstStartTime(LocalDateTime firstStartTime) {
-		this.firstSet.setStartTime(firstStartTime);
+        firstSet.setStartTime(firstStartTime);
 	}
 
 	public Long getSecondTestCaseRunId() {
@@ -123,7 +123,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondTestCaseRunId(Long secondTestCaseRunId) {
-		this.secondSet.setTestCaseRunId(secondTestCaseRunId);
+        secondSet.setTestCaseRunId(secondTestCaseRunId);
 	}
 
 	public Long getSecondMatrixRunId() {
@@ -131,11 +131,11 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondMatrixRunId(Long secondMatrixRunId) {
-		this.secondSet.setMatrixRunId(secondMatrixRunId);
+        secondSet.setMatrixRunId(secondMatrixRunId);
 	}
 
 	public void setSecondStatus(StatusType secondStatus) {
-		this.secondSet.setStatus(secondStatus);
+        secondSet.setStatus(secondStatus);
 	}
 
 	public String getSecondMatrixName() {
@@ -143,7 +143,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondMatrixName(String secondMatrixName) {
-		this.secondSet.setMatrixName(secondMatrixName);
+        secondSet.setMatrixName(secondMatrixName);
 	}
 
 	public String getSecondFailReason() {
@@ -151,7 +151,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondFailReason(String secondFailReason) {
-		this.secondSet.setFailReason(secondFailReason);
+        secondSet.setFailReason(secondFailReason);
 	}
 
 	public Map<Long, String> getSecondFailedActions() {
@@ -159,7 +159,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondFailedActions(Map<Long, String> secondFailedActions) {
-	    this.secondSet.setFailedActions(secondFailedActions);
+        secondSet.setFailedActions(secondFailedActions);
 	}
 
 	public String getSecondUserComment() {
@@ -167,7 +167,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondUserComment(String secondUserComment) {
-		this.secondSet.setUserComment(secondUserComment);
+        secondSet.setUserComment(secondUserComment);
 	}
 
 	public String getSecondUserStatus() {
@@ -175,7 +175,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondUserStatus(String secondUserStatus) {
-		this.secondSet.setUserStatus(secondUserStatus);
+        secondSet.setUserStatus(secondUserStatus);
 	}
 
 	public LocalDateTime getSecondStartTime() {
@@ -183,7 +183,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondStartTime(LocalDateTime secondStartTime) {
-		this.secondSet.setStartTime(secondStartTime);
+        secondSet.setStartTime(secondStartTime);
 	}
 
 	public Long getFirstTestCaseId() {
@@ -191,7 +191,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstTestCaseId(Long firstTestCaseId) {
-		this.firstSet.setTestCaseId(firstTestCaseId);
+        firstSet.setTestCaseId(firstTestCaseId);
 	}
 
 	public LocalDateTime getFirstFinishTime() {
@@ -199,7 +199,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstFinishTime(LocalDateTime firstFinishTime) {
-		this.firstSet.setFinishTime(firstFinishTime);
+        firstSet.setFinishTime(firstFinishTime);
 	}
 
 	public String getFirstRawTags() {
@@ -207,7 +207,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstRawTags(String firstRawTags) {
-		this.firstSet.setRawTags(firstRawTags);
+        firstSet.setRawTags(firstRawTags);
 	}
 
 	public Integer getFirstRawHash() {
@@ -215,7 +215,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setFirstRawHash(Integer firstRawHash) {
-	    this.firstSet.setRawHash(firstRawHash);
+        firstSet.setRawHash(firstRawHash);
 	}
 
 	public Long getSecondTestCaseId() {
@@ -223,7 +223,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondTestCaseId(Long secondTestCaseId) {
-		this.secondSet.setTestCaseId(secondTestCaseId);
+        secondSet.setTestCaseId(secondTestCaseId);
 	}
 
 	public LocalDateTime getSecondFinishTime() {
@@ -231,7 +231,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondFinishTime(LocalDateTime secondFinishTime) {
-		this.secondSet.setFinishTime(secondFinishTime);
+        secondSet.setFinishTime(secondFinishTime);
 	}
 
 	public String getSecondRawTags() {
@@ -239,7 +239,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondRawTags(String secondRawTags) {
-		this.secondSet.setRawTags(secondRawTags);
+        secondSet.setRawTags(secondRawTags);
 	}
 
 	public Integer getSecondRawHash() {
@@ -247,7 +247,7 @@ public class TaggedComparisonRow implements Serializable {
 	}
 
 	public void setSecondRawHash(Integer secondRawHash) {
-	    this.secondSet.setRawHash(secondRawHash);
+        secondSet.setRawHash(secondRawHash);
 	}
 
 	public StatusType getFirstStatus() {
@@ -263,7 +263,7 @@ public class TaggedComparisonRow implements Serializable {
     }
 
     public void setFirstDescription(String firstDescription) {
-        this.firstSet.setDescription(firstDescription);
+        firstSet.setDescription(firstDescription);
     }
 
     public String getSecondDescription() {
@@ -271,7 +271,7 @@ public class TaggedComparisonRow implements Serializable {
     }
 
     public void setSecondDescription(String secondDescription) {
-        this.secondSet.setDescription(secondDescription);
+        secondSet.setDescription(secondDescription);
     }
 
     public SfInstance getFirstSfInstance() {

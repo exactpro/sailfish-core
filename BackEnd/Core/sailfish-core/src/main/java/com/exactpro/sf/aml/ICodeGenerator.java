@@ -37,14 +37,15 @@ import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
  */
 public interface ICodeGenerator {
 
-	public abstract GeneratedScript generateCode(List<AMLTestCase> testCases, List<AMLTestCase> beforeTCBlocks, List<AMLTestCase> afterTCBlocks)
+	GeneratedScript generateCode(List<AMLTestCase> testCases, List<AMLTestCase> beforeTCBlocks, List<AMLTestCase> afterTCBlocks)
 			throws AMLException, IOException, InterruptedException;
 
-	public abstract AlertCollector getAlertCollector();
+	AlertCollector getAlertCollector();
 
-	public abstract void cleanup();
+	void cleanup();
 
-	public abstract void init(IWorkspaceDispatcher workspaceDispatcher, IAdapterManager adapterManager, IEnvironmentManager environment, IDictionaryManager dictionaryManager, IStaticServiceManager staticServiceManager, IActionManager actionManager, IUtilityManager utilityManager, ScriptContext scriptContext, AMLSettings amlSettings, List<IProgressListener> progressListeners, String compilerClassPath) throws AMLException;
+	void init(IWorkspaceDispatcher workspaceDispatcher, IAdapterManager adapterManager, IEnvironmentManager environment, IDictionaryManager dictionaryManager, IStaticServiceManager staticServiceManager, IActionManager actionManager,
+            IUtilityManager utilityManager, ScriptContext scriptContext, AMLSettings amlSettings, List<IProgressListener> progressListeners, String compilerClassPath) throws AMLException;
 
-    public abstract ScriptContext getScriptContext();
+    ScriptContext getScriptContext();
 }

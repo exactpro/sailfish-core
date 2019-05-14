@@ -54,15 +54,12 @@ public class PlainTextMatrixEditorBean implements Serializable {
 
 	private static final String charset = "UTF-8";
 
-	@ManagedProperty(value = "#{testScriptsBean.matrixToEdit}")
+	@ManagedProperty("#{testScriptsBean.matrixToEdit}")
 	private MatrixAdapter matrixAdapter;
 
 	private String textToSave = "";
 
-	public PlainTextMatrixEditorBean() {
-	}
-
-	@PostConstruct
+    @PostConstruct
 	public void initialize() {
 		if (matrixAdapter == null) {
 			logger.error("matrix not loaded from managed bean");

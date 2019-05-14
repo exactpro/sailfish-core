@@ -25,9 +25,9 @@ public class DebugController {
 
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 	private static final String PAUSED = "Paused by user: ";
-    private final AtomicReference<ControllerStatus> currentStataus = new AtomicReference<DebugController.ControllerStatus>(ControllerStatus.RUNNED);
-	private long id;
-	private IPauseListener pauseListener;
+    private final AtomicReference<ControllerStatus> currentStataus = new AtomicReference<ControllerStatus>(ControllerStatus.RUNNED);
+    private final long id;
+    private final IPauseListener pauseListener;
 	private String reason;
 	private long timeout;
 
@@ -38,8 +38,8 @@ public class DebugController {
 
 	// Called from GUI only (user press Resume button)
 	public synchronized void resumeScript() {
-	    this.currentStataus.compareAndSet(ControllerStatus.PAUSED, ControllerStatus.RUNNED);
-		this.notifyAll();
+        currentStataus.compareAndSet(ControllerStatus.PAUSED, ControllerStatus.RUNNED);
+        notifyAll();
 	}
 
 	// Called from GUI only (user press Pause button)
@@ -47,13 +47,13 @@ public class DebugController {
 		// change script state to PAUSED
 		this.reason = PAUSED;
 		this.timeout = 0;
-		this.currentStataus.compareAndSet(ControllerStatus.RUNNED, ControllerStatus.PAUSED);
+        currentStataus.compareAndSet(ControllerStatus.RUNNED, ControllerStatus.PAUSED);
 	}
 
 	// Called from GUI only (user press Stop button)
     public synchronized void stopScript() {
-        this.currentStataus.set(ControllerStatus.STOPPED);
-        this.notifyAll();
+        currentStataus.set(ControllerStatus.STOPPED);
+        notifyAll();
     }
 	
 	// Called from AskForContinue only
@@ -61,7 +61,7 @@ public class DebugController {
 		// change script state to PAUSED
 		this.timeout = timeout;
 		this.reason = reason;
-		this.currentStataus.compareAndSet(ControllerStatus.RUNNED, ControllerStatus.PAUSED);
+        currentStataus.compareAndSet(ControllerStatus.RUNNED, ControllerStatus.PAUSED);
 	}
 
 	// Called from GUI only (user press Next Step button)
@@ -71,24 +71,24 @@ public class DebugController {
 		//
 		this.reason = PAUSED;
 		this.timeout = 0;
-		this.notifyAll();
-		this.currentStataus.compareAndSet(ControllerStatus.RUNNED, ControllerStatus.PAUSED);
+        notifyAll();
+        currentStataus.compareAndSet(ControllerStatus.RUNNED, ControllerStatus.PAUSED);
 	}
 
 	// Called from from AskForContinue or before each script step 
 	public synchronized void doWait(String description) throws InterruptedException {
-	    ControllerStatus status = this.currentStataus.get();
+        ControllerStatus status = currentStataus.get();
 	    switch (status) {
             case RUNNED:
                 return;
             case PAUSED:
-                this.pauseListener.onScriptPaused(id, this.reason + description, this.timeout);
-                if (this.timeout > 0) {
-                    this.wait(this.timeout);
+                pauseListener.onScriptPaused(id, reason + description, timeout);
+                if(timeout > 0) {
+                    wait(timeout);
                 } else {
-                    this.wait();
+                    wait();
                 }
-                this.pauseListener.onScriptResumed(id);
+                pauseListener.onScriptResumed(id);
                 break;
             case STOPPED:
                 throw new InterruptedException("Stopped by user");

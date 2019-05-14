@@ -68,10 +68,10 @@ public abstract class AbstractAlert implements Serializable, Cloneable  {
 
         AbstractAlert that = (AbstractAlert)o;
         EqualsBuilder builder = new EqualsBuilder();
-        
-        builder.append(this.type, that.type);
-        builder.append(this.column, that.column);
-        builder.append(this.message, that.message);
+
+        builder.append(type, that.type);
+        builder.append(column, that.column);
+        builder.append(message, that.message);
 
         return builder.isEquals();
     }
@@ -79,10 +79,10 @@ public abstract class AbstractAlert implements Serializable, Cloneable  {
     @Override
     public int hashCode() {
         HashCodeBuilder builder = new HashCodeBuilder();
-        
-        builder.append(this.type);
-        builder.append(this.column);
-        builder.append(this.message);
+
+        builder.append(type);
+        builder.append(column);
+        builder.append(message);
         
         return builder.toHashCode();
     }

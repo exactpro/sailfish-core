@@ -25,11 +25,11 @@ import java.util.Set;
 public class XmlLibraryImportResult implements Serializable {
 
     private static final long serialVersionUID = -9092267213983176455L;
-    private long numExecutors = 0;
+    private long numExecutors;
 
-    private long numScripts = 0;
+    private long numScripts;
 
-    private long numServices = 0;
+    private long numServices;
 
     private long id;
 
@@ -37,9 +37,9 @@ public class XmlLibraryImportResult implements Serializable {
 
     private Set<XmlImportError> globalsErrors = new HashSet<>();
 
-    private Set<XmlImportError> executorErrors = new HashSet<>();
+    private final Set<XmlImportError> executorErrors = new HashSet<>();
 
-    private Set<XmlImportError> scriptListErrors = new HashSet<>();
+    private final Set<XmlImportError> scriptListErrors = new HashSet<>();
 
     public void incNumExecutors() {
 

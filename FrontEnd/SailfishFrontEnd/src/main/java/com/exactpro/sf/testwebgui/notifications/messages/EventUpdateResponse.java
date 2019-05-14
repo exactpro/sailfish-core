@@ -28,12 +28,8 @@ public class EventUpdateResponse extends AbstractMessage {
 	private String level;
 	
 	private String message;
-	
-	public EventUpdateResponse() {
-		super();
-	}
-	
-	public String getRequestId() {
+
+    public String getRequestId() {
 		return requestId;
 	}
 

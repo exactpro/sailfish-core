@@ -31,12 +31,12 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 
+import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
 
 public class MessageComparatorBenchmark {
     public static void main(String[] args) {
@@ -50,7 +50,7 @@ public class MessageComparatorBenchmark {
     }
 
     @State(Scope.Thread)
-    public static abstract class AbstractState {
+    public abstract static class AbstractState {
         public IMessage actual;
         public IMessage expected;
         public ComparatorSettings settings;

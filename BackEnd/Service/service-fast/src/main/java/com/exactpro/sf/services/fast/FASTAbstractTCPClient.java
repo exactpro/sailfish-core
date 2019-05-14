@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class FASTAbstractTCPClient  extends FASTAbstractClient{
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     @Override
     public synchronized void connect(){

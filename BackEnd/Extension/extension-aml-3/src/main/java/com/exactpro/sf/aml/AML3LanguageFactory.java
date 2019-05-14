@@ -24,11 +24,11 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.languagemanager.ICompatibilityChecker;
 import com.exactpro.sf.scriptrunner.languagemanager.ILanguageFactory;
 
-@Description(value = "Automation Matrix Language version 3")
+@Description("Automation Matrix Language version 3")
 public class AML3LanguageFactory implements ILanguageFactory {
     public static final SailfishURI URI = SailfishURI.unsafeParse("AML_v3");
 
-    private ICompatibilityChecker checker = new AML3Checker();
+    private final ICompatibilityChecker checker = new AML3Checker();
 
     @Override
     public void init(ClassLoader... pluginClassLoaders) {
@@ -56,6 +56,6 @@ public class AML3LanguageFactory implements ILanguageFactory {
 
     @Override
     public ClassLoader createClassLoader(URL binFolder, ClassLoader parent) {
-        return new URLClassLoader(new URL[] { binFolder }, this.getClass().getClassLoader());
+        return new URLClassLoader(new URL[] { binFolder }, getClass().getClassLoader());
     }
 }

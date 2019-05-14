@@ -24,8 +24,8 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 public class DefaultAdapterFactory implements IAdapterFactory 
 {
-	private Class<?>[] adapterList;
-	private Map<Class<?>, Class<?>> adapterMap; 
+    private final Class<?>[] adapterList;
+    private final Map<Class<?>, Class<?>> adapterMap;
 
 	public DefaultAdapterFactory(Class<?>[] adapterList, Map<Class<?>, Class<?>> adapterMap) {
 		this.adapterList = adapterList;
@@ -36,10 +36,11 @@ public class DefaultAdapterFactory implements IAdapterFactory
 	@Override
 	public Object getAdapter(Object adaptableObject, Class<?> adapterType) 
 	{
-		Class<?> adapterClass = this.adapterMap.get(adapterType);
+        Class<?> adapterClass = adapterMap.get(adapterType);
 
-		if ( adapterClass == null )
-			throw new EPSCommonException("Could not find adapterClass for adapter [" + adapterType + "]");
+        if(adapterClass == null) {
+            throw new EPSCommonException("Could not find adapterClass for adapter [" + adapterType + "]");
+        }
 
 		Constructor<?>[] constructors = adapterClass.getConstructors();
 		Constructor<?> constructor = constructors[0];
@@ -81,7 +82,7 @@ public class DefaultAdapterFactory implements IAdapterFactory
 
 	@Override
 	public Class<?>[] getAdapterList() {
-		return this.adapterList;
+        return adapterList;
 	}
 
 }

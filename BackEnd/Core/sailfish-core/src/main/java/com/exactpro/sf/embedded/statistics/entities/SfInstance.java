@@ -27,8 +27,7 @@ import javax.persistence.UniqueConstraint;
 
 @SuppressWarnings("serial")
 @Entity
-@Table(name="stsfinstances", 
-uniqueConstraints = {@UniqueConstraint(columnNames={"host", "port", "name"})})
+@Table(name = "stsfinstances", uniqueConstraints = @UniqueConstraint(columnNames = { "host", "port", "name" }))
 @SequenceGenerator(name="stsf_generator", sequenceName="stsf_sequence")
 public class SfInstance implements Serializable {
 	
@@ -91,7 +90,7 @@ public class SfInstance implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
@@ -99,18 +98,23 @@ public class SfInstance implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		SfInstance other = (SfInstance) obj;
 		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
+            if(other.id != null) {
+                return false;
+            }
+        } else if(!id.equals(other.id)) {
+            return false;
+        }
 		return true;
 	}
 	

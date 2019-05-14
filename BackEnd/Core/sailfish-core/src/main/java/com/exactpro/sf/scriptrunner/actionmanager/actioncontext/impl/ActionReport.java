@@ -44,7 +44,7 @@ public class ActionReport implements IActionReport {
     private final boolean updateStatus;
     private final IWorkspaceDispatcher workspaceDispatcher;
 
-    private Set<StatusType> elementStats = new HashSet<>();
+    private final Set<StatusType> elementStats = new HashSet<>();
     private Pair<String, Throwable> description;
     private ActionReport parent;
     private ActionReport child;

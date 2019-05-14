@@ -22,8 +22,7 @@ public class JsonMatrixList {
 	private final List<JsonMatrixDescription> matrices;
 
 	public JsonMatrixList(List<JsonMatrixDescription> matrices) {
-		super();
-		this.matrices = matrices;
+        this.matrices = matrices;
 	}
 
 	public List<JsonMatrixDescription> getMatrices() {

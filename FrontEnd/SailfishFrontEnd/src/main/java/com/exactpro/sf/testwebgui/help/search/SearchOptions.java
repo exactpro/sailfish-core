@@ -38,16 +38,16 @@ public class SearchOptions implements Serializable {
 	
     private boolean searchComponents = true; // Services, Languages, Validators,
                                              // Preprocessors, Providers
-	
-	private boolean searchJustInNames = false;
-	private boolean inSelection = false;
+
+    private boolean searchJustInNames;
+    private boolean inSelection;
     private boolean ignoreCase = true;
     
     private List<String> searchSwitchOptions = new ArrayList<>();
 	
 	public SearchOptions() {
-        this.searchSwitchOptions.add(HelpEntityName.ACTIONS.getValue());
-        this.searchSwitchOptions.add(HelpEntityName.DICTIONARIES.getValue());
+        searchSwitchOptions.add(HelpEntityName.ACTIONS.getValue());
+        searchSwitchOptions.add(HelpEntityName.DICTIONARIES.getValue());
 	}
 	
     public SearchOptions(TreeNode rootNode, String searchText) {
@@ -100,11 +100,11 @@ public class SearchOptions implements Serializable {
 	}
 
     public boolean isSearchActions() {
-        return this.searchSwitchOptions.contains("Actions");
+        return searchSwitchOptions.contains("Actions");
     }
 
     public boolean isSearchDictionaries() {
-        return this.searchSwitchOptions.contains("Dictionaries");
+        return searchSwitchOptions.contains("Dictionaries");
     }
 
     public boolean isInSelection() {

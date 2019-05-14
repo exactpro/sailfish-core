@@ -21,16 +21,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.time.format.DateTimeFormatter;
 
 import javax.faces.event.ActionListener;
 
-import com.exactpro.sf.util.DateTimeUtility;
 import org.primefaces.component.filedownload.FileDownloadActionListener;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.format.DateTimeFormatter;
+
+import com.exactpro.sf.util.DateTimeUtility;
 
 public class FileAdapter implements Serializable
 {
@@ -54,7 +55,7 @@ public class FileAdapter implements Serializable
 
 		setDirectory(file.isDirectory());
 
-		String sizeParam = (directory) ? "-" : humanReadableByteCount(file.length(), false);
+        String sizeParam = directory ? "-" : humanReadableByteCount(file.length(), false);
 		setSize(sizeParam);
 		setLastModification(formatter.format(DateTimeUtility.toLocalDateTime(file.lastModified())));
 		setRawLastModification(file.lastModified());
@@ -66,7 +67,9 @@ public class FileAdapter implements Serializable
 	private String humanReadableByteCount(long bytes, boolean si)
 	{
 		int unit = si ? 1000 : 1024;
-	    if (bytes < unit) return bytes + " B";
+        if(bytes < unit) {
+            return bytes + " B";
+        }
 	    int exp = (int) (Math.log(bytes) / Math.log(unit));
 	    String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
 	    return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
@@ -79,8 +82,9 @@ public class FileAdapter implements Serializable
 
 	public StreamedContent getStrContent()
 	{
-		if(!file.exists())
-			return null;
+        if(!file.exists()) {
+            return null;
+        }
 
 		try {
 			InputStream stream = new BufferedInputStream(new FileInputStream(file));
@@ -95,10 +99,7 @@ public class FileAdapter implements Serializable
 	public long getFolderSize(File directory) {
 		long length = 0;
 		for (File file : directory.listFiles()) {
-			if (file.isFile())
-				length += file.length();
-			else
-				length += getFolderSize(file);
+            length += file.isFile() ? file.length() : getFolderSize(file);
 		}
 		return length;
 	}
@@ -167,9 +168,6 @@ public class FileAdapter implements Serializable
 
 	@Override
 	public boolean equals(Object obj) {
-	    if (obj instanceof FileAdapter) {
-	        return this.file.equals(((FileAdapter)obj).file);
-	    }
-	    return false;
-	}
+        return obj instanceof FileAdapter && file.equals(((FileAdapter)obj).file);
+    }
 }

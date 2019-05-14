@@ -17,8 +17,10 @@ package com.exactpro.sf.help.helpmarshaller.jsoncontainers;
 
 import com.exactpro.sf.help.helpmarshaller.HelpEntityType;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+@JsonTypeInfo(use= Id.CLASS, include= As.PROPERTY, property="@class")
 public class MethodJsonContainer extends HelpJsonContainer {
 
     private Boolean isUtilMethod;
@@ -34,9 +36,6 @@ public class MethodJsonContainer extends HelpJsonContainer {
     }
 
     public Boolean getIsUtilMethod() {
-        if (isUtilMethod == null) {
-            return false;
-        }
-        return isUtilMethod;
+        return isUtilMethod != null && isUtilMethod;
     }
 }

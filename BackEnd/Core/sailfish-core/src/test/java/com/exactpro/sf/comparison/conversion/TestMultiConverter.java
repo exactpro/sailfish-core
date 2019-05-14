@@ -32,7 +32,7 @@ import com.exactpro.sf.util.DateTimeUtility;
 import junit.framework.Assert;
 
 public class TestMultiConverter {
-    private static final Object[][] VALUES = new Object[][] {
+    private static final Object[][] VALUES = {
             { null, null, null, null, null, null, null, null, null, true, null, null, null },
             { null, null, (byte)65, (byte)66, (byte)67, (byte)68, (byte)69, (byte)70, (byte)71, (byte)72, null, null, null },
             { null, (short)97, null, (short)98, (short)99, (short)100, (short)101, (short)102, (short)103, (short)104, null, null, null },

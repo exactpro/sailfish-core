@@ -44,8 +44,7 @@ public class DefaultDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     public DefaultDictionaryValidator() {
-		super();
-	}
+    }
 
 	public DefaultDictionaryValidator(IDictionaryValidator parentValidator) {
 		super(parentValidator);
@@ -135,9 +134,15 @@ public class DefaultDictionaryValidator extends AbstractDictionaryValidator {
 									Map<String, IAttributeStructure> values,
 									DictionaryValidationErrorType errType) {
 
-		if (value == null) return;
-		if (value instanceof String && StringUtils.isEmpty((String)value)) return;
-		if (values == null || values.isEmpty()) return;
+        if(value == null) {
+            return;
+        }
+        if(value instanceof String && StringUtils.isEmpty((String)value)) {
+            return;
+        }
+        if(values == null || values.isEmpty()) {
+            return;
+        }
 
 		boolean found = false;
 
@@ -154,7 +159,7 @@ public class DefaultDictionaryValidator extends AbstractDictionaryValidator {
 					"Value <strong>\"" + value + "\"</strong> wasn't found in values table",
 					DictionaryValidationErrorLevel.FIELD, errType));
 
-			logger.error("[{}{}] Value \"{}\" wasn't found in values table", (message != null ? message.getName() + "/" : ""), field.getName(), value);
+			logger.error("[{}{}] Value \"{}\" wasn't found in values table", message != null ? message.getName() + "/" : "", field.getName(), value);
 		}
 	}
 
@@ -216,7 +221,7 @@ public class DefaultDictionaryValidator extends AbstractDictionaryValidator {
         Dictionary,
         Attribute,
         Value {
-            Set<String> prohibit = new HashSet<>(prohibitedNames);
+            final Set<String> prohibit = new HashSet<>(prohibitedNames);
             {
                 prohibit.add("Missed");
                 prohibit.add("Present");

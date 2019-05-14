@@ -29,7 +29,7 @@ public class AMLHeadersVisitor implements IAMLElementVisitor {
 
     private final List<SimpleCell> mainHeaders;
 
-    private AMLElement lastDefineHeader = null;
+    private AMLElement lastDefineHeader;
 
     public AMLHeadersVisitor(List<SimpleCell> mainHeaders) {
         this.mainHeaders = new ArrayList<>(mainHeaders);
@@ -52,8 +52,9 @@ public class AMLHeadersVisitor implements IAMLElementVisitor {
                             break;
                         }
                     }
-                    if (isNewField)
+                    if(isNewField) {
                         mainHeaders.add(new SimpleCell(fieldCaption));
+                    }
                 } else {
                     if (!lastDefineHeader.getCells().keySet().contains(fieldCaption)) {
                         lastDefineHeader.setValue(fieldCaption, fieldCaption);

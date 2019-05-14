@@ -30,6 +30,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
@@ -68,13 +69,13 @@ public class VariableSetsResource {
                 XmlResponse response = new XmlResponse();
                 response.setMessage(e.getMessage());
                 response.setRootCause(Objects.toString(e.getCause(), null));
-                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                return Response.status(Status.BAD_REQUEST).entity(response).build();
             }
         }
 
         XmlResponse response = new XmlResponse();
         response.setMessage("Variable set name cannot be empty");
-        return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        return Response.status(Status.BAD_REQUEST).entity(response).build();
     }
 
     @POST
@@ -92,7 +93,7 @@ public class VariableSetsResource {
             XmlResponse response = new XmlResponse();
             response.setMessage(e.getMessage());
             response.setRootCause(Objects.toString(e.getCause(), null));
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            return Response.status(Status.BAD_REQUEST).entity(response).build();
         }
     }
 }

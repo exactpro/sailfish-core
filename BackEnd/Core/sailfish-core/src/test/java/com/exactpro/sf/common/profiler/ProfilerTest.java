@@ -21,7 +21,7 @@ import org.junit.Test;
 public class ProfilerTest {
     private static final String trace1 = "1";
     private static final String trace2 = "2";
-    public static final String[] tracesNames = new String[]{trace1, trace2};
+    public static final String[] tracesNames = { trace1, trace2 };
 
     @Test
     public void simpleTest() throws InterruptedException {

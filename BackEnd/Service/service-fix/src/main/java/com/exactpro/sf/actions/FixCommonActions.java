@@ -26,19 +26,17 @@ import com.exactpro.sf.services.fix.FIXClient;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 
 @MatrixActions
-@ResourceAliases({"FixCommonActions"})
+@ResourceAliases("FixCommonActions")
 public class FixCommonActions extends AbstractCaller {
 
     public static final String BEGIN = "begin";
     public static final String END = "end";
 
     @Description("Retrieve messages from begin and to end seq numbers from internal storage.")
-    @CommonColumns({
-            @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @CustomColumns({
             @CustomColumn(value = BEGIN, required = true),
-            @CustomColumn(value = END)
+            @CustomColumn(END)
     })
     @ActionMethod
     public void retrieveMessages(IActionContext actionContext, HashMap<?, ?> hashMap) {

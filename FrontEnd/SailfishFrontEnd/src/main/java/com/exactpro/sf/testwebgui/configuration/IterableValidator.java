@@ -30,19 +30,19 @@ import javax.faces.validator.ValidatorException;
 @FacesValidator("sailfish.IterableValidator")
 public class IterableValidator implements Validator {
 
-    private Pattern pattern = null;
-    private boolean disabled = false;
+    private Pattern pattern;
+    private boolean disabled;
     
     @Override
     public void validate(FacesContext context, UIComponent component, Object value) throws ValidatorException {
         if (!disabled && value instanceof Iterable<?>) {
-            if (this.pattern == null) {
+            if(pattern == null) {
                 throw new ValidatorException(new FacesMessage("Validator problem", "Set regex pattern for validator"));
             }
             Iterable<?> iterable = (Iterable<?>) value;
             List<FacesMessage> facesMessages = StreamSupport.stream(iterable.spliterator(), false)
                 .map(Object::toString)
-                .filter(item -> !this.pattern.matcher(item).matches())
+                    .filter(item -> !pattern.matcher(item).matches())
                 .map(item -> new FacesMessage("Incorrect value", "Value '"+ item +"' format mismatch"))
                 .collect(Collectors.toList());
             

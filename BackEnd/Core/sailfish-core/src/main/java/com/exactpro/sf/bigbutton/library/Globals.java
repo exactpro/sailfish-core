@@ -52,11 +52,11 @@ public class Globals implements Serializable {
 	}
 
     public boolean isRejected() {
-        return !this.rejectCause.isEmpty();
+        return !rejectCause.isEmpty();
     }
 
     public void addRejectCause(ImportError error) {
-        this.rejectCause.add(error);
+        rejectCause.add(error);
     }
 
     public Set<ImportError> getRejectCause() {

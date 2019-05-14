@@ -41,6 +41,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,7 +98,7 @@ public class MatrixEditorResource {
 
 	private final String STORAGE_ATTRIBUTE = "GuiMatrixEditorStorage";
 
-    private final static String EDITOR_USERNAME = "GUI_EDITOR";
+    private static final String EDITOR_USERNAME = "GUI_EDITOR";
 
 	@Context
     private HttpServletRequest request;
@@ -141,7 +142,7 @@ public class MatrixEditorResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not retrive matrix list", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
 
@@ -154,7 +155,7 @@ public class MatrixEditorResource {
 			EditorConfig config) {
 
 		logger.info("Matrix {} requested (shallow = {})", matrixId, shallow);
-		boolean isShallow = (shallow != null);
+        boolean isShallow = shallow != null;
         try {
         	GuiMatrixEditorStorage storage = getMatrixEditorStorage();
         	if (config != null) {
@@ -182,7 +183,7 @@ public class MatrixEditorResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not retrive matrix list", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
 
@@ -201,7 +202,7 @@ public class MatrixEditorResource {
     	} catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not save matrix", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
     	}
     }
 
@@ -217,7 +218,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not reset matrix", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -237,7 +238,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not configure MatrixEditor", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -253,7 +254,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not configure MatrixEditor", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -309,14 +310,14 @@ public class MatrixEditorResource {
 			logger.info("Editor: Test Script {} was enqueued under {}", imatrix, executionId);
 
 			if (executionId == -1) {
-				return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(executionId).build();
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(executionId).build();
 			}
 
 			return Response.ok(executionId).build();
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not runn matrix", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -344,7 +345,7 @@ public class MatrixEditorResource {
 			TestScriptDescription descr = SFLocalContext.getDefault().getScriptRunner().getTestScriptDescription(executionId);
 
 			if (descr == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
+                return Response.status(Status.NOT_FOUND).build();
 			}
 
 			List<UnexpectedMessagesContainer> container = storage.getMessageProvider(matrixId).getUnexpectedContainer();
@@ -354,7 +355,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not get matrix execution", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -371,13 +372,8 @@ public class MatrixEditorResource {
 
 			List<JsonMatrixLine> actions = new ArrayList<>();
 
-			Set<IMessage> ins;
-			if (unexpectedOnly) {
-				ins = contaier.getUnexpectedMessages();
-			} else {
-				ins = contaier.getAllMessages();
-			}
-			Set<JsonMatrixLine> outs = new LinkedHashSet<>(); // preserve order
+            Set<IMessage> ins = unexpectedOnly ? contaier.getUnexpectedMessages() : contaier.getAllMessages();
+            Set<JsonMatrixLine> outs = new LinkedHashSet<>(); // preserve order
 			for (IMessage in : ins) {
 				for (AMLElement action : IMessage2Action.convert(in)) {
 					JsonMatrixLine line = JsonAMLUtil.convertLine(action, null);
@@ -406,14 +402,11 @@ public class MatrixEditorResource {
 
 			IReceivedMessageProvider provider = storage.releaseMessageProvider(matrixId);
 
-			if (provider == null) {
-				return Response.status(Response.Status.NOT_FOUND).build();
-			}
-			return Response.ok().build();
-		} catch (Exception e) {
+            return provider == null ? Response.status(Status.NOT_FOUND).build() : Response.ok().build();
+        } catch(Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not runn matrix", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -432,7 +425,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not undo", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -451,7 +444,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not redo", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -476,7 +469,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not read acton", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -519,7 +512,7 @@ public class MatrixEditorResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not create action", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
 
@@ -576,7 +569,7 @@ public class MatrixEditorResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not update action", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
 
@@ -617,7 +610,7 @@ public class MatrixEditorResource {
          } catch (Exception e) {
              logger.error(e.getMessage(), e);
              JsonError response = new JsonError("Can not delete action", e.getMessage());
-             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
          }
     }
 
@@ -639,7 +632,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not read acton", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -678,7 +671,7 @@ public class MatrixEditorResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not create action", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
 
@@ -719,7 +712,7 @@ public class MatrixEditorResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not update action", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
     }
 
@@ -755,7 +748,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not delete action", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -826,7 +819,7 @@ public class MatrixEditorResource {
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			JsonError response = new JsonError("Can not execute transaction", e.getMessage());
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -840,11 +833,11 @@ public class MatrixEditorResource {
 
 		if (messages == null) {
 			logger.info("Log (null) messages collection from client: matrixId={}", matrixId);
-			return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Status.BAD_REQUEST).build();
 		}
 		if (messages.isEmpty()) {
 			logger.info("Log empty messages collection from client: matrixId={}", matrixId);
-			return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Status.BAD_REQUEST).build();
 		}
 
 		for (LogMessage logMessage: messages) {
@@ -875,7 +868,7 @@ public class MatrixEditorResource {
 			}
 		}
 
-		return Response.status(Response.Status.OK).build();
+        return Response.status(Status.OK).build();
 	}
 
 	@Path("language/aml/3/columns")
@@ -890,7 +883,7 @@ public class MatrixEditorResource {
 			}
 		}
 
-		return Response.status(Response.Status.OK).entity(result).build();
+        return Response.status(Status.OK).entity(result).build();
 	}
 
 	private void checkTransaction(JsonUpdateTransaction transaction) {
@@ -910,7 +903,7 @@ public class MatrixEditorResource {
 		int[] fullPath = toPath(path, start);
 		matrix = cloneToPath(matrix, fullPath);
 
-		if (path.size() == 0) {
+        if(path.isEmpty()) {
 			// Apply to TestCase
 			if (isShallowReplace) {
 				JsonMatrixTestCase line = data.get(0);
@@ -1062,9 +1055,9 @@ public class MatrixEditorResource {
 	private static class AMLBlockSearchVisitor implements IAMLElementVisitor {
 
 		private final int[] elementIndexes;
-		private AMLBlock block = null;
-		private int index = 0;
-		private int length = 0;
+        private AMLBlock block;
+        private int index;
+        private int length;
 
 		public AMLBlock getBlock() {
 			return block;

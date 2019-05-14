@@ -16,26 +16,26 @@
 
 package com.exactpro.sf.services.fast.blockstream;
 
-import org.openfast.Message;
-import org.openfast.MessageBlockReader;
-import org.openfast.template.type.codec.TypeCodec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
+import org.openfast.Message;
+import org.openfast.MessageBlockReader;
+import org.openfast.template.type.codec.TypeCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MulticastProxyInputStream extends InputStream implements MessageBlockReader {
-    private final static Logger logger = LoggerFactory.getLogger(UdpInputStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(UdpInputStream.class);
 
     protected static final int BUFFER_SIZE = 64 * 1024;
     private ByteBuffer buffer;
-    private Socket socket;
-    private IPacketHandler packetHandler;
-    private DataInputStream inputStream;
+    private final Socket socket;
+    private final IPacketHandler packetHandler;
+    private final DataInputStream inputStream;
 
 
     public MulticastProxyInputStream(Socket socket, IPacketHandler packetHandler) throws IOException {
@@ -52,8 +52,9 @@ public class MulticastProxyInputStream extends InputStream implements MessageBlo
 
     @Override
     public int read() throws IOException {
-        if (socket.isClosed())
+        if(socket.isClosed()) {
             return -1;
+        }
         if (!buffer.hasRemaining()) {
             if (logger.isDebugEnabled()) {
                 logger.debug("reading new packet");
@@ -64,11 +65,12 @@ public class MulticastProxyInputStream extends InputStream implements MessageBlo
             inputStream.read(msg);
             buffer = ByteBuffer.wrap(msg);
             buffer.flip();
-            if (packetHandler != null)
+            if(packetHandler != null) {
                 packetHandler.handlePacket(buffer.array()); //Reset context
+            }
             buffer.limit(msgSize);
         }
-        return (buffer.get() & 0xFF);
+        return buffer.get() & 0xFF;
     }
 
     @Override
@@ -77,7 +79,7 @@ public class MulticastProxyInputStream extends InputStream implements MessageBlo
 
     @Override
     public boolean readBlock(InputStream stream) {
-        int n = (TypeCodec.UINT.decode(stream)).toInt();
+        int n = TypeCodec.UINT.decode(stream).toInt();
 
         if (logger.isDebugEnabled()) {
             logger.debug("new block length:{}", n);

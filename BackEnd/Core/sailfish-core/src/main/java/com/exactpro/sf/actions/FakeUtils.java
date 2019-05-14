@@ -23,7 +23,7 @@ import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 import com.exactpro.sf.util.DateTimeUtility;
 
-@ResourceAliases({"FakeUtils"})
+@ResourceAliases("FakeUtils")
 public class FakeUtils extends AbstractCaller {
     private static final String FIX_DATE_FORMAT = "yyyyMMdd-HH:mm:ss";
     private static final DateTimeFormatter FIX_FORMATTER = DateTimeUtility.createFormatter(FIX_DATE_FORMAT);

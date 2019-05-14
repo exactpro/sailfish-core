@@ -15,22 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.factory;
 
+import java.util.Set;
+
 import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Set;
-
 public class ITCHMessageFactory extends AbstractMessageFactory {
-    public final static Set<String> UNCHECKED_FIELDS;
-
-    static {
-        UNCHECKED_FIELDS = ImmutableSet.of(
-                ITCHMessageHelper.FAKE_FIELD_MESSAGE_SEQUENCE_NUMBER,
-                ITCHMessageHelper.FAKE_FIELD_UH_SEQUENCE_NUMBER,
-                ITCHMessageHelper.FAKE_FIELD_UH_MARKET_DATA_GROUP,
-                ITCHMessageHelper.FAKE_FIELD_MESSAGE_TIME);
-    }
+    public static final Set<String> UNCHECKED_FIELDS = ImmutableSet.of(
+            ITCHMessageHelper.FAKE_FIELD_MESSAGE_SEQUENCE_NUMBER,
+            ITCHMessageHelper.FAKE_FIELD_UH_SEQUENCE_NUMBER,
+            ITCHMessageHelper.FAKE_FIELD_UH_MARKET_DATA_GROUP,
+            ITCHMessageHelper.FAKE_FIELD_MESSAGE_TIME);
 
     @Override
     public String getProtocol() {

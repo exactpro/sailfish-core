@@ -58,7 +58,7 @@ public final class NTGClient extends AbstractMINATCPService {
 			return;
 		}
 
-        final IMessage ntgMessage = (IMessage) message;
+        IMessage ntgMessage = (IMessage)message;
 
 		taskExecutor.addTask(new Runnable() {
             @Override
@@ -83,7 +83,7 @@ public final class NTGClient extends AbstractMINATCPService {
 
         IMessage ntgMessage = (IMessage) message;
 
-        if (this.state == NTGClientState.SessionCreated && MESSAGE_LOGON.equals(ntgMessage.getName())) {
+        if(state == NTGClientState.SessionCreated && MESSAGE_LOGON.equals(ntgMessage.getName())) {
 		    // Logon handling for AML 3
             updateState(NTGClientState.WaitingLogonReply);
 		}
@@ -93,7 +93,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	public final void sessionClosed(IoSession session) throws Exception {
         super.sessionClosed(session);
 
-        if (this.state.value >= NTGClientState.SessionCreated.value) {
+        if(state.value >= NTGClientState.SessionCreated.value) {
             destroyHeartbeatTimer();
             this.state = NTGClientState.SessionClosed;
 		}
@@ -140,7 +140,7 @@ public final class NTGClient extends AbstractMINATCPService {
 
     @Override
     protected void internalInit() throws Exception {
-        this.messageNamespace = this.dictionary.getNamespace();
+        this.messageNamespace = dictionary.getNamespace();
     }
 
 	@Override
@@ -153,7 +153,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	}
 
 	private void sendMessageInternal(IMessage message, boolean waitFuture) throws InterruptedException {
-        if ((NTGClientState.LoggedIn != this.state) && (!getSettings().isLowLevelService())) {
+        if((state != NTGClientState.LoggedIn) && !getSettings().isLowLevelService()) {
             logger.debug("NTGClient. ERROR: not logged on to the server. Cannot send the messge.");
 			throw new NotLoggedInException();
 		}
@@ -162,12 +162,13 @@ public final class NTGClient extends AbstractMINATCPService {
 
         if(session == null) {
             logger.error("Service {} sendMessage: session is null", this);
-            logger.error("State: {}", this.state);
+            logger.error("State: {}", state);
 
-            if (this.state == NTGClientState.SessionDropped)
+            if(state == NTGClientState.SessionDropped) {
                 throw new EPSCommonException("Could not send message - connection was closed by server.");
-            else
+            } else {
                 throw new EPSCommonException("Could not send message - connection closed.");
+            }
         } else {
             session.send(message);
 		}
@@ -202,7 +203,7 @@ public final class NTGClient extends AbstractMINATCPService {
 
     @Override
     protected MINASession createSession(IoSession session) {
-        return new NTGSession(this.serviceName, session, this.loggingConfigurator) {
+        return new NTGSession(serviceName, session, loggingConfigurator) {
             @Override
             protected Object prepareMessage(Object message) {
                 if(message instanceof IMessage) {
@@ -250,7 +251,7 @@ public final class NTGClient extends AbstractMINATCPService {
     }
 
 	private void destroyHeartbeatTimer() {
-		if( null != disconnectFuture ) {
+        if(disconnectFuture != null) {
 			try {
 				disconnectFuture.cancel(false);
 				disconnectFuture = null;
@@ -263,7 +264,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	public void login() throws InterruptedException {
         NTGSession session = getSession();
 
-        if (session != null && (NTGClientState.SessionCreated == this.state || NTGClientState.LoggedOut == this.state)) {
+        if(session != null && (state == NTGClientState.SessionCreated || state == NTGClientState.LoggedOut)) {
 			IMessage message = messageFactory.createMessage(MESSAGE_LOGON, messageNamespace);
             message.addField("CompID", getSettings().getLogin());
             message.addField("Username", getSettings().getLogin());
@@ -280,7 +281,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	public void logout() throws InterruptedException {
         NTGSession session = getSession();
 
-        if (session != null && NTGClientState.LoggedIn == this.state) {
+        if(session != null && state == NTGClientState.LoggedIn) {
             session.setLoggedOn(false);
 
 			IMessage message = messageFactory.createMessage("Logout", messageNamespace);
@@ -306,19 +307,19 @@ public final class NTGClient extends AbstractMINATCPService {
      * @param message instance of NTG message
 	 * @throws Exception
 	 */
-	private void processMessage( final IMessage message ) throws Exception {
+    private void processMessage(IMessage message) throws Exception {
 		String msgName = message.getName();
-		logger.debug("isMessageProcessed state [{}]", this.state);
+        logger.debug("isMessageProcessed state [{}]", state);
 
-		switch( this.state ) {
+        switch(state) {
 		case WaitingLogonReply:
-			if (msgName.equals("LogonReply")) {
+            if("LogonReply".equals(msgName)) {
 				evaluateServerReply(message);
-            } else if (msgName.equals("LogonResponse")) {
+            } else if("LogonResponse".equals(msgName)) {
                 evaluateServerReply(message);
-			} else if (msgName.equals("Heartbeat")) {
+            } else if("Heartbeat".equals(msgName)) {
 				restartDisconnectTimer();
-			} else if (msgName.equals("Reject")) {
+            } else if("Reject".equals(msgName)) {
 			    evaluateReject(message);
 			} else {
 				rejectMessage(message, RejectReason.NotLoggedIn);
@@ -326,7 +327,7 @@ public final class NTGClient extends AbstractMINATCPService {
 			break;
 
 		case LoggedIn:
-			if (msgName.equals("Heartbeat")) {
+            if("Heartbeat".equals(msgName)) {
 				restartDisconnectTimer();
 			}
 			break;
@@ -336,7 +337,7 @@ public final class NTGClient extends AbstractMINATCPService {
 			break;
 
 		case SessionCreated:
-			if (msgName.equals("Heartbeat")) {
+            if("Heartbeat".equals(msgName)) {
 				restartDisconnectTimer();
 			}
 			break;
@@ -346,11 +347,11 @@ public final class NTGClient extends AbstractMINATCPService {
 
 		default:
 			throw new InvalidClientStateException(
-					String.format( "Client state [%s] cannot be processed.", this.state.toString()));
+                    String.format("Client state [%s] cannot be processed.", state.toString()));
 		}
 	}
 
-	private void evaluateServerReply(final IMessage serverMessage) {
+    private void evaluateServerReply(IMessage serverMessage) {
 		Integer rejectCode = Integer.parseInt( serverMessage.getField( "RejectCode" ).toString()) ;
 
 		switch(rejectCode) {
@@ -365,7 +366,7 @@ public final class NTGClient extends AbstractMINATCPService {
 		}
 	}
 
-    private void evaluateReject(final IMessage serverMessage) throws Exception {
+    private void evaluateReject(IMessage serverMessage) throws Exception {
 	    Integer rejectCode = serverMessage.getField("RejectCode");
 	    String rejectReason = serverMessage.getField("RejectReason");
 	    String errorMessage = String.format("Received reject - code: %s, reason: %s", rejectCode, rejectReason);
@@ -380,7 +381,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	    }
 	}
 
-	private void rejectMessage(final IMessage serverMessage, RejectReason rejectReason) throws InterruptedException {
+    private void rejectMessage(IMessage serverMessage, RejectReason rejectReason) throws InterruptedException {
 		String msgType = (String)((IMessage)serverMessage.getField("MessageHeader")).getField("MessageType");
 
 		IMessage message = messageFactory.createMessage("Reject", messageNamespace);
@@ -396,7 +397,7 @@ public final class NTGClient extends AbstractMINATCPService {
             message.addField("ClientOrderID", "00000000000000000000");
 		}
 
-		this.sendMessageInternal(message, false);
+        sendMessageInternal(message, false);
 	}
 
 	private void sendHeartbeat() throws InterruptedException {
@@ -404,7 +405,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	        return;
 	    }
 
-        if (NTGClientState.LoggedIn != this.state) {
+        if(state != NTGClientState.LoggedIn) {
             return;
         }
 
@@ -428,9 +429,9 @@ public final class NTGClient extends AbstractMINATCPService {
 
         logger.debug("Set time for logout() in {} milliseconds.", getSettings().getForceLogoutTimeout());
 
-		this.sendHeartbeat();
+        sendHeartbeat();
 
-		if (null != disconnectFuture) {
+        if(disconnectFuture != null) {
 			disconnectFuture.cancel(false);
 		}
 
@@ -449,7 +450,7 @@ public final class NTGClient extends AbstractMINATCPService {
 	}
 
     public NTGClientState getState() {
-		return this.state ;
+        return state;
 	}
 
 	// Logon operation runnable task
@@ -464,14 +465,14 @@ public final class NTGClient extends AbstractMINATCPService {
 			do {
 				Thread.yield();
 
-                if (NTGClientState.LoggedIn == state) {
+                if(state == NTGClientState.LoggedIn) {
 					exitCode = ExitCode.BySuccessLogin;
 					break;
 				}
 			}
 			while(timeEnd > System.currentTimeMillis());
 
-			if(ExitCode.BySuccessLogin == exitCode ) {
+            if(exitCode == ExitCode.BySuccessLogin) {
                 NTGSession session = getSession();
 
                 if(session != null) {
@@ -507,7 +508,7 @@ public final class NTGClient extends AbstractMINATCPService {
 
 		final int value;
 
-        private NTGClientState(int value) {
+        NTGClientState(int value) {
 			this.value = value;
 		}
 
@@ -539,24 +540,24 @@ public final class NTGClient extends AbstractMINATCPService {
 	}
 
 	enum RejectReason {
-		NotLoggedIn;
-	}
+        NotLoggedIn
+    }
 
 	enum DisconnectReason {
 		ClientRequest,
-		Unknown;
-	}
+        Unknown
+    }
 
 	enum LogoutReason {
 		ClientRequest,
-		Unknown;
-	}
+        Unknown
+    }
 
 	public enum ExitCode {
 		Undefined,
 		ByTimeout,
-		BySuccessLogin;
-	}
+        BySuccessLogin
+    }
 
 	@Override
     public NTGClientSettings getSettings() {

@@ -37,13 +37,13 @@ public class ReportDownloadTask implements Runnable {
 	
     private final IWorkspaceDispatcher workspaceDispatcher;
 
-	private int scriptRunId;
-	
-	private SFAPIClient apiClient;
+    private final int scriptRunId;
+
+    private final SFAPIClient apiClient;
 	
     private final String reportsFolderPath;
-	
-	private boolean downloadNeded;
+
+    private final boolean downloadNeded;
 
     private final Long sfCurrentID;
 	
@@ -60,13 +60,12 @@ public class ReportDownloadTask implements Runnable {
 	}
 	
 	private FileDownloadWrapper downloadReport() throws APICallException, IOException, APIResponseException {
-		
-		FileDownloadWrapper fileDownload;
- 		fileDownload = apiClient.getTestScriptRunReportZip(scriptRunId);
+
+        FileDownloadWrapper fileDownload = apiClient.getTestScriptRunReportZip(scriptRunId);
         File reportFile;
 
         try {
-            reportFile = this.workspaceDispatcher.createFile(FolderType.REPORT, true, reportsFolderPath, fileDownload.getFileName());
+            reportFile = workspaceDispatcher.createFile(FolderType.REPORT, true, reportsFolderPath, fileDownload.getFileName());
         } catch (WorkspaceLayerException e) {
             throw new RuntimeException("Error while creating report file " + fileDownload.getFileName(), e);
         }

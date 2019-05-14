@@ -91,7 +91,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
      * @param encoder The class responsible for encoding the message
      * @param decoder The class responsible for decoding the message
      */
-    public HackedProtocolCodecFilter(final ProtocolEncoder encoder, final ProtocolDecoder decoder) {
+    public HackedProtocolCodecFilter(ProtocolEncoder encoder, ProtocolDecoder decoder) {
         if (encoder == null) {
             throw new IllegalArgumentException("encoder");
         }
@@ -122,8 +122,8 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
      * @param encoder The class responsible for encoding the message
      * @param decoder The class responsible for decoding the message
      */
-    public HackedProtocolCodecFilter(final Class<? extends ProtocolEncoder> encoderClass,
-            final Class<? extends ProtocolDecoder> decoderClass) {
+    public HackedProtocolCodecFilter(Class<? extends ProtocolEncoder> encoderClass,
+            Class<? extends ProtocolDecoder> decoderClass) {
         if (encoderClass == null) {
             throw new IllegalArgumentException("encoderClass");
         }
@@ -147,7 +147,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
             throw new IllegalArgumentException("decoderClass doesn't have a public default constructor.");
         }
 
-        final ProtocolEncoder encoder;
+        ProtocolEncoder encoder;
 
         try {
             encoder = encoderClass.newInstance();
@@ -155,7 +155,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
             throw new IllegalArgumentException("encoderClass cannot be initialized");
         }
 
-        final ProtocolDecoder decoder;
+        ProtocolDecoder decoder;
 
         try {
             decoder = decoderClass.newInstance();
@@ -242,12 +242,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
                 // Finish decoding if no exception was thrown.
                 decoderOut.flush(nextFilter, session);
             } catch (Throwable t) {
-                ProtocolDecoderException pde;
-                if (t instanceof ProtocolDecoderException) {
-                    pde = (ProtocolDecoderException) t;
-                } else {
-                    pde = new ProtocolDecoderException(t);
-                }
+                ProtocolDecoderException pde = t instanceof ProtocolDecoderException ? (ProtocolDecoderException)t : new ProtocolDecoderException(t);
 
                 if (pde.getHexdump() == null) {
                     // Generate a message hex dump
@@ -315,18 +310,18 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
             encoder.encode(session, message, encoderOut);
 
             // Send it directly
-            Queue<Object> bufferQueue = ((AbstractProtocolEncoderOutput) encoderOut).getMessageQueue();
+            Queue<Object> bufferQueue = ((AbstractProtocolEncoderOutput)encoderOut).getMessageQueue();
 
             // Write all the encoded messages now
-            while (!bufferQueue.isEmpty()) {
+            while(!bufferQueue.isEmpty()) {
                 Object encodedMessage = bufferQueue.poll();
 
-                if (encodedMessage == null) {
+                if(encodedMessage == null) {
                     break;
                 }
 
                 // Flush only when the buffer has remaining.
-                if (!(encodedMessage instanceof IoBuffer) || ((IoBuffer) encodedMessage).hasRemaining()) {
+                if(!(encodedMessage instanceof IoBuffer) || ((IoBuffer)encodedMessage).hasRemaining()) {
                     SocketAddress destination = writeRequest.getDestination();
                     WriteRequest encodedWriteRequest = new EncodedWriteRequest(encodedMessage, null, destination);
 
@@ -336,17 +331,11 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
 
             // Call the next filter
             nextFilter.filterWrite(session, new MessageWriteRequest(writeRequest));
+        } catch(ProtocolEncoderException e) {
+            throw e;
         } catch (Throwable t) {
-            ProtocolEncoderException pee;
-
             // Generate the correct exception
-            if (t instanceof ProtocolEncoderException) {
-                pee = (ProtocolEncoderException) t;
-            } else {
-                pee = new ProtocolEncoderException(t);
-            }
-
-            throw pee;
+            throw new ProtocolEncoderException(t);
         }
     }
 
@@ -358,14 +347,10 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
 
         try {
             decoder.finishDecode(session, decoderOut);
+        } catch(ProtocolDecoderException e) {
+            throw e;
         } catch (Throwable t) {
-            ProtocolDecoderException pde;
-            if (t instanceof ProtocolDecoderException) {
-                pde = (ProtocolDecoderException) t;
-            } else {
-                pde = new ProtocolDecoderException(t);
-            }
-            throw pde;
+            throw new ProtocolDecoderException(t);
         } finally {
             // Dispose everything
             disposeCodec(session);
@@ -456,7 +441,7 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
             if (future == null) {
                 // Creates an empty writeRequest containing the destination
                 WriteRequest writeRequest = new DefaultWriteRequest(null, null, destination);
-                future = DefaultWriteFuture.newNotWrittenFuture(session, new NothingWrittenException(writeRequest));
+                return DefaultWriteFuture.newNotWrittenFuture(session, new NothingWrittenException(writeRequest));
             }
 
             return future;
@@ -521,25 +506,25 @@ public class HackedProtocolCodecFilter extends IoFilterAdapter {
     private ProtocolDecoderOutput getDecoderOut(IoSession session, NextFilter nextFilter) {
         //ProtocolDecoderOutput out = (ProtocolDecoderOutput) session.getAttribute(DECODER_OUT);
 
-        if (this.decOut == null) {
+        if(decOut == null) {
             // Create a new instance, and stores it into the session
             this.decOut = new ProtocolDecoderOutputImpl();
             //session.setAttribute(DECODER_OUT, out);
         }
 
-        return this.decOut;
+        return decOut;
     }
 
     private ProtocolEncoderOutput getEncoderOut(IoSession session, NextFilter nextFilter, WriteRequest writeRequest) {
         //ProtocolEncoderOutput out = (ProtocolEncoderOutput) session.getAttribute(ENCODER_OUT);
 
-        if (this.encOut == null) {
+        if(encOut == null) {
             // Create a new instance, and stores it into the session
         	this.encOut = new ProtocolEncoderOutputImpl(session, nextFilter, writeRequest);
             //session.setAttribute(ENCODER_OUT, out);
         }
 
-        return this.encOut;
+        return encOut;
     }
 
     /**

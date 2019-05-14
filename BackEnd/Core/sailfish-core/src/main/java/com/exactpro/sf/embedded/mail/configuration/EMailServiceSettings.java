@@ -3,13 +3,14 @@ package com.exactpro.sf.embedded.mail.configuration;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.apache.commons.beanutils.BeanUtils;
-
-import com.exactpro.sf.storage.IMapableSettings;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
+
+import com.exactpro.sf.storage.IMapableSettings;
 
 public class EMailServiceSettings implements IMapableSettings, Serializable {
 
@@ -21,7 +22,7 @@ public class EMailServiceSettings implements IMapableSettings, Serializable {
 
     private String smtpHost = "smtp.example.com";
     private Integer smtpPort = 25;
-    private boolean useSSL = false;
+    private boolean useSSL;
     private String username = "user@example.com";
     private String password = "password";
     private String recipients = "user1@example.com;user2@example.com";
@@ -51,7 +52,7 @@ public class EMailServiceSettings implements IMapableSettings, Serializable {
 
     @Override
     public void fillFromMap(Map<String, String> options) throws Exception {
-        for(Map.Entry<String, String> entry : options.entrySet()) {
+        for(Entry<String, String> entry : options.entrySet()) {
             if(entry.getKey().startsWith(STORAGE_PREFIX)) {
                 BeanUtils.setProperty(this, entry.getKey().replace(STORAGE_PREFIX, ""), entry.getValue());
             }
@@ -65,7 +66,7 @@ public class EMailServiceSettings implements IMapableSettings, Serializable {
         Map<String, String> description = BeanUtils.describe(this);
 
         Map<String, String> result = new HashMap<>();
-        for(Map.Entry<String, String> entry : description.entrySet()) {
+        for(Entry<String, String> entry : description.entrySet()) {
             result.put(STORAGE_PREFIX + entry.getKey(), entry.getValue());
         }
         result.put(ENABLED_KEY, String.valueOf(serviceEnabled));
@@ -147,12 +148,12 @@ public class EMailServiceSettings implements IMapableSettings, Serializable {
         EMailServiceSettings that = (EMailServiceSettings) o;
         return Objects.equals(smtpHost, that.smtpHost) &&
                 Objects.equals(smtpPort, that.smtpPort) &&
-                Objects.equals(useSSL, that.useSSL) &&
+                useSSL == that.useSSL &&
                 Objects.equals(username, that.username) &&
                 Objects.equals(password, that.password) &&
                 Objects.equals(recipients, that.recipients) &&
                 Objects.equals(timeout, that.timeout) &&
-                Objects.equals(serviceEnabled, that.serviceEnabled);
+                serviceEnabled == that.serviceEnabled;
     }
 
     @Override

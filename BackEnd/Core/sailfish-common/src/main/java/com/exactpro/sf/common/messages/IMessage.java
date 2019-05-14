@@ -37,24 +37,24 @@ public interface IMessage
 
 	MsgMetaData getMetaData();
 
-	void addField(final String name, final Object value);
+	void addField(String name, Object value);
 
-	Object removeField(final String name);
+	Object removeField(String name);
 
-	<T> T getField(final String name);
+	<T> T getField(String name);
 
-	FieldMetaData getFieldMetaData(final String name);
+	FieldMetaData getFieldMetaData(String name);
 
-	boolean isFieldSet(final String name);
+	boolean isFieldSet(String name);
 
 	Set<String> getFieldNames();
 
     int getFieldCount();
 
-	IFieldInfo getFieldInfo(final String name);
+	IFieldInfo getFieldInfo(String name);
 
 	IMessage cloneMessage();
 
-	boolean compare(final IMessage message);
+	boolean compare(IMessage message);
 
 }

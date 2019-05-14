@@ -15,16 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.services.ntg;
 
-import com.exactpro.sf.common.util.EPSCommonException;
+import javax.xml.bind.annotation.XmlRootElement;
+
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.services.RequiredParam;
 import com.exactpro.sf.services.mina.AbstractMINASettings;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
-import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class NTGClientSettings extends AbstractMINASettings {
@@ -46,8 +47,7 @@ public class NTGClientSettings extends AbstractMINASettings {
 		, lowlevelService
 		, autosendHeartbeat
 		, defaultDictionaryDirectory
-		;
-	}
+    }
 
 
 	/**
@@ -155,7 +155,7 @@ public class NTGClientSettings extends AbstractMINASettings {
      * @return connect timeout
      */
 	public int getConnectTimeout() {
-		return this.connectTimeout;
+        return connectTimeout;
 	}
 
 	/**
@@ -163,11 +163,11 @@ public class NTGClientSettings extends AbstractMINASettings {
 	 * @return
 	 */
 	public int getLoginTimeout() {
-		return this.loginTimeout;
+        return loginTimeout;
 	}
 
 	public int getLogoutTimeout() {
-		return this.logoutTimeout;
+        return logoutTimeout;
 	}
 
 	/**
@@ -177,7 +177,7 @@ public class NTGClientSettings extends AbstractMINASettings {
 	 * @return
 	 */
 	public int getHeartbeatTimeout() {
-		return this.heartbeatTimeout;
+        return heartbeatTimeout;
 	}
 
 	/**
@@ -185,27 +185,27 @@ public class NTGClientSettings extends AbstractMINASettings {
 	 *	 @return
 	 */
 	public int getMaxMissedHeartbeats() {
-		return this.maxMissedHeartbeats;
+        return maxMissedHeartbeats;
 	}
 
 	public int getServerPort() {
-		return this.serverPort;
+        return serverPort;
 	}
 
 	public String getServerIP() {
-		return this.serverIP;
+        return serverIP;
 	}
 
 	public String getLogin() {
-		return this.login;
+        return login;
 	}
 
 	public String getPassword() {
-		return this.password;
+        return password;
 	}
 
 	public String getNewPassword() {
-		return this.newPassword;
+        return newPassword;
 	}
 
 	/*
@@ -249,11 +249,11 @@ public class NTGClientSettings extends AbstractMINASettings {
 	 * to max missed heartbeats
 	 */
 	public int getForceLogoutTimeout() {
-		return this.heartbeatTimeout * this.maxMissedHeartbeats;
+        return heartbeatTimeout * maxMissedHeartbeats;
 	}
 
 	public int getHeartbeatTimeoutInSeconds() {
-		return this.heartbeatTimeout / 1000;
+        return heartbeatTimeout / 1000;
 	}
 
 	public void setLogin(String login) {

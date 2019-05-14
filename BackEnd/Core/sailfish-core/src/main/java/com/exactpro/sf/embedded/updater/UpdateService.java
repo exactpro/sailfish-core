@@ -37,6 +37,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -50,12 +57,6 @@ import com.exactpro.sf.util.DateTimeUtility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.HierarchicalConfiguration;
-import org.apache.commons.configuration.XMLConfiguration;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class UpdateService implements IEmbeddedService {
     private static final Logger logger = LoggerFactory.getLogger(UpdateService.class);
@@ -187,7 +188,7 @@ public class UpdateService implements IEmbeddedService {
             throw new IllegalStateException("Can't execute update in current state: " + serviceStatus);
         }
 
-        if (this.updating) {
+        if(updating) {
             throw new IllegalStateException("Update process already started");
         }
         logger.info("Start updating...");
@@ -304,8 +305,8 @@ public class UpdateService implements IEmbeddedService {
         logger.info("Tear down");
         cancelCheckUpdateTask();
 
-        if (this.updateFuture != null) {
-            this.updateFuture.cancel(true);
+        if(updateFuture != null) {
+            updateFuture.cancel(true);
             this.updateFuture = null;
         }
 
@@ -330,11 +331,11 @@ public class UpdateService implements IEmbeddedService {
     }
 
     private synchronized void cancelCheckUpdateTask() {
-        if (this.updateCheckerFuture != null) {
+        if(updateCheckerFuture != null) {
             logger.info("Cancelling update checking task...");
-            this.updateCheckerFuture.cancel(true);
+            updateCheckerFuture.cancel(true);
             try {
-                this.updateCheckerFuture.get();
+                updateCheckerFuture.get();
             } catch (CancellationException e) {
                 logger.info("Update checker task was cancelled", e);
             } catch (InterruptedException e) {
@@ -455,9 +456,9 @@ public class UpdateService implements IEmbeddedService {
 
     public static class ComponentUpdateInfo {
 
-        private String name;
+        private final String name;
 
-        private String version;
+        private final String version;
 
         @JsonCreator
         public ComponentUpdateInfo(@JsonProperty(value = "name", required = true) String name,

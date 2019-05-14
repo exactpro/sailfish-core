@@ -17,8 +17,10 @@ package com.exactpro.sf.services.fast.converter;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openfast.FieldValue;
 import org.openfast.GroupValue;
 import org.openfast.Message;
@@ -36,7 +38,7 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 
 public class FastToIMessageConverter {
-	private final static Logger logger = LoggerFactory.getLogger(FastToIMessageConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(FastToIMessageConverter.class);
 	private final IMessageFactory messageFactory;
 	private final String namespace;
 
@@ -94,15 +96,15 @@ public class FastToIMessageConverter {
 			return;
 		}
 
-		if (fastFld.getTypeName().equals("scalar")) {
+        if("scalar".equals(fastFld.getTypeName())) {
 			setScalarValue((Scalar) fastFld, fastMsg, message, iMessageFieldName );
-		} else if (fastFld.getTypeName().equals("sequence")) {
+        } else if("sequence".equals(fastFld.getTypeName())) {
 			SequenceValue sqsValue = fastMsg.getSequence(index);
 			convertSequence(sqsValue, iMessageFieldName, message, msgName);
-		} else if (fastFld.getTypeName().equals("group")) {
+        } else if("group".equals(fastFld.getTypeName())) {
 			GroupValue grpValue = fastMsg.getGroup(index);
 			convertGroup(grpValue, iMessageFieldName, message, msgName);
-		} else if (fastFld.getTypeName().equals("decimal")) {
+        } else if("decimal".equals(fastFld.getTypeName())) {
 			BigDecimal bdVal = fastMsg.getBigDecimal(index);
 			message.addField(iMessageFieldName, bdVal);
 		} else {
@@ -134,7 +136,7 @@ public class FastToIMessageConverter {
 		Sequence sqs = sqsValue.getSequence();
 
 		String lengthName = sqs.getLength().getName();
-		if (lengthName == null || lengthName.equals("")) {
+        if(StringUtils.isEmpty(lengthName)) {
 			lengthName = "length";
 		}
 		lengthName = getIMessageName(lengthName);
@@ -142,7 +144,7 @@ public class FastToIMessageConverter {
 		message.addField(lengthName, sqsValue.getLength());
 		String msgType = msgName + "_" + iMessageFieldName;
 
-		java.util.ArrayList<IMessage> collectionMessages = new ArrayList<IMessage>();
+		ArrayList<IMessage> collectionMessages = new ArrayList<IMessage>();
 		for(GroupValue groupVal:sqsValue.getValues()) {
 			IMessage innerMessage;
 			try {
@@ -164,27 +166,27 @@ public class FastToIMessageConverter {
 		Group grp = fastMsg.getGroup();
 		int index = grp.getFieldIndex(fastFld);
 
-		if (fastFld.getType().getName().equals("int8")) {
+        if("int8".equals(fastFld.getType().getName())) {
 			Byte byteVal = fastMsg.getByte(index);
 			if (byteVal != null) {
 				message.addField(iMessageFieldName, byteVal);
 			}
-		} else if (fastFld.getType().getName().equals("int32")) {
+        } else if("int32".equals(fastFld.getType().getName())) {
 			Integer intVal = fastMsg.getInt(index);
 			if (intVal != null) {
 				message.addField(iMessageFieldName, intVal);
 			}
-		} else if (fastFld.getType().getName().equals("uInt32")) {
+        } else if("uInt32".equals(fastFld.getType().getName())) {
 			Long longVal = fastMsg.getLong(index);
 			if (longVal != null) {
 				message.addField(iMessageFieldName, longVal);
 			}
-		} else if (fastFld.getType().getName().equals("int64")) {
+        } else if("int64".equals(fastFld.getType().getName())) {
 			Long longVal = fastMsg.getLong(index);
 			if (longVal != null) {
 				message.addField(iMessageFieldName, longVal);
 			}
-		} else if (fastFld.getType().getName().equals("uInt64")) {
+        } else if("uInt64".equals(fastFld.getType().getName())) {
 			BigDecimal bdVal = fastMsg.getBigDecimal(index);
 			if (bdVal != null) {
 				message.addField(iMessageFieldName, bdVal);
@@ -194,24 +196,20 @@ public class FastToIMessageConverter {
 			if (sVal != null) {
 				message.addField(iMessageFieldName, sVal);
 			}
-		} else if (fastFld.getType().getName().equals("decimal")) {
+        } else if("decimal".equals(fastFld.getType().getName())) {
 
 			BigDecimal bdVal = fastMsg.getBigDecimal(index);
 			if (bdVal != null) {
 				message.addField(iMessageFieldName, bdVal);
 			}
-		} else if (fastFld.getType().getName().equals("byteVector")) {
+        } else if("byteVector".equals(fastFld.getType().getName())) {
 			byte[] bvVal = fastMsg.getBytes(index);
 			if (bvVal != null) {
 			//FIXME: in most cases a separate field contains encoding of the message
 
 //			message.addField(iMessageFieldName, bvVal);
-				try {
-					message.addField(iMessageFieldName, new String(bvVal, "ascii"));
-				} catch (UnsupportedEncodingException e) {
-					logger.debug("can not convert bytearray to string with ascii encoding", e);
-				}
-			}
+                message.addField(iMessageFieldName, new String(bvVal, StandardCharsets.US_ASCII));
+            }
 		} else {
 			throw new ConverterException("Can not convert field of type: " +
 					fastFld.getType().getName());

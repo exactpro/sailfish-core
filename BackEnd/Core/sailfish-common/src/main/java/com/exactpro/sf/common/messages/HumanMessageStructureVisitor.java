@@ -16,12 +16,11 @@
 package com.exactpro.sf.common.messages;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 
@@ -251,7 +250,7 @@ public class HumanMessageStructureVisitor implements IMessageStructureVisitor {
      * @param traverser
      */
     protected IHumanMessage visit(String fieldName, IMessage message, IFieldStructure complexField, MessageTraverser traverser) {
-        HumanMessageStructureVisitor visitor = new HumanMessageStructureVisitor(this.messageFactory, complexField.getName());
+        HumanMessageStructureVisitor visitor = new HumanMessageStructureVisitor(messageFactory, complexField.getName());
         traverser.traverse(visitor, complexField.getFields(), message, EmptyMessageStructureReaderHandler.instance());
 
         return visitor.getHumanMessage();

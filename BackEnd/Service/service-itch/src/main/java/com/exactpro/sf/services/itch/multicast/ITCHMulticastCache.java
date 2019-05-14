@@ -15,10 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
-import com.exactpro.sf.common.messages.IMessage;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import com.exactpro.sf.common.messages.IMessage;
 
 /**
  * Created by alexey.zarovny on 11/28/14.
@@ -27,7 +31,7 @@ public class ITCHMulticastCache {
 
     private final int limit;
     private final Map<Byte, Map<Integer, IMessage>> cacheMap;
-    private AtomicInteger size;
+    private final AtomicInteger size;
 
     public enum Status {
         REQUEST_ACCEPTED,
@@ -38,15 +42,15 @@ public class ITCHMulticastCache {
 
     public ITCHMulticastCache(int limit) {
         cacheMap = new HashMap<>();
-        if (limit == 0)
+        if(limit == 0) {
             throw new NullPointerException("Cache limit must not be null");
+        }
         this.limit = limit;
         size = new AtomicInteger(0);
     }
 
     public void add(int seqNumber, IMessage message, byte mdGroup) {
-        Map<Integer, IMessage> mdGroupCache;
-        mdGroupCache = cacheMap.get(mdGroup);
+        Map<Integer, IMessage> mdGroupCache = cacheMap.get(mdGroup);
         if (mdGroupCache == null) {
             mdGroupCache = new TreeMap<>();
             cacheMap.put(mdGroup, mdGroupCache);
@@ -77,14 +81,17 @@ public class ITCHMulticastCache {
 
         Map<Integer, IMessage> mdGroupCache = cacheMap.get(mdGroup);
 
-            if (mdGroupCache == null)
-                return Status.INVALID_MARKET_DATA_GROUP;
+        if(mdGroupCache == null) {
+            return Status.INVALID_MARKET_DATA_GROUP;
+        }
 
-            if (mdGroupCache.size() < quantity)
-                return Status.OUT_OF_RANGE;
+        if(mdGroupCache.size() < quantity) {
+            return Status.OUT_OF_RANGE;
+        }
 
-            if ((Integer) mdGroupCache.keySet().iterator().next() > startSeqNumber)
-                return Status.REPLAY_UNAVAILABLE;
+        if((Integer)mdGroupCache.keySet().iterator().next() > startSeqNumber) {
+            return Status.REPLAY_UNAVAILABLE;
+        }
 
             Iterator<Integer> it = mdGroupCache.keySet().iterator();
             int i = 0;
@@ -96,10 +103,6 @@ public class ITCHMulticastCache {
                 }
             }
 
-
-        if (result.size() < quantity) {
-            return Status.OUT_OF_RANGE;
-        }
-        return Status.REQUEST_ACCEPTED;
+        return result.size() < quantity ? Status.OUT_OF_RANGE : Status.REQUEST_ACCEPTED;
     }
 }

@@ -21,6 +21,7 @@ import java.util.Set;
 
 import com.exactpro.sf.aml.Direction;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class JsonAction {
@@ -34,16 +35,17 @@ public class JsonAction {
 	private final Direction direction;
 	
 	private final Set<String> utilClasses;
-	
-	private final boolean isAML2, isAML3;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private final boolean isAML2;
+
+    private final boolean isAML3;
+
+    @JsonInclude(Include.NON_NULL)
     private final String help;
 
 	public JsonAction(String name, Collection<String> required, Collection<String> optional,
 			Direction direction, Set<String> utilClasses, boolean isAML2, boolean isAML3, String help) {
-		super();
-		this.name = name;
+        this.name = name;
 		this.required = required;
 		this.optional = optional;
 		this.direction = direction;

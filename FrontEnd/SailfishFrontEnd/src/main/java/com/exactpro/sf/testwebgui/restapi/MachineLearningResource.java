@@ -18,6 +18,8 @@ package com.exactpro.sf.testwebgui.restapi;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,13 +34,12 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -56,7 +57,7 @@ public class MachineLearningResource {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineLearningResource.class);
 
-    private ObjectWriter jsonWriter = new ObjectMapper().writer();
+    private final ObjectWriter jsonWriter = new ObjectMapper().writer();
 
     @Context
     private ServletContext context;
@@ -80,19 +81,19 @@ public class MachineLearningResource {
                         ExceptionUtils.getThrowableList(e).stream().filter(t -> root != t)
                                 .map(t -> t.getMessage() + " , Reason: " + root.getMessage())
                                 .collect(Collectors.toList()));
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
             }
         }
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Machine Learning service is disabled").build();
+        return Response.status(Status.SERVICE_UNAVAILABLE).entity("Machine Learning service is disabled").build();
     }
 
     @GET
     @Path("predictions_ready")
     @Produces(MediaType.TEXT_PLAIN)
     public Response ready() {
-        
+
         if (getMachineLearningService().getMlPredictor() == null) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Predictor not ready").build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).entity("Predictor not ready").build();
         } else {
             return Response.ok().build();
         }
@@ -104,7 +105,7 @@ public class MachineLearningResource {
     public Response predictTrainingData(InputStream requestBody) {
 
         if (getMachineLearningService().getMlPredictor() == null) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Predictions plugin is not installed").build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).entity("Predictions plugin is not installed").build();
         }
 
         FailedAction fa;
@@ -117,7 +118,7 @@ public class MachineLearningResource {
                     ExceptionUtils.getThrowableList(e).stream().filter(t -> root != t)
                             .map(t -> t.getMessage() + " , Reason: " + root.getMessage())
                             .collect(Collectors.toList()));
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
 
         Map result = getMachineLearningService().getMlPredictor().classifyFailedAction(fa);

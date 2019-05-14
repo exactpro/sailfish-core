@@ -39,7 +39,7 @@ public class BigButtonUtil {
         ZipEntry ze;
         try (ZipFile zif = new ZipFile(zipFile)) {
 
-            final Enumeration<? extends ZipEntry> entries = zif.entries();
+            Enumeration<? extends ZipEntry> entries = zif.entries();
 
             while (entries.hasMoreElements()) {
 
@@ -55,9 +55,9 @@ public class BigButtonUtil {
                 }
 
             }
+            return path;
         }
 
-        return path;
     }
 
     public static InputStream getStream(String rootFolder, String relativePath,
@@ -85,12 +85,12 @@ public class BigButtonUtil {
 
     public static void getEntryFromReportZip(File zipFile, String entryToWrite, OutputStream out) throws IOException {
 
-        entryToWrite = BigButtonUtil.recognizeSeparatorInZipAndChangePath(zipFile, entryToWrite);
+        entryToWrite = recognizeSeparatorInZipAndChangePath(zipFile, entryToWrite);
 
         ZipEntry ze = null;
         try (ZipFile zif = new ZipFile(zipFile)) {
 
-            final Enumeration<? extends ZipEntry> entries = zif.entries();
+            Enumeration<? extends ZipEntry> entries = zif.entries();
 
             while (entries.hasMoreElements()) {
 

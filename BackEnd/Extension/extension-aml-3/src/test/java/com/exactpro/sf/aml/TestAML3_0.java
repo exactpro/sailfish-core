@@ -35,8 +35,8 @@ import com.exactpro.sf.services.ServiceDescription;
 
 public class TestAML3_0 extends TestAML3Base {
 
-	private static String VALID_TEST_PATH = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "aml3_0" + File.separator + "validTest" + File.separator;
-	private static String INVALID_TEST_PATH = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "aml3_0" + File.separator + "invalidTest" + File.separator;
+	private static final String VALID_TEST_PATH = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "aml3_0" + File.separator + "validTest" + File.separator;
+	private static final String INVALID_TEST_PATH = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "aml3_0" + File.separator + "invalidTest" + File.separator;
 
 	@Before
     public void initTestAML3_0() throws InterruptedException, ExecutionException {
@@ -92,8 +92,7 @@ public class TestAML3_0 extends TestAML3Base {
 		Collection<Alert> source = aml.getAlertCollector().getAlerts();
         Assert.assertEquals("List errors size", 3, source.size());
 
-        Alert alert = null;
-        alert = new Alert(141, "", "#check_point", "Unable to check checkpoint at compile time", AlertType.WARNING);
+        Alert alert = new Alert(141, "", "#check_point", "Unable to check checkpoint at compile time", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
         alert = new Alert(292, "", "FInteger", "Reference to unknown column 'idleTimeout' is found in column 'FInteger': '${settings.idleTimeout}'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
@@ -110,8 +109,9 @@ public class TestAML3_0 extends TestAML3Base {
 		AML aml = executeTest(VALID_TEST_PATH + "03_test_maxSendOrders.csv");
 		Assert.assertEquals(0, aml.getAlertCollector().getCount(AlertType.ERROR));
 		System.gc();
-		if (aml != null)
-			aml.cleanup();
+        if(aml != null) {
+            aml.cleanup();
+        }
 		System.gc();
 	}
 
@@ -158,8 +158,7 @@ public class TestAML3_0 extends TestAML3Base {
         Assert.assertEquals(17, aml.getTestCases().get(0).getActions().size());
         Assert.assertEquals(11, aml.getTestCases().get(1).getActions().size());
 
-        Alert alert = null;
-        alert = new Alert(24, "m3", "MarketDepthLevel_2_4", "Reference to unknown column 'm2' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
+        Alert alert = new Alert(24, "m3", "MarketDepthLevel_2_4", "Reference to unknown column 'm2' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
         alert = new Alert(24, "m3", "MarketDepthLevel_2_4" ,"Reference to unknown column 'MarketDepthLevel_2_4' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
@@ -188,9 +187,7 @@ public class TestAML3_0 extends TestAML3Base {
 		} catch (AMLException e) {
 			Collection<Alert> source = e.getAlertCollector().getAlerts();
 
-			Alert alert = null;
-
-			alert = new Alert(36, "", "#check_point", "Unable to check checkpoint at compile time", AlertType.WARNING);
+            Alert alert = new Alert(36, "", "#check_point", "Unable to check checkpoint at compile time", AlertType.WARNING);
 			Assert.assertTrue(alert.toString(), source.remove(alert));
 			alert = new Alert(37, "", "#check_point", "Unable to check checkpoint at compile time", AlertType.WARNING);
 			Assert.assertTrue(alert.toString(), source.remove(alert));

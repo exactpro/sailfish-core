@@ -28,17 +28,17 @@ public class NTGDefaultApplication implements INTGApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(NTGDefaultApplication.class);
 
-	private List<IMessage> inputMessages = new ArrayList<IMessage>(10000);
-	protected List<IMessage> outputMessages = new ArrayList<IMessage>(10000);
+    private final List<IMessage> inputMessages = new ArrayList<>(10_000);
+    protected List<IMessage> outputMessages = new ArrayList<>(10_000);
 
 	@Override
-	public void onMessageReceived(final IMessage message) {
+	public void onMessageReceived(IMessage message) {
         logger.trace(" DefaultNTGApplication.onMessageReceived()  [{}].", message);
 		inputMessages.add(message);
 	}
 
 	@Override
-	public void onMessageSent(final IMessage message) {
+	public void onMessageSent(IMessage message) {
         logger.trace(" DefaultNTGApplication.onMessageSent() Message has been sent.");
 		outputMessages.add(message);
 	}

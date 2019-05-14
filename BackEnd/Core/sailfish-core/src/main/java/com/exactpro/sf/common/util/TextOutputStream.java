@@ -29,10 +29,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class TextOutputStream implements Closeable {
 
-    protected final static String EOL = System.getProperty("line.separator");
-    protected final static String TAB = "\t";
+    protected static final String EOL = System.getProperty("line.separator");
+    protected static final String TAB = "\t";
 
-    private OutputStream os;
+    private final OutputStream os;
 
     public TextOutputStream(OutputStream os) {
         this.os = os;
@@ -45,7 +45,7 @@ public class TextOutputStream implements Closeable {
      * @throws IOException
      */
     public void write(String s) throws IOException {
-        this.os.write(s.getBytes());
+        os.write(s.getBytes());
     }
 
     /**
@@ -141,6 +141,6 @@ public class TextOutputStream implements Closeable {
      */
     @Override
     public void close() throws IOException {
-        this.os.close();
+        os.close();
     }
 }

@@ -28,7 +28,7 @@ public class Message {
     private MessageLevel level;
     private String title;
     private String message;
-    private List<String> submessages;
+    private final List<String> submessages;
     private Throwable cause;
 
     public Message() {

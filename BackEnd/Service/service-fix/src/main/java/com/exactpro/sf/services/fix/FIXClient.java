@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
 
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.configuration.IDictionaryManager;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -40,17 +38,18 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDataManager;
+import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.services.IInitiatorService;
 import com.exactpro.sf.services.IServiceContext;
@@ -96,7 +95,7 @@ import quickfix.mina.ssl.SSLSupport;
  */
 public class FIXClient implements IInitiatorService {
 
-	protected final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	protected volatile ServiceStatus curStatus;
 	protected IServiceMonitor monitor;
@@ -123,13 +122,13 @@ public class FIXClient implements IInitiatorService {
     protected ServiceInfo serviceInfo;
 
 	private IMessageStorage msgStorage;
-	private MessageFactory messageFactory = null;
+    private MessageFactory messageFactory;
 
     protected FixDataDictionaryProvider dictionaryProvider;
 
 	protected ILoggingConfigurator logConfigurator;
 
-	private boolean isPerformance = false;
+    private boolean isPerformance;
 	protected ITaskExecutor taskExecutor;
 
     protected IWorkspaceDispatcher workspaceDispatcher;
@@ -154,14 +153,14 @@ public class FIXClient implements IInitiatorService {
 	public void dispose() {
 		logger.info("dispose service {}", this);
 
-        this.changeStatus(ServiceStatus.DISPOSING, "Service disposing.", null );
-        this.closeResources();
-        this.changeStatus(ServiceStatus.DISPOSED, "Service disposed.", null );
+        changeStatus(ServiceStatus.DISPOSING, "Service disposing.", null);
+        closeResources();
+        changeStatus(ServiceStatus.DISPOSED, "Service disposed.", null);
 	}
 
     private void closeResources() {
         try {
-            FIXSession currentSession = this.session;
+            FIXSession currentSession = session;
             Session qfjSession = null;
             if (currentSession != null) {
                 if(!currentSession.isClosed()){
@@ -170,8 +169,8 @@ public class FIXClient implements IInitiatorService {
                 }
             }
 
-            if (this.initiator != null) {
-                this.initiator.stop();
+            if(initiator != null) {
+                initiator.stop();
             }
             
             if (qfjSession != null) {
@@ -185,16 +184,16 @@ public class FIXClient implements IInitiatorService {
                 }
             }
 
-            if (this.application != null) {
+            if(application != null) {
                 application.stopLogging();
             }
 
         } catch (Throwable e)	{
-            this.changeStatus(ServiceStatus.ERROR, "Service failed upon closing the resources: " + e.getMessage(), e );
+            changeStatus(ServiceStatus.ERROR, "Service failed upon closing the resources: " + e.getMessage(), e);
             logger.error("Service failed upon closing the resources", e);
         } finally {
             if(logConfigurator != null) {
-                logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+                logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                         serviceName);
             }
         }
@@ -203,25 +202,25 @@ public class FIXClient implements IInitiatorService {
 
 	@Override
 	public void init(
-			final IServiceContext serviceContext,
-			final IServiceMonitor serviceMonitor,
-			final IServiceHandler handler,
-			final IServiceSettings settings,
-			final ServiceName serviceName) {
+            IServiceContext serviceContext,
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            ServiceName serviceName) {
 
 		logger.info("init Service {}", this);
 
 		try {
-            this.changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
+            changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
 
             baseInit(serviceContext, serviceMonitor, handler, settings, serviceName);
 
             initFixApplication();
 
-			this.changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
+            changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
 
 		} catch (Exception e) {
-			this.changeStatus(ServiceStatus.ERROR, "Service initializing error", e);
+            changeStatus(ServiceStatus.ERROR, "Service initializing error", e);
 			throw new ServiceException(e);
 		}
 
@@ -229,69 +228,78 @@ public class FIXClient implements IInitiatorService {
 
 	}
 
-    protected void configureSessionSettings(final FIXClientApplication application, SessionID sessionID, final SessionSettings sessionSettings, final ServiceName serviceName, IDataManager dataManager)
+    protected void configureSessionSettings(FIXClientApplication application, SessionID sessionID, SessionSettings sessionSettings, ServiceName serviceName, IDataManager dataManager)
             throws IOException {
 
-        configureCommonSettings(this.fixSettings, sessionID, sessionSettings, serviceName);
+        configureCommonSettings(fixSettings, sessionID, sessionSettings, serviceName);
 
-        if ( this.serviceName != null)
-        	sessionSettings.setString( sessionID, "SessionName", this.serviceName.toString() );
-        else
-        	throw new ServiceException("Service name is not set");
+        if(this.serviceName != null) {
+            sessionSettings.setString(sessionID, "SessionName", this.serviceName.toString());
+        } else {
+            throw new ServiceException("Service name is not set");
+        }
 
         sessionSettings.setString( sessionID, SessionFactory.SETTING_CONNECTION_TYPE, "initiator" );
 
-        if ( this.fixSettings.getUsername() != null && !this.fixSettings.getUsername().equals("") )
-        	sessionSettings.setString( sessionID, "Username", this.fixSettings.getUsername() );
+        if(fixSettings.getUsername() != null && !"".equals(fixSettings.getUsername())) {
+            sessionSettings.setString(sessionID, "Username", fixSettings.getUsername());
+        }
 
-        if ( this.fixSettings.getPassword() != null && !this.fixSettings.getPassword().equals("") )
-        	sessionSettings.setString( sessionID, "Password", this.fixSettings.getPassword() );
+        if(fixSettings.getPassword() != null && !"".equals(fixSettings.getPassword())) {
+            sessionSettings.setString(sessionID, "Password", fixSettings.getPassword());
+        }
 
-        if ( this.fixSettings.getNewPassword() != null && !this.fixSettings.getNewPassword().equals(""))
-        	sessionSettings.setString( sessionID, "NewPassword", this.fixSettings.getNewPassword() );
+        if(fixSettings.getNewPassword() != null && !"".equals(fixSettings.getNewPassword())) {
+            sessionSettings.setString(sessionID, "NewPassword", fixSettings.getNewPassword());
+        }
 
-        if ( this.fixSettings.getEncryptionKeyFilePath() != null && !this.fixSettings.getEncryptionKeyFilePath().equals(""))
-        	sessionSettings.setString( sessionID, "EncryptionKeyFilePath", this.fixSettings.getEncryptionKeyFilePath() );
+        if(fixSettings.getEncryptionKeyFilePath() != null && !"".equals(fixSettings.getEncryptionKeyFilePath())) {
+            sessionSettings.setString(sessionID, "EncryptionKeyFilePath", fixSettings.getEncryptionKeyFilePath());
+        }
 
-        if ( this.fixSettings.getDefaultCstmApplVerID() != null && !this.fixSettings.getDefaultCstmApplVerID().equals(""))
-        	sessionSettings.setString( sessionID, FIXApplication.DefaultCstmApplVerID, this.fixSettings.getDefaultCstmApplVerID() );
+        if(fixSettings.getDefaultCstmApplVerID() != null && !"".equals(fixSettings.getDefaultCstmApplVerID())) {
+            sessionSettings.setString(sessionID, FIXApplication.DefaultCstmApplVerID, fixSettings.getDefaultCstmApplVerID());
+        }
 
-        if ( this.fixSettings.getExtExecInst() != null && !this.fixSettings.getExtExecInst().equals(""))
-        	sessionSettings.setString( sessionID, "ExtExecInst", this.fixSettings.getExtExecInst() );
+        if(fixSettings.getExtExecInst() != null && !"".equals(fixSettings.getExtExecInst())) {
+            sessionSettings.setString(sessionID, "ExtExecInst", fixSettings.getExtExecInst());
+        }
 
-        if( this.fixSettings.isUseDefaultApplVerID() ){
-        	if ( this.fixSettings.getDefaultApplVerID() != null && !this.fixSettings.getDefaultApplVerID().equals("") )
-        		sessionSettings.setString( sessionID, Session.SETTING_DEFAULT_APPL_VER_ID, this.fixSettings.getDefaultApplVerID() );
-        	else
-        		throw new ServiceException("'"+Session.SETTING_DEFAULT_APPL_VER_ID+"' parameter is not set in " + serviceName);
+        if(fixSettings.isUseDefaultApplVerID()) {
+            if(fixSettings.getDefaultApplVerID() != null && !"".equals(fixSettings.getDefaultApplVerID())) {
+                sessionSettings.setString(sessionID, Session.SETTING_DEFAULT_APPL_VER_ID, fixSettings.getDefaultApplVerID());
+            } else {
+                throw new ServiceException("'" + Session.SETTING_DEFAULT_APPL_VER_ID + "' parameter is not set in " + serviceName);
+            }
         	}
 
-        if ( this.fixSettings.getSocketConnectHost() != null && !this.fixSettings.getSocketConnectHost().equals("") )
-        	sessionSettings.setString( sessionID, Initiator.SETTING_SOCKET_CONNECT_HOST, this.fixSettings.getSocketConnectHost() );
-        else
-        	throw new ServiceException("'"+Initiator.SETTING_SOCKET_CONNECT_HOST+"' parameter is not set  in " + serviceName);
-
-        sessionSettings.setLong( sessionID, Initiator.SETTING_SOCKET_CONNECT_PORT, this.fixSettings.getSocketConnectPort() );
-        sessionSettings.setLong( sessionID, Session.SETTING_HEARTBTINT, this.fixSettings.getHeartBtInt() );
-        sessionSettings.setLong( sessionID, Session.SETTING_LOGON_TIMEOUT, this.fixSettings.getLogonTimeout() );
-        sessionSettings.setLong( sessionID, Session.SETTING_LOGOUT_TIMEOUT, this.fixSettings.getLogoutTimeout() );
-        sessionSettings.setLong(sessionID, Initiator.SETTING_RECONNECT_INTERVAL, this.fixSettings.getReconnectInterval());
-
-        if ( this.fixSettings.getStartDate() != null && !this.fixSettings.getStartDate().equals("") ) {
-            sessionSettings.setString(sessionID, Session.SETTING_START_DAY, this.fixSettings.getStartDate());
+        if(fixSettings.getSocketConnectHost() != null && !"".equals(fixSettings.getSocketConnectHost())) {
+            sessionSettings.setString(sessionID, Initiator.SETTING_SOCKET_CONNECT_HOST, fixSettings.getSocketConnectHost());
+        } else {
+            throw new ServiceException("'" + Initiator.SETTING_SOCKET_CONNECT_HOST + "' parameter is not set  in " + serviceName);
         }
 
-        if ( this.fixSettings.getEndDate() != null && !this.fixSettings.getEndDate().equals("") ) {
-            sessionSettings.setString(sessionID, Session.SETTING_END_DAY, this.fixSettings.getEndDate());
+        sessionSettings.setLong(sessionID, Initiator.SETTING_SOCKET_CONNECT_PORT, fixSettings.getSocketConnectPort());
+        sessionSettings.setLong(sessionID, Session.SETTING_HEARTBTINT, fixSettings.getHeartBtInt());
+        sessionSettings.setLong(sessionID, Session.SETTING_LOGON_TIMEOUT, fixSettings.getLogonTimeout());
+        sessionSettings.setLong(sessionID, Session.SETTING_LOGOUT_TIMEOUT, fixSettings.getLogoutTimeout());
+        sessionSettings.setLong(sessionID, Initiator.SETTING_RECONNECT_INTERVAL, fixSettings.getReconnectInterval());
+
+        if(fixSettings.getStartDate() != null && !"".equals(fixSettings.getStartDate())) {
+            sessionSettings.setString(sessionID, Session.SETTING_START_DAY, fixSettings.getStartDate());
         }
 
-        sessionSettings.setString(sessionID, ResetSeqNumFlag, this.fixSettings.getResetSeqNumFlag()); // Determines if sequence numbers should be reset when recieving a logon request. Acceptors only.
+        if(fixSettings.getEndDate() != null && !"".equals(fixSettings.getEndDate())) {
+            sessionSettings.setString(sessionID, Session.SETTING_END_DAY, fixSettings.getEndDate());
+        }
 
-        sessionSettings.setBool(sessionID, Session.IGNORE_ABSENCE_OF_141_TAG, this.fixSettings.isIgnoreAbsenceOf141tag());
-        sessionSettings.setBool( sessionID, Session.SETTING_REQUIRES_ORIG_SENDING_TIME, this.fixSettings.isRequiresOrigSendingTime());
+        sessionSettings.setString(sessionID, ResetSeqNumFlag, fixSettings.getResetSeqNumFlag()); // Determines if sequence numbers should be reset when recieving a logon request. Acceptors only.
 
-        sessionSettings.setBool( sessionID, FIXApplication.ENCRYPT_PASSWORD, this.fixSettings.isEncryptPassword());
-        sessionSettings.setBool( sessionID, FIXApplication.ADD_NEXT_EXPECTED_SEQ_NUM, this.fixSettings.isAddNextExpectedMsgSeqNum());
+        sessionSettings.setBool(sessionID, Session.IGNORE_ABSENCE_OF_141_TAG, fixSettings.isIgnoreAbsenceOf141tag());
+        sessionSettings.setBool(sessionID, Session.SETTING_REQUIRES_ORIG_SENDING_TIME, fixSettings.isRequiresOrigSendingTime());
+
+        sessionSettings.setBool(sessionID, FIXApplication.ENCRYPT_PASSWORD, fixSettings.isEncryptPassword());
+        sessionSettings.setBool(sessionID, FIXApplication.ADD_NEXT_EXPECTED_SEQ_NUM, fixSettings.isAddNextExpectedMsgSeqNum());
 
         sessionSettings.setBool(sessionID, Session.SETTING_REJECT_MESSAGE_ON_UNHANDLED_EXCEPTION, true);
 
@@ -358,11 +366,11 @@ public class FIXClient implements IInitiatorService {
     }
 
     protected void baseInit(
-            final IServiceContext serviceContext,
-            final IServiceMonitor serviceMonitor,
-            final IServiceHandler handler,
-            final IServiceSettings serviceSettings,
-            final ServiceName serviceName) {
+            IServiceContext serviceContext,
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings serviceSettings,
+            ServiceName serviceName) {
         this.serviceName = serviceName;
         this.serviceContext = Objects.requireNonNull(serviceContext, "'Service context' parameter");
 
@@ -376,7 +384,7 @@ public class FIXClient implements IInitiatorService {
         this.msgStorage = Objects.requireNonNull(this.serviceContext.getMessageStorage(), "'Message storage' parameter");
         this.serviceInfo = serviceContext.lookupService(serviceName);
 
-        if (this.serviceInfo == null) {
+        if(serviceInfo == null) {
             logger.debug("A service named {} was not found.", serviceName);
         }
         this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
@@ -397,31 +405,31 @@ public class FIXClient implements IInitiatorService {
                 false,
                 commonSettings.isOrderingFields());
         this.messageHelper = new FixMessageHelper();
-        this.messageHelper.init(messageFactory, dictionary);
+        messageHelper.init(messageFactory, dictionary);
     }
 
 
     protected void initFixApplication() throws IOException {
         this.messageFactory = new CommonMessageFactory(dictionaryProvider);
 
-        if(this.fixSettings.isPerformanceMode()) {
+        if(fixSettings.isPerformanceMode()) {
             this.isPerformance = true;
         }
-        SessionID sessionID = new SessionID( this.fixSettings.getBeginString(),
-                this.fixSettings.getSenderCompID(), this.fixSettings.getTargetCompID(), serviceName.toString().replace(':', '-'));
+        SessionID sessionID = new SessionID(fixSettings.getBeginString(),
+                fixSettings.getSenderCompID(), fixSettings.getTargetCompID(), serviceName.toString().replace(':', '-'));
 
-        this.messagesLogFile = workspaceDispatcher.createFolder(FolderType.LOGS, this.logConfigurator.getLogsPath(this.serviceName)).getCanonicalPath();
-        this.settings.setString( sessionID, FileLogFactory.SETTING_FILE_LOG_PATH, this.messagesLogFile);
+        this.messagesLogFile = workspaceDispatcher.createFolder(FolderType.LOGS, logConfigurator.getLogsPath(serviceName)).getCanonicalPath();
+        settings.setString(sessionID, FileLogFactory.SETTING_FILE_LOG_PATH, messagesLogFile);
 
-        this.settings.setBool( sessionID, Session.SETTING_USE_SENDER_DEFAULT_APPL_VER_ID_AS_INITIAL_TARGET, true);
-        this.settings.setBool(sessionID, Session.SETTING_VALIDATE_SEQUENCE_NUMBERS, this.fixSettings.isValidateSequenceNumbers());
+        settings.setBool(sessionID, Session.SETTING_USE_SENDER_DEFAULT_APPL_VER_ID_AS_INITIAL_TARGET, true);
+        settings.setBool(sessionID, Session.SETTING_VALIDATE_SEQUENCE_NUMBERS, fixSettings.isValidateSequenceNumbers());
 
-        configureSessionSettings(this.application, sessionID, this.settings, serviceName, this.serviceContext.getDataManager());
+        configureSessionSettings(application, sessionID, settings, serviceName, serviceContext.getDataManager());
 
         this.application = createFixApplication();
-        this.application.init(serviceContext,
-                new ApplicationContext(this.monitor, this.handler, this.fixSettings, this.settings, this.messageHelper, this.converter,
-                        this.dictionaryProvider, this::connectionProblem),
+        application.init(serviceContext,
+                new ApplicationContext(monitor, handler, fixSettings, settings, messageHelper, converter,
+                        dictionaryProvider, this::connectionProblem),
                 serviceName);
     }
 
@@ -444,47 +452,42 @@ public class FIXClient implements IInitiatorService {
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
             serviceName);
         application.startLogging();
 		logger.info("start service {}", this);
 
 		try{
 
-			this.changeStatus(ServiceStatus.STARTING, "Service starting", null);
+            changeStatus(ServiceStatus.STARTING, "Service starting", null);
 
-			MessageStoreFactory messageStoreFactory = new FileStoreFactory(this.settings);
+            MessageStoreFactory messageStoreFactory = new FileStoreFactory(settings);
 
-            LogFactory logFactory = new FIXLogFactory(new FileLogFactory(this.settings), this.fixSettings.isLogHeartbeats(), this, monitor, this.logger);
+            LogFactory logFactory = new FIXLogFactory(new FileLogFactory(settings), fixSettings.isLogHeartbeats(), this, monitor, logger);
 
 			FixSessionFactory sessionFactory = new FixSessionFactory(application, messageStoreFactory, logFactory,
 					messageFactory, dictionaryProvider);
 
-			this.initiator = new SocketInitiator(sessionFactory, this.settings, SessionConnector.DEFAULT_QUEUE_CAPACITY,
+            this.initiator = new SocketInitiator(sessionFactory, settings, SessionConnector.DEFAULT_QUEUE_CAPACITY,
 					taskExecutor.getThreadPool());
 
-			if (this.initiator == null) {
+            if(initiator == null) {
 				throw new ServiceException("'initiator' is not set");
 			}
 
-			if (this.fixSettings.isDoLogonOnStart()) {
+            if(fixSettings.isDoLogonOnStart()) {
 				logon();
 			}
 
-            this.changeStatus(ServiceStatus.STARTED, "Service started", null);
+            changeStatus(ServiceStatus.STARTED, "Service started", null);
 
 		} catch ( QFJException e ) {
 
 			logger.error("Service {} not started", this, e);
 
-			String cause = null;
+            String cause = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
 
-			if ( e.getCause() != null  )
-				cause = e.getCause().getMessage();
-			else
-				cause = e.getMessage();
-
-			this.changeStatus(ServiceStatus.ERROR, cause, e, true);
+            changeStatus(ServiceStatus.ERROR, cause, e, true);
 			throw new ServiceException("Exception during service starting", e);
 
 		} catch (SessionConfigError e ) {
@@ -504,7 +507,7 @@ public class FIXClient implements IInitiatorService {
 		} catch (Exception e) {
 
 			logger.error("not started", e);
-			this.changeStatus(ServiceStatus.ERROR, "Service start error", e, true);
+            changeStatus(ServiceStatus.ERROR, "Service start error", e, true);
 			throw new ServiceException("Exception during service starting", e);
 		}
 
@@ -516,49 +519,44 @@ public class FIXClient implements IInitiatorService {
 
 		logger.error("not started", e);
 
-		String cause = null;
+        String cause = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
 
-		if ( e.getCause() != null  )
-			cause = e.getCause().getMessage();
-		else
-			cause = e.getMessage();
-
-		this.changeStatus(ServiceStatus.ERROR, cause, e, true);
+        changeStatus(ServiceStatus.ERROR, cause, e, true);
 		throw new ServiceException(message, e);
 	}
 
 	public synchronized void logon() throws ConfigError, FieldConvertError {
 
-		SessionSettings settings = this.initiator.getSettings();
+        SessionSettings settings = initiator.getSettings();
 		logger.debug("settings = {}", settings);
 
 		logger.info("initiator.start");
-		this.initiator.start();
-		int size = this.initiator.getSessions().size();
+        initiator.start();
+        int size = initiator.getSessions().size();
 		if (size != 1) {
 			throw new EPSCommonException("Config file should contain only one session, but "+size);
 		}
-		Iterator<SessionID> iter = this.initiator.getSessions().iterator();
+        Iterator<SessionID> iter = initiator.getSessions().iterator();
 
 		while (iter.hasNext())	{
 			SessionID sessionID = iter.next();
-			FIXSession iSession = new FIXSession(this.serviceName.toString(), sessionID, msgStorage, this.converter, this.messageHelper);
+            FIXSession iSession = new FIXSession(serviceName.toString(), sessionID, msgStorage, converter, messageHelper);
 			String sessionName = settings.getString(sessionID, SessionName);
 			iSession.setServiceInfo(serviceInfo);
 			logger.info("register session: {}", sessionName);
 			this.session = iSession;
-			this.application.addSessionId(sessionID, iSession);
+            application.addSessionId(sessionID, iSession);
 		}
 	}
 
 	@Override
 	public IServiceHandler getServiceHandler() {
-		return this.handler;
+        return handler;
 	}
 
 	@Override
 	public ISession getSession() {
-		return this.session;
+        return session;
 	}
 
 	@Override
@@ -585,20 +583,20 @@ public class FIXClient implements IInitiatorService {
 
 	@Override
 	public ServiceStatus getStatus() {
-		return this.curStatus;
+        return curStatus;
 	}
 
 	public void disconnect() {
-		if ( this.initiator != null ) {
+        if(initiator != null) {
 			logger.info("disconnect");
-			this.initiator.stop();
+            initiator.stop();
 		}
 	}
 
 	public void forcedDisconnect() {
-		if ( this.initiator != null ) {
+        if(initiator != null) {
 			logger.info("forced.disconnect");
-			this.initiator.stop(true);
+            initiator.stop(true);
 		}
 	}
 
@@ -613,12 +611,8 @@ public class FIXClient implements IInitiatorService {
 	public IServiceSettings getSettings() {
 
 		try {
-		    if (this.fixSettings != null) {
-    			//return copy of the settings to prevent it's change
-    			return (IServiceSettings) BeanUtils.cloneBean(this.fixSettings);
-		    } else {
-		        return null;
-		    }
+            //return copy of the settings to prevent it's change
+            return fixSettings != null ? (IServiceSettings)BeanUtils.cloneBean(fixSettings) : null;
 		} catch (Exception e) {
 			logger.error("Could not copy settings object", e);
 			throw new EPSCommonException("Could not copy settings object", e);
@@ -645,7 +639,7 @@ public class FIXClient implements IInitiatorService {
 
 	@Override
     public IMessage receive(IActionContext actionContext, IMessage msg) throws InterruptedException {
-        return WaitAction.waitForMessage(actionContext, this.messageHelper.prepareMessageToEncode(msg, null), !msg.getMetaData().isAdmin());
+        return WaitAction.waitForMessage(actionContext, messageHelper.prepareMessageToEncode(msg, null), !msg.getMetaData().isAdmin());
     }
 
     public DirtyQFJIMessageConverter getConverter() {
@@ -661,8 +655,8 @@ public class FIXClient implements IInitiatorService {
         List<IMessage> messages = new ArrayList<>();
 
         try(FileInputStream fis = new FileInputStream(logPath);
-            InputStreamReader isr = new InputStreamReader(fis, CharsetSupport.getCharset());
-            BufferedReader reader = new BufferedReader(isr)) {
+                InputStreamReader isr = new InputStreamReader(fis, CharsetSupport.getCharset());
+                BufferedReader reader = new BufferedReader(isr)) {
 
             DataDictionary dictionary = dictionaryProvider.getSessionDataDictionary(sessionID.getBeginString());
             String line = null;
@@ -686,13 +680,13 @@ public class FIXClient implements IInitiatorService {
                     logger.warn("Problem during conversion fix message [{}] to IMessage", line, e);
                 }
             }
+            return messages;
         }
 
-        return messages;
     }
 
-	protected MessageHelper getMessageHelper() {
-		return this.messageHelper;
+    protected MessageHelper getMessageHelper() {
+        return messageHelper;
 	}
 
 	protected void setMessageHelper (MessageHelper messageHelper) {
@@ -700,13 +694,13 @@ public class FIXClient implements IInitiatorService {
 	}
 
     private void connectionProblem(boolean isPresent, String reason) {
-        if (this.curStatus == ServiceStatus.ERROR) {
+        if(curStatus == ServiceStatus.ERROR) {
             return;
         }
 
-        if (isPresent && this.curStatus != ServiceStatus.WARNING) {
+        if(isPresent && curStatus != ServiceStatus.WARNING) {
             changeStatus(ServiceStatus.WARNING, reason, null);
-        } else if (!isPresent && this.curStatus == ServiceStatus.WARNING) {
+        } else if(!isPresent && curStatus == ServiceStatus.WARNING) {
             changeStatus(ServiceStatus.STARTED, reason, null);
         }
     }

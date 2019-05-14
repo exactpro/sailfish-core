@@ -38,8 +38,8 @@ public class ScriptrunUpdateRetriever extends DefaultUpdateRetriever implements 
 	private static final String BLOCK_ID_PREFIX = "eps-result-";
 	private static final String EMPTY_BLOCK_ID = "empty";
 
-    private ISFContext context;
-	private List<IUpdateRequestListener> listeners;
+    private final ISFContext context;
+	private final List<IUpdateRequestListener> listeners;
 
 	public ScriptrunUpdateRetriever(ISFContext context){
 	    super(IUpdateRequestListener.class);

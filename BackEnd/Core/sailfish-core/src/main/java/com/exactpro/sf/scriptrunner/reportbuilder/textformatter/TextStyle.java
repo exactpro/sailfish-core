@@ -18,9 +18,9 @@ package com.exactpro.sf.scriptrunner.reportbuilder.textformatter;
 
 public enum TextStyle {
     BOLD("font-weight: bold;"), NORMAL("font-weight: normal; font-style: normal;"), ITALIC("font-style: italic;");
-    private String cssRule;
+    private final String cssRule;
 
-    private TextStyle(String cssRule) {
+    TextStyle(String cssRule) {
         this.cssRule = cssRule;
     }
 

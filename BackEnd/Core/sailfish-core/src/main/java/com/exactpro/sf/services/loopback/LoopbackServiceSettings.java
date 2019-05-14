@@ -26,7 +26,7 @@ public class LoopbackServiceSettings extends AbstractServiceSettings{
     private SailfishURI dictionaryName;
 
     @Override public SailfishURI getDictionaryName() {
-        return this.dictionaryName;
+        return dictionaryName;
     }
 
     @Override public void setDictionaryName(SailfishURI dictionaryName) {

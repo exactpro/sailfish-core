@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.fast;
 
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,9 +36,9 @@ import org.openfast.template.TemplateRegisteredListener;
 import org.openfast.template.TemplateRegistry;
 
 public class FASTMessageInputStream implements MessageStream {
-    private InputStream in;
-    private FastDecoder decoder;
-    private Context context;
+    private final InputStream in;
+    private final FastDecoder decoder;
+    private final Context context;
     private Map<MessageTemplate, MessageHandler> templateHandlers = Collections.emptyMap();
     private List<MessageHandler> handlers = Collections.emptyList();
     private MessageBlockReader blockReader = MessageBlockReader.NULL;
@@ -53,15 +54,17 @@ public class FASTMessageInputStream implements MessageStream {
     }
 
     /**
-     * @throws java.io.EOFException
+     * @throws EOFException
      * @return the next message in the stream
      */
     public Message readMessage(int skipInitialByteAmount) {
-        if (context.isTraceEnabled())
+        if(context.isTraceEnabled()) {
             context.startTrace();
+        }
         boolean keepReading = blockReader.readBlock(in);
-        if (!keepReading)
+        if(!keepReading) {
             return null;
+        }
         skipInitialByte(in, skipInitialByteAmount);
         Message message = decoder.readMessage();
         if (message == null) {

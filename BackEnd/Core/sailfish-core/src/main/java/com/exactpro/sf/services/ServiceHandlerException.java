@@ -28,7 +28,6 @@ public class ServiceHandlerException extends Exception {
     private Object sfMessage;
     
     public ServiceHandlerException() {
-        super();
     }
     
     public ServiceHandlerException(String message) {
@@ -59,7 +58,6 @@ public class ServiceHandlerException extends Exception {
     }
     
     public ServiceHandlerException(ISession session, IdleStatus idleStatus, Object sfMessage) {
-        super();
         init(session, idleStatus, sfMessage);
     }
     

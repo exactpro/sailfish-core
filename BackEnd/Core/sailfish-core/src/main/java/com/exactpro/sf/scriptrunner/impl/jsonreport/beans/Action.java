@@ -16,14 +16,14 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
-import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 
 public class Action implements IJsonReportNode {
 
@@ -51,26 +51,26 @@ public class Action implements IJsonReportNode {
     @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
         for (IJsonReportNode child : nodes) {
             if (child instanceof Message) {
-                this.relatedMessages.add(((Message) child).getId());
+                relatedMessages.add(((Message)child).getId());
             } else if (child instanceof Action || child instanceof CustomMessage || child instanceof CustomTable || child instanceof CustomLink) {
-                this.subNodes.add(child);
+                subNodes.add(child);
             } else if (child instanceof Bug) {
-                this.bugs.add((Bug) child);
+                bugs.add((Bug)child);
             } else if (child instanceof Verification) {
-                this.subNodes.add(child);
+                subNodes.add(child);
                 if (((Verification) child).getMessageId() != null) {
-                    this.relatedMessages.add(((Verification) child).getMessageId());
+                    relatedMessages.add(((Verification)child).getMessageId());
                 }
             } else if (child instanceof LogEntry) {
-                this.logs.add((LogEntry) child);
+                logs.add((LogEntry)child);
             } else {
-                throw new IllegalArgumentException("unsupported child node type: " + child.getClass().toString());
+                throw new IllegalArgumentException("unsupported child node type: " + child.getClass());
             }
         }
     }
 
     @Override public void addException(Throwable t) {
-        if (this.status == null) {
+        if(status == null) {
             this.status = new Status(t);
         }
     }

@@ -30,27 +30,27 @@ public abstract class MessageStorageWrapper implements IMessageStorage {
     
     @Override
     public void dispose() {
-        this.messageStorage.dispose();
+        messageStorage.dispose();
     }
 
     @Override
     public void storeMessage(IMessage message) {
-        this.messageStorage.storeMessage(message);
+        messageStorage.storeMessage(message);
     }
 
     @Override
     public Iterable<MessageRow> getMessages(int count, MessageFilter filter) {
-        return this.messageStorage.getMessages(count, filter);
+        return messageStorage.getMessages(count, filter);
     }
 
     @Override
     public Iterable<MessageRow> getMessages(int offset, int count, String where) {
-        return this.messageStorage.getMessages(offset, count, where);
+        return messageStorage.getMessages(offset, count, where);
     }
 
     @Override
     public void clear() {
-        this.messageStorage.clear();
+        messageStorage.clear();
     }
 
 }

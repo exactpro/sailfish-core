@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author nikita.smirnov
  */
 public class WrapperNioSocketConnector {
-	private final static Logger logger = LoggerFactory.getLogger(WrapperNioSocketConnector.class);
+    private static final Logger logger = LoggerFactory.getLogger(WrapperNioSocketConnector.class);
 	private final NioSocketConnector nioSocketConnector;
 	private final IoProcessor<NioSession> ioProcessor;
     private final ITaskExecutor taskExecutor;
@@ -56,26 +56,26 @@ public class WrapperNioSocketConnector {
 	}
 	
 	public void setConnectTimeoutMillis(long connectTimeoutInMillis) {
-		this.nioSocketConnector.setConnectTimeoutMillis(connectTimeoutInMillis);
+        nioSocketConnector.setConnectTimeoutMillis(connectTimeoutInMillis);
 	}
 	
 	public ConnectFuture connect() {
-		return this.nioSocketConnector.connect();
+        return nioSocketConnector.connect();
 	}
 	
 	public ConnectFuture connect(SocketAddress remoteAddress) {
-		return this.nioSocketConnector.connect(remoteAddress);
+        return nioSocketConnector.connect(remoteAddress);
 	}
 	
 	public ConnectFuture connect(IoSessionInitializer<? extends ConnectFuture> sessionInitializer) {
-		return this.nioSocketConnector.connect(sessionInitializer);
+        return nioSocketConnector.connect(sessionInitializer);
 	}
 	
 	public Future<?> dispose() {
 		return dispose(false);
 	}
-	
-	public Future<?> dispose(final boolean awaitTermination) {
+
+    public Future<?> dispose(boolean awaitTermination) {
         if(taskExecutor != null){
             return taskExecutor.addTask(new Runnable() {
                 @Override
@@ -98,15 +98,15 @@ public class WrapperNioSocketConnector {
 	}
 	
 	public void setHandler(IoHandler handler) {
-		this.nioSocketConnector.setHandler(handler);
+        nioSocketConnector.setHandler(handler);
 	}
 	
 	public void setDefaultRemoteAddress(SocketAddress defaultRemoteAddress) {
-		this.nioSocketConnector.setDefaultRemoteAddress(defaultRemoteAddress);
+        nioSocketConnector.setDefaultRemoteAddress(defaultRemoteAddress);
 	}
 	
 	public IoSessionConfig getSessionConfig() {
-		return this.nioSocketConnector.getSessionConfig();
+        return nioSocketConnector.getSessionConfig();
 	}
 	
 	public NioSocketConnector getNioSocketConnector() {
@@ -114,15 +114,15 @@ public class WrapperNioSocketConnector {
 	}
 	
 	public DefaultIoFilterChainBuilder getFilterChain() {
-		return this.nioSocketConnector.getFilterChain();
+        return nioSocketConnector.getFilterChain();
 	}
 	
 	public boolean isDisposed() {
-		return this.nioSocketConnector.isDisposed();
+        return nioSocketConnector.isDisposed();
 	}
 	
 	public boolean isActive() {
-		return this.nioSocketConnector.isActive();
+        return nioSocketConnector.isActive();
 	}
 
 	public IoProcessor<NioSession> getIoProcessor() {

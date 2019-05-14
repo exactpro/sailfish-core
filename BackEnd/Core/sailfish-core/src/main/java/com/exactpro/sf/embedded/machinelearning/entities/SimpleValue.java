@@ -25,9 +25,10 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"id", "type", "value"})
 @Entity
@@ -81,8 +82,8 @@ public class SimpleValue implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", this.id)
-                .append("type", this.type)
-                .append("value", this.value).toString();
+                .append("id", id)
+                .append("type", type)
+                .append("value", value).toString();
     }
 }

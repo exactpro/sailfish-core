@@ -112,13 +112,13 @@ public class FileServiceStorage implements IServiceStorage {
     @Override
     public ServiceInfo lookupService(ServiceName serviceName) {
         try {
-            this.descriptionLock.readLock().lock();
+            descriptionLock.readLock().lock();
 
             if(descriptionMap.containsKey(serviceName)) {
                 return new ServiceInfo(serviceName.toString(), serviceName);
             }
         } finally {
-            this.descriptionLock.readLock().unlock();
+            descriptionLock.readLock().unlock();
         }
 
         return null;
@@ -216,10 +216,10 @@ public class FileServiceStorage implements IServiceStorage {
     @Override
     public List<ServiceDescription> getServiceDescriptions() {
         try {
-            this.descriptionLock.readLock().lock();
+            descriptionLock.readLock().lock();
             return ImmutableList.copyOf(descriptionMap.values());
         } finally {
-            this.descriptionLock.readLock().unlock();
+            descriptionLock.readLock().unlock();
         }
     }
 

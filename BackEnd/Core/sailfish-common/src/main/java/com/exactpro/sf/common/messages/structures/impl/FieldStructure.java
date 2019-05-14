@@ -65,18 +65,8 @@ public class FieldStructure implements IFieldStructure {
 		this.collection = isCollection;
 		this.serviceName = isServiceName;
 		this.defaultValue = StructureUtils.castValueToJavaType(defaultValue, javaType);
-
-		if (attributes != null) {
-			this.attributes = Collections.unmodifiableMap(attributes);
-		} else {
-			this.attributes = Collections.emptyMap();
-		}
-
-		if (values != null) {
-			this.values = Collections.unmodifiableMap(values);
-		} else {
-			this.values = Collections.emptyMap();
-		}
+        this.attributes = attributes != null ? Collections.unmodifiableMap(attributes) : Collections.emptyMap();
+        this.values = values != null ? Collections.unmodifiableMap(values) : Collections.emptyMap();
 
         if(structureType == null && !this.values.isEmpty()) {
             structureType = StructureType.ENUM;
@@ -92,17 +82,17 @@ public class FieldStructure implements IFieldStructure {
 
 	@Override
 	public boolean isComplex() {
-		return StructureType.COMPLEX.equals(this.structureType);
+        return structureType == StructureType.COMPLEX;
 	}
 
 	@Override
 	public boolean isEnum() {
-		return StructureType.ENUM.equals(this.structureType);
+        return structureType == StructureType.ENUM;
 	}
 
 	@Override
 	public boolean isSimple() {
-		return StructureType.SIMPLE.equals(this.structureType);
+        return structureType == StructureType.SIMPLE;
 	}
 
 	@Override
@@ -167,6 +157,6 @@ public class FieldStructure implements IFieldStructure {
 
 	@Override
     public Map<String, IFieldStructure> getFields() {
-        throw new UnsupportedOperationException("Field '" + this.name + "' don't have another fields");
+        throw new UnsupportedOperationException("Field '" + name + "' don't have another fields");
 	}
 }

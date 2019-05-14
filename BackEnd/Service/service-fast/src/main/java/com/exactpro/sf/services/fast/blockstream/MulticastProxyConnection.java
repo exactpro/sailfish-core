@@ -16,19 +16,19 @@
 
 package com.exactpro.sf.services.fast.blockstream;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
+
 import org.openfast.MessageBlockReader;
 import org.openfast.session.Connection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
-
 public class MulticastProxyConnection implements Connection {
-    private final static Logger logger = LoggerFactory.getLogger(DatagramConnection.class);
+    private static final Logger logger = LoggerFactory.getLogger(DatagramConnection.class);
     private final int port;
-    private String host;
+    private final String host;
     private Socket socket;
     private MulticastProxyInputStream inputStream;
 

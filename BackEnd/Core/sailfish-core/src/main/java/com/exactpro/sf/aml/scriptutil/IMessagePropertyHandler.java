@@ -34,7 +34,7 @@ public class IMessagePropertyHandler implements PropertyHandler {
             Object propertyValue = iMessage.getField(propName);
             if(propertyValue instanceof IFilter){
                 try {
-                    propertyValue = ((IFilter) propertyValue).getValue();
+                    return ((IFilter) propertyValue).getValue();
                 } catch(MvelException e) {
                     throw new EPSCommonException("Failed to get value: probably wrong filter type", e);
                 }

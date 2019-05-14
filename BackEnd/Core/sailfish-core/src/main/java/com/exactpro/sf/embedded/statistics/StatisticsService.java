@@ -15,6 +15,7 @@
  *******************************************************************************/
 package com.exactpro.sf.embedded.statistics;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,32 +27,29 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.BiFunction;
 
-import com.exactpro.sf.comparison.ComparisonResult;
-import com.exactpro.sf.comparison.ComparisonUtil;
-import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
-import com.exactpro.sf.embedded.statistics.entities.TagGroup;
-import com.exactpro.sf.embedded.statistics.handlers.StatisticsReportHandlerLoader;
-import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
-import com.exactpro.sf.util.DateTimeUtility;
-
-import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.flywaydb.core.api.MigrationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.embedded.IEmbeddedService;
 import com.exactpro.sf.embedded.configuration.ServiceStatus;
+import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
 import com.exactpro.sf.embedded.statistics.configuration.StatisticsServiceSettings;
 import com.exactpro.sf.embedded.statistics.entities.ActionRun;
 import com.exactpro.sf.embedded.statistics.entities.MatrixRun;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.statistics.entities.TagGroup;
 import com.exactpro.sf.embedded.statistics.entities.TestCase;
 import com.exactpro.sf.embedded.statistics.entities.TestCaseRun;
+import com.exactpro.sf.embedded.statistics.handlers.StatisticsReportHandlerLoader;
+import com.exactpro.sf.embedded.statistics.storage.AggregatedReportRow;
 import com.exactpro.sf.embedded.statistics.storage.IStatisticsStorage;
 import com.exactpro.sf.embedded.statistics.storage.StatisticsReportingStorage;
 import com.exactpro.sf.embedded.statistics.storage.StatisticsStorage;
@@ -60,7 +58,8 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.util.BugDescription;
-import java.time.LocalDateTime;
+import com.exactpro.sf.util.DateTimeUtility;
+import com.google.common.collect.Sets;
 
 public class StatisticsService extends StatisticsReportHandlerLoader implements IEmbeddedService{
 
@@ -89,7 +88,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	private volatile String errorMsg = "";
 
-	private BlockingQueue<ActionRunSaveTask> batchInsertQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<ActionRunSaveTask> batchInsertQueue = new LinkedBlockingQueue<>();
 
 	private IStatisticsStorage storage;
 
@@ -97,7 +96,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	private final StatisticsFlywayWrapper statisticsFlywayWrapper = new StatisticsFlywayWrapper();
 
-	private volatile boolean exceptionEncountered = false;
+    private volatile boolean exceptionEncountered;
 
     private final Map<String, Tag> tagCache = new LinkedHashMap<String, Tag>(CACHE_SIZE, CACHE_LOAD_FACTOR, true) {
         @Override
@@ -112,9 +111,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	private void initStorage(HibernateStorageSettings storageSettings) {
 
-		if(this.storage != null) {
+        if(storage != null) {
 
-			this.storage.tearDown();
+            storage.tearDown();
 
 		}
 
@@ -153,7 +152,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	private void openMatrixRun(MatrixRun matrixRun, long scriptDescriptionId) {
 
-		this.storage.add(matrixRun);
+        storage.add(matrixRun);
         TestScriptDescription testScriptRun = SFLocalContext.getDefault().getScriptRunner().getTestScriptDescription(scriptDescriptionId);
         if (testScriptRun == null) {
             throw new EPSCommonException(String.format("TestScriptDescription with [%s] id is missed", scriptDescriptionId));
@@ -165,7 +164,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 	@Override
 	public boolean isConnected() {
 
-		return this.status.equals(ServiceStatus.Connected);
+        return status == ServiceStatus.Connected;
 
 	}
 
@@ -184,7 +183,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		logger.info("init");
 
-		if(this.status.equals(ServiceStatus.Connected) && settings.isServiceEnabled()) {
+        if(status == ServiceStatus.Connected && settings.isServiceEnabled()) {
 
 			throw new IllegalStateException("Already enabled");
 
@@ -205,18 +204,18 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 				throw t;
 			}
 
-			initStorage(this.settings.getStorageSettings());
+            initStorage(settings.getStorageSettings());
 
-			this.thisSfInstance = this.storage.loadSfInstance(this.settings.getThisSfHost(),
-					this.settings.getThisSfPort(),
-					this.settings.getThisSfName());
+            this.thisSfInstance = storage.loadSfInstance(settings.getThisSfHost(),
+                    settings.getThisSfPort(),
+                    settings.getThisSfName());
 
-			this.unknownTc = this.storage.loadUnknownTestCase();
+            this.unknownTc = storage.loadUnknownTestCase();
 
 			// Insert worker thread
 			this.insertWorker = new BatchInsertWorker();
 
-			Thread workerThread = new Thread(this.insertWorker, "Statistics insert worker");
+            Thread workerThread = new Thread(insertWorker, "Statistics insert worker");
 
 			workerThread.setDaemon(true);
 
@@ -225,7 +224,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 			// Schema checker thread
 			this.schemaChecker = new SchemaVersionChecker();
 
-			Thread checkerThread = new Thread(this.schemaChecker, "Statistics schema checker");
+            Thread checkerThread = new Thread(schemaChecker, "Statistics schema checker");
 
 			checkerThread.setDaemon(true);
 
@@ -247,7 +246,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		}
 
-		logger.info("{}", this.status);
+        logger.info("{}", status);
 
 	}
 
@@ -256,25 +255,25 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		logger.info("tearDown");
 
-		if(this.status.equals(ServiceStatus.Disconnected)) {
+        if(status == ServiceStatus.Disconnected) {
 
 			return;
 
 		}
 
-		this.batchInsertQueue.clear();
+        batchInsertQueue.clear();
 
-		if(this.insertWorker != null) {
+        if(insertWorker != null) {
 
-			this.insertWorker.stop();
+            insertWorker.stop();
 
 			this.insertWorker = null;
 
 		}
 
-		if(this.schemaChecker != null) {
+        if(schemaChecker != null) {
 
-			this.schemaChecker.stop();
+            schemaChecker.stop();
 
 			this.schemaChecker = null;
 
@@ -282,9 +281,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		}
 
-		if(this.storage != null) {
+        if(storage != null) {
 
-			this.storage.tearDown();
+            storage.tearDown();
 
 			this.storage = null;
 
@@ -294,9 +293,9 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		}
 
-		this.runningActions.clear();
-		this.runningMatrices.clear();
-		this.runningTestCases.clear();
+        runningActions.clear();
+        runningMatrices.clear();
+        runningTestCases.clear();
 
 		logger.info("Statistics service disposed");
 
@@ -305,7 +304,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 	public synchronized void  matrixStarted(String matrixName, String reportFolder, long sfRunId, String environmentName, String userName,
                               List<Tag> tags, long scriptDescriptionId) {
 
-		if(!this.status.equals(ServiceStatus.Connected)) {
+        if(status != ServiceStatus.Connected) {
 			return;
 		}
 
@@ -316,10 +315,10 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 			MatrixRun matrixRun = new MatrixRun();
 			matrixRun.setStartTime(DateTimeUtility.nowLocalDateTime());
 			matrixRun.setSfInstance(thisSfInstance);
-			matrixRun.setMatrix(this.storage.loadMatrix(matrixName));
+            matrixRun.setMatrix(storage.loadMatrix(matrixName));
 			matrixRun.setSfRunId(sfRunId);
-			matrixRun.setEnvironment(this.storage.getEnvironmentEntity(environmentName));
-			matrixRun.setUser(this.storage.getUserEntity(userName));
+            matrixRun.setEnvironment(storage.getEnvironmentEntity(environmentName));
+            matrixRun.setUser(storage.getUserEntity(userName));
 			matrixRun.setReportFolder(reportFolder);
             if(tags != null) {
                 matrixRun.setTags(new HashSet<>(tags));
@@ -327,7 +326,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			openMatrixRun(matrixRun, scriptDescriptionId);
 
-			this.runningMatrices.put(matrixName, matrixRun);
+            runningMatrices.put(matrixName, matrixRun);
 
 		} catch(Exception e) {
 
@@ -341,7 +340,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	public void matrixEception(String matrixName, Throwable cause) {
 
-        if(!this.status.equals(ServiceStatus.Connected)) {
+        if(status != ServiceStatus.Connected) {
             return;
         }
 
@@ -349,7 +348,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             logger.debug("Matrix {} init/run exception", matrixName);
 
-            MatrixRun matrixRun = this.runningMatrices.get(matrixName);
+            MatrixRun matrixRun = runningMatrices.get(matrixName);
 
             if(matrixRun == null) {
 
@@ -361,7 +360,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             matrixRun.setFailReason(cause.getMessage());
 
-            this.storage.update(matrixRun);
+            storage.update(matrixRun);
 
         } catch(Throwable t) {
 
@@ -375,7 +374,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	public void matrixFinished(String matrixName) {
 
-		if(!this.status.equals(ServiceStatus.Connected)) {
+        if(status != ServiceStatus.Connected) {
 			return;
 		}
 
@@ -391,7 +390,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			}
 
-			MatrixRun matrixRun = this.runningMatrices.remove(matrixName);
+            MatrixRun matrixRun = runningMatrices.remove(matrixName);
 
 			if(matrixRun == null) {
 
@@ -403,7 +402,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			matrixRun.setFinishTime(DateTimeUtility.nowLocalDateTime());
 
-			this.storage.update(matrixRun);
+            storage.update(matrixRun);
 
 		} catch(Throwable t) {
 
@@ -418,7 +417,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 	public synchronized void testCaseStarted(String matrixName, String tcId, String reportFile, String description, long rank,
                                 int tcHash, Set<String> tags) {
 
-		if(!this.status.equals(ServiceStatus.Connected)) {
+        if(status != ServiceStatus.Connected) {
 			return;
 		}
 
@@ -435,26 +434,17 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
             tcRun.setFinishTime(now);
 			tcRun.setRank(rank);
 			tcRun.setHash(tcHash);
-
-			if(tcId != null) {
-
-				tcRun.setTestCase(this.storage.loadTestCase(tcId));
-
-			} else {
-
-				tcRun.setTestCase(this.unknownTc);
-
-			}
+            tcRun.setTestCase(tcId != null ? storage.loadTestCase(tcId) : unknownTc);
 
             if (tags != null && !tags.isEmpty()) {
                 tcRun.addTags(loadTags(tags), false);
             }
 
-			tcRun.setMatrixRun(this.runningMatrices.get(matrixName));
+            tcRun.setMatrixRun(runningMatrices.get(matrixName));
 
-			this.storage.add(tcRun);
+            storage.add(tcRun);
 
-			this.runningTestCases.put(matrixName, tcRun);
+            runningTestCases.put(matrixName, tcRun);
 
 		} catch(Throwable t) {
 
@@ -468,7 +458,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 	public void testCaseFinished(String matrixName, StatusType status, String failReason, Set<BugDescription> knownBugs) { // status, description
 
-		if(!this.status.equals(ServiceStatus.Connected)) {
+        if(this.status != ServiceStatus.Connected) {
 			return;
 		}
 
@@ -476,7 +466,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			logger.debug("TC finished {}, {}, {}, {}", matrixName, status);
 
-			TestCaseRun tcRun = this.runningTestCases.remove(matrixName);
+            TestCaseRun tcRun = runningTestCases.remove(matrixName);
 
 			if(tcRun == null) {
 
@@ -495,7 +485,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
                 tcRun.setComment(String.format("Known bugs: [%s]", StringUtils.join(knownBugs, ", ")));
             }
 
-			this.storage.update(tcRun);
+            storage.update(tcRun);
 
 		} catch(Throwable t) {
 
@@ -510,7 +500,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
     public void actionStarted(String matrixName, String serviceName, String actionName, String msgType,
                               String description, long rank, String tag, int hash) {
 
-		if(!this.status.equals(ServiceStatus.Connected)) {
+        if(status != ServiceStatus.Connected) {
 			return;
 		}
 
@@ -522,7 +512,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		actionRun.setRank(rank);
 
-		actionRun.setTcRun(this.runningTestCases.get(matrixName));
+        actionRun.setTcRun(runningTestCases.get(matrixName));
 
         actionRun.setTag(tag);
 
@@ -530,18 +520,18 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 		ActionRunSaveTask saveTask = new ActionRunSaveTask(actionRun, serviceName, msgType, actionName);
 
-		this.runningActions.put(matrixName, saveTask);
+        runningActions.put(matrixName, saveTask);
 
 	}
 
 	public void actionFinished(String matrixName, StatusType status, String failReason) {
 
-		if(!this.status.equals(ServiceStatus.Connected)) {
+        if(this.status != ServiceStatus.Connected) {
 			return;
 		}
 
 		try {
-    		ActionRunSaveTask task = this.runningActions.remove(matrixName);
+            ActionRunSaveTask task = runningActions.remove(matrixName);
 
     		if(task == null) {
     			logger.error("Unknown action finished! {}, {}, {}", matrixName, status, failReason);
@@ -553,7 +543,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
     		task.getActionRun().setStatus(status);
     		task.getActionRun().setFailReason(failReason);
 
-			this.batchInsertQueue.put(task);
+            batchInsertQueue.put(task);
 
 		} catch (InterruptedException e) {
 			logger.error("Put interrupted", e);
@@ -570,7 +560,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
             if (!allKnownBugs.isEmpty()) {
                 Set<BugDescription> reproducedBugs = result.getReproducedBugs();
                 Set<BugDescription> noReproducedBugs = Sets.difference(allKnownBugs, reproducedBugs);
-                ActionRunSaveTask actionRunSaveTask = this.runningActions.get(matrixName);
+                ActionRunSaveTask actionRunSaveTask = runningActions.get(matrixName);
                 if (actionRunSaveTask == null) {
                     logger.error("Unknown action create verification! {}, {}", matrixName, result);
                     return;
@@ -609,22 +599,22 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 	}
 
 	public StatisticsReportingStorage getReportingStorage() {
-		return this.storage.getReportingStorage();
+        return storage.getReportingStorage();
 	}
 
 	private class ActionRunSaveTask {
 
-		private ActionRun actionRun;
+        private final ActionRun actionRun;
 
-		private String service;
+        private final String service;
 
-		private String msgType;
+        private final String msgType;
 
-		private String action;
+        private final String action;
 
-		private Set<BugDescription> reproducedKnownBugs = new HashSet<>();
+        private final Set<BugDescription> reproducedKnownBugs = new HashSet<>();
 
-		private Set<BugDescription> noReproducedKnownBugs = new HashSet<>();
+        private final Set<BugDescription> noReproducedKnownBugs = new HashSet<>();
 
 		public ActionRunSaveTask(ActionRun actionRun, String service,
 				String msgType, String action) {
@@ -676,7 +666,7 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
 			logger.info("Statistics InsertWorker started");
 
-			while(this.running) {
+            while(running) {
 
 				try {
 
@@ -837,20 +827,20 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
     }
 
     private void initSailfishTag() {
-        Tag optionalTag = this.storage.getTagByName(OPTIONAL_TAG_NAME);
+        Tag optionalTag = storage.getTagByName(OPTIONAL_TAG_NAME);
         if (optionalTag == null) {
             optionalTag = new Tag();
             optionalTag.setName(OPTIONAL_TAG_NAME);
-            sailfishGroup = this.storage.getGroupByName(INTERNAL_GROUP_NAME);
+            sailfishGroup = storage.getGroupByName(INTERNAL_GROUP_NAME);
             if (sailfishGroup == null) {
                 sailfishGroup = new TagGroup();
                 sailfishGroup.setName(INTERNAL_GROUP_NAME);
-                this.storage.add(sailfishGroup);
+                storage.add(sailfishGroup);
             }
             optionalTag.setGroup(sailfishGroup);
-            this.storage.add(optionalTag);
+            storage.add(optionalTag);
         }
-        this.tagCache.put(OPTIONAL_TAG_NAME, optionalTag);
+        tagCache.put(OPTIONAL_TAG_NAME, optionalTag);
     }
 
     private List<Tag> loadTags(Set<String> tagNames) {

@@ -15,6 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
+
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.codecs.CodecFactory;
 import com.exactpro.sf.common.messages.IMessage;
@@ -28,25 +38,16 @@ import com.exactpro.sf.services.codecs.HackedProtocolCodecFilter;
 import com.exactpro.sf.services.mina.AbstractMINATCPService;
 import com.exactpro.sf.services.mina.MINASession;
 import com.exactpro.sf.services.util.ServiceUtil;
-import org.apache.mina.core.filterchain.DefaultIoFilterChainBuilder;
-import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoSession;
-
-import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient {
-	private volatile boolean disconnecting = false;
-	private volatile boolean connectingFromMatrix = false;
+    private volatile boolean disconnecting;
+    private volatile boolean connectingFromMatrix;
 
 	private volatile boolean reconecting;
 	private volatile boolean disposeWhenSessionClosed;
 
-	private Runnable reconectCommand;
-    private Runnable sentHeartbeatCommand;
+    private final Runnable reconectCommand;
+    private final Runnable sentHeartbeatCommand;
 
     private int reconnectiongTimeout;
     private ITCHCodecSettings codecSettings;
@@ -220,11 +221,11 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 			}
 
 			if ( reconecting ) {
-                this.taskExecutor.schedule(reconectCommand, reconnectiongTimeout, TimeUnit.MILLISECONDS);
-                this.changeStatus(ServiceStatus.WARNING, "Connection was forcibly closed by the remote machine."
+                taskExecutor.schedule(reconectCommand, reconnectiongTimeout, TimeUnit.MILLISECONDS);
+                changeStatus(ServiceStatus.WARNING, "Connection was forcibly closed by the remote machine."
                         + "Service will be reconnect after " + reconnectiongTimeout + " milliseconds");
             } else {
-                this.changeStatus(ServiceStatus.ERROR, "Connection was forcibly closed by the remote machine");
+                changeStatus(ServiceStatus.ERROR, "Connection was forcibly closed by the remote machine");
 			}
 		} else {
 			if (connectingFromMatrix) {
@@ -240,9 +241,9 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 	}
 
 	protected void sendLiteLogin() throws InterruptedException {
-        ITCHTCPClientSettings settings = this.getSettings();
+        ITCHTCPClientSettings settings = getSettings();
 
-        IMessage liteLogin = this.messageFactory.createMessage("LoginRequestLite", this.namespace);
+        IMessage liteLogin = messageFactory.createMessage("LoginRequestLite", namespace);
 
 		liteLogin.addField("Username", settings.getUsername());
 		liteLogin.addField("Flag1", settings.getFlag1());
@@ -251,9 +252,9 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 	}
 
 	protected void sendLogin() throws InterruptedException {
-        ITCHTCPClientSettings settings = this.getSettings();
+        ITCHTCPClientSettings settings = getSettings();
 
-        IMessage liteLogin = this.messageFactory.createMessage("LoginRequest", this.namespace);
+        IMessage liteLogin = messageFactory.createMessage("LoginRequest", namespace);
 
 		liteLogin.addField("Username", settings.getUsername());
 
@@ -267,8 +268,8 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
             throw new ServiceException("Could not send a heartbeat. Client is not connected");
         }
 
-        logger.info("Client sent UnitHeader with namespace {}", this.namespace);
-        IMessage unitHeader = this.messageFactory.createMessage("UnitHeader", this.namespace);
+        logger.info("Client sent UnitHeader with namespace {}", namespace);
+        IMessage unitHeader = messageFactory.createMessage("UnitHeader", namespace);
 
 		unitHeader.addField("Length", 8);
 		unitHeader.addField("MessageCount",(short) 0);
@@ -281,7 +282,7 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 	@Override
 	protected void postConnect() throws Exception {
 	    super.postConnect();
-        ITCHTCPClientSettings settings = this.getSettings();
+        ITCHTCPClientSettings settings = getSettings();
 
 		if(settings.isDoLiteLoginOnStart()) {
 			sendLiteLogin();
@@ -297,7 +298,7 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
         super.sessionIdle(session, status);
 
         if(getSettings().isSendHeartBeats()) {
-            this.taskExecutor.schedule(sentHeartbeatCommand, 0, TimeUnit.MILLISECONDS);
+            taskExecutor.schedule(sentHeartbeatCommand, 0, TimeUnit.MILLISECONDS);
 		}
 	}
 

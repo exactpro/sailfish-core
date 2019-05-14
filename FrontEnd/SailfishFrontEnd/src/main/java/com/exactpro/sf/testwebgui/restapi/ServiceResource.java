@@ -37,6 +37,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -131,15 +132,15 @@ public class ServiceResource {
 					xmlServiceStatus.setStatus(servStatus.toString());
 
 					return Response.
-			                status(Response.Status.OK).
+                            status(Status.OK).
 			                entity(xmlServiceStatus).
 			                build();
-                } else if (actionName.equals("start")) {
+                } else if("start".equals(actionName)) {
                     TestToolsAPI.getInstance().startService(environment, serviceName, true, new ServiceNotifyListener());
-					return Response.noContent().status(Response.Status.OK).build();
-                } else if (actionName.equals("stop")) {
+                    return Response.noContent().status(Status.OK).build();
+                } else if("stop".equals(actionName)) {
                     TestToolsAPI.getInstance().stopService(environment, serviceName, true, new ServiceNotifyListener());
-					return Response.noContent().status(Response.Status.OK).build();
+                    return Response.noContent().status(Status.OK).build();
 				} else {
 				    return createResponse("unknown action");
 				}
@@ -168,14 +169,14 @@ public class ServiceResource {
                 XmlResponse xmlResponse = new XmlResponse();
                 xmlResponse.setMessage("Service  " + service + "in environment " + environment + " was successfully removed");
                 xmlResponse.setRootCause("");
-                return Response.status(Response.Status.OK).entity(xmlResponse).build();
+                return Response.status(Status.OK).entity(xmlResponse).build();
             } else {
                 TestToolsAPI.getInstance().removeServices(environment, null);
                 XmlResponse xmlResponse = new XmlResponse();
                 xmlResponse.setMessage("All services in environment " + environment + " was successfully removed");
                 xmlResponse.setRootCause("");
                 return Response.
-                        status(Response.Status.OK).
+                        status(Status.OK).
                         entity(xmlResponse).
                         build();
             }
@@ -305,7 +306,7 @@ public class ServiceResource {
 
             Map<String, Map<?, ?>> response = new HashMap<>();
 
-            targetServices.forEach(serviceName -> {
+            for(ServiceName serviceName : targetServices) {
                 List<String> errors = new ArrayList<>();
                 List<String> infos = new ArrayList<>();
                 Map<String, List<String>> wrapper = new HashMap<>();
@@ -326,9 +327,9 @@ public class ServiceResource {
 
                 try {
                     action.accept(serviceName, listener);
-                } catch (Exception e) {
+                } catch(Exception e) {
                     logger.error(e.getMessage(), e);
-                    if (ExceptionUtils.indexOfThrowable(e, ServiceException.class) == -1) {
+                    if(ExceptionUtils.indexOfThrowable(e, ServiceException.class) == -1) {
                         throw e;
                     }
                 } finally {
@@ -336,7 +337,7 @@ public class ServiceResource {
                 }
 
                 response.put(serviceName.getServiceName(), wrapper);
-            });
+            }
 
             return Response.ok(response).build();
         } catch (Exception e) {
@@ -352,7 +353,7 @@ public class ServiceResource {
         xmlResponse.setRootCause(rootCause);
 
         return Response.
-                status(Response.Status.BAD_REQUEST).
+                status(Status.BAD_REQUEST).
                 entity(xmlResponse).
                 build();
 	}

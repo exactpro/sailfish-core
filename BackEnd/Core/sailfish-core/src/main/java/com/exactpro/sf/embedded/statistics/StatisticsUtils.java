@@ -24,17 +24,28 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.embedded.statistics.entities.Tag;
+import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
+import com.exactpro.sf.embedded.statistics.storage.IStatisticsStorage;
+import com.exactpro.sf.embedded.statistics.storage.StatisticsReportingStorage;
+import com.google.common.collect.Iterables;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -63,9 +74,36 @@ public class StatisticsUtils {
             () -> new SimpleDateFormat("ddMMyyyy-HH:mm:ss"));
 
     private static final String KNOWN_BUGS_COLUMN = "Known Bugs";
-    public static final String[] availableScriptRunHistoryColumns = { "id", "Name", "Description", "Status",
-            "Failure Reason", "Failed Actions", "Start Time", "Finish Time", "Execution Time", "User Name", "SF",
-            "Environment", "Services Used", "User Status", "Comment", "Fix Revision", KNOWN_BUGS_COLUMN, "Hash", "Tagged Actions" };
+    private static final String ID_COLUMN = "id";
+    private static final String NAME_COLUMN = "Name";
+    private static final String DESCRIPTION_COLUMN = "Description";
+    private static final String STATUS_COLUMN = "Status";
+    private static final String FAILURE_REASON_COLUMN = "Failure Reason";
+    private static final String FAILED_ACTIONS_COLUMN = "Failed Actions";
+    private static final String START_TIME_COLUMN = "Start Time";
+    private static final String FINISH_TIME_COLUMN = "Finish Time";
+    private static final String EXECUTION_TIME_COLUMN = "Execution Time";
+    private static final String USER_NAME_COLUMN = "User Name";
+    private static final String SF_COLUMN = "SF";
+    private static final String ENVIRONMENT_COLUMN = "Environment";
+    private static final String SERVICES_USED_COLUMN = "Services Used";
+    private static final String USER_STATUS_COLUMN = "User Status";
+    private static final String COMMENT_COLUMN = "Comment";
+    private static final String FIX_REVISION_COLUMN = "Fix Revision";
+    private static final String HASH_COLUMN = "Hash";
+    private static final String TAGGED_ACTIONS_COLUMN = "Tagged Actions";
+    public static final String[] AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS = { ID_COLUMN, NAME_COLUMN, DESCRIPTION_COLUMN,
+            STATUS_COLUMN, FAILURE_REASON_COLUMN, FAILED_ACTIONS_COLUMN, START_TIME_COLUMN, FINISH_TIME_COLUMN,
+            EXECUTION_TIME_COLUMN, USER_NAME_COLUMN, SF_COLUMN, ENVIRONMENT_COLUMN, SERVICES_USED_COLUMN,
+            USER_STATUS_COLUMN, COMMENT_COLUMN, FIX_REVISION_COLUMN, KNOWN_BUGS_COLUMN, HASH_COLUMN,
+            TAGGED_ACTIONS_COLUMN };
+    public static final String[] DEFAULT_SCRIPT_RUN_HISTORY_COLUMNS = { ID_COLUMN, NAME_COLUMN, DESCRIPTION_COLUMN,
+            STATUS_COLUMN, FAILURE_REASON_COLUMN, START_TIME_COLUMN, FINISH_TIME_COLUMN,
+            EXECUTION_TIME_COLUMN, USER_NAME_COLUMN, SF_COLUMN, SERVICES_USED_COLUMN,
+            COMMENT_COLUMN, KNOWN_BUGS_COLUMN };
+
+    // average number of test cases per matrix is 100 so we decided to choose this limit for loading matrices
+    private static final int LOADING_MATRIX_LIMIT = 100;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final ObjectWriter LIST_JSON_WRITER = OBJECT_MAPPER.writer();
@@ -117,16 +155,11 @@ public class StatisticsUtils {
                                                                            List<TagGroupDimension> dimensions,
                                                                            TagGroupReportParameters params) {
         setDimensionParameters(dimensions, params);
-        List<TagGroupReportResult> results = new ArrayList<>();
-        for(int i =0; i < dimensions.size(); i++) {
-            params.setLoadForLevel(i);
-            results.add(statisticsService.getReportingStorage().generateTagGroupReport(params));
-        }
-        return results;
+        return statisticsService.getReportingStorage().generateTagGroupReport(params, dimensions);
     }
 
     public static void writeTagGroupReportToCsv(OutputStream outputStream, List<TagGroupReportResult> results) throws IOException {
-        String[] header = new String[] {
+        String[] header = {
                 "Tag",
                 "Total Execution Time",
                 "Total Test Cases",
@@ -150,6 +183,31 @@ public class StatisticsUtils {
                 writer.close();
             }
         }
+    }
+
+    public static void generateAggregatedReport(StatisticsService statisticsService,
+                                                AggregateReportParameters params,
+                                                IStatisticsReportHandler statisticsReportHandler) {
+        statisticsReportHandler.reset();
+        StatisticsReportingStorage reportingStorage = statisticsService.getReportingStorage();
+        SortedMap<Long, List<Long>> matrixToTestCaseIds = reportingStorage.getMatrixRunAndTestCaseRunIDs(params);
+        if (!matrixToTestCaseIds.isEmpty()) {
+            Iterator<List<Long>> matrixIdPartsIterator =
+                    Iterables.partition(matrixToTestCaseIds.keySet(), LOADING_MATRIX_LIMIT).iterator();
+            Iterator<List<List<Long>>> testCaseIdPartsIterator =
+                    Iterables.partition(matrixToTestCaseIds.values(), LOADING_MATRIX_LIMIT).iterator();
+            while (matrixIdPartsIterator.hasNext() && testCaseIdPartsIterator.hasNext()) {
+                List<Long> batchMatrixIds = matrixIdPartsIterator.next();
+                List<Long> batchTestCaseIds = testCaseIdPartsIterator.next()
+                        .stream()
+                        .flatMap(List::stream)
+                        .collect(Collectors.toList());
+                params.setMatrixRunIds(batchMatrixIds);
+                params.setTestCaseRunIds(batchTestCaseIds);
+                statisticsReportHandler.handleMatrixRunTestCases(reportingStorage.generateAggregatedReport(params), reportingStorage);
+            }
+        }
+        statisticsReportHandler.finalize(reportingStorage);
     }
 
     public static String createStatsPerTagsName() {
@@ -273,7 +331,7 @@ public class StatisticsUtils {
                 AggregateReportParameters parameters = new AggregateReportParameters();
                 parameters.setTestCaseRunIds(new ArrayList<>(testCasesToLoad.keySet()));
                 Map<Long, List<KnownBugRow>> testCasesKnownBugs = context.getStatisticsService().getReportingStorage().generateTestCasesKnownBugsReports(parameters);
-                for (Map.Entry<Long, List<KnownBugRow>> entry : testCasesKnownBugs.entrySet()) {
+                for(Entry<Long, List<KnownBugRow>> entry : testCasesKnownBugs.entrySet()) {
                     AggregatedReportRow row = testCasesToLoad.get(entry.getKey());
                     row.setCategorisedKnownBugs(groupKnownBugsByCategory(entry.getValue()));
                 }
@@ -319,7 +377,7 @@ public class StatisticsUtils {
                 columns.add(index + 1, "Passed");
             }
 
-            String header[] = columns.toArray(new String[columns.size()]);
+            String[] header = columns.toArray(new String[columns.size()]);
 
             writeRowsToCsv(writer, header, taggedActions, rowsToWrite, exportWithTCsInfo, exportWithActionsInfo, info);
 
@@ -418,17 +476,10 @@ public class StatisticsUtils {
                         } else {
                             String tag = headers[i].split("\\s", 3)[0];
                             List<ActionInfoRow> infoRows = taggedActions.get(row.getTestCaseRunId());
-
-                            if (infoRows != null) {
-                                toWrite = getActionDescriptionsByTag(infoRows, tag);
-                            } else {
-                                toWrite = "";
-                            }
+                            toWrite = infoRows != null ? getActionDescriptionsByTag(infoRows, tag) : "";
                         }
-                    } else if (headers[i].equals("Message Type")) {
-                        toWrite = "";
                     } else {
-                        toWrite = row.get(headers[i], "");
+                        toWrite = "Message Type".equals(headers[i]) ? "" : row.get(headers[i], "");
                     }
                 }
 
@@ -440,7 +491,7 @@ public class StatisticsUtils {
 
         boolean totalPrinted = false;
 
-        if (!headers[0].equals("Execution Time")) {
+        if(!"Execution Time".equals(headers[0])) {
             headers[0] = "TOTAL";
             totalPrinted = true;
         }
@@ -485,17 +536,9 @@ public class StatisticsUtils {
                     || (entry.getNonReproducedBugs().isEmpty() && !reproduced)) {
                 continue;
             }
-            if (StringUtils.isBlank(entry.getCategoryString())) {
-                cellText.append("No category");
-            } else {
-                cellText.append(entry.getCategoryString());
-            }
+            cellText.append(StringUtils.defaultIfBlank(entry.getCategoryString(), "No category"));
             cellText.append(categoryDelimiter);
-            if (reproduced) {
-                cellText.append(entry.getReproducedBugsString());
-            } else {
-                cellText.append(entry.getNonReproducedBugsString());
-            }
+            cellText.append(reproduced ? entry.getReproducedBugsString() : entry.getNonReproducedBugsString());
             cellText.append("\n");
         }
         return cellText.toString().trim();
@@ -520,12 +563,9 @@ public class StatisticsUtils {
 
         if (row.getMatrixFailReason() != null || row.getFailedCount() > 0) {
             return StatusType.FAILED.name();
-        } else if (row.getConditionallyPassedCount() > 0) {
-            return StatusType.CONDITIONALLY_PASSED.name();
-        } else {
-            return StatusType.PASSED.name();
         }
 
+        return row.getConditionallyPassedCount() > 0 ? StatusType.CONDITIONALLY_PASSED.name() : StatusType.PASSED.name();
     }
 
     private static String getActionDescriptionsByTag(List<ActionInfoRow> infoRows, String tag) {
@@ -608,6 +648,37 @@ public class StatisticsUtils {
                 matrixRunId = row.getMatrixRunId();
                 i++;
             }
+        }
+    }
+
+    public static void loadSfInstanceIdsFromDb(IStatisticsStorage statisticsStorage,
+                                               AggregateReportParameters parameters) {
+        if (CollectionUtils.isNotEmpty(parameters.getSfInstances())) {
+            for (SfInstance instance : parameters.getSfInstances()) {
+                SfInstance sfInstanceFromDb =
+                        statisticsStorage.getSfInstance(instance.getHost(), String.valueOf(instance.getPort()), instance.getName());
+                if (sfInstanceFromDb == null) {
+                    String message = String.format("Not registered SF Instance [host:%s, port:%s, name:%s] " +
+                            "in the stat db", instance.getHost(), instance.getPort(), instance.getName());
+                    throw new IllegalArgumentException(message);
+                }
+                instance.setId(sfInstanceFromDb.getId());
+            }
+
+        }
+    }
+
+    public static void loadTagIdsFromDb(IStatisticsStorage statisticsStorage, AggregateReportParameters parameters) {
+        if (CollectionUtils.isNotEmpty(parameters.getTags())) {
+            for (Tag tag : parameters.getTags()) {
+                Tag tagFromDb = statisticsStorage.getTagByName(tag.getName());
+                if (tagFromDb == null) {
+                    String message = String.format("Not registered Tag [name:%s] in the stat db", tag.getName());
+                    throw new IllegalArgumentException(message);
+                }
+                tag.setId(tagFromDb.getId());
+            }
+
         }
     }
 }

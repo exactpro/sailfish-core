@@ -34,15 +34,15 @@ public enum NTGFieldFormat
 	D ("D"),
     DATE("DATE");
 
-	private String fieldFormat;
+    private final String fieldFormat;
 
-    private NTGFieldFormat(String fieldFormat)
+    NTGFieldFormat(String fieldFormat)
     {
     	this.fieldFormat = fieldFormat;
     }
 
     public String getFieldFormat()
      {
-    	 return this.fieldFormat;
+         return fieldFormat;
      }
 }

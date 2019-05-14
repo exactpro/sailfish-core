@@ -15,24 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
-import com.exactpro.sf.aml.DictionarySettings;
-import com.exactpro.sf.configuration.IDictionaryManager;
-import com.exactpro.sf.configuration.StaticServiceDescription;
-import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
-import com.exactpro.sf.storage.util.ServiceStorageHelper;
-import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-import org.mockito.stubbing.Answer;
-
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -41,10 +23,30 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
+
+import com.exactpro.sf.aml.DictionarySettings;
+import com.exactpro.sf.configuration.IDictionaryManager;
+import com.exactpro.sf.configuration.StaticServiceDescription;
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 
 public class TestDisabledServiceSettings {
-    private File enabledExpectedFile = new File("src/test/resources/services/enabled_expected.xml");
-    private File disabledExpectedFile = new File("src/test/resources/services/disabled_expected.xml");
+    private final File enabledExpectedFile = new File("src/test/resources/services/enabled_expected.xml");
+    private final File disabledExpectedFile = new File("src/test/resources/services/disabled_expected.xml");
 
     private File enabledActualFile;
     private File disabledActualFile;
@@ -80,8 +82,8 @@ public class TestDisabledServiceSettings {
 
     @After
     public void tearDown() throws Exception {
-        this.enabledActualFile.delete();
-        this.disabledActualFile.delete();
+        enabledActualFile.delete();
+        disabledActualFile.delete();
     }
 
     @Test
@@ -92,7 +94,7 @@ public class TestDisabledServiceSettings {
         Map<String, File> stringFileMap = enabledMarshalManager.exportServices(Arrays.asList(enabledDescription));
         Assert.assertEquals(1, stringFileMap.size());
 
-        Map.Entry<String, File> next = stringFileMap.entrySet().iterator().next();
+        Entry<String, File> next = stringFileMap.entrySet().iterator().next();
         File exported = next.getValue();
         Assert.assertTrue(FileUtils.contentEquals(enabledExpectedFile, exported));
         exported.deleteOnExit();
@@ -120,7 +122,7 @@ public class TestDisabledServiceSettings {
         Map<String, File> stringFileMap = disabledMarshalManager.exportServices(Arrays.asList(disabledDescription));
         Assert.assertEquals(1, stringFileMap.size());
 
-        Map.Entry<String, File> next = stringFileMap.entrySet().iterator().next();
+        Entry<String, File> next = stringFileMap.entrySet().iterator().next();
         File exported = next.getValue();
         Assert.assertTrue(FileUtils.contentEquals(disabledExpectedFile, exported));
         exported.deleteOnExit();
@@ -160,7 +162,7 @@ public class TestDisabledServiceSettings {
         Map<String, File> stringFileMap = disabledMarshalManager.exportServices(Arrays.asList(description));
         Assert.assertEquals(1, stringFileMap.size());
 
-        Map.Entry<String, File> next = stringFileMap.entrySet().iterator().next();
+        Entry<String, File> next = stringFileMap.entrySet().iterator().next();
         File exported = next.getValue();
         Assert.assertTrue(FileUtils.contentEquals(disabledExpectedFile, exported));
         exported.deleteOnExit();
@@ -270,7 +272,7 @@ public class TestDisabledServiceSettings {
 
     private class ServiceManagerWithEnabled implements IStaticServiceManager {
         private final List<StaticServiceDescription> descriptions = new ArrayList<>();
-        private final SailfishURI[] serviceURIs = new SailfishURI[]{SailfishURI.unsafeParse("test:enabled_service")};
+        private final SailfishURI[] serviceURIs = { SailfishURI.unsafeParse("test:enabled_service") };
 
         {
             StaticServiceDescription description = new StaticServiceDescription(
@@ -291,10 +293,7 @@ public class TestDisabledServiceSettings {
 
         @Override
         public StaticServiceDescription findStaticServiceDescription(SailfishURI serviceURI) {
-            if (serviceURI.equals(serviceURIs[0])) {
-                return descriptions.get(0);
-            }
-            return null;
+            return serviceURI.equals(serviceURIs[0]) ? descriptions.get(0) : null;
         }
 
         @Override
@@ -304,10 +303,7 @@ public class TestDisabledServiceSettings {
 
         @Override
         public IServiceSettings createServiceSettings(SailfishURI serviceURI) {
-            if (serviceURI.equals(serviceURIs[0])) {
-                return new EnabledSettings();
-            }
-            return null;
+            return serviceURI.equals(serviceURIs[0]) ? new EnabledSettings() : null;
         }
 
         @Override

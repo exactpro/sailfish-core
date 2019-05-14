@@ -32,10 +32,10 @@ public class AdvancedMatrixWriterTest {
 
     // TODO 1.8 fails
 
-    private static List<Map<String, SimpleCell>> rows = new ArrayList<>();
+    private static final List<Map<String, SimpleCell>> rows = new ArrayList<>();
 
-    private String tmpDir = "build" + File.separator + "tmp";
-    private File csv = new File(tmpDir + File.separator + "test.csv");
+    private final String tmpDir = "build" + File.separator + "tmp";
+    private final File csv = new File(tmpDir + File.separator + "test.csv");
 
     static {
         Map<String, SimpleCell> first = new HashMap<>();
@@ -60,7 +60,7 @@ public class AdvancedMatrixWriterTest {
     public void test() throws Exception {
 
         try (AdvancedMatrixWriter writer = new AdvancedMatrixWriter(csv,
-                Arrays.asList(new SimpleCell[] { new SimpleCell("#action"), new SimpleCell("value") }));) {
+                Arrays.asList(new SimpleCell[] { new SimpleCell("#action"), new SimpleCell("value") }))) {
             writer.writeCells(rows.get(0));
 
             // Define header for row with new fields

@@ -19,7 +19,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class ActionParameter {
-    private String id;
+    private final String id;
     private final String name;
     private final String value;
     private final int level;

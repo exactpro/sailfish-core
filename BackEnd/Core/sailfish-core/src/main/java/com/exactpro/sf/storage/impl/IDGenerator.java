@@ -20,7 +20,7 @@ import java.util.UUID;
 public class IDGenerator 
 {
 	public static String createId() {
-		UUID uuid = java.util.UUID.randomUUID();
+		UUID uuid = UUID.randomUUID();
 		return uuid.toString();
 	}
 }

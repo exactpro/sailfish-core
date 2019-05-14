@@ -19,6 +19,6 @@ import org.openfast.Message;
 
 public interface IFastMessageFilter {
 
-	public abstract boolean isMessageAcceptable(Message fastMsg);
+	boolean isMessageAcceptable(Message fastMsg);
 
 }

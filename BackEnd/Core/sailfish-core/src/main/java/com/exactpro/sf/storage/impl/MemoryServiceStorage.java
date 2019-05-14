@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -26,7 +27,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.Instant;
 
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
@@ -62,13 +62,13 @@ public class MemoryServiceStorage implements IServiceStorage {
     @Override
     public ServiceInfo lookupService(ServiceName serviceName) {
         try {
-            this.descriptionLock.readLock().lock();
+            descriptionLock.readLock().lock();
 
-            if(this.descriptionMap.containsKey(serviceName)) {
+            if(descriptionMap.containsKey(serviceName)) {
                 return new ServiceInfo(serviceName.toString(), serviceName);
             }
         } finally {
-            this.descriptionLock.readLock().unlock();
+            descriptionLock.readLock().unlock();
         }
 
         return null;
@@ -78,24 +78,24 @@ public class MemoryServiceStorage implements IServiceStorage {
 	public void addServiceDescription(ServiceDescription description) {
 		ServiceName serviceName = new ServiceName(description.getEnvironment(), description.getName());
 		try {
-			this.descriptionLock.writeLock().lock();
-			if (!this.descriptionMap.containsKey(serviceName)) {
+            descriptionLock.writeLock().lock();
+            if(!descriptionMap.containsKey(serviceName)) {
 				try {
-					this.eventLock.writeLock().lock();
-					if (!this.eventMap.containsKey(serviceName)) {
-						this.descriptionMap.put(serviceName, description);
-						this.eventMap.put(serviceName, new LinkedList<ServiceEvent>());
+                    eventLock.writeLock().lock();
+                    if(!eventMap.containsKey(serviceName)) {
+                        descriptionMap.put(serviceName, description);
+                        eventMap.put(serviceName, new LinkedList<ServiceEvent>());
 					} else {
 						throw new StorageException("Service '" + serviceName + "' with the same name already exists");
 					}
 				} finally {
-					this.eventLock.writeLock().unlock();
+                    eventLock.writeLock().unlock();
 				}
 			} else {
 				throw new StorageException("Service '" + serviceName + "' with the same name already exists");
 			}
 		} finally {
-			this.descriptionLock.writeLock().unlock();
+            descriptionLock.writeLock().unlock();
 		}
 	}
 
@@ -103,16 +103,16 @@ public class MemoryServiceStorage implements IServiceStorage {
 	public void removeServiceDescription(ServiceDescription description) {
 		ServiceName serviceName = new ServiceName(description.getEnvironment(), description.getName());
 		try {
-			this.descriptionLock.writeLock().lock();
+            descriptionLock.writeLock().lock();
 			try {
-				this.eventLock.writeLock().lock();
-				this.descriptionMap.remove(serviceName);
-				this.eventMap.remove(serviceName);
+                eventLock.writeLock().lock();
+                descriptionMap.remove(serviceName);
+                eventMap.remove(serviceName);
 			} finally {
-				this.eventLock.writeLock().unlock();
+                eventLock.writeLock().unlock();
 			}
 		} finally {
-			this.descriptionLock.writeLock().unlock();
+            descriptionLock.writeLock().unlock();
 		}
 	}
 
@@ -120,10 +120,10 @@ public class MemoryServiceStorage implements IServiceStorage {
 	public void updateServiceDescription(ServiceDescription description) {
 		ServiceName serviceName = new ServiceName(description.getEnvironment(), description.getName());
 		try {
-			this.descriptionLock.writeLock().lock();
-			this.descriptionMap.put(serviceName, description);
+            descriptionLock.writeLock().lock();
+            descriptionMap.put(serviceName, description);
 		} finally {
-			this.descriptionLock.writeLock().unlock();
+            descriptionLock.writeLock().unlock();
 		}
 
 	}
@@ -131,11 +131,11 @@ public class MemoryServiceStorage implements IServiceStorage {
 	@Override
 	public List<ServiceDescription> getServiceDescriptions() {
 		try {
-			this.descriptionLock.readLock().lock();
-			List<ServiceDescription> result = new ArrayList<>(this.descriptionMap.values());
+            descriptionLock.readLock().lock();
+            List<ServiceDescription> result = new ArrayList<>(descriptionMap.values());
 			return result;
 		} finally {
-			this.descriptionLock.readLock().unlock();
+            descriptionLock.readLock().unlock();
 		}
 	}
 
@@ -143,10 +143,10 @@ public class MemoryServiceStorage implements IServiceStorage {
 	public void addServiceEvent(ServiceDescription description, ServiceEvent event) {
 		ServiceName serviceName = new ServiceName(description.getEnvironment(), description.getName());
 		try {
-			this.eventLock.writeLock().lock();
-			LinkedList<ServiceEvent> list = this.eventMap.get(serviceName);
+            eventLock.writeLock().lock();
+            LinkedList<ServiceEvent> list = eventMap.get(serviceName);
 			if (list != null) {
-				while (list.size() > this.eventLimit) {
+                while(list.size() > eventLimit) {
 					list.removeLast();
 				}
 				list.addFirst(event);
@@ -154,7 +154,7 @@ public class MemoryServiceStorage implements IServiceStorage {
 				logger.warn("Storage does not contain service {}", serviceName);
 			}
 		} finally {
-			this.eventLock.writeLock().unlock();
+            eventLock.writeLock().unlock();
 		}
 	}
 
@@ -162,11 +162,11 @@ public class MemoryServiceStorage implements IServiceStorage {
 	public long getEventsCount(ServiceDescription description, StorageFilter filter) {
 		ServiceName serviceName = new ServiceName(description.getEnvironment(), description.getName());
 		try {
-			this.eventLock.readLock().lock();
-			List<ServiceEvent> list = this.eventMap.get(serviceName);
+            eventLock.readLock().lock();
+            List<ServiceEvent> list = eventMap.get(serviceName);
 			return list != null ? list.size() : 0;
 		} finally {
-			this.eventLock.readLock().unlock();
+            eventLock.readLock().unlock();
 		}
 	}
 
@@ -180,23 +180,23 @@ public class MemoryServiceStorage implements IServiceStorage {
 	public void removeServiceEvents(ServiceDescription description) {
 		ServiceName serviceName = new ServiceName(description.getEnvironment(), description.getName());
 		try {
-			this.eventLock.writeLock().lock();
-			List<ServiceEvent> list = this.eventMap.get(serviceName);
+            eventLock.writeLock().lock();
+            List<ServiceEvent> list = eventMap.get(serviceName);
 			if (list != null) {
 				list.clear();
 			}
 		} finally {
-			this.eventLock.writeLock().unlock();
+            eventLock.writeLock().unlock();
 		}
 	}
 
 	@Override
     public void removeServiceEvents(Instant olderThan) {
 		try {
-			this.eventLock.writeLock().lock();
+            eventLock.writeLock().lock();
             long epochMillis = olderThan.toEpochMilli();
 
-			for (List<ServiceEvent> list : this.eventMap.values()) {
+            for(List<ServiceEvent> list : eventMap.values()) {
                 if(olderThan == null) {
                     list.clear();
                     continue;
@@ -218,7 +218,7 @@ public class MemoryServiceStorage implements IServiceStorage {
                 list.subList(0, toIndex + 1).clear();
 			}
 		} finally {
-			this.eventLock.writeLock().unlock();
+            eventLock.writeLock().unlock();
 		}
 	}
 
@@ -230,16 +230,16 @@ public class MemoryServiceStorage implements IServiceStorage {
     @Override
 	public void dispose() {
 		try {
-			this.descriptionLock.writeLock().lock();
+            descriptionLock.writeLock().lock();
 			try {
-				this.eventLock.writeLock().lock();
-				this.descriptionMap.clear();
-				this.eventMap.clear();
+                eventLock.writeLock().lock();
+                descriptionMap.clear();
+                eventMap.clear();
 			} finally {
-				this.eventLock.writeLock().unlock();
+                eventLock.writeLock().unlock();
 			}
 		} finally {
-			this.descriptionLock.writeLock().unlock();
+            descriptionLock.writeLock().unlock();
 		}
 	}
 }

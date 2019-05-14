@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.storage;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -24,10 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.impl.HibernateStorage;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class AbstractHibernateStorage implements IHibernateStorage {
 
@@ -76,16 +75,16 @@ public abstract class AbstractHibernateStorage implements IHibernateStorage {
     public void add(Object entity) {
 
         logger.debug("Try to add entity to statistic db:{}", entity);
-        
-        this.storage.add(entity);
+
+        storage.add(entity);
         
     }
     
     public void update(Object entity) {
 
         logger.debug("Try to update entity to statistic db:{}", entity);
-        
-        this.storage.update(entity);
+
+        storage.update(entity);
         
     }
 
@@ -95,7 +94,7 @@ public abstract class AbstractHibernateStorage implements IHibernateStorage {
             logger.debug("Try to batch update entities to statistic db:{}", entities.stream().map(Object::toString)
                     .collect(Collectors.joining(", ")));
         }
-        this.storage.batchUpdate(entities);
+        storage.batchUpdate(entities);
     }
 
     public synchronized void tearDown() {

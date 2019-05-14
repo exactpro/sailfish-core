@@ -22,26 +22,26 @@ import com.exactpro.sf.common.messages.IMessage;
 
 public class IMessageTimestampComparator implements Comparator<IMessage> {
 
-	public final static IMessageTimestampComparator instance = new IMessageTimestampComparator();
+    public static final IMessageTimestampComparator instance = new IMessageTimestampComparator();
 
 	@Override
 	public int compare(IMessage m1, IMessage m2) {
-		if (m1 == null || m2 == null)
-			throw new NullPointerException("Can't compere: IMessage is null");
+        if(m1 == null || m2 == null) {
+            throw new NullPointerException("Can't compere: IMessage is null");
+        }
 
-		if (m1.getMetaData() == null || m2.getMetaData() == null)
-			throw new NullPointerException("Can't compere IMessages: metadata is null");
+        if(m1.getMetaData() == null || m2.getMetaData() == null) {
+            throw new NullPointerException("Can't compere IMessages: metadata is null");
+        }
 
 		Date d1 = m1.getMetaData().getMsgTimestamp();
 		Date d2 = m2.getMetaData().getMsgTimestamp();
 
-		if (d1 == null || d2 == null)
-			throw new NullPointerException("Timestamp is null. Comparing... " + m1.getNamespace() + "@" + m1.getName() + "; " + m2.getNamespace() + "@" + m2.getName());
+        if(d1 == null || d2 == null) {
+            throw new NullPointerException("Timestamp is null. Comparing... " + m1.getNamespace() + "@" + m1.getName() + "; " + m2.getNamespace() + "@" + m2.getName());
+        }
 
-		if (d1.equals(d2))
-			return 0;
-
-		return d1.before(d2) ? -1 : 1;
+        return d1.compareTo(d2);
 	}
 
 }

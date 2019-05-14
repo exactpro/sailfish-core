@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.storage;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +26,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
-import java.time.LocalDateTime;
 
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
@@ -48,33 +49,33 @@ public class AggregatedReportRow extends CommonReportRow {
 
 	public AggregatedReportRow() {
         for (String type : TYPES) {
-            this.fields.put(type, null);
+            fields.put(type, null);
         }
-        this.fields.put("User Comments", new TestCaseRunComments());
-        this.fields.put("SfInstance", new SfInstance());
+        fields.put("User Comments", new TestCaseRunComments());
+        fields.put("SfInstance", new SfInstance());
 	}
 
 	public AggregatedReportRow(Long sfId, String name, String description,
 			int status, String failReason,
-			java.sql.Timestamp startTime, java.sql.Timestamp finishTime, String userName, String host,
+            Timestamp startTime, Timestamp finishTime, String userName, String host,
 			String reportFolder, String reportFile) {
 
-        this.fields.put("id", sfId);
-        this.fields.put("Name", name);
-        this.fields.put("Description", description);
-        this.fields.put("Status", StatusType.getStatusType(status));
-        this.fields.put("Failure Reason", failReason);
+        fields.put("id", sfId);
+        fields.put("Name", name);
+        fields.put("Description", description);
+        fields.put("Status", StatusType.getStatusType(status));
+        fields.put("Failure Reason", failReason);
 		//this.faildActions = faildActions;
-        this.fields.put("Start Time", DateTimeUtility.toLocalDateTime(startTime));
-        this.fields.put("Finish Time", DateTimeUtility.toLocalDateTime(finishTime));
-        this.fields.put("User Name", userName);
+        fields.put("Start Time", DateTimeUtility.toLocalDateTime(startTime));
+        fields.put("Finish Time", DateTimeUtility.toLocalDateTime(finishTime));
+        fields.put("User Name", userName);
         SfInstance sfInstance = new SfInstance();
         sfInstance.setHost(host);
-        this.fields.put("SfInstance", sfInstance);
+        fields.put("SfInstance", sfInstance);
 		//this.servicesUsed = servicesUsed;
 
-        this.fields.put("Report Folder", reportFolder);
-        this.fields.put("Report File", reportFile);
+        fields.put("Report Folder", reportFolder);
+        fields.put("Report File", reportFile);
 
 	}
 
@@ -83,7 +84,7 @@ public class AggregatedReportRow extends CommonReportRow {
         if (!TYPES.contains(key)) {
             throw new RuntimeException("There is no field in AggregatedReportRow: " + key);
         }
-        return ObjectUtils.defaultIfNull((T) this.fields.get(key), defaultValue);
+        return ObjectUtils.defaultIfNull((T)fields.get(key), defaultValue);
     }
 
 	public boolean isUnknownTc() {
@@ -93,7 +94,7 @@ public class AggregatedReportRow extends CommonReportRow {
 	public String getRowKey() {
 
         return Long.toString(getMatrixRunId() != null ? getMatrixRunId() : -1l)
-                + Long.toString(getTestCaseRunId() != null ? getTestCaseRunId() : -1l);
+                + (getTestCaseRunId() != null ? getTestCaseRunId() : -1l);
 
 	}
 
@@ -123,64 +124,64 @@ public class AggregatedReportRow extends CommonReportRow {
 	}
 
 	public void setSfId(long sfId) {
-        this.fields.put("id", sfId);
+        fields.put("id", sfId);
 	}
 
 	public String getDescription() {
-        return (String) this.fields.get("Description");
+        return (String)fields.get("Description");
 	}
 
 	public void setDescription(String description) {
 	    //TODO: Remove escaping after release 3.1, because escaping is executed on save data
-        this.fields.put("Description", StringEscapeUtils.escapeEcmaScript(description));
+        fields.put("Description", StringEscapeUtils.escapeEcmaScript(description));
 	}
 
 	public StatusType getStatus() {
-        return (StatusType) this.fields.get("Status");
+        return (StatusType)fields.get("Status");
 	}
 
 	public void setStatus(StatusType status) {
-        this.fields.put("Status", status);
+        fields.put("Status", status);
 	}
 
 	public String getFailReason() {
-        return (String) this.fields.get("Failure Reason");
+        return (String)fields.get("Failure Reason");
 	}
 
 	public void setFailReason(String failReason) {
-        this.fields.put("Failure Reason", failReason);
+        fields.put("Failure Reason", failReason);
 	}
 
 	public String getMatrixFailReason() {
-        return (String) this.fields.get("Matrix Failure Reason");
+        return (String)fields.get("Matrix Failure Reason");
     }
 
     public void setMatrixFailReason(String matrixFailReason) {
-        this.fields.put("Matrix Failure Reason", matrixFailReason);
+        fields.put("Matrix Failure Reason", matrixFailReason);
     }
 
     public String getFailedActions() {
-        return (String) this.fields.get("Failed Actions");
+        return (String)fields.get("Failed Actions");
 	}
 
 	public void setFailedActions(String faildActions) {
-        this.fields.put("Failed Actions", faildActions);
+        fields.put("Failed Actions", faildActions);
 	}
 
 	public LocalDateTime getStartTime() {
-        return (LocalDateTime) this.fields.get("Start Time");
+        return (LocalDateTime)fields.get("Start Time");
 	}
 
 	public void setStartTime(LocalDateTime startTime) {
-        this.fields.put("Start Time", startTime);
+        fields.put("Start Time", startTime);
 	}
 
 	public LocalDateTime getFinishTime() {
-        return (LocalDateTime) this.fields.get("Finish Time");
+        return (LocalDateTime)fields.get("Finish Time");
 	}
 
 	public void setFinishTime(LocalDateTime finishTime) {
-        this.fields.put("Finish Time", finishTime);
+        fields.put("Finish Time", finishTime);
 	}
 
     public Long getExecutionTime() {
@@ -198,11 +199,11 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
 	public String getUserName() {
-        return (String) this.fields.get("User Name");
+        return (String)fields.get("User Name");
 	}
 
 	public void setUserName(String userName) {
-        this.fields.put("User Name", userName);
+        fields.put("User Name", userName);
 	}
 
 	public String getHost() {
@@ -214,67 +215,67 @@ public class AggregatedReportRow extends CommonReportRow {
 	}
 
 	public String getServicesUsed() {
-        return (String) this.fields.get("Services Used");
+        return (String)fields.get("Services Used");
 	}
 
 	public void setServicesUsed(String servicesUsed) {
-        this.fields.put("Services Used", servicesUsed);
+        fields.put("Services Used", servicesUsed);
 	}
 
 	public String getMatrixName() {
-        return (String) this.fields.get("Matrix Name");
+        return (String)fields.get("Matrix Name");
 	}
 
 	public void setMatrixName(String matrixName) {
-        this.fields.put("Matrix Name", matrixName);
+        fields.put("Matrix Name", matrixName);
 	}
 
 	public String getTestCaseName() {
-        return (String) this.fields.get("Test Case Name");
+        return (String)fields.get("Test Case Name");
 	}
 
 	public void setTestCaseName(String testCaseName) {
-        this.fields.put("Test Case Name", testCaseName);
+        fields.put("Test Case Name", testCaseName);
 	}
 
     public Long getTestCaseNumber() {
-        return (Long)this.fields.get("Test Case Number");
+        return (Long)fields.get("Test Case Number");
     }
 
     public void setTestCaseNumber(Long testCaseNumber) {
-        this.fields.put("Test Case Number", testCaseNumber);
+        fields.put("Test Case Number", testCaseNumber);
     }
 
 	public LocalDateTime getMatrixStartTime() {
-        return (LocalDateTime) this.fields.get("Matrix Start Time");
+        return (LocalDateTime)fields.get("Matrix Start Time");
 	}
 
 	public void setMatrixStartTime(LocalDateTime matrixStartTime) {
-        this.fields.put("Matrix Start Time", matrixStartTime);
+        fields.put("Matrix Start Time", matrixStartTime);
 	}
 
 	public LocalDateTime getMatrixFinishTime() {
-        return (LocalDateTime) this.fields.get("Matrix Finish Time");
+        return (LocalDateTime)fields.get("Matrix Finish Time");
 	}
 
 	public void setMatrixFinishTime(LocalDateTime matrixFinishTime) {
-        this.fields.put("Matrix Finish Time", matrixFinishTime);
+        fields.put("Matrix Finish Time", matrixFinishTime);
 	}
 
 	public Long getTestCaseRunId() {
-        return (Long) this.fields.get("Test Case Run Id");
+        return (Long)fields.get("Test Case Run Id");
 	}
 
 	public void setTestCaseRunId(Long testCaseRunId) {
-        this.fields.put("Test Case Run Id", testCaseRunId);
+        fields.put("Test Case Run Id", testCaseRunId);
 	}
 
 	public String getEnvironmentName() {
-        return (String) this.fields.get("Environment");
+        return (String)fields.get("Environment");
 	}
 
 	public void setEnvironmentName(String environmentName) {
-        this.fields.put("Environment", environmentName);
+        fields.put("Environment", environmentName);
 	}
 
 	public boolean isMatrixRow() {
@@ -282,7 +283,7 @@ public class AggregatedReportRow extends CommonReportRow {
 	}
 
 	public void setMatrixRow(boolean matrixRow) {
-        this.fields.put("Matrix Row", matrixRow);
+        fields.put("Matrix Row", matrixRow);
 	}
 
 	public int getPort() {
@@ -302,60 +303,60 @@ public class AggregatedReportRow extends CommonReportRow {
 	}
 
 	public Long getMatrixRunId() {
-        return (Long) this.fields.get("Matrix Run Id");
+        return (Long)fields.get("Matrix Run Id");
 	}
 
 	public void setMatrixRunId(Long matrixRunId) {
-        this.fields.put("Matrix Run Id", matrixRunId);
+        fields.put("Matrix Run Id", matrixRunId);
 	}
 
 	public String getTestCaseId() {
-        return (String) this.fields.get("Test Case Id");
+        return (String)fields.get("Test Case Id");
 	}
 
 	public void setTestCaseId(String testCaseId) {
-        this.fields.put("Test Case Id", testCaseId);
+        fields.put("Test Case Id", testCaseId);
 	}
 
     @SuppressWarnings("unchecked")
     public List<Tag> getTags() {
-        return (List<Tag>) this.fields.get("Tags");
+        return (List<Tag>)fields.get("Tags");
 	}
 
     public String getTagsString() {
         List<Tag> tags = getTags();
-        if (tags != null && !tags.isEmpty()) {
+        if(tags != null && !tags.isEmpty()) {
             return tags.stream().map(Tag::getName).collect(Collectors.joining(","));
         }
         return "";
     }
 
 	public void setTags(List<Tag> tags) {
-        this.fields.put("Tags", tags);
+        fields.put("Tags", tags);
 	}
 
 	public String getReportFolder() {
-        return (String) this.fields.get("Report Folder");
+        return (String)fields.get("Report Folder");
 	}
 
 	public void setReportFolder(String reportFolder) {
-        this.fields.put("Report Folder", reportFolder);
+        fields.put("Report Folder", reportFolder);
 	}
 
 	public String getReportFile() {
-        return (String) this.fields.get("Report File");
+        return (String)fields.get("Report File");
 	}
 
 	public void setReportFile(String reportFile) {
-        this.fields.put("Report File", reportFile);
+        fields.put("Report File", reportFile);
 	}
 
 	public TestCaseRunComments getUserComments() {
-        return (TestCaseRunComments) this.fields.get("User Comments");
+        return (TestCaseRunComments)fields.get("User Comments");
 	}
 
 	public void setUserComments(TestCaseRunComments userComments) {
-        this.fields.put("User Comments", userComments);
+        fields.put("User Comments", userComments);
 	}
 
 	public long getPassedCount() {
@@ -363,7 +364,7 @@ public class AggregatedReportRow extends CommonReportRow {
 	}
 
 	public void setPassedCount(long passedCount) {
-        this.fields.put("Passed", passedCount);
+        fields.put("Passed", passedCount);
 	}
 
 	public long getFailedCount() {
@@ -371,7 +372,7 @@ public class AggregatedReportRow extends CommonReportRow {
 	}
 
 	public void setFailedCount(long failedCount) {
-        this.fields.put("Failed", failedCount);
+        fields.put("Failed", failedCount);
 	}
 
 	public long getConditionallyPassedCount() {
@@ -379,7 +380,7 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public void setConditionallyPassedCount(long conditionallyPassedCount) {
-        this.fields.put("CondPassed", conditionallyPassedCount);
+        fields.put("CondPassed", conditionallyPassedCount);
     }
 
     public int getHash() {
@@ -387,7 +388,7 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public void setHash(int hash) {
-        this.fields.put("Hash", hash);
+        fields.put("Hash", hash);
     }
 
     public String getTaggedActions() {
@@ -399,20 +400,20 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public String getMessageType() {
-        return (String) this.fields.get("Message Type");
+        return (String)fields.get("Message Type");
     }
 
     public void setMessageType(String messageType) {
-        this.fields.put("Message Type", messageType);
+        fields.put("Message Type", messageType);
     }
 
     //TODO merge ActionName, TestCaseName, MatrixName >> Name
     public String getActionName() {
-        return (String) this.fields.get("Action Name");
+        return (String)fields.get("Action Name");
     }
 
     public void setActionName(String matrixName) {
-        this.fields.put("Action Name", matrixName);
+        fields.put("Action Name", matrixName);
     }
 
     public boolean isActionRow() {
@@ -420,23 +421,23 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public void setActionRow(boolean matrixRow) {
-        this.fields.put("Action Row", matrixRow);
+        fields.put("Action Row", matrixRow);
     }
 
     public SfInstance getSfCurrentInstance() {
-        return (SfInstance) this.fields.get("sfCurrentInstance");
+        return (SfInstance)fields.get("sfCurrentInstance");
     }
 
     public void setSfCurrentInstance(SfInstance sfCurrent) {
-        this.fields.put("sfCurrentInstance", sfCurrent);
+        fields.put("sfCurrentInstance", sfCurrent);
     }
 
     public SfInstance getSfInstance() {
-        return (SfInstance) this.fields.get("SfInstance");
+        return (SfInstance)fields.get("SfInstance");
     }
 
     public void setSfInstance(SfInstance instance) {
-        this.fields.put("SfInstance", instance);
+        fields.put("SfInstance", instance);
     }
 
     public long getReproducedKnownBugsCount() {
@@ -444,7 +445,7 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public void setReproducedKnownBugsCount(long count) {
-        this.fields.put("Reproduced Known Bugs Count", count);
+        fields.put("Reproduced Known Bugs Count", count);
     }
 
     public long getNonReproducedKnownBugsCount() {
@@ -452,7 +453,7 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public void setNonReproducedKnownBugsCount(long count) {
-        this.fields.put("Non-reproduced Known Bugs Count", count);
+        fields.put("Non-reproduced Known Bugs Count", count);
     }
 
     public List<KnownBugCategoryRow> getCategorisedKnownBugs() {
@@ -460,7 +461,7 @@ public class AggregatedReportRow extends CommonReportRow {
     }
 
     public void setCategorisedKnownBugs(List<KnownBugCategoryRow> categorisedKnownBugs) {
-        this.fields.put("Known Bugs", categorisedKnownBugs);
+        fields.put("Known Bugs", categorisedKnownBugs);
     }
 
     public List<AggregatedReportRow> getTestCaseRows() {

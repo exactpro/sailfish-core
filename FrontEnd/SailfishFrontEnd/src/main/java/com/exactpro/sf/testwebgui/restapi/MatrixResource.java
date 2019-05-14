@@ -36,6 +36,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang3.StringUtils;
@@ -139,7 +140,7 @@ public class MatrixResource {
             XmlResponse response = new XmlResponse();
             response.setMessage("Can not retrive matrix list");
             response.setRootCause(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            return Response.status(Status.BAD_REQUEST).entity(response).build();
         }
     }
 
@@ -167,7 +168,7 @@ public class MatrixResource {
 
 			reqResponse = Response.ok(matrixUploadResponse).build();
 		} catch (Throwable e) {
-			logger.error("Could not store matrice [{}]", ((fileDetail != null) ? fileDetail.getFileName() : "null") , e);
+            logger.error("Could not store matrice [{}]", (fileDetail != null) ? fileDetail.getFileName() : "null", e);
 			errorMessage = e.getMessage();
 			rootCause = ExceptionUtils.getRootCauseMessage(e);
 		}
@@ -179,8 +180,8 @@ public class MatrixResource {
 			xmlResponse.setMessage(errorMessage);
 			xmlResponse.setRootCause(rootCause);
 
-			reqResponse = Response.status(Response.Status.BAD_REQUEST)
-					.entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST)
+                    .entity(xmlResponse).build();
 		}
 
 		return reqResponse;
@@ -203,7 +204,7 @@ public class MatrixResource {
             XmlResponse xmlResponse = new XmlResponse();
             xmlResponse.setMessage("Parameter 'link' cannot be empty");
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
         }
 
         try {
@@ -229,7 +230,7 @@ public class MatrixResource {
             xmlResponse.setMessage(errorMessage);
             xmlResponse.setRootCause(rootCause);
 
-            reqResponse = Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
         }
 
         return reqResponse;
@@ -245,7 +246,7 @@ public class MatrixResource {
 	        XmlResponse xmlResponse = new XmlResponse();
 	        xmlResponse.setMessage("Parameter 'matrix_id' cannot be empty");
 
-	        return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Status.BAD_REQUEST)
                     .entity(xmlResponse).build();
 	    }
 
@@ -253,7 +254,7 @@ public class MatrixResource {
             XmlResponse xmlResponse = new XmlResponse();
             xmlResponse.setMessage("Parameter 'converter_uri' cannot be empty");
 
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Status.BAD_REQUEST)
                     .entity(xmlResponse).build();
         }
 
@@ -272,7 +273,7 @@ public class MatrixResource {
             xmlResponse.setMessage(e.getMessage());
 			xmlResponse.setRootCause((e.getCause() != null) ? e.getCause().getMessage() : null);
 
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Status.BAD_REQUEST)
                     .entity(xmlResponse).build();
 
 		}
@@ -286,32 +287,29 @@ public class MatrixResource {
 		String errorMessage = null;
 		String rootCause = null;
 
-		Response reqResponse = null;
-
-		try {
+        try {
 			IMatrixStorage matrixStorage = SFLocalContext.getDefault().getMatrixStorage();
 			IMatrix matrix = matrixStorage.getMatrixById(id);
-			final File file = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.MATRIX, matrix.getFilePath());
+            File file = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.MATRIX, matrix.getFilePath());
 
 			if (file.exists()) {
-				StreamingOutput stream;
 
-				stream = new StreamingOutput() {
-					@Override
-					public void write(OutputStream out) throws IOException, WebApplicationException {
-						try (InputStream in = new FileInputStream(file)) {
-							int read;
-							byte[] bytes = new byte[1024];
+                StreamingOutput stream = new StreamingOutput() {
+                    @Override
+                    public void write(OutputStream out) throws IOException, WebApplicationException {
+                        try(InputStream in = new FileInputStream(file)) {
+                            int read;
+                            byte[] bytes = new byte[1024];
 
-							while ((read = in.read(bytes)) != -1) {
-								out.write(bytes, 0, read);
-							}
-						} catch (Exception e) {
-						    logger.error(e.getMessage(), e);
-							throw new WebApplicationException(e);
-						}
-					}
-				};
+                            while((read = in.read(bytes)) != -1) {
+                                out.write(bytes, 0, read);
+                            }
+                        } catch(Exception e) {
+                            logger.error(e.getMessage(), e);
+                            throw new WebApplicationException(e);
+                        }
+                    }
+                };
 
 				return Response
 						.ok(stream)
@@ -332,11 +330,11 @@ public class MatrixResource {
 			xmlResponse.setMessage(errorMessage);
 			xmlResponse.setRootCause(rootCause);
 
-			reqResponse = Response.status(Response.Status.BAD_REQUEST)
-					.entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST)
+                    .entity(xmlResponse).build();
 		}
 
-		return reqResponse;
+        return null;
  	}
 
     @GET
@@ -364,7 +362,7 @@ public class MatrixResource {
                         .collect(Collectors.toList())));
             }
 
-            return Response.status(Response.Status.OK)
+            return Response.status(Status.OK)
                     .entity(runReference)
                     .build();
         } catch (RuntimeException e) {
@@ -389,7 +387,7 @@ public class MatrixResource {
     		@DefaultValue("true") @QueryParam("ignoreaskforcontinue") boolean ignoreAskForContinue,
     		@DefaultValue("true") @QueryParam("runnetdumper") boolean runNetDumper,
             @DefaultValue("false") @QueryParam("skipoptional") boolean skipOptional,
-    		@QueryParam("tag") final List<String> tags,
+            @QueryParam("tag") List<String> tags,
     		@DefaultValue("{}") @QueryParam("staticvariables") String staticVariables,
 			@DefaultValue("") @QueryParam("subfolder") String subFolder,
 			@DefaultValue("") @QueryParam("language") String language) {
@@ -400,7 +398,7 @@ public class MatrixResource {
             xmlResponse.setMessage("Cannot stop matrix by it's name");
             xmlResponse.setRootCause(null);
 
-            return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Status.BAD_REQUEST)
                     .entity(xmlResponse).build();
 	    }
 
@@ -417,7 +415,7 @@ public class MatrixResource {
 
 		if (matrixId != -1) {
 
-			return this.executeAction(matrixId, actionName, rangeParam,
+            return executeAction(matrixId, actionName, rangeParam,
 					environmentParam, fileEncodingParam, amlParam,
 					continueOnFailed, autoStart, autoRun,
 					ignoreAskForContinue, runNetDumper, skipOptional, tags, staticVariables, subFolder, language);
@@ -428,7 +426,7 @@ public class MatrixResource {
 			xmlResponse.setMessage("Cannot find matrix " + matrixName);
 			xmlResponse.setRootCause(null);
 
-			return Response.status(Response.Status.BAD_REQUEST)
+            return Response.status(Status.BAD_REQUEST)
 					.entity(xmlResponse).build();
 		}
 
@@ -451,7 +449,7 @@ public class MatrixResource {
     		@DefaultValue("true") @QueryParam("ignoreaskforcontinue") boolean ignoreAskForContinue,
     		@DefaultValue("true") @QueryParam("runnetdumper") boolean runNetDumper,
     		@DefaultValue("false") @QueryParam("skipoptional") boolean skipOptional,
-    		@QueryParam("tag") final List<String> tags,
+            @QueryParam("tag") List<String> tags,
     		@DefaultValue("{}") @QueryParam("staticvariables") String staticVariables,
     		@DefaultValue("") @QueryParam("subfolder") String subFolder,
     		@DefaultValue("") @QueryParam("language") String language) {
@@ -464,8 +462,7 @@ public class MatrixResource {
 		try {
 			if ( actionName == null ) {
 				errorMessage = "action is null";
-			}
-			else if ( actionName.equals("start") ) {
+            } else if("start".equals(actionName)) {
 			    IMatrix matrix = context.getMatrixStorage().getMatrixById(id);
 
 			    if(matrix != null) {
@@ -498,22 +495,22 @@ public class MatrixResource {
     				XmlTestscriptActionResponse response = new XmlTestscriptActionResponse();
     				response.setId(enqueuedID);
 
-    				return Response.status(Response.Status.OK).
+                    return Response.status(Status.OK).
     		                entity(response).
 		                build();
 			    } else {
 			        errorMessage = "Matrix with id = [" + id + "] not found";
 			    }
-			}
-			else if ( actionName.equals("stop") ) {
+            } else if("stop".equals(actionName)) {
 			    if(TestToolsAPI.getInstance().containsScriptRun(id)) {
     			    TestToolsAPI.getInstance().stopScriptRun(id);
-    				return Response.noContent().status(Response.Status.OK).build();
+                    return Response.noContent().status(Status.OK).build();
 			    } else {
 			        errorMessage = "Script run with id = [" + id + "] not found";
 			    }
-			}
-			else errorMessage = "unknown action";
+            } else {
+                errorMessage = "unknown action";
+            }
 		}
 		catch ( Throwable e ) {
 			logger.error(e.getMessage() , e);
@@ -521,12 +518,7 @@ public class MatrixResource {
 			rootCause = ExceptionUtils.getRootCauseMessage(e);
 		}
 
-		if ( errorMessage != null ) {
-
-			return createBadResponse(errorMessage, rootCause);
-		}
-
-		return null;
+        return errorMessage != null ? createBadResponse(errorMessage, rootCause) : null;
     }
 
 	@GET
@@ -543,7 +535,7 @@ public class MatrixResource {
     		@DefaultValue("true") @QueryParam("ignoreaskforcontinue") boolean ignoreAskForContinue,
     		@DefaultValue("true") @QueryParam("runnetdumper") boolean runNetDumper,
             @DefaultValue("false") @QueryParam("skipoptional") boolean skipOptional,
-    		@QueryParam("tag") final List<String> tags,
+            @QueryParam("tag") List<String> tags,
     		@DefaultValue("{}") @QueryParam("staticvariables") String staticVariables,
 			@DefaultValue("") @QueryParam("subfolder") String subFolder,
 			@DefaultValue("") @QueryParam("language") String language) {
@@ -556,8 +548,7 @@ public class MatrixResource {
 		try {
 			if ( actionName == null ) {
 				errorMessage = "action is null";
-			}
-			else if ( actionName.equals("start") ) {
+            } else if("start".equals(actionName)) {
 
 				List<Tag> tagsList = null;
 
@@ -592,15 +583,15 @@ public class MatrixResource {
 				XmlTestSciptrunActionList response = new XmlTestSciptrunActionList();
 				response.setTestscriptRuns(responseList);
 
-				return Response.status(Response.Status.OK).
+                return Response.status(Status.OK).
 		                entity(response).
 		                build();
-			}
-			else if ( actionName.equals("stop") ) {
+            } else if("stop".equals(actionName)) {
 			    TestToolsAPI.getInstance().stopAllScriptRuns();
-				return Response.noContent().status(Response.Status.OK).build();
-			}
-			else errorMessage = "unknown action";
+                return Response.noContent().status(Status.OK).build();
+            } else {
+                errorMessage = "unknown action";
+            }
 		}
 		catch ( Throwable e ) {
 			logger.error(e.getMessage() , e);
@@ -608,12 +599,7 @@ public class MatrixResource {
 			rootCause = ExceptionUtils.getRootCauseMessage(e);
 		}
 
-		if ( errorMessage != null ) {
-
-			return createBadResponse(errorMessage, rootCause);
-		}
-
-		return null;
+        return errorMessage != null ? createBadResponse(errorMessage, rootCause) : null;
     }
 
     @GET
@@ -636,7 +622,7 @@ public class MatrixResource {
                     xmlResponse.setRootCause("");
 
                     return Response.
-                            status(Response.Status.OK).
+                            status(Status.OK).
                             entity(xmlResponse).
                             build();
                 } else {
@@ -645,7 +631,7 @@ public class MatrixResource {
                     xmlResponse.setRootCause("");
 
                     return Response.
-                            status(Response.Status.BAD_REQUEST).
+                            status(Status.BAD_REQUEST).
                             entity(xmlResponse).
                             build();
                 }
@@ -657,7 +643,7 @@ public class MatrixResource {
                 xmlResponse.setRootCause("");
 
                 return Response.
-                        status(Response.Status.OK).
+                        status(Status.OK).
                         entity(xmlResponse).
                         build();
             }
@@ -667,12 +653,7 @@ public class MatrixResource {
             rootCause = ExceptionUtils.getRootCauseMessage(e);
         }
 
-        if ( errorMessage != null ) {
-
-            return createBadResponse(errorMessage, rootCause);
-        }
-
-        return null;
+        return errorMessage != null ? createBadResponse(errorMessage, rootCause) : null;
     }
 
     @GET
@@ -700,7 +681,7 @@ public class MatrixResource {
                 xmlResponse.setRootCause("");
 
                 return Response.
-                        status(Response.Status.OK).
+                        status(Status.OK).
                         entity(xmlResponse).
                         build();
             } else {
@@ -709,7 +690,7 @@ public class MatrixResource {
                 xmlResponse.setRootCause("");
 
                 return Response.
-                        status(Response.Status.OK).
+                        status(Status.OK).
                         entity(xmlResponse).
                         build();
             }
@@ -719,12 +700,7 @@ public class MatrixResource {
             rootCause = ExceptionUtils.getRootCauseMessage(e);
         }
 
-        if ( errorMessage != null ) {
-
-            return createBadResponse(errorMessage, rootCause);
-        }
-
-        return null;
+        return errorMessage != null ? createBadResponse(errorMessage, rootCause) : null;
     }
 
     @GET
@@ -742,7 +718,7 @@ public class MatrixResource {
             xmlResponse.setRootCause("");
 
             return Response.
-                    status(Response.Status.OK).
+                    status(Status.OK).
                     entity(xmlResponse).
                     build();
         } catch (Exception e) {
@@ -751,12 +727,7 @@ public class MatrixResource {
             rootCause = ExceptionUtils.getRootCauseMessage(e);
         }
 
-        if ( errorMessage != null ) {
-
-            return createBadResponse(errorMessage, rootCause);
-        }
-
-        return null;
+        return errorMessage != null ? createBadResponse(errorMessage, rootCause) : null;
     }
 
     private Response createBadResponse(String errorMessage, String rootCause) {
@@ -766,7 +737,7 @@ public class MatrixResource {
         xmlResponse.setRootCause(rootCause);
     
         return Response
-                .status(Response.Status.BAD_REQUEST)
+                .status(Status.BAD_REQUEST)
                 .entity(xmlResponse)
                 .build();
     }

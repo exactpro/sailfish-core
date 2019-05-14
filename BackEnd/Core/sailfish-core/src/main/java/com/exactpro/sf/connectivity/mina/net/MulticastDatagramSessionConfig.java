@@ -186,7 +186,7 @@ public class MulticastDatagramSessionConfig extends AbstractDatagramSessionConfi
     public int getSoTimeout() 
     {
     	try {
-    		return this.socket.getSoTimeout();
+            return socket.getSoTimeout();
         } catch (SocketException e) {
             throw new RuntimeIoException(e);
         }
@@ -195,7 +195,7 @@ public class MulticastDatagramSessionConfig extends AbstractDatagramSessionConfi
 	
 	public void setSoTimeout(int soTimeout) {
 		try {
-    		this.socket.setSoTimeout(soTimeout);
+            socket.setSoTimeout(soTimeout);
         } catch (SocketException e) {
             throw new RuntimeIoException(e);
         }
@@ -205,8 +205,9 @@ public class MulticastDatagramSessionConfig extends AbstractDatagramSessionConfi
 	@Override
 	protected void doSetAll(IoSessionConfig config) 
 	{
-		if ( config instanceof DefaultMulticastDatagramSessionConfig )
-			setSoTimeout(((DefaultMulticastDatagramSessionConfig) config).getSoTimeout());
+        if(config instanceof DefaultMulticastDatagramSessionConfig) {
+            setSoTimeout(((DefaultMulticastDatagramSessionConfig)config).getSoTimeout());
+        }
 		
 		super.doSetAll(config);
 	}

@@ -33,7 +33,7 @@ import com.exactpro.sf.util.EMailUtil;
 public class ScriptList extends AbstractLibraryItem implements Comparable<ScriptList>, IBBActionExecutor {
     private static final Logger logger = LoggerFactory.getLogger(ScriptList.class);
 
-    private final static String TABLE_HEADER = "<tr><th>Script list</th><th>Executed on</th><th>Status</th><th style=\"color:green;\">Passed</th><th style=\"color:orange;\">Conditionally Passed</th><th style=\"color:red;\">Failed</th></tr>";
+    private static final String TABLE_HEADER = "<tr><th>Script list</th><th>Executed on</th><th>Status</th><th style=\"color:green;\">Passed</th><th style=\"color:orange;\">Conditionally Passed</th><th style=\"color:red;\">Failed</th></tr>";
 
     private final String name;
 
@@ -68,18 +68,17 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
         EXECUTED;
 
 	    public boolean isSkipped(){
-	        return this.equals(SKIPPED);
+            return this == SKIPPED;
         }
 
         public boolean isExecuted(){
-            return this.equals(EXECUTED);
+            return this == EXECUTED;
         }
     }
 
 	public ScriptList(String name, String executor, Set<String> serviceLists,
             SfApiOptions apiOptions, long priority, long lineNumber, String variableSet) {
-		super();
-		this.executor = executor;
+        this.executor = executor;
 		this.name = name;
 		this.serviceLists = serviceLists;
 		this.apiOptions = apiOptions;
@@ -92,7 +91,7 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
 	@Override
     public void addNested(Script item) {
 
-		this.scripts.add(item);
+        scripts.add(item);
 
 	}
 
@@ -158,9 +157,9 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
 
     public void addRejectCause(ImportError cause) {
         if (!isRejected()) {
-            setRejectCause(new ImportError(this.lineNumber, String.format("Script List \"%s\" : error", this.name)));
+            setRejectCause(new ImportError(lineNumber, String.format("Script List \"%s\" : error", name)));
         }
-        this.rejectCause.addCause(cause);
+        rejectCause.addCause(cause);
     }
 
     public void addRejectCause(Collection<ImportError> errors) {
@@ -169,9 +168,9 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
         }
 
         if (!isRejected()) {
-            setRejectCause(new ImportError(this.lineNumber, String.format("Script List  \"%s\" : error", this.name)));
+            setRejectCause(new ImportError(lineNumber, String.format("Script List  \"%s\" : error", name)));
         }
-        this.rejectCause.addCause(errors);
+        rejectCause.addCause(errors);
     }
 
     public ImportError getRejectCause() {
@@ -207,21 +206,19 @@ public class ScriptList extends AbstractLibraryItem implements Comparable<Script
         case FAILED:
             actions = apiOptions.getOnFailed();
             logger.info("Use failed script list actions {}", actions);
-            break;
+            return actions;
         case CONDITIONALLY_PASSED:
             actions = apiOptions.getOnCondPassed();
             logger.info("Use conditionally passed script list actions {}", actions);
-            break;
+            return actions;
         case PASSED:
             actions = apiOptions.getOnPassed();
             logger.info("Use passed script list actions {}", actions);
-            break;
+            return actions;
         default:
-            actions = Collections.emptySet();
-            break;
+            return Collections.emptySet();
         }
 
-        return  actions;
     }
 
     public StatusType getStatusType() {

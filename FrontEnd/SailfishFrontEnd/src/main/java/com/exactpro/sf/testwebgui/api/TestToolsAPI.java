@@ -28,6 +28,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -85,9 +86,9 @@ public class TestToolsAPI {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestToolsAPI.class);
 
-	private static TestToolsAPI instance = null;
+    private static TestToolsAPI instance;
 
-    private static ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
+    private static final ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
 
 	private final ISFContext context;
 
@@ -113,7 +114,7 @@ public class TestToolsAPI {
 	}
 
 	public IMatrix uploadMatrix(InputStream stream, String name, String description, String creator, SailfishURI languageURI, String matrixLink, SailfishURI matrixProviderURI) {
-		IMatrix matrix = this.context.getMatrixStorage().addMatrix(stream, name, description, creator, languageURI, matrixLink, matrixProviderURI);
+        IMatrix matrix = context.getMatrixStorage().addMatrix(stream, name, description, creator, languageURI, matrixLink, matrixProviderURI);
 
 		notifyAddMatrixListeners(new IMatrixNotifier() {
 			@Override
@@ -140,11 +141,11 @@ public class TestToolsAPI {
 	}
 
 	public boolean hasConverter() {
-		return !this.context.getMatrixConverterManager().getMatrixConverters().isEmpty();
+        return !context.getMatrixConverterManager().getMatrixConverters().isEmpty();
 	}
 
     public Set<SailfishURI> getMatrixConverters() {
-        return this.context.getMatrixConverterManager().getMatrixConverters();
+        return context.getMatrixConverterManager().getMatrixConverters();
 		}
 
     public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
@@ -153,9 +154,9 @@ public class TestToolsAPI {
 
     public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri, String newMatrixName) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
 	    IMatrixConverterSettings settings = getMatrixConverterSettings(converterUri);
-	    IMatrixStorage matrixStorage = this.context.getMatrixStorage();
+        IMatrixStorage matrixStorage = context.getMatrixStorage();
         IMatrix matrix = matrixStorage.getMatrixById(matrixId);
-        IWorkspaceDispatcher wd = this.context.getWorkspaceDispatcher();
+        IWorkspaceDispatcher wd = context.getWorkspaceDispatcher();
 
         if(matrix == null) {
             throw new IllegalArgumentException("Matrix id [" + matrixId + "] was not found");
@@ -168,8 +169,7 @@ public class TestToolsAPI {
             newMatrixName = converterUri.getResourceName() + "_" + matrix.getName();
         }
 
-        File outMatrixFilePath = null;
-        outMatrixFilePath = new File(Files.createTempDirectory(UUID.randomUUID().toString()).toFile(), newMatrixName);
+        File outMatrixFilePath = new File(Files.createTempDirectory(UUID.randomUUID().toString()).toFile(), newMatrixName);
 
         settings.setEnvironment(environment);
         settings.setInputFile(matrixFilePath);
@@ -181,26 +181,20 @@ public class TestToolsAPI {
 	//FIXME: Get converter
 	@Deprecated
 	public IMatrixConverter getMatrixConverter() {
-	    Iterator<SailfishURI> it = this.context.getMatrixConverterManager().getMatrixConverters().iterator();
-        if (it.hasNext()) {
-            return getMatrixConverter(it.next());
-        }
-        return null;
-	}
+        Iterator<SailfishURI> it = context.getMatrixConverterManager().getMatrixConverters().iterator();
+        return it.hasNext() ? getMatrixConverter(it.next()) : null;
+    }
 
     //FIXME: Get converter
     @Deprecated
     public IMatrixConverterSettings getMatrixConverterSettings() {
-        Iterator<SailfishURI> it = this.context.getMatrixConverterManager().getMatrixConverters().iterator();
-        if(it.hasNext()) {
-            return getMatrixConverterSettings(it.next());
-        }
-        return null;
+        Iterator<SailfishURI> it = context.getMatrixConverterManager().getMatrixConverters().iterator();
+        return it.hasNext() ? getMatrixConverterSettings(it.next()) : null;
     }
 
     public IMatrixConverter getMatrixConverter(SailfishURI uri) {
 		try {
-            return this.context.getMatrixConverterManager().getMatrixConverter(uri);
+            return context.getMatrixConverterManager().getMatrixConverter(uri);
         } catch (RuntimeException e) {
             logger.error("Failed to create & init MatrixConverter", e);
 			throw new RuntimeException("Failed to init converter", e);
@@ -209,7 +203,7 @@ public class TestToolsAPI {
 
     public IMatrixConverterSettings getMatrixConverterSettings(SailfishURI uri) {
         try {
-            return this.context.getMatrixConverterManager().getMatrixConverterSettings(uri);
+            return context.getMatrixConverterManager().getMatrixConverterSettings(uri);
         } catch(RuntimeException e) {
             logger.error("Failed to create matrix converter settings", e);
             throw new RuntimeException("Failed to create matrix converter settings", e);
@@ -245,7 +239,7 @@ public class TestToolsAPI {
 			boolean ignoreAskForContinue, boolean runNetDumper, boolean skipOptional,
             List<Tag> tags, Map<String, String> staticVariables,
 			Collection<IScriptReport> userListeners, String subFolder) throws FileNotFoundException, IOException {
-		return this.context.getScriptRunner().enqueueScript(
+        return context.getScriptRunner().enqueueScript(
 				"script.xml",
 				matrix.getFilePath(),
                 matrix.getDescription(),
@@ -276,12 +270,12 @@ public class TestToolsAPI {
 					listener.removeMatrix(matrix);
 				}
 			}, matrix);
-			this.context.getMatrixStorage().removeMatrix(matrix);
+            context.getMatrixStorage().removeMatrix(matrix);
 		}
 	}
 
 	public void deleteAllMatrix() {
-		List<IMatrix> matrixList = this.context.getMatrixStorage().getMatrixList();
+        List<IMatrix> matrixList = context.getMatrixStorage().getMatrixList();
 
 		if (matrixList != null) {
 			IMatrixNotifier notifier = new IMatrixNotifier() {
@@ -292,25 +286,25 @@ public class TestToolsAPI {
 			};
 			for (IMatrix matrix : matrixList) {
 				notifyAddMatrixListeners(notifier , matrix);
-				this.context.getMatrixStorage().removeMatrix(matrix);
+                context.getMatrixStorage().removeMatrix(matrix);
 			}
 		}
 	}
 
 	public void addListener(IMatrixListener listener) {
-		this.matrixListeners.addIfAbsent(listener);
+        matrixListeners.addIfAbsent(listener);
 	}
 
 	public void removeListener(IMatrixListener listener) {
-		this.matrixListeners.remove(listener);
+        matrixListeners.remove(listener);
 	}
 
 	public void addListener(IServiceNotifyListener listener) {
-        this.serviceListeners.addIfAbsent(listener);
+        serviceListeners.addIfAbsent(listener);
     }
 
     public void removeListener(IServiceNotifyListener listener) {
-        this.serviceListeners.remove(listener);
+        serviceListeners.remove(listener);
     }
 
 	public void removeService(String envName, String name, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
@@ -324,7 +318,7 @@ public class TestToolsAPI {
         if (service != null) {
         	conManager.removeService(serviceName, notifyListener).get();
         } else {
-            throw new IllegalArgumentException("Service " + serviceName.toString() + " was not found");
+            throw new IllegalArgumentException("Service " + serviceName + " was not found");
         }
 	}
 
@@ -604,11 +598,7 @@ public class TestToolsAPI {
         }
 
         if (importedCount == 1) {
-            if (replace) {
-                notifyListener.onInfoProcessing("Service " + lastImported + " has been replaced");
-            } else {
-                notifyListener.onInfoProcessing("Service " + lastImported + " has been imported");
-            }
+            notifyListener.onInfoProcessing("Service " + lastImported + " has been " + (replace ? "replaced" : "imported"));
         } else if (importedCount > 1) {
             notifyListener.onInfoProcessing(importedCount + " services have been imported");
         }
@@ -620,7 +610,7 @@ public class TestToolsAPI {
     }
 
     public File getTestScriptRunZip(long id) throws FileNotFoundException {
-        return ReportTask.getZip(id, this.context);
+        return ReportTask.getZip(id, context);
     }
     private void deleteServicesForReplace(IConnectionManager conManager, List<ServiceDescription> newServs, List<ServiceName> existServiceNames, IServiceNotifyListener notifyListener) {
         try {
@@ -644,13 +634,13 @@ public class TestToolsAPI {
     }
 
     private boolean checkServiceDuplicates(String environment, String serviceName){
-        IService service = TestToolsAPI.getInstance().getService(environment, serviceName);
+        IService service = getInstance().getService(environment, serviceName);
         return service != null;
     }
 
     public void setStatisticsDBSettings(StatisticsServiceSettings settings) throws Exception {
 
-        StatisticsService service = this.context.getStatisticsService();//BeanUtil.getSfContext().getStatisticsService();
+        StatisticsService service = context.getStatisticsService();//BeanUtil.getSfContext().getStatisticsService();
 
         if(service.isConnected()) {
             service.tearDown();
@@ -662,7 +652,7 @@ public class TestToolsAPI {
     }
 
     public void setEMailServiceSettings(EMailServiceSettings settings) throws Exception {
-        EMailService service = this.context.getEMailService();
+        EMailService service = context.getEMailService();
 
         if(service.isConnected()){
             service.tearDown();
@@ -675,7 +665,7 @@ public class TestToolsAPI {
     }
     
     public void setRegressionRunnerSettings(BigButtonSettings settings) throws Exception {
-        RegressionRunner runner = this.context.getRegressionRunner();
+        RegressionRunner runner = context.getRegressionRunner();
 
         runner.setSettings(settings);
 
@@ -683,7 +673,7 @@ public class TestToolsAPI {
     }
 
     public void setUpdateServiceSettings(UpdateServiceSettings settings) throws Exception {
-        UpdateService updateService = this.context.getUpdateService();
+        UpdateService updateService = context.getUpdateService();
         updateService.tearDown();
 
         updateService.setSettings(settings);
@@ -696,9 +686,9 @@ public class TestToolsAPI {
 
         Map<String, String> toSave = settings.toMap();
 
-        IOptionsStorage optionsStorage = this.context.getOptionsStorage();
+        IOptionsStorage optionsStorage = context.getOptionsStorage();
 
-        for(Map.Entry<String, String> entry : toSave.entrySet()) {
+        for(Entry<String, String> entry : toSave.entrySet()) {
 
             optionsStorage.setOption(entry.getKey(), entry.getValue());
         }
@@ -720,7 +710,7 @@ public class TestToolsAPI {
 
 	private void notifyAddMatrixListeners(IMatrixNotifier notifier, IMatrix matrix) {
 
-		for (IMatrixListener listener : this.matrixListeners) {
+        for(IMatrixListener listener : matrixListeners) {
 			try {
 				notifier.notify(listener, matrix);
 			} catch (Exception e) {
@@ -730,6 +720,6 @@ public class TestToolsAPI {
 	}
 
 	private interface IMatrixNotifier {
-		public void notify(IMatrixListener listener, IMatrix matrix);
+        void notify(IMatrixListener listener, IMatrix matrix);
 	}
 }

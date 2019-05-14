@@ -57,7 +57,7 @@ import com.exactpro.sf.services.fake.FakeClientService;
  */
 
 @MatrixActions
-@ResourceAliases({"FakeActions"})
+@ResourceAliases("FakeActions")
 public class FakeActions extends AbstractCaller
 {
 	@CommonColumns({

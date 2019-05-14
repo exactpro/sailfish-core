@@ -15,20 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
-import com.exactpro.sf.bigbutton.RegressionRunner;
-import com.exactpro.sf.bigbutton.execution.ProgressView;
-import com.exactpro.sf.bigbutton.importing.CsvLibraryBuilder;
-import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
-import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
-import com.exactpro.sf.testwebgui.restapi.xml.BBNodeStatus;
-import com.exactpro.sf.testwebgui.restapi.xml.BbExecutionStatus;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.time.Instant;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
 import javax.ws.rs.Consumes;
@@ -42,27 +38,34 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.time.Instant;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.bigbutton.RegressionRunner;
+import com.exactpro.sf.bigbutton.execution.ProgressView;
+import com.exactpro.sf.bigbutton.importing.CsvLibraryBuilder;
+import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
+import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
+import com.exactpro.sf.testwebgui.restapi.xml.BBNodeStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.BbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
 
 @Path("bb")
 @Singleton
 public class BigButtonResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BigButtonResource.class);
-	
-	private AtomicLong importIdCounter = new AtomicLong(0l);
-	
-	private ConcurrentMap<Long, LibraryImportResult> importedLibraries = new ConcurrentHashMap<>();
+
+    private final AtomicLong importIdCounter = new AtomicLong(0l);
+
+    private final ConcurrentMap<Long, LibraryImportResult> importedLibraries = new ConcurrentHashMap<>();
 	
 	@POST
 	@Path("upload")
@@ -79,24 +82,24 @@ public class BigButtonResource {
                     sfContext.getDictionaryManager());
 			
 			LibraryImportResult importedLibrary = builder.buildFromCsv(fileDetail.getFileName());
-			
-			long id = this.importIdCounter.incrementAndGet();
+
+            long id = importIdCounter.incrementAndGet();
 			
 			importedLibrary.setId(id);
 			
             if (importedLibrary.getCriticalErrorsQty() == 0) {
-				
-				this.importedLibraries.put(id, importedLibrary);
+
+                importedLibraries.put(id, importedLibrary);
 			
 				return Response.
-	                status(Response.Status.OK).
+                        status(Status.OK).
 	                entity(importedLibrary).
 	                build();
 				
 			} else {
 				
 				return Response.
-		                status(Response.Status.BAD_REQUEST).
+                        status(Status.BAD_REQUEST).
 		                entity(importedLibrary).
 		                build();
 			}
@@ -106,7 +109,7 @@ public class BigButtonResource {
 			logger.error(e.getMessage(), e);
 			
 			return Response.
-	                status(Response.Status.INTERNAL_SERVER_ERROR)   .
+                    status(Status.INTERNAL_SERVER_ERROR).
 	                entity(new XmlResponse("Internal Error", e.getMessage())).
 	                build();
 			
@@ -126,7 +129,7 @@ public class BigButtonResource {
 		if(importResult == null) {
 			
 			return Response.
-	                status(Response.Status.BAD_REQUEST).
+                    status(Status.BAD_REQUEST).
 	                entity(new XmlResponse("Library descriptor with id " + importId + " not found")).
 	                build();
 			
@@ -151,15 +154,15 @@ public class BigButtonResource {
             runner.prepare(importResult);
 			
 			runner.run();
-			
-			return Response.status(Response.Status.OK).build();
+
+            return Response.status(Status.OK).build();
 		
 		} catch(Exception e) {
 			
 			logger.error(e.getMessage(), e);
 			
 			return Response.
-	                status(Response.Status.INTERNAL_SERVER_ERROR).
+                    status(Status.INTERNAL_SERVER_ERROR).
 	                entity(new XmlResponse("Internal Error", e.getMessage())).
 	                build();
 			
@@ -190,7 +193,7 @@ public class BigButtonResource {
         result.setSlaveStatuses(nodeStatuses);
 		
 		return Response.
-                status(Response.Status.OK).
+                status(Status.OK).
                 entity(result).
                 build();
 		
@@ -200,36 +203,34 @@ public class BigButtonResource {
 	@Path("report")
 	@Produces(MediaType.APPLICATION_XML)
 	public Response downloadReport() {
-		
-		final ProgressView progressView = SFLocalContext.getDefault().getRegressionRunner().getProgressView(0, 0);
+
+        ProgressView progressView = SFLocalContext.getDefault().getRegressionRunner().getProgressView(0, 0);
 		
 		if(progressView.getReportFile() == null) {
 			
 			return Response.
-	                status(Response.Status.NOT_FOUND).
+                    status(Status.NOT_FOUND).
 	                entity(new XmlResponse("Report file not found or not ready")).
 	                build();
 			
 		}
-		
-		StreamingOutput stream;
 
-		stream = new StreamingOutput() {
-			@Override
-			public void write(OutputStream out) throws IOException, WebApplicationException {
-				try (InputStream in = new FileInputStream(progressView.getReportFile())) {
-					int read;
-					byte[] bytes = new byte[1024];
+        StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream out) throws IOException, WebApplicationException {
+                try(InputStream in = new FileInputStream(progressView.getReportFile())) {
+                    int read;
+                    byte[] bytes = new byte[1024];
 
-					while ((read = in.read(bytes)) != -1) {
-						out.write(bytes, 0, read);
-					}
-				} catch (Exception e) {
-				    logger.error(e.getMessage(), e);
-					throw new WebApplicationException(e);
-				}
-			}
-		};
+                    while((read = in.read(bytes)) != -1) {
+                        out.write(bytes, 0, read);
+                    }
+                } catch(Exception e) {
+                    logger.error(e.getMessage(), e);
+                    throw new WebApplicationException(e);
+                }
+            }
+        };
 
 		return Response
 				.ok(stream)
@@ -247,15 +248,15 @@ public class BigButtonResource {
 		try {
 
             SFLocalContext.getDefault().getRegressionRunner().interrupt("Interrupted by response");
-			
-			return Response.status(Response.Status.OK).build();
+
+            return Response.status(Status.OK).build();
 		
 		} catch(Exception e) {
 			
 			logger.error(e.getMessage(), e);
 			
 			return Response.
-	                status(Response.Status.INTERNAL_SERVER_ERROR).
+                    status(Status.INTERNAL_SERVER_ERROR).
 	                entity(new XmlResponse("Internal Error", e.getMessage())).
 	                build();
 			
@@ -272,13 +273,13 @@ public class BigButtonResource {
 
             SFLocalContext.getDefault().getRegressionRunner().pause();
 
-            return Response.status(Response.Status.OK).build();
+            return Response.status(Status.OK).build();
 
         } catch (Exception e) {
 
             logger.error(e.getMessage(), e);
 
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
                            .entity(new XmlResponse("Internal Error", e.getMessage()))
                            .build();
 
@@ -295,13 +296,13 @@ public class BigButtonResource {
 
             SFLocalContext.getDefault().getRegressionRunner().resume();
 
-            return Response.status(Response.Status.OK).build();
+            return Response.status(Status.OK).build();
 
         } catch (Exception e) {
 
             logger.error(e.getMessage(), e);
 
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Status.INTERNAL_SERVER_ERROR)
                            .entity(new XmlResponse("Internal Error", e.getMessage()))
                            .build();
 

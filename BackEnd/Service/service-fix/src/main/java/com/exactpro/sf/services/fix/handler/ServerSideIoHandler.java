@@ -46,13 +46,13 @@ public class ServerSideIoHandler extends AbstractProxyIoHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(ServerSideIoHandler.class);
 
-	private IMessageStorage storage;
-	private IServiceHandler handler;
-	private DefaultMessageFactory factory;
-	private DataDictionary appDictionary;
+	private final IMessageStorage storage;
+	private final IServiceHandler handler;
+	private final DefaultMessageFactory factory;
+	private final DataDictionary appDictionary;
 	private ServiceInfo serviceInfo;
-	private TCPIPProxy proxyService;
-	private DirtyQFJIMessageConverter converter;
+	private final TCPIPProxy proxyService;
+	private final DirtyQFJIMessageConverter converter;
 
 	public ServerSideIoHandler(IoConnector connector, IMessageStorage storage, IServiceHandler handler, TCPIPProxy proxyService, DefaultMessageFactory factory, DataDictionary appDictionary, DirtyQFJIMessageConverter converter) {
 		this.storage = storage;

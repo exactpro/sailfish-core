@@ -15,11 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.machinelearning.entities;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.persistence.*;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,16 +56,36 @@ public class FailedAction implements Serializable {
     private Message expectedMessage;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(name = "mlmessageparticipants", joinColumns = {
-            @JoinColumn(name = "failed_action_id", nullable = false, updatable = true) }, inverseJoinColumns = {
-                    @JoinColumn(name = "message_participant_id", nullable = false, updatable = true) })
+    @JoinTable(
+            name = "mlmessageparticipants",
+            joinColumns = @JoinColumn(name = "failed_action_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "message_participant_id", nullable = false)
+    )
     private List<MessageParticipant> participants;
 
     @Column(nullable = false)
     private long submittedAt;
 
-    @Column(nullable = true)
+    @Column
     private String submitter;
+
+    @Column
+    private long periodStart;
+
+    @Column
+    private long periodEnd;
+
+    @Column
+    private String dictionaryURI;
+
+    @Column
+    private String name;
+
+    @Column
+    private String protocol;
+
+    @Column
+    private String namespace;
 
     public FailedAction() {
         this.participants = new ArrayList<>();
@@ -61,11 +95,11 @@ public class FailedAction implements Serializable {
     public FailedAction(Message expectedMessage, MessageParticipant... messageParticipants) {
         this();
         this.expectedMessage = expectedMessage;
-        this.participants.addAll(Arrays.asList(messageParticipants));
+        participants.addAll(Arrays.asList(messageParticipants));
     }
 
     public void addParticipant(MessageParticipant participant) {
-        this.participants.add(participant);
+        participants.add(participant);
     }
 
     public long getId() {
@@ -111,10 +145,62 @@ public class FailedAction implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", this.id)
-                .append("expectedMessage", this.expectedMessage)
-                .append("participants", this.participants)
+                .append("id", id)
+                .append("expectedMessage", expectedMessage)
+                .append("participants", participants)
                 .append("submittedAt", submittedAt)
-                .append("submitter", submitter).toString();
+                .append("submitter", submitter)
+                .append("periodStart", periodStart)
+                .append("periodEnd", periodEnd)
+                .append("namespace", namespace)
+                .toString();
+    }
+
+    public long getPeriodStart() {
+        return periodStart;
+    }
+
+    public void setPeriodStart(long periodStart) {
+        this.periodStart = periodStart;
+    }
+
+    public long getPeriodEnd() {
+        return periodEnd;
+    }
+
+    public void setPeriodEnd(long periodEnd) {
+        this.periodEnd = periodEnd;
+    }
+
+    public String getDictionaryURI() {
+        return dictionaryURI;
+    }
+
+    public void setDictionaryURI(String dictionaryURI) {
+        this.dictionaryURI = dictionaryURI;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
     }
 }

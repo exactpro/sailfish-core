@@ -26,19 +26,15 @@ public class FASTCodecSettings extends AbstractServiceSettings {
 
     private static final long serialVersionUID = 3426549826737983629L;
 
-    private int skipInitialByteAmount = 0;
+    private int skipInitialByteAmount;
 	private boolean streamBlockEncoded = true;
 	private boolean resetContextAfterEachUdpPacket = true;
 	@RequiredParam
 	@Description("Dictionary title")
 	private SailfishURI dictionaryName;
 
-	public FASTCodecSettings() {
-		super();
-	}
-
-	public boolean isStreamBlockEncoded() {
-		return this.streamBlockEncoded;
+    public boolean isStreamBlockEncoded() {
+        return streamBlockEncoded;
 	}
 
 	public void setStreamBlockEncoded(boolean streamBlockEncoded) {

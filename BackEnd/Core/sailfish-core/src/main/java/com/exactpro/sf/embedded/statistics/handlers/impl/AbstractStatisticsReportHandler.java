@@ -19,14 +19,14 @@ package com.exactpro.sf.embedded.statistics.handlers.impl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import com.csvreader.CsvWriter;
 import org.apache.commons.lang3.StringUtils;
-import java.time.format.DateTimeFormatter;
 
+import com.csvreader.CsvWriter;
 import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
 import com.exactpro.sf.embedded.statistics.handlers.ReportRow;
 import com.exactpro.sf.embedded.statistics.handlers.ReportValue;
@@ -49,7 +49,7 @@ public abstract class AbstractStatisticsReportHandler implements IStatisticsRepo
 
     @Override
     public List<String> getHeaderColumns() {
-        return this.HEADER;
+        return HEADER;
     }
 
     @Override
@@ -57,7 +57,7 @@ public abstract class AbstractStatisticsReportHandler implements IStatisticsRepo
         Objects.requireNonNull(parameters, "'AggregateReportParameters' parameter");
         Objects.requireNonNull(parameters.getFrom(), "'From' parameter");
         Objects.requireNonNull(parameters.getTo(), "'To' parameter");
-        StringBuilder reportName = new StringBuilder(this.PREFIX)
+        StringBuilder reportName = new StringBuilder(PREFIX)
                 .append(AGGREGATED_REPORT_NAME_PART)
                 .append(formatter.format(parameters.getFrom()))
                 .append("__")

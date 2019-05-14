@@ -30,7 +30,7 @@ import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 
 @MatrixUtils
-@ResourceAliases({"NetworkUtils"})
+@ResourceAliases("NetworkUtils")
 public class NetworkUtils extends AbstractCaller {
 
     @Description("Returns the IPv4 for the specified network interface name.<br>" +

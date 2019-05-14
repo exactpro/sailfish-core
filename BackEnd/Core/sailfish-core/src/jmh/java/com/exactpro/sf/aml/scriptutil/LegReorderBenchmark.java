@@ -36,7 +36,7 @@ public class LegReorderBenchmark {
 	// $ gradle jmhJar
 	// $ java -jar build/libs/testtools-std-1.0-SNAPSHOT-jmh.jar
 
-	final static String NS = "namespace";
+    private static final String NS = "namespace";
 
 	@State(Scope.Thread)
 	public static class BMState {
@@ -74,7 +74,7 @@ public class LegReorderBenchmark {
 		MapMessage result = new MapMessage(NS, name);
 
 		if (str != null) {
-			while (str.length() != 0) {
+			while (!str.isEmpty()) {
 				List<String> pair = pareseKV(str);
 
 				String key = pair.get(0);

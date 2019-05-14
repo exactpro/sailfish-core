@@ -76,14 +76,14 @@ public class DataManager implements IDataManager, ILoadableManager {
 	 */
 	@Override
 	public InputStream getDataInputStream(SailfishURI uri) {
-		String resource = SailfishURIUtils.getMatchingValue(uri, this.location, SailfishURIRule.REQUIRE_RESOURCE);
+        String resource = SailfishURIUtils.getMatchingValue(uri, location, SailfishURIRule.REQUIRE_RESOURCE);
 
 		if (resource == null) {
 			throw new RuntimeException("No data found for URI: " + uri);
 		}
 
 		try {
-            return new FileInputStream(this.workspaceDispatcher.getFile(FolderType.ROOT, resource));
+            return new FileInputStream(workspaceDispatcher.getFile(FolderType.ROOT, resource));
         } catch (FileNotFoundException e) {
             throw new ScriptRunException("Could not create data input stream [" + resource + "]", e);
         }
@@ -115,20 +115,20 @@ public class DataManager implements IDataManager, ILoadableManager {
 	 */
 	@Override
 	public OutputStream getDataOutputStream(SailfishURI uri, boolean append) {
-	    String resource = SailfishURIUtils.getMatchingValue(uri, this.location, SailfishURIRule.REQUIRE_RESOURCE);
+        String resource = SailfishURIUtils.getMatchingValue(uri, location, SailfishURIRule.REQUIRE_RESOURCE);
 
         if (resource == null) {
             throw new RuntimeException("No data found for URI: " + uri);
         }
 
         try {
-            return new FileOutputStream(this.workspaceDispatcher.getOrCreateFile(FolderType.ROOT, resource), append);
+            return new FileOutputStream(workspaceDispatcher.getOrCreateFile(FolderType.ROOT, resource), append);
         } catch (IOException e) {
             throw new ScriptRunException("Could not create data output stream [" + resource + "]", e);
         }
 	}
 
-	private void loadDataLocations(final InputStream xml, final String pathToDataFolder, IVersion version) {
+    private void loadDataLocations(InputStream xml, String pathToDataFolder, IVersion version) {
 		DataListing dataListing = null;
 
 		try {
@@ -189,7 +189,7 @@ public class DataManager implements IDataManager, ILoadableManager {
 
     @Override
     public String getExtension(SailfishURI uri) {
-        String resource = SailfishURIUtils.getMatchingValue(uri, this.location, SailfishURIRule.REQUIRE_RESOURCE);
+        String resource = SailfishURIUtils.getMatchingValue(uri, location, SailfishURIRule.REQUIRE_RESOURCE);
 
         if(resource == null) {
             throw new RuntimeException("No data found for URI: " + uri);
