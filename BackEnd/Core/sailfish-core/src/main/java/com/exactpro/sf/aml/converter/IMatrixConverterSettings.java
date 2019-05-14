@@ -20,12 +20,12 @@ import java.io.File;
 import com.exactpro.sf.common.util.ICommonSettings;
 
 public interface IMatrixConverterSettings extends ICommonSettings {
-    public File getInputFile();
-    public void setInputFile(File inputFile);
+    File getInputFile();
+    void setInputFile(File inputFile);
 
-    public File getOutputFile();
-    public void setOutputFile(File outputFile);
+    File getOutputFile();
+    void setOutputFile(File outputFile);
 
-    public String getEnvironment();
-    public void setEnvironment(String environment);
+    String getEnvironment();
+    void setEnvironment(String environment);
 }

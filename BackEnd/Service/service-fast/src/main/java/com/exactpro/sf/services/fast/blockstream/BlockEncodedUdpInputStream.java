@@ -19,17 +19,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openfast.IntegerValue;
 import org.openfast.ScalarValue;
 import org.openfast.template.LongValue;
 import org.openfast.template.type.codec.TypeCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BlockEncodedUdpInputStream extends UdpInputStream {
-	private final static Logger logger = LoggerFactory.getLogger(BlockEncodedUdpInputStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(BlockEncodedUdpInputStream.class);
 
-	private long remainingBlockLen = 0;
+	private long remainingBlockLen;
 
 	public BlockEncodedUdpInputStream(DatagramSocket socket) {
 		this(socket, null);

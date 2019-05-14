@@ -24,13 +24,9 @@ import org.apache.log4j.spi.LoggingEvent;
 
 public class WebLoggingAppender extends AppenderSkeleton{
 
-	private static List<LogSubscriber> subscribers = new CopyOnWriteArrayList<LogSubscriber>();
-	
-	public WebLoggingAppender() {
+    private static final List<LogSubscriber> subscribers = new CopyOnWriteArrayList<LogSubscriber>();
 
-	}
-	
-	public static void registerSubscriber(LogSubscriber subscriber) {
+    public static void registerSubscriber(LogSubscriber subscriber) {
 		subscribers.add(subscriber);
 	}
 	

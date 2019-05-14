@@ -62,7 +62,7 @@ public class ServiceEventList extends FileBackedList<FileServiceEvent> {
 
         @Override
         public void serialize(FileServiceEvent object, File output) throws Exception {
-            this.fileSerializer.serialize(object, output);
+            fileSerializer.serialize(object, output);
             output.setLastModified(object.getOccurred().getTime());
         }
 
@@ -73,7 +73,7 @@ public class ServiceEventList extends FileBackedList<FileServiceEvent> {
 
         @Override
         public FileServiceEvent deserialize(File input) throws Exception {
-            return new FileServiceEvent(this.fileSerializer, input);
+            return new FileServiceEvent(fileSerializer, input);
         }
     }
 }

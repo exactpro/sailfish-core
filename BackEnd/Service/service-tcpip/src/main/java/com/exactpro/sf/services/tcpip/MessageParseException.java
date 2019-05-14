@@ -17,7 +17,7 @@ package com.exactpro.sf.services.tcpip;
 
 public class MessageParseException extends Exception {
     private static final long serialVersionUID = 4798323133341909811L;
-    private String rawMessage = null;
+    private String rawMessage;
 
     public MessageParseException() {
     }

@@ -72,15 +72,16 @@ public class NTGMessageHelper extends MessageHelper {
 
     private class NTGSizeCalculator extends SimpleMessageStructureVisitor {
 
-		private int messageSize = 0;
+		private int messageSize;
 
 		@Override
 		public void visit(String fieldName, Object value, IFieldStructure fldStruct, boolean isDefault) {
             int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
             int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
 
-			if (messageSize != offset)
-				throw new IllegalStateException();
+            if(messageSize != offset) {
+                throw new IllegalStateException();
+            }
 
 			messageSize = offset + length;
 		}
@@ -132,13 +133,12 @@ public class NTGMessageHelper extends MessageHelper {
 
 			if (messageTypeCode != null) { // skip headers...
 				// calculate message sizes
-				Integer messageSize = null;
-				MessageStructureWriter writer = new MessageStructureWriter();
+                MessageStructureWriter writer = new MessageStructureWriter();
                 NTGSizeCalculator visitor = new NTGSizeCalculator();
 				writer.traverse(visitor, structure);
-				messageSize = visitor.getMessageSize() - 3; // Don't include 'StartOfMessage' and 'MessageLength'
+                Integer messageSize = visitor.getMessageSize() - 3; // Don't include 'StartOfMessage' and 'MessageLength'
 
-				String messageType = GenericConverter.convertByteArrayToString( 1, new byte[] { messageTypeCode } );
+                String messageType = GenericConverter.convertByteArrayToString(1, new byte[] { messageTypeCode });
 				metadata.put(
 						structure.getName(),
                         new NTGMessageMetadata(messageType, messageSize));

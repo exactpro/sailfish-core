@@ -25,7 +25,7 @@ import com.exactprosystems.webchannels.channel.AbstractChannel;
 public class ScriptrunUpdateSubscriber implements IUpdateRequestListener{
 
 	private final AbstractChannel channel;
-	private String id;
+	private final String id;
 
 	public ScriptrunUpdateSubscriber(String id, AbstractChannel channel) {
 		this.id = id;

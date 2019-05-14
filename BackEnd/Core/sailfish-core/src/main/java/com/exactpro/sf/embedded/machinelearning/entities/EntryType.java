@@ -19,5 +19,5 @@ public enum EntryType {
     SIMPLE,
     MESSAGE,
     SIMPLE_ARRAY,
-    MESSAGE_ARRAY;
+    MESSAGE_ARRAY
 }

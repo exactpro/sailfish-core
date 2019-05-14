@@ -16,12 +16,14 @@
 package com.exactpro.sf.testwebgui.environment;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import javax.faces.context.ExternalContext;
@@ -55,9 +57,9 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 	private static final Logger auditLogger = LoggerFactory.getLogger("audit");
 
     private String currentEnvironment;
-    private IServiceNotifyListener notifyListener;
-    private List<EnvironmentNode> data;
-    private List<String> serviceNamesToEdit = new ArrayList<>();
+    private final IServiceNotifyListener notifyListener;
+    private final List<EnvironmentNode> data;
+    private final List<String> serviceNamesToEdit = new ArrayList<>();
     private ServiceEventLazyModel<ServiceEventModel> lazyEventsModel;
 
     private EnvironmentNode severalEdit;
@@ -72,7 +74,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         data = new ArrayList<EnvironmentNode>();
 	}
 
-    private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 
     	in.defaultReadObject();
 
@@ -91,12 +93,8 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
 
 	@Override
-    public void setRowIndex(final int rowIndex) {
-        if (rowIndex == -1 || getPageSize() == 0) {
-            super.setRowIndex(-1);
-        } else {
-            super.setRowIndex(rowIndex % getPageSize());
-        }
+    public void setRowIndex(int rowIndex) {
+        super.setRowIndex(rowIndex == -1 || getPageSize() == 0 ? -1 : rowIndex % getPageSize());
     }
 
 	@Override
@@ -125,7 +123,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
             if(!isFiltered(serviceName, filters)) {
                 EnvironmentNode envNode = createServiceNode(serviceName);
                 if(!isHidden(envNode)) {
-                    this.data.add(envNode);
+                    data.add(envNode);
                 }
             }
         }
@@ -137,7 +135,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         Collections.sort(data, new LazySorter(sortField, sortOrder));
 
         int dataSize = data.size();
-        this.setRowCount(dataSize);
+        setRowCount(dataSize);
 
         updateParamRoot();
         if(dataSize > pageSize && pageSize != 0) {
@@ -158,8 +156,8 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public void selectServiceToEdit(String name) {
     	auditLogger.info("selectServiceToEdit {} invoked {}", name, BeanUtil.getUser());
-        this.serviceNamesToEdit.clear();
-        this.serviceNamesToEdit.add(name);
+        serviceNamesToEdit.clear();
+        serviceNamesToEdit.add(name);
 
         if (name == null || name.isEmpty()) {
             logger.error("Service name to edit is not defined");
@@ -169,8 +167,8 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public void waitServiceToEdit(String name) {
     	logger.info("waitServiceToEdit {} invoked {}", name, BeanUtil.getUser());
-    	this.serviceNamesToEdit.clear();
-        this.serviceNamesToEdit.add(name);
+        serviceNamesToEdit.clear();
+        serviceNamesToEdit.add(name);
 
         if (name == null || name.isEmpty()) {
             logger.error("Service name to edit is not defined");
@@ -179,11 +177,11 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public void selectedServicesToEdit(EnvironmentNode[] selectedServices) {
 
-    	this.serviceNamesToEdit.clear();
+        serviceNamesToEdit.clear();
 
     	for (EnvironmentNode service : selectedServices) {
     		auditLogger.info("selectServiceToEdit {} invoked {}", service.getName(), BeanUtil.getUser());
-            this.serviceNamesToEdit.add(service.getName());
+            serviceNamesToEdit.add(service.getName());
     	}
         load(0, 1000, null,SortOrder.ASCENDING, Collections.<String, Object>emptyMap());
     }
@@ -194,21 +192,21 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     	TreeNode root = new DefaultTreeNode("root", null);
 
-    	if (this.serviceNamesToEdit.isEmpty()) {
+        if(serviceNamesToEdit.isEmpty()) {
     		this.paramRoot = root;
     		return;
     	}
 
         EnvironmentNode node;
 
-        if (this.serviceNamesToEdit.size() > 1) {
+        if(serviceNamesToEdit.size() > 1) {
 
-        	if (this.severalEdit == null) {
+            if(severalEdit == null) {
 
                 this.severalEdit = new EnvironmentNode(Type.SERVICE, new ServiceDescription(), "Services", null, Collections.emptyList(), false, null, null, null, null, null,
                         new ArrayList<>(), null, null);
 
-		        for (String name : this.serviceNamesToEdit) {
+                for(String name : serviceNamesToEdit) {
 
 		        	EnvironmentNode current = getEnvironmentNode(name);
 
@@ -216,10 +214,10 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 		        		continue;
 		        	}
 
-		        	if (this.severalEdit.getNodeChildren().isEmpty()) {
+                    if(severalEdit.getNodeChildren().isEmpty()) {
 
 		        		for (EnvironmentNode toClone : current.getNodeChildren()) {
-		        			this.severalEdit.getNodeChildren().add(
+                            severalEdit.getNodeChildren().add(
 		        					new EnvironmentNode(toClone.getType(), new ServiceDescription(), toClone.getName(),
                                             toClone.getDescription(), toClone.getEnumeratedValues(), toClone.isServiceParamRequired(), toClone.getInputMask(),
                                             toClone.getValue(), toClone.getVariable(), toClone.getVariableSet(), toClone.getParamClassType(), null, null, toClone.getEnvironment()));
@@ -227,7 +225,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
 		        	} else {
 
-		        		Iterator<EnvironmentNode> iter = this.severalEdit.getNodeChildren().iterator();
+                        Iterator<EnvironmentNode> iter = severalEdit.getNodeChildren().iterator();
 
 		        		while (iter.hasNext()) {
 
@@ -261,10 +259,10 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 		        }
         	}
 
-	        node = this.severalEdit;
+            node = severalEdit;
 
         } else {
-        	node = getEnvironmentNode(this.serviceNamesToEdit.get(0));
+            node = getEnvironmentNode(serviceNamesToEdit.get(0));
         }
 
         if (node != null) {
@@ -296,7 +294,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
     }
 
     public TreeNode getParamRoot() {
-    	return this.paramRoot;
+        return paramRoot;
     }
 
     public ServiceEventLazyModel<ServiceEventModel> getLazyEventsModel() {
@@ -308,14 +306,14 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
     }
 
     private boolean isHidden(EnvironmentNode envNode) {
-        return envNode.getServiceStatus() == ServiceStatus.DISABLED && !this.showDisabled;
+        return envNode.getServiceStatus() == ServiceStatus.DISABLED && !showDisabled;
     }
 
     class LazySorter implements Comparator<EnvironmentNode>
     {
-        private String sortField;
+        private final String sortField;
 
-        private SortOrder sortOrder;
+        private final SortOrder sortOrder;
 
         public LazySorter(String sortField, SortOrder sortOrder) {
             this.sortField = sortField;
@@ -327,15 +325,13 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
             try {
 
                 int result = 0;
-                if(sortField.equals("name"))
+                if("name".equals(sortField))
                 {
                     result = node1.getName().compareToIgnoreCase(node2.getName());
-                }
-                else if (sortField.equals("serviceType"))
+                } else if("serviceType".equals(sortField))
                 {
                     result = node1.getServiceType().compareTo(node2.getServiceType());
-                }
-                else if(sortField.equals("status"))
+                } else if("status".equals(sortField))
                 {
                     result = node1.getStatus().compareToIgnoreCase(node2.getStatus());
                 }
@@ -344,7 +340,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
                     logger.warn("Unknown column name: {}", sortField);
                 }
 
-                return SortOrder.ASCENDING.equals(sortOrder) ? result : -1 * result;
+                return sortOrder == SortOrder.ASCENDING ? result : -1 * result;
             }
             catch(Exception e) {
                 throw new RuntimeException();
@@ -371,7 +367,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public String getHeaderForEditDialog() {
 
-    	if (this.serviceNamesToEdit.isEmpty()) {
+        if(serviceNamesToEdit.isEmpty()) {
     		return "";
     	}
 
@@ -379,9 +375,9 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     	logger.info("getHeaderForEditDialog invoked {}", BeanUtil.getUser());
 
-    	if (this.serviceNamesToEdit.size() == 1) {
+        if(serviceNamesToEdit.size() == 1) {
 
-    		EnvironmentNode node = getEnvironmentNode(this.serviceNamesToEdit.get(0));
+            EnvironmentNode node = getEnvironmentNode(serviceNamesToEdit.get(0));
 
         	if (node != null) {
 
@@ -394,11 +390,11 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
     	} else {
 
     		int i = 0;
-    		for (String name : this.serviceNamesToEdit) {
+            for(String name : serviceNamesToEdit) {
 
     			builder.append(name);
 
-    			if (++i < this.serviceNamesToEdit.size()) {
+                if(++i < serviceNamesToEdit.size()) {
     				builder.append(", ");
     			}
     		}
@@ -420,15 +416,15 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
             return false;
         }
         ServiceDescription description = BeanUtil.getSfContext().getConnectionManager().getServiceDescription(serviceName);
-        for(Map.Entry<String, Object> filterProperty: filters.entrySet()) {
+        for(Entry<String, Object> filterProperty : filters.entrySet()) {
             Object filterValue = filterProperty.getValue();
             String fieldValue;
 
-            if(filterProperty.getKey().equals("name")) {
+            if("name".equals(filterProperty.getKey())) {
                 fieldValue = serviceName.getServiceName();
-            } else if (filterProperty.getKey().equals("serviceType")) {
+            } else if("serviceType".equals(filterProperty.getKey())) {
                 fieldValue = description.getType().toString();
-            } else if(filterProperty.getKey().equals("status")) {
+            } else if("status".equals(filterProperty.getKey())) {
                 IService iService = BeanUtil.getSfContext().getConnectionManager().getService(serviceName);
                 fieldValue = iService.getStatus().name();
             } else {
@@ -446,19 +442,19 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public void applyServiceSettings() {
 
-    	for (String name : this.serviceNamesToEdit) {
+        for(String name : serviceNamesToEdit) {
 
     		auditLogger.info("applyServiceSettings {} invoked {}", name, BeanUtil.getUser());
 
 	        EnvironmentNode serviceNode = getEnvironmentNode(name);
 
-	        if (this.serviceNamesToEdit.size() > 1) {
+            if(serviceNamesToEdit.size() > 1) {
 
-	        	if (this.severalEdit == null) {
+                if(severalEdit == null) {
 	        		return;
 	        	}
 
-	        	for (EnvironmentNode paramInSeveral : this.severalEdit.getNodeChildren()) {
+                for(EnvironmentNode paramInSeveral : severalEdit.getNodeChildren()) {
 
 	        		for (EnvironmentNode param : serviceNode.getNodeChildren()) {
 
@@ -525,7 +521,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     public void restoreServiceSettings() {
 
-    	for (String name : this.serviceNamesToEdit) {
+        for(String name : serviceNamesToEdit) {
 
     		auditLogger.info("restoreServiceSettings {} invoked {}", name, BeanUtil.getUser());
 
@@ -536,12 +532,12 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 	            return;
 	        }
 
-	        int index = this.data.indexOf(serviceNode);
+            int index = data.indexOf(serviceNode);
 
 	        ServiceName serviceName = new ServiceName(currentEnvironment, name);
 
 	        EnvironmentNode envNode = createServiceNode(serviceName);
-	        this.data.set(index, envNode);
+            data.set(index, envNode);
     	}
 
     	this.severalEdit = null;
@@ -557,7 +553,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         String environmentVariableSet = connectionManager.getEnvironmentVariableSet(serviceName.getEnvironment());
         Map<String, String> variableSet = environmentVariableSet != null ? connectionManager.getVariableSet(environmentVariableSet) : null;
 
-        EnvironmentNode handlerClassParamNode = new EnvironmentNode(EnvironmentNode.Type.DESCRIPTION, sd,
+        EnvironmentNode handlerClassParamNode = new EnvironmentNode(Type.DESCRIPTION, sd,
                 "HandlerClassName", "", Collections.emptyList(), false, null, sd.getServiceHandlerClassName(), null, null, String.class, null,
                 notifyListener, null);
 
@@ -568,7 +564,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
             if (proxy.haveWriteMethod(name)) {
 
                 EnvironmentNode paramNode = new EnvironmentNode(
-                        EnvironmentNode.Type.PARAMETER,
+                        Type.PARAMETER,
                         sd,
                         name,
                         proxy.getParameterDescription(name),
@@ -590,7 +586,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
         Collections.sort(params, Collections.reverseOrder());
 
         EnvironmentNode envNode = new EnvironmentNode(
-                EnvironmentNode.Type.SERVICE, sd, sd.getName(), "", Collections.emptyList(), false, null, null, null, null, null, params,
+                Type.SERVICE, sd, sd.getName(), "", Collections.emptyList(), false, null, null, null, null, null, params,
                 notifyListener, serviceName.getEnvironment());
 
         envNode.setStatus(connectionManager.getService(serviceName).getStatus());
@@ -599,7 +595,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
     private EnvironmentNode getEnvironmentNode(String serviceName) {
         if (serviceName != null) {
-            for (EnvironmentNode node : this.data) {
+            for(EnvironmentNode node : data) {
                 if (node.getName().equals(serviceName)) {
                     return node;
                 }

@@ -31,7 +31,7 @@ public class StorageFilter
 	
 	public void addCriterion(FilterCriterion criterion)
 	{
-		this.criteria.add(criterion);
+        criteria.add(criterion);
 	}
 	
 	public List<FilterCriterion> getCriteria() {

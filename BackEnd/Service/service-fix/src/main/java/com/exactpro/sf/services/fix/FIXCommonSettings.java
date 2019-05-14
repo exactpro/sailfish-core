@@ -92,16 +92,16 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     @Description("If set to checked, allow unknown fields in messages. This is intended for unknown fields with tags < 5000\n" +
             "(not user defined fields)")
-    protected boolean allowUnknownMsgFields = false;
+    protected boolean allowUnknownMsgFields;
 
     @Description("Determines if milliseconds should be added to timestamp fields. Only available for AML 3")
     protected boolean millisecondsInTimeStampFields = true;
 
     @Description("Determines if microseconds should be added to timestamp fields. Only available for AML 3. This value is more priority than 'Milliseconds In Time Stamp Fields'")
-    protected boolean microsecondsInTimeStampFields = false;
+    protected boolean microsecondsInTimeStampFields;
 
     @Description("Receive limit in bytes to emulate Slow Consumer")
-    protected int receiveLimit = 0;
+    protected int receiveLimit;
 
     @Description("Client send reject if message is invalid")
     protected boolean RejectInvalidMessage = true;
@@ -119,13 +119,13 @@ public class FIXCommonSettings extends AbstractServiceSettings {
     protected boolean ValidateFieldsHaveValues = true;
 
     @Description("If set to checked, no reject sent on incoming message with duplicate tags Allow duplicated tags.")
-    protected boolean duplicateTagsAllowed = false;
+    protected boolean duplicateTagsAllowed;
 
     @Description("If specified, the session start and end will be converted from default zone to UTC")
-    protected boolean useLocalTime = false;
+    protected boolean useLocalTime;
 
     @Description("Enables SSL usage for QFJ acceptor or initiator")
-    protected boolean useSSL = false;
+    protected boolean useSSL;
 
     @Description("KeyStore to use with SSL")
     protected String sslKeyStore;//TODO: Use Alias for DataManager
@@ -140,7 +140,7 @@ public class FIXCommonSettings extends AbstractServiceSettings {
     protected String sslCipherSuites;
 
     @Description("Enables fields ordering in raw message by dictionary")
-    protected boolean orderingFields = false;
+    protected boolean orderingFields;
 
     public String getBeginString() {
         return BeginString;

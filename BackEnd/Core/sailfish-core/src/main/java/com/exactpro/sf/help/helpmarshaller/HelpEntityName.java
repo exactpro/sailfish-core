@@ -24,14 +24,14 @@ public enum HelpEntityName {
     PROVIDERS("Matrix providers"),
     VALIDATORS("Validators"),
     PREPROCESSORS("Preprocessors");
-    
-    private String value;
-    
-    private HelpEntityName(String value) {
+
+    private final String value;
+
+    HelpEntityName(String value) {
         this.value = value;
     }
     
     public String getValue() {
-        return this.value;
+        return value;
     }
 }

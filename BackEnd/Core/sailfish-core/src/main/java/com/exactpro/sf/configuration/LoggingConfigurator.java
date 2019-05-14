@@ -243,7 +243,7 @@ public class LoggingConfigurator implements ILoggingConfigurator {
                 .append(serviceName.getEnvironment()).append(separator)
                 .append(serviceName.getServiceName());
         if (!folderOnly) {
-            pathBuilder.append(separator).append(serviceName.toString());
+            pathBuilder.append(separator).append(serviceName);
         }
 
         return pathBuilder.toString();

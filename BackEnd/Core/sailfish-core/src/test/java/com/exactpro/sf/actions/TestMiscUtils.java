@@ -26,10 +26,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.util.AbstractTest;
 import com.exactpro.sf.util.FieldKnownBugException;
 
@@ -37,7 +37,7 @@ public class TestMiscUtils extends AbstractTest {
 
     private final String intFiled = "int";
     private final String stringFiled = "str";
-    private MiscUtils miscUtils = null;
+    private MiscUtils miscUtils;
 
     @Before
     public void before() {
@@ -48,14 +48,14 @@ public class TestMiscUtils extends AbstractTest {
     public void testIntCheckCount() throws Exception {
         Collection<Integer> intCollection = Arrays.asList(4, 1, 2, 3, 4);
 
-        Assert.assertTrue(this.miscUtils.checkCount(intCollection, 5, 0));
-        Assert.assertFalse(this.miscUtils.checkCount(intCollection, 5, 1));
+        Assert.assertTrue(miscUtils.checkCount(intCollection, 5, 0));
+        Assert.assertFalse(miscUtils.checkCount(intCollection, 5, 1));
 
-        Assert.assertTrue(this.miscUtils.checkCount(intCollection, 2, 1));
-        Assert.assertFalse(this.miscUtils.checkCount(intCollection, 2, 2));
+        Assert.assertTrue(miscUtils.checkCount(intCollection, 2, 1));
+        Assert.assertFalse(miscUtils.checkCount(intCollection, 2, 2));
 
-        Assert.assertTrue(this.miscUtils.checkCount(intCollection, 4, 2));
-        Assert.assertFalse(this.miscUtils.checkCount(intCollection, 4, 0));
+        Assert.assertTrue(miscUtils.checkCount(intCollection, 4, 2));
+        Assert.assertFalse(miscUtils.checkCount(intCollection, 4, 0));
     }
 
     @Test
@@ -69,12 +69,12 @@ public class TestMiscUtils extends AbstractTest {
         int count = 2;
         Collection<IMessage> msgCollection = Collections.nCopies(count, fullItem);
 
-        Assert.assertTrue(this.miscUtils.checkCount(msgCollection, fullItem, count));
-        Assert.assertTrue(this.miscUtils.checkCount(msgCollection, partItem, count));
-        Assert.assertTrue(this.miscUtils.checkCount(msgCollection, empty, 0));
-        Assert.assertFalse(this.miscUtils.checkCount(msgCollection, fullItem, 0));
-        Assert.assertFalse(this.miscUtils.checkCount(msgCollection, partItem, 0));
-        Assert.assertFalse(this.miscUtils.checkCount(msgCollection, empty, count));
+        Assert.assertTrue(miscUtils.checkCount(msgCollection, fullItem, count));
+        Assert.assertTrue(miscUtils.checkCount(msgCollection, partItem, count));
+        Assert.assertTrue(miscUtils.checkCount(msgCollection, empty, 0));
+        Assert.assertFalse(miscUtils.checkCount(msgCollection, fullItem, 0));
+        Assert.assertFalse(miscUtils.checkCount(msgCollection, partItem, 0));
+        Assert.assertFalse(miscUtils.checkCount(msgCollection, empty, count));
 
         IMessage knownBugItem = empty.cloneMessage();
         knownBugItem.addField(intFiled,
@@ -84,7 +84,7 @@ public class TestMiscUtils extends AbstractTest {
 
         FieldKnownBugException fieldKnownBugException = null;
         try {
-            this.miscUtils.checkCount(msgCollection, knownBugItem, count);
+            miscUtils.checkCount(msgCollection, knownBugItem, count);
         } catch (FieldKnownBugException e) {
             fieldKnownBugException = e;
         }
@@ -98,7 +98,7 @@ public class TestMiscUtils extends AbstractTest {
                         "um.call(SailfishURI.parse(\"BugsUtils.Expected\"), \"str2\").Bug(\"string bug\", \"str\" )",
                         "um", SFLocalContext.getDefault().getUtilityManager()));
         try {
-            this.miscUtils.checkCount(msgCollection, knownBugItem, count);
+            miscUtils.checkCount(msgCollection, knownBugItem, count);
         } catch (FieldKnownBugException e) {
             fieldKnownBugException = e;
         }

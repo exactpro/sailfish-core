@@ -52,19 +52,16 @@ public class Library implements Serializable /*extends AbstractLibraryItem*/ {
 
     private String variableSetsFile;
 
-	private SfApiOptions defaultApiOptions;
+    private final SfApiOptions defaultApiOptions = new SfApiOptions();
 
 	public Library() {
-
-		this.defaultApiOptions = new SfApiOptions();
-
-		this.defaultApiOptions.setLanguage("Auto");
-		this.defaultApiOptions.setContinueIfFailed(false);
-		this.defaultApiOptions.setIgnoreAskForContinue(false);
-		this.defaultApiOptions.setContinueIfFailed(false);
-		this.defaultApiOptions.setAutoStart(false);
-        this.defaultApiOptions.setRunNetDumper(false);
-        this.defaultApiOptions.setSkipOptional(false);
+        defaultApiOptions.setLanguage("Auto");
+        defaultApiOptions.setContinueIfFailed(false);
+        defaultApiOptions.setIgnoreAskForContinue(false);
+        defaultApiOptions.setContinueIfFailed(false);
+        defaultApiOptions.setAutoStart(false);
+        defaultApiOptions.setRunNetDumper(false);
+        defaultApiOptions.setSkipOptional(false);
 	}
 
 	public Optional<Globals> getGlobals() {
@@ -210,7 +207,6 @@ public class Library implements Serializable /*extends AbstractLibraryItem*/ {
             }
         }
 
-
-        this.reportsFolder = substitutor.replace(this.reportsFolder);
+        this.reportsFolder = substitutor.replace(reportsFolder);
     }
 }

@@ -67,7 +67,7 @@ public class FixConnectivityUtil extends AbstractCaller {
     public final int addMsgSeqNum(int corr)
     {
         messageSeqNumber = messageSeqNumber + corr;
-        return ( messageSeqNumber );
+        return messageSeqNumber;
     }
 
     @Description("Set current MsgSeqNum to specified integer value.<br>"
@@ -78,7 +78,7 @@ public class FixConnectivityUtil extends AbstractCaller {
     public final int setMsgSeqNum(int corr)
     {
         messageSeqNumber =  corr;
-        return ( messageSeqNumber );
+        return messageSeqNumber;
     }
 
     @Description("Formats current date time in UTC time zone modified by pattern into string using <code>yyyyMMdd-HH:mm:ss.SSS</code> format pattern" + DateUtil.MODIFY_HELP + "Usage: #{DateMS(modifyPattern)}")

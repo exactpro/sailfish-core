@@ -19,9 +19,9 @@ import java.io.IOException;
 
 public interface IMatrixWriter extends AutoCloseable {
 
-    public void writeCells(SimpleCell[] cells) throws IOException;
+    void writeCells(SimpleCell[] cells) throws IOException;
 
-    public void write(String[] strings) throws IOException;
+    void write(String[] strings) throws IOException;
 
-    public void flush() throws IOException;
+    void flush() throws IOException;
 }

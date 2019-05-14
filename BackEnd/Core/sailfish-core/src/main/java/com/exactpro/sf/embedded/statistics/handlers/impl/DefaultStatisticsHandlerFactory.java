@@ -20,7 +20,7 @@ import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
 import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandlerFactory;
 
-@ResourceAliases({"Default_Report"})
+@ResourceAliases("Default_Report")
 public class DefaultStatisticsHandlerFactory implements IStatisticsReportHandlerFactory {
     @Override
     public IStatisticsReportHandler createReportHandler() {

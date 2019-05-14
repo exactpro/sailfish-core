@@ -32,12 +32,8 @@ public class ScriptrunnerUpdateRequest extends AbstractMessage {
 	public void setRequestId(String requestId) {
 		this.requestId = requestId;
 	}
-	
-	public ScriptrunnerUpdateRequest(){
-		super();
-	}
-	
-	@Override
+
+    @Override
 	public String toString() {
 		return new ToStringBuilder(this).append("messageType", SFMessageType.ScriptrunnerUpdateRequest).toString();
 	}

@@ -17,7 +17,6 @@ package com.exactpro.sf.comparison;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -39,7 +38,7 @@ public class Formatter {
 		// hide constructor
 	}
 
-    private final static ThreadLocal<DecimalFormat> df = new ThreadLocal<DecimalFormat>() {
+    private static final ThreadLocal<DecimalFormat> df = new ThreadLocal<DecimalFormat>() {
         @Override
         protected DecimalFormat initialValue() {
             return new DecimalFormat("#.####################");
@@ -55,69 +54,106 @@ public class Formatter {
 		{
 			if (o instanceof String) {
 				// DG: dirty hack for FIX protocol for DateTime fields comparison
-				if (o.equals(Convention.CONV_PRESENT_DATE_FIX_STRING)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_DATE_FIX_STRING)) return Convention.CONV_MISSED_STRING;
-				if (o.equals(Convention.CONV_PRESENT_CHAR_FIX_STRING)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_CHAR_FIX_STRING)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_DATE_FIX_STRING)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_DATE_FIX_STRING)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
+                if(o.equals(Convention.CONV_PRESENT_CHAR_FIX_STRING)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_CHAR_FIX_STRING)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				String s = (String)o;
-				if (s.startsWith(" ")
-						|| s.endsWith(" ")
-						|| s.startsWith("\t")
-						|| s.endsWith("\t")) {
-					return "["+s+"]";
-				}
-				return s;
-			}
+                return s.startsWith(" ")
+                        || s.endsWith(" ")
+                        || s.startsWith("\t")
+                        || s.endsWith("\t") ? "[" + s + "]" : s;
+            }
 			if (o instanceof Integer) {
-				if (o.equals(Convention.CONV_PRESENT_INTEGER)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_INTEGER)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_INTEGER)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_INTEGER)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 			if (o instanceof Long) {
-				if (o.equals(Convention.CONV_PRESENT_LONG)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_LONG)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LONG)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LONG)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 			if (o instanceof Double) {
-				if (o.equals(Convention.CONV_PRESENT_DOUBLE)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_DOUBLE)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_DOUBLE)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_DOUBLE)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				Double d = (Double)o;
-				return (d.equals(Double.NaN)) ? "NaN" : df.get().format(d);
+                return d.equals(Double.NaN) ? "NaN" : df.get().format(d);
 			}
 			if (o instanceof Float) {
-				if (o.equals(Convention.CONV_PRESENT_FLOAT)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_FLOAT)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_FLOAT)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_FLOAT)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				Float d = (Float)o;
-				return (d.equals(Float.NaN)) ? "NaN" : df.get().format(d);
+                return d.equals(Float.NaN) ? "NaN" : df.get().format(d);
 			}
             if (o instanceof LocalDateTime) {
-                if (o.equals(Convention.CONV_PRESENT_LOCAL_DATE_TIME)) return Convention.CONV_PRESENT_STRING;
-                if (o.equals(Convention.CONV_MISSED_LOCAL_DATE_TIME)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LOCAL_DATE_TIME)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LOCAL_DATE_TIME)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
                 return o.toString();
             }
             if (o instanceof LocalDate) {
-                if (o.equals(Convention.CONV_PRESENT_LOCAL_DATE)) return Convention.CONV_PRESENT_STRING;
-                if (o.equals(Convention.CONV_MISSED_LOCAL_DATE)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LOCAL_DATE)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LOCAL_DATE)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
                 return o.toString();
             }
             if (o instanceof LocalTime) {
-                if (o.equals(Convention.CONV_PRESENT_LOCAL_TIME)) return Convention.CONV_PRESENT_STRING;
-                if (o.equals(Convention.CONV_MISSED_LOCAL_TIME)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LOCAL_TIME)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LOCAL_TIME)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
                 return o.toString();
             }
 			if (o instanceof Character) {
-				if (o.equals(Convention.CONV_PRESENT_CHAR)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_CHAR)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_CHAR)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_CHAR)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 		}
 		if (o instanceof Double) {
 			Double d = (Double)o;
-			return (d.equals(Double.NaN)) ? "NaN" : df.get().format(d);
+            return d.equals(Double.NaN) ? "NaN" : df.get().format(d);
 		}
 		if (o instanceof Float) {
 			Float f = (Float)o;
-			return (f.equals(Float.NaN)) ? "NaN" : df.get().format(f);
+            return f.equals(Float.NaN) ? "NaN" : df.get().format(f);
 		}
 		if (o instanceof BigDecimal) {
 			BigDecimal bd = (BigDecimal)o;
@@ -154,10 +190,18 @@ public class Formatter {
 			}
 			if (o instanceof String) {
 				// DG: dirty hack for FIX protocol for DateTime fields comparison
-				if (o.equals(Convention.CONV_PRESENT_DATE_FIX_STRING)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_DATE_FIX_STRING)) return Convention.CONV_MISSED_STRING;
-				if (o.equals(Convention.CONV_PRESENT_CHAR_FIX_STRING)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_CHAR_FIX_STRING)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_DATE_FIX_STRING)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_DATE_FIX_STRING)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
+                if(o.equals(Convention.CONV_PRESENT_CHAR_FIX_STRING)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_CHAR_FIX_STRING)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				String s = (String)o;
 				if (s.startsWith(" ")
 						|| s.endsWith(" ")
@@ -174,48 +218,84 @@ public class Formatter {
 				return s.replaceAll(XML_10_PATTERN, Convention.CONV_MISSED_STRING);
 			}
 			if (o instanceof Integer) {
-				if (o.equals(Convention.CONV_PRESENT_INTEGER)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_INTEGER)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_INTEGER)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_INTEGER)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 			if (o instanceof Long) {
-				if (o.equals(Convention.CONV_PRESENT_LONG)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_LONG)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LONG)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LONG)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 			if (o instanceof Double) {
-				if (o.equals(Convention.CONV_PRESENT_DOUBLE)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_DOUBLE)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_DOUBLE)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_DOUBLE)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return df.get().format(o);
 			}
 			if (o instanceof Float) {
-				if (o.equals(Convention.CONV_PRESENT_FLOAT)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_FLOAT)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_FLOAT)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_FLOAT)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return df.get().format(o);
 			}
 			if (o instanceof Short) {
-				if (o.equals(Convention.CONV_PRESENT_SHORT)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_SHORT)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_SHORT)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_SHORT)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 			if (o instanceof LocalDateTime) {
-				if (o.equals(Convention.CONV_PRESENT_LOCAL_DATE_TIME)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_LOCAL_DATE_TIME)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LOCAL_DATE_TIME)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LOCAL_DATE_TIME)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
                 return ((LocalDateTime) o).format(LocalDateTimeConst.DATE_TIME_FORMATTER);
 			}
             if (o instanceof LocalDate) {
-                if (o.equals(Convention.CONV_PRESENT_LOCAL_DATE)) return Convention.CONV_PRESENT_STRING;
-                if (o.equals(Convention.CONV_MISSED_LOCAL_DATE)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LOCAL_DATE)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LOCAL_DATE)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
                 return ((LocalDate) o).format(LocalDateTimeConst.DATE_FORMATTER);
             }
             if (o instanceof LocalTime) {
-                if (o.equals(Convention.CONV_PRESENT_LOCAL_TIME)) return Convention.CONV_PRESENT_STRING;
-                if (o.equals(Convention.CONV_MISSED_LOCAL_TIME)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_LOCAL_TIME)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_LOCAL_TIME)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
                 return ((LocalTime) o).format(LocalDateTimeConst.TIME_FORMATTER);
             }
 			if (o instanceof Character) {
-				if (o.equals(Convention.CONV_PRESENT_CHAR)) return Convention.CONV_PRESENT_STRING;
-				if (o.equals(Convention.CONV_MISSED_CHAR)) return Convention.CONV_MISSED_STRING;
+                if(o.equals(Convention.CONV_PRESENT_CHAR)) {
+                    return Convention.CONV_PRESENT_STRING;
+                }
+                if(o.equals(Convention.CONV_MISSED_CHAR)) {
+                    return Convention.CONV_MISSED_STRING;
+                }
 				return o.toString();
 			}
 			if (o instanceof BigDecimal) {
@@ -241,21 +321,14 @@ public class Formatter {
 			return df.get().format(o);
 		}
 
-		String s;
-		if(o instanceof BigDecimal) {
-			s = ((BigDecimal) o).toPlainString();
-		} else
-			s = o.toString();
+        String s = o instanceof BigDecimal ? ((BigDecimal)o).toPlainString() : o.toString();
 
-		if (s.startsWith(" ")
-				|| s.endsWith(" ")
-				|| s.startsWith("\t")
-				|| s.endsWith("\t")) {
-			return "["+s+"]";
-		}
+        return s.startsWith(" ")
+                || s.endsWith(" ")
+                || s.startsWith("\t")
+                || s.endsWith("\t") ? "[" + s + "]" : s;
 
-		return s;
-	}
+    }
 
     public static String formatExpected(ComparisonResult result) {
         Object expected = result.getExpected();

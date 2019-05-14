@@ -20,8 +20,8 @@ import java.io.Serializable;
 @SuppressWarnings("serial")
 public class MessageReference implements Serializable {
 
-	private String accessor;
-	private String definition;
+    private final String accessor;
+    private final String definition;
 
 	public MessageReference(String accessor, String definition)
 	{
@@ -30,10 +30,10 @@ public class MessageReference implements Serializable {
 	}
 
 	public String getAccessor() {
-		return this.accessor;
+        return accessor;
 	}
 
 	public String getDefinition() {
-		return this.definition;
+        return definition;
 	}
 }

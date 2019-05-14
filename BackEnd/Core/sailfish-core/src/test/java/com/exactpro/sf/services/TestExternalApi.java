@@ -33,6 +33,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.common.messages.IMessage;
@@ -54,8 +56,8 @@ import com.exactpro.sf.externalapi.impl.EmptyListener;
 @RunWith(Parameterized.class)
 public class TestExternalApi {
 
-    private File writableLayer = Paths.get("build", "tmp", "test_external_api").toFile();
-    private ServiceName serviceName = new ServiceName("env", "serviceName");
+    private final File writableLayer = Paths.get("build", "tmp", "test_external_api").toFile();
+    private final ServiceName serviceName = new ServiceName("env", "serviceName");
     private SailfishURI serviceType;
     private SailfishURI testServiceType;
     private SailfishURI testDictionary;
@@ -64,10 +66,10 @@ public class TestExternalApi {
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
-    @Parameterized.Parameter
+    @Parameter
     public boolean strict = true;
 
-    @Parameterized.Parameters(name = "strictMode = {0}")
+    @Parameters(name = "strictMode = {0}")
     public static Collection<?> data() {
         return Arrays.asList(false, true);
     }
@@ -126,7 +128,7 @@ public class TestExternalApi {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
-            if (ServiceStatus.STARTED.equals(sp.getStatus())) {
+            if(sp.getStatus() == ServiceStatus.STARTED) {
                 sp.stop();
             }
         }
@@ -141,7 +143,7 @@ public class TestExternalApi {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
-            if (ServiceStatus.STARTED.equals(sp.getStatus())) {
+            if(sp.getStatus() == ServiceStatus.STARTED) {
                 sp.stop();
             }
         }
@@ -160,7 +162,7 @@ public class TestExternalApi {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
-            if (sp != null && ServiceStatus.STARTED.equals(sp.getStatus())) {
+            if(sp != null && sp.getStatus() == ServiceStatus.STARTED) {
                 sp.stop();
             }
         }
@@ -203,7 +205,7 @@ public class TestExternalApi {
             e1.printStackTrace();
             Assert.fail(e1.getMessage());
         } finally {
-            if (ServiceStatus.STARTED.equals(sp.getStatus())) {
+            if(sp.getStatus() == ServiceStatus.STARTED) {
                 sp.stop();
             }
         }
@@ -259,7 +261,7 @@ public class TestExternalApi {
             e1.printStackTrace();
             Assert.fail(e1.getMessage());
         } finally {
-            if (ServiceStatus.STARTED.equals(sp.getStatus())) {
+            if(sp.getStatus() == ServiceStatus.STARTED) {
                 sp.stop();
             }
         }
@@ -311,7 +313,7 @@ public class TestExternalApi {
             e.printStackTrace();
             Assert.fail(e.getMessage());
         } finally {
-            if (ServiceStatus.STARTED.equals(sp.getStatus())) {
+            if(sp.getStatus() == ServiceStatus.STARTED) {
                 sp.stop();
             }
         }

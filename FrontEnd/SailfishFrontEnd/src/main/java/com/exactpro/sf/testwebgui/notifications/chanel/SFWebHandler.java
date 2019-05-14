@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.exactprosystems.webchannels.messages.TestRequest;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class SFWebHandler implements IChannelHandler{
 	private static final Logger logger = LoggerFactory.getLogger(SFWebHandler.class);
 	private final String id;
 	private AbstractChannel channel;
-	private Map<IUpdateRetriever, List<IUpdateRequestListener>> subscribers;
+	private final Map<IUpdateRetriever, List<IUpdateRequestListener>> subscribers;
 	
 	public SFWebHandler(String id) {
 		
@@ -171,6 +172,8 @@ public class SFWebHandler implements IChannelHandler{
 				//Implement logic for unsubscribing
 				
 			} else if(message instanceof HeartBeat){
+
+            } else if (message instanceof TestRequest) {
 
             } else {
 				

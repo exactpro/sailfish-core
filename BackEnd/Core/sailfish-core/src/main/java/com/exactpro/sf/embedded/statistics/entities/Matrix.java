@@ -24,8 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name="stmatrices",
-uniqueConstraints = {@UniqueConstraint(columnNames={"name"})})
+@Table(name = "stmatrices", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @SequenceGenerator(name="stmatrices_generator", sequenceName="stmatrices_sequence")
 public class Matrix {
 	

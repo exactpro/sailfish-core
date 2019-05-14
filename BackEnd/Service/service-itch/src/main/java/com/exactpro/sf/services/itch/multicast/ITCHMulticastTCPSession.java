@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import org.apache.mina.filter.codec.ProtocolCodecFilter;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -22,10 +27,6 @@ import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.WrapperNioSocketAcceptor;
-import org.apache.mina.filter.codec.ProtocolCodecFilter;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
 
 /**
  * Created by alexey.zarovny on 11/19/14.
@@ -40,7 +41,7 @@ public class ITCHMulticastTCPSession implements ISession {
     private int port;
     private WrapperNioSocketAcceptor acceptor;
     private boolean isClosed;
-    private MessageHelper itchHandler;
+    private final MessageHelper itchHandler;
 
     public ITCHMulticastTCPSession(IServiceContext serviceContext, String serviceName, SailfishURI dictionaryURI, ITCHMulticastServer service, MessageHelper itchHandler, IMessageFactory factory) {
         this.name = serviceName + "TCPSession";
@@ -55,9 +56,9 @@ public class ITCHMulticastTCPSession implements ISession {
     public void open(int port, ITCHMulticastCache cache) throws IOException {
         this.port = port;
 
-        acceptor = new WrapperNioSocketAcceptor(this.serviceContext.getTaskExecutor());
-        acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new ITCHCodecFactory(this.serviceContext, itchHandler)));
-        acceptor.setHandler(new ITCHMulticastTCPHandlerAdapter(cache, dictionaryURI, this.serviceContext.getTaskExecutor(), service, this, ((ITCHMulticastSettings) service.getSettings()).getMarketDataGroup(), itchHandler, factory));
+        acceptor = new WrapperNioSocketAcceptor(serviceContext.getTaskExecutor());
+        acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(new ITCHCodecFactory(serviceContext, itchHandler)));
+        acceptor.setHandler(new ITCHMulticastTCPHandlerAdapter(cache, dictionaryURI, serviceContext.getTaskExecutor(), service, this, ((ITCHMulticastSettings)service.getSettings()).getMarketDataGroup(), itchHandler, factory));
         acceptor.setReuseAddress(true);
         acceptor.bind(new InetSocketAddress(this.port));
         isClosed = false;
@@ -83,7 +84,7 @@ public class ITCHMulticastTCPSession implements ISession {
     @Override
     public void close() {
         if (acceptor != null) {
-            acceptor.unbind(new InetSocketAddress(this.port));
+            acceptor.unbind(new InetSocketAddress(port));
             acceptor.dispose();
         }
         isClosed = true;

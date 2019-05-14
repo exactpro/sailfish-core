@@ -15,14 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
-import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,18 +34,20 @@ import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.OutcomeCollector;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
+import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 
 public class BroadcastScriptReport implements IScriptReport {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	private final List<IScriptReport> listeners;
 
-	private boolean actionCreated = false;
+    private boolean actionCreated;
 
-	private boolean testCaseCreated = false;
+    private boolean testCaseCreated;
 
-	public BroadcastScriptReport(final List<IScriptReport> listeners) {
+    public BroadcastScriptReport(List<IScriptReport> listeners) {
 		this.listeners = new CopyOnWriteArrayList<>(listeners);
 	}
 
@@ -149,7 +148,7 @@ public class BroadcastScriptReport implements IScriptReport {
 
 	@Override
 	public boolean isActionCreated() {
-		return this.actionCreated;
+        return actionCreated;
 	}
 
     @Override
@@ -320,8 +319,9 @@ public class BroadcastScriptReport implements IScriptReport {
 		for (IScriptReport listener: listeners) {
 			try {
 			    IReportStats stats = listener.getReportStats();
-			if (stats != null)
-				return stats;
+                if(stats != null) {
+                    return stats;
+                }
 			} catch (Exception e) {
 				logger.error("Error while firing get report stats with {} listener", listener.getClass().getName(), e);
 			}

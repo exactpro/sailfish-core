@@ -53,40 +53,33 @@ public final class NTGCodec extends AbstractCodec {
 	protected static final int MINIMAL_CAPACITY = 4 ;
 
     // Predefined value of the first byte of  NTG message.
-	protected final static byte CLIENT_START_OF_MESSAGE_INDICATOR  = 2;
+    protected static final byte CLIENT_START_OF_MESSAGE_INDICATOR = 2;
 
 	// NOTE: this value must be qualified in production
-	protected final static byte SERVER_START_OF_MESSAGE_INDICATOR  = 1;
+    protected static final byte SERVER_START_OF_MESSAGE_INDICATOR = 1;
 
 	// FIXME: SessionAttribute.RESTORE may work incorrect with this attribute
 	private static final String ATTRIBUTE_IS_INPUT_MESSAGE = "IsInput";
 	private static final String ATTRIBUTE_MESSAGE_TYPE = "MessageType";
 
-	private IMessageFactory msgFactory = null;
-	private IDictionaryStructure dictionary = null;
-	private static int parsedMessagesCount = 0;
+    private IMessageFactory msgFactory;
+    private IDictionaryStructure dictionary;
 
-	private MessageStructureReader messageStructureReader = null;
-	private MessageStructureWriter messageStructureWriter = null;
+    private MessageStructureReader messageStructureReader;
+    private MessageStructureWriter messageStructureWriter;
 
 	private Map<Byte, IMessageStructure> decodeMsgTypeToStructure = new HashMap<>();
-	private Map<Long, Integer> msgIdents = new HashMap<>();
+    private final Map<Long, Integer> msgIdents = new HashMap<>();
 
-    public NTGCodec() {
-		// default constructor
-	}
-
-
-
-	@Override
+    @Override
 	public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary)
 	{
 
-		if (null == msgFactory) {
+        if(msgFactory == null) {
 			throw new IllegalArgumentException("Parameter [msgFactory] could not be null");
 		}
 
-		if (null == dictionary) {
+        if(dictionary == null) {
 			throw new IllegalArgumentException("Parameter [dictionary] could not be null");
 		}
 
@@ -118,7 +111,7 @@ public final class NTGCodec extends AbstractCodec {
 		}
 
 		this.decodeMsgTypeToStructure = outputMap;
-		this.decodeMsgTypeToStructure.putAll(inputMap);
+        decodeMsgTypeToStructure.putAll(inputMap);
 
 		for (Entry<Byte, IMessageStructure> entry : decodeMsgTypeToStructure.entrySet()) {
 
@@ -128,7 +121,7 @@ public final class NTGCodec extends AbstractCodec {
                 Integer fldLength = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
 
                 if(fldLength == null) {
-                    throw new ServiceException("Attribute [" + NTGProtocolAttribute.Length.toString() + "] missed in definition field "
+                    throw new ServiceException("Attribute [" + NTGProtocolAttribute.Length + "] missed in definition field "
                             + fldStruct.getName() + " in message " + entry.getValue().getName());
                 }
 
@@ -139,11 +132,11 @@ public final class NTGCodec extends AbstractCodec {
 
             iden <<= 24;
 
-            iden |= ((msgLength - 3) << 8);
+            iden |= (msgLength - 3) << 8;
 
             iden |= 2;
 
-            this.msgIdents.put(iden, msgLength - 3);
+            msgIdents.put(iden, msgLength - 3);
         }
 
 		this.messageStructureReader = new MessageStructureReader();
@@ -156,11 +149,9 @@ public final class NTGCodec extends AbstractCodec {
 	{
 		inputBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		short messageLength = 0;
-		boolean isDecodable = false;
-		byte messageType = -1;
+        boolean isDecodable = false;
 
-		if( inputBuffer.remaining() < MINIMAL_CAPACITY ) {
+        if(inputBuffer.remaining() < MINIMAL_CAPACITY) {
 			return false;
 		}
 
@@ -169,7 +160,7 @@ public final class NTGCodec extends AbstractCodec {
 		byte messageStartByte  = inputBuffer.get();
 
 		// Implementation of SEVRER_START_OF_MESSAGE_INDICATOR need to be qualified.
-		if( CLIENT_START_OF_MESSAGE_INDICATOR != messageStartByte
+        if(messageStartByte != CLIENT_START_OF_MESSAGE_INDICATOR
 		/* && SEVRER_START_OF_MESSAGE_INDICATOR != messageStartByte */ )
 		{
             inputBuffer.reset();
@@ -180,7 +171,7 @@ public final class NTGCodec extends AbstractCodec {
             throw new EPSCommonException("Unexpected start of message: " + messageStartByte);
 		}
 
-		messageLength = inputBuffer.getShort();
+        short messageLength = inputBuffer.getShort();
 
 		if( messageLength < 0 )
 		{
@@ -192,7 +183,7 @@ public final class NTGCodec extends AbstractCodec {
 			isDecodable = true;
 		}
 
-		messageType = inputBuffer.get();
+        byte messageType = inputBuffer.get();
 		inputBuffer.reset();
 
 		if(logger.isDebugEnabled())
@@ -223,18 +214,18 @@ public final class NTGCodec extends AbstractCodec {
 		inputBuffer.reset();
 		int startposition = inputBuffer.position();
 
-		IMessageStructure msgStructure = this.decodeMsgTypeToStructure.get( messageType );
+        IMessageStructure msgStructure = decodeMsgTypeToStructure.get(messageType);
 
-		if(null == msgStructure ) {
+        if(msgStructure == null) {
 			throw new UndefinedMessageException("Message type ["+messageType+"] is not defined in the dictionary.");
 		}
 
 		IMessage msg = msgFactory.createMessage(msgStructure.getName(), msgStructure.getNamespace());
         NTGVisitorDecode visitorNTGDecode = new NTGVisitorDecode(inputBuffer, msgFactory, msg);
-        this.messageStructureWriter.traverse(visitorNTGDecode, msgStructure);
+        messageStructureWriter.traverse(visitorNTGDecode, msgStructure);
         IMessage msgDecoded = visitorNTGDecode.getMessage();
 
-		if ( null != msgDecoded )
+        if(msgDecoded != null)
 		{
             pdOutput.write(visitorNTGDecode.getMessage());
 			resultDecode = true;
@@ -248,7 +239,7 @@ public final class NTGCodec extends AbstractCodec {
 		sizeofmessage -= startposition;
 		byte[] rawMsg = new byte[sizeofmessage];
 		System.arraycopy( inputBuffer.array(), startposition, rawMsg, 0, sizeofmessage );
-		if( null != msgDecoded ) {
+        if(msgDecoded != null) {
 			msgDecoded.getMetaData().setRawMessage( rawMsg );
 		}
 
@@ -258,8 +249,9 @@ public final class NTGCodec extends AbstractCodec {
 	@Override
     public void encode(IoSession session, Object objMessage, ProtocolEncoderOutput peOutput)
 	{
-		if ( !(objMessage instanceof IMessage ) )
-			throw new IllegalArgumentException("Message parameter is not instance of " + IMessage.class.getCanonicalName() );
+        if(!(objMessage instanceof IMessage)) {
+            throw new IllegalArgumentException("Message parameter is not instance of " + IMessage.class.getCanonicalName());
+        }
 
 		IMessage message = (IMessage)objMessage;
 
@@ -290,12 +282,6 @@ public final class NTGCodec extends AbstractCodec {
             logger.debug(" encode() as hex    [{}]", NTGUtility.getHexdump(visitorNTG.getBuffer(), visitorNTG.getAccumulatedLength()));
             logger.debug(MINAUtil.getHexdumpAdv(visitorNTG.getBuffer(), visitorNTG.getAccumulatedLength()));
 		}
-	}
-
-
-	public static int getParsedMessagesCount()
-	{
-		return parsedMessagesCount;
 	}
 
 }

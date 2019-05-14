@@ -73,7 +73,7 @@ public class EMailService implements IEmbeddedService{
     public void send(String subject, String body, String htmlBody,
                      List<String> additionalRecipients,
                      List<File> attachments) {
-        if (!ServiceStatus.Connected.equals(this.status)) {
+        if(status != ServiceStatus.Connected) {
             logger.warn("EMail service in not the connected status. Please check its configurations");
             return;
         }
@@ -91,7 +91,7 @@ public class EMailService implements IEmbeddedService{
         List<String> recipients = setTransportSettings(mailer);
 
         if (attachments != null && !attachments.isEmpty()) {
-            for (final File attachment : attachments) {
+            for(File attachment : attachments) {
                 if (attachment != null) {
                     try {
                         ((MultiPartEmail) mailer).attach(new Attachment(attachment.getName(), attachment), attachment.getName(), "");
@@ -132,18 +132,18 @@ public class EMailService implements IEmbeddedService{
 
     public EMailServiceSettings getSettings() {
         try {
-            this.lock.readLock().lock();
+            lock.readLock().lock();
             return settings;
         } finally {
-            this.lock.readLock().unlock();
+            lock.readLock().unlock();
         }
     }
 
     @Override
     public void setSettings(IMapableSettings settings) {
-        this.lock.writeLock().lock();
+        lock.writeLock().lock();
         this.settings = (EMailServiceSettings) settings;
-        this.lock.writeLock().unlock();
+        lock.writeLock().unlock();
     }
 
     public void preCheckConnection() {
@@ -176,7 +176,7 @@ public class EMailService implements IEmbeddedService{
 
     @Override
     public boolean isConnected(){
-        return this.status.equals(ServiceStatus.Connected);
+        return status == ServiceStatus.Connected;
     }
 
     @Override
@@ -192,7 +192,7 @@ public class EMailService implements IEmbeddedService{
 
     private List<String>  setTransportSettings(Email email) {
         try {
-            this.lock.readLock().lock();
+            lock.readLock().lock();
 
             email.setHostName(settings.getSmtpHost());
             email.setSmtpPort(settings.getSmtpPort());
@@ -208,7 +208,7 @@ public class EMailService implements IEmbeddedService{
             logger.error("Cannot set the email settings", e);
             throw new EPSCommonException("Cannot set the email settings", e);
         } finally {
-            this.lock.readLock().unlock();
+            lock.readLock().unlock();
         }
     }
 

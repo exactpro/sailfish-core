@@ -25,8 +25,7 @@ public class ExceptionInboundHandler extends ChannelInboundHandlerAdapter {
 	private final NettySession session;
 	
 	public ExceptionInboundHandler(NettySession session) {
-		super();
-		this.session = session;
+        this.session = session;
 	}
 
 	@Override

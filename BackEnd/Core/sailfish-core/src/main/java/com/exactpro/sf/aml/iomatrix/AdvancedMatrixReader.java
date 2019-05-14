@@ -33,14 +33,14 @@ import com.exactpro.sf.aml.generator.matrix.JavaStatement;
 
 public class AdvancedMatrixReader implements AutoCloseable {
 
-    private final static String ACTION_FIELD = Column.Action.getName();
-    private final static String DEFINE_HEADER = JavaStatement.DEFINE_HEADER.getValue();
-    private final static String SYSTEM_FIELD_PREFIX = Column.getSystemPrefix();
+    private static final String ACTION_FIELD = Column.Action.getName();
+    private static final String DEFINE_HEADER = JavaStatement.DEFINE_HEADER.getValue();
+    private static final String SYSTEM_FIELD_PREFIX = Column.getSystemPrefix();
 
     private final IMatrixReader reader;
     private List<SimpleCell> header;
     private final MatrixFileTypes fileType;
-    private boolean positionFound = false;
+    private boolean positionFound;
     private int actionPosition = -1;
     private int rowNumber = 1;
 
@@ -147,7 +147,7 @@ public class AdvancedMatrixReader implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        this.reader.close();
+        reader.close();
     }
 
     private void redefineHeaders(SimpleCell[] readedSimpleCells) throws AMLException {
@@ -215,7 +215,7 @@ public class AdvancedMatrixReader implements AutoCloseable {
                     letterPositions.append(", ");
                 }
                 throw new AMLException("Invalid matrix structure. Detected duplicated fields at "
-                        + letterPositions.toString() + " positions. Field name is " + header.get(i - 1).getValue());
+                        + letterPositions + " positions. Field name is " + header.get(i - 1).getValue());
             }
         }
 

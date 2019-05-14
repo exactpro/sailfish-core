@@ -28,7 +28,7 @@ import com.exactpro.sf.scriptrunner.utilitymanager.UtilityManager;
 
 public class StrictDictionaryManager extends DictionaryManager {
 
-    private final static Logger logger = LoggerFactory.getLogger(StrictDictionaryManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(StrictDictionaryManager.class);
 
     public StrictDictionaryManager(IWorkspaceDispatcher workspaceDispatcher, UtilityManager utilityManager) {
         super(workspaceDispatcher, utilityManager);

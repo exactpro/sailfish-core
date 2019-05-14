@@ -27,12 +27,10 @@ public class JsonMatrixDescription {
 	protected SailfishURI languageURI;
 
 	public JsonMatrixDescription() {
-		super();
-	}
+    }
 
 	public JsonMatrixDescription(Long id, String name, Date date, SailfishURI languageURI) {
-		super();
-		this.id = id;
+        this.id = id;
 		this.name = name;
 		this.date = date;
 		this.languageURI = languageURI;

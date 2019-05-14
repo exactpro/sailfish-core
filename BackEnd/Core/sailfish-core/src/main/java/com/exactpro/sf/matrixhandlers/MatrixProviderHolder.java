@@ -37,12 +37,10 @@ public class MatrixProviderHolder {
 
 	private final Map<SailfishURI, IMatrixProviderFactory> uriToFactory = new HashMap<>();
 
-    public MatrixProviderHolder() {}
-
     public void registerMatrixProvider(IVersion version, IMatrixProviderFactory factory) {
         try {
             SailfishURI matrixProviderURI = new SailfishURI(version.getAlias(), null, factory.getAlias());
-            IMatrixProviderFactory currentFactory = this.uriToFactory.put(matrixProviderURI, factory);
+            IMatrixProviderFactory currentFactory = uriToFactory.put(matrixProviderURI, factory);
 
             if (currentFactory != null && !currentFactory.getClass().equals(factory.getClass())) {
                 logger.warn("Duplicate Matrix provider registration {}", matrixProviderURI);
@@ -67,7 +65,7 @@ public class MatrixProviderHolder {
     }
 
     public Set<SailfishURI> getProviderURIs() {
-    	return Collections.unmodifiableSet(this.uriToFactory.keySet());
+        return Collections.unmodifiableSet(uriToFactory.keySet());
     }
 
     public Map<String, IMatrixProvider> getMatrixProviders(String link, SailfishURI matrixProviderURI) {

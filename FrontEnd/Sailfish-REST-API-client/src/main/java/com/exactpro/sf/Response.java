@@ -21,7 +21,7 @@ import org.w3c.dom.Node;
 public class Response {
 	
 	private int id;
-	private String message;
+	private final String message;
 	private String cause;
 	
 	public Response(String message) {

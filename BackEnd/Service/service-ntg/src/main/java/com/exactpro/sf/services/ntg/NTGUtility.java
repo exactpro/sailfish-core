@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.actions.DateUtil;
 import com.exactpro.sf.common.util.StringUtil;
+import com.exactpro.sf.services.IdleStatus;
 import com.exactpro.sf.services.ntg.exceptions.UnknownMina2SessionIdleStatusException;
 import com.exactpro.sf.util.DateTimeUtility;
 
@@ -41,15 +42,15 @@ public final class NTGUtility {
 
 	public static final String EOL = StringUtil.EOL;
 	private static Long ordID = 0L;
-	private static Long currentTimeMillis = null;
-	private static String ClientOrderID_FROMAT = "%s%s";
-	private final static ThreadLocal<DecimalFormat> formatter1 = new ThreadLocal<DecimalFormat>() {
+    private static Long currentTimeMillis;
+    private static final String ClientOrderID_FROMAT = "%s%s";
+    private static final ThreadLocal<DecimalFormat> formatter1 = new ThreadLocal<DecimalFormat>() {
         @Override
         protected DecimalFormat initialValue() {
             return new DecimalFormat("0000000000000");
         }
     };
-    private final static ThreadLocal<DecimalFormat> formatter2 = new ThreadLocal<DecimalFormat>() {
+    private static final ThreadLocal<DecimalFormat> formatter2 = new ThreadLocal<DecimalFormat>() {
         @Override
         protected DecimalFormat initialValue() {
             return new DecimalFormat("0000000");
@@ -77,7 +78,7 @@ public final class NTGUtility {
 	 */
 	static
 	{
-		final byte[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
+        byte[] digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
 				'9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 		int i;
@@ -104,7 +105,7 @@ public final class NTGUtility {
 
 		synchronized(ordID)
 		{
-			if (null == currentTimeMillis)
+            if(currentTimeMillis == null)
 			{
 				currentTimeMillis = System.currentTimeMillis();
 			}
@@ -118,13 +119,13 @@ public final class NTGUtility {
 		return clordID;
 	}
 
-	public static String getNewShortClOrdID(final String userKey)
+    public static String getNewShortClOrdID(String userKey)
 	{
 		String clordID = "";
 
 		synchronized(ordID)
 		{
-			if (null == currentTimeMillis)
+            if(currentTimeMillis == null)
 			{
 				currentTimeMillis = System.currentTimeMillis();
 			}
@@ -144,20 +145,20 @@ public final class NTGUtility {
 		return clordID;
 	}
 
-    public static com.exactpro.sf.services.IdleStatus
-	translateMinaIdleStatus(final org.apache.mina.core.session.IdleStatus minaStatus )
+    public static IdleStatus
+    translateMinaIdleStatus(org.apache.mina.core.session.IdleStatus minaStatus)
 	{
 		if (minaStatus == org.apache.mina.core.session.IdleStatus.READER_IDLE)
 		{
-            return com.exactpro.sf.services.IdleStatus.READER_IDLE;
+            return IdleStatus.READER_IDLE;
 		}
 		else if (minaStatus == org.apache.mina.core.session.IdleStatus.WRITER_IDLE)
 		{
-            return com.exactpro.sf.services.IdleStatus.WRITER_IDLE;
+            return IdleStatus.WRITER_IDLE;
 		}
 		else if (minaStatus == org.apache.mina.core.session.IdleStatus.BOTH_IDLE)
 		{
-            return com.exactpro.sf.services.IdleStatus.BOTH_IDLE;
+            return IdleStatus.BOTH_IDLE;
 		}
 		else
 		{
@@ -172,7 +173,7 @@ public final class NTGUtility {
 
 		try
 		{
-			machineIP = InetAddress.getLocalHost().getHostAddress();
+            return InetAddress.getLocalHost().getHostAddress();
 		}
 		catch( UnknownHostException e )
 		{
@@ -195,9 +196,8 @@ public final class NTGUtility {
 
 	public static String setupLoggerConfiguration()
 	{
-		String configFileName = null;
 
-		String defaultSettings =
+        String defaultSettings =
 			"log4j.rootLogger=ALL,A,C" + EOL +
 			"#,SOCK" + EOL +
 			"log4j.appender.A=org.apache.log4j.RollingFileAppender" + EOL +
@@ -240,11 +240,11 @@ public final class NTGUtility {
 				output.write( defaultSettings );
 				output.flush();
 				output.close();
-				configFileName = tempConfigFileName;
+                return tempConfigFileName;
 			}
 			else
 			{
-				configFileName = tempConfigFileName;
+                return tempConfigFileName;
 			}
 		}
 		catch( IOException e )
@@ -252,7 +252,7 @@ public final class NTGUtility {
 			logger.error(e.getMessage(), e);
 		}
 
-		return configFileName;
+        return null;
 	}
 
 	/**
@@ -293,7 +293,7 @@ public final class NTGUtility {
 
     }
 
-    private final static ThreadLocal<DecimalFormat> millisFormat = new ThreadLocal<DecimalFormat>() {
+    private static final ThreadLocal<DecimalFormat> millisFormat = new ThreadLocal<DecimalFormat>() {
         @Override
         protected DecimalFormat initialValue() {
             return new DecimalFormat("000000");
@@ -359,7 +359,7 @@ public final class NTGUtility {
     public static long getTransactTime(LocalDateTime localDateTime) {
         long microseconds = localDateTime.getNano() / 1_000;
         long seconds = DateTimeUtility.getMillisecond(localDateTime) / 1000;
-        return ((microseconds << 32) + seconds);
+        return (microseconds << 32) + seconds;
     }
 
 	public static String getEntryTime()
@@ -413,7 +413,7 @@ public final class NTGUtility {
 	 * @param lengthLimit the limit at which hex dumping will stop
 	 * @return a hex formatted string representation of the in IoBuffer.
 	 */
-	public static String getHexdump(final IoBuffer in, int lengthLimit)
+    public static String getHexdump(IoBuffer in, int lengthLimit)
 	{
 		if (lengthLimit == 0)
 		{
@@ -422,18 +422,9 @@ public final class NTGUtility {
 		}
 
 		boolean truncate = in.remaining() > lengthLimit;
-		int size;
+        int size = truncate ? lengthLimit : in.remaining();
 
-		if (truncate)
-		{
-			size = lengthLimit;
-		}
-		else
-		{
-			size = in.remaining();
-		}
-
-		if (size == 0)
+        if(size == 0)
 		{
 			return "empty";
 		}

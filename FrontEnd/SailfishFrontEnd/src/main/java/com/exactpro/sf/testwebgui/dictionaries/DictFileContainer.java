@@ -64,7 +64,7 @@ public class DictFileContainer implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((fileName == null) ? 0 : fileName.hashCode());
 		result = prime * result + ((namespace == null) ? 0 : namespace.hashCode());
@@ -74,28 +74,37 @@ public class DictFileContainer implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		DictFileContainer other = (DictFileContainer) obj;
 		if (fileName == null) {
-			if (other.fileName != null)
-				return false;
-		} else if (!fileName.equals(other.fileName))
-			return false;
+            if(other.fileName != null) {
+                return false;
+            }
+        } else if(!fileName.equals(other.fileName)) {
+            return false;
+        }
 		if (namespace == null) {
-			if (other.namespace != null)
-				return false;
-		} else if (!namespace.equals(other.namespace))
-			return false;
+            if(other.namespace != null) {
+                return false;
+            }
+        } else if(!namespace.equals(other.namespace)) {
+            return false;
+        }
 		if (uri == null) {
-			if (other.uri != null)
-				return false;
-		} else if (!uri.equals(other.uri))
-			return false;
+            if(other.uri != null) {
+                return false;
+            }
+        } else if(!uri.equals(other.uri)) {
+            return false;
+        }
 		return true;
 	}
 }

@@ -66,7 +66,7 @@ public class SFRestApiListener implements ApplicationEventListener {
                     break;
                 case RESOURCE_METHOD_FINISHED:
                     long methodExecution = System.currentTimeMillis() - methodStartTime;
-                    final String methodName = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable().getHandlingMethod().getName();
+                    String methodName = requestEvent.getUriInfo().getMatchedResourceMethod().getInvocable().getHandlingMethod().getName();
                     logger.debug("Method '{}' executed. Processing time: {} ms", methodName, methodExecution);
                     break;
                 case ON_EXCEPTION:

@@ -21,7 +21,7 @@ import com.exactpro.sf.center.IDisposable;
 import com.exactpro.sf.common.messages.IMessage;
 
 public interface IMessageStorage extends IDisposable {
-    public static final int BUFFER_SIZE = 50;
+    int BUFFER_SIZE = 50;
 
 	@Deprecated // move to proper class
     default ScriptRun openScriptRun(String name, String description) {

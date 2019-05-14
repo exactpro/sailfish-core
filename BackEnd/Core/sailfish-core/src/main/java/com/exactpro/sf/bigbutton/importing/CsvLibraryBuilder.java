@@ -93,19 +93,19 @@ public class CsvLibraryBuilder {
 
     private final IWorkspaceDispatcher workspaceDispatcher;
 
-	private InputStream libraryFile;
+    private final InputStream libraryFile;
 
-	private Library library = new Library();
+    private final Library library = new Library();
 
 	private AbstractLibraryItem currentList;
 
-	private LibraryImportResult importResult = new LibraryImportResult();
+    private final LibraryImportResult importResult = new LibraryImportResult();
 
 	private static final Set<String> booleanTrue = new HashSet<>();
 
 	private static final Set<String> booleanFalse = new HashSet<>();
 
-	private Map<Executor, String> executorDaemonMap = new HashMap<>();
+    private final Map<Executor, String> executorDaemonMap = new HashMap<>();
 
 	static {
 
@@ -121,9 +121,9 @@ public class CsvLibraryBuilder {
 
 	}
 
-	private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-	private TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String,String>>() {};
+    private final TypeReference<Map<String, String>> typeRef = new TypeReference<Map<String, String>>() {};
 
     public CsvLibraryBuilder(InputStream libraryFile, IWorkspaceDispatcher workspaceDispatcher,
                              IStaticServiceManager serviceManager, IDictionaryManager dictionaryManager) {
@@ -151,7 +151,7 @@ public class CsvLibraryBuilder {
 
 		try {
 
-			reader = new CsvReader(this.libraryFile, Charset.forName("UTF-8"));
+            reader = new CsvReader(libraryFile, Charset.forName("UTF-8"));
 
             DocumentBuilder domBuilder;
 
@@ -179,7 +179,7 @@ public class CsvLibraryBuilder {
 
 				} catch(Exception e) {
 
-                    this.importResult.getCommonErrors().add(new ImportError(currentRecordNumber, e.getMessage()));
+                    importResult.getCommonErrors().add(new ImportError(currentRecordNumber, e.getMessage()));
 
 				}
 
@@ -219,7 +219,7 @@ public class CsvLibraryBuilder {
                 .filter(scriptList -> scriptList.getExecutor() != null)
                 .filter(scriptList -> !executorNames.contains(scriptList.getExecutor()))
                 .forEach(scriptList -> {
-                    this.importResult.getCommonErrors().add(new ImportError(scriptList.getLineNumber(),
+                    importResult.getCommonErrors().add(new ImportError(scriptList.getLineNumber(),
                             "Unknown executor '" + scriptList.getExecutor() + "' in script list '" + scriptList.getName() + "\'"));
                 });
 
@@ -328,7 +328,7 @@ public class CsvLibraryBuilder {
 		result.setApiOptions( parseApiOptions(row) );
 
 		if (!StringUtils.isEmpty(daemon)) {
-			this.executorDaemonMap.put(result, daemon);
+            executorDaemonMap.put(result, daemon);
 		}
 
         result.setLineNumber(lineNumber);
@@ -361,8 +361,8 @@ public class CsvLibraryBuilder {
 		result.setPath(path);
 		result.setTimeout(timeout);
 
-		for (Executor executor : this.executorDaemonMap.keySet()) {
-			String daemonName = this.executorDaemonMap.get(executor);
+        for(Executor executor : executorDaemonMap.keySet()) {
+            String daemonName = executorDaemonMap.get(executor);
 			if (daemonName.equals(name)) {
 				executor.setDaemon(result);
 			}
@@ -445,15 +445,9 @@ public class CsvLibraryBuilder {
 	}
 
 	private StartMode parseServiceOptions(Map<String, String> row) {
-
 	    String tmp = row.get(CsvHeader.StartMode.getFieldKey());
-
-	    if (StringUtils.isEmpty(tmp)) {
-	        return null;
-	    }
-
-	    return StartMode.valueOf(tmp);
-	}
+        return StringUtils.isEmpty(tmp) ? null : StartMode.valueOf(tmp);
+    }
 
 	private Set<String> parseServiceListReferences(String services) {
 
@@ -559,37 +553,37 @@ public class CsvLibraryBuilder {
 		SfApiOptions result = new SfApiOptions();
 
 		if(row.containsKey(CsvHeader.Range.getFieldKey())) {
-			result.setRange((row.get(CsvHeader.Range.getFieldKey())));
+            result.setRange(row.get(CsvHeader.Range.getFieldKey()));
 		}
 
 		if(row.containsKey(CsvHeader.Language.getFieldKey())) {
 			if(StringUtils.isNotEmpty(row.get(CsvHeader.Language.getFieldKey()))) {
-				result.setLanguage((row.get(CsvHeader.Language.getFieldKey())));
+                result.setLanguage(row.get(CsvHeader.Language.getFieldKey()));
 			}
 		}
 
 		if(row.containsKey(CsvHeader.ContinueIfFailed.getFieldKey())) {
-			result.setContinueIfFailed(parseBoolean((row.get(CsvHeader.ContinueIfFailed.getFieldKey()))));
+            result.setContinueIfFailed(parseBoolean(row.get(CsvHeader.ContinueIfFailed.getFieldKey())));
 		}
 
 		if(row.containsKey(CsvHeader.AutoStart.getFieldKey())) {
-			result.setAutoStart(parseBoolean((row.get(CsvHeader.AutoStart.getFieldKey()))));
+            result.setAutoStart(parseBoolean(row.get(CsvHeader.AutoStart.getFieldKey())));
 		}
 
 		if(row.containsKey(CsvHeader.IgnoreAskForContinue.getFieldKey())) {
-			result.setIgnoreAskForContinue(parseBoolean((row.get(CsvHeader.IgnoreAskForContinue.getFieldKey()))));
+            result.setIgnoreAskForContinue(parseBoolean(row.get(CsvHeader.IgnoreAskForContinue.getFieldKey())));
 		}
 
         if(row.containsKey(CsvHeader.RunNetDumper.getFieldKey())){
-            result.setRunNetDumper(parseBoolean((row.get(CsvHeader.RunNetDumper.getFieldKey()))));
+            result.setRunNetDumper(parseBoolean(row.get(CsvHeader.RunNetDumper.getFieldKey())));
         }
 
         if (row.containsKey(CsvHeader.SkipOptional.getFieldKey())) {
-            result.setSkipOptional(parseBoolean((row.get(CsvHeader.SkipOptional.getFieldKey()))));
+            result.setSkipOptional(parseBoolean(row.get(CsvHeader.SkipOptional.getFieldKey())));
         }
 
 		if(row.containsKey(CsvHeader.Tags.getFieldKey())) {
-			result.setTags(parseTags((row.get(CsvHeader.Tags.getFieldKey()))));
+            result.setTags(parseTags(row.get(CsvHeader.Tags.getFieldKey())));
 		}
 
 		if(row.containsKey(CsvHeader.ExecuteOnFailed.getFieldKey())){
@@ -732,25 +726,25 @@ public class CsvLibraryBuilder {
 
 			case "library folder":
 
-				this.library.setRootFolder(parseLibraryFolder(row));
+                library.setRootFolder(parseLibraryFolder(row));
 
 				break;
 
 			case "reports folder":
 
-				this.library.setReportsFolder(parseLibraryFolder(row));
+                library.setReportsFolder(parseLibraryFolder(row));
 
 				break;
 
         case "variable sets file":
 
-            this.library.setVariableSetsFile(parseVariableSetsFile(row));
+            library.setVariableSetsFile(parseVariableSetsFile(row));
 
             break;
 
 			case "globals":
 
-            this.library.setGlobals(Optional.ofNullable(parseGlobals(row, currentRecordNumber)));
+                library.setGlobals(Optional.ofNullable(parseGlobals(row, currentRecordNumber)));
 
 				break;
 
@@ -758,7 +752,7 @@ public class CsvLibraryBuilder {
 
 				ExecutorList list = new ExecutorList();
 
-				this.library.setExecutors(list);
+                library.setExecutors(list);
 
 				this.currentList = list;
 
@@ -768,9 +762,9 @@ public class CsvLibraryBuilder {
 
             Executor executor = parseExecutor(row, currentRecordNumber);
 
-				this.currentList.addNested(executor);
+                currentList.addNested(executor);
 
-				this.importResult.incNumExecutors();
+                importResult.incNumExecutors();
 
 				break;
 
@@ -778,7 +772,7 @@ public class CsvLibraryBuilder {
 
 				DaemonList daemonList = new DaemonList();
 
-				this.library.setDaemons(daemonList);
+                library.setDaemons(daemonList);
 
 				this.currentList = daemonList;
 
@@ -788,7 +782,7 @@ public class CsvLibraryBuilder {
 
 				Daemon daemon = parseDaemon(row);
 
-				this.currentList.addNested(daemon);
+                currentList.addNested(daemon);
 
 				break;
 
@@ -796,11 +790,11 @@ public class CsvLibraryBuilder {
 
             ServiceList sList = parseServiceList(row, currentRecordNumber);
 
-				if(this.library.getServiceLists().containsKey(sList.getName())) {
+                if(library.getServiceLists().containsKey(sList.getName())) {
 					throw new InvalidRowException("Service List with name " + sList.getName() + " is already defined");
 				}
 
-				this.library.getServiceLists().put(sList.getName(), sList);
+                library.getServiceLists().put(sList.getName(), sList);
 
 				this.currentList = sList;
 
@@ -810,8 +804,8 @@ public class CsvLibraryBuilder {
 
             Service service = parseService(row, currentRecordNumber, domBuilder);
 
-            this.currentList.addNested(service);
-            this.importResult.incNumServices();
+                currentList.addNested(service);
+                importResult.incNumServices();
 
 				break;
 
@@ -819,7 +813,7 @@ public class CsvLibraryBuilder {
 
             ScriptList scriptList = parseScriptList(row, currentRecordNumber);
 
-				this.library.getScriptLists().add(scriptList);
+                library.getScriptLists().add(scriptList);
 
 				this.currentList = scriptList;
 
@@ -829,12 +823,12 @@ public class CsvLibraryBuilder {
 
 				Script script = parseScript(row, currentRecordNumber);
 
-				this.currentList.addNested(script);
+                currentList.addNested(script);
 
-				this.importResult.incNumScripts();
+                importResult.incNumScripts();
 
                 if (script.isRejected()) {
-                    ScriptList current = (ScriptList) this.currentList;
+                    ScriptList current = (ScriptList)currentList;
                     current.addRejectCause(script.getRejectCause());
                 }
 
@@ -844,11 +838,11 @@ public class CsvLibraryBuilder {
 
 				TagList tList = parseTagList(row);
 
-				if(this.library.getTagList() != null) {
+                if(library.getTagList() != null) {
 					throw new InvalidRowException("Tag List is already defined");
 				}
 
-				this.library.setTagList(tList);
+                library.setTagList(tList);
 
 				this.currentList = tList;
 
@@ -858,7 +852,7 @@ public class CsvLibraryBuilder {
 
 				Tag tag = parseTag(row);
 
-				this.currentList.addNested(tag);
+                currentList.addNested(tag);
 
 				break;
 
@@ -873,23 +867,23 @@ public class CsvLibraryBuilder {
 
         checkServiceLists();
 
-        if (this.library.getGlobals().isPresent()) {
+        if(library.getGlobals().isPresent()) {
 
             checkGlobalsServices();
         }
 
-		if(this.library.getExecutors() == null ||
-				this.library.getExecutors().getExecutors().size() == 0) {
+        if(library.getExecutors() == null ||
+                library.getExecutors().getExecutors().isEmpty()) {
 
-            this.importResult.getCommonErrors().add(new ImportError(0, "At least one executor is required"));
+            importResult.getCommonErrors().add(new ImportError(0, "At least one executor is required"));
 
         } else {
             checkExecutors();
 		}
 
-		if(this.library.getScriptLists().size() == 0) {
+        if(library.getScriptLists().isEmpty()) {
 
-            this.importResult.getCommonErrors().add(
+            importResult.getCommonErrors().add(
 					new ImportError(0, "No script lists defined. Nothing to execute"));
 
         } else {
@@ -904,7 +898,7 @@ public class CsvLibraryBuilder {
 	}
 
     private void checkServiceLists() {
-        for (ServiceList sList : this.library.getServiceLists().values()) {
+        for(ServiceList sList : library.getServiceLists().values()) {
             ImportError error = new ImportError(sList.getLineNumber(), String.format("Service List \"%s\" error", sList.getName()));
             for (Service service : sList.getServices()) {
                 if (service.isRejected()) {
@@ -918,7 +912,7 @@ public class CsvLibraryBuilder {
     }
 
     private void checkGlobalsServices() {
-        Globals globals = this.library.getGlobals().get();
+        Globals globals = library.getGlobals().get();
 
         for (String serviceList : globals.getServiceLists()) {
             if (!library.getServiceLists().containsKey(serviceList)) {
@@ -927,7 +921,7 @@ public class CsvLibraryBuilder {
                 importResult.getGlobalsErrors().add(error);
                 continue;
             }
-            ServiceList sList = this.library.getServiceLists().get(serviceList);
+            ServiceList sList = library.getServiceLists().get(serviceList);
             if (sList.isRejected()) {
                 globals.addRejectCause(sList.getRejectCause());
                 importResult.getGlobalsErrors().add(sList.getRejectCause());
@@ -948,14 +942,14 @@ public class CsvLibraryBuilder {
                 if (!library.getServiceLists().containsKey(serviceList)) {
                     exec.addRejectCause(new ImportError(0, "Service List '" + serviceList + "' is not declared"));
                 } else {
-                    ServiceList sList = this.library.getServiceLists().get(serviceList);
+                    ServiceList sList = library.getServiceLists().get(serviceList);
                     if (sList.isRejected()) {
                         exec.addRejectCause(sList.getRejectCause());
                     }
                 }
             }
             if (exec.isRejected()) {
-                this.importResult.getExecutorErrors().add(exec.getRejectCause());
+                importResult.getExecutorErrors().add(exec.getRejectCause());
             }
         }
     }
@@ -969,7 +963,7 @@ public class CsvLibraryBuilder {
                 if (!library.getServiceLists().containsKey(serviceList)) {
                     list.addRejectCause(new ImportError(0, "Service List '" + serviceList + "' is not declared"));
                 } else {
-                    ServiceList sList = this.library.getServiceLists().get(serviceList);
+                    ServiceList sList = library.getServiceLists().get(serviceList);
                     if (sList.isRejected()) {
                         list.addRejectCause(sList.getRejectCause());
                     }
@@ -986,7 +980,7 @@ public class CsvLibraryBuilder {
                 Set<String> declaredIn = new HashSet<>();
 
                 for (String serviceList : list.getServiceLists()) {
-                    ServiceList sList = this.library.getServiceLists().get(serviceList);
+                    ServiceList sList = library.getServiceLists().get(serviceList);
                     for (Service service : sList.getServices()) {
                         if (!service.isRejected() && service.getName().equals(duplicateService)) {
                             declaredIn.add(serviceList);
@@ -999,7 +993,7 @@ public class CsvLibraryBuilder {
             }
 
             if (list.isRejected()) {
-                this.importResult.getScriptListErrors().add(list.getRejectCause());
+                importResult.getScriptListErrors().add(list.getRejectCause());
             }
         }
 
@@ -1055,37 +1049,37 @@ public class CsvLibraryBuilder {
         }
 
         for(Executor exec : executorList.getExecutors()) {
-            if (this.library.getGlobals().isPresent() && !this.importResult.getGlobalsErrors().isEmpty()) {
-                ImportError globalsError = new ImportError(this.library.getGlobals().get().getLineNumber(), "Globals error");
+            if(library.getGlobals().isPresent() && !importResult.getGlobalsErrors().isEmpty()) {
+                ImportError globalsError = new ImportError(library.getGlobals().get().getLineNumber(), "Globals error");
                 globalsError.addCause(importResult.getGlobalsErrors());
                 exec.addRejectCause(globalsError);
             }
             if (exec.isRejected()) {
-                this.importResult.getExecutorErrors().add(exec.getRejectCause());
+                importResult.getExecutorErrors().add(exec.getRejectCause());
             }
         }
     }
 
     private void checkExecutorsReady() {
-        int executorsReady = this.library.getExecutors().getExecutors().size();
+        int executorsReady = library.getExecutors().getExecutors().size();
 
         if (executorsReady == 0) {
             return;
         }
 
-        for (Executor executor : this.library.getExecutors().getExecutors()) {
+        for(Executor executor : library.getExecutors().getExecutors()) {
             if (executor.isRejected()) {
                 executorsReady--;
             }
         }
 
         if (executorsReady == 0) {
-            this.importResult.getCommonErrors().add(new ImportError(0, "All executors gone to error state"));
+            importResult.getCommonErrors().add(new ImportError(0, "All executors gone to error state"));
         }
     }
 
     private ImportError checkFileExisting(String path, long lineNumber) {
-        String libraryPath = this.library.getRootFolder();
+        String libraryPath = library.getRootFolder();
 
         if (libraryPath != null) {
 
@@ -1097,7 +1091,7 @@ public class CsvLibraryBuilder {
 
                 String zipPath = relativePath.substring(0, zipIndex + 4);
                 try {
-                    File zipFile = this.workspaceDispatcher.getFile(FolderType.TEST_LIBRARY, zipPath);
+                    File zipFile = workspaceDispatcher.getFile(FolderType.TEST_LIBRARY, zipPath);
 
                     String restPath = relativePath.substring(zipIndex + 5);
 
@@ -1112,7 +1106,7 @@ public class CsvLibraryBuilder {
                     return new ImportError(lineNumber, "File " + zipPath + " not found");
                 }
             } else {
-                if (!this.workspaceDispatcher.exists(FolderType.TEST_LIBRARY, relativePath)) {
+                if(!workspaceDispatcher.exists(FolderType.TEST_LIBRARY, relativePath)) {
                     return new ImportError(lineNumber, "File not exists: " + relativePath);
                 }
             }
@@ -1129,7 +1123,7 @@ public class CsvLibraryBuilder {
 
 		try (ZipFile zif = new ZipFile(zipFile)) {
 
-			final Enumeration<? extends ZipEntry> entries = zif.entries();
+            Enumeration<? extends ZipEntry> entries = zif.entries();
 
 			while (entries.hasMoreElements()) {
 
@@ -1148,16 +1142,16 @@ public class CsvLibraryBuilder {
 
 	private void mergeApiOptionsForScripts() {
 
-		SfApiOptions defaultsAndGlobals = this.library.getDefaultApiOptions();
+        SfApiOptions defaultsAndGlobals = library.getDefaultApiOptions();
 
-		if(this.library.getGlobals().isPresent()) {
+        if(library.getGlobals().isPresent()) {
 
-			SfApiOptions globals = this.library.getGlobals().get().getApiOptions();
+            SfApiOptions globals = library.getGlobals().get().getApiOptions();
 			defaultsAndGlobals = defaultsAndGlobals.mergeOptions(globals);
 
 		}
 
-		for(ScriptList list : this.library.getScriptLists()) {
+        for(ScriptList list : library.getScriptLists()) {
 
 			SfApiOptions mergedListOptions = defaultsAndGlobals.mergeOptions(list.getApiOptions());
 
@@ -1186,9 +1180,9 @@ public class CsvLibraryBuilder {
 
 		library.setDescriptorFileName(fileName);
 
-		this.importResult.setLibrary(library);
+        importResult.setLibrary(library);
 
-		return this.importResult;
+        return importResult;
 
 	}
 

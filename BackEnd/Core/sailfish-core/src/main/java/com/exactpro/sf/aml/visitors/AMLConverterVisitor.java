@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,6 +49,7 @@ import com.exactpro.sf.aml.generator.matrix.TypeHelper;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.reader.struct.AMLBlock;
 import com.exactpro.sf.aml.reader.struct.AMLElement;
+import com.exactpro.sf.aml.reader.struct.ExecutionMode;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -106,7 +106,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
             }
         } else if(settings.isSuppressAskForContinue() && AMLLangConst.ASK_FOR_CONTINUE_ACTION_URI.matches(actionURI)) {
             return;
-        } else if(JavaStatement.DEFINE_HEADER == JavaStatement.value(actionURI)) {
+        } else if(JavaStatement.value(actionURI) == JavaStatement.DEFINE_HEADER) {
             return;
         }
 
@@ -203,7 +203,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
                         // hack to support old namespaces for FIX messages
                         if(cellValue.startsWith("quickfix.fix")) {
-                            cellValue = "com.exactpro." + cellValue;
+                            cellValue = "com.exactpro.sf." + cellValue;
                         }
 
                         if(actionURI == null && element.containsCell(Column.Reference)) {
@@ -234,7 +234,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                                     addError(element, column, "Invalid value: %s", cellValue);
                                     break;
                                 }
-                            } else if(JavaStatement.BEGIN_LOOP == JavaStatement.value(actionURI)) {
+                            } else if(JavaStatement.value(actionURI) == JavaStatement.BEGIN_LOOP) {
                                 if(!isNumeric(cellValue) && !isFunction(cellValue) && !isReference(cellValue) && !isStaticVariableReference(cellValue)) {
                                     addError(element, column, "Invalid value: %s", cellValue);
                                     break;
@@ -284,8 +284,8 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                             if(cellValue.startsWith(AMLLangConst.SMART_CHECKPOINT_PREFIX)) {
                                 tempValue = cellValue.substring(AMLLangConst.SMART_CHECKPOINT_PREFIX.length());
                             }
-                        } else if(JavaStatement.DEFINE_SERVICE_NAME == JavaStatement.value(actionURI)) {
-                            if(AMLLangUtil.isStaticVariableReference(cellValue)) {
+                        } else if(JavaStatement.value(actionURI) == JavaStatement.DEFINE_SERVICE_NAME) {
+                            if(isStaticVariableReference(cellValue)) {
                                 tempValue = AMLLangUtil.getStaticVariableName(cellValue);
                             } else {
                                 addError(element, column, "Invalid value: %s (expected: %sname%s)", cellValue, AMLLangConst.BEGIN_STATIC, AMLLangConst.END_STATIC);
@@ -309,7 +309,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                     case ServiceName:
                         tempValue = cellValue;
 
-                        if(AMLLangUtil.isStaticVariableReference(cellValue)) {
+                        if(isStaticVariableReference(cellValue)) {
                             tempValue = AMLLangUtil.getStaticVariableName(cellValue);
                         }
 
@@ -359,7 +359,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                                 break;
                             }
                         } catch(NumberFormatException e) {
-                            if(AMLLangUtil.isStaticVariableReference(cellValue)) {
+                            if(isStaticVariableReference(cellValue)) {
                                 String variableName = AMLLangUtil.getStaticVariableName(cellValue);
                                 if(!validateVariableName(element, column, variableName)) {
                                     break;

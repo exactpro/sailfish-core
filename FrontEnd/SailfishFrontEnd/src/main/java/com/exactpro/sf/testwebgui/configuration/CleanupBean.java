@@ -38,7 +38,7 @@ public class CleanupBean implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(CleanupBean.class);
 
     private Date olderThan = new Date();
-    private Map<ResourceCleaner, Boolean> cleaners = new EnumMap<>(ResourceCleaner.class);
+    private final Map<ResourceCleaner, Boolean> cleaners = new EnumMap<>(ResourceCleaner.class);
 
     public void clean() {
         ISFContext context = BeanUtil.getSfContext();

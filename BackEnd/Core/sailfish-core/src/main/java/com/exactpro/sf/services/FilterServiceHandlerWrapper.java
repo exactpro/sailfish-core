@@ -38,7 +38,7 @@ public class FilterServiceHandlerWrapper extends ServiceHandlerWrapper {
 
     @Override
     public void putMessage(ISession session, ServiceHandlerRoute route, IMessage message) throws ServiceHandlerException {
-        if (this.processedMessageTypes.contains(message.getName())) {
+        if(processedMessageTypes.contains(message.getName())) {
             super.putMessage(session, route, message);
         } else {
             logger.trace("Message {} skipped by service settings. Route {}, Session {}", message.getName(), route, session);

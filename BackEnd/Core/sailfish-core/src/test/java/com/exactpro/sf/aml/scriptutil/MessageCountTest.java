@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +30,7 @@ import org.junit.Test;
 import com.exactpro.sf.aml.scriptutil.MessageCount.Operation;
 
 public class MessageCountTest {
-    private Map<String, Map.Entry<String, Integer>> inputStrings = new HashMap<String, Map.Entry<String, Integer>>();
+    private final Map<String, Entry<String, Integer>> inputStrings = new HashMap<String, Entry<String, Integer>>();
 
     @Before
     public void before() throws Exception {
@@ -98,7 +99,7 @@ public class MessageCountTest {
         checkIsValidExpression("${ref.field1} + ${ref.field2} + 100");
         checkIsValidExpression("${ref.field1} + ${ref.field2} + ${ref.field3}");
 
-        for (Operation operation : MessageCount.Operation.values()) {
+        for (Operation operation : Operation.values()) {
             checkIsValidExpression(operation.getValue() + " ${ref.field}");
         }
         

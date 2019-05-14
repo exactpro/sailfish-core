@@ -28,13 +28,15 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
+        use = Id.NAME,
+        include = As.PROPERTY,
         property = "actionNodeType")
 @JsonSubTypes({
         @Type(value = Action.class, name = "action"),

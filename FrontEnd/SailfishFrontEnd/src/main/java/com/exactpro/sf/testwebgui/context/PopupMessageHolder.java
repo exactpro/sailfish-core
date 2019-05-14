@@ -29,7 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class PopupMessageHolder {
 
-    private Map<String, List<FacesMessageAdapter>> messageList;
+    private final Map<String, List<FacesMessageAdapter>> messageList;
 
     public PopupMessageHolder() {
         messageList = new TreeMap<String, List<FacesMessageAdapter>>();
@@ -52,10 +52,7 @@ public class PopupMessageHolder {
 
     public List<FacesMessageAdapter> getMessagesList(String uri) {
         List<FacesMessageAdapter> result = messageList.get(uri);
-        if(result == null) {
-            result = new ArrayList<FacesMessageAdapter>();
-        }
-        return result;
+        return result == null ? new ArrayList<>() : result;
     }
 
     public void clearMessagesList() {

@@ -28,6 +28,7 @@ import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceEvent;
 import com.exactpro.sf.storage.FilterCriterion;
+import com.exactpro.sf.storage.FilterCriterion.Operation;
 import com.exactpro.sf.storage.SortCriterion;
 import com.exactpro.sf.storage.StorageFilter;
 import com.exactpro.sf.storage.StorageResult;
@@ -39,7 +40,7 @@ public class ServiceEventLazyModel<T extends ServiceEventModel> extends LazyData
 
 	private static final Logger logger = LoggerFactory.getLogger(ServiceEventLazyModel.class);
 
-	private ServiceName serviceName;
+    private final ServiceName serviceName;
 
 	public ServiceEventLazyModel(ServiceName serviceName) {
 		this.serviceName = serviceName;
@@ -50,11 +51,11 @@ public class ServiceEventLazyModel<T extends ServiceEventModel> extends LazyData
 
 		try	{
 
-			ServiceDescription description = BeanUtil.getSfContext().getConnectionManager().getServiceDescription(this.serviceName);
+            ServiceDescription description = BeanUtil.getSfContext().getConnectionManager().getServiceDescription(serviceName);
 
 			List<SortCriterion> sorting = new ArrayList<>(1);
 
-			boolean sortAscending = SortOrder.ASCENDING == sortOrder;
+            boolean sortAscending = sortOrder == SortOrder.ASCENDING;
 
 			if (sortField != null) {
 				sorting.add(new SortCriterion(sortField, sortAscending));
@@ -64,7 +65,7 @@ public class ServiceEventLazyModel<T extends ServiceEventModel> extends LazyData
 
 			StorageFilter filter = new StorageFilter();
 			for(String key : filters.keySet()) {
-				FilterCriterion filterCriterion = new FilterCriterion(key, "%" + filters.get(key) + "%", FilterCriterion.Operation.LIKE);
+                FilterCriterion filterCriterion = new FilterCriterion(key, "%" + filters.get(key) + "%", Operation.LIKE);
 				filter.addCriterion(filterCriterion);
 			}
 

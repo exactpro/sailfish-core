@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -134,19 +135,19 @@ public class BigButtonSettings implements IMapableSettings, Serializable {
             if (StringUtils.isNotEmpty(emailRecipients)) {
                 emailRecipients.append(EMailUtil.DELIMITER);
             }
-            emailRecipients.append(this.emailFailedRecipients);
+            emailRecipients.append(emailFailedRecipients);
             break;
         case CONDITIONALLY_PASSED:
             if (StringUtils.isNotEmpty(emailRecipients)) {
                 emailRecipients.append(EMailUtil.DELIMITER);
             }
-            emailRecipients.append(this.emailCondPassedRecipients);
+            emailRecipients.append(emailCondPassedRecipients);
             break;
         case PASSED:
             if (StringUtils.isNotEmpty(emailRecipients)) {
                 emailRecipients.append(EMailUtil.DELIMITER);
             }
-            emailRecipients.append(this.emailPassedRecipients);
+            emailRecipients.append(emailPassedRecipients);
             break;
         }
 
@@ -160,7 +161,7 @@ public class BigButtonSettings implements IMapableSettings, Serializable {
 
     @Override
     public void fillFromMap(Map<String, String> options) throws Exception {
-        for (Map.Entry<String, String> entry : options.entrySet()) {
+        for(Entry<String, String> entry : options.entrySet()) {
             if (entry.getKey().startsWith(STORAGE_EMAIL_PREFIX)) {
                 BeanUtils.setProperty(this, entry.getKey().replace(STORAGE_EMAIL_PREFIX, ""), entry.getValue());
             } else if (entry.getKey().startsWith(STORAGE_PREFIX)) {
@@ -175,7 +176,7 @@ public class BigButtonSettings implements IMapableSettings, Serializable {
         Map<String, String> description = BeanUtils.describe(this);
 
         Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, String> entry : description.entrySet()) {
+        for(Entry<String, String> entry : description.entrySet()) {
             result.put(STORAGE_PREFIX + entry.getKey(), entry.getValue());
         }
         return result;

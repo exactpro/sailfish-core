@@ -27,8 +27,7 @@ public class JsonUtilFunction {
 		private final String type;
 
 		public Parameter(String parameter, String type) {
-			super();
-			this.parameter = parameter;
+            this.parameter = parameter;
 			this.type = type;
 		}
 
@@ -64,8 +63,7 @@ public class JsonUtilFunction {
     private final String returnType;
 
 	public JsonUtilFunction(String name, String help, Collection<Parameter> parameters, String returnType) {
-		super();
-		this.name = name;
+        this.name = name;
 		this.help = help;
 		this.parameters = parameters;
 		this.returnType = returnType;

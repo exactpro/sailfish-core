@@ -15,6 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IdleStatus;
+import org.apache.mina.core.session.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -23,16 +34,7 @@ import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ITaskExecutor;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.apache.mina.core.session.IdleStatus;
-import org.apache.mina.core.session.IoSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.exactpro.sf.services.itch.multicast.ITCHMulticastCache.Status;
 
 /**
  * Created by alexey.zarovny on 11/29/14.
@@ -47,7 +49,7 @@ public class ITCHMulticastTCPHandlerAdapter extends IoHandlerAdapter {
     public static final String COUNT = "Count";
     public static final String STATUS = "Status";
     public static final String LOGIN_RESPONSE = "LoginResponse";
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private final ITCHMulticastCache cache;
     private final ITCHMulticastServer service;
@@ -55,9 +57,9 @@ public class ITCHMulticastTCPHandlerAdapter extends IoHandlerAdapter {
     private final int sessionIdleTimeout;
     private final int loginTimeout;
     private final IMessageFactory msgFactory;
-    private ITaskExecutor taskExecutor;
+    private final ITaskExecutor taskExecutor;
     private final byte mdGroup;
-    private MessageHelper itchHandler;
+    private final MessageHelper itchHandler;
 
     public ITCHMulticastTCPHandlerAdapter(ITCHMulticastCache cache, SailfishURI dictionaryURI, ITaskExecutor taskExecutor, ITCHMulticastServer service, ISession iSession, byte mdGroup, MessageHelper itchHandler,
                                           IMessageFactory msgFactory) {
@@ -101,9 +103,9 @@ public class ITCHMulticastTCPHandlerAdapter extends IoHandlerAdapter {
     }
 
     @Override
-    public void messageReceived(final IoSession session, Object message) {
+    public void messageReceived(IoSession session, Object message) {
         if (message instanceof IMessage) {
-            final IMessage iMsg = (IMessage) message;
+            IMessage iMsg = (IMessage)message;
 
             if (ITCHMessageHelper.MESSAGELIST_NAME.equals(iMsg.getName())) {
                 taskExecutor.addTask(new Runnable() {
@@ -151,11 +153,11 @@ public class ITCHMulticastTCPHandlerAdapter extends IoHandlerAdapter {
     private IMessage onReplay(IMessage iMessage, IoSession session) {
         Object firstMessage = iMessage.getField(FIRST_MESSAGE);
         Object count = iMessage.getField(COUNT);
-        final Object marketDataGroup = iMessage.getField(MARKET_DATA_GROUP);
+        Object marketDataGroup = iMessage.getField(MARKET_DATA_GROUP);
         List<IMessage> messageList = new ArrayList<>();
         IMessage result = msgFactory.createMessage(REPLAY_RESPONSE, iMessage.getNamespace());
         result.addField(MARKET_DATA_GROUP, marketDataGroup);
-        ITCHMulticastCache.Status status = ITCHMulticastCache.Status.REQUEST_ACCEPTED;
+        Status status = Status.REQUEST_ACCEPTED;
         if (firstMessage != null && count != null) {
             logger.debug("ReplayRequest works");
              status = cache.getMessages(Integer.valueOf(firstMessage.toString()), (Integer) count, new Byte(marketDataGroup.toString()), messageList);
@@ -189,7 +191,7 @@ public class ITCHMulticastTCPHandlerAdapter extends IoHandlerAdapter {
         result = itchHandler.prepareMessageToEncode(result, params);
         session.write(result);
         handleMessage(result, false, false, session.getRemoteAddress().toString());
-        if (status == ITCHMulticastCache.Status.REQUEST_ACCEPTED) {
+        if(status == Status.REQUEST_ACCEPTED) {
             for(IMessage msg:messageList){
                 session.write(msg);
                 handleMessage(msg, false, false, session.getRemoteAddress().toString());
@@ -205,8 +207,7 @@ public class ITCHMulticastTCPHandlerAdapter extends IoHandlerAdapter {
     private IMessage onLogon(IMessage iMessage, IoSession session) {
         handleMessage(iMessage, true, true, session.getRemoteAddress().toString());
 
-        IMessage loginResponse;
-        loginResponse = msgFactory.createMessage(LOGIN_RESPONSE, iMessage.getNamespace());
+        IMessage loginResponse = msgFactory.createMessage(LOGIN_RESPONSE, iMessage.getNamespace());
         if (iMessage.getField("Username") != null && iMessage.getField("Password") != null) {
             loginResponse.addField(STATUS, toShort('A'));
         } else {

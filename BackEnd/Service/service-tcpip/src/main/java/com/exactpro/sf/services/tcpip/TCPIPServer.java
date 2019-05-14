@@ -74,7 +74,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, IInitiatorService {
 
     private final Logger logger = LoggerFactory
-            .getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+            .getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private volatile ServiceStatus curStatus;
 
@@ -82,7 +82,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
     private TCPIPServerSettings settings;
     private IServiceHandler handler;
     private MessageHelper messageHelper;
-    private List<ISession> sessions;
+    private final List<ISession> sessions;
     private TCPIPServerSession session;
     private WrapperNioSocketAcceptor acceptor;
     private ServiceName serviceName;
@@ -106,8 +106,8 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
     }
 
     @Override
-    public void init(IServiceContext serviceContext, final IServiceMonitor serviceMonitor,
-            final IServiceHandler handler, final IServiceSettings settings, final ServiceName serviceName) {
+    public void init(IServiceContext serviceContext, IServiceMonitor serviceMonitor,
+            IServiceHandler handler, IServiceSettings settings, ServiceName serviceName) {
         try {
             changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
 
@@ -142,26 +142,26 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
                         Class<?> fieldConverterClass = getClass().getClassLoader()
                                 .loadClass(this.settings.getFieldConverterClassName());
                         fieldConverter = (IFieldConverter) fieldConverterClass.newInstance();
-                        fieldConverter.init(dictionary, this.dictionary.getNamespace());
+                        fieldConverter.init(dictionary, dictionary.getNamespace());
                     } catch (Exception e) {
                         throw new IllegalStateException("fieldConverterClass: " + e.getMessage(), e);
                     }
                 }
 
                 defaultFactory = dictionaryManager.getMessageFactory(dictionaryName);
-                this.messageHelper.init(defaultFactory, dictionary);
+                messageHelper.init(defaultFactory, dictionary);
             } else {
                 defaultFactory = dictionaryManager.createMessageFactory();
             }
 
-            if (this.fieldConverter == null) {
+            if(fieldConverter == null) {
                 this.fieldConverter = new DefaultFieldConverter();
             }
             try {
-                this.codecClass = this.getClass().getClassLoader().loadClass(this.settings.getCodecClassName()).asSubclass(AbstractCodec.class);
+                this.codecClass = getClass().getClassLoader().loadClass(this.settings.getCodecClassName()).asSubclass(AbstractCodec.class);
             } catch (ClassNotFoundException e) {
                 logger.error(e.getMessage(), e);
-                this.changeStatus(ServiceStatus.ERROR, "ERROR while initializing service", null);
+                changeStatus(ServiceStatus.ERROR, "ERROR while initializing service", null);
                 throw new ServiceException("Could not find codec class [" + this.settings.getCodecClassName() + "]", e);
             }
 
@@ -189,7 +189,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            this.changeStatus(ServiceStatus.ERROR, "Init error : " + e.getMessage(), e);
+            changeStatus(ServiceStatus.ERROR, "Init error : " + e.getMessage(), e);
             throw new EPSCommonException(e);
         }
         logger.info("initialization finished");
@@ -199,7 +199,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
     private void installSSLFilter() throws NoSuchAlgorithmException, KeyStoreException,
             CertificateException, IOException, KeyManagementException, UnrecoverableKeyException {
 
-        this.acceptor.getFilterChain().addFirst("SSLFilter",
+        acceptor.getFilterChain().addFirst("SSLFilter",
                 MINAUtil.createSslFilter(false, settings.getSslProtocol(),
                         settings.getKeyStoreType(), settings.getSslKeyStore(),
                         settings.getSslKeyStorePassword().toCharArray()));
@@ -207,29 +207,29 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public void start() {
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
         try {
-            this.changeStatus(ServiceStatus.STARTING, "service starting", null);
+            changeStatus(ServiceStatus.STARTING, "service starting", null);
 
             this.acceptor = new WrapperNioSocketAcceptor(taskExecutor);
             IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
 
-            CodecFactory codecFactory = new CodecFactory(this.serviceContext, msgFactory, this.dictionary, codecClass, this.settings.createCodecSettings());
+            CodecFactory codecFactory = new CodecFactory(serviceContext, msgFactory, dictionary, codecClass, settings.createCodecSettings());
 
             if (settings.isUseSSL()) {
                 installSSLFilter();
             }
 
-            this.acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
+            acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
             acceptor.setHandler(this);
             adress = new InetSocketAddress(settings.getHost(), settings.getPort());
-            this.acceptor.bind(adress);
+            acceptor.bind(adress);
 
             this.session = new TCPIPServerSession(this);
-            new Thread(this.session).start();
+            new Thread(session).start();
 
-            this.changeStatus(ServiceStatus.STARTED, "service started", null);
+            changeStatus(ServiceStatus.STARTED, "service started", null);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             changeStatus(ServiceStatus.ERROR, e.getMessage(), e);
@@ -242,23 +242,23 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
         changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
 
         try {
-            if (this.acceptor != null) {
-                this.acceptor.unbind(adress);
-                this.acceptor.dispose();
+            if(acceptor != null) {
+                acceptor.unbind(adress);
+                acceptor.dispose();
                 this.acceptor = null;
             }
-            if (this.session != null) {
-                this.session.close();
+            if(session != null) {
+                session.close();
                 this.session = null;
             }
         } catch (Exception err) {
-            this.changeStatus(ServiceStatus.ERROR, "Error when disposing", null);
+            changeStatus(ServiceStatus.ERROR, "Error when disposing", null);
         }
 
         changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 
         if (logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                     serviceName);
         }
 
@@ -310,12 +310,12 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
         logger.info("sessionCreated: {} {} {}",
                 session, session.getClass().getCanonicalName(), session.hashCode());
-        session.setReceiveLimit(this.settings.getReceiveLimit());
+        session.setReceiveLimit(settings.getReceiveLimit());
     }
 
     @Override
     public void sessionOpened(IoSession session) throws Exception {
-        this.handler.sessionOpened(sessionMap.get(session));
+        handler.sessionOpened(sessionMap.get(session));
 
         storeSessionEventMessage(session, "connection opened!");
 
@@ -357,10 +357,10 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
             if (metaData.isAdmin()) {
                 logger.debug("Add fromAdmin: {}", iMessage.getName());
-                this.handler.putMessage(this.session, ServiceHandlerRoute.FROM_ADMIN, iMessage);
+                handler.putMessage(this.session, ServiceHandlerRoute.FROM_ADMIN, iMessage);
             } else {
                 logger.debug("Add fromApp: {}", iMessage.getName());
-                this.handler.putMessage(this.session, ServiceHandlerRoute.FROM_APP, iMessage);
+                handler.putMessage(this.session, ServiceHandlerRoute.FROM_APP, iMessage);
             }
         }
     }
@@ -382,10 +382,10 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
             if (metaData.isAdmin()) {
                 logger.info("Add toAdmin: {}", iMessage.getName());
-                this.handler.putMessage(this.session, ServiceHandlerRoute.TO_ADMIN, iMessage);
+                handler.putMessage(this.session, ServiceHandlerRoute.TO_ADMIN, iMessage);
             } else {
                 logger.info("Add toApp: {}", iMessage.getName());
-                this.handler.putMessage(this.session, ServiceHandlerRoute.TO_APP, iMessage);
+                handler.putMessage(this.session, ServiceHandlerRoute.TO_APP, iMessage);
             }
         }
     }
@@ -415,7 +415,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public ISession getSession() {
-        return this.session;
+        return session;
     }
 
     @Override
@@ -424,7 +424,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public IMessage receive(IActionContext actionContext, IMessage msg) throws InterruptedException {
-        IMessage convertedMessage = this.fieldConverter.convertFields(msg, this.messageFactory, true);
+        IMessage convertedMessage = fieldConverter.convertFields(msg, messageFactory, true);
         try {
             return WaitAction.waitForMessage(actionContext, convertedMessage, !messageHelper.isAdmin(convertedMessage));
         } catch (MessageNotFoundException e) {

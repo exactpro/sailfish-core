@@ -29,7 +29,7 @@ public class XmlStatisticsDBSettings {
     private String password;
 
     public boolean getStatisticsServiceEnabled() {
-        return this.statisticsServiceEnabled;
+        return statisticsServiceEnabled;
     }
 
     public void setStatisticsServiceEnabled(boolean statisticsServiceEnabled) {

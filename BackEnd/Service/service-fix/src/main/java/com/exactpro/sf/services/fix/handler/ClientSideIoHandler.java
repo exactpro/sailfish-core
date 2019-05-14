@@ -55,19 +55,19 @@ import quickfix.field.TargetCompID;
  */
 public class ClientSideIoHandler extends AbstractProxyIoHandler {
 
-	private static Logger logger = LoggerFactory.getLogger(ClientSideIoHandler.class);
-	private ServerSideIoHandler connectorHandler = null;
+    private static final Logger logger = LoggerFactory.getLogger(ClientSideIoHandler.class);
+    private final ServerSideIoHandler connectorHandler;
 	private final IoConnector connector;
 	private final SocketAddress remoteAddress;
-	private IMessageStorage storage;
-	private IServiceHandler handler;
-	private DefaultMessageFactory factory = new DefaultMessageFactory();
-	private DataDictionary appDictionary;
+    private final IMessageStorage storage;
+    private final IServiceHandler handler;
+    private final DefaultMessageFactory factory = new DefaultMessageFactory();
+    private final DataDictionary appDictionary;
 	private ServiceInfo serviceInfo;
-	private TCPIPProxy proxyService;
-	private ILoggingConfigurator logConfigurator;
-	private DirtyQFJIMessageConverter converter;
-    private ServiceName serviceName;
+    private final TCPIPProxy proxyService;
+    private final ILoggingConfigurator logConfigurator;
+    private final DirtyQFJIMessageConverter converter;
+    private final ServiceName serviceName;
 
 	public ClientSideIoHandler(IoConnector connector,
             SocketAddress remoteAddress, IMessageStorage storage, IServiceHandler handler, TCPIPProxy proxyService, ILoggingConfigurator logConfigurator, IDictionaryStructure dictionary, IMessageFactory factory,
@@ -89,7 +89,7 @@ public class ClientSideIoHandler extends AbstractProxyIoHandler {
 	}
 
 	@Override
-	public void sessionOpened(final IoSession session) throws Exception {
+    public void sessionOpened(IoSession session) throws Exception {
 
 		logger.debug("sessionOpened");
 

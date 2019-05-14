@@ -258,7 +258,7 @@ public class EnumReplacer {
             EnumReplacingVisitor visitor = new EnumReplacingVisitor(value);
 
             messageStructureReader.traverse(visitor, complexField.getFields(), value, MessageStructureReaderHandlerImpl.instance());
-            this.message.addField(fieldName, visitor.getMessage());
+            message.addField(fieldName, visitor.getMessage());
         }
 
         @Override
@@ -282,7 +282,7 @@ public class EnumReplacer {
                 list.add(visitor.getMessage());
             }
 
-            this.message.addField(fieldName, list);
+            message.addField(fieldName, list);
         }
 
         private void visit(String fieldName, List<?> values, IFieldStructure fldStruct) {

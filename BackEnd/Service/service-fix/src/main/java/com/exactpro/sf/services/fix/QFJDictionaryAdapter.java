@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,16 +72,16 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	private boolean checkFieldsOutOfOrder = true;
 	private boolean checkFieldsHaveValues = true;
 	private boolean checkUserDefinedFields = true;
-	private boolean allowUnknownMessageFields = false;
+    private boolean allowUnknownMessageFields;
     private boolean checkUnorderedGroupFields = true;
-	private IDictionaryStructure iMsgDict;
-	private String version;
+    private final IDictionaryStructure iMsgDict;
+    private final String version;
 	private String namespace;
 
-	private HashMap<Integer, IFieldStructure> fields = new HashMap<>();
+    private final HashMap<Integer, IFieldStructure> fields = new HashMap<>();
 
-	private HashMap<String, IMessageStructure> messages = new HashMap<>();
-	private HashMap<String, HashMap<Integer, IFieldStructure>> mesgFields = new HashMap<>();
+    private final HashMap<String, IMessageStructure> messages = new HashMap<>();
+    private final HashMap<String, HashMap<Integer, IFieldStructure>> mesgFields = new HashMap<>();
 	private final Map<String, Set<Integer>> requiredFields = new HashMap<>();
 	private final Map<Integer, Set<String>> fieldValues = new HashMap<>();
     private final Map<String, String> messageCategory = new HashMap<>();
@@ -114,12 +115,6 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		}
 	}
 
-    private void addFieldName(int field, String name) /*throws ConfigError*/ {
-        if (names.put(name, field) != null) {
-            //throw new ConfigError("Field named " + name + " defined multiple times");
-        }
-    }
-
     private void indexFields(String messageType, Collection<IFieldStructure> fieldStructures, boolean onlyFields) {
 		HashMap<Integer, IFieldStructure> msgFields = mesgFields.get(messageType);
 		if (msgFields == null && !onlyFields) {
@@ -147,7 +142,6 @@ public class QFJDictionaryAdapter extends DataDictionary {
 				msgFields.put(tag, fs);
 			}
 			fields.put(tag, fs);
-			addFieldName(tag.intValue(), fs.getName());
 			if (fs.isRequired() && !onlyFields) {
 				try {
 					if (
@@ -172,7 +166,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
                 }
 
 			    for (String enumElement : fs.getValues().keySet()) {
-			        if (JavaType.JAVA_LANG_BOOLEAN.equals(fs.getJavaType())) {
+                    if(fs.getJavaType() == JavaType.JAVA_LANG_BOOLEAN) {
 			            fldValues.add(Boolean.TRUE.equals(fs.getValues().get(enumElement).getCastValue()) ? "Y" : "N");
 			        } else {
 			            fldValues.add(fs.getValues().get(enumElement).getValue());
@@ -252,29 +246,29 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 
 	private void checkHasRequired(String msgType, FieldMap fields, boolean bodyOnly) {
-		final Set<Integer> requiredFieldsForMessage = requiredFields.get(msgType);
-		if (requiredFieldsForMessage == null || requiredFieldsForMessage.size() == 0) {
+        Set<Integer> requiredFieldsForMessage = requiredFields.get(msgType);
+        if(requiredFieldsForMessage == null || requiredFieldsForMessage.isEmpty()) {
 			return;
 		}
 
-		final Iterator<Integer> fieldItr = requiredFieldsForMessage.iterator();
+        Iterator<Integer> fieldItr = requiredFieldsForMessage.iterator();
 		while (fieldItr.hasNext()) {
-			final int field = (fieldItr.next()).intValue();
+            int field = fieldItr.next().intValue();
 			if (!fields.isSetField(field)) {
 				throw new FieldException(SessionRejectReason.REQUIRED_TAG_MISSING, field);
 			}
 		}
 
-		final Map<Integer, List<Group>> groups = fields.getGroups();
-		if (groups.size() > 0) {
-			final Iterator<Map.Entry<Integer, List<Group>>> groupIter = groups.entrySet()
+        Map<Integer, List<Group>> groups = fields.getGroups();
+        if(!groups.isEmpty()) {
+            Iterator<Entry<Integer, List<Group>>> groupIter = groups.entrySet()
 			.iterator();
 			while (groupIter.hasNext()) {
-				final Map.Entry<Integer, List<Group>> entry = groupIter.next();
-				final GroupInfo p = getGroup(msgType, (entry.getKey()).intValue());
-				final List<Group> groupInstances = entry.getValue();
+                Entry<Integer, List<Group>> entry = groupIter.next();
+                GroupInfo p = getGroup(msgType, entry.getKey().intValue());
+                List<Group> groupInstances = entry.getValue();
 				for (int i = 0; i < groupInstances.size(); i++) {
-					final FieldMap groupFields = groupInstances.get(i);
+                    FieldMap groupFields = groupInstances.get(i);
 					p.getDataDictionary().checkHasRequired(null, groupFields, null,
 							msgType, bodyOnly);
 				}
@@ -285,9 +279,9 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	@Override
 	public void iterate(FieldMap map, String msgType, DataDictionary dd)
 	throws IncorrectTagValue, IncorrectDataFormat {
-		final Iterator<Field<?>> iterator = map.iterator();
+        Iterator<Field<?>> iterator = map.iterator();
 		while (iterator.hasNext()) {
-			final StringField field = (StringField) iterator.next();
+            StringField field = (StringField)iterator.next();
 
 			checkHasValue(field);
 
@@ -305,8 +299,8 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			}
 		}
 
-		for (final List<Group> groups : map.getGroups().values()) {
-			for (final Group group : groups) {
+        for(List<Group> groups : map.getGroups().values()) {
+            for(Group group : groups) {
 				iterate(group, msgType, dd.getGroup(msgType, group.getFieldTag())
 						.getDataDictionary());
 			}
@@ -324,12 +318,12 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	}
 
 	private void checkValue(StringField field) throws IncorrectTagValue {
-		final int tag = field.getField();
+        int tag = field.getField();
 		if (!hasFieldValue(tag)) {
 			return;
 		}
 
-		final String value = field.getValue();
+        String value = field.getValue();
 		if (!isFieldValue(tag, value)) {
 			throw new IncorrectTagValue(tag);
 		}
@@ -345,13 +339,13 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 	@Override
     public boolean isFieldValue(int field, String value) {
-		final Set<String> validValues = fieldValues.get(field);
+        Set<String> validValues = fieldValues.get(field);
 
 		if (validValues.contains(ANY_VALUE)) {
 			return true;
 		}
 
-		if (validValues == null || validValues.size() == 0) {
+        if(validValues == null || validValues.isEmpty()) {
 			return false;
 		}
 
@@ -360,7 +354,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		}
 
 		// MultipleValueString
-		final String[] values = value.split(" ");
+        String[] values = value.split(" ");
 		for (int i = 0; i < values.length; i++) {
 			if (!validValues.contains(values[i])) {
 				return false;
@@ -380,7 +374,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		}
 
 		try {
-			final FieldType fieldType = getFieldTypeEnum(field.getTag());
+            FieldType fieldType = getFieldTypeEnum(field.getTag());
 			if (fieldType == FieldType.String) {
 				// String
 			} else if (fieldType == FieldType.Char) {
@@ -434,14 +428,14 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			} else if (fieldType == FieldType.Country) {
 				// String
 			}
-		} catch (final FieldConvertError e) {
+        } catch(FieldConvertError e) {
 			throw new IncorrectDataFormat(field.getTag(), field.getValue());
 		}
 	}
 
 	// / Check if a field has a value.
 	private void checkHasValue(StringField field) {
-		if (checkFieldsHaveValues && field.getValue().length() == 0) {
+        if(checkFieldsHaveValues && field.getValue().isEmpty()) {
 			throw new FieldException(SessionRejectReason.TAG_SPECIFIED_WITHOUT_A_VALUE, field
 					.getField());
 		}
@@ -450,7 +444,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	// / Check if group count matches number of groups in
 	@Override
 	public void checkGroupCount(StringField field, FieldMap fieldMap, String msgType) {
-		final int fieldNum = field.getField();
+        int fieldNum = field.getField();
 		if (isGroup(msgType, fieldNum)) {
 			if (fieldMap.getGroupCount(fieldNum) != Integer.parseInt(field.getValue())) {
 				throw new FieldException(
@@ -514,7 +508,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	@Override
 	public Map<String, Set<Integer>> getMessageFields() {
 		Map<String, Set<Integer>> msgFields = new HashMap<>();
-		for (Map.Entry<String, HashMap<Integer, IFieldStructure>> mesgFld : mesgFields.entrySet()) {
+        for(Entry<String, HashMap<Integer, IFieldStructure>> mesgFld : mesgFields.entrySet()) {
 			String msgType = mesgFld.getKey();
 			msgFields.put(msgType, new HashSet<>(mesgFld.getValue().keySet()));
 		}
@@ -566,19 +560,18 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 	@Override
 	public String getValueName(int tag, String value) {
-	    if (tag == MsgType.FIELD)
+        if(tag == MsgType.FIELD) {
             return getMessageName(value);
-        String result = null;
+        }
         IFieldStructure fieldType = iMsgDict.getFields().get(fields.get(tag).getName());
         if (fieldType != null && fieldType.isEnum()) {
             for (String el : fieldType.getValues().keySet()) {
                 if (fieldType.getValues().get(el).getValue().equals(value)) {
-                    result = el;
-                    break;
+                    return el;
                 }
             }
         }
-		return result;
+        return null;
 	}
 
 	@Override
@@ -594,11 +587,8 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			return false;
 		}
 		IFieldStructure fld = msgFld.get(field);
-		if (fld == null) {
-			return false;
-		}
-		return fld.isCollection();
-	}
+        return fld != null && fld.isCollection();
+    }
 
 	@Override
 	public int[] getOrderedFields() {
@@ -628,16 +618,12 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			return false;
 		}
         String fixType = getAttributeValue(fs, ATTRIBUTE_FIX_TYPE);
-		if (fixType == null) {
-			//group field
-			return false;
-		}
-		return fixType.equals("DATA");
-	}
+        return fixType != null && "DATA".equals(fixType);
+    }
 
 	@Override
 	public int getFieldTag(String name) {
-        final Integer tag = names.get(name);
+        Integer tag = names.get(name);
         return tag != null ? tag.intValue() : -1;
 	}
 
@@ -675,7 +661,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 	@Override
 	public boolean isMsgField(String msgType, int tag) {
-		final HashMap<Integer, IFieldStructure> fields = mesgFields.get(msgType);
+        HashMap<Integer, IFieldStructure> fields = mesgFields.get(msgType);
 		return fields != null && fields.containsKey(tag);
 	}
 
@@ -711,10 +697,10 @@ public class QFJDictionaryAdapter extends DataDictionary {
 	}
 
 	class GroupDictionary extends DataDictionary {
-		private int[] orderedFields = null;
-		private HashSet<Integer> fields = null;
+        private int[] orderedFields;
+        private HashSet<Integer> fields;
 		private Set<Integer> grpRequiredFields;
-		private IFieldStructure fieldStructure;
+        private final IFieldStructure fieldStructure;
 
 		public GroupDictionary(String msg, int field, IFieldStructure fieldStructure) {
 			this.fieldStructure = fieldStructure;
@@ -762,29 +748,29 @@ public class QFJDictionaryAdapter extends DataDictionary {
 		}
 
 		public void checkHasRequired(String msgType, FieldMap subGroup) {
-			final Set<Integer> requiredFieldsForMessage = getRequiredFieldsForGroup() ;
-			if (requiredFieldsForMessage == null || requiredFieldsForMessage.size() == 0) {
+            Set<Integer> requiredFieldsForMessage = getRequiredFieldsForGroup();
+            if(requiredFieldsForMessage == null || requiredFieldsForMessage.isEmpty()) {
 				return;
 			}
 
-			final Iterator<Integer> fieldItr = requiredFieldsForMessage.iterator();
+            Iterator<Integer> fieldItr = requiredFieldsForMessage.iterator();
 			while (fieldItr.hasNext()) {
-				final int field = (fieldItr.next()).intValue();
+                int field = fieldItr.next().intValue();
 				if (!subGroup.isSetField(field)) {
 					throw new FieldException(SessionRejectReason.REQUIRED_TAG_MISSING, field);
 				}
 			}
 
-			final Map<Integer, List<Group>> groups = subGroup.getGroups();
-			if (groups.size() > 0) {
-				final Iterator<Map.Entry<Integer, List<Group>>> groupIter = groups.entrySet()
+            Map<Integer, List<Group>> groups = subGroup.getGroups();
+            if(!groups.isEmpty()) {
+                Iterator<Entry<Integer, List<Group>>> groupIter = groups.entrySet()
 				.iterator();
 				while (groupIter.hasNext()) {
-					final Map.Entry<Integer, List<Group>> entry = groupIter.next();
-					final GroupInfo p = getGroup(msgType, (entry.getKey()).intValue());
-					final List<Group> groupInstances = entry.getValue();
+                    Entry<Integer, List<Group>> entry = groupIter.next();
+                    GroupInfo p = getGroup(msgType, entry.getKey().intValue());
+                    List<Group> groupInstances = entry.getValue();
 					for (int i = 0; i < groupInstances.size(); i++) {
-						final FieldMap groupFields = groupInstances.get(i);
+                        FieldMap groupFields = groupInstances.get(i);
 						p.getDataDictionary().checkHasRequired(null, groupFields, null,
 								msgType, true);
 					}
@@ -877,10 +863,10 @@ public class QFJDictionaryAdapter extends DataDictionary {
 
 		@Override
 		public boolean isField(int tag) {
-			if (this.fields == null) {
+            if(fields == null) {
 				indexFields();
 			}
-			return this.fields.contains(tag);
+            return fields.contains(tag);
 		}
 
         @Override

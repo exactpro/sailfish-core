@@ -24,7 +24,7 @@ public enum TestCasesDisplayMode {
 	
 	private final String label;
 	
-	private TestCasesDisplayMode(String label) {
+	TestCasesDisplayMode(String label) {
 		this.label = label;
 	}
 

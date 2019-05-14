@@ -31,10 +31,10 @@ public class AppZip {
 
 	private static final Logger logger = LoggerFactory.getLogger(AppZip.class);
 
-	private List<String> fileList = new ArrayList<String>();
-	private List<String> absoluteList = new ArrayList<String>();
+    private final List<String> fileList = new ArrayList<String>();
+    private final List<String> absoluteList = new ArrayList<String>();
 
-	private String sourcePath = null;
+    private String sourcePath;
 
 	private String currentFolder;
 
@@ -44,20 +44,20 @@ public class AppZip {
 
 
 		try (	FileOutputStream fos = new FileOutputStream(zipFile);
-				ZipOutputStream zos = new ZipOutputStream(fos);
-				) {
+                ZipOutputStream zos = new ZipOutputStream(fos)
+        ) {
 
 
 			logger.debug("Output to Zip : {}", zipFile);
 
 			int i = 0;
-			for (String file : this.fileList) {
+            for(String file : fileList) {
 
 				logger.debug("File Added : {}", file);
 				ZipEntry ze = new ZipEntry(file);
 				zos.putNextEntry(ze);
 
-				try (FileInputStream in = new FileInputStream(this.absoluteList.get(i++))) {
+                try(FileInputStream in = new FileInputStream(absoluteList.get(i++))) {
 					int len;
 					while ((len = in.read(buffer)) > 0) {
 						zos.write(buffer, 0, len);
@@ -82,17 +82,17 @@ public class AppZip {
 
 		if (node.isFile()) {
 
-			if (null == this.sourcePath) {
+            if(sourcePath == null) {
 				String file = node.getAbsoluteFile().toString();
 				this.sourcePath = file.substring(0, file.lastIndexOf(File.separator));
 			}
 
-			if (null == this.currentFolder) {
-				this.fileList.add(generateZipEntry(node.getAbsoluteFile().toString()));
+            if(currentFolder == null) {
+                fileList.add(generateZipEntry(node.getAbsoluteFile().toString()));
 			} else {
-				this.fileList.add(this.currentFolder+File.separator+generateZipEntry(node.getAbsoluteFile().toString()));
+                fileList.add(currentFolder + File.separator + generateZipEntry(node.getAbsoluteFile().toString()));
 			}
-			this.absoluteList.add(node.getAbsoluteFile().toString());
+            absoluteList.add(node.getAbsoluteFile().toString());
 
 		}
 
@@ -100,10 +100,10 @@ public class AppZip {
 
 			if (first) {
 				this.sourcePath = node.getAbsolutePath().toString();
-				if (this.sourcePath.endsWith(File.separator)) {
-                    this.sourcePath = this.sourcePath.substring(0, this.sourcePath.length());
+                if(sourcePath.endsWith(File.separator)) {
+                    this.sourcePath = sourcePath.substring(0, sourcePath.length());
                 }
-				this.currentFolder = this.sourcePath.substring(this.sourcePath.lastIndexOf(File.separator)+1);
+                this.currentFolder = sourcePath.substring(sourcePath.lastIndexOf(File.separator) + 1);
 			}
 
 			String[] subNote = node.list();
@@ -121,11 +121,7 @@ public class AppZip {
 	}
 
 	private String generateZipEntry(String file) {
-		if (null == this.sourcePath) {
-			return file.substring(file.lastIndexOf(File.separator)+1);
-		}
-
-    	return file.substring(this.sourcePath.length()+1, file.length());
+        return sourcePath == null ? file.substring(file.lastIndexOf(File.separator) + 1) : file.substring(sourcePath.length() + 1);
     }
 
 }

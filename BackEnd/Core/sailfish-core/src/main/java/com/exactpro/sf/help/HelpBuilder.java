@@ -151,7 +151,7 @@ public class HelpBuilder {
     public static final String HTML = ".html";
 
     private static final String TEMPLATE_PACKAGE_PATH = "/com/exactpro/sf/help/template";
-    private static final String[] PAGE_RESOURCES = new String[] { "static-help.css", "static-help.js", "ui-bg_flat_75_ffffff_40x100.png",
+    private static final String[] PAGE_RESOURCES = { "static-help.css", "static-help.js", "ui-bg_flat_75_ffffff_40x100.png",
             "ui-icons_c02669_256x240.png", "SFicon.png" };
 
     private final HelpTemplateWrapperFactory templateWrapperFactory;
@@ -301,7 +301,7 @@ public class HelpBuilder {
 
     private void build(String rootName, String rootAlias) throws IOException, SailfishURIException, TemplateException {
 
-        if (this.actionManager == null) {
+        if(actionManager == null) {
             throw new UnsupportedOperationException();
         }
 
@@ -380,7 +380,7 @@ public class HelpBuilder {
 
         for (ActionClass loadedAction : unmarshalledActions) {
             if (loadedAction.getPlugin().equals(plugin)) {
-                validActions.add((loadedAction));
+                validActions.add(loadedAction);
             }
         }
 
@@ -636,7 +636,7 @@ public class HelpBuilder {
         for (Method actionMethod : actionClass.getClassMethods()) {
             if (method.getName().equals(actionMethod.getName()) && actionMethod.getParameterTypes().length == 2) {
                 FieldsDescriber.describeFields(fields, actionMethod.getParameterTypes()[1]);
-                break;
+                return fields;
             }
         }
         return fields;
@@ -659,7 +659,7 @@ public class HelpBuilder {
 
                         if (abstrFM instanceof Field) {
 
-                            Field field = ((Field) abstrFM);
+                            Field field = (Field)abstrFM;
 
                             String fieldName = field.getName();
 
@@ -687,7 +687,7 @@ public class HelpBuilder {
 
                         } else {
 
-                            Message message = ((Message) abstrFM);
+                            Message message = (Message)abstrFM;
 
                             String messageName = message.getName();
 
@@ -900,7 +900,7 @@ public class HelpBuilder {
 
         for(IFieldStructure field : fields.getFields().values()) {
             String fieldName = field.getName();
-            boolean hasChildren = field.isCollection() || (field.isComplex());
+            boolean hasChildren = field.isCollection() || field.isComplex();
             HelpEntityType fieldNodeType = hasChildren ? HelpEntityType.MESSAGE : HelpEntityType.FIELD;
             HelpJsonContainer fieldJsonNode;
             Integer customHash = HelpUtil.getHashCode(field);
@@ -928,7 +928,7 @@ public class HelpBuilder {
 
                     fieldTemplate.setData("attributes", field.getAttributes());
 
-                    if (!fieldNodeType.equals(HelpEntityType.MESSAGE)) {
+                    if(fieldNodeType != HelpEntityType.MESSAGE) {
                         fieldTemplate.setData("validValues", field.getValues());
                     }
 

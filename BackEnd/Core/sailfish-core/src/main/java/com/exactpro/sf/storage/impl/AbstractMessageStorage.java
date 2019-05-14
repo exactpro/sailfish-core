@@ -53,11 +53,11 @@ public abstract class AbstractMessageStorage implements IMessageStorage {
         
         SailfishURI dictionaryURI = message.getMetaData().getDictionaryURI();
         if (dictionaryURI != null) {
-            dictionary = this.dictionaryManager.getDictionary(dictionaryURI);
+            dictionary = dictionaryManager.getDictionary(dictionaryURI);
             if (dictionary != null) {
                 messageStructure = dictionary.getMessages().get(message.getName());
             }
-            messageFactory = this.dictionaryManager.getMessageFactory(dictionaryURI);
+            messageFactory = dictionaryManager.getMessageFactory(dictionaryURI);
         }
         
         IHumanMessage humanMessage = MessageUtil.convertToIHumanMessage(messageFactory, messageStructure, message);

@@ -15,15 +15,31 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.machinelearning.entities;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"id", "name", "type", "value", "message", "values", "messages"})
 @Entity
@@ -46,23 +62,27 @@ public class MessageEntry implements Serializable {
     private String name;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "simple_value_id", nullable = true)
+    @JoinColumn(name = "simple_value_id")
     private SimpleValue value;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "message_id", nullable = true)
+    @JoinColumn(name = "message_id")
     private Message message;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "mlsimplearray", joinColumns = {
-            @JoinColumn(name = "entry_id", nullable = false, updatable = true) }, inverseJoinColumns = {
-                    @JoinColumn(name = "simple_value_id", nullable = false, updatable = true) })
+    @JoinTable(
+            name = "mlsimplearray",
+            joinColumns = @JoinColumn(name = "entry_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "simple_value_id", nullable = false)
+    )
     private List<SimpleValue> values;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "mlmessagearray", joinColumns = {
-            @JoinColumn(name = "entry_id", nullable = false, updatable = true) }, inverseJoinColumns = {
-                    @JoinColumn(name = "message_id", nullable = false, updatable = true) })
+    @JoinTable(
+            name = "mlmessagearray",
+            joinColumns = @JoinColumn(name = "entry_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "message_id", nullable = false)
+    )
     private List<Message> messages;
 
     public MessageEntry() {
@@ -152,27 +172,27 @@ public class MessageEntry implements Serializable {
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", this.id)
-                .append("type", this.type)
-                .append("name", this.name);
-        switch (this.type) {
+                .append("id", id)
+                .append("type", type)
+                .append("name", name);
+        switch(type) {
         case SIMPLE:
-            builder.append("value", this.value);
+            builder.append("value", value);
             break;
         case MESSAGE:
-            builder.append("message", this.message);
+            builder.append("message", message);
             break;
         case SIMPLE_ARRAY:
-            builder.append("values", this.values);
+            builder.append("values", values);
             break;
         case MESSAGE_ARRAY:
-            builder.append("messages", this.messages);
+            builder.append("messages", messages);
             break;
         default:
-            builder.append("value", this.value)
-                .append("message", this.message)
-                .append("values", this.values)
-                .append("messages", this.messages);
+            builder.append("value", value)
+                    .append("message", message)
+                    .append("values", values)
+                    .append("messages", messages);
             break;
         }
 

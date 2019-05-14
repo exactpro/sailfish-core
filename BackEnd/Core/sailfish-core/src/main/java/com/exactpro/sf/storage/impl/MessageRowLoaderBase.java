@@ -44,11 +44,7 @@ public abstract class MessageRowLoaderBase<T> implements Iterable<MessageRow> {
         this.filter = filter;
         this.count = count;
         this.bufferSize = bufferSize;
-        if (filter.getRawMessage() != null) {
-            this.isHex = "hex".equals(filter.getRawMessage());
-        } else {
-            this.isHex = true;
-        }
+        this.isHex = filter.getRawMessage() == null || "hex".equals(filter.getRawMessage());
         this.buffer = new ArrayDeque<>(this.bufferSize);
     }
 
@@ -67,14 +63,14 @@ public abstract class MessageRowLoaderBase<T> implements Iterable<MessageRow> {
 
         return new Iterator<MessageRow>() {
 
-            int counter = 0;
+            int counter;
             private long lastID;
             private final Interner<String> interner = new CHMInterner<>();
             {
-                lastID = (Boolean.FALSE.equals(filter.getSortOrder()))
+                lastID = Boolean.FALSE.equals(filter.getSortOrder())
                         ? Long.MAX_VALUE
                         : 0;
-                retrieveMessages(MessageRowLoaderBase.this.buffer, MessageRowLoaderBase.this.bufferSize, this.lastID);
+                retrieveMessages(buffer, bufferSize, lastID);
             }
 
             @Override
@@ -87,14 +83,14 @@ public abstract class MessageRowLoaderBase<T> implements Iterable<MessageRow> {
                 this.counter++;
                 T tmp = buffer.remove();
                 this.lastID = getID(tmp);
-                if (MessageRowLoaderBase.this.buffer.isEmpty() && needMessages()) {
-                    retrieveMessages(MessageRowLoaderBase.this.buffer, MessageRowLoaderBase.this.bufferSize, this.lastID);
+                if(buffer.isEmpty() && needMessages()) {
+                    retrieveMessages(buffer, bufferSize, lastID);
                 }
-                return convert(tmp, this.interner);
+                return convert(tmp, interner);
             }
 
             private boolean needMessages() {
-                return (this.counter < MessageRowLoaderBase.this.count || MessageRowLoaderBase.this.count < 0);
+                return counter < count || count < 0;
             }
 
             @Override

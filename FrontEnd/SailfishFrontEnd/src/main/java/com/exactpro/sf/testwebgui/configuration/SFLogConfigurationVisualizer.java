@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.log4j.Level;
@@ -39,8 +40,8 @@ public class SFLogConfigurationVisualizer implements Serializable {
     private List<AppenderAdapter> appenders;
 
     private List<String> levels;
-    private String level = null;
-    private TreeNode tree = null;
+    private String level;
+    private TreeNode tree;
 
     private static final Logger logger = LoggerFactory.getLogger(SFLogConfigurationVisualizer.class);
 
@@ -196,7 +197,7 @@ public class SFLogConfigurationVisualizer implements Serializable {
                 alreadyRenderesAppenders.add(appenderName);
                 AppenderAdapter appenderAdapter = getAppenderByName(appenderName);
                 sb.append("log4j.appender.").append(appenderAdapter.getName()).append("=").append(appenderAdapter.getType()).append(LS);
-                for(Map.Entry<String, String> entry : appenderAdapter.getParams().entrySet()) {
+                for(Entry<String, String> entry : appenderAdapter.getParams().entrySet()) {
                     sb.append("log4j.appender.").append(appenderAdapter.getName()).append(".").append(entry.getKey()).append("=").append(entry.getValue()).append(LS);
                 }
             }
@@ -241,7 +242,7 @@ public class SFLogConfigurationVisualizer implements Serializable {
             level = loggers.get(0).getLevel();
         }
 
-        for(LoggerAdapter logger : this.loggers) {
+        for(LoggerAdapter logger : loggers) {
             if(!logger.getLevel().equals(level)) {
                 return " -- ";
             }
@@ -262,7 +263,7 @@ public class SFLogConfigurationVisualizer implements Serializable {
             TreeNode loggerNode = new DefaultTreeNode("logger", loggerWrapper, root);
 
             for(String appenderName : logger.getAppenders()) {
-                AppenderAdapter appenderAdapter = this.getAppenderByName(appenderName);
+                AppenderAdapter appenderAdapter = getAppenderByName(appenderName);
                 LoggerNodeWrapper appenderWrapper = new LoggerNodeWrapper(appenderAdapter);
                 TreeNode appenderNode = new DefaultTreeNode("appender", appenderWrapper, loggerNode);
 
@@ -277,7 +278,7 @@ public class SFLogConfigurationVisualizer implements Serializable {
     }
 
     public TreeNode getTree() {
-        if(this.tree == null) {
+        if(tree == null) {
             this.tree = buildTree();
         }
         return tree;

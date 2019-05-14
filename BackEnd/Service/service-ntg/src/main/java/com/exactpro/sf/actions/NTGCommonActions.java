@@ -27,11 +27,9 @@ import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
 import com.exactpro.sf.services.ntg.NTGClient;
 
-@ResourceAliases({"NTGCommonActions"})
+@ResourceAliases("NTGCommonActions")
 public class NTGCommonActions extends AbstractCaller {
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void NAT_Connect(IActionContext actionContext) throws Exception
     {
@@ -43,15 +41,13 @@ public class NTGCommonActions extends AbstractCaller {
 
         client.connect();
         long timeout = System.currentTimeMillis()+1000;
-        while (timeout > System.currentTimeMillis() && false == client.isConnected())
+        while(timeout > System.currentTimeMillis() && !client.isConnected())
         {
             Thread.sleep(10);
         }
     }
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void NAT_Disconnect(IActionContext actionContext) throws Exception
     {
@@ -94,9 +90,7 @@ public class NTGCommonActions extends AbstractCaller {
         throw new ScriptRunException("[" + actionContext.getServiceName() +"] not disconnected");
     }
 
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void NAT_CheckConnected(IActionContext actionContext) throws Exception
     {

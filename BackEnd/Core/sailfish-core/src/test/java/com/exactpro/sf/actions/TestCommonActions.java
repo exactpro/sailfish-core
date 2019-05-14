@@ -41,9 +41,8 @@ public class TestCommonActions extends AbstractTest {
 	@Test
 	public void testBD() {
 
-		Object o = null;
-		long l = 5l;
-		o = l;
+        long l = 5l;
+        Object o = l;
 
 		System.out.println(o.getClass().isPrimitive());
 

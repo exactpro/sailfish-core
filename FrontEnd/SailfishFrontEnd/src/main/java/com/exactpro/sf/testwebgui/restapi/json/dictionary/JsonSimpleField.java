@@ -33,6 +33,6 @@ public class JsonSimpleField extends JsonField {
 	}
 
 	public JavaType getValueType() {
-		return this.valueType;
+        return valueType;
 	}
 }

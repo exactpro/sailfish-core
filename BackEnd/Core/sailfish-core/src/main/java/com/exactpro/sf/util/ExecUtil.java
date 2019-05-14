@@ -39,7 +39,7 @@ public class ExecUtil {
 
 	private void run(String[] args)
 	{
-		if (args.length < 2 || args[1].equals("-h") || args[1].equals("--help")) {
+        if(args.length < 2 || "-h".equals(args[1]) || "--help".equals(args[1])) {
 			usage();
 			return;
 		}
@@ -84,7 +84,7 @@ public class ExecUtil {
 			}
 		}
 
-		if (methods.size() == 0) {
+		if (methods.isEmpty()) {
 			System.out.println("No methods found.");
 		} else {
 			String s = methods.size() == 1 ? "" : "s";

@@ -15,17 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.services.CollectorServiceHandler;
-import com.exactpro.sf.services.ServiceException;
-import com.exactpro.sf.services.ServiceStatus;
-import com.exactpro.sf.util.TestITCHClientBase;
-import junit.framework.Assert;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.services.CollectorServiceHandler;
+import com.exactpro.sf.services.ServiceException;
+import com.exactpro.sf.services.ServiceStatus;
+import com.exactpro.sf.util.TestITCHClientBase;
+
+import junit.framework.Assert;
 
 public class TestITCHClientNegative extends TestITCHClientBase {
 
@@ -121,7 +123,7 @@ public class TestITCHClientNegative extends TestITCHClientBase {
         try {
             server.dispose();
             long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-            while(System.currentTimeMillis()<time && ServiceStatus.STARTED.equals(server.getStatus())){
+            while(System.currentTimeMillis() < time && server.getStatus() == ServiceStatus.STARTED) {
                 Thread.sleep(LOOP_TIMEOUT);
             }
             Assert.assertEquals(ServiceStatus.DISPOSED, server.getStatus());
@@ -137,7 +139,7 @@ public class TestITCHClientNegative extends TestITCHClientBase {
                     Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
                 }
                 server.start();
-                while(System.currentTimeMillis()<time && ServiceStatus.DISPOSED.equals(server.getStatus())){
+                while(System.currentTimeMillis() < time && server.getStatus() == ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.STARTED, server.getStatus());
@@ -172,7 +174,7 @@ public class TestITCHClientNegative extends TestITCHClientBase {
             logger.error(e.getLocalizedMessage(), e);
             throw e;
         } finally {
-            if(ServiceStatus.STARTED.equals(client.getStatus())){
+            if(client.getStatus() == ServiceStatus.STARTED) {
                 client.dispose();
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
             }

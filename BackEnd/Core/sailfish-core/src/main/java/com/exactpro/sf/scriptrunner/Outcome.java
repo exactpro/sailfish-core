@@ -38,8 +38,8 @@ public class Outcome {
         }
 	}
 
-	private String group;
-	private String name;
+    private final String group;
+    private final String name;
 	private Status status = Status.NOT_CHECKED;
 
 	public Outcome(String group, String name)
@@ -49,11 +49,11 @@ public class Outcome {
 	}
 
 	public String getGroup() {
-		return this.group;
+        return group;
 	}
 
 	public String getName() {
-		return this.name;
+        return name;
 	}
 
 	public Outcome setStatus(Status status) {
@@ -62,11 +62,11 @@ public class Outcome {
 	}
 
 	public Status getStatus() {
-		return this.status;
+        return status;
 	}
 
 	@Override
 	public String toString() {
-		return this.group+":"+this.name+" = "+this.status;
+        return group + ":" + name + " = " + status;
 	}
 }

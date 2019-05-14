@@ -28,7 +28,7 @@ public class EventSubscriber implements IUpdateRequestListener{
 
 	private static final Logger logger = LoggerFactory.getLogger(EventSubscriber.class);
 	private final AbstractChannel channel;
-	private String id;
+	private final String id;
 
 	public EventSubscriber(String id, AbstractChannel channel) {
 

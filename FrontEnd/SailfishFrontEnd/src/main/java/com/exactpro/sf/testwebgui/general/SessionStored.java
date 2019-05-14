@@ -25,6 +25,6 @@ import java.lang.annotation.Target;
 public @interface SessionStored {
 	
 	// Store cloned value (cloned by serialization)
-	public boolean cloneBySerialization() default false;
+    boolean cloneBySerialization() default false;
 	
 }

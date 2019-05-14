@@ -25,11 +25,11 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.services.ISession;
 
 public class FakeSession implements ISession {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName()  + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 	private final String name;
 
 	private volatile boolean closed;
-	private volatile FakeClientService fakeService;
+    private final FakeClientService fakeService;
 
 	public FakeSession(FakeClientService fakeService)
 	{
@@ -49,7 +49,7 @@ public class FakeSession implements ISession {
 	{
 		try
 		{
-			this.fakeService.messageSent((IMessage)message);
+            fakeService.messageSent((IMessage)message);
 		}
 		catch (Exception e)
 		{

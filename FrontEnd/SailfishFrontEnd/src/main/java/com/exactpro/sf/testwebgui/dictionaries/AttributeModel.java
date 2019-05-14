@@ -32,11 +32,11 @@ public class AttributeModel implements Serializable {
 
 	private ModifiableFieldStructure owner;
 
-	private boolean inheritedAttribute = false;
+    private boolean inheritedAttribute;
 
-	private boolean overrides = false;
+    private boolean overrides;
 
-	private boolean attribute; // attribute/value
+    private final boolean attribute; // attribute/value
 
     public static List<ModifiableAttributeStructure> cloneAttributes(List<ModifiableAttributeStructure> toClone) {
         List<ModifiableAttributeStructure> result = new ArrayList<>();
@@ -77,12 +77,11 @@ public class AttributeModel implements Serializable {
 	}
 	
 	public String getActualType() {
-		if (this.actual == null || this.actual.getType() == null) return null;
-        return BeanUtil.getJavaTypeLabel(this.actual.getType());
-	}
+        return actual == null || actual.getType() == null ? null : BeanUtil.getJavaTypeLabel(actual.getType());
+    }
 	
 	public void setActualType(String str) {
-        this.actual.setType(DictionaryEditorModel.fromTypeLabel(str));
+        actual.setType(DictionaryEditorModel.fromTypeLabel(str));
 	}
 
 	public ModifiableAttributeStructure getActual() {

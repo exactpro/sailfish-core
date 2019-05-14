@@ -15,16 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.suri;
 
-import com.google.common.collect.Multimap;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Multimap;
 
 public class SailfishURIUtils {
     //FIXME: use "resolve once" strategy in managers instead of matching URIs every time
@@ -43,14 +44,8 @@ public class SailfishURIUtils {
     public static <T> T getMatchingValue(SailfishURI uri, Multimap<SailfishURI, T> multimap, SailfishURIRule defaultRule, SailfishURIRule... rules) {
 		Objects.requireNonNull(multimap, "multimap cannot be null");
         checkURI(uri, defaultRule, rules);
-
         Collection<T> c = getMatchingValue(uri, multimap.asMap(), defaultRule, rules);
-
-        if(c == null || c.isEmpty()) {
-            return null;
-        }
-
-        return c.iterator().next();
+        return c == null || c.isEmpty() ? null : c.iterator().next();
     }
 
     /**
@@ -141,10 +136,6 @@ public class SailfishURIUtils {
     }
 
     public static String sanitize(String value) {
-        if(value != null) {
-            return value.replaceAll("[^\\w:.]", "_");
-        }
-
-        return null;
+        return value != null ? value.replaceAll("[^\\w:.]", "_") : null;
     }
 }

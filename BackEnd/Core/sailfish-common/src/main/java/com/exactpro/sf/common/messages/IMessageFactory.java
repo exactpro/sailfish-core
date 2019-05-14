@@ -23,13 +23,13 @@ public interface IMessageFactory
 {
     void init(String namespace, SailfishURI dictionaryURI);
 
-	public IMessage createMessage(String name, String namespace);
+	IMessage createMessage(String name, String namespace);
 
-    public IMessage createMessage(String name);
+    IMessage createMessage(String name);
     
-    public IHumanMessage createHumanMessage(String name);
+    IHumanMessage createHumanMessage(String name);
 
-	public void fillMessageType(IMessage message);
+	void fillMessageType(IMessage message);
 
 	Set<String> getUncheckedFields();
 

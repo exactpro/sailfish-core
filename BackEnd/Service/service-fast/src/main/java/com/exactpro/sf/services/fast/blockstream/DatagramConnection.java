@@ -20,24 +20,20 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openfast.MessageBlockReader;
 import org.openfast.session.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatagramConnection implements Connection {
-	private final static Logger logger = LoggerFactory.getLogger(DatagramConnection.class);
-	private MulticastSocket socket;
-	private InetAddress group;
-	private UdpInputStream inputStream;
+    private static final Logger logger = LoggerFactory.getLogger(DatagramConnection.class);
+    private final MulticastSocket socket;
+    private final InetAddress group;
+    private final UdpInputStream inputStream;
 
 	public DatagramConnection(MulticastSocket socket, InetAddress group,
 			boolean isBlockEncoded, IPacketHandler packetHandler) {
-		if (isBlockEncoded) {
-			this.inputStream = new BlockEncodedUdpInputStream(socket, packetHandler);
-		} else {
-			this.inputStream = new UdpInputStream(socket, packetHandler);
-		}
+        this.inputStream = isBlockEncoded ? new BlockEncodedUdpInputStream(socket, packetHandler) : new UdpInputStream(socket, packetHandler);
 		this.socket = socket;
 		this.group = group;
 	}

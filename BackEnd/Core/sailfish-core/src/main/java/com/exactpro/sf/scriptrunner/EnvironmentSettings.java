@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.HierarchicalConfiguration.Node;
 import org.apache.commons.lang3.StringUtils;
 import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
@@ -47,7 +48,7 @@ public class EnvironmentSettings implements ICommonSettings
 
         private final String name;
 
-        private StorageType(String name) {
+        StorageType(String name) {
             this.name = name;
         }
 
@@ -75,7 +76,7 @@ public class EnvironmentSettings implements ICommonSettings
 
         private final String name;
 
-        private ReportOutputFormat(String name) {
+        ReportOutputFormat(String name) {
             this.name = name;
         }
 
@@ -108,9 +109,9 @@ public class EnvironmentSettings implements ICommonSettings
         ARRIVAL_TIME("arrival_time"),
         FAILED_FIELDS("failed_fields");
 
-        private String name;
+        private final String name;
 
-        private RelevantMessagesSortingMode(String name) {
+        RelevantMessagesSortingMode(String name) {
             this.name = name;
         }
 
@@ -131,17 +132,17 @@ public class EnvironmentSettings implements ICommonSettings
         }
     }
 
-	private final static String GENERAL_KEY = "GeneralSettings";
-	private final static String ASYNC_RUN_MATRIX_KEY = "AsyncRunMatrix";
-	private final static String NOTIFICATION_IF_SOME_SERVICES_NOT_STARTED = "NotificationIfSomeServicesNotStarted";
-	private final static String MATRIX_COMPILER_PRIORITY = "MatrixCompilerPriority";
-	private final static String EXCLUDED_MESSAGES_FROM_REPORT = "ExcludedMessagesFromReport";
-    private final static String COMPARISON_PRECISION = "ComparisonPrecision";
+    private static final String GENERAL_KEY = "GeneralSettings";
+    private static final String ASYNC_RUN_MATRIX_KEY = "AsyncRunMatrix";
+    private static final String NOTIFICATION_IF_SOME_SERVICES_NOT_STARTED = "NotificationIfSomeServicesNotStarted";
+    private static final String MATRIX_COMPILER_PRIORITY = "MatrixCompilerPriority";
+    private static final String EXCLUDED_MESSAGES_FROM_REPORT = "ExcludedMessagesFromReport";
+    private static final String COMPARISON_PRECISION = "ComparisonPrecision";
 
-	private final static String SCRIPT_RUN = "ScriptRun";
-	private final static String FAIL_UNEXPECTED_KEY = "FailUnexpected";
-	private final static String REPORT_OUTPUT_FORMAT = "ReportOutputFormat";
-    private final static String RELEVANT_MESSAGES_SORTING_MODE = "RelevantMessagesSortingMode";
+    private static final String SCRIPT_RUN = "ScriptRun";
+    private static final String FAIL_UNEXPECTED_KEY = "FailUnexpected";
+    private static final String REPORT_OUTPUT_FORMAT = "ReportOutputFormat";
+    private static final String RELEVANT_MESSAGES_SORTING_MODE = "RelevantMessagesSortingMode";
     private static final String MAX_STORAGE_QUEUE_SIZE = "MaxStorageQueueSize";
 
 	private StorageType storageType = StorageType.DB;
@@ -164,28 +165,28 @@ public class EnvironmentSettings implements ICommonSettings
 	public EnvironmentSettings(HierarchicalConfiguration hierarchicalConfiguration) {
 		this.config = hierarchicalConfiguration;
 		if (config.configurationsAt(GENERAL_KEY).isEmpty()) {
-		    config.getRootNode().addChild(new HierarchicalConfiguration.Node(GENERAL_KEY));
+            config.getRootNode().addChild(new Node(GENERAL_KEY));
         }
         if (config.configurationsAt(SCRIPT_RUN).isEmpty()) {
-            config.getRootNode().addChild(new HierarchicalConfiguration.Node(SCRIPT_RUN));
+            config.getRootNode().addChild(new Node(SCRIPT_RUN));
         }
 	}
 
 	@Override
     public EnvironmentSettings clone() {
-	    EnvironmentSettings result = new EnvironmentSettings(this.config);
-	    result.fileStoragePath = this.fileStoragePath;
-	    result.storeAdminMessages = this.storeAdminMessages;
-	    result.asyncRunMatrix = this.asyncRunMatrix;
-	    result.notificationIfServicesNotStarted = this.notificationIfServicesNotStarted;
-	    result.matrixCompilerPriority = this.matrixCompilerPriority;
-	    result.excludedMessages = this.excludedMessages;
-	    result.failUnexpected = this.failUnexpected;
-        result.storageType = this.storageType;
-        result.reportOutputFormat = this.reportOutputFormat;
-        result.relevantMessagesSortingMode = this.relevantMessagesSortingMode;
-        result.comparisonPrecision = this.comparisonPrecision;
-        result.maxQueueSize = this.maxQueueSize;
+        EnvironmentSettings result = new EnvironmentSettings(config);
+        result.fileStoragePath = fileStoragePath;
+        result.storeAdminMessages = storeAdminMessages;
+        result.asyncRunMatrix = asyncRunMatrix;
+        result.notificationIfServicesNotStarted = notificationIfServicesNotStarted;
+        result.matrixCompilerPriority = matrixCompilerPriority;
+        result.excludedMessages = excludedMessages;
+        result.failUnexpected = failUnexpected;
+        result.storageType = storageType;
+        result.reportOutputFormat = reportOutputFormat;
+        result.relevantMessagesSortingMode = relevantMessagesSortingMode;
+        result.comparisonPrecision = comparisonPrecision;
+        result.maxQueueSize = maxQueueSize;
 
 	    return result;
 	}
@@ -207,7 +208,7 @@ public class EnvironmentSettings implements ICommonSettings
 	}
 
 	public String getFileStoragePath() {
-		return this.fileStoragePath;
+        return fileStoragePath;
 	}
 
 	public void setFileStoragePath(String path) {
@@ -286,7 +287,7 @@ public class EnvironmentSettings implements ICommonSettings
         return excludedMessages;
     }
 
-    @Description(value = "Exclude messages from information block about all messages in report")
+    @Description("Exclude messages from information block about all messages in report")
     @ValidateRegex(regex = IDictionaryValidator.NAME_REGEX)
     public void setExcludedMessages(Set<String> excludedMessages) {
         this.excludedMessages = CollectionUtils.isEmpty(excludedMessages) ? Collections.emptySet() : ImmutableSet.copyOf(excludedMessages);
@@ -312,8 +313,9 @@ public class EnvironmentSettings implements ICommonSettings
 	@Override
 	public void load(HierarchicalConfiguration config)
 	{
-		if ( !(config.configurationsAt(GENERAL_KEY).isEmpty()) )
-			loadGeneralSettings(config.configurationAt(GENERAL_KEY));
+        if(!config.configurationsAt(GENERAL_KEY).isEmpty()) {
+            loadGeneralSettings(config.configurationAt(GENERAL_KEY));
+        }
 
         if (!config.configurationsAt(SCRIPT_RUN).isEmpty()){
             loadScriptRunSettings(config.configurationAt(SCRIPT_RUN));
@@ -348,7 +350,7 @@ public class EnvironmentSettings implements ICommonSettings
     }
 
     private void update() {
-		if (!(config.configurationsAt(GENERAL_KEY).isEmpty())) {
+        if(!config.configurationsAt(GENERAL_KEY).isEmpty()) {
             updateGeneralSettings(config.configurationAt(GENERAL_KEY));
         }
 

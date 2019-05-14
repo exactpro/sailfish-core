@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
+import org.apache.commons.configuration.HierarchicalConfiguration.Node;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.center.ISFContext;
@@ -34,7 +35,7 @@ import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
 public abstract class AbstractStaticTest {
     protected static ISFContext initContext(List<File> workspaceLayers) throws Exception {
         HierarchicalConfiguration config = new HierarchicalConfiguration();
-        config.setRootNode(new HierarchicalConfiguration.Node("configuration"));
+        config.setRootNode(new Node("configuration"));
 
         config.addProperty("Environment.GeneralSettings.StorageType", "file");
         config.addProperty("Environment.GeneralSettings.FileStoragePath", "storage");

@@ -17,11 +17,12 @@ package com.exactpro.sf.aml.generator;
 
 import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 import static java.lang.String.format;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -75,7 +76,7 @@ public class NewImpl {
 
 	private static final Logger logger = LoggerFactory.getLogger(NewImpl.class);
 
-	protected final static String EOL = System.getProperty("line.separator");
+    protected static final String EOL = System.getProperty("line.separator");
 
 	public static final String TAB1 = "\t";
 	public static final String TAB2 = "\t\t";
@@ -89,7 +90,7 @@ public class NewImpl {
 	public static final String STATIC_MAP_NAME = CONTEXT_NAME+".getStaticMap()";
 	public static final String SERVICE_MAP_NAME = CONTEXT_NAME+".getServiceNames()";
 	private static final String LOGGER_NAME = "logger";
-	private boolean continueOnFailed = false;
+    private boolean continueOnFailed;
 
 	private List<Variable> variables;
 	private final AlertCollector alertCollector;
@@ -98,8 +99,8 @@ public class NewImpl {
     private final IActionManager actionManager;
     private final IUtilityManager utilityManager;
 
-    private final static int CAPACITY_4K = 4096;
-    private final static int CAPACITY_128K = 131072;
+    private static final int CAPACITY_4K = 4096;
+    private static final int CAPACITY_128K = 131072;
 
 	public NewImpl(AlertCollector alertCollector, IAdapterManager adapterManager, IConnectionManager connectionManager, IDictionaryManager dictionaryManager, IActionManager actionManager, IUtilityManager utilityManager, IStaticServiceManager staticServiceManager, CodeGenerator_new codeGenerator) {
 	    this.dictionaryManager = dictionaryManager;
@@ -122,7 +123,7 @@ public class NewImpl {
 		}
 
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
 			return null;
 		}
 
@@ -145,7 +146,7 @@ public class NewImpl {
 		if (type != null)
 		{
 			if (!action.hasDictionaryURI()) {
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Dictionary.getName(), "Dictionary is not specified"));
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Dictionary.getName(), "Dictionary is not specified"));
 				return null;
 			}
 
@@ -176,7 +177,7 @@ public class NewImpl {
         IDictionaryStructure dictionary = getDictionary(action.getDictionaryURI());
 
         if (dictionary == null) {
-            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
                     "Can't find dictionary [" + action.getDictionaryURI() + "]"));
             return "";
         }
@@ -192,11 +193,11 @@ public class NewImpl {
 
         if (action.getFailUnexpected() != null && !"".equals(action.getFailUnexpected())) // TODO: do this on per Repeating group level.
         {
-            failUnexpected = TypeConverter.convert(java.lang.String.class, action.getFailUnexpected());
+            failUnexpected = TypeConverter.convert(String.class, action.getFailUnexpected());
         }
 
 		if (parentVar != null) {
-		    sb.append(TAB2+metaContainer.getName()+" = createMetaContainer(" + parentVar + ", " + TypeConverter.convert(java.lang.String.class, field) + ", " + failUnexpected + ");" + EOL);
+            sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + parentVar + ", " + TypeConverter.convert(String.class, field) + ", " + failUnexpected + ");" + EOL);
 		} else {
 		    sb.append(TAB2+metaContainer.getName()+" = createMetaContainer(" + failUnexpected + ");" + EOL);
 		}
@@ -262,11 +263,7 @@ public class NewImpl {
             sb.append(settings.getName());
             sb.append(".getCheckPoint(), ");
 
-            if(action.hasTag()) {
-                sb.append(StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"'));
-            } else {
-                sb.append("null");
-            }
+            sb.append(action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null");
 
             sb.append(",");
             sb.append(action.getHash());
@@ -282,7 +279,7 @@ public class NewImpl {
 		}
 
 		ActionInfo actionInfo = action.getActionInfo();
-		String mainCallArgs = String.format("%s.parse(\"%s\"), %s", SailfishURI.class.getSimpleName(), actionInfo.getURI(), settings.getName());
+        String mainCallArgs = format("%s.parse(\"%s\"), %s", SailfishURI.class.getSimpleName(), actionInfo.getURI(), settings.getName());
         Variable outputVariable = null;
 
 		if (returnType != void.class) {
@@ -337,13 +334,13 @@ public class NewImpl {
 	{
 		SailfishURI dictionaryURI = action.getDictionaryURI();
 		if (dictionaryURI == null) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Empty namespace for action: " + action.getActionURI()));
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Empty namespace for action: " + action.getActionURI()));
 			return "";
 		}
 		IDictionaryStructure dictionary = getDictionary(dictionaryURI);
 
 		if (dictionary == null) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
 					"Can't find dictionary [" + dictionaryURI + "]"));
 			return "";
 		}
@@ -352,7 +349,7 @@ public class NewImpl {
 
         IFieldStructure dm = dictionary.getMessages().get(action.getMessageTypeColumn());
 		if (dm == null) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Dictionary "+action.getDictionaryURI()+
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Dictionary " + action.getDictionaryURI() +
 					" does not contain message "+action.getMessageTypeColumn()));
 			return "";
 		}
@@ -378,7 +375,7 @@ public class NewImpl {
 
             if(templateDictionary == null || !templateDictionary.matches(dictionaryURI)) {
                 alertCollector.add(new Alert(action.getLine(), action.getReference(), Column.Template.getName(),
-                        String.format("Template's dictionary '%s' differs from this action's dictionary '%s'. Template: %s", templateDictionary, dictionaryURI, template)));
+                        format("Template's dictionary '%s' differs from this action's dictionary '%s'. Template: %s", templateDictionary, dictionaryURI, template)));
                 return StringUtils.EMPTY;
             }
 
@@ -387,7 +384,7 @@ public class NewImpl {
 
             if(!StringUtils.equals(messageType, templateMessageType)) {
                 alertCollector.add(new Alert(action.getLine(), action.getReference(), Column.Template.getName(),
-                        String.format("Template's message type '%s' differs from this action's message type '%s'. Template: %s", templateMessageType, messageType, template)));
+                        format("Template's message type '%s' differs from this action's message type '%s'. Template: %s", templateMessageType, messageType, template)));
                 return StringUtils.EMPTY;
             }
 
@@ -398,7 +395,7 @@ public class NewImpl {
             sb.append(")");
             sb.append(CodeGenerator_new.MAP_NAME);
             sb.append(".get(");
-            sb.append(StringUtil.enclose(template, '"'));
+            sb.append(enclose(template, '"'));
             sb.append(")).cloneMessage();");
             sb.append(EOL);
         } else {
@@ -422,7 +419,7 @@ public class NewImpl {
 			        boolean isCollection = AMLLangUtil.isCollection(value.getValue());
 			        fStruct = new FieldStructure(null, null, null, null, null, null, null, false, isCollection, false, null);
 				} else {
-					this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '"+dm.getName()+"' in namespace '"+dm.getNamespace()+"' does not contain '"+fieldName+"' field"));
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '" + dm.getName() + "' in namespace '" + dm.getNamespace() + "' does not contain '" + fieldName + "' field"));
 			        continue;
 			    }
 			}
@@ -439,7 +436,7 @@ public class NewImpl {
 			    try {
 			        refs = AMLLangUtil.getReferences(value.getValue());
                 } catch (AMLException e) {
-                    this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': " + e.getMessage()));
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': " + e.getMessage()));
                     continue;
                 }
 
@@ -459,7 +456,7 @@ public class NewImpl {
 			        }
 			    }
 
-		        value.setValue("[" + newValue.toString() + "]");
+                value.setValue("[" + newValue + "]");
 			}
 
 			for(String ref : refs) {
@@ -491,7 +488,7 @@ public class NewImpl {
 			        String strValue = value.getValue();
 
 			        if(!AMLLangUtil.isCollection(strValue)) {
-                        this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': Invalid collection format '" + value.getValue() + "'"));
+                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
                         continue;
                     }
 
@@ -534,12 +531,12 @@ public class NewImpl {
 
 		    	if(collection) {
 			        if(!AMLLangUtil.isCollection(value.getValue())) {
-			            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': Invalid collection format '" + value.getValue() + "'"));
+                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
 			            continue;
 			        }
 
 					if(isDirty) {
-	            		value.setValue(String.format("(($ != null ? $.toString() : 'null') in %s)", value.getValue()));
+                        value.setValue(format("(($ != null ? $.toString() : 'null') in %s)", value.getValue()));
 			        }
 
 			        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
@@ -562,13 +559,13 @@ public class NewImpl {
 			else if (fStruct.isComplex())
 			{
 				if(!AMLLangUtil.isSubmessage(value.getValue())) {
-				    this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': Invalid collection format '" + value.getValue() + "'"));
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
 				    continue;
                 }
 
 				if (!fStruct.isCollection()) {
 					if (value.getValue().split(",").length > 1) {
-						this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
+                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
 						continue;
 					}
 
@@ -615,7 +612,7 @@ public class NewImpl {
                     return;
                 }
 
-                elements[i] = StringUtil.enclose(service.getServiceName().getServiceName());
+                elements[i] = enclose(service.getServiceName().getServiceName());
             }
 
             valueString = "Arrays.asList(" + StringUtils.join(elements, ", ") + ")";
@@ -631,13 +628,13 @@ public class NewImpl {
                 return;
             }
 
-            valueString = StringUtil.enclose(service.getServiceName().getServiceName());
+            valueString = enclose(service.getServiceName().getServiceName());
         }
 
         sb.append(TAB2);
         sb.append(inputVariable.getName());
         sb.append(".addField(");
-        sb.append(StringUtil.enclose(fieldName));
+        sb.append(enclose(fieldName));
         sb.append(", ");
         sb.append(valueString);
         sb.append(");//service name field");
@@ -650,7 +647,7 @@ public class NewImpl {
 	}
 
 	boolean isEmptyString(String string) {
-		return string == null || string.equals("");
+        return string == null || "".equals(string);
 	}
 
 	private String getEnumValue(String value, IFieldStructure enumField, long line, long uid, String column, boolean isDirty) {
@@ -676,17 +673,17 @@ public class NewImpl {
 	{
 		switch (valueType)
 		{
-		case JAVA_LANG_BOOLEAN:	{
-			String value = object.toString().toLowerCase();
-			if (value.equals("n") || value.equals("false")) {
+        case JAVA_LANG_BOOLEAN:
+            String value = object.toString().toLowerCase();
+            if("n".equals(value) || "false".equals(value)) {
 				return "false";
-			} else if (value.equals("y") || value.equals("true")) {
+            } else if("y".equals(value) || "true".equals(value)) {
 				return "true";
 			}
-			alertCollector.add(new Alert(line, uid, null, column, "Unknown boolean value: " + value));
+            alertCollector.add(new Alert(line, uid, null, column, "Unknown boolean value: " + value));
             return null;
-		}
-		case JAVA_LANG_BYTE:		return "(byte)("+object+")";
+        case JAVA_LANG_BYTE:
+            return "(byte)(" + object + ")";
 		case JAVA_LANG_CHARACTER:		return "'"+object+"'";
         case JAVA_TIME_LOCAL_DATE_TIME:
         case JAVA_TIME_LOCAL_DATE:
@@ -695,7 +692,7 @@ public class NewImpl {
             return null;
 		case JAVA_LANG_SHORT:		return "(short)("+object+")";
         case JAVA_LANG_INTEGER:		return "(int)("+object+")";
-        case JAVA_LANG_LONG: {
+        case JAVA_LANG_LONG:
             try {
                 String string = object.toString();
                 Long.valueOf(StringUtils.removeEndIgnoreCase(string, "L"));
@@ -704,11 +701,12 @@ public class NewImpl {
                 alertCollector.add(new Alert(line, uid, null, column, "Invalid long value: " + object));
                 return null;
             }
-        }
-		case JAVA_LANG_FLOAT:		return "(float)("+object+")";
+        case JAVA_LANG_FLOAT:
+            return "(float)(" + object + ")";
 		case JAVA_LANG_DOUBLE:	return "(double)("+object+")";
 		case JAVA_MATH_BIG_DECIMAL:	return "new java.math.BigDecimal(\""+object+"\")";
-		case JAVA_LANG_STRING:	return "\""+StringUtil.toJavaString(object.toString())+"\"";
+        case JAVA_LANG_STRING:
+            return "\"" + toJavaString(object.toString()) + "\"";
 		default: return null;
 		}
 	}
@@ -717,17 +715,17 @@ public class NewImpl {
 	{
 		switch (valueType)
 		{
-		case JAVA_LANG_BOOLEAN:	{
-			String value = object.toString().toLowerCase();
-			if (value.equals("n") || value.equals("false")) {
+        case JAVA_LANG_BOOLEAN:
+            String value = object.toString().toLowerCase();
+            if("n".equals(value) || "false".equals(value)) {
 				return "false";
-			} else if (value.equals("y") || value.equals("true")) {
+            } else if("y".equals(value) || "true".equals(value)) {
 				return "true";
 			}
-			alertCollector.add(new Alert(line, uid, null, column, "Unknown boolean value: " + value));
+            alertCollector.add(new Alert(line, uid, null, column, "Unknown boolean value: " + value));
             return null;
-		}
-		case JAVA_LANG_BYTE:		return "(byte)("+object+")";
+        case JAVA_LANG_BYTE:
+            return "(byte)(" + object + ")";
 		case JAVA_LANG_CHARACTER:		return "'"+object+"'.charAt(0)";
 //		case CHAR:		return object.toString();
         case JAVA_TIME_LOCAL_DATE_TIME:
@@ -737,7 +735,7 @@ public class NewImpl {
             return null;
 		case JAVA_LANG_SHORT:		return "(short)("+object+")";
 		case JAVA_LANG_INTEGER:		return "(int)("+object+")";
-        case JAVA_LANG_LONG: {
+        case JAVA_LANG_LONG:
             try {
                 String string = object.toString();
                 Long.valueOf(StringUtils.removeEndIgnoreCase(string, "L"));
@@ -746,18 +744,18 @@ public class NewImpl {
                 alertCollector.add(new Alert(line, uid, null, column, "Invalid long value: " + object));
                 return null;
             }
-        }
-		case JAVA_LANG_FLOAT:	return "(float)("+object+")";
+        case JAVA_LANG_FLOAT:
+            return "(float)(" + object + ")";
 		case JAVA_LANG_DOUBLE:	return "(double)("+object+")";
-		case JAVA_MATH_BIG_DECIMAL:	{
-		    try {
-		        new BigDecimal(object.toString());
-		        return "new BigDecimal(\"" + object.toString() + "\")";
-		    } catch(NumberFormatException e) {
-		        return "" + object+"";
-		    }
-		}
-		case JAVA_LANG_STRING:	return "\""+StringUtil.toJavaString(object.toString())+"\"";
+        case JAVA_MATH_BIG_DECIMAL:
+            try {
+                new BigDecimal(object.toString());
+                return "new BigDecimal(\"" + object + "\")";
+            } catch(NumberFormatException e) {
+                return "" + object + "";
+            }
+        case JAVA_LANG_STRING:
+            return "\"" + toJavaString(object.toString()) + "\"";
 		default: return null;
 		}
 	}
@@ -765,11 +763,8 @@ public class NewImpl {
 	private String castReceiveEnum(Object object, JavaType valueType, boolean isSimpleExpression, long line, long uid, String column)
 	{
 		if (isSimpleExpression) {
-			if (valueType==JavaType.JAVA_LANG_BOOLEAN) {
-				return object.toString().toLowerCase();
-			}
-			return "" + object;
-		}
+            return valueType == JavaType.JAVA_LANG_BOOLEAN ? object.toString().toLowerCase() : String.valueOf(object);
+        }
 		return castReceiveValue(object, valueType, alertCollector, line, uid, column);
 	}
 
@@ -779,7 +774,7 @@ public class NewImpl {
 
 		Variable var = new Variable(varName, type);
 		// check if variable with same name and type already exists
-		if (this.variables.contains(var))
+        if(variables.contains(var))
 		{
 			return var;
 		}
@@ -791,12 +786,12 @@ public class NewImpl {
 		while (found)
 		{
 			found = false;
-			for (Variable v : this.variables)
+            for(Variable v : variables)
 			{
 				if (v.getName().equals(varName))
 				{
 					found = true;
-					varName = varNameOrig+(i++);
+                    varName = varNameOrig + i++;
 					break;
 				}
 			}
@@ -806,7 +801,7 @@ public class NewImpl {
 					throw new NullPointerException("Variable type is null");
 				}
 				var = new Variable(varName, type);
-				this.variables.add(var);
+                variables.add(var);
 				return var;
 			}
 		}
@@ -866,7 +861,7 @@ public class NewImpl {
 		}
 
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
 			return null;
 		}
 
@@ -889,7 +884,7 @@ public class NewImpl {
 		if (type != null)
 		{
 			if (!action.hasDictionaryURI()) {
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Dictionary.getName(), "Dictionary is not specified"));
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Dictionary.getName(), "Dictionary is not specified"));
 				return null;
 			}
 
@@ -943,11 +938,7 @@ public class NewImpl {
             sb.append(settings.getName());
             sb.append(".getCheckPoint(), ");
 
-            if(action.hasTag()) {
-                sb.append(StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"'));
-            } else {
-                sb.append("null");
-            }
+            sb.append(action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null");
 
             sb.append(",");
             sb.append(action.getHash());
@@ -963,7 +954,7 @@ public class NewImpl {
 		}
 
         ActionInfo actionInfo = action.getActionInfo();
-		String callArgs = String.format("%s.parse(\"%s\"), %s, %s", SailfishURI.class.getSimpleName(), actionInfo.getURI(), settings.getName(), inputVariable.getName());
+        String callArgs = format("%s.parse(\"%s\"), %s, %s", SailfishURI.class.getSimpleName(), actionInfo.getURI(), settings.getName(), inputVariable.getName());
         Variable outputVariable = null;
 
 		if (returnType != void.class) {
@@ -1074,18 +1065,14 @@ public class NewImpl {
         sb.append(REPORT_NAME);
         sb.append(".createTestCase(");
 
-        if(tc.hasReference()) {
-            sb.append(StringUtil.enclose(tc.getReference()));
-        } else {
-            sb.append("null");
-        }
+        sb.append(tc.hasReference() ? enclose(tc.getReference()) : "null");
 
         sb.append(", ");
 
         String description = tc.getDescription();
 
         if(StringUtils.isNotBlank(description)) {
-            sb.append(StringUtil.enclose(StringUtil.toJavaString(description)));
+            sb.append(enclose(toJavaString(description)));
             sb.append(", ");
         } else {
             sb.append("null, ");
@@ -1100,7 +1087,7 @@ public class NewImpl {
         String id = tc.getId();
 
         if(StringUtils.isNotBlank(id)) {
-            sb.append(StringUtil.enclose(StringUtil.toJavaString(id)));
+            sb.append(enclose(toJavaString(id)));
             sb.append(", ");
         } else {
             sb.append("null, ");
@@ -1135,7 +1122,7 @@ public class NewImpl {
                 + "\"" + messageType.trim() + "\", "
 
                 + description + " , null, null, "
-                + (action.hasTag() ? StringUtil.enclose(StringUtil.toJavaString(action.getTag()), '"') : "null") + ", "
+                + (action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null") + ", "
                 + action.getHash() + ", "
                 + "Arrays.asList( " + verificationsOrder + ")"
                 +");" + EOL);
@@ -1190,7 +1177,7 @@ public class NewImpl {
 		IDictionaryStructure dictionary = getDictionary(action.getDictionaryURI());
 
 		if (dictionary == null) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
 					"Can't find dictionary [" + action.getDictionaryURI() + "]"));
 			return "";
 		}
@@ -1199,7 +1186,7 @@ public class NewImpl {
 
         IFieldStructure dm = dictionary.getMessages().get(action.getMessageTypeColumn());
 		if (dm == null) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Dictionary "+action.getDictionaryURI()+
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Dictionary " + action.getDictionaryURI() +
 					" does not contain message "+action.getMessageTypeColumn()));
 			return "";
 		}
@@ -1234,7 +1221,7 @@ public class NewImpl {
             IFieldStructure fStruct = dm.getFields().get(fieldName);
 
 			if (fStruct == null) {
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '"+dm.getName()+"' in namespace '"+dm.getNamespace()+"' does not contain '"+fieldName+"' field"));
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '" + dm.getName() + "' in namespace '" + dm.getNamespace() + "' does not contain '" + fieldName + "' field"));
 			} else {
                 if(fStruct.isSimple() && fStruct.isServiceName()) {
                     writeServiceFieldDefinition(value, action, fieldName, fStruct, sb, inputVariable);
@@ -1249,7 +1236,7 @@ public class NewImpl {
                     try {
                         refs = AMLLangUtil.getReferences(value.getValue());
                     } catch (AMLException e) {
-                        this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': " + e.getMessage()));
+                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': " + e.getMessage()));
                         continue;
                     }
 
@@ -1269,7 +1256,7 @@ public class NewImpl {
                         }
                     }
 
-                    value.setValue("[" + newValue.toString() + "]");
+                    value.setValue("[" + newValue + "]");
                 }
 
                 for(String ref : refs) {
@@ -1304,7 +1291,7 @@ public class NewImpl {
 	                    }
 
                         if(!AMLLangUtil.isCollection(strValue)) {
-                            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': Invalid collection format '" + value.getValue() + "'"));
+                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
                             continue;
                         }
 
@@ -1344,7 +1331,7 @@ public class NewImpl {
 	                    }
 
 				        if(!AMLLangUtil.isCollection(value.getValue())) {
-				            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': Invalid collection format '" + value.getValue() + "'"));
+                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
 				            continue;
                         }
 
@@ -1376,13 +1363,13 @@ public class NewImpl {
                     }
 
                     if(!AMLLangUtil.isSubmessage(value.getValue())) {
-                        this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '"+fieldName+"': Invalid collection format"));
+                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format"));
                         continue;
                     }
 
                     if (!fStruct.isCollection()) {
                         if (value.getValue().split(",").length > 1) {
-                            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
+                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
                             continue;
                         }
 
@@ -1417,7 +1404,7 @@ public class NewImpl {
 	    AMLAction subAction = tc.findActionByRef(refName);
 
         if(subAction == null || action.equals(subAction)) {
-            this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
                     "Column '%s': Reference '%s' is not defined in matrix", fieldName, refName)));
 
             return;
@@ -1429,7 +1416,7 @@ public class NewImpl {
                 SailfishURI actionDictionary = action.getDictionaryURI();
 
                 if(dictionary != null && !dictionary.matches(actionDictionary)) {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
                             "Subaction dictionary '%s' differs from action dictionary '%s'", dictionary, actionDictionary)));
 
                     return;
@@ -1443,13 +1430,13 @@ public class NewImpl {
                 if(StringUtils.isEmpty(subMsgType)) {
                     subAction.setMessageTypeColumn(msgType);
                 } else if(!subMsgType.equals(msgType)) {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
                             "Subaction message type '%s' differs from action message type '%s'", subMsgType, msgType)));
 
                     return;
                 }
             } else {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
                     "Subaction must predefined to use references to it's fields.")));
                 return;
             }
@@ -1473,13 +1460,13 @@ public class NewImpl {
             IMessageStructure msgStruct = getMessageStructure(dictURI, msgType);
 
             if(msgStruct == null) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
                         "Column '%s': Reference to unknown message('%s')/dictionary('%s') in reference '%s'", fieldName, msgType, dictURI, reference)));
                 return;
             }
 
             if(msgStruct.getFields().get(subField) == null) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, String.format(
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
                         "Column '%s': Reference to unknown column '%s' in reference '%s'", fieldName, subField, reference)));
                 return;
             }
@@ -1497,7 +1484,7 @@ public class NewImpl {
 	    if (subAction.getGenerateStatus() != AMLGenerateStatus.GENERATED) {
 
 	    	if (subAction.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
-				this.alertCollector.add(new Alert(subAction.getLine(), action.getUID(), subAction.getReference(), "Recursion detected"));
+                alertCollector.add(new Alert(subAction.getLine(), action.getUID(), subAction.getReference(), "Recursion detected"));
 				return;
 			}
 
@@ -1549,7 +1536,7 @@ public class NewImpl {
 
             return sb.toString();
         } else {
-            return "\"" + StringUtil.toJavaString(input) + "\"";
+            return "\"" + toJavaString(input) + "\"";
         }
 	}
 
@@ -1559,15 +1546,15 @@ public class NewImpl {
         sb.append("eval(");
         sb.append(line);
         sb.append(", ");
-        sb.append(StringUtil.enclose(column));
+        sb.append(enclose(column));
         sb.append(", ");
-        sb.append(StringUtil.enclose(StringUtil.toJavaString(value.getValue())));
+        sb.append(enclose(toJavaString(value.getValue())));
 
         for(RefParameter p : value.getParameters()) {
             sb.append(EOL);
             sb.append(indent);
             sb.append(", ");
-            sb.append(StringUtil.enclose(p.getName()));
+            sb.append(enclose(p.getName()));
             sb.append(", ");
             sb.append(p.getValue());
         }
@@ -1583,7 +1570,7 @@ public class NewImpl {
     }
 
     public static String generateFilter(long line, String column, Value value, String indent, String type) {
-	    String v = StringUtil.toJavaString(value.getValue());
+        String v = toJavaString(value.getValue());
 
         if("regexFilter".equals(type)) {
 	        v = getRegex(value.getValue());
@@ -1594,15 +1581,15 @@ public class NewImpl {
 	    sb.append("(");
 	    sb.append(line);
 	    sb.append(", ");
-	    sb.append(StringUtil.enclose(column));
+        sb.append(enclose(column));
 	    sb.append(", ");
-	    sb.append(StringUtil.enclose(v));
+        sb.append(enclose(v));
 
 	    for(RefParameter p : value.getParameters()) {
 	        sb.append(EOL);
             sb.append(indent);
             sb.append(", ");
-            sb.append(StringUtil.enclose(p.getName()));
+            sb.append(enclose(p.getName()));
             sb.append(", ");
             sb.append(p.getValue());
         }
@@ -1626,20 +1613,20 @@ public class NewImpl {
 		String v = origValue;
 
 		if (origValue.equals(CONV_VALUE_PRESENT)) {
-			return "notNullFilter(" + line + ", " + StringUtil.enclose(column) + ")";
+            return "notNullFilter(" + line + ", " + enclose(column) + ")";
 		} else if (origValue.equals(CONV_VALUE_MISSING)) {
-			return "nullFilter(" + line + ", " + StringUtil.enclose(column) + ")";
+            return "nullFilter(" + line + ", " + enclose(column) + ")";
 		} else if (checkValue(origValue)) {
-			if (JavaType.JAVA_LANG_BOOLEAN.equals(fType.getJavaType())){
+            if(fType.getJavaType() == JavaType.JAVA_LANG_BOOLEAN) {
 				v = v.replace("TRUE", "true"); // TODO: add parameter TRUE and FALSE
 				v = v.replace("FALSE", "false"); // TODO: add parameter TRUE and FALSE
-			} else if (JavaType.JAVA_LANG_STRING.equals(fType.getJavaType())){
-				v = StringUtil.toJavaString(v);
+            } else if(fType.getJavaType() == JavaType.JAVA_LANG_STRING) {
+                v = toJavaString(v);
 			}
-			return "filter(" + line + ", " + StringUtil.enclose(column) + ", " + StringUtil.enclose(v) +")";
+            return "filter(" + line + ", " + enclose(column) + ", " + enclose(v) + ")";
 		} else if (isRegex(origValue)) {
             String regexp = getRegex(origValue);
-            return "regexFilter(" + line + ", " + StringUtil.enclose(column) + ", " + StringUtil.enclose(regexp) + ")";
+            return "regexFilter(" + line + ", " + enclose(column) + ", " + enclose(regexp) + ")";
         }
 
 //		v = "x == "+v;
@@ -1652,9 +1639,9 @@ public class NewImpl {
 //		return "filter(\""+v+"\")";
 
 		v = castReceiveValue(v, fType.getJavaType(), alertCollector, line, uid, column);
-		v = StringUtil.toJavaString(v);
+        v = toJavaString(v);
 
-		return "simpleFilter(" + line + ", " + StringUtil.enclose(column) + ", " + StringUtil.enclose(v) + ")";
+        return "simpleFilter(" + line + ", " + enclose(column) + ", " + enclose(v) + ")";
 	}
 
 	/*
@@ -1675,14 +1662,14 @@ public class NewImpl {
 
 			while (index != -1)
 			{
-				char c = (char)(v.getBytes()[index-1]);
+                char c = (char)v.getBytes()[index - 1];
 				if (isAlpha(c)) {
 					index = v.indexOf(e, index+1);
 					continue;
 				}
 
 				// check next byte after end of alias
-				c = (char)(v.getBytes()[index+e.length()]);
+                c = (char)v.getBytes()[index + e.length()];
 				if (isAlphaNum(c)) {
 					index = v.indexOf(e, index+1);
 					continue;
@@ -1719,8 +1706,9 @@ public class NewImpl {
         if (!"x".equals(v)) {
         	String[] tokens = v.split(AMLLangConst.REGEX_MVEL_NOT_VARIABLE);
             for (String token : tokens) {
-            	if ("x".equals(token))
-            		return true;
+                if("x".equals(token)) {
+                    return true;
+                }
             }
         }
 		return false;
@@ -1731,7 +1719,7 @@ public class NewImpl {
 	}
 
     private static String getRegex(String regex) {
-		return StringUtil.toJavaString(regex.substring(regex.indexOf("[")+1, regex.lastIndexOf(REGEX_VALUE_SUFFIX)));
+        return toJavaString(regex.substring(regex.indexOf("[") + 1, regex.lastIndexOf(REGEX_VALUE_SUFFIX)));
 	}
 
     /**

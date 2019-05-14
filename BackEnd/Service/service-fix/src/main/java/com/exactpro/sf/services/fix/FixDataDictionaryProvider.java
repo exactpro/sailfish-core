@@ -50,16 +50,16 @@ public class FixDataDictionaryProvider implements DataDictionaryProvider {
 	}
 
 	public void configure(SessionSettings settings, SessionID sessionID) throws ConfigError, FieldConvertError {
-	    synchronized (this.configureLock) {
-	        if (this.settingMap != null) {
-	            logger.warn("Data dictionary provider already configured {}", this.settingMap);
+        synchronized(configureLock) {
+            if(settingMap != null) {
+                logger.warn("Data dictionary provider already configured {}", settingMap);
 	        }
 	        
 	        this.settingMap = new EnumMap<>(DataDictionarySetting.class);
 	        
 	        for (DataDictionarySetting setting : DataDictionarySetting.values()) {
 	            if (settings.isSetting(sessionID, setting.settingName)) {
-	                this.settingMap.put(setting, settings.getBool(sessionID, setting.settingName));
+                    settingMap.put(setting, settings.getBool(sessionID, setting.settingName));
 	            }
 	        }
 	    }
@@ -80,15 +80,15 @@ public class FixDataDictionaryProvider implements DataDictionaryProvider {
     }
 	
     private DataDictionary getDictionary() {
-        DataDictionary localDataDictionary = this.dataDictionary;
+        DataDictionary localDataDictionary = dataDictionary;
         if (localDataDictionary == null) {
-            synchronized (this.configureLock) {
-                localDataDictionary = this.dataDictionary;
+            synchronized(configureLock) {
+                localDataDictionary = dataDictionary;
                 if (localDataDictionary == null) {
-                    this.dataDictionary = localDataDictionary = new QFJDictionaryAdapter(this.dictionaryStructure);
+                    this.dataDictionary = localDataDictionary = new QFJDictionaryAdapter(dictionaryStructure);
 
-                    if (this.settingMap != null) {
-                        for (Entry<DataDictionarySetting, Boolean> entry : this.settingMap.entrySet()) {
+                    if(settingMap != null) {
+                        for(Entry<DataDictionarySetting, Boolean> entry : settingMap.entrySet()) {
                             DataDictionarySetting setting = entry.getKey();
                             boolean flag = entry.getValue();
                             setting.set(localDataDictionary, flag);
@@ -102,8 +102,8 @@ public class FixDataDictionaryProvider implements DataDictionaryProvider {
 
         return localDataDictionary;
     }
-    
-    private static enum DataDictionarySetting {
+
+    private enum DataDictionarySetting {
         ALLOW_UNKNOWN_MSG_FIELDS(Session.SETTING_ALLOW_UNKNOWN_MSG_FIELDS) {
             @Override
             public void set(DataDictionary dataDictionary, boolean flag) {
@@ -136,8 +136,8 @@ public class FixDataDictionaryProvider implements DataDictionaryProvider {
         };
         
         private final String settingName;
-        
-        private DataDictionarySetting(String settingName) {
+
+        DataDictionarySetting(String settingName) {
             this.settingName = settingName;
         }
         

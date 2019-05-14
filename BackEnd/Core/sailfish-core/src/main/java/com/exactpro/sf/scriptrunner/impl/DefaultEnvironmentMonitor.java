@@ -24,9 +24,9 @@ import com.exactpro.sf.storage.IServiceStorage;
 
 public class DefaultEnvironmentMonitor implements IEnvironmentMonitor {
 
-	private IConnectionManager manager;
+    private final IConnectionManager manager;
 
-	private IServiceStorage storage;
+    private final IServiceStorage storage;
 
 	public DefaultEnvironmentMonitor(IConnectionManager manager, IServiceStorage storage) {
 		this.manager = manager;
@@ -35,7 +35,7 @@ public class DefaultEnvironmentMonitor implements IEnvironmentMonitor {
 
 	@Override
 	public void onEvent(ServiceEvent event) {
-		this.storage.addServiceEvent(this.manager.getServiceDescription(event.getServiceName()), event);
+        storage.addServiceEvent(manager.getServiceDescription(event.getServiceName()), event);
 		for (IEnvironmentListener listener : manager.getEnvironmentListeners()) {
 			listener.onEvent(event);
 		}

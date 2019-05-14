@@ -16,14 +16,13 @@
 package com.exactpro.sf.comparison.conversion;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.comparison.conversion.impl.BigDecimalConverter;
 import com.exactpro.sf.comparison.conversion.impl.BooleanConverter;
@@ -41,9 +40,9 @@ import com.exactpro.sf.comparison.conversion.impl.StringConverter;
 
 public class MultiConverter {
 
-    private final static Map<Class<?>, IConverter<?>> CONVERTERS = initConverters();
+    private static final Map<Class<?>, IConverter<?>> CONVERTERS = initConverters();
 
-    public final static Set<Class<?>> SUPPORTED_TYPES = Collections.unmodifiableSet(CONVERTERS.keySet());
+    public static final Set<Class<?>> SUPPORTED_TYPES = Collections.unmodifiableSet(CONVERTERS.keySet());
 
     @SuppressWarnings("unchecked")
     public static <T> T convert(Object value, Class<T> clazz) {

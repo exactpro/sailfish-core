@@ -42,17 +42,12 @@ public class Executor implements Serializable {
     private String variableSet;
 
 	public String getHttpUrl() {
-		
-		String result = this.path;
-		
-		if(!result.startsWith("http")) {
-			
-			result = "http://" + result;
-			
-		}
-		
-		return result;
-	}
+
+        String result = path;
+
+        return !result.startsWith("http") ? "http://" + result : result;
+
+    }
 	
 	public String getName() {
 		return name;
@@ -103,14 +98,14 @@ public class Executor implements Serializable {
 	}
 
     public boolean isRejected() {
-        return this.rejectCause != null;
+        return rejectCause != null;
     }
 
     public void addRejectCause(ImportError cause) {
         if (!isRejected()) {
-            setRejectCause(new ImportError(this.lineNumber, String.format("Executor \"%s\" : error", this.name)));
+            setRejectCause(new ImportError(lineNumber, String.format("Executor \"%s\" : error", name)));
         }
-        this.rejectCause.addCause(cause);
+        rejectCause.addCause(cause);
     }
 
     public ImportError getRejectCause() {

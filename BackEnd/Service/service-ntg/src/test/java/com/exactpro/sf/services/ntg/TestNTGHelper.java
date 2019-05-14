@@ -119,7 +119,7 @@ public final class TestNTGHelper extends AbstractTest {
 		return messageHelper;
 	}
 
-	public final static String getDictionaryPath()
+    public static final String getDictionaryPath()
 	{
 		return String.format( "%s%s%s%s%s",
 				BASE_DIR, File.separator,
@@ -135,7 +135,7 @@ public final class TestNTGHelper extends AbstractTest {
 		}
 	}
 
-	private static Random rnd = new Random(Calendar.getInstance().getTimeInMillis());
+    private static final Random rnd = new Random(Calendar.getInstance().getTimeInMillis());
 
 	public static byte[] getRandomBytesArray(int length)
 	{

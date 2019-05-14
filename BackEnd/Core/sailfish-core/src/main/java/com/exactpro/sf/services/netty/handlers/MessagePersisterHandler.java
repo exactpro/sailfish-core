@@ -50,7 +50,7 @@ public class MessagePersisterHandler extends ChannelDuplexHandler {
         ctx.write(msg, promise);
     }
 
-	protected void persistRecievedMessage(final IMessage message) {
+	protected void persistRecievedMessage(IMessage message) {
 		message.getMetaData().setServiceInfo(serviceInfo);
 		storage.storeMessage(message);
 	}

@@ -25,7 +25,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("serial")
 public class ServiceName implements Cloneable, Serializable, Comparable<ServiceName> {
@@ -49,11 +48,7 @@ public class ServiceName implements Cloneable, Serializable, Comparable<ServiceN
 
 	@JsonCreator
 	public ServiceName(@JsonProperty("env") String env, @JsonProperty("serviceName") String serviceName) {
-		if (env == null) {
-			this.environment = DEFAULT_ENVIRONMENT;
-		} else {
-			this.environment = StringUtils.trim(env);
-		}
+        this.environment = env == null ? DEFAULT_ENVIRONMENT : StringUtils.trim(env);
 		this.serviceName = StringUtils.trim(serviceName);
 	}
 
@@ -67,25 +62,24 @@ public class ServiceName implements Cloneable, Serializable, Comparable<ServiceN
 
 	@JsonIgnore
 	public boolean isDefault() {
-		return DEFAULT_ENVIRONMENT.equals(this.environment);
+        return DEFAULT_ENVIRONMENT.equals(environment);
 	}
 
 	@Override
 	public String toString() {
-        return this.environment + ENVIRONMENT_SEPARATOR + this.serviceName;
+        return environment + ENVIRONMENT_SEPARATOR + serviceName;
 	}
 
 	public static String toString(String env, String serviceName) {
-		if (null == env) env = DEFAULT_ENVIRONMENT;
+        if(env == null) {
+            env = DEFAULT_ENVIRONMENT;
+        }
 		return env+ENVIRONMENT_SEPARATOR+serviceName;
 	}
 
 	public static ServiceName parse(String serviceName) {
-		if (null == serviceName) {
-			return null;
-		}
-		return new ServiceName(serviceName);
-	}
+        return serviceName == null ? null : new ServiceName(serviceName);
+    }
 
 	@Override
 	public int hashCode() {
@@ -110,15 +104,15 @@ public class ServiceName implements Cloneable, Serializable, Comparable<ServiceN
         ServiceName that = (ServiceName)obj;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(StringUtils.lowerCase(this.environment), StringUtils.lowerCase(that.environment));
-        builder.append(this.serviceName, that.serviceName);
+        builder.append(StringUtils.lowerCase(environment), StringUtils.lowerCase(that.environment));
+        builder.append(serviceName, that.serviceName);
 
         return builder.isEquals();
 	}
 
 	@Override
     public ServiceName clone() {
-		return new ServiceName(this.environment, this.serviceName);
+        return new ServiceName(environment, serviceName);
 	}
 
     @Override
@@ -129,8 +123,8 @@ public class ServiceName implements Cloneable, Serializable, Comparable<ServiceN
 
         CompareToBuilder builder = new CompareToBuilder();
 
-        builder.append(this.environment, o.environment, String.CASE_INSENSITIVE_ORDER);
-        builder.append(this.serviceName, o.serviceName);
+        builder.append(environment, o.environment, String.CASE_INSENSITIVE_ORDER);
+        builder.append(serviceName, o.serviceName);
 
         return builder.toComparison();
     }

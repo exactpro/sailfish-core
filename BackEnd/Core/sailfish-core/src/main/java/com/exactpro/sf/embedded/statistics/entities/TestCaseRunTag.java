@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.entities;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -22,8 +25,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.Table;
-import java.io.Serializable;
-import java.util.Objects;
 
 @Entity
 @Table(name = "sttcrtags")
@@ -86,8 +87,12 @@ public class TestCaseRunTag implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TestCaseRunTag that = (TestCaseRunTag) o;
         return Objects.equals(id, that.id);
     }

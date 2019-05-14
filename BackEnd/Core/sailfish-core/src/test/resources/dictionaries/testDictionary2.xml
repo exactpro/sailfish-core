@@ -1,0 +1,50 @@
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<dictionary xmlns="http://exactprosystems.com/dictionary" name="dictionary">
+    <fields>
+        <field defaultvalue="3.3" type="java.lang.Double" name="UnknownDefaultValue" id="F_UnknownDefaultValue">
+            <value name="First">1.1</value>
+            <value name="Second">2.2</value>
+        </field>
+        <field type="java.lang.String" name="DuplicateField"/>
+        <field type="java.lang.String" name="WrongAttributeValue" id="F_WrongAttributeValue">
+            <attribute type="java.lang.Boolean" name="attr">net</attribute>
+        </field>
+        <field type="java.lang.String" name="for">
+            <attribute type="java.lang.Integer" name="while">2</attribute>
+            <value name="char">char</value>
+            <value name="_"> </value>
+            <value name="Missed">missed</value>
+        </field>
+    </fields>
+    <messages>
+        <message name="DuplicateMessage">
+            <field reference="F_UnknownDefaultValue" name="Field1"/>
+            <field type="java.lang.Integer" name="Field2"/>
+            <field reference="F_WrongAttributeValue" name="SomeField1"/>
+            <field type="java.lang.Character" name="SomeField2"/>
+        </message>
+        <message name="Test">
+            <attribute type="java.lang.Double" name="Double">2.2</attribute>
+            <field type="java.lang.Integer" name="DuplicateField"/>
+            <field type="java.lang.String" name="DuplicateField"/>
+        </message>
+        <message name="protected">
+            <attribute type="java.lang.String" name="static">stat</attribute>
+            <field type="java.lang.Boolean" name="class"/>
+        </message>
+    </messages>
+</dictionary>

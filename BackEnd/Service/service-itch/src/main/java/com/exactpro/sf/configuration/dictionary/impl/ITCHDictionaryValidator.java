@@ -37,13 +37,13 @@ import com.exactpro.sf.configuration.dictionary.ValidationHelper;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.services.itch.ITCHMessageHelper;
 import com.exactpro.sf.services.itch.ITCHVisitorBase;
+import com.exactpro.sf.services.itch.ITCHVisitorBase.ProtocolType;
 
 public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
     private static final long serialVersionUID = 14671967127441418L;
 
     public ITCHDictionaryValidator() {
-        super();
     }
 
     public ITCHDictionaryValidator(IDictionaryValidator parentValidator) {
@@ -112,8 +112,9 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
         for(IMessageStructure message : dictionary.getMessages().values()) {
             for(IFieldStructure field : message.getFields().values()) {
-                if (field.getReferenceName() != null && field.getReferenceName().equals(subMessage.getName()))
+                if(field.getReferenceName() != null && field.getReferenceName().equals(subMessage.getName())) {
                     return true;
+                }
             }
         }
         return false;
@@ -162,8 +163,8 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                     return;
                 }
 
-                ITCHVisitorBase.ProtocolType type =
-                        ITCHVisitorBase.ProtocolType.getEnum(getAttributeValue(field, ITCHVisitorBase.TYPE_ATTRIBUTE));
+                ProtocolType type =
+                        ProtocolType.getEnum(getAttributeValue(field, ITCHVisitorBase.TYPE_ATTRIBUTE));
                 Integer length = getAttributeValue(field, ITCHVisitorBase.LENGTH_ATTRIBUTE);
 
                 JavaType javaType = field.getJavaType();
@@ -214,12 +215,12 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                                 JavaType.JAVA_LANG_DOUBLE,
                                 JavaType.JAVA_MATH_BIG_DECIMAL}, javaType);
 
-                        if (javaType.equals(JavaType.JAVA_LANG_FLOAT)) {
+                        if(javaType == JavaType.JAVA_LANG_FLOAT) {
                             if (length != 4) {
                                 addProtocolTypeError(errors, message, field, type, 4, length);
                             }
-                        } else if (javaType.equals(JavaType.JAVA_LANG_DOUBLE)
-                                || javaType.equals(JavaType.JAVA_MATH_BIG_DECIMAL)) {
+                        } else if(javaType == JavaType.JAVA_LANG_DOUBLE
+                                || javaType == JavaType.JAVA_MATH_BIG_DECIMAL) {
                             if (length != 8) {
                                 addProtocolTypeError(errors, message, field, type, 8, length);
                             }
@@ -378,7 +379,7 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
     }
 
-    private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ITCHVisitorBase.ProtocolType type,
+    private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
                                       int expectedLength, int actualLength) {
         errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                 "Attribute <strong>\"Length\"</strong> for type <strong>\"" + type
@@ -390,7 +391,7 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
     private boolean checkJavaType(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field,
                                   JavaType expectedType, JavaType actualType) {
 
-        if(!actualType.equals(expectedType)) {
+        if(actualType != expectedType) {
             errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                     "Field <strong>\"" + field.getName() + "\"</strong> has incorrect type = ["
                             + actualType + "]. Must be [" + expectedType + "]",
@@ -405,7 +406,7 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
     private boolean checkJavaTypeArray(List<DictionaryValidationError> errors, IMessageStructure message,
                                        IFieldStructure field, JavaType[] expectedTypeList, JavaType actualType) {
         for(JavaType currentType : expectedTypeList) {
-            if(actualType.equals(currentType)) {
+            if(actualType == currentType) {
                 return true;
             }
         }

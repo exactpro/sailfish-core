@@ -19,6 +19,7 @@ import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.Set;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.primefaces.model.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,8 @@ public class MessageSorter implements Comparator<MessageAdapter>{
 
 	private static final Logger logger = LoggerFactory.getLogger(MessageSorter.class);
 
-	private Set<String> fields;
-	private SortOrder order;
+    private final Set<String> fields;
+    private final SortOrder order;
 
     public MessageSorter(Set<String> fields, SortOrder order) {
 		this.fields = fields;
@@ -50,11 +51,13 @@ public class MessageSorter implements Comparator<MessageAdapter>{
 				Object value2 = f.get(m2);
 					result = compareValues(value1, value2);
 
-				if (result != 0) break;
+                if(result != 0) {
+                    break;
+                }
 
 			}
 
-			return SortOrder.ASCENDING.equals(order) ? result : result * (-1);
+            return order == SortOrder.ASCENDING ? result : result * -1;
 
 		} catch (Exception e) {
 
@@ -67,26 +70,7 @@ public class MessageSorter implements Comparator<MessageAdapter>{
 
     @SuppressWarnings("unchecked")
     private int compareValues(Object value1, Object value2) {
-
-		int result = 0;
-
-		if (value1 == null && value2 == null) {
-			result = 0;
-		}
-
-		if (value1 != null && value2 == null) {
-			result = -1;
-		}
-
-		if (value1 == null && value2 != null) {
-			result = 1;
-		}
-
-		if (value1 != null && value2 != null) {
-			result = ((Comparable<Object>)value1).compareTo(value2);
-		}
-		return result;
-
-	}
+        return ObjectUtils.compare((Comparable<Object>)value2, (Comparable<Object>)value1);
+    }
 
 }

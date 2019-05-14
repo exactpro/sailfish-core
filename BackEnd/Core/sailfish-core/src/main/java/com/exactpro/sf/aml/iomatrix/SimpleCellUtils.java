@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class SimpleCellUtils {
 
@@ -56,7 +57,7 @@ public class SimpleCellUtils {
 	
 	public static Map<String, String> dropStyles(Map<String, SimpleCell> line) {
 		Map<String, String> result = new LinkedHashMap<>();
-		for (Map.Entry<String, SimpleCell> entry : line.entrySet()) {
+		for (Entry<String, SimpleCell> entry : line.entrySet()) {
 			result.put(entry.getKey(), entry.getValue().getValue());
 		}
 		return result;
@@ -64,7 +65,7 @@ public class SimpleCellUtils {
 	
 	public static Map<String, SimpleCell> addStyles(Map<String, String> line) {
 		Map<String, SimpleCell> result = new LinkedHashMap<>();
-		for (Map.Entry<String, String> entry : line.entrySet()) {
+		for (Entry<String, String> entry : line.entrySet()) {
 			result.put(entry.getKey(), new SimpleCell(entry.getValue()));
 		}
 		return result;

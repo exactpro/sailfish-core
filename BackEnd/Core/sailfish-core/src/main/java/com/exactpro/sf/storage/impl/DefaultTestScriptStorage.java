@@ -15,17 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
-import com.exactpro.sf.storage.entities.XmlReportProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -41,21 +49,25 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IScriptRunListener;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.ScriptProgress;
+import com.exactpro.sf.scriptrunner.ScriptProgress.IScriptRunProgressListener;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.ZipReport;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
 import com.exactpro.sf.storage.ITestScriptStorage;
+import com.exactpro.sf.storage.entities.XmlReportProperties;
 import com.exactpro.sf.util.DirectoryFilter;
 import com.exactpro.sf.util.ReportFilter;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class DefaultTestScriptStorage implements ITestScriptStorage {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultTestScriptStorage.class);
 
-    public final static String REPORT_DATA_DIR = "reportData";
+    public static final String REPORT_DATA_DIR = "reportData";
     public static final String ROOT_JSON_REPORT_FILE = REPORT_DATA_DIR + "/report.json";
 
     @Deprecated
@@ -202,9 +214,9 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
 
         testScriptDescription.setContext(scriptContext);
         testScriptDescription.setState(
-                TestScriptDescription.ScriptState.valueOf(properties.getState()));
+                ScriptState.valueOf(properties.getState()));
         testScriptDescription.setStatus(
-                TestScriptDescription.ScriptStatus.valueOf(properties.getStatus()));
+                ScriptStatus.valueOf(properties.getStatus()));
         testScriptDescription.setStartedTime(properties.getStartTime());
         testScriptDescription.setFinishedTime(properties.getFinishTime());
         testScriptDescription.setCause(SerializeUtil.deserializeBase64Obj(properties.getCause(), Throwable.class));
@@ -254,7 +266,7 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
         }
     }
 
-    private class ScriptRunProgressListenerStub implements ScriptProgress.IScriptRunProgressListener{
+    private class ScriptRunProgressListenerStub implements IScriptRunProgressListener{
         @Override
         public void onProgressChanged(long id) {
 

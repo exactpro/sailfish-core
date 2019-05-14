@@ -9,14 +9,12 @@ dependencies {
 
     if (incremental_build) {
         compileOnly "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
-        compile "com.exactpro.sf:extension-aml-3:${artifactVersion}"
         compile "com.exactpro.sf:service-ntg:${artifactVersion}"
         compile "com.exactpro.sf:service-itch:${artifactVersion}"
         compile "com.exactpro.sf:service-fix:${artifactVersion}"
         compile "com.exactpro.sf:service-fast:${artifactVersion}"
     } else {
         compileOnly project(':BackEnd:Core:sailfish-core')
-        compile project(':BackEnd:Extension:extension-aml-3')
         compile project(':BackEnd:Service:service-ntg')
         compile project(':BackEnd:Service:service-itch')
         compile project(':BackEnd:Service:service-fix')
@@ -35,7 +33,7 @@ generateVersionClass {
 	alias 	= plugin_alias
 }
 
-compileJava.dependsOn.add('generateVersionClass')
+compileKotlin.dependsOn.add('generateVersionClass')
 
 validateDictionary {
     validate(NTG_VALIDATOR, 'NTG_GENERIC.xml')

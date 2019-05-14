@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -52,7 +51,6 @@ import com.exactpro.sf.aml.IValidator;
 import com.exactpro.sf.aml.generator.Alert;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.aml.generator.GeneratedScript;
-import com.exactpro.sf.aml.generator.JavaValidator;
 import com.exactpro.sf.center.IDisposable;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.common.adapting.IAdapterManager;
@@ -68,12 +66,15 @@ import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings.ReportOutputFormat;
+import com.exactpro.sf.scriptrunner.ScriptProgress.IScriptRunProgressListener;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.impl.BroadcastScriptReport;
 import com.exactpro.sf.scriptrunner.impl.ScriptReportWithLogs;
 import com.exactpro.sf.scriptrunner.impl.StatisticScriptReport;
 import com.exactpro.sf.scriptrunner.impl.htmlreport.HtmlReport;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 import com.exactpro.sf.scriptrunner.junit40.SFJUnitRunner;
 import com.exactpro.sf.scriptrunner.languagemanager.ILanguageFactory;
 import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
@@ -84,15 +85,15 @@ import com.exactpro.sf.storage.ScriptRun;
 
 public abstract class AbstractScriptRunner implements IDisposable {
 
-    private final static Logger logger = LoggerFactory.getLogger(AbstractScriptRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractScriptRunner.class);
 
-    protected final static String LS = System.getProperty("line.separator");
-    protected final static String PACKAGE_NAME = "com.exactpro.sf.testscript";
-    protected final static int DEFAULT_TIMEOUT = 1000;
-    protected final static String forbiddenChars = " ?#;";
+    protected static final String LS = System.getProperty("line.separator");
+    protected static final String PACKAGE_NAME = "com.exactpro.sf.testscript";
+    protected static final int DEFAULT_TIMEOUT = 1000;
+    protected static final String forbiddenChars = " ?#;";
 
     protected final List<IScriptRunListener> listeners;
-    protected final ScriptProgress.IScriptRunProgressListener progressListener;
+    protected final IScriptRunProgressListener progressListener;
     protected final IPauseListener pauseListener;
     protected final IScriptRunListener stateListener;
 
@@ -104,7 +105,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     protected volatile State runnerState;
     protected volatile boolean isDisposing;
-    protected volatile boolean shutdown = false;
+    protected volatile boolean shutdown;
     protected final SimpleDateFormat scriptFolderSuffix;
     protected final Map<Long, TestScriptDescription> testScripts;
     protected final Deque<Long> addedTestScripts;
@@ -114,38 +115,38 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     protected Thread tScriptCompiler;
     protected Thread tScriptExecutor;
-    protected final static Date startDate = new Date();
+    protected static final Date startDate = new Date();
 
     private final ScriptRunnerSettings settings;
     private final PreprocessorLoader preprocessorLoader;
     private final ValidatorLoader validatorLoader;
 
-    private StatisticsService statisticsService;
-    private IEnvironmentManager environmentManager;
-    private ITestScriptStorage testScriptStorage;
-    private IAdapterManager adapterManager;
-    private IStaticServiceManager staticServiceManager;
-    private String compilerClassPath;
+    private final StatisticsService statisticsService;
+    private final IEnvironmentManager environmentManager;
+    private final ITestScriptStorage testScriptStorage;
+    private final IAdapterManager adapterManager;
+    private final IStaticServiceManager staticServiceManager;
+    private final String compilerClassPath;
 
     protected enum State {
-        INIT, DISPOSING, DISPOSED;
+        INIT, DISPOSING, DISPOSED
     }
 
     public AbstractScriptRunner(
-    		final IWorkspaceDispatcher wd,
-    		final IDictionaryManager dictionaryManager,
-    		final IActionManager actionManager,
-			final IUtilityManager utilityManager,
-			final LanguageManager languageManager,
-    		final PreprocessorLoader preprocessorLoader,
-    		final ValidatorLoader validatorLoader,
-    		final ScriptRunnerSettings settings,
-    		final StatisticsService statisticsService,
-    		final IEnvironmentManager environmentManager,
-    		final ITestScriptStorage testScriptStorage,
-    		final IAdapterManager adapterManager,
-    		final IStaticServiceManager staticServiceManager,
-    		final String compilerClassPath) {
+            IWorkspaceDispatcher wd,
+            IDictionaryManager dictionaryManager,
+            IActionManager actionManager,
+            IUtilityManager utilityManager,
+            LanguageManager languageManager,
+            PreprocessorLoader preprocessorLoader,
+            ValidatorLoader validatorLoader,
+            ScriptRunnerSettings settings,
+            StatisticsService statisticsService,
+            IEnvironmentManager environmentManager,
+            ITestScriptStorage testScriptStorage,
+            IAdapterManager adapterManager,
+            IStaticServiceManager staticServiceManager,
+            String compilerClassPath) {
 
         this.workspaceDispatcher = wd;
         this.dictionaryManager = dictionaryManager;
@@ -189,7 +190,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
     }
 
     public TestScriptDescription getTestScriptDescription(long id) {
-        return this.testScripts.get(id);
+        return testScripts.get(id);
     }
 
     public long enqueueScript(String scriptSettingsPath, String scriptMatrixPath, String matrixDescription,
@@ -206,7 +207,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
             // copy files:
             WorkFolderPaths workFolderPaths = copyFilesToWorkFolder(matrixFileName, scriptMatrixPath, scriptSettingsPath, workFolder);
 
-            TestScriptDescription scriptDescription = new TestScriptDescription(this.stateListener, new Date(),
+            TestScriptDescription scriptDescription = new TestScriptDescription(stateListener, new Date(),
                     scriptMatrixPath,
                     scriptSettingsPath,
                     workFolderPaths.getMatrixPath(),
@@ -227,7 +228,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
                     tags,
                     staticVariables);
 
-            scriptDescription.setStatus(TestScriptDescription.ScriptStatus.NONE);
+            scriptDescription.setStatus(ScriptStatus.NONE);
             scriptDescription.setLanguageURI(languageURI);
 
             IScriptProgress scriptProgress = new ScriptProgress(scriptDescription.getId(), progressListener);
@@ -250,7 +251,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
             BroadcastScriptReport aggregateReport = new BroadcastScriptReport(aggregateReportListeners);
 
-            reportListeners.add(new ScriptReportWithLogs(aggregateReport, this.settings.getExcludedMessages()));
+            reportListeners.add(new ScriptReportWithLogs(aggregateReport, settings.getExcludedMessages()));
             // user-defined listeners
             if (userListeners != null) {
                 reportListeners.addAll(userListeners);
@@ -268,18 +269,17 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
             scriptDescription.setContext(context);
 
-
-            this.testScripts.put(scriptDescription.getId(), scriptDescription);
+            testScripts.put(scriptDescription.getId(), scriptDescription);
 
             if (scriptDescription.getAutoRun()) {
                 scriptDescription.scriptInitialized();
                 synchronized (addedTestScripts) {
-                    this.addedTestScripts.add(scriptDescription.getId());
+                    addedTestScripts.add(scriptDescription.getId());
                 }
             } else {
                 scriptDescription.scriptPending();
                 synchronized (pendingTestScriptsToPrepare) {
-                    this.pendingTestScriptsToPrepare.add(scriptDescription.getId());
+                    pendingTestScriptsToPrepare.add(scriptDescription.getId());
                 }
             }
 
@@ -433,8 +433,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
         logger.info("compileScript({})", id);
         synchronized (pendingTestScriptsToPrepare) {
             synchronized (addedTestScripts) {
-                if (this.pendingTestScriptsToPrepare.remove(id)) {
-                    this.addedTestScripts.add(id);
+                if(pendingTestScriptsToPrepare.remove(id)) {
+                    addedTestScripts.add(id);
                 }
             }
         }
@@ -452,8 +452,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
         if (runnerState != State.DISPOSED && runnerState != State.DISPOSING) {
             isDisposing = true;
             runnerState = State.DISPOSING;
-            joinThread(this.tScriptCompiler);
-            joinThread(this.tScriptExecutor);
+            joinThread(tScriptCompiler);
+            joinThread(tScriptExecutor);
             runnerState = State.DISPOSED;
         }
         logger.info("Script runner was disposed");
@@ -487,8 +487,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
     }
 
     protected void fireEvent(TestScriptDescription testScriptDescription) {
-        synchronized (this.listeners) {
-            for (IScriptRunListener listener : this.listeners) {
+        synchronized(listeners) {
+            for(IScriptRunListener listener : listeners) {
                 try {
                     listener.onScriptRunEvent(testScriptDescription);
                 } catch ( Throwable e ) {
@@ -526,7 +526,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
         fireEvent(descr); // update script run status after report is complete
     }
 
-	protected GeneratedScript generateJavaSourcesFromMatrix(final TestScriptDescription description) throws ScriptRunException, IOException {
+    protected GeneratedScript generateJavaSourcesFromMatrix(TestScriptDescription description) throws ScriptRunException, IOException {
 
 		File matrixFile = new File(description.getMatrixPath());
 
@@ -549,12 +549,14 @@ public abstract class AbstractScriptRunner implements IDisposable {
         settings.setStaticVariables(description.getStaticVariables());
 
         List<IPreprocessor> preprocessors = preprocessorLoader.getPreprocessors();
-        for (IPreprocessor preprocessor : preprocessors)
+        for(IPreprocessor preprocessor : preprocessors) {
             settings.addPreprocessor(preprocessor);
+        }
 
         List<IValidator> validators = validatorLoader.getValidators();
-        for (IValidator validator : validators)
+        for(IValidator validator : validators) {
             settings.addValidator(validator);
+        }
 
         try {
 
@@ -654,7 +656,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
                 workFolderPath + File.separator + origMatrixFile.getName());
     }
 
-    protected GeneratedScript prepareScript(final TestScriptDescription description) throws Exception {
+    protected GeneratedScript prepareScript(TestScriptDescription description) throws Exception {
         logger.info("Prepare script started [{}]", description.getMatrixFileName());
 
         GeneratedScript script = generateJavaSourcesFromMatrix(description);
@@ -662,8 +664,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
         File binFolder = workspaceDispatcher.createFolder(FolderType.REPORT, description.getWorkFolder(), "bin");
 
         // parent class loader must be specified for new web-gui
-        ILanguageFactory languageFactory = this.languageManager.getLanguageFactory(description.getLanguageURI());
-        ClassLoader classLoader = languageFactory.createClassLoader(binFolder.toURI().toURL(), this.getClass().getClassLoader());
+        ILanguageFactory languageFactory = languageManager.getLanguageFactory(description.getLanguageURI());
+        ClassLoader classLoader = languageFactory.createClassLoader(binFolder.toURI().toURL(), getClass().getClassLoader());
 
         // load Script Settings
         File scriptFile = workspaceDispatcher.getFile(FolderType.REPORT, description.getSettingsPath());
@@ -683,7 +685,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
         return script;
     }
 
-    protected void compileScript(final GeneratedScript script, final TestScriptDescription description) throws InterruptedException {
+    protected void compileScript(GeneratedScript script, TestScriptDescription description) throws InterruptedException {
 
         logger.info("Compile script #{} started (matrix {})", description.getId(), description.getMatrixFileName());
         Thread t = new Thread(new Runnable() {
@@ -706,7 +708,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
                 }
             }
         }, "Script compiler #"+description.getId());
-        t.setPriority(this.settings.getCompilerPriority());
+        t.setPriority(settings.getCompilerPriority());
         t.start();
 
         while (t.isAlive()) {
@@ -753,7 +755,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
 
                 // Init Report
-                if (description == null || description.equals("")) {
+                if(description == null || "".equals(description)) {
                     description = IScriptReport.NO_DESCRIPTION;
                 }
 
@@ -777,7 +779,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
         }
     }
 
-    protected void cancelScript(final TestScriptDescription description) {
+    protected void cancelScript(TestScriptDescription description) {
         logger.info("Script #{} (matrix {}) has been canceled", description.getId(), description.getMatrixFileName());
 
         ScriptContext scriptContext = description.getContext();
@@ -856,7 +858,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
         return LoggerFactory.getLogger(scriptLogger.getName());
     }
 
-    protected class InternalProgressListener implements ScriptProgress.IScriptRunProgressListener {
+    protected class InternalProgressListener implements IScriptRunProgressListener {
         @Override
         public void onProgressChanged(long id) {
             TestScriptDescription testScriptDescription = testScripts.get(id);
@@ -934,7 +936,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
             catch (Throwable e)
             {
                 logger.error(e.getMessage(), e);
-                this.scriptContext.getScriptConfig().getLogger().error("Problem during testscript running", e);
+                scriptContext.getScriptConfig().getLogger().error("Problem during testscript running", e);
                 result = e;
             }
 

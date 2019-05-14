@@ -32,10 +32,6 @@ public class MessagesUpdateRequest extends AbstractMessage {
         this.requestId = requestId;
     }
 
-    public MessagesUpdateRequest(){
-        super();
-    }
-
     @Override
     public String toString() {
         return new ToStringBuilder(this).append("messageType", SFMessageType.MessagesUpdateRequest).toString();

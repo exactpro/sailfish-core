@@ -21,14 +21,14 @@ public enum Status {
 	FAIL("FAIL"),
 	NOT_TESTED("");
 
-	private String status;
+    private final String status;
 
-	private Status(String status) {
+    Status(String status) {
 		this.status = status;
 	}
 	
 	public String getString() {
-		return this.status;
+        return status;
 	}
 
 	public static String compare(Object actual, Object expected) {

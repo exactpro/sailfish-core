@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
-import com.exactpro.sf.configuration.suri.SailfishURI;
-
 import javax.xml.bind.annotation.XmlRootElement;
+
+import com.exactpro.sf.configuration.suri.SailfishURI;
 
 @XmlRootElement
 public class EnabledSettings extends AbstractServiceSettings {
@@ -28,7 +28,7 @@ public class EnabledSettings extends AbstractServiceSettings {
 
     @Override
     public SailfishURI getDictionaryName() {
-        return this.dictionaryName;
+        return dictionaryName;
     }
 
     @Override

@@ -149,7 +149,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 	 */
 	@Test
 	public void testDecodeOrderRejectFromBytes(){
-		int[] ints = new int[]{
+		int[] ints = {
 				0x02, 0x45, 0x00, 0x39, 0x01, 0xf2, 0xdd, 0x00, 0x00, 0x6f, 0x62, 0x75, 0x79, 0x2d, 0x31, 0x32,
 				0x37, 0x34, 0x37, 0x31, 0x34, 0x34, 0x38, 0x37, 0x33, 0x37, 0x35, 0x00, 0x61, 0x4f, 0x31, 0x31,
 				0x41, 0x6c, 0x41, 0x5f, 0x34, 0x00, 0x37, 0x31, 0x34, 0x34, 0x38, 0x37, 0x33, 0x37, 0x35, 0x00,
@@ -170,7 +170,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 	@Test
 	public void testDecodeExecutionReportFromBytes()
 	{
-		int[] ints = new int[]{
+		int[] ints = {
 				0x02, 0x97, 0x00, 0x38, 0x01, 0xd3, 0xdb, 0x04, 0x00, 0x45, 0x30, 0x31, 0x78, 0x4d, 0x63, 0x47,
 				0x36, 0x55, 0x46, 0x36, 0x4f, 0x31, 0x32, 0x37, 0x36, 0x36, 0x38, 0x35, 0x37, 0x38, 0x36, 0x33,
 				0x39, 0x35, 0x30, 0x30, 0x30, 0x30, 0x30, 0x31, 0x33, 0x4f, 0x31, 0x31, 0x43, 0x53, 0x6e, 0x5f,
@@ -216,7 +216,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 	@Test
 	public void testDecodeCancelRejectFromBytes()
 	{
-		int[] ints = new int[]{
+		int[] ints = {
 				0x02, 0x3c, 0x00, 0x39, 0x01, 0x83, 0x0f, 0x03, 0x00, 0x31, 0x33, 0x39, 0x34, 0x34, 0x35, 0x31,
 				0x30, 0x30, 0x30, 0x34, 0x30, 0x32, 0x30, 0x30, 0x30, 0x30, 0x30, 0x31, 0x35, 0x4e, 0x4f, 0x4e,
 				0x45, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xd0, 0x07, 0x00, 0x00, 0xea, 0xad, 0x1d,
@@ -265,7 +265,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 		messageHeader.addField("MessageLength", 5);
 		messageHeader.addField("MessageType", "6");
 		message.addField("MessageHeader", messageHeader);
-		message.addField("testDouble", 3.14d);
+        message.addField("testDouble", 3.14);
 		try{
             testRoundTrip(message, TestNTGHelper.getDictionaryWithDifferentTypesMessages());
 		}catch(Exception e){
@@ -308,7 +308,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 		messageHeader.addField("MessageLength", 9);
 		messageHeader.addField("MessageType", "3");
 		message.addField("MessageHeader", messageHeader);
-		message.addField("testBigDecimal", new BigDecimal(10));
+        message.addField("testBigDecimal", BigDecimal.TEN);
 		try{
             testRoundTrip(message, TestNTGHelper.getDictionaryWithDifferentTypesMessages());
 		}catch(Exception e){
@@ -330,7 +330,7 @@ public class TestNTGCodecPositive extends AbstractTest {
 		messageHeader.addField("MessageLength", 9);
 		messageHeader.addField("MessageType", "2");
 		message.addField("MessageHeader", messageHeader);
-		message.addField("testBigDecimalPrice", new BigDecimal(10));
+        message.addField("testBigDecimalPrice", BigDecimal.TEN);
 		try{
             testRoundTrip(message, TestNTGHelper.getDictionaryWithDifferentTypesMessages());
 		}catch(Exception e){
@@ -350,13 +350,13 @@ public class TestNTGCodecPositive extends AbstractTest {
 
 			encodeCodec.init(serviceContext, null, DefaultMessageFactory.getFactory(), dictionary);
 
-            ProtocolEncoderOutput output = (new TestNTGHelper()).new MockProtocolEncoderOutput();
+            ProtocolEncoderOutput output = new TestNTGHelper().new MockProtocolEncoderOutput();
  			encodeCodec.encode(new DummySession(), message, output);
 
 			Queue<Object> msgQueue = ((AbstractProtocolEncoderOutput) output).getMessageQueue();
 
 			Assert.assertNotNull("Message queue from AbstractProtocolEncoderOutput.", msgQueue);
-			Assert.assertTrue("Message queue size must be equal 1.", 1 == msgQueue.size());
+            Assert.assertTrue("Message queue size must be equal 1.", msgQueue.size() == 1);
 
 			Object lastMessage = msgQueue.element();
 
@@ -381,11 +381,11 @@ public class TestNTGCodecPositive extends AbstractTest {
 				boolean decodeResult = decodeCodec.doDecode(decodeSession, toDecode, decoderOutput);
 				Assert.assertTrue("Decoding error.", decodeResult);
 
-				Assert.assertTrue( "Message queue size must not less then 1.", 1 <= decoderOutput.getMessageQueue().size());
+                Assert.assertTrue("Message queue size must not less then 1.", decoderOutput.getMessageQueue().size() >= 1);
 				Object decodedMessage = decoderOutput.getMessageQueue().element();
 
-				Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage instanceof IMessage) );
-				Assert.assertTrue( "Object must be instance of MapMessage.", (decodedMessage instanceof MapMessage) );
+				Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage instanceof IMessage);
+				Assert.assertTrue( "Object must be instance of MapMessage.", decodedMessage instanceof MapMessage);
                 Assert.assertTrue("Messages must be equal. Original message:" + JsonMessageConverter.toJson(message, dictionary) + "; "
                         + "result message:" + JsonMessageConverter.toJson((IMessage)decodedMessage, dictionary),
                         message.compare((MapMessage) decodedMessage));
@@ -424,11 +424,11 @@ public class TestNTGCodecPositive extends AbstractTest {
 		boolean decodeResult = decodeCodec2.doDecode( decodeSession2, toDecode, decoderOutput2 );
 		Assert.assertTrue( "Decoding error.", decodeResult );
 
-		Assert.assertTrue( "Message queue size must not less then 1.", 1 <= ((AbstractProtocolDecoderOutput)decoderOutput2).getMessageQueue().size() );
+        Assert.assertTrue("Message queue size must not less then 1.", ((AbstractProtocolDecoderOutput)decoderOutput2).getMessageQueue().size() >= 1);
 		Object decodedMessage2 = ((AbstractProtocolDecoderOutput)decoderOutput2).getMessageQueue().element();
 
-		Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage2 instanceof IMessage) );
-		Assert.assertTrue( "Object must be instance of MapMessage.", (decodedMessage2 instanceof MapMessage) );
+		Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage2 instanceof IMessage);
+		Assert.assertTrue( "Object must be instance of MapMessage.", decodedMessage2 instanceof MapMessage);
 	}
 
 

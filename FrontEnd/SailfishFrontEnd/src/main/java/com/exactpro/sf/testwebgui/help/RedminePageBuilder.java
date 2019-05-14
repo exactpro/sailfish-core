@@ -23,7 +23,7 @@ import com.taskadapter.redmineapi.bean.WikiPageDetail;
 
 public class RedminePageBuilder {
 
-    private Map<String, String> parsedPages = new HashMap<String, String>();
+    private final Map<String, String> parsedPages = new HashMap<String, String>();
 
     private WikiPageDetail getWikiPage(String pageName) {
         WikiPageDetail pd = RedmineLoaderRuntime.getWikiPage(pageName);
@@ -40,7 +40,7 @@ public class RedminePageBuilder {
         WikiPageDetail pd = getWikiPage(page);
         String content;
         if(pd.getText() == null) {
-            content = null;
+            return null;
         } else {
             content = TextileAdapter.process(pd);
             parsedPages.put(page, content);

@@ -36,11 +36,11 @@ import org.junit.Test;
 
 public class ExcelMatrixWriterTest {
 
-    private String tmpDir = System.getProperty("java.io.tmpdir");
-    private String fileName = tmpDir + File.separator + "test.xls";
-    private String fileNameX = tmpDir + File.separator + "test.xlsx";
-    private File tmpFile = new File(fileName);
-    private File tmpFileX = new File(fileNameX);
+    private final String tmpDir = System.getProperty("java.io.tmpdir");
+    private final String fileName = tmpDir + File.separator + "test.xls";
+    private final String fileNameX = tmpDir + File.separator + "test.xlsx";
+    private final File tmpFile = new File(fileName);
+    private final File tmpFileX = new File(fileNameX);
 
     @Test
     public void testExcelMatrixWriterStringBoolean() {
@@ -134,7 +134,7 @@ public class ExcelMatrixWriterTest {
     public void testWriteCells() {
         HSSFWorkbook fakeWorkbook = new HSSFWorkbook();
         CellStyle style = fakeWorkbook.createCellStyle();
-        HSSFColor myColor = HSSFColor.HSSFColorPredefined.RED.getColor();
+        HSSFColor myColor = HSSFColorPredefined.RED.getColor();
 
         try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFile), false, "someName")) {
             SimpleCell[] cells = new SimpleCell[10];
@@ -312,6 +312,6 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testFlush() {
-        assert (true);
+        assert true;
     }
 }

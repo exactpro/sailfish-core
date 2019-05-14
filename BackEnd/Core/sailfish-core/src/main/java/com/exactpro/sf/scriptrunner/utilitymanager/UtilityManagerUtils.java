@@ -15,23 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.utilitymanager;
 
+import static org.apache.commons.lang3.ClassUtils.isAssignable;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 
-import com.exactpro.sf.aml.Description;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
 public class UtilityManagerUtils {
-    private static final Object[] NULL_ARGUMENT_ARRAY = new Object[] { null };
+    private static final Object[] NULL_ARGUMENT_ARRAY = { null };
 
     public static boolean checkArgs(Object[] args, Class<?>... argTypes) {
-        return ClassUtils.isAssignable(ClassUtils.toClass(args), argTypes, true);
+        return isAssignable(ClassUtils.toClass(args), argTypes, true);
     }
 
     @SuppressWarnings("unchecked")
@@ -70,11 +72,7 @@ public class UtilityManagerUtils {
         Class<?>[] classes = new Class<?>[argsLength];
 
         for(int i = 0; i < args.length; i++) {
-            if(i < typesLength) {
-                classes[i] = argTypes[i];
-            } else {
-                classes[i] = argTypes[typesLength - 1];
-            }
+            classes[i] = argTypes[Math.min(i, typesLength - 1)];
         }
 
         return classes;
@@ -97,12 +95,7 @@ public class UtilityManagerUtils {
 
         for(int i = 0; i < resultLength; i++) {
             Object value = args[i + startIndex];
-
-            if(ClassUtils.isAssignable(clazz, Number.class, true)) {
-                result[i] = (T)castNumber(value, clazz);
-            } else {
-                result[i] = (T)value;
-            }
+            result[i] = isAssignable(clazz, Number.class, true) ? castNumber(value, clazz) : (T)value;
         }
 
         return result;
@@ -160,7 +153,7 @@ public class UtilityManagerUtils {
                 int lastIndex = signatureLength - 1;
                 Class<?> varArgsClass = signatureClasses[lastIndex].getComponentType();
 
-                if(ClassUtils.isAssignable(argumentsClasses[lastIndex], varArgsClass)) {
+                if(isAssignable(argumentsClasses[lastIndex], varArgsClass)) {
                     signatureClasses[lastIndex] = varArgsClass;
                 }
             }
@@ -192,7 +185,7 @@ public class UtilityManagerUtils {
                 continue;
             }
 
-            if(!ClassUtils.isAssignable(argumentClass, signatureClass)) {
+            if(!isAssignable(argumentClass, signatureClass)) {
                 return -1;
             }
         }

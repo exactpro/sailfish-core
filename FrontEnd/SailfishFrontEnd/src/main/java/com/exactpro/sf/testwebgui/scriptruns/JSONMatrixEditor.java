@@ -177,11 +177,8 @@ public class JSONMatrixEditor {
 		if (idx == -1) {
 			return null;
 		}
-		if (idx >= line.length) {
-			return null;
-		}
-		return line[idx];
-	}
+        return idx >= line.length ? null : line[idx];
+    }
 
 	private void setValue(SimpleCell[] line, List<SimpleCell> headers, String key, SimpleCell value) {
 		int idx = -1;
@@ -230,11 +227,7 @@ public class JSONMatrixEditor {
 		if (result.get(0).length < max) {
 		    List<String> header = new ArrayList<>(max);
 		    for(int i=0; i<max; i++) {
-		        if (i < result.get(0).length) {
-		            header.add(result.get(0)[i]);
-		        } else {
-		            header.add("");
-		        }
+                header.add(i < result.get(0).length ? result.get(0)[i] : "");
 		    }
 
 		    result.set(0, header.toArray(new String[0]));
@@ -272,7 +265,7 @@ public class JSONMatrixEditor {
 	}
 
 	public void flush() throws Exception {
-        final File matrixFile = new File(SFLocalContext.getDefault().getWorkspaceDispatcher().getFolder(FolderType.MATRIX), matrix.getFilePath());
+        File matrixFile = new File(SFLocalContext.getDefault().getWorkspaceDispatcher().getFolder(FolderType.MATRIX), matrix.getFilePath());
 
 		try (IMatrixWriter writer = AdvancedMatrixWriter.getWriter(matrixFile)) {
 			for (SimpleCell[] line : lines) {
@@ -285,7 +278,7 @@ public class JSONMatrixEditor {
 	}
 
 	public Set<String> getTestcaseNames() {
-		final Set<String> testCaseNames = new LinkedHashSet<>();
+		Set<String> testCaseNames = new LinkedHashSet<>();
 
 		for (MetaData md : metadata) {
 			testCaseNames.add(md.getTestCaseName());
@@ -295,7 +288,7 @@ public class JSONMatrixEditor {
 	}
 
 	public void addTestcase(String testCaseName) {
-		final Set<String> testCaseNames = getTestcaseNames();
+		Set<String> testCaseNames = getTestcaseNames();
 		if (testCaseNames.contains(testCaseName)) { // FIXME: add logic for AML-auto-generated TestCase names?
 			throw new RuntimeException("Testcase " + testCaseName + " already exists");
 		} else {
@@ -334,11 +327,8 @@ public class JSONMatrixEditor {
 	 */
 	private List<SimpleCell[]> getLines(String testCaseName) {
 		MetaData md = getMetaData(testCaseName);
-		if (md == null) {
-			return null;
-		}
-		return lines.subList(md.getOffset(), md.getOffset() + md.getCount()+1);
-	}
+        return md == null ? null : lines.subList(md.getOffset(), md.getOffset() + md.getCount() + 1);
+    }
 
 	private MetaData getMetaData(String testCaseName) {
 		for (MetaData md : metadata) {

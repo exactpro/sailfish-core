@@ -31,7 +31,7 @@ import com.exactpro.sf.util.BugsListCheckerBuilder;
  *
  */
 @MatrixUtils
-@ResourceAliases({"BugsUtils"})
+@ResourceAliases("BugsUtils")
 public class BugsUtils extends AbstractCaller {
     @UtilityMethod
     @Description("This method compares the actual value against the expected value and also takes into account<br/>"

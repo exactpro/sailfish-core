@@ -23,7 +23,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 public class EPSTestCase
 {
-	private static boolean isLoggingAlreadyConfigured = false;
+	private static boolean isLoggingAlreadyConfigured;
 
 	protected static final String BIN_FOLDER_PATH = "build/test-results";
 	protected static final Path BASE_DIR = Paths.get((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir")).toAbsolutePath().normalize();

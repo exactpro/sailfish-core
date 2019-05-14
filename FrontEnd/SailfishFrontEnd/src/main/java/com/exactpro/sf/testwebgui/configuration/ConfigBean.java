@@ -32,6 +32,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -72,7 +73,6 @@ import org.xml.sax.InputSource;
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.ValidateRegex;
 import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.configuration.ILoggingConfiguration;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
@@ -82,12 +82,13 @@ import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.embedded.configuration.ServiceStatus;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings.RelevantMessagesSortingMode;
+import com.exactpro.sf.scriptrunner.EnvironmentSettings.StorageType;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.auth.PasswordHasher;
 import com.exactpro.sf.storage.auth.User;
 import com.exactpro.sf.storage.auth.UserRole;
-import com.exactpro.sf.util.JdbcUtils;
 import com.exactpro.sf.testwebgui.BeanUtil;
+import com.exactpro.sf.util.JdbcUtils;
 
 @ManagedBean(name="configBean")
 @SessionScoped
@@ -110,9 +111,9 @@ public class ConfigBean implements Serializable {
 
 	private String newDBName;
 
-	private boolean dbChangesApplied = false;
+    private boolean dbChangesApplied;
 
-	private ConfigModel configModel = new ConfigModel();
+    private final ConfigModel configModel = new ConfigModel();
 
 	private Configuration config;
 
@@ -134,16 +135,12 @@ public class ConfigBean implements Serializable {
     private boolean createIndividualAppenders;
     private String individualAppendersThreshold;
 
-	private static String DEFAULT_PASSWORD = "Welcome";
+    private static final String DEFAULT_PASSWORD = "Welcome";
 
 	private ServiceStatus conStatus = ServiceStatus.Connected;
 	private String conErrorText;
 
 	private String section;
-
-	public ConfigBean() {
-
-	}
 
     //refresh state after deserialization
     private Object readResolve()  {
@@ -207,9 +204,9 @@ public class ConfigBean implements Serializable {
         BeanUtilsBean.getInstance().getConvertUtils().register(new Converter() {
             @Override
             public Object convert(@SuppressWarnings("rawtypes") Class type, Object value) {
-                return EnvironmentSettings.StorageType.parse(value.toString());
+                return StorageType.parse(value.toString());
             }
-        }, EnvironmentSettings.StorageType.class);
+        }, StorageType.class);
 
         BeanUtilsBean.getInstance().getConvertUtils().register(new Converter() {
             @Override
@@ -226,10 +223,10 @@ public class ConfigBean implements Serializable {
 	}
 
     public void onPageLoad() {
-        if (StringUtils.isEmpty(this.section)) {
+        if(StringUtils.isEmpty(section)) {
             this.section = DEFAULT_SECTION;
         }
-        RequestContext.getCurrentInstance().execute("setSectionVisible('" + this.section + "')");
+        RequestContext.getCurrentInstance().execute("setSectionVisible('" + section + "')");
     }
 
 	public void changeSection() {
@@ -238,7 +235,7 @@ public class ConfigBean implements Serializable {
 	        reqSection = DEFAULT_SECTION;
 	    }
 	    this.section = reqSection;
-        RequestContext.getCurrentInstance().execute("setSectionVisible('" + this.section + "')");
+        RequestContext.getCurrentInstance().execute("setSectionVisible('" + section + "')");
 	}
 
 	public void refresh() {
@@ -253,7 +250,7 @@ public class ConfigBean implements Serializable {
 		this.selectedUserRoles = new HashSet<>();
 
 		for (String role : BeanUtil.getSfContext().getAuthStorage().getRoles()) {
-			this.selectedUserRoles.add(new UserRole(role, role.equals("user")));
+            selectedUserRoles.add(new UserRole(role, "user".equals(role)));
 		}
 
 	}
@@ -262,19 +259,19 @@ public class ConfigBean implements Serializable {
 		logger.info("add invoked {}", getUser());
 		try {
 
-			this.newUser.setRegistered(new Date());
-			this.newUser.setPassword(PasswordHasher.getHash(this.newUser.getPassword()));
+            newUser.setRegistered(new Date());
+            newUser.setPassword(PasswordHasher.getHash(newUser.getPassword()));
 
-			for (UserRole role : this.selectedUserRoles) {
+            for(UserRole role : selectedUserRoles) {
 				if (role.isHasRole()) {
-					this.newUser.getRoles().add(role.getName());
+                    newUser.getRoles().add(role.getName());
 				}
 			}
 
-			BeanUtil.getSfContext().getAuthStorage().addUser(this.newUser);
+            BeanUtil.getSfContext().getAuthStorage().addUser(newUser);
 
 			this.newUser = null;
-			this.selectedUserRoles.clear();
+            selectedUserRoles.clear();
 
 			refresh();
 
@@ -312,7 +309,7 @@ public class ConfigBean implements Serializable {
 		logger.info("save invoked {} selectedUserRoles[{}]", getUser(), selectedUserRoles);
 		try {
 			if(newPassword != null && !newPassword.trim().isEmpty()) {
-				this.selectedUser.setPassword(PasswordHasher.getHash(newPassword));
+                selectedUser.setPassword(PasswordHasher.getHash(newPassword));
 				newPassword = "";
 			}
 
@@ -324,11 +321,11 @@ public class ConfigBean implements Serializable {
                 }
             }
 
-			BeanUtil.getSfContext().getAuthStorage().updateUser(this.selectedUser);
+            BeanUtil.getSfContext().getAuthStorage().updateUser(selectedUser);
 
-			this.selectedUser.getRoles().clear();
+            selectedUser.getRoles().clear();
 
-			this.selectedUserRoles.clear();
+            selectedUserRoles.clear();
 
 			refresh();
 
@@ -343,13 +340,13 @@ public class ConfigBean implements Serializable {
 
 		User user = BeanUtil.getObject(BeanUtil.KEY_USER, User.class);
 
-		if (PasswordHasher.getHash(this.oldPassword).equals(user.getPassword())) {
+        if(PasswordHasher.getHash(oldPassword).equals(user.getPassword())) {
 
-			if (this.newPassword.equals(this.newPasswordConfirm)) {
+            if(newPassword.equals(newPasswordConfirm)) {
 
-				if (!this.newPassword.equals(this.oldPassword)) {
+                if(!newPassword.equals(oldPassword)) {
 
-					user.setPassword(PasswordHasher.getHash(this.newPassword));
+                    user.setPassword(PasswordHasher.getHash(newPassword));
 
 					BeanUtil.getSfContext().getAuthStorage().updateUser(user);
 
@@ -387,8 +384,7 @@ public class ConfigBean implements Serializable {
 	public void resetUserPassword() {
 		logger.info("resetUserPassword invoked {}", getUser());
 
-
-		User user = this.selectedUser;
+        User user = selectedUser;
 		user.setPassword(PasswordHasher.getHash(DEFAULT_PASSWORD));
 
 		BeanUtil.getSfContext().getAuthStorage().updateUser(user);
@@ -397,7 +393,7 @@ public class ConfigBean implements Serializable {
 	}
 
 	public Set<UserRole> getRoles(User user){
-		return this.selectedUserRoles;
+        return selectedUserRoles;
 	}
 
 	public void setRoles(Set<UserRole> roles){
@@ -411,7 +407,7 @@ public class ConfigBean implements Serializable {
 		StringBuilder text = new StringBuilder();
 		try {
 			File file = BeanUtil.getSfContext().getWorkspaceDispatcher().getFile(FolderType.CFG, LOG_PROPERTIES_FILE);
-			try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"))) {
+            try(BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 				String str;
 				while ((str = br.readLine()) != null) {
 					text.append("\n").append(str);
@@ -460,12 +456,12 @@ public class ConfigBean implements Serializable {
 		if (document != null) {
 
 			Element sfNode = document.getRootElement().element("session-factory");
-			findPropertyNode(sfNode, AvailableSettings.URL).setText(createProtocolUrl(this.configModel));
-			findPropertyNode(sfNode, AvailableSettings.USER).setText(this.configModel.getUserName());
-			findPropertyNode(sfNode, AvailableSettings.PASS).setText(this.configModel.getPassword());
-			findPropertyNode(sfNode, AvailableSettings.DRIVER).setText(this.configModel.getDriverClass());
-			findPropertyNode(sfNode, AvailableSettings.DIALECT).setText(this.configModel.getDialect());
-			findPropertyNode(sfNode, PREFFERED_TEST_QUERY).setText(this.configModel.getPreferredTestQuery());
+            findPropertyNode(sfNode, AvailableSettings.URL).setText(createProtocolUrl(configModel));
+            findPropertyNode(sfNode, AvailableSettings.USER).setText(configModel.getUserName());
+            findPropertyNode(sfNode, AvailableSettings.PASS).setText(configModel.getPassword());
+            findPropertyNode(sfNode, AvailableSettings.DRIVER).setText(configModel.getDriverClass());
+            findPropertyNode(sfNode, AvailableSettings.DIALECT).setText(configModel.getDialect());
+            findPropertyNode(sfNode, PREFFERED_TEST_QUERY).setText(configModel.getPreferredTestQuery());
 
 			try {
                 hibFile = BeanUtil.getSfContext().getWorkspaceDispatcher().createFile(FolderType.CFG, true, HIBERNATE_CFG_FILE);
@@ -493,8 +489,8 @@ public class ConfigBean implements Serializable {
 
 	public void revertChanges() {
 
-		if (!this.configModel.equals(this.config)) {
-			this.configModel.applyConfig(this.config);
+        if(!configModel.equals(config)) {
+            configModel.applyConfig(config);
 			applySettings();
 		}
 
@@ -507,8 +503,8 @@ public class ConfigBean implements Serializable {
 
 	public void preCheckConnection() {
 
-		if (this.configModel.equals(this.config)) {
-			if (!ServiceStatus.Connected.equals(this.conStatus)) {
+        if(configModel.equals(config)) {
+            if(conStatus != ServiceStatus.Connected) {
 				this.conStatus = ServiceStatus.Connected;
 				RequestContext.getCurrentInstance().update("connectionStatusForm");
 				RequestContext.getCurrentInstance().update("buttonsForm");
@@ -524,7 +520,7 @@ public class ConfigBean implements Serializable {
 
 	public void checkConnection() {
 
-		if (this.configModel.equals(this.config)) {
+        if(configModel.equals(config)) {
 			return;
 		}
 
@@ -536,14 +532,14 @@ public class ConfigBean implements Serializable {
 			return;
 		}
 
-		final Configuration configClone = new Configuration();
+        Configuration configClone = new Configuration();
 		configClone.configure(fDescr);
-		this.configModel.applyToConfiguration(configClone);
+        configModel.applyToConfiguration(configClone);
 
 		try {
 
-			JdbcUtils.executeTestQuery(this.configModel.driverClass, createProtocolUrl(configModel), this.configModel.getUserName(),
-			        this.configModel.getPassword(), this.configModel.getPreferredTestQuery());
+            JdbcUtils.executeTestQuery(configModel.driverClass, createProtocolUrl(configModel), configModel.getUserName(),
+                    configModel.getPassword(), configModel.getPreferredTestQuery());
 
 			this.conStatus = ServiceStatus.Connected;
 
@@ -559,7 +555,7 @@ public class ConfigBean implements Serializable {
 	}
 
 	public boolean isConfigWasChanged() {
-		return !this.configModel.equals(this.config);
+        return !configModel.equals(config);
 	}
 
 	private Node findPropertyNode(Element contextNode, String propertyName) {
@@ -611,7 +607,7 @@ public class ConfigBean implements Serializable {
 
 		try (BufferedWriter bufferedWriter = new BufferedWriter(
 				new OutputStreamWriter(
-				new FileOutputStream(config), "UTF-8"))) {
+                        new FileOutputStream(config), StandardCharsets.UTF_8))) {
 
 	    	bufferedWriter.write(logConfigText);
 
@@ -710,8 +706,8 @@ public class ConfigBean implements Serializable {
 		this.selectedUserRoles = new HashSet<>();
 
         for(String role : BeanUtil.getSfContext().getAuthStorage().getRoles()) {
-            boolean hasRole = null != selectedUser && selectedUser.getRoles().contains(role);
-            this.selectedUserRoles.add(new UserRole(role, hasRole));
+            boolean hasRole = selectedUser != null && selectedUser.getRoles().contains(role);
+            selectedUserRoles.add(new UserRole(role, hasRole));
 		}
 	}
 
@@ -751,7 +747,7 @@ public class ConfigBean implements Serializable {
     public void switchWorkspace() {
 		logger.info("switchWorkspace invoked {}", getUser());
 		try {
-			BeanUtil.getSfContext().getWorkspaceDispatcher().selectWorkspace(this.workspacePath, DefaultWorkspaceLayout.getInstance());
+            BeanUtil.getSfContext().getWorkspaceDispatcher().selectWorkspace(workspacePath, DefaultWorkspaceLayout.getInstance());
 			((HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true)).invalidate();
 		} catch (UnsupportedOperationException | FileNotFoundException e) {
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "ERROR", "Error during switching workspace: " + e.getMessage());
@@ -802,7 +798,7 @@ public class ConfigBean implements Serializable {
 	public void onTabChange(TabChangeEvent event) {
 		String tabTitle = event.getTab().getTitle();
 		logConfigText = readConfig();
-		if(tabTitle.equals("As text")) {
+        if("As text".equals(tabTitle)) {
 			//
 		} else {
 			updateLogConfigModel();
@@ -974,11 +970,7 @@ public class ConfigBean implements Serializable {
 				setSubProtocol(uri.getScheme());
 				setHost(uri.getHost());
 				int intPort = uri.getPort();
-				if (intPort == -1) {
-					port = "";
-				} else {
-					port = String.valueOf(intPort);
-				}
+                port = intPort == -1 ? "" : String.valueOf(intPort);
 				path = uri.getPath().replace("/", "");
 				query = uri.getQuery();
 			} catch (URISyntaxException e) {

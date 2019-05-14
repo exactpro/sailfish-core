@@ -15,18 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+
+import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 import com.exactpro.sf.services.ntg.NTGUtility;
 import com.exactpro.sf.util.DateTimeUtility;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 /**
  * Collection of matrix utilities for NTG protocol.
@@ -34,16 +36,16 @@ import java.time.temporal.TemporalUnit;
  *
  */
 @MatrixUtils
-@ResourceAliases({"NTGMatrixUtil"})
+@ResourceAliases("NTGMatrixUtil")
 public class NTGMatrixUtil extends AbstractCaller {
 
     private static final Logger logger = LoggerFactory.getLogger(NTGMatrixUtil.class);
 
     /**
-	 * Generate unique ClOrID for new order.
+	 * Generates a unique ClOrID for the new order.
 	 * @return
 	 */
-	@Description("Generate unique ClOrdID for new order<br>"
+	@Description("Generates a unique ClOrdID for the new order<br>"
 			+ " Example:"
 			+ "#{ShortClOrdID(\"test\")}<br>"
 			+ " will return:<br>"
@@ -53,16 +55,16 @@ public class NTGMatrixUtil extends AbstractCaller {
 			+ " will return:<br>"
 			+ "000000000000000002_xxxxx<br>")
 	@UtilityMethod
-	public final String ShortClOrdID(final String userKey)
+	public final String ShortClOrdID(String userKey)
 	{
         return NTGUtility.getNewShortClOrdID(userKey);
 	}
 
 	/**
-	 * Generate unique ClOrID for new order.
+	 * Generates a unique ClOrdID for the new order.
 	 * @return
 	 */
-	@Description("Generate unique ClOrdID for new order<br>"
+	@Description("Generates a unique ClOrdID for the new order<br>"
 			+ "Example:<br>"
 			+ "#{ClOrdID()}<br>"
 			+ "will return:<br>"
@@ -76,17 +78,17 @@ public class NTGMatrixUtil extends AbstractCaller {
 	}
 
 	/**
-	 * Generate unique ClOrID for new order.
+	 * Generates a unique ClOrID for the new order.
 	 * @param length
 	 * @return
 	 */
 	@Description(
-			"Generate unique ClOrID for new order.<br>"
+			"Generates a unique ClOrID for the new order.<br>"
 	)
 	@UtilityMethod
 	public final String ClOrdID(int length)
 	{
-		return String.valueOf(RandomStringUtils.random(length, "0123456789"));
+		return RandomStringUtils.random(length, "0123456789");
 	}
 
 	@Description("Generate TransactTime according specification.<br>" +
@@ -105,7 +107,7 @@ public class NTGMatrixUtil extends AbstractCaller {
         return NTGUtility.getTransactTime();
 	}
 
-	@Description("Transact Time - return time in GMT time zone<br>"
+	@Description("Transact Time - return time in the GMT time zone<br>"
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
             + "#{TransactTime(\"Y+2:M-6:D=4:h+1:m-2:s=39\")}<br>"
@@ -119,7 +121,7 @@ public class NTGMatrixUtil extends AbstractCaller {
         return DateUtil.modifyLocalDateTime(dateFormat);
 	}
 
-	@Description("Return current date in GMT time zone in format: yyyyMMdd hh:mm:ss.SSS<br>"
+	@Description("Returns the current date in the GMT time zone in the format: yyyyMMdd hh:mm:ss.SSS<br>"
 			+ "Example:<br>"
 			+ "#{EntryTime()}<br>"
 			+ "will return:<br>"
@@ -135,7 +137,7 @@ public class NTGMatrixUtil extends AbstractCaller {
 	 *
 	 * @return formatted date time one day apart from current
 	 */
-	@Description("Return expire date time one day in future from the current date.<br>"
+	@Description("Returns the expiry DateTime in the format: 'current date + 1 day'.<br>"
 			+ "Example:<br>"
 			+ "#{ExpireDateTime()}<br>"
 			+ "will return:<br>"
@@ -151,7 +153,7 @@ public class NTGMatrixUtil extends AbstractCaller {
 	 *
 	 * @return formatted date time
 	 */
-	@Description("Return expire date time.<br>"
+	@Description("Returns the expiry DateTime.<br>"
 			+  DateUtil.MODIFY_HELP)
 	@UtilityMethod
 	public final int ExpireDateTime(String dateFormat)
@@ -164,16 +166,16 @@ public class NTGMatrixUtil extends AbstractCaller {
      *
      * @return formatted date time
      */
-    @Description("Return expire date time.<br>"
+    @Description("Returns the expiry DateTime.<br>"
             + " Example:<br>"
             + " For the <b>25 Mar 2010, 08:00:00</b>"
             + " where input date parameter <b>#{getDate(\"Y+2:m-1:D=4\")}</b>"
             + " this method will return the following:<br>"
             + " 1330833600<br>"
             + " All fields are optional. If you do not specify any fields"
-            + " than current time will be returned."
-            + " All specified date modification operations will be applied"
-            + " in the same order as they present in input string.<br>")
+            + " then the current time will be returned."
+            + " All the specified date modification operations will be applied"
+            + " in the same order as they are presented in the input string.<br>")
     @UtilityMethod
     public final int ExpireDateTime(LocalDateTime date)
     {
@@ -185,8 +187,8 @@ public class NTGMatrixUtil extends AbstractCaller {
 	 *
 	 * @return formatted date time
 	 */
-	@Description("Return expire date time as specified in input values.<br>"
-			+ "Function parameters is year, month, day, hour, minute, second<br>"
+	@Description("Returns the expiry DateTime as specified in the input values.<br>"
+			+ "Function parameters are year, month, day, hour, minute, second<br>"
 			+ "Example:<br>"
 			+ "#{ExpireDateTime(2013,8,6,18,25,31)}<br>"
 			+ "will return:<br>"
@@ -212,9 +214,9 @@ public class NTGMatrixUtil extends AbstractCaller {
 	 * @throws Exception
 	 */
 	@Description("<b>Same as ExpireDateTimePOSIX</b><BR>"
-			+ " Return expire date in GMT time zone time according with input parameters.<br>"
-			+ " First parameter is one of the values:  SECOND , MINUTE, HOUR, DAY, MONTH, YEAR.<br>"
-			+ " Second parameter is integer amount of time. Absence of the sign sybmol is evaluated as positive number.<br>"
+			+ " Returns the expiry DateTime in the GMT time zone time according to the input parameters.<br>"
+			+ " The first parameter is one of the values: SECOND , MINUTE, HOUR, DAY, MONTH, YEAR.<br>"
+			+ " The second parameter is an integer amount of time. The absence of the sign symbol is evaluated as a positive number.<br>"
 			+ " Example:<br>"
 			+ " #{ExpireDateTime(\"MINUTE\", \"5\")}<br>"
 			+ " will return:<br>"
@@ -231,9 +233,9 @@ public class NTGMatrixUtil extends AbstractCaller {
 //		return dateTime;
 	}
 
-	@Description(" Return expire date time in GMT time zone according with input parameters.<br>"
-			+ " First parameter is one of the values:  SECOND , MINUTE, HOUR, DAY, MONTH, YEAR.<br>"
-			+ " Second parameter is integer amount of time. Absence of the sign sybmol is evaluated as positive number.<br>"
+	@Description(" Returns the expiry DateTime in the GMT time zone according to the input parameters.<br>"
+			+ " The first parameter is one of the values: SECOND , MINUTE, HOUR, DAY, MONTH, YEAR.<br>"
+			+ " The second parameter is an integer amount of time. The absence of the sign symbol is evaluated as a positive number.<br>"
 			+ " Example:<br>"
 			+ " #{ExpireDateTimePOSIX(\"MINUTE\", \"5\")}<br>"
 			+ " will return:<br>"
@@ -250,13 +252,13 @@ public class NTGMatrixUtil extends AbstractCaller {
 	
 	protected static long modifyDateTime(LocalDateTime localDateTime, String timeUnit, String value) throws Exception {
 
-		if(null == timeUnit || timeUnit.isEmpty())
+        if(timeUnit == null || timeUnit.isEmpty())
 		{
 			logger.error("datePart is empty. Return default expire date time value.");
             return System.currentTimeMillis();
 		}
 
-		if(null == value || value.isEmpty())
+        if(value == null || value.isEmpty())
 		{
 			logger.error("datePart is empty. Return default expire date time value.");
             return System.currentTimeMillis();
@@ -300,7 +302,7 @@ public class NTGMatrixUtil extends AbstractCaller {
 
         private final TemporalUnit temporalUnit;
 
-        private TimeUnit(TemporalUnit temporalUnit) {
+        TimeUnit(TemporalUnit temporalUnit) {
             this.temporalUnit = temporalUnit;
         }
 	}

@@ -40,8 +40,8 @@ public class TagsAdminBean implements Serializable {
 	private List<Tag> allTags; // without group
 	
 	private List<TagGroup> allGroups;
-	
-	private boolean editMode = false; // edit/add new 
+
+    private boolean editMode; // edit/add new
 	
 	private Tag selectedTag = new Tag();
 	
@@ -76,8 +76,8 @@ public class TagsAdminBean implements Serializable {
 	public void editTagSubmit() {
 		
 		try {
-			
-			if(this.editMode) {
+
+            if(editMode) {
 				
 				saveSelectedTag();
 				
@@ -104,8 +104,8 @@ public class TagsAdminBean implements Serializable {
 	public void editGroupSubmit() {
 		
 		try {
-			
-			if(this.editMode) {
+
+            if(editMode) {
 				
 				saveSelectedGroup();
 				

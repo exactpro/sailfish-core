@@ -58,7 +58,7 @@ public class DownloadBean implements Serializable {
 
 	private boolean upNotAvailable;
 
-	private boolean showHiddenFiles = false;
+    private boolean showHiddenFiles;
 	
     private String loadedPageOfFile;
 
@@ -95,43 +95,41 @@ public class DownloadBean implements Serializable {
 				FileAdapter adapter = new FileAdapter(
 						workspaceDispatcher.getFile(FolderType.ROOT, curDirPath, file),
 						curDirPath + File.separator + file);
-				this.files.add(adapter);
+                files.add(adapter);
 			} catch (FileNotFoundException | WorkspaceSecurityException e) {
 				// skip file
 				logger.info("Failed to get file from workspace", e );
 			}
 		}
-		Collections.sort(this.files, new FileNameComparator());
+        Collections.sort(files, new FileNameComparator());
 
 		if (!upNotAvailable) {
-			File currentDir = workspaceDispatcher.getFile(FolderType.ROOT, this.curDirPath);
+            File currentDir = workspaceDispatcher.getFile(FolderType.ROOT, curDirPath);
 			FileAdapter parent = new FileAdapter(
 					currentDir.getParentFile(),
 					new File(curDirPath).getParent());
 			parent.setName("..");
-			this.files.add(0, parent);
+            files.add(0, parent);
 		}
 	}
 
 	public StreamedContent getStrContent() {
 		logger.info("getStrContent invoked {}", getUser());
-		if (this.selectedFiles.length != 1)
-			return null; // Message?
-		if (this.selectedFiles[0].isDirectory())
-			return null; // Message?
+        if(selectedFiles.length != 1) {
+            return null; // Message?
+        }
+        if(selectedFiles[0].isDirectory()) {
+            return null; // Message?
+        }
 
-		StreamedContent content = this.selectedFiles[0].getStrContent();
-		if (content == null)
-			return null; // Message?
-
-		return content;
-	}
+        StreamedContent content = selectedFiles[0].getStrContent();
+        return content == null ? null : content;
+    }
 
 	public StreamedContent getZipContent() {
 		logger.info("getZipContent invoked {}", getUser());
-		StreamedContent content = null;
-		
-		try {
+
+        try {
 			
 			String absoluteWebPath = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/");
 			File zipFile = new File(absoluteWebPath, ZIP_NAME);
@@ -141,22 +139,22 @@ public class DownloadBean implements Serializable {
 			}
 		
 			AppZip appZip = new AppZip();
-			
-			for (FileAdapter fa : this.selectedFiles) {
+
+            for(FileAdapter fa : selectedFiles) {
 				appZip.generateFileList(fa.getFile());
 			}
 			
 			appZip.zipIt(zipFile.getAbsoluteFile().toString());
 			
 			FileInputStream in = new FileInputStream(zipFile);
-			
-			content = new DefaultStreamedContent(in, "application/zip", ZIP_NAME);
+
+            return new DefaultStreamedContent(in, "application/zip", ZIP_NAME);
 			
 		} catch (IOException e) {
 			logger.error("Zip Downloading Error", e.getMessage(), e);
 		}
-		
-		return content;
+
+        return null;
 	}
 	
 	public void postDownload() {
@@ -180,11 +178,11 @@ public class DownloadBean implements Serializable {
 	}
 
 	public List<FileAdapter> getFiles() {
-		return this.files;
+        return files;
 	}
 
 	public FileAdapter[] getSelectedFiles() {
-		return this.selectedFiles;
+        return selectedFiles;
 	}
 
 	public void setSelectedFiles(FileAdapter[] selectedFiles) {
@@ -194,14 +192,14 @@ public class DownloadBean implements Serializable {
 
 	public void getFolderSize() {
 		logger.info("getFolderSize invoked {}", getUser());
-		if (this.selectedFiles == null) {
+        if(selectedFiles == null) {
 			return;
 		}
 		for (FileAdapter fileAdapter : selectedFiles) {
 			if (fileAdapter.isDirectory()) {
-				int index = this.files.indexOf(fileAdapter);
+                int index = files.indexOf(fileAdapter);
 				if (index != -1) {
-					this.files.get(index).updateFolderSize();
+                    files.get(index).updateFolderSize();
 				} else {
 					logger.warn("Current directory {} does not contain subfolder {}", curDirPath, fileAdapter.getFile().getName());
 				}
@@ -211,10 +209,11 @@ public class DownloadBean implements Serializable {
 
 	public void toSelected() {
 		logger.info("toSelected invoked {}", getUser());
-		if (this.selectedFiles.length != 1 || !this.selectedFiles[0].isDirectory())
-			return;
+        if(selectedFiles.length != 1 || !selectedFiles[0].isDirectory()) {
+            return;
+        }
 
-        changeDirectory(this.selectedFiles[0].getRelativePath());
+        changeDirectory(selectedFiles[0].getRelativePath());
 	}
 
 	public void toTextFolder() {
@@ -228,11 +227,8 @@ public class DownloadBean implements Serializable {
 	}
 
 	public boolean isDownloadNotAvailable() {
-		if (selectedFiles.length != 1) {
-			return true; // only 1 file should be selected;
-		}
-		return selectedFiles[0].isDirectory();
-	}
+        return selectedFiles.length != 1 || selectedFiles[0].isDirectory(); // only 1 file should be selected;
+    }
 
 	public boolean isSizeBtnNotAvailable() {
 		if (selectedFiles == null) {
@@ -252,18 +248,15 @@ public class DownloadBean implements Serializable {
 	}
 
 	public boolean isOpenFolderNotAvailable() {
-		if (selectedFiles.length != 1) {
-			return true; // only 1 folder should be selected;
-		}
-		return !selectedFiles[0].isDirectory();
-	}
+        return selectedFiles.length != 1 || !selectedFiles[0].isDirectory(); // only 1 folder should be selected;
+    }
 
 	public boolean isUpNotAvailable() {
-		return this.upNotAvailable;
+        return upNotAvailable;
 	}
 
 	public boolean isShowHiddenFiles() {
-		return this.showHiddenFiles;
+        return showHiddenFiles;
 	}
 
 	public void setShowHiddenFiles(boolean showHiddenFiles) {
@@ -287,7 +280,7 @@ public class DownloadBean implements Serializable {
 				return false;
 			}
 			curDirPath = newPath;
-			upNotAvailable = newPath.equals(".");
+            upNotAvailable = ".".equals(newPath);
 			return true;
 		} catch (FileNotFoundException | WorkspaceSecurityException e) {
 			logger.error("Update current path to {} failed", newPath, e);
@@ -335,12 +328,7 @@ public class DownloadBean implements Serializable {
     }
 
     public void find(boolean reverse) {
-
-        if (reverse) {
-            loadPage("findBack");
-        } else {
-            loadPage("findNext");
-        }
+        loadPage(reverse ? "findBack" : "findNext");
     }
 
     private void loadPage(String command) {
@@ -429,8 +417,8 @@ public class DownloadBean implements Serializable {
     }
 
     public void setSearchPhrase(String searchPhrase) {
-        if (!searchPhrase.equals(this.searchPhrase) && this.pagedFileViewer != null) {
-            this.pagedFileViewer.setFindInCurrentPage(true);
+        if(!searchPhrase.equals(this.searchPhrase) && pagedFileViewer != null) {
+            pagedFileViewer.setFindInCurrentPage(true);
         }
         this.searchPhrase = searchPhrase;
     }

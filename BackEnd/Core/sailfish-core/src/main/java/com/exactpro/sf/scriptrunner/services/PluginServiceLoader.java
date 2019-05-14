@@ -1,7 +1,6 @@
 package com.exactpro.sf.scriptrunner.services;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.apache.commons.lang3.ArrayUtils.contains;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 import com.exactpro.sf.services.ServiceDescription;
@@ -59,25 +57,11 @@ public class PluginServiceLoader {
             throw new EPSCommonException("Failed to load service descriptions. Errors:" + System.lineSeparator() + String.join(System.lineSeparator(), errors));
         }
 
-        List<String> environments = connectionManager.getEnvironmentList();
-
         for(ServiceDescription description : descriptions) {
-            ServiceName serviceName = description.getServiceName();
-
-            if(contains(connectionManager.getServiceNames(), serviceName)) {
-                continue;
-            }
-
-            String environment = serviceName.getEnvironment();
-
-            if(!serviceName.isDefault() && !environments.contains(environment)) {
-                connectionManager.addEnvironment(environment, null);
-            }
-
             try {
-                connectionManager.addService(description, null).get();
+                connectionManager.addDefaultService(description, null);
             } catch(Throwable t) {
-                throw new EPSCommonException("Failed to add service: " + description.getServiceName(), t);
+                throw new EPSCommonException("Failed to add default service: " + description.getName(), t);
             }
         }
     }

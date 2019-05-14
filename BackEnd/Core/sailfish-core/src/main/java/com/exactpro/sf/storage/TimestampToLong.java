@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
 
 import org.hibernate.HibernateException;
@@ -41,7 +42,9 @@ public class TimestampToLong implements UserType, Serializable{
 
 	@Override
 	public Object deepCopy(Object obj) throws HibernateException {
-		if (obj == null) return null;
+        if(obj == null) {
+            return null;
+        }
 		Date orig = (Date) obj;
 		return new Timestamp(orig.getTime());
 	}
@@ -75,12 +78,8 @@ public class TimestampToLong implements UserType, Serializable{
 
 	@Override
 	public void nullSafeSet(PreparedStatement ps, Object value, int index, SessionImplementor s)
-			throws HibernateException, SQLException {		
-		 if (value == null)
-			 LongType.INSTANCE.set(ps, 0L, index, s);
-		 else
-			 LongType.INSTANCE.set(ps, ((Date) value).getTime(), index, s);
-
+            throws HibernateException, SQLException {
+        LongType.INSTANCE.set(ps, value == null ? 0L : ((Date)value).getTime(), index, s);
 	}
 
 	@Override
@@ -95,7 +94,7 @@ public class TimestampToLong implements UserType, Serializable{
 
 	@Override
 	public int[] sqlTypes() {
-		return new int[] { java.sql.Types.BIGINT };
+		return new int[] { Types.BIGINT };
 	}
 
 }

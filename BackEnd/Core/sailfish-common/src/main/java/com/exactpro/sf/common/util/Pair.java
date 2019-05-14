@@ -15,15 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.common.util;
 
-public class Pair<A extends Object, B extends Object> {
+public class Pair<A, B> {
 
 	private A first;
 	private B second;
 
 	public Pair(A first, B second)
 	{
-		this.setFirst(first);
-		this.setSecond(second);
+        setFirst(first);
+        setSecond(second);
 	}
 
 	public void setFirst(A first) {
@@ -46,9 +46,9 @@ public class Pair<A extends Object, B extends Object> {
 	public String toString()
 	{
 		StringBuilder sb = new StringBuilder();
-		sb.append(this.first);
+        sb.append(first);
 		sb.append("=");
-		sb.append(this.second);
+        sb.append(second);
 		return sb.toString();
 	}
 }

@@ -49,13 +49,13 @@ public class OutcomeCollector {
 	 * Clear outcome state
 	 */
 	public void clear() {
-		for (List<String> list : this.completed.values()) {
+        for(List<String> list : completed.values()) {
 			list.clear();
 		}
-		this.completed.clear();
-		this.groups.clear();
-		this.groupOrder.clear();
-		this.defined.clear();
+        completed.clear();
+        groups.clear();
+        groupOrder.clear();
+        defined.clear();
 	}
 
 	/**
@@ -66,11 +66,11 @@ public class OutcomeCollector {
 	 */
 	public void storeOutcome(Outcome outcome) {
 		logger.debug("storeOutcome: {}", outcome);
-		Group group = this.groups.get(outcome.getGroup());
+        Group group = groups.get(outcome.getGroup());
 		if (group == null) {
 			group = new Group();
-			this.groups.put(outcome.getGroup(), group);
-			this.groupOrder.add(outcome.getGroup());
+            groups.put(outcome.getGroup(), group);
+            groupOrder.add(outcome.getGroup());
 		}
 
 		if (outcome.getStatus() == Status.PASSED) {
@@ -96,7 +96,7 @@ public class OutcomeCollector {
 	 *  {@code true} if Outcome completed and all verifications are passed.
 	 */
     public Status getOutcomeStatus(String group, String name) {
-		Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
 		if (grp == null) {
 			logger.debug("getOutcomeStatus: {}:{} grp {} not started", group, name, group);
             return Status.PASSED;
@@ -117,7 +117,7 @@ public class OutcomeCollector {
 	}
 
     public Status getGroupStatus(String group) {
-		Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
 		if (grp == null) {
 			logger.error("getGroupStatus: group {} not exist", group);
 			throw new EPSCommonException("getGroupStatus: group \""+group+"\" not exist");
@@ -134,42 +134,33 @@ public class OutcomeCollector {
 
 	public int getPassedCount(String group, String name)
 	{
-		Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
 		if (grp == null) {
 			return 0;
 		}
 
 		Integer cnt = grp.passed.get(name);
-		if (cnt == null) {
-			cnt = 0;
-		}
-		return cnt;
-	}
+        return cnt == null ? 0 : cnt;
+    }
 
     public int getConditionallyPassedCount(String group, String name) {
-        Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
         if (grp == null) {
             return 0;
         }
 
         Integer cnt = grp.conditionallyPassed.get(name);
-        if (cnt == null) {
-            cnt = 0;
-        }
-        return cnt;
+        return cnt == null ? 0 : cnt;
     }
 
     public int getFailedCount(String group, String name) {
-        Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
         if (grp == null) {
             return 0;
         }
 
         Integer cnt = grp.failedCounter.get(name);
-        if (cnt == null) {
-            cnt = 0;
-        }
-        return cnt;
+        return cnt == null ? 0 : cnt;
     }
 
 	/**
@@ -177,11 +168,11 @@ public class OutcomeCollector {
 	 * @return all completed outcomes
 	 */
 	public Map<String, List<String>> getOutcomes() {
-		return this.completed;
+        return completed;
 	}
 
 	public List<String> getGroupOrder() {
-		return this.groupOrder;
+        return groupOrder;
 	}
 
 	/**
@@ -189,7 +180,7 @@ public class OutcomeCollector {
 	 * @return all possible outcomes
 	 */
 	public Map<String, Set<String>> getDefinedOutcomes() {
-		return this.defined;
+        return defined;
 	}
 
 	/**
@@ -199,7 +190,7 @@ public class OutcomeCollector {
 	 */
 	public void onOutcomeComplete(String group, String name)
 	{
-		Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
 		if (grp == null) {
 			throw new NullPointerException("Group="+group+", name="+name);
 		}
@@ -213,7 +204,7 @@ public class OutcomeCollector {
 		}
 		logger.debug("onOutcomeComplete: {}:{} groupPassed: {} groupConditionallyPassed: {}", group, name, grp.groupPassed, grp.groupConditionallyPassed);
 
-		Set<String> set = this.defined.computeIfAbsent(group, k -> new HashSet<>());
+        Set<String> set = defined.computeIfAbsent(group, k -> new HashSet<>());
 		set.add(name);
 	}
 
@@ -224,7 +215,7 @@ public class OutcomeCollector {
 	 */
     public void onGroupComplete(String group)
 	{
-		Group grp = this.groups.get(group);
+        Group grp = groups.get(group);
 		if (grp == null) {
 			throw new NullPointerException("Group is null: "+group);
 		}
@@ -233,7 +224,7 @@ public class OutcomeCollector {
 			grp.name = "Unexpected";
 		}
 
-		List<String> list = this.completed.computeIfAbsent(group, k -> new LinkedList<>());
+        List<String> list = completed.computeIfAbsent(group, k -> new LinkedList<>());
 
 		list.add(grp.name);
 
@@ -265,17 +256,17 @@ public class OutcomeCollector {
 		/**
 		 * Set when first result of outcome is PASSED or all possible variants are FAILED
 		 */
-		boolean groupPassed = false;
+        boolean groupPassed;
         /**
          * Set when first result of outcome is CONDITIONALLY PASSED or all
          * possible variants are FAILED
          */
-        boolean groupConditionallyPassed = false;
+        boolean groupConditionallyPassed;
 	}
 
     class Counter
 	{
-		private Map<String, Integer> counter = new HashMap<>();
+        private final Map<String, Integer> counter = new HashMap<>();
 
 		public void add(String name) {
 			Integer cnt = counter.get(name);
@@ -290,7 +281,7 @@ public class OutcomeCollector {
 		}
 
 		public int getCount() {
-			return this.counter.size();
+            return counter.size();
 		}
 	}
 }

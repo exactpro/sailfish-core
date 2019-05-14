@@ -39,8 +39,9 @@ public class AbstractPersistentObject implements PersistentObject {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
-			return true;
+        if(this == o) {
+            return true;
+        }
 		if (o == null || !(o instanceof PersistentObject)) {
 
 			return false;
@@ -48,25 +49,17 @@ public class AbstractPersistentObject implements PersistentObject {
 
 		PersistentObject other = (PersistentObject) o;
 
-		// if the id is missing, return false
-		if (id == null)
-			return false;
-
-		// equivalence by id
-		return id.equals(other.getId());
-	}
+        return id != null && id.equals(other.getId());
+    }
 
 	@Override
 	public int hashCode() {
-		if (id != null) {
-			return id.hashCode();
-		}
-		return super.hashCode();
-	}
+        return id != null ? id.hashCode() : super.hashCode();
+    }
 
 	@Override
 	public String toString() {
-		return this.getClass().getName() + "[id=" + id + "]";
+        return getClass().getName() + "[id=" + id + "]";
 	}
 
 }

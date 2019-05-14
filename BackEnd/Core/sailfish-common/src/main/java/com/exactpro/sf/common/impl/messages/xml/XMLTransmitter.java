@@ -42,6 +42,8 @@ import javax.xml.validation.SchemaFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.format.DateTimeFormatter;
+
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -49,9 +51,9 @@ import com.exactpro.sf.util.DateTimeUtility;
 
 public class XMLTransmitter {
 
-	private static Logger logger = LoggerFactory.getLogger(XMLTransmitter.class);
+	private static final Logger logger = LoggerFactory.getLogger(XMLTransmitter.class);
 
-	private static XMLTransmitter instance = new XMLTransmitter();
+	private static final XMLTransmitter instance = new XMLTransmitter();
 
 	private final Map<Package, JAXBContext> contexts = new HashMap<>();
 
@@ -61,7 +63,7 @@ public class XMLTransmitter {
 		JAXBContext context;
 		Package pack = tclass.getPackage();
 		if(contexts.containsKey(pack)){
-			context = contexts.get(pack);
+            return contexts.get(pack);
 		}else{
 			context = JAXBContext.newInstance(pack.getName());
 			contexts.put(pack, context);
@@ -75,7 +77,7 @@ public class XMLTransmitter {
 		public boolean handleEvent(ValidationEvent ve) {
 			String msg = ve.getMessage();
 			ValidationEventLocator vel = ve.getLocator();
-			org.w3c.dom.Node  node = vel.getNode();
+			Node  node = vel.getNode();
 
 			String name = node!=null?node.getLocalName():"null";
 			logger.error(  "node  : {}.{}: {}", name, vel.getOffset(), msg );

@@ -31,9 +31,9 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 
 class DataMessageReaderVisitor implements IMessageStructureVisitor {
 
-	private DataMessage dataMessage;
-	private IMessage mapMessage;
-	private static MessageStructureWriter wtraverser = new MessageStructureWriter();
+	private final DataMessage dataMessage;
+	private final IMessage mapMessage;
+	private static final MessageStructureWriter wtraverser = new MessageStructureWriter();
 
 	public DataMessageReaderVisitor(DataMessage dataMessage, IMessage mapMessage) {
 		this.dataMessage = dataMessage;

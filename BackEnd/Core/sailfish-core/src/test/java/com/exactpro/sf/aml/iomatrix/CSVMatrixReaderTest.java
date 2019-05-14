@@ -15,7 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.iomatrix;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.fail;
 
 import java.io.FileInputStream;
 import java.util.Arrays;
@@ -130,7 +131,7 @@ public class CSVMatrixReaderTest {
     public void testReadFromNoMarkSupportInputStream() {
         try (CSVMatrixReader reader = new CSVMatrixReader(
                 new FileInputStream("src/test/resources/aml/iomatrix/testcsv.csv"))) {
-            String[] expectedCells = new String[]{"1494574053", "1000199004", "975277106", "-900841273", "-1205771794",
+            String[] expectedCells = { "1494574053", "1000199004", "975277106", "-900841273", "-1205771794",
                     "-436980907","-544962948","-1060190917","1082171287","284431925"};
             String[] actualCells = reader.read();
             assertArrayEquals("Wrong reading line", expectedCells, actualCells);

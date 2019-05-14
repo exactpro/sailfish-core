@@ -40,7 +40,7 @@ public class CSHArrayList<E> extends ArrayList<E> {
 	}
 
 	public void addCheckPoint(CheckPoint checkPoint) {
-	    putCheckPoint(checkPoint, super.size());
+        putCheckPoint(checkPoint, size());
 	}
 
 	protected void putCheckPoint(CheckPoint checkPoint, int index) {
@@ -53,13 +53,8 @@ public class CSHArrayList<E> extends ArrayList<E> {
     }
 
     public List<E> subList(int fromIndex) {
-        int size = super.size();
-
-        if(fromIndex < size) {
-            return new ArrayList<>(super.subList(fromIndex, size));
-        }
-
-        return new ArrayList<>();
+        int size = size();
+        return fromIndex < size ? new ArrayList<>(subList(fromIndex, size)) : new ArrayList<>();
     }
 
 	public long getID() {

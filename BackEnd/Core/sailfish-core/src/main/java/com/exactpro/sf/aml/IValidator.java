@@ -22,7 +22,7 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 
 public interface IValidator
 {
-	public boolean validate(AMLMatrix matrix, IActionManager actionManager, SailfishURI language, AlertCollector alertCollector) throws AMLException;
+	boolean validate(AMLMatrix matrix, IActionManager actionManager, SailfishURI language, AlertCollector alertCollector) throws AMLException;
 
-	public String getName();
+	String getName();
 }

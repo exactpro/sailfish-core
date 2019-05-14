@@ -18,17 +18,15 @@ package com.exactpro.sf;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.exactpro.sf.Service.Status;
+
 public class ServiceImportResult {
 	
 	private String serviceName;
 	private String problem;
-	private Service.Status status;
-	
-	public ServiceImportResult() {
-		
-	}
+	private Status status;
 
-	public String getServiceName() {
+    public String getServiceName() {
 		return serviceName;
 	}
 
@@ -44,11 +42,11 @@ public class ServiceImportResult {
 		this.problem = problem;
 	}
 
-	public Service.Status getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
-	protected void setStatus(Service.Status status) {
+	protected void setStatus(Status status) {
 		this.status = status;
 	}
 	
@@ -59,7 +57,7 @@ public class ServiceImportResult {
 		ServiceImportResult res = new ServiceImportResult();
 		
 		res.serviceName = Util.getTextContent(el, "name");
-		res.status = Enum.valueOf(Service.Status.class, Util.getTextContent(el, "status"));
+		res.status = Enum.valueOf(Status.class, Util.getTextContent(el, "status"));
 		if (el.getElementsByTagName("problem").getLength() > 0) {
 			res.problem = Util.getTextContent(el, "problem");
 		}

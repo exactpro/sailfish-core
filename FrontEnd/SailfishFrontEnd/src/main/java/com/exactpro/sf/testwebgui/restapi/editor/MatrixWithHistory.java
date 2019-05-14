@@ -36,11 +36,10 @@ public class MatrixWithHistory extends DefaultMatrix {
 	private static class MatrixWithHistoryEntry implements Serializable {
 		private AMLMatrix matrix;
 		private Collection<Alert> errors;
-		private boolean commited = false;
+        private boolean commited;
 
 		MatrixWithHistoryEntry(AMLMatrix matrix, Collection<Alert> errors) {
-			super();
-			this.matrix = matrix;
+            this.matrix = matrix;
 			this.errors = errors;
 		}
 
@@ -57,8 +56,9 @@ public class MatrixWithHistory extends DefaultMatrix {
 		}
 
 		void commit(AMLMatrix matrix, Collection<Alert> errors) {
-			if (commited)
-				throw new IllegalStateException("This snapshot had been already commited");
+            if(commited) {
+                throw new IllegalStateException("This snapshot had been already commited");
+            }
 
 			// unmodifiable collections to prevent bugs
 			this.matrix = matrix;
@@ -67,12 +67,12 @@ public class MatrixWithHistory extends DefaultMatrix {
 		}
 
 		void commit() {
-			this.commit(this.matrix, this.errors);
+            commit(matrix, errors);
 		}
 
 	}
 
-	private LinkedList<MatrixWithHistoryEntry> history = new LinkedList<MatrixWithHistoryEntry>();
+    private final LinkedList<MatrixWithHistoryEntry> history = new LinkedList<MatrixWithHistoryEntry>();
 	private int position = -1;
 
 	public MatrixWithHistory(Long id, String name, String description, SailfishURI languageURI, String filePath, Date date) {
@@ -99,8 +99,9 @@ public class MatrixWithHistory extends DefaultMatrix {
 		}
 
 		history.remove(position);
-		if (position != 0)
-			position--;
+        if(position != 0) {
+            position--;
+        }
 
 		rollbackIfUncommited();
 		return true;

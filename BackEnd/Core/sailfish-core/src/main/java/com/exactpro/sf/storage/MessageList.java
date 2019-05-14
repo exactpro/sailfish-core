@@ -62,7 +62,7 @@ public class MessageList extends FileBackedList<FileMessage> {
 
         @Override
         public void serialize(FileMessage object, File output) throws Exception {
-            this.fileSerializer.serialize(object, output);
+            fileSerializer.serialize(object, output);
             output.setLastModified(object.getTimestamp().getTime());
         }
 
@@ -73,7 +73,7 @@ public class MessageList extends FileBackedList<FileMessage> {
 
         @Override
         public FileMessage deserialize(File input) throws Exception {
-            return new FileMessage(this.fileSerializer, input);
+            return new FileMessage(fileSerializer, input);
         }
     }
 }

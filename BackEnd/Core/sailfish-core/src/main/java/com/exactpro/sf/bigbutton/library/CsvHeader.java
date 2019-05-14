@@ -44,7 +44,7 @@ public enum CsvHeader {
 
 	private final String fieldKey;
 
-	private CsvHeader(String fieldKey) {
+	CsvHeader(String fieldKey) {
 		this.fieldKey = fieldKey;
 	}
 

@@ -31,9 +31,9 @@ import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 
 public class TestPrototypeDictionaryValidator {
 
-    private final static String PROTOTYPE_DICTIONARY = Paths.get("dictionaries","prototypeDictionary.xml").toString();
-    private final static String VALID_DICTIONARY = Paths.get("dictionaries", "validDictionary.xml").toString();
-    private final static String INVALID_DICTIONARY = Paths.get("dictionaries", "invalidDictionary.xml").toString();
+    private static final String PROTOTYPE_DICTIONARY = Paths.get("dictionaries", "prototypeDictionary.xml").toString();
+    private static final String VALID_DICTIONARY = Paths.get("dictionaries", "validDictionary.xml").toString();
+    private static final String INVALID_DICTIONARY = Paths.get("dictionaries", "invalidDictionary.xml").toString();
 
     private static IDictionaryValidator prototypeValidator;
     private static IDictionaryStructure validDictionary;
@@ -50,7 +50,7 @@ public class TestPrototypeDictionaryValidator {
     @Test
     public void testInvalid() {
         List<DictionaryValidationError> errors = prototypeValidator.validate(invalidDictionary, true, null);
-        String[] expectedErrors = new String[] {
+        String[] expectedErrors = {
                 "DictionaryValidationError[message=<null>,field=EnumNumber,error=Value <strong>SECOND</strong> was missed,level=FIELD,type=ERR_VALUES]",
                 "DictionaryValidationError[message=<null>,field=EnumNumber,error=Value <strong>THIRD</strong> should be <strong>3</strong> but was <strong>4</strong>,level=FIELD,type=ERR_VALUES]",
                 "DictionaryValidationError[message=SecondMessage,field=ComplexField,error=<strong>JavaType</strong> should be <strong>null</strong> but was <strong>JAVA_LANG_INTEGER</strong>,level=FIELD,type=ERR_FIELD_TYPE]",
@@ -83,7 +83,9 @@ public class TestPrototypeDictionaryValidator {
                 "DictionaryValidationError[message=ThirdMessage,field=<null>,error=Missed required message ThirdMessage,level=DICTIONARY,type=ERR_REQUIRED_FIELD]"
         };
         if (expectedErrors.length != errors.size()) {
-            errors.forEach(System.out::println);
+            for(DictionaryValidationError error : errors) {
+                System.out.println(error);
+            }
         }
         Assert.assertEquals("Some unexpected errors", expectedErrors.length, errors.size());
 

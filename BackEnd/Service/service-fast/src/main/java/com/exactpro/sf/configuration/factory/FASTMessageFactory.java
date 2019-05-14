@@ -22,7 +22,7 @@ import com.exactpro.sf.services.fast.FASTMessageHelper;
 import com.google.common.collect.ImmutableSet;
 
 public class FASTMessageFactory extends AbstractMessageFactory {
-    public final static Set<String> UNCHECKED_FIELDS = ImmutableSet.of(
+    public static final Set<String> UNCHECKED_FIELDS = ImmutableSet.of(
         "SendingTime",
         FASTMessageHelper.TEMPLATE_ID_FIELD,
         FASTMessageHelper.MESSAGE_TYPE_FIELD

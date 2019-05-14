@@ -163,6 +163,4 @@ public class ReportRoot {
         this.reportProperties = reportProperties;
     }
 
-    public ReportRoot() {
-    }
 }

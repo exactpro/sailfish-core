@@ -54,7 +54,7 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
             throw new EPSCommonException(
                     "Alternative " + alternativeList + " with description " + bugDescription + " are equal to origin " + originList);
         }
-        if (this.alternativeSizes.put(alternativeList.size, alternativeList) != null) {
+        if(alternativeSizes.put(alternativeList.size, alternativeList) != null) {
             throw new EPSCommonException("Alternative sizes map already contains " + alternativeList);
         }
         return this;
@@ -62,8 +62,8 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
 
     @Override
     public BugsListCheckerBuilder BugAny(String subject, String... categories) {
-        if (this.originList.size != MISSED_LIST_SIZE.key) {
-            throw new EPSCommonException("Expected size '" + this.originList + "' is not empty");
+        if(originList.size != MISSED_LIST_SIZE.key) {
+            throw new EPSCommonException("Expected size '" + originList + "' is not empty");
         }
         return Bug(subject, Convention.CONV_PRESENT_OBJECT, categories);
     }
@@ -80,8 +80,8 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
     public ExpressionResult validate(Object actualValue) throws KnownBugException {
         int actualSize = this.actualSize != DEFAULT_LIST.key ? this.actualSize : size(actualValue);
 
-        if (this.originList.size == PRESENT_LIST_SIZE.key && actualSize != MISSED_LIST_SIZE.key) {
-            return new ExpressionResult(false, this.originList.list, ORIGIN_SIZE_MESSAGE, null, null, getDescriptions());
+        if(originList.size == PRESENT_LIST_SIZE.key && actualSize != MISSED_LIST_SIZE.key) {
+            return new ExpressionResult(false, originList.list, ORIGIN_SIZE_MESSAGE, null, null, getDescriptions());
         }
 
         if (originList.size != actualSize) {
@@ -98,13 +98,13 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
             Throwable exception = new EPSCommonException("Expected " + originList + " value is not equal actual " + formatSize(actualSize) + " value");
             return new ExpressionResult(false, exception.getMessage(), exception, null, getDescriptions());
         }
-        return new ExpressionResult(false, this.originList.list, ORIGIN_SIZE_MESSAGE, null, null, getDescriptions());
+        return new ExpressionResult(false, originList.list, ORIGIN_SIZE_MESSAGE, null, null, getDescriptions());
     }
 
     @Override
     public String getCondition() {
         StringBuilder stringBuilder = new StringBuilder()
-                .append("Expected: ").append(this.originList).append(", Bugs: [");
+                .append("Expected: ").append(originList).append(", Bugs: [");
         for (Integer alternativeSize : alternativeSizes.keySet()) {
             stringBuilder
                     .append("'").append(alternativeSizes.get(alternativeSize).description).append("'")
@@ -129,7 +129,7 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
     }
 
     private Set<BugDescription> getDescriptions() {
-        return this.alternativeSizes.values().stream()
+        return alternativeSizes.values().stream()
                 .map(ListWrapper::getDescription)
                 .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
     }
@@ -140,8 +140,8 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
     }
 
     private boolean isActualEmpty() {
-        if (this.actualSize != DEFAULT_LIST.key) {
-            throw new EPSCommonException("Actual already set '" + formatSize(this.actualSize) + "'");
+        if(actualSize != DEFAULT_LIST.key) {
+            throw new EPSCommonException("Actual already set '" + formatSize(actualSize) + "'");
         }
 
         return true;
@@ -238,20 +238,20 @@ public class BugsListCheckerBuilder extends AbstractBugsChecker {
 
             ListWrapper that = (ListWrapper) o;
             return new EqualsBuilder()
-                    .append(this.size, that.size)
+                    .append(size, that.size)
                     .isEquals();
         }
 
         @Override
         public int hashCode() {
             return new HashCodeBuilder()
-                    .append(this.size)
+                    .append(size)
                     .toHashCode();
         }
 
         @Override
         public String toString() {
-            return formatSize(this.size);
+            return formatSize(size);
         }
     }
 }

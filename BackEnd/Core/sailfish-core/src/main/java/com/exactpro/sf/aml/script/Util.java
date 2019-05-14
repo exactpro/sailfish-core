@@ -22,7 +22,7 @@ package com.exactpro.sf.aml.script;
  */
 public class Util {
 
-	public final static String EOL = System.getProperty("line.separator");
+    public static final String EOL = System.getProperty("line.separator");
 
 	private Util()
 	{
@@ -36,7 +36,7 @@ public class Util {
 	 * @return converted object
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends Object> T cast(Object o)
+	public static <T> T cast(Object o)
 	{
 		return (T)o;
 	}

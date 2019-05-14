@@ -34,7 +34,7 @@ public class ReportTable {
     private final List<String> header;
     private final List<Map<String, String>> rows = new ArrayList<>();
 
-    private boolean hasCheckPoints = false;
+    private boolean hasCheckPoints;
 
     public ReportTable(String name, List<String> header) {
         if(StringUtils.isBlank(name)) {

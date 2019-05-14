@@ -47,21 +47,15 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
             Map<String, ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes,
 			boolean isRequired, boolean isCollection, ModifiableMessageStructure reference) {
 		super(id, name, namespace, description, attributes, null, null, isRequired, isCollection, false, null);
-
-		if (fields != null) {
-            this.fields = ListOrderedMap.listOrderedMap(fields);
-		} else {
-            this.fields = new ListOrderedMap<>();
-		}
-
+        this.fields = fields != null ? ListOrderedMap.listOrderedMap(fields) : new ListOrderedMap<>();
 		this.reference = reference;
 	}
 
     @SuppressWarnings("unchecked")
 	@Override
     public Map<String, IFieldStructure> getFields() {
-		if (this.reference != null) {
-			return ((ModifiableMessageStructure)this.reference).getFields();
+        if(reference != null) {
+            return ((ModifiableMessageStructure)reference).getFields();
 		}
 
         return (Map<String, IFieldStructure>)(Map<String, ?>)fields;
@@ -104,7 +98,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public boolean isRequired() {
-		if (this.reference != null) {
+        if(reference != null) {
 			return super.isRequired();
 		}
 
@@ -143,7 +137,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     
 	@Override
 	public void setRequired(boolean req) {
-		if (this.reference != null) {
+        if(reference != null) {
 			super.setRequired(req);
 			return;
 		}
@@ -153,7 +147,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public boolean isCollection() {
-		if (this.reference != null) {
+        if(reference != null) {
 			return super.isCollection();
 		}
 
@@ -162,7 +156,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public void setCollection(boolean col) {
-		if (this.reference != null) {
+        if(reference != null) {
 			super.setCollection(col);
 			return;
 		}
@@ -198,15 +192,15 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 	/** IMPL **/
 
 	public void addField(ModifiableFieldStructure field) {
-        this.fields.put(field.getName(), field);
+        fields.put(field.getName(), field);
 	}
 
     public void addField(int index, ModifiableFieldStructure field) {
-        this.fields.put(index, field.getName(), field);
+        fields.put(index, field.getName(), field);
     }
 
 	public void removeField(ModifiableFieldStructure field) {
-        this.fields.remove(field.getName());
+        fields.remove(field.getName());
     }
 
     public ListOrderedMap<String, ModifiableFieldStructure> getImplFields() {

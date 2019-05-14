@@ -77,11 +77,11 @@ public class ModifiableFieldStructure implements IFieldStructure {
 	}
 
 	public boolean isMessage() {
-		return isComplex() && this.reference == null;
+        return isComplex() && reference == null;
 	}
 
 	public boolean isSubMessage() {
-		return isComplex() && this.reference != null;
+        return isComplex() && reference != null;
 	}
 
 	@Override
@@ -108,12 +108,12 @@ public class ModifiableFieldStructure implements IFieldStructure {
 
 	@Override
 	public Map<String, IAttributeStructure> getAttributes() {
-        return getAttributeMapping(this.attributes, parent -> true, IFieldStructure::getAttributes);
+        return getAttributeMapping(attributes, parent -> true, IFieldStructure::getAttributes);
 	}
 
 	@Override
 	public Map<String, IAttributeStructure> getValues() {
-        return getAttributeMapping(this.values, IFieldStructure::isEnum, IFieldStructure::getValues);
+        return getAttributeMapping(values, IFieldStructure::isEnum, IFieldStructure::getValues);
 	}
 
 	@Override
@@ -123,11 +123,8 @@ public class ModifiableFieldStructure implements IFieldStructure {
 
 	@Override
 	public JavaType getJavaType() {
-        if (javaType == null && this.reference != null) {
-            return getImplReference().getJavaType();
-        }
-		return javaType;
-	}
+        return javaType == null && reference != null ? getImplReference().getJavaType() : javaType;
+    }
 
 	@Override
 	public boolean isRequired() {
@@ -167,11 +164,11 @@ public class ModifiableFieldStructure implements IFieldStructure {
 	/** IMPL **/
 
     public boolean isImplEnum() {
-        return !this.values.isEmpty();
+        return !values.isEmpty();
     }
 	
     public boolean isImplSimple() {
-        return this.values.isEmpty();
+        return values.isEmpty();
     }
     
     public JavaType getImplJavaType() {
@@ -195,11 +192,11 @@ public class ModifiableFieldStructure implements IFieldStructure {
     }
 	
 	public void addAttribute(ModifiableAttributeStructure attr) {
-		this.attributes.put(attr.getName(), attr);
+        attributes.put(attr.getName(), attr);
 	}
 
 	public void addValue(ModifiableAttributeStructure val) {
-		this.values.put(val.getName(), val);
+        values.put(val.getName(), val);
 	}
 
 	public void addAttributes(List<ModifiableAttributeStructure> attrs) {
@@ -207,7 +204,7 @@ public class ModifiableFieldStructure implements IFieldStructure {
 		for (ModifiableAttributeStructure attr : attrs) {
 			toAdd.put(attr.getName(), attr);
 		}
-		this.attributes.putAll(toAdd);
+        attributes.putAll(toAdd);
 	}
 
 	public void addValues(List<ModifiableAttributeStructure> vals) {
@@ -215,24 +212,28 @@ public class ModifiableFieldStructure implements IFieldStructure {
 		for (ModifiableAttributeStructure val : vals) {
 			toAdd.put(val.getName(), val);
 		}
-		this.attributes.putAll(toAdd);
+        attributes.putAll(toAdd);
 	}
 
 	public void removeAttribute(String name) {
-		this.attributes.remove(name);
+        attributes.remove(name);
 	}
 
 	public void removeValue(String name) {
-		this.values.remove(name);
+        values.remove(name);
 	}
 
 	public void setAttributes(Map<String, ModifiableAttributeStructure> attributes) {
-		if (attributes == null) return;
+        if(attributes == null) {
+            return;
+        }
 		this.attributes = attributes;
 	}
 
 	public void setValues(Map<String, ModifiableAttributeStructure> values) {
-		if (values == null) return;
+        if(values == null) {
+            return;
+        }
 		this.values = values;
 	}
 
@@ -257,11 +258,11 @@ public class ModifiableFieldStructure implements IFieldStructure {
 	}
 
 	public Object getReference() {
-		return this.reference;
+        return reference;
 	}
 
 	public ModifiableFieldStructure getImplReference() {
-		return (ModifiableFieldStructure)this.reference;
+        return (ModifiableFieldStructure)reference;
 	}
 
 	public void setReference(Object reference) {
@@ -285,7 +286,7 @@ public class ModifiableFieldStructure implements IFieldStructure {
     }
 
     public String getImplDefaultValue() {
-		return this.defaultValue;
+        return defaultValue;
 	}
 
 	public void setDefaultValue(String defaultValue) {

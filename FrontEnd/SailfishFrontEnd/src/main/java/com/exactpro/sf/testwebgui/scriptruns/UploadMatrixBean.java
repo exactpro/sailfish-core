@@ -193,13 +193,13 @@ public class UploadMatrixBean implements Serializable {
 
     public void addWrapperForLinkedMatrix() {
 
-        this.wrappers.add(0, new MatrixWrapper(MatrixType.TYPE_LINKED, defaultProviderURI));
+        wrappers.add(0, new MatrixWrapper(MatrixType.TYPE_LINKED, defaultProviderURI));
     }
 
     public void reloadMatrixByLink() {
-        logger.info("Reload started for matrix with [{}] id", this.matrixId);
+        logger.info("Reload started for matrix with [{}] id", matrixId);
 
-        IMatrix matrix = BeanUtil.getMatrixHolder().getMatrixById(this.matrixId);
+        IMatrix matrix = BeanUtil.getMatrixHolder().getMatrixById(matrixId);
 
         if(matrix == null) {
             BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Matrix not found", "");
@@ -223,15 +223,14 @@ public class UploadMatrixBean implements Serializable {
     }
 
     public String getWarningValue(int index) {
-        String message = "";
         SailfishURI providerURI = wrappers.get(index).getProviderURI();
         if (providerURI != null) {
             IMatrixProviderFactory factory = getMatrixProviderHolder().getMatrixProviderFactory(providerURI);
             if (factory != null) {
-                message = factory.getNotes();
+                return factory.getNotes();
             }
         }
-        return message;
+        return "";
     }
 
     public TestScriptsBean getTestScriptsBean() {

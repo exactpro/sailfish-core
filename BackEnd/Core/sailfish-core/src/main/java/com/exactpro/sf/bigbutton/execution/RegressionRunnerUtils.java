@@ -37,7 +37,7 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticsDBSettings;
 
 public class RegressionRunnerUtils {
 
-    private final static Logger logger = LoggerFactory.getLogger(RegressionRunnerUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(RegressionRunnerUtils.class);
 
     private RegressionRunnerUtils() {
 
@@ -51,12 +51,7 @@ public class RegressionRunnerUtils {
 
         int result = (int) ((actual * 100.0f) / total);
 
-        if (result > 100) {
-            return 100;
-        }
-
-        return result;
-
+            return result > 100 ? 100 : result;
     }
 
     public static String createErrorText(Throwable t) {
@@ -80,7 +75,7 @@ public class RegressionRunnerUtils {
         dbSettings.setConnectionOptionsQuery(settings.getStorageSettings().getConnectionOptionsQuery());
         dbSettings.setUsername(settings.getStorageSettings().getUsername());
         dbSettings.setPassword(settings.getStorageSettings().getPassword());
-        final StringBuilder xml = new StringBuilder();
+        StringBuilder xml = new StringBuilder();
         try {
             JAXBContext.newInstance(XmlStatisticsDBSettings.class).createMarshaller().marshal(dbSettings, new OutputStream() {
                 @Override

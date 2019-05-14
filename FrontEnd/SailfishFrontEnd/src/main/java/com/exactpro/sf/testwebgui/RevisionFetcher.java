@@ -22,39 +22,42 @@ import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 public class RevisionFetcher {
 	private String ttRevision;
 	private String cmnRevision;
-	private String guiRevision;
-	
-	private String totalVersion;
+    private final String guiRevision;
+
+    private final String totalVersion;
 	
 	public RevisionFetcher(String guiRevision) {
 		this.ttRevision = AbstractScriptRunner.class.getPackage().getImplementationVersion();
 		this.cmnRevision = IMessage.class.getPackage().getImplementationVersion();		
 		//this.guiRevision = SFWebApplication.class.getPackage().getImplementationVersion();
-		this.guiRevision = guiRevision;		
-		
-		if(ttRevision == null)
-			ttRevision ="";
-		if(cmnRevision == null)
-			cmnRevision ="";
-		if(guiRevision == null)
-			guiRevision ="";
+        this.guiRevision = guiRevision;
+
+        if(ttRevision == null) {
+            ttRevision = "";
+        }
+        if(cmnRevision == null) {
+            cmnRevision = "";
+        }
+        if(guiRevision == null) {
+            guiRevision = "";
+        }
 		
 		this.totalVersion = StringUtil.maximumString(guiRevision, cmnRevision);
 	}
 	
 	public String getTestToolsRev() {
-		return this.ttRevision;
+        return ttRevision;
 	}
 	
 	public String getCommonRev() {
-		return this.cmnRevision;
+        return cmnRevision;
 	}
 	
 	public String getGUIRev() {
-		return this.guiRevision;
+        return guiRevision;
 	}
 	
 	public String getTotalRev() {
-		return this.totalVersion;
+        return totalVersion;
 	}
 }

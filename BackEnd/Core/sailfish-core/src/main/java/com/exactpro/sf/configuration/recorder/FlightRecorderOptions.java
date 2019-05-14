@@ -18,6 +18,7 @@ package com.exactpro.sf.configuration.recorder;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -32,7 +33,7 @@ public class FlightRecorderOptions implements Serializable {
 	
 	public void fillFromMap(Map<String, String> options) throws Exception {
 		
-		for(Map.Entry<String, String> entry : options.entrySet()) {
+		for(Entry<String, String> entry : options.entrySet()) {
 			
 			if(entry.getKey().startsWith(STORAGE_PREFIX)) {
 				
@@ -51,9 +52,9 @@ public class FlightRecorderOptions implements Serializable {
 		
 		Map<String, String> result = new HashMap<String, String>();
 		
-		for(Map.Entry<String, String> entry : description.entrySet()) {
-			
-			if(!entry.getKey().equals("class")) {
+		for(Entry<String, String> entry : description.entrySet()) {
+
+            if(!"class".equals(entry.getKey())) {
 			
 				result.put(STORAGE_PREFIX + entry.getKey(), entry.getValue());
 			

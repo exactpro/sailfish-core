@@ -19,7 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class TestEncodingUtility {
-    private EncodingUtility encodingUtility= new EncodingUtility();
+    private final EncodingUtility encodingUtility= new EncodingUtility();
 
     @Test
     public void testConvertBase64() throws Exception {

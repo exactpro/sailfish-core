@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -98,18 +99,18 @@ public class NetDumperService implements IEnvironmentListener {
 
 		try {
 
-            this.readWriteLock.writeLock().lock();
-            this.options.fillFromMap(optionsStorage.getAllOptions());
+            readWriteLock.writeLock().lock();
+            options.fillFromMap(optionsStorage.getAllOptions());
 
 		} catch (Exception e) {
 
 			logger.error("Settings could not be read; connection to RESTDumper will fail");
 
         } finally {
-            this.readWriteLock.writeLock().unlock();
+            readWriteLock.writeLock().unlock();
 		}
 
-        this.connectionManager.subscribeForEvents(this);
+        connectionManager.subscribeForEvents(this);
 	}
 
 	@Override
@@ -117,14 +118,14 @@ public class NetDumperService implements IEnvironmentListener {
 
         try {
 
-            this.readWriteLock.readLock().lock();
+            readWriteLock.readLock().lock();
 
-            if (!this.options.isEnabled()) {
+            if(!options.isEnabled()) {
                 return;
             }
 
         } finally {
-            this.readWriteLock.readLock().unlock();
+            readWriteLock.readLock().unlock();
         }
 
 		if (event instanceof ServiceStatusUpdateEvent) {
@@ -137,7 +138,7 @@ public class NetDumperService implements IEnvironmentListener {
 
                     if (event.getType() != Type.STARTING && event.getType() != Type.STARTED) {
 
-                        List<RESTDumperClient> clients = this.serviceRecordings.remove(event.getServiceName());
+                        List<RESTDumperClient> clients = serviceRecordings.remove(event.getServiceName());
 
                         if (clients != null) {
                             handleFinish(clients);
@@ -153,22 +154,22 @@ public class NetDumperService implements IEnvironmentListener {
 
     public NetDumperOptions getOptions() {
         try {
-            this.readWriteLock.readLock().lock();
-            return this.options.clone();
+            readWriteLock.readLock().lock();
+            return options.clone();
         } finally {
-            this.readWriteLock.readLock().unlock();
+            readWriteLock.readLock().unlock();
         }
 	}
 
 	public File[] getRecordedFiles() throws IOException {
-        if (this.recordedFiles == null) {
+        if(recordedFiles == null) {
 			updateFiles();
 		}
-        return this.recordedFiles;
+        return recordedFiles;
 	}
 
 	private void updateFiles() throws IOException {
-        this.recordedFiles = this.workspaceDispatcher.getFolder(FolderType.TRAFFIC_DUMP).listFiles();
+        this.recordedFiles = workspaceDispatcher.getFolder(FolderType.TRAFFIC_DUMP).listFiles();
 	}
 
 	public boolean checkAvailability() {
@@ -177,11 +178,11 @@ public class NetDumperService implements IEnvironmentListener {
 
         try {
 
-            this.readWriteLock.readLock().lock();;
-            rootUrl = this.options.getRootUrl();
+            readWriteLock.readLock().lock();
+            rootUrl = options.getRootUrl();
 
         } finally {
-            this.readWriteLock.readLock().unlock();
+            readWriteLock.readLock().unlock();
         }
 
 		try {
@@ -211,18 +212,18 @@ public class NetDumperService implements IEnvironmentListener {
 
 		try {
 
-            this.readWriteLock.writeLock().lock();
+            readWriteLock.writeLock().lock();
             this.options = options;
 
-            for (Map.Entry<String, String> option : options.toMap().entrySet()) {
-				this.optionsStorage.setOption(option.getKey(), option.getValue());
+            for(Entry<String, String> option : options.toMap().entrySet()) {
+                optionsStorage.setOption(option.getKey(), option.getValue());
             }
 
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 
         } finally {
-            this.readWriteLock.writeLock().unlock();
+            readWriteLock.writeLock().unlock();
 		}
 	}
 
@@ -243,7 +244,7 @@ public class NetDumperService implements IEnvironmentListener {
 			for (ServiceName svcName : services) {
                 list.addAll(startRecordingService(svcName, svcName.toString()));
 			}
-            this.externalRecorders.put(recordId, list);
+            externalRecorders.put(recordId, list);
 		}
 		catch (Exception e) {
 			logger.error("An error occured while starting traffic recording for matrix", e);
@@ -253,13 +254,13 @@ public class NetDumperService implements IEnvironmentListener {
 	public void stopAndZip(long recordId, OutputStream out) {
 		try {
 			ZipOutputStream zip = new ZipOutputStream(out);
-            for (RESTDumperClient cl : this.externalRecorders.get(recordId)) {
+            for(RESTDumperClient cl : externalRecorders.get(recordId)) {
 				zip.putNextEntry(new ZipEntry(cl.generateFilename()));
 				cl.stopRecord(zip);
 				zip.closeEntry();
 			}
 			zip.close();
-            this.externalRecorders.remove(recordId);
+            externalRecorders.remove(recordId);
 		}
 		catch (Exception e) {
 			logger.error("An error occured while finishing traffic recording for matrix", e);
@@ -268,12 +269,12 @@ public class NetDumperService implements IEnvironmentListener {
 
 	public void stopAndStore(long recordId, File rootDir) {
 		try {
-            for (RESTDumperClient cl : this.externalRecorders.get(recordId)) {
+            for(RESTDumperClient cl : externalRecorders.get(recordId)) {
 				try (OutputStream out = new FileOutputStream(rootDir.getAbsolutePath() + File.separator + cl.generateFilename())) {
 					cl.stopRecord(out);
 				}
 			}
-            this.externalRecorders.remove(recordId);
+            externalRecorders.remove(recordId);
 		}
 		catch (Exception e) {
 			logger.error("An error occured while finishing traffic recording for matrix", e);
@@ -282,7 +283,7 @@ public class NetDumperService implements IEnvironmentListener {
 
 	private List<RESTDumperClient> startRecordingService(ServiceName svcName, String identifier) throws Exception {
 
-        IServiceSettings svcSettings = this.connectionManager.getServiceDescription(svcName).getSettings();
+        IServiceSettings svcSettings = connectionManager.getServiceDescription(svcName).getSettings();
 
         if (!svcSettings.isPerformDump()) {
 			return new ArrayList<>();
@@ -313,11 +314,11 @@ public class NetDumperService implements IEnvironmentListener {
 
         try {
 
-            this.readWriteLock.readLock().lock();
-            rootUrl = this.options.getRootUrl();
+            readWriteLock.readLock().lock();
+            rootUrl = options.getRootUrl();
 
         } finally {
-            this.readWriteLock.readLock().unlock();
+            readWriteLock.readLock().unlock();
         }
 
         for (Integer index : catchMap.keySet()) {
@@ -353,14 +354,14 @@ public class NetDumperService implements IEnvironmentListener {
     }
 
 	private void handleStart(ServiceName svcName, Date startTime) throws Exception {
-        this.serviceRecordings.put(svcName, startRecordingService(svcName, svcName.toString() + "." +
+        serviceRecordings.put(svcName, startRecordingService(svcName, svcName + "." +
                 dateFormat.get().format(startTime)));
 	}
 
     private void handleFinish(List<RESTDumperClient> clients) throws Exception {
 
         for (RESTDumperClient cl : clients) {
-            cl.stopRecord(this.workspaceDispatcher.createFile(FolderType.TRAFFIC_DUMP, false, cl.generateFilename()));
+            cl.stopRecord(workspaceDispatcher.createFile(FolderType.TRAFFIC_DUMP, false, cl.generateFilename()));
 		}
 
 		updateFiles();

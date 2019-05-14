@@ -20,6 +20,6 @@ package com.exactpro.sf.configuration;
  *
  */
 public interface ILoadableManager {
-    public void load(final ILoadableManagerContext context) throws Exception;
-    public void finalize(final ILoadableManagerContext context) throws Exception;
+    void load(ILoadableManagerContext context) throws Exception;
+    void finalize(ILoadableManagerContext context) throws Exception;
 }

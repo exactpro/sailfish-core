@@ -31,11 +31,11 @@ public class LibraryImportResult implements Serializable {
 	@XmlTransient
 	private Library library;
 	
-	private long numExecutors = 0;
+	private long numExecutors;
 	
-	private long numScripts = 0;
+	private long numScripts;
 	
-	private long numServices = 0;
+	private long numServices;
 	
 	private long id;
 
@@ -43,9 +43,9 @@ public class LibraryImportResult implements Serializable {
 
     private Set<ImportError> globalsErrors = new HashSet<>();
 
-    private Set<ImportError> executorErrors = new HashSet<>();
+    private final Set<ImportError> executorErrors = new HashSet<>();
 
-    private Set<ImportError> scriptListErrors = new HashSet<>();
+    private final Set<ImportError> scriptListErrors = new HashSet<>();
 	
 	public void incNumExecutors() {
 		

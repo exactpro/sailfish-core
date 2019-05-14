@@ -89,16 +89,16 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 			SAXParseException saxParseException = null;
 
-			if (null != jabEx.getCause() && (jabEx.getCause() instanceof SAXParseException)) {
-				saxParseException = ((SAXParseException) jabEx.getCause());
-			} else if (null != jabEx.getLinkedException()
+            if(jabEx.getCause() != null && (jabEx.getCause() instanceof SAXParseException)) {
+                saxParseException = (SAXParseException)jabEx.getCause();
+            } else if(jabEx.getLinkedException() != null
 					&& (jabEx.getLinkedException() instanceof SAXParseException)) {
-				saxParseException = ((SAXParseException) jabEx.getLinkedException());
+                saxParseException = (SAXParseException)jabEx.getLinkedException();
 			}
 
-			if (null != saxParseException) {
+            if(saxParseException != null) {
 
-				final String strError = String.format("%4$sThis xml stream structure could not be unmarshaled due to SAXParser error %4$s[%1$s].%4$sError was found on the line [%2$d], column [%3$d].%4$s",
+                String strError = String.format("%4$sThis xml stream structure could not be unmarshaled due to SAXParser error %4$s[%1$s].%4$sError was found on the line [%2$d], column [%3$d].%4$s",
 													  saxParseException.getMessage(), saxParseException.getLineNumber(),
 													  saxParseException.getColumnNumber(), StringUtil.EOL);
 
@@ -156,8 +156,8 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 				throw new EPSCommonException("It is impossible to keep messages in fields");
 			} else {
 
-				JavaType javaType = getFieldType(field, this.aggregateAttributes);
-				String defVal = getDefaultValue(field, this.aggregateAttributes);
+                JavaType javaType = getFieldType(field, aggregateAttributes);
+                String defVal = getDefaultValue(field, aggregateAttributes);
 
 				IFieldStructure fieldStructure = createFieldStructure(
 						field, true,
@@ -200,7 +200,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
                 }
                 
                 throw new EPSCommonException(
-                        "Messages with same names has been detected! Check names of your messages. Message names: " + duplicatedNames.toString());
+                        "Messages with same names has been detected! Check names of your messages. Message names: " + duplicatedNames);
             }
 
 			Message msg = messages.get(i++);
@@ -289,20 +289,12 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 	}
 
 	private String getDefaultValue(Field field, boolean search) {
-	    if (!search) {
-	        return field.getDefaultvalue();
-	    }	        
-	        
-		if (field.getDefaultvalue() != null) {
-			return field.getDefaultvalue();
-		}
+        if(!search || field.getDefaultvalue() != null) {
+            return field.getDefaultvalue();
+        }
 
-		if (field.getReference() != null) {
-			return getDefaultValue((Field)field.getReference(), search);
-		}
-
-		return null;
-	}
+        return field.getReference() != null ? getDefaultValue((Field)field.getReference(), true) : null;
+    }
 
     private Map<String, IFieldStructure> createFieldStructures(StructureBuilder builder, Message message, String namespace) {
         Map<String, IFieldStructure> result = new LinkedHashMap<>();
@@ -331,8 +323,8 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 									field.getName(), message.getName()));
 				}
 
-				JavaType javaType = getFieldType(field, this.aggregateAttributes);
-				String defVal = getDefaultValue(field, this.aggregateAttributes);
+                JavaType javaType = getFieldType(field, aggregateAttributes);
+                String defVal = getDefaultValue(field, aggregateAttributes);
 
 				fieldStructure = createFieldStructure(
 						field, false,
@@ -360,27 +352,18 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 	    if (!search) {
 	        return field.getType();
 	    }
-	    
-		if (field.getReference() != null) {
-			return getFieldType((Field) field.getReference(), search);
-		} else {
-			return field.getType();
-		}		
-	}
+
+        return field.getReference() != null ? getFieldType((Field)field.getReference(), true) : field.getType();
+    }
 
 	private boolean isComplex(Field field) {
-		Object reference = field.getReference();
+        if(field instanceof Message) {
+            return true;
+        }
 
-		boolean value = (field instanceof Message);
-
-		if (!value) {
-			if (reference != null) {
-				value = isComplex((Field) field.getReference());
-			}
-		}
-
-		return value;
-	}
+        Object reference = field.getReference();
+        return reference != null && isComplex((Field)reference);
+    }
 
 	private Map<String, IAttributeStructure> getAttributes(Field field, boolean isValues, JavaType javaType) {
 	    List<Attribute> attributes = new ArrayList<>();
@@ -427,7 +410,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 	private void collectFieldAttributesOrValues(Field field, Collection<Attribute> attrOrVal, List<Attribute> attrOrValList, boolean isValue) {
 
-		if (this.aggregateAttributes) {
+        if(aggregateAttributes) {
 			Object reference = field.getReference();
 	        if (reference != null) {
 	        	collectFieldAttributesOrValues((Field) reference, attrOrVal, isValue ? ((Field)reference).getValues() : ((Field)reference).getAttributes(), isValue);

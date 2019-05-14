@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
@@ -29,9 +30,9 @@ import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
 
 public class StatisticsMigration {
 
-    private final static String CHECK_MODE = "check";
-    private final static String MIGRATE_MODE = "migrate";
-    private final static int NEED_MIGRATION_CODE = 7;
+    private static final String CHECK_MODE = "check";
+    private static final String MIGRATE_MODE = "migrate";
+    private static final int NEED_MIGRATION_CODE = 7;
 
     public static void main(String[] args) {
         try {
@@ -53,7 +54,7 @@ public class StatisticsMigration {
             }
 
             Map<String, String> settingsMap = new HashMap<>();
-            for (Map.Entry<Object, Object> prop : properties.entrySet()) {
+            for (Entry<Object, Object> prop : properties.entrySet()) {
                 settingsMap.put(prop.getKey().toString(), prop.getValue().toString());
             }
             StatisticsServiceSettings settings = new StatisticsServiceSettings();

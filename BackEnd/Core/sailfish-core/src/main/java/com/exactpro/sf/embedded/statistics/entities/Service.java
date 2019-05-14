@@ -24,8 +24,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(name="stservices",
-uniqueConstraints = {@UniqueConstraint(columnNames={"name"})})
+@Table(name = "stservices", uniqueConstraints = @UniqueConstraint(columnNames = "name"))
 @SequenceGenerator(name="stservices_generator", sequenceName="stservices_sequence")
 public class Service {
 	

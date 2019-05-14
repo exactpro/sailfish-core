@@ -29,9 +29,9 @@ import com.exactpro.sf.util.BugDescription;
 public abstract class BaseEntity {
     private String name;
     private String description;
-    private List<Object> elements;
-    private Set<BugDescription> allKnownBugs;
-    private Set<BugDescription> reproducedBugs;
+    private final List<Object> elements;
+    private final Set<BugDescription> allKnownBugs;
+    private final Set<BugDescription> reproducedBugs;
 
     public BaseEntity() {
         elements = new ArrayList<>();

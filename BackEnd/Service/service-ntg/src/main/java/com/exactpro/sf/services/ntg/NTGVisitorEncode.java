@@ -37,12 +37,7 @@ import com.exactpro.sf.services.ntg.exceptions.UnknownNTGMessageTypeException;
 public final class NTGVisitorEncode extends NTGVisitorBase {
     private static final Logger logger = LoggerFactory.getLogger(NTGVisitorEncode.class);
 
-    public NTGVisitorEncode() {
-		super();
-	}
-
-
-	@Override
+    @Override
 	public void visit(String fieldName, IMessage message, IFieldStructure complexField, boolean isDefault)
 	{
 		if (message == null) {
@@ -63,7 +58,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
         messageStructureReader.traverse(visitorNTG, complexField.getFields(), message,
 					MessageStructureReaderHandlerImpl.instance());
 
-        this.buffer.put(visitorNTG.getBuffer().flip());
+        buffer.put(visitorNTG.getBuffer().flip());
 		accumulatedLength += length;
 	}
 
@@ -71,7 +66,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
     public void visit(String fieldName, String value, IFieldStructure fldStruct, boolean isDefault)
     {
         if (logger.isDebugEnabled()) {
-            logger.debug("   Encode visiting String field [{}] , value = [{}]", fieldName, (null == value ? "" : value));
+            logger.debug("   Encode visiting String field [{}] , value = [{}]", fieldName, value == null ? "" : value);
         }
 
         validateAttributesMap(fieldName, String.class, fldStruct);
@@ -88,15 +83,15 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
                 return;
             }
             long time = NTGUtility.getTransactTime(value);
-            this.buffer.putLong( time );
+            buffer.putLong(time);
         }
         else
         {
             StringBuffer terminatedString  = new StringBuffer();
 
-            if(null == value)
+            if(value == null)
             {
-                terminatedString.append(super.STRING_TERMINATOR);
+                terminatedString.append(STRING_TERMINATOR);
             }
             else
             {
@@ -112,11 +107,11 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
                 if( value.length() < length )
                 {
-                    terminatedString.append(super.STRING_TERMINATOR);
+                    terminatedString.append(STRING_TERMINATOR);
                 }
             }
 
-            this.buffer.put( GenericConverter.convertStringToArray( length, terminatedString.toString() ));
+            buffer.put(GenericConverter.convertStringToArray(length, terminatedString.toString()));
         }
         accumulatedLength += length;
     }
@@ -125,7 +120,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 	public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
 	    
 	    if (logger.isDebugEnabled()) {
-            logger.debug("   Encode visiting String field [{}] , value = [{}]", fieldName, (null == value ? "" : value));
+            logger.debug("   Encode visiting String field [{}] , value = [{}]", fieldName, value == null ? "" : value);
         }
 
         validateAttributesMap(fieldName, LocalDateTime.class, fldStruct);
@@ -136,7 +131,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
         validateOffset(fieldName, accumulatedLength, offset);
 
         long time = NTGUtility.getTransactTime(value);
-        this.buffer.putLong( time );
+        buffer.putLong(time);
         
         accumulatedLength += length;
 	    
@@ -153,7 +148,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		if (logger.isDebugEnabled()) {
 			logger.debug("   Encode visiting Double field [{}] , value = [{}]", fieldName, value);			
 			logger.debug("         float value [{}] will be encoded as integer [{}]", value,
-					(int) (value * 100000000.0d));
+                    (int)(value * 100_000_000));
 		}
 		validateAttributesMap(fieldName, Double.class, fldStruct);
 
@@ -208,7 +203,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
 		BigDecimal baseValue = new BigDecimal( value );
 		BigDecimal baseScaled  = baseValue.setScale( 4, BigDecimal.ROUND_HALF_UP );
-		BigDecimal multiplied = baseScaled.multiply( new BigDecimal(10000.0f)) ;
+        BigDecimal multiplied = baseScaled.multiply(new BigDecimal(10_000));
 
 		buffer.putInt(multiplied.intValue());
 
@@ -240,7 +235,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		if (writeFiller(value, length, fieldName)) {
             return;
         }
-        if (ProtocolType.UINT32 == protocolType) {
+        if(protocolType == ProtocolType.UINT32) {
             validateLength(fieldName, lengthInt, length);
             buffer.putUnsignedInt(value);
         } else {
@@ -333,7 +328,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 			logger.debug("   Encode visiting BigDecimal field [{}] , value = [{}]", fieldName, value);
 		}
 
-		if(null == value )
+        if(value == null)
 		{
 			throw new NullFieldValue(String.format( "Field name = [%s] has null value" , fieldName ));
 		}
@@ -348,12 +343,12 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 		validateLength(fieldName, lengthBigDecimal, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
-		if(type.equals("Uint64")) {
+        if("Uint64".equals(type)) {
 			buffer.putLong(value.longValue());
-		} else if(type.equals("Price")) {
+        } else if("Price".equals(type)) {
 
 			BigDecimal baseScaled  = value.setScale( 8, BigDecimal.ROUND_HALF_UP );
-			BigDecimal multiplied = baseScaled.multiply( new BigDecimal(100000000.0d)) ;
+            BigDecimal multiplied = baseScaled.multiply(new BigDecimal(100_000_000));
 
 			buffer.putLong(multiplied.longValue());
 		} else {
@@ -369,11 +364,11 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 	}
 
 	public int getAccumulatedLength() {
-		return super.accumulatedLength;
+        return accumulatedLength;
 	}
 
     private boolean writeFiller(Object value, int length, String fieldName) {
-        if (null == value) {
+        if(value == null) {
             for (int i = 0; i < length; i++) {
                 buffer.put((byte) 0x0);
             }

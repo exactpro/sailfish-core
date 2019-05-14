@@ -44,7 +44,7 @@ public class SFWebApplication {
 
 	//private volatile boolean dbError = false;
 	
-	private volatile boolean fatalError = false;
+	private volatile boolean fatalError;
 	
 	private volatile String fatalErrorMessage;
 
@@ -61,7 +61,7 @@ public class SFWebApplication {
 		return instance;
 	}
 
-	public void init(String logFilePath, ISFContext context) {
+	public void init(ISFContext context) {
 
 		logger.debug("init() invoked");
 
@@ -75,8 +75,9 @@ public class SFWebApplication {
 	public boolean isPageNotRestricted(String name) {
 		if(ReleaseController.getRestrictions() != null) {        
 	        for(String suffix : ReleaseController.getRestrictions()) {
-	        	if(name.equals(suffix))
-	        		return false;
+                if(name.equals(suffix)) {
+                    return false;
+                }
 	        }
 		}
 		return true;

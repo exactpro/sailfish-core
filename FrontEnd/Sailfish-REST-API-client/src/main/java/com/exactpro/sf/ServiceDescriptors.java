@@ -27,12 +27,11 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class ServiceDescriptors {
-	
-	private Map<String, ServiceDescriptor> descriptors;
+
+    private final Map<String, ServiceDescriptor> descriptors = new HashMap<>();
 	
 	private ServiceDescriptors() {
-		descriptors = new HashMap<String, ServiceDescriptor>();
-	}
+    }
 	
 	public ServiceDescriptor get(String name) {
 		return descriptors.get(name);

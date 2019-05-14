@@ -17,9 +17,9 @@ package com.exactpro.sf.center;
 
 public interface IVersion {
     
-    public static final String CORE_VERSION_PROPERTY = "core_version";
+    String CORE_VERSION_PROPERTY = "core_version";
     
-    public static final String GENERAL = "General";
+    String GENERAL = "General";
     
     String buildShortVersion();
     

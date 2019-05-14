@@ -69,8 +69,8 @@ public final class NTGServerTest extends IoHandlerAdapter
 	private final ServerProperties serverProperties ;
 
 	private final Map<String, String> validClients ;
-	private Map<Long, ConnectedClient> clients = new HashMap<>();
-	private static Object syncObjClients = new Object();
+    private final Map<Long, ConnectedClient> clients = new HashMap<>();
+    private static final Object syncObjClients = new Object();
 
     NTGServerTest()
 	throws IOException
@@ -84,7 +84,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		for( int i = 0 ; i < 10000 ; i++ )
 		{
-			String clnt = String.format("Client_%d", ( 1 + i));
+            String clnt = String.format("Client_%d", 1 + i);
 			validClients.put(clnt, clnt );
 		}
 	}
@@ -106,9 +106,9 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		synchronized(syncObjClients)
 		{
-			if( ! this.clients.containsKey( session.getId() ))
+            if(!clients.containsKey(session.getId()))
 			{
-				this.clients.put( session.getId(), new ConnectedClient( session ) );
+                clients.put(session.getId(), new ConnectedClient(session));
 			}
 			else
 			{
@@ -125,9 +125,9 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		synchronized(syncObjClients)
 		{
-			if( !  this.clients.containsKey( session.getId() ))
+            if(!clients.containsKey(session.getId()))
 			{
-				this.clients.put( session.getId(), new ConnectedClient( session ));
+                clients.put(session.getId(), new ConnectedClient(session));
 			}
 			else
 			{
@@ -143,9 +143,9 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		synchronized(syncObjClients)
 		{
-			if( this.clients.containsKey( session.getId() ))
+            if(clients.containsKey(session.getId()))
 			{
-				this.clients.remove( session.getId() );
+                clients.remove(session.getId());
 			}
 		}
 	}
@@ -156,16 +156,16 @@ public final class NTGServerTest extends IoHandlerAdapter
 	{
 		logger.trace( "    Server: onSessionIdle().");
 
-		if( ServerStrategy.NoHeartbeat != this.strategy  )
+        if(strategy != ServerStrategy.NoHeartbeat)
 		{
             IMessage heartBeat = new MapMessage("NTG", "Heartbeat");
 			heartBeat.addField("MessageHeader", getHeader());
 
 			synchronized(syncObjClients)
 			{
-				if( this.clients.containsKey( session.getId() ))
+                if(clients.containsKey(session.getId()))
 				{
-					ConnectedClient clnt  = this.clients.get(session.getId());
+                    ConnectedClient clnt = clients.get(session.getId());
 					clnt.sentMessage(heartBeat);
 				}
 			}
@@ -196,9 +196,9 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		synchronized(syncObjClients)
 		{
-			if( this.clients.containsKey( session.getId() ))
+            if(clients.containsKey(session.getId()))
 			{
-				clnt  = this.clients.get(session.getId());
+                clnt = clients.get(session.getId());
 			}
 		}
         processMessage(clnt, ntgMessage);
@@ -212,12 +212,11 @@ public final class NTGServerTest extends IoHandlerAdapter
 		onMessageSent();
 	}
 
-
-	private void processMessage( ConnectedClient cln, final IMessage clientMessage )
+    private void processMessage(ConnectedClient cln, IMessage clientMessage)
 	throws Exception
 	{
 
-		switch(this.strategy)
+        switch(strategy)
 		{
 		case HeartbeatOnly:
 			break;
@@ -238,76 +237,65 @@ public final class NTGServerTest extends IoHandlerAdapter
 		}
 	}
 
-	private boolean strategyLogonReject(final ConnectedClient cln, final IMessage clientMessage)
+    private boolean strategyLogonReject(ConnectedClient cln, IMessage clientMessage)
 	{
 		return true;
 	}
 
-	private boolean strategyNormal(final ConnectedClient cln, final IMessage clientMessage)
+    private boolean strategyNormal(ConnectedClient cln, IMessage clientMessage)
 	throws Exception
 	{
-		boolean processed = false ;
 
-		MessageType msgType = MessageType.getEnumValue(
+        MessageType msgType = MessageType.getEnumValue(
 				((IMessage)clientMessage.getField("MessageHeader")).getField("MessageType").toString());
 
 		switch(msgType)
 		{
 		case Logon :
 			replyToClientLogon( cln, clientMessage);
-			processed = true;
-			break;
+            return true;
 
-		case Heartbeat:
-			processed = true;
-			break;
+        case Heartbeat:
+            return true;
 
-		case Logout:
+        case Logout:
 			replyToClientLogout( cln, clientMessage);
-			processed = true;
-			break;
+            return true;
 
-		default:
+        default:
 			throw new Exception(String.format( "Invalid message type [%s].",
 					msgType.toString() ));
 		}
-		return processed;
-	}
+    }
 
-	private boolean strategyNoHeartbeat(final ConnectedClient cln, final IMessage clientMessage)
+    private boolean strategyNoHeartbeat(ConnectedClient cln, IMessage clientMessage)
 	throws Exception
 	{
 
-		boolean processed = false ;
-
-		MessageType msgType = MessageType.getEnumValue(
+        MessageType msgType = MessageType.getEnumValue(
 				((IMessage)clientMessage.getField("MessageHeader")).getField("MessageType").toString());
 
 		switch(msgType)
 		{
 		case Logon :
 			replyToClientLogon( cln, clientMessage);
-			processed = true;
-			break;
+            return true;
 
-		case Heartbeat:
+        case Heartbeat:
             logger.trace("NTGServer. Received heartbeat from client [{}]. Server heartbeat supressed.", cln.session.getId());
-			processed = true;
-			break;
+            return true;
 
-		case Logout:
+        case Logout:
 			replyToClientLogout( cln, clientMessage);
-			processed = true;
-			break;
+            return true;
 
-		default:
+        default:
 			throw new Exception(String.format( "Invalid message type [%s].",
 					msgType.toString() ));
 		}
-		return processed;
-	}
+    }
 
-	private void replyToClientLogon(final ConnectedClient clnt,  final IMessage clientMessage)
+    private void replyToClientLogon(ConnectedClient clnt, IMessage clientMessage)
 	{
 		IMessage logon = clientMessage.cloneMessage();
 		clnt.addRecievdMessage(clientMessage);
@@ -360,8 +348,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 		clnt.Login((String)logon.getField("Username"), (String)logon.getField("Password"));
 	}
 
-
-	private void replyToClientLogout(final ConnectedClient cln, final IMessage clientMessage)
+    private void replyToClientLogout(ConnectedClient cln, IMessage clientMessage)
 	{
 		//Logout msgLogout = new Logout(clientMessage);
 
@@ -383,7 +370,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 	{
 		try
 		{
-			if ( null == session )
+            if(session == null)
 			{
 				throw new IllegalArgumentException("Connection is not established. Invoke connect(host, port) first.");
 			}
@@ -399,10 +386,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 			e.printStackTrace();
 
 		}
-		finally
-		{
-		}
-	}
+    }
 
 
 	private void onMessageSent()
@@ -419,7 +403,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 	private ServerProperties readPropertiesFile(String propfileName ) throws IOException
 	{
-		if(null == propfileName)
+        if(propfileName == null)
 		{
 			throw new IllegalArgumentException("Parameter [propfileName] cannot be null.");
 		}
@@ -427,7 +411,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 		ServerProperties serverProperties = new ServerProperties();
 		String mappedPropertiesFile = getBaseDir() + File.separator + propfileName;
 
-		if((new File(mappedPropertiesFile).exists()))
+        if(new File(mappedPropertiesFile).exists())
 		{
 			try
 			{
@@ -435,7 +419,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 				//is.close();
 				Properties prop = new Properties();
 				prop.load(new FileInputStream( mappedPropertiesFile ));
-				serverProperties = new ServerProperties(prop);
+                return new ServerProperties(prop);
 
 			}
 			catch(Exception e)
@@ -449,7 +433,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 	private class ServerProperties
 	{
-		Properties prop = null;
+        Properties prop;
 
 		public ServerProperties()
 		{
@@ -460,16 +444,16 @@ public final class NTGServerTest extends IoHandlerAdapter
 			this.prop = prop;
 		}
 
-		private int heartbeatTimeout = 3000;
+        private final int heartbeatTimeout = 3000;
 
 		// Number of missed client heartbeat messages forcing the client to
 		// break the connection.
-		private int maxMissedHeartbeats = 5;
+        private final int maxMissedHeartbeats = 5;
 
 
 		public int getHeartbeatTimeout()
 		{
-			if( null != prop && prop.containsKey("HeartbeatTimeout"))
+            if(prop != null && prop.containsKey("HeartbeatTimeout"))
 			{
 				return Integer.parseInt( prop.getProperty("HeartbeatTimeout"));
 			}
@@ -481,7 +465,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		public int getMaxMissedHeartbeats()
 		{
-			if( null != prop && prop.containsKey("MaxMissedHeartbeats"))
+            if(prop != null && prop.containsKey("MaxMissedHeartbeats"))
 			{
 				return Integer.parseInt( prop.getProperty("MaxMissedHeartbeats"));
 			}
@@ -500,37 +484,32 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 	private String getBaseDir()
 	{
-		return ((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir"));
-	}
+        return (System.getProperty("basedir") == null) ? "." : System.getProperty("basedir");
+    }
 
+    private boolean isClientDefined(String name, String password) {
 
-	private boolean isClientDefined(final String name, final String password )
-	{
-		boolean isDefined = false;
+        if(validClients.containsKey(name)) {
+            String thisPassword = validClients.get(name);
 
-		if( this.validClients.containsKey(name) )
-		{
-			String thisPassword = this.validClients.get(name);
-
-			if( 0 == thisPassword.compareTo(password))
-			{
-				isDefined = true;
-			}
-		}
-		return isDefined;
-	}
+            if(thisPassword.compareTo(password) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 
 	final class ConnectedClient implements Comparable <ConnectedClient>
 	{
-		private IoSession session;
-		private List<IMessage> messagesIn = new ArrayList<>();
-		private List<IMessage> messagesOut = new ArrayList<>();
+        private final IoSession session;
+        private final List<IMessage> messagesIn = new ArrayList<>();
+        private final List<IMessage> messagesOut = new ArrayList<>();
 		private String name;
 		private String password;
-		private String newPassword = "XYZ" ;
-		private Timer timerClientHeartbeat = null;
-		private boolean loggedIn = false;
+        private final String newPassword = "XYZ";
+        private Timer timerClientHeartbeat;
+        private boolean loggedIn;
 
 		public ConnectedClient( IoSession session )
 		{
@@ -546,7 +525,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 		public IoSession getSession()
 		{
-			return this.session;
+            return session;
 		}
 
 		public void addRecievdMessage(IMessage message)
@@ -588,17 +567,15 @@ public final class NTGServerTest extends IoHandlerAdapter
 		@Override
 		public int compareTo(ConnectedClient other)
 		{
-			if( this.session.getId() != other.getSession().getId())
+            if(session.getId() != other.getSession().getId())
 			{
-				return ( new Long( this.session.getId())).compareTo( new Long(other.getSession().getId()));
-			}
-			else if( 0 != this.name.compareTo(other.getName()))
+                return Long.compare(session.getId(), other.getSession().getId());
+            } else if(name.compareTo(other.getName()) != 0)
 			{
-				return this.name.compareTo(other.getName());
-			}
-			else if(0 != this.password.compareTo(other.getPassword()))
+                return name.compareTo(other.getName());
+            } else if(password.compareTo(other.getPassword()) != 0)
 			{
-				return this.password.compareTo(other.getPassword());
+                return password.compareTo(other.getPassword());
 			}
 			else
 			{
@@ -613,7 +590,7 @@ public final class NTGServerTest extends IoHandlerAdapter
 
 			// Restart timer
 			//this.timerClientHeartbeat.scheduleAtFixedRate(new TimerTask()
-			this.timerClientHeartbeat.schedule( new TimerTask()
+            timerClientHeartbeat.schedule(new TimerTask()
 			{
 				@Override
 				public void run()
@@ -639,8 +616,8 @@ public final class NTGServerTest extends IoHandlerAdapter
 		// Heartbeats and reject attempt to logon
 		LogonReject,
 
-		UnexpectedShutdown;
-	}
+        UnexpectedShutdown
+    }
 
 	public enum MessageType {
 	    LogonReply("B"),
@@ -648,9 +625,9 @@ public final class NTGServerTest extends IoHandlerAdapter
 	    Logon("A"),
 	    Logout("5");
 
-	    private String type;
+        private final String type;
 
-	    private MessageType(String type) {
+        MessageType(String type) {
 	        this.type = type;
 	    }
 

@@ -31,7 +31,7 @@ public class BaseMessage implements Cloneable
 
 	public IMessage getMessage()
 	{
-		return this.msg;
+        return msg;
 	}
 
 	public boolean isAdmin(){
@@ -40,15 +40,12 @@ public class BaseMessage implements Cloneable
 
 	@Override
 	public BaseMessage clone() {
-		Constructor<? extends BaseMessage> ctor = null;
-		BaseMessage clone = null;
-		try {
-			ctor = this.getClass().getConstructor(IMessage.class);
-			clone = ctor.newInstance(this.msg.cloneMessage());
+        try {
+            Constructor<? extends BaseMessage> ctor = getClass().getConstructor(IMessage.class);
+            return ctor.newInstance(msg.cloneMessage());
 		} catch (Exception e) {
 			throw new EPSCommonException(e);
 		}
-		return clone;
-	}
+    }
 
 }

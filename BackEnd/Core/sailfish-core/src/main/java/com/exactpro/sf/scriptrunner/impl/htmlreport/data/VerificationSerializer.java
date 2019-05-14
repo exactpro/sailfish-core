@@ -16,13 +16,13 @@
 
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
+import java.io.IOException;
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
-import java.io.IOException;
-import java.util.List;
 
 public class VerificationSerializer extends StdSerializer<Verification> {
 
@@ -45,13 +45,7 @@ public class VerificationSerializer extends StdSerializer<Verification> {
 
             int newLvl = parameter.getLevel();
 
-            int nextLvl;
-
-            if (i < lastIndex) {
-                nextLvl = parameters.get(i + 1).getLevel();
-            } else {
-                nextLvl = newLvl;
-            }
+            int nextLvl = i < lastIndex ? parameters.get(i + 1).getLevel() : newLvl;
 
             if (newLvl > level) {
                 gen.writeStartObject();

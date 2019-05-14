@@ -15,20 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.notifications.messages;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.exactprosystems.webchannels.messages.AbstractMessage;
 import com.exactprosystems.webchannels.messages.ChannelsMessage;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @ChannelsMessage
 public class CloseRequest extends AbstractMessage{
 
 	private String requestId;
-	
-	public CloseRequest() {
-		super();
-	}
 
-	public String getRequestId() {
+    public String getRequestId() {
 		return requestId;
 	}
 

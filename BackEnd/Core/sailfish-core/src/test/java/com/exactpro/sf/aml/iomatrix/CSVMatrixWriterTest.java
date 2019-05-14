@@ -25,9 +25,9 @@ import org.junit.Test;
 
 public class CSVMatrixWriterTest {
 
-    private String tmpDir = System.getProperty("java.io.tmpdir");
-    private String fileName = tmpDir + File.separator + "test.csv";
-    private File tmpFile = new File(fileName);
+    private final String tmpDir = System.getProperty("java.io.tmpdir");
+    private final String fileName = tmpDir + File.separator + "test.csv";
+    private final File tmpFile = new File(fileName);
 
     @Test
     public void testCSVMatrixWriterString() {

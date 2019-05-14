@@ -25,7 +25,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
@@ -45,7 +44,7 @@ public class KnownBug {
      * {@code ["Subject"]}<br/>
      * {@code ["Category1","Subject"]}<br/>
      */
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "255"))
     @Column(name = "known_bug", unique = true)
     private String knownBug;
 
@@ -67,8 +66,12 @@ public class KnownBug {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
         KnownBug knownBug1 = (KnownBug) o;
         return Objects.equals(knownBug, knownBug1.knownBug);
     }

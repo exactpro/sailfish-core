@@ -24,7 +24,7 @@ import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 
 public interface IDictionaryValidator {
 
-    public static final String NAME_REGEX = "[a-zA-Z]+\\w*";
+    String NAME_REGEX = "[a-zA-Z]+\\w*";
     
 	/**
 	 *  fieldsOnly == null  ? Validate messages and fields

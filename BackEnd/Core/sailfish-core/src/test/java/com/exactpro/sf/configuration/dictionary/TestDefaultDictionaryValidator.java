@@ -45,7 +45,7 @@ public class TestDefaultDictionaryValidator {
     @Test
     public void testValidator() {
         List<DictionaryValidationError> errors = validator.validate(dictionaryStructure, true, null);
-        String[] expectedErrors = new String[] {
+        String[] expectedErrors = {
                 "DictionaryValidationError[message=<null>,field=UnknownDefaultValue,error=Value <strong>\"3.3\"</strong> wasn't found in values table,level=FIELD,type=ERR_DEFAULT_VALUE]",
                 "DictionaryValidationError[message=<null>,field=WrongAttributeValue,error=Value <strong>\"net\"</strong> is not applicable for Boolean type,level=FIELD,type=ERR_ATTRIBUTES]",
                 "DictionaryValidationError[message=<null>,field=for,error=Prohibited name <strong>for</strong> for Field. Name can't be Java keyword or have value that presents in this list [_],level=FIELD,type=ERR_NAME]",
@@ -59,7 +59,9 @@ public class TestDefaultDictionaryValidator {
                 "DictionaryValidationError[message=DuplicateMessage,field=SomeField1,error=Value <strong>\"net\"</strong> is not applicable for Boolean type,level=FIELD,type=ERR_ATTRIBUTES]"
         };
         if (expectedErrors.length != errors.size()) {
-            errors.forEach(System.err::println);
+            for(DictionaryValidationError error : errors) {
+                System.err.println(error);
+            }
         }
         Assert.assertEquals("Unexpected errors", expectedErrors.length, errors.size());
 

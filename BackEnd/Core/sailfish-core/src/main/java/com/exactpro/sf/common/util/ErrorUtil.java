@@ -34,7 +34,7 @@ public class ErrorUtil {
 		StringBuilder sb = new StringBuilder();
 
 		sb
-		.append(e.toString())
+		.append(e)
 		.append(EOL);
 
 		sb.append(formatStackTrace(e.getStackTrace()));
@@ -55,7 +55,7 @@ public class ErrorUtil {
 		{
 			sb
 			.append("\tat ")
-			.append(element.toString())
+			.append(element)
 			.append(EOL);
 		}
 

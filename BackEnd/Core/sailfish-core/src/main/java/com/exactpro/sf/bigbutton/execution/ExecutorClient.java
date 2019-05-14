@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.SFAPIClient;
+import com.exactpro.sf.Service.Status;
 import com.exactpro.sf.ServiceImportResult;
 import com.exactpro.sf.bigbutton.BigButtonSettings;
 import com.exactpro.sf.bigbutton.RegressionRunner;
@@ -75,6 +76,7 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.util.EMailUtil;
@@ -106,10 +108,10 @@ public class ExecutorClient {
 	private ClientWorker worker;
 	
     private final Set<String> errorText = Collections.synchronizedSet(new HashSet<String>());
-	
-	private ObjectMapper mapper = new ObjectMapper();
-	
-	private volatile Boolean executorReady = null;
+
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    private volatile Boolean executorReady;
 	
     private final Map<String, Service> executorServicesUploaded = new LinkedHashMap<>();
 
@@ -148,7 +150,7 @@ public class ExecutorClient {
 
         String execErrMessage = String.format("Executor \"%s\" : error. Cause: %s", executor.getName(), errMessage);
         logger.error(execErrMessage);
-        this.errorText.add(errMessage);
+        errorText.add(errMessage);
 		this.state = ExecutorState.Error;
         monitor.executorClientEncounteredError(this);
         monitor.warn(execErrMessage);
@@ -161,7 +163,7 @@ public class ExecutorClient {
         logger.error(String.format("Executor \"%s\" error because of parsing errors", executor.getName()));
 
         for (ImportError error : errMessage.getCause()) {
-            this.errorText.add(error.getMessage());
+            errorText.add(error.getMessage());
         }
         this.state = ExecutorState.Error;
         monitor.executorClientEncounteredError(this);
@@ -172,20 +174,20 @@ public class ExecutorClient {
 
         String message = String.format("Executor \"%s\" : error. Cause: %s", executor.getName(), RegressionRunnerUtils.createErrorText(t));
         logger.warn(message);
-        this.errorText.add(RegressionRunnerUtils.createErrorText(t));
+        errorText.add(RegressionRunnerUtils.createErrorText(t));
         monitor.warn(message);
 		
 	}
 	
 	public void start() {
-		
-		if(this.apiClient == null) { 
-			createApiClient();
+
+        if(apiClient == null) {
+            createApiClient();
 		}
 		
 		this.worker = new ClientWorker();
-		
-		Thread workerThread = new Thread(worker, "BB Executor " + this.executor.getName());
+
+        Thread workerThread = new Thread(worker, "BB Executor " + executor.getName());
 		
 		workerThread.setDaemon(true);
 		
@@ -195,16 +197,16 @@ public class ExecutorClient {
 
 	private void createApiClient() {
 		try {
-			this.apiClient = new SFAPIClient(URI.create(this.executor.getHttpUrl() + "/sfapi").normalize().toString());
+            this.apiClient = new SFAPIClient(URI.create(executor.getHttpUrl() + "/sfapi").normalize().toString());
 		} catch (ParserConfigurationException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
 	public void tearDown() {
-		
-        if (this.worker != null) {
-		    this.worker.stop();
+
+        if(worker != null) {
+            worker.stop();
         }
 		
 	}
@@ -214,7 +216,7 @@ public class ExecutorClient {
 	}
 	
     public boolean prepareExecutor(String xmlConfig) {
-        if (this.state == ExecutorState.Error) {
+        if(state == ExecutorState.Error) {
             return false;
         }
         try {
@@ -262,7 +264,7 @@ public class ExecutorClient {
 
             for (ServiceImportResult result : importResult) {
 
-                if (result.getStatus().equals(com.exactpro.sf.Service.Status.ERROR)) {
+                if(result.getStatus() == Status.ERROR) {
 
                     String errMessage = String.format("Service <%s> import failed. Cause: <%s>", service.getPath(), result.getProblem());
 
@@ -318,7 +320,11 @@ public class ExecutorClient {
 
         if(!serviceExceptions.isEmpty()) {
             RuntimeException e = new EPSCommonException(String.format("Command '%s' was not executed for services: %s", commandName, serviceExceptions.keySet()));
-            serviceExceptions.values().forEach(e::addSuppressed);
+
+            for(Exception exception : serviceExceptions.values()) {
+                e.addSuppressed(exception);
+            }
+
             throw e;
         }
     }
@@ -344,8 +350,8 @@ public class ExecutorClient {
     }
     
     public void cleanExecutorEnvironment() {
-        if (this.state == ExecutorState.Error) {
-            logger.warn(String.format("Executor \"%s\" : can not clean environment, executor is in Error state ", this.executor.getName()));
+        if(state == ExecutorState.Error) {
+            logger.warn(String.format("Executor \"%s\" : can not clean environment, executor is in Error state ", executor.getName()));
             return;
         }
         try {
@@ -367,20 +373,20 @@ public class ExecutorClient {
 		Set<String> knownGroups = new HashSet<>();
 		
 		try {
-			
-			if(this.apiClient == null) { 
-				createApiClient();
+
+            if(apiClient == null) {
+                createApiClient();
 			}
 		
 			for(Tag tag : tags) {
 
-                com.exactpro.sf.testwebgui.restapi.xml.XmlResponse response;
+                XmlResponse response;
 				
 				if(StringUtils.isNotEmpty(tag.getGroup())) {
 					
 					if(!knownGroups.contains(tag.getGroup())) {
-						
-						response = this.apiClient.registerTagGroup(tag.getGroup());
+
+                        response = apiClient.registerTagGroup(tag.getGroup());
 						
 						logger.debug("Group registration response {}: {}", response.getMessage(), response.getRootCause());
 						
@@ -391,12 +397,12 @@ public class ExecutorClient {
 						knownGroups.add(tag.getGroup());
 						
 					}
-					
-					response = this.apiClient.registerTagInGroup(tag.getName(), tag.getGroup());
+
+                    response = apiClient.registerTagInGroup(tag.getName(), tag.getGroup());
 					
 				} else {
-					
-					response = this.apiClient.registerTag(tag.getName());
+
+                    response = apiClient.registerTag(tag.getName());
 					
 				}
 				
@@ -565,7 +571,7 @@ public class ExecutorClient {
 					String targetReportFolder = null;
 					
 					if(library.getReportsFolder() != null) {
-                        targetReportFolder = this.relativeListReportsFolder;
+                        targetReportFolder = relativeListReportsFolder;
 					}
 					
 					XmlTestscriptActionResponse response = apiClient.performMatrixAction((int)matrix.getId(), 
@@ -620,7 +626,7 @@ public class ExecutorClient {
 					}
 					
                     executeOnFinishScript(script);
-					monitor.scriptExecuted(script, (int)scriptRunId, executor, this.relativeListReportsFolder, reportDownloadNeeded);
+                    monitor.scriptExecuted(script, (int)scriptRunId, executor, relativeListReportsFolder, reportDownloadNeeded);
 					
 					apiClient.deleteMatrix((int)matrix.getId());
 				}
@@ -645,9 +651,9 @@ public class ExecutorClient {
 			while(true) {
 				
 				try {
-					
-					if(!this.running) { 
-						logger.info("Invoking stop");
+
+                    if(!running) {
+                        logger.info("Invoking stop");
 						apiClient.stopTestScriptRun(id);
 						return null;
 					}
@@ -725,7 +731,7 @@ public class ExecutorClient {
 			
 				for(int i =0; i< currentList.getScripts().size(); i++) {//Script script : currentList.getScripts()) {
 
-					if(!this.running) {
+                    if(!running) {
 						return;
 					}
 
@@ -751,7 +757,7 @@ public class ExecutorClient {
                         script.setFinished(true);
                         statistics.incNumFailed();
                         try {
-                            monitor.scriptExecuted(script, 0, executor, this.relativeListReportsFolder, false);
+                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false);
                         } catch (Exception e) {
                             logger.error("scriptExecuted error", e);
                         }
@@ -773,13 +779,8 @@ public class ExecutorClient {
 		}
 		
 		private String createRelativeListRepotsFolder() {
-			
-			if(library.getReportsFolder() == null) {
-				return null;
-			}
-			
-            return Paths.get(library.getReportsFolder(), currentList.getName()).toString();
-		}
+            return library.getReportsFolder() == null ? null : Paths.get(library.getReportsFolder(), currentList.getName()).toString();
+        }
 		
         @Override
 		public void run() {
@@ -790,8 +791,8 @@ public class ExecutorClient {
 			long msTimeout = executor.getTimeout() * 1000;
 			
 			RuntimeException possibleEx = null;
-			
-			while(this.running) {
+
+            while(running) {
 				
 				try {
 					
@@ -932,8 +933,8 @@ public class ExecutorClient {
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 			}
-			
-			if (!state.equals(ExecutorState.Error)) {
+
+            if(state != ExecutorState.Error) {
 				
 				state = ExecutorState.Inactive;
 				
@@ -945,9 +946,9 @@ public class ExecutorClient {
 		private boolean restartNode() throws IOException {
 			
 			state = ExecutorState.Restarting;
-			
-			HttpURLConnection con = (HttpURLConnection) (new URL(executor.getDaemon().getHttpUrl() + "/" + 
-						"restart?alias=" + executor.getDaemon().getName())).openConnection();
+
+            HttpURLConnection con = (HttpURLConnection)new URL(executor.getDaemon().getHttpUrl() + "/" +
+                    "restart?alias=" + executor.getDaemon().getName()).openConnection();
 			
 			con.setConnectTimeout(executor.getDaemon().getTimeout() * 1000);
 			
@@ -968,7 +969,7 @@ public class ExecutorClient {
                         script.getStatistics().setStatus("CONNECTION_FAILED");
                         script.getStatistics().setNumFailed(script.getStatistics().getNumFailed() + 1);
                         try {
-                            monitor.scriptExecuted(script, 0, executor, this.relativeListReportsFolder, false);
+                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false);
                         } catch (Exception e) {
                             logger.error("scriptExecuted error", e);
                         }
@@ -994,7 +995,7 @@ public class ExecutorClient {
 						script.getStatistics().setStatus("CONNECTION_FAILED");
 						script.getStatistics().setNumFailed(script.getStatistics().getNumFailed() + 1);
 						try {
-							monitor.scriptExecuted(script, 0, executor, this.relativeListReportsFolder,  false);
+                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false);
 						} catch (Exception e) {
 							logger.error("scriptExecuted error", e);
 						}

@@ -32,7 +32,7 @@ import java.util.zip.DeflaterInputStream;
 import java.util.zip.InflaterInputStream;
 
 @MatrixUtils
-@ResourceAliases({"EncodingUtility"})
+@ResourceAliases("EncodingUtility")
 public class EncodingUtility extends AbstractCaller {
     @Description("Encodes string to base64.<br/>"+
             "<b>content</b> - string to encode.<br/>" +

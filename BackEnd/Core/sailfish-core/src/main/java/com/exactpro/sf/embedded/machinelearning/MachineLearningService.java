@@ -53,7 +53,7 @@ public class MachineLearningService implements IEmbeddedService {
 
     private BatchInsertWorker insertWorker;
 
-    private BlockingQueue<FailedAction> batchInsertQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<FailedAction> batchInsertQueue = new LinkedBlockingQueue<>();
     private final ExecutorService exService = Executors.newSingleThreadExecutor();
 
     private MLPredictor mlPredictor;
@@ -86,7 +86,7 @@ public class MachineLearningService implements IEmbeddedService {
 
     @Override
     public boolean isConnected() {
-        return this.status.equals(ServiceStatus.Connected);
+        return status == ServiceStatus.Connected;
     }
 
     @Override
@@ -117,18 +117,18 @@ public class MachineLearningService implements IEmbeddedService {
     public synchronized void tearDown() {
         logger.info("tearDown");
 
-        if(this.status.equals(ServiceStatus.Disconnected)) {
+        if(status == ServiceStatus.Disconnected) {
             return;
         }
 
-        this.batchInsertQueue.clear();
+        batchInsertQueue.clear();
 
-        if(this.insertWorker != null) {
-            this.insertWorker.stop();
+        if(insertWorker != null) {
+            insertWorker.stop();
             this.insertWorker = null;
         }
 
-        if (this.storage != null) {
+        if(storage != null) {
             setStatus(ServiceStatus.Disconnected);
         }
 
@@ -150,7 +150,7 @@ public class MachineLearningService implements IEmbeddedService {
             }
 
             this.insertWorker = new BatchInsertWorker();
-            Thread workerThread = new Thread(this.insertWorker, "Machine Learning insert worker");
+            Thread workerThread = new Thread(insertWorker, "Machine Learning insert worker");
             workerThread.setDaemon(true);
             workerThread.start();
 
@@ -160,19 +160,19 @@ public class MachineLearningService implements IEmbeddedService {
 
             initPredictor();
 
-            logger.info("{}", this.status);
+            logger.info("{}", status);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }
     }
 
     public void storeData(FailedAction fAction) {
-        if(!this.status.equals(ServiceStatus.Connected)) {
+        if(status != ServiceStatus.Connected) {
             return;
         }
 
         try {
-            this.batchInsertQueue.put(fAction);
+            batchInsertQueue.put(fAction);
         } catch (InterruptedException e) {
             logger.error("Put interrupted", e);
             Thread.currentThread().interrupt();
@@ -245,7 +245,7 @@ public class MachineLearningService implements IEmbeddedService {
         public void run() {
             logger.info("Machine Learning InsertWorker started");
 
-            while (this.running) {
+            while(running) {
                 try {
                     FailedAction fAction = batchInsertQueue.poll();
 

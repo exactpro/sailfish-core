@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 public class EofCheckedStream extends InputStream {
 	private final Logger logger = LoggerFactory.getLogger(EofCheckedStream.class);
 
-	private InputStream is;
+	private final InputStream is;
 
 	public EofCheckedStream(InputStream is) {
 		this.is = is;

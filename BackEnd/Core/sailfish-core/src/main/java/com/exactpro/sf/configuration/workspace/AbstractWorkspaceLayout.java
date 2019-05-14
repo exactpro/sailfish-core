@@ -26,8 +26,9 @@ public abstract class AbstractWorkspaceLayout implements IWorkspaceLayout {
     
     protected String getFolder(FolderType folderType) {
 
-        if (folderType == null)
+        if(folderType == null) {
             throw new NullPointerException();
+        }
         switch (folderType) {
         case MATRIX:
             return "uploaded";

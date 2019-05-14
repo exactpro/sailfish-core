@@ -28,7 +28,7 @@ import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 
 @MatrixUtils
-@ResourceAliases({"MessageUtil"})
+@ResourceAliases("MessageUtil")
 public class MessageUtil extends AbstractCaller {
 
     @Description("Finds a message within the list, matching the specified field.<br/>" +
@@ -66,11 +66,7 @@ public class MessageUtil extends AbstractCaller {
     public Object FindField(List<IMessage> groups, String fieldName, Object fieldValue, String targetFieldName) {
         IMessage msg = FindGroup(groups, fieldName, fieldValue);
         targetFieldName = targetFieldName != null ? targetFieldName.trim() : null;
-        if (msg.isFieldSet(targetFieldName)) {
-            return msg.getField(targetFieldName);
-        } else {
-            return null;
-        }
+        return msg.isFieldSet(targetFieldName) ? msg.getField(targetFieldName) : null;
     }
 
     @Description("Returns the special object representing any value.<br/>" +

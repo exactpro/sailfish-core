@@ -28,7 +28,7 @@ public class CombineQueue<T> {
     private final Map<String, BlockingQueue<T>> exeutorToQueue = new HashMap<>();
     
     public void register(String name) {
-        if (this.exeutorToQueue.put(name, new LinkedBlockingQueue<>()) != null) {
+        if(exeutorToQueue.put(name, new LinkedBlockingQueue<>()) != null) {
             throw new IllegalArgumentException("Name '"+ name +"' is already registered");
         }
     }
@@ -51,7 +51,7 @@ public class CombineQueue<T> {
     
     private BlockingQueue<T> getNamedOrCommonQueue(String name) {
         BlockingQueue<T> result = getQueue(name);
-        return result.isEmpty() ? this.commonQueue : result;
+        return result.isEmpty() ? commonQueue : result;
     }
     
     private BlockingQueue<T> getQueue(String name) {
@@ -63,7 +63,7 @@ public class CombineQueue<T> {
                 throw new IllegalArgumentException("Name '"+ name +"' is unregistered");
             }
         }
-        
-        return this.commonQueue;
+
+        return commonQueue;
     }
 }

@@ -15,16 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+
 public class DimensionMap {
-    private Map<String, List<String>> dimensions = new LinkedHashMap<>();
+    private final Map<String, List<String>> dimensions = new LinkedHashMap<>();
 
     @JsonAnyGetter
     public Map<String, List<String>> getDimensions() {
@@ -33,7 +33,7 @@ public class DimensionMap {
 
     @JsonAnySetter
     public void setDimensions(String key, List<String> value) {
-        this.dimensions.put(key, value);
+        dimensions.put(key, value);
     }
 
     public List<String> getTagNames() {

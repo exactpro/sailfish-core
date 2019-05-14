@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.dictionaries;
 
+import static com.exactpro.sf.testwebgui.BeanUtil.getJavaTypeLabel;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +35,6 @@ import org.omnifaces.model.tree.TreeModel;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationError;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorLevel;
 import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType;
-import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.structures.ModifiableAttributeStructure;
 import com.exactpro.sf.testwebgui.structures.ModifiableFieldStructure;
 
@@ -49,27 +50,27 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 
 	private boolean standaloneField;
 
-	private boolean selected = false;
+    private boolean selected;
 
 	private boolean collapsed 					= true;
 	private boolean collapsedForSlide			= true;
 	private boolean propertiesCollapsed 		= true;
 	private boolean propertiesCollapsedForSlide = true;
 
-	private boolean propertiesChanged = false;
+    private boolean propertiesChanged;
 
 	private TreeModel<FieldEditorModel> treeModel;
-	private int childCount = 0;
+    private int childCount;
 	private int level = 1;
 	private String index;
-	
-	private boolean defaultValueInherited = false;
-	private boolean descriptionInherited  = false;
-	private boolean defaultValueOverrides = false;
-	private boolean descriptionOverrides  = false;
-    private boolean noDefValue = false; // This indicates have the field default
+
+    private boolean defaultValueInherited;
+    private boolean descriptionInherited;
+    private boolean defaultValueOverrides;
+    private boolean descriptionOverrides;
+    private boolean noDefValue; // This indicates have the field default
                                         // value or not
-    private boolean resettingDefaultValue = false; // We need this to prevent
+                                        private boolean resettingDefaultValue; // We need this to prevent
                                                    // calling setter while
                                                    // resetting default value
 	
@@ -85,7 +86,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 
             this.defaultValueInherited = this.field.getReference() != null;
 
-            this.defaultValueOverrides = this.defaultValueInherited
+            this.defaultValueOverrides = defaultValueInherited
                 ? !StringUtils.equals(this.field.getImplDefaultValue(), this.field.getImplReference().getImplDefaultValue()) : false;
 
         }
@@ -99,7 +100,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
     // method returns the first value from enum, otherwise method returns empty
     // string
     private String findFirstValue() {
-        return !this.valueModels.getModels().isEmpty() ? this.valueModels.getModels().get(0).getActual().getValue() : StringUtils.EMPTY;
+        return !valueModels.getModels().isEmpty() ? valueModels.getModels().get(0).getActual().getValue() : StringUtils.EMPTY;
     }
 
 	private void normalizeStrings(ModifiableFieldStructure field) {
@@ -109,7 +110,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 
         // We don't need to normalize if we know that field have no default
         // value
-        if (this.noDefValue) {
+        if(noDefValue) {
             return;
         }
 
@@ -152,17 +153,11 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 
 		List<AttributeModel> result = new ArrayList<>();
 
-		List<ModifiableAttributeStructure> collection;
-
-		Map<String, AttributeModel> knownAttributes = new LinkedHashMap<>();
+        Map<String, AttributeModel> knownAttributes = new LinkedHashMap<>();
 
 		Set<String> knownOverrided = new HashSet<>();
 
-		if (attributes) {
-			collection = field.getImplAttributes();
-		} else {
-			collection = field.getImplValues();
-		}
+        List<ModifiableAttributeStructure> collection = attributes ? field.getImplAttributes() : field.getImplValues();
 
 		for (ModifiableAttributeStructure attribute : collection) {
 
@@ -178,11 +173,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 				continue;
 			}
 
-			if (attributes) {
-				collection = parent.getImplAttributes();
-			} else {
-				collection = parent.getImplValues();
-			}
+            collection = attributes ? parent.getImplAttributes() : parent.getImplValues();
 
 			for (ModifiableAttributeStructure attribute : collection) {
 
@@ -193,7 +184,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 					ModifiableAttributeStructure knownAttribute = knownModel.getOriginal();
 
                     if (!(Objects.equals(knownAttribute.getValue(), attribute.getValue())
-                            && Objects.equals(knownAttribute.getType(), attribute.getType()))) {
+                            && knownAttribute.getType() == attribute.getType())) {
 						
 						knownModel.setOverrides(true);
 					}
@@ -226,40 +217,40 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	public void delete(AttributeModel toDelete, boolean attribute) {
 
 		if (attribute) {
-			this.field.removeAttribute(toDelete.getOriginal().getName());
+            field.removeAttribute(toDelete.getOriginal().getName());
 		} else {
-			this.field.removeValue(toDelete.getOriginal().getName());
+            field.removeValue(toDelete.getOriginal().getName());
 		}
 
 		createModels();
 	}
 	
 	public void applyChanges() {
-		
-		if (!this.field.isComplex()) {
-            this.field.setDefaultValue(this.editedField.getImplDefaultValue());
-			this.field.setJavaType(this.editedField.getImplJavaType());
-		}
-		
-		if (!this.field.isMessage()) {
-			this.field.setCollection(this.editedField.isCollection());
-			this.field.setRequired(this.editedField.isRequired());
-		}
-		
-		this.field.setDescription (this.editedField.getDescription());
-		this.field.setName(this.editedField.getName());
-		
-		normalizeStrings(this.field);
 
-		if (this.field.getDescription() == null) {
-			this.setDescriptionOverrides(false);
+        if(!field.isComplex()) {
+            field.setDefaultValue(editedField.getImplDefaultValue());
+            field.setJavaType(editedField.getImplJavaType());
+        }
+
+        if(!field.isMessage()) {
+            field.setCollection(editedField.isCollection());
+            field.setRequired(editedField.isRequired());
+        }
+
+        field.setDescription(editedField.getDescription());
+        field.setName(editedField.getName());
+
+        normalizeStrings(field);
+
+        if(field.getDescription() == null) {
+            setDescriptionOverrides(false);
 		}
 	}
 	
     public boolean isDefaultValueChangesMade() {
-        normalizeStrings(this.editedField);
+        normalizeStrings(editedField);
 
-        if (!this.field.isComplex() && !Objects.equals(this.field.getDefaultValue(), this.editedField.getDefaultValue())) {
+        if(!field.isComplex() && !Objects.equals(field.getDefaultValue(), editedField.getDefaultValue())) {
             return true;
         }
 
@@ -267,41 +258,41 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
     }
 
 	public boolean isPropertiesChangesMade() {
-		
-        if (!this.field.getName().equals(this.editedField.getName())) {
+
+        if(!field.getName().equals(editedField.getName())) {
             return true;
         }
-        if (!this.field.isComplex() && !Objects.equals(this.field.getImplJavaType(), this.editedField.getImplJavaType())) {
+        if(!field.isComplex() && field.getImplJavaType() != editedField.getImplJavaType()) {
             return true;
         }
-		
-		normalizeStrings(this.editedField);
-		
-        if (!this.field.isComplex() && !Objects.equals(this.field.getDefaultValue(), this.editedField.getDefaultValue())) {
+
+        normalizeStrings(editedField);
+
+        if(!field.isComplex() && !Objects.equals(field.getDefaultValue(), editedField.getDefaultValue())) {
             return true;
         }
-		
-        if (!Objects.equals(this.field.getDescription(), this.editedField.getDescription())) {
+
+        if(!Objects.equals(field.getDescription(), editedField.getDescription())) {
             return true;
         }
-		
-        if (this.field.isRequired() != this.editedField.isRequired()) {
+
+        if(field.isRequired() != editedField.isRequired()) {
             return true;
         }
-        if (this.field.isCollection() != this.editedField.isCollection()) {
+        if(field.isCollection() != editedField.isCollection()) {
             return true;
         }
-		
-        if (!this.field.isComplex() && this.field.getImplValuesSize() != this.editedField.getImplValuesSize()) {
+
+        if(!field.isComplex() && field.getImplValuesSize() != editedField.getImplValuesSize()) {
             return true;
         }
-        if (this.field.getImplAttributesSize() != this.editedField.getImplAttributesSize()) {
+        if(field.getImplAttributesSize() != editedField.getImplAttributesSize()) {
             return true;
         }
-		
-		if (!this.field.isComplex()) {
-			for (ModifiableAttributeStructure val : this.field.getImplValues()) {
-				for (ModifiableAttributeStructure val2 : this.editedField.getImplValues()) {
+
+        if(!field.isComplex()) {
+            for(ModifiableAttributeStructure val : field.getImplValues()) {
+                for(ModifiableAttributeStructure val2 : editedField.getImplValues()) {
                     if (!val.getName().equals(val2.getName())) {
                         return true;
                     }
@@ -311,13 +302,13 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 				}
 			}
 		}
-		
-		for (ModifiableAttributeStructure attr : this.field.getImplAttributes()) {
-			for (ModifiableAttributeStructure attr2 : this.editedField.getImplAttributes()) {
+
+        for(ModifiableAttributeStructure attr : field.getImplAttributes()) {
+            for(ModifiableAttributeStructure attr2 : editedField.getImplAttributes()) {
                 if (!attr.getName().equals(attr2.getName())) {
                     return true;
                 }
-                if (!Objects.equals(attr.getType(), attr2.getType())) {
+                if(attr.getType() != attr2.getType()) {
                     return true;
                 }
                 if (!Objects.equals(attr.getValue(), attr2.getValue())) {
@@ -330,9 +321,9 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	}
 	
 	private void createModels() {
-		this.attributeModels.setModels(createModel(true));
-		if (!this.field.isComplex()) {
-			this.valueModels.setModels(createModel(false));
+        attributeModels.setModels(createModel(true));
+        if(!field.isComplex()) {
+            valueModels.setModels(createModel(false));
 		}
 	}
 
@@ -344,119 +335,94 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	}
 	
 	public boolean isIsCollection() {
-		
-		if (this.field.isMessage()) {
-			return false;
-		}
-		
-		return this.field.isCollection();
-	}
+        return !field.isMessage() && field.isCollection();
+    }
 	
 	public void setIsCollection(boolean isCollection) {
-		this.field.setCollection(isCollection);
+        field.setCollection(isCollection);
 	}
 	
 	public void setIsCollection(Boolean isCollection) {
-		this.field.setCollection(isCollection);
+        field.setCollection(isCollection);
 	}
 	
 	public boolean isIsCollectionEdited() {
-		
-		if (this.editedField.isMessage()) {
-			return false;
-		}
-		
-		return this.editedField.isCollection();
-	}
+        return !editedField.isMessage() && editedField.isCollection();
+    }
 	
 	public void setIsCollectionEdited(boolean isCollection) {
-		this.editedField.setCollection(isCollection);
+        editedField.setCollection(isCollection);
 	}
 	
 	public void setIsCollectionEdited(Boolean isCollection) {
-		this.editedField.setCollection(isCollection);
+        editedField.setCollection(isCollection);
 	}
 
 	public boolean isRequired() {
-		
-		if (this.field.isMessage()) {
-			return false;
-		}
-		
-		return this.field.isRequired();
-	}
+        return !field.isMessage() && field.isRequired();
+    }
 	
 	public void setRequired(Boolean required) {
-		this.field.setRequired(required);
+        field.setRequired(required);
 	}
 
 	public void setRequired(boolean required) {
-		this.field.setRequired(required);
+        field.setRequired(required);
 	}
 	
 	public boolean isRequiredEdited() {
-		
-		if (this.editedField.isMessage()) {
-			return false;
-		}
-		
-		return this.editedField.isRequired();
-	}
+        return !editedField.isMessage() && editedField.isRequired();
+    }
 	
 	public void setRequiredEdited(boolean required) {
-		this.editedField.setRequired(required);
+        editedField.setRequired(required);
 	}
 	
 	public void setRequiredEdited(Boolean required) {
-		this.editedField.setRequired(required);
+        editedField.setRequired(required);
 	}
 
 	public boolean isValuesEditable() {
 
-		if (this.field.getReference() != null) {
+        if(field.getReference() != null) {
 
-			if (this.field.getImplReference().isComplex()) {
+            if(field.getImplReference().isComplex()) {
 				return false;
 			}
 
 			return true;
 		}
 
-		return !this.field.isComplex();
+        return !field.isComplex();
 	}
 
 	public boolean isMessage() {
 
-		if (this.field.getReference() != null) {
+        if(field.getReference() != null) {
 
-			if (this.field.getImplReference().isComplex()) {
+            if(field.getImplReference().isComplex()) {
 				return true;
 			}
 
 			return false;
 		}
 
-		return this.field.isComplex();
+        return field.isComplex();
 	}
 	
 	public String getDescription() {
-		
-		if (descriptionInherited && !descriptionOverrides) {
-			return this.field.getImplReference().getDescription();
-		}
-		
-		return this.field.getDescription();
-	}
+        return descriptionInherited && !descriptionOverrides ? field.getImplReference().getDescription() : field.getDescription();
+    }
 	
 	public boolean isErrorsInside() {
-		
-		if (this.errors != null && !this.errors.isEmpty()) {
+
+        if(errors != null && !errors.isEmpty()) {
 			return true;
 		}
-		
-		if (this.treeModel != null && this.treeModel.getChildCount() > 0) {
-		
-			for (TreeModel<FieldEditorModel> child : this.treeModel.getChildren()) {
+
+        if(treeModel != null && treeModel.getChildCount() > 0) {
+
+            for(TreeModel<FieldEditorModel> child : treeModel.getChildren()) {
 				if (child.getData().getErrors() != null && !child.getData().getErrors().isEmpty()) {
 					return true;
 				}
@@ -468,14 +434,14 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	}
 	
 	public String[] getDefValues() {
-		
-		if (this.valueModels.getModels().size() == 0) {
+
+        if(valueModels.getModels().isEmpty()) {
 			return null;
 		}
 		
 		List<String> result = new ArrayList<>();
-		
-		for (AttributeModel model : this.valueModels.getModels()) {
+
+        for(AttributeModel model : valueModels.getModels()) {
 			result.add(model.getActual().getName() + " (" + model.getActual().getValue() + ")");
 		}
 		
@@ -483,19 +449,19 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	}
 	
 	public String getDefValEdited() {
-		
-		for (AttributeModel model : this.valueModels.getModels()) {
-			if (model.getActual().getValue().equals(this.editedField.getDefaultValue())) {
+
+        for(AttributeModel model : valueModels.getModels()) {
+            if(model.getActual().getValue().equals(editedField.getDefaultValue())) {
 				return model.getActual().getName() + " (" + model.getActual().getValue() + ")";
 			}
 		}
-		
-		return this.editedField.getImplDefaultValue();
+
+        return editedField.getImplDefaultValue();
 	}
 	
 	public void setDefValEdited(String defVal) {
 
-        if (this.resettingDefaultValue) {
+        if(resettingDefaultValue) {
             this.resettingDefaultValue = false;
             return;
         }
@@ -505,46 +471,50 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 		if (defVal.contains(" (")) {
 			dv = defVal.substring(0, defVal.indexOf(" ("));
 
-            for (AttributeModel model : this.valueModels.getModels()) {
+            for(AttributeModel model : valueModels.getModels()) {
                 if (model.getActual().getName().equals(dv)) {
-                    this.editedField.setDefaultValue(model.getActual().getValue());
+                    editedField.setDefaultValue(model.getActual().getValue());
                     this.noDefValue = false;
                     return;
                 }
             }
 		}
-		
-		this.editedField.setDefaultValue(defVal);
+
+        editedField.setDefaultValue(defVal);
         this.noDefValue = false;
 	}
 	
 	public void removeError(DictionaryValidationErrorLevel errorLevel) {
-		
-		if (this.errors == null || this.errors.isEmpty()) return;
-		
-		Iterator<DictionaryValidationError> errorsIterator = this.errors.iterator();
+
+        if(errors == null || errors.isEmpty()) {
+            return;
+        }
+
+        Iterator<DictionaryValidationError> errorsIterator = errors.iterator();
 		while (errorsIterator.hasNext()) {
 			DictionaryValidationError error = errorsIterator.next();
-			
-			if (error.getLevel().equals(errorLevel)) {
+
+            if(error.getLevel() == errorLevel) {
 				errorsIterator.remove();
 			}
 		}
 	}
 	
 	public String getError(String errorType) {
-		
-		if (this.errors == null || this.errors.isEmpty()) return null;
+
+        if(errors == null || errors.isEmpty()) {
+            return null;
+        }
 		
 		DictionaryValidationErrorType type = DictionaryValidationErrorType.valueOf(errorType);
 		
 		StringBuilder builder = new StringBuilder();
 		
 		int errCount = 0;
-		
-		for (DictionaryValidationError error : this.errors) {
-			
-			if (error.getType().equals(type)) {
+
+        for(DictionaryValidationError error : errors) {
+
+            if(error.getType() == type) {
 				if (!builder.toString().isEmpty()) {
 					builder.append("<br />");
 				}
@@ -557,9 +527,9 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 		String result = builder.toString();
 		
 		if (errCount == 1) {
-			result = "Error: " + result;
+            return "Error: " + result;
 		} else if (errCount > 1) {
-			result = "Errors:<br />" + result;
+            return "Errors:<br />" + result;
 		}
 		
 		return result;
@@ -642,9 +612,8 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	}
 
 	public TreeModel<FieldEditorModel> getTreeModelForPage() {
-		if (isMessage() && this.collapsed) return null;
-		return treeModel;
-	}
+        return isMessage() && collapsed ? null : treeModel;
+    }
 
 	public void setTreeModel(TreeModel<FieldEditorModel> treeModel) {
 		this.treeModel = treeModel;
@@ -679,12 +648,11 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 	}
 	
 	public String getEditedFieldType() {
-		if (this.editedField == null || this.editedField.getImplJavaType() == null) return null;
-        return BeanUtil.getJavaTypeLabel(this.editedField.getImplJavaType());
-	}
+        return editedField == null || editedField.getImplJavaType() == null ? null : getJavaTypeLabel(editedField.getImplJavaType());
+    }
 	
 	public void setEditedFieldType(String str) {
-        this.editedField.setJavaType(DictionaryEditorModel.fromTypeLabel(str));
+        editedField.setJavaType(DictionaryEditorModel.fromTypeLabel(str));
 	}
 	
 	public ModifiableFieldStructure getEditedField() {
@@ -695,15 +663,15 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 		this.editedField = editedField;
 		
 		if (editedField != null && !field.isComplex() && field.getReference() != null) {
-			
-			if (!this.descriptionOverrides && StringUtils.isEmpty(field.getDescription()) && 
-					!StringUtils.isEmpty(field.getImplReference().getDescription())) {
+
+            if(!descriptionOverrides && StringUtils.isEmpty(field.getDescription()) &&
+                    !StringUtils.isEmpty(field.getImplReference().getDescription())) {
 				
 				this.descriptionInherited = true;
 				this.editedField.setDescription(field.getImplReference().getDescription());
 			}
 
-            if (!this.defaultValueOverrides) {
+            if(!defaultValueOverrides) {
 				this.editedField.setDefaultValue(field.getImplReference().getImplDefaultValue());
                 this.noDefValue = this.editedField.getImplDefaultValue() == null;
 			}
@@ -784,7 +752,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
 
 	@Override
 	public int compareTo(FieldEditorModel o) {
-		return this.getIndex().compareTo(o.getIndex());
+        return getIndex().compareTo(o.getIndex());
 	}
 
     public boolean isNoDefValue() {
@@ -792,7 +760,7 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
     }
 
     public void setNoDefValue(boolean noDefValue) {
-        if (this.editedField != null) {
+        if(editedField != null) {
             if (noDefValue) { // No default value flag turned on
                 if (isDefaultValueInherited()) { // If default value inherited,
                                                  // we can not delete it, we
@@ -800,20 +768,20 @@ public class FieldEditorModel implements Comparable<FieldEditorModel>, Serializa
                                                  // value of the parent field
                                                  // and turn off the 'overrides'
                                                  // flag
-                    this.editedField.setDefaultValue(this.field.getImplReference().getImplDefaultValue());
+                    editedField.setDefaultValue(field.getImplReference().getImplDefaultValue());
                     this.defaultValueOverrides = false;
                     this.resettingDefaultValue = true;
-                    this.noDefValue = this.editedField.getDefaultValue() == null;
+                    this.noDefValue = editedField.getDefaultValue() == null;
                 } else { // If default value not inherited, we delete it
-                    this.editedField.setDefaultValue(null);
+                    editedField.setDefaultValue(null);
                     this.noDefValue = true;
                 }
             } else {
                 // No default value flag turned on, if the edited field not hold
                 // some value,
                 // we use findFirstValue() method to set default value
-                if (this.editedField.getImplDefaultValue() == null) {
-                    this.editedField.setDefaultValue(findFirstValue());
+                if(editedField.getImplDefaultValue() == null) {
+                    editedField.setDefaultValue(findFirstValue());
                 }
                 this.noDefValue = false;
             }

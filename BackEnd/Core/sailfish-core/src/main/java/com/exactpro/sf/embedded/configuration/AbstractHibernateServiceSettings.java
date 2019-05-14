@@ -28,8 +28,8 @@ public abstract class AbstractHibernateServiceSettings implements IMapableSettin
     private static final long serialVersionUID = 6465531653053776115L;
     
     protected final HibernateStorageSettings storageSettings;
-    
-    protected boolean serviceEnabled = false;
+
+    protected boolean serviceEnabled;
     
     protected String testQuery;
     
@@ -39,14 +39,14 @@ public abstract class AbstractHibernateServiceSettings implements IMapableSettin
     
     @Override
     public void fillFromMap(Map<String, String> options) throws Exception {
-        this.storageSettings.fillFromMap(options);
+        storageSettings.fillFromMap(options);
         this.serviceEnabled = BooleanUtils.toBoolean(options.get(getStoragePrefix() + "serviceEnabled"));
         this.testQuery = options.get(getStoragePrefix() + "testQuery");
     }
     
     @Override
     public Map<String, String> toMap() throws Exception {
-        Map<String, String> result = this.storageSettings.toMap();
+        Map<String, String> result = storageSettings.toMap();
         result.put(getStoragePrefix() + "serviceEnabled", Boolean.toString(serviceEnabled));
         result.put(getStoragePrefix() + "testQuery", testQuery);
         return result;

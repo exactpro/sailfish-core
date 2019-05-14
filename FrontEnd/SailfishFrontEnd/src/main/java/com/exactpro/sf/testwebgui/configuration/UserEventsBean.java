@@ -47,7 +47,7 @@ import com.exactpro.sf.testwebgui.BeanUtil;
 @ViewScoped
 public class UserEventsBean {
 
-    private static Map styleMapping = new HashMap() {
+    private static final Map styleMapping = new HashMap() {
         {
             put("DEBUG", "ue_table_priority_debug");
             put("INFO", "ue_table_priority_info");
@@ -58,7 +58,7 @@ public class UserEventsBean {
 
     private static final DateTimeFormatter  LOGGERFORMAT = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd HH:mm:ss,SSS").toFormatter();
 
-    private final static String LOG_SEPARATOR = "[$]";
+    private static final String LOG_SEPARATOR = "[$]";
     private final String[] properties = {"datetime", "priority", "message"};
 
     private List<Map<String, ?>> filteredLogs;
@@ -69,7 +69,7 @@ public class UserEventsBean {
         ISFContext sfContext = BeanUtil.getSfContext();
         IWorkspaceDispatcher workspaceDispatcher = sfContext.getWorkspaceDispatcher();
 
-        Function<String, Map<String, Object>> parseString = (s) -> {
+        Function<String, Map<String, Object>> parseString = s -> {
             Map<String, Object> result = new HashMap<>();
             int counter = 0;
             for (String element : s.split(Pattern.quote(LOG_SEPARATOR))) {
@@ -79,7 +79,7 @@ public class UserEventsBean {
             return result;
         };
 
-        Function<Map<String, Object>, Map<String, Object>> process = (sourceMap) -> {
+        Function<Map<String, Object>, Map<String, Object>> process = sourceMap -> {
             String targetStyle = (String) styleMapping.getOrDefault(sourceMap.get("priority"), "");
             sourceMap.put("style", targetStyle);
             String datetime = (String) sourceMap.get("datetime");

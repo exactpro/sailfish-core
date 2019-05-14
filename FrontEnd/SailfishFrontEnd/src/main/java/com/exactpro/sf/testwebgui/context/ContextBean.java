@@ -28,11 +28,7 @@ import com.exactpro.sf.center.impl.SFLocalContext;
 @SuppressWarnings("serial")
 public class ContextBean implements Serializable {
 
-	public ContextBean() {
-
-	}
-
-	public ISFContext getContext() {
+    public ISFContext getContext() {
 
 		return SFLocalContext.getDefault();
 

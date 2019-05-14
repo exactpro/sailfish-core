@@ -15,15 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.common.util;
 
+import static java.lang.Character.isWhitespace;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class StringUtil {
 
@@ -58,13 +63,13 @@ public class StringUtil {
 
 		for (byte b : s.getBytes())
 		{
-			if ((b >= 'a' && b <= 'z'))
+			if (b >= 'a' && b <= 'z')
 			{
 				if (isFirst) {
 					b -= shift;
 					isFirst = false;
 				}
-			} else if ((b >= 'A' && b <= 'Z'))
+			} else if (b >= 'A' && b <= 'Z')
 			{
 				if (isFirst) {
 					isFirst = false;
@@ -152,9 +157,8 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String getSSuffix(int quantity) {
-		if (quantity != 1) return "s";
-		return "";
-	}
+        return quantity != 1 ? "s" : "";
+    }
 
 	/**
 	 * Parse string: '1-3,5 , 7-' to set of integers.
@@ -165,7 +169,7 @@ public class StringUtil {
 	public static Set<Integer> parseRange(String s, int size)
 	{
 		Set<Integer> list = new HashSet<>();
-		if (s == null || s.trim().equals("")) {
+        if(StringUtils.isBlank(s)) {
 			for (int i=0; i<size; i++) {
 				list.add(i);
 			}
@@ -258,28 +262,12 @@ public class StringUtil {
 	}
 
 	/**
-	 * Compare 2 objects without NullPointerException.
-	 * @param o1
-	 * @param o2
-	 * @return {@code true} if objects are equals or both are {@code null}
-	 */
-	public static boolean equals(Object o1, Object o2) {
-		if (o1 == null && o2 == null) {
-			return true;
-		}
-		if (o1 != null) {
-			return o1.equals(o2);
-		}
-		return false;
-	}
-
-	/**
 	 * Split string to array.
 	 * @param s source string
 	 * @param delim delimiter
 	 * @return
 	 */
-	public static String[] split(final String s, final String delim)
+	public static String[] split(String s, String delim)
 	{
 		if (s == null) {
 			throw new NullPointerException("String is null");
@@ -287,7 +275,7 @@ public class StringUtil {
 		if (delim == null) {
 			throw new NullPointerException("Delimiter is null");
 		}
-		if (delim.equals("")) {
+        if(delim.isEmpty()) {
 			List<String> arr = new ArrayList<>();
 			for (int i=0; i<s.length(); i++) {
 				arr.add(String.valueOf(s.charAt(i)));
@@ -305,7 +293,7 @@ public class StringUtil {
 			endIndex = s.indexOf(delim, beginIndex);
 		}
 
-		list.add(s.substring(beginIndex, s.length()));
+        list.add(s.substring(beginIndex));
 
 		return list.toArray(new String[list.size()]);
 	}
@@ -331,7 +319,7 @@ public class StringUtil {
 		return sb.toString();
 	}
 
-	private static HashMap<Character, String> trans = null;
+	private static HashMap<Character, String> trans;
 	private static int cur = 192;
 
 	private static void next(String s) {
@@ -423,17 +411,19 @@ public class StringUtil {
 	public static final String escapeHTML(String s){
 	   StringBuffer sb = new StringBuffer();
 	   int n = s.length();
-	   if (trans == null)
-		   initHTMLtransformer();
+        if(trans == null) {
+            initHTMLtransformer();
+        }
 
 
 	   for (int i = 0; i < n; i++) {
 	      char c = s.charAt(i);
 	      String app = trans.get(c);
-	      if (app != null)
-	    	  sb.append(app);
-	      else
-	    	  sb.append(c);
+           if(app != null) {
+               sb.append(app);
+           } else {
+               sb.append(c);
+           }
 	   }
 	   return sb.toString();
 	}
@@ -478,8 +468,7 @@ public class StringUtil {
 	 * @return the maximum string
 	 */
 	public static final String maximumString(String s1, String s2) {
-		if (s1.compareTo(s2) > 0) return s1;
-		else return s2;
+        return s1.compareTo(s2) > 0 ? s1 : s2;
 	}
 
 	public static final String enclose(String input) {
@@ -491,12 +480,8 @@ public class StringUtil {
 	}
 
 	public static boolean isStripped(CharSequence cs) {
-	    if(cs == null || cs.length() == 0) {
-	        return true;
-	    }
-
-	    return !Character.isWhitespace(cs.charAt(0)) && !Character.isWhitespace(cs.charAt(cs.length() - 1));
-	}
+        return cs == null || cs.length() == 0 || !isWhitespace(cs.charAt(0)) && !isWhitespace(cs.charAt(cs.length() - 1));
+    }
 
     public static String validateFileName(String fileName) {
         Matcher matcher = FORBIDDEN_FILENAME_ELEMENTS.matcher(fileName);

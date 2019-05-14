@@ -42,7 +42,7 @@ import com.exactpro.sf.testwebgui.BeanUtil;
 public class NetDumperBean implements Serializable {
 	
 	private static final Logger logger = LoggerFactory.getLogger(NetDumperBean.class);
-	private static final String[] fileSizeSuffixes = new String[] { "B", "KB", "MB", "GB", "TB" };
+    private static final String[] fileSizeSuffixes = { "B", "KB", "MB", "GB", "TB" };
 	
     private static final String AVAILABLE = "Available";
     private static final String UNAVAILABLE = "Unavailable";
@@ -63,8 +63,8 @@ public class NetDumperBean implements Serializable {
         this.options = new NetDumperOptions();
 		
 		try {
-		    
-            this.options.fillFromMap(actual.toMap());
+
+            options.fillFromMap(actual.toMap());
 			
         } catch (Exception e) {
 			throw new RuntimeException("Actual NetDumper options could not be copied", e);
@@ -72,10 +72,10 @@ public class NetDumperBean implements Serializable {
 	}
 	
     public String getStatus() {
-        if (this.status == null) {
+        if(status == null) {
 			forceStatusUpdate();
 		}
-        return this.status;
+        return status;
 	}
 	
 	public void forceStatusUpdate() {

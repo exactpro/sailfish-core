@@ -15,8 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.configuration;
 
-import java.util.Map;
-
 import com.exactpro.sf.embedded.configuration.AbstractHibernateServiceSettings;
 import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
 
@@ -96,7 +94,7 @@ public class StatisticsServiceSettings extends AbstractHibernateServiceSettings 
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+        int prime = 31;
 		int result = 1;
 		result = prime * result + (serviceEnabled ? 1231 : 1237);
 		result = prime * result
@@ -112,35 +110,47 @@ public class StatisticsServiceSettings extends AbstractHibernateServiceSettings 
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		StatisticsServiceSettings other = (StatisticsServiceSettings) obj;
-		if (serviceEnabled != other.serviceEnabled)
-			return false;
+        if(serviceEnabled != other.serviceEnabled) {
+            return false;
+        }
 		if (storageSettings == null) {
-			if (other.storageSettings != null)
-				return false;
-		} else if (!storageSettings.equals(other.storageSettings))
-			return false;
+            if(other.storageSettings != null) {
+                return false;
+            }
+        } else if(!storageSettings.equals(other.storageSettings)) {
+            return false;
+        }
 		if (thisSfHost == null) {
-			if (other.thisSfHost != null)
-				return false;
-		} else if (!thisSfHost.equals(other.thisSfHost))
-			return false;
+            if(other.thisSfHost != null) {
+                return false;
+            }
+        } else if(!thisSfHost.equals(other.thisSfHost)) {
+            return false;
+        }
 		if (thisSfName == null) {
-			if (other.thisSfName != null)
-				return false;
-		} else if (!thisSfName.equals(other.thisSfName))
-			return false;
+            if(other.thisSfName != null) {
+                return false;
+            }
+        } else if(!thisSfName.equals(other.thisSfName)) {
+            return false;
+        }
 		if (thisSfPort == null) {
-			if (other.thisSfPort != null)
-				return false;
-		} else if (!thisSfPort.equals(other.thisSfPort))
-			return false;
+            if(other.thisSfPort != null) {
+                return false;
+            }
+        } else if(!thisSfPort.equals(other.thisSfPort)) {
+            return false;
+        }
 		return true;
 	}
 

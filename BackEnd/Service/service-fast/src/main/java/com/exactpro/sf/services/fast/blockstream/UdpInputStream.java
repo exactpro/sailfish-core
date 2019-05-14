@@ -21,20 +21,20 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.openfast.Message;
 import org.openfast.MessageBlockReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UdpInputStream extends InputStream implements MessageBlockReader {
-	private final static Logger logger = LoggerFactory.getLogger(UdpInputStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(UdpInputStream.class);
 
 	protected static final int BUFFER_SIZE = 64 * 1024;
-	private DatagramSocket socket;
-	private ByteBuffer buffer;
+    private final DatagramSocket socket;
+    private final ByteBuffer buffer;
 	private boolean canReceivePacket;
 
-	private IPacketHandler packetHandler;
+    private final IPacketHandler packetHandler;
 
 	public UdpInputStream(DatagramSocket socket) {
 		this(socket, BUFFER_SIZE, null);
@@ -53,8 +53,9 @@ public class UdpInputStream extends InputStream implements MessageBlockReader {
 
 	@Override
 	public int read() throws IOException {
-		if (socket.isClosed())
-			return -1;
+        if(socket.isClosed()) {
+            return -1;
+        }
 		if (!buffer.hasRemaining()) {
 			if (!canReceivePacket) {
 				logger.debug("no data left in the buffer.");
@@ -66,12 +67,13 @@ public class UdpInputStream extends InputStream implements MessageBlockReader {
 					buffer.capacity());
 			socket.receive(packet);
 			buffer.flip();
-			if (packetHandler != null)
-				packetHandler.handlePacket(buffer.array()); //Reset context
+            if(packetHandler != null) {
+                packetHandler.handlePacket(buffer.array()); //Reset context
+            }
 			buffer.limit(packet.getLength());
 		}
 		canReceivePacket = false;
-		return (buffer.get() & 0xFF);
+		return buffer.get() & 0xFF;
 	}
 
 	public void clearBuffer() {

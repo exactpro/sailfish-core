@@ -24,12 +24,8 @@ import com.exactprosystems.webchannels.messages.ChannelsMessage;
 public class NotifyResponse extends AbstractMessage{
 	
 	private String requestId;
-	
-	public NotifyResponse() {
-		super();
-	}
-	
-	public String getRequestId() {
+
+    public String getRequestId() {
 		return requestId;
 	}
 

@@ -16,6 +16,7 @@
 package com.exactpro.sf.storage.impl;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -23,10 +24,7 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.exactpro.sf.scriptrunner.EnvironmentSettings;
-import com.exactpro.sf.storage.BaseStorageSettings;
 import org.apache.commons.io.FilenameUtils;
-import java.time.Instant;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
@@ -34,8 +32,8 @@ import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.util.HexDumper;
-import com.exactpro.sf.configuration.DictionaryManager;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.storage.BaseStorageSettings;
 import com.exactpro.sf.storage.IObjectFlusher;
 import com.exactpro.sf.storage.MessageFilter;
 import com.exactpro.sf.storage.MessageList;
@@ -71,7 +69,7 @@ public class FileMessageStorage extends AbstractMessageStorage {
         this.interner = new CHMInterner<>();
         this.messageID = new AtomicLong(messages.size());
 
-        this.flusher.start();
+        flusher.start();
     }
 
     @Override

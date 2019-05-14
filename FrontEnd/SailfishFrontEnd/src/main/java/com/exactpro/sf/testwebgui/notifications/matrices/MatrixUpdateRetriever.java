@@ -30,7 +30,7 @@ public class MatrixUpdateRetriever implements IUpdateRetriever, MatrixUpdateList
 
 	private static final Logger logger = LoggerFactory.getLogger(MatrixUpdateRetriever.class);
 
-	private List<IUpdateRequestListener> listeners;
+	private final List<IUpdateRequestListener> listeners;
 
 	public MatrixUpdateRetriever() {
 		listeners = new CopyOnWriteArrayList<>();

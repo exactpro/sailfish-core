@@ -41,8 +41,7 @@ public class JsonUpdateTransactionSpliceEntry {
 			@JsonProperty("deleteCount") int deleteCount,
 			@JsonProperty("shallowReplace") boolean shallowReplace,
 			@JsonProperty("data") List<JsonMatrixTestCase> data) {
-		super();
-		this.path = path;
+        this.path = path;
 		this.start = start;
 		this.deleteCount = deleteCount;
 		this.shallowReplace = shallowReplace;

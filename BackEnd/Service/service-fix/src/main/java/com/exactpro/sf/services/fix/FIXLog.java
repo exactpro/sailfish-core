@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.ServiceEvent;
+import com.exactpro.sf.services.ServiceEvent.Type;
 import com.exactpro.sf.services.ServiceEventFactory;
 
 import quickfix.Log;
@@ -35,10 +36,10 @@ public class FIXLog implements Log, Closeable  {
 	private final Logger logger;
 	private final Log nativeLog;
 
-	private boolean INFO_ENABLE;
-	private boolean ERROR_ENABLE;
+    private final boolean INFO_ENABLE;
+    private final boolean ERROR_ENABLE;
 
-	public FIXLog(Log nativeLog, boolean logHeartbeats, final IService service, final IServiceMonitor monitor, final Logger logger) {
+    public FIXLog(Log nativeLog, boolean logHeartbeats, IService service, IServiceMonitor monitor, Logger logger) {
 	    this.nativeLog = Objects.requireNonNull(nativeLog, "'Native log' can't be null");
 		this.service = Objects.requireNonNull(service, "'Service' can't be null");
 		this.servMonitor = Objects.requireNonNull(monitor, "'Service monitor' can't be null");
@@ -54,7 +55,7 @@ public class FIXLog implements Log, Closeable  {
 
 	@Override
 	public void onEvent(String text) {
-		ServiceEvent event = ServiceEventFactory.createEventInfo(service.getServiceName(), ServiceEvent.Type.INFO, text, null);
+        ServiceEvent event = ServiceEventFactory.createEventInfo(service.getServiceName(), Type.INFO, text, null);
 		if(INFO_ENABLE) {
 			logger.info(text);
 		}
@@ -64,7 +65,7 @@ public class FIXLog implements Log, Closeable  {
 
     @Override
     public void onErrorEvent(String text) {
-        ServiceEvent event = ServiceEventFactory.createEventError(service.getServiceName(), ServiceEvent.Type.ERROR, text, null);
+        ServiceEvent event = ServiceEventFactory.createEventError(service.getServiceName(), Type.ERROR, text, null);
 		if(ERROR_ENABLE) {
 			logger.error(text);
 		}
@@ -84,8 +85,8 @@ public class FIXLog implements Log, Closeable  {
 
     @Override
     public void close() throws IOException {
-        if (this.nativeLog instanceof Closeable) {
-            ((Closeable)this.nativeLog).close();
+        if(nativeLog instanceof Closeable) {
+            ((Closeable)nativeLog).close();
         }
     }
 

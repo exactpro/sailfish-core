@@ -29,10 +29,10 @@ public class MatrixAdapter implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7538488603270652995L;
 
-	private Long matrixId;
+    private final Long matrixId;
 
 	private boolean continueOnFailed  = true;
-	private boolean autoStart 		  = false;
+	private boolean autoStart;
 	private String range;
 	private IView view;
 
@@ -47,7 +47,7 @@ public class MatrixAdapter implements Serializable, Cloneable {
 		if (obj instanceof MatrixAdapter) {
 			MatrixAdapter matrixAdapter = (MatrixAdapter)obj;
 			return matrixId != null ?
-					(matrixAdapter.getMatrixId() != null ? matrixId.equals(matrixAdapter.getMatrixId()) : false) :
+                    matrixAdapter.getMatrixId() != null ? matrixId.equals(matrixAdapter.getMatrixId()) : false :
 						matrixAdapter.getMatrixId() == null;
 		}
 
@@ -164,11 +164,8 @@ public class MatrixAdapter implements Serializable, Cloneable {
 	protected IMatrix getIMatrix() {
 		if (view != null) {
 			IMatrix matrix = view.getMatrixHolder().getMatrixById(matrixId);
-			if (matrix == null) {
-				return new DefaultMatrix();
-			}
-			return view.getMatrixHolder().getMatrixById(matrixId);
-		} else {
+            return matrix == null ? new DefaultMatrix() : view.getMatrixHolder().getMatrixById(matrixId);
+        } else {
 			throw new IllegalStateException("View in null");
 		}
 	}

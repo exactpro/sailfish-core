@@ -62,8 +62,8 @@ public class SimpleCell {
         SimpleCell that = (SimpleCell)obj;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.value, that.value);
-        builder.append(this.cellStyle, that.cellStyle);
+        builder.append(value, that.value);
+        builder.append(cellStyle, that.cellStyle);
 
         return builder.isEquals();
     }

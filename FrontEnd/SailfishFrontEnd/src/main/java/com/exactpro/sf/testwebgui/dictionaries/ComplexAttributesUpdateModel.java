@@ -126,9 +126,9 @@ public class ComplexAttributesUpdateModel {
 
         if (oldAction == AttributeAction.REMOVE) {
             boolean showMsg = false;
-            Iterator iterator = newAttributes.iterator();
+            Iterator<ModifiableAttributeStructure> iterator = newAttributes.iterator();
             while (iterator.hasNext()) {
-                ModifiableAttributeStructure attr = (ModifiableAttributeStructure) iterator.next();
+                ModifiableAttributeStructure attr = iterator.next();
                 if (StringUtils.isEmpty(attr.getValue()) || attr.getType() == null) {
                     iterator.remove();
                     showMsg = true;

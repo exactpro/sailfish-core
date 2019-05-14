@@ -18,8 +18,7 @@ package com.exactpro.sf.services.fast.converter;
 public class ConverterException extends Exception {
 
 	public ConverterException() {
-		super();
-	}
+    }
 
 	public ConverterException(String message, Throwable cause) {
 		super(message, cause);

@@ -36,6 +36,7 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.storage.FilterCriterion;
+import com.exactpro.sf.storage.FilterCriterion.Operation;
 import com.exactpro.sf.storage.xml.DataMessage;
 import com.exactpro.sf.storage.xml.DataMessageConverter;
 import com.exactpro.sf.storage.xml.DataMessagePersister;
@@ -137,7 +138,7 @@ public class StoreTest extends AbstractTest {
 	public void dbRetrieve() throws Exception {
 		DBPersister persister = new DBPersister();
 
-		FilterCriterion crirerion = new FilterCriterion(XmlDataMessage.RAW_DATA, "0", FilterCriterion.Operation.LIKE);
+		FilterCriterion crirerion = new FilterCriterion(XmlDataMessage.RAW_DATA, "0", Operation.LIKE);
 		List<FilterCriterion> filterCriterions = new LinkedList<FilterCriterion>();
 		filterCriterions.add(crirerion);
 		DataMessage dataMessage = persister.getDataMessage(filterCriterions, null);

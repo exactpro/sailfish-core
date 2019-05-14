@@ -24,12 +24,8 @@ import com.exactprosystems.webchannels.messages.ChannelsMessage;
 public class MatrixUpdateResponse extends AbstractMessage {	
 	
 	private String requestId;
-	
-	public MatrixUpdateResponse() {
-		super();
-	}
-	
-	public String getRequestId() {
+
+    public String getRequestId() {
 		return requestId;
 	}
 

@@ -137,11 +137,11 @@ public abstract class TestNTGClientBase extends TestClientBase {
                     session.write(messageNewOrder);
                 }
             }
+            return messageNewOrder;
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
             throw e;
         }
-        return messageNewOrder;
     }
 
     protected static IServiceSettings getServerSettings() {

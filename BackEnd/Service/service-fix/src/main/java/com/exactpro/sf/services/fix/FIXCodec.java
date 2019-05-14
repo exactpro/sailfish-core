@@ -103,7 +103,7 @@ public class FIXCodec extends AbstractCodec {
         this.msgFactory = msgFactory;
 		this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
 		this.fieldConverter = new FixFieldConverter();
-		this.fieldConverter.init(dictionary, dictionary.getNamespace());
+        fieldConverter.init(dictionary, dictionary.getNamespace());
 		this.qfjConverter = new DirtyQFJIMessageConverter(dictionary, msgFactory, false, false, false);
 		this.msgStructures = new HashMap<>();
 
@@ -116,12 +116,12 @@ public class FIXCodec extends AbstractCodec {
 
                 Boolean hasXmlFields = getAttributeValue(messageStructure, FixMessageHelper.HAS_XML_FIELDS_ATTR_NAME);
                 if (Boolean.TRUE.equals(hasXmlFields)) {
-                    this.messagesWithXmlField.add(msgType);
+                    messagesWithXmlField.add(msgType);
                 }
             }
         }
         this.dataDict = new QFJDictionaryAdapter(dictionary);
-        this.dataDict.setAllowUnknownMessageFields(true);
+        dataDict.setAllowUnknownMessageFields(true);
 
         String filterValues = this.settings.getFilterMessages();
         messageFilter = StringUtils.isNotEmpty(filterValues) ? new TagValueFilter(filterValues) : new FakeFilter();
@@ -219,12 +219,11 @@ public class FIXCodec extends AbstractCodec {
                 message.getMetaData().setRawMessage(raw);
 
                 out.write(message);
-                decoded = true;
-                break;
+                return true;
             }
 
             if (fixString == null) {
-                break;
+                return decoded;
             }
 
             logger.debug("doDecode: FixString = {}", fixString);
@@ -236,11 +235,7 @@ public class FIXCodec extends AbstractCodec {
             }
 
             try {
-                if (settings.isDecodeByDictionary()) {
-                    message = convertToIMessageByIDictionaryStructure(fixString);
-                } else {
-                    message = convertToIMessage(fixString);
-                }
+                message = settings.isDecodeByDictionary() ? convertToIMessageByIDictionaryStructure(fixString) : convertToIMessage(fixString);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
 
@@ -257,13 +252,12 @@ public class FIXCodec extends AbstractCodec {
             decoded = true;
         }
 
-        return decoded;
     }
 
     @Override
     public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
         if (message instanceof IMessage) {
-            IMessage originIMessage = ((IMessage) message);
+            IMessage originIMessage = (IMessage)message;
 
             MsgMetaData metaData = originIMessage.getMetaData();
             IMessage encoded = originIMessage.cloneMessage();
@@ -298,11 +292,7 @@ public class FIXCodec extends AbstractCodec {
             MsgMetaData metaData = iMessage.getMetaData();
 
             String unexpectedMessages = settings.getUnexpectedMessages();
-            if (unexpectedMessages != null && !unexpectedMessages.trim().isEmpty()) {
-                metaData.setAdmin(isUnexpectedMessage(fixMessage, unexpectedMessages));
-            } else {
-                metaData.setAdmin(false);
-            }
+            metaData.setAdmin(unexpectedMessages != null && !unexpectedMessages.trim().isEmpty() && isUnexpectedMessage(fixMessage, unexpectedMessages));
         }
 
         return iMessage;
@@ -316,7 +306,7 @@ public class FIXCodec extends AbstractCodec {
             int separatorIndex = tagValueArray[i].indexOf("=");
             String key = tagValueArray[i].substring(0, separatorIndex);
             String value = tagValueArray[i].substring(separatorIndex + 1);
-            String convertedKey = (String) this.fieldConverter.convertValue(key, true);
+            String convertedKey = (String)fieldConverter.convertValue(key, true);
             if (convertedKey == null) {
                 logger.warn("Tag [{}] does not present in the [{}] dictionary, " +
                             "but exists in the [{}] incoming message", key, dictionary.getNamespace(), fixMessage);
@@ -327,7 +317,7 @@ public class FIXCodec extends AbstractCodec {
         }
 
         String msgType = fields.get(FixMessageHelper.MSG_TYPE_FIELD);
-        IMessageStructure messageStructure = this.msgStructures.get(msgType);
+        IMessageStructure messageStructure = msgStructures.get(msgType);
 
         String messageName;
         if(messageStructure == null) {
@@ -338,7 +328,7 @@ public class FIXCodec extends AbstractCodec {
         }
 
         IMessage iMessage =
-                MessageUtil.convertToIMessage(fields, this.msgFactory, this.dictionary.getNamespace(), messageName);
+                MessageUtil.convertToIMessage(fields, msgFactory, dictionary.getNamespace(), messageName);
 
         parseXmlFields(iMessage, new IMessageFieldExtractor(iMessage), iMessage.getField(FixMessageHelper.MSG_TYPE_FIELD));
 
@@ -346,11 +336,7 @@ public class FIXCodec extends AbstractCodec {
         metaData.setRawMessage(fixMessage.getBytes());
         metaData.setRejected(rejected);
         String unexpectedMessages = settings.getUnexpectedMessages();
-        if (unexpectedMessages != null && !unexpectedMessages.trim().isEmpty()) {
-            metaData.setAdmin(isUnexpectedMessage(fixMessage, unexpectedMessages));
-        } else {
-            metaData.setAdmin(false);
-        }
+        metaData.setAdmin(unexpectedMessages != null && !unexpectedMessages.trim().isEmpty() && isUnexpectedMessage(fixMessage, unexpectedMessages));
         return iMessage;
     }
 
@@ -402,7 +388,7 @@ public class FIXCodec extends AbstractCodec {
     }
     private IMessage convertMessageToIMessage(Message message, String namespace) throws Exception {
         String msgType = message.getHeader().getString(MsgType.FIELD);
-        String messageName = this.msgStructures.get(msgType).getName();
+        String messageName = msgStructures.get(msgType).getName();
         IMessage iMessage = msgFactory.createMessage(messageName, namespace);
 
         // create header / trailer if not exist
@@ -444,10 +430,10 @@ public class FIXCodec extends AbstractCodec {
                     Integer groupTag = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG);
                     List<Group> groups = message.getGroups(groupTag);
 
-                    if(groups.size() != 0) {
+                    if(!groups.isEmpty()) {
                         List<IMessage> groupList = new ArrayList<>();
                         addGroup(groups, groupList, fieldStructure);
-                        if(groupList.size() != 0) {
+                        if(!groupList.isEmpty()) {
                             iMessageTo.addField(fieldStructure.getName(), groupList);
                         }
                     }
@@ -458,7 +444,7 @@ public class FIXCodec extends AbstractCodec {
                     IMessageStructure componentStructure = dictionary.getMessages().get(fieldStructure.getReferenceName());
 
                     copyFields(message, iMessageComponent, componentStructure);
-                    if(iMessageComponent.getFieldNames().size() != 0) {
+                    if(!iMessageComponent.getFieldNames().isEmpty()) {
                         iMessageTo.addField(fieldStructure.getName(), Arrays.asList(iMessageComponent));
                     }
 
@@ -466,12 +452,12 @@ public class FIXCodec extends AbstractCodec {
             } else {
                 Integer tag = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_TAG);
                 if(tag != null && message.isSetField(tag)) {
-                    if(this.settings.isRemoveTrailingZeros()) {
+                    if(settings.isRemoveTrailingZeros()) {
                         try {
-                            if (JavaType.JAVA_LANG_DOUBLE.equals(fieldStructure.getJavaType())) {
+                            if(fieldStructure.getJavaType() == JavaType.JAVA_LANG_DOUBLE) {
                                 String value = new BigDecimal(message.getString(tag)).stripTrailingZeros().toPlainString();
                                 iMessageTo.addField(fieldStructure.getName(), value);
-                            } else if (JavaType.JAVA_MATH_BIG_DECIMAL.equals(fieldStructure.getJavaType())) {
+                            } else if(fieldStructure.getJavaType() == JavaType.JAVA_MATH_BIG_DECIMAL) {
                                 String value = message.getDecimal(tag).stripTrailingZeros().toPlainString();
                                 iMessageTo.addField(fieldStructure.getName(), value);
                             } else {
@@ -499,7 +485,7 @@ public class FIXCodec extends AbstractCodec {
     private IMessage parseXmlFields(IMessage targetMessage, IFieldExtractor fieldExtractor, String msgType)
             throws Exception {
        if (msgType != null && messagesWithXmlField.contains(msgType)) {
-            IMessageStructure msgStructure = this.msgStructures.get(msgType);
+           IMessageStructure msgStructure = msgStructures.get(msgType);
             if (msgStructure != null) {
                 for(IFieldStructure fieldStructure : msgStructure.getFields().values()) {
                     String entityType = getAttributeValue(fieldStructure, FixMessageHelper.ATTRIBUTE_ENTITY_TYPE);

@@ -112,20 +112,20 @@ public class ExpressionResult {
 
         ExpressionResult that = (ExpressionResult) o;
         return new EqualsBuilder()
-                .append(this.result, that.result)
-                .append(this.description, that.description)
-                .append(this.actualDescriptions, that.actualDescriptions)
-                .append(this.potentialDescriptions, that.potentialDescriptions)
+                .append(result, that.result)
+                .append(description, that.description)
+                .append(actualDescriptions, that.actualDescriptions)
+                .append(potentialDescriptions, that.potentialDescriptions)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(this.result)
-                .append(this.description)
-                .append(this.actualDescriptions)
-                .append(this.potentialDescriptions)
+                .append(result)
+                .append(description)
+                .append(actualDescriptions)
+                .append(potentialDescriptions)
                 .toHashCode();
     }
 

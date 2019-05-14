@@ -39,7 +39,7 @@ import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 
 public class IMessageToFastConverter {
-	private final static Logger logger = LoggerFactory.getLogger(IMessageToFastConverter.class);
+    private static final Logger logger = LoggerFactory.getLogger(IMessageToFastConverter.class);
 
 	private final IDictionaryStructure dictionary;
 	private final TemplateRegistry templateRegistry;
@@ -94,9 +94,8 @@ public class IMessageToFastConverter {
 
 	private void convertField(Group template, GroupValue fastMsg, IMessage message,
 			String fieldName, IMessageStructure structure) throws ConverterException {
-		String fastFieldName = null;
-		IFieldStructure messageFieldDescr = msgFielsMap.get(structure).get(fieldName);
-        fastFieldName = getAttributeValue(messageFieldDescr, "fastName");
+        IFieldStructure messageFieldDescr = msgFielsMap.get(structure).get(fieldName);
+        String fastFieldName = getAttributeValue(messageFieldDescr, "fastName");
 
 		if (fastFieldName == null) {
             Boolean isLength = getAttributeValue(messageFieldDescr, "isLength");
@@ -115,7 +114,7 @@ public class IMessageToFastConverter {
 	throws ConverterException {
 		
 		if (value instanceof Byte) {
-			byte[] byteValue = new byte[] { (Byte) value };
+            byte[] byteValue = { (Byte)value };
 			fastMsg.setByteVector(fastFieldName, byteValue);
 		} else if (value instanceof Integer) {
 			Integer intValue = (Integer) value;

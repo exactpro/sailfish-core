@@ -35,8 +35,6 @@ public class DayleTestCasesStatRow {
 	public DayleTestCasesStatRow(Date date,
 			long passedCount, long conditionallyPassedCount, long failedCount) {
 
-		super();
-
         this.date = DateTimeUtility.toLocalDateTime(date);
 
 		this.passedCount = passedCount;

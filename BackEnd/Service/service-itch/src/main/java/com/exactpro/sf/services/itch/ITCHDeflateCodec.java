@@ -15,6 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import java.nio.ByteOrder;
+import java.util.Arrays;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.ProtocolDecoderOutput;
+import org.apache.mina.filter.codec.ProtocolEncoderOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -25,15 +35,6 @@ import com.exactpro.sf.services.mina.MINAUtil;
 import com.jcraft.jzlib.Inflater;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZStream;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.ProtocolDecoderOutput;
-import org.apache.mina.filter.codec.ProtocolEncoderOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteOrder;
-import java.util.Arrays;
 
 @SuppressWarnings("deprecation")
 public class ITCHDeflateCodec extends AbstractCodec {
@@ -44,9 +45,9 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
 	private static final int DELIMITER_LENGTH = 2;
 
-	private Inflater inflater;
+    private final Inflater inflater = new Inflater();
 
-	private byte[] uncompressed;
+    private final byte[] uncompressed = new byte[65536];
 
 	private byte[] delimiter;
 
@@ -54,11 +55,7 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
 		logger.debug("Instance created");
 
-		this.inflater = new Inflater();
-
-		this.uncompressed = new byte[65536];
-
-	}
+    }
 
 	@Override
 	public void encode(IoSession session, Object message,
@@ -75,7 +72,7 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
         this.delimiter = ((ITCHCodecSettings) settings).getChunkDelimiter();
 
-		logger.debug("Delimiter is {}", this.delimiter);
+        logger.debug("Delimiter is {}", delimiter);
 
 	}
 
@@ -104,7 +101,7 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
 		if(! Arrays.equals(delimiter, actualDelimiter)) {
 
-			logger.error("Delimiter {} does not equeals to expected {}", actualDelimiter, this.delimiter);
+            logger.error("Delimiter {} does not equeals to expected {}", actualDelimiter, delimiter);
 
 		}
 
@@ -159,14 +156,12 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
 	private byte[] decompress(byte[] compressed){
 
-		int err;
-
-		int comprLen = compressed.length;
+        int comprLen = compressed.length;
 
 		inflater.setInput(compressed);
 		inflater.setOutput(uncompressed);
 
-		err = inflater.init();
+        int err = inflater.init();
 		CHECK_ERR(inflater, err, "inflateInit");
 
 		while ( inflater.total_in < comprLen) {
@@ -192,8 +187,9 @@ public class ITCHDeflateCodec extends AbstractCodec {
 
 	private void CHECK_ERR(ZStream z, int err, String msg) {
 		if (err != JZlib.Z_OK) {
-			if (z.msg != null)
-				logger.error(z.msg);
+            if(z.msg != null) {
+                logger.error(z.msg);
+            }
 			logger.error("{} error: {}", msg, err);
 			throw new RuntimeException("Error on decode: " + msg + " error: " + err);
 		}

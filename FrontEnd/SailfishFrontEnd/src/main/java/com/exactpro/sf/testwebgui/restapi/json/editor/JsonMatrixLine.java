@@ -36,11 +36,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties({"key"})
+@JsonIgnoreProperties("key")
 public class JsonMatrixLine implements WithJsonAMLError {
 
 	// special optional value. It allows to group actions to sets
-	@JsonInclude(value =Include.NON_NULL)
+	@JsonInclude(Include.NON_NULL)
 	private int setId;
 	private final Map<String, String> values;
 	private final Map<String, String> metadata;
@@ -51,8 +51,7 @@ public class JsonMatrixLine implements WithJsonAMLError {
 	@JsonCreator
 	public JsonMatrixLine(@JsonProperty("values") Map<String, String> values,
 			@JsonProperty(value = "items", required = false) List<JsonMatrixLine> items) {
-		super();
-		this.values = values;
+        this.values = values;
 		this.items = items;
 		this.metadata = Collections.emptyMap();
 		this.errors = Collections.emptyList();
@@ -63,8 +62,7 @@ public class JsonMatrixLine implements WithJsonAMLError {
 	}
 	
 	public JsonMatrixLine(Map<String, String> values, Map<String, String> metadata, List<JsonAMLError> errors, List<JsonMatrixLine> items) {
-		super();
-		this.values = values;
+        this.values = values;
 		this.metadata = metadata;
 		this.errors = errors;
 		this.items = items;
@@ -111,8 +109,7 @@ public class JsonMatrixLine implements WithJsonAMLError {
 	}
 	
 	public AMLElement toAMLElement(int lineNumber) {
-		AMLElement result;
-		JavaStatement action = JavaStatement.value(values.get(Column.Action.getName()));
+        JavaStatement action = JavaStatement.value(values.get(Column.Action.getName()));
 		if (JsonAMLUtil.isBlockAction(action)) {
 			List<AMLElement> internalActions = new ArrayList<AMLElement>();
 			if (items != null) {
@@ -120,12 +117,11 @@ public class JsonMatrixLine implements WithJsonAMLError {
 					internalActions.add(internalLine.toAMLElement(lineNumber));
 				}
 			}
-			result = new AMLBlock(lineNumber, stringToCell(), internalActions);
+            return new AMLBlock(lineNumber, stringToCell(), internalActions);
 		} else {
-			result = new AMLElement(lineNumber, stringToCell());
+            return new AMLElement(lineNumber, stringToCell());
 		}
-		return result;
-	}
+    }
 
 	private Map<String, SimpleCell> stringToCell() {
 		LinkedHashMap<String, SimpleCell> result = new LinkedHashMap<>();

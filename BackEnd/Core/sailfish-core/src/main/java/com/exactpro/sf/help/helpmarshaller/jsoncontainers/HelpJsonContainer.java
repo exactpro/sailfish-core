@@ -20,8 +20,10 @@ import java.util.List;
 import com.exactpro.sf.help.helpmarshaller.HelpEntityName;
 import com.exactpro.sf.help.helpmarshaller.HelpEntityType;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-@JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include=JsonTypeInfo.As.PROPERTY, property="@class")
+@JsonTypeInfo(use = Id.CLASS, include = As.PROPERTY, property = "@class")
 public class HelpJsonContainer {
 
     public static final String PLUGIN_ICON = "ui-icon-suitcase";
@@ -103,7 +105,7 @@ public class HelpJsonContainer {
     }
 
     public void addChild(HelpJsonContainer child) {
-        this.childNodes.add(child);
+        childNodes.add(child);
     }
 
     public String getFilePath() {

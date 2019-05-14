@@ -31,8 +31,8 @@ import org.slf4j.Logger;
 
 import com.exactpro.sf.SerializeUtil;
 import com.exactpro.sf.aml.AMLException;
-import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AggregateAlert;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
@@ -40,7 +40,7 @@ import com.exactpro.sf.embedded.statistics.entities.Tag;
 
 public class TestScriptDescription implements Closeable
 {
-	private final static AtomicLong scriptIdCounter = new AtomicLong();
+    private static final AtomicLong scriptIdCounter = new AtomicLong();
 
 	private final String originalMatrixPath;   // relative (to MATRIX folder) path to matrix
 	private final String originalSettingsPath; // relative (to CFG folder) path to 'script.xml'
@@ -104,7 +104,7 @@ public class TestScriptDescription implements Closeable
 
     private long matrixRunId;
 
-    private boolean canceled = false;
+    private boolean canceled;
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -222,8 +222,8 @@ public class TestScriptDescription implements Closeable
 		PENDING(8, false),
 		PAUSED(9, false);
 
-		private int weight;
-		private boolean terminate;
+        private final int weight;
+        private final boolean terminate;
 
 		ScriptState(int weight, boolean terminate) {
 			this.weight = weight;
@@ -249,16 +249,16 @@ public class TestScriptDescription implements Closeable
         CANCELED("CANCELED", 5),
         RUN_FAILED("RUN FAILED", 6);
 
-        private String title;
-		private int weight;
+        private final String title;
+        private final int weight;
 
-        private ScriptStatus(String title, int weight) {
+        ScriptStatus(String title, int weight) {
             this.title = title;
 			this.weight = weight;
 		}
 
         public String getTitle() {
-            return this.title;
+            return title;
         }
 
 		public int getWeight() {
@@ -428,19 +428,19 @@ public class TestScriptDescription implements Closeable
     }
 
     public String getMatrixFileName() {
-        return this.matrixFileName;
+        return matrixFileName;
     }
 
     public boolean getContinueOnFailed() {
-        return this.continueOnFailed;
+        return continueOnFailed;
     }
 
     public boolean getAutoStart() {
-        return this.autoStart;
+        return autoStart;
     }
 
     public boolean getAutoRun() {
-        return this.autoRun;
+        return autoRun;
     }
 
 	public SailfishURI getLanguageURI() {
@@ -551,13 +551,13 @@ public class TestScriptDescription implements Closeable
 	}
 
 	public void notifyListener() {
-		this.listener.onScriptRunEvent(this);
+        listener.onScriptRunEvent(this);
 	}
 
 	public String getPauseReason() {
         try {
             readLock.lock();
-            return this.pauseReason;
+            return pauseReason;
         } finally {
             readLock.unlock();
         }
@@ -566,7 +566,7 @@ public class TestScriptDescription implements Closeable
 	public long getPauseTimeout() {
 	    try {
 	        readLock.lock();
-            return this.pauseTimeout;
+            return pauseTimeout;
         } finally {
 	        readLock.unlock();
         }
@@ -583,11 +583,7 @@ public class TestScriptDescription implements Closeable
 	public String getServices() {
 	    try {
 	        readLock.lock();
-	        if (context == null) {
-                return null;
-            } else {
-	            return context.getServiceList().toString();
-            }
+            return context == null ? null : context.getServiceList().toString();
         } finally {
 	        readLock.unlock();
         }
@@ -688,7 +684,7 @@ public class TestScriptDescription implements Closeable
                 int size = aggregatedAlerts.size();
                 sb.append("Found ").append(size).append(" error(s) during preparing script:");
                 for (AggregateAlert aggregatedAlert : aggregatedAlerts) {
-                    sb.append(aggregatedAlert.toString()).append(System.lineSeparator());
+                    sb.append(aggregatedAlert).append(System.lineSeparator());
                 }
             } else {
                 sb.append("Found unknown errors during preparing script.").append(System.lineSeparator()).append("Returned message is \"")
@@ -698,11 +694,7 @@ public class TestScriptDescription implements Closeable
         } else if (causeCause instanceof InvocationTargetException) {
             InvocationTargetException e = (InvocationTargetException) causeCause;
             Throwable target = e.getTargetException();
-            if (target.getCause() != null) {
-                return "Found error during running script: " + target.getCause().getMessage();
-            } else {
-                return "Found error during running script: " + target.getMessage();
-            }
+            return "Found error during running script: " + (target.getCause() != null ? target.getCause().getMessage() : target.getMessage());
         } else {
             return causeCause.getMessage();
         }
@@ -712,10 +704,7 @@ public class TestScriptDescription implements Closeable
     public String getProblem(){
         try {
             readLock.lock();
-            if (cause == null) {
-                return null;
-            }
-            return cause.getMessage();
+            return cause == null ? null : cause.getMessage();
         } finally {
             readLock.unlock();
         }
@@ -780,7 +769,7 @@ public class TestScriptDescription implements Closeable
         }
     }
 
-    public void scriptInitFailed(final Throwable cause) {
+    public void scriptInitFailed(Throwable cause) {
         try {
             writeLock.lock();
             changeState(ScriptState.FINISHED, ScriptStatus.INIT_FAILED);
@@ -841,7 +830,7 @@ public class TestScriptDescription implements Closeable
         }
     }
 
-    public void scriptPaused(final String pauseReason, final long pauseTimeout) {
+    public void scriptPaused(String pauseReason, long pauseTimeout) {
         try {
             writeLock.lock();
             if (changeState(ScriptState.PAUSED, null)) {
@@ -877,7 +866,7 @@ public class TestScriptDescription implements Closeable
         }
     }
 
-    public void scriptRunFailed(final Throwable cause) {
+    public void scriptRunFailed(Throwable cause) {
         try {
             writeLock.lock();
             changeState(ScriptState.FINISHED, ScriptStatus.RUN_FAILED);
@@ -914,14 +903,14 @@ public class TestScriptDescription implements Closeable
             writeLock.lock();
 
             // stop class loader
-            if (this.classLoader != null && this.classLoader.getClass().isAssignableFrom(Closeable.class)) {
-                ((Closeable) this.classLoader).close();
+            if(classLoader != null && classLoader.getClass().isAssignableFrom(Closeable.class)) {
+                ((Closeable)classLoader).close();
             }
             this.classLoader = null;
 
             // stop script logger
-            if (this.scriptLogger != null) {
-                org.apache.log4j.Logger.getLogger(this.scriptLogger.getName()).removeAllAppenders();
+            if(scriptLogger != null) {
+                org.apache.log4j.Logger.getLogger(scriptLogger.getName()).removeAllAppenders();
             }
             this.scriptLogger = null;
         } finally {

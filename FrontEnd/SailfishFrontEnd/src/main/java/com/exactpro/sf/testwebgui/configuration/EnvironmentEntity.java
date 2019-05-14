@@ -68,6 +68,6 @@ public class EnvironmentEntity implements Serializable {
     }
     
     public String getType() {
-        return this.type != null ? this.type.name() : null;
+        return type != null ? type.name() : null;
     }
 }

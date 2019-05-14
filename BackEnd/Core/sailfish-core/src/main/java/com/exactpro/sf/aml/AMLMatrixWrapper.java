@@ -63,7 +63,7 @@ public class AMLMatrixWrapper {
                                                              blocks.get(AMLBlockType.LastBlock));
 
         for(AMLBlock block : blocksIterable) {
-            if(AMLBlockType.GlobalBlock != AMLBlockType.value(block.getValue(Column.Action))) {
+            if(AMLBlockType.value(block.getValue(Column.Action)) != AMLBlockType.GlobalBlock) {
                 staticVariables.putAll(block, currentVariables);
             }
 

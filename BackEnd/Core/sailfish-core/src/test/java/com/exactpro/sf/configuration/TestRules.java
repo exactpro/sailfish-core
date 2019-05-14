@@ -55,10 +55,8 @@ public class TestRules extends AbstractTest {
     	Rules rules = load("TestSimpleRules");
     	RulesProcessor processor = new RulesProcessor(rules);
 
-    	IMessage msg = null;
-
-    	// empty messages
-    	msg = DefaultMessageFactory.getFactory().createMessage("AddOrder", "TEST");
+        // empty messages
+        IMessage msg = DefaultMessageFactory.getFactory().createMessage("AddOrder", "TEST");
     	processor.processMessage(msg);
     	Assert.assertTrue(msg.getFieldNames().isEmpty());
 

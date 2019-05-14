@@ -15,13 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast.filter;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.template.Field;
 import org.openfast.template.Group;
-
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class SimpleMessageFilter implements IFastMessageFilter {
 
@@ -37,14 +37,12 @@ public class SimpleMessageFilter implements IFastMessageFilter {
 	//it must have the value not equal to the value in ignoreFieldValues to be accepted by filter
 	private HashMap<String, String> ignoreValues = new HashMap<String, String>();
 
-	public SimpleMessageFilter() {};
+	public SimpleMessageFilter() {}
 
-
-
-	public SimpleMessageFilter(String filterString) {
+    public SimpleMessageFilter(String filterString) {
 		HashMap<String, String> requiredValuesMap = new HashMap<String, String>();
 		HashMap<String, String> ignoreValuesMap = new HashMap<String, String>();
-		if (filterString == null || filterString.equals("")) {
+        if(filterString == null || "".equals(filterString)) {
 			setRequiredValues(requiredValuesMap);
 			setIgnoreValues(ignoreValuesMap);
 			return;
@@ -101,7 +99,7 @@ public class SimpleMessageFilter implements IFastMessageFilter {
 			}
 			Field field = group.getField(fieldName);
 
-			if (field.getTypeName().equals("scalar")) {
+            if("scalar".equals(field.getTypeName())) {
 				String value = fastMsg.getString(field.getName());
 				String requiredValue = getRequiredValues().get(fieldName);
 				if (!requiredValue.equals(value)) {
@@ -120,7 +118,7 @@ public class SimpleMessageFilter implements IFastMessageFilter {
 			}
 			Field field = group.getField(fieldName);
 
-			if (field.getTypeName().equals("scalar")) {
+            if("scalar".equals(field.getTypeName())) {
 				String value = fastMsg.getString(field.getName());
 				String ignoreValue = getIgnoreValues().get(fieldName);
 				if (ignoreValue.equals(value)) {

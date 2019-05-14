@@ -30,7 +30,6 @@ public class SendMessageFailedException extends RuntimeException {
      * 
      */
     public SendMessageFailedException() {
-        super();
     }
 
     /**

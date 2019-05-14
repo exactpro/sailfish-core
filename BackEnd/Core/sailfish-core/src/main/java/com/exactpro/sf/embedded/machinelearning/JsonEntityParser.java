@@ -16,6 +16,7 @@
 
 package com.exactpro.sf.embedded.machinelearning;
 
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class JsonEntityParser {
 
@@ -58,48 +61,67 @@ public class JsonEntityParser {
         FailedAction failedAction = new FailedAction();
         checkToken(parser, JsonToken.START_OBJECT, parser.nextToken());
         Map<String, String> rootFields = new HashMap<>();
-        while (JsonToken.END_OBJECT != parser.nextToken()) {
-            switch (parser.getCurrentToken()) {
-            case FIELD_NAME:
-                if(!collectField(parser, rootFields, "expected", "actuals", "user")) {
-                    switch (parser.getCurrentName()) {
-                    case "expected":
-                        failedAction.setExpectedMessage(parseMessage(dictionaryManager, parser, rootFields, false));
-                        break;
-                    case "actuals":
-                        checkToken(parser, JsonToken.START_ARRAY, parser.nextToken());
-                        parser.nextToken();
-                        do {
-                            checkToken(parser, JsonToken.START_OBJECT, parser.getCurrentToken());
-                            Map<String, String> messageFields = new HashMap<>();
-                            Message message = null;
-                            while (JsonToken.END_OBJECT != parser.nextToken()) {
-                                if (!collectField(parser, messageFields, JsonMessageConverter.JSON_MESSAGE)) {
-                                    message = parseMessage(dictionaryManager, parser, messageFields, true);
-                                }
-                            }
-                            boolean explanation = BooleanUtils.toBoolean(messageFields.get("problemExplanation"));
-                            long participantId = ObjectUtils.defaultIfNull(Long.parseLong(messageFields.get("id")), 0L);
-                            MessageParticipant messageParticipant = new MessageParticipant(explanation, message);
-                            if (storeId) {
-                                messageParticipant.setId(participantId);
-                            }
-                            failedAction.addParticipant(messageParticipant);
-                        } while (JsonToken.END_ARRAY != parser.nextToken());
-                        break;
-                    case "user":
-                        parser.nextToken();
-                        failedAction.setSubmitter(parser.getValueAsString());
-                        break;
-                    default:
-                        throw new JsonParseException("Unsupported root field " + parser.getCurrentName(), parser.getCurrentLocation());
+
+        Consumer<JsonParser> actualsPropertyParser = consumerWrapper(p -> {
+            checkToken(p, JsonToken.START_ARRAY, p.nextToken());
+            p.nextToken();
+            do {
+                checkToken(p, JsonToken.START_OBJECT, p.getCurrentToken());
+                Map<String, String> messageFields = new HashMap<>();
+                Message message = null;
+                while (p.nextToken() != JsonToken.END_OBJECT) {
+                    if (!collectField(p, messageFields, JsonMessageConverter.JSON_MESSAGE)) {
+                        message = parseMessage(dictionaryManager, p, messageFields, true);
                     }
                 }
-                break;
-            default:
+                boolean explanation = BooleanUtils.toBoolean(messageFields.get("problemExplanation"));
+                long participantId = ObjectUtils.defaultIfNull(Long.parseLong(messageFields.get("id")), 0L);
+                MessageParticipant messageParticipant = new MessageParticipant(explanation, message);
+                if (storeId) {
+                    messageParticipant.setId(participantId);
+                }
+                if (messageFields.containsKey("timestamp")) {
+                    messageParticipant.setTimestamp(Long.parseLong(messageFields.get("timestamp")));
+                }
+                failedAction.addParticipant(messageParticipant);
+            } while (p.nextToken() != JsonToken.END_ARRAY);
+        });
+
+        Map<String, Consumer<JsonParser>> beanPropertiesHandlers = new HashMap<>();
+        beanPropertiesHandlers.put("actuals", actualsPropertyParser);
+        beanPropertiesHandlers.put("user", consumerWrapper(p -> {
+            p.nextToken();
+            failedAction.setSubmitter(p.getValueAsString());
+        }));
+
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+
+            if (parser.getCurrentToken() == JsonToken.FIELD_NAME) {
+
+                if (collectField(parser, rootFields, "expected", "actuals", "user")) continue;
+
+                String currentName = parser.getCurrentName();
+                if ("expected".equals(currentName)) {
+                    //Special logic for handle properties before expected complex node
+                    failedAction.setExpectedMessage(parseMessage(dictionaryManager, parser, rootFields, false));
+                    rootFields.forEach((k, v) -> {
+                        try {
+                            BeanUtils.setProperty(failedAction, k, v);
+                        } catch (Exception e) {
+                            throw new EPSCommonException(e);
+                        }
+                    });
+                } else {
+                    if (!beanPropertiesHandlers.containsKey(currentName)) {
+                        throw new JsonParseException("Unsupported root field " + currentName, parser.getCurrentLocation());
+                    }
+                    beanPropertiesHandlers.get(currentName).accept(parser);
+                }
+            } else {
                 throw new JsonParseException("Unsupported type " + parser.getCurrentToken(), parser.getCurrentLocation());
             }
         }
+
         checkToken(parser, JsonToken.END_OBJECT, parser.getCurrentToken());
 
         return failedAction;
@@ -193,5 +215,20 @@ public class JsonEntityParser {
             message.addEntry(entry);
         }
 
+    }
+    //FIXME extract this to a util or use lib like a https://github.com/jOOQ/jOOL
+    @FunctionalInterface
+    private interface ThrowingConsumer<T, E extends Exception> {
+        void accept(T t) throws E;
+    }
+
+    private static <T> Consumer<T> consumerWrapper(ThrowingConsumer<T, Exception> throwingConsumer) {
+        return object -> {
+            try {
+                throwingConsumer.accept(object);
+            } catch (Exception e) {
+                throw new EPSCommonException(e);
+            }
+        };
     }
 }

@@ -17,7 +17,11 @@
 package com.exactpro.sf.testwebgui;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -71,11 +75,7 @@ public class GuiSettingsProxy extends AbstractSettingsProxy {
 
     public  boolean isShowElement(String name){
         Field element = getSettingsParameter(name);
-
-        if(element == null){
-            return false;
-        }
-        return !element.isAnnotationPresent(Ignore.class);
+        return element != null && !element.isAnnotationPresent(Ignore.class);
     }
 
     public String getParameterMask(String name) {
@@ -86,11 +86,7 @@ public class GuiSettingsProxy extends AbstractSettingsProxy {
         }
 
         InputMask mask = field.getAnnotation(InputMask.class);
-        if (mask == null) {
-            return null;
-        }
-
-        return mask.value();
+        return mask == null ? null : mask.value();
     }
 
     public String getParameterDescription(String name) {
@@ -100,11 +96,7 @@ public class GuiSettingsProxy extends AbstractSettingsProxy {
         }
 
         Description descr = field.getAnnotation(Description.class);
-        if (descr == null) {
-            return null;
-        }
-
-        return descr.value();
+        return descr == null ? null : descr.value();
     }
 
     public List<String> getEnumeratedValues(String name) {

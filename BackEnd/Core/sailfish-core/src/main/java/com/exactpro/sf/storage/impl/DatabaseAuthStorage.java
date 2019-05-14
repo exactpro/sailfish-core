@@ -42,12 +42,7 @@ public class DatabaseAuthStorage implements IAuthStorage {
     @Override
     public User getUser(String name) {
         AppUser appUser = storage.getEntityByField(AppUser.class, "userName", name);
-
-        if(appUser == null) {
-            return null;
-        }
-
-        return convertAppUser(appUser);
+        return appUser == null ? null : convertAppUser(appUser);
     }
 
     private User convertAppUser(AppUser appUser) {

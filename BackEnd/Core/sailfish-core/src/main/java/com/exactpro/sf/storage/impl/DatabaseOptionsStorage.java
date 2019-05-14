@@ -24,8 +24,8 @@ import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.entities.StoredOption;
 
 public class DatabaseOptionsStorage implements IOptionsStorage {
-	
-	private IStorage hbStorage;
+
+    private final IStorage hbStorage;
 	
 	public DatabaseOptionsStorage(IStorage hbStorage) {
 		
@@ -35,40 +35,33 @@ public class DatabaseOptionsStorage implements IOptionsStorage {
 
 	@Override
 	public void setOption(String key, String value) {
-		
-		StoredOption stored = this.hbStorage.getEntityByField(StoredOption.class, "optionName", key);
+
+        StoredOption stored = hbStorage.getEntityByField(StoredOption.class, "optionName", key);
 		
 		if(stored == null) {
 			
 			stored = new StoredOption(key, value);
-			this.hbStorage.add(stored);
+            hbStorage.add(stored);
 			
 		} else {
 			
 			stored.setOptionValue(value);
-			this.hbStorage.update(stored);
+            hbStorage.update(stored);
 			
 		}
 		
 	}
 
 	@Override
-	public String getOption(String key) {
-		
-		StoredOption stored = this.hbStorage.getEntityByField(StoredOption.class, "optionName", key);
-		
-		if(stored != null) {
-			return stored.getOptionValue();
-		}
-		
-		return null;
-		
-	}
+    public String getOption(String key) {
+        StoredOption stored = hbStorage.getEntityByField(StoredOption.class, "optionName", key);
+        return stored != null ? stored.getOptionValue() : null;
+    }
 
 	@Override
 	public Map<String, String> getAllOptions() {
-		
-		return optionsToMap(this.hbStorage.getAllEntities(StoredOption.class));
+
+        return optionsToMap(hbStorage.getAllEntities(StoredOption.class));
 		
 	}
 	

@@ -51,7 +51,7 @@ public class StatisticsHomeBean extends AbstractTagsStatisticsBean implements Se
 
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-	private LineChartModel areaModel = null;
+    private LineChartModel areaModel;
 
 	private List<ScriptWeatherRow> weatherReport;
 
@@ -179,12 +179,12 @@ public class StatisticsHomeBean extends AbstractTagsStatisticsBean implements Se
 
 	public void generateWeatherReport() {
 
-		if(this.weatherScriptsLimit <= 0 ) {
+        if(weatherScriptsLimit <= 0) {
 			BeanUtil.addErrorMessage("Error", "X parameter must be greater than 0");
 			return;
 		}
 
-		if(this.weatherRunsLimit <= 0 ) {
+        if(weatherRunsLimit <= 0) {
 			BeanUtil.addErrorMessage("Error", "Y parameter must be greater than 0");
 			return;
 		}
@@ -193,9 +193,9 @@ public class StatisticsHomeBean extends AbstractTagsStatisticsBean implements Se
 
 			AggregateReportParameters params = new AggregateReportParameters();
 
-			params.setLimit(this.weatherScriptsLimit);
+            params.setLimit(weatherScriptsLimit);
 
-			params.setSecondLimit(this.weatherRunsLimit);
+            params.setSecondLimit(weatherRunsLimit);
 
 			this.weatherReport = BeanUtil.getSfContext().getStatisticsService().getReportingStorage().generateScriptsWeatherReport(params);
 
@@ -210,7 +210,7 @@ public class StatisticsHomeBean extends AbstractTagsStatisticsBean implements Se
 
 	public void moreWeather() {
 
-		setWeatherScriptsLimit(this.weatherScriptsLimit + WEATHER_STEP);
+        setWeatherScriptsLimit(weatherScriptsLimit + WEATHER_STEP);
 
 		generateWeatherReport();
 

@@ -46,10 +46,10 @@ public class IterableConverter implements Converter {
             throw new ConverterException(new FacesMessage("Converter problem", "Set type for converter"));
         }
         return StringUtils.isBlank(value) ? null :
-                Arrays.stream(value.split(this.separator))
+                Arrays.stream(value.split(separator))
                 .map(String::trim)
                 .filter(StringUtils::isNotEmpty)
-                .collect(this.type.collector());
+                        .collect(type.collector());
     }
 
     @Override
@@ -78,8 +78,8 @@ public class IterableConverter implements Converter {
     public void setType(String type) {
         this.type = Enum.valueOf(CollectionType.class, type);
     }
-    
-    public static enum CollectionType {
+
+    public enum CollectionType {
         SET {
             @Override
             public <T> Collector<T, ?, Set<T>> collector() {

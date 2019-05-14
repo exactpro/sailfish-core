@@ -77,10 +77,10 @@ public class DefaultSettings implements IActionContext {
 	private SailfishURI dictionaryURI;
 	private Map<String, Object> messages = Collections.emptyMap();
 	private MetaContainer metaContainer;
-	private boolean checkGroupsOrder = false;
+    private boolean checkGroupsOrder;
 	@Deprecated
 	private Map<String, Boolean> negativeMap = Collections.emptyMap();
-	private boolean reorderGroups = false;
+    private boolean reorderGroups;
 	private Set<String> uncheckedFields = Collections.emptySet();
 	private final IActionReport report;
 	private final IActionServiceManager serviceManager;
@@ -218,12 +218,8 @@ public class DefaultSettings implements IActionContext {
 			sb.append("timeout=").append(getTimeout()).append(", ");
 		}
 
-		if (sb.length() > 2) {
-			return sb.substring(0, sb.length()-2);
-		}
-
-		return sb.toString();
-	}
+        return sb.length() > 2 ? sb.substring(0, sb.length() - 2) : sb.toString();
+    }
 
 	public void setAddToReport(boolean addToReport) {
 		this.addToReport = addToReport;
@@ -240,7 +236,7 @@ public class DefaultSettings implements IActionContext {
 
 	@Override
     public MessageCount getMessageCount() {
-		return this.messageCount;
+        return messageCount;
 	}
 
     @Override
@@ -299,13 +295,8 @@ public class DefaultSettings implements IActionContext {
 	@Override
     public Object getMessage(String reference) {
 		Object message = messages.get(reference);
-
-		if(message instanceof IMessage) {
-		    return ((IMessage)message).cloneMessage();
-		}
-
-		return message;
-	}
+        return message instanceof IMessage ? ((IMessage)message).cloneMessage() : message;
+    }
 
 	public void setMessages(Map<String, Object> messages) {
 		this.messages = messages;
@@ -313,7 +304,7 @@ public class DefaultSettings implements IActionContext {
 
 	@Override
     public MetaContainer getMetaContainer() {
-		return this.metaContainer;
+        return metaContainer;
 	}
 
 	public void setMetaContainer(MetaContainer metaContainer) {
@@ -337,7 +328,7 @@ public class DefaultSettings implements IActionContext {
 	@Override
     @Deprecated // In AML3 we use 'x != 2'
 	public Map<String, Boolean> getNegativeMap() {
-		return this.negativeMap;
+        return negativeMap;
 	}
 
     @Override
@@ -361,12 +352,12 @@ public class DefaultSettings implements IActionContext {
 
     @Override
     public IDataManager getDataManager() {
-        return this.dataManager;
+        return dataManager;
     }
 
     @Override
     public Set<String> getUncheckedFields() {
-        return this.uncheckedFields;
+        return uncheckedFields;
     }
 
     public void setUncheckedFields(Set<String> uncheckedFields) {

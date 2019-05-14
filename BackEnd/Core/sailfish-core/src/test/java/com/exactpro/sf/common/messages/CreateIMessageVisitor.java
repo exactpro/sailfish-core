@@ -27,8 +27,8 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.util.DateTimeUtility;
 
 public class CreateIMessageVisitor extends DefaultMessageStructureVisitor {
-    private IMessageFactory factory;
-    private IMessage imessage;
+    private final IMessageFactory factory;
+    private final IMessage imessage;
 
     public IMessage getImessage() {
         return imessage;

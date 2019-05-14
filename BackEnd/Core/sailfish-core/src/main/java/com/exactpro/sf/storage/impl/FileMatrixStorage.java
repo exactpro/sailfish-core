@@ -43,14 +43,8 @@ public class FileMatrixStorage extends AbstractMatrixStorage {
     public FileMatrixStorage(String path, IWorkspaceDispatcher dispatcher) {
         super(dispatcher);
         Objects.requireNonNull(path, "path cannot be null");
-
         this.matrices = new FileBackedList<>(FilenameUtils.concat(path, MATRICES_DIR), JSONSerializer.of(DefaultMatrix.class), dispatcher);
-
-        if(matrices.isEmpty()) {
-            matrixId = new AtomicLong();
-        } else {
-            matrixId = new AtomicLong(matrices.get(matrices.size() - 1).getId());
-        }
+        this.matrixId = matrices.isEmpty() ? new AtomicLong() : new AtomicLong(matrices.get(matrices.size() - 1).getId());
     }
 
     @Override

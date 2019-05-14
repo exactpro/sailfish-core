@@ -79,13 +79,13 @@ public class TestAbstractDictionaryValidator {
         this.fieldStructure = Mockito.mock(IFieldStructure.class);
 
         this.messageStructure = Mockito.mock(IMessageStructure.class);
-        Map<String, IFieldStructure> fields = singletonMap(this.fieldStructure.getName(), this.fieldStructure);
-        Mockito.when(this.messageStructure.getFields()).thenReturn(fields);
+        Map<String, IFieldStructure> fields = singletonMap(fieldStructure.getName(), fieldStructure);
+        Mockito.when(messageStructure.getFields()).thenReturn(fields);
 
         this.dictionaryStructure = Mockito.mock(IDictionaryStructure.class);
-        Map<String, IMessageStructure> messages = singletonMap(this.messageStructure.getName(), this.messageStructure);
-        Mockito.when(this.dictionaryStructure.getMessages()).thenReturn(messages);
-        Mockito.when(this.dictionaryStructure.getFields()).thenReturn(fields);
+        Map<String, IMessageStructure> messages = singletonMap(messageStructure.getName(), messageStructure);
+        Mockito.when(dictionaryStructure.getMessages()).thenReturn(messages);
+        Mockito.when(dictionaryStructure.getFields()).thenReturn(fields);
 
         AbstractDictionaryValidator parent = new AbstractDictionaryValidator() {
 
@@ -108,11 +108,7 @@ public class TestAbstractDictionaryValidator {
             @Override
             public List<DictionaryValidationError> validate(IMessageStructure message, IFieldStructure field) {
                 List<DictionaryValidationError> list = super.validate(message, field);
-                if (message != null) {
-                    list.add(parentMessageFieldError);
-                } else {
-                    list.add(parentFieldError);
-                }
+                list.add(message != null ? parentMessageFieldError : parentFieldError);
                 return list;
             }
         };
@@ -137,11 +133,7 @@ public class TestAbstractDictionaryValidator {
             @Override
             public List<DictionaryValidationError> validate(IMessageStructure message, IFieldStructure field) {
                 List<DictionaryValidationError> list = super.validate(message, field);
-                if (message != null) {
-                    list.add(childMessageFieldError);
-                } else {
-                    list.add(childFieldError);
-                }
+                list.add(message != null ? childMessageFieldError : childFieldError);
                 return list;
             }
         };
@@ -150,35 +142,35 @@ public class TestAbstractDictionaryValidator {
     @Test
     public void testCallTrace() {
         Assert.assertArrayEquals(new Object[] { parentMessageFieldError, childMessageFieldError },
-                childDictionaryValidator.validate(this.messageStructure, this.fieldStructure).toArray());
+                childDictionaryValidator.validate(messageStructure, fieldStructure).toArray());
 
         Assert.assertArrayEquals(
                 new Object[] { parentMessageOldError, parentMessageNewError, parentMessageFieldError, childMessageFieldError, childMessageOldError, childMessageNewError },
-                childDictionaryValidator.validate(this.dictionaryStructure, this.messageStructure, true).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, messageStructure, true).toArray());
         Assert.assertArrayEquals(
                 new Object[] { parentMessageOldError, parentMessageNewError, childMessageOldError, childMessageNewError },
-                childDictionaryValidator.validate(this.dictionaryStructure, this.messageStructure, false).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, messageStructure, false).toArray());
 
         Assert.assertArrayEquals(
                 new Object[] { parentDictionaryError, childDictionaryError },
-                childDictionaryValidator.validate(this.dictionaryStructure, false, false).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, false, false).toArray());
         Assert.assertArrayEquals(
                 new Object[] { parentDictionaryError, childDictionaryError },
-                childDictionaryValidator.validate(this.dictionaryStructure, false, true).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, false, true).toArray());
         Assert.assertArrayEquals(
                 new Object[] { parentDictionaryError, childDictionaryError },
-                childDictionaryValidator.validate(this.dictionaryStructure, false, null).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, false, null).toArray());
         Assert.assertArrayEquals(
                 new Object[] { parentDictionaryError, parentMessageOldError, parentMessageNewError, parentMessageFieldError, childMessageFieldError, childMessageOldError,
                         childMessageNewError, childDictionaryError },
-                childDictionaryValidator.validate(this.dictionaryStructure, true, false).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, true, false).toArray());
         Assert.assertArrayEquals(
                 new Object[] { parentDictionaryError, parentFieldError, childFieldError, childDictionaryError },
-                childDictionaryValidator.validate(this.dictionaryStructure, true, true).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, true, true).toArray());
         Assert.assertArrayEquals(
                 new Object[] { parentDictionaryError, parentFieldError, childFieldError, parentMessageOldError, parentMessageNewError, parentMessageFieldError,
                         childMessageFieldError, childMessageOldError, childMessageNewError, childDictionaryError },
-                childDictionaryValidator.validate(this.dictionaryStructure, true, null).toArray());
+                childDictionaryValidator.validate(dictionaryStructure, true, null).toArray());
     }
 
 }

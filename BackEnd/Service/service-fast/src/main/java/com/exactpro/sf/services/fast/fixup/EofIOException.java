@@ -22,8 +22,7 @@ public class EofIOException extends IOException {
 	private static final long serialVersionUID = 1514243615429864025L;
 
 	public EofIOException() {
-		super();
-	}
+    }
 
 	public EofIOException(String message, Throwable cause) {
 		super(message, cause);

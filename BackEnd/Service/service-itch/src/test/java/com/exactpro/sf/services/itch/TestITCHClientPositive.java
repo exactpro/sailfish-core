@@ -15,17 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import java.util.Optional;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.scriptrunner.Outcome;
 import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.util.TestITCHClientBase;
-import org.junit.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author sergey.vasiliev
@@ -92,7 +100,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -127,7 +135,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -182,7 +190,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -208,7 +216,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             }
             long time = DISCONNECT_WAITING_TIMEOUT + RECONNECTING_TIMEOUT + System.currentTimeMillis();
             while(System.currentTimeMillis() < time
-                    && (!ServiceStatus.STARTED.equals(client.getStatus()) || !client.isConnected())) {
+                    && (client.getStatus() != ServiceStatus.STARTED || !client.isConnected())) {
                 Thread.sleep(LOOP_TIMEOUT);
             }
             Assert.assertTrue("Client isn't connected",client.isConnected());
@@ -221,7 +229,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -243,8 +251,8 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             waitThread.start();
             client.start();
             long time = RECONNECTING_TIMEOUT + System.currentTimeMillis();
-            while(System.currentTimeMillis() < time 
-                    && (!ServiceStatus.STARTED.equals(client.getStatus()) || !client.isConnected())) {
+            while(System.currentTimeMillis() < time
+                    && (client.getStatus() != ServiceStatus.STARTED || !client.isConnected())) {
                 Thread.sleep(LOOP_TIMEOUT);
             }
             Assert.assertTrue("Client isn't connected",client.isConnected());
@@ -256,13 +264,14 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
             }
-            if (waitThread != null)
+            if(waitThread != null) {
                 waitThread.interrupt();
+            }
         }
     }
 
@@ -290,7 +299,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -320,7 +329,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -350,7 +359,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
@@ -389,7 +398,7 @@ public class TestITCHClientPositive extends TestITCHClientBase {
             if (client != null) {
                 client.dispose();
                 long time = DISCONNECT_WAITING_TIMEOUT + System.currentTimeMillis();
-                while (System.currentTimeMillis() < time && !ServiceStatus.DISPOSED.equals(client.getStatus())) {
+                while(System.currentTimeMillis() < time && client.getStatus() != ServiceStatus.DISPOSED) {
                     Thread.sleep(LOOP_TIMEOUT);
                 }
                 Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());

@@ -60,10 +60,10 @@ import com.exactpro.sf.storage.util.ServiceStorageHelper;
 public class ServiceMarshalManager {
 	private static final Logger logger = LoggerFactory.getLogger(ServiceMarshalManager.class);
 
-	private DocumentBuilder domBuilder;
-	private XPathExpression typeExpression;
-	private IStaticServiceManager staticServiceManager;
-	private IDictionaryManager dictionaryManager;
+	private final DocumentBuilder domBuilder;
+	private final XPathExpression typeExpression;
+	private final IStaticServiceManager staticServiceManager;
+	private final IDictionaryManager dictionaryManager;
 
 	public ServiceMarshalManager(IStaticServiceManager staticServiceManager, IDictionaryManager dictionaryManager) {
 	    this.staticServiceManager = staticServiceManager;
@@ -129,8 +129,9 @@ public class ServiceMarshalManager {
 				FileInputStream fis = new FileInputStream(e.getValue());
 				zos.putNextEntry(new ZipEntry(e.getKey()));
 	               int len;
-	               while ((len = fis.read(buf)) > 0)
-	                  zos.write(buf, 0, len);
+                while((len = fis.read(buf)) > 0) {
+                    zos.write(buf, 0, len);
+                }
 	               fis.close();
 	               zos.closeEntry();
 			}
@@ -200,8 +201,8 @@ public class ServiceMarshalManager {
 				try {
 
 					if ( !ze.isDirectory() ) {
-						
-						if (ze.getName().equals("environment_description.xml")) {
+
+                        if("environment_description.xml".equals(ze.getName())) {
 							envDescr = unmarshalEnvironment(new CloseShieldInputStream(zis));
 						} else {
 							ServiceDescription descr = unmarshalService(new CloseShieldInputStream(zis));

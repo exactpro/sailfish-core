@@ -26,7 +26,7 @@ public class TestScriptRunAggregateReportQueryBuilder {
 	}
 	
 	public TestScriptRunAggregateReportQueryBuilder type(Type value) {
-		query += (query.isEmpty() ? "type=" : "&type=") + value.toString();
+		query += (query.isEmpty() ? "type=" : "&type=") + value;
 		return this;
 	}
 	
@@ -41,12 +41,12 @@ public class TestScriptRunAggregateReportQueryBuilder {
 	}
 	
 	public TestScriptRunAggregateReportQueryBuilder details(boolean value) {
-		query += (query.isEmpty() ? "details=" : "&details=") + String.valueOf(value);
+		query += (query.isEmpty() ? "details=" : "&details=") + value;
 		return this;
 	}
 	
 	public TestScriptRunAggregateReportQueryBuilder duration(Duration value) {
-		query += (query.isEmpty() ? "duration=" : "&duration=") + value.toString();
+		query += (query.isEmpty() ? "duration=" : "&duration=") + value;
 		return this;
 	}
 	
@@ -54,14 +54,14 @@ public class TestScriptRunAggregateReportQueryBuilder {
 		return query;
 	}
 	
-	public static enum Type {
+	public enum Type {
 		BASE,
 		SEND_DATA,
 		FAIL_REASON,
 		ETM
 	}
 	
-	public static enum Duration {
+	public enum Duration {
 		TODAY,
 		WEEK,
 		MONTH,

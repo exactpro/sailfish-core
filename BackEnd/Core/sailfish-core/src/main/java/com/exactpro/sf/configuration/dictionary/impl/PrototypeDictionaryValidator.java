@@ -128,7 +128,7 @@ public class PrototypeDictionaryValidator extends AbstractDictionaryValidator {
         
         String field = dictionaryPath.getField();
 
-        if (DictionaryValidationErrorType.ERR_REQUIRED_FIELD == type) {
+        if(type == DictionaryValidationErrorType.ERR_REQUIRED_FIELD) {
             field = null;
         }
 
@@ -154,38 +154,33 @@ public class PrototypeDictionaryValidator extends AbstractDictionaryValidator {
         switch (type) {
             case AttributeValue:
                 if (actual == null) {
-                    errorMsg = String.format("Attribute <strong>%s</strong> was missed", path.getAttribute());
+                    return String.format("Attribute <strong>%s</strong> was missed", path.getAttribute());
                 } else {
-                    errorMsg = String.format("Attribute <strong>%s</strong> should be <strong>%s</strong> but was <strong>%s</strong>", path.getAttribute(), prototype, actual);
+                    return String.format("Attribute <strong>%s</strong> should be <strong>%s</strong> but was <strong>%s</strong>", path.getAttribute(), prototype, actual);
                 }
-                break;
-            case EnumValue:
+        case EnumValue:
                 if (actual == null) {
-                    errorMsg = String.format("Value <strong>%s</strong> was missed", path.getValue());
+                    return String.format("Value <strong>%s</strong> was missed", path.getValue());
                 } else {
-                    errorMsg = String.format("Value <strong>%s</strong> should be <strong>%s</strong> but was <strong>%s</strong>", path.getValue(), prototype, actual);
+                    return String.format("Value <strong>%s</strong> should be <strong>%s</strong> but was <strong>%s</strong>", path.getValue(), prototype, actual);
                 }
-                break;
-            case JavaType:
+        case JavaType:
             case IsCollection:
             case IsRequired:
             case IsServiceName:
             case IsComplex:
             case IsEnum:
             case DefaultValue:
-                errorMsg = String.format("<strong>%s</strong> should be <strong>%s</strong> but was <strong>%s</strong>", type, prototype, actual);
-                break;
-            case Existing:
-                errorMsg = "Missed required field <strong>" + path.getField() + "</strong>";
-                break;
-            case FieldOrder:
+                return String.format("<strong>%s</strong> should be <strong>%s</strong> but was <strong>%s</strong>", type, prototype, actual);
+        case Existing:
+            return "Missed required field <strong>" + path.getField() + "</strong>";
+        case FieldOrder:
                 errorMsg = String.format("At this position message should have field <strong>%s</strong> but it was <strong>%s</strong>",
                         prototype, actual);
             default:
                 //do nothing
-                break;
+                return errorMsg;
         }
-        return errorMsg;
     }
 
     private String createDictionaryErrorMsg(DictionaryPath path) {

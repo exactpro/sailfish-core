@@ -144,8 +144,9 @@ public class TestNTGClientPositive extends TestNTGClientBase {
         } finally {
             client.dispose();
             Assert.assertEquals(ServiceStatus.DISPOSED, client.getStatus());
-            if (waitThread != null)
+            if(waitThread != null) {
                 waitThread.interrupt();
+            }
         }
     }
 
@@ -296,7 +297,7 @@ public class TestNTGClientPositive extends TestNTGClientBase {
             Thread.sleep(((NTGClientSettings) client.getSettings()).getHeartbeatTimeout());
 
             long timeEnd = System.currentTimeMillis() + WAITING_TIMEOUT;
-            while (timeEnd > System.currentTimeMillis() && !NTGClientState.SessionClosed.equals(client.getState())) {
+            while(timeEnd > System.currentTimeMillis() && client.getState() != NTGClientState.SessionClosed) {
                 Thread.sleep(LOOP_TIMEOUT);
             }
 

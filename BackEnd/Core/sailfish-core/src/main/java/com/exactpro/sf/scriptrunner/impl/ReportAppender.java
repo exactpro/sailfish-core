@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.AppenderSkeleton;
+import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 
 import com.exactpro.sf.scriptrunner.LoggerRow;
@@ -36,7 +37,7 @@ public class ReportAppender extends AppenderSkeleton{
 		header.add("Class");
 		header.add("Message");
 		header.add("StackTrace");
-		setThreshold(org.apache.log4j.Level.WARN); //No debug and info messages
+        setThreshold(Level.WARN); //No debug and info messages
 
 	}
 	List<LoggerRow> rows;
@@ -61,8 +62,9 @@ public class ReportAppender extends AppenderSkeleton{
 
 	@Override
 	public void close() {
-		if(this.closed)
-			return;
+        if(closed) {
+            return;
+        }
 		this.closed = true;
 
 	}

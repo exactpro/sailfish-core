@@ -40,8 +40,8 @@ public class NTGServerSettings extends AbstractServiceSettings
 		serverPort,
 		heartbeatTimeout,
 		maxMissedHeartbeats,
-		strategies;
-	}
+        strategies
+    }
 
     public enum NTGServerStrategy
 	{
@@ -50,8 +50,8 @@ public class NTGServerSettings extends AbstractServiceSettings
 		PartFillFill,
 		CancelReject,
 		Reject,
-		Amend;
-	}
+        Amend
+    }
 
 	// Default IP address.
 	// Key "serverIP"
@@ -113,27 +113,27 @@ public class NTGServerSettings extends AbstractServiceSettings
 	*/
 	public int getHeartbeatTimeout()
 	{
-		return this.heartbeatTimeout;
+        return heartbeatTimeout;
 	}
 
 	public int getMaxMissedHeartbeats()
 	{
-		return this.maxMissedHeartbeats;
+        return maxMissedHeartbeats;
 	}
 
 	public int getServerPort()
 	{
-		return this.serverPort;
+        return serverPort;
 	}
 
 	public String getServerIP()
 	{
-		return this.serverIP;
+        return serverIP;
 	}
 
     public Map<String, NTGServerStrategy> getStrategy()
 	{
-		return Collections.unmodifiableMap(this.strategy );
+        return Collections.unmodifiableMap(strategy);
 		//return this.strategy;
 	}
 
@@ -145,7 +145,7 @@ public class NTGServerSettings extends AbstractServiceSettings
 
 	public int getSendDelay()
 	{
-		return this.sendDelay;
+        return sendDelay;
 	}
 
 
@@ -185,12 +185,12 @@ public class NTGServerSettings extends AbstractServiceSettings
 	 */
 	public int getForceLogoutTimeout()
 	{
-		return this.heartbeatTimeout * this.maxMissedHeartbeats;
+        return heartbeatTimeout * maxMissedHeartbeats;
 	}
 
 	public int getHeartbeatTimeoutInSeconds()
 	{
-		return this.heartbeatTimeout / 1000;
+        return heartbeatTimeout / 1000;
 	}
 
 

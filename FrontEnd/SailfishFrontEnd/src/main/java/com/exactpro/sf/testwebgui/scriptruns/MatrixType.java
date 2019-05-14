@@ -21,7 +21,7 @@ public enum MatrixType {
 
     private final String type;
 
-    private MatrixType(String type) {
+    MatrixType(String type) {
         this.type = type;
     }
 

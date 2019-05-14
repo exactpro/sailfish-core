@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.AML;
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.AMLSettings;
-import com.exactpro.sf.aml.IOutputStreamFactory;
+import com.exactpro.sf.aml.IOutputStreamFactory.NullOutputStreamFactory;
 import com.exactpro.sf.aml.JsonAML;
 import com.exactpro.sf.aml.generator.Alert;
 import com.exactpro.sf.aml.reader.struct.AMLMatrix;
@@ -68,8 +68,9 @@ public class GuiMatrixEditorStorage {
 	public synchronized MatrixWithHistory getMatrix(long matrixId) throws IOException, InterruptedException, AMLException {
 		if (!views.containsKey(matrixId)) {
 			IMatrix matrix = storageProvider.getStorage().getMatrixById(matrixId);
-			if (matrix == null)
-				throw new RuntimeException("Can't find matrix with id = " + matrixId);
+            if(matrix == null) {
+                throw new RuntimeException("Can't find matrix with id = " + matrixId);
+            }
 			MatrixWithHistory view = loadMatrixFromDisk(matrix, matrix.getFilePath(), SailfishURI.unsafeParse("AML_v3")); // hardcode AML version
 			views.put(matrixId, view);
 		}
@@ -133,7 +134,7 @@ public class GuiMatrixEditorStorage {
 		amlSetting.setLanguageURI(languageURI);
 
 		// Don't create files on hdd:
-		amlSetting.setOutputStreamFactory(new IOutputStreamFactory.NullOutputStreamFactory());
+        amlSetting.setOutputStreamFactory(new NullOutputStreamFactory());
 
 		return amlSetting;
 	}
@@ -215,7 +216,7 @@ public class GuiMatrixEditorStorage {
                               SFLocalContext.getDefault().getCompilerClassPath(),
                               matrix);
         try {
-        	aml.run(getScriptContext(), this.config.getEncoding());
+            aml.run(getScriptContext(), config.getEncoding());
         } catch (AMLException e) {
         	logger.info(e.getMessage(), e);
         	// ignore this errors
