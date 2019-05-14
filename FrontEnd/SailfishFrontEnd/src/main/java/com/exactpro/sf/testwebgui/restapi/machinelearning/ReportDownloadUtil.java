@@ -19,6 +19,7 @@ package com.exactpro.sf.testwebgui.restapi.machinelearning;
 import com.exactpro.sf.common.util.EPSCommonException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -43,14 +44,16 @@ public class ReportDownloadUtil {
             return httpclient.execute(get, response -> {
                 String attachmentName = DEFAULT_REPORT_NAME_ZIP;
 
-                for (HeaderElement headerElement : response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION).getElements()) {
-                    NameValuePair parameter = headerElement.getParameterByName(FILENAME_HEADER_PARAM);
-                    if (parameter != null) {
-                        attachmentName = ObjectUtils.defaultIfNull(parameter.getValue(), UUID.randomUUID().toString());
-                        break;
+                Header header = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
+                if (header != null) {
+                    for (HeaderElement headerElement : header.getElements()) {
+                        NameValuePair parameter = headerElement.getParameterByName(FILENAME_HEADER_PARAM);
+                        if (parameter != null) {
+                            attachmentName = ObjectUtils.defaultIfNull(parameter.getValue(), UUID.randomUUID().toString());
+                            break;
+                        }
                     }
                 }
-
                 File zipTarget = fileProvider.apply(attachmentName);
                 if (zipTarget.length() != response.getEntity().getContentLength()) {
                     FileUtils.copyInputStreamToFile(response.getEntity().getContent(), zipTarget);

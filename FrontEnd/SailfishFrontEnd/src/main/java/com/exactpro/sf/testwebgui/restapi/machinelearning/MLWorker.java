@@ -35,7 +35,6 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCase;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.TestCaseMetadata;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Verification;
-import com.exactpro.sf.testwebgui.restapi.machinelearning.model.PredictionProbability;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.model.PredictionResultEntry;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.model.PredictionResultEntry.ClassValueEnum;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMessageDescriptor;
@@ -138,14 +137,7 @@ public class MLWorker {
         predictionResult.setActionId(tcId);
         predictionResult.setMessageId(id);
         predictionResult.setClassValue(ClassValueEnum.fromValue((String) stats.get("classValue")));
-        List<PredictionProbability> predictionProbabilies = Stream.of(ClassValueEnum.TRUE, ClassValueEnum.FALSE).map(key -> {
-            PredictionProbability p = new PredictionProbability();
-            p.setValue(key);
-            p.setProbabilityOfValue(Float.parseFloat((String) stats.get(key.value())));
-            return p;
-        }).collect(Collectors.toList());
-
-        predictionResult.setProbabilities(predictionProbabilies);
+        predictionResult.setPredictedClassProbability(Float.parseFloat((String) stats.get(predictionResult.getClassValue().value())));
 
         return predictionResult;
     }
