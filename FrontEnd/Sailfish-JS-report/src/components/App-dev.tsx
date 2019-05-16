@@ -92,7 +92,7 @@ class AppBase extends React.Component<AppProps> {
                 currentTestCase = report.testCases.find(testCase => testCase.name === currentMetadata.name);
 
             updateTestCase(currentTestCase)
-            return null;
+            return <div></div>;
         }
 
         return (

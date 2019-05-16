@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "build": "NODE_ENV=production webpack --config webpack.config.js",
-    "dev-build": "NODE_ENV=development webpack --config webpack.config.js",
+    "dev-build": "NODE_ENV=development webpack --config webpack.config.js --watch",
     "dev-server": "NODE_ENV=development webpack-dev-server --config webpack.dev.config.js -d --history-api-fallback"
   },
   "author": "vladislav.kotelnikov",
@@ -16,7 +16,8 @@
     "react-dom": "^16.8.6",
     "react-redux": "^7.0.3",
     "react-virtualized": "^9.21.0",
-    "redux": "^4.0.1"
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
     "@types/react": "^16.8.17",

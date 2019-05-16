@@ -14,16 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { App } from "./components/App-dev";
-import { Provider } from 'react-redux';
-import { createAppStore } from './store/store-dev';
-import { testReport } from './test/testReport';
+import { ThunkDispatch, ThunkAction } from "redux-thunk";
+import { AnyAction } from "redux";
+import AppState from "../state/models/AppState";
+import { fetchReport } from "../helpers/jsonp";
+import { setReport } from "../actions/actionCreators";
+import { StateActionType } from "../actions/stateActions";
 
-ReactDOM.render(
-    <Provider store={createAppStore(testReport)}>
-        <App/>
-    </Provider>, 
-    document.getElementById("index")
-);
+export function loadReport(): ThunkAction<void, {}, {}, AnyAction> {
+    return (dispatch: ThunkDispatch<{}, {}, StateActionType>) => {
+        fetchReport()
+            .then(report => dispatch(setReport(report)))
+            .catch(err => console.error(err));
+    }
+}

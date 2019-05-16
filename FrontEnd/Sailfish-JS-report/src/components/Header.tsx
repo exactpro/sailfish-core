@@ -22,8 +22,6 @@ import { FilterPanel } from './FilterPanel';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import {
-    nextTestCase,
-    prevTestCase,
     resetTestCase,
     switchSplitMode,
     switchActionsFilter,
@@ -31,6 +29,9 @@ import {
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { createSelector } from '../helpers/styleCreators';
+import { ThunkDispatch } from 'redux-thunk';
+import { StateActionType } from '../actions/stateActions';
+import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -170,9 +171,9 @@ export const Header = connect(
         actionsFilter: state.filter.actionsFilter,
         fieldsFilter: state.filter.fieldsFilter
     }),
-    dispatch => ({
-        nextTestCaseHandler: () => dispatch(nextTestCase()),
-        prevTestCaseHandler: () => dispatch(prevTestCase()),
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+        nextTestCaseHandler: () => dispatch(loadNextTestCase()),
+        prevTestCaseHandler: () => dispatch(loadPrevTestCase()),
         backToListHandler: () => dispatch(resetTestCase()),
         switchSplitMode: () => dispatch(switchSplitMode()),
         switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),

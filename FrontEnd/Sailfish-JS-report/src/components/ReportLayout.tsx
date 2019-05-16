@@ -27,6 +27,9 @@ import TestCaseCard from './TestCaseCard';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
 import { createSelector } from '../helpers/styleCreators';
+import { loadTestCase } from '../thunks/loadTestCase';
+import { ThunkDispatch } from 'redux-thunk';
+import { StateActionType } from '../actions/stateActions';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -151,8 +154,8 @@ const ReportLayout = connect(
     (state: AppState) => ({
         report: state.report.report
     }),
-    dispatch => ({
-        onTestCaseSelect: (testCaseLink: string) => dispatch(setTestCasePath(testCaseLink))
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+        onTestCaseSelect: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
 )(ReportLayoutBase);
 

@@ -18,6 +18,7 @@ import Action, { ActionNode } from "./Action";
 import Message from "./Message";
 import Log from "./Log";
 import Status from './Status';
+import Report from "./Report";
 
 export default interface TestCase {
     actionNodeType: string;
@@ -38,4 +39,8 @@ export default interface TestCase {
     startTime: string;
     finishTime: string;
     verifications?: any[];
+}
+
+export function isTestCase(testCase: TestCase | Report): testCase is TestCase {
+    return (testCase as TestCase).actionNodeType === 'testCase';  
 }

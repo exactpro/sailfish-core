@@ -19,9 +19,11 @@ import * as ReactDOM from 'react-dom';
 import App from "./components/App";
 import { Provider } from 'react-redux';
 import { createAppStore } from './store/store';
+import { setReport, setTestCase } from './actions/actionCreators';
 
 ReactDOM.render(
-    <Provider store={createAppStore(null)}>
+    <Provider store={createAppStore()}>
         <App/>
     </Provider>, 
-    document.getElementById("index"));
+    document.getElementById("index")
+);

@@ -15,6 +15,7 @@
  ******************************************************************************/
 
 import { createStore, applyMiddleware, combineReducers } from 'redux';
+import thunk from 'redux-thunk';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { initialAppState } from '../state/initial/initialAppState';
 import Report from '../models/Report';
@@ -39,5 +40,5 @@ export const createAppStore = (report: Report) => createStore(
             report: report
         }
     },
-    composeWithDevTools(applyMiddleware(urlHandler))
+    composeWithDevTools(applyMiddleware(urlHandler, thunk))
 )

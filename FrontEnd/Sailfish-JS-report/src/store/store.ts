@@ -15,6 +15,7 @@
  ******************************************************************************/
 
 import { createStore, applyMiddleware } from 'redux';
+import thunk, { ThunkMiddleware } from 'redux-thunk';
 import { initialAppState } from '../state/initial/initialAppState';
 import Report from '../models/Report';
 import { urlHandler } from '../middleware/urlHandler';
@@ -25,9 +26,10 @@ import { selectedReducer } from '../reducers/selectedReducer';
 import { viewReducer } from '../reducers/viewReducer';
 import { filterReducer } from '../reducers/filterReducer';
 import { machineLearningReducer } from '../reducers/machineLearningReducer';
-import initialMachineLearningState from '../state/initial/initialMachineLearningState';
+import AppState from '../state/models/AppState';
+import { StateActionType } from '../actions/stateActions';
 
-export const createAppStore = (report: Report) => createStore(
+export const createAppStore = (report: Report = null) => createStore<AppState, StateActionType, {}, {}>(
     combineReducers({
         report: reportReducer,
         selected: selectedReducer,
@@ -42,5 +44,5 @@ export const createAppStore = (report: Report) => createStore(
             report: report
         }
     },
-    applyMiddleware(urlHandler)
+    applyMiddleware(urlHandler, thunk as ThunkMiddleware<AppState, StateActionType>)
 )
