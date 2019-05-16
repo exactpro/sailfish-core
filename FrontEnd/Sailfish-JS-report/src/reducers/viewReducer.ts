@@ -74,6 +74,13 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
             }
         }
 
+        case StateActionTypes.SET_IS_LOADING: {
+            return {
+                ...state,
+                isLoading: stateAction.isLoading
+            }
+        }
+
         default: {
             return state
         }

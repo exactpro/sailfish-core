@@ -35,14 +35,19 @@ import { loadReport } from '../thunks/loadReport';
 import { ThunkDispatch } from 'redux-thunk';
 import { StateActionType } from '../actions/stateActions';
 import { loadTestCase } from '../thunks/loadTestCase';
+import SplashScreen from './SplashScreen';
 
 const REPORT_FILE_PATH = 'index.html';
 
-interface AppProps {
+interface AppStateProps {
     report: Report;
     testCase: TestCase;
     mlToken: string;
     submittedMlData: SubmittedData[];
+    isLoading: boolean;
+}
+
+interface AppDispatchProps {
     setMlToken: (token: string) => any;
     setSubmittedMlData: (data: SubmittedData[]) => any;
     selectAction: (actionId: number) => any;
@@ -50,6 +55,8 @@ interface AppProps {
     loadReport: () => any;
     loadTestCase: (testCasePath: string) => any;
 }
+
+interface AppProps extends AppStateProps, AppDispatchProps {}
 
 class AppBase extends React.Component<AppProps, {}> {
 
@@ -122,13 +129,15 @@ class AppBase extends React.Component<AppProps, {}> {
     }
 
     render() {
-        const {report, testCase } = this.props;
+        const { testCase, isLoading } = this.props;
 
-        if (!report) return (
-            <div className="root">
-                <p>Loading json...</p>
-            </div>
-        );
+        if (isLoading) {
+            return (
+                <div className="root">  
+                    <SplashScreen/>
+                </div>
+            )
+        }
 
         if (testCase) {
             return (
@@ -147,13 +156,14 @@ class AppBase extends React.Component<AppProps, {}> {
 }
 
 const App = connect(
-    (state: AppState) => ({
+    (state: AppState): AppStateProps => ({
         report: state.report,
         testCase: state.selected.testCase,
         mlToken: state.machineLearning.token,
-        submittedMlData: state.machineLearning.submittedData
+        submittedMlData: state.machineLearning.submittedData,
+        isLoading: state.view.isLoading
     }),
-    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): AppDispatchProps => ({
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
         selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
         setMlToken: (token: string) => dispatch(setMlToken(token)),

@@ -40,7 +40,8 @@ export enum StateActionTypes {
     SET_ML_TOKEN = 'SET_ML_TOKEN',
     SET_SUBMITTED_ML_DATA = "SET_SUBMITTED_ML_DATA",
     ADD_SUBMITTED_ML_DATA = "ADD_SUBMITTED_ML_DATA",
-    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA"
+    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA",
+    SET_IS_LOADING = 'SET_IS_LOADING'
 }
 
 export interface SetReportStateAction {
@@ -138,8 +139,12 @@ export interface RemoveSubmittedMlDataStateAction {
     data: SubmittedData;
 }
 
-export type StateActionType = 
-    SetReportStateAction |
+export interface SetIsLoadingStateAction {
+    type: StateActionTypes.SET_IS_LOADING;
+    isLoading: boolean;
+}
+
+export type StateActionType = SetReportStateAction |
     SetTestCaseStateAction | 
     ResetTestCaseStateAction |
     ActionSelectStateAction |
@@ -158,4 +163,6 @@ export type StateActionType =
     SetMlTokenStateAction |
     SetSubmittedMlDataStateAction |
     AddSubmittedMlDataStateAction |
-    RemoveSubmittedMlDataStateAction
+    RemoveSubmittedMlDataStateAction |
+    SetLeftPaneStateActions | 
+    SetIsLoadingStateAction;

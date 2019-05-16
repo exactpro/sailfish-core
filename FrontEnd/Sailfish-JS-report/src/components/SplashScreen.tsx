@@ -14,20 +14,13 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ThunkDispatch, ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
-import AppState from "../state/models/AppState";
-import { fetchReport } from "../helpers/jsonp";
-import { setReport, setIsLoading } from "../actions/actionCreators";
-import { StateActionType } from "../actions/stateActions";
+import * as React from 'react';
+import '../styles/root.scss';
 
-export function loadReport(): ThunkAction<void, {}, {}, AnyAction> {
-    return (dispatch: ThunkDispatch<{}, {}, StateActionType>) => {
-        dispatch(setIsLoading(true));
+const SplashScreen = () => (
+    <div className="splash-screen"> 
+        <p className="splash-screen__title">Loading...</p>
+    </div>
+)
 
-        fetchReport()
-            .then(report => dispatch(setReport(report)))
-            .catch(err => console.error(err))
-            .finally(() => dispatch(setIsLoading(false)));
-    }
-}
+export default SplashScreen;

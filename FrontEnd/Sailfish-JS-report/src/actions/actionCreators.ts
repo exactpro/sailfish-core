@@ -34,7 +34,8 @@ import {
     SetMlTokenStateAction,
     SetSubmittedMlDataStateAction,
     AddSubmittedMlDataStateAction,
-    RemoveSubmittedMlDataStateAction
+    RemoveSubmittedMlDataStateAction,
+    SetIsLoadingStateAction
 } from "./stateActions";
 
 import TestCase from "../models/TestCase";
@@ -138,4 +139,8 @@ export const addSubmittedMlData = (data: SubmittedData): AddSubmittedMlDataState
 export const removeSubmittedMlData = (data: SubmittedData): RemoveSubmittedMlDataStateAction => ({
     type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA,
     data: data
+})
+export const setIsLoading = (isLoading: boolean): SetIsLoadingStateAction => ({
+    type: StateActionTypes.SET_IS_LOADING,
+    isLoading
 })

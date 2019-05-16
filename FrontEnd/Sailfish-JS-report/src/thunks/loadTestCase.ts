@@ -17,16 +17,19 @@
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import { AnyAction } from "redux";
 import { fetchTestCase } from "../helpers/jsonp";
-import { setTestCase } from "../actions/actionCreators";
+import { setTestCase, setIsLoading } from "../actions/actionCreators";
 import { StateActionType } from "../actions/stateActions";
 import AppState from '../state/models/AppState';
 import { findNextCyclicItem, findPrevCyclicItem } from "../helpers/array";
 
 export function loadTestCase(testCasePath: string): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>) => {
+        dispatch(setIsLoading(true));
+
         fetchTestCase(testCasePath)
             .then(report => dispatch(setTestCase(report)))
-            .catch(err => console.error(err));
+            .catch(err => console.error(err))
+            .finally(() => dispatch(setIsLoading(false)));
     }
 }
 
@@ -36,9 +39,12 @@ export function loadNextTestCase(): ThunkAction<void, {}, {}, AnyAction> {
             nextMetadata = findNextCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id),
             testCasePath = nextMetadata.jsonpFileName;
 
+        dispatch(setIsLoading(true));
+
         fetchTestCase(testCasePath)
             .then(report => dispatch(setTestCase(report)))
-            .catch(err => console.error(err));
+            .catch(err => console.error(err))
+            .finally(() => dispatch(setIsLoading(false)));
     }
 }
 
@@ -48,8 +54,11 @@ export function loadPrevTestCase(): ThunkAction<void, {}, {}, AnyAction> {
             nextMetadata = findPrevCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id),
             testCasePath = nextMetadata.jsonpFileName;
 
+        dispatch(setIsLoading(true));
+
         fetchTestCase(testCasePath)
             .then(report => dispatch(setTestCase(report)))
-            .catch(err => console.error(err));
+            .catch(err => console.error(err))
+            .finally(() => dispatch(setIsLoading(false)));
     }
 }

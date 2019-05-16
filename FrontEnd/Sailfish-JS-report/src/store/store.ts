@@ -17,7 +17,6 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunk, { ThunkMiddleware } from 'redux-thunk';
 import { initialAppState } from '../state/initial/initialAppState';
-import Report from '../models/Report';
 import { urlHandler } from '../middleware/urlHandler';
 import { combineReducers } from 'redux';
 import { reportReducer } from '../reducers/reportReducer';
