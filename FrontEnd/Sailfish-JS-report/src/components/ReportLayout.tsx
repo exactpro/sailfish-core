@@ -18,7 +18,6 @@ import * as React from 'react';
 import Report from '../models/Report';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
-import { setTestCasePath } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
@@ -152,7 +151,7 @@ function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): JSX
 
 const ReportLayout = connect(
     (state: AppState) => ({
-        report: state.report.report
+        report: state.report
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
         onTestCaseSelect: (testCasePath: string) => dispatch(loadTestCase(testCasePath))

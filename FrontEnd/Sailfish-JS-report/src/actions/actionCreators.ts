@@ -19,9 +19,6 @@ import {
     StateActionTypes,
     ActionSelectStateAction,
     MessageSelectStateAction,
-    NextTestCaseStateAction,
-    PrevTestCaseStateAction,
-    SetTestCasePathStateAction,
     SetReportStateAction,
     ResetTestCaseStateAction,
     SwitchSplitModeStateAction,
@@ -102,19 +99,6 @@ export const switchActionsFilter = (status: StatusType): SwitchActionFilterState
 export const switchFieldsFilter = (status: StatusType): SwitchFieldsFilterStateAction => ({
     type: StateActionTypes.SWITCH_FIELDS_FILTER,
     status: status
-})
-
-export const nextTestCase = (): NextTestCaseStateAction => ({
-    type: StateActionTypes.NEXT_TEST_CASE
-})
-
-export const prevTestCase = (): PrevTestCaseStateAction => ({
-    type: StateActionTypes.PREV_TEST_CASE
-})
-
-export const setTestCasePath = (testCasePath: string): SetTestCasePathStateAction => ({
-    type: StateActionTypes.SET_TEST_CASE_PATH,
-    testCasePath: testCasePath
 })
 
 export const switchSplitMode = (): SwitchSplitModeStateAction => ({

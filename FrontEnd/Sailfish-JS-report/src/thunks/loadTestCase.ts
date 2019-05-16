@@ -33,7 +33,7 @@ export function loadTestCase(testCasePath: string): ThunkAction<void, {}, {}, An
 export function loadNextTestCase(): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>, getState: () => AppState) => {
         const { report, selected } = getState(),
-            nextMetadata = findNextCyclicItem(report.report.metadata, metadata => metadata.id === selected.testCase.id),
+            nextMetadata = findNextCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id),
             testCasePath = nextMetadata.jsonpFileName;
 
         fetchTestCase(testCasePath)
@@ -45,7 +45,7 @@ export function loadNextTestCase(): ThunkAction<void, {}, {}, AnyAction> {
 export function loadPrevTestCase(): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>, getState: () => AppState) => {
         const { report, selected } = getState(),
-            nextMetadata = findPrevCyclicItem(report.report.metadata, metadata => metadata.id === selected.testCase.id),
+            nextMetadata = findPrevCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id),
             testCasePath = nextMetadata.jsonpFileName;
 
         fetchTestCase(testCasePath)

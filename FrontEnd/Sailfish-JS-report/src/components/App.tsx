@@ -22,7 +22,7 @@ import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
-import { setTestCase, setReport, setTestCasePath, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
+import { setTestCase, setReport, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,
@@ -41,7 +41,6 @@ const REPORT_FILE_PATH = 'index.html';
 interface AppProps {
     report: Report;
     testCase: TestCase;
-    testCaseFilePath: string;
     mlToken: string;
     submittedMlData: SubmittedData[];
     setMlToken: (token: string) => any;
@@ -123,7 +122,7 @@ class AppBase extends React.Component<AppProps, {}> {
     }
 
     render() {
-        const {report, testCase, testCaseFilePath} = this.props;
+        const {report, testCase } = this.props;
 
         if (!report) return (
             <div className="root">
@@ -139,27 +138,18 @@ class AppBase extends React.Component<AppProps, {}> {
             )
         }
 
-        if (!testCaseFilePath) {
-            return (
-                <div className="root">
-                    <ReportLayout/>
-                </div>
-            );
-        }
-
         return (
             <div className="root">
-                <p>Loading json...</p>
+                <ReportLayout/>
             </div>
-        )
+        );
     };
 }
 
 const App = connect(
     (state: AppState) => ({
-        report: state.report.report,
+        report: state.report,
         testCase: state.selected.testCase,
-        testCaseFilePath: state.report.currentTestCasePath,
         mlToken: state.machineLearning.token,
         submittedMlData: state.machineLearning.submittedData
     }),

@@ -40,17 +40,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsMap: generateActionsMap(getActions(stateAction.testCase.actions))
             }
         }
-
-        case StateActionTypes.SET_TEST_CASE_PATH: {
-            return {
-                ...state,
-                testCase: initialSelectedState.testCase
-            }
-        }
     
-        case StateActionTypes.RESET_TEST_CASE: 
-        case StateActionTypes.PREV_TEST_CASE:
-        case StateActionTypes.NEXT_TEST_CASE: {
+        case StateActionTypes.RESET_TEST_CASE: {
             return {
                 ...initialSelectedState,
             }

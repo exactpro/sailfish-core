@@ -23,11 +23,8 @@ import Message from "../models/Message";
 import { SubmittedData } from "../models/MlServiceResponse";
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
-    NEXT_TEST_CASE = 'NEXT_TEST_CASE',
-    PREV_TEST_CASE = 'PREV_TEST_CASE',
-    SET_TEST_CASE_PATH = 'SET_TEST_CASE_PATH',
     SET_TEST_CASE = 'SET_TEST_CASE',
-    RESET_TEST_CASE= 'RESET_TEST_CASE',
+    RESET_TEST_CASE = 'RESET_TEST_CASE',
     SELECT_ACTION = 'SELECT_ACTION',
     SELECT_ACTION_BY_ID = 'SELECT_ACTION_BY_ID',
     SELECT_MESSAGE = 'SELECT_MESSAGE',
@@ -107,19 +104,6 @@ export interface SwitchFieldsFilterStateAction {
     status: StatusType;
 }
 
-export interface NextTestCaseStateAction {
-    type: StateActionTypes.NEXT_TEST_CASE;
-}
-
-export interface PrevTestCaseStateAction {
-    type: StateActionTypes.PREV_TEST_CASE;
-}
-
-export interface SetTestCasePathStateAction {
-    type: StateActionTypes.SET_TEST_CASE_PATH;
-    testCasePath: string;
-}
-
 export interface SwitchSplitModeStateAction {
     type: StateActionTypes.SWITCH_SPLIT_MODE;
 }
@@ -163,11 +147,8 @@ export type StateActionType =
     MessageSelectStateAction | 
     VerificationSelectStateAction |
     CheckpointSelectStateAction |
-    RejectedMessageSelectStateAction |
-    NextTestCaseStateAction |
-    PrevTestCaseStateAction | 
+    RejectedMessageSelectStateAction | 
     SetTestCaseStateAction | 
-    SetTestCasePathStateAction | 
     SetAdminMessageEnabledStateAction |
     SwitchSplitModeStateAction | 
     SwitchActionFilterStateAction | 
