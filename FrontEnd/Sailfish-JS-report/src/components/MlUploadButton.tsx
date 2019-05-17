@@ -27,7 +27,7 @@ interface MlUploadButtonProps {
     messageId: number;
     token: string;
     submittedData: SubmittedData[];
-    selectedActionIds: number[];
+    activeActionId: number;
     actionMap: Map<number, Action>;
     setSubmittedMlData: (data: SubmittedData[]) => any;
     addSubmittedMlData: (data: SubmittedData) => any;
@@ -35,17 +35,15 @@ interface MlUploadButtonProps {
 }
 
 export class MlUploadButtonBase extends Component<MlUploadButtonProps, {}> {
-    render({ submittedData, messageId, token, selectedActionIds, actionMap }: MlUploadButtonProps) {
-
-        let selectedActionId = selectedActionIds.length === 1 ? selectedActionIds[0] : null
+    render({ submittedData, messageId, token, activeActionId, actionMap }: MlUploadButtonProps) {
 
         let isAvailable = token !== null
-            && selectedActionId !== null
-            && actionMap.get(selectedActionId).status.status === "FAILED";
+            && activeActionId !== null
+            && actionMap.get(activeActionId).status.status === "FAILED";
 
         let isSubmitted = isAvailable && submittedData.some((entry) => {
             return entry.messageId === messageId
-                && entry.actionId === selectedActionId
+                && entry.actionId === activeActionId
         });
 
         // default one (message cannot be submitted or ml servie is unavailable)
@@ -57,14 +55,14 @@ export class MlUploadButtonBase extends Component<MlUploadButtonProps, {}> {
                 ? <div class="mc-header__submit-icon submitted" 
                     title="Revoke ML data"
                     onClick={(e) => {
-                        deleteEntry(token, { messageId: messageId, actionId: selectedActionId }, this.props.removeSubmittedMlData);
+                        deleteEntry(token, { messageId: messageId, actionId: activeActionId }, this.props.removeSubmittedMlData);
                         e.cancelBubble = true;
                     }} />
 
                 : <div class="mc-header__submit-icon active" 
                     title="Submit ML data"
                     onClick={(e) => {
-                        submitEntry(token, { messageId: messageId, actionId: selectedActionId }, this.props.addSubmittedMlData);
+                        submitEntry(token, { messageId: messageId, actionId: activeActionId }, this.props.addSubmittedMlData);
                         e.cancelBubble = true;
                     }} />
         }
@@ -81,7 +79,7 @@ export const MlUploadButton = connect(
     (state: AppState) => ({
         token: state.machineLearning.token,
         submittedData: state.machineLearning.submittedData,
-        selectedActionIds: state.selected.actionsId,
+        activeActionId: state.selected.activeActionId,
         actionMap: state.selected.actionsMap
     }),
     (dispatch) => ({

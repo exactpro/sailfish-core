@@ -48,8 +48,17 @@ export function deleteEntry(token: string, dataToDelete: SubmittedData, updateMl
 
     let currentHost = new URL(window.location.href).host;
 
-    fetch(`http://${currentHost}/${BASE_ML_API_PATH}/${token}?actionId=${dataToDelete.actionId}&messageId=${dataToDelete.messageId}`, {
+    fetch(`http://${currentHost}/${BASE_ML_API_PATH}/${token}`, {
         method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify([
+            {
+                actionId: dataToDelete.actionId,
+                messageId: dataToDelete.messageId
+            }
+        ])
     })
         .then(response => {
             if (response.ok) {

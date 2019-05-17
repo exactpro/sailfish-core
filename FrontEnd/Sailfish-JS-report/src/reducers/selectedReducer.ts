@@ -72,7 +72,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 status: stateAction.action.status.status,
                 messagesId: stateAction.action.relatedMessages,
                 scrolledActionId: initialSelectedState.scrolledActionId,
-                scrolledMessageId: new Number(scrolledMessageId)
+                scrolledMessageId: new Number(scrolledMessageId),
+                activeActionId: stateAction.action.id
             }
         }
 
@@ -81,7 +82,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 actionsId: [stateAction.actionId],
                 status: initialSelectedState.status,
-                scrolledActionId: new Number(stateAction.actionId)
+                scrolledActionId: new Number(stateAction.actionId),
+                activeActionId: stateAction.actionId
             }
         }
 
@@ -105,7 +107,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 status: stateAction.status,
                 actionsId: relatedActions,
                 scrolledActionId: new Number(scrolledAction),
-                scrolledMessageId: initialSelectedState.scrolledMessageId
+                scrolledMessageId: initialSelectedState.scrolledMessageId,
+                activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId
             }
         }
 
