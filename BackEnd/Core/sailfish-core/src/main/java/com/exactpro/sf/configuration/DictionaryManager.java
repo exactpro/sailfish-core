@@ -43,6 +43,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
+import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityManagerException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -166,11 +167,19 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 			    }
 
 			    for (String className : dict.getUtilityClassName()){
+			        try {
 			        UtilityClass utilityClass = utilityManager.load(loader, className, version);
 
 			        for(String utilityClassAlias : utilityClass.getClassAliases()) {
 			            SailfishURI utilityClassURI = new SailfishURI(version.getAlias(), utilityClassAlias);
 			            settings.addUtilityClassURI(utilityClassURI);
+                        }
+                    } catch (UtilityManagerException e) {
+                        if (context.getVersion().isLightweight()) {
+                            logger.warn("Can't load utility class '{}'", className, e);
+                        } else {
+                            throw e;
+                        }
 			        }
                 }
 

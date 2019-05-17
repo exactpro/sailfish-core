@@ -25,11 +25,6 @@ subprojects {
 	    }
     }
 
-    configurations {
-        zip_data
-        data
-    }
-
 	generateXmlFAST {
 		inputFolderPath "${dataDir}/fast/templates/"
 		outputFolderPath "${genDictionaryDir}"
@@ -57,33 +52,14 @@ subprojects {
                    file("${mainPluginDir}/cfg"), 
                    file("${genPluginDir}/cfg"), 
                    file("${externalPluginDir}/cfg")]
-    	versionFile = writeFile.outputFile
     	minCoreRevision = min_core_revision
     	silent = silent_check
     }
-	
-	task copyFromData (type: Copy) {
-        into externalWorkspaceDir
     
-        from {
-           configurations.zip_data.collect { zipTree(it) }
-        }
-        from { 
-            configurations.data
-        }
-    }
-    
-    publishPlugin {
+    validateDictionary {
+        dependsOn.add('compileKotlin')
         dependsOn.add('copyFromData')
-        dependsOn.add('checkCompatibility')
-    }
-    zipRelease {
-        dependsOn.add('copyFromData')
-        dependsOn.add('checkCompatibility')
-    }
-    
-    validateDictionary() {
-        dependsOn.add('copyFromData')
+
     	sourceDir([file("${mainPluginDir}/cfg/dictionaries"), file("${mainWorkspaceDir}/cfg/dictionaries"), file("${genPluginDir}/cfg/dictionaries")])
     	setDefault(DEFAULT_VALIDATOR)
 

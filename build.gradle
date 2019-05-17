@@ -42,6 +42,8 @@ allprojects {
         sharedWorkspaceDir      = file("${project.rootDir}/shared_workspace")
         tmpWorkspaceDir         = file("${project.rootDir}/tmp_workspace")
 
+        lightPluginDir          = file("${project.buildDir}/light_plugin")
+
         srcDir                  = file('src')
         mainDir                 = file("${srcDir}/main")
         testDir                 = file("${srcDir}/test")

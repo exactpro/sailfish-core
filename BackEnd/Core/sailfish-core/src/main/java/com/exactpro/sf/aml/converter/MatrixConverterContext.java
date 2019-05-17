@@ -24,15 +24,22 @@ import com.exactpro.sf.services.IServiceSettings;
 
 public class MatrixConverterContext implements IMatrixConverterContext {
 
+    private final SailfishURI converterURI;
     private final IWorkspaceDispatcher workspaceDispatcher;
     private final IDictionaryManager dictionaryManager;
     private final IConnectionManager connectionManager;
     
-    public MatrixConverterContext(IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager,
+    public MatrixConverterContext(SailfishURI converterURI, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager,
             IConnectionManager connectionManager) {
+        this.converterURI = converterURI;
         this.workspaceDispatcher = workspaceDispatcher;
         this.dictionaryManager = dictionaryManager;
         this.connectionManager = connectionManager;
+    }
+
+    @Override
+    public SailfishURI getConverterURI() {
+        return converterURI;
     }
 
     @Override

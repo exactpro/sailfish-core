@@ -437,7 +437,7 @@ collectDependencies {
 }
 
 def getReleaseName() {
-    return "sf_${artifactCoreVersion}_b${build_number}.zip"
+    return "sf_${sailfishVersion}.${revision}_b${build_number}.zip"
 }
 
 def getReleaseDir(buildDir) {

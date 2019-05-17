@@ -1,7 +1,13 @@
 subprojects {
+    ext {
+        pluginDictionaryDir = file("${lightPluginDir}/dictionary")
+    }
+
     configurations {
         provided_zip_data
         provided_data
+        zip_data
+        data
     }
 
     dependencies {
@@ -13,28 +19,155 @@ subprojects {
 
     writeBuildInfo.dependsOn.add('assemble')
     build.dependsOn.add('writeBuildInfo')
+    jar.dependsOn('writeFile')
 
-    writeFile {
-        dependsOn.add('jar')
+    afterEvaluate { Project project ->
 
-        afterEvaluate { Project project ->
+        writeFile {
+            if (project.hasProperty('plugin_alias')) {
+                line("plugin_alias: ${project.plugin_alias}")
+                line("name: ${project.archivesBaseName}")
+            }
+
+            outputDir = genPluginDir
+        }
+
+        task pluginDictionaryWriteVersion(type: com.exactpro.sf.WriteFileTask) {
+            if (project.hasProperty('plugin_alias')) {
+                line('lightweight: true')
+                line("plugin_alias: ${project.plugin_alias}_dictionary")
+                line("name: ${project.archivesBaseName}_dictionary")
+            }
+
+            outputDir = pluginDictionaryDir
+        }
+
+        configure([writeFile, pluginDictionaryWriteVersion]) {
             onlyIf {
                 project.hasProperty('plugin_alias')
             }
 
             if (project.hasProperty('plugin_alias')) {
-	            line ("plugin_alias: ${project.plugin_alias}")
-		        line ("build_number: ${build_number}")
-		        line ("revision: ${revision}")
-		        line ("git_hash: ${git_hash}")
+                line ("build_number: ${build_number}")
+                line ("revision: ${revision}")
+                line ("git_hash: ${git_hash}")
                 line ('group: sailfish')
-                line ("name: ${project.archivesBaseName}")
+                line ("branch: ${project.branch}")
                 line ("version: ${sailfish_version_major}.${sailfish_version_minor}.${revision}.${build_number}")
-	        }
+            }
+            fileName    = 'VERSION'
         }
 
-        fileName    = 'VERSION'
-        outputDir   = genPluginDir
+        checkCompatibility {
+            versionFile = writeFile.outputFile
+        }
+        
+        def publishPluginData = fileTree(mainPluginDir) +
+                                fileTree(genPluginDir) +
+                                fileTree(externalPluginDir) +
+                                fileTree(mainWorkspaceDir) +
+                                fileTree(genWorkspaceDir) +
+                                fileTree(externalWorkspaceDir)
+
+        task publishPlugin(type: Copy) { }
+
+        task zipRelease (type: Zip) {
+            if (project.hasProperty('plugin_name')) {
+                archiveName = getReleaseName(project.plugin_name)
+                destinationDir = getReleaseDir(project.buildDir, project.plugin_name)
+            }
+
+            doLast {
+                createLink(destinationDir, archiveName, 'last_build')
+            }
+        }
+
+        task publishPluginDictionary(type: Copy) { }
+
+        task zipReleasePluginDictionary (type: Zip) {
+            if (project.hasProperty('plugin_name')) {
+                def name = "${project.plugin_name}_dictionary"
+                archiveName = getReleaseName(name)
+                destinationDir = getReleaseDir(project.buildDir, name)
+            }
+
+            doLast {
+                createLink(destinationDir, archiveName, 'last_build_dictionary')
+            }
+        }
+
+
+        configure([publishPlugin, zipRelease,
+                   publishPluginDictionary, zipReleasePluginDictionary]) {
+
+            onlyIf {
+                project.hasProperty('plugin_alias')
+            }
+
+            dependsOn.add('checkCompatibility')
+            dependsOn.add('copyFromData')
+            dependsOn.add('copyFromProvidedData')
+        }
+
+        configure([publishPlugin, zipRelease]) {
+            dependsOn.add('jar')
+            dependsOn.add('writeFile')
+            dependsOn.add('generateSailfishHelp')
+
+            if (project.hasProperty('plugin_name')) {
+                def pluginFolderName = getZipPluginFolder(project.plugin_name)
+
+                into(pluginFolderName) {
+                    from publishPluginData
+                }
+
+                into("${pluginFolderName}/${zipPluginLibsDir}") {
+                    from configurations.compile - configurations.compileOnly
+                    from(libsDir) {
+                        exclude '*-sources.jar'
+                        exclude '*-tests.jar'
+                    }
+                }
+            }
+        }
+
+        configure([publishPluginDictionary, zipReleasePluginDictionary]) {
+            dependsOn.add('pluginDictionaryWriteVersion')
+
+            if (project.hasProperty('plugin_name')) {
+                def pluginFolderName = getZipPluginFolder("${project.plugin_name}_dictionary")
+
+                into (pluginFolderName) {
+                    from fileTree(pluginDictionaryDir) + publishPluginData.matching {
+                        include 'cfg/dictionaries.xml'
+                        include 'cfg/dictionaries/*.xml'
+                        include 'cfg/data.xml'
+                        include 'cfg/data/*.xml'
+                    }
+                }
+            }
+        }
+
+        configure([publishPlugin, publishPluginDictionary]) {
+            into sharedWorkspaceDir
+        }
+
+        configure([zipRelease, zipReleasePluginDictionary]) {
+            includeEmptyDirs = false
+            zip64 = true
+            duplicatesStrategy = 'EXCLUDE'
+        }
+    }
+
+    task copyFromData (type: Copy) {
+        into externalWorkspaceDir
+
+        from {
+            configurations.zip_data.collect { zipTree(it) }
+        }
+        from {
+            configurations.data
+        }
     }
 
     task copyFromProvidedData (type: Copy) {
@@ -48,85 +181,6 @@ subprojects {
         }
     }
 	test.dependsOn.add('copyFromProvidedData')
-
-    task publishPlugin (type: Copy) {
-        dependsOn.add('jar')
-        dependsOn.add('writeFile')
-        dependsOn.add('generateSailfishHelp')
-
-        into sharedWorkspaceDir
-
-        afterEvaluate { Project project ->
-            onlyIf {
-                project.hasProperty('plugin_name')
-            }
-
-            if (project.hasProperty('plugin_name')) {
-	            def pluginFolderName = getZipPluginFolder(project.plugin_name)
-
-	            into (pluginFolderName) {
-	                from mainPluginDir
-	                from genPluginDir
-                    from externalPluginDir
-
-                    from mainWorkspaceDir
-                    from genWorkspaceDir
-                    from externalWorkspaceDir
-	            }
-
-	            into ("${pluginFolderName}/${zipPluginLibsDir}") {
-	                from configurations.compile - configurations.compileOnly
-	                from libsDir
-	            }
-            }
-        }
-    }
-
-    task zipRelease (type: Zip) {
-        includeEmptyDirs = false
-        duplicatesStrategy = 'EXCLUDE'
-
-        dependsOn.add('jar')
-        dependsOn.add('writeFile')
-        dependsOn.add('generateSailfishHelp')
-
-        afterEvaluate { Project project ->
-            onlyIf {
-                project.hasProperty('plugin_name')
-            }
-            if (project.hasProperty('plugin_name')) {
-	            archiveName = getReleaseName(project.plugin_name)
-	            destinationDir = getReleaseDir(project.buildDir, project.plugin_name)
-
-	            def pluginFolderName = getZipPluginFolder(project.plugin_name)
-
-	            into (pluginFolderName) {
-	                from mainPluginDir
-	                from genPluginDir
-                    from externalPluginDir
-
-                    from mainWorkspaceDir
-                    from genWorkspaceDir
-                    from externalWorkspaceDir
-	            }
-
-	            into ("${pluginFolderName}/${zipPluginLibsDir}") {
-	                from configurations.compile - configurations.compileOnly
-	                from(libsDir) {
-	                    exclude '*-sources.jar'
-	                    exclude '*-tests.jar'
-	                }
-	            }
-
-                doLast {
-                    exec {
-                        workingDir getReleaseDir(project.buildDir, project.plugin_name)
-                        commandLine 'ln', '-s', getReleaseName(project.plugin_name), 'last_build.zip'
-                    }
-                }
-            }
-        }
-    }
 
     task cleanSharedWorkspace (type: Delete) {
         doLast {
@@ -161,6 +215,17 @@ def getReleaseName(plugin_name) {
 
 def getReleaseDir(buildDir, plugin_name) {
     return file("${buildDir}/release/${plugin_name}")
+}
+
+def createLink(releaseDir, releaseName, linkName) {
+    exec {
+        def link = file("${releaseDir}/${linkName}.zip")
+        if (!link.exists()) {
+            commandLine 'ln', '-s', releaseName, link
+        } else {
+            commandLine 'echo', 'link is already created'
+        }
+    }
 }
 
 // Setting this property to true will make the artifactoryPublish task
