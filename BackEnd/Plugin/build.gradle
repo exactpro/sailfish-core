@@ -57,7 +57,7 @@ subprojects {
     }
     
     validateDictionary {
-        dependsOn.add('compileKotlin')
+        dependsOn.add('compileJava')
         dependsOn.add('copyFromData')
 
     	sourceDir([file("${mainPluginDir}/cfg/dictionaries"), file("${mainWorkspaceDir}/cfg/dictionaries"), file("${genPluginDir}/cfg/dictionaries")])
