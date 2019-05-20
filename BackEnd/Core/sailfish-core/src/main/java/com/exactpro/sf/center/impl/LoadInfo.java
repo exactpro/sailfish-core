@@ -17,7 +17,9 @@ package com.exactpro.sf.center.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,7 +29,7 @@ import java.util.Set;
 public class LoadInfo {
 
     private final StringBuilder classPath = new StringBuilder();
-    private final Set<ClassLoader> classLoaders = new HashSet<>();
+    private final Map<String, ClassLoader> classLoaders = new HashMap<>();
 
     public String getClassPath() {
         return classPath.toString();
@@ -40,12 +42,12 @@ public class LoadInfo {
         this.classPath.append(classPath);
     }
 
-    public Set<ClassLoader> getClassLoaders() {
-        return Collections.unmodifiableSet(classLoaders);
+    public Map<String, ClassLoader> getClassLoaders() {
+        return Collections.unmodifiableMap(classLoaders);
     }
 
-    public void appendClassLoaders(Collection<ClassLoader> classLoaders) {
-        this.classLoaders.addAll(classLoaders);
+    public void appendClassLoaders(Map<String, ClassLoader> classLoaders) {
+        this.classLoaders.putAll(classLoaders);
     }
 
 }

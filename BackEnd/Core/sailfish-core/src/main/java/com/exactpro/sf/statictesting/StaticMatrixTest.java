@@ -116,7 +116,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
             attachFiles();
 
             String errors = e.getAlertCollector()
-                    .getAlerts()
+                    .getAlerts(AlertType.ERROR)
                     .stream()
                     .map(Alert::toString)
                     .collect(Collectors.joining(System.lineSeparator()));

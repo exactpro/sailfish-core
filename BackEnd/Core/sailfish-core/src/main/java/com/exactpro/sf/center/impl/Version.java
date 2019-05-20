@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.center.impl;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.io.BufferedInputStream;
@@ -49,9 +50,10 @@ public class Version extends AbstractVersion {
     private final String alias;
     private final String branch;
     private final String artifactName;
+    private final String revision;
     private final boolean lightweight;
 
-    protected Version(int major, int minor, int maintenance, int build, String alias, String branch, String artifactName, boolean lightweight) {
+    protected Version(int major, int minor, int maintenance, int build, String alias, String branch, String artifactName, String revision, boolean lightweight) {
         this.major = major;
         this.minor = minor;
         this.maintenance = maintenance;
@@ -59,6 +61,7 @@ public class Version extends AbstractVersion {
         this.alias = alias;
         this.branch = branch;
         this.artifactName = artifactName;
+        this.revision = revision;
         this.lightweight = lightweight;
     }
 
@@ -85,6 +88,7 @@ public class Version extends AbstractVersion {
                 Objects.requireNonNull(properties.getProperty("plugin_alias"), "'plugin_alias' property is skipped"),
                 Objects.requireNonNull(properties.getProperty("branch"), "'branch' property is skipped"),
                 Objects.requireNonNull(properties.getProperty("name"), "'name' property is skipped"),
+                ObjectUtils.defaultIfNull(properties.getProperty("plugin_version"), "std"),
                 BooleanUtils.toBoolean(properties.getProperty("lightweight"))
             );
         }
@@ -128,6 +132,11 @@ public class Version extends AbstractVersion {
     @Override
     public String getArtifactName() {
         return artifactName;
+    }
+
+    @Override
+    public String getRevision() {
+        return revision;
     }
 
     /**

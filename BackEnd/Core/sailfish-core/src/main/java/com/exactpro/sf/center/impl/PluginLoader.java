@@ -50,9 +50,11 @@ import java.net.URLClassLoader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 import java.util.Set;
@@ -149,7 +151,7 @@ public class PluginLoader {
 		// load core
 		loadPluginFrom(FolderType.ROOT, ".", loadInfo);
 
-		Set<ClassLoader> pluginClassLoaders = new HashSet<>();
+		Map<String, ClassLoader> pluginClassLoaders = new HashMap<>();
         for (String pluginPath : wd.listFiles(DirectoryFilter.getInstance(), FolderType.PLUGINS)) {
             try {
                 userEventsLogger.info("Start loading {} plugin", pluginPath);
@@ -157,18 +159,18 @@ public class PluginLoader {
                 ClassLoader pluginClassLoader = loadPluginFrom(FolderType.PLUGINS, pluginPath, loadInfo);
                 userEventsLogger.info("Plugin {} version {} successfully loaded", pluginPath, version.buildShortVersion());
                 if (pluginClassLoader != null) {
-                    pluginClassLoaders.add(pluginClassLoader);
+                    pluginClassLoaders.put(version.getAlias(), pluginClassLoader);
                 }
             } catch (Exception e) {
                 userEventsLogger.error("Can't load plugin from {} - path[{}]. Reason: {}", pluginPath, wd.getFile(FolderType.PLUGINS, pluginPath), e.getMessage());
             }
         }
 
-        pluginClassLoaders.remove(PluginLoader.class.getClassLoader());
+        pluginClassLoaders.values().remove(PluginLoader.class.getClassLoader());
         loadInfo.appendClassLoaders(pluginClassLoaders);
 
         LoadableManagerContext context = new LoadableManagerContext();
-        context.setClassLoaders(pluginClassLoaders.toArray(new ClassLoader[0]));
+        context.setClassLoaders(pluginClassLoaders.values().toArray(new ClassLoader[0]));
 
         try {
             if(actionManager != null) {

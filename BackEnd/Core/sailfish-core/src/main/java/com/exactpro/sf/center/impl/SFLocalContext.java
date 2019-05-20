@@ -363,7 +363,7 @@ public class SFLocalContext implements ISFContext {
 		this.preprocessors = Collections.unmodifiableList(preprocessorLoader.getPreprocessors());
 		this.pluginToPreprocessors = preprocessorLoader.getPluginToPreprocessorsMap();
 		this.pluginVersions = pluginLoader.getPluginVersions();
-        this.pluginClassLoaders = pluginVersions.stream().collect(Collectors.collectingAndThen(Collectors.toMap(IVersion::getAlias, x -> x.getClass().getClassLoader()), Collections::unmodifiableMap));
+        this.pluginClassLoaders = loadInfo.getClassLoaders();
 
         this.machineLearningService = new MachineLearningService(workspaceDispatcher, dictionaryManager, dataManager, pluginClassLoaders);
         embeddedServices.add(machineLearningService);
