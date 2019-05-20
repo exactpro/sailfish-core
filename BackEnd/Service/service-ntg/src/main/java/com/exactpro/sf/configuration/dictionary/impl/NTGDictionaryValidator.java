@@ -16,6 +16,7 @@
 package com.exactpro.sf.configuration.dictionary.impl;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.MessageHelper.FIELD_MESSAGE_TYPE;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.ATTRIBUTE_MESSAGE_TYPE;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_MESSAGE_LENGTH;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.FIELD_START_OF_MESSAGE;
@@ -26,6 +27,7 @@ import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_REJECT;
 import static com.exactpro.sf.services.ntg.NTGMessageHelper.MESSAGE_TYPE;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -41,8 +43,11 @@ import com.exactpro.sf.configuration.dictionary.DictionaryValidationErrorType;
 import com.exactpro.sf.configuration.dictionary.ValidationHelper;
 import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
 import com.exactpro.sf.services.MessageHelper;
+import com.exactpro.sf.services.ntg.NTGFieldFormat;
 import com.exactpro.sf.services.ntg.NTGProtocolAttribute;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.SetMultimap;
 
 public class NTGDictionaryValidator extends AbstractDictionaryValidator {
@@ -56,6 +61,10 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     protected static final int lengthDouble = 8;
     protected static final int lengthBigDecimal = 8;
     protected static final int lengthLong = 8;
+
+    private final Multimap<JavaType, String> typeAllowedFormats = ImmutableSetMultimap.<JavaType, String>builder()
+            .putAll(JavaType.JAVA_LANG_STRING, NTGFieldFormat.A.name(), NTGFieldFormat.D.name())
+            .build();
 
     public NTGDictionaryValidator() {
     }
@@ -82,6 +91,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     public List<DictionaryValidationError> validate(IDictionaryStructure dictionary, IMessageStructure message, boolean full) {
         List<DictionaryValidationError> errors = super.validate(dictionary, message, full);
 
+        checkRequiredFields(errors, message);
         checkRequiredAttributes(errors, message);
 
         return errors;
@@ -91,8 +101,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     public List<DictionaryValidationError> validate(IMessageStructure message, IFieldStructure field) {
         List<DictionaryValidationError> errors = super.validate(message, field);
 
-        if((message == null && !field.isEnum())
-                || (message != null && !field.isComplex())) {
+        if(message != null && !field.isComplex()) {
 
             boolean containLength = ValidationHelper.checkRequiredFieldAttribute(errors, message, field,
                     NTGProtocolAttribute.Length.toString());
@@ -100,12 +109,30 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                     NTGProtocolAttribute.Offset.toString());
 
             if (containLength && containOffset) {
-                checkFormat(errors, message, field);
+                checkLength(errors, message, field);
                 checkFieldOffsets(errors, message, field);
+            }
+
+            if (typeAllowedFormats.containsKey(field.getJavaType())) {
+                checkFormatAttribute(errors, message, field, typeAllowedFormats.get(field.getJavaType()));
             }
         }
 
         return errors;
+    }
+
+    private void checkFormatAttribute(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, Collection<String> allowedFormats) {
+        if (ValidationHelper.checkRequiredFieldAttribute(errors, message, field, NTGProtocolAttribute.Format.name())) {
+            String format = getAttributeValue(field, NTGProtocolAttribute.Format.name());
+            if (!allowedFormats.contains(format)) {
+                errors.add(
+                        new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
+                                String.format("Attribute <strong>%s</strong> must have one of the next values [%s] for field with type [%s] but has [%s]", NTGProtocolAttribute.Format,
+                                        String.join(",", allowedFormats), field.getJavaType().value(), format),
+                                DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES)
+                );
+            }
+        }
     }
 
     private void checkFieldOffsets(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure structure) {
@@ -114,10 +141,10 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
         for(IFieldStructure field : message.getFields().values()) {
 
             if (structure.getName().equals(field.getName())) {
-                int offset = getAttributeValue(field, "Offset");
+                int offset = getAttributeValue(field, NTGProtocolAttribute.Offset.name());
                 if (sum != offset) {
 
-                    String errorText = String.format("Offset attribute is incorrect. actual - %s %s - expected", offset, sum);
+                    String errorText = String.format("Offset attribute is incorrect. actual - %s; expected - %s", offset, sum);
                     DictionaryValidationError error = new DictionaryValidationError(message.getName(), field.getName(), errorText, DictionaryValidationErrorLevel.FIELD,
                             DictionaryValidationErrorType.ERR_ATTRIBUTES);
                     errors.add(error);
@@ -125,31 +152,32 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 break;
             }
 
-            sum += StructureUtils.<Integer>getAttributeValue(field, "Length");
+            sum += StructureUtils.<Integer>getAttributeValue(field, NTGProtocolAttribute.Length.name());
         }
     }
 
     private void checkRequiredAttributes(List<DictionaryValidationError> errors, IMessageStructure message) {
-
-        if (message.getName().equals(MESSAGE_HEADER)) {
-            ValidationHelper.checkRequiredField(errors, message, FIELD_MESSAGE_LENGTH);
-            ValidationHelper.checkRequiredField(errors, message, MESSAGE_TYPE);
-            ValidationHelper.checkRequiredField(errors, message, FIELD_START_OF_MESSAGE);
-        }
-
         if(!message.getAttributes().isEmpty()) {
             if (message.getName().equals(MESSAGE_HEADER)) {
                 ValidationHelper.checkRequiredAttribute(errors, message, NTGProtocolAttribute.Length.toString());
                 ValidationHelper.checkRequiredAttribute(errors, message, NTGProtocolAttribute.Offset.toString());
     
             } else {
-                ValidationHelper.checkRequiredAttribute(errors, message, MESSAGE_TYPE);
+                ValidationHelper.checkRequiredAttribute(errors, message, ATTRIBUTE_MESSAGE_TYPE);
                 ValidationHelper.checkRequiredAttribute(errors, message, MessageHelper.ATTRIBUTE_IS_ADMIN);
             }
         }
     }
 
-    private void checkFormat(List<DictionaryValidationError> errors, IMessageStructure message,
+    private void checkRequiredFields(List<DictionaryValidationError> errors, IMessageStructure message) {
+        if (message.getName().equals(MESSAGE_HEADER)) {
+            ValidationHelper.checkRequiredField(errors, message, FIELD_MESSAGE_LENGTH);
+            ValidationHelper.checkRequiredField(errors, message, MESSAGE_TYPE);
+            ValidationHelper.checkRequiredField(errors, message, FIELD_START_OF_MESSAGE);
+        }
+    }
+
+    private void checkLength(List<DictionaryValidationError> errors, IMessageStructure message,
                              IFieldStructure field) {
         JavaType javaType = field.getJavaType();
         Integer length = getAttributeValue(field, NTGProtocolAttribute.Length.toString());
@@ -256,9 +284,16 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     }
 
     private void checkMessageTypes(List<DictionaryValidationError> errors, IDictionaryStructure dictionary) {
-//        Set<Object> messageTypes = new HashSet<>();
         SetMultimap<Object, Boolean> test = HashMultimap.create();
-        outerLoop:
+
+        IFieldStructure messageTypeEnum = dictionary.getFields().get(FIELD_MESSAGE_TYPE);
+        if (messageTypeEnum == null) {
+            errors.add(new DictionaryValidationError(null, null, "Dictionary doesn't contain <strong>" + FIELD_MESSAGE_TYPE + "</strong> field",
+                    DictionaryValidationErrorLevel.DICTIONARY, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));
+            return;
+        }
+        Map<String, IAttributeStructure> messageTypeValues = messageTypeEnum.getValues();
+
         for(IMessageStructure message : dictionary.getMessages().values()) {
 
             if(message.getAttributes().containsKey(ATTRIBUTE_MESSAGE_TYPE)) {
@@ -273,44 +308,25 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                                 DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
                     }
 
-                    IFieldStructure messageTypeEnum = dictionary.getFields().get(ATTRIBUTE_MESSAGE_TYPE);
+                    Byte byteValue = Byte.parseByte(messageTypeAttribute.toString());
 
-                    if (messageTypeEnum != null) {
+                    if (byteValue < 0) { // for messageType with UByte value;
+                        continue;
+                    }
 
-	                    Map<String, IAttributeStructure> messageTypeValues = messageTypeEnum.getValues();
+                    boolean valueMatched = messageTypeValues.values().stream()
+                            .map(attr -> (byte)attr.getValue().charAt(0))
+                            .anyMatch(byteValue::equals);
+                    if (valueMatched) {
+                        continue;
+                    }
 
+                    if(!message.getName().equals(MESSAGE_HEARTBEAT)) {
 
-	                    Byte byteValue = Byte.parseByte(messageTypeAttribute.toString());
-
-	                    if(byteValue < 0) { // for messageType with UByte value;
-	                        continue;
-	                    }
-
-	                    for(IAttributeStructure messageTypeValue : messageTypeValues.values()) {
-	                        Byte asciiValue = (byte)messageTypeValue.getValue().charAt(0);
-
-	                        if(asciiValue.equals(byteValue)) {
-	                            continue outerLoop;
-	                        }
-	                    }
-
-	                    if(!message.getName().equals(MESSAGE_HEARTBEAT)) {
-
-	                        errors.add(new DictionaryValidationError(message.getName(), null,
-	                                ATTRIBUTE_MESSAGE_TYPE
-	                                        + " attribute value is not exist in enum. Value [" + messageTypeAttribute + "]",
-	                                DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
-
-	                    }
-
-                    } else {
-
-                    	String errMsg = "Dictionary doesn't contain <strong>" + ATTRIBUTE_MESSAGE_TYPE + "</strong> field";
-
-                    	if (!ValidationHelper.checkErrorExistByText(errors, errMsg)) {
-                    		errors.add(new DictionaryValidationError(null, null, errMsg,
-                    				DictionaryValidationErrorLevel.DICTIONARY, DictionaryValidationErrorType.ERR_REQUIRED_FIELD));
-                    	}
+                        errors.add(new DictionaryValidationError(message.getName(), null,
+                                ATTRIBUTE_MESSAGE_TYPE
+                                        + " attribute value is not exist in enum. Value [" + messageTypeAttribute + "]",
+                                DictionaryValidationErrorLevel.MESSAGE, DictionaryValidationErrorType.ERR_ATTRIBUTES));
                     }
                 }
             }
