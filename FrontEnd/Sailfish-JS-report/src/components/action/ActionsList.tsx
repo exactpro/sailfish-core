@@ -38,6 +38,8 @@ interface ListState {
 
 export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
 
+    private list = React.createRef<VirtualizedList>();
+
     constructor(props: ListProps) {
         super(props);
 
@@ -51,8 +53,6 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
             scrolledIndex: new Number(0)
         });
     }
-
-    private list: VirtualizedList;
 
     private getScrolledIndex(scrolledActionId: Number, actions: ActionNode[]): Number {
         const scrolledIndex = actions.findIndex(
@@ -81,7 +81,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
                         <VirtualizedList
                             rowCount={actions.length}
                             itemSpacing={6}
-                            ref={ref => this.list = ref}
+                            ref={this.list}
                             elementRenderer={this.renderAction}
                             scrolledIndex={scrolledIndex}
                         />
@@ -98,8 +98,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
             <ActionTree 
                 action={action}
                 onExpand={() => {
-                    this.list.measurerCache.clear(idx);
-                    this.list.updateList();
+                    this.list.current.remeasureRow(idx);
                 }}/>
         )
     }

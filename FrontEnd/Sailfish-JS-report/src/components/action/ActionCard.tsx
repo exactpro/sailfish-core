@@ -17,7 +17,7 @@
 import * as React from 'react';
 import Action from "../../models/Action";
 import ParamsTable, { RecoverableParamsTable } from "./ParamsTable";
-import ExpandablePanel, { RecoverableExpandablePanel } from "../ExpandablePanel";
+import { RecoverableExpandablePanel } from "../ExpandablePanel";
 import { StatusType } from "../../models/Status";
 import "../../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";

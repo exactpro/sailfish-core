@@ -16,6 +16,7 @@
 
 import AppState from "../state/models/AppState";
 import { StateActionType } from "../actions/stateActions";
+import { Middleware } from "redux";
 
 export const TEST_CASE_PARAM_KEY = 'tc',
     ACTION_PARAM_KEY = 'action',
@@ -34,7 +35,7 @@ export function getUrlSearchString(url: string) {
 }
 
 // redux middleware
-export const urlHandler = store =>  next => (action: StateActionType) => {
+export const urlHandler: Middleware = store =>  next => (action: StateActionType) => {
 
     const prevState = store.getState() as AppState,
         result = next(action),

@@ -49,8 +49,7 @@ class MessagesVirtualizedListBase extends React.Component<MessagesVirtualizedLis
     componentWillReceiveProps(nextProps: MessagesVirtualizedListProps) {
         if (nextProps.adminMessagesEnabled !== this.props.adminMessagesEnabled) {
             this.messagesCardStates = this.messagesCardStates.map(state => ({...state, adminExpanded: nextProps.adminMessagesEnabled }));
-            this.list.measurerCache.clearAll();
-            this.list.updateList();
+            this.list.remeasureAll();
         }
     }
 
@@ -84,8 +83,7 @@ class MessagesVirtualizedListBase extends React.Component<MessagesVirtualizedLis
     }
 
     private measureElement(index: number) {
-        this.list.measurerCache.clear(index);
-        this.list.updateList();
+        this.list.remeasureRow(index);
     }
 
     private messageCardStateHandler(nextState: MessageCardExpandState, elementIndex: number) {

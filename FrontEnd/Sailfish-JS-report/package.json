@@ -24,6 +24,7 @@
     "@types/react-custom-scrollbars": "^4.0.5",
     "@types/react-dom": "^16.8.4",
     "@types/react-redux": "^7.0.8",
+    "@types/react-virtualized": "^9.21.1",
     "awesome-typescript-loader": "^5.2.1",
     "css-loader": "^1.0.0",
     "cssnano": "^4.1.10",

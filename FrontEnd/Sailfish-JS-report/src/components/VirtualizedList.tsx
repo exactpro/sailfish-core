@@ -31,11 +31,12 @@ interface VirtualizedListProps {
 
 export class VirtualizedList extends React.Component<VirtualizedListProps> {
     
-    public readonly measurerCache = new CellMeasurerCache({
+    private readonly measurerCache = new CellMeasurerCache({
         defaultHeight: 50,
         fixedWidth: true
     });
 
+    private lastWidth = 0
     private forceUpdateList : Function;
     private scrollToIndex: (idx: number) => any;
 
@@ -43,11 +44,21 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         this.forceUpdateList && this.forceUpdateList();
     }
 
+    public remeasureRow(index: number) {
+        this.measurerCache.clear(index, 0);
+        this.updateList();
+    }
+
+    public remeasureAll() {
+        this.measurerCache.clearAll();
+        this.updateList();
+    }
+
     render() {
         const { rowCount, scrolledIndex } = this.props;
 
         return (
-            <AutoSizer>
+            <AutoSizer onResize={this.onResize}>
                 {({ height, width }) => (
                     <List
                         height={height}
@@ -87,6 +98,14 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         )
     }
 
+    private onResize = ({width}) => {
+        if (width !== this.lastWidth) {
+            this.lastWidth = width;
+            this.measurerCache.clearAll();
+            this.updateList();
+        }
+    }
+
     componentDidUpdate(prevProps: VirtualizedListProps) {
         // Here we handle a situation, when primitive value of Number object doesn't changed 
         // and passing new index value in List doesn't make any effect (because it requires primitive value).
@@ -108,8 +127,7 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         // Besides that, it fixes bug, related with invallid rendering, when data (test case) is changed (but it looks realy bad) 
 
         raf(() => { 
-            this.measurerCache.clearAll();
-            this.forceUpdateList();
+            this.remeasureAll();
         }, 2);
     }
 }

@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import UserMessage from '../../models/UserMessage';
-import ExpandablePanel, { RecoverableExpandablePanel } from './../ExpandablePanel';
+import { RecoverableExpandablePanel } from './../ExpandablePanel';
 import ExceptionCard from './../ExceptionCard';
 import { createSelector } from '../../helpers/styleCreators';
 import '../../styles/action.scss';
