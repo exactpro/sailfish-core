@@ -15,7 +15,8 @@
  ******************************************************************************/
 
 import { createStore, applyMiddleware } from 'redux';
-import thunk, { ThunkMiddleware } from 'redux-thunk';
+import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import { initialAppState } from '../state/initial/initialAppState';
 import { urlHandler } from '../middleware/urlHandler';
 import { combineReducers } from 'redux';
@@ -36,5 +37,5 @@ export const createAppStore = () => createStore<AppState, StateActionType, {}, {
         machineLearning: machineLearningReducer
     }),
     initialAppState,
-    applyMiddleware(urlHandler, thunk as ThunkMiddleware<AppState, StateActionType>)
+    composeWithDevTools(applyMiddleware(urlHandler, thunk))
 )

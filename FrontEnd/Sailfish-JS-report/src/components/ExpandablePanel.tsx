@@ -29,58 +29,26 @@ interface PanelProps {
     children: JSX.Element[];
 }
 
-interface PanelState {
-    isExpanded: boolean;
-}
+const ExpandablePanel = ({ header, body, children, expandedHeader, isExpanded, onExpand }: PanelProps) => {
+    const iconClass = createSelector(
+        "expandable-panel__icon", 
+        isExpanded ? "expanded" : "hidden"
+    );
 
-export default class ExpandablePanel extends React.Component<PanelProps, PanelState> {
-    constructor(props: PanelProps) {
-        super(props);
-        this.state = {
-            isExpanded: props.isExpanded != null ? props.isExpanded : false
-        };
-    }
-
-    expandPanel() {
-        this.setState({isExpanded: !this.state.isExpanded});
-    }
-
-    componentWillReceiveProps(nextProps: PanelProps) {
-        if (nextProps.isExpanded != null) {
-            this.setState({isExpanded: nextProps.isExpanded});
-        }
-    }
-
-    render() {
-        const { header, body, children, expandedHeader } = this.props,
-            { isExpanded } = this.state;
-
-        const iconClass = createSelector(
-            "expandable-panel__icon", 
-            isExpanded ? "expanded" : "hidden"
-        );
-
-        return (
-            <div className="expandable-panel">
-                <div className="expandable-panel__header">
-                    <div className={iconClass} 
-                        onClick={e => this.expandPanel()}/>
-                    { (isExpanded && expandedHeader) || header || children[0] }
-                </div>
-                {
-                    isExpanded ? 
-                        body || children.slice(1)
-                        : null
-                }
+    return (
+        <div className="expandable-panel">
+            <div className="expandable-panel__header">
+                <div className={iconClass} 
+                    onClick={() => onExpand(!isExpanded)}/>
+                { (isExpanded && expandedHeader) || header || children[0] }
             </div>
-        )
-    }
-
-    componentDidUpdate(prevProps, prevState: PanelState) {
-        if (prevState.isExpanded !== this.state.isExpanded) {
-            this.props.onExpand && this.props.onExpand(this.state.isExpanded);
-        }
-    }
+            {
+                isExpanded ? 
+                    body || children.slice(1)
+                    : null
+            }
+        </div>
+    )
 }
 
 interface RecoverablePanelProps extends PanelProps, RecoverableElementProps {}
