@@ -15,8 +15,8 @@
 ******************************************************************************/
 
 import * as React from 'react';
-import UserTable from '../../models/UserTable';
-import Action, { ActionNodeType } from '../../models/Action';
+import UserTable, { isUserTable } from '../../models/UserTable';
+import Action from '../../models/Action';
 import { RecoverableExpandablePanel } from '../ExpandablePanel';
 import { CustomTable } from './CustomTable';
 
@@ -28,7 +28,7 @@ interface UserTableCardProps {
 
 const UserTableCard = ({ parent, table, onExpand }: UserTableCardProps) => {
     const stateKey = parent.id + '-user-table-' + parent.subNodes
-        .filter(node => node.actionNodeType === ActionNodeType.TABLE)
+        .filter(isUserTable)
         .indexOf(table).toString();
 
     return (

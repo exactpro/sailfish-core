@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import '../../styles/action.scss';
-import Action, { ActionNode, ActionNodeType } from '../../models/Action';
+import Action, { ActionNode, ActionNodeType, isAction } from '../../models/Action';
 import { ActionTree } from './ActionTree';
 import { HeatmapScrollbar } from '../HeatmapScrollbar';
 import { VirtualizedList } from '../VirtualizedList';
@@ -56,7 +56,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
 
     private getScrolledIndex(scrolledActionId: Number, actions: ActionNode[]): Number {
         const scrolledIndex = actions.findIndex(
-            action => action.actionNodeType === ActionNodeType.ACTION && (action as Action).id === +scrolledActionId
+            action => isAction(action) && action.id === +scrolledActionId
         );
 
         return scrolledIndex !== -1 ? new Number(scrolledIndex) : null;
@@ -97,9 +97,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
         return (
             <ActionTree 
                 action={action}
-                onExpand={() => {
-                    this.list.current.remeasureRow(idx);
-                }}/>
+                onExpand={() => this.list.current.remeasureRow(idx)}/>
         )
     }
 }   

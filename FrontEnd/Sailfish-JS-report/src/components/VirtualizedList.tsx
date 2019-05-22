@@ -17,6 +17,7 @@
 import * as React from 'react';
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
 import { raf } from '../helpers/raf';
+import RemeasureHandler from './util/RemeasureHandler';
 
 interface VirtualizedListProps {
     elementRenderer: (idx: number) => JSX.Element;
@@ -39,6 +40,7 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
     private lastWidth = 0
     private forceUpdateList : Function;
     private scrollToIndex: (idx: number) => any;
+    private remeasureHandler: (idx: number) => any;
 
     public updateList() {
         this.forceUpdateList && this.forceUpdateList();
@@ -91,9 +93,12 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
                 rowIndex={index}
                 parent={parent}
                 key={key}>
-                    <div style={ { ...style, paddingTop: this.props.itemSpacing / 2, paddingBottom: this.props.itemSpacing / 2 }}>
+                    <RemeasureHandler 
+                        itemSpacing={this.props.itemSpacing}
+                        style={style}
+                        measureHandler={() => this.remeasureHandler && this.remeasureHandler(index)}>
                         {this.props.elementRenderer(index)}
-                    </div>
+                    </RemeasureHandler>
             </CellMeasurer>
         )
     }
@@ -129,5 +134,9 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         raf(() => { 
             this.remeasureAll();
         }, 2);
+
+        this.remeasureHandler = (index) => {
+            this.remeasureRow(index);
+        }
     }
 }

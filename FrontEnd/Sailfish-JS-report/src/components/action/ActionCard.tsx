@@ -17,7 +17,7 @@
 import * as React from 'react';
 import Action from "../../models/Action";
 import ParamsTable, { RecoverableParamsTable } from "./ParamsTable";
-import { RecoverableExpandablePanel } from "../ExpandablePanel";
+import { RecoverableExpandablePanel, ExpandablePanel } from "../ExpandablePanel";
 import { StatusType } from "../../models/Status";
 import "../../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";
@@ -35,9 +35,10 @@ interface CardProps {
     ref?: Function;
     onSelect?: (action: Action) => void;
     onExpand: () => void;
+    onRootExpand: (isExpanded: boolean) => void;
 }
 
-export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onExpand }: CardProps) => {
+export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onExpand, onRootExpand }: CardProps) => {
     const {
         matrixId,
         serviceName,
@@ -67,21 +68,20 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
-    const clickHandler = e => {
+    const clickHandler = (e: React.MouseEvent) => {
         if (!onSelect) return;
         onSelect(action);
         // here we cancel handling by parent divs
-        e.cancelBubble = true;
+        e.stopPropagation();
     };
 
     return (
         <div className={rootClassName}
             onClick={clickHandler}
             key={action.id}>
-            <RecoverableExpandablePanel
-                stateKey={action.id.toString()}
+            <ExpandablePanel
                 isExpanded={isExpanded}
-                onExpand={() => onExpand()}>
+                onExpand={isExpanded => onRootExpand(isExpanded)}>
                 <div className={headerClassName}>
                     <div className="ac-header__title">
                         <div className="ac-header__name">
@@ -146,7 +146,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         ) : null
                     }
                 </div>
-            </RecoverableExpandablePanel>
+            </ExpandablePanel>
         </div>
     )
 }

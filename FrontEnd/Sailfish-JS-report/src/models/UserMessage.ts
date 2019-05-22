@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionNodeType } from './Action';
+import Action, { ActionNodeType, ActionNode } from './Action';
 import Exception from './Exception';
 
 export type UserMessageTextColor =  'BLACK' | 'BLUE' | 'RED' | 'ORANGE' | 'GRAY';
@@ -29,5 +29,9 @@ export default interface UserMessage {
     style: string;
     level?: string;
     exception?: Exception;
-    actionNodeType: string;
+    actionNodeType: ActionNodeType.CUSTOM_MESSAGE;
+}
+
+export function isUserMessage(actionNode: ActionNode): actionNode is UserMessage {
+    return actionNode.actionNodeType === ActionNodeType.CUSTOM_MESSAGE;
 }

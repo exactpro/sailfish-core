@@ -14,10 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNodeType } from "./Action";
+import { ActionNodeType, ActionNode } from "./Action";
 
 export default interface UserTable {
-    actionNodeType: ActionNodeType;
+    actionNodeType: ActionNodeType.TABLE;
     name?: string;
     content: Object[];
+}
+
+export function isUserTable(actionNode: ActionNode): actionNode is UserTable {
+    return actionNode.actionNodeType === ActionNodeType.TABLE;
 }

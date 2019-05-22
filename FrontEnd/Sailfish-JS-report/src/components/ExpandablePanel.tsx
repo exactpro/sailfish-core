@@ -20,16 +20,16 @@ import { createSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
 
 interface PanelProps {
-    header?: JSX.Element;
+    header?: React.ReactNode;
     // shows, when panel is expanded
-    expandedHeader?: JSX.Element;
-    body?: JSX.Element;
+    expandedHeader?: React.ReactNode;
+    body?: React.ReactNode;
     isExpanded?: boolean;
     onExpand?: (isExpanded: boolean) => any;
-    children: JSX.Element[];
+    children: React.ReactNode[];
 }
 
-const ExpandablePanel = ({ header, body, children, expandedHeader, isExpanded, onExpand }: PanelProps) => {
+export const ExpandablePanel = ({ header, body, children, expandedHeader, isExpanded, onExpand }: PanelProps) => {
     const iconClass = createSelector(
         "expandable-panel__icon", 
         isExpanded ? "expanded" : "hidden"

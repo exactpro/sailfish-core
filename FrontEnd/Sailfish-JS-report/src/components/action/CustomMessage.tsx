@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import UserMessage from '../../models/UserMessage';
+import UserMessage, { isUserMessage } from '../../models/UserMessage';
 import { RecoverableExpandablePanel } from './../ExpandablePanel';
 import ExceptionCard from './../ExceptionCard';
 import { createSelector } from '../../helpers/styleCreators';
@@ -34,7 +34,7 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
     const { message, color, style, level, exception } = userMessage;
 
     const stateKey = parent.id + '-user-message-' + parent.subNodes && parent.subNodes
-        .filter(node => node.actionNodeType === ActionNodeType.CUSTOM_MESSAGE)
+        .filter(isUserMessage)
         .indexOf(userMessage).toString();
 
     // italic style value - only for fontStyle css property
