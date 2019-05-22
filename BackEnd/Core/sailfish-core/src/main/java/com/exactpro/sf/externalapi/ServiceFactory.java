@@ -122,7 +122,7 @@ public class ServiceFactory implements IServiceFactory {
 
     /**
      * Creates ServiceFactory with default parameters.
-     * @param workspaceLayers the sequence of workspace layers {@link com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher}
+     * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @throws IOException
      * @throws WorkspaceSecurityException
      * @throws SailfishURIException
@@ -135,7 +135,7 @@ public class ServiceFactory implements IServiceFactory {
 
     /**
      * Creates ServiceFactory with default parameters.
-     * @param workspaceLayers the sequence of workspace layers {@link com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher}
+     * @param workspaceLayers the sequence of workspace layers {@link IWorkspaceDispatcher}
      * @param useResourceLayer if true resource layer '{@link #ROOT_PACKAGE}' will be plugged
      * @throws IOException
      * @throws WorkspaceSecurityException
@@ -182,7 +182,7 @@ public class ServiceFactory implements IServiceFactory {
         this.wd = createWorkspaceDispatcher(useResourceLayer, workspaceLayers);
         this.staticServiceManager = new DefaultStaticServiceManager();
         this.utilManager = new UtilityManager();
-        if (useStrictMessages) {
+        if(useStrictMessages) {
             this.dictionaryManager = new StrictDictionaryManager(wd, utilManager);
         } else {
             this.dictionaryManager = new DictionaryManager(wd, utilManager);
@@ -201,11 +201,11 @@ public class ServiceFactory implements IServiceFactory {
         disposables.add(taskExecutor);
         IMessageStorage emptyMessageStorage = new FakeMessageStorage();
         IServiceStorage emptyServiceStorage = new EmptyServiceStorage();
-        this.messageFactory = new DictionaryMessageFactory(this.dictionaryManager);
+        this.messageFactory = new DictionaryMessageFactory(dictionaryManager);
 
         this.emptyServiceContext = new DefaultServiceContext(dictionaryManager, emptyMessageStorage, emptyServiceStorage, loggingConfigurator, taskExecutor, dataManager, wd);
 
-        this.serviceTypes = new HashSet<>(Arrays.asList(this.staticServiceManager.getServiceURIs()));
+        this.serviceTypes = new HashSet<>(Arrays.asList(staticServiceManager.getServiceURIs()));
     }
 
     /**
@@ -226,9 +226,9 @@ public class ServiceFactory implements IServiceFactory {
 
     @Override
     public void close() throws Exception {
-        while (!this.disposables.isEmpty()) {
+        while(!disposables.isEmpty()) {
             try {
-                this.disposables.remove().dispose();
+                disposables.remove().dispose();
             } catch (RuntimeException e) {
                 logger.error(e.getMessage(), e);
             }
@@ -236,12 +236,12 @@ public class ServiceFactory implements IServiceFactory {
     }
 
     @Override
-    public IServiceProxy createService(InputStream setting, final IServiceListener listener) throws ServiceFactoryException {
+    public IServiceProxy createService(InputStream setting, IServiceListener listener) throws ServiceFactoryException {
         List<ServiceDescription> importResults = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
         try {
-            this.marshalManager.unmarshalServices(setting, false, importResults, errors);
+            marshalManager.unmarshalServices(setting, false, importResults, errors);
         } catch (RuntimeException e) {
             throw new ServiceFactoryException("Problem during service configuration reading", e);
         }
@@ -251,7 +251,7 @@ public class ServiceFactory implements IServiceFactory {
         if (!errors.isEmpty() || importResults.size() != 1) {
             throw new ServiceFactoryException("Unmarshalling the settings set failed, reason " + errors);
         }
-        final ServiceDescription desc = importResults.get(0);
+        ServiceDescription desc = importResults.get(0);
         ServiceSettingsProxy settingsProxy = new ServiceSettingsProxy(desc.getSettings());
         return createService(desc.getType(), settingsProxy, ServiceName.parse(desc.getName()), listener);
     }
@@ -269,12 +269,12 @@ public class ServiceFactory implements IServiceFactory {
 
     @Override
     public Set<SailfishURI> getDictionaries() {
-        return this.dictionaryManager.getDictionaryURIs();
+        return dictionaryManager.getDictionaryURIs();
     }
 
     @Override
     public IDictionaryStructure getDictionary(SailfishURI uri) {
-        return this.dictionaryManager.getDictionary(uri);
+        return dictionaryManager.getDictionary(uri);
     }
 
     @Override
@@ -282,14 +282,14 @@ public class ServiceFactory implements IServiceFactory {
         if (!serviceTypes.contains(serviceType)) {
             throw new IllegalArgumentException("Unknown service type " + serviceType);
         }
-        return this.messageFactory;
+        return messageFactory;
     }
 
     @Override
     public SailfishURI registerDictionary(String title, InputStream dictionary, boolean overwrite) throws ServiceFactoryException  {
         try {
             IDictionaryRegistrator registrator = dictionaryManager.registerDictionary(title, overwrite);
-            try (OutputStream os = new BufferedOutputStream(new FileOutputStream(this.wd.getFile(FolderType.ROOT, registrator.getPath())))) {
+            try(OutputStream os = new BufferedOutputStream(new FileOutputStream(wd.getFile(FolderType.ROOT, registrator.getPath())))) {
                 IOUtils.copy(dictionary, os);
             }
             return registrator.registrate();
@@ -323,7 +323,7 @@ public class ServiceFactory implements IServiceFactory {
 
         IInitiatorService service;
         try {
-            IService tmp = this.staticServiceManager.createService(serviceType);
+            IService tmp = staticServiceManager.createService(serviceType);
             if (!(tmp instanceof IInitiatorService)) {
                 throw new ServiceFactoryException("Only IInitiator service supported");
             }
@@ -332,14 +332,13 @@ public class ServiceFactory implements IServiceFactory {
             throw new ServiceFactoryException(String.format("Failed to instantiate service with SailfishURI %s", serviceType), e);
         }
 
-
-        if (DISABLED == service.getStatus()) {
+        if(service.getStatus() == DISABLED) {
             throw new ServiceFactoryException(
                     String.format("Could not create service %s. Target service '%s' is not presented in plug-ins", serviceType, serviceType));
         }
 
         if (settingsProxy == null) {
-            IServiceSettings settings = this.staticServiceManager.createServiceSettings(serviceType);
+            IServiceSettings settings = staticServiceManager.createServiceSettings(serviceType);
             settingsProxy = new ServiceSettingsProxy(settings);
         }
 
@@ -361,7 +360,7 @@ public class ServiceFactory implements IServiceFactory {
             super.storeMessage(message);
             if (message.getMetaData().isRejected()) {
                 ServiceHandlerRoute route = message.getMetaData().isAdmin() ? ServiceHandlerRoute.FROM_ADMIN : ServiceHandlerRoute.FROM_APP;
-                this.listener.onMessage(serviceProxy, message, true, route);
+                listener.onMessage(serviceProxy, message, true, route);
             }
         }
     }
@@ -415,10 +414,10 @@ public class ServiceFactory implements IServiceFactory {
 
         @Override
         public void onEvent(ServiceEvent event) {
-            this.listener.onEvent(this.service, event);
+            listener.onEvent(service, event);
         }
 
-    };
+    }
 
     private static class IntServiceHandler extends AbstractServiceHandler {
 
@@ -432,29 +431,29 @@ public class ServiceFactory implements IServiceFactory {
 
         @Override
         public void sessionOpened(ISession session) throws ServiceHandlerException {
-            listener.sessionOpened(this.service);
+            listener.sessionOpened(service);
         }
 
         @Override
         public void sessionIdle(ISession session, IdleStatus status) throws ServiceHandlerException {
-            listener.sessionIdle(this.service, status);
+            listener.sessionIdle(service, status);
         }
 
         @Override
         public void sessionClosed(ISession session) throws ServiceHandlerException {
-            listener.sessionClosed(this.service);
+            listener.sessionClosed(service);
         }
 
         @Override
         public void putMessage(ISession session, ServiceHandlerRoute route, IMessage message) throws ServiceHandlerException {
-            listener.onMessage(this.service, message, false, route);
+            listener.onMessage(service, message, false, route);
         }
 
         @Override
         public void exceptionCaught(ISession session, Throwable cause) {
-            listener.exceptionCaught(this.service, cause);
+            listener.exceptionCaught(service, cause);
         }
-    };
+    }
 
     private static class ServiceProxy implements IServiceProxy {
 
@@ -489,17 +488,17 @@ public class ServiceFactory implements IServiceFactory {
         @Override
         public void stop() {
 
-            if (STARTED.equals(service.getStatus()) || WARNING.equals(service.getStatus())) {
+            if(service.getStatus() == STARTED || service.getStatus() == WARNING) {
                 service.dispose();
             } else {
-                throw new IllegalStateException(String.format("Service %s not started", this.name));
+                throw new IllegalStateException(String.format("Service %s not started", name));
             }
         }
 
         @Override
         public void start() {
             if (checkServiceState(service.getStatus(), ERROR, CREATED, DISPOSED, INITIALIZED)) {
-                this.service.init(this.serviceContext, this.serviceMonitor, this.serviceHandler, this.settingsProxy.getSettings(), this.name);
+                service.init(serviceContext, serviceMonitor, serviceHandler, settingsProxy.getSettings(), name);
                 service.start();
             } else {
                 throw new IllegalStateException(String.format("Service in illegal statate: %s", service.getStatus()));
@@ -509,7 +508,7 @@ public class ServiceFactory implements IServiceFactory {
         @Override
         public IMessage send(IMessage message) throws InterruptedException {
 
-            if (STARTED.equals(service.getStatus()) || WARNING.equals(service.getStatus())) {
+            if(service.getStatus() == STARTED || service.getStatus() == WARNING) {
                 IInitiatorService xService = service;
                 xService.getSession().send(message);
             } else {
@@ -537,7 +536,7 @@ public class ServiceFactory implements IServiceFactory {
         @Override
         public ISettingsProxy getSettings() {
 
-            return this.settingsProxy;
+            return settingsProxy;
         }
 
         private boolean checkServiceState(ServiceStatus actual, ServiceStatus... expected) {
@@ -554,11 +553,11 @@ public class ServiceFactory implements IServiceFactory {
 
         public IServiceSettings getSettings() {
             try {
-                IServiceSettings result = (IServiceSettings) this.settings.getClass().newInstance();
+                IServiceSettings result = (IServiceSettings)settings.getClass().newInstance();
 
                 Object value = null;
                 for (PropertyDescriptor descriptor : descriptors.values()) {
-                    value = descriptor.getReadMethod().invoke(this.settings);
+                    value = descriptor.getReadMethod().invoke(settings);
                     descriptor.getWriteMethod().invoke(result, value);
                 }
 
@@ -570,12 +569,12 @@ public class ServiceFactory implements IServiceFactory {
 
         @Override
         public SailfishURI getDictionary() {
-            return ((IServiceSettings) this.settings).getDictionaryName();
+            return ((IServiceSettings)settings).getDictionaryName();
         }
 
         @Override
         public void setDictionary(SailfishURI dictionary) {
-            ((IServiceSettings) this.settings).setDictionaryName(dictionary);
+            ((IServiceSettings)settings).setDictionaryName(dictionary);
         }
     }
 

@@ -70,7 +70,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 public abstract class TCPIPProxy implements IInitiatorService
 {
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	private Rules rules;
 	private volatile ServiceStatus curStatus;
@@ -85,10 +85,10 @@ public abstract class TCPIPProxy implements IInitiatorService
     private ServiceInfo serviceInfo;
 	private WrapperNioSocketAcceptor acceptor;
 	private IoSession session;
-	private boolean haveConnection = false;
+    private boolean haveConnection;
 	private Class<? extends AbstractCodec> codecClass;
 	private IServiceMonitor monitor;
-	private Map<IoSession, MINASession> sessions = Collections.synchronizedMap(new HashMap<IoSession, MINASession>());
+    private final Map<IoSession, MINASession> sessions = Collections.synchronizedMap(new HashMap<IoSession, MINASession>());
 	private IServiceContext serviceContext;
 	private ITaskExecutor taskExecutor;
 	private IDataManager dataManager;
@@ -113,10 +113,10 @@ public abstract class TCPIPProxy implements IInitiatorService
 
 	@Override
 	public void init(IServiceContext serviceContext,
-			final IServiceMonitor serviceMonitor,
-			final IServiceHandler handler,
-			final IServiceSettings serviceSettings,
-			final ServiceName serviceName)
+            IServiceMonitor serviceMonitor,
+            IServiceHandler handler,
+            IServiceSettings serviceSettings,
+            ServiceName serviceName)
 	{
 		try {
 			changeStatus(ServiceStatus.INITIALIZING, "Service initializing", null);
@@ -129,13 +129,15 @@ public abstract class TCPIPProxy implements IInitiatorService
 
 			this.handler = Objects.requireNonNull(handler, "'Service handler' parameter");
 
-			if (serviceSettings == null)
-				throw new NullPointerException("settings");
+            if(serviceSettings == null) {
+                throw new NullPointerException("settings");
+            }
 
-			if (serviceSettings instanceof TCPIPProxySettings)
-				this.settings = (TCPIPProxySettings) serviceSettings;
-			else
-				throw new ServiceException("Incorrect class of settings has been passed to init " + serviceSettings.getClass());
+            if(serviceSettings instanceof TCPIPProxySettings) {
+                this.settings = (TCPIPProxySettings)serviceSettings;
+            } else {
+                throw new ServiceException("Incorrect class of settings has been passed to init " + serviceSettings.getClass());
+            }
 
 			this.monitor = serviceMonitor;
 
@@ -152,14 +154,14 @@ public abstract class TCPIPProxy implements IInitiatorService
 			}
 
 			try {
-                this.codecClass = this.getClass().getClassLoader().loadClass(this.settings.getCodecClassName()).asSubclass(AbstractCodec.class);
+                this.codecClass = getClass().getClassLoader().loadClass(settings.getCodecClassName()).asSubclass(AbstractCodec.class);
 			} catch (ClassNotFoundException e) {
 				changeStatus(ServiceStatus.ERROR, "Error while init", e);
 				logger.error(e.getMessage(), e);
 				throw new ScriptRunException("Could not find codec class [" + settings.getCodecClassName() + "]", e);
 			}
 
-			if ((settings.isChangeTags()) && (settings.getRulesAlias() != null)) {
+            if(settings.isChangeTags() && (settings.getRulesAlias() != null)) {
 				Unmarshaller u = null;
 				JAXBContext jc = null;
 
@@ -178,12 +180,12 @@ public abstract class TCPIPProxy implements IInitiatorService
 				}
 			}
 
-            SailfishURI dictionaryName = Objects.requireNonNull(this.settings.getDictionaryName(), "dictionary name cannot be null");
+            SailfishURI dictionaryName = Objects.requireNonNull(settings.getDictionaryName(), "dictionary name cannot be null");
 
             this.dictionary = this.serviceContext.getDictionaryManager().getDictionary(dictionaryName);
             this.factory = this.serviceContext.getDictionaryManager().getMessageFactory(dictionaryName);
 
-            internalInit(serviceName, this.serviceContext.getDictionaryManager(), handler, serviceSettings, storage, serviceMonitor, this.logConfigurator, taskExecutor, dataManager);
+            internalInit(serviceName, this.serviceContext.getDictionaryManager(), handler, serviceSettings, storage, serviceMonitor, logConfigurator, taskExecutor, dataManager);
 
 			changeStatus(ServiceStatus.INITIALIZED, "Service initialized", null);
 		} catch (RuntimeException e){
@@ -201,7 +203,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 			throw new ServiceException("Incorrect class of settings has been passed to init " + serviceSettings.getClass());
 		}
 
-		if ((newSettings.isChangeTags()) && (newSettings.getRulesAlias() != null)) {
+        if(newSettings.isChangeTags() && (newSettings.getRulesAlias() != null)) {
 			try {
 				JAXBContext jc = JAXBContext.newInstance(new Class[]{Rules.class});
 				Unmarshaller u = jc.createUnmarshaller();
@@ -217,20 +219,20 @@ public abstract class TCPIPProxy implements IInitiatorService
 		}
 	}
 
-    protected abstract void internalInit(final ServiceName serviceName,
-            final IDictionaryManager dictionaryManager,
-            final IServiceHandler handler,
-            final IServiceSettings settings,
-            final IMessageStorage storage,
-            final IServiceMonitor serviceMonitor,
-            final ILoggingConfigurator logConfigurator,
-            final ITaskExecutor taskExecutor,
-            final IDataManager dataManager);
+    protected abstract void internalInit(ServiceName serviceName,
+            IDictionaryManager dictionaryManager,
+            IServiceHandler handler,
+            IServiceSettings settings,
+            IMessageStorage storage,
+            IServiceMonitor serviceMonitor,
+            ILoggingConfigurator logConfigurator,
+            ITaskExecutor taskExecutor,
+            IDataManager dataManager);
 
 	@Override
 	public void start() {
 
-        logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
 
 		changeStatus(ServiceStatus.STARTING, "Service starting", null);
@@ -238,13 +240,13 @@ public abstract class TCPIPProxy implements IInitiatorService
 		this.connector = new WrapperNioSocketConnector(taskExecutor);
 		this.acceptor = new WrapperNioSocketAcceptor(taskExecutor);
 
-		connector.setConnectTimeoutMillis(this.settings.getTimeout());
+        connector.setConnectTimeoutMillis(settings.getTimeout());
 		IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
 
-		CodecFactory codecFactory = new CodecFactory(this.serviceContext, msgFactory, null, this.codecClass, settings);
+        CodecFactory codecFactory = new CodecFactory(serviceContext, msgFactory, null, codecClass, settings);
 
-		this.connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
-		this.acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
+        connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
+        acceptor.getFilterChain().addLast("codec", new ProtocolCodecFilter(codecFactory));
 
 		IProxyIoHandler clientSideIoHandler = getProxyIoHandler();
         clientSideIoHandler.setServiceInfo(serviceInfo);
@@ -278,19 +280,19 @@ public abstract class TCPIPProxy implements IInitiatorService
 
 		changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
 
-		if (this.connector != null) {
-			this.connector.dispose();
+        if(connector != null) {
+            connector.dispose();
 			this.connector = null;
 		}
-		if (this.acceptor != null) {
-			this.acceptor.dispose();
+        if(acceptor != null) {
+            acceptor.dispose();
 			this.acceptor = null;
 		}
 
 		changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 
 		if(logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
 		}
 
@@ -300,7 +302,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 	@Override
 	public IServiceHandler getServiceHandler()
 	{
-		return this.handler;
+        return handler;
 	}
 
 
@@ -312,11 +314,8 @@ public abstract class TCPIPProxy implements IInitiatorService
 		//for (ISession session : this.sessions.values()) {
 		//	list.add(session);
 		//}
-		if (sessions.size() > 0)
-			return sessions.get(session);
-
-		return null;
-	}
+        return !sessions.isEmpty() ? sessions.get(session) : null;
+    }
 
 	public ISession getSession(IoSession key) {
 		return sessions.get(key);
@@ -324,21 +323,20 @@ public abstract class TCPIPProxy implements IInitiatorService
 
 	public boolean connect(long timeOut) throws IOException
 	{
-		if (this.haveConnection) {
+        if(haveConnection) {
 			return true;
 		}
 
-		this.acceptor.bind(new InetSocketAddress(this.settings.getListenPort()));
+        acceptor.bind(new InetSocketAddress(settings.getListenPort()));
 
 		this.haveConnection = true;
-		return this.haveConnection;
+        return haveConnection;
 	}
 
 	public boolean disconnect()
 	{
-		if ( this.haveConnection )
-		{
-			this.session.close(true);
+        if(haveConnection) {
+            session.close(true);
 			this.haveConnection = false;
 		}
 		return true;
@@ -347,7 +345,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 	@Override
 	public ServiceStatus getStatus()
 	{
-		return this.curStatus;
+        return curStatus;
 	}
 
 	protected void changeStatus(ServiceStatus status, String message, Throwable e) {
@@ -358,7 +356,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 	public void addSession(IoSession key, MINASession value)
 	{
 		this.session = key;
-		this.sessions.put(key, value);
+        sessions.put(key, value);
 	}
 
 	public Rules getRules() {

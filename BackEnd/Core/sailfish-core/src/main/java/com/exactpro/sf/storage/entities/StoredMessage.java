@@ -18,10 +18,11 @@ package com.exactpro.sf.storage.entities;
 import java.sql.Timestamp;
 import java.util.Set;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.exactpro.sf.storage.IMeasurable;
 import com.exactpro.sf.storage.util.StorageMeasureUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class StoredMessage implements IMeasurable {
 
@@ -59,10 +60,7 @@ public class StoredMessage implements IMeasurable {
 		this.subMessage = subMessage;
 	}
 
-	public StoredMessage() {
-	}
-	
-	public String getFrom() {
+    public String getFrom() {
 		return from;
 	}
 
@@ -167,7 +165,7 @@ public class StoredMessage implements IMeasurable {
 	}
 
     public String getServiceId() {
-        return this.serviceId;
+        return serviceId;
     }
 
     public void setServiceId(String serviceId) {

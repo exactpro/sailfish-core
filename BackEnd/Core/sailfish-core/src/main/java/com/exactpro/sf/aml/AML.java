@@ -78,34 +78,23 @@ public class AML {
      * 4) java formulas with references
      */
 
-    private static Logger logger = LoggerFactory.getLogger(AML.class);
+    private static final Logger logger = LoggerFactory.getLogger(AML.class);
 
-    private final static String EOL = System.getProperty("line.separator");
-    public final static String INCLUDE_BLOCK_OLD = "Include Block";
-    public final static String INCLUDE_BLOCK = INCLUDE_BLOCK_OLD.replace(" ", "");
-    public final static SailfishURI INCLUDE_BLOCK_URI;
+    private static final String EOL = System.getProperty("line.separator");
 
-    public final static String PACKAGE_NAME = "com.exactpro.sf.testscript.matrix";
-    public final static String CLASS_NAME = "Matrix";
-    public final static String PACKAGE_PATH = AML.PACKAGE_NAME.replace(".", File.separator) + File.separator;
+    public static final String PACKAGE_NAME = "com.exactpro.sf.testscript.matrix";
+    public static final String CLASS_NAME = "Matrix";
+    public static final String PACKAGE_PATH = PACKAGE_NAME.replace(".", File.separator) + File.separator;
 
-    private final static long M10 = 10*1024*1024L;
-
-    static {
-        try {
-            INCLUDE_BLOCK_URI = new SailfishURI(null, null, INCLUDE_BLOCK);
-        } catch(SailfishURIException e) {
-            throw new EPSCommonException(e);
-        }
-    }
+    private static final long M10 = 10 * 1024 * 1024L;
 
     private final AMLSettings amlSettings;
-    private AlertCollector alertCollector;
+    private final AlertCollector alertCollector;
 
     private List<AMLTestCase> testCases;
     private AMLMatrix matrix;
 
-    private List<IProgressListener> progressListeners;
+    private final List<IProgressListener> progressListeners;
 
     private final IWorkspaceDispatcher workspaceDispatcher;
     private final IAdapterManager adapterManager;
@@ -141,19 +130,19 @@ public class AML {
 
     public GeneratedScript run(ScriptContext scriptContext, String fileEncoding) throws AMLException, IOException, InterruptedException
     {
-        try(AdvancedMatrixReader reader = initReader(this.amlSettings.getMatrixPath(), fileEncoding)) {
-            if(this.alertCollector.getCount(AlertType.ERROR) != 0) {
+        try(AdvancedMatrixReader reader = initReader(amlSettings.getMatrixPath(), fileEncoding)) {
+            if(alertCollector.getCount(AlertType.ERROR) != 0) {
             	this.matrix = new AMLMatrix(new ArrayList<SimpleCell>(), new ArrayList<AMLBlock>());
-                throw new AMLException("Errors detected on reader initialization", this.alertCollector);
+                throw new AMLException("Errors detected on reader initialization", alertCollector);
             }
-            return run(scriptContext, AMLReader.read(reader, this.amlSettings.isSkipOptional()));
+            return run(scriptContext, AMLReader.read(reader, amlSettings.isSkipOptional()));
         } catch(AMLException e) {
             throw e;
         } catch(Exception e) {
-            throw new AMLException(e.getMessage(), e, this.alertCollector);
+            throw new AMLException(e.getMessage(), e, alertCollector);
         }
         finally {
-            this.progressListeners.clear();
+            progressListeners.clear();
         }
     }
 
@@ -188,9 +177,10 @@ public class AML {
                          progressListeners,
                          compilerClassPath);
 
-            for (IPreprocessor preprocessor : this.amlSettings.getPreprocessors()) {
-                if (!preprocessor.preprocess(scriptContext.getEnvironmentName(), this, matrix, this.alertCollector))
-                    throw new AMLException("Preprocessor " + preprocessor.getName() + " detect errors", this.alertCollector);
+            for(IPreprocessor preprocessor : amlSettings.getPreprocessors()) {
+                if(!preprocessor.preprocess(scriptContext.getEnvironmentName(), this, matrix, alertCollector)) {
+                    throw new AMLException("Preprocessor " + preprocessor.getName() + " detect errors", alertCollector);
+                }
             }
 
             GeneratedScript script = null;
@@ -198,23 +188,25 @@ public class AML {
             try {
                 script = codeGen.generateCode(blocks.get(AMLBlockType.TestCase), blocks.get(AMLBlockType.BeforeTCBlock), blocks.get(AMLBlockType.AfterTCBlock));
             } finally {
-                this.alertCollector.add(codeGen.getAlertCollector());
+                alertCollector.add(codeGen.getAlertCollector());
             }
 
-            for (IValidator validator : this.amlSettings.getValidators()) {
-                if (!validator.validate(matrix, actionManager, languageURI, this.alertCollector))
-                    throw new AMLException("Validator " + validator.getName() + " detect errors", this.alertCollector);
+            for(IValidator validator : amlSettings.getValidators()) {
+                if(!validator.validate(matrix, actionManager, languageURI, alertCollector)) {
+                    throw new AMLException("Validator " + validator.getName() + " detect errors", alertCollector);
+                }
             }
 
             return script;
         } finally {
-            if (codeGen != null)
+            if(codeGen != null) {
                 codeGen.cleanup();
+            }
         }
     }
 
     public AlertCollector getAlertCollector() {
-        return this.alertCollector;
+        return alertCollector;
     }
 
     protected AdvancedMatrixReader initReader(String matrixFile, String fileEncoding) throws IOException {
@@ -222,7 +214,7 @@ public class AML {
         try {
             file = workspaceDispatcher.getFile(FolderType.REPORT, matrixFile);
         } catch (FileNotFoundException ex) {
-            this.alertCollector.add(new Alert("Input CSV/XLS file not found: "+matrixFile));
+            alertCollector.add(new Alert("Input CSV/XLS file not found: " + matrixFile));
             return null;
         }
 
@@ -230,11 +222,11 @@ public class AML {
         try {
             reader = new AdvancedMatrixReader(file, fileEncoding);
         } catch (AMLException e) {
-            this.alertCollector.add(new Alert(e.getMessage()));
+            alertCollector.add(new Alert(e.getMessage()));
         }
 
         if (reader != null && !reader.hasNext()) {
-            this.alertCollector.add(new Alert("Input CSV/XLS/XLSX file is empty: "+matrixFile));
+            alertCollector.add(new Alert("Input CSV/XLS/XLSX file is empty: " + matrixFile));
         }
 
         return reader;
@@ -311,15 +303,16 @@ public class AML {
         printWriter.flush();
         boolean isCompiled = compiler.getTask(printWriter, fileManager,null, option, null, units).call();
 
-        if (!isCompiled)
-            throw new ScriptRunException("Could not compile sources: " + EOL + writer.toString());
+        if(!isCompiled) {
+            throw new ScriptRunException("Could not compile sources: " + EOL + writer);
+        }
     }
 
     public void cleanup()
     {
-        if (this.testCases != null) {
-            this.testCases.clear();
-            this.testCases = null;
+        if(testCases != null) {
+            testCases.clear();
+            testCases = null;
         }
     }
 
@@ -350,21 +343,21 @@ public class AML {
     }
 
     public void addProgressListener(IProgressListener iProgressListener) {
-        this.progressListeners.add(iProgressListener);
+        progressListeners.add(iProgressListener);
     }
 
     public void removeProgressListener(IProgressListener iProgressListener) {
-        this.progressListeners.remove(iProgressListener);
+        progressListeners.remove(iProgressListener);
     }
 
     private void onProgressChanged(int i) {
-        for (IProgressListener listener : this.progressListeners) {
+        for(IProgressListener listener : progressListeners) {
             listener.onProgressChanged(i);
         }
     }
 
     private void onDetermineLanguage(SailfishURI languageURI) {
-        for (IProgressListener listener : this.progressListeners) {
+        for(IProgressListener listener : progressListeners) {
             listener.onDetermineLanguage(languageURI);
         }
     }
@@ -374,7 +367,7 @@ public class AML {
      * @return
      */
     protected List<AMLTestCase> getTestCases() {
-        return this.testCases;
+        return testCases;
     }
 
     /*

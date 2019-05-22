@@ -64,8 +64,8 @@ public class FASTMessageHelper extends MessageHelper {
 
     @Override
     public IMessage prepareMessageToEncode(IMessage message, Map<String, String> params) {
-        addCachedValue(message, MESSAGE_TYPE_FIELD, this.messageTypes);
-        addCachedValue(message, TEMPLATE_ID_FIELD, this.templateIds);
+        addCachedValue(message, MESSAGE_TYPE_FIELD, messageTypes);
+        addCachedValue(message, TEMPLATE_ID_FIELD, templateIds);
         return message;
     }
 

@@ -31,6 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class DictionaryResource {
 		private final LinkedHashMap<String, JsonField> fields = new LinkedHashMap<>();
 
 		public void traverse(IMessageStructure msgStructure) {
-            this.traverse(msgStructure.getFields().values());
+            traverse(msgStructure.getFields().values());
 		}
 
         public void traverse(Collection<IFieldStructure> fields) {
@@ -81,13 +82,8 @@ public class DictionaryResource {
 						visitIMessage(curField, i++);
 					}
 				} catch (RuntimeException e) {
-					StringBuilder builder;
-					if (e.getMessage() != null) {
-						builder = new StringBuilder(e.getMessage());
-					} else {
-						builder = new StringBuilder();
-					}
-					builder.append(". in field name = [").append(curField.getName()).append("]");
+                    StringBuilder builder = e.getMessage() != null ? new StringBuilder(e.getMessage()) : new StringBuilder();
+                    builder.append(". in field name = [").append(curField.getName()).append("]");
 					throw new EPSCommonException(builder.toString(), e);
 				}
 
@@ -169,11 +165,11 @@ public class DictionaryResource {
 
 			JsonDictionariesList response = new JsonDictionariesList();
 			response.setDictionaries(dURIs.stream().map(SailfishURI::toString).collect(Collectors.toList()));
-			return Response.status(Response.Status.OK).entity(response).build();
+            return Response.status(Status.OK).entity(response).build();
 		} catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not retrive dictionaries list", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -196,7 +192,7 @@ public class DictionaryResource {
 			response.setNamespace(dictionary.getNamespace());
 			response.setDescription(dictionary.getDescription());
 
-            Map<SailfishURI, Set<JsonUtilFunction>> utils = DictionaryResource.toJsonUtilFunctions(
+            Map<SailfishURI, Set<JsonUtilFunction>> utils = toJsonUtilFunctions(
                     dictManager.getSettings(dictionaryURI).getUtilityClassURIs(), utilityManager);
 
             response.setUtils(utils);
@@ -205,11 +201,11 @@ public class DictionaryResource {
 				response.getMessages().put(structure.getName(), convert(structure, deep != null));
 			}
 
-			return Response.status(Response.Status.OK).entity(response).build();
+            return Response.status(Status.OK).entity(response).build();
 		} catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not retrieve dictionaries", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 
@@ -231,11 +227,11 @@ public class DictionaryResource {
 			if (structure != null) {
 				response.add(convert(structure, true));
 			}
-			return Response.status(Response.Status.OK).entity(response).build();
+            return Response.status(Status.OK).entity(response).build();
 		} catch (Exception e) {
             logger.error(e.getMessage(), e);
             JsonError response = new JsonError("Can not retrive message", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
 		}
 	}
 

@@ -14,98 +14,220 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "vars";
+@import "./common/vars";
 
 .report {
     width: 100%;
+    height: 100%;
     display: grid;
-    grid-template-rows: 47px auto;
-    grid-template-columns: 1fr 500px;
-    grid-template-areas: "report-header report-header"
-                         "report-testcases report-info";
+    padding: 0 10px;
+    grid-template-rows: 47px 47px 1fr;
+    grid-template-columns: 340px 1fr;
+    grid-template-areas: "header header"
+                         "summary-title controls"
+                         "summary testcases";
 
-    &-header {
-        grid-area: report-header;
+    &__header {
+        grid-area: header;
+    }
+
+    &__summary-title {
+        grid-area: summary-title;
+
+        display: flex;
+        align-items: center;
+        padding-left: 2px;
+    }
+
+    &__controls {
+        grid-area: controls;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-left: 20px;
+    }
+
+    &__summary {
+        grid-area: summary;
+    }
+
+    &__testcases {
+        grid-area: testcases;
+        
         width: 100%;
         height: 100%;
-        padding: 5px;
-        border: 0px solid transparent;
-        border-radius: 5px;
-        background: $reportHeaderBackground;
-        font-size: 18px;
+        padding: 0 5px 0 15px;
+    }
 
+    &__title {
+        font-size:  17px;
+        color: $reportTitleTextColor;
+        font-weight: bold;
+    }
+}
+
+.report-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $reportHeaderBackground;
+    border-radius: 5px;
+    position: relative;
+    
+    &__title {
+        color: $primaryTextColor;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    &__old-report-link {
+        position: absolute;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        left: 20px;
+        top: 0;
+        color: $primaryTextColor;
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+}
+
+.report-summary {
+    padding-top: 6px;
+
+    &__card {
+        border: 2px solid $reportBorderColor;
+        border-radius: 5px;
+        padding: 15px;
+    }
+
+    &__logo {
+        margin: 10px;
+        height: 66px;
+        width: 203px;
+        background: url(../../resources/icons/sf-logo.svg);
+        background-size: 100%;
+        background-repeat: no-repeat;
+    }
+
+    &__divider {
+        border: 1px solid $reportBorderColor;
+        margin: 10px 0;
+    }
+
+    &__element {
+        width: 100%;
+        padding: 5px 0;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    &__element-title {
+        font-size: 13px;
+        color: $secondaryTextColor;
+    }
+
+    &__element-value {
+        @include status-text;
+        font-size: 15px;
+        color: $primaryTextColor;
+
+        &.bold {
+            font-weight: bold;
+        }
+    }
+}
+
+.tc-card {
+    @include status-card;
+
+    width: 100%;
+    display: grid;
+    grid-template: auto auto / 55px 1fr auto;
+    grid-template-areas: "index title status"
+                        "index info elapsed-time";
+
+    border: 2px solid var(--status-secondary-border-color);
+    border-radius: 5px;
+
+    font-size: 17px;
+    padding: 7px 10px 7px 0;
+    margin: 6px 15px 6px 0;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--status-secondary-background-color);
+    }
+
+    &__index {
+        grid-area: index;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: $secondaryTextColor;
+        font-weight: bold;
+    }
+
+    &__title {
+        grid-area: title;
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    &__name {
+        color: var(--status-primary-color);
+        font-weight: bold;
+    }
+
+    &__description {
+        color: var(--status-secondary-color);
+        padding-left: 5px;
+    }
+    
+    &__info {
+        grid-area: info;
+
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+
+        font-size: 13px;
+    }
+    
+    &__info-element {
+        margin-right: 15px;
         display: flex;
         justify-content: center;
         align-items: center;
     }
-
-    &-testcases {
-        grid-area: report-testcases;
-        
-        &-list {
-            line-height: 25px;
-            margin: 20px;
-            font-weight: bold;
-            font-size: 18px;
-
-            &-item {
-                cursor: pointer;
-
-                &.passed {
-                    color: $passedTextColor;
-                }
-
-                &.failed {
-                    color: $failedTextColor;
-                }
-
-                &.conditionally_passed {
-                    color: $conditionallyTextColor;
-                }
-            }
-        }
+    
+    &__info-title {
+        color: $secondaryTextColor;
     }
 
-    &-info {
-        grid-area: report-info;
-        margin: 10px;
-        box-shadow: 0 0 15px 5px $reportInfoShadowColor;
-        margin-top: 30px;
+    &__info-value {
+        padding-left: 15px;
+        color: $primaryTextColor;
+    }
+
+    &__status {
+        grid-area: status;
+    }
+
+    &__elapsed-time {
+        grid-area: elapsed-time;
+    }
+
+    &__status, &__elapsed-time {
+        color: var(--status-primary-color);
+        font-weight: bold;
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 10px;
-
-        &-logo {
-            margin-top: 20px;
-            background-image: url(../../resources/icons/sf-logo.jpg);
-            background-size: 100%;
-            width: 172px;
-            height: 150px;
-        }
-
-        &-table {
-            margin-top: 20px;
-
-            &-name {
-                width: 30%;
-                font-weight: bold;
-            }
-
-            &-value {
-                width: 70%;
-                word-wrap: break-word;
-                overflow: hidden;
-
-                &-plugins {
-                    overflow: scroll;
-                }
-            }
-
-            table {
-                table-layout: fixed;
-                width: 100%;
-            }
-        }
+        justify-content: flex-end;
     }
 }

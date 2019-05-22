@@ -15,7 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,23 +53,23 @@ import com.exactpro.sf.storage.ITestScriptStorage;
 
 public class AsyncScriptRunner extends AbstractScriptRunner {
 
-	private final static Logger logger = LoggerFactory.getLogger(AsyncScriptRunner.class);
+    private static final Logger logger = LoggerFactory.getLogger(AsyncScriptRunner.class);
 
 	public AsyncScriptRunner(
-    		final IWorkspaceDispatcher wd,
-    		final IDictionaryManager dictionaryManager,
-    		final IActionManager actionManager,
-    		final IUtilityManager utilityManager,
-    		final LanguageManager languageManager,
-    		final PreprocessorLoader preprocessorLoader,
-    		final ValidatorLoader validatorLoader,
-    		final ScriptRunnerSettings settings,
-    		final StatisticsService statisticsService,
-    		final IEnvironmentManager environmentManager,
-    		final ITestScriptStorage testScriptStorage,
-    		final IAdapterManager adapterManager,
-    		final IStaticServiceManager staticServiceManager,
-    		final String compilerClassPath) {
+            IWorkspaceDispatcher wd,
+            IDictionaryManager dictionaryManager,
+            IActionManager actionManager,
+            IUtilityManager utilityManager,
+            LanguageManager languageManager,
+            PreprocessorLoader preprocessorLoader,
+            ValidatorLoader validatorLoader,
+            ScriptRunnerSettings settings,
+            StatisticsService statisticsService,
+            IEnvironmentManager environmentManager,
+            ITestScriptStorage testScriptStorage,
+            IAdapterManager adapterManager,
+            IStaticServiceManager staticServiceManager,
+            String compilerClassPath) {
 		super(wd, dictionaryManager, actionManager, utilityManager, languageManager, preprocessorLoader, validatorLoader, settings, statisticsService, environmentManager, testScriptStorage, adapterManager, staticServiceManager, compilerClassPath);
 		tScriptCompiler = new Thread(new ScriptCompiler(), "ScriptCompiler");
 		tScriptExecutor = new Thread(new ScriptExecutor(), "ScriptExecutor");
@@ -79,15 +79,15 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 
 	class ScriptCompiler implements Runnable {
 		private final ExecutorService executorService = Executors.newFixedThreadPool(2);
-		private final Queue<Map.Entry<Long, GeneratedScript>> scriptsForCompileQueue = new ConcurrentLinkedQueue<>();
+        private final Queue<Entry<Long, GeneratedScript>> scriptsForCompileQueue = new ConcurrentLinkedQueue<>();
 
 		@Override
         public void run() {
 			while (!isDisposing) {
 				try {
 					if (!scriptsForCompileQueue.isEmpty()) {
-						final Map.Entry<Long, GeneratedScript> entry = scriptsForCompileQueue.poll();
-						final TestScriptDescription descrForCompile = testScripts.get(entry.getKey());
+                        Entry<Long, GeneratedScript> entry = scriptsForCompileQueue.poll();
+                        TestScriptDescription descrForCompile = testScripts.get(entry.getKey());
 
 	        			if (descrForCompile == null) {
 	        				logger.warn("Can't find script [{}]. Probably it was removed", entry.getKey());
@@ -118,7 +118,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 
 					Thread.sleep(100);
 
-                    final Long testScript;
+                    Long testScript;
                     synchronized (addedTestScripts) {
                         testScript = addedTestScripts.poll();
                     }
@@ -127,7 +127,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 						continue;
 					}
 
-					final TestScriptDescription descrForPrep = testScripts.get(testScript);
+                    TestScriptDescription descrForPrep = testScripts.get(testScript);
 
         			if (descrForPrep == null) {
         				logger.warn("Can't find script [{}]. Probably it was removed", testScript);
@@ -150,7 +150,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 						public void run() {
 							try {
 								GeneratedScript generatedScript = prepareScript(descrForPrep);
-								Map.Entry<Long, GeneratedScript> entry = new AbstractMap.SimpleEntry<>(testScript, generatedScript);
+                                Entry<Long, GeneratedScript> entry = new SimpleEntry<>(testScript, generatedScript);
 								scriptsForCompileQueue.add(entry);
 							} catch (Exception e) {
 								scriptExceptionProcessing(descrForPrep, e);
@@ -281,22 +281,24 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 			}
 
 			pullScripts();
-			for (Long tsId : this.prepared) {
+            for(Long tsId : prepared) {
 				TestScriptDescription descr = testScripts.get(tsId);
                 descr.scriptNotStarted();
                 onRunFinished(descr);
 				logger.info("TestScript {} was not started", tsId);
 			}
-			this.prepared.clear();
+            prepared.clear();
 		}
 
 		private void startScript(Map<Long, Future<Throwable>> runningScriptMap) throws InterruptedException {
-		    if (this.prepared.isEmpty())
-		    	return;
-		    if (runningScriptMap.size() >= MAX_THREADS)
-		    	return;
+            if(prepared.isEmpty()) {
+                return;
+            }
+            if(runningScriptMap.size() >= MAX_THREADS) {
+                return;
+            }
 
-		        Iterator<Long> iterator = this.prepared.iterator();
+            Iterator<Long> iterator = prepared.iterator();
     		    while (iterator.hasNext() && runningScriptMap.size() < MAX_THREADS) {
     		        Long currentTestScript = iterator.next();
 
@@ -384,7 +386,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
                     testScriptId = preparedTestScripts.poll();
                     if (testScriptId != null) {
                         logger.info("TestScript {} was taken from waiting queue", testScriptId);
-                        this.prepared.add(testScriptId);
+                        prepared.add(testScriptId);
                     }
                 }
             }
@@ -393,8 +395,8 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 
 		private boolean tryToLockServices(TestScriptDescription descr) {
 		    List<String> services = descr.getContext().getServiceList();
-		    if (Collections.disjoint(this.locksServices, services)) {
-		        this.locksServices.addAll(services);
+            if(Collections.disjoint(locksServices, services)) {
+                locksServices.addAll(services);
 		        logger.info("TestScript {} locked services {}", descr.getId(), services);
 		        return true;
 		    }
@@ -403,7 +405,7 @@ public class AsyncScriptRunner extends AbstractScriptRunner {
 
 		private void unlockServices(TestScriptDescription descr) {
             List<String> services = descr.getContext().getServiceList();
-            this.locksServices.removeAll(services);
+            locksServices.removeAll(services);
             logger.info("TestScript {} unlocked services {}", descr.getId(), services);
         }
 	}

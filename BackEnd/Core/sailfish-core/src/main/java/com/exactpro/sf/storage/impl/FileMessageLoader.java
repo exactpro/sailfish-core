@@ -35,7 +35,7 @@ public class FileMessageLoader extends MessageRowLoaderBase<FileMessage> {
     private final long startTime;
     private final long finishTime;
 
-    private int nextIndex = 0;
+    private int nextIndex;
 
     public FileMessageLoader(List<FileMessage> source, MessageFilter filter, int count, int bufferSize) {
         super(filter, count, bufferSize);

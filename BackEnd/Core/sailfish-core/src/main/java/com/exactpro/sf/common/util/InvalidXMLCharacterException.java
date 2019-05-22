@@ -65,7 +65,7 @@ public class InvalidXMLCharacterException extends RuntimeException {
     }
 
     public String getInfo() {
-        return new StringBuilder(this.getMessage())
+        return new StringBuilder(getMessage())
                 .append(", column: ")
                 .append(invalidCharacterColumn)
                 .append(", line: ")

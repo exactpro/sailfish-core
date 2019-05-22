@@ -39,11 +39,11 @@ import com.exactpro.sf.util.AbstractTest;
 import com.google.common.collect.ListMultimap;
 
 public class AMLConverterTest extends AbstractTest {
-    private static AMLSettings settings = new AMLSettings();
-    private static ActionRequirements actionRequirements = Mockito.mock(ActionRequirements.class);
-    private static ActionInfo actionInfo = Mockito.mock(ActionInfo.class);
-    private static ActionInfo actionInfoVoid = Mockito.mock(ActionInfo.class);
-    private static ActionManager actionManager = Mockito.mock(ActionManager.class);
+    private static final AMLSettings settings = new AMLSettings();
+    private static final ActionRequirements actionRequirements = Mockito.mock(ActionRequirements.class);
+    private static final ActionInfo actionInfo = Mockito.mock(ActionInfo.class);
+    private static final ActionInfo actionInfoVoid = Mockito.mock(ActionInfo.class);
+    private static final ActionManager actionManager = Mockito.mock(ActionManager.class);
 
     @SuppressWarnings("serial")
     @BeforeClass

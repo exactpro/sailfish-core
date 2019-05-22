@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -35,8 +36,8 @@ import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.storage.IMappableSettingsSerializer;
 
 public class PropertiesSettingsReaderSerializer implements IMappableSettingsSerializer {
-    private final static Logger logger = LoggerFactory.getLogger(PropertiesSettingsReaderSerializer.class);
-    private final static String SETTINGS_EXTENSION = ".properties";
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesSettingsReaderSerializer.class);
+    private static final String SETTINGS_EXTENSION = ".properties";
 
     public void readMappableSettings(IMapableSettings settings, IWorkspaceDispatcher wd, FolderType folderType, String... relativePath) throws Exception {
         String fileName = settings.settingsName() + SETTINGS_EXTENSION;
@@ -47,7 +48,7 @@ public class PropertiesSettingsReaderSerializer implements IMappableSettingsSeri
             properties.load(in);
         }
         Map<String, String> settingsMap = new HashMap<>();
-        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+        for (Entry<Object, Object> entry : properties.entrySet()) {
             settingsMap.put(entry.getKey().toString(), entry.getValue().toString());
         }
         settings.fillFromMap(settingsMap);
@@ -58,7 +59,7 @@ public class PropertiesSettingsReaderSerializer implements IMappableSettingsSeri
         String fileName = settings.settingsName() + SETTINGS_EXTENSION;
         File settingsFile = wd.createFile(folderType, true, ArrayUtils.addAll(relativePath, fileName));
         Properties properties = new Properties();
-        for (Map.Entry<String, String> entry : settings.toMap().entrySet()) {
+        for (Entry<String, String> entry : settings.toMap().entrySet()) {
             if (entry.getValue() != null) {
                 properties.put(entry.getKey(), entry.getValue());
             }

@@ -32,8 +32,8 @@ public class Table
 	private static final Row headerRow = new Row(0, "Tag", "Expected", "Actual", "Result");
 	public static final Row DELIMITER_ROW = new Row(0, null, null, null, null);
 	private Row header;
-	private List<Row> rows;
-	private int offset = 0;
+    private final List<Row> rows;
+    private int offset;
 	private String title;
 
 	public Table()
@@ -70,7 +70,7 @@ public class Table
 	}
 
 	public int getOffset() {
-		return this.offset;
+        return offset;
 	}
 
 	public int getMaxColumnLength(int iColumn)
@@ -85,7 +85,7 @@ public class Table
 
 	public void add(Table that)
 	{
-		if (that.rows.size() != 0) {
+        if(!that.rows.isEmpty()) {
 //			rows.add(new Row());
 			rows.addAll(that.rows);
 		}
@@ -93,7 +93,7 @@ public class Table
 
 	public void add(Row row)
 	{
-		this.rows.add(row);
+        rows.add(row);
 	}
 
 	@Override
@@ -101,35 +101,35 @@ public class Table
 	{
 		StringBuilder sb = new StringBuilder();
 
-		int[] colWidth = new int[Table.COLUMN_COUNT];
+        int[] colWidth = new int[COLUMN_COUNT];
 
 		int tableWidth = 0;
 		for (int i=0; i<colWidth.length; i++) {
 			int headerLength = 0;
-			if (this.header != null) {
-				headerLength = this.header.getColumnLength(i);
+            if(header != null) {
+                headerLength = header.getColumnLength(i);
 			}
 			colWidth[i] = Math.max(headerLength, getMaxColumnLength(i));
 			tableWidth += colWidth[i];
 		}
 
-		if (this.title != null) {
+        if(title != null) {
 			sb.append(new Row().toString(colWidth)).append(EOL);
 			sb.append("| ");
-			sb.append(this.title);
-			for (int i=this.title.length(); i<tableWidth+Table.COLUMN_COUNT-2; i++) {
+            sb.append(title);
+            for(int i = title.length(); i < tableWidth + COLUMN_COUNT - 2; i++) {
 				sb.append(" ");
 			}
 			sb.append("|");
 			sb.append(EOL);
 		}
 
-		if (this.header != null) {
+        if(header != null) {
 			sb.append(new Row().toString(colWidth)).append(EOL);
 			sb.append(header.toString(colWidth)).append(EOL);
 		}
 		sb.append(new Row().toString(colWidth)).append(EOL);
-		for (Row row : this.rows) {
+        for(Row row : rows) {
 			sb.append(row.toString(colWidth)).append(EOL);
 		}
 
@@ -137,6 +137,6 @@ public class Table
 	}
 
 	public List<Row> getRows() {
-		return this.rows;
+        return rows;
 	}
 }

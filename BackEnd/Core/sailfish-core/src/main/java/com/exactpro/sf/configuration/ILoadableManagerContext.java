@@ -25,8 +25,8 @@ import com.exactpro.sf.center.IVersion;
  */
 public interface ILoadableManagerContext {
     
-    public IVersion getVersion();
-    public String getResourceFolder();
-    public ClassLoader[] getClassLoaders();
-    public InputStream getResourceStream();
+    IVersion getVersion();
+    String getResourceFolder();
+    ClassLoader[] getClassLoaders();
+    InputStream getResourceStream();
 }

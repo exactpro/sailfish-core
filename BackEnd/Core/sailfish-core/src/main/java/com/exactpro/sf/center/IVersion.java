@@ -17,9 +17,9 @@ package com.exactpro.sf.center;
 
 public interface IVersion {
     
-    public static final String CORE_VERSION_PROPERTY = "core_version";
+    String CORE_VERSION_PROPERTY = "core_version";
     
-    public static final String GENERAL = "General";
+    String GENERAL = "General";
     
     String buildShortVersion();
     
@@ -43,6 +43,11 @@ public interface IVersion {
     int getMinCoreRevision();
     
     boolean isGeneral();
+
+    /** If true some of the plugin components maybe missed */
+    default boolean isLightweight() {
+        return false;
+    }
 
     String getArtifactName();
 }

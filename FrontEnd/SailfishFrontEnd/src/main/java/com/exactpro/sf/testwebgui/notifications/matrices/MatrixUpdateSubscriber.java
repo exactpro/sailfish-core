@@ -29,7 +29,7 @@ public class MatrixUpdateSubscriber implements IUpdateRequestListener{
 
 	private static final Logger logger = LoggerFactory.getLogger(ScriptrunUpdateSubscriber.class);
 	private final AbstractChannel channel;
-	private String id;
+	private final String id;
 
 	public MatrixUpdateSubscriber(String id, AbstractChannel channel) {
 

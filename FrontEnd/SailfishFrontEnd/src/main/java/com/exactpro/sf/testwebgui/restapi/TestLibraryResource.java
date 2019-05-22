@@ -27,6 +27,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -72,7 +73,7 @@ public class TestLibraryResource {
 			reqResponse = Response.ok().entity(new XmlResponse()).build();
 
 		} catch (Throwable e) {
-			logger.error("Could not store test library [{}]", ((fileDetail != null) ? fileDetail.getFileName() : "null") , e);
+			logger.error("Could not store test library [{}]", (fileDetail != null) ? fileDetail.getFileName() : "null", e);
 			errorMessage = e.getMessage();
 			rootCause = (e.getCause() != null) ? e.getCause().getMessage() : null;
 		}
@@ -84,8 +85,8 @@ public class TestLibraryResource {
 			xmlResponse.setMessage(errorMessage);
 			xmlResponse.setRootCause(rootCause);
 
-			reqResponse = Response.status(Response.Status.BAD_REQUEST)
-					.entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST)
+                        .entity(xmlResponse).build();
 		}
 
 		return reqResponse;

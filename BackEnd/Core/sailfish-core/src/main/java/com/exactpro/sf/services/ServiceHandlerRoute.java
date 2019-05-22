@@ -25,7 +25,7 @@ public enum ServiceHandlerRoute {
     private final boolean from;
     private final String alias;
 
-    private ServiceHandlerRoute(String alias) {
+    ServiceHandlerRoute(String alias) {
         this.alias = alias;
         this.from = alias.startsWith("from");
         this.admin = alias.endsWith("Admin");

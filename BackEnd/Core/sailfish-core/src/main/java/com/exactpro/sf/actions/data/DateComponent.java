@@ -53,19 +53,19 @@ public enum DateComponent {
     }
 
     public long diff(LocalDateTime minuend, LocalDateTime subtrahend) {
-        return this.temporalField.getBaseUnit().between(subtrahend, minuend);
+        return temporalField.getBaseUnit().between(subtrahend, minuend);
     }
 
     public int extract(Temporal source) {
-        return source.get(this.temporalField);
+        return source.get(temporalField);
     }
 
     public TemporalField getTemporalField() {
-        return this.temporalField;
+        return temporalField;
     }
 
     @Override
     public String toString() {
-        return this.datePart;
+        return datePart;
     }
 }

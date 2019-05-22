@@ -17,6 +17,7 @@ package com.exactpro.sf.aml.generator;
 
 import static com.exactpro.sf.common.util.StringUtil.enclose;
 import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+import static org.apache.commons.lang3.ClassUtils.getSimpleName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class OldImpl {
 
 	private static final Logger logger = LoggerFactory.getLogger(OldImpl.class);
 
-	protected final static String EOL = System.getProperty("line.separator");
+    protected static final String EOL = System.getProperty("line.separator");
 
 	public static final String TAB1 = "\t";
 	public static final String TAB2 = "\t\t";
@@ -82,8 +83,8 @@ public class OldImpl {
 	private final IUtilityManager utilityManager;
 	private final CodeGenerator_new codeGenerator;
 
-	private final static int CAPACITY_4K = 4096;
-    private final static int CAPACITY_128K = 131072;
+    private static final int CAPACITY_4K = 4096;
+    private static final int CAPACITY_128K = 131072;
 
 	public OldImpl(AlertCollector alertCollector, IAdapterManager adapterManager, IDictionaryManager dictionaryManager, IActionManager actionManager, IUtilityManager utilityManager, CodeGenerator_new codeGenerator) {
 		this.alertCollector = alertCollector;
@@ -106,7 +107,7 @@ public class OldImpl {
 		}
 
 		if (action.getGenerateStatus() == AMLGenerateStatus.GENERATING) {
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Recursion detected"));
 			return null;
 		}
 
@@ -144,10 +145,9 @@ public class OldImpl {
 			Class<?> returnType = action.getActionInfo().getReturnType();
 			if (action.hasReference() && void.class.equals(returnType))
 			{
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot refer to void method: "+action.getActionURI()+". "
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot refer to void method: " + action.getActionURI() + ". "
 						+ "Please remove reference label and all reference occurrences to this row.", AlertType.WARNING));
-			}
-			else if (false == void.class.equals(returnType))
+            } else if(!void.class.equals(returnType))
 			{
 				outputVariable = getVariable(returnType, MESSAGE_PREFIX + returnType.getSimpleName());
 			}
@@ -165,7 +165,7 @@ public class OldImpl {
 			}
 
             Variable settings = getVariable(ActionContext.class, "actionContext");
-			String s = codeGenerator.createFillSettings(tc, action, null, settings, this.alertCollector);
+            String s = codeGenerator.createFillSettings(tc, action, null, settings, alertCollector);
 			sb.append(s);
 			sb.append(TAB2+LOGGER_NAME+".debug(\"start action: "+action.getActionURI()+", line:"+action.getLine()+"\");"+EOL);
 
@@ -197,7 +197,7 @@ public class OldImpl {
             writeCreateAction(action, sb);
             NewImpl.addActionToReport(action, sb, true, variable, TAB3);
 
-            closeTryClause(tc, action, sb, action.getContinueOnFailed() || this.continueOnFailed);
+            closeTryClause(tc, action, sb, action.getContinueOnFailed() || continueOnFailed);
 		}
 		else
 		{
@@ -222,11 +222,11 @@ public class OldImpl {
         String failUnexpected = null;
 
         if(action.getFailUnexpected() != null && !"".equals(action.getFailUnexpected())) {
-            failUnexpected = TypeConverter.convert(java.lang.String.class, action.getFailUnexpected());
+            failUnexpected = TypeConverter.convert(String.class, action.getFailUnexpected());
         }
 
         if(parentVar != null) {
-            sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + parentVar + ", " + TypeConverter.convert(java.lang.String.class, field) + ", " + failUnexpected + ");" + EOL);
+            sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + parentVar + ", " + TypeConverter.convert(String.class, field) + ", " + failUnexpected + ");" + EOL);
         } else {
             sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + failUnexpected + ");" + EOL);
         }
@@ -247,7 +247,7 @@ public class OldImpl {
 
 		Variable var = new Variable(varName, type);
 		// check if variable with same name and type already exists
-		if (this.variables.contains(var))
+        if(variables.contains(var))
 		{
 			return var;
 		}
@@ -259,19 +259,19 @@ public class OldImpl {
 		while (found)
 		{
 			found = false;
-			for (Variable v : this.variables)
+            for(Variable v : variables)
 			{
 				if (v.getName().equals(varName))
 				{
 					found = true;
-					varName = varNameOrig+(i++);
+                    varName = varNameOrig + i++;
 					break;
 				}
 			}
 			if (found == false)
 			{
 				var = new Variable(varName, type);
-				this.variables.add(var);
+                variables.add(var);
 				return var;
 			}
 		}
@@ -293,11 +293,11 @@ public class OldImpl {
 
 			try {
 				IGetterSetterGenerator gsFactory = (IGetterSetterGenerator)
-				this.adapterManager.getAdapter(action.getActionInfo().getMessageType(), IGetterSetterGenerator.class);
+                        adapterManager.getAdapter(action.getActionInfo().getMessageType(), IGetterSetterGenerator.class);
 
 				if (gsFactory == null)
 				{
-					this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot find getter&setter generator instance for type '"
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot find getter&setter generator instance for type '"
 							+action.getActionInfo().getMessageType().getCanonicalName()+"'"));
 					continue;
 				}
@@ -322,7 +322,7 @@ public class OldImpl {
 					expandSetter(action, gsFactory, sb, column, v, v.getValue(), variable.getName());
 				}
 			} catch (AMLException | SailfishURIException ex) {
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '"+column+"': "+ex.getMessage()));
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "': " + ex.getMessage()));
 				continue;
 			}
 		}
@@ -353,7 +353,7 @@ public class OldImpl {
 		String setter = gsFactory.getSetter(action.getActionInfo().getMessageType(), column, val, v.isReference() || v.isJava());
 		if (setter == null)
 		{
-			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot set value '"+val+"' of type '"
+            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot set value '" + val + "' of type '"
 					+column+"' for message '"+action.getActionInfo().getMessageType().getCanonicalName()+"'"));
 			return;
 		}
@@ -395,7 +395,7 @@ public class OldImpl {
 
 	            if (subAction == null)
 	            {
-	                this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '"+column+"'"
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "'"
 	                        +": Reference '"+ref+"' not defined in matrix."));
 	                continue;
 	            }
@@ -433,7 +433,7 @@ public class OldImpl {
                 eval.append(enclose(ref));
 	            eval.append("))");
 
-	            setter.append(TAB2 + subListVariable.getName() + ".add(" + eval.toString() + ");" + EOL);
+                setter.append(TAB2 + subListVariable.getName() + ".add(" + eval + ");" + EOL);
 
                 action.addChildAction(column, subAction);
 
@@ -452,7 +452,7 @@ public class OldImpl {
 
 			if (subAction == null)
 			{
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '"+column+"'"
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "'"
 						+": Reference '"+reference+"' not defined in matrix."));
 				continue;
 			}
@@ -480,7 +480,7 @@ public class OldImpl {
 
 			if (type == null)
 			{
-				this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot find submessage "+column+" in message '"+action.getActionInfo().getMessageType().getCanonicalName()+"'."));
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot find submessage " + column + " in message '" + action.getActionInfo().getMessageType().getCanonicalName() + "'."));
 				continue;
 			}
 
@@ -488,14 +488,14 @@ public class OldImpl {
 			subAction.getActionInfo().setReturnType(type);
 
 			if (subAction.getMessageTypeColumn() != null
-					&& false == subAction.getMessageTypeColumn().equals(""))
+                    && !"".equals(subAction.getMessageTypeColumn()))
 			{
-				if (false == type.equals(List.class)
-				        && false == type.equals(IMessage.class)
-						&& false == type.getCanonicalName().equals(subAction.getMessageTypeColumn())
-						&& false == type.getSimpleName().equals(subAction.getMessageTypeColumn()))
+                if(!type.equals(List.class)
+                        && !type.equals(IMessage.class)
+                        && !type.getCanonicalName().equals(subAction.getMessageTypeColumn())
+                        && !type.getSimpleName().equals(subAction.getMessageTypeColumn()))
 				{
-					this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Message type ["+subAction.getMessageTypeColumn()+"] for submessage ["+subAction.getReference()
+                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Message type [" + subAction.getMessageTypeColumn() + "] for submessage [" + subAction.getReference()
 							+"] does not match calculated submessage type '"+type.getCanonicalName()+"'."
 							+" Possible that reference placed in wrong column or specified submessage type is incorrect."
 							+" Make sure that value in "+Column.MessageType.getName()+" column for message in line "
@@ -505,7 +505,7 @@ public class OldImpl {
 				}
 			}
             codeGenerator.addDefinedReferences(reference);
-			String subMessage = writeFillMessage(tc, subAction, this.variables);
+            String subMessage = writeFillMessage(tc, subAction, variables);
 			if (subMessage != null) {
 				subMessages.add(subMessage);
 				subAction.addGenerationSteps(action.getGenerationPath(), action.getReference());
@@ -528,28 +528,28 @@ public class OldImpl {
             eval.append(enclose(reference));
             eval.append("))");
 
-			setter.append(TAB2 + subListVariable.getName() + ".add(" + eval.toString() + ");" + EOL);
+            setter.append(TAB2 + subListVariable.getName() + ".add(" + eval + ");" + EOL);
 
             action.addChildAction(column, subAction);
 		}
 
 		if(setter.length() > 0) {
-			sb.append(EOL + setter.toString() + EOL);
+            sb.append(EOL + setter + EOL);
 			sb.append(TAB2 + variable.getName() + ".put(\"" + column + "\", " + subListVariable.getName() + ");" + EOL);
 
     		if (v.isCheck()) {
-    			action.getSetters().add(new Pair<>(column, subListVariable.getType().getCanonicalName() + " " + setter.toString()));
+                action.getSetters().add(new Pair<>(column, subListVariable.getType().getCanonicalName() + " " + setter));
     		}
 		}
 	}
 
 	void addReferenceToFilter(StringBuilder sb, AMLAction action, Variable inputVariable)
 	{
-		if (false == "".equals(action.getReferenceToFilter()))
+        if(!"".equals(action.getReferenceToFilter()))
 		{
 			if ((action.getActionInfo() == null)
 					|| (action.getActionInfo() != null
-							&& false == void.class.equals(action.getActionInfo().getReturnType())))
+                    && !void.class.equals(action.getActionInfo().getReturnType())))
 			{
 				if (inputVariable != null)
 				{
@@ -567,13 +567,13 @@ public class OldImpl {
 		IGetterSetterGenerator factory = null;
 
 		if(inputVariable != null) {
-            factory = (IGetterSetterGenerator)this.adapterManager.getAdapter(action.getActionInfo().getMessageType(), IGetterSetterGenerator.class);
+            factory = (IGetterSetterGenerator)adapterManager.getAdapter(action.getActionInfo().getMessageType(), IGetterSetterGenerator.class);
 
     		if (factory == null)
     		{
-    			this.alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot find getter&setter generator instance for type '"
+                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot find getter&setter generator instance for type '"
     					+action.getActionInfo().getMessageType().getCanonicalName()));
-    			throw new AMLException("Cannot find getter&setter generator", this.alertCollector);
+                throw new AMLException("Cannot find getter&setter generator", alertCollector);
     		}
 		}
 
@@ -615,11 +615,7 @@ public class OldImpl {
             sb.append(settings.getName());
             sb.append(".getCheckPoint(), ");
 
-            if(action.hasTag()) {
-                sb.append(enclose(toJavaString(action.getTag()), '"'));
-            } else {
-                sb.append("null");
-            }
+            sb.append(action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null");
 
             sb.append(",");
             sb.append(action.getHash());

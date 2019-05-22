@@ -30,7 +30,7 @@ import com.exactpro.sf.common.messages.structures.StructureType;
 public class MessageStructure extends FieldStructure implements IMessageStructure {
     private final Map<String, IFieldStructure> fields;
 
-	private IMessageStructure reference;
+    private final IMessageStructure reference;
 
 	public MessageStructure(String name, String namespace, boolean isCollection, IMessageStructure reference) {
 	    this(name, namespace, null, null, false, isCollection, null, reference);
@@ -50,24 +50,14 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 			boolean isRequired, boolean isCollection, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
 		super(name, namespace, description, reference != null ? reference.getName() : null, attributes,
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
-
-		if (fields != null) {
-            this.fields = Collections.unmodifiableMap(fields);
-		} else {
-            this.fields = Collections.emptyMap();
-		}
-
+        this.fields = fields != null ? Collections.unmodifiableMap(fields) : Collections.emptyMap();
 		this.reference = reference;
 	}
 
 	@Override
     public Map<String, IFieldStructure> getFields() {
-		if (this.reference != null) {
-			return this.reference.getFields();
-		}
-
-		return this.fields;
-	}
+        return reference != null ? reference.getFields() : fields;
+    }
 
 	@Override
 	public Map<String, IAttributeStructure> getValues() {
@@ -81,7 +71,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public boolean isRequired() {
-		if (this.reference != null) {
+        if(reference != null) {
 			return super.isRequired();
 		}
 
@@ -90,7 +80,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public boolean isCollection() {
-		if (this.reference != null) {
+        if(reference != null) {
 			return super.isCollection();
 		}
 

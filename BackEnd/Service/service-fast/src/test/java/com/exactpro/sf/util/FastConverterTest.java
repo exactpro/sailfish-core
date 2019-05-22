@@ -93,11 +93,14 @@ public class FastConverterTest {
 	}
 	
 	protected boolean isEqual(byte[] firstArray, byte[] secondArray){
-		if(firstArray.length!=secondArray.length)
-			return false;
-		for(int i=0;i<firstArray.length;i++)
-			if(firstArray[i]!=secondArray[i])
-				return false;
+        if(firstArray.length != secondArray.length) {
+            return false;
+        }
+        for(int i = 0; i < firstArray.length; i++) {
+            if(firstArray[i] != secondArray[i]) {
+                return false;
+            }
+        }
 		return true;
 		
 	}

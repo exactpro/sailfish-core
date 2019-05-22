@@ -43,7 +43,7 @@ public class PollingServlet extends HttpServlet {
 
 	private static final String ASYNC_SUP = "org.apache.catalina.ASYNC_SUPPORTED";
 
-	private long contextTimeout = 60000;
+	private final long contextTimeout = 60000;
 
 	private HttpChannelProcessor processor;
 
@@ -89,9 +89,9 @@ public class PollingServlet extends HttpServlet {
 		logger.trace("Create new async context for request {}{}, session {}", req.getRequestURL(), req.getQueryString(), req.getSession().getId());
 		processor.processAsyncContext(ctx);
 
-	};
+	}
 
-	@Override
+    @Override
 	public void destroy() {
 		processor.destroy();
 		super.destroy();

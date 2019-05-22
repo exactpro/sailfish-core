@@ -31,12 +31,8 @@ public class Report extends BaseEntity {
     private String user;
     private long id;
     private Date date;
-    private SetMultimap<String, BugDescription> allKnownBugs = LinkedHashMultimap.create();
-    private SetMultimap<String, BugDescription> reproducedBugs = LinkedHashMultimap.create();
-
-    public Report() {
-        super();
-    }
+    private final SetMultimap<String, BugDescription> allKnownBugs = LinkedHashMultimap.create();
+    private final SetMultimap<String, BugDescription> reproducedBugs = LinkedHashMultimap.create();
 
     public String getHost() {
         return host;

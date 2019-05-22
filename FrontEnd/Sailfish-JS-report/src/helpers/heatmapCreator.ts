@@ -16,6 +16,7 @@
 import Message from '../models/Message';
 import { StatusType } from '../models/Status';
 import Action from '../models/Action';
+import { TestcaseMetadata } from '../models/TestcaseMetadata';
 
 export function messagesHeatmap(messages: Message[], selectedMessages: number[], selectedStatus: StatusType): Map<number, StatusType> {
     const heatmap = new Map<number, StatusType>();
@@ -29,12 +30,25 @@ export function messagesHeatmap(messages: Message[], selectedMessages: number[],
     return heatmap;
 }
 
-export function actionsHeatmap(actions: Action[], selectedActionId: number): Map<number, StatusType> {
+export function actionsHeatmap(actions: Action[], selectedActionsId: number[]): Map<number, StatusType> {
     const heatmap = new Map<number, StatusType>();
 
     actions.forEach((action, idx) => {
-        if (action.id == selectedActionId) {
+        if (selectedActionsId.includes(action.id)) {
             heatmap.set(idx, action.status.status);
+        }
+    });
+
+    return heatmap;
+}
+
+export function testCasesHeatmap(testCases: TestcaseMetadata[]): Map<number, StatusType> {
+    const heatmap = new Map<number, StatusType>();
+
+    testCases.forEach((metadata, idx) => {
+        // skip only passed testcases on heatmap
+        if (metadata.status.status != 'PASSED') {
+            heatmap.set(idx, metadata.status.status);
         }
     });
 

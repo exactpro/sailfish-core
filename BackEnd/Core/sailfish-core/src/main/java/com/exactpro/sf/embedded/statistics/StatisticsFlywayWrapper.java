@@ -16,22 +16,23 @@
 
 package com.exactpro.sf.embedded.statistics;
 
-import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
-import com.exactpro.sf.embedded.statistics.storage.NewerSchemaException;
-import com.exactpro.sf.embedded.statistics.storage.OlderSchemaException;
-import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.MigrationState;
 
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.exactpro.sf.embedded.statistics.configuration.DbmsType;
+import com.exactpro.sf.embedded.statistics.storage.NewerSchemaException;
+import com.exactpro.sf.embedded.statistics.storage.OlderSchemaException;
+import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
 
 public class StatisticsFlywayWrapper {
-    private final static String PSQL_SCRIPT_LOCATION = "com/exactpro/sf/statistics/storage/pg/migration";
-    private final static String MYSQL_SCRIPT_LOCATION = "com/exactpro/sf/statistics/storage/mysql/migration";
-    private final static String[] MYSQL_INIT_SQL = new String[] { "SET default_storage_engine=InnoDB;" };
+    private static final String PSQL_SCRIPT_LOCATION = "com/exactpro/sf/statistics/storage/pg/migration";
+    private static final String MYSQL_SCRIPT_LOCATION = "com/exactpro/sf/statistics/storage/mysql/migration";
+    private static final String[] MYSQL_INIT_SQL = { "SET default_storage_engine=InnoDB;" };
 
     private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
@@ -102,7 +103,7 @@ public class StatisticsFlywayWrapper {
             if (all.length != 0) {
                 MigrationInfo lastKnown = all[all.length - 1];
 
-                if (lastKnown.getState().equals(MigrationState.FUTURE_SUCCESS)) {
+                if(lastKnown.getState() == MigrationState.FUTURE_SUCCESS) {
 
                     sfUpdateRequired = true;
 

@@ -19,6 +19,6 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 
 public interface IHumanMessage {
 
-    public void addField(IFieldStructure fieldStructure, String fieldName, Object value);
+    void addField(IFieldStructure fieldStructure, String fieldName, Object value);
 
 }

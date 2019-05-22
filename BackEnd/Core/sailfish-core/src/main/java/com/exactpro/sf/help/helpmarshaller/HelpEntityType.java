@@ -24,5 +24,5 @@ public enum HelpEntityType {
     FIELD,
     MESSAGE,
     COMPONENT,
-    ERROR;
+    ERROR
 }

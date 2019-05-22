@@ -30,7 +30,7 @@ import java.util.Set;
 public class ITCHWaitResponse implements Runnable {
 
     private int timeout = 5000;
-    private int sleepTimeout = 100;
+    private final int sleepTimeout = 100;
     private final IMessage messageReply;
     private final String logonMessageName;
     private final TCPIPServer server;

@@ -14,30 +14,23 @@
  * limitations under the License.
  ******************************************************************************/
 
-import AppState from "./AppState";
-import { statusValues } from "../models/Status";
-import SelectedState from './SelectedState';
-import { Panel } from "../helpers/Panel";
+@import './common/vars';
 
-export const initialSelectedState: SelectedState = {
-    actionId: null,
-    messagesId: [],
-    status: 'NA',
-    checkpointMessageId: null,
-    checkpointActionId: null,
-    rejectedMessageId: null
-}
+.notification {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 19px;
+    padding: 10px;
+    color: $primaryTextColor;
+    background-color: $notificationBackground;
+    border-radius: 5px;
+    font-family: Open sans;
 
-export const initialAppState: AppState = {
-    report: null,
-    currentTestCasePath: "",
-    actionsFilter: statusValues,
-    fieldsFilter: statusValues,
-    testCase: null,
-    checkpointActions: [],
-    selected: initialSelectedState,
-    adminMessagesEnabled: false,
-    splitMode: true,
-    leftPane: Panel.Actions,
-    rightPane: Panel.Messages
+    p {
+        margin: 0;
+    }
 }

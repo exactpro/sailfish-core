@@ -32,7 +32,7 @@ import org.junit.Test;
 import com.exactpro.sf.aml.AMLException;
 
 public class AdvancedMatrixReaderTest {
-    private File csv = new File("src/test/resources/aml/iomatrix/TestDefineHeader.csv");
+    private final File csv = new File("src/test/resources/aml/iomatrix/TestDefineHeader.csv");
     private final String PATH = "src/test/resources/aml/iomatrix/";
     private final String XLSX_MATRIX = "Execl_2007_2013.xlsx";
     private final String XLS_MATRIX = "Execl_97_2003.xls";
@@ -83,7 +83,7 @@ public class AdvancedMatrixReaderTest {
     }
 
     private void checkMap(File file) throws Exception {
-        try (AdvancedMatrixReader reader = new AdvancedMatrixReader(file);) {
+        try (AdvancedMatrixReader reader = new AdvancedMatrixReader(file)) {
 
             Assert.assertEquals(asList("#1", "#2", "#3", "#4", "#action", "6", "7", "8", "9", "#10"),
                                 reader.getHeader());
@@ -116,7 +116,7 @@ public class AdvancedMatrixReaderTest {
     public void someTest() throws Exception{
         try (AdvancedMatrixReader reader = new AdvancedMatrixReader(new File("/home/sergey.smirnov/coding/TMP/validTests1AFTERSAVE.csv"))) {
             while (reader.hasNext()) {
-                for (Map.Entry<String, SimpleCell> cell:reader.readCells().entrySet()) {
+                for (Entry<String, SimpleCell> cell:reader.readCells().entrySet()) {
                     if (!cell.getValue().getValue().isEmpty()) {
                         System.out.print(cell.getKey() + " = " + cell.getValue() + ", ");
                     }

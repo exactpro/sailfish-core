@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.entities;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -28,21 +34,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.exactpro.sf.statistics.LocalDateTimeDBConverter;
-import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
 import com.exactpro.sf.scriptrunner.StatusType;
-import java.time.LocalDateTime;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import com.exactpro.sf.statistics.LocalDateTimeDBConverter;
 
 @Entity
 @Table(name="sttestcaseruns")
@@ -53,7 +51,7 @@ public class TestCaseRun {
 	@GeneratedValue(strategy=GenerationType.AUTO, generator="sttestcaseruns_generator")
 	private Long id;
 
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "255"))
 	private String description;
 
     @Convert(converter = LocalDateTimeDBConverter.class)
@@ -64,14 +62,14 @@ public class TestCaseRun {
 
 	private int status;
 
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "255")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "255"))
     private String failReason;
 
 	private long rank;
 
 	private String reportFile;
 
-    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = {@Parameter(name = "length", value = "1024")})
+    @Type(type = "com.exactpro.sf.storage.TruncatedString", parameters = @Parameter(name = "length", value = "1024"))
 	private String comment;
 
 	private String fixRevision;
@@ -239,8 +237,12 @@ public class TestCaseRun {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if(this == o) {
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()) {
+            return false;
+        }
         TestCaseRun that = (TestCaseRun) o;
         return Objects.equals(id, that.id);
     }

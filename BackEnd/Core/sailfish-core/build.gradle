@@ -30,7 +30,8 @@ ext {
     htmlResourcesGenDir      = file("${genResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
     htmlResourcesMainDir     = file("${mainResDir}/com/exactpro/sf/scriptrunner/impl/htmlreport")
 	templatesDir    	     = file("${mainDir}/templates")
-    jqueryUiResourcesDir     = file("${htmlResourcesProvidedDir}/resources")
+    jqueryResourcesTargetDir = file("${htmlResourcesProvidedDir}/resources")
+    npmInstallDir            = file("${buildDir}/npm/")
 }
 
 archivesBaseName = 'sailfish-core'
@@ -133,39 +134,34 @@ dependencies {
     runtimeOnly 'commons-collections:commons-collections:3.2.2' // for commons-configuration
 
     testRuntime 'org.apache.derby:derby:10.14.2.0'
+}
 
-    clientDependencies {
-        npm {
-            'jquery'('~3.3.1'){
-                include 'jquery.min.js'
-                eachFile {
-                    it.path = "../" + it.name //remove remove jquery folder
-                }
-            }
-            'components-jqueryui'('1.12.1') {
-                include 'jquery-ui.min.js', '**/ui-icons_222222_256x240.png'
-                include 'themes/base/jquery-ui.min.css'
-                eachFile {
-                    it.path = '../' + it.name //remove remove subfolders folder
-                }
-            }
-
+ clientDependencies {
+    npm {
+        'jquery'('~3.3.1'){
+            include 'jquery.min.js'
         }
-        installDir = jqueryUiResourcesDir
+
+        'components-jqueryui'('1.12.1') {
+            include 'jquery-ui.min.js'
+            include '**/ui-darkness/images/ui-icons_222222_256x240.png'
+            include 'themes/base/jquery-ui.min.css'
+        }
     }
+
+    installDir = npmInstallDir
 }
 
 
 task createDir {
-    doLast {
-		genJavaDir.mkdirs()
-		genResDir.mkdirs()
-        htmlResourcesGenDir.mkdirs()
-        jqueryUiResourcesDir.mkdirs()
-	}
-}
 
-clientInstall.dependsOn("createDir")
+    doLast {
+        genJavaDir.mkdirs()
+        genResDir.mkdirs()
+        htmlResourcesGenDir.mkdirs()
+        jqueryResourcesTargetDir.mkdirs()
+    }
+}
 
 task generateJavaFromXsd (dependsOn: 'createDir') {
 
@@ -254,7 +250,7 @@ task generateJavaFromXsd (dependsOn: 'createDir') {
 task jamonGenerate {
 	inputs.files fileTree(templatesDir).include('**/*.jamon')
 	inputs.files.each { fileName ->
-		def shortName = "${fileName.absolutePath}".replaceAll(file(templatesDir).absolutePath, '').replaceAll('.jamon', '')
+		def shortName = "${fileName.absolutePath}".replace(file(templatesDir).absolutePath, '').replace('.jamon', '')
 		outputs.file file("${genJavaDir}${shortName}Impl.java")
 		outputs.file file("${genJavaDir}${shortName}.java")
 	}
@@ -304,13 +300,32 @@ task generateService_Dictionaries{
     }
 }
 
+task copyNpmResources (type: Copy) {
+   dependsOn(clientInstall)
+
+   from (npmInstallDir) {
+       eachFile {
+           it.relativePath = new RelativePath(true, it.relativePath.lastName)
+       }
+   }
+   into jqueryResourcesTargetDir
+   
+   includeEmptyDirs = false
+}
+
+task unpackJsReportData (type: Copy) {
+    dependsOn.add("copyNpmResources")
+
+    from { configurations.js_report.collect { zipTree(it) } }
+    into htmlResourcesProvidedDir
+}
 
 // FIXME: update gradle-plugin for delayed write support ( e.g. doLast{} )
 // FIXME: extract file enumeration logic into 'local plugin'
 task writeReportResourceContents() {
-    dependsOn.add('copyJsReportData')
+    dependsOn.add('unpackJsReportData')
 
-    doLast{
+    doLast {
         String contents = Stream.concat(
                 fileTree(htmlResourcesMainDir).getFiles().stream()
                         .map { f -> htmlResourcesMainDir.toPath().relativize(f.toPath()) },
@@ -327,19 +342,12 @@ task writeReportResourceContents() {
     }
 }
 
-task copyJsReportData (type: Copy) {
-    into htmlResourcesProvidedDir
-
-    from { configurations.js_report.collect { zipTree(it) } }
-}
-
-compileJava {
+compileKotlin {
     dependsOn.add("generateJavaFromXsd")
     dependsOn.add("jamonGenerate")
     dependsOn.add("generateTest_aml_Dictionaries")
     dependsOn.add("generateService_Dictionaries")
     dependsOn.add('generateVersionClass')
-    dependsOn.add('clientInstall')
     dependsOn.add("writeReportResourceContents")
 }
 
@@ -347,8 +355,6 @@ test {
     systemProperties "basedir": "${projectDir}"
 
 	jvmArgs '-XX:MaxPermSize=256m'
-
-
 }
 
 artifacts {
@@ -375,14 +381,6 @@ generateVersionClass {
 checkCompatibility {
 	cfgDirs = [file("${mainWorkspaceDir}/cfg"), file("${genWorkspaceDir}/cfg/")]
 	versionFile = File.createTempFile("${getTemporaryDir()}",'VERSION')
-}
-
-clientInstall {
-    doLast {
-        jqueryUiResourcesDir.eachDir { //remove empty dirs
-            it.deleteDir()
-        }
-    }
 }
 
 //Functions TODO: move to parent

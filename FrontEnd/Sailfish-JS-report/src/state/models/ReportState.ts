@@ -14,13 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from "../models/Status";
+import Report from '../../models/Report';
 
-export default interface SelectedState {
-    actionId: number;
-    messagesId: number[];
-    checkpointMessageId: number;
-    checkpointActionId: number;
-    rejectedMessageId: number;
-    status: StatusType;
+export default interface ReportState {
+    report: Report;
+    currentTestCasePath: string;
 }

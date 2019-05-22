@@ -39,7 +39,7 @@ public class FileBackedList<E> extends AbstractList<E> implements RandomAccess {
     protected final File path;
     protected final ISerializer<E> serializer;
 
-    protected int size = 0;
+    protected int size;
 
     public FileBackedList(File path, ISerializer<E> serializer) {
         this.path = Objects.requireNonNull(path, "path cannot be null");

@@ -99,7 +99,7 @@ public class FASTCodec extends AbstractCodec {
 
 
 	private void createConverter() {
-		if (this.converter == null) {
+        if(converter == null) {
 			FastToIMessageConverter converter = new FastToIMessageConverter(
 					msgFactory,
 					msgDictionary.getNamespace()
@@ -108,7 +108,7 @@ public class FASTCodec extends AbstractCodec {
 		}
 	}
 
-	private void loadFastTemplates(final IDataManager dataManager, String pluginAlias, String templateName) {
+    private void loadFastTemplates(IDataManager dataManager, String pluginAlias, String templateName) {
 		XMLMessageTemplateLoader loader = new XMLMessageTemplateLoader();
 		loader.setLoadTemplateIdFromAuxId(true);
 
@@ -169,8 +169,9 @@ public class FASTCodec extends AbstractCodec {
 	public void decode(IoSession session, IoBuffer in,
 			ProtocolDecoderOutput out) throws Exception {
 		if (!session.getTransportMetadata().hasFragmentation()) {
-			if (settings.isResetContextAfterEachUdpPacket())
-			getInputContext(session).reset();
+            if(settings.isResetContextAfterEachUdpPacket()) {
+                getInputContext(session).reset();
+            }
 		}
 		super.decode(session, in, out);
 	}
@@ -180,11 +181,11 @@ public class FASTCodec extends AbstractCodec {
 			IoBuffer in,
 			ProtocolDecoderOutput out) throws IOException, ConverterException {
 		int position = in.position();
-		byte data [] = new byte[in.remaining()];
+        byte[] data = new byte[in.remaining()];
 		in.get(data);
 
         try(InputStream is = new EofCheckedStream(new ByteArrayInputStream(data))) {
-            int msgLen = (TypeCodec.UINT.decode(is)).toInt();
+            int msgLen = TypeCodec.UINT.decode(is).toInt();
             if(is.available() < msgLen) {
                 return false;
             }
@@ -223,14 +224,9 @@ public class FASTCodec extends AbstractCodec {
 		metaData.setAdmin(isAdmin);
 		//metaData.setToService(this.serviceName);
 
-		String packetAddress;
-		if (in instanceof IoBufferWithAddress) {
-			packetAddress = ((IoBufferWithAddress)in).getAddress();
-		} else {
-			packetAddress = session.getRemoteAddress().toString();
-		}
+        String packetAddress = in instanceof IoBufferWithAddress ? ((IoBufferWithAddress)in).getAddress() : session.getRemoteAddress().toString();
 
-		metaData.setFromService(packetAddress);
+        metaData.setFromService(packetAddress);
 
 		metaData.setRawMessage(rawMessage);
 	}
@@ -262,9 +258,8 @@ public class FASTCodec extends AbstractCodec {
 
 		IMessageToFastConverter converter = getIMessageToFastConverter();
 		IMessage iMsg = (IMessage) message;
-		Message fastMsg;
 
-		fastMsg = converter.convert(iMsg);
+        Message fastMsg = converter.convert(iMsg);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		Context oc = getOutputContext(session);
 		MessageOutputStream msgOutStream = new MessageOutputStream(os, oc);
@@ -283,7 +278,7 @@ public class FASTCodec extends AbstractCodec {
 
 	private IMessageToFastConverter getIMessageToFastConverter() {
 		if (iMsgToFastConverter == null) {
-			IDictionaryStructure dictionary = this.msgDictionary;
+            IDictionaryStructure dictionary = msgDictionary;
 			iMsgToFastConverter = new IMessageToFastConverter(dictionary, getRegistry());
 		}
 		return iMsgToFastConverter;

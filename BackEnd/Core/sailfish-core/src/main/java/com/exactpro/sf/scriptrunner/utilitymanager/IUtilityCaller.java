@@ -19,5 +19,5 @@ import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityCallExcepti
 import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityNotFoundException;
 
 public interface IUtilityCaller {
-    public <T> T call(String utilityName, Object... args) throws UtilityCallException, UtilityNotFoundException, InterruptedException;
+    <T> T call(String utilityName, Object... args) throws UtilityCallException, UtilityNotFoundException, InterruptedException;
 }

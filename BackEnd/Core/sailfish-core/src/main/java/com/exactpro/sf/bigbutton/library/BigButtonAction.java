@@ -27,7 +27,7 @@ public enum BigButtonAction {
 
     private final String action;
 
-    private BigButtonAction(String action) {
+    BigButtonAction(String action) {
         this.action = action;
     }
 

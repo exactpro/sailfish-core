@@ -70,11 +70,7 @@ public abstract class AbstractNumberConverter<T extends Number> extends Abstract
 
     @SuppressWarnings("unchecked")
     protected T getValue(Number value) {
-        if(value == null || value.getClass() == getTargetClass()) {
-            return (T)value;
-        }
-
-        return checkForDataLoss(value, convertValue(value));
+        return value == null || value.getClass() == getTargetClass() ? (T)value : checkForDataLoss(value, convertValue(value));
     }
 
     protected T getValue(String value) {

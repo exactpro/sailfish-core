@@ -38,10 +38,12 @@ public class SearchUtil {
 		for (int i=0; i<n; i++)
 		{
 			fromIndex = src.indexOf(s1, fromIndex);
-			if (fromIndex == -1)
-				return -1;
-			if (i+1 != n)
-				fromIndex++;
+            if(fromIndex == -1) {
+                return -1;
+            }
+            if(i + 1 != n) {
+                fromIndex++;
+            }
 		}
 		return fromIndex;
 	}
@@ -49,8 +51,9 @@ public class SearchUtil {
 	public static String substring(String src, String s1, int n1)
 	{
 		int beginIndex = indexOf(src, s1, n1);
-		if (beginIndex == -1)
-			return null;
+        if(beginIndex == -1) {
+            return null;
+        }
 		beginIndex += s1.length();
 		return src.substring(beginIndex);
 	}
@@ -63,14 +66,13 @@ public class SearchUtil {
 	public static String substring(String src, String s1, int n1, String s2, int n2)
 	{
 		int beginIndex = indexOf(src, s1, n1, 0);
-		if (beginIndex == -1)
-			return null;
+        if(beginIndex == -1) {
+            return null;
+        }
 		beginIndex += s1.length();
 		int endIndex = indexOf(src, s2, n2, beginIndex);
-		if (endIndex == -1)
-			return null;
-		return src.substring(beginIndex, endIndex);
-	}
+        return endIndex == -1 ? null : src.substring(beginIndex, endIndex);
+    }
 
 	public static String substring(String src, String s1, String s2)
 	{
@@ -82,10 +84,12 @@ public class SearchUtil {
 		for (int i=0; i<n; i++)
 		{
 			fromIndex = src.lastIndexOf(s1, fromIndex);
-			if (fromIndex == -1)
-				return -1;
-			if (i+1 != n)
-				fromIndex--;
+            if(fromIndex == -1) {
+                return -1;
+            }
+            if(i + 1 != n) {
+                fromIndex--;
+            }
 		}
 		return fromIndex;
 	}
@@ -93,54 +97,55 @@ public class SearchUtil {
 	public static String searchFBFF(String src, String s1, String s2, String s3, String s4)
 	{
 		int index = src.indexOf(s1);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index = lastIndexOf(src, s2, 1, index);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index += s2.length();
 		index = src.indexOf(s3, index);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index += s3.length();
 		int index2 = src.indexOf(s4, index);
-		if (index2 == -1)
-			return null;
-		return src.substring(index, index2);
-	}
+        return index2 == -1 ? null : src.substring(index, index2);
+    }
 
 	public static String searchFBF(String src, String s1, String s2, String s3)
 	{
 		int index = src.indexOf(s1);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index = lastIndexOf(src, s2, 1, index);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index += s2.length();
 		int index2 = src.indexOf(s3, index);
-		if (index2 == -1)
-			return null;
-		return src.substring(index, index2);
-	}
+        return index2 == -1 ? null : src.substring(index, index2);
+    }
 
 	public static String searchFF(String src, String s1, String s2)
 	{
 		int index = src.indexOf(s1);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index += s1.length();
 		int index2 = src.indexOf(s2, index);
-		if (index2 == -1)
-			return null;
-		return src.substring(index, index2);
-	}
+        return index2 == -1 ? null : src.substring(index, index2);
+    }
 
 	public static String searchF(String src, String s1)
 	{
 		int index = src.indexOf(s1);
-		if (index == -1)
-			return null;
+        if(index == -1) {
+            return null;
+        }
 		index += s1.length();
 		return src.substring(index);
 	}

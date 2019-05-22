@@ -64,9 +64,9 @@ public class StatisticScriptReport extends DefaultScriptReport {
 
 		//this.environmentName = environmentName;
 
-		if(this.statisticsService != null) {
+        if(statisticsService != null) {
 
-			this.statisticsService.matrixStarted(matrixName, reportFolder, scriptRunId, environmentName, userName, tags,
+            statisticsService.matrixStarted(matrixName, reportFolder, scriptRunId, environmentName, userName, tags,
                     context.getScriptDescriptionId());
 
 		}
@@ -75,14 +75,14 @@ public class StatisticScriptReport extends DefaultScriptReport {
 
 	@Override
 	public void createException(Throwable cause) {
-        if(this.statisticsService != null && actionCouter == 1) {
+        if(statisticsService != null && actionCouter == 1) {
             statisticsService.matrixEception(matrixName, cause);
         }
 	}
 
 	@Override
 	public void closeReport() {
-		if(this.statisticsService != null) {
+        if(statisticsService != null) {
 			statisticsService.matrixFinished(matrixName);
 		}
 	}
@@ -93,8 +93,8 @@ public class StatisticScriptReport extends DefaultScriptReport {
         String name = ReportUtils.generateTestCaseName(reference, matrixOrder, type);
         logger.debug("Create test case {}", name);
 
-		if(this.statisticsService != null) {
-            this.statisticsService.testCaseStarted(this.matrixName, tcId, name.replaceAll("\\W", "_"),
+        if(statisticsService != null) {
+            statisticsService.testCaseStarted(matrixName, tcId, name.replaceAll("\\W", "_"),
                     description, order, tcHash, tags);
 
 		}
@@ -104,7 +104,7 @@ public class StatisticScriptReport extends DefaultScriptReport {
 	@Override
 	public void closeTestCase(StatusDescription status) {
 
-		if(this.statisticsService != null) {
+        if(statisticsService != null) {
 
 			String failReason = null;
 
@@ -114,7 +114,7 @@ public class StatisticScriptReport extends DefaultScriptReport {
 
 			}
 
-			this.statisticsService.testCaseFinished(this.matrixName, status.getStatus(), failReason, status.getKnownBugs());
+            statisticsService.testCaseFinished(matrixName, status.getStatus(), failReason, status.getKnownBugs());
 
 		}
 
@@ -126,9 +126,9 @@ public class StatisticScriptReport extends DefaultScriptReport {
     public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters, CheckPoint checkPoint, String tag, int hash,
             List<String> verificationsOrder, String outcome) {
 
-		if(this.statisticsService != null) {
+		if(statisticsService != null) {
 
-            this.statisticsService.actionStarted(matrixName, serviceName, name, messageType, description, actionCouter++, tag,
+            statisticsService.actionStarted(matrixName, serviceName, name, messageType, description, actionCouter++, tag,
                                                  hash);
 
 		}
@@ -138,7 +138,7 @@ public class StatisticScriptReport extends DefaultScriptReport {
 	@Override
     public void closeAction(StatusDescription status, Object actionResult) {
 
-		if(this.statisticsService != null) {
+        if(statisticsService != null) {
 
 			String failReason = null;
 
@@ -148,7 +148,7 @@ public class StatisticScriptReport extends DefaultScriptReport {
 
 			}
 
-			this.statisticsService.actionFinished(matrixName, status.getStatus(), failReason);
+            statisticsService.actionFinished(matrixName, status.getStatus(), failReason);
 
 		}
 
@@ -156,8 +156,8 @@ public class StatisticScriptReport extends DefaultScriptReport {
 
     @Override
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
-        if (this.statisticsService != null) {
-            this.statisticsService.addKnownBugsToActionRun(matrixName, result);
+        if(statisticsService != null) {
+            statisticsService.addKnownBugsToActionRun(matrixName, result);
         }
     }
 

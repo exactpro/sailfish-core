@@ -52,40 +52,40 @@ public class DefaultScriptConfig implements IScriptConfig
 	@Override
 	public String getName()
 	{
-		return this.scriptSettings.getScriptName();
+        return scriptSettings.getScriptName();
 	}
 
 	@Override
 	public Set<String> getPropertiesKeys()
 	{
-		return this.scriptSettings.getPropertiesKeys();
+        return scriptSettings.getPropertiesKeys();
 	}
 
 	@Override
 	public String getProperty(String name)
 	{
-		return this.scriptSettings.getProperty(name);
+        return scriptSettings.getProperty(name);
 	}
 
 	@Override
 	public String getReportFolder()
 	{
-		return this.reportFolder;
+        return reportFolder;
 	}
 
 	@Override
 	public Logger getLogger()
 	{
-		return this.scriptLogger;
+        return scriptLogger;
 	}
 
 	@Override
 	public boolean isAddMessagesToReport() {
-		return this.scriptSettings.isAddMessagesToReport();
+        return scriptSettings.isAddMessagesToReport();
 	}
 
 	@Override
 	public String getDescription() {
-		return this.description;
+        return description;
 	}
 }

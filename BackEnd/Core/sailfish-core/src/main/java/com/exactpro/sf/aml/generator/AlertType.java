@@ -22,9 +22,9 @@ public enum AlertType {
     WARNING;
     
     private final String capitalized;
-    
-    private AlertType() {
-        this.capitalized = StringUtils.capitalize(this.toString().toLowerCase());
+
+    AlertType() {
+        this.capitalized = StringUtils.capitalize(toString().toLowerCase());
     }
     
     public String getCapitalized() {

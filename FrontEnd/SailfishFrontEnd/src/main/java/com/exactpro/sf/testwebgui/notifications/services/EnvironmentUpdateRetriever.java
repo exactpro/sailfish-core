@@ -36,7 +36,7 @@ public class EnvironmentUpdateRetriever implements IUpdateRetriever, IEnvironmen
 
 	private static final Logger logger = LoggerFactory.getLogger(EnvironmentUpdateRetriever.class);
 
-	private List<IUpdateRequestListener> listeners;
+	private final List<IUpdateRequestListener> listeners;
 
 	public EnvironmentUpdateRetriever() {
 		listeners = new ArrayList<>();

@@ -21,9 +21,9 @@ import java.util.List;
 
 public interface INTGApplication
 {
-	void onMessageReceived(final IMessage message);
+	void onMessageReceived(IMessage message);
 
-	void onMessageSent(final IMessage message);
+	void onMessageSent(IMessage message);
 
 	void onSessionIdle();
 

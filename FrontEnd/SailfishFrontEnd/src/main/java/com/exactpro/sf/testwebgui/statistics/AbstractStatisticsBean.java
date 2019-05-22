@@ -21,13 +21,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import com.exactpro.sf.embedded.statistics.StatisticsService;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
-import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.general.SessionStorage;
@@ -63,12 +62,12 @@ public abstract class AbstractStatisticsBean {
 
         BeanUtil.findBean("sessionStorage", SessionStorage.class).restoreStateOfAnnotatedBean(this);
 
-        logger.debug("{} [{}] constructed", this.getClass().getSimpleName(), hashCode());
+        logger.debug("{} [{}] constructed", getClass().getSimpleName(), hashCode());
     }
 
     protected void initByStatistics(StatisticsService statisticsService) {
         this.allSfInstances = statisticsService.getStorage().getAllSfInstances();
-        this.selectedSfInstances.addAll(this.allSfInstances);
+        selectedSfInstances.addAll(allSfInstances);
     }
 
     public List<SfInstance> getSelectedSfInstances() {

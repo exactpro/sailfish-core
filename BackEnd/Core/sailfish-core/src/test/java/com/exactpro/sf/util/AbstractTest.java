@@ -78,8 +78,8 @@ public class AbstractTest {
     protected static IServiceContext serviceContext;
     protected static IWorkspaceDispatcher workspaceDispatcher;
 
-	private static boolean isLoggingAlreadyConfigured = false;
-	private static boolean isAlreadyConfigured = false;
+	private static boolean isLoggingAlreadyConfigured;
+	private static boolean isAlreadyConfigured;
 
     private static final String DEFAULT_CFG_FILENAME = "sf.cfg.xml";
 
@@ -115,7 +115,7 @@ public class AbstractTest {
 		synchronized(logger) {
 		    try {
     			if(!isLoggingAlreadyConfigured) {
-                    try (InputStream inputStream = AbstractTest.class.getClassLoader().getResourceAsStream(LOG_PROPERTIES_PATH);) {
+                    try (InputStream inputStream = AbstractTest.class.getClassLoader().getResourceAsStream(LOG_PROPERTIES_PATH)) {
                         PropertyConfigurator.configure(inputStream);
                     }
     			}

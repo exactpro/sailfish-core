@@ -15,24 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.util.StringUtil;
-import com.exactpro.sf.aml.scriptutil.StaticUtil;
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.comparison.ComparatorSettings;
-import com.exactpro.sf.comparison.ComparisonResult;
-import com.exactpro.sf.comparison.ComparisonUtil;
-import com.exactpro.sf.comparison.MessageComparator;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +22,26 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.exactpro.sf.aml.scriptutil.StaticUtil;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.util.StringUtil;
+import com.exactpro.sf.comparison.ComparatorSettings;
+import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.ComparisonUtil;
+import com.exactpro.sf.comparison.MessageComparator;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 /**
  * @author sergey.vasiliev
  *
@@ -967,47 +967,43 @@ public class KnownBugPostValidationTest extends AbstractTest {
 
         public KnownBugBuilder(String expectedValue, boolean list) {
             if(list) {
-                this.builder.append("List");
+                builder.append("List");
             }
 
-            this.builder.append("\"), ").append(expectedValue).append(" )");
+            builder.append("\"), ").append(expectedValue).append(" )");
         }
 
         public KnownBugBuilder(boolean empty, boolean list) {
-            if (empty) {
-                this.builder.append("Empty");
-            } else {
-                this.builder.append("Any");
-            }
+            builder.append(empty ? "Empty" : "Any");
 
             if (list) {
-                this.builder.append("List");
+                builder.append("List");
             }
 
-            this.builder.append("\"))");
+            builder.append("\"))");
         }
 
         public KnownBugBuilder bug(String description, String value, String... categories) {
-            this.builder.append(".Bug( \"").append(description).append("\" , ").append(value);
+            builder.append(".Bug( \"").append(description).append("\" , ").append(value);
             for (String category : categories) {
-                this.builder.append(" , \"").append(category).append("\"");
+                builder.append(" , \"").append(category).append("\"");
             }
-            this.builder.append(" )");
+            builder.append(" )");
             return this;
         }
 
         public KnownBugBuilder bug(String description, String value) {
-            this.builder.append(".Bug( \"").append(description).append("\" , ").append(value).append(" )");
+            builder.append(".Bug( \"").append(description).append("\" , ").append(value).append(" )");
             return this;
         }
 
         public KnownBugBuilder bugEmpty(String description) {
-            this.builder.append(".BugEmpty( \"").append(description).append("\" )");
+            builder.append(".BugEmpty( \"").append(description).append("\" )");
             return this;
         }
 
         public KnownBugBuilder bugAny(String description) {
-            this.builder.append(".BugAny( \"").append(description).append("\" )");
+            builder.append(".BugAny( \"").append(description).append("\" )");
             return this;
         }
 
@@ -1017,7 +1013,7 @@ public class KnownBugPostValidationTest extends AbstractTest {
                 postfix = ".Actual(x)";
             }
             args = ArrayUtils.addAll(args, "um", utilityManger);
-            return StaticUtil.filter(0, null, this.builder.toString() + postfix, args);
+            return StaticUtil.filter(0, null, builder + postfix, args);
         }
     }
 }

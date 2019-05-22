@@ -48,18 +48,18 @@ public class TestNTGMessageHelper extends AbstractTest {
             this.dictionary = loadMessageDictionary(inputStream);
             this.messageFactory = DefaultMessageFactory.getFactory();
             this.messageHelper = new NTGMessageHelper();
-            this.messageHelper.init(this.messageFactory, this.dictionary);
-            this.namespace = this.messageHelper.getNamespace();
+            messageHelper.init(messageFactory, dictionary);
+            this.namespace = messageHelper.getNamespace();
         }
 
     }
 
     @Test
     public void testMessageType() throws IOException {
-        IFieldStructure typeField = this.dictionary.getFields().get("MessageType");
+        IFieldStructure typeField = dictionary.getFields().get("MessageType");
         for (String element : typeField.getValues().keySet()) {
-            IMessage message = this.messageFactory.createMessage(element, this.namespace);
-            this.messageHelper.prepareMessageToEncode(message, null);
+            IMessage message = messageFactory.createMessage(element, namespace);
+            messageHelper.prepareMessageToEncode(message, null);
             checkValueInMessageHeader(message, "MessageType", typeField.getValues().get(element).getCastValue());
             checkValueInMessageHeader(message, "StartOfMessage", 2);
         }

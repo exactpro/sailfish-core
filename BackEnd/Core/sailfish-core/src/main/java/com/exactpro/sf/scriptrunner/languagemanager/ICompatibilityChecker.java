@@ -18,5 +18,5 @@ package com.exactpro.sf.scriptrunner.languagemanager;
 import java.lang.reflect.Method;
 
 public interface ICompatibilityChecker {
-    public boolean isCompatible(Method method);
+    boolean isCompatible(Method method);
 }

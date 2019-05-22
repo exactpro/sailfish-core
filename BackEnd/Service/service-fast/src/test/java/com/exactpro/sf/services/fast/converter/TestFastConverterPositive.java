@@ -100,7 +100,7 @@ public class TestFastConverterPositive extends FastConverterTest{
 	@Test
 	public void testByteVector(){
 		Assert.assertTrue("Fix fastMessage.bv != fastBackConvertMessage.bv",
-				this.isEqual(fastMessage.getBytes("bv"),fastBackConvertMessage.getBytes("bv")));
+                isEqual(fastMessage.getBytes("bv"),fastBackConvertMessage.getBytes("bv")));
 	}
 	
 	@Test

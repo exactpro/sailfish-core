@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import com.exactpro.sf.center.IVersion;
+import com.exactpro.sf.common.logging.CommonLoggers;
 import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.ILoadableManagerContext;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -29,15 +30,17 @@ import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.configuration.suri.SailfishURIRule;
 import com.exactpro.sf.configuration.suri.SailfishURIUtils;
 import com.exactpro.sf.scriptrunner.languagemanager.exceptions.LanguageManagerException;
+import org.slf4j.Logger;
 
 public class LanguageManager implements ILoadableManager {
 
     public static final ILanguageFactory AUTO = new AutoLanguageFactory();
 
+    private final Logger userEventsLogger = CommonLoggers.USER_EVENTS_LOGGER;
+
+
     @SuppressWarnings("serial")
     private final Map<SailfishURI, ILanguageFactory> uriToFactory = new TreeMap<SailfishURI, ILanguageFactory>() {{ put(AutoLanguageFactory.URI, AUTO); }};
-
-    public LanguageManager() {}
 
     @Override
     public void load(ILoadableManagerContext context) {
@@ -46,8 +49,14 @@ public class LanguageManager implements ILoadableManager {
         
         try {
             for (ILanguageFactory languageFactory : ServiceLoader.load(ILanguageFactory.class, classLoader)) {
+                if (languageFactory.getClass().getClassLoader() != classLoader) {
+                    continue;
+                }
+
                 SailfishURI languageURI = new SailfishURI(version.getAlias(), null, languageFactory.getName());
                 uriToFactory.put(languageURI, languageFactory);
+
+                userEventsLogger.info("Loaded {} languageFactory from {}", languageFactory.getName(), context.getVersion().getArtifactName());
             }
         } catch(Exception e) {
             throw new LanguageManagerException("Failed to load language factories", e);

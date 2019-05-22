@@ -20,7 +20,7 @@ import org.apache.mina.transport.socket.DefaultDatagramSessionConfig;
 public class DefaultMulticastDatagramSessionConfig extends
 		DefaultDatagramSessionConfig 
 {
-	private static int DEFAULT_SOTIMEOUT = 1000;
+	private static final int DEFAULT_SOTIMEOUT = 1000;
 	
 	private int soTimeout = DEFAULT_SOTIMEOUT;
 	

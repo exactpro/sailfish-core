@@ -17,21 +17,17 @@ package com.exactpro.sf.aml.generator;
 
 import java.util.Arrays;
 
+import javax.lang.model.SourceVersion;
+
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Collection of validations for Java language.
  * @author dmitry.guriev
  *
  */
 public class JavaValidator {
-
-	private static final String keywords[] = { "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char",
-			"class", "const", "continue", "default", "do", "double", "else", "extends", "false", "final", "finally",
-            "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface", "long", "native",
-			"new", "null", "package", "private", "protected", "public", "return", "short", "static", "strictfp",
-			"super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "void",
-			"volatile", "while" };
-	
-	private JavaValidator()
+    private JavaValidator()
 	{
 		// hide constructor
 	}
@@ -58,8 +54,8 @@ public class JavaValidator {
 		if (typeName.contains("\t")) {
 			return "Type '"+typeName+"' contain tab character";
 		}
-		
-		if (Arrays.binarySearch(keywords, typeName) >= 0) {
+
+        if(SourceVersion.isKeyword(typeName)) {
 			return "Type '"+typeName+"' is reserved java word";
 		}
 
@@ -67,11 +63,11 @@ public class JavaValidator {
 		for (int i=0; i<bytes.length; i++)
 		{
 			byte b = bytes[i];
-			boolean valid = ( (b ==  '_')
+            boolean valid = (b == '_')
 					|| (b >= '0' && b <= '9')
 					|| (b >= 'a' && b <= 'z')
-					|| (b >= 'A' && b <= 'Z'));
-			if (false == valid) {
+                    || (b >= 'A' && b <= 'Z');
+            if(!valid) {
 				return "Type '"+typeName+"' contain invalid character";
 			}
 		}
@@ -105,8 +101,8 @@ public class JavaValidator {
 		if (function.contains("\t")) {
 			return "Function '"+function+"' contain tab character";
 		}
-		
-		if (Arrays.binarySearch(keywords, function) >= 0) {
+
+        if(SourceVersion.isKeyword(function)) {
 			return "Function '"+function+"' is reserved java word";
 		}
 
@@ -114,11 +110,11 @@ public class JavaValidator {
 		for (int i=0; i<bytes.length; i++)
 		{
 			byte b = bytes[i];
-			boolean valid = ( (b ==  '_')
+            boolean valid = (b == '_')
 					|| (b >= '0' && b <= '9')
 					|| (b >= 'a' && b <= 'z')
-					|| (b >= 'A' && b <= 'Z'));
-			if (false == valid) {
+                    || (b >= 'A' && b <= 'Z');
+            if(!valid) {
 				return "Function '"+function+"' contain invalid character";
 			}
 		}
@@ -152,7 +148,7 @@ public class JavaValidator {
 			return "Variable '"+variable+"' contain tab character";
 		}
 
-		if (Arrays.binarySearch(keywords, variable) >= 0) {
+        if(SourceVersion.isKeyword(variable)) {
 			return "Variable '"+variable+"' is reserved java word";
 		}
 
@@ -160,11 +156,11 @@ public class JavaValidator {
 		for (int i=0; i<bytes.length; i++)
 		{
 			byte b = bytes[i];
-			boolean valid = ( (b ==  '_')
+            boolean valid = (b == '_')
 					|| (b >= '0' && b <= '9')
 					|| (b >= 'a' && b <= 'z')
-					|| (b >= 'A' && b <= 'Z'));
-			if (false == valid) {
+                    || (b >= 'A' && b <= 'Z');
+            if(!valid) {
 				return "Variable '"+variable+"' contain invalid character";
 			}
 		}
@@ -185,7 +181,7 @@ public class JavaValidator {
 	 * @param packageName tested package name
 	 */
 	public static String validatePackageName(String packageName) {
-		if (packageName == null || packageName.equals("")) {
+        if(StringUtils.isEmpty(packageName)) {
 			return null;
 		}
 
@@ -203,7 +199,7 @@ public class JavaValidator {
 
 		String[] parts = packageName.split("\\.");
 		for (String part: parts) {
-			if (Arrays.binarySearch(keywords, part) >= 0) {
+            if(SourceVersion.isKeyword(part)) {
 				return "Invalid package name. Package name '"+packageName+"' contains reserved java word '"+part+"'";
 			}
 		}
@@ -212,13 +208,13 @@ public class JavaValidator {
 		for (int i=0; i<bytes.length; i++)
 		{
 			byte b = bytes[i];
-			boolean valid = ( (b ==  '_')
+            boolean valid = (b == '_')
 					|| (b ==  '.')
 					|| (b ==  '$')
 					|| (b >= '0' && b <= '9')
 					|| (b >= 'a' && b <= 'z')
-					|| (b >= 'A' && b <= 'Z'));
-			if (false == valid) {
+                    || (b >= 'A' && b <= 'Z');
+            if(!valid) {
 				return "Invalid package name. Package name '"+packageName+"' is not valid java indentifier";
 			}
 		}

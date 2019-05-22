@@ -34,6 +34,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.AML;
@@ -134,7 +135,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(IScriptReport.class.getCanonicalName());
         imports.add(Map.class.getCanonicalName());
         imports.add(Outcome.class.getCanonicalName());
-        imports.add(Outcome.Status.class.getCanonicalName());
+        imports.add(Status.class.getCanonicalName());
         imports.add(SailFishAction.class.getCanonicalName());
         imports.add(SailFishTestCase.class.getCanonicalName());
         imports.add(ScriptContext.class.getCanonicalName());
@@ -188,7 +189,7 @@ public abstract class AbstractCodeBuilder {
     public abstract void writeActionClassDefinition(TextOutputStream stream, String className) throws IOException;
 
     public void writeLogger(TextOutputStream stream, String loggerName, boolean isStatic) throws IOException {
-        String loggerClass = org.apache.log4j.Logger.class.getCanonicalName();
+        String loggerClass = Logger.class.getCanonicalName();
         String varPrefix = isStatic ? "static " : "";
 
         stream.writeLine(1, "%s%s %s = %2$s.getLogger(\"TimeStamps\");", varPrefix, loggerClass, loggerName);

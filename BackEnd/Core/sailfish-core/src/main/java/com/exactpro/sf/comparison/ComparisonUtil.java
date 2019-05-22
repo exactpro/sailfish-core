@@ -15,16 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.comparison;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAccessor;
 
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.messages.IMessage;
@@ -47,7 +47,7 @@ public class ComparisonUtil {
 	{
 		int count = 0;
 
-		if (status.equals(result.getStatus())) {
+        if(status == result.getStatus()) {
 			count++;
 		}
 

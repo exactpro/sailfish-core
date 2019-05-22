@@ -19,7 +19,7 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 
 public class TestScriptProgressListener implements IProgressListener {
 
-	private TestScriptDescription description;
+    private final TestScriptDescription description;
 
 	public TestScriptProgressListener(TestScriptDescription description) {
 		this.description = description;
@@ -27,11 +27,11 @@ public class TestScriptProgressListener implements IProgressListener {
 
 	@Override
 	public void onProgressChanged(int progress) {
-		this.description.setProgress(progress);
+        description.setProgress(progress);
 	}
 
     @Override
     public void onDetermineLanguage(SailfishURI languageURI) {
-        this.description.setLanguageURI(languageURI);
+        description.setLanguageURI(languageURI);
     }
 }

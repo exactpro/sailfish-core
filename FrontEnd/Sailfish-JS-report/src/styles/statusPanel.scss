@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "vars";
+@import "./common/vars";
 
 .status {
     height: 100%;
@@ -52,8 +52,13 @@
         }
 
         &.conditionally_passed {
-            border-color: $conditionallyBorderColor;
-            background-color: $conditionallyBackgroundColor;
+            border-color: $conditionallyPassedBorderColor;
+            background-color: $conditionallyPassedBackgroundColor;
+        }
+
+        &.conditionally_failed {
+            border-color: $conditionallyFailedBorderColor;
+            background-color: $conditionallyFailedBackgroundColor;
         }
 
         &-wrapper {

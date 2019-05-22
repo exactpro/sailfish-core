@@ -36,9 +36,9 @@ import java.util.Date;
 public class TestITCHVisitorNegative extends TestITCHHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(TestITCHVisitorNegative.class);
-    private static ITCHCodec codec = null;
-    private static ITCHCodec codecValid = null;
-    private static ITCHCodec codecLength = null;
+    private static ITCHCodec codec;
+    private static ITCHCodec codecValid;
+    private static ITCHCodec codecLength;
 	
 	@BeforeClass
 	public static void setUpClass(){
@@ -80,15 +80,14 @@ public class TestITCHVisitorNegative extends TestITCHHelper {
 	 */
 	@Test
 	public void testInvalidTypeDecode(){
-		byte[] array = new byte[]
-        		{58, 0, 1, 48, 0, 0, 0, 0, 
-        			46, 13, 102, 102, 115, 116, 49, 32, 
-        			32, 32, 49, 48, 58, 52, 57, 58, 
-        			48, 48, 77, 111, 110, 32, 74, 117, 
-        			108, 32, 48, 52, 32, 49, 52, 58, 
-        			48, 50, 58, 51, 48, 32, 77, 83, 
-        			75, 32, 50, 48, 49, 54, 0, 0, 
-        			0, 0, 0, 0, 0, 0, 0, 0,};   
+		byte[] array = {58, 0, 1, 48, 0, 0, 0, 0,
+            46, 13, 102, 102, 115, 116, 49, 32,
+            32, 32, 49, 48, 58, 52, 57, 58,
+            48, 48, 77, 111, 110, 32, 74, 117,
+            108, 32, 48, 52, 32, 49, 52, 58,
+            48, 50, 58, 51, 48, 32, 77, 83,
+            75, 32, 50, 48, 49, 54, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,};
    		try{
    			MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
 			IoSession decodeSession = new DummySession();
@@ -241,7 +240,7 @@ public class TestITCHVisitorNegative extends TestITCHHelper {
 	public void testInvalidTypeFloat(){
 		try{
 			IMessage message = getMessageHelper().getMessageFactory().createMessage("testFloat", "ITCH");
-			message.addField("Int16", (float)1.1);
+            message.addField("Int16", 1.1f);
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 			testNegativeEncode(message, codec);
 	        message=getMessageCreator().getTestFloat();
@@ -260,7 +259,7 @@ public class TestITCHVisitorNegative extends TestITCHHelper {
 	public void testInvalidTypeDouble(){
 		try{
 			IMessage message = getMessageHelper().getMessageFactory().createMessage("testDouble", "ITCH");
-			message.addField("Int64", (double)1.1);
+            message.addField("Int64", 1.1);
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 			testNegativeEncode(message, codec);
 	        message=getMessageCreator().getTestDouble();

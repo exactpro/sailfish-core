@@ -20,13 +20,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.Assert;
-
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import junit.framework.Assert;
 
 /**
  * @author nikita.smirnov
@@ -100,15 +100,15 @@ public class TestTaskExecutor {
 		}
 	}
 	
-	private class Task implements Runnable, Callable<String> { 
-		
-		private volatile int maxRun = 0;
-		private volatile int runCount = 0;
+	private class Task implements Runnable, Callable<String> {
+
+        private volatile int maxRun;
+        private volatile int runCount;
 		
 		@Override
 		public void run() {
 		    System.out.println(Thread.currentThread().getName());
-			if (++this.runCount >= this.maxRun) {
+            if(++this.runCount >= maxRun) {
 				throw new RuntimeException("Test");
 			}
 		}
@@ -120,7 +120,7 @@ public class TestTaskExecutor {
 		}
 
 		public int getRunCount() {
-			return this.runCount;
+            return runCount;
 		}
 
 		public void setMaxRun(int value) {

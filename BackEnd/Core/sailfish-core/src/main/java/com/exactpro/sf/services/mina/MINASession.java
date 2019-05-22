@@ -53,7 +53,7 @@ public class MINASession implements ISession {
 
     @Override
 	public String getName() {
-        return this.serviceName.toString();
+        return serviceName.toString();
 	}
 
     @Override
@@ -88,11 +88,7 @@ public class MINASession implements ISession {
             throw new SendMessageFailedException("Message send failed. Session: " + this, future.getException());
         }
 
-        if(message instanceof IMessage) {
-            return (IMessage)message;
-        }
-
-        return null;
+        return message instanceof IMessage ? (IMessage)message : null;
     }
 
     @Override

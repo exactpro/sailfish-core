@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.InflaterOutputStream;
@@ -82,7 +82,7 @@ import com.exactpro.sf.util.DateTimeUtility;
  */
 
 @MatrixActions
-@ResourceAliases({"CommonActions"})
+@ResourceAliases("CommonActions")
 public class CommonActions extends AbstractCaller {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommonActions.class);
@@ -91,9 +91,7 @@ public class CommonActions extends AbstractCaller {
     public static final String FIRST_ARG = "firstArg";
     public static final String SECOND_ARG = "secondArg";
 
-	@CommonColumns({
-        @CommonColumn(value = Column.Reference, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.Reference, required = true))
 	@ActionMethod
 	public CheckPoint GetCheckPoint(IActionContext actionContext)
 	{
@@ -137,9 +135,7 @@ public class CommonActions extends AbstractCaller {
 		return checkPoint;
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.Reference, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.Reference, required = true))
 	@ActionMethod
 	public CheckPoint GetAdminCheckPoint(IActionContext actionContext)
 	{
@@ -177,9 +173,7 @@ public class CommonActions extends AbstractCaller {
 //		return checkPoint;
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.Timeout, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.Timeout, required = true))
 	@ActionMethod
 	public void Sleep(IActionContext actionContext) throws InterruptedException
 	{
@@ -187,9 +181,7 @@ public class CommonActions extends AbstractCaller {
 		Thread.sleep(actionContext.getTimeout());
 	}
 
-    @CustomColumns({
-        @CustomColumn(value = WAIT_TILL_TIME_ARG_DATE, required = true)
-    })
+    @CustomColumns(@CustomColumn(value = WAIT_TILL_TIME_ARG_DATE, required = true))
     @ActionMethod
 	public void WaitTillTime(IActionContext actionContext, HashMap<?, ?> inputData) throws InterruptedException {
         Object o = inputData.get(WAIT_TILL_TIME_ARG_DATE);
@@ -225,9 +217,7 @@ public class CommonActions extends AbstractCaller {
 		return message;
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
 	public void CheckLogon(IActionContext actionContext) throws InterruptedException
 	{
@@ -255,9 +245,7 @@ public class CommonActions extends AbstractCaller {
 		throw new EPSCommonException("Service "+serviceName+" is not logged on.");
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
 	public void CleanMessages(IActionContext actionContext)
 	{
@@ -266,9 +254,7 @@ public class CommonActions extends AbstractCaller {
 		client.getServiceHandler().cleanMessages(ServiceHandlerRoute.values());
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
 	public void CleanAppMessages(IActionContext actionContext)
 	{
@@ -286,9 +272,7 @@ public class CommonActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
 	public void CleanAdminMessages(IActionContext actionContext)
 	{
@@ -357,22 +341,20 @@ public class CommonActions extends AbstractCaller {
         "relatively - 16:56:00+1m (where 1m = 1 minute)<br>" +
         "17:00:00+3h (where 3h = 3 hours)<br>" +
 	    "17:13:00+25s (where 25s = 25 seconds)<br>")
-	@CustomColumns({
-        @CustomColumn(value = "TimeSync", required = true)
-    })
+    @CustomColumns(@CustomColumn(value = "TimeSync", required = true))
 	@ActionMethod
 	public void TimeSync(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception
 	{
-        final DateTimeFormatter df = DateTimeUtility.createFormatter("HH:mm:ss");
+        DateTimeFormatter df = DateTimeUtility.createFormatter("HH:mm:ss");
 
-		final int s_ms = 1000;
-		final int m_ms = 60000;
-		final int h_ms = 3600000;
+        int s_ms = 1000;
+        int m_ms = 60000;
+        int h_ms = 3600000;
 
 		String value = ((String) inputData.get("TimeSync")).trim();
-		final StringTokenizer t = new StringTokenizer(value, "+");
+        StringTokenizer t = new StringTokenizer(value, "+");
 
-		final List<String> tokens = new ArrayList<>();
+        List<String> tokens = new ArrayList<>();
 		while (t.hasMoreTokens()) {
 			tokens.add(t.nextToken().trim());
 		}
@@ -397,9 +379,13 @@ public class CommonActions extends AbstractCaller {
 				int mul = Integer.parseInt(token.substring(0, token.length()-1));
 				String smul2 = token.substring(token.length()-1, token.length());
 				int mul2 = 0;
-				if ("h".equals(smul2)) mul2 = h_ms;
-				else if ("m".equals(smul2)) mul2 = m_ms;
-				else if ("s".equals(smul2)) mul2 = s_ms;
+                if("h".equals(smul2)) {
+                    mul2 = h_ms;
+                } else if("m".equals(smul2)) {
+                    mul2 = m_ms;
+                } else if("s".equals(smul2)) {
+                    mul2 = s_ms;
+                }
 				abs += mul*mul2;
 			}
 		}
@@ -413,9 +399,7 @@ public class CommonActions extends AbstractCaller {
         }
     }
 
-	@CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
 	public HashMap<?,?> GetSettings(IActionContext actionContext) {
 
@@ -431,9 +415,7 @@ public class CommonActions extends AbstractCaller {
 		}
 	}
 
-	@CommonColumns({
-        @CommonColumn(value = Column.Reference, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.Reference, required = true))
 	@ActionMethod
 	public String GetEnvironmentName(IActionContext actionContext) {
 		return actionContext.getEnvironmentName();
@@ -460,9 +442,7 @@ public class CommonActions extends AbstractCaller {
 	 * Value of "PathArgs" must contain path to script and its arguments, separated by space.<br />
 	 * @throws Exception - throws an exception
 	 */
-	@CustomColumns({
-        @CustomColumn(value = "PathArgs", required = true)
-    })
+    @CustomColumns(@CustomColumn(value = "PathArgs", required = true))
 	@ActionMethod
 	public void RunScript(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
         String command = (String) inputData.get("PathArgs");
@@ -536,7 +516,7 @@ public class CommonActions extends AbstractCaller {
         String content = (String) inputData.get("Content");
 
         try (InputStream bais = new ByteArrayInputStream(content.getBytes());
-             InputStream b64 = new Base64InputStream(bais, false);) {
+                InputStream b64 = new Base64InputStream(bais, false)) {
             saveContent(actionContext, inputData, b64);
         }
     }
@@ -555,7 +535,7 @@ public class CommonActions extends AbstractCaller {
     @CustomColumns({
         @CustomColumn(value = "FileAlias", required = true),
         @CustomColumn(value = "Content", required = true),
-        @CustomColumn(value = "Append")
+            @CustomColumn("Append")
         })
     @ActionMethod
     @Description("Save specified \"Content\" into file mapped by \"FileAlias\". "
@@ -583,7 +563,7 @@ public class CommonActions extends AbstractCaller {
     @Description("Encode file to base64.<br/>"+
             "<b>FileAlias</b> - file to encode.<br/>" +
             "<b>Compress</b> - do compress result string (y / Y / n / N).<br/>")
-    @CommonColumns({ @CommonColumn(value = Column.Reference, required = true) })
+    @CommonColumns(@CommonColumn(value = Column.Reference, required = true))
     @CustomColumns({ @CustomColumn(value = "FileAlias", required = true), @CustomColumn(value = "Compress", required = false)})
     @ActionMethod
     public String LoadBase64Content(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
@@ -597,7 +577,7 @@ public class CommonActions extends AbstractCaller {
 
             byte[] result;
 
-            try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
+            try(ByteArrayOutputStream os = new ByteArrayOutputStream()) {
                 try (OutputStream b64 =  new Base64OutputStream(os, true, -1, new byte[0]);
                         InputStream dm = dataManager.getDataInputStream(target);
                         InputStream is = compress ? new DeflaterInputStream(dm) : dm) {
@@ -642,13 +622,13 @@ public class CommonActions extends AbstractCaller {
      */
     private static String preparePath(String path) {
         if (path.startsWith("~")) {
-            path = System.getProperty("user.home") + path.substring(1);
+            return System.getProperty("user.home") + path.substring(1);
         } else if (path.startsWith("$HOME")) {
-            path = System.getProperty("user.home") + path.substring(5);
+            return System.getProperty("user.home") + path.substring(5);
         } else if (path.startsWith("$")) {
             String var = path.substring(1, path.indexOf(File.separator));
             if (System.getenv().containsKey(var)) {
-                path = path.replace(path.substring(0, path.indexOf(File.separator)), System.getenv(var));
+                return path.replace(path.substring(0, path.indexOf(File.separator)), System.getenv(var));
             } else {
                 throw new RuntimeException("Can't find environment variable " + var);
             }
@@ -688,8 +668,9 @@ public class CommonActions extends AbstractCaller {
         //remove empty args
         Iterator<String> it = args.iterator();
         while(it.hasNext()){
-            if(it.next().trim().isEmpty())
+            if(it.next().trim().isEmpty()) {
                 it.remove();
+            }
         }
         String[] result = new String[args.size()];
         for (int i = 0; i < args.size(); i++) {
@@ -706,9 +687,7 @@ public class CommonActions extends AbstractCaller {
      * Value of "Command" must contain path to script, its arguments must be in column with it name.<br />
      * @throws Exception - throws an exception
      */
-    @CustomColumns({
-        @CustomColumn(value = "Command", required = true)
-    })
+    @CustomColumns(@CustomColumn(value = "Command", required = true))
     @ActionMethod
     public void RunScriptWithArgs(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
         String command = preparePath((String) inputData.get("Command"));
@@ -717,7 +696,7 @@ public class CommonActions extends AbstractCaller {
         pathArgs.add(command);
 
         for(Object arg:inputData.keySet()) {
-            if(!((String)arg).equals("Command")) {
+            if(!"Command".equals((String)arg)) {
                 pathArgs.add((String)arg + "=" +inputData.get(arg));
             }
         }
@@ -766,7 +745,7 @@ public class CommonActions extends AbstractCaller {
 
 		Throwable problem = null;
 
-		for ( Map.Entry<?, ?> entry : filterData.entrySet() ) {
+        for(Entry<?, ?> entry : filterData.entrySet()) {
             ComparisonResult curResult = new ComparisonResult(entry.getKey().toString());
 
 			curResult.setExpected("True");
@@ -775,9 +754,9 @@ public class CommonActions extends AbstractCaller {
 			try {
 				Boolean result = (Boolean)MVEL.eval(entry.getValue().toString());
 
-				if ( result )
-					curResult.setStatus(StatusType.PASSED);
-				else {
+                if(result) {
+                    curResult.setStatus(StatusType.PASSED);
+                } else {
 					curResult.setStatus(StatusType.FAILED);
 					compResult.setStatus(StatusType.FAILED);
 				}
@@ -821,9 +800,6 @@ public class CommonActions extends AbstractCaller {
     @Description("Create message with pair column / value. Value will have type String if it is not contain AML constructions.")
     @ActionMethod
     public HashMap<?, ?> SetVariables(IActionContext actionContext, HashMap<?, ?> message) throws Exception {
-        if (message.size() > 0) {
-            return message;
-        }
-        return null;
+        return message.isEmpty() ? null : message;
     }
 }

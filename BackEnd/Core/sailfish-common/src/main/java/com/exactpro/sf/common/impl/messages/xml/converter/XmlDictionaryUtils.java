@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Field;
@@ -54,11 +55,11 @@ public class XmlDictionaryUtils {
         return fieldsName;
     }
 
-    protected static List<Map.Entry<String, Object>> getGroupFieldsName(Message field){
+    protected static List<Entry<String, Object>> getGroupFieldsName(Message field){
         if(field == null){
             return null;
         }
-        List<Map.Entry<String, Object>> groupFieldsName = new ArrayList<Map.Entry<String, Object>>();
+        List<Entry<String, Object>> groupFieldsName = new ArrayList<Entry<String, Object>>();
         Message subField = (Message)field.getReference();
         if(subField == null){
             for(Field fieldName: field.getFields()){

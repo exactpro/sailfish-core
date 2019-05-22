@@ -20,8 +20,8 @@ import '../styles/action.scss';
 import Action from '../models/Action';
 import { ActionTree } from './ActionTree';
 import { StatusType } from '../models/Status';
-import AppState from '../state/AppState';
-import { selectAction, selectMessages, selectCheckpoint } from '../actions/actionCreators';
+import AppState from '../state/models/AppState';
+import { selectAction, selectCheckpoint, selectVerification } from '../actions/actionCreators';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { actionsHeatmap } from '../helpers/heatmapCreator';
 import { getActions } from '../helpers/actionType';
@@ -29,7 +29,8 @@ import { getActions } from '../helpers/actionType';
 interface ListProps {
     actions: Array<Action>;
     checkpointActions: Array<Action>;
-    selectedActionId: number;
+    selectedActionId: number[];
+    scrolledActionId: Number;
     selectedMessageId: number;
     selectedCheckpointId: number;
     actionsFilter: StatusType[];
@@ -43,7 +44,6 @@ export class ActionsListBase extends Component<ListProps, {}> {
 
     private elements: ActionTree[] = [];
     private scrollbar: HeatmapScrollbar;
-    private root: HTMLElement;
 
     scrollToTop() {
         this.scrollbar && this.scrollbar.scrollToTop();
@@ -58,6 +58,11 @@ export class ActionsListBase extends Component<ListProps, {}> {
     }
 
     shouldComponentUpdate(nextProps: ListProps) {
+
+        if (nextProps.scrolledActionId !== this.props.scrolledActionId) {
+            return true;
+        }
+
         if (nextProps.filterFields !== this.props.filterFields) {
             return true;
         }
@@ -75,21 +80,21 @@ export class ActionsListBase extends Component<ListProps, {}> {
             nextProps.selectedMessageId !== this.props.selectedMessageId;
     }
 
-    render({ actions, selectedCheckpointId, selectedActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
+    render({ actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
 
         return (
             <div class="actions">
-                <div class="actions-list"
-                    ref={ref => this.root = ref}>
+                <div class="actions__list">
                     <HeatmapScrollbar
                         selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}
                         ref={ref => this.scrollbar = ref}>
                         {actions.map(action => (
                             <ActionTree 
                                 action={action}
-                                selectedActionId={selectedActionId}
+                                selectedActionsId={selectedActionId}
                                 selectedMessageId={selectedMessageId}
                                 selectedCheckpointId={selectedCheckpointId}
+                                scrolledActionId={scrolledActionId}
                                 actionSelectHandler={onSelect}
                                 messageSelectHandler={onMessageSelect}
                                 actionsFilter={actionsFilter}
@@ -105,17 +110,18 @@ export class ActionsListBase extends Component<ListProps, {}> {
 }   
 
 export const ActionsList = connect((state: AppState) => ({
-        actions: state.testCase.actions,
-        selectedActionId: state.selected.actionId,
-        selectedMessageId: state.selected.actionId ? null : state.selected.messagesId[0],
+        actions: state.selected.testCase.actions,
+        selectedActionId: state.selected.actionsId,
+        scrolledActionId: state.selected.scrolledActionId,
+        selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
         selectedCheckpointId: state.selected.checkpointActionId,
-        actionsFilter: state.actionsFilter,
-        filterFields: state.fieldsFilter,
-        checkpointActions: state.checkpointActions
+        actionsFilter: state.filter.actionsFilter,
+        filterFields: state.filter.fieldsFilter,
+        checkpointActions: state.selected.checkpointActions
     }),
     dispatch => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),
-        onMessageSelect: (id: number, status: StatusType) => dispatch(selectMessages([id], status)),
+        onMessageSelect: (id: number, status: StatusType) => dispatch(selectVerification(id, status)),
         setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpoint(checkpointAction))
     }),
     null,

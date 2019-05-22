@@ -17,9 +17,9 @@ package com.exactpro.sf;
 
 public class ServiceDescriptor {
 	
-	private String name;
-	private String className;
-	private String settingsClassName;
+	private final String name;
+	private final String className;
+	private final String settingsClassName;
 	
 	public ServiceDescriptor(String name, String className, String settingsClassName) {
 		this.name = name;

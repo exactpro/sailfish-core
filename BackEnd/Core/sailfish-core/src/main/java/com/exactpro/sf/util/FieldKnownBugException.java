@@ -73,10 +73,10 @@ public class FieldKnownBugException extends KnownBugException {
     }
 
     public Set<BugDescription> getActualDescriptions() {
-        return this.actualDescriptions;
+        return actualDescriptions;
     }
     
     public boolean isKnownBug() {
-        return !this.actualDescriptions.isEmpty(); 
+        return !actualDescriptions.isEmpty();
     }
 }

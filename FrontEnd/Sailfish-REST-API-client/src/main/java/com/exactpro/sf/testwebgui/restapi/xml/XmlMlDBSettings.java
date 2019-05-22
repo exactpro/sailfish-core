@@ -32,7 +32,7 @@ public class XmlMlDBSettings {
     private String protocol;
 
     public boolean getServiceEnabled() {
-        return this.serviceEnabled;
+        return serviceEnabled;
     }
 
     public void setServiceEnabled(boolean serviceEnabled) {

@@ -15,18 +15,15 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.notifications.messages;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import com.exactprosystems.webchannels.messages.AbstractMessage;
 import com.exactprosystems.webchannels.messages.ChannelsMessage;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 
 @ChannelsMessage
 public class CloseChannel extends AbstractMessage {
 
-	public CloseChannel() {
-		super();
-	}
-	
-	@Override
+    @Override
 	public String toString() {
 		return new ToStringBuilder(this).append("messageType", SFMessageType.CloseChannel).toString();
 	}

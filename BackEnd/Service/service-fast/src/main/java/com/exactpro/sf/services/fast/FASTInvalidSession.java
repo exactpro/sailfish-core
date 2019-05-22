@@ -21,7 +21,7 @@ import com.exactpro.sf.services.ISession;
 
 class FASTInvalidSession implements ISession {
 
-	private String name;
+	private final String name;
 
 	FASTInvalidSession(String name) {
 		this.name = name;

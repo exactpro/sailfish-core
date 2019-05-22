@@ -210,11 +210,7 @@ public class ZipReport implements IScriptReport {
         }
     }
     private String buildPath(String path, String file) {
-        if (StringUtils.isEmpty(path)) {
-            return file;
-        } else {
-            return FilenameUtils.separatorsToUnix(FilenameUtils.concat(path, file));
-        }
+        return StringUtils.isEmpty(path) ? file : FilenameUtils.separatorsToUnix(FilenameUtils.concat(path, file));
     }
 
     private void removeFiles(File reportFolder) throws IOException {

@@ -36,7 +36,7 @@ public class CORSFilter implements ContainerResponseFilter {
 
         //Handle preflight requests only for machinelearning
         List<PathSegment> segments = info.getPathSegments();
-        if (segments != null && segments.get(0).getPath().equals("machinelearning")) {
+        if(segments != null && "machinelearning".equals(segments.get(0).getPath())) {
             response.getHeaders().add("Access-Control-Allow-Origin", "*");
             response.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
             response.getHeaders().add("Access-Control-Allow-Credentials", "true");

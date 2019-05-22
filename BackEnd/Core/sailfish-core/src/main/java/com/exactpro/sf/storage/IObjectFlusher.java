@@ -18,12 +18,12 @@ package com.exactpro.sf.storage;
 import java.util.List;
 
 public interface IObjectFlusher<T> {
-    public void start();
-    public void stop();
-    public void add(T object);
-    public void flush();
+    void start();
+    void stop();
+    void add(T object);
+    void flush();
 
-    public interface IFlushProvider<T> {
-        public void flush(List<T> objects) throws Exception;
+    interface IFlushProvider<T> {
+        void flush(List<T> objects) throws Exception;
     }
 }

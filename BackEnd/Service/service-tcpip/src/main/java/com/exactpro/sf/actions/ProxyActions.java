@@ -27,9 +27,7 @@ import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.tcpip.TCPIPProxy;
 
 public class ProxyActions extends AbstractCaller {
-    @CommonColumns({
-        @CommonColumn(value = Column.ServiceName, required = true)
-    })
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public void reinit(IActionContext actionContext) throws InterruptedException {
         ServiceName serviceName = ServiceName.parse(actionContext.getServiceName());

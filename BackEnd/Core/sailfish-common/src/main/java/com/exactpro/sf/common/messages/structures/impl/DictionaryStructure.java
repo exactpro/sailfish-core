@@ -37,24 +37,9 @@ public class DictionaryStructure implements IDictionaryStructure {
             Map<String, IMessageStructure> messages, Map<String, IFieldStructure> fields) {
 		this.namespace = namespace;
 		this.description = description;
-
-        if(messages != null) {
-            this.messages = Collections.unmodifiableMap(messages);
-		} else {
-            this.messages = Collections.emptyMap();
-        }
-
-        if(fields != null) {
-            this.fields = Collections.unmodifiableMap(fields);
-		} else {
-            this.fields = Collections.emptyMap();
-		}
-
-		if (attributes != null) {
-			this.attributes = Collections.unmodifiableMap(attributes);
-		} else {
-			this.attributes = Collections.emptyMap();
-		}
+        this.messages = messages != null ? Collections.unmodifiableMap(messages) : Collections.emptyMap();
+        this.fields = fields != null ? Collections.unmodifiableMap(fields) : Collections.emptyMap();
+        this.attributes = attributes != null ? Collections.unmodifiableMap(attributes) : Collections.emptyMap();
 	}
 
 	@Override
@@ -64,17 +49,17 @@ public class DictionaryStructure implements IDictionaryStructure {
 
 	@Override
     public Map<String, IMessageStructure> getMessages() {
-        return this.messages;
+        return messages;
 	}
 	
 	@Override
     public Map<String, IFieldStructure> getFields() {
-        return this.fields;
+        return fields;
 	}
 
 	@Override
 	public String getNamespace() {
-		return this.namespace;
+        return namespace;
 	}
 	
 	@Override

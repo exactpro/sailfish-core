@@ -49,9 +49,9 @@ import quickfix.field.TargetCompID;
 public class ConverterTest extends AbstractTest {
 
     private final IMessageFactory messageFactory = DefaultMessageFactory.getFactory();
-    private static IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
-    private static Map<String, DataDictionary> fixDixtionaries = new HashMap<>();
-    private static Map<String, IDictionaryStructure> sfDictionaries = new HashMap<>();
+    private static final IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
+    private static final Map<String, DataDictionary> fixDixtionaries = new HashMap<>();
+    private static final Map<String, IDictionaryStructure> sfDictionaries = new HashMap<>();
 
     protected static DataDictionary getFixDictionary(String fileName) throws FileNotFoundException, IOException, ConfigError {
         DataDictionary result = fixDixtionaries.get(fileName);

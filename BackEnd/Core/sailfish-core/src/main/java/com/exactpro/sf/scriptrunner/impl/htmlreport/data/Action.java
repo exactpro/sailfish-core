@@ -44,10 +44,6 @@ public class Action extends BaseEntity {
     private StatusDescription status;
     private Object result;
 
-    public Action() {
-        super();
-    }
-
     public int getId() {
         return id;
     }

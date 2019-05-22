@@ -32,8 +32,7 @@ public class UnexpectedMessagesContainer {
 	private final SortedSet<IMessage> receivedMessages = new TreeSet<>(IMessageTimestampComparator.instance);
 
 	public UnexpectedMessagesContainer(String testCaseName) {
-		super();
-		this.testCaseName = testCaseName;
+        this.testCaseName = testCaseName;
 	}
 
 	public SortedSet<IMessage> getAllMessages() {

@@ -30,7 +30,7 @@ import com.exactpro.sf.aml.generator.TypeConverter;
 
 public class TypeHelper {
 
-	private static Map<String, Class<?>> types = new HashMap<String, Class<?>>();
+    private static final Map<String, Class<?>> TYPES = new HashMap<String, Class<?>>();
 
 	static {
 		add(String.class);
@@ -59,8 +59,8 @@ public class TypeHelper {
 	}
 
     private static void add(Class<?> keyClass, Class<?> valueClass) {
-        types.put(keyClass.getCanonicalName(), valueClass);
-        types.put(keyClass.getSimpleName(), valueClass);
+        TYPES.put(keyClass.getCanonicalName(), valueClass);
+        TYPES.put(keyClass.getSimpleName(), valueClass);
     }
 
 	private static void add(Class<?> clazz) {
@@ -72,7 +72,7 @@ public class TypeHelper {
 	}
 
 	public static Class<?> getClass(String clazz) {
-		return types.get(clazz);
+        return TYPES.get(clazz);
 	}
 
 	public static String convertValue(String type, String value) throws AMLException

@@ -40,15 +40,15 @@ import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 
 public class BroadcastScriptReport implements IScriptReport {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	private final List<IScriptReport> listeners;
 
-	private boolean actionCreated = false;
+    private boolean actionCreated;
 
-	private boolean testCaseCreated = false;
+    private boolean testCaseCreated;
 
-	public BroadcastScriptReport(final List<IScriptReport> listeners) {
+    public BroadcastScriptReport(List<IScriptReport> listeners) {
 		this.listeners = new CopyOnWriteArrayList<>(listeners);
 	}
 
@@ -149,7 +149,7 @@ public class BroadcastScriptReport implements IScriptReport {
 
 	@Override
 	public boolean isActionCreated() {
-		return this.actionCreated;
+        return actionCreated;
 	}
 
 	@Override
@@ -304,8 +304,9 @@ public class BroadcastScriptReport implements IScriptReport {
 		for (IScriptReport listener: listeners) {
 			try {
 			    IReportStats stats = listener.getReportStats();
-			if (stats != null)
-				return stats;
+                if(stats != null) {
+                    return stats;
+                }
 			} catch (Exception e) {
 				logger.error("Error while firing get report stats with {} listener", listener.getClass().getName(), e);
 			}

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -33,9 +34,9 @@ public class MetaContainer {
 	private final Map<String, Double> systemPrecision = new HashMap<>();
     private final Map<String, Object> systemColumns = new HashMap<>();
 	private String alternateValue;
-	private String failUnexpected = null;
+    private String failUnexpected;
 
-	private Map<String, List<MetaContainer>> children;
+    private final Map<String, List<MetaContainer>> children;
 
 	private void propogateParentValues(MetaContainer parentMetaContainer)
 	{
@@ -53,8 +54,9 @@ public class MetaContainer {
 			}
 		}
 
-		if (failUnexpected == null)
-			failUnexpected = parentMetaContainer.getFailUnexpected();
+        if(failUnexpected == null) {
+            failUnexpected = parentMetaContainer.getFailUnexpected();
+        }
 
 		for (Entry<String, List<MetaContainer>> fldChl : children.entrySet()) {
 			for (MetaContainer child: fldChl.getValue()) {
@@ -68,28 +70,22 @@ public class MetaContainer {
 	}
 
 	private Map<String, Double> getDoublePrecision() {
-		return this.doublePrecision;
+        return doublePrecision;
 	}
 	public Double getDoublePrecision(String field) {
-		if (this.doublePrecision != null) {
-			return this.doublePrecision.get(field);
-		}
-		return null;
-	}
+        return doublePrecision != null ? doublePrecision.get(field) : null;
+    }
 
 	public void addDoublePrecision(String doublePrecision) {
 		this.doublePrecision.putAll(parsePrecision(doublePrecision));
 	}
 
 	private Map<String, Double> getSystemPrecision() {
-		return this.systemPrecision;
+        return systemPrecision;
 	}
 	public Double getSystemPrecision(String field) {
-		if (this.systemPrecision != null) {
-			return this.systemPrecision.get(field);
-		}
-		return null;
-	}
+        return systemPrecision != null ? systemPrecision.get(field) : null;
+    }
 
 	public void addSystemPrecision(String systemPrecision) {
 		this.systemPrecision.putAll(parsePrecision(systemPrecision));
@@ -111,7 +107,7 @@ public class MetaContainer {
 		List<MetaContainer> obj = children.get(name);
 		if (obj == null) {
 			obj = new ArrayList<>();
-			this.children.put(name, obj);
+            children.put(name, obj);
 		}
 		mc.propogateParentValues(this);
 		obj.add(mc);
@@ -123,7 +119,7 @@ public class MetaContainer {
 
 	private Map<String, Double> parsePrecision(String precision)
 	{
-		if (precision == null || precision.equals("")) {
+        if(StringUtils.isEmpty(precision)) {
 			return Collections.emptyMap();
 		}
 		Map<String, Double> fieldVal = new HashMap<>();
@@ -132,7 +128,7 @@ public class MetaContainer {
 		{
 			String[] arr = prec.trim().split("=");
 			String field = arr[0].trim();
-			if (field.equals("")) {
+            if(field.isEmpty()) {
 				throw new EPSCommonException("Parameter name not specified: "+precision);
 			}
 			if (arr.length == 1) {
@@ -198,8 +194,8 @@ public class MetaContainer {
 	public String toString() {
 		return new ToStringBuilder(this)
 		.append("failUnexpected", failUnexpected)
-		.append("alternateValue", this.alternateValue)
-		.append("doublePrecision", this.doublePrecision)
-		.append("children", this.children).toString();
+                .append("alternateValue", alternateValue)
+                .append("doublePrecision", doublePrecision)
+                .append("children", children).toString();
 	}
 }

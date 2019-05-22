@@ -28,7 +28,7 @@ public enum StatusType
 
     private final int id;
 
-    private StatusType(int id) {
+    StatusType(int id) {
         this.id = id;
     }
 

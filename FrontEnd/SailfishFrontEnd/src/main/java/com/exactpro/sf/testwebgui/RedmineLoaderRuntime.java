@@ -18,6 +18,7 @@ package com.exactpro.sf.testwebgui;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -54,30 +55,23 @@ public class RedmineLoaderRuntime {
 	private static List<WikiPageDetail> wikiPages;
 
 	private static void loadWikiPagesFromXML() throws IOException {
-		List<WikiPageDetail> result = null;
-		FileInputStream fis = null;
 		try {
 			File file = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.ROOT, "help", XML_FILE_NAME);
-			fis = new FileInputStream(file);
-			result = readXml(fis);
+            try (InputStream fis = new FileInputStream(file)) {
+                wikiPages = readXml(fis);
+            }
 		} catch (Exception e) {
 			logger.error("Error while parsing wiki pages from xml. {}", e.getMessage());
 			e.printStackTrace();
-		} finally {
-			if (fis != null) {
-				fis.close();
-			}
 		}
-
-		wikiPages = result;
 	}
 
-    private static List<WikiPageDetail> readXml(FileInputStream fis) throws IOException, SAXException, ParserConfigurationException, ParseException {
+    private static List<WikiPageDetail> readXml(InputStream fis) throws IOException, SAXException, ParserConfigurationException, ParseException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(fis);
 
-        List<WikiPageDetail> result = new ArrayList<WikiPageDetail>();
+        List<WikiPageDetail> result = new ArrayList<>();
 
         NodeList nodeList = doc.getElementsByTagName("com.taskadapter.redmineapi.bean.WikiPageDetail");
         for(int i=0;i<nodeList.getLength();i++) {
@@ -87,7 +81,7 @@ public class RedmineLoaderRuntime {
 
             for(int j=0;j<pageNode.getChildNodes().getLength();j++) {
                 Node paramNode = pageNode.getChildNodes().item(j);
-                if(paramNode.getNodeName().equals("#text")) {
+                if("#text".equals(paramNode.getNodeName())) {
                     continue;
                 }
                 setPageParam(paramNode, wikiPageDetail);
@@ -98,34 +92,34 @@ public class RedmineLoaderRuntime {
     }
 
     private static void setPageParam(Node paramNode, WikiPageDetail wikiPageDetail) throws ParseException {
-        if(paramNode.getNodeName().equals("title")) {
+        if("title".equals(paramNode.getNodeName())) {
             wikiPageDetail.setTitle(paramNode.getTextContent());
-        } else if(paramNode.getNodeName().equals("text")) {
+        } else if("text".equals(paramNode.getNodeName())) {
             wikiPageDetail.setText(paramNode.getTextContent());
-        } else if(paramNode.getNodeName().equals("version")) {
+        } else if("version".equals(paramNode.getNodeName())) {
             wikiPageDetail.setVersion(Integer.valueOf(paramNode.getTextContent()));
-        } else if(paramNode.getNodeName().equals("updatedOn")) {
+        } else if("updatedOn".equals(paramNode.getNodeName())) {
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
             Date d = format.parse(paramNode.getTextContent());
             wikiPageDetail.setUpdatedOn(d);
-        } else if(paramNode.getNodeName().equals("createdOn")) {
+        } else if("createdOn".equals(paramNode.getNodeName())) {
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
             Date d = format.parse(paramNode.getTextContent());
             wikiPageDetail.setCreatedOn(d);
-        } else if(paramNode.getNodeName().equals("user")) {
+        } else if("user".equals(paramNode.getNodeName())) {
             User user = parseUser(paramNode.getChildNodes());
             wikiPageDetail.setUser(user);
-        } else if(paramNode.getNodeName().equals("attachments")) {
+        } else if("attachments".equals(paramNode.getNodeName())) {
             List<Attachment> attachments = parseAttachments(paramNode.getChildNodes());
             wikiPageDetail.setAttachments(attachments);
         }
     }
 
     private static List<Attachment> parseAttachments(NodeList childNodes) throws ParseException {
-        List<Attachment> attachments = new ArrayList<Attachment>();
+        List<Attachment> attachments = new ArrayList<>();
 
         for(int i=0;i<childNodes.getLength();i++) {
-            if(childNodes.item(i).getNodeName().equals("#text")){
+            if("#text".equals(childNodes.item(i).getNodeName())) {
                 continue;
             }
 
@@ -133,7 +127,7 @@ public class RedmineLoaderRuntime {
             Attachment attach = null;
             for(int j=0;j<attachNode.getChildNodes().getLength();j++) {
                 Node paramNode = attachNode.getChildNodes().item(j);
-                if(paramNode.getNodeName().equals("id")) {
+                if("id".equals(paramNode.getNodeName())) {
                     attach = AttachmentFactory.create(Integer.valueOf(paramNode.getTextContent()));
                     break;
                 }
@@ -146,21 +140,21 @@ public class RedmineLoaderRuntime {
             for(int j=0;j<attachNode.getChildNodes().getLength();j++) {
                 Node paramNode = attachNode.getChildNodes().item(j);
                 String paramName = paramNode.getNodeName();
-                if(paramName.equals("fileName")) {
+                if("fileName".equals(paramName)) {
                     attach.setFileName(paramNode.getTextContent());
-                } else if(paramName.equals("fileSize")) {
+                } else if("fileSize".equals(paramName)) {
                     attach.setFileSize(Long.valueOf(paramNode.getTextContent()));
-                } else if(paramName.equals("contentType")) {
+                } else if("contentType".equals(paramName)) {
                     attach.setContentType(paramNode.getTextContent());
-                } else if(paramName.equals("contentURL")) {
+                } else if("contentURL".equals(paramName)) {
                     attach.setContentURL(paramNode.getTextContent());
-                } else if(paramName.equals("description")) {
+                } else if("description".equals(paramName)) {
                     attach.setDescription(paramNode.getTextContent());
-                } else if(paramName.equals("createdOn")) {
+                } else if("createdOn".equals(paramName)) {
                     DateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
                     Date d = format.parse(paramNode.getTextContent());
                     attach.setCreatedOn(d);
-                } else if(paramName.equals("author")) {
+                } else if("author".equals(paramName)) {
                     User author = parseUser(paramNode.getChildNodes());
                     attach.setAuthor(author);
                 }
@@ -176,7 +170,7 @@ public class RedmineLoaderRuntime {
         for(int i=0;i<userParams.getLength();i++) {
             Node paramNode = userParams.item(i);
             String paramName = paramNode.getNodeName();
-            if(paramName.equals("id")) {
+            if("id".equals(paramName)) {
                 user = UserFactory.create(Integer.valueOf(paramNode.getTextContent()));
                 break;
             }
@@ -189,9 +183,9 @@ public class RedmineLoaderRuntime {
         for(int i=0;i<userParams.getLength();i++) {
             Node paramNode = userParams.item(i);
             String paramName = paramNode.getNodeName();
-            if(paramName.equals("firstName")) {
+            if("firstName".equals(paramName)) {
                 user.setFirstName(paramNode.getTextContent());
-            } else if(paramName.equals("lastName")) {
+            } else if("lastName".equals(paramName)) {
                 user.setLastName(paramNode.getTextContent());
             }
         }
@@ -216,7 +210,7 @@ public class RedmineLoaderRuntime {
 			}
 		}
 
-        if(title.trim().length() == 0) {
+        if(title.trim().isEmpty()) {
             title = getRootPage();
         }
 

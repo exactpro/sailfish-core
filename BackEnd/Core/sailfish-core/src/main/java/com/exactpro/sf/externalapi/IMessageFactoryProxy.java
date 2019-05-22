@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.externalapi;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
@@ -33,9 +36,9 @@ public interface IMessageFactoryProxy {
 
     /**
      * @deprecated - this method has been deprecated, will be REMOVED in future releases
-     * Please set true for useStrictMessage in {@link com.exactpro.sf.externalapi.ServiceFactory} for using strict messages in ExternalAPI
+     * Please set true for useStrictMessage in {@link ServiceFactory} for using strict messages in ExternalAPI
      *
-     * Creates instance of {@link com.exactpro.sf.common.messages.IMessage
+     * Creates instance of {@link IMessage
      * IMessage} with name passed in arguments. Strict message tries to convert
      * addition value to target type otherwise throws {@link RuntimeException}.
      * <p>
@@ -45,7 +48,7 @@ public interface IMessageFactoryProxy {
      * <p>
      * If added value is single value but field in dictionary is collection -
      * implementation wrapped single value in
-     * {@link java.util.Collections#checkedList(java.util.List, Class) CheckedList}.
+     * {@link Collections#checkedList(List, Class) CheckedList}.
      * All collection added in this implementation also wrapped in this type of
      * {@code List}
      * 

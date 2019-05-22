@@ -47,7 +47,7 @@ public class TCPIPProxySettings extends AbstractServiceSettings
 	}
 
 	public final String getHost() {
-		return this.host;
+        return host;
 	}
 
 	public final void setHost(String host) {
@@ -55,7 +55,7 @@ public class TCPIPProxySettings extends AbstractServiceSettings
 	}
 
 	public final int getPort() {
-		return this.port;
+        return port;
 	}
 
 	public final void setPort(int port) {
@@ -77,7 +77,7 @@ public class TCPIPProxySettings extends AbstractServiceSettings
 	}
 
 	public int getListenPort() {
-		return this.listenPort;
+        return listenPort;
 	}
 
 	public void setTimeout(long timeout) {
@@ -85,7 +85,7 @@ public class TCPIPProxySettings extends AbstractServiceSettings
 	}
 
 	public long getTimeout() {
-		return this.timeout;
+        return timeout;
 	}
 
 	public boolean isChangeTags() {

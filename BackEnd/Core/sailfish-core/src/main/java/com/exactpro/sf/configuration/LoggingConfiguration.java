@@ -24,8 +24,8 @@ import com.exactpro.sf.common.util.ICommonSettings;
  */
 public class LoggingConfiguration implements ILoggingConfiguration, ICommonSettings {
 
-    private final static String INDIVIDUAL_APPENDER_ENABLE_PROPERTY = "IndividualAppendersEnabled";
-    private final static String INDIVIDUAL_APPENDER_THRESHOLD_PROPERTY = "IndividualAppendersThreshold";
+    private static final String INDIVIDUAL_APPENDER_ENABLE_PROPERTY = "IndividualAppendersEnabled";
+    private static final String INDIVIDUAL_APPENDER_THRESHOLD_PROPERTY = "IndividualAppendersThreshold";
 
     private boolean individualAppendersEnabled;
     private final HierarchicalConfiguration config;

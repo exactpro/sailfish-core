@@ -40,7 +40,7 @@ public class MatrixActionsGenerator {
 			String genDir,
 			String actionPackage,
 			String messagesPackageName,
-			final IDictionaryStructure dictionary,
+			IDictionaryStructure dictionary,
 			String uncheckedFields)
 	throws IOException {
 
@@ -85,8 +85,9 @@ public class MatrixActionsGenerator {
 			throw new EPSCommonException(e);
 		} finally {
 			try {
-				if (writer != null)
-					writer.close();
+                if(writer != null) {
+                    writer.close();
+                }
 			} catch (IOException e) {
 				throw new EPSCommonException(e);
 			}

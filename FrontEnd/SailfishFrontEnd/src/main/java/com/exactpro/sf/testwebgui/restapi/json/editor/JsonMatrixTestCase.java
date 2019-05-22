@@ -43,8 +43,7 @@ public class JsonMatrixTestCase implements WithJsonAMLError {
 	public JsonMatrixTestCase(
 			Map<String, String> values,
 			List<JsonMatrixLine> items) {
-		super();
-		this.values = values;
+        this.values = values;
 		this.items = items == null ? Collections.<JsonMatrixLine>emptyList() : items;
 		this.errors = Collections.emptyList();
 	}
@@ -54,8 +53,7 @@ public class JsonMatrixTestCase implements WithJsonAMLError {
 			@JsonProperty("values") Map<String, String> values,
 			@JsonProperty(value="items", required=false) List<JsonMatrixLine> items,
 			@JsonProperty(value="errors", required=false) List<JsonAMLError> errors) {
-		super();
-		this.values = values;
+        this.values = values;
 		this.items = items == null ? Collections.<JsonMatrixLine>emptyList() : items;
 		this.errors = errors == null ? Collections.<JsonAMLError>emptyList() : errors;
 	}

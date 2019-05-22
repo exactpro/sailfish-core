@@ -22,13 +22,15 @@ public class FileNameComparator implements Comparator<FileAdapter> {
 
 	@Override
 	public int compare(FileAdapter fa1, FileAdapter fa2) {
-		final File f1 = fa1.getFile();
-		final File f2 = fa2.getFile();
+        File f1 = fa1.getFile();
+        File f2 = fa2.getFile();
 
-		if (f1.isDirectory() && f2.isFile())
-			return -1;
-		if (f1.isFile() && f2.isDirectory())
-			return 1;
+        if(f1.isDirectory() && f2.isFile()) {
+            return -1;
+        }
+        if(f1.isFile() && f2.isDirectory()) {
+            return 1;
+        }
 
 		return f1.getName().compareTo(f2.getName());
 	}

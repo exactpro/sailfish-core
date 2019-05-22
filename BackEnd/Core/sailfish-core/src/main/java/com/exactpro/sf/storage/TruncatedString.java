@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Properties;
 
 import org.hibernate.HibernateException;
@@ -49,7 +50,7 @@ public class TruncatedString implements UserType, ParameterizedType, Serializabl
 
     @Override
     public int[] sqlTypes() {
-        return new int[] { java.sql.Types.VARCHAR };
+        return new int[] { Types.VARCHAR };
     }
 
     @Override
@@ -60,7 +61,7 @@ public class TruncatedString implements UserType, ParameterizedType, Serializabl
 
     @Override
     public boolean equals(Object x, Object y) throws HibernateException {
-        return (x == y) || (x != null && y != null && (x.equals(y)));
+        return (x == y) || (x != null && y != null && x.equals(y));
     }
 
     @Override
@@ -76,7 +77,7 @@ public class TruncatedString implements UserType, ParameterizedType, Serializabl
     @Override
     public void nullSafeSet(PreparedStatement st, Object value, int index, SessionImplementor session) throws HibernateException, SQLException {
         String val = (String) value;
-        if (val != null && val.length() > this.maxLength) {
+        if(val != null && val.length() > maxLength) {
             val = val.substring(0, maxLength);
         }
         st.setString(index, val);
@@ -84,10 +85,7 @@ public class TruncatedString implements UserType, ParameterizedType, Serializabl
 
     @Override
     public Object deepCopy(Object value) throws HibernateException {
-        if (value == null) {
-            return null;
-        }
-        return new String(((String) value));
+        return value;
     }
 
     @Override

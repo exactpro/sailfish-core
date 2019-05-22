@@ -34,7 +34,6 @@ public class PredictionResultEntry {
     private @Valid Integer actionId = null;
     private @Valid Integer messageId = null;
 
-
     public enum ClassValueEnum {
 
         TRUE("true"), FALSE("false");
@@ -68,7 +67,7 @@ public class PredictionResultEntry {
 
 
     private @Valid ClassValueEnum classValue = null;
-    private @Valid List<PredictionProbability> probabilities = new ArrayList<>();
+    private @Valid Float predictedClassProbability = null;
 
     public PredictionResultEntry actionId(Integer actionId) {
         this.actionId = actionId;
@@ -112,19 +111,15 @@ public class PredictionResultEntry {
         this.classValue = classValue;
     }
 
-    public PredictionResultEntry probabilities(List<PredictionProbability> probabilities) {
-        this.probabilities = probabilities;
-        return this;
+    @JsonProperty("predictedClassProbability")
+    public Float getPredictedClassProbability() {
+        return predictedClassProbability;
     }
 
-    @JsonProperty("probabilities")
-    public List<PredictionProbability> getProbabilities() {
-        return probabilities;
+    public void setPredictedClassProbability(Float predictedClassProbability) {
+        this.predictedClassProbability = predictedClassProbability;
     }
 
-    public void setProbabilities(List<PredictionProbability> probabilities) {
-        this.probabilities = probabilities;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -140,14 +135,14 @@ public class PredictionResultEntry {
         return equalsBuilder.append(actionId, predictionResultEntry.actionId)
                 .append(messageId, predictionResultEntry.messageId)
                 .append(classValue, predictionResultEntry.classValue)
-                .append(probabilities, predictionResultEntry.probabilities).isEquals();
+                .append(predictedClassProbability, predictionResultEntry.predictedClassProbability).isEquals();
     }
 
     @Override
     public int hashCode() {
 
         HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-        return hashCodeBuilder.append(actionId).append(messageId).append(classValue).append(probabilities).toHashCode();
+        return hashCodeBuilder.append(actionId).append(messageId).append(classValue).append(predictedClassProbability).toHashCode();
     }
 
     @Override
@@ -157,7 +152,7 @@ public class PredictionResultEntry {
         toStringBuilder.append("actionId", actionId)
                 .append("messageId", messageId)
                 .append("classValue", classValue)
-                .append("probabilities",probabilities);
+                .append("probabilities", predictedClassProbability);
 
         return toStringBuilder.toString();
     }

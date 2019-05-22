@@ -66,7 +66,10 @@
 		
 		<property name="hibernate.hbm2ddl.auto">update</property>
 		<property name="hibernate.jdbc.batch_size">50</property>
-		
+
+		<property name="hibernate.query.plan_cache_max_size">64</property>
+		<property name="hibernate.query.plan_parameter_metadata_max_size">32</property>
+
 		<property name="javax.persistence.validation.mode">none</property>
 		
 		<!-- List of XML mapping files -->

@@ -43,9 +43,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
-import com.exactpro.sf.common.messages.IHumanMessage;
-import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityManagerException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -54,8 +52,10 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.Dictionaries;
 import com.exactpro.sf.aml.Dictionary;
 import com.exactpro.sf.aml.DictionarySettings;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.PluginLoader;
+import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.DummyMessageFactory;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -72,6 +72,7 @@ import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
+import com.exactpro.sf.scriptrunner.ManagerUtils;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityClass;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityInfo;
@@ -98,13 +99,13 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	// plugin alias -> list of dictionary URI's
 	private final SetMultimap<String, SailfishURI> pluginDictTitles = HashMultimap.create();
 
-	private long dictLoadedCounter = 0;
+    private long dictLoadedCounter;
 
-	private Map<SailfishURI, Long> dictionaryIds = new ConcurrentHashMap<>();
+    private final Map<SailfishURI, Long> dictionaryIds = new ConcurrentHashMap<>();
 
 	private final List<IDictionaryManagerListener> eventListeners;
 
-	public DictionaryManager(final IWorkspaceDispatcher workspaceDispatcher, UtilityManager utilityManager) {
+    public DictionaryManager(IWorkspaceDispatcher workspaceDispatcher, UtilityManager utilityManager) {
         this.workspaceDispatcher = Objects.requireNonNull(workspaceDispatcher, "workspaceDispatcher cannot be null");
         this.utilityManager = Objects.requireNonNull(utilityManager, "utilityManager cannot be null");
 		this.eventListeners = new CopyOnWriteArrayList<>();
@@ -117,16 +118,16 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
     @Override
     public synchronized Set<SailfishURI> getDictionaryURIs(String pluginAlias) {
-        if (pluginAlias == null || !this.pluginDictTitles.containsKey(pluginAlias)) {
+        if(pluginAlias == null || !pluginDictTitles.containsKey(pluginAlias)) {
             logger.error("Dictionary titles for plugin alias '{}' not found", pluginAlias);
             return null;
         }
-        return this.pluginDictTitles.get(pluginAlias);
+        return pluginDictTitles.get(pluginAlias);
     }
 
     @Override
 	public synchronized List<SailfishURI> getCachedDictURIs() {
-		return new ArrayList<>(this.dicts.keySet());
+        return new ArrayList<>(dicts.keySet());
 	}
 
     @Override
@@ -137,10 +138,10 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
     @Override
 	public void load(ILoadableManagerContext context) {
 		try {
-		    final ClassLoader loader = context.getClassLoaders()[0];
-		    final InputStream stream = context.getResourceStream();
-		    final String dictionaryFolderPath = context.getResourceFolder();
-            final IVersion version = context.getVersion();
+            ClassLoader loader = context.getClassLoaders()[0];
+            InputStream stream = context.getResourceStream();
+            String dictionaryFolderPath = context.getResourceFolder();
+            IVersion version = context.getVersion();
 		    
 			JAXBContext jc = JAXBContext.newInstance(Dictionaries.class);
 			Unmarshaller u = jc.createUnmarshaller();
@@ -157,20 +158,28 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
                 SailfishURI dictionaryURI = new SailfishURI(version.getAlias(), null, SailfishURIUtils.sanitize(dict.getTitle()));
                 DictionarySettings settings = dictSettings.get(dictionaryURI);
 
-			    this.pluginDictTitles.put(dictionaryURI.getPluginAlias(), dictionaryURI);
+                pluginDictTitles.put(dictionaryURI.getPluginAlias(), dictionaryURI);
 
 			    if (settings == null) {
 			        settings = new DictionarySettings();
 			        settings.setURI(dictionaryURI);
-			        this.dictSettings.put(dictionaryURI, settings);
+                    dictSettings.put(dictionaryURI, settings);
 			    }
 
 			    for (String className : dict.getUtilityClassName()){
+			        try {
 			        UtilityClass utilityClass = utilityManager.load(loader, className, version);
 
 			        for(String utilityClassAlias : utilityClass.getClassAliases()) {
 			            SailfishURI utilityClassURI = new SailfishURI(version.getAlias(), utilityClassAlias);
 			            settings.addUtilityClassURI(utilityClassURI);
+                        }
+                    } catch (UtilityManagerException e) {
+                        if (context.getVersion().isLightweight()) {
+                            logger.warn("Can't load utility class '{}'", className, e);
+                        } else {
+                            throw e;
+                        }
 			        }
                 }
 
@@ -183,7 +192,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
                     }
                 }
 
-                String currentResource = this.location.get(dictionaryURI);
+                String currentResource = location.get(dictionaryURI);
                 String resource = dict.getResource();
                 if (resource == null) {
                 	logger.warn("resource (xml dictionary) not specified for dictionary {}", dictionaryURI);
@@ -192,7 +201,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
                     if (currentResource != null && !currentResource.equals(resource)) {
                         logger.warn("Resources '{}' wasn't sent, because current value '{}' not null", resource, currentResource);
                     } else {
-                    	this.location.put(dictionaryURI, resource);
+                        location.put(dictionaryURI, resource);
                     }
                 }
 
@@ -224,26 +233,26 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
 	@Override
 	public synchronized IDictionaryStructure getDictionary(SailfishURI uri) throws RuntimeException {
-		IDictionaryStructure dict = SailfishURIUtils.getMatchingValue(uri, this.dicts, SailfishURIRule.REQUIRE_RESOURCE);
+        IDictionaryStructure dict = SailfishURIUtils.getMatchingValue(uri, dicts, SailfishURIRule.REQUIRE_RESOURCE);
 
 		if (dict == null) {
 
 			this.dictLoadedCounter++;
-			this.dictionaryIds.put(uri, this.dictLoadedCounter);
+            dictionaryIds.put(uri, dictLoadedCounter);
 
-			String resource = SailfishURIUtils.getMatchingValue(uri, this.location, SailfishURIRule.REQUIRE_RESOURCE);
+            String resource = SailfishURIUtils.getMatchingValue(uri, location, SailfishURIRule.REQUIRE_RESOURCE);
 
 			if (resource == null) {
 				throw new RuntimeException("No dictionary found for URI: " + uri);
 			}
 
-			dict = this.createMessageDictionary(resource);
+            dict = createMessageDictionary(resource);
 
 			if (dict == null) {
 				throw new RuntimeException("Can not create dictionary for URI: " + uri +", resource = "+resource);
 			}
 
-			this.dicts.put(uri, dict);
+            dicts.put(uri, dict);
 
 			logger.info("Dictionary {} was loaded", uri);
 		}
@@ -269,9 +278,10 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (Entry<SailfishURI, IDictionaryStructure> e : this.dicts.entrySet()) {
-			if (sb.length() > 0)
-				sb.append(", ");
+        for(Entry<SailfishURI, IDictionaryStructure> e : dicts.entrySet()) {
+            if(sb.length() > 0) {
+                sb.append(", ");
+            }
 			sb.append(e.getKey());
 			sb.append(" = ");
 			sb.append(e.getValue().getNamespace());
@@ -282,17 +292,17 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	@Override
 	public synchronized void invalidateDictionaries(SailfishURI ... uris) {
 	    if (uris == null || uris.length == 0) {
-		    this.invalidateEvent(Collections.unmodifiableSet(this.dicts.keySet()));
-		    this.dicts.clear();
-	        this.dictionaryIds.clear();
-	        this.factories.clear();
+            invalidateEvent(Collections.unmodifiableSet(dicts.keySet()));
+            dicts.clear();
+            dictionaryIds.clear();
+            factories.clear();
             logger.info("All dictionaries have been invalidated");
 	    } else {
-		    this.invalidateEvent(new HashSet<>(Arrays.asList(uris)));
+            invalidateEvent(new HashSet<>(Arrays.asList(uris)));
 	        for (SailfishURI uri : uris) {
-                this.dicts.remove(uri);
-                this.dictionaryIds.remove(uri);
-                this.factories.remove(uri);
+                dicts.remove(uri);
+                dictionaryIds.remove(uri);
+                factories.remove(uri);
             }
             StringBuilder builder = new StringBuilder("Dictionaries ")
                 .append(Arrays.toString(uris))
@@ -337,7 +347,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
         SailfishURI uri = settings.getURI();
 
-        if (DictionaryManager.this.getDictionaryURIs().contains(uri)) {
+        if(getDictionaryURIs().contains(uri)) {
             if (!overwrite) {
                 throw new EPSCommonException(String.format("Concurrent dictionary registration with SailfishURI: '%s' and name: '%s' already exists", uri, filename));
             }
@@ -357,10 +367,10 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
 		Dictionaries dictionaries = null;
 
-		if (this.workspaceDispatcher.exists(FolderType.CFG, PluginLoader.CUSTOM_DICTIONARIES_XML)) {
+        if(workspaceDispatcher.exists(FolderType.CFG, PluginLoader.CUSTOM_DICTIONARIES_XML)) {
 
 			try {
-				File customDictionariesXml = this.workspaceDispatcher.getFile(FolderType.CFG, PluginLoader.CUSTOM_DICTIONARIES_XML);
+                File customDictionariesXml = workspaceDispatcher.getFile(FolderType.CFG, PluginLoader.CUSTOM_DICTIONARIES_XML);
 
 				JAXBContext jc = JAXBContext.newInstance(Dictionaries.class);
 				Unmarshaller u = jc.createUnmarshaller();
@@ -378,7 +388,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 		dictionaries.getDictionary().add(dictionary);
 
 		try {
-			File customDictionariesXml = this.workspaceDispatcher.createFile(FolderType.CFG, true, PluginLoader.CUSTOM_DICTIONARIES_XML);
+            File customDictionariesXml = workspaceDispatcher.createFile(FolderType.CFG, true, PluginLoader.CUSTOM_DICTIONARIES_XML);
 
 			JAXBContext jc = JAXBContext.newInstance(Dictionaries.class);
 			Marshaller m = jc.createMarshaller();
@@ -407,7 +417,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	    try {
 	        IDictionaryStructureLoader loader = createStructureLoader(pathName);
 
-    	    File targetFile = this.workspaceDispatcher.getFile(FolderType.ROOT, pathName);
+            File targetFile = workspaceDispatcher.getFile(FolderType.ROOT, pathName);
 
         	try (InputStream in = new BufferedInputStream(new FileInputStream(targetFile))) {
         		return loader.load(in);
@@ -447,6 +457,20 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	    return null;
 	}
 
+    @Override
+    public UtilityInfo getUtilityInfo(SailfishURI dictionaryURI, SailfishURI utilityURI, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes) throws SailfishURIException {
+        if (utilityURI.isAbsolute()) {
+            return utilityManager.getUtilityInfo(utilityURI, argTypes);
+        }
+
+        DictionarySettings settings = SailfishURIUtils.getMatchingValue(dictionaryURI, dictSettings, SailfishURIRule.REQUIRE_RESOURCE);
+
+        if (settings == null) {
+            return null;
+        }
+
+        return ManagerUtils.getUtilityInfo(settings.getUtilityClassURIs(), utilityManager, utilityURI, line, uid, column, alertCollector, argTypes);
+    }
 
     @Override
     public Set<SailfishURI> getUtilityURIs(SailfishURI dictionaryURI) {
@@ -476,12 +500,12 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
 	@Override
 	public void subscribeForEvents(IDictionaryManagerListener listener){
-		this.eventListeners.add(listener);
+        eventListeners.add(listener);
 	}
 
 	@Override
 	public void unSubscribeForEvents(IDictionaryManagerListener listener){
-		this.eventListeners.remove(listener);
+        eventListeners.remove(listener);
 	}
 
     public void invalidateEvent(Set<SailfishURI> uris) {
@@ -503,22 +527,22 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
 
 	@Override
-	public IDictionaryRegistrator registerDictionary(final String title, final boolean overwrite) throws WorkspaceStructureException, WorkspaceSecurityException {
+    public IDictionaryRegistrator registerDictionary(String title, boolean overwrite) throws WorkspaceStructureException, WorkspaceSecurityException {
 
-	    final SailfishURI suri;
+        SailfishURI suri;
 	    try {
             suri = new SailfishURI(IVersion.GENERAL, null, title);
         } catch (SailfishURIException e) {
             throw new EPSCommonException(String.format("Name '%s' is incorrect", title));
         }
 	    synchronized (this) {
-	        if (!overwrite && this.getDictionaryURIs().contains(suri)) {
+            if(!overwrite && getDictionaryURIs().contains(suri)) {
 	            throw new EPSCommonException(String.format("Dictionary with title %s and suri %s already registred", title, suri));
 	        }
         }
 
 	    Path relativePath = Paths.get("cfg", "dictionaries", title + ".xml");
-        this.workspaceDispatcher.createFile(FolderType.ROOT, overwrite, relativePath.toString());
+        workspaceDispatcher.createFile(FolderType.ROOT, overwrite, relativePath.toString());
         return new DictionaryRegistrator(suri, relativePath, overwrite);
 	}
 
@@ -544,30 +568,30 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
             this.relativePath = relativePath;
             this.overwrite = overwrite;
             this.dictionarySettings = new DictionarySettings();
-            this.dictionarySettings.setURI(dictionarySURI);
-            this.dictionarySettings.setFactoryClass(DummyMessageFactory.class);
+            dictionarySettings.setURI(dictionarySURI);
+            dictionarySettings.setFactoryClass(DummyMessageFactory.class);
         }
 
         @Override
         public SailfishURI registrate() {
 
             try {
-                DictionaryManager.this.createDictionary(this.relativePath.getFileName().toString(), this.dictionarySettings, this.overwrite);
+                createDictionary(relativePath.getFileName().toString(), dictionarySettings, overwrite);
             } catch (Exception e) {
-                throw new EPSCommonException(String.format("Could not create dictionary with SailfishURI: '%s'", this.dictionarySettings.getURI()), e);
+                throw new EPSCommonException(String.format("Could not create dictionary with SailfishURI: '%s'", dictionarySettings.getURI()), e);
             }
 
-            return this.dictionarySettings.getURI();
+            return dictionarySettings.getURI();
         }
 
         @Override
         public String getPath() {
-            return this.relativePath.toString();
+            return relativePath.toString();
         }
 
         @Override
         public IDictionaryRegistrator addUtilityClassURI(SailfishURI uri) {
-            this.dictionarySettings.addUtilityClassURI(uri);
+            dictionarySettings.addUtilityClassURI(uri);
             return this;
         }
 
@@ -581,7 +605,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
         @Override
         public IDictionaryRegistrator setFactoryClass(Class<? extends IMessageFactory> factoryClass) {
-            this.dictionarySettings.setFactoryClass(factoryClass);
+            dictionarySettings.setFactoryClass(factoryClass);
             return this;
         }
 	}

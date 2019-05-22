@@ -24,11 +24,11 @@ import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionCallException
 import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionNotFoundException;
 
 public interface IActionCaller {
-    public <T> T call(String actionName, IActionContext actionContext) throws ActionCallException, ActionNotFoundException, InterruptedException;
-    public <T> T call(String actionName, IActionContext actionContext, IMessage iMessage) throws ActionCallException, ActionNotFoundException, InterruptedException;
-    public <T> T call(String actionName, IActionContext actionContext, BaseMessage baseMessage) throws ActionCallException, ActionNotFoundException, InterruptedException;
-    public <T> T call(String actionName, IActionContext actionContext, Object message) throws ActionCallException, ActionNotFoundException, InterruptedException;
-    public <T> T call(String actionName, IActionContext actionContext, HashMap<?,?> hashMap) throws ActionCallException, ActionNotFoundException, InterruptedException;
+    <T> T call(String actionName, IActionContext actionContext) throws ActionCallException, ActionNotFoundException, InterruptedException;
+    <T> T call(String actionName, IActionContext actionContext, IMessage iMessage) throws ActionCallException, ActionNotFoundException, InterruptedException;
+    <T> T call(String actionName, IActionContext actionContext, BaseMessage baseMessage) throws ActionCallException, ActionNotFoundException, InterruptedException;
+    <T> T call(String actionName, IActionContext actionContext, Object message) throws ActionCallException, ActionNotFoundException, InterruptedException;
+    <T> T call(String actionName, IActionContext actionContext, HashMap<?, ?> hashMap) throws ActionCallException, ActionNotFoundException, InterruptedException;
 
     interface ConsumerAction<T extends IActionCaller> {
         void accept(T actionClass, IActionContext actionContext) throws Exception;

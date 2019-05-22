@@ -18,17 +18,17 @@ package com.exactpro.sf.scriptrunner;
 
 public class ScriptProgress implements IScriptProgress
 {
-	private int loaded = 0;
-	private int executedTC = 0;
-	private int currentTC = 0;
-	private long currentActions = 0;
-	private long currentExecutedActions = 0;
-	private long totalActions = 0;
-	private long totalExecutedActions = 0;
+    private int loaded;
+    private int executedTC;
+    private int currentTC;
+    private long currentActions;
+    private long currentExecutedActions;
+    private long totalActions;
+    private long totalExecutedActions;
 
-	private long passed = 0;
-    private long conditionallyPassed = 0;
-	private long failed = 0;
+    private long passed;
+    private long conditionallyPassed;
+    private long failed;
 
 
 
@@ -54,7 +54,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		this.loaded = loaded;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		executedTC = executed;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		executedTC++;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		currentTC = executed;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		currentActions = actions;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		currentExecutedActions = executedActions;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		this.totalActions = totalActions;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		this.totalExecutedActions = totalExecutedActions;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class ScriptProgress implements IScriptProgress
 		currentExecutedActions++;
 		totalExecutedActions++;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	public interface IScriptRunProgressListener
@@ -167,7 +167,7 @@ public class ScriptProgress implements IScriptProgress
     @Override
 	public void setPassed(long passed) {
 		this.passed = passed;
-        this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class ScriptProgress implements IScriptProgress
 	{
 		++this.passed;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
 	@Override
@@ -186,14 +186,14 @@ public class ScriptProgress implements IScriptProgress
     @Override
     public void setFailed(long failed) {
         this.failed = failed;
-        this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
     }
 
     @Override
 	public void increaseFailed() {
 		++this.failed;
 
-		this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
 	}
 
     @Override
@@ -204,13 +204,13 @@ public class ScriptProgress implements IScriptProgress
     @Override
     public void setConditionallyPassed(long conditionallyPassed) {
         this.conditionallyPassed = conditionallyPassed;
-        this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
     }
 
     @Override
     public void increaseConditionallyPassed() {
         ++this.conditionallyPassed;
-        this.listener.onProgressChanged(this.testScriptRunId);
+        listener.onProgressChanged(testScriptRunId);
     }
 
 }

@@ -138,7 +138,7 @@ public class TestStorage extends AbstractTest {
 			Thread.sleep(3);
 		}
 
-		System.out.println(((double)(System.currentTimeMillis() - start))/10000.00);
+		System.out.println((double)(System.currentTimeMillis() - start) /10000.00);
 
 		defMsgStorage.closeScriptRun(scriptRun);
 

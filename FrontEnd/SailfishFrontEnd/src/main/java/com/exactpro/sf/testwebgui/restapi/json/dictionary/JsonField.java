@@ -58,32 +58,28 @@ public abstract class JsonField {
 	}
 
 	public String getName() {
-		return this.name;
+        return name;
 	}
 
 	@JsonIgnore
 	public Set<String> getProtocolAttributesNames() {
-		if (this.attributes != null)
-			return Collections.unmodifiableSet(this.attributes.keySet());
-
-		return null;
-	}
+        return attributes != null ? Collections.unmodifiableSet(attributes.keySet()) : null;
+    }
 
 	@JsonIgnore
 	public IAttributeStructure getProtocolAttributeValue(String name) {
-		if (this.attributes != null)
-			return this.attributes.get(name);
-
-		return null;
-	}
+        return attributes != null ? attributes.get(name) : null;
+    }
 
 	public Object getProtocolAttributeValueIgnoreCase(String name) {
-		if (this.attributes == null)
-			return null;
+        if(attributes == null) {
+            return null;
+        }
 
 		Object result = attributes.get(name);
-		if (result != null)
-			return result;
+        if(result != null) {
+            return result;
+        }
 
 		for (String attrName : attributes.keySet()) {
 			if (attrName.equalsIgnoreCase(name)) {
@@ -92,10 +88,10 @@ public abstract class JsonField {
 		}
 
 		return null;
-	};
-	
-	public String getDescription() {
-		return this.description;
+    }
+
+    public String getDescription() {
+        return description;
 	}
 
 	public Object getDefaultValue() {

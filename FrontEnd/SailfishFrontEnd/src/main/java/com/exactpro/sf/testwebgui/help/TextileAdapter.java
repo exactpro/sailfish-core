@@ -32,7 +32,7 @@ import com.taskadapter.redmineapi.bean.WikiPageDetail;
 import net.sf.textile4j.Textile;
 
 public class TextileAdapter {
-    private static Textile textile = new Textile();
+    private static final Textile textile = new Textile();
     private static WikiPageDetail wikiPage;
 
     public static String process(WikiPageDetail pd) {
@@ -172,7 +172,9 @@ public class TextileAdapter {
             if(cur.startsWith(">")) {
                 linesToReplace.add(i);
                 stringList.set(i, stringList.get(i).substring(1));
-                if(!blockQuoteStarted) blockQuoteStarted = true;
+                if(!blockQuoteStarted) {
+                    blockQuoteStarted = true;
+                }
             } else {
                 if(blockQuoteStarted) {
                     //do replace
@@ -211,13 +213,11 @@ public class TextileAdapter {
         int iter = 0;
         while(matcher.find()) {
             String fullTag = inputString.substring(matcher.start(1), matcher.end(1));
-            if(fullTag.startsWith("http")) {
-                inputString = inputString.replace(matcher.group(0), fullTag);
-            } else {
-                inputString = inputString.replace(matcher.group(0), findAttachURL(fullTag));
-            }
+            inputString = inputString.replace(matcher.group(0), fullTag.startsWith("http") ? fullTag : findAttachURL(fullTag));
             matcher = pattern.matcher(inputString);
-            if(iter++ > 20) break;
+            if(iter++ > 20) {
+                break;
+            }
         }
 
         return inputString;
@@ -357,7 +357,7 @@ public class TextileAdapter {
                         stringList.remove((int)rowsWithTable.get(j));
                         i--;
                     }
-                    stringList.add(rowsWithTable.get(0), tagBefore.concat(table.toString()).concat(tagAfter));
+                    stringList.add(rowsWithTable.get(0), tagBefore + table + tagAfter);
                     table = new StringBuilder();
                     rowsWithTable.clear();
                     i++;
@@ -450,7 +450,7 @@ public class TextileAdapter {
                 String rawLink = sb.substring(from + 2, to);
                 int dividerIndex = rawLink.indexOf("|");
                 String name = StringEscapeUtils.escapeHtml4(rawLink.substring(dividerIndex + 1));
-                String link = StringEscapeUtils.escapeHtml4(rawLink.substring(0, dividerIndex + 1).length() > 0 ? rawLink.substring(0, dividerIndex) : name);
+                String link = StringEscapeUtils.escapeHtml4(!rawLink.substring(0, dividerIndex + 1).isEmpty() ? rawLink.substring(0, dividerIndex) : name);
 
                 String newLink = "\"" + name + "\":" + link.replaceAll(" ", "_");
                 sb.replace(from, to + 2, newLink.replaceAll("\\(", "&#40;").replaceAll("\\)", "&#41;"));

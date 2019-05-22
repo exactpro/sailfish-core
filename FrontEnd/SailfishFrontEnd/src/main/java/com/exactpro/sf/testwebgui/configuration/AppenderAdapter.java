@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -27,16 +28,10 @@ import org.apache.commons.lang3.tuple.Pair;
 public class AppenderAdapter  implements Serializable {
     private static final long serialVersionUID = -1010492361025052656L;
 
-    private String name;
+    private String name = "";
     private String type;
-    private Map<String, String> params;
-    private List<Pair<String, String>> pairs;
-
-    public AppenderAdapter() {
-        this.name = "";
-        this.params = new HashMap<>();
-        pairs = new ArrayList<>();
-    }
+    private Map<String, String> params = new HashMap<>();
+    private List<Pair<String, String>> pairs = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -61,7 +56,7 @@ public class AppenderAdapter  implements Serializable {
     public void setParams(Map<String, String> params) {
         this.params = params;
         pairs = new ArrayList<>();
-        for(Map.Entry<String, String> entry : params.entrySet()) {
+        for(Entry<String, String> entry : params.entrySet()) {
             pairs.add(new MutablePair<>(entry.getKey(), entry.getValue()));
         }
     }

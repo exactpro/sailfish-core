@@ -41,7 +41,7 @@ public class AppUser implements Serializable {
 	private Set<Role> roles = new HashSet<Role>();
 	
 	@Transient
-	private boolean transientUser = false;
+	private boolean transientUser;
 
 	public AppUser() {
 	}
@@ -124,7 +124,7 @@ public class AppUser implements Serializable {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		int prime = 31;
 		int result = 1;
 		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
 		return result;
@@ -132,13 +132,23 @@ public class AppUser implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
+        if(this == obj) {
+            return true;
+        }
+        if(obj == null) {
+            return false;
+        }
+        if(getClass() != obj.getClass()) {
+            return false;
+        }
 		AppUser other = (AppUser) obj;
 		if (userName == null) {
-			if (other.userName != null) return false;
-		} else if (!userName.equals(other.userName)) return false;
+            if(other.userName != null) {
+                return false;
+            }
+        } else if(!userName.equals(other.userName)) {
+            return false;
+        }
 		return true;
 	}
 

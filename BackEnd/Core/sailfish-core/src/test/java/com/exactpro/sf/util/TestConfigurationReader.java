@@ -35,7 +35,7 @@ public class TestConfigurationReader extends EPSTestCase {
     @Test
     public void testConfigurationXmlNegative() throws Exception
     {
-        String dictName = this.getBaseDir() + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "negative.xml";
+        String dictName = getBaseDir() + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "negative.xml";
         
         IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
         
@@ -48,11 +48,7 @@ public class TestConfigurationReader extends EPSTestCase {
         } catch (EPSCommonException e) {
             e.printStackTrace();
             String err = "A field null with an id S4 has neither a type nor a reference";
-            if (e.getCause() != null) {
-            	Assert.assertEquals(err, e.getCause().getMessage());
-            } else {
-            	Assert.assertEquals(err, e.getMessage());
-            }
+            Assert.assertEquals(err, e.getCause() != null ? e.getCause().getMessage() : e.getMessage());
             error = true;
         }
         

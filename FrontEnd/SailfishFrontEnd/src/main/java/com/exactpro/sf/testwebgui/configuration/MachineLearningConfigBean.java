@@ -27,6 +27,7 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletResponse;
 
+import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,10 +85,8 @@ public class MachineLearningConfigBean implements Serializable {
         response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"",
                 "dump" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".zip"));
 
-        MachineLearningService mlService = BeanUtil.getSfContext().getMachineLearningService();
-
-        try (InputStream is = mlService.getAllSubmitsAsZip(); OutputStream os = response.getOutputStream()) {
-            IOUtils.copy(is, os);
+        try (OutputStream os = response.getOutputStream()) {
+            TestToolsAPI.getInstance().zipMlFolder(BeanUtil.getSfContext().getWorkspaceDispatcher(), os, false);
         }
 
         facesContext.responseComplete();

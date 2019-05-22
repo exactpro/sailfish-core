@@ -30,11 +30,7 @@ public class SessionListener implements HttpSessionListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(SessionListener.class);
 
-	public SessionListener() {
-
-	}
-
-	@Override
+    @Override
 	public void sessionCreated(HttpSessionEvent arg0) {
 
 		HttpSession session =  arg0.getSession();

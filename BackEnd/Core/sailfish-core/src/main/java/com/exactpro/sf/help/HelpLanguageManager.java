@@ -101,8 +101,9 @@ class HelpLanguageManager extends LanguageManager {
 
                         boolean isBaseMessage = BaseMessage.class.isAssignableFrom(parameterTypes[1]);
 
-                        boolean isFixMessage = superClasses.size() >= 2 && superClasses.get(1).getCanonicalName().equals("quickfix.Message");
+                        boolean isFixMessage = superClasses.size() >= 2 && "quickfix.Message".equals(superClasses.get(1).getCanonicalName());
 
+                        //noinspection SimplifiableIfStatement
                         if ((isBaseMessage || isFixMessage) && method.isAnnotationPresent(MessageDirection.class)) {
                             return false;
                         }

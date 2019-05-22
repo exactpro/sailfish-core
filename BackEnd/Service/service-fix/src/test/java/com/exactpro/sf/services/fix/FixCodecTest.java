@@ -18,6 +18,9 @@ package com.exactpro.sf.services.fix;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +34,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.actions.DirtyFixUtil;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
@@ -106,7 +107,7 @@ public class FixCodecTest extends AbstractTest {
         this.msgFactory = DefaultMessageFactory.getFactory();
 
         this.codec = new FIXCodec();
-        this.codec.init(serviceContext, settings, msgFactory, dictionary);
+        codec.init(serviceContext, settings, msgFactory, dictionary);
     }
 
     @Test
@@ -123,39 +124,40 @@ public class FixCodecTest extends AbstractTest {
         IoSession session = new DummySession();
         AbstractProtocolDecoderOutput outputDec = new MockProtocolDecoderOutput();
 
+        @SuppressWarnings("ConfusingOctalEscapeSequence")
         String message =
                 "8=FIXT.1.1\0019=1232\00135=777\00149=SEN\00156=TARGET\00134=2\00152=20121212-00:00:00\001" +
-                "11111=777.888999\001" +
-                "22222=StringField\001" +
-                "33333=333\001" +
-                "44444=-444.555666\001" +
-                "55555=Y\001" +
-                "66666=20170428\001" +
-                "77777=14:15:31.766\001" +
-                "88888=20170428-14:15:31.766\001" +
-                "99999=C\001" +
-                "7777=2\001" +                          // group
-                "7778=Tom\001" +
-                "7779=1\001" +
-                "7780=20001515-02:02:02.222\001" +
-                "7778=Jerry\001" +
-                "7779=2\001" +
-                "7780=20001515-03:03:03.333\001" +
-                "8888=CompString\001" +                 // component
-                "8889=-5\001" +
-                "8890=20001515-04:04:04.444\001" +
-                "100001=<xml_context>\012" +            // xml message
-                "    <udf name = \"String Field\" entity = \"SOME~ENTITY\" type = \"STRING\" value = \"It's work\" />\012" +
-                "    <udf name = \"Integer Field\" entity = \"SOME~ENTITY\" type = \"INTEGER\" value = \"13\" />\012" +
-                "    <udf name = \"Double Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"444.555666\" />\012" +
-                "    <udf name = \"Big Decimal Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"111.222333\" />\012" +
-                "    <udf name = \"Boolean Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"Y\" />\012" +
-                "    <udf name = \"Character Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"C\" />\012" +
-                "    <udf name = \"Local Date Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"20170428\" />\012" +
-                "    <udf name = \"Local Time Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"14:15:31.766\" />\012" +
-                "    <udf name = \"Local Date Time Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"20170428-14:15:31.766\" />\012" +
-                "</xml_context>\012\001" +
-                "10=170\001";
+                        "11111=777.888999\001" +
+                        "22222=StringField\001" +
+                        "33333=333\001" +
+                        "44444=-444.555666\001" +
+                        "55555=Y\001" +
+                        "66666=20170428\001" +
+                        "77777=14:15:31.766\001" +
+                        "88888=20170428-14:15:31.766\001" +
+                        "99999=C\001" +
+                        "7777=2\001" +                          // group
+                        "7778=Tom\001" +
+                        "7779=1\001" +
+                        "7780=20001515-02:02:02.222\001" +
+                        "7778=Jerry\001" +
+                        "7779=2\001" +
+                        "7780=20001515-03:03:03.333\001" +
+                        "8888=CompString\001" +                 // component
+                        "8889=-5\001" +
+                        "8890=20001515-04:04:04.444\001" +
+                        "100001=<xml_context>\012" +            // xml message
+                        "    <udf name = \"String Field\" entity = \"SOME~ENTITY\" type = \"STRING\" value = \"It's work\" />\012" +
+                        "    <udf name = \"Integer Field\" entity = \"SOME~ENTITY\" type = \"INTEGER\" value = \"13\" />\012" +
+                        "    <udf name = \"Double Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"444.555666\" />\012" +
+                        "    <udf name = \"Big Decimal Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"111.222333\" />\012" +
+                        "    <udf name = \"Boolean Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"Y\" />\012" +
+                        "    <udf name = \"Character Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"C\" />\012" +
+                        "    <udf name = \"Local Date Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"20170428\" />\012" +
+                        "    <udf name = \"Local Time Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"14:15:31.766\" />\012" +
+                        "    <udf name = \"Local Date Time Field\" entity = \"SOME~ENTITY\" type = \"DOUBLE\" value = \"20170428-14:15:31.766\" />\012" +
+                        "</xml_context>\012\001" +
+                        "10=170\001";
         IoBuffer buffer = IoBuffer.wrap(message.getBytes());
 
         codec.decode(session, buffer, outputDec);
@@ -271,6 +273,7 @@ public class FixCodecTest extends AbstractTest {
         // check component
         IMessage component = (IMessage)decodedMessage.getField("SomeComp");
         Assert.assertEquals("CompString", component.getField("StringComp"));
+        //noinspection UnnecessaryParentheses
         Assert.assertEquals((Integer)(-5), component.getField("IntegerComp"));
         Assert.assertEquals(DateTimeUtility.toLocalDateTime(
                 UtcTimestampConverter.convert("20001515-04:04:04.444")),
@@ -398,21 +401,21 @@ public class FixCodecTest extends AbstractTest {
         map.put("9", "001");
         map.put("10", "2");
 
-        IMessage iMessage = MessageUtil.convertToIMessage(map, this.msgFactory, "namespace", "name");
+        IMessage iMessage = MessageUtil.convertToIMessage(map, msgFactory, "namespace", "name");
         ProtocolEncoderOutput out = Mockito.mock(ProtocolEncoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
             @Override
-			public Void answer(org.mockito.invocation.InvocationOnMock invocation) throws Throwable {
+            public Void answer(InvocationOnMock invocation) throws Throwable {
 
                 Assert.assertEquals(
                         //"8=FIXT.1.19=13935=216134=27582=CheckSum2010=12047=test2306=62620=modintsov3182=2254220=2451=2163464=MDRT006451=21632711=MDRT0067583=RefTagID10=151",
                         "8=FIXT.1.19=00135=21612010=12047=test2306=62620=modintsov3182=2254220=2451=2163464=MDRT006451=21632711=MDRT00610=2",
                         invocation.<IoBuffer>getArgument(0).getString(Charset.forName("UTF-8").newDecoder()));
                 return null;
-            };
+            }
         } ).when(out).write(Mockito.anyObject());
 
-        this.codec.encode(null, iMessage, out);
+        codec.encode(null, iMessage, out);
         Assert.assertTrue(subMap1.containsKey("GroupDelimiter") && subMap2.containsKey("GroupDelimiter"));
 
 
@@ -424,21 +427,21 @@ public class FixCodecTest extends AbstractTest {
         //TODO: Implement DUPLICATE_TAG for subMessage
         //subMap2.put(DirtyFixUtil.DUPLICATE_TAG, "2711=ABC;2711=DEF");
 
-        iMessage = MessageUtil.convertToIMessage(map, this.msgFactory, "namespace", "name");
+        iMessage = MessageUtil.convertToIMessage(map, msgFactory, "namespace", "name");
         out = Mockito.mock(ProtocolEncoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
             @Override
-			public Void answer(org.mockito.invocation.InvocationOnMock invocation) throws Throwable {
+            public Void answer(InvocationOnMock invocation) throws Throwable {
 
                 Assert.assertEquals(
                         //"8=FIXT.8.89=77735=216134=27582=CheckSum2010=12047=test2306=62620=modintsov3182=2254220=2451=2163464=MDRT006451=21632711=MDRT0067583=RefTagID2010=22010=310=999",
                         "8=FIXT.8.89=77735=21612010=12010=22010=32047=test2306=62620=modintsov3182=2254220=2451=2163464=MDRT006451=21632711=MDRT00610=999",
                         invocation.<IoBuffer>getArgument(0).getString(Charset.forName("UTF-8").newDecoder()));
                 return null;
-            };
+            }
         } ).when(out).write(Mockito.anyObject());
 
-        this.codec.encode(null, iMessage, out);
+        codec.encode(null, iMessage, out);
     }
 
 	@Test

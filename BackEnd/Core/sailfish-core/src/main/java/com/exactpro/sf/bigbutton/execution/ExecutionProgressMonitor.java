@@ -15,20 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.execution;
 
-import com.exactpro.sf.SFAPIClient;
-import com.exactpro.sf.bigbutton.RegressionRunner;
-import com.exactpro.sf.bigbutton.importing.ErrorType;
-import com.exactpro.sf.bigbutton.importing.ImportError;
-import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
-import com.exactpro.sf.bigbutton.library.Executor;
-import com.exactpro.sf.bigbutton.library.Library;
-import com.exactpro.sf.bigbutton.library.Script;
-import com.exactpro.sf.bigbutton.library.ScriptList;
-import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.embedded.statistics.entities.SfInstance;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -38,10 +24,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.SFAPIClient;
+import com.exactpro.sf.bigbutton.RegressionRunner;
+import com.exactpro.sf.bigbutton.importing.ErrorType;
+import com.exactpro.sf.bigbutton.importing.ImportError;
+import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
+import com.exactpro.sf.bigbutton.library.Executor;
+import com.exactpro.sf.bigbutton.library.Library;
+import com.exactpro.sf.bigbutton.library.Script;
+import com.exactpro.sf.bigbutton.library.ScriptList;
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.scriptrunner.StatusType;
 
 public class ExecutionProgressMonitor {
 
@@ -49,13 +51,13 @@ public class ExecutionProgressMonitor {
 
 	private final List<ExecutorClient> allExecutors = new ArrayList<>();
 
-	private List<ScriptList> enqueued = new ArrayList<>();
+    private final List<ScriptList> enqueued = new ArrayList<>();
 
-	private Map<Executor, List<ScriptList>> executed = new HashMap<>();
+    private final Map<Executor, List<ScriptList>> executed = new HashMap<>();
 
-    private List<ScriptList> rejected = new ArrayList<>();
+    private final List<ScriptList> rejected = new ArrayList<>();
 
-	private Map<Executor, ScriptList> running  = new HashMap<>();
+    private final Map<Executor, ScriptList> running = new HashMap<>();
 
 	private long totalListsCount;
 
@@ -67,7 +69,7 @@ public class ExecutionProgressMonitor {
 
 	private final RegressionRunner runner;
 
-	private volatile boolean finished = false;
+    private volatile boolean finished;
 
 	private BigButtonExecutionStatus status = BigButtonExecutionStatus.Inactive;
 
@@ -75,15 +77,15 @@ public class ExecutionProgressMonitor {
 
 	private String errorText;
 
-    private List<String> warns = new ArrayList<>();
+    private final List<String> warns = new ArrayList<>();
 
 	private ExecutionReportExporter reportExporter;
 
-	private int numExecutorsInError = 0;
+    private int numExecutorsInError;
 
 	private ExecutorService taskExecutor;
 
-	private BbExecutionStatistics executionStatistics = new BbExecutionStatistics();
+    private final BbExecutionStatistics executionStatistics = new BbExecutionStatistics();
 
 	private ExecutorsStatusChecker statusChecker;
 
@@ -112,23 +114,23 @@ public class ExecutionProgressMonitor {
         writeReport();
         identifyExecutionStatus();
 
-		if(this.reportExporter != null) {
-			this.reportExporter.writeCompleted();
+        if(reportExporter != null) {
+            reportExporter.writeCompleted();
 		}
 
-		if(this.taskExecutor != null) {
-			this.taskExecutor.shutdown();
+        if(taskExecutor != null) {
+            taskExecutor.shutdown();
 		}
 
-		if(this.statusChecker != null) {
-			this.statusChecker.stop();
+        if(statusChecker != null) {
+            statusChecker.stop();
 		}
 
-		this.executionStatistics.setFinished(new Date());
+        executionStatistics.setFinished(new Date());
 		this.finished = true;
         this.importErrors = null;
         try {
-            this.runner.close();
+            runner.close();
         } catch (Exception e) {
             logger.error("Error while closing RegressionRunner", e);
         }
@@ -142,7 +144,7 @@ public class ExecutionProgressMonitor {
 
     public synchronized void ready(LibraryImportResult importResult) {
 
-        if (this.status != BigButtonExecutionStatus.Error) {
+        if(status != BigButtonExecutionStatus.Error) {
             this.status = BigButtonExecutionStatus.Ready;
         }
 
@@ -150,14 +152,14 @@ public class ExecutionProgressMonitor {
 
         this.importErrors = new ConcurrentHashMap<>();
 
-        this.importErrors.put(ErrorType.COMMON, importResult.getCommonErrors());
-        this.importErrors.put(ErrorType.GLOBALS, importResult.getGlobalsErrors());
-        this.importErrors.put(ErrorType.EXECUTOR, importResult.getExecutorErrors());
-        this.importErrors.put(ErrorType.SCRIPTLIST, importResult.getScriptListErrors());
+        importErrors.put(ErrorType.COMMON, importResult.getCommonErrors());
+        importErrors.put(ErrorType.GLOBALS, importResult.getGlobalsErrors());
+        importErrors.put(ErrorType.EXECUTOR, importResult.getExecutorErrors());
+        importErrors.put(ErrorType.SCRIPTLIST, importResult.getScriptListErrors());
 
 		this.statusChecker = new ExecutorsStatusChecker();
 
-		Thread statusCheckerThread = new Thread(this.statusChecker, "BB slaves status checker");
+        Thread statusCheckerThread = new Thread(statusChecker, "BB slaves status checker");
 		statusCheckerThread.setDaemon(true);
 		statusCheckerThread.start();
 
@@ -167,8 +169,8 @@ public class ExecutionProgressMonitor {
 
 		try {
 
-			this.executionStatistics.setStarted(new Date());
-			this.taskExecutor = Executors.newFixedThreadPool(this.allExecutors.size());
+            executionStatistics.setStarted(new Date());
+            this.taskExecutor = Executors.newFixedThreadPool(allExecutors.size());
 			this.reportExporter = new ExecutionReportExporter();
 
 		} catch (IOException e) {
@@ -187,12 +189,12 @@ public class ExecutionProgressMonitor {
 	}
 
     public synchronized void warn(String text) {
-        this.warns.add(text);
+        warns.add(text);
     }
 
 	public synchronized void listEnqueued(ScriptList list) {
 
-		this.enqueued.add(list);
+        enqueued.add(list);
 
 		this.totalListsCount++;
 
@@ -210,11 +212,11 @@ public class ExecutionProgressMonitor {
 
 		for(int i = enqueued.size() -1; i >= 0; i--) {
 
-			if(this.enqueued.get(i).equals(list) ) {
+            if(enqueued.get(i).equals(list)) {
 
-				this.enqueued.remove(i);
+                enqueued.remove(i);
 
-				this.running.put(executor, list);
+                running.put(executor, list);
 
 				return;
 
@@ -228,24 +230,24 @@ public class ExecutionProgressMonitor {
 
 	public synchronized void listExecuted(Executor executor, ScriptList list) {
 
-		this.running.remove(executor);
+        running.remove(executor);
 
-		if(!this.executed.containsKey(executor)) {
-			this.executed.put(executor, new ArrayList<ScriptList>());
+        if(!executed.containsKey(executor)) {
+            executed.put(executor, new ArrayList<ScriptList>());
 		}
 
-		this.executed.get(executor).add(0, list);
+        executed.get(executor).add(0, list);
 
 		this.executedListsCount++;
 
-		if(this.finished) {
+        if(finished) {
 			return;
 		}
 
-		if(this.executedListsCount == this.totalListsCount) {
+        if(executedListsCount == totalListsCount) {
 			this.status = BigButtonExecutionStatus.DownloadingReports;
 			//doTearDown();
-			this.taskExecutor.submit(new DownloadsCompleteTask(this));
+            taskExecutor.submit(new DownloadsCompleteTask(this));
 
 		}
 
@@ -282,7 +284,7 @@ public class ExecutionProgressMonitor {
 		Map<Executor, List<ScriptList>> executedView = new HashMap<>();
 		Map<Executor, Long> executedSizes = new HashMap<>();
 
-		for(Map.Entry<Executor, List<ScriptList>> entry : this.executed.entrySet()) {
+        for(Entry<Executor, List<ScriptList>> entry : executed.entrySet()) {
 
 			List<ScriptList> fullList = entry.getValue();
 			List<ScriptList> listView = getLimitedListView(fullList, outQueueLimit);
@@ -296,7 +298,7 @@ public class ExecutionProgressMonitor {
 		result.setExecuted(executedView);
 		result.setNumExecuted(executedSizes);
 
-		result.setRunning(new HashMap<>(this.running));
+        result.setRunning(new HashMap<>(running));
 
 		result.setCurrentTotalProgressPercent(
 				RegressionRunnerUtils.calcPercent(executedScriptsCount, totalScriptsCount));
@@ -307,23 +309,23 @@ public class ExecutionProgressMonitor {
 		result.setStatus(status);
         result.setExecutionStatus(executionStatus);
 
-		result.setErrorText(this.errorText);
-        result.setWarns(this.warns);
+        result.setErrorText(errorText);
+        result.setWarns(warns);
 
 		if(library != null) {
 			result.setLibraryFileName(library.getDescriptorFileName());
 		}
 		result.setLibrary(library);
 
-        result.setImportErrors(this.importErrors);
+        result.setImportErrors(importErrors);
 
-		if(this.finished && this.reportExporter != null) {
-			result.setReportFile(this.reportExporter.getFile());
+        if(finished && reportExporter != null) {
+            result.setReportFile(reportExporter.getFile());
 		}
 
-		if(this.finished) {
+        if(finished) {
 
-			result.setExecutionStatistics(new BbExecutionStatistics(this.executionStatistics));
+            result.setExecutionStatistics(new BbExecutionStatistics(executionStatistics));
 
 		}
 
@@ -335,7 +337,7 @@ public class ExecutionProgressMonitor {
 
 		this.numExecutorsInError++;
 
-		if(numExecutorsInError == this.allExecutors.size()) {
+        if(numExecutorsInError == allExecutors.size()) {
             error("All executors gone to 'Error' state");
 		}
 
@@ -343,8 +345,8 @@ public class ExecutionProgressMonitor {
 
     public synchronized void interrupt(String message) {
 
-		if(this.status == BigButtonExecutionStatus.Inactive
-				|| this.status == BigButtonExecutionStatus.Finished) {
+        if(status == BigButtonExecutionStatus.Inactive
+                || status == BigButtonExecutionStatus.Finished) {
 
 			return;
 
@@ -375,26 +377,24 @@ public class ExecutionProgressMonitor {
 
         ScriptExecutionStatistics statistics = script.getStatistics();
 
-        this.executionStatistics.incNumPassedTcs(statistics.getNumPassed());
-        this.executionStatistics.incNumCondPassedTcs(statistics.getNumConditionallyPassed());
-        this.executionStatistics.incNumFailedTcs(statistics.getNumFailed());
+        executionStatistics.incNumPassedTcs(statistics.getNumPassed());
+        executionStatistics.incNumCondPassedTcs(statistics.getNumConditionallyPassed());
+        executionStatistics.incNumFailedTcs(statistics.getNumFailed());
 
         if (statistics.isExecutionFailed()) {
-			this.executionStatistics.incNumInitFailed();
+            executionStatistics.incNumInitFailed();
 		}
 
-		if(this.finished) {
+        if(finished) {
 			return;
 		}
 
-        SFAPIClient apiClient = null;
+        SFAPIClient apiClient = new SFAPIClient(URI.create(executor.getHttpUrl() + "/sfapi").normalize().toString());
 
-        apiClient = new SFAPIClient(URI.create(executor.getHttpUrl() + "/sfapi").normalize().toString());
-
-        SfInstance currentSfInstance = this.runner.getCurrentSfInstance();
+        SfInstance currentSfInstance = runner.getCurrentSfInstance();
         Long sfCurrentID = currentSfInstance == null ? null : currentSfInstance.getId();
 
-        ReportDownloadTask task = new ReportDownloadTask(this.runner.getWorkspaceDispatcher(), scriptRunId, reportsFolder,
+        ReportDownloadTask task = new ReportDownloadTask(runner.getWorkspaceDispatcher(), scriptRunId, reportsFolder,
                 apiClient, downloadNeded, sfCurrentID);
 
         taskExecutor.submit(task);
@@ -407,7 +407,7 @@ public class ExecutionProgressMonitor {
         for (Script script : list.getScripts()) {
             script.getStatistics().setStatus("REJECTED");
         }
-        this.rejected.add(list);
+        rejected.add(list);
     }
 
 	public List<ExecutorClient> getAllExecutors() {
@@ -471,7 +471,7 @@ public class ExecutionProgressMonitor {
 		        connection.setReadTimeout(timeout);
 		        connection.setRequestMethod("HEAD");
 		        int responseCode = connection.getResponseCode();
-		        return (200 <= responseCode && responseCode <= 399);
+                return responseCode >= 200 && responseCode <= 399;
 
 		    } catch (IOException e) {
 		        return false;

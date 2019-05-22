@@ -18,6 +18,8 @@ package com.exactpro.sf.services.itch;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteOrder;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -29,8 +31,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
@@ -39,7 +39,7 @@ import com.exactpro.sf.util.TestITCHHelper;
 public class TestITCHVisitorPositive extends TestITCHHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(TestITCHVisitorPositive.class);
-    private static ITCHCodec codec = null;
+    private static ITCHCodec codec;
 
 	@BeforeClass
 	public static void setUpClass(){
@@ -69,8 +69,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
@@ -99,8 +99,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"uInt32",Long.class);
@@ -128,8 +128,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"uInt8",Short.class);
@@ -156,8 +156,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"byte",Byte.class);
@@ -181,8 +181,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"Alpha",String.class);
@@ -208,8 +208,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"Price",Float.class);
@@ -231,8 +231,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			IMessage message = getMessageCreator().getTestDouble();
 			IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"Price",Double.class);
@@ -258,15 +258,17 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			double neg=-3.1;
 			IMessage message = getMessageHelper().getMessageFactory().createMessage("testDouble", "ITCH");
 			message.addField("Price", neg);
-			message.addField("Size", (double)0);
+            message.addField("Size", 0d);
 			message.addField("Price4", neg);
-			message.addField("Size4", (double)0);
-			message.addField("UInt16", (double)0);
+            message.addField("Size4", 0d);
+            message.addField("UInt16", 0d);
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 			IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            //noinspection UnnecessaryParentheses
             Assert.assertEquals((Double)(-9.223372036544775E10), result.get(1).getField("Price"));
+            //noinspection UnnecessaryParentheses
             Assert.assertEquals((Double)(-9.223372036854745E14), result.get(1).getField("Price4"));
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
@@ -288,8 +290,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			IMessage message = getMessageCreator().getTestBigDecimal();
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		    compareFieldsValues(result.get(1),original.get(1),"UInt64",BigDecimal.class);
@@ -324,14 +326,14 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 
-	        long val = (long) (negativeValue.doubleValue() * 100000000);
+            long val = (long)(negativeValue.doubleValue() * 100_000_000);
 			long mask = 0x7FFFFFFFFFFFFFFFL;
 			val = val & mask;
 			val = val * -1L;
 			BigDecimal valBD = new BigDecimal(val);
-			valBD=valBD.divide(new BigDecimal(100000000L));
+            valBD = valBD.divide(new BigDecimal(100_000_000L));
 
 			Assert.assertEquals(valBD,result.get(1).getField("Price"));
 		}catch(Exception e){
@@ -353,8 +355,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			message.addField("testMessage", testMessage);
 			message=getMessageHelper().prepareMessageToEncode(message, null);
 			IMessage decodedMessage=decode(encode(message,codec),codec);
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
 		}catch(Exception e){
@@ -369,15 +371,14 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 	 */
 	@Test
 	public void testStringAlphaNotrimDecode(){
-		byte[] array = new byte[]
-        		{58, 0, 1, 48, 0, 0, 0, 0,
-        			46, 13, 102, 102, 115, 116, 49, 32,
-        			32, 32, 49, 48, 58, 52, 57, 58,
-        			48, 48, 77, 111, 110, 32, 74, 117,
-        			108, 32, 48, 52, 32, 49, 52, 58,
-        			48, 50, 58, 51, 48, 32, 77, 83,
-        			75, 32, 50, 48, 49, 54, 0, 0,
-        			0, 0, 0, 0, 0, 0, 0, 0,};
+        byte[] array = { 58, 0, 1, 48, 0, 0, 0, 0,
+                46, 13, 102, 102, 115, 116, 49, 32,
+                32, 32, 49, 48, 58, 52, 57, 58,
+                48, 48, 77, 111, 110, 32, 74, 117,
+                108, 32, 48, 52, 32, 49, 52, 58,
+                48, 50, 58, 51, 48, 32, 77, 83,
+                75, 32, 50, 48, 49, 54, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, };
    		IoBuffer toDecode = IoBuffer.wrap( array );
 		toDecode.order(ByteOrder.LITTLE_ENDIAN);
 		toDecode.position(0);
@@ -389,7 +390,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			Assert.assertTrue( "Decoding error.", decodableResult);
 			IMessage message=(IMessage) decoderOutput.getMessageQueue().element();
 			@SuppressWarnings("unchecked")
-            List<IMessage> result = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 			Assert.assertEquals(2, result.size());
 			Assert.assertEquals(1, (int)Integer.valueOf(result.get(1).getField("Alpha_notrim").toString().trim()));
 		}catch(Exception e){
@@ -411,8 +412,8 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 
 	        IMessage decodedMessage=decode(encode(message,codec),codec);
 
-            List<IMessage> result = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-            List<IMessage> original = (List<IMessage>) message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> result = decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
+            List<IMessage> original = message.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+original.get(0)+"; \n"
 		    		+ "Result message:"+result.get(0),result.get(0).compare(original.get(0)));
             compareFieldsValues(result.get(1), original.get(1), "Date", LocalDate.class);

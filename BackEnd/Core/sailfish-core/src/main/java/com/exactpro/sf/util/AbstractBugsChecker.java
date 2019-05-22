@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IKnownBug;
+import com.exactpro.sf.aml.scriptutil.StaticUtil.KnownBugFilter;
 import com.exactpro.sf.comparison.Convention;
 
 public abstract class AbstractBugsChecker implements IKnownBug {
@@ -30,6 +31,6 @@ public abstract class AbstractBugsChecker implements IKnownBug {
     }
 
     public IFilter toFilter() {
-        return new StaticUtil.KnownBugFilter(0, StringUtils.EMPTY, this);
+        return new KnownBugFilter(0, StringUtils.EMPTY, this);
     }
 }

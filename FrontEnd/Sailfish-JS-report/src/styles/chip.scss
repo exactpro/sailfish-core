@@ -14,43 +14,33 @@
  * limitations under the License.
  ******************************************************************************/
 
-.expandable-panel-root {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: auto;
-    padding-left: 10px;
-}
+@import './common/vars';
 
-.expandable-panel-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-start;
-    align-items: center;
-    min-height: 40px;
+.chip {
+    @include unselectable;
+    @include status-card;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    height: 20px;
+    width: auto;
+    min-width: 20px;
+    margin: 0 5px;
+    color: $chipTextColor;
+    border-color: var(--status-secondary-border-color);
 
-    .expandable-panel-header-icon {
-        height: 15px;
-        width: 15px;
-        cursor: pointer;
-        background-size: 100%;
-        margin-right: 15px;
-
-        &.expanded {
-            background-image: url(../../resources/icons/expand-on.svg);
-        }
-
-        &.hidden {
-            background-image: url(../../resources/icons/expand-off.svg);
-        }
+    &__title {
+        font-size: 11px;
+        padding: 0 5px;
     }
-}
 
-.expandable-panel-body {
-    display: block;
-}
+    &.selected {
+        font-weight: bold;
+        color: white;
+        border-color: var(--status-primary-border-color);
+        background-color: var(--status-primary-background-color);
+    }
 
-.expandable-panel-body-hidden {
-    @extend .expandable-panel-body;
-    display: none;
+    &.clickable {
+        cursor: pointer;
+    }
 }

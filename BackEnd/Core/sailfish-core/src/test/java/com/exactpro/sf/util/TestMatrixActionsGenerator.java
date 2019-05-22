@@ -15,15 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
-import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
-import junit.framework.Assert;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+
+import org.junit.Test;
+
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
+import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
+
+import junit.framework.Assert;
 
 public class TestMatrixActionsGenerator extends AbstractTest
 {
@@ -48,7 +50,8 @@ public class TestMatrixActionsGenerator extends AbstractTest
 		);
 
         File actionFile = new File(path + "/com/exactpro/sf/actions/EXAMPLE_SndRcvMatrixActions.java");
-        if (!actionFile.exists())
+        if(!actionFile.exists()) {
             Assert.fail();
+        }
     }
 }

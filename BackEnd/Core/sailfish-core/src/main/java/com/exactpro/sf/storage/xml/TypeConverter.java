@@ -15,21 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.xml;
 
+import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Date;
 
 public class TypeConverter {
 
 	public static boolean getBoolean(String value){
-		 return value.equals("true")?true:false;
+        return "true".equals(value) ? true : false;
 	}
 
 	public static String getString(boolean value){

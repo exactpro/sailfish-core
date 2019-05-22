@@ -23,7 +23,7 @@ public class MappingContainer {
     private String to;
 
 
-    boolean error = false;
+    boolean error;
 
     public String getFrom() {
         return from;

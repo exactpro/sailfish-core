@@ -10,15 +10,16 @@
 
 package com.exactpro.sf.testwebgui.statistics;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
 import com.exactpro.sf.testwebgui.general.SessionStored;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 //TODO refactor all statistics beans
 public abstract class AbstractTagsStatisticsBean extends AbstractStatisticsBean {
@@ -33,7 +34,7 @@ public abstract class AbstractTagsStatisticsBean extends AbstractStatisticsBean 
     protected Tag tagToAdd;
 
     @SessionStored
-    protected boolean anyTag = false;
+    protected boolean anyTag;
 
     @Override
     protected void initByStatistics(StatisticsService statisticsService) {
@@ -53,19 +54,19 @@ public abstract class AbstractTagsStatisticsBean extends AbstractStatisticsBean 
 
         logger.debug("Tag select invoked");
 
-        this.tags.add(tagToAdd);
+        tags.add(tagToAdd);
 
         this.tagToAdd = null;
 
-        this.allTags.removeAll(tags);
+        allTags.removeAll(tags);
 
     }
 
     public void removeTag(Tag tag) {
 
-        this.tags.remove(tag);
+        tags.remove(tag);
 
-        this.allTags.add(tag);
+        allTags.add(tag);
 
     }
 
@@ -90,7 +91,7 @@ public abstract class AbstractTagsStatisticsBean extends AbstractStatisticsBean 
     }
 
     public List<Tag> completeTag(String query) {
-        return completeTag(query, this.allTags);
+        return completeTag(query, allTags);
     }
 
     public Tag getTagToAdd() {

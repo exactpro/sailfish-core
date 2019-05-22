@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.Test;
@@ -84,7 +85,7 @@ public class TestMapMessage {
         message.addField("message", subMessage);
         message.addField("message_array", Arrays.asList(new MapMessage[] { subMessage, subMessage }));
         
-        ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL)
+        ObjectMapper objectMapper = new ObjectMapper().enableDefaultTyping(DefaultTyping.NON_FINAL)
                 .registerModule(new JavaTimeModule());
         ObjectReader reader = objectMapper.reader(IMessage.class);
         ObjectWriter writer = objectMapper.writer();

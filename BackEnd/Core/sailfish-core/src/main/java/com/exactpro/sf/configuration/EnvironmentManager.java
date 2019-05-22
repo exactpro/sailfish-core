@@ -44,7 +44,7 @@ public class EnvironmentManager implements IEnvironmentManager
 
     private final EnvironmentSettings envSettings;
 
-    public EnvironmentManager(final IMessageStorage messageStorage, final IServiceStorage serviceStorage, final IConnectionManager connectionManager, final EnvironmentSettings envSettings) throws Exception {
+    public EnvironmentManager(IMessageStorage messageStorage, IServiceStorage serviceStorage, IConnectionManager connectionManager, EnvironmentSettings envSettings) throws Exception {
 		logger.info("Environment manager initializing started...");
 		this.messageStorage = messageStorage;
         this.serviceStorage = serviceStorage;
@@ -55,35 +55,35 @@ public class EnvironmentManager implements IEnvironmentManager
     @Override
     public void updateEnvironmentSettings(EnvironmentSettings envSettings) {
         try {
-            this.envSettingsLock.writeLock().lock();
+            envSettingsLock.writeLock().lock();
             this.envSettings.set(envSettings);
         } finally {
-            this.envSettingsLock.writeLock().unlock();
+            envSettingsLock.writeLock().unlock();
         }
     }
 
     @Override
     public EnvironmentSettings getEnvironmentSettings() {
         try {
-            this.envSettingsLock.readLock().lock();
+            envSettingsLock.readLock().lock();
             return envSettings.clone();
         } finally {
-            this.envSettingsLock.readLock().unlock();
+            envSettingsLock.readLock().unlock();
         }
     }
 
     @Override
     public IConnectionManager getConnectionManager() {
-        return this.connectionManager;
+        return connectionManager;
     }
 
     @Override
     public IMessageStorage getMessageStorage() {
-        return this.messageStorage;
+        return messageStorage;
     }
 
     @Override
     public IServiceStorage getServiceStorage() {
-        return this.serviceStorage;
+        return serviceStorage;
     }
 }

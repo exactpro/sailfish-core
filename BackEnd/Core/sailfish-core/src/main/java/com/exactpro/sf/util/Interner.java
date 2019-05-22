@@ -17,6 +17,6 @@ package com.exactpro.sf.util;
 
 public interface Interner<T> {
     
-    public T intern(T object);
+    T intern(T object);
 
 }

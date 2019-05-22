@@ -117,13 +117,10 @@ public class SailfishURI implements Comparable<SailfishURI>, Serializable {
     }
 
     public boolean matches(SailfishURI uri) {
-        if(uri == null) {
-            return false;
-        }
-
-        return matchElements(pluginAlias, uri.pluginAlias, hashPluginAlias, uri.hashPluginAlias) &&
-               matchElements(classAlias, uri.classAlias, hashClassAlias, uri.hashClassAlias) &&
-               matchElements(resourceName, uri.resourceName, hashResourceName, uri.hashResourceName);
+        return uri != null &&
+                matchElements(pluginAlias, uri.pluginAlias, hashPluginAlias, uri.hashPluginAlias) &&
+                matchElements(classAlias, uri.classAlias, hashClassAlias, uri.hashClassAlias) &&
+                matchElements(resourceName, uri.resourceName, hashResourceName, uri.hashResourceName);
     }
 
     public String getPluginAlias() {
@@ -169,9 +166,9 @@ public class SailfishURI implements Comparable<SailfishURI>, Serializable {
 
         CompareToBuilder builder = new CompareToBuilder();
 
-        builder.append(this.pluginAlias, o.pluginAlias, String.CASE_INSENSITIVE_ORDER);
-        builder.append(this.classAlias, o.classAlias, String.CASE_INSENSITIVE_ORDER);
-        builder.append(this.resourceName, o.resourceName, String.CASE_INSENSITIVE_ORDER);
+        builder.append(pluginAlias, o.pluginAlias, String.CASE_INSENSITIVE_ORDER);
+        builder.append(classAlias, o.classAlias, String.CASE_INSENSITIVE_ORDER);
+        builder.append(resourceName, o.resourceName, String.CASE_INSENSITIVE_ORDER);
 
         return builder.toComparison();
     }
@@ -189,9 +186,9 @@ public class SailfishURI implements Comparable<SailfishURI>, Serializable {
         SailfishURI that = (SailfishURI)o;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(StringUtils.lowerCase(this.pluginAlias), StringUtils.lowerCase(that.pluginAlias));
-        builder.append(StringUtils.lowerCase(this.classAlias), StringUtils.lowerCase(that.classAlias));
-        builder.append(StringUtils.lowerCase(this.resourceName), StringUtils.lowerCase(that.resourceName));
+        builder.append(StringUtils.lowerCase(pluginAlias), StringUtils.lowerCase(that.pluginAlias));
+        builder.append(StringUtils.lowerCase(classAlias), StringUtils.lowerCase(that.classAlias));
+        builder.append(StringUtils.lowerCase(resourceName), StringUtils.lowerCase(that.resourceName));
 
         return builder.isEquals();
     }

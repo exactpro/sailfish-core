@@ -206,7 +206,7 @@ public class AMLBlockProcessor {
         for(int i = 0; i < actionsSize; i++) {
             AMLAction action = actions.get(i);
 
-            if(JavaStatement.INCLUDE_BLOCK == JavaStatement.value(action.getActionURI())) {
+            if(JavaStatement.value(action.getActionURI()) == JavaStatement.INCLUDE_BLOCK) {
                 String blockRef = action.getTemplate();
 
                 if(invalidBlockReferences.contains(blockRef)) {
@@ -273,7 +273,7 @@ public class AMLBlockProcessor {
 
     private static void checkBlock(AMLTestCase block, List<AMLTestCase> blocks, Stack<String> refStack, Stack<AMLAction> actionStack, Set<String> recursiveBlocks, AlertCollector alertCollector) {
         for(AMLAction a : block.getActions()) {
-            if(JavaStatement.INCLUDE_BLOCK == JavaStatement.value(a.getActionURI())) {
+            if(JavaStatement.value(a.getActionURI()) == JavaStatement.INCLUDE_BLOCK) {
                 String blockReference = a.getTemplate();
                 AMLTestCase refBlock = getBlockByReference(blockReference, blocks);
 

@@ -17,7 +17,7 @@ package com.exactpro.sf.bigbutton.execution;
 
 public class DownloadsCompleteTask implements Runnable {
 
-	private ExecutionProgressMonitor monitor;
+    private final ExecutionProgressMonitor monitor;
 	
 	public DownloadsCompleteTask(ExecutionProgressMonitor monitor) {
 		
@@ -27,8 +27,8 @@ public class DownloadsCompleteTask implements Runnable {
 	
 	@Override
 	public void run() {
-		
-		this.monitor.reportsProcessingFinished();
+
+        monitor.reportsProcessingFinished();
 		
 	}
 

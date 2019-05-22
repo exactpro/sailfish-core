@@ -15,6 +15,33 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.statistics;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.annotation.PostConstruct;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.model.DefaultTreeNode;
+import org.primefaces.model.TreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.embedded.statistics.StatisticsException;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
@@ -26,31 +53,6 @@ import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportParam
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportResult;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TagGroupReportRow;
 import com.exactpro.sf.testwebgui.BeanUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.primefaces.model.DefaultTreeNode;
-import org.primefaces.model.TreeNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.PostConstruct;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @ManagedBean(name="tgReportBean")
 @ViewScoped
@@ -73,9 +75,9 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 
 	// Row styling fields
 
-	private String[] rowClasses = new String[] {"ui-datatable-odd", "ui-datatable-even"};
+    private final String[] rowClasses = { "ui-datatable-odd", "ui-datatable-even" };
 
-	private Map<Integer, Integer> classIndexes = new HashMap<>();
+    private final Map<Integer, Integer> classIndexes = new HashMap<>();
 
 	private TreeNode selectedNode;
 
@@ -136,7 +138,7 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 
 	public void generateReport() {
 
-		if(this.selectedDemensions.isEmpty()) {
+        if(selectedDemensions.isEmpty()) {
 
 			BeanUtil.addErrorMessage("No tags selected", "");
 
@@ -148,7 +150,7 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
             StatisticsService statisticsService = BeanUtil.getSfContext().getStatisticsService();
             TagGroupReportParameters params = createParameters();
             List<TagGroupReportResult> results = StatisticsUtils.generateTagGroupReportResults(
-                                statisticsService, this.selectedDemensions, params);
+                    statisticsService, selectedDemensions, params);
 			buildTreeModel(results);
             this.results = results;
 		} catch (StatisticsException e) {
@@ -166,15 +168,15 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 
 	public String getRowClass(TagGroupReportRow row) {
 
-		if(!this.classIndexes.containsKey(row.getDimensionsPath().length)) {
+        if(!classIndexes.containsKey(row.getDimensionsPath().length)) {
 
-			this.classIndexes.put(row.getDimensionsPath().length, (row.getDimensionsPath().length -1) % this.rowClasses.length);
+            classIndexes.put(row.getDimensionsPath().length, (row.getDimensionsPath().length - 1) % rowClasses.length);
 
 		}
 
-		int index = this.classIndexes.get(row.getDimensionsPath().length);
+        int index = classIndexes.get(row.getDimensionsPath().length);
 
-		this.classIndexes.put(row.getDimensionsPath().length, (index + 1) % this.rowClasses.length);
+        classIndexes.put(row.getDimensionsPath().length, (index + 1) % rowClasses.length);
 
 		return rowClasses[index];
 
@@ -205,16 +207,16 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 	public void onTagSelect() {
     	
     	logger.debug("Tag select invoked");
-    		
-		this.selectedDemensions.add(tagToAdd);
+
+        selectedDemensions.add(tagToAdd);
     	
     	this.tagToAdd = null;
     	
     }
     
     public void removeTag(TagGroupDimension tag) {
-    	
-		this.selectedDemensions.remove(tag);
+
+        selectedDemensions.remove(tag);
     	
     }
 	
@@ -228,8 +230,8 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
     	for(TagGroup group : groups) {
     		
     		TagGroupDimension dimension = TagGroupDimension.fromGroup(group);
-    		
-    		if(!this.selectedDemensions.contains(dimension)) {
+
+            if(!selectedDemensions.contains(dimension)) {
     			result.add(dimension);
     		}
     		
@@ -238,8 +240,8 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
     	for(Tag tag: tags) {
     		
     		TagGroupDimension dimension = TagGroupDimension.fromTag(tag);
-    		
-    		if(!this.selectedDemensions.contains(dimension)) {
+
+            if(!selectedDemensions.contains(dimension)) {
     			result.add(dimension);
     		}
     		
@@ -296,13 +298,11 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 	}
 	
     public Set<String> getDimensionsFileNames() {
-        Set<String> result;
         try {
-            result = BeanUtil.getSfContext().getWorkspaceDispatcher().listFiles(null, FolderType.CFG, DIMENSIONS_DIR);
+            return BeanUtil.getSfContext().getWorkspaceDispatcher().listFiles(null, FolderType.CFG, DIMENSIONS_DIR);
         } catch (Throwable e) {
-            result = Collections.emptySet();
+            return Collections.emptySet();
         }
-        return result;
     }
 
     public void preSaveDimensions() {
@@ -315,26 +315,26 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 
     public void saveLoadDimensions() {
 
-        if (StringUtils.isEmpty(this.dimensionsFileName)) {
-            BeanUtil.addErrorMessage(this.saveDialog ? "Not saved" : "Not loaded", "Please specify a file name");
+        if(StringUtils.isEmpty(dimensionsFileName)) {
+            BeanUtil.addErrorMessage(saveDialog ? "Not saved" : "Not loaded", "Please specify a file name");
             return;
         }
 
         try {
             JAXBContext jaxbContext = JAXBContext.newInstance(TagGroupDimensionListWrapper.class, TagGroupDimension.class);
 
-            if (this.saveDialog) {
+            if(saveDialog) {
                 Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
                 jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
                 File file = BeanUtil.getSfContext().getWorkspaceDispatcher().createFile(FolderType.CFG, true, DIMENSIONS_DIR,
-                        this.dimensionsFileName);
+                        dimensionsFileName);
                 TagGroupDimensionListWrapper wrapper = new TagGroupDimensionListWrapper();
-                wrapper.setSelectedDemensions(this.selectedDemensions);
+                wrapper.setSelectedDemensions(selectedDemensions);
                 jaxbMarshaller.marshal(wrapper, file);
             } else {
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                 TagGroupDimensionListWrapper wrapper = (TagGroupDimensionListWrapper) jaxbUnmarshaller
-                        .unmarshal(BeanUtil.getSfContext().getWorkspaceDispatcher().getFile(FolderType.CFG, DIMENSIONS_DIR, this.dimensionsFileName));
+                        .unmarshal(BeanUtil.getSfContext().getWorkspaceDispatcher().getFile(FolderType.CFG, DIMENSIONS_DIR, dimensionsFileName));
                 this.selectedDemensions = wrapper.getSelectedDemensions();
             }
         } catch (Throwable e) {
@@ -347,11 +347,11 @@ public class TagGroupDimensionalReportBean extends AbstractStatisticsBean implem
 
     private String buildErrorMessage() {
         StringBuilder builder = new StringBuilder("Failed to ");
-        builder.append(this.saveDialog ? "save " : "load ");
+        builder.append(saveDialog ? "save " : "load ");
         builder.append("dimensions ");
-        builder.append(this.saveDialog ? "to " : "from ");
+        builder.append(saveDialog ? "to " : "from ");
         builder.append("file: ");
-        builder.append(this.dimensionsFileName);
+        builder.append(dimensionsFileName);
 
         return builder.toString();
     }

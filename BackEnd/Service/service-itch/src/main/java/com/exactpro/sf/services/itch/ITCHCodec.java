@@ -66,8 +66,8 @@ public class ITCHCodec extends AbstractCodec {
 
 	private final Map<Short, IMessageStructure> msgTypeToMsgStruct = new HashMap<>();
 	private final MessageStructureReader msgStructReader = new MessageStructureReader();
-	private final MessageStructureWriter msgStructWriter = new MessageStructureWriter();;
-	private final ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
+    private final MessageStructureWriter msgStructWriter = new MessageStructureWriter();
+    private final ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
 
 	private IDictionaryStructure msgDictionary;
 	private IMessageFactory msgFactory;
@@ -92,13 +92,13 @@ public class ITCHCodec extends AbstractCodec {
 			this.codecMessageFilter = new CodecMessageFilter(msettings.getFilterValues());
             this.preprocessor = DefaultPreprocessor.loadPreprocessor(serviceContext,
                     msettings.getDictionaryURI(), ITCH_PREPROCESSORS_MAPPING_FILE_URI,
-                        this.getClass().getClassLoader());
+                    getClass().getClassLoader());
 		}
         if(codecMessageFilter != null) {
             codecMessageFilter.init(dictionary);
         }
 
-		this.msgTypeToMsgStruct.clear();
+        msgTypeToMsgStruct.clear();
 
         for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
             Short msgType = getAttributeValue(msgStruct, ITCHMessageHelper.ATTRIBUTE_MESSAGE_TYPE);
@@ -225,7 +225,7 @@ public class ITCHCodec extends AbstractCodec {
 			}
 		}
 
-		if (!(someMsgDropped && messages.size() == 1 && (System.currentTimeMillis() - this.lastDecode < 2000))) { //Skip single "UnitHeader"
+        if(!(someMsgDropped && messages.size() == 1 && (System.currentTimeMillis() - lastDecode < 2000))) { //Skip single "UnitHeader"
             IMessage message = DefaultMessageFactory.getFactory().createMessage(ITCHMessageHelper.MESSAGELIST_NAME, ITCHMessageHelper.MESSAGELIST_NAMESPACE);
 
             message.addField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME, messages);
@@ -253,13 +253,9 @@ public class ITCHCodec extends AbstractCodec {
 
 	private int getMessageLength(IFieldStructure message) {
 	    int sum = 0;
-        for(IFieldStructure field : message.getFields().values()) {
 
-	        if (field.isComplex()) {
-	            sum+=getMessageLength(field);
-	        } else {
-                sum += StructureUtils.<Integer>getAttributeValue(field, ITCHVisitorBase.LENGTH_ATTRIBUTE);
-	        }
+        for(IFieldStructure field : message.getFields().values()) {
+            sum += field.isComplex() ? getMessageLength(field) : StructureUtils.<Integer>getAttributeValue(field, ITCHVisitorBase.LENGTH_ATTRIBUTE);
 	    }
 
 	    return sum;
@@ -269,7 +265,7 @@ public class ITCHCodec extends AbstractCodec {
 	    int sumforHead = 0;
 	    for (Object message:messages) {
 	        IMessage m = (IMessage) message;
-            IFieldStructure structure = this.msgDictionary.getMessages().get(m.getName());
+            IFieldStructure structure = msgDictionary.getMessages().get(m.getName());
 	        if (structure == null) {
                 throw new EPSCommonException("Could not find IMessageStructure for messageName=[" + m.getName() + "] Namespace=[" + m.getNamespace() + "]");
             }
@@ -312,10 +308,10 @@ public class ITCHCodec extends AbstractCodec {
 
         Object fieldValue = messagesList.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 
-		if (fieldValue == null && !messagesList.getName().equals("UnitHeader")) {
+        if(fieldValue == null && !"UnitHeader".equals(messagesList.getName())) {
             throw new NullPointerException("MessagesList didn't contain field: " + ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
 		}
-        if (messagesList.getName().equals("UnitHeader")) {
+        if("UnitHeader".equals(messagesList.getName())) {
             fieldValue = new ArrayList<IMessage>(1);
             ((List<IMessage>)fieldValue).add(messagesList);
         }
@@ -326,9 +322,7 @@ public class ITCHCodec extends AbstractCodec {
 		IoBuffer buffer = IoBuffer.allocate(DEFAULT_BUFFER_SIZE, false);
         ITCHVisitorEncode msgStructVisitor = new ITCHVisitorEncode(buffer, byteOrder);
 
-
-
-		if (this.msgDictionary == null) {
+        if(msgDictionary == null) {
             throw new NullPointerException("ITCH Encode: msgDictionary is not defined");
 		}
 
@@ -340,7 +334,7 @@ public class ITCHCodec extends AbstractCodec {
 			String msgName = message.getName();
 			String msgNamespace = message.getNamespace();
 
-            IMessageStructure msgStructure = this.msgDictionary.getMessages().get(msgName);
+            IMessageStructure msgStructure = msgDictionary.getMessages().get(msgName);
 
 			if (msgStructure == null) {
 				throw new EPSCommonException("Could not find IMessageStructure for messageName=[" + msgName + "] Namespace=[" + msgNamespace + "]");

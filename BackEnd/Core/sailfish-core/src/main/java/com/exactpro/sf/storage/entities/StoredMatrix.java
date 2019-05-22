@@ -55,7 +55,7 @@ public class StoredMatrix {
 
 	private List<StoredScriptRun> scriptRuns;
 
-	private SimpleDateFormat dateFormat;
+    private final SimpleDateFormat dateFormat;
 
 	private String link;
 
@@ -111,7 +111,7 @@ public class StoredMatrix {
 
 	public InputStream readStream(IWorkspaceDispatcher workspaceDispatcher) {
 		try {
-		    File target = workspaceDispatcher.getFile(FolderType.MATRIX, this.filePath);
+            File target = workspaceDispatcher.getFile(FolderType.MATRIX, filePath);
 			return new FileInputStream(target);
 		} catch (Exception e) {
 			throw new StorageException("Can't open stored matrix", e);

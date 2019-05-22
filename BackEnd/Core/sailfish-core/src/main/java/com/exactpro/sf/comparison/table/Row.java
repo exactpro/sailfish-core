@@ -19,7 +19,7 @@ package com.exactpro.sf.comparison.table;
 
 public class Row {
 
-	private Column[] columns;
+    private final Column[] columns;
 
 	private int offset;
 
@@ -48,7 +48,7 @@ public class Row {
 		for (Column c : columns) {
 			length += c.getLength();
 		}
-		return length == this.offset;
+        return length == offset;
 	}
 
 	public String toString(int[] length)
@@ -71,7 +71,7 @@ public class Row {
 		{
 			Column c = columns[ic];
 			int len = length[ic];
-			sb.append(c.toString());
+            sb.append(c);
 			for (int i=c.getLength(); i<len; i++) {
 				sb.append(" ");
 			}
@@ -86,10 +86,10 @@ public class Row {
 	}
 
 	public Column[] getColumns() {
-		return this.columns;
+        return columns;
 	}
 
 	public Column getColumn(int index) {
-		return this.columns[index];
+        return columns[index];
 	}
 }

@@ -10,18 +10,16 @@
 
 package com.exactpro.sf.common.messages;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
-import com.exactpro.sf.common.messages.ReorderFieldComparator;
-import com.exactpro.sf.common.messages.structures.IFieldStructure;
-import com.exactpro.sf.common.util.EPSCommonException;
+import static com.exactpro.sf.common.messages.DirtyConst.EXCLUDED_FIELD;
+import static com.exactpro.sf.common.messages.DirtyConst.FIELD_ORDER;
 
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import static com.exactpro.sf.common.messages.DirtyConst.FIELD_ORDER;
-import static com.exactpro.sf.common.messages.DirtyConst.EXCLUDED_FIELD;
-import static com.exactpro.sf.common.messages.DirtyConst.FIELD_ORDER;
+import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
+import com.exactpro.sf.common.util.EPSCommonException;
 
 public class DirtyMessageTraverser extends MessageTraverser {
 
@@ -75,8 +73,9 @@ public class DirtyMessageTraverser extends MessageTraverser {
     public void visitSimpleField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, JavaType javaType, String fieldName, Object value,
             boolean isDefault) {
 
-        if (dropMetaField(curField, value))
+        if(dropMetaField(curField, value)) {
             return;
+        }
 
         super.visitSimpleField(curField, msgStrVisitor, javaType, fieldName, value, isDefault);
     }
@@ -85,8 +84,9 @@ public class DirtyMessageTraverser extends MessageTraverser {
     protected void visitField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessageStructureReaderHandler handler,
             String fieldName, Object value) {
 
-        if (dropMetaField(curField, value))
+        if(dropMetaField(curField, value)) {
             return;
+        }
 
         super.visitField(curField, msgStrVisitor, handler, fieldName, value);
     }
@@ -94,17 +94,14 @@ public class DirtyMessageTraverser extends MessageTraverser {
     @Override
     protected void visitComplexField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, String fieldName, Object value) {
 
-        if (dropMetaField(curField, value))
+        if(dropMetaField(curField, value)) {
             return;
+        }
 
         super.visitComplexField(curField, msgStrVisitor, fieldName, value);
     }
 
     private boolean dropMetaField(IFieldStructure curField, Object value) {
-        if (value == EXCLUDED_FIELD)
-            return true;
-        if (curField.getName().equals(FIELD_ORDER))
-            return true;
-        return false;
+        return value == EXCLUDED_FIELD || curField.getName().equals(FIELD_ORDER);
     }
 }

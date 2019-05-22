@@ -54,7 +54,7 @@ public enum AMLBlockBrace {
     }
 
     public String getName() {
-        return this.blockBrace;
+        return blockBrace;
     }
 
     public boolean isStart() {
@@ -112,6 +112,6 @@ public enum AMLBlockBrace {
 
     @Override
     public String toString() {
-        return this.blockBrace;
+        return blockBrace;
     }
 }

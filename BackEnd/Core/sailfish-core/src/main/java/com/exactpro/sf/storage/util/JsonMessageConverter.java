@@ -277,30 +277,26 @@ public class JsonMessageConverter {
     }
 
     private static String getValueClass(Object value, IFieldStructure structure) {
-        String clazz = null;
-
         if(value instanceof List<?>) {
             value = Iterables.get((Iterable<?>)value, 0, null);
 
             if(value != null || structure != null) {
-                clazz = List.class.getSimpleName() + "<" + getValueClass(value, structure) + ">";
+                return List.class.getSimpleName() + "<" + getValueClass(value, structure) + ">";
             } else {
-                clazz = List.class.getSimpleName() + "<String>";
+                return List.class.getSimpleName() + "<String>";
             }
         } else if(value instanceof IMessage) {
-            clazz = IMessage.class.getSimpleName();
+            return IMessage.class.getSimpleName();
         } else {
             if(structure != null) {
                 if(structure.isComplex()) {
-                    clazz = IMessage.class.getSimpleName();
+                    return IMessage.class.getSimpleName();
                 } else {
-                    clazz = StringUtils.substringAfterLast(structure.getJavaType().value(), ".");
+                    return StringUtils.substringAfterLast(structure.getJavaType().value(), ".");
                 }
             } else {
-                clazz = ClassUtils.getSimpleName(value, null);
+                return ClassUtils.getSimpleName(value, null);
             }
         }
-
-        return clazz;
     }
 }

@@ -23,7 +23,7 @@ public enum StartMode {
 
     private final String name;
 
-    private StartMode(String name) {
+    StartMode(String name) {
         this.name = name;
     }
 

@@ -34,7 +34,7 @@ public class FIXLogFactory implements LogFactory
     private final LogFactory nativeLogFactory;
     private final Logger logger;
 
-	public FIXLogFactory(LogFactory nativeLogFactory, boolean logHeartbeats, final IService service, final IServiceMonitor monitor, final Logger logger)
+    public FIXLogFactory(LogFactory nativeLogFactory, boolean logHeartbeats, IService service, IServiceMonitor monitor, Logger logger)
 	{
 		this.service = Objects.requireNonNull(service, "'Service' can't be null");
 		
@@ -56,7 +56,7 @@ public class FIXLogFactory implements LogFactory
 	
 	@Override
 	public Log create(SessionID sessionID) {
-		return new FIXLog(this.nativeLogFactory.create(sessionID), this.logHeartbeats, this.service, this.servMonitor, this.logger);
+        return new FIXLog(nativeLogFactory.create(sessionID), logHeartbeats, service, servMonitor, logger);
 	}
 
 }

@@ -26,22 +26,24 @@ import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.embedded.configuration.ServiceStatus;
 import com.exactpro.sf.embedded.updater.UpdateService;
+import com.exactpro.sf.embedded.updater.UpdateService.ComponentUpdateInfo;
 import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @ManagedBean(name = "updateBean")
 @ViewScoped
 public class UpdaterConfigBean implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(UpdaterConfigBean.class);
 
-    private final String[] availableTimeUnits = new String[] {
+    private final String[] availableTimeUnits = {
             TimeUnit.MINUTES.name(), TimeUnit.HOURS.name(), TimeUnit.DAYS.name()
     };
 
@@ -62,7 +64,9 @@ public class UpdaterConfigBean implements Serializable {
             UpdateService updateService = BeanUtil.getSfContext().getUpdateService();
             updateService.checkUpdates();
 
-            this.currentVersions.forEach(componentInfo -> componentInfo.setNewVersion(null));
+            for(ComponentInfo componentInfo : currentVersions) {
+                componentInfo.setNewVersion(null);
+            }
 
             BeanUtil.addInfoMessage("Updates checked", updateService.isUpdateRequire() ? "Needs update" : "No updates");
         } catch (Exception e) {
@@ -147,11 +151,12 @@ public class UpdaterConfigBean implements Serializable {
     private void fillNewVersions() {
         UpdateService updateService = BeanUtil.getSfContext().getUpdateService();
         if (updateService.isConnected() && updateService.isUpdateRequire()) {
-            updateService.getComponentUpdateInfos()
-                    .forEach(componentUpdateInfo -> currentVersions.stream()
-                            .filter(componentInfo -> componentInfo.getName().equals(componentUpdateInfo.getName()))
-                            .findFirst()
-                            .ifPresent(componentInfo -> componentInfo.setNewVersion(componentUpdateInfo.getVersion())));
+            for(ComponentUpdateInfo componentUpdateInfo : updateService.getComponentUpdateInfos()) {
+                currentVersions.stream()
+                        .filter(componentInfo -> componentInfo.getName().equals(componentUpdateInfo.getName()))
+                        .findFirst()
+                        .ifPresent(componentInfo -> componentInfo.setNewVersion(componentUpdateInfo.getVersion()));
+            }
         }
     }
 

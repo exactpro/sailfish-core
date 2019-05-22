@@ -19,12 +19,10 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -34,6 +32,7 @@ import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 
+import com.exactpro.sf.embedded.statistics.StatisticsUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,9 +57,6 @@ public class StatisticsReportingBean implements Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(StatisticsReportingBean.class);
 	
 	private static final String REPORT_FILE_PREFIX = "Aggregated_report";
-
-	// average number of test cases per matrix is 100 so we decided to choose this limit for loading matrices
-	private static final int LOADING_MATRIX_LIMIT = 100;
 	
 	private boolean statisticsDbAvailable;
 	
@@ -81,7 +77,7 @@ public class StatisticsReportingBean implements Serializable {
 	private IStatisticsReportHandler statisticsReportHandler;
 
     @SessionStored
-    private List<Tag> tags = new ArrayList<>();
+    private final List<Tag> tags = new ArrayList<>();
 
     private Tag tagToAdd;
     private List<Tag> allTags;
@@ -96,16 +92,16 @@ public class StatisticsReportingBean implements Serializable {
         StatisticsService statisticsService = BeanUtil.getSfContext().getStatisticsService();
 
         this.statisticsDbAvailable = statisticsService.isConnected();
-		
-		if(this.statisticsDbAvailable) {
+
+        if(statisticsDbAvailable) {
 		
 			this.from = DateUtils.truncate( new Date(), Calendar.DATE );
 			
 			this.to = new Date();
 			
 			this.allSfInstances = statisticsService.getStorage().getAllSfInstances();
-			
-			this.selectedSfInstances.addAll(this.allSfInstances);
+
+            selectedSfInstances.addAll(allSfInstances);
 
             this.allTags = statisticsService.getStorage().getAllTags();
 
@@ -128,35 +124,16 @@ public class StatisticsReportingBean implements Serializable {
     }
 	
 	public void generateReport() {
-		
-		logger.debug("Generate {} - {}; {}", this.from, this.to, this.selectedSfInstances);
+
+        logger.debug("Generate {} - {}; {}", from, to, selectedSfInstances);
 
         AggregateReportParameters params = getAggregateReportParameters();
 
         try {
-            statisticsReportHandler.reset();
-            StatisticsReportingStorage reportingStorage = BeanUtil.getSfContext().getStatisticsService().getReportingStorage();
-            SortedMap<Long, List<Long>> matrixToTestCaseIds = reportingStorage.getMatrixRunAndTestCaseRunIDs(params);
-            if (!matrixToTestCaseIds.isEmpty()) {
-                int limit = 0;
-                List<Long> matrixIds = new ArrayList<>(matrixToTestCaseIds.keySet());
-                List<List<Long>> testCaseRunIds = new ArrayList<>(matrixToTestCaseIds.values());
-                while (limit < matrixIds.size()) {
-                    List<Long> batchMatrixIds = matrixIds.subList(
-                            limit, Math.min((limit + LOADING_MATRIX_LIMIT), matrixIds.size()));
-                    List<Long> batchTestCaseIds = testCaseRunIds.subList(
-                            limit, Math.min(limit += LOADING_MATRIX_LIMIT, matrixToTestCaseIds.size()))
-                            .stream()
-                            .flatMap(List::stream)
-                            .collect(Collectors.toList());
-                    params.setMatrixRunIds(batchMatrixIds);
-                    params.setTestCaseRunIds(batchTestCaseIds);
-                    statisticsReportHandler.handleMatrixRunTestCases(reportingStorage.generateAggregatedReport(params), reportingStorage);
-                }
-            }
-            statisticsReportHandler.finalize(reportingStorage);
+            this.lastResult = Collections.emptyList();
+            StatisticsUtils.generateAggregatedReport(BeanUtil.getSfContext().getStatisticsService(),
+                    params, statisticsReportHandler);
             this.lastResult = statisticsReportHandler.getReportRows();
-
 			
 			this.loadedFrom = from;
 			this.loadedTo = to;
@@ -206,20 +183,20 @@ public class StatisticsReportingBean implements Serializable {
     public void onTagSelect() {
         logger.debug("Tag select invoked");
 
-        this.tags.add(tagToAdd);
+        tags.add(tagToAdd);
         this.tagToAdd = null;
-        this.allTags.removeAll(tags);
+        allTags.removeAll(tags);
     }
 
     public void removeTag(Tag tag) {
-        this.tags.remove(tag);
-        this.allTags.add(tag);
+        tags.remove(tag);
+        allTags.add(tag);
     }
 
     public List<Tag> completeTag(String query) {
         List<Tag> result = new ArrayList<>();
         String loweredQuery = query.toLowerCase();
-        for(Tag tag : this.allTags) {
+        for(Tag tag : allTags) {
             if(tag.getName().toLowerCase().contains(loweredQuery)) {
                 result.add(tag);
             }

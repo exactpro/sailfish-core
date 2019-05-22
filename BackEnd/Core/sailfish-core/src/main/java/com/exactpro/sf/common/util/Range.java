@@ -27,7 +27,7 @@ import java.util.List;
 public class Range {
 
 	private String origRange;
-	private List<Operator> operators;
+    private final List<Operator> operators;
 
 	public static Range newInstance(String s)
 	{
@@ -49,23 +49,19 @@ public class Range {
 	@Override
 	public String toString()
 	{
-		return this.origRange;
+        return origRange;
 	}
 
 	public String toStringEx()
 	{
 		StringBuilder sb = new StringBuilder();
-		
-		for (int i=0; i<this.operators.size(); i++)
+
+        for(int i = 0; i < operators.size(); i++)
 		{
 			sb.append("(");
-			Operator op = this.operators.get(i);
-			sb.append(op.toString());
-			if (i+1 != this.operators.size()) {
-				sb.append(") && ");
-			} else {
-				sb.append(")");
-			}
+            Operator op = operators.get(i);
+            sb.append(op);
+            sb.append(i + 1 != operators.size() ? ") && " : ")");
 		}
 		
 		return sb.toString();
@@ -73,28 +69,30 @@ public class Range {
 	
 	public boolean contain(long n)
 	{
-		if (operators.size() == 0) {
+        if(operators.isEmpty()) {
 			return false;
 		}
 		
 		for (Operator op : operators)
 		{
-			if (op.match(n))
-				return true;
+            if(op.match(n)) {
+                return true;
+            }
 		}
 		return false;
 	}
 
 	public boolean notContain(long n)
 	{
-		if (operators.size() == 0) {
+        if(operators.isEmpty()) {
 			return true;
 		}
 
 		for (Operator op : operators)
 		{
-			if (op.match(n))
-				return false;
+            if(op.match(n)) {
+                return false;
+            }
 		}
 		return true;
 	}
@@ -105,15 +103,15 @@ public class Range {
 		for (int i=0; i<arr.length; i++) {
 			Operator op = parseSingleInterval(arr[i], i+1 == arr.length);
 			if (op != null) {
-				this.operators.add(op);
+                operators.add(op);
 			}
 		}
 	}
 
-	private Operator parseSingleInterval(final String interval, final boolean isLast)
+    private Operator parseSingleInterval(String interval, boolean isLast)
 	{
 		String s = interval.replace(" ", "");
-		if (s.length() == 0) {
+        if(s.isEmpty()) {
 			throw new InvalidRangeException("Empty interval detected.");
 		}
 
@@ -163,7 +161,7 @@ public class Range {
 
 		if (s.endsWith("-"))
 		{
-			if (false == isLast) {
+            if(!isLast) {
 				throw new InvalidRangeException("Only last interval can be specified without endpoint: "+interval);
 			}
 
@@ -224,12 +222,12 @@ public class Range {
 
 		@Override
 		public boolean checkCondition(long n) {
-			return n < this.number;
+            return n < number;
 		}
 		
 		@Override
 		public String toString() {
-			return "X < "+this.number;
+            return "X < " + number;
 		}
 	}
 
@@ -241,12 +239,12 @@ public class Range {
 
 		@Override
 		protected boolean checkCondition(long n) {
-			return n <= this.number;
+            return n <= number;
 		}
 
 		@Override
 		public String toString() {
-			return "X <= "+this.number;
+            return "X <= " + number;
 		}
 	}
 
@@ -258,12 +256,12 @@ public class Range {
 
 		@Override
 		protected boolean checkCondition(long n) {
-			return n == this.number;
+            return n == number;
 		}
 
 		@Override
 		public String toString() {
-			return "X == "+this.number;
+            return "X == " + number;
 		}
 	}
 
@@ -275,12 +273,12 @@ public class Range {
 
 		@Override
 		protected boolean checkCondition(long n) {
-			return n != this.number;
+            return n != number;
 		}
 
 		@Override
 		public String toString() {
-			return "X != "+this.number;
+            return "X != " + number;
 		}
 	}
 
@@ -292,12 +290,12 @@ public class Range {
 
 		@Override
 		protected boolean checkCondition(long n) {
-			return n >= this.number;
+            return n >= number;
 		}
 
 		@Override
 		public String toString() {
-			return "X >= "+this.number;
+            return "X >= " + number;
 		}
 	}
 
@@ -309,12 +307,12 @@ public class Range {
 
 		@Override
 		protected boolean checkCondition(long n) {
-			return n > this.number;
+            return n > number;
 		}
 
 		@Override
 		public String toString() {
-			return "X > "+this.number;
+            return "X > " + number;
 		}
 	}
 
@@ -326,20 +324,17 @@ public class Range {
 		}
 		protected abstract boolean match(long n);
 		protected void add(AbstractCondition cond) {
-			this.conditions.add(cond);
+            conditions.add(cond);
 		}
 	}
 
 	protected class OP_AND extends Operator
 	{
-		protected OP_AND() {
-			super();
-		}
 
-		@Override
+        @Override
 		protected boolean match(long n)
 		{
-			for (AbstractCondition a : this.conditions)
+            for(AbstractCondition a : conditions)
 			{
 				if (!a.checkCondition(n)) {
 					return false;
@@ -352,9 +347,9 @@ public class Range {
 		public String toString()
 		{
 			StringBuilder sb = new StringBuilder();
-			for (int i=0; i<this.conditions.size(); i++) {
-				sb.append(this.conditions.get(i).toString());
-				if (i+1 != this.conditions.size()) {
+            for(int i = 0; i < conditions.size(); i++) {
+                sb.append(conditions.get(i));
+                if(i + 1 != conditions.size()) {
 					sb.append(" && ");
 				}
 			}
@@ -364,14 +359,11 @@ public class Range {
 
 	protected class OP_OR extends Operator
 	{
-		protected OP_OR() {
-			super();
-		}
 
-		@Override
+        @Override
 		protected boolean match(long n)
 		{
-			for (AbstractCondition a : this.conditions)
+            for(AbstractCondition a : conditions)
 			{
 				if (a.checkCondition(n)) {
 					return true;
@@ -384,9 +376,9 @@ public class Range {
 		public String toString()
 		{
 			StringBuilder sb = new StringBuilder();
-			for (int i=0; i<this.conditions.size(); i++) {
-				sb.append(this.conditions.get(i).toString());
-				if (i+1 != this.conditions.size()) {
+            for(int i = 0; i < conditions.size(); i++) {
+                sb.append(conditions.get(i));
+                if(i + 1 != conditions.size()) {
 					sb.append(" || ");
 				}
 			}

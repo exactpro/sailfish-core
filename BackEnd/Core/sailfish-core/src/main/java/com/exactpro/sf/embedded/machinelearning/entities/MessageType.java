@@ -27,15 +27,16 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 @JsonPropertyOrder({"id", "name", "dictionaryURI", "protocol"})
 @Entity
-@Table(name = "mlmessagetype", uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "protocol", "dictionaryURI" }) })
+@Table(name = "mlmessagetype", uniqueConstraints = @UniqueConstraint(columnNames = { "name", "protocol", "dictionaryURI" }))
 @SequenceGenerator(name = "mlmessagetype_generator", sequenceName = "mlmessagetype_sequence")
 public class MessageType implements Serializable {
 
@@ -82,10 +83,10 @@ public class MessageType implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("id", this.id)
-                .append("name", this.name)
-                .append("dictionaryURI", this.dictionaryURI)
-                .append("protocol", this.protocol).toString();
+                .append("id", id)
+                .append("name", name)
+                .append("dictionaryURI", dictionaryURI)
+                .append("protocol", protocol).toString();
     }
 
     @Override
@@ -96,16 +97,16 @@ public class MessageType implements Serializable {
 
         MessageType that = (MessageType)o;
         return new EqualsBuilder()
-                .append(this.name, that.name)
-                .append(this.dictionaryURI, that.dictionaryURI)
-                .append(this.protocol, that.protocol).isEquals();
+                .append(name, that.name)
+                .append(dictionaryURI, that.dictionaryURI)
+                .append(protocol, that.protocol).isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(this.name)
-                .append(this.dictionaryURI)
-                .append(this.protocol).toHashCode();
+                .append(name)
+                .append(dictionaryURI)
+                .append(protocol).toHashCode();
     }
 }

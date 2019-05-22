@@ -39,7 +39,7 @@ public class EnvironmentUpdateSubscriber implements IUpdateRequestListener{
 
 	private static final Logger logger = LoggerFactory.getLogger(EnvironmentUpdateSubscriber.class);
 	private final AbstractChannel channel;
-	private String id;
+	private final String id;
 	private final Set<ServiceUpdateResponse> eventCache = new HashSet<>();
     private Future<?> future;
 

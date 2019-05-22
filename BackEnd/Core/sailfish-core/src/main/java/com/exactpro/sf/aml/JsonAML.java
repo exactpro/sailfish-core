@@ -16,6 +16,7 @@
 package com.exactpro.sf.aml;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import com.exactpro.sf.aml.generator.GeneratedScript;
 import com.exactpro.sf.aml.iomatrix.AdvancedMatrixReader;
@@ -32,7 +33,7 @@ import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 
 public class JsonAML extends AML {
 
-	private AMLMatrix amlMatrix;
+	private final AMLMatrix amlMatrix;
 
 	public JsonAML(AMLSettings settings, IWorkspaceDispatcher workspaceDispatcher, IAdapterManager adapterManager,
 			IEnvironmentManager environmentManager, IDictionaryManager dictionaryManager,
@@ -40,9 +41,7 @@ public class JsonAML extends AML {
 			IUtilityManager utilityManager, String compilerClassPath, AMLMatrix matrix) throws AMLException {
 		super(settings, workspaceDispatcher, adapterManager, environmentManager, dictionaryManager,
 				staticServiceManager, languageManager, actionManager, utilityManager, compilerClassPath);
-		if (matrix == null)
-			throw new NullPointerException("matrix can't be null");
-		this.amlMatrix = matrix;
+        this.amlMatrix = Objects.requireNonNull(matrix, "matrix can't be null");
 	}
 
 	@Override
@@ -53,6 +52,6 @@ public class JsonAML extends AML {
     @Override
     public GeneratedScript run(ScriptContext scriptContext, String fileEncoding)
             throws AMLException, IOException, InterruptedException {
-        return super.run(scriptContext, amlMatrix);
+        return run(scriptContext, amlMatrix);
 	}
 }

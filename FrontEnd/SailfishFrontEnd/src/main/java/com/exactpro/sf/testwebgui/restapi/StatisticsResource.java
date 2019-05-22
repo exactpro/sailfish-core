@@ -15,6 +15,46 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletContext;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
+import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.embedded.statistics.DimensionMap;
@@ -35,38 +75,6 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticStatusResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticsDBSettings;
 import com.exactpro.sf.util.DateTimeUtility;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.ServletContext;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Path("statistics")
 public class StatisticsResource {
@@ -76,13 +84,13 @@ public class StatisticsResource {
 	    @Override
 	    protected SimpleDateFormat initialValue() {
 	        return new SimpleDateFormat("ddMMyyyy-HH:mm:ss");
-	    };
-	};
+	    }
+    };
     private static final ThreadLocal<SimpleDateFormat> xmlFormat = new ThreadLocal<SimpleDateFormat>() {
         @Override
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ss");
-        };
+        }
     };
 	
 	@Context
@@ -119,7 +127,7 @@ public class StatisticsResource {
 			@QueryParam("group") String groupName) {
 		
 		XmlResponse xmlResponse = new XmlResponse();
-		Response.Status status = Response.Status.OK;
+		Status status = Status.OK;
 		
 		TagGroup loadedGroup = null;
 		
@@ -182,7 +190,7 @@ public class StatisticsResource {
 			} else {
 				
 				xmlResponse.setMessage("Disconnected from statistics DB");
-				status = Response.Status.BAD_REQUEST;
+				status = Status.BAD_REQUEST;
 				
 			}
 		
@@ -194,7 +202,7 @@ public class StatisticsResource {
 			if(e.getCause() != null) {
 				xmlResponse.setRootCause(e.getCause().toString());
 			}
-			status = Response.Status.BAD_REQUEST;
+			status = Status.BAD_REQUEST;
 			
 		}
 		
@@ -211,18 +219,18 @@ public class StatisticsResource {
     @Produces(MediaType.TEXT_PLAIN)
     public Response statictcsHistoryReport(@DefaultValue("junit") @QueryParam("type") String type,
                                            @QueryParam("from") String from, @QueryParam("to") String to,
-                                           @DefaultValue("Sailfish") @QueryParam("title") final String title,
+                                           @DefaultValue("Sailfish") @QueryParam("title") String title,
                                            @DefaultValue("true") @QueryParam("alltags") boolean allTags,
                                            @DefaultValue("false") @QueryParam("exportwithtcsinfo") boolean exportWithTCsInfo,
                                            @DefaultValue("false") @QueryParam("exportwithactionsinfo") boolean exportWithActionsInfo,
                                            DimensionMap dimension) {
 	    
 	    XmlResponse xmlResponse = new XmlResponse();
-	    Response.Status status = Response.Status.OK;
+	    Status status = Status.OK;
 	    
 	    if (!getStatisticsService().isConnected()) {
 	        xmlResponse.setMessage("Statistics service is not available.");
-	        return Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+	        return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
 	    }
 	    
 	    try {
@@ -243,7 +251,7 @@ public class StatisticsResource {
             if(e.getCause() != null) {
                 xmlResponse.setRootCause(e.getCause().toString());
             }
-            status = Response.Status.BAD_REQUEST;
+            status = Status.BAD_REQUEST;
         }
 
 	    return Response.
@@ -288,19 +296,18 @@ public class StatisticsResource {
             params.setTags(tags);
 
             columns = dimension.getColumns().isEmpty() ? new ArrayList<>(
-                    Arrays.asList(StatisticsUtils.availableScriptRunHistoryColumns)) : dimension.getColumns();
+                    Arrays.asList(StatisticsUtils.AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS)) : dimension.getColumns();
         } else {
-            columns = new ArrayList<>(Arrays.asList(StatisticsUtils.availableScriptRunHistoryColumns));
+            columns = new ArrayList<>(Arrays.asList(StatisticsUtils.AVAILABLE_SCRIPT_RUN_HISTORY_COLUMNS));
         }
 
         List<AggregatedReportRow> reportRows = service.getReportingStorage().generateTestScriptsReport(params);
 
-        StreamingOutput stream;
-        stream = out -> {
+        StreamingOutput stream = out -> {
             try {
-                StatisticsUtils.writeScriptRunsHistory((ISFContext) context.getAttribute("sfContext"), out, columns,
-                                                       reportRows, exportWithTCsInfo, exportWithActionsInfo);
-            } catch (Exception e) {
+                StatisticsUtils.writeScriptRunsHistory((ISFContext)context.getAttribute("sfContext"), out, columns,
+                        reportRows, exportWithTCsInfo, exportWithActionsInfo);
+            } catch(Exception e) {
                 logger.error(e.getMessage(), e);
                 throw new WebApplicationException(e);
             }
@@ -318,7 +325,7 @@ public class StatisticsResource {
      * @return
      * @throws ParseException
      */
-    private Response generateJunitReport(String from, String to, final String title) throws ParseException {
+    private Response generateJunitReport(String from, String to, String title) throws ParseException {
         
         AggregateReportParameters params = new AggregateReportParameters();
         params.setFrom(parseFormat.get().parse(from));
@@ -327,11 +334,11 @@ public class StatisticsResource {
         params.setSortBy("MR.startTime");
         params.setSortAsc(true);
 
-        final List<AggregatedReportRow> result = getStatisticsService().getReportingStorage().generateTestScriptsReport(params);
+        List<AggregatedReportRow> result = getStatisticsService().getReportingStorage().generateTestScriptsReport(params);
 
         MatrixInfo matrixInfo = MatrixInfo.extractMatrixInfo(result);
-        final long failures = matrixInfo.getAllCasesFailed();
-        final long test = matrixInfo.getAllCases();
+        long failures = matrixInfo.getAllCasesFailed();
+        long test = matrixInfo.getAllCases();
 
         long tmp = 0;
         
@@ -342,7 +349,7 @@ public class StatisticsResource {
             }
         }
 
-        final long totalTime = tmp;
+        long totalTime = tmp;
         
         StreamingOutput output = new StreamingOutput() {
 
@@ -376,7 +383,7 @@ public class StatisticsResource {
 
                                 writer.writeStartElement("testsuite");
                                 writer.writeAttribute("package", title);
-                                writer.writeAttribute("errors", "" + (row.getFailedCount()));
+                                writer.writeAttribute("errors", "" + row.getFailedCount());
                                 writer.writeAttribute("failures", "" + row.getFailedCount());
                                 writer.writeAttribute("hostname", row.getHost());
                                 writer.writeAttribute("name", matrixName);
@@ -423,7 +430,7 @@ public class StatisticsResource {
 	public Response registerGroup(@QueryParam("name") String groupName) {
 		
 		XmlResponse xmlResponse = new XmlResponse();
-		Response.Status status = Response.Status.OK;
+		Status status = Status.OK;
 		
 		TagGroup loadedGroup = null;
 		
@@ -466,7 +473,7 @@ public class StatisticsResource {
 			} else {
 				
 				xmlResponse.setMessage("Disconnected from statistics DB");
-				status = Response.Status.BAD_REQUEST;
+				status = Status.BAD_REQUEST;
 				
 			}
 		
@@ -476,7 +483,7 @@ public class StatisticsResource {
 			
 			xmlResponse.setMessage(e.getMessage());
 			xmlResponse.setRootCause(e.getCause().toString());
-			status = Response.Status.BAD_REQUEST;
+			status = Status.BAD_REQUEST;
 			
 		}
 		
@@ -493,7 +500,7 @@ public class StatisticsResource {
 	public Response status() {
 		
 		XmlStatisticStatusResponse xmlResponse = new XmlStatisticStatusResponse();
-		Response.Status status = Response.Status.OK;
+		Status status = Status.OK;
 		
 		try {
 			
@@ -521,7 +528,7 @@ public class StatisticsResource {
 		} catch (Throwable t) {
 			
 			logger.error(t.getMessage(), t);
-			status = Response.Status.INTERNAL_SERVER_ERROR;
+			status = Status.INTERNAL_SERVER_ERROR;
 			xmlResponse.setMessage("Unexpected error");
 			xmlResponse.setRootCause(t.getMessage());
 			
@@ -541,7 +548,7 @@ public class StatisticsResource {
     public Response setDBSettings(XmlStatisticsDBSettings dbSettings) throws IOException {
         
         XmlResponse xmlResponse = new XmlResponse();
-        Response.Status status = Response.Status.OK;
+        Status status = Status.OK;
         
         StatisticsServiceSettings settings = new StatisticsServiceSettings(getStatisticsService().getSettings());
         settings.setServiceEnabled(dbSettings.getStatisticsServiceEnabled());
@@ -557,7 +564,7 @@ public class StatisticsResource {
             TestToolsAPI.getInstance().setStatisticsDBSettings(settings);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            status = Response.Status.INTERNAL_SERVER_ERROR;
+            status = Status.INTERNAL_SERVER_ERROR;
             xmlResponse.setMessage("Unexpected error");
             xmlResponse.setRootCause(e.getMessage());
         }
@@ -575,7 +582,7 @@ public class StatisticsResource {
 	public Response migrate() {
 		
 		XmlResponse xmlResponse = new XmlResponse();
-		Response.Status status = Response.Status.OK;
+		Status status = Status.OK;
 		
 		try {
 			
@@ -598,7 +605,7 @@ public class StatisticsResource {
 		} catch (Throwable t) {
 			
 			logger.error(t.getMessage(), t);
-			status = Response.Status.OK;
+			status = Status.OK;
 			xmlResponse.setMessage("Migration failed");
 			xmlResponse.setRootCause(t.getCause() != null ? t.getCause().getMessage() : "");
 			
@@ -614,16 +621,48 @@ public class StatisticsResource {
     @GET
     @Path("stats_per_tags")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML})
     public Response getStatsPerTagsFromJson(DimensionMap dimensionMap) {
         XmlResponse xmlResponse = new XmlResponse();
-        Response.Status status;
+        Status status;
         try {
             List<TagGroupDimension> selectedDimensions = parseDimensions(dimensionMap);
             return generateStatsPerTags(selectedDimensions);
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
-            status = Response.Status.INTERNAL_SERVER_ERROR;
+            status = Status.INTERNAL_SERVER_ERROR;
+            xmlResponse.setMessage(e.getMessage());
+            xmlResponse.setRootCause((e.getCause() != null) ? e.getCause().getMessage() : null);
+        }
+        return Response.
+                status(status).
+                entity(xmlResponse).
+                build();
+    }
+
+    @GET
+    @Path("aggregated_report")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.TEXT_PLAIN, MediaType.APPLICATION_XML})
+    public Response getAggregatedReport(AggregateReportParameters parameters) {
+        XmlResponse xmlResponse = new XmlResponse();
+        Status status;
+        try {
+            StatisticsService statisticsService = getStatisticsService();
+            String reportType = parameters.getReportType();
+            if (reportType == null) {
+                throw new IllegalArgumentException("ReportType is not set");
+            }
+            IStatisticsReportHandler statisticsReportHandler =
+                    statisticsService.getStatisticsReportHandler(SailfishURI.parse(reportType));
+            IStatisticsStorage statisticsStorage = statisticsService.getStorage();
+            StatisticsUtils.loadSfInstanceIdsFromDb(statisticsStorage, parameters);
+            StatisticsUtils.loadTagIdsFromDb(statisticsStorage, parameters);
+            StatisticsUtils.generateAggregatedReport(statisticsService, parameters, statisticsReportHandler);
+            return generateAggregatedReport(statisticsReportHandler, parameters);
+        } catch (Throwable e) {
+            logger.error(e.getMessage(), e);
+            status = Status.INTERNAL_SERVER_ERROR;
             xmlResponse.setMessage(e.getMessage());
             xmlResponse.setRootCause((e.getCause() != null) ? e.getCause().getMessage() : null);
         }
@@ -649,11 +688,29 @@ public class StatisticsResource {
         List<TagGroupReportResult> tagGroupReportResults = StatisticsUtils.generateTagGroupReportResults(
                 getStatisticsService(), selectedDimensions, new TagGroupReportParameters());
         String reportName = StatisticsUtils.createStatsPerTagsName();
-        StreamingOutput stream;
-        stream = out -> {
+        StreamingOutput stream = out -> {
             try {
                 StatisticsUtils.writeTagGroupReportToCsv(out, tagGroupReportResults);
-            } catch (Exception e) {
+            } catch(Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response
+                .ok(stream)
+                .header("content-disposition",
+                        "attachment; filename = "
+                                + reportName).build();
+    }
+
+    private Response generateAggregatedReport(IStatisticsReportHandler statisticsReportHandler,
+                                              AggregateReportParameters parameters) {
+
+        String reportName = statisticsReportHandler.getReportName(parameters);
+        StreamingOutput stream = out -> {
+            try {
+                statisticsReportHandler.writeReport(out);
+            } catch(Exception e) {
                 logger.error(e.getMessage(), e);
                 throw new WebApplicationException(e);
             }
@@ -668,7 +725,7 @@ public class StatisticsResource {
     private List<TagGroupDimension> parseDimensions(DimensionMap dimensions) {
         IStatisticsStorage storage = getStatisticsService().getStorage();
         List<TagGroupDimension> parsedDimensions = new ArrayList<>();
-        for (Map.Entry<String, List<String>> dimension : dimensions.getDimensions().entrySet()) {
+        for (Entry<String, List<String>> dimension : dimensions.getDimensions().entrySet()) {
             String tagOrGroupName = dimension.getKey();
             Tag tag = storage.getTagByName(tagOrGroupName);
             if (tag != null) {
@@ -695,4 +752,6 @@ public class StatisticsResource {
         }
         return parsedDimensions;
     }
+
+
 }

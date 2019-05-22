@@ -42,20 +42,16 @@ public class MatrixEditorBean implements Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MatrixEditorBean.class);
 
-	@ManagedProperty(value = "#{testScriptsBean.matrixToEdit}")
+	@ManagedProperty("#{testScriptsBean.matrixToEdit}")
 	private MatrixAdapter matrixAdapter;
 
 	private String testcaseToEdit = "";
 	private String testcaseName = "";
 	private String textToSave = "";
-	private List<String> testcaseNames = new ArrayList<>();
-	private transient JSONMatrixEditor editor = null;
-	
-	
-	public MatrixEditorBean() {
-	}
+    private final List<String> testcaseNames = new ArrayList<>();
+    private transient JSONMatrixEditor editor;
 
-	@PostConstruct
+    @PostConstruct
 	public void initialize() {
 		if (matrixAdapter == null) {
 			logger.error("matrix not loaded from managed bean");

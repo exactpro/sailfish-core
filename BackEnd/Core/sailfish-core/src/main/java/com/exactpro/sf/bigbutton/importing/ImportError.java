@@ -31,7 +31,7 @@ public class ImportError implements Serializable {
 	
     private String message;
 
-    private Set<ImportError> cause = new HashSet<>();
+    private final Set<ImportError> cause = new HashSet<>();
 
 	public ImportError() {
 		
@@ -66,11 +66,11 @@ public class ImportError implements Serializable {
     }
 
     public void addCause(ImportError error) {
-        this.cause.add(error);
+        cause.add(error);
     }
 
     public void addCause(Collection<ImportError> errors) {
-        this.cause.addAll(errors);
+        cause.addAll(errors);
     }
 	
 }

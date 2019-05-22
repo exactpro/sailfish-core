@@ -17,48 +17,48 @@ package com.exactpro.sf.scriptrunner;
 
 public interface IScriptProgress {
 
-	public long getCurrentActions();
+	long getCurrentActions();
 
-	public long getCurrentExecutedActions();
+	long getCurrentExecutedActions();
 
-	public int getCurrentTC();
+	int getCurrentTC();
 
-	public int getExecutedTC();
+	int getExecutedTC();
 
-	public long getFailed();
+	long getFailed();
 
-    public void setFailed(long failed);
+    void setFailed(long failed);
 
-	public int getLoaded();
+	int getLoaded();
 
-    public long getConditionallyPassed();
+    long getConditionallyPassed();
 
-	public long getPassed();
+	long getPassed();
 
-    public void setConditionallyPassed(long conditionallyPassed);
+    void setConditionallyPassed(long conditionallyPassed);
 
-	public void setPassed(long passed);
+	void setPassed(long passed);
 
-	public long getTotalActions();
+	long getTotalActions();
 
-	public long getTotalExecutedActions();
+	long getTotalExecutedActions();
 
-	public void increaseFailed();
+	void increaseFailed();
 
-	public void increasePassed();
+	void increasePassed();
 
-    public void increaseConditionallyPassed();
+    void increaseConditionallyPassed();
 
-	public void incrementActions();
+	void incrementActions();
 
-	public void incrementExecutedTC();
+	void incrementExecutedTC();
 
-	public void setCurrentActions(long i);
+	void setCurrentActions(long i);
 
-	public void setCurrentTC(int executed);
+	void setCurrentTC(int executed);
 
-	public void setLoaded(int size);
+	void setLoaded(int size);
 
-	public void setTotalActions(long i);
+	void setTotalActions(long i);
 
 }

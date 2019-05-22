@@ -47,7 +47,7 @@ import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
-import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.scriptrunner.EnvironmentSettings.ReportOutputFormat;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.ZipReport;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -57,13 +57,13 @@ public class ReportTask implements Runnable{
 
 	private static final Logger logger = LoggerFactory.getLogger(ReportTask.class);
 
-	private AsyncContext ctx;
+    private final AsyncContext ctx;
 
-	private IWorkspaceDispatcher workspaceDispatcher;
+    private final IWorkspaceDispatcher workspaceDispatcher;
 
-	private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
-	private ISFContext context;
+    private final ISFContext context;
 
 	public ReportTask(AsyncContext ctx, ISFContext context) {
 		this.ctx = ctx;
@@ -122,7 +122,7 @@ public class ReportTask implements Runnable{
 
 		try(ZipFile zif = new ZipFile(zipFile)) { //ZipInputStream zin = new ZipInputStream(bin)
 
-			final Enumeration<? extends ZipEntry> entries = zif.entries();
+            Enumeration<? extends ZipEntry> entries = zif.entries();
 
 			String fs = System.getProperty("file.separator");
 
@@ -181,8 +181,8 @@ public class ReportTask implements Runnable{
             requestUrl = requestUrl.substring(ReportServlet.REPORT_URL_PREFIX.length() + 2); // remove
                                                                                              // 'report/'-prefix
 
-            if (requestUrl.equals("reports")) {
-                List<String> names = this.mapper.readValue(request.getParameter("reports"), new TypeReference<ArrayList<String>>() {});
+            if("reports".equals(requestUrl)) {
+                List<String> names = mapper.readValue(request.getParameter("reports"), new TypeReference<ArrayList<String>>() {});
                 File temp = File.createTempFile("reports_download", ZipReport.ZIP);
                 ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(temp));
 
@@ -227,30 +227,24 @@ public class ReportTask implements Runnable{
                         String query = request.getParameter("action");
 
 
-			if (query == null || query.equals("view")) {
+            if (query == null || query.equals("view")) {
+                if(workspaceDispatcher.exists(FolderType.REPORT, requestUrl)) {
+                    File path = workspaceDispatcher.getFile(FolderType.REPORT, requestUrl);
+                    response.setHeader("Content-Disposition", "inline; filename=" + path.getName());
 
+                    try (OutputStream output = response.getOutputStream();
+                         InputStream input = new FileInputStream(path)) {
+                        int l = 0;
+                        byte[] buf = new byte[65535];
+                        while((l = input.read(buf)) > 0) {
+                            output.write(buf, 0, l);
+                        }
+                    }
+                } else {
+                    tryExtractFromZip(response, requestUrl);
+                }
 
-
-				if(workspaceDispatcher.exists(FolderType.REPORT, requestUrl)) {
-
-					File path = workspaceDispatcher.getFile(FolderType.REPORT, requestUrl);
-
-					try (OutputStream output = response.getOutputStream();
-						 InputStream input = new FileInputStream(path)) {
-						int l = 0;
-						byte[] buf = new byte[65535];
-						while((l = input.read(buf)) > 0) {
-							output.write(buf, 0, l);
-						}
-					}
-
-				} else {
-
-					tryExtractFromZip(response, requestUrl);
-
-				}
-
-				ctx.complete();
+                ctx.complete();
 
 			} else if (query.equals("pack")) {
                 //Used only in ReportOutputFormat.FILES mode, also report automatically wrap into zip
@@ -259,14 +253,14 @@ public class ReportTask implements Runnable{
                 TestScriptDescription descr = context.getScriptRunner().getTestScriptDescription(id);
                 String workFolder = descr.getWorkFolder();
                 if(!workspaceDispatcher.exists(FolderType.REPORT, workFolder, workFolder + ZipReport.ZIP)){
-                    ZipReport zipReport = new ZipReport(descr.getWorkFolder(), workspaceDispatcher,  descr, EnvironmentSettings.ReportOutputFormat.ZIP_FILES);
+                    ZipReport zipReport = new ZipReport(descr.getWorkFolder(), workspaceDispatcher, descr, ReportOutputFormat.ZIP_FILES);
                     zipReport.createReport(null, null, null, id, null, null);
                     zipReport.closeReport();
                 }
 
 				response.getWriter().close();
 				ctx.complete();
-			} else if (query.equals("zip")) {
+            } else if("zip".equals(query)) {
 
 				String script_id = request.getParameter("script_id");
 				Long id = Long.parseLong(script_id);
@@ -287,7 +281,7 @@ public class ReportTask implements Runnable{
 				}
 
 				ctx.complete();
-			} else if (query.equals("simplezip")) {
+            } else if("simplezip".equals(query)) {
 
 			    File path;
 

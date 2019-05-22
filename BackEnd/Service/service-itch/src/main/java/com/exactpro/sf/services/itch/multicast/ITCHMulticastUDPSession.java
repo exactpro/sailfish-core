@@ -15,27 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch.multicast;
 
-import com.exactpro.sf.common.codecs.AbstractCodec;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.SendMessageFailedException;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.services.IServiceContext;
-import com.exactpro.sf.services.ISession;
-import com.exactpro.sf.services.ITaskExecutor;
-import com.exactpro.sf.services.MessageHelper;
-import com.exactpro.sf.services.itch.ITCHMessageHelper;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.future.DefaultWriteFuture;
-import org.apache.mina.core.future.WriteFuture;
-import org.apache.mina.core.session.DummySession;
-import org.apache.mina.core.session.IoSession;
-import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -48,32 +27,54 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.future.DefaultWriteFuture;
+import org.apache.mina.core.future.WriteFuture;
+import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.filter.codec.AbstractProtocolEncoderOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.common.codecs.AbstractCodec;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.common.util.SendMessageFailedException;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.ISession;
+import com.exactpro.sf.services.ITaskExecutor;
+import com.exactpro.sf.services.MessageHelper;
+import com.exactpro.sf.services.itch.ITCHMessageHelper;
+
 /**
  * Created by alexey.zarovny on 11/18/14.
  */
 public class ITCHMulticastUDPSession implements ISession {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private final String name;
     private final SailfishURI dictionaryURI;
     private final ITCHMulticastServer service;
     private final int heartbeatInterval;
-    private AbstractCodec codec;
+    private final AbstractCodec codec;
     private DatagramSocket udpPrimarySocket;
     private DatagramSocket udpSecondarySocket;
-    private InetAddress primaryAddress = null;
-    private InetAddress secondaryAddress = null;
-    private int primaryPort = 0;
-    private int secondaryPort = 0;
+    private InetAddress primaryAddress;
+    private InetAddress secondaryAddress;
+    private int primaryPort;
+    private int secondaryPort;
     private final IMessageFactory msgFactory;
-    private AtomicInteger sequenceNumber = new AtomicInteger(1);
-    private byte marketDataGroup;
+    private final AtomicInteger sequenceNumber = new AtomicInteger(1);
+    private final byte marketDataGroup;
     private ITCHMulticastCache cache;
     private final IoSession dummySession;
     private Future<?> heartbeatFuture;
-    private String remoteName;
-    private MessageHelper itchHandler;
+    private final String remoteName;
+    private final MessageHelper itchHandler;
 
     private final IServiceContext serviceContext;
 
@@ -94,7 +95,7 @@ public class ITCHMulticastUDPSession implements ISession {
 
     private void runHeartBeatTimer() {
         ITaskExecutor taskExecutor = service.getTaskExecutor();
-        heartbeatFuture = taskExecutor.addRepeatedTask(new HeartBeatTimerTask(this.serviceContext, this), 0L, heartbeatInterval, TimeUnit.SECONDS);
+        heartbeatFuture = taskExecutor.addRepeatedTask(new HeartBeatTimerTask(serviceContext, this), 0L, heartbeatInterval, TimeUnit.SECONDS);
     }
 
     @Override
@@ -111,10 +112,11 @@ public class ITCHMulticastUDPSession implements ISession {
         ProtocolEncoder pdOut = new ProtocolEncoder(dummySession);
         IMessage iMsg = (IMessage) message;
         byte mdGroup = 0;
-        if (iMsg.getField(ITCHMessageHelper.FAKE_FIELD_UH_MARKET_DATA_GROUP) != null)
+        if(iMsg.getField(ITCHMessageHelper.FAKE_FIELD_UH_MARKET_DATA_GROUP) != null) {
             mdGroup = Byte.valueOf(Byte.valueOf(iMsg.getField(ITCHMessageHelper.FAKE_FIELD_UH_MARKET_DATA_GROUP).toString()));
+        }
         mdGroup = mdGroup != 0 ? mdGroup : marketDataGroup;
-        final byte marketDataGroup = mdGroup;
+        byte marketDataGroup = mdGroup;
         @SuppressWarnings("serial")
         Map<String, String> params = new HashMap<String, String>(){{
             put(ITCHMessageHelper.FIELD_MARKET_DATA_GROUP_NAME, String.valueOf(marketDataGroup));
@@ -168,8 +170,9 @@ public class ITCHMulticastUDPSession implements ISession {
 
     @Override
     public void close() {
-        if(heartbeatFuture != null)
+        if(heartbeatFuture != null) {
             heartbeatFuture.cancel(true);
+        }
 
         if (udpPrimarySocket != null) {
             udpPrimarySocket.close();

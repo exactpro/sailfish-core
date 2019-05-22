@@ -18,6 +18,7 @@ package com.exactpro.sf.help.helpmarshaller.describers;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -79,7 +80,7 @@ public class FieldsDescriber {
 					try {
 						Object obj = paramClass.newInstance();
 						for (Field c : paramClass.getDeclaredFields()) {
-							if (c.getName().equals("FIELD")) {
+                            if("FIELD".equals(c.getName())) {
 								newField.setTag(c.get(obj).toString());
 								break;
 							}
@@ -123,7 +124,7 @@ public class FieldsDescriber {
 			}
 		}
 
-		if (java.util.HashMap.class.equals(messageClazz)) {
+		if (HashMap.class.equals(messageClazz)) {
 			return;
 		}
 
@@ -159,35 +160,23 @@ public class FieldsDescriber {
 		for (Method m : methods) {
 			if (m.getName().startsWith("get") && m.getParameterTypes().length == 0) {
 				String fname = m.getName().substring(3);
-				if (getSeen.containsKey(fname)) {
-					getSeen.put(fname, getSeen.get(fname) + 1);
-				} else {
-					getSeen.put(fname, 1);
-				}
+                getSeen.merge(fname, 1, Integer::sum);
 				if (!paramTypes.containsKey(fname)) {
 					paramTypes.put(fname, m.getReturnType());
 				}
 			}
 			// FIX implementation
-			else if (m.getName().equals("set") && m.getParameterTypes().length == 1) {
+            else if("set".equals(m.getName()) && m.getParameterTypes().length == 1) {
 				String fname = m.getParameterTypes()[0].getSimpleName();
 				if (!fname.isEmpty()) {
-					if (setSeen.containsKey(fname)) {
-						setSeen.put(fname, setSeen.get(fname) + 1);
-					} else {
-						setSeen.put(fname, 1);
-					}
+                    setSeen.merge(fname, 1, Integer::sum);
 				}
 			}
 			// generic implementation
 			else if ((m.getName().startsWith("set") || m.getName().startsWith("add")) && m.getParameterTypes().length == 1) {
 				String fname = m.getName().substring(3);
 				if (!fname.isEmpty()) {
-					if (setSeen.containsKey(fname)) {
-						setSeen.put(fname, setSeen.get(fname) + 1);
-					} else {
-						setSeen.put(fname, 1);
-					}
+                    setSeen.merge(fname, 1, Integer::sum);
 					if (m.getName().startsWith("add")) {
 						paramTypes.put(fname, m.getParameterTypes()[0]);
 					}
@@ -231,8 +220,9 @@ public class FieldsDescriber {
 				try {
 					Object obj = clazz.newInstance();
 					for (Field c : clazz.getDeclaredFields()) {
-						if (!(c.getName().equals("FIELD") || c.getName().equals("serialVersionUID") || (c.getName().equals("MSGTYPE") && c.get(obj)
-								.equals("")))) {
+                        if(!("FIELD".equals(c.getName()) ||
+                                "serialVersionUID".equals(c.getName()) ||
+                                ("MSGTYPE".equals(c.getName()) && "".equals(c.get(obj))))) {
 							String valueString = c.getName() + "=" + c.get(obj);
 							validValues.add(valueString);
 						}

@@ -15,20 +15,45 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration.suri;
 
-import com.google.common.collect.Multimap;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Multimap;
+
 public class SailfishURIUtils {
     //FIXME: use "resolve once" strategy in managers instead of matching URIs every time
     private static final Logger LOGGER = LoggerFactory.getLogger(SailfishURIUtils.class);
+
+    /**
+     * Finds an URI in the set which matches specified URI
+     *
+     *  @param  uri         URI for matching
+     *  @param  set         set with URI
+     *  @param  defaultRule default URI rule
+     *  @param  rules       array of URI rules
+     *
+     *  @return found URI or {@code null}
+     */
+    public static SailfishURI getMatchingURI(SailfishURI uri, Set<SailfishURI> set, SailfishURIRule defaultRule, SailfishURIRule... rules) {
+        Objects.requireNonNull(set, "set cannot be null");
+        checkURI(uri, defaultRule, rules);
+
+        for(SailfishURI sailfishURI : set) {
+            if(uri.matches(sailfishURI)) {
+                LOGGER.debug("Matching: {} -> {}", uri, sailfishURI);
+                return sailfishURI;
+            }
+        }
+
+        return null;
+    }
 
 	/**
      * Finds a value in multimap with key matching specified URI
@@ -43,14 +68,8 @@ public class SailfishURIUtils {
     public static <T> T getMatchingValue(SailfishURI uri, Multimap<SailfishURI, T> multimap, SailfishURIRule defaultRule, SailfishURIRule... rules) {
 		Objects.requireNonNull(multimap, "multimap cannot be null");
         checkURI(uri, defaultRule, rules);
-
         Collection<T> c = getMatchingValue(uri, multimap.asMap(), defaultRule, rules);
-
-        if(c == null || c.isEmpty()) {
-            return null;
-        }
-
-        return c.iterator().next();
+        return c == null || c.isEmpty() ? null : c.iterator().next();
     }
 
     /**
@@ -65,16 +84,8 @@ public class SailfishURIUtils {
      */
     public static <T> T getMatchingValue(SailfishURI uri, Map<SailfishURI, T> map, SailfishURIRule defaultRule, SailfishURIRule... rules) {
 		Objects.requireNonNull(map, "map cannot be null");
-        checkURI(uri, defaultRule, rules);
-
-        for(SailfishURI key : map.keySet()) {
-            if(uri.matches(key)) {
-                LOGGER.debug("Matching: {} -> {}", uri, key);
-                return map.get(key);
-            }
-        }
-
-        return null;
+        SailfishURI key = getMatchingURI(uri, map.keySet(), defaultRule, rules);
+        return key != null ? map.get(key) : null;
     }
 
     /**
@@ -141,10 +152,6 @@ public class SailfishURIUtils {
     }
 
     public static String sanitize(String value) {
-        if(value != null) {
-            return value.replaceAll("[^\\w:.]", "_");
-        }
-
-        return null;
+        return value != null ? value.replaceAll("[^\\w:.]", "_") : null;
     }
 }

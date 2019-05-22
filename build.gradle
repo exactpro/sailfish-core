@@ -1,13 +1,15 @@
 buildscript {
+    ext.kotlin_version = '1.3.21'
+
     repositories {
         maven {
             name 'MavenLocal' // for local builds only
             url 'shared'
         }
-            jcenter()
+        jcenter()
 
         configurations.all {
-           resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
         }
     }
 
@@ -20,6 +22,7 @@ buildscript {
         classpath(group: 'javax.xml.bind',                      name: 'jaxb-api',                           version: '2.2.11')
         classpath(group: 'com.github.ben-manes',                name: 'gradle-versions-plugin',             version: '0.20.0')
         classpath(group: 'com.bmuschko',                        name: 'gradle-cargo-plugin',                version: '2.4')
+        classpath group: 'org.jetbrains.kotlin', name: 'kotlin-gradle-plugin', version: "${kotlin_version}"
     }
 }
 
@@ -38,6 +41,8 @@ allprojects {
         sharedDir               = file("${project.rootDir}/shared")
         sharedWorkspaceDir      = file("${project.rootDir}/shared_workspace")
         tmpWorkspaceDir         = file("${project.rootDir}/tmp_workspace")
+
+        lightPluginDir          = file("${project.buildDir}/light_plugin")
 
         srcDir                  = file('src')
         mainDir                 = file("${srcDir}/main")
@@ -125,7 +130,7 @@ artifactory {
 }
 
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'kotlin'
     apply plugin: 'maven'
     apply plugin: 'jacoco'
 
@@ -141,12 +146,24 @@ subprojects {
             maven {
                 name 'MavenLocal' // for local builds only
                 url sharedDir
-                }
-                jcenter()
+            }
+            jcenter()
         }
 
         configurations.all {
            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDir genJavaDir
+            }
+            resources {
+                srcDir genResDir
+                srcDir providedResDir
+            }
         }
     }
 
@@ -262,6 +279,17 @@ subprojects {
         delete providedDir
     }
 
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+
     task saveDependencies (type: Copy) {
         from configurations.compile
         into "${project.buildDir}/dependencies"
@@ -302,6 +330,7 @@ subprojects {
         compile group: 'com.sun.xml.bind', name: 'jaxb-core', version: '2.2.7'
         compile group: 'com.sun.xml.bind', name: 'jaxb-impl', version: '2.2.7'
         compile group: 'javax.activation', name: 'activation', version: '1.1.1'
+        compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-jdk8', version: "${kotlin_version}"
     }
     
     jacoco {

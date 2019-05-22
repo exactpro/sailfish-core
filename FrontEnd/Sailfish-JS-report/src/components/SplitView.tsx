@@ -16,6 +16,7 @@
 
 import { h, Component } from 'preact';
 import '../styles/splitter.scss';
+import { createSelector } from '../helpers/styleCreators';
 
 const SPLITTER_WIDTH = 25;
 
@@ -141,10 +142,10 @@ export class SplitView extends Component<SplitViewProps, SplitState> {
             percentageRightWidth = 100 - minPanelPercentageWidth - splitterPercentageWidth;
         }
 
-        const leftClassName = ["splitter-pane-left", (isDragging ? "dragging" : "")].join(' '),
-              rightClassName = ["splitter-pane-right", (isDragging ? "dragging" : "")].join(' '),
-              splitterClassName = ["splitter-bar", (isDragging ? "dragging" : "")].join(' '),
-              rootClassName = ["splitter", (isDragging ? "dragging" : "")].join(' ');
+        const leftClassName = createSelector("splitter-pane-left", isDragging ? "dragging" : null),
+              rightClassName = createSelector("splitter-pane-right", isDragging ? "dragging" : null),
+              splitterClassName = createSelector("splitter-bar", isDragging ? "dragging" : null),
+              rootClassName = createSelector("splitter", isDragging ? "dragging" : null);
 
         return (
             <div class={rootClassName} ref={ref => this.root = ref}

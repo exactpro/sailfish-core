@@ -27,6 +27,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,12 +60,12 @@ public class EnvironmentResource {
                 XmlResponse response = new XmlResponse();
                 response.setMessage(e.getMessage());
                 response.setRootCause(e.getCause().toString());
-                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                return Response.status(Status.BAD_REQUEST).entity(response).build();
             }
         } else {
             XmlResponse response = new XmlResponse();
             response.setMessage("Can't create environment with empty name");
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            return Response.status(Status.BAD_REQUEST).entity(response).build();
         }
         XmlResponse response = new XmlResponse();
         response.setMessage("Environment " + name + " was successfully created");
@@ -83,12 +84,12 @@ public class EnvironmentResource {
                 XmlResponse response = new XmlResponse();
                 response.setMessage(e.getMessage());
                 response.setRootCause(e.getCause().toString());
-                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                return Response.status(Status.BAD_REQUEST).entity(response).build();
             }
         } else {
             XmlResponse response = new XmlResponse();
             response.setMessage("Can't remove environment with empty name");
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            return Response.status(Status.BAD_REQUEST).entity(response).build();
         }
         XmlResponse response = new XmlResponse();
         response.setMessage("Environment " + name + " was successfully removed");
@@ -108,17 +109,17 @@ public class EnvironmentResource {
                     XmlResponse response = new XmlResponse();
                     response.setMessage(e.getMessage());
                     response.setRootCause(e.getCause().toString());
-                    return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                    return Response.status(Status.BAD_REQUEST).entity(response).build();
                 }
             } else {
                 XmlResponse response = new XmlResponse();
                 response.setMessage("Can't rename environment to empty name");
-                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                return Response.status(Status.BAD_REQUEST).entity(response).build();
             }
         } else {
             XmlResponse response = new XmlResponse();
             response.setMessage("Can't rename environment with empty name");
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            return Response.status(Status.BAD_REQUEST).entity(response).build();
         }
         XmlResponse response = new XmlResponse();
         response.setMessage("Environment " + oldName + " was successfully renamed to " + newName);
@@ -141,13 +142,13 @@ public class EnvironmentResource {
                 XmlResponse response = new XmlResponse();
                 response.setMessage(e.getMessage());
                 response.setRootCause(Objects.toString(e.getCause(), null));
-                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                return Response.status(Status.BAD_REQUEST).entity(response).build();
             }
         }
 
         XmlResponse response = new XmlResponse();
         response.setMessage("Environment name cannot be empty");
-        return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+        return Response.status(Status.BAD_REQUEST).entity(response).build();
     }
 
     @GET //FIXME: use PUT when SFAPIClient will be supporting it
@@ -166,12 +167,12 @@ public class EnvironmentResource {
                 XmlResponse response = new XmlResponse();
                 response.setMessage(e.getMessage());
                 response.setRootCause(Objects.toString(e.getCause(), null));
-                return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+                return Response.status(Status.BAD_REQUEST).entity(response).build();
             }
         } else {
             XmlResponse response = new XmlResponse();
             response.setMessage("Environment name cannot be empty");
-            return Response.status(Response.Status.BAD_REQUEST).entity(response).build();
+            return Response.status(Status.BAD_REQUEST).entity(response).build();
         }
 
         XmlResponse response = new XmlResponse();

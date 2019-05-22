@@ -29,7 +29,7 @@ import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
  *
  */
 @MatrixUtils
-@ResourceAliases({ "CompareUtil" })
+@ResourceAliases("CompareUtil")
 public class CompareUtil extends AbstractCaller {
 
     @Description("Tests if a number is in the neighbourhood of base +/- delta (inclusive / non-strict) Usage: #{inRangeBased(actual, base, delta)}")

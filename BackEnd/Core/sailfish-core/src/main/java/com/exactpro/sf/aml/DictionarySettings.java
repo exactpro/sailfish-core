@@ -28,17 +28,15 @@ public class DictionarySettings implements Serializable {
 
     private SailfishURI uri;
 	private Class<? extends IMessageFactory> factoryClass;
-	private Set<SailfishURI> utilityClassURIs;
+    private final Set<SailfishURI> utilityClassURIs = new HashSet<>();
 
-	public DictionarySettings() {
-	    this.utilityClassURIs = new HashSet<>();
-	}
+    public DictionarySettings() {
+    }
 
 	public DictionarySettings(DictionarySettings settings) {
 	    this.uri = settings.uri;
 		this.factoryClass = settings.factoryClass;
-		this.utilityClassURIs = new HashSet<>();
-	}
+    }
 
     public void addUtilityClassURI(SailfishURI uri) {
 	    utilityClassURIs.add(uri);

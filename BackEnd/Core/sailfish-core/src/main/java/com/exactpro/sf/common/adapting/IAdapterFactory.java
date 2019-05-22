@@ -42,7 +42,7 @@ public interface IAdapterFactory {
 	 *    does not have an adapter of the given type for the
 	 *    given object
 	 */
-	public Object getAdapter(Object adaptableObject, Class<?> adapterType);
+    Object getAdapter(Object adaptableObject, Class<?> adapterType);
 
 	/**
 	 * Returns the collection of adapter types handled by this
@@ -55,5 +55,5 @@ public interface IAdapterFactory {
 	 *
 	 * @return the collection of adapter types
 	 */
-	public Class<?>[] getAdapterList();
+    Class<?>[] getAdapterList();
 }

@@ -403,7 +403,7 @@ public class ActionContextWrapper implements IActionContext{
 
     @Override
     public Set<String> getUncheckedFields() {
-        return this.unchekedFields;
+        return unchekedFields;
     }
 
     @Override

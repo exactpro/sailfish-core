@@ -74,7 +74,7 @@ public class FIXClientSettings extends FIXCommonSettings {
 	@Description("Value of NewPassword(925) tag used in Logon(A) message")
 	private String NewPassword;
 
-	private boolean EncryptPassword = false;
+	private boolean EncryptPassword;
 
 	private String EncryptionKeyFilePath;
 
@@ -108,13 +108,13 @@ public class FIXClientSettings extends FIXCommonSettings {
 	private Integer SeqNumTarget;
 
 	@Description("Add NextExpectedMsgSeqNum(789) tag into Logon(A) message")
-	private boolean addNextExpectedMsgSeqNum = false;
+	private boolean addNextExpectedMsgSeqNum;
 
 	@Description("Ignore if tag ResetSeqNumFlag(141) is not present in the received Logon(A) message")
-	private boolean ignoreAbsenceOf141tag = false;
+	private boolean ignoreAbsenceOf141tag;
 
 	@Description("If set to checked, service does not store messages")
-	private boolean performanceMode = false;
+	private boolean performanceMode;
 
 	@Description("Create new session after disconnecting on the server side")
 	private boolean autorelogin = true;

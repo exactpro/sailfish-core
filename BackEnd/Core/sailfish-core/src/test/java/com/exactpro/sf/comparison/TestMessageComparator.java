@@ -50,7 +50,7 @@ import com.exactpro.sf.util.DateTimeUtility;
 @SuppressWarnings("deprecation")
 public class TestMessageComparator extends AbstractTest {
 
-    private final static Set<String> uncheckedFields = new HashSet<>();
+    private static final Set<String> uncheckedFields = new HashSet<>();
 
     static {
         uncheckedFields.add("BeginString");
@@ -71,8 +71,8 @@ public class TestMessageComparator extends AbstractTest {
 	@Test
     public void testNullAndNotNull() {
 
-        IMessage message = this.messageFactory.createMessage("name", "namespace");
-        IMessage filter = this.messageFactory.createMessage("name", "namespace");
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
 
         IFilter nullFilter = StaticUtil.nullFilter(0, null);
         IFilter notNullFilter = StaticUtil.notNullFilter(0, null);
@@ -108,8 +108,8 @@ public class TestMessageComparator extends AbstractTest {
 		String failed = StatusType.FAILED.name();
 		String passed = StatusType.PASSED.name();
 
-		IMessage message = this.messageFactory.createMessage("name", "namespace");
-		IMessage filter = this.messageFactory.createMessage("name", "namespace");
+        IMessage message = messageFactory.createMessage("name", "namespace");
+        IMessage filter = messageFactory.createMessage("name", "namespace");
 
 		message.addField("float" + failed, 1.001f);
 		filter.addField("float" + failed, 1.002f);
@@ -277,83 +277,71 @@ public class TestMessageComparator extends AbstractTest {
     {
         //System.out.println("------- failUnexpected="+failUnexpected+", expected="+expected+", actual="+actual);
 	    String namespace = "namespace";
-        IMessage message;
-        IMessage filter;
         IMessage noPartyIDs;
-        IMessage header;
-        IMessage trailer;
-        List<IMessage> group;
 
-        {
-            message = new MapMessage(namespace, "ExecutionReport");
-            header = new MapMessage(namespace, "header");
-            trailer = new MapMessage(namespace, "trailer");
+        IMessage message = new MapMessage(namespace, "ExecutionReport");
+        IMessage header = new MapMessage(namespace, "header");
+        IMessage trailer = new MapMessage(namespace, "trailer");
 
-            header.addField("BeginString", "FIXT.1.1");
-            header.addField("BodyLength", 20);
-            header.addField("MsgType", "8");
-            header.addField("MsgSeqNum", 1);
-            header.addField("TargetCompID", "TCI");
-            header.addField("SenderCompID", "SCI");
-            trailer.addField("CheckSum", 10);
-            message.addField("header", header);
-            message.addField("trailer", trailer);
-            message.addField("ClOrdID", "ClOrdID");
+        header.addField("BeginString", "FIXT.1.1");
+        header.addField("BodyLength", 20);
+        header.addField("MsgType", "8");
+        header.addField("MsgSeqNum", 1);
+        header.addField("TargetCompID", "TCI");
+        header.addField("SenderCompID", "SCI");
+        trailer.addField("CheckSum", 10);
+        message.addField("header", header);
+        message.addField("trailer", trailer);
+        message.addField("ClOrdID", "ClOrdID");
 
-            group = new ArrayList<>(actual);
-            for (int i=0; i<actual; i++)
-            {
+        List<IMessage> group = new ArrayList<>(actual);
+        for(int i = 0; i < actual; i++) {
+            noPartyIDs = new MapMessage(namespace, "NoPartyIDs");
+            noPartyIDs.addField("PartyID", "PartyID");
+            noPartyIDs.addField("PartyIDSource", 'B');
+            noPartyIDs.addField("PartyRole", 1);
+            group.add(noPartyIDs);
+        }
+        message.addField("group_NoPartyIDs", group);
+
+        IMessage filter = new MapMessage(namespace, "ExecutionReport");
+        header = new MapMessage(namespace, "header");
+        trailer = new MapMessage(namespace, "trailer");
+
+        header.addField("BeginString", "FIXT.1.1");
+        header.addField("BodyLength", 21);
+        header.addField("MsgType", "8");
+        header.addField("MsgSeqNum", 2);
+        header.addField("TargetCompID", "TCI*");
+        trailer.addField("CheckSum", 11);
+        filter.addField("header", header);
+        filter.addField("trailer", trailer);
+
+        switch(filterType) {
+        case VALUE:
+            group = new ArrayList<>(expected);
+            for(int i = 0; i < expected; i++) {
                 noPartyIDs = new MapMessage(namespace, "NoPartyIDs");
                 noPartyIDs.addField("PartyID", "PartyID");
-                noPartyIDs.addField("PartyIDSource", 'B');
                 noPartyIDs.addField("PartyRole", 1);
                 group.add(noPartyIDs);
             }
-            message.addField("group_NoPartyIDs", group);
-
-        }
-
-        {
-            filter = new MapMessage(namespace, "ExecutionReport");
-            header = new MapMessage(namespace, "header");
-            trailer = new MapMessage(namespace, "trailer");
-
-            header.addField("BeginString", "FIXT.1.1");
-            header.addField("BodyLength", 21);
-            header.addField("MsgType", "8");
-            header.addField("MsgSeqNum", 2);
-            header.addField("TargetCompID", "TCI*");
-            trailer.addField("CheckSum", 11);
-            filter.addField("header", header);
-            filter.addField("trailer", trailer);
-
-            switch (filterType) {
-                case VALUE:
-                    group = new ArrayList<>(expected);
-                    for (int i=0; i<expected; i++)
-                    {
-                        noPartyIDs = new MapMessage(namespace, "NoPartyIDs");
-                        noPartyIDs.addField("PartyID", "PartyID");
-                        noPartyIDs.addField("PartyRole", 1);
-                        group.add(noPartyIDs);
-                    }
-                filter.addField("group_NoPartyIDs", group);
-                    break;
-                case NOT_EMPTY:
-                filter.addField("group_NoPartyIDs", StaticUtil.notNullFilter(0, null));
-                    break;
-                case EMPTY:
-                filter.addField("group_NoPartyIDs", StaticUtil.nullFilter(0, null));
-                    break;
-                default:
-                    throw new IllegalArgumentException("No action for filter type " + filterType);
-            }
+            filter.addField("group_NoPartyIDs", group);
+            break;
+        case NOT_EMPTY:
+            filter.addField("group_NoPartyIDs", StaticUtil.notNullFilter(0, null));
+            break;
+        case EMPTY:
+            filter.addField("group_NoPartyIDs", StaticUtil.nullFilter(0, null));
+            break;
+        default:
+            throw new IllegalArgumentException("No action for filter type " + filterType);
         }
 
         ComparatorSettings compSettings = new ComparatorSettings();
-        MetaContainer metaContainer = new com.exactpro.sf.aml.script.MetaContainer();
+        MetaContainer metaContainer = new MetaContainer();
         metaContainer.setFailUnexpected(failUnexpected);
-        MetaContainer NoContraBrokers = new com.exactpro.sf.aml.script.MetaContainer();
+        MetaContainer NoContraBrokers = new MetaContainer();
         for (int i=0; i<expected; i++)
         {
             metaContainer.add("group_NoPartyIDs", NoContraBrokers);
@@ -411,7 +399,7 @@ public class TestMessageComparator extends AbstractTest {
 
         ComparatorSettings compSettings = new ComparatorSettings();
         compSettings.setCheckGroupsOrder(checkGroupOrder);
-        MetaContainer metaContainer = new com.exactpro.sf.aml.script.MetaContainer();
+        MetaContainer metaContainer = new MetaContainer();
         metaContainer.setFailUnexpected(failUnexpected);
         compSettings.setMetaContainer(metaContainer);
 
@@ -421,12 +409,11 @@ public class TestMessageComparator extends AbstractTest {
 	@Test
 	public void testDSGComparing()
 	{
-		IMessage mEXECUTION_REPORT;
 
-		HashMap<String, Boolean> map = new HashMap<>();
+        HashMap<String, Boolean> map = new HashMap<>();
 		map.put("OldGrossConsideration", new Boolean(true));
 
-		mEXECUTION_REPORT = messageFactory.createMessage("EXECUTION_REPORT", "namespace");
+        IMessage mEXECUTION_REPORT = messageFactory.createMessage("EXECUTION_REPORT", "namespace");
         mEXECUTION_REPORT.addField("CounterParty", "CounterParty0");
 		mEXECUTION_REPORT.addField("OrderStatus", "OrderStatus.Filled");
 		mEXECUTION_REPORT.addField("Origin", 1);
@@ -454,7 +441,7 @@ public class TestMessageComparator extends AbstractTest {
 		mEXECUTION_REPORT.addField("ContingentValue", 0);
 		mEXECUTION_REPORT.addField("ContingentCondition", -1);
 		mEXECUTION_REPORT.addField("TraderIndex", 5710);
-		mEXECUTION_REPORT.addField("SourceGatewayType",  new java.lang.Byte("0"));
+        mEXECUTION_REPORT.addField("SourceGatewayType", new Byte("0"));
 		mEXECUTION_REPORT.addField("ExecType", "ExecType.Fill");
 		mEXECUTION_REPORT.addField("Symbol", "AKPS1");
 		mEXECUTION_REPORT.addField("AllocatedSize", 0);
@@ -493,7 +480,7 @@ public class TestMessageComparator extends AbstractTest {
 		mEXECUTION_REPORT.addField("OnlyForMarketDataSystem", "OnlyForMarketDataSystem.RegularTrade");
 		mEXECUTION_REPORT.addField("Qualifier", "Qualifier.Conventional");
 		mEXECUTION_REPORT.addField("SideQualifier", "SideQualifier.BUY");
-		mEXECUTION_REPORT.addField("CrossType",  new java.lang.Byte("0"));
+        mEXECUTION_REPORT.addField("CrossType", new Byte("0"));
 		mEXECUTION_REPORT.addField("TransactTime", "*");
 		mEXECUTION_REPORT.addField("RoutingSeq", -999L);
 		mEXECUTION_REPORT.addField("ClearingAccountType", "ClearingAccountType.House");
@@ -510,14 +497,13 @@ public class TestMessageComparator extends AbstractTest {
 	@Test
 	public void testComparingWithNegativeMap()
 	{
-		IMessage mEXECUTION_REPORT;
 
-		HashMap<String, Boolean> map = new HashMap<>();
+        HashMap<String, Boolean> map = new HashMap<>();
 		map.put("OldGrossConsideration", true);
 		map.put("LevelID", true);
 		map.put("OrderStatus", true);
 
-		mEXECUTION_REPORT = this.messageFactory.createMessage("EXECUTION_REPORT", "namespace");
+        IMessage mEXECUTION_REPORT = messageFactory.createMessage("EXECUTION_REPORT", "namespace");
         mEXECUTION_REPORT.addField("CounterParty", "CounterParty");
 		mEXECUTION_REPORT.addField("OrderStatus", "OrderStatus.Filled");
 		mEXECUTION_REPORT.addField("Origin", 1);
@@ -542,14 +528,13 @@ public class TestMessageComparator extends AbstractTest {
 
 	@Test
 	public void testComparingPresentMissedEnums() {
-		IMessage mEXECUTION_REPORT;
 
-		HashMap<String, Boolean> map = new HashMap<>();
+        HashMap<String, Boolean> map = new HashMap<>();
 		map.put("OldGrossConsideration", true);
 		map.put("LevelID", true);
 		map.put("OrderStatus", true);
 
-		mEXECUTION_REPORT = this.messageFactory.createMessage("EXECUTION_REPORT", "namespace");
+        IMessage mEXECUTION_REPORT = messageFactory.createMessage("EXECUTION_REPORT", "namespace");
         mEXECUTION_REPORT.addField("CounterParty", "CounterParty");
 		mEXECUTION_REPORT.addField("OrderStatus", "OrderStatus.Filled");
 		mEXECUTION_REPORT.addField("Origin", 1);
@@ -565,8 +550,7 @@ public class TestMessageComparator extends AbstractTest {
         ComparatorSettings compSettings = new ComparatorSettings();
 		compSettings.setNegativeMap(map);
 
-		IMessage mEXECUTION_REPORT_FILTER;
-		mEXECUTION_REPORT_FILTER = this.messageFactory.createMessage("EXECUTION_REPORT", "namespace");
+        IMessage mEXECUTION_REPORT_FILTER = messageFactory.createMessage("EXECUTION_REPORT", "namespace");
         mEXECUTION_REPORT_FILTER.addField("CounterParty", "CounterParty");
 		mEXECUTION_REPORT_FILTER.addField("OrderStatus", "OrderStatus.Present");
 		mEXECUTION_REPORT_FILTER.addField("Origin", 1);
@@ -588,114 +572,102 @@ public class TestMessageComparator extends AbstractTest {
 	public void testCompareMultipleSubmessages()
 	{
 		Map<String, Object> actions = new HashMap<>();
-		IMessage messageTradeConfirmation;
-		IMessage messageTradeConfirmation2;
-		IMessage messageOTHRPRTY;
-		IMessage messageSETDET;
-		IMessage messageSETPRTY;
-		IMessage messageBasicHeader;
-		IMessage messageCONFDET;
-		IMessage messageCONFPRTY;
-		IMessage messageGENL;
-		IMessage messageLINK;
-		IMessage messageTrailer;
-		IMessage messageApplicationHeaderInput;
 
-		messageOTHRPRTY = this.messageFactory.createMessage("OTHRPRTY", "namespace");
-        messageOTHRPRTY.addField("CounterParty", new java.lang.String("CounterParty"));
+        IMessage messageOTHRPRTY = messageFactory.createMessage("OTHRPRTY", "namespace");
+        messageOTHRPRTY.addField("CounterParty", new String("CounterParty"));
 		actions.put("othrprty", messageOTHRPRTY);
 
-		messageSETPRTY = this.messageFactory.createMessage("SETPRTY", "namespace");
-        messageSETPRTY.addField("SettlementAccount", new java.lang.String("SettlementAccount_1"));
-		messageSETPRTY.addField("SettlementParty_Seller_R", new java.lang.String( "SettlementParty_Seller_R_1" ));
-		messageSETPRTY.addField("PlaceOfSettlement", new java.lang.String( "PlaceOfSettlement_1" ));
-		messageSETPRTY.addField("SettlementParty_Seller_P", new java.lang.String( "SettlementParty_Seller_P_1" ));
-		messageSETPRTY.addField("SettlementParty_Buyer_R", new java.lang.String( "SettlementParty_Buyer_R_1" ));
-		messageSETPRTY.addField("SettlementParty_Buyer_P", new java.lang.String( "SettlementParty_Buyer_P_1" ));
+        IMessage messageSETPRTY = messageFactory.createMessage("SETPRTY", "namespace");
+        messageSETPRTY.addField("SettlementAccount", new String("SettlementAccount_1"));
+        messageSETPRTY.addField("SettlementParty_Seller_R", new String("SettlementParty_Seller_R_1"));
+        messageSETPRTY.addField("PlaceOfSettlement", new String("PlaceOfSettlement_1"));
+        messageSETPRTY.addField("SettlementParty_Seller_P", new String("SettlementParty_Seller_P_1"));
+        messageSETPRTY.addField("SettlementParty_Buyer_R", new String("SettlementParty_Buyer_R_1"));
+        messageSETPRTY.addField("SettlementParty_Buyer_P", new String("SettlementParty_Buyer_P_1"));
 		actions.put("setprty1", messageSETPRTY);
 
-		messageSETPRTY = this.messageFactory.createMessage("SETPRTY", "namespace");
-        messageSETPRTY.addField("SettlementAccount", new java.lang.String("SettlementAccount_2"));
-		messageSETPRTY.addField("SettlementParty_Seller_R", new java.lang.String( "SettlementParty_Seller_R_2" ));
-		messageSETPRTY.addField("PlaceOfSettlement", new java.lang.String( "PlaceOfSettlement_2" ));
-		messageSETPRTY.addField("SettlementParty_Seller_P", new java.lang.String( "SettlementParty_Seller_P_2" ));
-		messageSETPRTY.addField("SettlementParty_Buyer_R", new java.lang.String( "SettlementParty_Buyer_R_2" ));
-		messageSETPRTY.addField("SettlementParty_Buyer_P", new java.lang.String( "SettlementParty_Buyer_P_2" ));
+        messageSETPRTY = messageFactory.createMessage("SETPRTY", "namespace");
+        messageSETPRTY.addField("SettlementAccount", new String("SettlementAccount_2"));
+        messageSETPRTY.addField("SettlementParty_Seller_R", new String("SettlementParty_Seller_R_2"));
+        messageSETPRTY.addField("PlaceOfSettlement", new String("PlaceOfSettlement_2"));
+        messageSETPRTY.addField("SettlementParty_Seller_P", new String("SettlementParty_Seller_P_2"));
+        messageSETPRTY.addField("SettlementParty_Buyer_R", new String("SettlementParty_Buyer_R_2"));
+        messageSETPRTY.addField("SettlementParty_Buyer_P", new String("SettlementParty_Buyer_P_2"));
 		actions.put("setprty2", messageSETPRTY);
 
-		messageSETDET = this.messageFactory.createMessage("SETDET", "namespace");
-		messageSETDET.addField("TypeOfSettlementIndicator", new java.lang.String( "TypeOfSettlementIndicator" ));
+        IMessage messageSETDET = messageFactory.createMessage("SETDET", "namespace");
+        messageSETDET.addField("TypeOfSettlementIndicator", new String("TypeOfSettlementIndicator"));
 		messageSETDET.addField("SETPRTY", actions.get("setprty1"));
 		messageSETDET.addField("SETPRTY", actions.get("setprty2"));
 		actions.put("setdet", messageSETDET);
 
-		messageBasicHeader = this.messageFactory.createMessage("BasicHeader", "namespace");
+        IMessage messageBasicHeader = messageFactory.createMessage("BasicHeader", "namespace");
 		messageBasicHeader.addField("ServiceID", 1 );
-		messageBasicHeader.addField("LogicalTerminalAddress", new java.lang.String( "ANASCH20AXXX" ));
+        messageBasicHeader.addField("LogicalTerminalAddress", new String("ANASCH20AXXX"));
 		messageBasicHeader.addField("SessionNumber", 4321 );
 		messageBasicHeader.addField("SequenceNumber", 654321 );
-		messageBasicHeader.addField("ApplicationID", new java.lang.String( "F" ));
+        messageBasicHeader.addField("ApplicationID", new String("F"));
 		actions.put("bh", messageBasicHeader);
 
-		messageCONFPRTY = this.messageFactory.createMessage("CONFPRTY", "namespace");
-		messageCONFPRTY.addField("ClearingMember_P", new java.lang.String( "ClearingMember_P" ));
-		messageCONFPRTY.addField("PartyCapacity", new java.lang.String( "PartyCapacity" ));
-		messageCONFPRTY.addField("AccountAtTradingVenue", new java.lang.String( "AccountAtTradingVenue" ));
-		messageCONFPRTY.addField("ClearingMember_R", new java.lang.String( "ClearingMember_R" ));
-		messageCONFPRTY.addField("Buyer_P", new java.lang.String( "Buyer_P" ));
-        messageCONFPRTY.addField("PositionAccount", new java.lang.String("PositionAccount"));
-		messageCONFPRTY.addField("Buyer_R", new java.lang.String( "Buyer_R" ));
-		messageCONFPRTY.addField("TradingPartyReference", new java.lang.String( "TradingPartyReference" ));
-		messageCONFPRTY.addField("PartyNarrative", new java.lang.String( "PartyNarrative" ));
-		messageCONFPRTY.addField("Seller_P", new java.lang.String( "Seller_P" ));
-		messageCONFPRTY.addField("Seller_R", new java.lang.String( "Seller_R" ));
+        IMessage messageCONFPRTY = messageFactory.createMessage("CONFPRTY", "namespace");
+        messageCONFPRTY.addField("ClearingMember_P", new String("ClearingMember_P"));
+        messageCONFPRTY.addField("PartyCapacity", new String("PartyCapacity"));
+        messageCONFPRTY.addField("AccountAtTradingVenue", new String("AccountAtTradingVenue"));
+        messageCONFPRTY.addField("ClearingMember_R", new String("ClearingMember_R"));
+        messageCONFPRTY.addField("Buyer_P", new String("Buyer_P"));
+        messageCONFPRTY.addField("PositionAccount", new String("PositionAccount"));
+        messageCONFPRTY.addField("Buyer_R", new String("Buyer_R"));
+        messageCONFPRTY.addField("TradingPartyReference", new String("TradingPartyReference"));
+        messageCONFPRTY.addField("PartyNarrative", new String("PartyNarrative"));
+        messageCONFPRTY.addField("Seller_P", new String("Seller_P"));
+        messageCONFPRTY.addField("Seller_R", new String("Seller_R"));
 		actions.put("confprty", messageCONFPRTY);
 
-		messageCONFDET = this.messageFactory.createMessage("CONFDET", "namespace");
-		messageCONFDET.addField("PlaceOfTrade", new java.lang.String( "PlaceOfTrade" ));
-		messageCONFDET.addField("SettlementDate", new java.lang.String( "SettlementDate" ));
+        IMessage messageCONFDET = messageFactory.createMessage("CONFDET", "namespace");
+        messageCONFDET.addField("PlaceOfTrade", new String("PlaceOfTrade"));
+        messageCONFDET.addField("SettlementDate", new String("SettlementDate"));
 		messageCONFDET.addField("CONFPRTY", actions.get("confprty"));
-		messageCONFDET.addField("QuantityTraded", new java.lang.String( "QuantityTraded" ));
-		messageCONFDET.addField("DealPriceAndCurrency_B", new java.lang.String( "DealPriceAndCurrency_B" ));
-		messageCONFDET.addField("BuySellIndicator", new java.lang.String( "BuySellIndicator" ));
-		messageCONFDET.addField("SettlementAmountAndCurrency", new java.lang.String( "SettlementAmountAndCurrency" ));
-		messageCONFDET.addField("DealPriceAndCurrency_A", new java.lang.String( "DealPriceAndCurrency_A" ));
-		messageCONFDET.addField("TradeDateTime", new java.lang.String( "TradeDateTime" ));
-		messageCONFDET.addField("FinancialInstrument", new java.lang.String( "FinancialInstrument" ));
-		messageCONFDET.addField("PaymentIndicator", new java.lang.String( "PaymentIndicator" ));
-		messageCONFDET.addField("TradeProcessingNarrative", new java.lang.String( "TradeProcessingNarrative" ));
+        messageCONFDET.addField("QuantityTraded", new String("QuantityTraded"));
+        messageCONFDET.addField("DealPriceAndCurrency_B", new String("DealPriceAndCurrency_B"));
+        messageCONFDET.addField("BuySellIndicator", new String("BuySellIndicator"));
+        messageCONFDET.addField("SettlementAmountAndCurrency", new String("SettlementAmountAndCurrency"));
+        messageCONFDET.addField("DealPriceAndCurrency_A", new String("DealPriceAndCurrency_A"));
+        messageCONFDET.addField("TradeDateTime", new String("TradeDateTime"));
+        messageCONFDET.addField("FinancialInstrument", new String("FinancialInstrument"));
+        messageCONFDET.addField("PaymentIndicator", new String("PaymentIndicator"));
+        messageCONFDET.addField("TradeProcessingNarrative", new String("TradeProcessingNarrative"));
 		actions.put("confdet", messageCONFDET);
 
-		messageLINK = this.messageFactory.createMessage("LINK", "namespace");
-		messageLINK.addField("LinkedMessage", new java.lang.String( "LinkedMessage" ));
-        messageLINK.addField("TradeReference", new java.lang.String("TradeReference"));
-		messageLINK.addField("PreviousReference", new java.lang.String( "PreviousReference" ));
-		messageLINK.addField("VenueTradeReference", new java.lang.String( "VenueTradeReference" ));
+        IMessage messageLINK = messageFactory.createMessage("LINK", "namespace");
+        messageLINK.addField("LinkedMessage", new String("LinkedMessage"));
+        messageLINK.addField("TradeReference", new String("TradeReference"));
+        messageLINK.addField("PreviousReference", new String("PreviousReference"));
+        messageLINK.addField("VenueTradeReference", new String("VenueTradeReference"));
 		actions.put("link", messageLINK);
 
-		messageGENL = this.messageFactory.createMessage("GENL", "namespace");
-		messageGENL.addField("TradeType", new java.lang.String( "TradeType" ));
-		messageGENL.addField("SendersReference", new java.lang.String( "SendersReference" ));
-		messageGENL.addField("PreparationDateTime", new java.lang.String( "PreparationDateTime" ));
+        IMessage messageGENL = messageFactory.createMessage("GENL", "namespace");
+        messageGENL.addField("TradeType", new String("TradeType"));
+        messageGENL.addField("SendersReference", new String("SendersReference"));
+        messageGENL.addField("PreparationDateTime", new String("PreparationDateTime"));
 		messageGENL.addField("LINK", actions.get("link"));
 		actions.put("genl", messageGENL);
 
-		messageTrailer = this.messageFactory.createMessage("Trailer", "namespace");
-		messageTrailer.addField("TNG", new java.lang.String( "TNG" ));
-		messageTrailer.addField("CHK", new java.lang.String( "CHK" ));
-		messageTrailer.addField("MAC", new java.lang.String( "MAC" ));
+        IMessage messageTrailer = messageFactory.createMessage("Trailer", "namespace");
+        messageTrailer.addField("TNG", new String("TNG"));
+        messageTrailer.addField("CHK", new String("CHK"));
+        messageTrailer.addField("MAC", new String("MAC"));
 		actions.put("trailer", messageTrailer);
 
-		messageApplicationHeaderInput = this.messageFactory.createMessage("ApplicationHeaderInput", "namespace");
+        IMessage messageApplicationHeaderInput = messageFactory.createMessage("ApplicationHeaderInput", "namespace");
 		messageApplicationHeaderInput.addField("ObsolescencePeriod", 3 );
-		messageApplicationHeaderInput.addField("Input", new java.lang.String( "I" ));
-		messageApplicationHeaderInput.addField("ReceiversAddress", new java.lang.String( "BANKDEFFXXXX" ));
-		messageApplicationHeaderInput.addField("MessagePriority", new java.lang.String( "U" ));
+        messageApplicationHeaderInput.addField("Input", new String("I"));
+        messageApplicationHeaderInput.addField("ReceiversAddress", new String("BANKDEFFXXXX"));
+        messageApplicationHeaderInput.addField("MessagePriority", new String("U"));
 		messageApplicationHeaderInput.addField("MessageType", 518 );
-		messageApplicationHeaderInput.addField("DeliveryMonitoring", new java.lang.String( "3" ));
+        messageApplicationHeaderInput.addField("DeliveryMonitoring", new String("3"));
 		actions.put("h1", messageApplicationHeaderInput);
 
-		messageTradeConfirmation = this.messageFactory.createMessage("TradeConfirmation", "namespace");
+        IMessage messageTradeConfirmation = messageFactory.createMessage("TradeConfirmation", "namespace");
 		messageTradeConfirmation.addField("OTHRPRTY", actions.get("othrprty"));
 		messageTradeConfirmation.addField("SETDET", actions.get("setdet"));
 		messageTradeConfirmation.addField("BasicHeader", actions.get("bh"));
@@ -704,19 +676,19 @@ public class TestMessageComparator extends AbstractTest {
 		messageTradeConfirmation.addField("Trailer", actions.get("trailer"));
 		messageTradeConfirmation.addField("ApplicationHeaderInput", actions.get("h1"));
 
-		messageSETPRTY = this.messageFactory.createMessage("SETPRTY", "namespace");
-        messageSETPRTY.addField("SettlementAccount", new java.lang.String("another value"));
-		messageSETPRTY.addField("SettlementParty_Seller_R", new java.lang.String( "another value" ));
-		messageSETPRTY.addField("PlaceOfSettlement", new java.lang.String( "another value" ));
+        messageSETPRTY = messageFactory.createMessage("SETPRTY", "namespace");
+        messageSETPRTY.addField("SettlementAccount", new String("another value"));
+        messageSETPRTY.addField("SettlementParty_Seller_R", new String("another value"));
+        messageSETPRTY.addField("PlaceOfSettlement", new String("another value"));
 		actions.put("setprty2", messageSETPRTY);
 
-		messageSETDET = this.messageFactory.createMessage("SETDET", "namespace");
-		messageSETDET.addField("TypeOfSettlementIndicator", new java.lang.String( "TypeOfSettlementIndicator" ));
+        messageSETDET = messageFactory.createMessage("SETDET", "namespace");
+        messageSETDET.addField("TypeOfSettlementIndicator", new String("TypeOfSettlementIndicator"));
 		messageSETDET.addField("SETPRTY", messageSETPRTY);
 		messageSETDET.addField("SETPRTY", actions.get("setprty1"));
 		actions.put("setdet", messageSETDET);
 
-		messageTradeConfirmation2 = this.messageFactory.createMessage("TradeConfirmation", "namespace");
+        IMessage messageTradeConfirmation2 = messageFactory.createMessage("TradeConfirmation", "namespace");
 		messageTradeConfirmation2.addField("OTHRPRTY", actions.get("othrprty"));
 		messageTradeConfirmation2.addField("SETDET", actions.get("setdet"));
 		messageTradeConfirmation2.addField("BasicHeader", actions.get("bh"));
@@ -736,21 +708,17 @@ public class TestMessageComparator extends AbstractTest {
     @Test
 	public void testDoublePresicion()
 	{
-		IMessage mGrossRecord;
-		IMessage mGrossRecord2;
-        com.exactpro.sf.aml.script.MetaContainer metaContainer;
-        ComparatorSettings settings;
 
-		mGrossRecord = this.messageFactory.createMessage("GrossRecord", "namespace");
+        IMessage mGrossRecord = messageFactory.createMessage("GrossRecord", "namespace");
 		mGrossRecord.addField("CurrentGross", 89518.08d);
 
-		mGrossRecord2 = this.messageFactory.createMessage("GrossRecord", "namespace");
+        IMessage mGrossRecord2 = messageFactory.createMessage("GrossRecord", "namespace");
 		mGrossRecord2.addField("CurrentGross", 89519d);
 
-        metaContainer = new com.exactpro.sf.aml.script.MetaContainer();
+        MetaContainer metaContainer = new MetaContainer();
 		metaContainer.addDoublePrecision("CurrentGross=10");
 
-        settings = new ComparatorSettings();
+        ComparatorSettings settings = new ComparatorSettings();
 		settings.setMetaContainer(metaContainer);
 
         ComparisonResult result = MessageComparator.compare(mGrossRecord, mGrossRecord2, settings);
@@ -762,17 +730,17 @@ public class TestMessageComparator extends AbstractTest {
 	@Test
 	public void testDoublePre()
 	{
-		IMessage mGrossRecord = this.messageFactory.createMessage("GrossRecord", "namespace");
+        IMessage mGrossRecord = messageFactory.createMessage("GrossRecord", "namespace");
 		mGrossRecord.addField("BrokerId", "MEMBERFIRM1");
 		mGrossRecord.addField("CurrentGross", 74598.4);
 		mGrossRecord.addField("UserId", "NAT_MAX_1");
 
-		IMessage mGrossRecord2 = this.messageFactory.createMessage("GrossRecord", "namespace");
+        IMessage mGrossRecord2 = messageFactory.createMessage("GrossRecord", "namespace");
 		mGrossRecord2.addField("BrokerId", "MEMBERFIRM1");
 		mGrossRecord2.addField("CurrentGross", 74599);
 		mGrossRecord2.addField("UserId", "NAT_MAX_1");
 
-        MetaContainer metaContainer = new com.exactpro.sf.aml.script.MetaContainer();
+        MetaContainer metaContainer = new MetaContainer();
 		metaContainer.addDoublePrecision("CurrentGross=10");
 
         ActionContext settings = new ActionContext(getScriptContext(), true);

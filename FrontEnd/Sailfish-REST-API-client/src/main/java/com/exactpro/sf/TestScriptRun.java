@@ -20,7 +20,7 @@ import org.w3c.dom.Node;
 
 public class TestScriptRun {
 	
-	private int id;
+	private final int id;
 	private String description;
 	private String matrixName;
 	private int passed;
@@ -113,7 +113,7 @@ public class TestScriptRun {
 	
 	// Static members
 
-	public static enum State {
+	public enum State {
 		FINISHED,
 		CANCELLED,
 		READY,
@@ -122,7 +122,7 @@ public class TestScriptRun {
 		INITIAL
 	}
 	
-	public static enum Status {
+	public enum Status {
 		INIT_FAILED,
 		PREPARING,
 		EXECUTED,
@@ -140,40 +140,49 @@ public class TestScriptRun {
 	
 	protected static void fillFromXml(Element el, TestScriptRun run) {
 		String val = Util.getTextContent(el, "description");
-		if (val != null)
-			run.description = val;
+        if(val != null) {
+            run.description = val;
+        }
 		
 		val = Util.getTextContent(el, "matrixFileName");
-		if (val != null)
-			run.matrixName = val;
+        if(val != null) {
+            run.matrixName = val;
+        }
 		
 		val = Util.getTextContent(el, "scriptState");
-		if (val != null)
-			run.state = val;
+        if(val != null) {
+            run.state = val;
+        }
 		
 		val = Util.getTextContent(el, "scriptStatus");
-		if (val != null)
-			run.status = val;
+        if(val != null) {
+            run.status = val;
+        }
 		
 		val = Util.getTextContent(el, "passed");
-		if (val != null)
-			run.passed = Integer.parseInt(val);
+        if(val != null) {
+            run.passed = Integer.parseInt(val);
+        }
 		
 		val = Util.getTextContent(el, "failed");
-		if (val != null)
-			run.failed = Integer.parseInt(val);
+        if(val != null) {
+            run.failed = Integer.parseInt(val);
+        }
 		
 		val = Util.getTextContent(el, "total");
-		if (val != null)
-			run.total = Integer.parseInt(val);
+        if(val != null) {
+            run.total = Integer.parseInt(val);
+        }
 		
 		val = Util.getTextContent(el, "problem");
-		if (val != null)
-			run.problem = val;
+        if(val != null) {
+            run.problem = val;
+        }
 		
 		val = Util.getTextContent(el, "cause");
-		if (val != null)
-			run.cause = val;
+        if(val != null) {
+            run.cause = val;
+        }
 	}
 
 	@Override

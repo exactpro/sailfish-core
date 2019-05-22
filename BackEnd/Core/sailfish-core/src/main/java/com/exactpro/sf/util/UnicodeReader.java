@@ -33,7 +33,7 @@ public class UnicodeReader extends Reader {
      * @throws IOException If an I/O error occurs.
      */
     public UnicodeReader(InputStream in, String defaultEncoding) throws IOException {
-        byte bom[] = new byte[BOM_SIZE];
+        byte[] bom = new byte[BOM_SIZE];
         String encoding;
         int unread;
         PushbackInputStream pushbackStream = new PushbackInputStream(in, BOM_SIZE);
@@ -62,17 +62,13 @@ public class UnicodeReader extends Reader {
 
         // Unread bytes if necessary and skip BOM marks.
         if (unread > 0) {
-            pushbackStream.unread(bom, (n - unread), unread);
+            pushbackStream.unread(bom, n - unread, unread);
         } else if (unread < -1) {
             pushbackStream.unread(bom, 0, 0);
         }
 
         // Use given encoding.
-        if (encoding == null) {
-            reader = new InputStreamReader(pushbackStream);
-        } else {
-            reader = new InputStreamReader(pushbackStream, encoding);
-        }
+        reader = encoding == null ? new InputStreamReader(pushbackStream) : new InputStreamReader(pushbackStream, encoding);
     }
 
     public String getEncoding() {

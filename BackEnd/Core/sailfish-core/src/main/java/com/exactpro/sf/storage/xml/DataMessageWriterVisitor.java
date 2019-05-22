@@ -30,9 +30,9 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 
 public class DataMessageWriterVisitor implements IMessageStructureVisitor {
 
-	private DataMessage dataMessage;
+	private final DataMessage dataMessage;
 	
-	private static MessageStructureReader rtraverser = new MessageStructureReader(); 
+	private static final MessageStructureReader rtraverser = new MessageStructureReader();
 	
 	public DataMessageWriterVisitor(DataMessage dataMessage){
 		this.dataMessage = dataMessage;

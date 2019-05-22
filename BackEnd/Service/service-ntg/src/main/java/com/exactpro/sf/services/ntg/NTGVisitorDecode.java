@@ -35,10 +35,10 @@ import com.exactpro.sf.services.ntg.exceptions.UnknownNTGMessageTypeException;
 
 final class NTGVisitorDecode extends NTGVisitorBase {
     private static final Logger logger = LoggerFactory.getLogger(NTGVisitorDecode.class);
-	private IMessage message = null;
+    private final IMessage message;
 	private final IMessageFactory msgFactory ;
 
-    public NTGVisitorDecode(final IoBuffer buffer, IMessageFactory msgFactory,
+    public NTGVisitorDecode(IoBuffer buffer, IMessageFactory msgFactory,
                             IMessage message)
 	{
 		super(buffer);
@@ -58,7 +58,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 
 		validateOffset(fieldName, accumulatedLength, offset);
 		IMessage msg = msgFactory.createMessage(complexField.getName(), complexField.getNamespace());
-        NTGVisitorDecode visitorNTG = new NTGVisitorDecode(super.buffer, msgFactory, msg);
+        NTGVisitorDecode visitorNTG = new NTGVisitorDecode(buffer, msgFactory, msg);
 		MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
         messageStructureWriter.traverse(visitorNTG, complexField.getFields());
 
@@ -81,17 +81,17 @@ final class NTGVisitorDecode extends NTGVisitorBase {
         String decodedValue;
         if ("D".equals(format) || "DATE".equals(format))
         {
-            long time = super.buffer.getLong();
+            long time = buffer.getLong();
             decodedValue = NTGUtility.getTransactTime(time);
         }
         else
         {
             byte[] fieldBytes = new byte[length];
-            super.buffer.get( fieldBytes );
+            buffer.get(fieldBytes);
             decodedValue = GenericConverter.convertByteArrayToString( length, fieldBytes );
             int index = decodedValue.indexOf( '\0' );
 
-            if( -1 != index )
+            if(index != -1)
             {
                 decodedValue = decodedValue.substring( 0 , index );
             }
@@ -100,7 +100,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
             logger.debug("   Decode visiting String field [{}], decoded value [{}].", fieldName, decodedValue);
         }
 
-        this.message.addField( fieldName, decodedValue.toString() );
+        message.addField(fieldName, decodedValue.toString());
         accumulatedLength += length;
     }
 	
@@ -114,22 +114,19 @@ final class NTGVisitorDecode extends NTGVisitorBase {
         validateLength(fieldName, lengthLong, length);
         validateOffset(fieldName, accumulatedLength, offset);
 
-		LocalDateTime decodedValue = null;
-        
-        long time = super.buffer.getLong();
+        long time = buffer.getLong();
 
-        decodedValue = NTGUtility.getTransactTimeAsDate(time);
+        LocalDateTime decodedValue = NTGUtility.getTransactTimeAsDate(time);
         
         if (logger.isDebugEnabled()) {
             logger.debug("   Decode visiting Double field [{}], decoded value [{}].", fieldName, decodedValue);
         }
 
-        this.message.addField( fieldName, decodedValue );
+        message.addField(fieldName, decodedValue);
         accumulatedLength += length;
 	}
 
-
-	@Override
+    @Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault)
 	{
 		validateAttributesMap(fieldName, Double.class, fldStruct);
@@ -139,19 +136,19 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 
         String type = getAttributeValue(fldStruct, NTGProtocolAttribute.Type.toString());
 
-		double divisor = "Price4".equals(type) ? 10000.0D : 100000000.0D;
+        double divisor = "Price4".equals(type) ? 10_000 : 100_000_000;
 
 		validateLength(fieldName, lengthLong, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
-		long longValue = super.buffer.getLong();
+        long longValue = buffer.getLong();
 		Double decodedValue = longValue / divisor;
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("   Decode visiting Double field [{}], decoded value [{}].", fieldName, decodedValue);
 		}
 
-		this.message.addField( fieldName, decodedValue );
+        message.addField(fieldName, decodedValue);
 		accumulatedLength += length;
 	}
 
@@ -166,14 +163,14 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 		validateLength(fieldName, lengthFloat, length);
 		validateOffset(fieldName, accumulatedLength, offset);
 
-		int intValue = super.buffer.getInt();
-		Float decodedValue = intValue / 10000.0f;
+        int intValue = buffer.getInt();
+        Float decodedValue = intValue / 10_000.0f;
 
 		if( logger.isDebugEnabled()) {
 			logger.debug("   Decode visiting Float field [{}], decoded value [{}].", fieldName, decodedValue);
 		}
 
-		this.message.addField( fieldName, decodedValue );
+        message.addField(fieldName, decodedValue);
 		accumulatedLength += length;
 	}
 
@@ -191,19 +188,19 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 
 		Long decodedValue;
-        if (ProtocolType.UINT32 == protocolType) {
+        if(protocolType == ProtocolType.UINT32) {
             validateLength(fieldName, lengthInt, length);
-            decodedValue = super.buffer.getUnsignedInt();
+            decodedValue = buffer.getUnsignedInt();
         } else {
             validateLength(fieldName, lengthLong, length);
-            decodedValue = super.buffer.getLong();
+            decodedValue = buffer.getLong();
         }
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("   Decode visiting Long field [{}], decoded value [{}].", fieldName, decodedValue);
 		}
 
-		this.message.addField( fieldName, decodedValue );
+        message.addField(fieldName, decodedValue);
 		accumulatedLength += length;
 	}
 
@@ -222,15 +219,15 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 		switch(length)
 		{
 			case lengthByte:
-				decodedValue = new Integer( super.buffer.get());
+                decodedValue = new Integer(buffer.get());
 				break;
 
 			case lengthShort:
-				decodedValue = new Integer( super.buffer.getShort());
+                decodedValue = new Integer(buffer.getShort());
 				break;
 
 			case lengthInt:
-				decodedValue = super.buffer.getInt();
+                decodedValue = buffer.getInt();
 				break;
 			default:
 				throw new EPSCommonException(
@@ -241,7 +238,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 			logger.debug("   Decode visiting String field [{}], decoded value [{}].", fieldName, decodedValue);
 		}
 
-		this.message.addField( fieldName, decodedValue );
+        message.addField(fieldName, decodedValue);
 		accumulatedLength += length;
 	}
 
@@ -256,13 +253,13 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 
 		validateLength(fieldName, lengthByte, length);
 		validateOffset(fieldName, accumulatedLength, offset);
-		Byte decodedValue = super.buffer.get();
+        Byte decodedValue = buffer.get();
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("   Decode visiting String field [{}], decoded value [{}].", fieldName, decodedValue);
 		}
 
-		this.message.addField( fieldName, decodedValue );
+        message.addField(fieldName, decodedValue);
 		accumulatedLength += length;
 	}
 
@@ -282,31 +279,30 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 			logger.debug("Visit fieldname = [{}]; fieldType [BigDecimal]", fieldName);
 		}
 
-		if(type.equals("Uint64")) {
+        if("Uint64".equals(type)) {
 
 			byte[] rawArray = new byte[length + 1];
 
 			rawArray[length] = 0;
 
-			super.buffer.get(rawArray, 0, length);
+            buffer.get(rawArray, 0, length);
 
 			// reverse
 			for (int i = 0; i < (length + 1)/2; ++i )
 			{
-				byte temp = 0;
-				temp = rawArray[length - i];
+                byte temp = rawArray[length - i];
 				rawArray[length - i] = rawArray[i];
 				rawArray[i] = temp;
 			}
 
 			BigInteger bigInt = new BigInteger(rawArray);
 			BigDecimal bigDec = new BigDecimal(bigInt);
-			this.message.addField( fieldName, bigDec );
+            message.addField(fieldName, bigDec);
 
-		} else if(type.equals("Price")) {
+        } else if("Price".equals(type)) {
 			long val = buffer.getLong();
 
-			boolean positive = ((byte)(val >> 63)) == 0;
+            boolean positive = (byte)(val >> 63) == 0;
 
 			if ( !positive )
 			{
@@ -319,7 +315,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 
 			BigDecimal valBD = new BigDecimal(val);
 
-			this.message.addField(fieldName, valBD.divide(new BigDecimal(100000000L)));
+            message.addField(fieldName, valBD.divide(new BigDecimal(100_000_000L)));
 		} else {
             throw new UnknownNTGMessageTypeException("Unknown protocol atribute Type: " + type);
 		}

@@ -44,8 +44,8 @@ import com.exactpro.sf.comparison.conversion.ConversionException;
  */
 public class TestStrictMessageWrapper {
     private static IDictionaryStructure dictionary;
-    private static String dictionaryName = "/messages/strictMessage.xml";
-    private String namespace = "TestStrictmessage";
+    private static final String dictionaryName = "/messages/strictMessage.xml";
+    private final String namespace = "TestStrictmessage";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -104,7 +104,7 @@ public class TestStrictMessageWrapper {
         // add single element in collection
         strictMsg.addField("double_collection", 10.1d);
 
-        System.out.println(strictMsg.toString());
+        System.out.println(strictMsg);
     }
 
     @Test

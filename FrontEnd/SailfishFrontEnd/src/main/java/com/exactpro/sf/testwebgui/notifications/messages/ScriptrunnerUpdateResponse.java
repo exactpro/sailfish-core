@@ -34,12 +34,8 @@ public class ScriptrunnerUpdateResponse extends AbstractMessage {
 	private ScriptState state;
 	
 	private ScriptStatus status;
-	
-	public ScriptrunnerUpdateResponse() {
-		super();
-	}
 
-	public String getRequestId() {
+    public String getRequestId() {
 		return requestId;
 	}
 

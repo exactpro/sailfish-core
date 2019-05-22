@@ -45,6 +45,7 @@ import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceEvent;
+import com.exactpro.sf.services.ServiceEvent.Type;
 import com.exactpro.sf.services.ServiceEventFactory;
 import com.exactpro.sf.services.ServiceHandlerException;
 import com.exactpro.sf.services.ServiceHandlerRoute;
@@ -69,12 +70,13 @@ import quickfix.field.DefaultApplVerID;
 import quickfix.field.EndSeqNo;
 import quickfix.field.MsgSeqNum;
 import quickfix.field.MsgType;
+import quickfix.field.NextExpectedMsgSeqNum;
 import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 
 public class FIXApplication implements FIXClientApplication {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
 	public static final String ENCRYPT_PASSWORD = "EncryptPassword";
 	public static final String ADD_NEXT_EXPECTED_SEQ_NUM = "AddNextExpectedMsgSeqNum";
@@ -107,12 +109,12 @@ public class FIXApplication implements FIXClientApplication {
 
 	private Integer seqNumSender;
 	private Integer seqNumTarget;
-	private boolean incorrectSenderMsgSeqNum = false; // update seqnum on logon
-	private boolean incorrectTargetMsgSeqNum = false; // update seqnum on logon
+    private boolean incorrectSenderMsgSeqNum; // update seqnum on logon
+    private boolean incorrectTargetMsgSeqNum; // update seqnum on logon
 
-	private boolean useDefaultApplVerID = false;
+    private boolean useDefaultApplVerID;
 
-	private boolean isPerformance = false;
+    private boolean isPerformance;
 
 	private boolean autorelogin = true;
 
@@ -136,16 +138,16 @@ public class FIXApplication implements FIXClientApplication {
         this.storage = serviceContext.getMessageStorage();
         this.serviceInfo = serviceContext.lookupService(serviceName);
         this.settings = this.applicationContext.getSessionSettings();
-        if (this.settings.isSetting(SEND_APP_REJECT)) {
+        if(settings.isSetting(SEND_APP_REJECT)) {
             try {
-                this.sendAppReject = this.settings.getBool(SEND_APP_REJECT);
+                this.sendAppReject = settings.getBool(SEND_APP_REJECT);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
         }
-        if (this.settings.isSetting(SEND_ADMIN_REJECT)) {
+        if(settings.isSetting(SEND_ADMIN_REJECT)) {
             try {
-                this.sendAdminReject = this.settings.getBool(SEND_ADMIN_REJECT);
+                this.sendAdminReject = settings.getBool(SEND_ADMIN_REJECT);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
             }
@@ -165,7 +167,7 @@ public class FIXApplication implements FIXClientApplication {
 
         this.useDefaultApplVerID = fixSettings.isUseDefaultApplVerID();
         this.isPerformance = fixSettings.isPerformanceMode();
-        this.latencyCalculator = new FIXLatencyCalculator(this.messageHelper);
+        this.latencyCalculator = new FIXLatencyCalculator(messageHelper);
     }
 
     @Override
@@ -211,7 +213,8 @@ public class FIXApplication implements FIXClientApplication {
                 textMessage = "Received Logout has text (58) tag: " + text;
 
 				if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
-				        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">."))
+				        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
+                        || StringUtil.containsAll(text, "Sequence Number", "<", "expected"))
 				{
 					incorrectSenderMsgSeqNum = true;
 					// extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1
@@ -243,15 +246,17 @@ public class FIXApplication implements FIXClientApplication {
 					targSeq = message.getHeader().getInt(MsgSeqNum.FIELD); // TODO: +1 ?
 				}
 
-				if (seqNum != -1)
-					this.seqNumSender = new Integer(seqNum);
+                if(seqNum != -1) {
+                    this.seqNumSender = new Integer(seqNum);
+                }
 
-				if (targSeq != -1)
-					this.seqNumTarget = new Integer(targSeq);
+                if(targSeq != -1) {
+                    this.seqNumTarget = new Integer(targSeq);
+                }
 			}
             if (serviceMonitor != null) {
                 ServiceEvent event = ServiceEventFactory.createEventInfo(serviceName,
-                        ServiceEvent.Type.INFO, textMessage, null);
+                        Type.INFO, textMessage, null);
                 serviceMonitor.onEvent(event);
             }
 		} else if (MsgType.RESEND_REQUEST.equals(msgType)) {
@@ -301,12 +306,8 @@ public class FIXApplication implements FIXClientApplication {
 	public void onMessageRejected(Message message, SessionID sessionID) {
 		logger.debug("onMessageRejected: {}", message);
 		try {
-			IMessage iMsg = convert(message, sessionID.getTargetCompID(), this.serviceStringName, message.isAdmin(), false, true);
-			if (message.getException() != null) {
-                iMsg.getMetaData().setRejectReason(message.getException().getMessage());
-            } else {
-                iMsg.getMetaData().setRejectReason("Unknown");
-            }
+            IMessage iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
+            iMsg.getMetaData().setRejectReason(message.getException() != null ? message.getException().getMessage() : "Unknown");
 
             if (!isPerformance) {
                 storeMessage(sessionID, iMsg);
@@ -326,23 +327,23 @@ public class FIXApplication implements FIXClientApplication {
 		Session session = Session.lookupSession(sessionID);
 
 		try {
-			if (this.seqNumSender != null) {
-				session.setNextSenderMsgSeqNum(this.seqNumSender);
+            if(seqNumSender != null) {
+                session.setNextSenderMsgSeqNum(seqNumSender);
 				logger.info("Set session.setNextSenderMsgSeqNum = {}", seqNumSender);
 			}
 		} catch (IOException e) {
 			logger.error("Could not set specified both seqNumSender={} for the session {}.",
-			        this.seqNumSender, iSession.getName(), e);
+                    seqNumSender, iSession.getName(), e);
 		}
 
 		try {
-            if (this.seqNumTarget != null) {
-                session.setNextTargetMsgSeqNum(this.seqNumTarget);
+            if(seqNumTarget != null) {
+                session.setNextTargetMsgSeqNum(seqNumTarget);
                 logger.info("Set session.setNextTargetMsgSeqNum = {}", seqNumTarget);
             }
         } catch (IOException e) {
             logger.error("Could not set specified both seqNumTarget={} for the session {}.",
-                    this.seqNumTarget, iSession.getName(), e);
+                    seqNumTarget, iSession.getName(), e);
         }
 
 		if (handler == null) {
@@ -374,7 +375,7 @@ public class FIXApplication implements FIXClientApplication {
 			handler.exceptionCaught(iSession, e);
             logger.error("onLogout: can not do handler.sessionClosed({}) ", iSession, e);
 		}
-		if (!this.autorelogin)
+        if(!autorelogin)
 		{
 			Session session = Session.lookupSession(sessionID);
 			session.logout("Logon After Server Logout");
@@ -402,7 +403,7 @@ public class FIXApplication implements FIXClientApplication {
 				String encryptStr = settings.getSessionProperties(sessionID).get(ENCRYPT_PASSWORD).toString();
 				String password = null;
 				String newPassword = null;
-				if(encryptStr.equalsIgnoreCase("Y")) {
+                if("Y".equalsIgnoreCase(encryptStr)) {
 				    PublicKey publicKey = null;
 				    ObjectInputStream inputStream = null;
 				    try {
@@ -415,12 +416,10 @@ public class FIXApplication implements FIXClientApplication {
 				    }
 					Cipher cipher = Cipher.getInstance("RSA");
 					cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-					byte[] encryptedPasswordBytes = null;
-					encryptedPasswordBytes = cipher.doFinal(settingsPassword.getBytes());
+                    byte[] encryptedPasswordBytes = cipher.doFinal(settingsPassword.getBytes());
 					password = new String(Base64.encodeBase64(encryptedPasswordBytes));
 					if(settingsNewPassword != null) {
-						byte[] encryptedNewPasswordBytes = null;
-						encryptedNewPasswordBytes = cipher.doFinal(settingsNewPassword.getBytes());
+                        byte[] encryptedNewPasswordBytes = cipher.doFinal(settingsNewPassword.getBytes());
 						newPassword = new String(Base64.encodeBase64(encryptedNewPasswordBytes));
 					}
 				} else {
@@ -444,31 +443,38 @@ public class FIXApplication implements FIXClientApplication {
 				String addNextExpectedSeqNum = (String) settings.getSessionProperties(sessionID).get(ADD_NEXT_EXPECTED_SEQ_NUM);
 				int nextExpectedSeqNum = Session.lookupSession(sessionID).getSessionState().getNextTargetMsgSeqNum();
 
-				if (userName != null)
-					message.setString(quickfix.field.Username.FIELD, userName);
-				if (password != null)
-					message.setString(quickfix.field.Password.FIELD, password);
-				if (newPassword != null)
-					message.setString(quickfix.field.NewPassword.FIELD, newPassword);
-				if (defaultCstmApplVerID != null)
+                if(userName != null) {
+                    message.setString(quickfix.field.Username.FIELD, userName);
+                }
+                if(password != null) {
+                    message.setString(quickfix.field.Password.FIELD, password);
+                }
+                if(newPassword != null) {
+                    message.setString(quickfix.field.NewPassword.FIELD, newPassword);
+                }
+                if(defaultCstmApplVerID != null) {
                     message.setString(1408, defaultCstmApplVerID);
-				if (extExecInst != null)
+                }
+                if(extExecInst != null) {
                     message.setString(8718, extExecInst);
+                }
 				if (resetSeqNumFlag != null)
 				{
 					String sResetSeqNumFlag = ((String)resetSeqNumFlag).toLowerCase();
-					if (sResetSeqNumFlag.equals("true") || sResetSeqNumFlag.equals("y"))
-						message.setBoolean(ResetSeqNumFlag.FIELD, true);
-					if (sResetSeqNumFlag.equals("false") || sResetSeqNumFlag.equals("n"))
-						message.setBoolean(ResetSeqNumFlag.FIELD, false);
-				}
-				if(addNextExpectedSeqNum.equalsIgnoreCase("Y")) {
-					message.setInt(quickfix.field.NextExpectedMsgSeqNum.FIELD, nextExpectedSeqNum);
+                    if("true".equals(sResetSeqNumFlag) || "y".equals(sResetSeqNumFlag)) {
+                        message.setBoolean(ResetSeqNumFlag.FIELD, true);
+                    }
+                    if("false".equals(sResetSeqNumFlag) || "n".equals(sResetSeqNumFlag)) {
+                        message.setBoolean(ResetSeqNumFlag.FIELD, false);
+                    }
+                }
+                if("Y".equalsIgnoreCase(addNextExpectedSeqNum)) {
+                    message.setInt(NextExpectedMsgSeqNum.FIELD, nextExpectedSeqNum);
 				}
 
-				if (this.incorrectSenderMsgSeqNum)
+                if(incorrectSenderMsgSeqNum)
 				{
-					message.getHeader().setInt(MsgSeqNum.FIELD, this.seqNumSender);
+                    message.getHeader().setInt(MsgSeqNum.FIELD, seqNumSender);
 
 					try {
 						logger.info("set next sender MsgSeqNum after logout to: {}", seqNumSender);
@@ -479,7 +485,7 @@ public class FIXApplication implements FIXClientApplication {
 					}
 					this.incorrectSenderMsgSeqNum = false;
 				}
-				if (this.incorrectTargetMsgSeqNum)
+                if(incorrectTargetMsgSeqNum)
 				{
 
 					try {
@@ -525,7 +531,7 @@ public class FIXApplication implements FIXClientApplication {
 				}
 				if (serviceMonitor != null) {
 				    ServiceEvent event = ServiceEventFactory.createEventInfo(serviceName,
-				            ServiceEvent.Type.INFO, textMessage, null);
+                            Type.INFO, textMessage, null);
 				    serviceMonitor.onEvent(event);
 				}
 			}
@@ -541,7 +547,7 @@ public class FIXApplication implements FIXClientApplication {
 
 		String type = getMessageType(message);
 
-		if (this.sendAppReject == false) {
+        if(sendAppReject == false) {
 			if (MsgType.REJECT.equals(type)) {
 				logger.info("Block appliction sending Reject message : {}", message);
 
@@ -570,14 +576,14 @@ public class FIXApplication implements FIXClientApplication {
 	public void addSessionId(SessionID sessionID, ISession iSession) {
         logger.info("add session: {} -> {} = {}", sessionID.getSenderCompID(),
                 sessionID.getTargetCompID(), iSession.getName());
-		this.sessionMap.put(sessionID, iSession);
+        sessionMap.put(sessionID, iSession);
 		Session session = Session.lookupSession(sessionID);
 		session.logon();
 	}
 
 	@Override
 	public List<ISession> getSessions() {
-		return new ArrayList<>(this.sessionMap.values());
+        return new ArrayList<>(sessionMap.values());
 	}
 
 	public Integer getSeqNumSender() {
@@ -607,7 +613,7 @@ public class FIXApplication implements FIXClientApplication {
     @Override
     public void startLogging() {
         if (logConfigurator != null) {
-            logConfigurator.createIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
         }
     }
@@ -615,7 +621,7 @@ public class FIXApplication implements FIXClientApplication {
     @Override
     public void stopLogging() {
         if (logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(this.getClass().getName() + "@" + Integer.toHexString(hashCode()),
+            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                     serviceName);
         }
     }
@@ -667,8 +673,8 @@ public class FIXApplication implements FIXClientApplication {
         String messageData = message.getMessageData();
         byte[] rawMessage = messageData != null ? messageData.getBytes(CharsetSupport.getCharsetInstance()) : message.toString().getBytes(CharsetSupport.getCharsetInstance());
 		IMessage msg = isRejected
-                ? this.converter.convertDirty(message, verifyTags, false, false, true)
-                : this.converter.convert(message, verifyTags, null);
+                ? converter.convertDirty(message, verifyTags, false, false, true)
+                : converter.convert(message, verifyTags, null);
 		MsgMetaData meta = msg.getMetaData();
 
 		meta.setFromService(from);

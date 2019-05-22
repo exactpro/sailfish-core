@@ -130,11 +130,13 @@ public class SfDictionaryConverterTest extends AbstractTest {
             }
         } finally {
             File del = new File(outputFolder);
-            if (del.exists())
+            if(del.exists()) {
                 FileUtils.deleteDirectory(del);
+            }
             File types = new File("types.xml");
-            if (types.exists())
+            if(types.exists()) {
                 types.delete();
+            }
         }
     }
 

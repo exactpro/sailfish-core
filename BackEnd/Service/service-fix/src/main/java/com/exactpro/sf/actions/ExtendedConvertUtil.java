@@ -19,7 +19,7 @@ import com.exactpro.sf.configuration.ResourceAliases;
 
 import quickfix.Field;
 
-@ResourceAliases({"ExtendedConvertUtil"})
+@ResourceAliases("ExtendedConvertUtil")
 public class ExtendedConvertUtil extends ConvertUtil {
 
     @Override

@@ -73,8 +73,7 @@ public class MachineLearningResourceV2 {
     @DELETE
     @Path("/{token}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response tokenDelete(@PathParam("token") String token, @QueryParam("actionId") @NotNull Integer actionId,
-            @QueryParam("messageId") @NotNull Integer messageId) {
+    public Response tokenDelete(@PathParam("token") String token, @Valid List<ReportMessageDescriptor> body) {
 
         HttpSession session = httpRequest.getSession();
         String sessionKey = token;
@@ -85,7 +84,7 @@ public class MachineLearningResourceV2 {
             return Response.status(Status.UNAUTHORIZED).build();
         }
 
-        sessionStorage.removeUserMark(actionId, messageId);
+        body.forEach( descriptor -> sessionStorage.removeUserMark((int)descriptor.getActionId(), (int)descriptor.getMessageId()));
 
         return Response.ok().build();
     }

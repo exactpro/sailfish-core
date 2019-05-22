@@ -19,26 +19,34 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.service.IoHandler;
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.configuration.FieldName;
 import com.exactpro.sf.configuration.FieldPosition;
 import com.exactpro.sf.configuration.RuleDescription;
 import com.exactpro.sf.services.tcpip.IProxyIoHandler;
 import com.exactpro.sf.services.tcpip.TCPIPProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.service.IoHandlerAdapter;
-import org.apache.mina.core.session.IoSession;
-import quickfix.*;
+
+import quickfix.Field;
+import quickfix.FieldMap;
+import quickfix.FieldNotFound;
+import quickfix.Group;
+import quickfix.Message;
+import quickfix.StringField;
 
 /**
- * Base class of {@link org.apache.mina.core.service.IoHandler} classes which handle
+ * Base class of {@link IoHandler} classes which handle
  * proxied connections.
  *
  */
 public abstract class AbstractProxyIoHandler extends IoHandlerAdapter implements IProxyIoHandler {
 
-	private static Logger logger = LoggerFactory.getLogger(AbstractProxyIoHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(AbstractProxyIoHandler.class);
 	private static final Charset CHARSET = Charset.forName("iso8859-1");
 	public static final String OTHER_IO_SESSION = AbstractProxyIoHandler.class.getName()+".OtherIoSession";
 
@@ -136,11 +144,11 @@ public abstract class AbstractProxyIoHandler extends IoHandlerAdapter implements
 
 					if (equals)
 					{
-						if (null != rule.getNotSend()) {
+                        if(rule.getNotSend() != null) {
 							notSend = true;
 						} else {
 
-							if (null != rule.getChange()) {
+                            if(rule.getChange() != null) {
 								for (FieldPosition field : rule.getChange().getField())
 								{
 									int fieldId = getFieldId(field.getName());
@@ -151,26 +159,26 @@ public abstract class AbstractProxyIoHandler extends IoHandlerAdapter implements
 
 										try {
 
-											if (null != mess.getString(fieldId)) {
-												mess.setField(new quickfix.StringField(fieldId, field.getValue()));
+                                            if(mess.getString(fieldId) != null) {
+                                                mess.setField(new StringField(fieldId, field.getValue()));
 											}
 
 										} catch (FieldNotFound e) {
 
-											mess.getHeader().setField(new quickfix.StringField(fieldId, field.getValue()));
+                                            mess.getHeader().setField(new StringField(fieldId, field.getValue()));
 
 										}
 
 									} else {
 
-										map.setField(new quickfix.StringField(fieldId, field.getValue()));
+                                        map.setField(new StringField(fieldId, field.getValue()));
 
 									}
 
 								}
 							}
 
-							if (null != rule.getRemove()) {
+                            if(rule.getRemove() != null) {
 								for (FieldName field : rule.getRemove().getField())
 								{
 									int fieldId = getFieldId(field.getName());
@@ -181,7 +189,7 @@ public abstract class AbstractProxyIoHandler extends IoHandlerAdapter implements
 
 										try {
 
-											if (null != mess.getString(fieldId)) {
+                                            if(mess.getString(fieldId) != null) {
 												mess.removeField(fieldId);
 											}
 
@@ -251,13 +259,9 @@ public abstract class AbstractProxyIoHandler extends IoHandlerAdapter implements
 
 			}
 
-			if (null != fm) {
-				return getField(fm, name.substring(name.indexOf(".")+1, name.length()));
-			}
+            return fm != null ? getField(fm, name.substring(name.indexOf(".") + 1)) : null;
 
-			return null;
-
-		} else {
+        } else {
 			return fmap;
 		}
 	}

@@ -76,15 +76,11 @@ public class AlertCollector implements Serializable {
     }
     
     public void add(AlertCollector alertCollector) {
-        this.alerts.putAll(alertCollector.alerts);
+        alerts.putAll(alertCollector.alerts);
     }
 
     public Collection<Alert> getAlerts(AlertType type) {
-        if (type != null) {
-            return this.alerts.get(type);
-        }
-        
-        return this.alerts.values();
+        return type != null ? alerts.get(type) : alerts.values();
     }
     
     public Collection<Alert> getAlerts() {
@@ -92,11 +88,7 @@ public class AlertCollector implements Serializable {
     }
 
     public int getCount(AlertType type) {
-        if (type != null) {
-            return this.alerts.get(type).size();
-        }
-        
-        return this.alerts.values().size();
+        return type != null ? alerts.get(type).size() : alerts.values().size();
     }
     
     public int getCount() {

@@ -47,12 +47,7 @@ public class AuthBean implements Serializable {
 	private String password;
 	private String originalURL;
 
-	public AuthBean() {
-
-
-	}
-
-	@PostConstruct
+    @PostConstruct
 	public void init() {
 		ExternalContext externalContext = FacesContext.getCurrentInstance()
 				.getExternalContext();
@@ -86,7 +81,7 @@ public class AuthBean implements Serializable {
 
 			if (user == null) {
 
-				logger.error("User with login [{}] not found in storage!", this.username);
+                logger.error("User with login [{}] not found in storage!", username);
 
 				BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR,
 						"Invalid login/password pair", "");
@@ -101,7 +96,7 @@ public class AuthBean implements Serializable {
 		} catch (ServletException e) {
 
 			// Handle unknown username/password in request.login().
-			logger.warn("Bad login attempt with username [{}]; message: {}", this.username ,e.getMessage());
+            logger.warn("Bad login attempt with username [{}]; message: {}", username, e.getMessage());
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Invalid login/password pair", "");
 
 			return;

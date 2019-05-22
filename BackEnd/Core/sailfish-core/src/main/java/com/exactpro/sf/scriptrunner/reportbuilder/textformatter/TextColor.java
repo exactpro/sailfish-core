@@ -23,9 +23,9 @@ public enum TextColor {
     ORANGE("conditionally_passed"),
     GREY("na");
 
-    private String cssClass;
+    private final String cssClass;
 
-    private TextColor(String cssClass) {
+    TextColor(String cssClass) {
         this.cssClass = cssClass;
     }
 

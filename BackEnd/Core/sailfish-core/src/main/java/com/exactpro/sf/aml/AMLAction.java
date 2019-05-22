@@ -49,19 +49,19 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
     private static final String GENERATION_PATH_DELIMITER = " -> ";
 
-	private final Map<String, Value> parameters;
-	private final Map<String, Value> serviceFields;
-	private Map<Column, IField> definedServiceFields;	//all defined and interpreted service fields (copy)
-	private final Set<String> definedColumns;
+    private final Map<String, Value> parameters = new HashMap<>();
+    private final Map<String, Value> serviceFields = new HashMap<>();
+    private final Map<Column, IField> definedServiceFields = new HashMap<>();    //all defined and interpreted service fields (copy)
+    private final Set<String> definedColumns = new HashSet<>();
 	private String reference = "";
 	private String referenceToFilter = "";
 	private String template = "";
-	private String id = null;
-	private String serviceName = null;
+    private String id;
+    private String serviceName;
     private ExecutionMode executionMode = ExecutionMode.EXECUTABLE;
-	private SailfishURI actionURI = null; // null if not set
-	private SailfishURI dictionaryURI = null;
-	private Value timeout = null;
+    private SailfishURI actionURI; // null if not set
+    private SailfishURI dictionaryURI;
+    private Value timeout;
 	private long line;
 	private Class<?> actionParameterType;
 	private String checkPoint;
@@ -69,31 +69,31 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	private String description = "";
 	private boolean addToReport = true;
 	private AMLGenerateStatus generateStatus = AMLGenerateStatus.NOT_GENERATED;
-	private StringBuilder generationPathBuilder;
-	private String messageCount = null;
-	private final List<Pair<String, String>> setters;
+    private final StringBuilder generationPathBuilder = new StringBuilder();
+    private String messageCount;
+    private final List<Pair<String, String>> setters = new ArrayList<>();
 	private String doublePrecision = "";
 	private String systemPrecision = "";
 	private String failUnexpected = "";
 	private String staticType;
 	private Value staticValue;
-	private boolean continueOnFailed = false;
-	private boolean breakPoint = false;
-	private boolean autoStart = false;
+    private boolean continueOnFailed;
+    private boolean breakPoint;
+    private boolean autoStart;
 	private List<String> headers;
 	private String outcome;
 	private String outcomeGroup;
 	private String outcomeName;
-	private boolean isLastOutcome = false;
-	private boolean isGroupFinished = false;
-	private boolean checkGroupsOrder = false;
-	private Map<String, MessageReference> messageReferences;
-	private List<Pair<String, AMLAction>> children;
+    private boolean isLastOutcome;
+    private boolean isGroupFinished;
+    private boolean checkGroupsOrder;
+    private Map<String, MessageReference> messageReferences = new HashMap<>();
+    private final List<Pair<String, AMLAction>> children = new ArrayList<>();
 	private Value condition;
 	private String includeBlockReference = "";
-	private boolean reorderGroups = false;
+    private boolean reorderGroups;
 	private ActionInfo actionInfo;
-	private boolean staticAction = false;
+    private boolean staticAction;
     private String tag;
     private List<String> dependencies = Collections.emptyList();
     private List<String> verificationsOrder = Collections.emptyList();
@@ -101,52 +101,42 @@ public class AMLAction implements IAction, Cloneable, Serializable {
     private final long uid;
 
 	public AMLAction(long uid, int hash) {
-		this.parameters = new HashMap<>();
-		this.serviceFields = new HashMap<>();
-		this.definedServiceFields = new HashMap<>();
-		this.definedColumns = new HashSet<>();
-		this.setters = new ArrayList<>();
-		this.messageReferences = new HashMap<>();
-		this.children = new ArrayList<>();
-		this.generationPathBuilder = new StringBuilder();
-		this.uid = uid;
+        this.uid = uid;
 		this.hash = hash;
 	}
 
 	@Override
 	public void setReference(String ref)
 	{
-		this.reference = (ref == null) ? "" : ref;
+        this.reference = StringUtils.defaultString(ref);
 	}
 
 	@Override
 	public String getReference()
 	{
-		return this.reference;
+        return reference;
 	}
 
 	@Override
-	public boolean hasReference()
-	{
-		return this.reference != null && !this.reference.equals("");
+    public boolean hasReference() {
+        return StringUtils.isNotEmpty(reference);
 	}
 
 	@Override
 	public void setReferenceToFilter(String ref)
 	{
-		this.referenceToFilter = (ref == null) ? "" : ref;
+        this.referenceToFilter = StringUtils.defaultString(ref);
 	}
 
 	@Override
-	public boolean hasReferenceToFilter()
-	{
-		return this.referenceToFilter != null && false == this.referenceToFilter.equals("");
-	}
+    public boolean hasReferenceToFilter() {
+        return StringUtils.isNotEmpty(referenceToFilter);
+    }
 
 	@Override
 	public String getReferenceToFilter()
 	{
-		return this.referenceToFilter;
+        return referenceToFilter;
 	}
 
 	@Override
@@ -156,47 +146,46 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public void setTemplate(String template) {
-		this.template = template == null ? "" : template;
+        this.template = StringUtils.defaultString(template);
 	}
 
 	@Override
 	public boolean hasTemplate() {
-		return this.template != null && !this.template.equals("");
-	}
+        return StringUtils.isNotEmpty(template);
+    }
 
 	@Override
 	public void put(String key, Value value)
 	{
-		this.parameters.put(key, value);
+        parameters.put(key, value);
 	}
 
 	public void remove(String key) {
-	    this.parameters.remove(key);
+        parameters.remove(key);
 	}
 
 	@Override
 	public Value get(String key)
 	{
-		return this.parameters.get(key);
+        return parameters.get(key);
 	}
 
 	@Override
 	public void setId(String id)
 	{
-		this.id = (id != null) ? id : "";
+        this.id = StringUtils.defaultString(id);
 	}
 
 	@Override
 	public String getId()
 	{
-		return this.id;
+        return id;
 	}
 
 	@Override
-	public boolean hasId()
-	{
-		return this.id != null && !this.id.trim().isEmpty();
-	}
+    public boolean hasId() {
+        return StringUtils.isNotEmpty(id);
+    }
 
 	@Override
 	public void setServiceName(String serviceName)
@@ -207,7 +196,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	@Override
 	public String getServiceName()
 	{
-		return this.serviceName;
+        return serviceName;
 	}
 
 	@Override
@@ -224,13 +213,13 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	@Override
 	public ExecutionMode getExecutionMode()
 	{
-		return this.executionMode;
+        return executionMode;
 	}
 
 	@Override
 	public SailfishURI getActionURI()
 	{
-		return this.actionURI;
+        return actionURI;
 	}
 
 	@Override
@@ -247,7 +236,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	@Override
 	public SailfishURI getDictionaryURI()
 	{
-		return this.dictionaryURI;
+        return dictionaryURI;
 	}
 
 	@Override
@@ -268,7 +257,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public Value getTimeout() {
-		return this.timeout;
+        return timeout;
 	}
 
 	public void setLine(long line) {
@@ -276,12 +265,12 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	public long getLine() {
-		return this.line;
+        return line;
 	}
 
 	@Override
 	public Map<String, Value> getParameters() {
-		return this.parameters;
+        return parameters;
 	}
 
 	public void setActionParameterType(Class<?> type)
@@ -291,7 +280,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	public Class<?> getActionParameterType()
 	{
-		return this.actionParameterType;
+        return actionParameterType;
 	}
 
 	@Override
@@ -301,12 +290,12 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public String getCheckPoint() {
-		return this.checkPoint;
+        return checkPoint;
 	}
 
 	@Override
 	public String getMessageTypeColumn() {
-		return this.messageTypeColumn;
+        return messageTypeColumn;
 	}
 
 	@Override
@@ -315,34 +304,34 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	public Map<String, Value> getServiceFields() {
-		return this.serviceFields;
+        return serviceFields;
 	}
 
 	public Value getServiceField(String key) {
-		return this.serviceFields.get(key);
+        return serviceFields.get(key);
 	}
 
 	public boolean isServiceFieldExist(String key) {
-		return this.serviceFields.containsKey(key);
+        return serviceFields.containsKey(key);
 	}
 
 	public void putServiceField(String key, Value value) {
-		this.serviceFields.put(key, value);
+        serviceFields.put(key, value);
 	}
 
 	@Override
 	public void addDefinedColumn(String columnName) {
-		this.definedColumns.add(columnName);
+        definedColumns.add(columnName);
 	}
 
 	@Override
 	public Set<String> getDefinedColumns() {
-		return this.definedColumns;
+        return definedColumns;
 	}
 
 	@Override
 	public String getDescrption() {
-		return this.description;
+        return description;
 	}
 
 	@Override
@@ -355,7 +344,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	public boolean isAddToReport() {
-		return this.addToReport;
+        return addToReport;
 	}
 
 	public void setGenerateStatus(AMLGenerateStatus alreadyGenerated) {
@@ -363,22 +352,22 @@ public class AMLAction implements IAction, Cloneable, Serializable {
     }
 
 	public AMLGenerateStatus getGenerateStatus() {
-		return this.generateStatus;
+        return generateStatus;
 	}
 
 	public void addGenerationSteps(String ... generationSteps) {
 	    if (generationSteps != null) {
 	        for (int i = 0; i < generationSteps.length; i++) {
 	            if (!generationSteps[i].trim().isEmpty()) {
-	                this.generationPathBuilder.append(generationSteps[i]).append(GENERATION_PATH_DELIMITER);
+                    generationPathBuilder.append(generationSteps[i]).append(GENERATION_PATH_DELIMITER);
 	            }
             }
 	    }
     }
 
 	public String getGenerationPath() {
-	    if (this.generationPathBuilder.length() >= GENERATION_PATH_DELIMITER.length()) {
-    	    return this.generationPathBuilder.substring(0, this.generationPathBuilder.length() - GENERATION_PATH_DELIMITER.length());
+        if(generationPathBuilder.length() >= GENERATION_PATH_DELIMITER.length()) {
+            return generationPathBuilder.substring(0, generationPathBuilder.length() - GENERATION_PATH_DELIMITER.length());
 	    }
 	    return "";
     }
@@ -390,16 +379,16 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public String getMessageCount() {
-		return this.messageCount;
+        return messageCount;
 	}
 
 	public List<Pair<String, String>> getSetters() {
-		return this.setters;
+        return setters;
 	}
 
 	@Override
 	public String getDoublePrecision() {
-		return this.doublePrecision;
+        return doublePrecision;
 	}
 
 	@Override
@@ -409,7 +398,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public String getSystemPrecision() {
-		return this.systemPrecision;
+        return systemPrecision;
 	}
 
 	@Override
@@ -418,7 +407,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	public String getFailUnexpected() {
-		return this.failUnexpected;
+        return failUnexpected;
 	}
 
 	public void setFailUnexpected(String value)
@@ -428,7 +417,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public String getStaticType() {
-		return this.staticType;
+        return staticType;
 	}
 
 	@Override
@@ -438,7 +427,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public Value getStaticValue() {
-		return this.staticValue;
+        return staticValue;
 	}
 
 	@Override
@@ -448,7 +437,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public boolean getContinueOnFailed() {
-		return this.continueOnFailed;
+        return continueOnFailed;
 	}
 
 	@Override
@@ -457,7 +446,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	public boolean getBreakPoint() {
-		return this.breakPoint;
+        return breakPoint;
 	}
 
 	public void setBreakPoint(boolean b) {
@@ -466,7 +455,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public boolean getAutoStart() {
-		return this.autoStart;
+        return autoStart;
 	}
 
 	@Override
@@ -476,7 +465,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public boolean getReorderGroups() {
-	    return this.reorderGroups;
+        return reorderGroups;
 	}
 
 	@Override
@@ -486,7 +475,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public List<String> getHeaders() {
-		return this.headers;
+        return headers;
 	}
 
 	@Override
@@ -496,7 +485,7 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 
 	@Override
 	public String getOutcome() {
-		return this.outcome;
+        return outcome;
 	}
 
 	@Override
@@ -546,12 +535,12 @@ public class AMLAction implements IAction, Cloneable, Serializable {
     }
     @Override
 	public void addMessageReference(String lineRef, MessageReference ref) {
-		this.messageReferences.put(lineRef, ref);
+        messageReferences.put(lineRef, ref);
 	}
 
 	@Override
 	public Map<String, MessageReference> getMessageReferences() {
-		return this.messageReferences;
+        return messageReferences;
 	}
 
 	@Override
@@ -560,11 +549,11 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 	}
 
 	public void addChildAction(String column, AMLAction action) {
-		this.children.add(new Pair<>(column, action));
+        children.add(new Pair<>(column, action));
 	}
 
 	public List<Pair<String, AMLAction>> getChildren() {
-		return this.children;
+        return children;
 	}
 
 	public Value getCondition() {
@@ -586,91 +575,87 @@ public class AMLAction implements IAction, Cloneable, Serializable {
     @Override
 	public AMLAction clone()
 	{
-		AMLAction that = new AMLAction(this.uid, this.hash);
-		that.actionInfo = this.actionInfo;
-		that.actionParameterType = this.actionParameterType;
-		that.addToReport = this.addToReport;
-		that.generateStatus = this.generateStatus;
-		that.autoStart = this.autoStart;
-		that.checkGroupsOrder = this.checkGroupsOrder;
-		that.checkPoint = this.checkPoint;
-		that.children.addAll(this.children);
-		that.condition = this.condition != null ? this.condition.clone() : null;
-		that.continueOnFailed = this.continueOnFailed;
+        AMLAction that = new AMLAction(uid, hash);
+        that.actionInfo = actionInfo;
+        that.actionParameterType = actionParameterType;
+        that.addToReport = addToReport;
+        that.generateStatus = generateStatus;
+        that.autoStart = autoStart;
+        that.checkGroupsOrder = checkGroupsOrder;
+        that.checkPoint = checkPoint;
+        that.children.addAll(children);
+        that.condition = condition != null ? condition.clone() : null;
+        that.continueOnFailed = continueOnFailed;
+        that.definedColumns.addAll(definedColumns);
+        that.dictionaryURI = dictionaryURI;
+        that.dependencies = dependencies;
+        that.description = description;
+        that.executionMode = executionMode;
+        that.actionURI = actionURI;
+        that.failUnexpected = failUnexpected;
+        that.headers = headers;
+        that.id = id;
+        that.includeBlockReference = includeBlockReference;
+        that.isLastOutcome = isLastOutcome;
+        that.isGroupFinished = isGroupFinished;
+        that.line = line;
+        that.messageCount = messageCount;
+        that.messageTypeColumn = messageTypeColumn;
+        that.outcome = outcome;
+        that.outcomeGroup = outcomeGroup;
+        that.outcomeName = outcomeName;
 
-		for (String s : this.definedColumns) {
-			that.definedColumns.add(s);
-		}
-
-		that.dictionaryURI =  this.dictionaryURI;
-        that.dependencies = this.dependencies;
-		that.description = this.description;
-		that.executionMode = this.executionMode;
-		that.actionURI = this.actionURI;
-		that.failUnexpected = this.failUnexpected;
-		that.headers = this.headers;
-		that.id = this.id;
-		that.includeBlockReference = this.includeBlockReference;
-		that.isLastOutcome = this.isLastOutcome;
-		that.isGroupFinished = this.isGroupFinished;
-		that.line = this.line;
-		that.messageCount = this.messageCount;
-		that.messageTypeColumn = this.messageTypeColumn;
-		that.outcome = this.outcome;
-		that.outcomeGroup = this.outcomeGroup;
-		that.outcomeName = this.outcomeName;
-
-		for(Entry<String, Value> entry : this.parameters.entrySet()) {
+        for(Entry<String, Value> entry : parameters.entrySet()) {
 			that.parameters.put(entry.getKey(), entry.getValue().clone());
 		}
 
-		that.reference = this.reference;
-		that.referenceToFilter = this.referenceToFilter;
-		that.reorderGroups = this.reorderGroups;
+        that.reference = reference;
+        that.referenceToFilter = referenceToFilter;
+        that.reorderGroups = reorderGroups;
 
-		for (Entry<String, MessageReference> entry : this.messageReferences.entrySet()) {
+        for(Entry<String, MessageReference> entry : messageReferences.entrySet()) {
 			that.messageReferences.put(entry.getKey(), new MessageReference(entry.getValue().getAccessor(), entry.getValue().getDefinition()));
 		}
-		for(Entry<String, Value> entry : this.serviceFields.entrySet()) {
+        for(Entry<String, Value> entry : serviceFields.entrySet()) {
 			that.serviceFields.put(entry.getKey(), entry.getValue().clone());
 		}
 
-		that.serviceName = this.serviceName;
+        that.serviceName = serviceName;
 
-		for(Pair<String, String> entry : this.setters) {
+        for(Pair<String, String> entry : setters) {
 			that.setters.add(new Pair<>(entry.getFirst(), entry.getSecond()));
 		}
 
-		that.staticType = this.staticType;
-		that.staticValue = this.staticValue != null ? this.staticValue.clone() : null;
-        that.tag = this.tag;
-		that.template = this.template;
-		that.timeout = this.timeout != null ? this.timeout.clone() : null;
+        that.staticType = staticType;
+        that.staticValue = staticValue != null ? staticValue.clone() : null;
+        that.tag = tag;
+        that.template = template;
+        that.timeout = timeout != null ? timeout.clone() : null;
 
-		that.doublePrecision = this.doublePrecision;
-        that.systemPrecision = this.systemPrecision;
+        that.doublePrecision = doublePrecision;
+        that.systemPrecision = systemPrecision;
 
-		for(Entry<Column, IField> entry : this.definedServiceFields.entrySet()) {
+        for(Entry<Column, IField> entry : definedServiceFields.entrySet()) {
 			that.definedServiceFields.put(entry.getKey(), entry.getValue());
 		}
 
-        that.breakPoint = this.breakPoint;
-        that.staticAction = this.staticAction;
+        that.breakPoint = breakPoint;
+        that.staticAction = staticAction;
 
-        that.verificationsOrder = this.verificationsOrder;
+        that.verificationsOrder = verificationsOrder;
 
 		return that;
 	}
 
 	public void clear()
 	{
-		this.definedColumns.clear();
-		this.headers.clear();
-		this.parameters.clear();
-		this.serviceFields.clear();
-		this.setters.clear();
-		this.messageReferences.clear();
-		this.children.clear();
+        definedColumns.clear();
+        headers.clear();
+        parameters.clear();
+        serviceFields.clear();
+        setters.clear();
+        messageReferences.clear();
+        children.clear();
 
 		this.headers = null;
 	}

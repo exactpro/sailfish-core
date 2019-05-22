@@ -40,11 +40,10 @@ public class RulesProcessor {
 	private final Map<String, Map<String, Object>> mapStorage = new HashMap<>();
 
 	public RulesProcessor(Rules rules) {
-		super();
-		this.rules = rules;
+        this.rules = rules;
 	}
 
-	public boolean processMessage(final IMessage message) {
+	public boolean processMessage(IMessage message) {
 		boolean notSend = false;
 
 		for (RuleDescription rule : rules.getRuleDescription()) {
@@ -73,7 +72,7 @@ public class RulesProcessor {
 							msg.addField(changeField.getName(), changeField.getValue());
 						}
 					}
-				} // if CHANGE
+                }
 
 				if (rule.getRemove() != null) {
 					for (FieldName removeField : rule.getRemove().getField()) {
@@ -82,7 +81,7 @@ public class RulesProcessor {
 							msg.removeField(removeField.getName());
 						}
 					}
-				} // if REMOVE
+                }
 
 				if (rule.getSave() != null) {
 					for (FieldPosition saveField : rule.getSave().getField()) {
@@ -91,8 +90,8 @@ public class RulesProcessor {
 
 						fieldStorage.put(mappingAlias, lookupField(message, fieldName));
 					}
-				} // if SAVE
-				if (null != rule.getLoad()) {
+                }
+                if(rule.getLoad() != null) {
 					for (FieldPosition loadField : rule.getLoad().getField()) {
 						String fieldName = loadField.getName();
 						String mappingAlias = loadField.getValue();
@@ -104,9 +103,9 @@ public class RulesProcessor {
 							logger.debug("Can't load: path not found in message");
 						}
 					}
-				} // if LOAD
+                }
 
-				if (null != rule.getSaveMapping()) {
+                if(rule.getSaveMapping() != null) {
 					for (FieldMapping saveMappingField : rule.getSaveMapping().getField()) {
 						key = saveMappingField.getKeyField();
 						value = saveMappingField.getValueField();
@@ -119,8 +118,8 @@ public class RulesProcessor {
 
 						map.put(String.valueOf(lookupField(message, key)), lookupField(message, value));
 					}
-				} // if SAVE MAPPING
-				if (null != rule.getLoadMapping()) {
+                }
+                if(rule.getLoadMapping() != null) {
 					for (FieldMapping loadMappingField : rule.getLoadMapping().getField()) {
 						key = loadMappingField.getKeyField();
 						value = loadMappingField.getValueField();
@@ -136,7 +135,7 @@ public class RulesProcessor {
 							msg.addField(value, map.get(lookupField(msg, key)));
 						}
 					}
-				} // if LOAD MAPPING
+                }
 			}
 		}
 		return notSend;
@@ -169,18 +168,11 @@ public class RulesProcessor {
 		
 		// FIXME: collections?
 		Object nested = message.getField(group);
-		
-		if (nested instanceof IMessage) {
-			return lookupParentToFieldMessage((IMessage) nested, restName);
-		}
 
-		return null;
-	}
+        return nested instanceof IMessage ? lookupParentToFieldMessage((IMessage)nested, restName) : null;
+    }
 
-	private static String getLastFiled(final String path) {
-		if (path.indexOf('.') < 0) {
-			return path;
-		}
-		return path.substring(path.lastIndexOf('.'));
-	}
+	private static String getLastFiled(String path) {
+        return path.indexOf('.') < 0 ? path : path.substring(path.lastIndexOf('.'));
+    }
 }

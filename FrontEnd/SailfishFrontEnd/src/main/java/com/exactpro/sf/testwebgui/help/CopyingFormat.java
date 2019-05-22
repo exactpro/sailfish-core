@@ -92,37 +92,28 @@ public class CopyingFormat {
     }
     public void addToLine(String group, String header, String content) {
 
-        if (!this.headerWasSet) {
+        if(!headerWasSet) {
 
             this.header.add(header);
 
         } else if (!this.header.contains(header)) {
 
-            this.newColumns.add(header);
+            newColumns.add(header);
 
         }
 
         if (group == null) {
 
-            this.mainLine.put(header, content);
+            mainLine.put(header, content);
 
         } else {
-            this.groups.get(group).put(header, content);
+            groups.get(group).put(header, content);
         }
     }
     
     private String addGroup(String group) {
-
-        String groupName;
-
-        if (!this.groups.containsKey(group)) {
-            groupName = group;
-        } else {
-            groupName = group + "0";
-        }
-
-        this.groups.put(groupName, new HashMap<String, String>());
-
+        String groupName = !groups.containsKey(group) ? group : group + "0";
+        groups.put(groupName, new HashMap<String, String>());
         return groupName;
     }
 
@@ -130,22 +121,19 @@ public class CopyingFormat {
 
         StringBuilder builder = new StringBuilder();
 
-        if (this.groups != null) {
-            for (Map<String, String> group : this.groups.values()) {
+        if(groups != null) {
+            for(Map<String, String> group : groups.values()) {
                 addLine(builder, group);
             }
         }
 
-        addLine(builder, this.mainLine);
+        addLine(builder, mainLine);
 
         return builder.toString();
     }
 
     public String copyNewColumns() {
-        if (!this.newColumns.isEmpty()) {
-            return StringUtils.join(this.newColumns, this.separator);
-        }
-        return null;
+        return !newColumns.isEmpty() ? StringUtils.join(newColumns, separator) : null;
     }
 
     public String copyJustHeader() {
@@ -158,15 +146,15 @@ public class CopyingFormat {
 
         builder.append(createAllHeader()).append(LINE_SEPARATOR);
 
-        this.header.addAll(this.newColumns);
+        header.addAll(newColumns);
 
-        if (this.groups != null) {
-            for (Map<String, String> group : this.groups.values()) {
+        if(groups != null) {
+            for(Map<String, String> group : groups.values()) {
                 addLine(builder, group);
             }
         }
 
-        addLine(builder, this.mainLine);
+        addLine(builder, mainLine);
 
         return builder.toString();
     }
@@ -175,10 +163,10 @@ public class CopyingFormat {
 
         StringBuilder builder = new StringBuilder();
 
-        builder.append(StringUtils.join(this.header, this.separator));
-        
-        if (!this.newColumns.isEmpty()) {
-            builder.append(this.separator).append(StringUtils.join(this.newColumns, this.separator));
+        builder.append(StringUtils.join(header, separator));
+
+        if(!newColumns.isEmpty()) {
+            builder.append(separator).append(StringUtils.join(newColumns, separator));
         }
 
         return builder.toString();
@@ -188,15 +176,11 @@ public class CopyingFormat {
 
         List<String> contentLine = new ArrayList<>();
 
-        for (String header : this.header) {
-            if (line.containsKey(header)) {
-                contentLine.add(line.get(header));
-            } else {
-                contentLine.add("");
-            }
+        for(String header : header) {
+            contentLine.add(line.containsKey(header) ? line.get(header) : "");
         }
 
-        builder.append(StringUtils.join(contentLine, this.separator))
+        builder.append(StringUtils.join(contentLine, separator))
                 .append(LINE_SEPARATOR);
     }
 
@@ -255,14 +239,14 @@ public class CopyingFormat {
 
 
     public boolean isNewColumnsWasAdded() {
-        return this.newColumns.size() > 0;
+        return !newColumns.isEmpty();
     }
 
     public Set<String> getNewColumns() {
-        return this.headerWasSet ? new HashSet<>(this.newColumns) : new HashSet<>(this.header);
+        return headerWasSet ? new HashSet<>(newColumns) : new HashSet<>(header);
     }
 
     public int getNewColumnsCount() {
-        return this.newColumns.size();
+        return newColumns.size();
     }
 }

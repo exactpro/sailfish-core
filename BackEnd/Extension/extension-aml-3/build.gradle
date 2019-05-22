@@ -20,5 +20,3 @@ dependencies {
 
     testRuntime 'org.apache.derby:derby:10.14.2.0'
 }
-
-generateVersionClass.enabled = false

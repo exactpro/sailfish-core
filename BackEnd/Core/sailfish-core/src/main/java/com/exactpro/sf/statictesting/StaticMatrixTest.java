@@ -85,14 +85,14 @@ import io.qameta.allure.Allure;
 
 @RunWith(Parameterized.class)
 public class StaticMatrixTest extends AbstractStaticTest {
-    private static ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
+    private static final ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
 
     private static List<Object[]> testData = Collections.emptyList();
 
-    private ISFContext context;
-    private File matrix;
-    private File services;
-    private boolean skipOptional;
+    private final ISFContext context;
+    private final File matrix;
+    private final File services;
+    private final boolean skipOptional;
 
     public StaticMatrixTest(ISFContext context, File matrix, File services, boolean skipOptional) {
         this.context = context;
@@ -116,7 +116,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
             attachFiles();
 
             String errors = e.getAlertCollector()
-                    .getAlerts()
+                    .getAlerts(AlertType.ERROR)
                     .stream()
                     .map(Alert::toString)
                     .collect(Collectors.joining(System.lineSeparator()));
@@ -154,7 +154,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             File matricesPath = (File) commandLine.getParsedOptionValue("matrices");
 
-            Set<File> servicesPaths = Arrays.stream(commandLine.getOptionValues("services"))
+            Set<File> servicesPaths = stream(commandLine.getOptionValues("services"))
                     .map(File::new)
                     .collect(Collectors.toSet());
 
@@ -412,7 +412,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .filter(Files::isRegularFile)
                 .map(Path::toFile)
                 .filter(filter)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private static void compileMatrix(ISFContext context, File matrix, boolean skipOptional) throws Exception {

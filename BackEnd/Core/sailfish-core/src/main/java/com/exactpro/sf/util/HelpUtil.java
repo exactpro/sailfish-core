@@ -19,6 +19,7 @@ package com.exactpro.sf.util;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -122,14 +123,14 @@ public class HelpUtil {
             hashCode.append(fieldStructure.getJavaType().value());
         }
 
-        for (Map.Entry<String, IAttributeStructure> entry : fieldStructure.getAttributes().entrySet()) {
+        for (Entry<String, IAttributeStructure> entry : fieldStructure.getAttributes().entrySet()) {
             hashCode.append(entry.getKey());
             hashCode.append(entry.getValue().getValue());
         }
 
 
         if(!hasChildren){
-            for(Map.Entry<String, IAttributeStructure> entry : fieldStructure.getValues().entrySet()){
+            for(Entry<String, IAttributeStructure> entry : fieldStructure.getValues().entrySet()){
                 hashCode.append(entry.getKey());
                 hashCode.append(entry.getValue().getValue());
             }
@@ -155,7 +156,7 @@ public class HelpUtil {
                 return false;
             }
 
-            for(Map.Entry<String, IAttributeStructure> firstEntry : firstMap.entrySet()){
+            for(Entry<String, IAttributeStructure> firstEntry : firstMap.entrySet()){
                 IAttributeStructure secondVal = secondMap.get(firstEntry.getKey());
                 if(secondVal == null || !firstEntry.getValue().getValue().equals(secondVal.getValue())){
                     return false;

@@ -21,18 +21,12 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.exactpro.sf.aml.Hash;
-import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
-import com.exactpro.sf.configuration.workspace.FolderType;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -41,8 +35,10 @@ import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.storage.DefaultMatrix;
 import com.exactpro.sf.storage.IMatrix;
@@ -216,14 +212,8 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
 			}
 		}
 
-		IMatrix result = null;
-
-		if ( !list.isEmpty() ) {
-			result = convertFromStoredMatrix(list.get(0));
-		}
-
-		return result;
-	}
+        return !list.isEmpty() ? convertFromStoredMatrix(list.get(0)) : null;
+    }
 
     @Override
     protected void updateReloadedMatrix(IMatrix matrix) {
@@ -297,7 +287,9 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
                 return (fileType == MatrixFileTypes.CSV) || (fileType == MatrixFileTypes.XLS) || (fileType == MatrixFileTypes.XLSX);
             }).collect(Collectors.toSet());
 
-            list.forEach(storedMatrix -> matrices.remove(storedMatrix.getFilePath()));
+            for(StoredMatrix storedMatrix : list) {
+                matrices.remove(storedMatrix.getFilePath());
+            }
 
             Transaction tx = null;
 
@@ -351,18 +343,8 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
 	}
 
 	private StoredMatrix convertToStoredMatrix(IMatrix matrix, Session session) {
-
-		StoredMatrix storedMatrix = null;
-
-		if (matrix.getId() == null) {
-			storedMatrix = new StoredMatrix();
-		} else {
-			storedMatrix = (StoredMatrix) session.load(StoredMatrix.class, matrix.getId());
-		}
-
-		return storedMatrix;
-
-	}
+        return matrix.getId() == null ? new StoredMatrix() : (StoredMatrix)session.load(StoredMatrix.class, matrix.getId());
+    }
 
 	private IMatrix convertFromStoredMatrix(StoredMatrix storedMatrix) {
 		try {

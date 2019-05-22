@@ -18,12 +18,13 @@ package com.exactpro.sf.actions;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
 import com.exactpro.sf.util.DateTimeUtility;
 
-@ResourceAliases({"FakeUtils"})
+@ResourceAliases("FakeUtils")
 public class FakeUtils extends AbstractCaller {
     private static final String FIX_DATE_FORMAT = "yyyyMMdd-HH:mm:ss";
     private static final DateTimeFormatter FIX_FORMATTER = DateTimeUtility.createFormatter(FIX_DATE_FORMAT);
@@ -72,5 +73,11 @@ public class FakeUtils extends AbstractCaller {
         sb.append(day);
 
         return sb.toString();
+    }
+
+    @Description("Returns the current date/time in the UTC time zone<br/>Example: #{getDateTime()}")
+    @UtilityMethod
+    public final LocalDateTime getDateTime() {
+        return DateTimeUtility.nowLocalDateTime();
     }
 }

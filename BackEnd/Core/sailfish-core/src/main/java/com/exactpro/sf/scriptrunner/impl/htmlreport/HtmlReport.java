@@ -16,7 +16,11 @@
 package com.exactpro.sf.scriptrunner.impl.htmlreport;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.scriptrunner.StatusType.CONDITIONALLY_FAILED;
+import static com.exactpro.sf.scriptrunner.StatusType.CONDITIONALLY_PASSED;
 import static com.exactpro.sf.scriptrunner.StatusType.FAILED;
+import static com.exactpro.sf.scriptrunner.StatusType.PASSED;
+import static com.exactpro.sf.scriptrunner.StatusType.SKIPPED;
 import static java.util.Comparator.comparingLong;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -147,22 +151,22 @@ public class HtmlReport implements IScriptReport {
     private TestCase testCase;
     private Deque<Action> actions = new ArrayDeque<>();
 
-    private int totalTestCases = 0;
-    private int passedTestCases = 0;
-    private int cpTestCases = 0;
-    private int failedTestCases = 0;
-    private int notAppTestCases = 0;
+    private int totalTestCases;
+    private int passedTestCases;
+    private int cpTestCases;
+    private int failedTestCases;
+    private int notAppTestCases;
 
-    private int nodeId = 0;
-    private int verificationId = 0;
+    private int nodeId;
+    private int verificationId;
     private int sequenceId = 100000;
 
     private OutcomeCollector outcomes;
     private IReportStats reportStats = new ReportStats();
 
-    private ArrayList<IReportEntryContainer> containers = new ArrayList<>();
+    private final ArrayList<IReportEntryContainer> containers = new ArrayList<>();
     private Map<Integer, MachineLearningData> dataMap;
-    private RelevantMessagesSortingMode relevantMessagesSortingMode;
+    private final RelevantMessagesSortingMode relevantMessagesSortingMode;
 
     public HtmlReport(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
         this.reportFolder = reportFolder;
@@ -313,8 +317,8 @@ public class HtmlReport implements IScriptReport {
             }
             writeElements(testCaseWriter, testCase.getElements(), 5);
 
-            boolean passed = status.getStatus() == StatusType.PASSED;
-            boolean conditionallyPassed = status.getStatus() == StatusType.CONDITIONALLY_PASSED;
+            boolean passed = status.getStatus() == PASSED;
+            boolean conditionallyPassed = status.getStatus() == CONDITIONALLY_PASSED;
             long duration = testCase.getFinishTime().getTime() - testCase.getStartTime().getTime();
 
             writeLine(testCaseWriter, "</div>", 4);
@@ -491,7 +495,7 @@ public class HtmlReport implements IScriptReport {
 
         MachineLearningData data = action.getMachineLearningData();
 
-        if(data != null && status.getStatus() == StatusType.FAILED) {
+        if(data != null && status.getStatus() == FAILED) {
             data.setPeriodEnd(finishTime);
             dataMap.put(action.getId(), data);
         }
@@ -546,7 +550,7 @@ public class HtmlReport implements IScriptReport {
     private void writeStatus(Writer writer, StatusDescription status, int indentSize) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
         logger.debug("writeStatus - context: {}, status: {}, description: {}", currentContext, status.getStatus(), status.getDescription());
 
-        if(status.getStatus() != StatusType.PASSED) {
+        if(status.getStatus() != PASSED) {
             createNode(writer, "Status", NodeType.STATUS, status.getStatus(), null, indentSize);
 
             TemplateWrapper statusTableTemplate = templateWrapperFactory.createWrapper("status_table.ftlh");
@@ -629,7 +633,7 @@ public class HtmlReport implements IScriptReport {
         }
 
         Verification first = verifications.get(0);
-        if(first.getStatusDescription().getStatus() == StatusType.FAILED){
+        if(first.getStatusDescription().getStatus() == FAILED) {
             writeLine(writer, "<div class='sort-container'><label class='input-label' for=\"input" + first.getId() + "\">Sort verifications by fields:</label><input list=\"datalist" + first.getId() + "\" id=\"input" + first.getId() + "\" onkeyup='verificationSorter.parse(this)' class='sort-verifications-input' title='Syntax: fieldName:status,fieldName2:status'>", indentSize);
             writeLine(writer, "<div class=\"chips\"></div>", indentSize);
             writeLine(writer, "<datalist id=\"datalist" + first.getId() + "\"></datalist></div>", indentSize);
@@ -639,7 +643,7 @@ public class HtmlReport implements IScriptReport {
             Verification v = verifications.get(i);
 
             if(i == MAX_VERIFICATIONS) {
-                String fileName = testCase.getName() + "_verifications_" + (++verificationId) + ".html";
+                String fileName = testCase.getName() + "_verifications_" + ++verificationId + ".html";
 
                 writeLine(writer, "<button class='ui-button ui-big-button eps-show-all-btn' href='" + fileName + "' onclick='return expandToIFrame(event, this);'>show all steps</button>", indentSize);
 
@@ -659,7 +663,7 @@ public class HtmlReport implements IScriptReport {
 
             boolean hasDescription = StringUtils.isNotBlank(description);
             boolean hasParameters = parameters != null && !parameters.isEmpty();
-            boolean isPassed = status == StatusType.PASSED;
+            boolean isPassed = status == PASSED;
 
             boolean isVerificationNode = hasParameters || !isPassed;
             boolean isContainOnlyComparison = hasParameters && isPassed;
@@ -1009,12 +1013,12 @@ public class HtmlReport implements IScriptReport {
     }
 
     private void writeException(Writer writer, Throwable cause) {
-        createNode(writer, "Status", NodeType.STATUS, StatusType.FAILED, null, 5);
+        createNode(writer, "Status", NodeType.STATUS, FAILED, null, 5);
 
         try {
             TemplateWrapper statusTableTemplate = templateWrapperFactory.createWrapper("status_table.ftlh");
 
-            statusTableTemplate.setData("status", StatusType.FAILED);
+            statusTableTemplate.setData("status", FAILED);
             statusTableTemplate.setData("description", cause.getClass() + ": " + cause.getMessage());
             statusTableTemplate.setData("exception", cause);
             statusTableTemplate.setData("id", ++nodeId * 1000);
@@ -1038,7 +1042,7 @@ public class HtmlReport implements IScriptReport {
             updateReport();
             break;
         case TESTCASE:
-            if(tableName.equals("Messages")) {
+            if("Messages".equals(tableName)) {
                 createNode(testCaseWriter, "Table: All messages", NodeType.INFO, null, MessageLevel.INFO, 5);
 
                 try {
@@ -1218,68 +1222,68 @@ public class HtmlReport implements IScriptReport {
     }
 
     private String getNodeClass(NodeType nodeType, StatusType statusType, MessageLevel messageLevel) {
-        String nodeClass = "";
 
-        if (nodeType == NodeType.TESTCASE && statusType == StatusType.PASSED)
-            nodeClass = "testcase_passed";
-        else if (nodeType == NodeType.TESTCASE && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "testcase_conditionally_passed";
-        else if (nodeType == NodeType.TESTCASE && statusType == StatusType.FAILED)
-            nodeClass = "testcase_failed";
-        else if (nodeType == NodeType.TESTCASE && statusType == StatusType.SKIPPED)
-            nodeClass = "testcase_skipped";
-        else if (nodeType == NodeType.DESCRIPTION)
-            nodeClass = "description";
-        else if (nodeType == NodeType.ACTION && statusType == StatusType.PASSED)
-            nodeClass = "action_passed";
-        else if (nodeType == NodeType.ACTION && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "action_conditionally_passed";
-        else if (nodeType == NodeType.ACTION && statusType == StatusType.FAILED)
-            nodeClass = "action_failed";
-        else if (nodeType == NodeType.ACTION && statusType == StatusType.SKIPPED)
-            nodeClass = "action_skipped";
-        else if (nodeType == NodeType.INPUT)
-            nodeClass = "inputparams";
-        else if (nodeType == NodeType.INFO)
-            nodeClass = "info_" + messageLevel.toString().toLowerCase();
-        else if (nodeType == NodeType.STATUS && statusType == StatusType.PASSED)
-            nodeClass = "statustype_passed";
-        else if (nodeType == NodeType.STATUS && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "statustype_conditionally_passed";
-        else if (nodeType == NodeType.STATUS && statusType == StatusType.CONDITIONALLY_FAILED)
-            nodeClass = "statustype_conditionally_failed";
-        else if (nodeType == NodeType.STATUS && statusType == StatusType.FAILED)
-            nodeClass = "statustype_failed";
-        else if (nodeType == NodeType.EXCEPTION && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "conditionally_exceptiontype";
-        else if (nodeType == NodeType.EXCEPTION)
-            nodeClass = "exceptiontype";
-        else if (nodeType == NodeType.ALERTS)
-            nodeClass = "alerttype";
-        else if (nodeType == NodeType.VERIFICATION && statusType == StatusType.PASSED)
-            nodeClass = "verification_passed";
-        else if (nodeType == NodeType.VERIFICATION && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "verification_conditionally_passed";
-        else if (nodeType == NodeType.VERIFICATION && statusType == StatusType.FAILED)
-            nodeClass = "verification_failed";
-        else if (nodeType == NodeType.VERIFICATION && statusType == StatusType.SKIPPED)
-            nodeClass = "verification_skipped";
-        else if (nodeType == NodeType.COMPARISON && statusType == StatusType.PASSED)
-            nodeClass = "comparisontype_passed";
-        else if (nodeType == NodeType.COMPARISON && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "comparisontype_conditionally_passed";
-        else if (nodeType == NodeType.COMPARISON && statusType != StatusType.PASSED)
-            nodeClass = "comparisontype_notpassed";
-        else if (nodeType == NodeType.MATRIX && statusType == StatusType.PASSED)
-            nodeClass = "matrix_passed";
-        else if (nodeType == NodeType.MATRIX && statusType == StatusType.CONDITIONALLY_PASSED)
-            nodeClass = "matrix_conditionally_passed";
-        else if (nodeType == NodeType.MATRIX && statusType == StatusType.FAILED)
-            nodeClass = "matrix_failed";
-        else if (nodeType == NodeType.MATRIX && statusType == StatusType.SKIPPED)
-            nodeClass = "matrix_skipped";
+        if(nodeType == NodeType.TESTCASE && statusType == PASSED) {
+            return "testcase_passed";
+        } else if(nodeType == NodeType.TESTCASE && statusType == CONDITIONALLY_PASSED) {
+            return "testcase_conditionally_passed";
+        } else if(nodeType == NodeType.TESTCASE && statusType == FAILED) {
+            return "testcase_failed";
+        } else if(nodeType == NodeType.TESTCASE && statusType == SKIPPED) {
+            return "testcase_skipped";
+        } else if(nodeType == NodeType.DESCRIPTION) {
+            return "description";
+        } else if(nodeType == NodeType.ACTION && statusType == PASSED) {
+            return "action_passed";
+        } else if(nodeType == NodeType.ACTION && statusType == CONDITIONALLY_PASSED) {
+            return "action_conditionally_passed";
+        } else if(nodeType == NodeType.ACTION && statusType == FAILED) {
+            return "action_failed";
+        } else if(nodeType == NodeType.ACTION && statusType == SKIPPED) {
+            return "action_skipped";
+        } else if(nodeType == NodeType.INPUT) {
+            return "inputparams";
+        } else if(nodeType == NodeType.INFO) {
+            return "info_" + messageLevel.toString().toLowerCase();
+        } else if(nodeType == NodeType.STATUS && statusType == PASSED) {
+            return "statustype_passed";
+        } else if(nodeType == NodeType.STATUS && statusType == CONDITIONALLY_PASSED) {
+            return "statustype_conditionally_passed";
+        } else if(nodeType == NodeType.STATUS && statusType == CONDITIONALLY_FAILED) {
+            return "statustype_conditionally_failed";
+        } else if(nodeType == NodeType.STATUS && statusType == FAILED) {
+            return "statustype_failed";
+        } else if(nodeType == NodeType.EXCEPTION && statusType == CONDITIONALLY_PASSED) {
+            return "conditionally_exceptiontype";
+        } else if(nodeType == NodeType.EXCEPTION) {
+            return "exceptiontype";
+        } else if(nodeType == NodeType.ALERTS) {
+            return "alerttype";
+        } else if(nodeType == NodeType.VERIFICATION && statusType == PASSED) {
+            return "verification_passed";
+        } else if(nodeType == NodeType.VERIFICATION && statusType == CONDITIONALLY_PASSED) {
+            return "verification_conditionally_passed";
+        } else if(nodeType == NodeType.VERIFICATION && statusType == FAILED) {
+            return "verification_failed";
+        } else if(nodeType == NodeType.VERIFICATION && statusType == SKIPPED) {
+            return "verification_skipped";
+        } else if(nodeType == NodeType.COMPARISON && statusType == PASSED) {
+            return "comparisontype_passed";
+        } else if(nodeType == NodeType.COMPARISON && statusType == CONDITIONALLY_PASSED) {
+            return "comparisontype_conditionally_passed";
+        } else if(nodeType == NodeType.COMPARISON && statusType != PASSED) {
+            return "comparisontype_notpassed";
+        } else if(nodeType == NodeType.MATRIX && statusType == PASSED) {
+            return "matrix_passed";
+        } else if(nodeType == NodeType.MATRIX && statusType == CONDITIONALLY_PASSED) {
+            return "matrix_conditionally_passed";
+        } else if(nodeType == NodeType.MATRIX && statusType == FAILED) {
+            return "matrix_failed";
+        } else if(nodeType == NodeType.MATRIX && statusType == SKIPPED) {
+            return "matrix_skipped";
+        }
 
-        return nodeClass;
+        return "";
     }
 
     private String getStatusClass(StatusType status) {
@@ -1388,12 +1392,7 @@ public class HtmlReport implements IScriptReport {
         }
 
         IDictionaryStructure dictionaryStructure = dictionaryManager.getDictionary(dictionaryURI);
-
-        if(dictionaryStructure == null) {
-            return null;
-        }
-
-        return dictionaryStructure.getMessages().get(metaData.getMsgName());
+        return dictionaryStructure == null ? null : dictionaryStructure.getMessages().get(metaData.getMsgName());
     }
 
     private List<VerificationParameter> convert(ComparisonResult result, String parentRaw, int counter, int nestingLevel) {
@@ -1653,7 +1652,7 @@ public class HtmlReport implements IScriptReport {
     }
 
     private interface IReportEntryContainer {
-        public void write(Writer writer);
+        void write(Writer writer);
     }
 
     private class ReportTestcaseContainer implements IReportEntryContainer {
@@ -1668,21 +1667,21 @@ public class HtmlReport implements IScriptReport {
         public void write(Writer writer) {
             Long duration = null;
             StatusType status = null;
-            if (this.testcase.getStatus() != null && this.testcase.getFinishTime() != null) {
-                status = this.testcase.getStatus().getStatus();
-                duration = this.testcase.getFinishTime().getTime() - this.testcase.getStartTime().getTime();
+            if(testcase.getStatus() != null && testcase.getFinishTime() != null) {
+                status = testcase.getStatus().getStatus();
+                duration = testcase.getFinishTime().getTime() - testcase.getStartTime().getTime();
             }
 
             TemplateWrapper reportTestCaseLinkTemplate;
             try {
                 reportTestCaseLinkTemplate = templateWrapperFactory.createWrapper("report_test_case_link.ftlh");
 
-                reportTestCaseLinkTemplate.setData("name", this.testcase.getName());
-                reportTestCaseLinkTemplate.setData("fileName", this.testcase.getName().replaceAll("\\W", "_"));
-                reportTestCaseLinkTemplate.setData("description", this.testcase.getDescription());
+                reportTestCaseLinkTemplate.setData("name", testcase.getName());
+                reportTestCaseLinkTemplate.setData("fileName", testcase.getName().replaceAll("\\W", "_"));
+                reportTestCaseLinkTemplate.setData("description", testcase.getDescription());
                 reportTestCaseLinkTemplate.setData("status", status);
                 reportTestCaseLinkTemplate.setData("duration", duration);
-                reportTestCaseLinkTemplate.setData("tags", this.testcase.getTags());
+                reportTestCaseLinkTemplate.setData("tags", testcase.getTags());
                 reportTestCaseLinkTemplate.write(writer, 5);
 
             } catch (TemplateException | IOException e) {

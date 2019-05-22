@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -44,28 +44,28 @@ public class FlightRecorderService {
 	
 	private static final String JCMD_INVOKE_COMMAND = 
 			" %s JFR.start duration=%ss name=MyRecording filename='%s' settings=profile";
-	
-	private volatile boolean recordingStarted = false;
-	
-	private volatile boolean continiousRecordingStarted = false;
+
+    private volatile boolean recordingStarted;
+
+    private volatile boolean continiousRecordingStarted;
 	
 	private String errorMessage;
 	
 	private boolean canRecord = true;
-	
-	private final String[] requiredOptions = new String[] {"-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder"};
+
+    private final String[] requiredOptions = { "-XX:+UnlockCommercialFeatures", "-XX:+FlightRecorder" };
 	
 	private final List<RecordedFile> recordFiles = new ArrayList<RecordedFile>();
-	
-	private volatile Date busyTill = null;
-	
-	private ITaskExecutor taskExecutor;
+
+    private volatile Date busyTill;
+
+    private final ITaskExecutor taskExecutor;
 	
 	private ContiniousRecordTask continiousRecordingTask;
 	
 	private volatile FlightRecorderOptions settings;
-	
-	private IOptionsStorage optionsStorage;
+
+    private final IOptionsStorage optionsStorage;
 	
 	public FlightRecorderService(ITaskExecutor taskExecutor, IOptionsStorage optionsStorage) {
 		
@@ -76,8 +76,8 @@ public class FlightRecorderService {
 		this.settings = new FlightRecorderOptions();
 		
 		try {
-			
-			this.settings.fillFromMap(optionsStorage.getAllOptions());
+
+            settings.fillFromMap(optionsStorage.getAllOptions());
 			
 		} catch (Exception e) {
 			
@@ -92,16 +92,16 @@ public class FlightRecorderService {
 	}
 	
 	private void initDefaultSettings() {
-		
-		if(this.settings.getJdkPath() == null) {
-			
-			this.settings.setJdkPath(getJdkFolder());
+
+        if(settings.getJdkPath() == null) {
+
+            settings.setJdkPath(getJdkFolder());
 			
 		}
-		
-		if(this.settings.getRecordsFolder() == null) {
-			
-			this.settings.setRecordsFolder(System.getProperty("java.io.tmpdir"));
+
+        if(settings.getRecordsFolder() == null) {
+
+            settings.setRecordsFolder(System.getProperty("java.io.tmpdir"));
 			
 		}
 		
@@ -150,8 +150,8 @@ public class FlightRecorderService {
 		List<String> missingArguments = new ArrayList<>();
 		
 		logger.info("{}", arguments);
-		
-		for(String option : this.requiredOptions) {
+
+        for(String option : requiredOptions) {
 			
 			if(!arguments.contains(option)) {
 				
@@ -168,28 +168,20 @@ public class FlightRecorderService {
 		}
 		
 	}
-	
-	private String getJdkFolder() {
-		
-		String environmentValue = System.getenv("JAVA_HOME");
-		
-		if(StringUtils.isNotEmpty(environmentValue)) {
-			return environmentValue;
-		}
-		
-		return System.getProperty("java.home");
-		
-	}
+
+    private String getJdkFolder() {
+        return StringUtils.defaultIfEmpty(System.getenv("JAVA_HOME"), System.getProperty("java.home"));
+    }
 	
 	private String getProcessId() {
 	    // Note: may fail in some JVM implementations
 
 	    // something like '<pid>@<hostname>', at least in SUN / Oracle JVMs
-	    final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+        String jvmName = ManagementFactory.getRuntimeMXBean().getName();
 	    
 	    logger.info("JVM name: {}", jvmName);
-	    
-	    final int index = jvmName.indexOf('@');
+
+        int index = jvmName.indexOf('@');
 
 	    if (index < 1) {
 	        // part before '@' empty (index = 0) / '@' not found (index = -1)
@@ -211,8 +203,8 @@ public class FlightRecorderService {
 	private void refreshFilesList() {
 		
 		List<RecordedFile> toRemove = new ArrayList<>();
-		
-		for(RecordedFile file : this.recordFiles) {
+
+        for(RecordedFile file : recordFiles) {
 			
 			File fsFile = new File(file.getPath());
 			
@@ -227,8 +219,8 @@ public class FlightRecorderService {
 		}
 		
 		if(!toRemove.isEmpty()) {
-			
-			this.recordFiles.removeAll(toRemove);
+
+            recordFiles.removeAll(toRemove);
 			
 		}
 		
@@ -237,12 +229,12 @@ public class FlightRecorderService {
 	private File createRecordFile(String name) {
 		
 		try {
-			
-			File recordsFolder = new File(this.settings.getRecordsFolder());
+
+            File recordsFolder = new File(settings.getRecordsFolder());
 			
 			if(!recordsFolder.exists()) {
-				
-				throw new FileNotFoundException(this.settings.getRecordsFolder());
+
+                throw new FileNotFoundException(settings.getRecordsFolder());
 				
 			}
 			
@@ -265,14 +257,14 @@ public class FlightRecorderService {
 	public void applySettings(FlightRecorderOptions settings) {
 		
 		this.settings = settings;
-		
-		this.recordFiles.clear();
+
+        recordFiles.clear();
 		
 		try {
-			
-			for(Map.Entry<String, String> option : this.settings.toMap().entrySet()) {
-				
-				this.optionsStorage.setOption(option.getKey(), option.getValue());
+
+            for(Entry<String, String> option : this.settings.toMap().entrySet()) {
+
+                optionsStorage.setOption(option.getKey(), option.getValue());
 				
 			}
 			
@@ -293,18 +285,18 @@ public class FlightRecorderService {
 	}
 	
 	public synchronized void startRecording(long duration) {
-		
-		if(this.recordingStarted) {
-			
-			if(this.busyTill.after(new Date())) {
+
+        if(recordingStarted) {
+
+            if(busyTill.after(new Date())) {
 				
 				throw new IllegalStateException("Recording already in progress");
 				
 			}
 			
 		}
-		
-		String jvmPath =this.settings.getJdkPath();
+
+        String jvmPath = settings.getJdkPath();
 		
 		if(StringUtils.isEmpty(jvmPath)) {
 			
@@ -337,7 +329,7 @@ public class FlightRecorderService {
 		File jcmdFile = null;
 		
 		for (File file : binFolder.listFiles()) {
-			if (file.getName().equals("jcmd") || file.getName().startsWith("jcmd.")) {
+            if("jcmd".equals(file.getName()) || file.getName().startsWith("jcmd.")) {
 				jcmdFile = file;
 				break;
 			}
@@ -357,29 +349,29 @@ public class FlightRecorderService {
 		this.recordingStarted = true;
 		
 		this.busyTill = recordedTo;
-		
-		this.recordFiles.add(0, new RecordedFile(fileName, 
-				resultFile.getAbsolutePath(), recordedFrom, recordedTo) );
+
+        recordFiles.add(0, new RecordedFile(fileName,
+                resultFile.getAbsolutePath(), recordedFrom, recordedTo) );
 		
 	}
 	
 	public synchronized void startContiniousRecording(long durationChank) {
 		
 		this.continiousRecordingTask = new ContiniousRecordTask(durationChank);
-		
-		this.taskExecutor.addRepeatedTask(continiousRecordingTask, 0, durationChank, TimeUnit.SECONDS);
+
+        taskExecutor.addRepeatedTask(continiousRecordingTask, 0, durationChank, TimeUnit.SECONDS);
 		
 		this.continiousRecordingStarted = true;
 		
 	}
 	
 	public synchronized void stopContiniousRecording() {
-		
-		if(this.continiousRecordingTask == null) {
+
+        if(continiousRecordingTask == null) {
 			throw new IllegalStateException("Recording is not started");
 		}
-		
-		this.continiousRecordingTask.stop();
+
+        continiousRecordingTask.stop();
 		
 		this.continiousRecordingStarted = false;
 		
@@ -388,8 +380,8 @@ public class FlightRecorderService {
 	public synchronized List<RecordedFile> getRecordedFiles() {
 		
 		refreshFilesList();
-		
-		return Collections.unmodifiableList(this.recordFiles);
+
+        return Collections.unmodifiableList(recordFiles);
 		
 	}
 	

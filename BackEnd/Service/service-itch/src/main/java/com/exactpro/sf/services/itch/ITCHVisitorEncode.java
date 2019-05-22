@@ -42,7 +42,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 	private final IoBuffer buffer;
 	private final ByteOrder byteOrder;
 
-	private final static Byte DEFAULT_BYTE = 0x0;
+    private static final Byte DEFAULT_BYTE = 0x0;
 
     public ITCHVisitorEncode(IoBuffer buffer, ByteOrder byteOrder) {
 		this.buffer = buffer;
@@ -183,7 +183,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         }
 
 		if (type == ProtocolType.PRICE) {
-			int val = (int) (value.floatValue() * 10000);
+            int val = (int)(value.floatValue() * 10_000);
 			buffer.putInt(val);
 		} else {
 			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
@@ -201,10 +201,10 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         }
 
 		if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
-			long val = (long) (value.doubleValue() * 100000000);
+            long val = (long)(value.doubleValue() * 100_000_000);
 			buffer.putLong(val);
 		} else if (type == ProtocolType.PRICE4 || type == ProtocolType.SIZE4) {
-			long val = (long) (value.doubleValue() * 10000);
+            long val = (long)(value.doubleValue() * 10_000);
 			buffer.putLong(val);
 		} else if (type == ProtocolType.UINT16) {
 			double val = value.doubleValue();
@@ -242,7 +242,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 		tryToFillDefaultBytes(type, value, fieldName, length);
 
         if (type == ProtocolType.DAYS) {
-            buffer.putShort((short) (DateTimeUtility.getMillisecond(value) / 86400_000L));
+            buffer.putShort((short)(DateTimeUtility.getMillisecond(value) / 86_400_000L));
         } else if (type == ProtocolType.DATE) {
             String temp = value.format(dateFormatter);
         	buffer.put(temp.getBytes());
@@ -287,7 +287,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 			}
 			buffer.putLong(val);
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.SIZE) {
-			long val = (long) (value.doubleValue() * 100000000);
+            long val = (long)(value.doubleValue() * 100_000_000);
 			buffer.putLong(val);
 		} else if (type == ProtocolType.UDT) {
 			byte[] longArray = new byte[length];

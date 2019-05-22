@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.exactpro.sf.common.logging.CommonLoggers;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,13 @@ import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 public class MatrixHolder implements IMatrixListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MatrixHolder.class);
-    public static final Logger USER_EVENTS_LOG = LoggerFactory.getLogger("USER_EVENTS_LOG");
+    public static final Logger USER_EVENTS_LOG = CommonLoggers.USER_EVENTS_LOGGER;
 
     private final IWorkspaceDispatcher wd;
 	private final IMatrixStorage matrixStorage;
 	private final MatrixProviderHolder matrixProviderHolder;
 
-	private List<IMatrix> matrices;
+    private final List<IMatrix> matrices;
 
 	public MatrixHolder(IWorkspaceDispatcher wd, IMatrixStorage matrixStorage, MatrixProviderHolder matrixProviderHolder) throws FileNotFoundException {
 		this.wd = wd;
@@ -57,12 +58,12 @@ public class MatrixHolder implements IMatrixListener {
 
 	@Override
 	public void addMatrix(IMatrix matrix) {
-		this.matrices.add(0, matrix);
+        matrices.add(0, matrix);
 	}
 
 	@Override
 	public void removeMatrix(IMatrix matrix) {
-		this.matrices.remove(matrix);
+        matrices.remove(matrix);
 	}
 
 	public IMatrix getMatrixById(long id) {

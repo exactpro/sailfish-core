@@ -29,6 +29,8 @@ import org.junit.Test;
 import com.exactpro.sf.common.impl.messages.xml.XMLTransmitter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Attribute;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
+import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary.Fields;
+import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary.Messages;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Field;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Message;
@@ -47,7 +49,7 @@ import com.exactpro.sf.util.EPSTestCase;
 
 public class ReadConfigTest extends EPSTestCase {
 
-	private String PATH_PREFIX = getBaseDir() + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator ;
+	private final String PATH_PREFIX = getBaseDir() + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator ;
 	
 	@Test
 	public void test0() throws Exception {
@@ -76,7 +78,7 @@ public class ReadConfigTest extends EPSTestCase {
 		tmp.setType(JavaType.JAVA_LANG_BYTE);
 		tmp.setValue("3");
 		field.getValues().add(tmp);
-		dict.setFields(new Dictionary.Fields());
+		dict.setFields(new Fields());
 		dict.getFields().getFields().add(field);
 
 		Message message = new Message();
@@ -86,7 +88,7 @@ public class ReadConfigTest extends EPSTestCase {
 		mfield.setName("f_name");
 		mfield.setReference(field);
 		message.getFields().add(mfield);
-		dict.setMessages(new Dictionary.Messages());
+		dict.setMessages(new Messages());
 		dict.getMessages().getMessages().add(message);
 
 		XMLTransmitter
@@ -196,7 +198,7 @@ public class ReadConfigTest extends EPSTestCase {
 			System.out.println(fieldStructure0.getName() + " " + fieldStructure0.getStructureType());
 			if (fieldStructure0.isComplex()) {
 				messageCount518++;
-				if( fieldStructure0.getName().equals("SMandatorySequenceBConfirmationDetails") ){
+                if("SMandatorySequenceBConfirmationDetails".equals(fieldStructure0.getName())) {
 					Assert.assertEquals(3, fieldStructure0.getFields().size());
                     for(IFieldStructure fieldStructure1 : fieldStructure0.getFields().values()) {
 						System.out.println(fieldStructure1.getName() + " " + fieldStructure1.getStructureType());

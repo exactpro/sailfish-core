@@ -30,7 +30,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -66,6 +65,8 @@ import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
+import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.SFWebApplication;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
@@ -82,7 +83,7 @@ public class TestScriptsBean implements Serializable, IView {
 
     private static final Logger logger = LoggerFactory.getLogger(TestScriptsBean.class);
 
-    @ManagedProperty(value="#{scriptRunsBean}")
+    @ManagedProperty("#{scriptRunsBean}")
 	private ScriptRunsBean scriptRunsBean;
 
     public static final List<String> ENCODE_VALUES = ImmutableList.of("UTF-8", "ISO-8859-1");
@@ -121,7 +122,7 @@ public class TestScriptsBean implements Serializable, IView {
 
 	private String newFileName;
 
-	private List<Long> selectedMatrices;
+    private final List<Long> selectedMatrices;
 	private List<Long> filteredMatrices;
 
 	private MatrixAdapter matrixToEdit;
@@ -140,9 +141,9 @@ public class TestScriptsBean implements Serializable, IView {
 
 	private Tag tagToAdd;
 
-	private boolean statisticsEnabled = false;
+    private boolean statisticsEnabled;
 
-    private Map<String, Comparator<TestScriptDescription>> comparators;
+    private final Map<String, Comparator<TestScriptDescription>> comparators;
     private String sortBy;
 
 	public Set<SailfishURI> getLanguageURIs() {
@@ -155,13 +156,13 @@ public class TestScriptsBean implements Serializable, IView {
         allResultStatuses = new HashSet<>();
 
         allResultStatuses.addAll(
-                Arrays.stream(TestScriptDescription.ScriptStatus.values()).map(Enum::name)
-                        .filter(i -> !i.equals(TestScriptDescription.ScriptStatus.EXECUTED.name())).collect(Collectors.toSet()));
+                Arrays.stream(ScriptStatus.values()).map(Enum::name)
+                        .filter(i -> !i.equals(ScriptStatus.EXECUTED.name())).collect(Collectors.toSet()));
 
         allResultStatuses.add("EXECUTED SUCCESS");
         allResultStatuses.add("EXECUTED WITH ERRORS");
 
-        allResultStatuses.addAll(Arrays.stream(TestScriptDescription.ScriptState.values()).map(Enum::name).collect(Collectors.toSet()));
+        allResultStatuses.addAll(Arrays.stream(ScriptState.values()).map(Enum::name).collect(Collectors.toSet()));
 
         sortBy = DEFAULT_SORT_ORDER;
         comparators = new HashMap<>();
@@ -239,7 +240,7 @@ public class TestScriptsBean implements Serializable, IView {
     	List<Tag> result = new ArrayList<>();
     	String loweredQuery = query.toLowerCase();
 
-    	for (Tag tag : this.allTags) {
+        for(Tag tag : allTags) {
     		if (tag.getName().toLowerCase().contains(loweredQuery)) {
 
     			result.add(tag);
@@ -252,22 +253,22 @@ public class TestScriptsBean implements Serializable, IView {
     public void onTagSelect() {
     	logger.debug("Tag select invoked");
 
-    	this.tags.add(tagToAdd);
+        tags.add(tagToAdd);
     	this.tagToAdd = null;
-    	this.allTags.removeAll(tags);
+        allTags.removeAll(tags);
 
     	saveSelectedTags();
     }
 
     public void removeTag(Tag tag) {
-    	this.tags.remove(tag);
-    	this.allTags.add(tag);
+        tags.remove(tag);
+        allTags.add(tag);
 
     	saveSelectedTags();
     }
 
     private void saveSelectedTags() {
-    	this.scriptRunsBean.setTags(new ArrayList<>(tags));
+        scriptRunsBean.setTags(new ArrayList<>(tags));
     }
 
 	private void enqueue(MatrixAdapter matrixAdapter, boolean autoRun) throws FileNotFoundException, IOException {
@@ -279,22 +280,22 @@ public class TestScriptsBean implements Serializable, IView {
 
 		String currentRange = matrixAdapter.getRange();
 		long enqueuedID = TestToolsAPI.getInstance().executeMatrix(
-				matrixAdapter.getIMatrix(), this.selectedLanguageURI, currentRange,
-				this.selectedEncoding, this.selectedEnvironment,
-				BeanUtil.getUser(), this.continueOnFailed, this.autoStart,
-				autoRun, this.ignoreAskForContinue, runNetDumper, skipOptional, new ArrayList<>(this.tags), null, null, null);
+                matrixAdapter.getIMatrix(), selectedLanguageURI, currentRange,
+                selectedEncoding, selectedEnvironment,
+                BeanUtil.getUser(), continueOnFailed, autoStart,
+                autoRun, ignoreAskForContinue, runNetDumper, skipOptional, new ArrayList<>(tags), null, null, null);
 
         if (logger.isInfoEnabled()) {
-            String tagsString = this.tags == null ? null : Arrays.toString(this.tags.toArray());
+            String tagsString = tags == null ? null : Arrays.toString(tags.toArray());
             logger.info(
                 "Test Script {} was enqueued under {}. Script properties [selectedLanguage : [{}], range : [{}], " +
                 "selectedEncoding : [{}], selectedEnvironment : [{}], user : [{}], continueOnFailed : [{}], " +
                 "autoStart : [{}], autoRun : [{}], ignoreAskForContinue : [{}], tags : [{}], " +
                 "staticVariables : [null], userListeners : [null], subFolder : [null]",
                     matrixAdapter.getIMatrix(), enqueuedID,  selectedLanguageURI, currentRange,
-                    this.selectedEncoding, this.selectedEnvironment,
-                    BeanUtil.getUser(), this.continueOnFailed, this.autoStart,
-                    autoRun, this.ignoreAskForContinue, tagsString);
+                    selectedEncoding, selectedEnvironment,
+                    BeanUtil.getUser(), continueOnFailed, autoStart,
+                    autoRun, ignoreAskForContinue, tagsString);
 
         }
 
@@ -314,7 +315,7 @@ public class TestScriptsBean implements Serializable, IView {
 		for (String env : envs) {
 		    environmentValues.put(env, env);
 		}
-        this.scriptRunsBean.setEnvironmentValues(environmentValues);
+        scriptRunsBean.setEnvironmentValues(environmentValues);
 	}
 
 	private String packZip() throws IOException {
@@ -380,7 +381,7 @@ public class TestScriptsBean implements Serializable, IView {
 	public void createNewScript() {
 		logger.debug("createNewScript invoked {}", BeanUtil.getUser());
 		try {
-			TestToolsAPI.getInstance().uploadMatrix(null, this.newFileName.trim() + ".csv", null, "Unknown creator", null, null, null);
+            TestToolsAPI.getInstance().uploadMatrix(null, newFileName.trim() + ".csv", null, "Unknown creator", null, null, null);
 		} catch (Exception e) {
 			logger.error("Could not create new script file", e);
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Could not create new script file", e.getMessage() );
@@ -391,11 +392,8 @@ public class TestScriptsBean implements Serializable, IView {
 
 	public boolean isNotOneSelected() {
 		logger.debug("isNotOneSelected invoked {}", BeanUtil.getUser());
-		if (selectedMatrices == null ) {
-			return true;
-		}
-		return selectedMatrices.size() != 1;
-	}
+        return selectedMatrices == null || selectedMatrices.size() != 1;
+    }
 
 	public void run(MatrixAdapter matrixAdapter) throws FileNotFoundException, IOException {
 		logger.debug("run invoked {} id[{}] range[{}]", BeanUtil.getUser(), matrixAdapter.getMatrixId(), matrixAdapter.getRange());
@@ -424,13 +422,13 @@ public class TestScriptsBean implements Serializable, IView {
 
         if (BeanUtil.getRequestParam("contIfFailed") != null) {
         	this.continueOnFailed = Boolean.valueOf(BeanUtil.getRequestParam("contIfFailed"));
-        	matrixAdapter.setContinueOnFailed(this.continueOnFailed);
+            matrixAdapter.setContinueOnFailed(continueOnFailed);
 
         }
 
         if (BeanUtil.getRequestParam("autoStart") != null) {
         	this.autoStart = Boolean.valueOf(BeanUtil.getRequestParam("autoStart"));
-        	matrixAdapter.setAutoStart(this.autoStart);
+            matrixAdapter.setAutoStart(autoStart);
         }
 
         if (BeanUtil.getRequestParam("ignoreAskForContinue") != null) {
@@ -449,8 +447,7 @@ public class TestScriptsBean implements Serializable, IView {
         	this.selectedEnvironment = BeanUtil.getRequestParam("environment");
         }
 
-
-        if (testCaseToRun.length() > 0) {
+        if(!testCaseToRun.isEmpty()) {
 			//only one :
 			if (testCaseToRun.indexOf(":") != testCaseToRun.lastIndexOf(":")) {
 				String number = testCaseToRun.substring(0, testCaseToRun.indexOf(":"));
@@ -776,8 +773,8 @@ public class TestScriptsBean implements Serializable, IView {
 
     public boolean filterByDate(Object value, Object filter, Locale locale) {
 		logger.debug("filterByDate invoked {} value[{}], filter[{}], locale[{}]", BeanUtil.getUser(), value, filter, locale);
-        Date filterDate = (filter == null) ? null : (filter instanceof Date ? (Date)filter : null);
-        Date valueDate = (value == null) ? null : (value instanceof Date ? (Date)value : null);
+        Date filterDate = (filter == null) ? null : filter instanceof Date ? (Date)filter : null;
+        Date valueDate = (value == null) ? null : value instanceof Date ? (Date)value : null;
 
         if (filterDate == null || valueDate == null) {
             return true;
@@ -1011,7 +1008,7 @@ public class TestScriptsBean implements Serializable, IView {
 	}
 
     public void addFilterCallback() {
-        RequestContext.getCurrentInstance().addCallbackParam("statuses", JSONArray.fromObject(this.selectedResultStatuses).toString());
+        RequestContext.getCurrentInstance().addCallbackParam("statuses", JSONArray.fromObject(selectedResultStatuses).toString());
     }
 
 	public void restoreFilters() {
@@ -1072,8 +1069,8 @@ public class TestScriptsBean implements Serializable, IView {
 	}
 
 	public String getMatrixCountInfo() {
-		int selected = this.selectedMatrices.size();
-		int total = this.matrixAdapterList.size();
+        int selected = selectedMatrices.size();
+        int total = matrixAdapterList.size();
 		return "Selected: " + selected + ", Total: " + total;
 	}
 

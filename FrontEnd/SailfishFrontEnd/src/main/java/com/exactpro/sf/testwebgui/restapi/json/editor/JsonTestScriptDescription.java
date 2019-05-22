@@ -61,14 +61,14 @@ public class JsonTestScriptDescription {
 
 		this.matrixFileName = descr.getMatrixFileName();
 		this.settings = new RunMatrixSettings();
-		this.settings.setRange(descr.getRange());
-		this.settings.setContinueOnFailed(descr.getContinueOnFailed());
-		this.settings.setAutoStart(descr.getAutoStart());
-		this.settings.setIgnoreAskForContinue(descr.isSuppressAskForContinue());
-		this.settings.setEnvironment(descr.getContext().getEnvironmentName());
-		this.settings.setEncoding(descr.getEncoding());
-		this.settings.setAutoRun(false); // FIXME
-		this.settings.setSkipOptional(descr.isSkipOptional());
+        settings.setRange(descr.getRange());
+        settings.setContinueOnFailed(descr.getContinueOnFailed());
+        settings.setAutoStart(descr.getAutoStart());
+        settings.setIgnoreAskForContinue(descr.isSuppressAskForContinue());
+        settings.setEnvironment(descr.getContext().getEnvironmentName());
+        settings.setEncoding(descr.getEncoding());
+        settings.setAutoRun(false); // FIXME
+        settings.setSkipOptional(descr.isSkipOptional());
 
 		this.languageURI = descr.getLanguageURI();
 		this.progress = descr.getProgress();

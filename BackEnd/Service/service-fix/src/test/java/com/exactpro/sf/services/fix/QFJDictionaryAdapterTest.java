@@ -55,16 +55,16 @@ public class QFJDictionaryAdapterTest {
     	}
 
         this.qfjDictionaryAdapter = new QFJDictionaryAdapter(dictionaryStructure);
-        when(provider.getApplicationDataDictionary(new ApplVerID(ApplVerID.FIX50SP2))).thenReturn(this.qfjDictionaryAdapter);
+        when(provider.getApplicationDataDictionary(new ApplVerID(ApplVerID.FIX50SP2))).thenReturn(qfjDictionaryAdapter);
     }
 
     @Test
     public void testValidateInsertGroup() throws Exception {
         try {
             String messageString =  "8=FIXT.1.19=24235=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO1091=Y235=XD268=1279=0453=1448=25910=24";
-            Message message = MessageUtils.parse(this.session, messageString);
-            this.qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
-            this.qfjDictionaryAdapter.validate(message, false);
+            Message message = MessageUtils.parse(session, messageString);
+            qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
+            qfjDictionaryAdapter.validate(message, false);
         } catch (Exception e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -78,8 +78,8 @@ public class QFJDictionaryAdapterTest {
             Message msg = new Message();
             msg.fromString(messageString, qfjDictionaryAdapter, true);
 //            Message message = MessageUtils.parse(this.session, messageString);
-            this.qfjDictionaryAdapter.setAllowUnknownMessageFields(false);
-            this.qfjDictionaryAdapter.validate(msg, false);
+            qfjDictionaryAdapter.setAllowUnknownMessageFields(false);
+            qfjDictionaryAdapter.validate(msg, false);
         } catch (Exception e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -90,9 +90,9 @@ public class QFJDictionaryAdapterTest {
     public void testAllowOtherValues() throws Exception {
         try {
             String messageString =  "8=FIXT.1.19=23535=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO234=000.1235=XD268=1279=0453=1448=25910=126";
-            Message message = MessageUtils.parse(this.session, messageString);
-            this.qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
-            this.qfjDictionaryAdapter.validate(message, false);
+            Message message = MessageUtils.parse(session, messageString);
+            qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
+            qfjDictionaryAdapter.validate(message, false);
         } catch (Exception e){
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -100,9 +100,9 @@ public class QFJDictionaryAdapterTest {
 
         try {
             String messageString =  "8=FIXT.1.19=23535=X49=TOR56=ft0134=852=20150529-11:30:20.596262=14328989480720000002-MBO234=XD235=0.001268=1279=0453=1448=25910=126";
-            Message message = MessageUtils.parse(this.session, messageString);
-            this.qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
-            this.qfjDictionaryAdapter.validate(message, false);
+            Message message = MessageUtils.parse(session, messageString);
+            qfjDictionaryAdapter.setAllowUnknownMessageFields(true);
+            qfjDictionaryAdapter.validate(message, false);
         } catch (IncorrectTagValue e) {
             Assert.assertEquals(235, e.field);
         }

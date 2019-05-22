@@ -24,12 +24,8 @@ import com.exactprosystems.webchannels.messages.ChannelsMessage;
 public class ServiceUpdateRequest extends AbstractMessage {
 
 	private String requestId;
-	
-	public ServiceUpdateRequest(){
-		super();
-	}
-	
-	public String getRequestId() {
+
+    public String getRequestId() {
 		return requestId;
 	}
 

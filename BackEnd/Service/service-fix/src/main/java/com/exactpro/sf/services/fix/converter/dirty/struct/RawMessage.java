@@ -73,6 +73,6 @@ public class RawMessage extends FieldList {
     }
 
     public byte[] getBytes() {
-        return super.getBytes(CharsetSupport.getCharsetInstance());
+        return getBytes(CharsetSupport.getCharsetInstance());
     }
 }

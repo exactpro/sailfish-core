@@ -155,31 +155,31 @@ public class FixSessionFactory implements SessionFactory {
             int logonTimeout = getSetting(settings, sessionID, Session.SETTING_LOGON_TIMEOUT, 10);
             int logoutTimeout = getSetting(settings, sessionID, Session.SETTING_LOGOUT_TIMEOUT, 2);
 
-            final boolean validateSequenceNumbers = getSetting(settings, sessionID, Session.SETTING_VALIDATE_SEQUENCE_NUMBERS, true);
-            final boolean validateIncomingMessage  = getSetting(settings, sessionID, Session.SETTING_VALIDATE_INCOMING_MESSAGE, true);
-            final boolean resetOnError = getSetting(settings, sessionID, Session.SETTING_RESET_ON_ERROR, false);
-            final boolean disconnectOnError = getSetting(settings, sessionID, Session.SETTING_DISCONNECT_ON_ERROR, false);
-            final boolean disableHeartBeatCheck = getSetting(settings, sessionID, Session.SETTING_DISABLE_HEART_BEAT_CHECK, false);
-            final boolean forceResendWhenCorruptedStore = getSetting(settings, sessionID, Session.SETTING_FORCE_RESEND_WHEN_CORRUPTED_STORE, false);
-            final boolean enableNextExpectedMsgSeqNum = getSetting(settings, sessionID, Session.SETTING_ENABLE_NEXT_EXPECTED_MSG_SEQ_NUM, false);
-            final boolean enableLastMsgSeqNumProcessed = getSetting(settings, sessionID, Session.SETTING_ENABLE_LAST_MSG_SEQ_NUM_PROCESSED, false);
-            final int resendRequestChunkSize = getSetting(settings, sessionID, Session.SETTING_RESEND_REQUEST_CHUNK_SIZE, Session.DEFAULT_RESEND_RANGE_CHUNK_SIZE);
+            boolean validateSequenceNumbers = getSetting(settings, sessionID, Session.SETTING_VALIDATE_SEQUENCE_NUMBERS, true);
+            boolean validateIncomingMessage  = getSetting(settings, sessionID, Session.SETTING_VALIDATE_INCOMING_MESSAGE, true);
+            boolean resetOnError = getSetting(settings, sessionID, Session.SETTING_RESET_ON_ERROR, false);
+            boolean disconnectOnError = getSetting(settings, sessionID, Session.SETTING_DISCONNECT_ON_ERROR, false);
+            boolean disableHeartBeatCheck = getSetting(settings, sessionID, Session.SETTING_DISABLE_HEART_BEAT_CHECK, false);
+            boolean forceResendWhenCorruptedStore = getSetting(settings, sessionID, Session.SETTING_FORCE_RESEND_WHEN_CORRUPTED_STORE, false);
+            boolean enableNextExpectedMsgSeqNum = getSetting(settings, sessionID, Session.SETTING_ENABLE_NEXT_EXPECTED_MSG_SEQ_NUM, false);
+            boolean enableLastMsgSeqNumProcessed = getSetting(settings, sessionID, Session.SETTING_ENABLE_LAST_MSG_SEQ_NUM_PROCESSED, false);
+            int resendRequestChunkSize = getSetting(settings, sessionID, Session.SETTING_RESEND_REQUEST_CHUNK_SIZE, Session.DEFAULT_RESEND_RANGE_CHUNK_SIZE);
 
-            final boolean rejectInvalidMessage = getSetting(settings, sessionID,
+            boolean rejectInvalidMessage = getSetting(settings, sessionID,
                     Session.SETTING_REJECT_INVALID_MESSAGE, true);
 
-            final boolean rejectMessageOnUnhandledException = getSetting(settings, sessionID,
+            boolean rejectMessageOnUnhandledException = getSetting(settings, sessionID,
                     Session.SETTING_REJECT_MESSAGE_ON_UNHANDLED_EXCEPTION, false);
 
-            final boolean requiresOrigSendingTime = getSetting(settings, sessionID,
+            boolean requiresOrigSendingTime = getSetting(settings, sessionID,
                     Session.SETTING_REQUIRES_ORIG_SENDING_TIME, true);
 
-            final int[] logonIntervals = getLogonIntervalsInSeconds(settings, sessionID);
-            final Set<InetAddress> allowedRemoteAddresses = getInetAddresses(settings, sessionID);
+            int[] logonIntervals = getLogonIntervalsInSeconds(settings, sessionID);
+            Set<InetAddress> allowedRemoteAddresses = getInetAddresses(settings, sessionID);
 
             int receiveLimit = getSetting(settings, sessionID, Session.RECEIVE_LIMIT, 0);
 
-            final Session session = new Session(application, messageStoreFactory, sessionID,
+            Session session = new Session(application, messageStoreFactory, sessionID,
                     dataDictionaryProvider, new SessionSchedule(settings, sessionID), logFactory,
                     messageFactory, heartbeatInterval, checkLatency, maxLatency, millisInTimestamp, microsInTimestamp,
                     resetOnLogon, resetOnLogout, resetOnDisconnect, refreshAtLogon, checkCompID,
@@ -211,12 +211,7 @@ public class FixSessionFactory implements SessionFactory {
     }
 
     private ApplVerID toApplVerID(String value) {
-        if (isApplVerIdEnum(value)) {
-            return new ApplVerID(value);
-        } else {
-            // value should be a beginString
-            return MessageUtils.toApplVerID(value);
-        }
+        return isApplVerIdEnum(value) ? new ApplVerID(value) : MessageUtils.toApplVerID(value); // value should be a beginString
     }
 
     private boolean isApplVerIdEnum(String value) {
@@ -245,10 +240,12 @@ public class FixSessionFactory implements SessionFactory {
     private int[] getLogonIntervalsInSeconds(SessionSettings settings, SessionID sessionID) throws ConfigError {
         if (settings.isSetting(sessionID, Initiator.SETTING_RECONNECT_INTERVAL)) {
             try {
-                final String raw = settings.getString(sessionID, Initiator.SETTING_RECONNECT_INTERVAL);
-                final int[] ret = SessionSettings.parseSettingReconnectInterval(raw);
-                if (ret != null) return ret;
-            } catch (final Throwable e) {
+                String raw = settings.getString(sessionID, Initiator.SETTING_RECONNECT_INTERVAL);
+                int[] ret = SessionSettings.parseSettingReconnectInterval(raw);
+                if(ret != null) {
+                    return ret;
+                }
+            } catch (Throwable e) {
                 throw new ConfigError(e);
             }
         }
@@ -259,10 +256,10 @@ public class FixSessionFactory implements SessionFactory {
             throws ConfigError {
         if (settings.isSetting(sessionID, Session.SETTING_ALLOWED_REMOTE_ADDRESSES)) {
             try {
-                final String raw = settings.getString(sessionID,
+                String raw = settings.getString(sessionID,
                         Session.SETTING_ALLOWED_REMOTE_ADDRESSES);
                 return SessionSettings.parseRemoteAddresses(raw);
-            } catch (final Throwable e) {
+            } catch (Throwable e) {
                 throw new ConfigError(e);
             }
         }

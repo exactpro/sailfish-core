@@ -36,6 +36,8 @@ import com.exactpro.sf.embedded.storage.IHibernateStorage;
 public interface IStatisticsStorage extends IHibernateStorage {
 	
 	SfInstance loadSfInstance(String host, String port, String sfName);
+
+	SfInstance getSfInstance(String host, String port, String sfName);
 	
 	TestCase loadUnknownTestCase();
 	

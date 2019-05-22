@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.aml.IOutputStreamFactory.DefaultOutputStreamFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
 /**
@@ -39,16 +40,14 @@ public class AMLSettings {
 	private boolean autoRun;
 	private boolean runNetDumper;
 	private boolean skipOptional;
-	private List<IValidator> validators;
-	private List<IPreprocessor> preprocessors;
-	private boolean suppressAskForContinue = false;
-	private IOutputStreamFactory outputStreamFactory = new IOutputStreamFactory.DefaultOutputStreamFactory();
+    private final List<IValidator> validators = new ArrayList<>();
+    private final List<IPreprocessor> preprocessors = new ArrayList<>();
+    private boolean suppressAskForContinue;
+    private IOutputStreamFactory outputStreamFactory = new DefaultOutputStreamFactory();
 	private Map<String, String> staticVariables;
 
 	public AMLSettings() {
-		this.validators = new ArrayList<IValidator>();
-		this.preprocessors = new ArrayList<IPreprocessor>();
-	}
+    }
 
 	/**
 	 * Set project directory.
@@ -121,7 +120,7 @@ public class AMLSettings {
 	 * @return
 	 */
 	public String getSrcDir() {
-		return this.srcDir;
+        return srcDir;
 	}
 
 	/**
@@ -150,7 +149,7 @@ public class AMLSettings {
 	 * @return String representation of number test cases to be executed
 	 */
 	public String getTestCasesRange() {
-		return this.testCasesRange;
+        return testCasesRange;
 	}
 
 	public void setContinueOnFailed(boolean b) {
@@ -158,7 +157,7 @@ public class AMLSettings {
 	}
 
 	public boolean getContinueOnFailed() {
-		return this.continueOnFailed;
+        return continueOnFailed;
 	}
 
 	public void setAutoStart(boolean b) {
@@ -166,7 +165,7 @@ public class AMLSettings {
 	}
 
 	public boolean getAutoStart() {
-		return this.autoStart;
+        return autoStart;
 	}
 
 	public void setAutoRun(boolean b) {
@@ -174,7 +173,7 @@ public class AMLSettings {
 	}
 
 	public boolean getAutoRun() {
-		return this.autoRun;
+        return autoRun;
 	}
 
 	/**
@@ -182,7 +181,7 @@ public class AMLSettings {
 	 * @return Language name
 	 */
 	public SailfishURI getLanguageURI() {
-		return this.languageURI;
+        return languageURI;
 	}
 
 	public void setLanguageURI(SailfishURI languageURI) {
@@ -190,16 +189,16 @@ public class AMLSettings {
 	}
 
 	public void addValidator(IValidator validator) {
-		this.validators.add(validator);
+        validators.add(validator);
 	}
 
 	public List<IValidator> getValidators()
 	{
-		return this.validators;
+        return validators;
 	}
 
 	public void addPreprocessor(IPreprocessor preprocessor) {
-		this.preprocessors.add(preprocessor);
+        preprocessors.add(preprocessor);
 	}
 
 	public List<IPreprocessor> getPreprocessors() {

@@ -15,9 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.servlets;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.helpers.FileWatchdog;
+import org.apache.log4j.helpers.LogLog;
+
+import com.exactpro.sf.center.impl.PluginLoader;
+import com.exactpro.sf.configuration.workspace.FolderType;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 
 /**
  * PropertyConfigurator is able to stopWatch to clean up its threads
@@ -26,9 +35,8 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
 
     private static CustomPropertyWatchdog pdog;
 
-    public static void configureAndWatch(String configFileName) {
-        pdog = new CustomPropertyWatchdog(configFileName);
-        pdog.setDelay(FileWatchdog.DEFAULT_DELAY);
+    public static void configureAndWatch(IWorkspaceDispatcher workspaceDispatcher) {
+        pdog = new CustomPropertyWatchdog(workspaceDispatcher);
         pdog.start();
     }
 
@@ -36,33 +44,64 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
         pdog.interrupt();
     }
 
+    private static class CustomPropertyWatchdog extends Thread {
 
-    private static class CustomPropertyWatchdog extends FileWatchdog {
+        private final IWorkspaceDispatcher workspaceDispatcher;
+        /**
+         * The delay to observe between every check. By default set @
+         * {@link FileWatchdog#DEFAULT_DELAY}.
+         */
+        protected volatile long delay = 1000;//FileWatchdog.DEFAULT_DELAY;
 
-        private volatile boolean customInterrupted = false;
+        private long lastModif = 0;
+        private boolean warnedAlready = false;
+        private boolean interrupted = false;
 
-        public CustomPropertyWatchdog(String configFileName) {
-            super(configFileName);
-        }
-
-        @Override
-        protected void doOnChange() {
-            new PropertyConfigurator().doConfigure(filename,
-                    LogManager.getLoggerRepository());
-
+        public CustomPropertyWatchdog(IWorkspaceDispatcher workspaceDispatcher) {
+            super("CustomPropertyWatchdog");
+            setDaemon(true);
+            this.workspaceDispatcher = workspaceDispatcher;
+            checkAndConfigure();
         }
 
         @Override
         public void run() {
-            while(!customInterrupted) {
+            while (!interrupted) {
                 try {
                     Thread.sleep(delay);
-                } catch(InterruptedException e) {
-                    customInterrupted = true;
+                    checkAndConfigure();
+                } catch (InterruptedException e) {
+                    interrupted = true;
                     return;
                 }
-                checkAndConfigure();
             }
+        }
+        
+        protected void checkAndConfigure() {
+            try {
+                File file = workspaceDispatcher.getFile(FolderType.CFG, PluginLoader.LOG4J_PROPERTIES_FILE_NAME);
+                long l = file.lastModified();
+                if (l > lastModif) {
+                    lastModif = l;
+                    doOnChange(file);
+                    warnedAlready = false;
+                }
+            } catch (SecurityException | WorkspaceSecurityException e) {
+                LogLog.warn("Was not allowed to read check file existance, file:[" +
+                        PluginLoader.LOG4J_PROPERTIES_FILE_NAME + "].", e);
+                interrupted = true;
+            } catch (FileNotFoundException e) {
+                if (!warnedAlready) {
+                    LogLog.debug("[" + PluginLoader.LOG4J_PROPERTIES_FILE_NAME + "] does not exist.", e);
+                    warnedAlready = true;
+                }
+            }
+        }
+
+        protected void doOnChange(File file) {
+            new PropertyConfigurator().doConfigure(file.getAbsolutePath(),
+                    LogManager.getLoggerRepository());
+
         }
     }
 }

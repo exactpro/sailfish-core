@@ -18,6 +18,7 @@ package com.exactpro.sf.scriptrunner.utilitymanager;
 import java.util.List;
 import java.util.Set;
 
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityCallException;
 import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityNotFoundException;
@@ -54,6 +55,22 @@ public interface IUtilityManager {
      * @return utility info or {@code null}
      */
     UtilityInfo getUtilityInfo(SailfishURI uri, Class<?>... argTypes);
+
+    /**
+     * Retrieves utility info by specified URI and argument types.
+     * <br><br>
+     * The only difference from {@link #getUtilityInfo(SailfishURI, Class[])} is that in case of a lookup ambiguity
+     * a warning with a list of matching URIs of utility classes will be added to a provided {@link AlertCollector}.
+     *
+     * @param uri            utility URI (must contain at least resource name)
+     * @param line           action line
+     * @param uid            action UID
+     * @param column         action column
+     * @param alertCollector alert collector
+     * @param argTypes       utility argument types
+     * @return utility info or {@code null}
+     */
+    UtilityInfo getUtilityInfo(SailfishURI uri, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes);
 
     /**
      * @param utilityURI

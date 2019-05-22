@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.services.tcpip;
 
+import java.time.LocalDateTime;
+import java.time.Month;
+
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
@@ -26,8 +29,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import java.time.LocalDateTime;
-import java.time.Month;
 
 import com.exactpro.sf.common.codecs.AbstractCodec;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
@@ -47,7 +48,7 @@ public class TestInternalJsonCodec extends AbstractTest {
     @Before
     public void init() {
         this.codec = new InternalJsonCodec();
-        this.codec.init(serviceContext, null, DefaultMessageFactory.getFactory(), null);
+        codec.init(serviceContext, null, DefaultMessageFactory.getFactory(), null);
 
         this.session = new DummySession();
     }
@@ -55,13 +56,13 @@ public class TestInternalJsonCodec extends AbstractTest {
 
     @Test
     public void testEncode() throws Exception {
-        final IMessage msg = new MapMessage("namespace", "name");
+        IMessage msg = new MapMessage("namespace", "name");
         msg.addField("MessageType", 123);
         msg.addField("Qty", 123.123);
         msg.addField("ClOrdID", "");
         msg.addField("fieldDate", LocalDateTime.of(2010, Month.JANUARY, 1, 11, 22, 33, 444_555_666));
 
-        final ProtocolDecoderOutput decoderOutput = Mockito.mock(ProtocolDecoderOutput.class);
+        ProtocolDecoderOutput decoderOutput = Mockito.mock(ProtocolDecoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -75,16 +76,16 @@ public class TestInternalJsonCodec extends AbstractTest {
             }
         }).when(decoderOutput).write(Mockito.anyObject());
 
-        final ProtocolEncoderOutput encoderOutput = Mockito.mock(ProtocolEncoderOutput.class);
+        ProtocolEncoderOutput encoderOutput = Mockito.mock(ProtocolEncoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
             @Override
-            public Void answer(org.mockito.invocation.InvocationOnMock invocation) throws Throwable {
+            public Void answer(InvocationOnMock invocation) throws Throwable {
                 codec.decode(session, invocation.getArgument(0), decoderOutput);
                 return null;
-            };
+            }
         } ).when(encoderOutput).write(Mockito.anyObject());
 
-        codec.encode(this.session, msg, encoderOutput);
+        codec.encode(session, msg, encoderOutput);
     }
 
     @Test
@@ -94,19 +95,19 @@ public class TestInternalJsonCodec extends AbstractTest {
         ProtocolDecoderOutput decoderOutput = Mockito.mock(ProtocolDecoderOutput.class);
         Mockito.doAnswer(new Answer<Void>() {
 
-            private String[] responses = new String[] { "Cause=Unexpected end-of-input within/between Object entries",
+            private final String[] responses = { "Cause=Unexpected end-of-input within/between Object entries",
                     "Qty=123.123|ClOrdID=|MessageType=123", "Qty=456.456|ClOrdID=ORD34|MessageType=100",
                     "Qty=777.777|ClOrdID=WithDate|fieldDate=2010-01-01T11:22:33.444555666|MessageType=123"
             };
-            private int index = 0;
+            private int index;
 
             @Override
-            public Void answer(org.mockito.invocation.InvocationOnMock invocation) throws Throwable {
+            public Void answer(InvocationOnMock invocation) throws Throwable {
                 String input = invocation.<IMessage>getArgument(0).toString();
-                Assert.assertTrue("index: " + index + " expect: " + this.responses[index] + " actual: " + input, input.startsWith(this.responses[index]));
+                Assert.assertTrue("index: " + index + " expect: " + responses[index] + " actual: " + input, input.startsWith(responses[index]));
                 index++;
                 return null;
-            };
+            }
         }).when(decoderOutput).write(Mockito.anyObject());
 
         String data = "{\"Qty\":123.123,\"ClOrdID\"";
@@ -130,6 +131,6 @@ public class TestInternalJsonCodec extends AbstractTest {
         buffer.put(data.getBytes());
         buffer.flip();
 
-        codec.decode(this.session, buffer, decoderOutput);
+        codec.decode(session, buffer, decoderOutput);
     }
 }

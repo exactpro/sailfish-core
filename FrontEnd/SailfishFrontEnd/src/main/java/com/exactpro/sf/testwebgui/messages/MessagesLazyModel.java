@@ -53,17 +53,13 @@ public class MessagesLazyModel extends LazyDataModel<MessageAdapter> {
 	private List<MessageAdapter> lastMessages;
 	private String lastWhereStatement;
 
-    public MessagesLazyModel() {
-//        this.messages = new ArrayList<>();
-    }
-
     public void reinit(String firstMsgId, int limitNumber, String whereStatement) {
     	this.numberOfRecords = limitNumber;
     	this.commonWhereStatement = buildCommonWhereSatment(firstMsgId, whereStatement);
 
     	this.lastSortField = "";
     	this.lastSortOrder = SortOrder.DESCENDING;
-        this.setRowIndex(0);
+        setRowIndex(0);
     }
 
     @Override
@@ -71,30 +67,30 @@ public class MessagesLazyModel extends LazyDataModel<MessageAdapter> {
 
     	if (checkAndUpdateLoadParameters(first, pageSize, sortField, sortOrder)) {
 
-	    	String currentWhereStatment = this.commonWhereStatement;
+            String currentWhereStatment = commonWhereStatement;
 
         	this.lastWhereStatement = currentWhereStatment;
         	this.lastMessages = load(first, pageSize);
 
-        	this.setRowCount(this.lastMessages.isEmpty() ? 0 : this.numberOfRecords);
+            setRowCount(lastMessages.isEmpty() ? 0 : numberOfRecords);
 
 //    	    RequestContext.getCurrentInstance().addCallbackParam("totalRecords", 0);
 
-        	this.setRowIndex(0);
+            setRowIndex(0);
     	}
 
-    	return this.lastMessages;
+        return lastMessages;
     }
 
     public List<MessageAdapter> load(int first, int pageSize) {
     	List<MessageAdapter> messages = Collections.emptyList();
 
     	try {
-    		logger.info("Start loading offset {} length {} query {}", first, pageSize, this.lastWhereStatement);
+            logger.info("Start loading offset {} length {} query {}", first, pageSize, lastWhereStatement);
 
-	    	int limit = Math.min(this.numberOfRecords, pageSize);
+            int limit = Math.min(numberOfRecords, pageSize);
 
-	        messages = loadMessages(BeanUtil.getSfContext().getMessageStorage().getMessages(first, limit, this.lastWhereStatement));
+            messages = loadMessages(BeanUtil.getSfContext().getMessageStorage().getMessages(first, limit, lastWhereStatement));
 
 		} catch (StorageException e) {
 	        BeanUtil.addErrorMessage("Query error", e.getCause().getMessage());
@@ -109,15 +105,11 @@ public class MessagesLazyModel extends LazyDataModel<MessageAdapter> {
 	    }
 
 	    Set<String> fields = new TreeSet<String>();
-	    if (this.lastSortField != null) {
-	        fields.add(this.lastSortField);
-	    } else {
-	    	fields.add("timestamp");
-	    }
+        fields.add(lastSortField != null ? lastSortField : "timestamp");
 
-	    Collections.sort(messages, new MessageSorter(fields, this.lastSortOrder));
+        Collections.sort(messages, new MessageSorter(fields, lastSortOrder));
 
-	    logger.info("End loading offset {} length {} query {}", first, pageSize, this.lastWhereStatement);
+        logger.info("End loading offset {} length {} query {}", first, pageSize, lastWhereStatement);
 
 	    return messages;
     }
@@ -151,9 +143,9 @@ public class MessagesLazyModel extends LazyDataModel<MessageAdapter> {
      *          changed; <code>false</code> otherwise
      */
     private boolean checkAndUpdateLoadParameters(int first, int pageSize, String sortField, SortOrder sortOrder) {
-    	if (this.lastFirst != first || this.lastPageSize != pageSize ||
-    			!StringUtils.equals(this.lastSortField, sortField) ||
-                (this.lastSortOrder != sortOrder && sortField != null)) {
+        if(lastFirst != first || lastPageSize != pageSize ||
+                !StringUtils.equals(lastSortField, sortField) ||
+                (lastSortOrder != sortOrder && sortField != null)) {
     				this.lastFirst = first;
     				this.lastPageSize = pageSize;
     				this.lastSortField = sortField;

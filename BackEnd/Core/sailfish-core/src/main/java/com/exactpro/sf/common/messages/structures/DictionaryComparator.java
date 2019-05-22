@@ -15,7 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.castValueToJavaType;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.get;
 import static com.google.common.collect.Iterables.indexOf;
 
@@ -36,7 +38,6 @@ import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.google.common.base.Objects;
-import com.google.common.collect.Iterables;
 
 public class DictionaryComparator {
 
@@ -92,7 +93,7 @@ public class DictionaryComparator {
         if (distinctionType != null) {
             builder.append(" - ").append(distinctionType);
         }
-        System.out.println(builder.toString());
+        System.out.println(builder);
     }
 
     public void compare(IDiffListener listener, IDictionaryStructure one, IDictionaryStructure two, boolean compareOrder, boolean checkByFirst, boolean deepCheck) {
@@ -101,12 +102,10 @@ public class DictionaryComparator {
         path = new DictionaryPath(one.getNamespace());
         equal(listener, one.getDescription(), two.getDescription(), path, DistinctionType.Description);
 
-        Iterable<? extends IFieldStructure> iterable;
-        if (checkByFirst) {
-            iterable = one.getMessages().values();
-        } else {
-            iterable = Iterables.concat(one.getMessages().values(), two.getMessages().values());
-        }
+        Iterable<? extends IFieldStructure> iterable = checkByFirst
+                ? one.getMessages().values()
+                : concat(one.getMessages().values(), two.getMessages().values());
+
         Set<String> names = getNames(iterable);
         for (String name : names) {
             compare(listener, one.getMessages().get(name), two.getMessages().get(name), new DictionaryPath(path).setMessage(name),
@@ -114,11 +113,7 @@ public class DictionaryComparator {
 
         }
 
-        if (checkByFirst) {
-            iterable = one.getFields().values();
-        } else {
-            iterable = Iterables.concat(one.getFields().values(), two.getFields().values());
-        }
+        iterable = checkByFirst ? one.getFields().values() : concat(one.getFields().values(), two.getFields().values());
         names = getNames(iterable);
         for (String name : names) {
             compare(listener, one.getFields().get(name), two.getFields().get(name), new DictionaryPath(path).setField(name),
@@ -247,11 +242,7 @@ public class DictionaryComparator {
 
     private Object safeCastValue(IAttributeStructure attributeStructure) {
         if (attributeStructure != null) {
-            if (this.typedCheck) {
-                return attributeStructure.getCastValue();
-            } else {
-                return attributeStructure.getValue();
-            }
+            return typedCheck ? attributeStructure.getCastValue() : attributeStructure.getValue();
         }
         return null;
     }
@@ -275,10 +266,7 @@ public class DictionaryComparator {
     private int safeFieldIndex(IFieldStructure fieldStructureOne, IFieldStructure fieldStructureTwo, String subFieldName) {
         try {
             int result = indexOf(fieldStructureOne.getFields().keySet(), subFieldName::equals);
-            if(result == -1){
-                result = indexOf(fieldStructureTwo.getFields().keySet(), subFieldName::equals);
-            }
-            return result;
+            return result == -1 ? indexOf(fieldStructureTwo.getFields().keySet(), subFieldName::equals) : result;
         } catch (UnsupportedOperationException e) {
             return -1;
         }
@@ -301,10 +289,7 @@ public class DictionaryComparator {
     }
 
     private Object tryToCast(IFieldStructure fieldStructure, Object value) {
-        if (!this.typedCheck && value instanceof String) {
-            value = StructureUtils.castValueToJavaType((String)value, fieldStructure.getJavaType());
-        }
-        return value;
+        return !typedCheck && value instanceof String ? castValueToJavaType((String)value, fieldStructure.getJavaType()) : value;
     }
 
     public static class DictionaryPath {

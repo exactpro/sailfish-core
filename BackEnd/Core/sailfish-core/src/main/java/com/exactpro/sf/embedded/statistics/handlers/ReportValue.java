@@ -58,7 +58,7 @@ public class ReportValue {
 
     @Override
     public String toString() {
-        return this.value.toString();
+        return value.toString();
     }
 
     protected enum Type {

@@ -51,15 +51,6 @@ if(project.hasProperty('rmTimeout')) {
     ext.redmimeParams.timeout = project.property('rmTimeout')
 }
 
-// Change default project layout
-sourceSets {
-    main {
-        java {
-            srcDir genJavaDir
-        }
-    }
-}
-
 tasks.eclipse.dependsOn('copyFromData')
 
 eclipse {
@@ -139,9 +130,11 @@ dependencies {
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-core:${artifactCoreVersion}"
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
+        compile "com.exactpro.sf:extension-aml-3:${artifactCoreVersion}"
     } else {
         compile project(':BackEnd:Core:sailfish-core')
         compile project(':FrontEnd:Sailfish-REST-API-client')
+        compile project(':BackEnd:Extension:extension-aml-3')
     }
 
 
@@ -411,7 +404,7 @@ clean {
     delete webContentGen
 }
 
-compileJava.dependsOn.add('generateVersionClass')
+compileKotlin.dependsOn.add('generateVersionClass')
 
 def formatVersionFolderName() {
     def version = new StringBuffer(build_number)
@@ -444,7 +437,7 @@ collectDependencies {
 }
 
 def getReleaseName() {
-    return "sf_${artifactCoreVersion}_b${build_number}.zip"
+    return "sf_${sailfishVersion}.${revision}_b${build_number}.zip"
 }
 
 def getReleaseDir(buildDir) {

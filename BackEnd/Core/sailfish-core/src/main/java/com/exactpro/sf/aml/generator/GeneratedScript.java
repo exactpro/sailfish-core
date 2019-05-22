@@ -22,7 +22,7 @@ import java.util.List;
 public class GeneratedScript {
 
 	private File mainFile;
-	private List<File> files;
+    private final List<File> files;
 
 	public GeneratedScript()
 	{
@@ -38,11 +38,11 @@ public class GeneratedScript {
 	}
 
 	public void addFile(File file) {
-		this.files.add(file);
+        files.add(file);
 	}
 
 	public List<File> getFilesList() {
-		return this.files;
+        return files;
 	}
 
 }

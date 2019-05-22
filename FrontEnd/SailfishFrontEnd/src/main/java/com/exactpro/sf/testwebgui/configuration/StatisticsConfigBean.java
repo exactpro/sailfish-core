@@ -43,8 +43,8 @@ public class StatisticsConfigBean implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(StatisticsConfigBean.class);
 
     private StatisticsServiceSettings settings;
-    
-    private List<String> supportedDbms = new ArrayList<>();
+
+    private final List<String> supportedDbms = new ArrayList<>();
 
     {
         for (DbmsType dbmsType : DbmsType.values()) {
@@ -68,7 +68,7 @@ public class StatisticsConfigBean implements Serializable {
 
     public List<String> getSupportedDbms() {
 
-        return this.supportedDbms;
+        return supportedDbms;
 
     }
 
@@ -129,9 +129,9 @@ public class StatisticsConfigBean implements Serializable {
     private boolean isChangesMade() {
     	StatisticsService service = BeanUtil.getSfContext().getStatisticsService();
         StatisticsServiceSettings currentSettings = service.getSettings();
-        
-        return !currentSettings.equals(this.settings) || service.getStatus().equals(ServiceStatus.Error) 
-        		|| service.getStatus().equals(ServiceStatus.Checking);
+
+        return !currentSettings.equals(settings) || service.getStatus() == ServiceStatus.Error
+                || service.getStatus() == ServiceStatus.Checking;
     }
     
     public void preApplySettings() {

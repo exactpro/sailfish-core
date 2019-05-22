@@ -15,23 +15,28 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.DummySession;
+import org.apache.mina.core.session.IoSession;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.util.DateTimeUtility;
 import com.exactpro.sf.util.TestITCHHelper;
-import org.apache.mina.core.buffer.IoBuffer;
-import org.apache.mina.core.session.DummySession;
-import org.apache.mina.core.session.IoSession;
-import org.junit.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class TestITCHCodecPositive extends TestITCHHelper {
 
@@ -59,7 +64,6 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 
             ITCHCodec codec = new ITCHCodec();
             ITCHCodecSettings settings = new ITCHCodecSettings();
-            settings = new ITCHCodecSettings();
             settings.setMsgLength(1);
             settings.setDictionaryURI(SailfishURI.unsafeParse("ITCH"));
             codec.init(serviceContext, settings, getMessageHelper().getMessageFactory(), getMessageHelper().getDictionaryStructure());
@@ -70,8 +74,8 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 			IMessage orderExecuted = getMessageCreator().getOrderExecuted();
 			orderExecuted = getMessageHelper().prepareMessageToEncode(orderExecuted, null);
 			decodedMessage=decode(encode(orderExecuted,null),codec);
-			Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage instanceof IMessage) );
-		    Assert.assertTrue( "Object must be instance of MapMessage.", (decodedMessage instanceof MapMessage) );
+			Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage instanceof IMessage);
+		    Assert.assertTrue( "Object must be instance of MapMessage.", decodedMessage instanceof MapMessage);
 
             List<IMessage> listResult = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
             List<IMessage> original = (List<IMessage>) messageAddOrder.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
@@ -93,8 +97,8 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 		IMessage messageHeader = getUnitHeader((short)0);
 		try{
 	    	IMessage decodedMessage=decode(encode(messageHeader,null),null);
-		    Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage instanceof IMessage) );
-		    Assert.assertTrue( "Object must be instance of MapMessage.", (decodedMessage instanceof MapMessage) );
+		    Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage instanceof IMessage);
+		    Assert.assertTrue( "Object must be instance of MapMessage.", decodedMessage instanceof MapMessage);
 		    @SuppressWarnings("unchecked")
             IMessage resultUnitHeader = ((List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME)).get(0);
 		    Assert.assertTrue("UnitHeader messages must be equal. Original message:"+messageHeader+"; \n"
@@ -125,8 +129,8 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 	    IMessage messageList = getMessageCreator().getMessageList(list);
 	    try{
 	    	IMessage decodedMessage=decode(encode(messageList,null),null);
-		    Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage instanceof IMessage) );
-		    Assert.assertTrue( "Object must be instance of MapMessage.", (decodedMessage instanceof MapMessage) );
+		    Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage instanceof IMessage);
+		    Assert.assertTrue( "Object must be instance of MapMessage.", decodedMessage instanceof MapMessage);
 
             List<IMessage> listResult = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
             List<IMessage> original = (List<IMessage>) messageList.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
@@ -164,8 +168,8 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 		IMessage messageList = getMessageHelper().prepareMessageToEncode(message, null);
 		try{
 			IMessage decodedMessage=decode(encode(messageList,null),null);
-			Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage instanceof IMessage) );
-		    Assert.assertTrue( "Object must be instance of MapMessage.", (decodedMessage instanceof MapMessage) );
+			Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage instanceof IMessage);
+		    Assert.assertTrue( "Object must be instance of MapMessage.", decodedMessage instanceof MapMessage);
 
             List<IMessage> listResult = (List<IMessage>) decodedMessage.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
             List<IMessage> original = (List<IMessage>) messageList.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
@@ -196,8 +200,9 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 	        byte[] asd = ((IoBuffer)lastMessage).array();
 	        int limit = ((IoBuffer)lastMessage).limit();
 	        byte[] bytes = Arrays.copyOf(asd, limit );
-	        for(int i=0;i<bytes.length;i++)
-	        	System.out.println(bytes[i]);
+            for(int i = 0; i < bytes.length; i++) {
+                System.out.println(bytes[i]);
+            }
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			Assert.fail(e.getMessage());
@@ -216,8 +221,9 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 			byte[] asd = ((IoBuffer)lastMessage).array();
 			int limit = ((IoBuffer)lastMessage).limit();
 			byte[] bytes = Arrays.copyOf(asd, limit );
-			for(int i=0;i<bytes.length;i++)
-	        	System.out.println(bytes[i]);
+            for(int i = 0; i < bytes.length; i++) {
+                System.out.println(bytes[i]);
+            }
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			Assert.fail(e.getMessage());
@@ -230,11 +236,10 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 	@Ignore@Test
 	public void testDecodeMessageAddOrderOneByteLength(){
         ITCHCodec codec = (ITCHCodec) getMessageHelper().getCodec(serviceContext);
-        int[] array = new int[]
-             {0x2E, 0x00, 0x01, 0x31, 0x10, 0x05, 0x00, 0x00, 0x2E, 0x41, 0xE0, 0x98, 0xC3, 0x22, 0x0E, 0x00,
-              0x00, 0x40, 0xC4, 0xD4, 0x57, 0x01, 0x42, 0xE8, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3D,
-              0xE6, 0x46, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x72, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+        int[] array = {0x2E, 0x00, 0x01, 0x31, 0x10, 0x05, 0x00, 0x00, 0x2E, 0x41, 0xE0, 0x98, 0xC3, 0x22, 0x0E, 0x00,
+         0x00, 0x40, 0xC4, 0xD4, 0x57, 0x01, 0x42, 0xE8, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3D,
+         0xE6, 0x46, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x72, 0x53, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+         0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         byte[] b = new byte[array.length];
 		for (int i=0; i<array.length; i++)
 		{
@@ -263,7 +268,7 @@ public class TestITCHCodecPositive extends TestITCHHelper {
 	@Ignore@Test
 	public void testDecodeMessageSymbolDirectory(){
         ITCHCodec codec = (ITCHCodec) getMessageHelper().getCodec(serviceContext);
-		int[] array = new int[]{
+		int[] array = {
 				0x64, 0x00, // Size
 				0x01,       // Count
 				0x31,       // MD Group
@@ -304,187 +309,10 @@ public class TestITCHCodecPositive extends TestITCHHelper {
         list.add(messageAddOrder);
         IMessage messageList = getMessageCreator().getMessageList(list);
         IMessage decodedMessage=decode(encode(messageList,null),null);
-        Assert.assertTrue( "Object must be instance of IMessage.", (decodedMessage instanceof IMessage) );
+        Assert.assertTrue( "Object must be instance of IMessage.", decodedMessage instanceof IMessage);
 
         List<IMessage> listResult = decodedMessage.<List<IMessage>>getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
         Assert.assertEquals(3, listResult.size());
         Assert.assertEquals(DateTimeUtility.toLocalDateTime((Integer.MAX_VALUE + 1l) * 1000).plusNanos(Integer.MAX_VALUE + 2l), listResult.get(2).getField(ITCHMessageHelper.FAKE_FIELD_MESSAGE_TIME));
     }
-
-	/*
-	@Ignore@Ignore@Test
-	public void testFakeMessageTime() throws Exception {
-	    long second = 60 * 4 + 8;
-	    long nanoseconds = 1_123_456_789L;
-
-	    ITCHCodec codec = (ITCHCodec) this.messageHelper.getCodec();
-        ProtocolEncoderOutput output = new MockProtocolEncoderOutput();
-
-        IMessage messageHeader = msgFactory.createMessage("UnitHeader", namespace);
-        messageHeader.addField("Length", 52);
-        messageHeader.addField("MessageCount", (short) 2);
-        messageHeader.addField("MarketDataGroup", "M");
-        messageHeader.addField("SequenceNumber", 1L);
-
-        IMessage messageTime = msgFactory.createMessage("Time", namespace);
-        messageTime.addField(ITCHMessageHelper.FIELD_SECONDS, Long.valueOf(second));
-
-        IMessage messageAddOrder = msgFactory.createMessage("AddOrderOneByteLength", namespace);
-        messageAddOrder.addField(ITCHMessageHelper.FIELD_NANOSECOND, nanoseconds);
-        messageAddOrder.addField("OrderID", new BigDecimal(10));
-        messageAddOrder.addField("Side", (short)66);
-        messageAddOrder.addField("Quantity", new BigDecimal(10));
-        messageAddOrder.addField("InstrumentID", 10L);
-        messageAddOrder.addField("Reserved1", (short)10);
-        messageAddOrder.addField("Reserved2", (short)10);
-        messageAddOrder.addField("Price", 10d);
-        messageAddOrder.addField("Flags", (short)10);
-        messageAddOrder.addField("ImpliedPrice", 10d);
-
-        IMessage messageList = msgFactory.createMessage(ITCHMessageHelper.MESSAGELIST_NAME, namespace);
-
-        List<IMessage> list = new ArrayList<>();
-        list.add(messageHeader);
-        list.add(messageTime);
-        list.add(messageAddOrder);
-
-        messageList.addField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME, list);
-
-        session.write(messageList);
-        codec.encode(session, messageList, output);
-        Queue<Object> msgQueue = ((AbstractProtocolEncoderOutput)output).getMessageQueue();
-        Object lastMessage = msgQueue.element();
-        Assert.assertNotNull(lastMessage);
-
-        MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-        IoSession decodeSession = new DummySession();
-        IoBuffer toDecode = IoBuffer.wrap( ((IoBuffer)lastMessage).array() );
-
-        Assert.assertTrue(codec.doDecode( decodeSession, toDecode, decoderOutput ));
-        IMessage result = (IMessage) decoderOutput.getMessageQueue().element();
-        @SuppressWarnings("unchecked")
-        List<IMessage> listResult = (List<IMessage>) result.getField(ITCHMessageHelper.SUBMESSAGES_FIELD_NAME);
-
-        Calendar calendar = new GregorianCalendar();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-
-        long timeInMilliseconds = calendar.getTimeInMillis() + second * 1_000L + nanoseconds / 1_000_000L;
-
-        System.out.println(listResult.get(2));
-        System.out.println(listResult.get(2).getField("MessageTime"));
-        System.out.println(new DateFormatted(timeInMilliseconds));
-
-        Assert.assertEquals(timeInMilliseconds, ((Date)listResult.get(2).getField("MessageTime")).getTime());
-    }
-
-	// AddOrder
-	// ,0x2E ,0x00 ,0x01 ,0x31 ,0x10 ,0x05 ,0x00 ,0x00 ,0x26 ,0x41 ,0xE0 ,0x98 ,0xC3 ,0x22 ,0x0E ,0x00 ,0x00 ,0x40 ,0xC4 ,0xD4 ,0x57 ,0x01 ,0x42 ,0xE8 ,0x03 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00 ,0x3D ,0xE6 ,0x46 ,0x00 ,0x00 ,0x00 ,0x00 ,0x4E ,0x72 ,0x53 ,0x00 ,0x00 ,0x00 ,0x00 ,0x00
-
-	@Ignore@Ignore@Test
-	public void testDecodeFloatField() throws Exception
-	{
-		ITCHCodec codec = (ITCHCodec) messageHelper.getCodec();
-		int[] array = new int[]
-             {0x64, 0x00, 0x01, 0x41, 0x00, 0x00, 0x00, 0x00, 0x5C, 0x52, 0x78, 0x02, 0x73, 0x08, 0x46, 0x18,
-              0x00, 0x00, 0x00, 0x00, 0x20, 0x4E, 0x4F, 0x30, 0x30, 0x30, 0x33, 0x37, 0x33, 0x33, 0x38, 0x30,
-              0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x42, 0x58,
-              0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x4F, 0x4B, 0x00, 0x20, 0x20, 0x20,
-              0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x64, 0x00, 0x01, 0x41, 0x00, 0x00, 0x00, 0x00, 0x5C, 0x52, 0x38, 0xD1,
-              0x75, 0x08, 0x4C, 0x18, 0x00, 0x00, 0x00, 0x00, 0x20, 0x4E, 0x4F, 0x30, 0x30, 0x31, 0x30, 0x31,
-              0x39, 0x39, 0x31, 0x35, 0x31, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-              0x00, 0x4F, 0x42, 0x58, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x4F, 0x4B,
-              0x00, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x20, 0x20,
-              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-              0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x64, 0x00, 0x01, 0x41, 0x00, 0x00, 0x00, 0x00,
-              0x5C, 0x52, 0x80, 0xB3, 0x78, 0x08, 0x60, 0x18, 0x00, 0x00, 0x00, 0x00, 0x20, 0x4E, 0x4F, 0x30,
-              0x30, 0x30, 0x33, 0x30, 0x32, 0x38, 0x39, 0x30, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x42, 0x58, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
-              0x00, 0x4E, 0x4F, 0x4B, 0x00, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-              0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x64, 0x00, 0x01, 0x41,
-              0x00, 0x00, 0x00, 0x00, 0x5C, 0x52, 0x10, 0x8A, 0x7B, 0x08, 0x90, 0x18, 0x00, 0x00, 0x00, 0x00,
-              0x20, 0x4E, 0x4F, 0x30, 0x30, 0x30, 0x33, 0x30, 0x35, 0x33, 0x36, 0x30, 0x35, 0x00, 0x00, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x42, 0x58, 0x20, 0x20, 0x20, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x4F, 0x4B, 0x00, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00,
-              0x64, 0x00, 0x01, 0x41, 0x00, 0x00, 0x00, 0x00, 0x5C, 0x52, 0x88, 0x64, 0x7E, 0x08, 0x23, 0xFC,
-              0x00, 0x00, 0x00, 0x00, 0x20, 0x4E, 0x4F, 0x30, 0x30, 0x31, 0x30, 0x32, 0x33, 0x39, 0x34, 0x33,
-              0x37, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4F, 0x42, 0x58,
-              0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x4E, 0x4F, 0x4B, 0x00, 0x20, 0x20, 0x20,
-              0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00,
-              0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x01, 0x41, 0x00, 0x00, 0x00, 0x00, 0x18, 0x83, 0x00, 0x00,
-              0x00, 0x00, 0x4F, 0x42, 0x58, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
-              0x01, 0x00, 0x00, 0x00};
-		byte[] b = new byte[array.length];
-		for (int i=0; i<array.length; i++)
-		{
-			b[i] = (byte) array[i];
-		}
-
-		IoBuffer toDecode = IoBuffer.wrap( b );
-		toDecode.order(ByteOrder.LITTLE_ENDIAN);
-		toDecode.position(0);
-
-		IoSession decodeSession = new DummySession();
-
-		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
-		boolean decodableResult = codec.doDecode( decodeSession, toDecode, decoderOutput );
-        Assert.assertTrue( "Decoding error.", decodableResult);
-        //System.out.println(decoderOutput.getMessageQueue().element());
-
-		IMessage im = (IMessage)decoderOutput.getMessageQueue().element();
-		System.out.println(((List)im.getField("IncludedMessages")).get(1));
-		SimpleTreeEntity entity1 = new SimpleTreeEntity(IMessage.class.getCanonicalName(), ((List)im.getField("IncludedMessages")).get(1));
-
-		IMessage sd = new MapMessage("itch", "SymbolDirectory");
-		// only this field should be compared
-		sd.addField("DynamicCircuitBreakerTolerances", 0.0f);
-
-		System.out.println(sd);
-
-		SimpleTreeEntity entity2 = new SimpleTreeEntity(IMessage.class.getCanonicalName(), sd);
-
-		CompareSettings compSettings = new CompareSettings();
-		//compSettings.setDoublePrecision(0.0);
-
-		ComparisonResult table = TreeComparer.compare(entity1, entity2, compSettings);
-		System.out.println(table);
-		System.out.println(ComparisonUtil.toTable(table).toString());
-
-		int count = ComparisonUtil.getResultCount(table, StatusType.FAILED);
-		count += ComparisonUtil.getResultCount(table, StatusType.CONDITIONALLY_FAILED);
-		Assert.assertTrue("Some comparison failed", count == 0);
-		count = ComparisonUtil.getResultCount(table, StatusType.PASSED);
-		count += ComparisonUtil.getResultCount(table, StatusType.CONDITIONALLY_PASSED);
-		Assert.assertTrue("Some comparison do not passed", count == 1);
-	}
-
-
-
-
-	@Ignore@Test
-	public void testDoubleTypeVisitorLogic() {
-		byte[] array = new byte[] {0x00, 0x00, 0x00, 0x00, 0x05, (byte)0xf5, (byte)0xe1, 0x00};
-
-		long ioLong = IoBuffer.wrap(array).getLong();
-		long byteLong = ByteBuffer.wrap(array).getLong();
-		BigInteger bi = new BigInteger(array);
-
-		Assert.assertEquals(100000000, ioLong);
-		Assert.assertEquals(100000000, byteLong);
-		Assert.assertEquals(new BigInteger("100000000"), bi);
-	}
-
-	*/
-
-
-
-
 }

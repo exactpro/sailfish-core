@@ -54,8 +54,9 @@ public class Search {
 
     public static List<TreeNode> doSearch(SearchOptions o) {
 
-        if (o.getRootNode() == null)
+        if(o.getRootNode() == null) {
             return null;
+        }
 
         List<TreeNode> results = new ArrayList<>();
 
@@ -127,7 +128,7 @@ public class Search {
 
             String description = BeanUtil.getHelpContentHolder().getDescription(container, pluginName);
 
-            fileResult.put(filePath, Search.matchText(description, o));
+            fileResult.put(filePath, matchText(description, o));
         }
 
         return fileResult.get(filePath);
@@ -169,7 +170,7 @@ public class Search {
             currentRowKey.add(i);
 
             if ((!o.isSearchDictionaries() && HelpEntityName.DICTIONARIES.getValue().equals(childNode.getName()))
-                    || (!o.isSearchActions()) && HelpEntityName.ACTIONS.getValue().equals(childNode.getName())) {
+                    || !o.isSearchActions() && HelpEntityName.ACTIONS.getValue().equals(childNode.getName())) {
                 continue;
             }
 
@@ -179,7 +180,7 @@ public class Search {
         }
     }
 
-    public static boolean matchText(final String string, final SearchOptions o) {
+    public static boolean matchText(String string, SearchOptions o) {
 
         String text = string;
         String pattern = o.getSearchText();

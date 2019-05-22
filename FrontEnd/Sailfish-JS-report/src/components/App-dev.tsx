@@ -15,16 +15,14 @@
  ******************************************************************************/
 
 import { h, Component } from "preact";
-import "../styles/styles.scss";
+import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import ReportLayout from './ReportLayout';
 import TestCase from "../models/TestCase";
 import Report from "../models/Report";
 import { connect } from 'preact-redux';
-import AppState from "../state/AppState";
-import { setTestCase, setTestCasePath, selectAction } from "../actions/actionCreators";
-import { selectActionById } from '../actions/actionCreators';
-import { selectMessages } from '../actions/actionCreators';
+import AppState from "../state/models/AppState";
+import { setTestCase, setTestCasePath, selectVerification, selectActionById } from "../actions/actionCreators";
 import { 
     ACTION_PARAM_KEY,
     MESSAGE_PARAM_KEY,
@@ -106,14 +104,14 @@ class AppBase extends Component<AppProps> {
 
 export const App = connect(
     (state: AppState) => ({
-        report: state.report,
-        testCase: state.testCase,
-        testCaseFilePath: state.currentTestCasePath
+        report: state.report.report,
+        testCase: state.selected.testCase,
+        testCaseFilePath: state.report.currentTestCasePath
     }),
     dispatch => ({
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
         updateTestCasePath: (testCasePath: string) => dispatch(setTestCasePath(testCasePath)),
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
-        selectMessage: (messageId: number) => dispatch(selectMessages([messageId]))
+        selectMessage: (messageId: number) => dispatch(selectVerification(messageId))
     })
 )(AppBase)

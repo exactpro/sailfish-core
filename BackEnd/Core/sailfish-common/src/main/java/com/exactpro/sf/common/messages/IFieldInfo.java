@@ -32,8 +32,8 @@ public interface IFieldInfo
 		TIME,
 		CHAR,
 		DECIMAL,
-		SUBMESSAGE;
-	}
+		SUBMESSAGE
+    }
 	
 	FieldType getFieldType();
 	

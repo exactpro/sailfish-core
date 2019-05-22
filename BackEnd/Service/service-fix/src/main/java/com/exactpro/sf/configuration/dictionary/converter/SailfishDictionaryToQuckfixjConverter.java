@@ -82,12 +82,13 @@ public class SailfishDictionaryToQuckfixjConverter {
     private final String NUMBER = "number";
 
     // variable
-    private Set<String> componentNames;
-    private Set<String> fieldNames;
+    private final Set<String> componentNames;
+    private final Set<String> fieldNames;
     private IDictionaryStructure sailfishDictionary;
-    private List<Element> accumulateList;
-    private List<Element> accumulateValueList;
-    private int minor, major;
+    private final List<Element> accumulateList;
+    private final List<Element> accumulateValueList;
+    private int minor;
+    private int major;
 
     public SailfishDictionaryToQuckfixjConverter()
             throws ParserConfigurationException, TransformerConfigurationException {
@@ -275,7 +276,8 @@ public class SailfishDictionaryToQuckfixjConverter {
         componentNames.clear();
         fieldNames.clear();
 
-        Element header, trailer;
+        Element header;
+        Element trailer;
 
         if (mode != Mode.APP) {
             header = (Element)createHeader(sailfishDictionary.getMessages().get(FixMessageHelper.HEADER), doc);
@@ -465,11 +467,7 @@ public class SailfishDictionaryToQuckfixjConverter {
         tempElement.setAttribute(NAME, messageStructure.getName());
         tempElement.setAttribute("msgtype",
                 getAttributeValue(messageStructure, FixMessageHelper.MESSAGE_TYPE_ATTR_NAME).toString());
-        if(StructureUtils.<Boolean>getAttributeValue(messageStructure, IS_ADMIN)) {
-            tempElement.setAttribute("msgcat", "admin");
-        } else {
-            tempElement.setAttribute("msgcat", "app");
-        }
+        tempElement.setAttribute("msgcat", getAttributeValue(messageStructure, IS_ADMIN) ? "admin" : "app");
 
         boolean isEmpty = true;
         for(IFieldStructure field : messageStructure.getFields().values()) {
@@ -616,6 +614,6 @@ public class SailfishDictionaryToQuckfixjConverter {
     }
 
     private enum Mode {
-        ALL, APP, ADMIN;
+        ALL, APP, ADMIN
     }
 }

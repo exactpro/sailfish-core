@@ -15,12 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.statistics;
 
+import java.util.List;
+import java.util.function.BiFunction;
 
 import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.embedded.statistics.entities.TestCaseRun;
-
-import java.util.List;
-import java.util.function.BiFunction;
 
 public enum Action {
     ADD("Add") {
@@ -36,9 +35,9 @@ public enum Action {
         }
     };
 
-    private String label;
+    private final String label;
 
-    private Action(String label) {
+    Action(String label) {
         this.label = label;
     }
 

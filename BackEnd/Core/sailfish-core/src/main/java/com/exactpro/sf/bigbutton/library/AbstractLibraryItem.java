@@ -23,8 +23,8 @@ public abstract class AbstractLibraryItem implements Serializable {
 	private void reportNotAllowed(Object item) {
 		
 		throw new IllegalNestedItemException(item.getClass().getSimpleName() 
-				+ " is not allowed under " 
-				+ this.getClass().getSimpleName());
+				+ " is not allowed under "
+                + getClass().getSimpleName());
 		
 	}
 	

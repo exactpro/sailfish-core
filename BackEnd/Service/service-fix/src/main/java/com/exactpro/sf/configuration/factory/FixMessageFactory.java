@@ -23,10 +23,7 @@ import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.google.common.collect.ImmutableSet;
 
 public class FixMessageFactory extends AbstractMessageFactory {
-    public final static Set<String> UNCHECKED_FIELDS;
-
-    static {
-        UNCHECKED_FIELDS = ImmutableSet.of(
+    public static final Set<String> UNCHECKED_FIELDS = ImmutableSet.of(
             "header",
             "BeginString",
             "BodyLength",
@@ -43,8 +40,7 @@ public class FixMessageFactory extends AbstractMessageFactory {
             "SenderSubID",
             "PossResend",
             "trailer"
-        );
-    }
+    );
 
     @Override
     public IHumanMessage createHumanMessage(String name) {

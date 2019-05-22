@@ -15,21 +15,22 @@
  ******************************************************************************/
 
 import { h, Component } from "preact";
-import "../styles/styles.scss";
+import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import Report, { isReport } from '../models/Report';
 import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'preact-redux';
-import AppState from "../state/AppState";
-import { setTestCase, setReport, setTestCasePath, selectActionById } from "../actions/actionCreators";
-import { selectMessages } from '../actions/actionCreators';
+import AppState from "../state/models/AppState";
+import { setTestCase, setReport, setTestCasePath, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,
     MESSAGE_PARAM_KEY,
     TEST_CASE_PARAM_KEY
 } from "../middleware/urlHandler";
+import { fetchToken } from "../helpers/machineLearning";
+import { SubmittedData } from "../models/MlServiceResponse" 
 
 const REPORT_FILE_PATH = 'index.html';
 
@@ -37,11 +38,15 @@ interface AppProps {
     report: Report;
     testCase: TestCase;
     testCaseFilePath: string;
+    mlToken: string;
+    submittedMlData: SubmittedData[];
     updateTestCase: (testCase: TestCase) => any;
     updateTestCasePath: (testCasePath: string) => any;
     selectAction: (actionId: number) => any;
     selectMessage: (messageId: number) => any;
     updateReport: (report: Report) => any;
+    setMlToken: (token: string) => any;
+    setSubmittedMlData: (data: SubmittedData[]) => any;
 }
 
 class AppBase extends Component<AppProps, {}> {
@@ -74,7 +79,10 @@ class AppBase extends Component<AppProps, {}> {
         if (!this.searchParams) {
             this.searchParams = new URLSearchParams(getUrlSearchString(top.window.location.href));
             this.handleSharedUrl();
-            return;
+        }
+
+        if (!this.props.mlToken && this.props.report.reportProperties) {
+            fetchToken(this.props.report.reportProperties.workFolder, this.props.setMlToken, this.props.setSubmittedMlData)
         }
     }
 
@@ -151,15 +159,19 @@ class AppBase extends Component<AppProps, {}> {
 
 export const App = connect(
     (state: AppState) => ({
-        report: state.report,
-        testCase: state.testCase,
-        testCaseFilePath: state.currentTestCasePath
+        report: state.report.report,
+        testCase: state.selected.testCase,
+        testCaseFilePath: state.report.currentTestCasePath,
+        mlToken: state.machineLearning.token,
+        submittedMlData: state.machineLearning.submittedData
     }),
     dispatch => ({
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
         updateTestCasePath: (testCasePath: string) => dispatch(setTestCasePath(testCasePath)),
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
-        selectMessage: (messageId: number) => dispatch(selectMessages([messageId])),
-        updateReport: (report: Report) => dispatch(setReport(report))
+        selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
+        updateReport: (report: Report) => dispatch(setReport(report)),
+        setMlToken: (token: string) => dispatch(setMlToken(token)),
+        setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data))
     })
 )(AppBase)

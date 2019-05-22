@@ -61,12 +61,12 @@ class FASTSession implements ISession {
 
     @Override
 	public void close() {
-        this.fastClient.closeSession();
+        fastClient.closeSession();
 	}
 
 	@Override
 	public boolean isClosed() {
-	    return this.fastClient.isSessionClosed();
+        return fastClient.isSessionClosed();
 	}
 
 	@Override
@@ -80,8 +80,8 @@ class FASTSession implements ISession {
 	}
 
 	protected void internalSend(Object msg) throws InterruptedException {
-	    synchronized (this.fastClient) {
-            this.fastClient.send(msg);
+        synchronized(fastClient) {
+            fastClient.send(msg);
 	    }
 	}
 }

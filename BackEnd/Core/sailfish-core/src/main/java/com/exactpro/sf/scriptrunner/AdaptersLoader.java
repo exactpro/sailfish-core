@@ -25,8 +25,8 @@ import com.exactpro.sf.configuration.AdapterDescription;
 
 public class AdaptersLoader {
 
-	private final static String SETTINGS_ADAPTERS_KEY = "Adapters";
-	private final static String SETTINGS_ADAPTER_KEY = "Adapter";
+    private static final String SETTINGS_ADAPTERS_KEY = "Adapters";
+    private static final String SETTINGS_ADAPTER_KEY = "Adapter";
 
 	private final List<AdapterDescription> adapters = new LinkedList<>();
 
@@ -43,13 +43,13 @@ public class AdaptersLoader {
 			AdapterDescription adapterDescription = new AdapterDescription();
 			adapterDescription.load(sub);
 
-			this.adapters.add(adapterDescription);
+            adapters.add(adapterDescription);
 		}
 
 	}
 
 	public List<AdapterDescription> getAdapters() {
-		return this.adapters;
+        return adapters;
 	}
 
 }

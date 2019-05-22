@@ -34,11 +34,13 @@ public class FileDownloadWrapper implements Closeable {
     private final InputStream inputStream;
 
     public FileDownloadWrapper(String fileName, CloseableHttpResponse response) throws UnsupportedOperationException, IOException {
-        if (fileName == null || fileName.isEmpty())
+        if(fileName == null || fileName.isEmpty()) {
             throw new IllegalArgumentException("File name can't be null");
-        
-        if (response == null)
+        }
+
+        if(response == null) {
             throw new IllegalArgumentException("Response can't be null");
+        }
         
         this.response = response;
         this.inputStream = response.getEntity().getContent();
@@ -47,8 +49,8 @@ public class FileDownloadWrapper implements Closeable {
     
     @Override
     public void close() throws IOException {
-        this.inputStream.close();
-        this.response.close();
+        inputStream.close();
+        response.close();
     }
 
     public String getFileName() {

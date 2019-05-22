@@ -33,8 +33,8 @@ import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 @ApplicationScoped
 @SuppressWarnings("serial")
 public class SfInstanceConverter implements Converter, Serializable {
-	
-	@ManagedProperty(value="#{sfContext}")
+
+    @ManagedProperty("#{sfContext}")
 	private ISFContext sfContext;
 	
 	@Override
@@ -42,9 +42,9 @@ public class SfInstanceConverter implements Converter, Serializable {
 		
 		if (value == null || !value.matches("\\d+")) {
             return null;
-        }        
+        }
 
-		SfInstance result = this.sfContext.getStatisticsService().getStorage().getSfInstanceById(Long.valueOf(value));
+        SfInstance result = sfContext.getStatisticsService().getStorage().getSfInstanceById(Long.valueOf(value));
 
         if (result == null) {
             throw new ConverterException(new FacesMessage("Unknown Account ID: " + value));
@@ -55,13 +55,8 @@ public class SfInstanceConverter implements Converter, Serializable {
 
 	@Override
 	public String getAsString(FacesContext arg0, UIComponent arg1, Object value) {
-		
-		if (!(value instanceof SfInstance)) {
-            return null;
-        }
-
-        return String.valueOf(((SfInstance) value).getId());
-	}
+        return value instanceof SfInstance ? String.valueOf(((SfInstance)value).getId()) : null;
+    }
 
 	public void setSfContext(ISFContext sfContext) {
 		this.sfContext = sfContext;

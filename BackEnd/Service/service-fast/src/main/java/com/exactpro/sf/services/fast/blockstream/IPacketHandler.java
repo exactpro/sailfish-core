@@ -17,6 +17,6 @@ package com.exactpro.sf.services.fast.blockstream;
 
 public interface IPacketHandler {
 
-	public void handlePacket(byte[] packetData);
+	void handlePacket(byte[] packetData);
 
 }

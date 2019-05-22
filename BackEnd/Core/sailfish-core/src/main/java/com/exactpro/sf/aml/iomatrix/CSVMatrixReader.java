@@ -23,8 +23,8 @@ import java.io.Reader;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.csvreader.CsvReader;
 import com.exactpro.sf.util.UnicodeReader;
@@ -74,8 +74,8 @@ public class CSVMatrixReader implements IMatrixReader {
 
         reader = new CsvReader(rdr);
         reader.setDelimiter(delimiter);
-        this.reader.setSkipEmptyRecords(false);
-        this.reader.setTrimWhitespace(true);
+        reader.setSkipEmptyRecords(false);
+        reader.setTrimWhitespace(true);
         readRecord();
     }
 
@@ -151,8 +151,9 @@ public class CSVMatrixReader implements IMatrixReader {
      * @throws IOException
      */
     public static char determineCSVDelimiter(InputStream is, boolean needClose) throws IOException {
-        if (is.markSupported())
+        if(is.markSupported()) {
             is.mark(0);
+        }
 
         byte[] bytes = new byte[1024];
         try {
@@ -197,10 +198,6 @@ public class CSVMatrixReader implements IMatrixReader {
     }
 
     private static InputStream wrappedStream(InputStream in) {
-        if (in.markSupported()) {
-            return in;
-        } else {
-            return new BufferedInputStream(in);
-        }
+        return in.markSupported() ? in : new BufferedInputStream(in);
     }
 }

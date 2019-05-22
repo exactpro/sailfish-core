@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -52,11 +52,11 @@ public class BugDescription implements Comparable<BugDescription> {
     }
     
     public String getSubject() {
-        return this.subject;
+        return subject;
     }
     
     public Category getCategories() {
-        return this.category;
+        return category;
     }
     
     @Override
@@ -67,8 +67,8 @@ public class BugDescription implements Comparable<BugDescription> {
         
         CompareToBuilder builder = new CompareToBuilder();
 
-        builder.append(this.category, o.category);
-        builder.append(this.subject, o.subject);
+        builder.append(category, o.category);
+        builder.append(subject, o.subject);
 
         return builder.toComparison();
     }
@@ -86,8 +86,8 @@ public class BugDescription implements Comparable<BugDescription> {
         BugDescription that = (BugDescription)o;
         EqualsBuilder builder = new EqualsBuilder();
 
-        builder.append(this.category, that.category);
-        builder.append(this.subject, that.subject);
+        builder.append(category, that.category);
+        builder.append(subject, that.subject);
 
         return builder.isEquals();
     }
@@ -96,20 +96,20 @@ public class BugDescription implements Comparable<BugDescription> {
     public int hashCode() {
         HashCodeBuilder builder = new HashCodeBuilder();
 
-        builder.append(this.category);
-        builder.append(this.subject);
+        builder.append(category);
+        builder.append(subject);
 
         return builder.toHashCode();
     }
     
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        
-        for (String category : this.category.categories) {
+
+        for(String category : category.categories) {
             builder.append(category).append('(');
         }
-        builder.append(this.subject);
-        for (int i = 0; i < this.category.categories.size(); i++) {
+        builder.append(subject);
+        for(int i = 0; i < category.categories.size(); i++) {
             builder.append(')');
         }
         return builder.toString();
@@ -147,7 +147,7 @@ public class BugDescription implements Comparable<BugDescription> {
 
             Comparator<String[]> categoriesComparator = new BugCategoriesComparator();
 
-            return categoriesComparator.compare(Iterables.toArray(this.categories, String.class),
+            return categoriesComparator.compare(Iterables.toArray(categories, String.class),
                     Iterables.toArray(o.categories, String.class));
         }
 
@@ -164,7 +164,7 @@ public class BugDescription implements Comparable<BugDescription> {
             Category that = (Category)o;
             EqualsBuilder builder = new EqualsBuilder();
 
-            builder.append(this.categories, that.categories);
+            builder.append(categories, that.categories);
 
             return builder.isEquals();
         }
@@ -173,23 +173,23 @@ public class BugDescription implements Comparable<BugDescription> {
         public int hashCode() {
             HashCodeBuilder builder = new HashCodeBuilder();
 
-            builder.append(this.categories);
+            builder.append(categories);
 
             return builder.toHashCode();
         }
         
         public String toString() {
-            if (this.categories.isEmpty()) {
+            if(categories.isEmpty()) {
                 return "";
             }
-            
-            StringBuilder builder = new StringBuilder(this.categories.get(0));
-            
-            for (int i = 1; i < this.categories.size(); i++) {
-                builder.append('(').append(this.categories.get(i));
+
+            StringBuilder builder = new StringBuilder(categories.get(0));
+
+            for(int i = 1; i < categories.size(); i++) {
+                builder.append('(').append(categories.get(i));
             }
-            
-            for (int i = 0; i < this.categories.size() - 1; i++) {
+
+            for(int i = 0; i < categories.size() - 1; i++) {
                 builder.append(')');
             }
             return builder.toString();

@@ -15,11 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.configuration.IDictionaryManager;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.embedded.machinelearning.JsonEntityParser;
+import com.exactpro.sf.embedded.machinelearning.MachineLearningService;
+import com.exactpro.sf.embedded.machinelearning.entities.FailedAction;
+import com.exactpro.sf.embedded.machinelearning.storage.MLFileStorage;
+import com.exactpro.sf.testwebgui.api.TestToolsAPI;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -32,23 +41,14 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.configuration.IDictionaryManager;
-import com.exactpro.sf.embedded.machinelearning.JsonEntityParser;
-import com.exactpro.sf.embedded.machinelearning.MachineLearningService;
-import com.exactpro.sf.embedded.machinelearning.entities.FailedAction;
-import com.exactpro.sf.embedded.machinelearning.storage.MLFileStorage;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Deprecated
 @Path("machinelearning")
@@ -56,7 +56,7 @@ public class MachineLearningResource {
 
     private static final Logger logger = LoggerFactory.getLogger(MachineLearningResource.class);
 
-    private ObjectWriter jsonWriter = new ObjectMapper().writer();
+    private final ObjectWriter jsonWriter = new ObjectMapper().writer();
 
     @Context
     private ServletContext context;
@@ -80,19 +80,19 @@ public class MachineLearningResource {
                         ExceptionUtils.getThrowableList(e).stream().filter(t -> root != t)
                                 .map(t -> t.getMessage() + " , Reason: " + root.getMessage())
                                 .collect(Collectors.toList()));
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+                return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
             }
         }
-        return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Machine Learning service is disabled").build();
+        return Response.status(Status.SERVICE_UNAVAILABLE).entity("Machine Learning service is disabled").build();
     }
 
     @GET
     @Path("predictions_ready")
     @Produces(MediaType.TEXT_PLAIN)
     public Response ready() {
-        
+
         if (getMachineLearningService().getMlPredictor() == null) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Predictor not ready").build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).entity("Predictor not ready").build();
         } else {
             return Response.ok().build();
         }
@@ -104,7 +104,7 @@ public class MachineLearningResource {
     public Response predictTrainingData(InputStream requestBody) {
 
         if (getMachineLearningService().getMlPredictor() == null) {
-            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Predictions plugin is not installed").build();
+            return Response.status(Status.SERVICE_UNAVAILABLE).entity("Predictions plugin is not installed").build();
         }
 
         FailedAction fa;
@@ -117,7 +117,7 @@ public class MachineLearningResource {
                     ExceptionUtils.getThrowableList(e).stream().filter(t -> root != t)
                             .map(t -> t.getMessage() + " , Reason: " + root.getMessage())
                             .collect(Collectors.toList()));
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response).build();
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(response).build();
         }
 
         Map result = getMachineLearningService().getMlPredictor().classifyFailedAction(fa);
@@ -131,16 +131,9 @@ public class MachineLearningResource {
     @GET
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @Path("get_dump")
-    public Response getDump(@DefaultValue("4") @QueryParam("compression_lvl") int compression) {
+    public Response getDump(@DefaultValue("4") @QueryParam("compression_lvl") int compression, @DefaultValue("false") @QueryParam("remove") boolean remove) {
 
-        MachineLearningService mlService = getMachineLearningService();
-
-        StreamingOutput streamingOutput = outputStream -> {
-
-            try (OutputStream os = outputStream) {
-                mlService.getStorage().zipDocumentsToStream(os, compression);
-            }
-        };
+        StreamingOutput streamingOutput = outputStream -> TestToolsAPI.getInstance().zipMlFolder(getWorkspaceDispatcher(), outputStream, remove);
 
         return Response.ok(streamingOutput).header("Content-Disposition",
                 String.format("attachment; filename=\"%s\"", "dump" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".zip")).build();
@@ -152,6 +145,10 @@ public class MachineLearningResource {
 
     private IDictionaryManager getDictionaryManager() {
         return ((ISFContext)context.getAttribute("sfContext")).getDictionaryManager();
+    }
+
+    private IWorkspaceDispatcher getWorkspaceDispatcher() {
+        return ((ISFContext)context.getAttribute("sfContext")).getWorkspaceDispatcher();
     }
 
 }

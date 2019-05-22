@@ -228,7 +228,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 				reverseBytes(rawArray);
 			}
 
-			final UnsignedLong divider = (type == ProtocolType.SIZE) ? SIZE_DEVIDER : SIZE4_DEVIDER;
+			UnsignedLong divider = (type == ProtocolType.SIZE) ? SIZE_DEVIDER : SIZE4_DEVIDER;
 
 			double result = ServiceUtil.convertFromUint64(rawArray, divider);
 
@@ -236,7 +236,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		} else if (type == ProtocolType.PRICE || type == ProtocolType.PRICE4) {
 			long val = buffer.getLong();
 
-			boolean positive = ((byte) (val >> 63)) == 0;
+			boolean positive = (byte) (val >> 63) == 0;
 			
 			if (!positive) {
 				long mask = 0x7FFFFFFFFFFFFFFFL;
@@ -245,15 +245,10 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 				val = val * -1L;
 			}
-			double valDouble;
 
-			if (type == ProtocolType.PRICE) {
-				valDouble = ServiceUtil.divide(val, 100000000L);
-			} else {
-				valDouble = ServiceUtil.divide(val, 10000L);
-			}
+            double valDouble = ServiceUtil.divide(val, type == ProtocolType.PRICE ? 100_000_000L : 10_000L);
 
-			msg.addField(fieldName, valDouble);
+            msg.addField(fieldName, valDouble);
 		} else if (type == ProtocolType.UINT16) {
 			BigDecimal val = new BigDecimal(buffer.getUnsignedShort());
 
@@ -371,7 +366,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		} else if (type == ProtocolType.PRICE) {
 			long val = buffer.getLong();
 
-			boolean positive = ((byte) (val >> 63)) == 0;
+			boolean positive = (byte) (val >> 63) == 0;
 
 			if (!positive) {
 				long mask = 0x7FFFFFFFFFFFFFFFL;
@@ -443,7 +438,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
                 throw new EPSCommonException("Incorrect field lenth = " + length + " for " + fieldName + " field");
             }
             int days = buffer.getShort();
-            msg.addField(fieldName, DateTimeUtility.toLocalDate(86400_000L * days));
+            msg.addField(fieldName, DateTimeUtility.toLocalDate(86_400_000L * days));
         } else if (type == ProtocolType.DATE) {
             byte[] array = new byte[length];
 

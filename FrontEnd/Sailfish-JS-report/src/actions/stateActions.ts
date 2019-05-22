@@ -19,7 +19,8 @@ import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from '../models/Report';
 import { Panel } from "../helpers/Panel";
-
+import Message from "../models/Message";
+import { SubmittedData } from "../models/MlServiceResponse";
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
     NEXT_TEST_CASE = 'NEXT_TEST_CASE',
@@ -29,7 +30,8 @@ export enum StateActionTypes {
     RESET_TEST_CASE= 'RESET_TEST_CASE',
     SELECT_ACTION = 'SELECT_ACTION',
     SELECT_ACTION_BY_ID = 'SELECT_ACTION_BY_ID',
-    SELECT_MESSAGES = 'SELECT_MESSAGES',
+    SELECT_MESSAGE = 'SELECT_MESSAGE',
+    SELECT_VERIFICATION = 'SELECT_VERIFICATION',
     SELECT_CHECKPOINT = 'SELECT_CHECKPOINT',
     SELECT_REJECTED_MESSAGE = 'SELECT_REJECTED_MESSAGE',
     SET_ADMIN_MSG_ENABLED = 'SET_ADMIN_MSG_ENABLED',
@@ -37,7 +39,11 @@ export enum StateActionTypes {
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
     SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
     SET_LEFT_PANE = 'SET_LEFT_PANE',
-    SET_RIGHT_PANE = 'SET_RIGHT_PANE'
+    SET_RIGHT_PANE = 'SET_RIGHT_PANE',
+    SET_ML_TOKEN = 'SET_ML_TOKEN',
+    SET_SUBMITTED_ML_DATA = "SET_SUBMITTED_ML_DATA",
+    ADD_SUBMITTED_ML_DATA = "ADD_SUBMITTED_ML_DATA",
+    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA"
 }
 
 export interface SetReportStateAction {
@@ -64,9 +70,15 @@ export interface ActionSelectByIdStateAction {
     actionId: number;
 }
 
-export interface MessagesSelectStateAction {
-    type: StateActionTypes.SELECT_MESSAGES;
-    messagesId: number[];
+export interface MessageSelectStateAction {
+    type: StateActionTypes.SELECT_MESSAGE;
+    message: Message;
+    status: StatusType;
+}
+
+export interface VerificationSelectStateAction {
+    type: StateActionTypes.SELECT_VERIFICATION;
+    messageId: number;
     status: StatusType;
 }
 
@@ -122,12 +134,34 @@ export interface SetRightPaneStateAction {
     pane: Panel;
 }
 
-export type StateActionType = SetReportStateAction |
+export interface SetMlTokenStateAction {
+    type: StateActionTypes.SET_ML_TOKEN;
+    token: string;
+}
+
+export interface SetSubmittedMlDataStateAction {
+    type: StateActionTypes.SET_SUBMITTED_ML_DATA;
+    data: SubmittedData[];
+}
+
+export interface AddSubmittedMlDataStateAction {
+    type: StateActionTypes.ADD_SUBMITTED_ML_DATA;
+    data: SubmittedData;
+}
+
+export interface RemoveSubmittedMlDataStateAction {
+    type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA;
+    data: SubmittedData;
+}
+
+export type StateActionType = 
+    SetReportStateAction |
     SetTestCaseStateAction | 
     ResetTestCaseStateAction |
     ActionSelectStateAction |
     ActionSelectByIdStateAction |
-    MessagesSelectStateAction | 
+    MessageSelectStateAction | 
+    VerificationSelectStateAction |
     CheckpointSelectStateAction |
     RejectedMessageSelectStateAction |
     NextTestCaseStateAction |
@@ -139,4 +173,8 @@ export type StateActionType = SetReportStateAction |
     SwitchActionFilterStateAction | 
     SwitchFieldsFilterStateAction | 
     SetRightPaneStateAction | 
-    SetLeftPaneStateActions;
+    SetLeftPaneStateActions |
+    SetMlTokenStateAction |
+    SetSubmittedMlDataStateAction |
+    AddSubmittedMlDataStateAction |
+    RemoveSubmittedMlDataStateAction

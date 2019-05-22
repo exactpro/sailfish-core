@@ -107,7 +107,11 @@ public class MLPersistenceManager {
             }
 
             writeExplanations(mlFolder, updater.apply(old));
-        } finally {
+        }
+        catch (Exception e) {
+            throw new EPSCommonException("unable to update submitted ml data", e);
+        }
+        finally {
             rwLock.writeLock().unlock();
         }
     }

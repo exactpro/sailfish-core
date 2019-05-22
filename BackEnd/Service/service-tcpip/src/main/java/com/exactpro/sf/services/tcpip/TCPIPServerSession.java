@@ -31,12 +31,12 @@ import com.exactpro.sf.services.ISession;
 
 public class TCPIPServerSession implements ISession, Runnable {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
-	private TCPIPServer server;
-	private String name;
-	private boolean loggedOn = false;
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final TCPIPServer server;
+    private final String name;
+    private final boolean loggedOn;
 
-	public boolean isClosed = false;
+    public boolean isClosed;
 
 
 	public TCPIPServerSession(TCPIPServer server) {
@@ -63,7 +63,7 @@ public class TCPIPServerSession implements ISession, Runnable {
 
 	@Override
 	public String getName() {
-		return this.name;
+        return name;
 	}
 
 	@Override
@@ -88,18 +88,14 @@ public class TCPIPServerSession implements ISession, Runnable {
         if (!errorSending.isEmpty()) {
             StringBuilder errors = new StringBuilder("For sessions: ");
             for (IoSession session : errorSending) {
-                errors.append(session.toString() + "\n");
+                errors.append(session + "\n");
             }
 
             throw new SendMessageFailedException("Message wasn't send during 1 second." + errors.toString().trim());
         }
 
-		if(message instanceof IMessage) {
-			return (IMessage) message;
-		}
-
-		return null;
-	}
+        return message instanceof IMessage ? (IMessage)message : null;
+    }
 
 	@Override
 	public IMessage sendDirty(Object message) throws InterruptedException {
@@ -113,12 +109,12 @@ public class TCPIPServerSession implements ISession, Runnable {
 
 	@Override
 	public boolean isClosed() {
-		return this.isClosed;
+        return isClosed;
 	}
 
 	@Override
 	public boolean isLoggedOn() {
-		return this.loggedOn;
+        return loggedOn;
 	}
 
 	@Override
@@ -137,18 +133,14 @@ public class TCPIPServerSession implements ISession, Runnable {
 
 		TCPIPServerSession anotherServerSession = (TCPIPServerSession) obj;
 
-		return (anotherServerSession.server != null && anotherServerSession.server.equals(this.server)
-				&& anotherServerSession.name != null && anotherServerSession.name.equals(this.name)
-				&& anotherServerSession.isClosed == this.isClosed
-				&& anotherServerSession.loggedOn == this.loggedOn);
+        return anotherServerSession.server != null && anotherServerSession.server.equals(server)
+                && anotherServerSession.name != null && anotherServerSession.name.equals(name)
+                && anotherServerSession.isClosed == isClosed
+                && anotherServerSession.loggedOn == loggedOn;
 	}
 
 	@Override
 	public int hashCode() {
-		if(server == null || name == null) {
-			return super.hashCode();
-		}
-
-		return server.hashCode() + 3 * name.hashCode();
-	}
+        return server == null || name == null ? super.hashCode() : server.hashCode() + 3 * name.hashCode();
+    }
 }

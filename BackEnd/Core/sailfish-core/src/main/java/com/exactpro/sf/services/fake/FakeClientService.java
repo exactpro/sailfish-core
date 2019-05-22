@@ -61,20 +61,20 @@ public class FakeClientService extends AbstractInitiatorService {
     }
 
     public IMessageStorage getStorage() {
-        return this.storage;
+        return storage;
     }
 
     public ServiceInfo getServiceInfo() {
-        return this.serviceInfo;
+        return serviceInfo;
     }
 
     public IDictionaryStructure getDictionary() {
-        return this.dictionary;
+        return dictionary;
     }
 
 	@Override
 	public FakeSession getSession() {
-		return this.session;
+        return session;
 	}
 
 	public void removeFilters(IMessage message)
@@ -85,7 +85,7 @@ public class FakeClientService extends AbstractInitiatorService {
 
 			Object field = message.getField(fldStruct.getName());
 
-			if(null == field)
+            if(field == null)
 			{
 				continue;
 			}
@@ -112,12 +112,7 @@ public class FakeClientService extends AbstractInitiatorService {
 		removeFilters(message);
 		boolean admin = false;
 		persistMessage(admin, message, serviceName.toString(), serviceName.toString());
-
-		if (admin) {
-			handler.putMessage(session, ServiceHandlerRoute.FROM_ADMIN, message);
-		} else {
-			handler.putMessage(session, ServiceHandlerRoute.FROM_APP, message);
-		}
+        handler.putMessage(session, admin ? ServiceHandlerRoute.FROM_ADMIN : ServiceHandlerRoute.FROM_APP, message);
 	}
 
 	public void messageSent(IMessage message) throws Exception
@@ -126,14 +121,7 @@ public class FakeClientService extends AbstractInitiatorService {
 		persistMessage(admin, message, serviceName.toString(), serviceName.toString());
 
 		// Putting message into a service handler
-		if (admin)
-		{
-			handler.putMessage(session, ServiceHandlerRoute.TO_ADMIN, message);
-		}
-		else
-		{
-			handler.putMessage(session, ServiceHandlerRoute.TO_APP, message);
-		}
+        handler.putMessage(session, admin ? ServiceHandlerRoute.TO_ADMIN : ServiceHandlerRoute.TO_APP, message);
 	}
 
 	// Persists message to storage

@@ -14,44 +14,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "vars";
-@font-face{
-    font-family: 'Open sans';
-    font-weight: normal;
-    src: url('../../resources/fonts/open-sans-v15-latin-regular.woff')
-}
+@import './common/vars';
 
-@font-face {
-    font-family: 'Open sans';
-    font-weight: bold;
-    src: url('../../resources/fonts/open-sans-v15-latin-600.woff')
-}
-
-body {
-    margin: 0;
-}
-
-.root {
-    font-family: Open sans;
-    display: block;
-    box-sizing: border-box;
-    width: 100vw;
-    height: 100vh;
-    padding: 8px;
-
-    div {
-        box-sizing: border-box;
-    }
-
-    p, span, h1, h2, h3, h4, h5, pre {
-        margin: 0;
-        padding: 0;
-        border: 0;
-        vertical-align: baseline;
-    }
-}
-
-.button-root {
+.toggle-button {
     @include unselectable;
     display: inline-flex;
     height: 38px;
@@ -60,62 +25,44 @@ body {
     margin: 0 3px;
     border: 1.5px solid transparent;
     border-radius: 7px;
+    font-size: 16px;
     cursor: pointer;
+
+    &__title {
+        margin: 0 20px;
+    }
 
     &.toggled {
         border-radius: 7px;
     }
-    
-    p {
-        margin: 0 20px;
+
+    &.disabled {
+        filter: opacity(0.4);
+        cursor: unset;
     }
+    
 
     // themes for button
     &.green {
         background: $filterButtonDisabled;
         border-color: $filterButtonDisabled;
         height: 30px;
+        color: $filterButtonTextColor;
+        font-size: 14px;
 
         &.toggled {
             background: $filterButtonEnabled;
             border-color: $filterButtonEnabled;
         }
-
-        p {
-            color: $filterButtonTextColor;
-            font-size: 14px;
-        }
     }
 
     &.default {
         background: $buttonDisabledBackground;
+        color: $primaryTextColor;
 
         &.toggled {
             border-color: black;
             background: transparent;
         }
-
-        p {
-            color: $primaryTextColor;
-        }
-    }
-}
-
-.notification {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 19px;
-    padding: 10px;
-    color: $primaryTextColor;
-    background-color: $notificationBackground;
-    border-radius: 5px;
-    font-family: Open sans;
-    
-    p {
-        margin: 0;
     }
 }

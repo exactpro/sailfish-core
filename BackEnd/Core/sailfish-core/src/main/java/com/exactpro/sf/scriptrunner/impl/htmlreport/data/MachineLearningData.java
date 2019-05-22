@@ -27,6 +27,7 @@ import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
 
+@Deprecated // Used only in old HTML report
 public class MachineLearningData {
     private final String name;
     private final String namespace;
@@ -34,7 +35,6 @@ public class MachineLearningData {
     private final String protocol;
     private final long periodStart;
     private long periodEnd;
-    private boolean problemExplanation = false;
     private final Map<String, Object> expected;
     private final List<Long> actuals = new ArrayList<>();
 
@@ -86,10 +86,6 @@ public class MachineLearningData {
 
     public Map<String, Object> getExpected() {
         return expected;
-    }
-
-    public boolean isProblemExplanation() {
-        return problemExplanation;
     }
 
     public void addActual(ComparisonResult actual) {

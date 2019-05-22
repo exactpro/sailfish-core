@@ -16,6 +16,8 @@
 package com.exactpro.sf.actions;
 
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +29,6 @@ import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.script.MetaContainer;
@@ -52,6 +52,8 @@ import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
 import com.exactpro.sf.util.DateTimeUtility;
 
 import quickfix.FixVersions;
+import quickfix.Message;
+import quickfix.field.MsgSeqNum;
 
 /**
  * Collection of matrix utilities for FIX protocol.
@@ -59,10 +61,10 @@ import quickfix.FixVersions;
  *
  */
 @MatrixUtils
-@ResourceAliases({"FIXMatrixUtil"})
+@ResourceAliases("FIXMatrixUtil")
 public class FIXMatrixUtil extends AbstractCaller {
 
-	private static Logger logger = LoggerFactory.getLogger(FIXMatrixUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(FIXMatrixUtil.class);
 
     private static final String FIX_DATE_FORMAT = "yyyyMMdd";
     private static final String FIX_DATE_TIME_FORMAT = FIX_DATE_FORMAT + "-HH:mm:ss";
@@ -75,7 +77,7 @@ public class FIXMatrixUtil extends AbstractCaller {
     private static final DateTimeFormatter FIX_DATE_TIME_FORMATTER_MS = DateTimeUtility.createFormatter(FIX_DATE_TIME_FORMAT_MS);
     private static final DateTimeFormatter FIX_DATE_TIME_FORMATTER_NS = DateTimeUtility.createFormatter(FIX_DATE_TIME_FORMAT_NS);
 
-    @Description("Transact Time - return time in GMT time zone<br>"
+    @Description("Transact Time - returns the time in the GMT time zone<br>"
             + DateUtil.MODIFY_HELP
 			+ "Example:<br>"
 			+ "#{TransactTime(\"Y+2:m-6:D=4:h+1:M-2:s=39\")}<br>"
@@ -89,7 +91,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         return DateUtil.modifyLocalDateTime(dateFormat);
 	}
 
-	@Description("ExpireTime function accept three parameters: Time Shifting Patterns related current time, Date and Time Format Patterns and Date and TimeZone."
+	@Description("ExpireTime function accepts three parameters: Time Shifting Patterns in reference to the current time, Date and Time Format Patterns and Date and TimeZone."
 			+ DateUtil.FORMAT_HELP
 			+ DateUtil.MODIFY_HELP
 			+ "<h4>Example:</h4>"
@@ -104,7 +106,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         return DateUtil.formatDateTime(dateFormat, format, timeZone);
 	}
 
-	@Description(" Expire Time - return time in GMT time zone<br>"
+	@Description(" Expire Time - returns the time in the GMT time zone<br>"
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
 			+ "<br>"
@@ -121,10 +123,10 @@ public class FIXMatrixUtil extends AbstractCaller {
         return DateUtil.modifyZonedDateTime(dateFormat).format(FIX_DATE_TIME_FORMATTER);
 	}
 
-    @Description(" Expire Time - return time in GMT time zone in format " + FIX_DATE_TIME_FORMAT + "<br>"
+    @Description(" Expire Time - returns the time in the GMT time zone in the format " + FIX_DATE_TIME_FORMAT + "<br>"
 			+ " Example:<br>"
 			+ " For the <b>10 Nov 2015, 13:00:00</b>"
-			+ " where input date parameter <b>#{getDate(\"h=16:m=23:s=0\")}</b>"
+			+ " with input date parameter <b>#{getDate(\"h=16:m=23:s=0\")}</b>"
 			+ " this method will return the following:<br>"
 			+ " 20151110-16:23:00<br>"
 	)
@@ -134,8 +136,8 @@ public class FIXMatrixUtil extends AbstractCaller {
         return DateTimeUtility.nowZonedDateTime().format(FIX_DATE_TIME_FORMATTER);
 	}
 
-	@Description("Calculates checksum of FIX message. "
-	        +"Message contains | delimiter.<br>"
+	@Description("Calculates the checksum of FIX message. "
+	        +"The message contains the default | delimiter.<br>"
 	        +"Example: <br> "
 	        +"For this message '8=FIX.4.4|9=122|35=D|34=215|49=CLIENT12|52=20100225-19:41:57.316|56=B|1=Marcel|11=13346|21=1|40=2|44=5|54=1|59=0|60=20100225-19:39:52.020|' <br> "
 	        +"checksum is 072"
@@ -153,8 +155,9 @@ public class FIXMatrixUtil extends AbstractCaller {
         return formatter.format(checksum & 0xFF);
     }
 
-	@Description("Calculates checksum of FIX message. "
-            +"Message contains delimiter specified in delimiter arg.<br>"
+	@Description("Calculates the checksum of FIX message. "
+            +"Msg - the message for which checksum needs to be calculated;<br>"
+            +"Delimiter - the separator of the message fields;<br>"
             +"Example: <br> "
             +"For this message '8=FIX.4.4|9=122|35=D|34=215|49=CLIENT12|52=20100225-19:41:57.316|56=B|1=Marcel|11=13346|21=1|40=2|44=5|54=1|59=0|60=20100225-19:39:52.020|' <br> "
             +"exec calculateChecksum(msg,'|') return checksum is 072"
@@ -172,7 +175,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         return formatter.format(checksum & 0xFF);
     }
 
-	@Description(" Expire Time - return time in GMT time zone<br>"
+	@Description(" Expire Time - returns the time in the GMT time zone<br>"
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
             + "#{ExpireTime(\"Y+2:M-6:D=4:h+1:m-2:s=39\")}<br>"
@@ -186,7 +189,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         return DateUtil.modifyZonedDateTime(dateFormat).format(FIX_DATE_TIME_FORMATTER_MS);
 	}
 
-	@Description(" Expire Time - return time in GMT time zone<br>"
+	@Description(" Expire Time - returns the time in the GMT time zone<br>"
             + DateUtil.MODIFY_HELP
             + "#{ExpireTime(\"Y+2:M-6:D=4:h+1:m-2:s=39:mc=123456\")}<br>"
             + "default format : yyyyMMdd-HH:mm:ss.000000"
@@ -198,7 +201,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         return result.substring(0, FIX_DATE_TIME_FORMAT_NS.length() - 3);
     }
 
-    @Description(" Expire Time - return time in GMT time zone<br>"
+    @Description(" Expire Time - returns the time in the GMT time zone<br>"
             + DateUtil.MODIFY_HELP
             + "Example:<br>"
             + "#{ExpireTime(\"Y+2:M-6:D=4:h+1:m-2:s=39:ns=123456789\")}<br>"
@@ -212,8 +215,8 @@ public class FIXMatrixUtil extends AbstractCaller {
         return result.substring(0, FIX_DATE_TIME_FORMAT_NS.length() - 3);
     }
 
-	@Description("Expire Date - return time in GMT time zone<br>"
-			+ " Format date to FIX date format."
+	@Description("Expire Date - returns the time in the GMT time zone<br>"
+			+ " Formats the date to the FIX date format."
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
             + "#{ExpireDate(\"Y+2:M-6:D=4\")}<br>"
@@ -226,7 +229,7 @@ public class FIXMatrixUtil extends AbstractCaller {
 	}
 
 
-	@Description(" Expire Time - return time in UTC time zone<br>"
+	@Description(" Expire Time - returns the time in the UTC time zone<br>"
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
 			+ "<br>"
@@ -243,7 +246,7 @@ public class FIXMatrixUtil extends AbstractCaller {
         return ExpireTime(dateFormat);
 	}
 
-	@Description(" Expire Time - return time in GMT time zone<br>"
+	@Description(" Expire Time - returns the time in the GMT time zone<br>"
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
             + "#{ExpireTime(\"Y+2:M-6:D=4:h+1:m-2:s=39:ms=123\")}<br>"
@@ -257,8 +260,8 @@ public class FIXMatrixUtil extends AbstractCaller {
         return ExpireTimeMS(dateFormat); // BaseExpireTime(dateFormat, FIX_DATE_TIME_FORMAT_MS, DateUtil.GMT_TIME_ZONE.getID(), DateUtil.UTC_TIME_ZONE.getID());
 	}
 
-	@Description("Expire Date - return time in GMT time zone<br>"
-			+ " Format date to FIX date format."
+	@Description("Expire Date - returns the time in the GMT time zone<br>"
+			+ " Formats the date to the FIX date format."
 			+ DateUtil.MODIFY_HELP
 			+ "Example:<br>"
             + "#{ExpireDate(\"Y+2:M-6:D=4\")}<br>"
@@ -299,7 +302,7 @@ public class FIXMatrixUtil extends AbstractCaller {
 	 * @return
 	 */
 	@Description(
-			"Generate unique ClOrID for new order.<br>"
+			"Generates a unique ClOrID for a new order. <br>"
 	)
 	@UtilityMethod
 	public final String ClOrdID(int length)
@@ -307,27 +310,25 @@ public class FIXMatrixUtil extends AbstractCaller {
 		return FixUtil.generateClorIDSpecLng(length);
 	}
 
-	@Description("Mark field as excluded.<br>"
-	        + "This method excludes auto generated field from message when use in sendDirty action.")
+	@Description("Marks a field as excluded.<br>"
+	        + "This method excludes the auto generated field from the message when used in the “sendDirty” action.")
 	@UtilityMethod
 	public Object ExcludeField() {
         return FieldConst.EXCLUDED_FIELD;
     }
 
-	@Description("Convert Side field from ITCH to FIX format")
+	@Description("Converts Side field from ITCH to FIX format")
 	@UtilityMethod
 	public char ITCHSideToFIXSide(Short side)
 	{
-		char fixSide;
-		if(side == 66) {
-			fixSide = '1';
+        if(side == 66) {
+            return '1';
 		} else if(side == 83) {
-			fixSide = '2';
+            return '2';
 		} else {
-			fixSide = '3';
-		}
-		return fixSide;
-	}
+            return '3';
+        }
+    }
 
 	@Description("Wraps SeqNum to prepare it for writing to a file")
 	@UtilityMethod
@@ -344,7 +345,7 @@ public class FIXMatrixUtil extends AbstractCaller {
 	}
 
     @UtilityMethod
-    @Description("Return the MsgSeqNum from the Text field<br>" + "<b>Usage:</b> #{extractMsgSeqNum(\"text\")}<br>")
+    @Description("Returns the MsgSeqNum from the Text field<br>" + "<b>Usage:</b> #{extractMsgSeqNum(\"text\")}<br>")
     public int extractMsgSeqNum(String text) {
 	    try {
             return extractSeqNum(text);
@@ -356,6 +357,7 @@ public class FIXMatrixUtil extends AbstractCaller {
     public static int extractSeqNum(String text) {
         String value = StringUtils.substringBetween(text, "expecting ", " but received");
         value = value == null ? StringUtils.substringBetween(text, "Expected: ", ">") : value;
+        value = value == null ? StringUtils.substringBetween(text, "expected (", ")") : value;
         return Integer.parseInt(value);
     }
 
@@ -481,10 +483,10 @@ public class FIXMatrixUtil extends AbstractCaller {
 	/*
 	 * Common send method
 	 */
-	static quickfix.Message send(IActionContext actionContext,
-			quickfix.Message message) throws Exception {
+	static Message send(IActionContext actionContext,
+			Message message) throws Exception {
 		String serviceName = actionContext.getServiceName();
-		IInitiatorService service = FIXMatrixUtil.getClient(actionContext);
+        IInitiatorService service = getClient(actionContext);
 
 		boolean performance = false;
 		if (service instanceof FIXClient) {
@@ -497,10 +499,10 @@ public class FIXMatrixUtil extends AbstractCaller {
             logger.info("[{}] {}", serviceName, FixUtil.toString(message, FixUtil.getDictionary(message)));
         }
 
-		if (message.getHeader().isSetField(quickfix.field.MsgSeqNum.FIELD)) {
+		if (message.getHeader().isSetField(MsgSeqNum.FIELD)) {
 			int seqnum = message.getHeader().getInt(
-					quickfix.field.MsgSeqNum.FIELD);
-			((FIXSession) (service.getSession())).addExpectedSenderNum(seqnum);
+					MsgSeqNum.FIELD);
+			((FIXSession)service.getSession()).addExpectedSenderNum(seqnum);
 		}
 
 		Thread.sleep(actionContext.getTimeout());
@@ -514,10 +516,10 @@ public class FIXMatrixUtil extends AbstractCaller {
 		return message;
 	}
 
-	static quickfix.Message receive(IActionContext actionContext, quickfix.Message messageFilter) throws Exception
+	static Message receive(IActionContext actionContext, Message messageFilter) throws Exception
 	{
 		boolean isApp = messageFilter.isApp();
-		FIXClient service = FIXMatrixUtil.getClient(actionContext);
+        FIXClient service = getClient(actionContext);
 		IServiceSettings serviceSettings = service.getSettings();
 		if(serviceSettings instanceof FIXClientSettings) {
 			FIXClientSettings fixClientSettings = (FIXClientSettings) serviceSettings;
@@ -537,9 +539,9 @@ public class FIXMatrixUtil extends AbstractCaller {
 		}
 	}
 
-	static void countMessages(IActionContext actionContext, quickfix.Message message) throws Exception {
+	static void countMessages(IActionContext actionContext, Message message) throws Exception {
 		boolean isApp = message.isApp();
-		FIXClient service = FIXMatrixUtil.getClient(actionContext);
+        FIXClient service = getClient(actionContext);
 		QFJIMessageConverter converter = service.getConverter();
 		IMessage newMessageFilter = converter.convert(message, null, Boolean.TRUE);// convert to AML3 format
 		ActionContextWrapper actionContextWrapper = new ActionContextWrapper(actionContext);

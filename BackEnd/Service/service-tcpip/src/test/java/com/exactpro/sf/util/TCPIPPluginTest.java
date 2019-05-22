@@ -50,8 +50,8 @@ public class TCPIPPluginTest {
 	protected static final String WORKSPACE_FOLDER = BIN_FOLDER_PATH + File.separator + "plugin" + File.separator;
 	protected static final String LOG_PROPERTIES_PATH = BASE_DIR + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "log4j.properties";
 
-	private static boolean isLoggingAlreadyConfigured = false;
-	private static boolean isAlreadyConfigured = false;
+	private static boolean isLoggingAlreadyConfigured;
+	private static boolean isAlreadyConfigured;
 
 	private static final String DEFAULT_CFG_FILENAME = "sf.cfg.xml";
 

@@ -233,13 +233,13 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 			if (type.getDerivationMethod() == null) {
 
-				if (States.MESSAGE.equals(curState)) {
+                if(curState == States.MESSAGE) {
 
 					for (int i = 0; i < type.getParticleCount(); ++i) {
-						this.particle(builder, type.getParticle(i));
+                        particle(builder, type.getParticle(i));
 					}
 
-				} else if (States.FIELD.equals(curState)) {
+                } else if(curState == States.FIELD) {
 					// Should create complex field type
 					Map<String, Object> fieldAttributes = (Map<String, Object>) context.value;
 
@@ -310,7 +310,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 		String declName = decl.getName();
 		XMLType type = decl.getType();
 
-		if (States.MESSAGE.equals(curState)) {
+        if(curState == States.MESSAGE) {
 			// Field declaration
 			Context fldStrContext = new Context();
 			fldStrContext.deep = curIntend + 1;
@@ -329,7 +329,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 			Boolean isCollection = decl.getMaxOccurs() != 1;
 
-			Boolean isServiceName = isComplexType ? false : fieldStructureForType.isServiceName();
+            Boolean isServiceName = !isComplexType && fieldStructureForType.isServiceName();
 
 			StructureBuilder msgStruct = (StructureBuilder) context.value;
 
@@ -339,7 +339,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 			if (!isComplexType) {
 				// Simple field
-				String defValue = (decl.getDefaultValue() == null) ? null : decl.getDefaultValue();
+                String defValue = decl.getDefaultValue();
 
 				IFieldStructure fldStruct = new FieldStructure(declName, builder.getNamespace(), description, null,
 						declProtocolAttributes, null, fieldStructureForType.getJavaType() == null
@@ -364,7 +364,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 	private void modelGroup(StructureBuilder builder, ModelGroup group) {
 
-		final int len = group.getParticleCount();
+        int len = group.getParticleCount();
 
 		for (int i = 0; i < len; i++) {
 			particle(builder, group.getParticle(i));
@@ -373,7 +373,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 	private void group(StructureBuilder builder, Group group) {
 
-		final int len = group.getParticleCount();
+        int len = group.getParticleCount();
 
 		for (int i = 0; i < len; i++) {
 			particle(builder, group.getParticle(i));
@@ -383,15 +383,15 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 	private void particle(StructureBuilder builder, Particle particle) {
 
 		if (particle.getStructureType() == Structure.ELEMENT) {
-			this.elementDecl(builder, (ElementDecl) particle);
+            elementDecl(builder, (ElementDecl)particle);
 		} else if (particle.getStructureType() == Structure.MODELGROUP) {
-			this.modelGroup(builder, (ModelGroup) particle);
+            modelGroup(builder, (ModelGroup)particle);
 		} else if (particle.getStructureType() == Structure.GROUP) {
-			this.group(builder, (Group) particle);
+            group(builder, (Group)particle);
 		} else if (particle.getStructureType() == Structure.MODELGROUP_REF) {
-			this.modelGroup(builder, (ModelGroup) particle);
+            modelGroup(builder, (ModelGroup)particle);
 		} else if (particle.getStructureType() == Structure.WILDCARD) {
-			this.wildcard((Wildcard) particle);
+            wildcard((Wildcard)particle);
 		} else {
 			throw new RuntimeException("not implemented. Structure type = " + particle.getStructureType());
 		}
@@ -413,7 +413,7 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 		if (simpleType.isBuiltInType()) {
 
-			if (States.FIELD.equals(curState)) {
+            if(curState == States.FIELD) {
 
 				Map<String, Object> fieldAttribs = (Map<String, Object>) context.value;
 
@@ -429,9 +429,9 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 				throw new RuntimeException("is not implemented");
 			}
 
-		} else if (simpleType.getDerivationMethod().equals("restriction")) {
+        } else if("restriction".equals(simpleType.getDerivationMethod())) {
 
-			if (States.FIELD.equals(curState)) {
+            if(curState == States.FIELD) {
 
 				Map<String, Object> fieldAttribs = (Map<String, Object>) context.value;
 
@@ -445,9 +445,9 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 					IFieldStructure fieldStructure = null;
 
 					List<Pair<String, IAttributeStructure>> enumElementsList = null;
-					if (simpleType.isBuiltInType())
-						fieldStructure = builder.getFieldStructure(simpleType.getName());
-					else if (simpleType.getBaseType().isSimpleType()
+                    if(simpleType.isBuiltInType()) {
+                        fieldStructure = builder.getFieldStructure(simpleType.getName());
+                    } else if(simpleType.getBaseType().isSimpleType()
 							&& ((SimpleType) simpleType.getBaseType()).isBuiltInType()) {
 						fieldStructure = builder.getFieldStructure(simpleType.getBaseType().getName());
 
@@ -462,37 +462,32 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
                                             intend(curIntend), facet.getName(), facet.getValue());
                                 }
 
-								if (facet.getName().equals("enumeration")) {
+                                if("enumeration".equals(facet.getName())) {
 									Map<String, IAttributeStructure> enumElementProtocolAttributes = getProtocolAttributes(
 											facet.getAnnotations());
 
 									String alias = null;
 
-									if (enumElementProtocolAttributes != null)
-										alias = enumElementProtocolAttributes.get("Alias").getValue();
+                                    if(enumElementProtocolAttributes != null) {
+                                        alias = enumElementProtocolAttributes.get("Alias").getValue();
+                                    }
 
-									Pair<String, IAttributeStructure> enumElement = null;
+                                    IAttributeStructure attr = enumElementProtocolAttributes.values().iterator().next();
 
-									IAttributeStructure attr = enumElementProtocolAttributes.values().iterator().next();
+                                    JavaType javaType = fieldStructure != null ? fieldStructure.getJavaType() : getFieldType(simpleType.getBaseType().getName());
 
-									JavaType javaType = null;
-
-									if (fieldStructure != null) {
-										javaType = fieldStructure.getJavaType();
-									} else {
-										javaType = getFieldType(simpleType.getBaseType().getName());
-									}
-
-									enumElement = new Pair<>(alias,
-											new AttributeStructure(attr.getValue(), facet.getValue(),
-													StructureUtils.castValueToJavaType(facet.getValue(), javaType), javaType));
+                                    Pair<String, IAttributeStructure> enumElement = new Pair<>(alias,
+                                            new AttributeStructure(attr.getValue(), facet.getValue(),
+                                                    StructureUtils.castValueToJavaType(facet.getValue(), javaType), javaType));
 
 									enumElements.add(enumElement);
 								}
 							}
 
 							if (!enumElements.isEmpty()) {
-								if (enumElementsList == null) enumElementsList = new ArrayList<>();
+                                if(enumElementsList == null) {
+                                    enumElementsList = new ArrayList<>();
+                                }
 								enumElementsList.addAll(enumElements);
 							}
 						}
@@ -626,15 +621,15 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 							String attrName = attrib.getLocalName();
 							String attrValue = attrib.getStringValue();
 
-							if (attrName.equals("name")) {
+                            if("name".equals(attrName)) {
 
 								name = attrValue;
 
-							} else if (attrName.equals("type")) {
+                            } else if("type".equals(attrName)) {
 
 								type = attrValue;
 
-							} else if (attrName.equals("default")) {
+                            } else if("default".equals(attrName)) {
 
 								value = attrValue;
 
@@ -646,22 +641,25 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 							attrib = attrib.getNextSibling();
 						}
 
-						if (name == null)
-							throw new EPSCommonException("Attribute \"name\" must be specified within protocol element");
+                        if(name == null) {
+                            throw new EPSCommonException("Attribute \"name\" must be specified within protocol element");
+                        }
 
 						if (type == null) {
 							throw new EPSCommonException("Attribute \"type\" must be specified within protocol element");
 						}
 
-						if (type.indexOf(':') != -1) {
+                        int indexOfColon = type.indexOf(':');
 
-							String prefix = type.substring(0, type.indexOf(':'));
+                        if(indexOfColon != -1) {
 
-							if (!prefix.equals("xsd")) {
+                            String prefix = type.substring(0, indexOfColon);
+
+                            if(!"xsd".equals(prefix)) {
 								throw new IllegalArgumentException("Namespace prefix should be \"xsd\"");
 							}
 
-							type = type.substring(type.indexOf(':') + 1);
+                            type = type.substring(indexOfColon + 1);
 
 						} else {
 							throw new IllegalArgumentException("Namespace prefix should be\"xsd\"");
@@ -680,29 +678,29 @@ public class XsdDictionaryStructureLoader implements IDictionaryStructureLoader 
 	}
 
 	private JavaType getFieldType(String typeName) {
-		if (typeName.equals("string")) {
+        if("string".equals(typeName)) {
 			return JavaType.JAVA_LANG_STRING;
-		} else if (typeName.equals("int")) {
+        } else if("int".equals(typeName)) {
 			return JavaType.JAVA_LANG_INTEGER;
-		} else if (typeName.equals("byte")) {
+        } else if("byte".equals(typeName)) {
 			return JavaType.JAVA_LANG_BYTE;
-		} else if (typeName.equals("short")) {
+        } else if("short".equals(typeName)) {
 			return JavaType.JAVA_LANG_SHORT;
-		} else if (typeName.equals("long")) {
+        } else if("long".equals(typeName)) {
 			return JavaType.JAVA_LANG_LONG;
-		} else if (typeName.equals("boolean")) {
+        } else if("boolean".equals(typeName)) {
 			return JavaType.JAVA_LANG_BOOLEAN;
-		} else if (typeName.equals("float")) {
+        } else if("float".equals(typeName)) {
 			return JavaType.JAVA_LANG_FLOAT;
-		} else if (typeName.equals("double")) {
+        } else if("double".equals(typeName)) {
 			return JavaType.JAVA_LANG_DOUBLE;
-        } else if (typeName.equals("date") || typeName.equals("localDateTime")) {
+        } else if("date".equals(typeName) || "localDateTime".equals(typeName)) {
 			return JavaType.JAVA_TIME_LOCAL_DATE_TIME;
-        } else if (typeName.equals("localDate")) {
+        } else if("localDate".equals(typeName)) {
             return JavaType.JAVA_TIME_LOCAL_DATE;
-        } else if (typeName.equals("localTime")) {
+        } else if("localTime".equals(typeName)) {
             return JavaType.JAVA_TIME_LOCAL_TIME;
-		} else if (typeName.equals("decimal")) {
+        } else if("decimal".equals(typeName)) {
 			return JavaType.JAVA_MATH_BIG_DECIMAL;
 		} else {
 			return null;

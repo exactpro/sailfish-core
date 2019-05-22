@@ -18,6 +18,7 @@ package com.exactpro.sf.embedded.storage;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -82,8 +83,8 @@ public class HibernateStorageSettings implements IMapableSettings, Serializable 
     }
 
     public void fillFromMap(Map<String, String> options) throws Exception {
-        
-        for(Map.Entry<String, String> entry : options.entrySet()) {
+
+        for(Entry<String, String> entry : options.entrySet()) {
             
             if(entry.getKey().startsWith(storagePrefix)) {
                 
@@ -101,10 +102,10 @@ public class HibernateStorageSettings implements IMapableSettings, Serializable 
         Map<String, String> description = BeanUtils.describe(this);
         
         Map<String, String> result = new HashMap<String, String>();
-        
-        for(Map.Entry<String, String> entry : description.entrySet()) {
-            
-            if(!entry.getKey().equals("class")) {
+
+        for(Entry<String, String> entry : description.entrySet()) {
+
+            if(!"class".equals(entry.getKey())) {
             
                 result.put(storagePrefix + entry.getKey(), entry.getValue());
             
@@ -117,28 +118,24 @@ public class HibernateStorageSettings implements IMapableSettings, Serializable 
     }
     
     public String buildConnectionUrl() {
-        
-        String format;
-        
+        StringBuilder builder = new StringBuilder();
+
+        builder.append(protocol);
+        builder.append(':');
+        builder.append(subProtocol);
+        builder.append("://");
+        builder.append(host);
+        builder.append(':');
+        builder.append(port);
+        builder.append('/');
+        builder.append(dbName);
+
         if(StringUtils.isNotEmpty(connectionOptionsQuery)) {
-            
-            format = "%s:%s://%s:%s/%s?%s";
-            
-        } else {
-            
-            format = "%s:%s://%s:%s/%s";
-            
+            builder.append('?');
+            builder.append(connectionOptionsQuery);
         }
-        
-        return String.format(format,
-                protocol,
-                subProtocol,
-                
-                host,
-                port,
-                dbName,
-                connectionOptionsQuery);
-        
+
+        return builder.toString();
     }
     
     
@@ -233,31 +230,31 @@ public class HibernateStorageSettings implements IMapableSettings, Serializable 
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-                .append("HibernateStorageSettings", this.protocol)
-                .append("subProtocol", this.subProtocol)
-                .append("host", this.host)
-                .append("port", this.port)
-                .append("dbName", this.dbName)
-                .append("connectionOptionsQuery", this.connectionOptionsQuery)
-                .append("username", this.username)
+                .append("HibernateStorageSettings", protocol)
+                .append("subProtocol", subProtocol)
+                .append("host", host)
+                .append("port", port)
+                .append("dbName", dbName)
+                .append("connectionOptionsQuery", connectionOptionsQuery)
+                .append("username", username)
                 .append("password", "***")
-                .append("dialect", this.dialect)
-                .append("driverClass", this.driverClass).toString();
+                .append("dialect", dialect)
+                .append("driverClass", driverClass).toString();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(this.connectionOptionsQuery)
-                .append(this.dbName)
-                .append(this.dialect)
-                .append(this.driverClass)
-                .append(this.password)
-                .append(this.protocol)
-                .append(this.subProtocol)
-                .append(this.host)
-                .append(this.port)
-                .append(this.username).toHashCode();
+                .append(connectionOptionsQuery)
+                .append(dbName)
+                .append(dialect)
+                .append(driverClass)
+                .append(password)
+                .append(protocol)
+                .append(subProtocol)
+                .append(host)
+                .append(port)
+                .append(username).toHashCode();
     }
 
     @Override
@@ -268,17 +265,17 @@ public class HibernateStorageSettings implements IMapableSettings, Serializable 
 
         HibernateStorageSettings that = (HibernateStorageSettings)o;
         return new EqualsBuilder()
-                .append(this.dbms, that.dbms)
-                .append(this.connectionOptionsQuery, that.connectionOptionsQuery)
-                .append(this.dbName, that.dbName)
-                .append(this.dialect, that.dialect)
-                .append(this.driverClass, that.driverClass)
-                .append(this.password, that.password)
-                .append(this.protocol, that.protocol)
-                .append(this.subProtocol, that.subProtocol)
-                .append(this.host, that.host)
-                .append(this.port, that.port)
-                .append(this.username, that.username).isEquals();
+                .append(dbms, that.dbms)
+                .append(connectionOptionsQuery, that.connectionOptionsQuery)
+                .append(dbName, that.dbName)
+                .append(dialect, that.dialect)
+                .append(driverClass, that.driverClass)
+                .append(password, that.password)
+                .append(protocol, that.protocol)
+                .append(subProtocol, that.subProtocol)
+                .append(host, that.host)
+                .append(port, that.port)
+                .append(username, that.username).isEquals();
     }
     
 }

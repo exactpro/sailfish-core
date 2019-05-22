@@ -25,12 +25,12 @@ import com.csvreader.CsvWriter;
 
 public class CsvMessageWriter {
 
-	private List<String> columnHeaders;
+    private final List<String> columnHeaders;
 
 	public CsvMessageWriter(List<String> columns, boolean includeRawMessage) {
 		this.columnHeaders = columns;
 		if(includeRawMessage) {
-			this.columnHeaders.add("rawMessage");
+            columnHeaders.add("rawMessage");
 		}
 	}
 
@@ -41,12 +41,24 @@ public class CsvMessageWriter {
 	
 	private String[] splitMessage(MessageAdapter message) {
 		List<String> formatedMessage = new ArrayList<String>();
-		if(columnHeaders.contains("timestamp")) formatedMessage.add(message.getTimestamp());
-		if(columnHeaders.contains("name")) formatedMessage.add(message.getName());
-		if(columnHeaders.contains("from")) formatedMessage.add(message.getFrom());
-		if(columnHeaders.contains("to")) formatedMessage.add(message.getTo());
-		if(columnHeaders.contains("content")) formatedMessage.add(message.getHumanReadable());
-		if(columnHeaders.contains("rawMessage")) formatedMessage.add(message.getRawMessage());
+        if(columnHeaders.contains("timestamp")) {
+            formatedMessage.add(message.getTimestamp());
+        }
+        if(columnHeaders.contains("name")) {
+            formatedMessage.add(message.getName());
+        }
+        if(columnHeaders.contains("from")) {
+            formatedMessage.add(message.getFrom());
+        }
+        if(columnHeaders.contains("to")) {
+            formatedMessage.add(message.getTo());
+        }
+        if(columnHeaders.contains("content")) {
+            formatedMessage.add(message.getHumanReadable());
+        }
+        if(columnHeaders.contains("rawMessage")) {
+            formatedMessage.add(message.getRawMessage());
+        }
 		
 		String[] result = formatedMessage.toArray(new String[formatedMessage.size()]);
 		return result;

@@ -30,8 +30,7 @@ public class RecordedFile {
 	private long size;
 	
 	public RecordedFile(String name, String path, Date from, Date to) {
-		super();
-		this.name = name;
+        this.name = name;
 		this.path = path;
 		this.from = from;
 		this.to = to;

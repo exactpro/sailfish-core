@@ -34,7 +34,7 @@ import org.w3c.dom.NodeList;
 public class Util {
 	
 	public static String readStream(InputStream s) throws IOException {
-		final int n = 0x100;
+		int n = 0x100;
 		String o = "";
 		Reader r = new InputStreamReader(s);
 		char[] buf = new char[n];
@@ -68,14 +68,14 @@ public class Util {
 	 * @throws TransformerException
 	 */
 	public static void zipServices(OutputStream out, DocumentBuilder builder, Transformer transformer, Service... svcs) throws IOException, TransformerException {
-		ZipOutputStream zip = new ZipOutputStream(out);
-		for (Service s : svcs) {
-			ZipEntry en = new ZipEntry(s.getName() + ".xml");
-			zip.putNextEntry(en);
-			s.write(zip, builder, transformer);
-			zip.closeEntry();
-		}
-		zip.close();
+        try (ZipOutputStream zip = new ZipOutputStream(out)) {
+            for (Service s : svcs) {
+                ZipEntry en = new ZipEntry(s.getName() + ".xml");
+                zip.putNextEntry(en);
+                s.write(zip, builder, transformer);
+                zip.closeEntry();
+            }
+        }
 	}
 	
 }

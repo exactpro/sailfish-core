@@ -24,9 +24,9 @@ public class CSHIterator<E> implements ICSHIterator<E> {
     private final CSHArrayList<E> list;
     private final CheckPoint checkPoint;
 
-    private List<E> cache;
-    private int offset;
-    private int index = 0;
+    private final List<E> cache;
+    private final int offset;
+    private int index;
 
     public CSHIterator(CSHArrayList<E> list, CheckPoint checkPoint) {
         this.list = list;

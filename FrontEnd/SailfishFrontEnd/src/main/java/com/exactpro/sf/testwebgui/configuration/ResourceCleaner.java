@@ -132,7 +132,7 @@ public enum ResourceCleaner {
 
     private final String name;
 
-    private ResourceCleaner(String name) {
+    ResourceCleaner(String name) {
         this.name = name;
     }
 

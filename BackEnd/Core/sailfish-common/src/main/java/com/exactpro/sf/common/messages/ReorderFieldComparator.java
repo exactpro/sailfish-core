@@ -24,7 +24,9 @@ public class ReorderFieldComparator implements Comparator<String> {
         for (String name : names) {
             int index = order.indexOf(name);
 
-            if (index == -1) continue;
+            if(index == -1) {
+                continue;
+            }
 
             this.order.put(name, index);
         }
@@ -41,6 +43,6 @@ public class ReorderFieldComparator implements Comparator<String> {
 
     @Override
     public int compare(String o1, String o2) {
-        return this.order.get(o1) - this.order.get(o2);
+        return order.get(o1) - order.get(o2);
     }
 }

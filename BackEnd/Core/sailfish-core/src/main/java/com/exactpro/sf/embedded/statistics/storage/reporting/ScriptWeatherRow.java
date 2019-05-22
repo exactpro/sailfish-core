@@ -28,7 +28,7 @@ public class ScriptWeatherRow implements Serializable {
 
 		private final String value;
 
-		private Weather(final String value) {
+        Weather(String value) {
 
 			this.value = value;
 
@@ -53,8 +53,7 @@ public class ScriptWeatherRow implements Serializable {
 	}
 
 	public ScriptWeatherRow(String matrixName, long passed, long conditionallyPassed, long failed) {
-		super();
-		this.matrixName = matrixName;
+        this.matrixName = matrixName;
 		this.passed = passed;
 		this.conditionallyPassed = conditionallyPassed;
 		this.failed = failed;
@@ -62,13 +61,13 @@ public class ScriptWeatherRow implements Serializable {
 
 	public String getWeatherString() {
 
-		if(this.failed == 0) {
+        if(failed == 0) {
 
 			return Weather.Good.getValue();
 
 		}
 
-		if(this.passed == 0 && this.conditionallyPassed == 0) {
+        if(passed == 0 && conditionallyPassed == 0) {
 
 			return Weather.Bad.getValue();
 

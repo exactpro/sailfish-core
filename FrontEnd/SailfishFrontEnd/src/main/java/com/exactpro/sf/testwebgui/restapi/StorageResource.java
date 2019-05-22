@@ -20,6 +20,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +43,14 @@ public class StorageResource {
             xmlResponse.setMessage("All messages and events was successfully removed from storage");
             xmlResponse.setRootCause("");
 
-            return Response.status(Response.Status.OK).entity(xmlResponse).build();
+            return Response.status(Status.OK).entity(xmlResponse).build();
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);
             XmlResponse xmlResponse = new XmlResponse();
             xmlResponse.setMessage(e.getMessage());
             xmlResponse.setRootCause((e.getCause() != null) ? e.getCause().getMessage() : null);
 
-            return Response.status(Response.Status.BAD_REQUEST).entity(xmlResponse).build();
+            return Response.status(Status.BAD_REQUEST).entity(xmlResponse).build();
         }
     }
 }

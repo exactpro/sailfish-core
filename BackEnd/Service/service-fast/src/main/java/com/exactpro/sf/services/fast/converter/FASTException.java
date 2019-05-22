@@ -23,8 +23,7 @@ public class FASTException extends RuntimeException
 	 * 
 	 */
 	public FASTException() {
-		super();
-	}
+    }
 
 	/**
 	 * @param message

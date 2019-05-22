@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,9 +37,6 @@ import com.exactpro.sf.common.messages.structures.impl.MessageStructure;
 public class MessageTraverser extends MessageStructureReader {
 
     private final IMessageStructure emptyMessageStructure = new MessageStructure("Empty", "Empty", false, null);
-    
-    public MessageTraverser() {
-    }
 
     @Override
     public void traverse(IMessageStructureVisitor msgStrVisitor,
@@ -119,7 +114,7 @@ public class MessageTraverser extends MessageStructureReader {
                 value = ((List<Object>) value).stream()
                         .map(msg -> {
                             if (msg instanceof Map) {
-                                msg = MessageUtil.convertToIMessage((Map<?, ?>) msg, DefaultMessageFactory.getFactory(), namespace, name);
+                                return MessageUtil.convertToIMessage((Map<?, ?>)msg, DefaultMessageFactory.getFactory(), namespace, name);
                             }
                             return msg;
                         }).collect(Collectors.toList());
@@ -134,24 +129,24 @@ public class MessageTraverser extends MessageStructureReader {
     }
     
     protected IFieldStructure createFieldStructure(IFieldStructure fieldStructure, String namespace, String fieldName, Object value) {
-        Optional<?> optional = Optional.ofNullable(value);
-        if (optional.isPresent()) {
+        if(value != null) {
             boolean isCollection = false;
             JavaType javaType = null;
             StructureType structureType = (fieldStructure != null && !fieldStructure.isComplex()) ? fieldStructure.getStructureType() : StructureType.SIMPLE;
 
-            if (optional.get() instanceof List<?>) {
+            if(value instanceof List<?>) {
                 isCollection = true;
-                optional = ((List<?>) optional.get()).stream()
-                        .filter(Objects::nonNull).findFirst();
+                value = ((List<?>)value).stream()
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .orElse(null);
             }
 
-            if (optional.isPresent()) {
-                if ((optional.get() instanceof IMessage) ||
-                        (optional.get() instanceof HashMap)) {
+            if(value != null) {
+                if((value instanceof IMessage) || (value instanceof HashMap)) {
                     structureType = StructureType.COMPLEX;
                 } else {
-                    javaType = ObjectUtils.defaultIfNull(getJavaTypeSafe(optional.get().getClass().getCanonicalName()), JavaType.JAVA_LANG_STRING);
+                    javaType = ObjectUtils.defaultIfNull(getJavaTypeSafe(value.getClass().getCanonicalName()), JavaType.JAVA_LANG_STRING);
                 }
             }
 
@@ -167,11 +162,11 @@ public class MessageTraverser extends MessageStructureReader {
                 }
             }
         }
-        
+
         if (fieldStructure == null) {
-            fieldStructure = new FieldStructure(fieldName, namespace, JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
+            return new FieldStructure(fieldName, namespace, JavaType.JAVA_LANG_STRING, false, StructureType.SIMPLE);
         }
-        
+
         return fieldStructure;
     }
 

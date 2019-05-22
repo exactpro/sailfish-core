@@ -15,34 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.center.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
-import java.util.Set;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.SFException;
+import com.exactpro.sf.common.logging.CommonLoggers;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.Utils;
+import com.exactpro.sf.common.util.Utils.FileExtensionFilter;
 import com.exactpro.sf.configuration.ILoadableManager;
 import com.exactpro.sf.configuration.LoadableManagerContext;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -57,16 +34,40 @@ import com.exactpro.sf.scriptrunner.PreprocessorLoader;
 import com.exactpro.sf.scriptrunner.ValidatorLoader;
 import com.exactpro.sf.scriptrunner.services.PluginServiceLoader;
 import com.exactpro.sf.util.DirectoryFilter;
-import com.google.common.collect.Iterables;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.Set;
 
 public class PluginLoader {
 
 	private static final Logger logger = LoggerFactory.getLogger(PluginLoader.class);
-	private final Logger userEventsLogger = LoggerFactory.getLogger("USER_EVENTS_LOG");
+	private final Logger userEventsLogger = CommonLoggers.USER_EVENTS_LOGGER;
 
+	public static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
 	public static final String CUSTOM_DICTIONARIES_XML = "custom_dictionaries.xml";
-	public static final String VERSION_FILE_NAME = "VERSION"; 
-	
+	public static final String VERSION_FILE_NAME = "VERSION";
+
 	protected static final String SERVICES_XML_FILE_NAME = "services.xml";
 	protected static final String ACTIONS_XML_FILE_NAME = "actions.xml";
 	protected static final String DICTIONARIES_XML_FILE_NAME = "dictionaries.xml";
@@ -74,7 +75,6 @@ public class PluginLoader {
 	protected static final String VALIDATORS_XML_FILE_NAME = "validators.xml";
 	protected static final String ADAPTERS_XML_FILE_NAME = "adapters.xml";
 	protected static final String DATA_XML_FILE_NAME = "data.xml";
-	protected static final String LOG4J_PROPERTIES_FILE_NAME = "log.properties";
     protected static final String SERVICES_FOLDER_NAME = "services";
 
 	private final IWorkspaceDispatcher wd;
@@ -108,20 +108,20 @@ public class PluginLoader {
     private final List<IVersion> pluginVersions;
 
 	public PluginLoader(
-			final IWorkspaceDispatcher wd,
-            final ILoadableManager staticServiceManager,
-            final ILoadableManager actionManager,
-            final ILoadableManager dictionaryManager,
-			final PreprocessorLoader preprocessorLoader,
-			final ValidatorLoader validatorLoader,
-            final ILoadableManager adapterManager,
-            final ILoadableManager dataManager,
-            final ILoadableManager languageManager,
-			final MatrixProviderHolder matrixProviderHolder,
-            final ILoadableManager matrixConverterManager,
-            final ILoadableManager statisticsReportsLoader,
-            final PluginServiceLoader pluginServiceLoader,
-            final IVersion coreVersion) {
+            IWorkspaceDispatcher wd,
+            ILoadableManager staticServiceManager,
+            ILoadableManager actionManager,
+            ILoadableManager dictionaryManager,
+            PreprocessorLoader preprocessorLoader,
+            ValidatorLoader validatorLoader,
+            ILoadableManager adapterManager,
+            ILoadableManager dataManager,
+            ILoadableManager languageManager,
+            MatrixProviderHolder matrixProviderHolder,
+            ILoadableManager matrixConverterManager,
+            ILoadableManager statisticsReportsLoader,
+            PluginServiceLoader pluginServiceLoader,
+            IVersion coreVersion) {
 		if (wd == null) {
 		    throw new NullPointerException("IWorkspaceDispatcher can't be null");
 		}
@@ -145,32 +145,32 @@ public class PluginLoader {
 	}
 
 	public LoadInfo load() throws FileNotFoundException, WorkspaceSecurityException, SailfishURIException {
-		
+
 	    LoadInfo loadInfo = new LoadInfo();
-	    
+
 		// load core
 		loadPluginFrom(FolderType.ROOT, ".", loadInfo);
 
-		Set<ClassLoader> pluginClassLoaders = new HashSet<>();
+		Map<String, ClassLoader> pluginClassLoaders = new HashMap<>();
         for (String pluginPath : wd.listFiles(DirectoryFilter.getInstance(), FolderType.PLUGINS)) {
             try {
                 userEventsLogger.info("Start loading {} plugin", pluginPath);
+                IVersion version = extractVersion(wd, pluginPath);
                 ClassLoader pluginClassLoader = loadPluginFrom(FolderType.PLUGINS, pluginPath, loadInfo);
-                IVersion version = extractVersion(pluginClassLoader);
                 userEventsLogger.info("Plugin {} version {} successfully loaded", pluginPath, version.buildShortVersion());
                 if (pluginClassLoader != null) {
-                    pluginClassLoaders.add(pluginClassLoader);
+                    pluginClassLoaders.put(version.getAlias(), pluginClassLoader);
                 }
             } catch (Exception e) {
                 userEventsLogger.error("Can't load plugin from {} - path[{}]. Reason: {}", pluginPath, wd.getFile(FolderType.PLUGINS, pluginPath), e.getMessage());
             }
         }
 
-        pluginClassLoaders.remove(PluginLoader.class.getClassLoader());
+        pluginClassLoaders.values().remove(PluginLoader.class.getClassLoader());
         loadInfo.appendClassLoaders(pluginClassLoaders);
-        
+
         LoadableManagerContext context = new LoadableManagerContext();
-        context.setClassLoaders(pluginClassLoaders.toArray(new ClassLoader[0]));
+        context.setClassLoaders(pluginClassLoaders.values().toArray(new ClassLoader[0]));
 
         try {
             if(actionManager != null) {
@@ -193,7 +193,7 @@ public class PluginLoader {
 		} catch (WorkspaceSecurityException e) {
 			throw new EPSCommonException("Cannot access plugin's folder '{" + folderType + "}/" + pluginPath + "'", e);
 		}
-		
+
 		//
         // Create ClassLoader
         //
@@ -205,70 +205,68 @@ public class PluginLoader {
 				logger.info("Plugin folder '{{}}/{}/cfg' not found", folderType, pluginPath);
 			}
 
-			try {
-				wd.getFile(folderType, pluginPath, "libs");
-			} catch (FileNotFoundException e) {
-				logger.info("Plugin folder '{{}}/{}/libs' not found", folderType, pluginPath);
-			}
-
             // only plug-ins should have special ClassLoader
-			try {
-                StringBuilder classPath = new StringBuilder();
+            if (wd.exists(folderType, pluginPath, "libs")) {
+                try {
+                    StringBuilder classPath = new StringBuilder();
 
-                Set<String> libs = wd.listFiles(new Utils.FileExtensionFilter("jar"), folderType, pluginPath, "libs");
-                URL[] urls = new URL[libs.size()];
-                Iterator<String> libsIterator = libs.iterator();
-                for (int i=0; i<libs.size(); i++) {
-                    String lib = libsIterator.next();
-                    File jar = wd.getFile(folderType, pluginPath, "libs", lib);
-                    urls[i] = jar.toURI().toURL();
-                    classPath.append(jar.getAbsolutePath()).append(System.getProperty("path.separator"));
+                    Set<String> libs = wd.listFiles(new FileExtensionFilter("jar"), folderType, pluginPath, "libs");
+                    URL[] urls = new URL[libs.size()];
+                    Iterator<String> libsIterator = libs.iterator();
+                    for (int i = 0; i < libs.size(); i++) {
+                        String lib = libsIterator.next();
+                        File jar = wd.getFile(folderType, pluginPath, "libs", lib);
+                        urls[i] = jar.toURI().toURL();
+                        classPath.append(jar.getAbsolutePath()).append(System.getProperty("path.separator"));
+                    }
+                    classLoader = new URLClassLoader(urls, classLoader);
+
+                    loadInfo.appendClassPath(classPath.toString());
+                } catch (FileNotFoundException e) {
+                    throw new EPSCommonException("Plugin folder '{" + folderType + "}/" + pluginPath + "/libs' not found", e);
+                } catch (MalformedURLException e) {
+                    throw new EPSCommonException("Can't resolve some plugin's file path to URL", e);
                 }
-                classLoader = new URLClassLoader(urls, classLoader);
-
-                loadInfo.appendClassPath(classPath.toString());
-            } catch (FileNotFoundException e) {
-                throw new EPSCommonException("Plugin folder '{" + folderType + "}/" + pluginPath + "/libs' not found", e);
-            } catch (MalformedURLException e) {
-                throw new EPSCommonException("Can't resolve some plugin's file path to URL", e);
             }
         }
-		
+
 		IVersion version = null;
 
 		if (folderType == FolderType.PLUGINS) {
 			try {
-			    version = extractVersion(classLoader);
-			    
+                version = extractVersion(wd, pluginPath);
+
 			    if(version.getMajor() != coreVersion.getMajor() || version.getMinor() != coreVersion.getMinor()) {
                     throw new SFException(String.format("Plugin '%s' has unsupported version: %s.%s (expected: %s.%s)", pluginPath,
                             version.getMajor(), version.getMinor(), coreVersion.getMajor(), coreVersion.getMinor()));
 			    }
 
-                if (version.getMinCoreRevision() > this.coreVersion.getMaintenance()) {
+                if(version.getMinCoreRevision() > coreVersion.getMaintenance()) {
                     throw new SFException(String.format("Plugin '%s' need newer core revision: %s.%s.%s (expected: %s.%s.%s or higher)", pluginPath,
-                            this.coreVersion.getMajor(), this.coreVersion.getMinor(), this.coreVersion.getMaintenance(),
+                            coreVersion.getMajor(), coreVersion.getMinor(), coreVersion.getMaintenance(),
                             version.getMajor(), version.getMinor(), version.getMaintenance()));
                 }
 
 			    pluginVersions.add(version);
-			} catch(EPSCommonException e) {
+            } catch (FileNotFoundException | WorkspaceSecurityException e) {
+                logger.error("Version file does not exist '{{}}/{}/{}': ", folderType, pluginPath, VERSION_FILE_NAME, e);
+			} catch(IOException e) {
 			    logger.error("Failed to load version file '{{}}/{}/{}': ", folderType, pluginPath, VERSION_FILE_NAME, e);
             }
 		} else {
-            version = this.coreVersion;
-            this.pluginVersions.add(version);
+            version = coreVersion;
+            pluginVersions.add(version);
 		}
-		
+
 		if (version == null) {
 		    logger.warn("Plugin '{}' wasn't loaded - no plugin version", pluginPath);
 		    return null;
 		}
 
 		logger.info("Loading {}", version);
-		
+
 		// root = {resolved folderType} / {pluginPath}
-		final String root = new File(DefaultWorkspaceLayout.getInstance().getPath(new File("."), folderType), pluginPath).getPath();
+        String root = new File(DefaultWorkspaceLayout.getInstance().getPath(new File("."), folderType), pluginPath).getPath();
 
 		//
 		// Load log.properties
@@ -277,7 +275,7 @@ public class PluginLoader {
 		    File file = wd.getFile(folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    logger.info("Loading logger configuration: {{}}/{}/{}", folderType, pluginPath, LOG4J_PROPERTIES_FILE_NAME);
 		    try {
-		    	(new PropertyConfigurator()).doConfigure(file.getPath(), LogManager.getLoggerRepository());
+                new PropertyConfigurator().doConfigure(file.getPath(), LogManager.getLoggerRepository());
 		    } catch (Throwable e) {
 		        throw new EPSCommonException("Failed to configure logger. {" + folderType + "}/" + pluginPath + "/" + LOG4J_PROPERTIES_FILE_NAME, e);
 		    }
@@ -289,13 +287,11 @@ public class PluginLoader {
 		// LoadableContext
 		//
 		LoadableManagerContext loadableContext = new LoadableManagerContext();
-        {
-            loadableContext.setResourceFolder(root);
-            loadableContext.setVersion(version);
-            loadableContext.setClassLoaders(classLoader);
-        }        
+        loadableContext.setResourceFolder(root);
+        loadableContext.setVersion(version);
+        loadableContext.setClassLoaders(classLoader);
 
-		//
+        //
 		// load services (Services + ServiceSettings)
 		//
         if (staticServiceManager != null) {
@@ -306,7 +302,7 @@ public class PluginLoader {
 			        staticServiceManager.load(loadableContext.setResourceStream(stream));
                 } catch (Exception e) {
 				    throw new EPSCommonException("Could not load {" + folderType + "}/" + pluginPath + "/cfg/" + SERVICES_XML_FILE_NAME, e);
-			    } 
+			    }
 		    } catch (FileNotFoundException e) {
                 logger.info("No services in plugin: {}", pluginPath);
             }
@@ -430,7 +426,7 @@ public class PluginLoader {
 		} else {
 		    logger.info("Ignore data [No DataManager]. Plugin: {}", pluginPath);
 		}
-		
+
 		//
 		// Load Preprocessors, should be loading after data loading
 		//
@@ -461,7 +457,7 @@ public class PluginLoader {
 			        if(!version.isGeneral() && factory instanceof LocalMatrixProviderFactory) {
 			            continue;
 			        }
-        
+
 				    factory.init(wd);
 				    matrixProviderHolder.registerMatrixProvider(version, factory);
 				    logger.info("MatrixProvider {} had been loaded", factory.getClass().getCanonicalName());
@@ -533,7 +529,7 @@ public class PluginLoader {
             logger.info("Loading dictionaries: {{}}/{}/cfg/{}", FolderType.ROOT, ",", CUSTOM_DICTIONARIES_XML);
             String pathToDictionaries = Paths.get("././.", "cfg", "dictionaries").toString();
             try (InputStream stream = new FileInputStream(file)) {
-                LoadableManagerContext context = new LoadableManagerContext(this.coreVersion, pathToDictionaries, stream, PluginLoader.class.getClassLoader());
+                LoadableManagerContext context = new LoadableManagerContext(coreVersion, pathToDictionaries, stream, PluginLoader.class.getClassLoader());
                 dictionaryManager.load(context);
             } catch (Exception e) {
                 throw new EPSCommonException(
@@ -553,15 +549,8 @@ public class PluginLoader {
         return Collections.unmodifiableList(pluginVersions);
     }
 
-    private IVersion extractVersion(ClassLoader classLoader) {
-        ServiceLoader<IVersion> serviceLoader = ServiceLoader.load(IVersion.class, classLoader);
-
-        try {
-            return Iterables.getOnlyElement(serviceLoader);
-        } catch(NoSuchElementException e) {
-            throw new EPSCommonException("Plugin should contain version");
-        } catch(IllegalArgumentException e) {
-            throw new EPSCommonException("Plugin should contain only one version instead of " + Iterables.toString(serviceLoader));
-        }
+    public static IVersion extractVersion(IWorkspaceDispatcher dispatcher, String pluginPath) throws IOException {
+        File versionFile = dispatcher.getFile(FolderType.PLUGINS, pluginPath, VERSION_FILE_NAME);
+        return Version.loadVersion(versionFile);
     }
 }

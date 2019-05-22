@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import 'vars';
+@import "./common/vars";
 
 .heatmap {
     position: relative;
@@ -67,8 +67,13 @@
             }
         
             &.conditionally_passed {
-                background-color: $conditionallyBackgroundColor;
-                border-color: $conditionallyBorderColor;
+                background-color: $conditionallyPassedBackgroundColor;
+                border-color: $conditionallyPassedBorderColor;
+            }
+
+            &.conditionally_failed {
+                background-color: $conditionallyFailedBackgroundColor;
+                border-color: $conditionallyFailedBorderColor;
             }
         }
     }

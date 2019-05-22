@@ -34,8 +34,8 @@ import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionManagerException;
 
 public class ActionRequirements {
-    private Set<String> requiredColumns = new HashSet<String>();
-    private Set<String> deprecatedColumns = new HashSet<String>();
+    private final Set<String> requiredColumns = new HashSet<String>();
+    private final Set<String> deprecatedColumns = new HashSet<String>();
 
     protected ActionRequirements(CommonColumns commonColumns, CustomColumns customColumns) {
         if(commonColumns != null) {
@@ -98,8 +98,8 @@ public class ActionRequirements {
          ActionRequirements that = (ActionRequirements)o;
          EqualsBuilder builder = new EqualsBuilder();
 
-         builder.append(this.requiredColumns, that.requiredColumns);
-         builder.append(this.deprecatedColumns, that.deprecatedColumns);
+         builder.append(requiredColumns, that.requiredColumns);
+         builder.append(deprecatedColumns, that.deprecatedColumns);
 
          return builder.isEquals();
      }

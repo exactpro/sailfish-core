@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -36,6 +35,7 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.ICommonSettings;
 import com.exactpro.sf.services.IServiceContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Codec implements encode / decode message between internal tools by JSON protocol
@@ -61,9 +61,9 @@ public class InternalJsonCodec extends AbstractCodec {
     public void encode(IoSession session, Object message, ProtocolEncoderOutput out) throws Exception {
         if (message instanceof IMessage) {
             Map<String, Object> map = MessageUtil.convertToHashMap((IMessage)message);
-            String json = this.objectMapper.writeValueAsString(map);
+            String json = objectMapper.writeValueAsString(map);
 
-            long seq = this.sequence.getAndIncrement();
+            long seq = sequence.getAndIncrement();
 
             IoBuffer buffer = IoBuffer.allocate(json.length() + HEADER_SIZE);
             buffer.putLong(json.length());
@@ -116,8 +116,8 @@ public class InternalJsonCodec extends AbstractCodec {
                 IMessage message = null;
 
                 try {
-                    Map<?, ?> map = this.objectMapper.readValue(buff, HashMap.class);
-                    message = MessageUtil.convertToIMessage(map, this.msgFactory, TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE,
+                    Map<?, ?> map = objectMapper.readValue(buff, HashMap.class);
+                    message = MessageUtil.convertToIMessage(map, msgFactory, TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE,
                             TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE);
 
                 } catch (Exception e) {

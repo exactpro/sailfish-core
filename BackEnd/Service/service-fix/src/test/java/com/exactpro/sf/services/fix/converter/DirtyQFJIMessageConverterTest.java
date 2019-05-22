@@ -17,6 +17,7 @@ package com.exactpro.sf.services.fix.converter;
 
 import java.sql.Timestamp;
 import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -68,7 +69,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     private static DataDictionary dataDictionary;
     private static IDictionaryStructure dictionary;
     private static final Logger logger = LoggerFactory.getLogger(DirtyQFJIMessageConverterTest.class);
-    private String MESSAGE = "8=FIXT.1.19=15535=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169";
+    private final String MESSAGE = "8=FIXT.1.19=15535=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169";
 
     @BeforeClass
     public static void initClass() {
@@ -156,7 +157,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             IMessage iMessage = converter.convertDirty(message, false);
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
-            Assert.assertTrue("Message " + message.toString() + " is different from RawMessage " + raw.toString(),
+            Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                     compareMessages(message, raw));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -179,7 +180,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             IMessage iMessage = converter.convertDirty(message, true);
             String mock = null;
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, mock, 0, mock, mock);
-            Assert.assertTrue("Message " + message.toString() + " is different from RawMessage " + raw.toString(),
+            Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                     compareMessages(message, raw));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -252,13 +253,13 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
             String timeExpected = UtcTimestampConverter.convert(new Timestamp(System.currentTimeMillis()), false, false).substring(0, 14);
-            Assert.assertTrue("Message " + message.toString() + " is different from RawMessage " + raw.toString(),
+            Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                     compareMessages(message, raw, 52));
             String timeActual = getDateFromMessage(raw, 52);
             if (timeExpected != null) {
                 Assert.assertEquals(timeExpected, timeActual.substring(0, 14));
             } else {
-                Assert.fail("There is no SendingTime in the message " + raw.toString());
+                Assert.fail("There is no SendingTime in the message " + raw);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -354,7 +355,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
                     false);
             IMessage iMessage = converter.convertDirty(message, false);
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "", 0, "", "");
-            Assert.assertTrue("Message " + message.toString() + " is different from RawMessage " + raw.toString(),
+            Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                     compareMessages(message, raw));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -437,7 +438,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             fields.clear();
             excluded.clear();
 
-            fields.add(new AbstractMap.SimpleEntry<>(CheckSum.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(CheckSum.class.getSimpleName(),
                     String.valueOf(CheckSum.FIELD)));
             raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152, "FIX_CSV_ds1", "FGW");
             checkFieldExisting(raw.getField("trailer").getFields(), fields, excluded);
@@ -458,19 +459,19 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             fields.clear();
             excluded.clear();
 
-            fields.add(new AbstractMap.SimpleEntry<>(BeginString.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(BeginString.class.getSimpleName(),
                     String.valueOf(BeginString.FIELD)));
-            fields.add(new AbstractMap.SimpleEntry<>(BodyLength.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(BodyLength.class.getSimpleName(),
                     String.valueOf(BodyLength.FIELD)));
-            fields.add(new AbstractMap.SimpleEntry<>(MsgType.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(MsgType.class.getSimpleName(),
                     String.valueOf(MsgType.FIELD)));
-            fields.add(new AbstractMap.SimpleEntry<>(SenderCompID.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(SenderCompID.class.getSimpleName(),
                     String.valueOf(SenderCompID.FIELD)));
-            fields.add(new AbstractMap.SimpleEntry<>(TargetCompID.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(TargetCompID.class.getSimpleName(),
                     String.valueOf(TargetCompID.FIELD)));
-            fields.add(new AbstractMap.SimpleEntry<>(MsgSeqNum.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(MsgSeqNum.class.getSimpleName(),
                     String.valueOf(MsgSeqNum.FIELD)));
-            fields.add(new AbstractMap.SimpleEntry<>(SendingTime.class.getSimpleName(),
+            fields.add(new SimpleEntry<>(SendingTime.class.getSimpleName(),
                     String.valueOf(SendingTime.FIELD)));
 
             raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152, "FIX_CSV_ds1", "FGW");
@@ -509,7 +510,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             IMessage iMessage = converter.convertDirty(message, true);
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
-            Assert.assertTrue("Message " + message.toString() + " is different from RawMessage " + raw.toString(),
+            Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                     compareMessages(message, raw, false, false));
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -740,7 +741,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     private void testGroupCounter(IMessage iMessage, Message message, DirtyQFJIMessageConverter converter) throws MessageConvertException {
         RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", false, "FIXT.1.1", 1152,
                 "FIX_CSV_ds1", "FGW");
-        Assert.assertTrue("Message " + message.toString() + " is different from RawMessage " + raw.toString(),
+        Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                 compareMessages(message, raw, 1461));
         Assert.assertTrue("RawMessage doesn't contain 1461=2", raw.toString().contains("1461=2"));
     }

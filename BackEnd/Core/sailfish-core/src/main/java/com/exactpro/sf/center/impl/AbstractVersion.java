@@ -58,7 +58,7 @@ public abstract class AbstractVersion implements IVersion {
     
     @Override
     public boolean isGeneral() {
-        return GENERAL.equals(this.getAlias());
+        return GENERAL.equals(getAlias());
     }
 
     @Override
@@ -74,6 +74,7 @@ public abstract class AbstractVersion implements IVersion {
                 .append("Maintenance", getMaintenance())
                 .append("Build", getBuild())
                 .append("Alias", getAlias())
+                .append("Revision", getRevision())
                 .append("Branch", getBranch()).toString();
     }
 
@@ -86,6 +87,7 @@ public abstract class AbstractVersion implements IVersion {
                 .append(getMaintenance())
                 .append(getBuild())
                 .append(getAlias())
+                .append(getRevision())
                 .append(getBranch()).toHashCode();
     }
 
@@ -98,11 +100,17 @@ public abstract class AbstractVersion implements IVersion {
 
         AbstractVersion that = (AbstractVersion) o;
         return new EqualsBuilder()
-                .append(this.getMajor(), that.getMajor())
-                .append(this.getMinor(), that.getMinor())
-                .append(this.getMaintenance(), that.getMaintenance())
-                .append(this.getBuild(), that.getBuild())
-                .append(this.getAlias(), that.getAlias()).isEquals();
+                .append(getMajor(), that.getMajor())
+                .append(getMinor(), that.getMinor())
+                .append(getMaintenance(), that.getMaintenance())
+                .append(getBuild(), that.getBuild())
+                .append(getRevision(), that.getRevision())
+                .append(getAlias(), that.getAlias()).isEquals();
+    }
+
+    @Override
+    public boolean isLightweight() {
+        return false;
     }
 
     @Override
