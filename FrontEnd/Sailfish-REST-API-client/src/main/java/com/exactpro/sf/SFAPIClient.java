@@ -33,13 +33,16 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
 
+import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticStatusResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -257,6 +260,18 @@ public class SFAPIClient implements AutoCloseable {
         try {
             CloseableHttpResponse migrateResponse = http.execute(migrateDB);
             checkHttpResponse(migrateResponse);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public XmlStatisticStatusResponse getStatisticsStatus() throws  APICallException {
+        HttpGet status = new  HttpGet(rootUrl + "statistics/status");
+        try {
+            try (CloseableHttpResponse statusResponse = http.execute(status)) {
+                checkHttpResponse(statusResponse);
+                return unmarshall(XmlStatisticStatusResponse.class, statusResponse);
+            }
         } catch (Exception e) {
             throw new APICallException(e);
         }
@@ -1203,7 +1218,9 @@ public class SFAPIClient implements AutoCloseable {
 	private <T> T unmarshall(Class<T> clazz, HttpResponse response) throws JAXBException, IOException {
         if (response != null) {
 			Unmarshaller unmarshaller = getUnmarshaller(clazz);
-            return (T) unmarshaller.unmarshal(response.getEntity().getContent());
+            StreamSource streamSource = new StreamSource(response.getEntity().getContent());
+            JAXBElement<T> unmarshalledElement = unmarshaller.unmarshal(streamSource, clazz);
+            return unmarshalledElement.getValue();
 		}
 		return null;
 	}
