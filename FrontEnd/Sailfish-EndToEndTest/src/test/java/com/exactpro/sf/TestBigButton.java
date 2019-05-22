@@ -7,19 +7,23 @@
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  ******************************************************************************/
 
 package com.exactpro.sf;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
@@ -39,18 +43,20 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
-import com.google.common.io.ByteStreams;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticStatusResponse;
 
 public class TestBigButton {
 
     private final static Logger logger = LoggerFactory.getLogger(TestBigButton.class.getName());
     private static SFAPIClient sfapi;
+    private static final String  EXECUTOR_VARIABLE = ":executor_url";
 
     @BeforeClass
     public static void setUpClass() throws Exception {
         logger.info("Start positive tests of matricies");
         try {
             sfapi = new SFAPIClient(TestMatrix.SF_GUI_URL);
+            checkStatisticsStatus();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
@@ -65,19 +71,6 @@ public class TestBigButton {
 
     @Test
     public void runBB() throws Exception {
-
-        String statisticsSettings = new String(ByteStreams.toByteArray(getClass().getClassLoader().getResourceAsStream("statisticsDBSettings.xml")));
-        try {
-            sfapi.setStatisticsDBSettings(statisticsSettings);
-        } catch (APICallException e) {
-            if (e.getMessage().contains(" OK;")) {
-                sfapi.forceMigrateStatistics();
-            } else {
-                logger.error(e.getMessage());
-                throw e;
-            }
-        }
-
         File testSuites = Files.createTempFile(UUID.randomUUID().toString(), ".zip").toFile();
 
         try (ZipOutputStream zipStream = new ZipOutputStream(new FileOutputStream(testSuites))) {
@@ -98,8 +91,11 @@ public class TestBigButton {
             }
         }
 
+        File patternBBConfig = new File(getClass().getClassLoader().getResource("testBB.csv").getFile());
+        File resultBBConfig = createResultBBConfig(patternBBConfig);
+
         sfapi.uploadTestLibrary(new FileInputStream(testSuites), "TestSuite1.zip", true);
-        XmlLibraryImportResult importResult = sfapi.uploadBBLibrary(new File(getClass().getClassLoader().getResource("testBB.csv").getFile()), "testBB.csv");
+        XmlLibraryImportResult importResult = sfapi.uploadBBLibrary(resultBBConfig, "testBB.csv");
         sfapi.runBB(importResult.getId());
 
         String status = "";
@@ -154,5 +150,39 @@ public class TestBigButton {
 
     }
 
+    private static void checkStatisticsStatus() throws APICallException {
+        XmlStatisticStatusResponse statisticsStatus = sfapi.getStatisticsStatus();
+        if (statisticsStatus.isMigrationRequired()) {
+            throw new RuntimeException("migration is required for statistics db");
+        }
+        if (statisticsStatus.isSailfishUpdateRequired()) {
+            throw new RuntimeException("sailfish update required");
+        }
+        if (!"Connected".equalsIgnoreCase(statisticsStatus.getMessage())) {
+            throw new RuntimeException(
+                String.format("statistics db is disconnected. Message:%s, rootCause:%s",
+                    statisticsStatus.getMessage(), statisticsStatus.getRootCause())
+            );
+        }
+    }
 
+    private File createResultBBConfig(File patternConfig) throws IOException {
+        File resultBBConfig = Files.createTempFile("resultBBConfig", "").toFile();
+        try(BufferedReader reader = new BufferedReader(new FileReader(patternConfig));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(resultBBConfig))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(EXECUTOR_VARIABLE)) {
+                    line = line.replaceAll(EXECUTOR_VARIABLE, AbstractSFTest.SF_EXECUTOR_URL);
+                }
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            logger.error("Could not write result bb config", e);
+            throw e;
+        }
+        return resultBBConfig;
+
+    }
 }

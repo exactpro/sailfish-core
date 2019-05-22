@@ -7,7 +7,7 @@ description,item,name,path,services,priority,autostart,continue_if_failed,range,
 ,Globals,,,,,y,y,,"run_test,GENERIC,env,${date_time}",,"{""ZZZ"":""1111""}",,y,true,
 ,,,,,,,,,,,,,,,
 ,Executor List,,,,,,,,,,,,,,
-,Executor,shaitan01_master_sf01,localhost:65535/sailfishname,,,,,,,,,,,,
+,Executor,shaitan01_master_sf01,:executor_url,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 ,Service List,TestSuite1.services,,,,,,,,,,,,,LIST

@@ -30,13 +30,16 @@ import com.exactpro.sf.exceptions.APIResponseException;
 
 public abstract class AbstractSFTest {
 
-    protected final static String SF_GUI_URL = System.getenv("SF_GUI_URL") == null ?
-            "http://localhost:8080/sfgui/" : // for local run and debug
-            System.getenv("SF_GUI_URL");
     protected final static String CLIENT = "fake.xml";
     protected final static String SERVER = "FIXServerTest.xml";
     protected final static String CLIENT_NAME = "fake";
     protected final static String SERVER_NAME = "FIXServerTest";
+    protected final static String SF_GUI_URL = System.getenv("SF_GUI_URL") == null ?
+            "http://localhost:8080/sfgui/" : // for local run and debug
+            System.getenv("SF_GUI_URL");
+    protected final static String SF_EXECUTOR_URL = System.getenv("SF_EXECUTOR_URL") == null ?
+            "http://localhost:8080/sfgui/" :
+            System.getenv("SF_EXECUTOR_URL");
 
     protected static void startService(SFAPIClient sfapiClient, String cfgName, String serviceName, String environment) throws Exception {
         // import
