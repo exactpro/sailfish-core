@@ -15,14 +15,14 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { Provider, StatesMap, StateSaverContext } from './StateSaver';
+import { Provider, StateSaverContext } from './StateSaver';
 
 interface ProviderProps {
     children: JSX.Element | JSX.Element[];
 }
 
 interface ProviderState {
-    statesMap: StatesMap;
+    statesMap: Map<string, any>;
 }
 
 
@@ -41,11 +41,12 @@ export default class StateSaverProvider extends React.Component<ProviderProps, P
 
     private stateHandler = (stateKey: string, nextState: any) => {
         if (this.state.statesMap[stateKey] !== nextState) {
+            const nextStatesMap = new Map(this.state.statesMap);
+
+            nextStatesMap.set(stateKey, nextState);
+
             this.setState({
-                statesMap: {
-                    ...this.state.statesMap,
-                    [stateKey]: nextState
-                }
+                statesMap: nextStatesMap
             });
         }
     }

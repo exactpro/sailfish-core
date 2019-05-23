@@ -15,27 +15,25 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { connect } from 'react-redux';
+import { connect, Omit } from 'react-redux';
+import '../../styles/action.scss';
 import Action, { ActionNode, ActionNodeType, isAction } from '../../models/Action';
-import { ActionCard } from './ActionCard';
 import { StatusType } from '../../models/Status';
-import { CustomMessage } from './CustomMessage';
 import Tree, { createNode, mapTree } from '../../models/util/Tree';
 import AppState from '../../state/models/AppState';
+import ActionExpandStatus from '../../models/util/ActionExpandStatus';
+import { ActionCard } from './ActionCard';
+import { CustomMessage } from './CustomMessage';
 import { CheckpointAction } from '../Checkpoint';
-import { isCheckpoint } from '../../helpers/actionType';
 import { selectAction } from '../../actions/actionCreators';
 import { selectVerification } from '../../actions/actionCreators';
 import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
-import '../../styles/action.scss';
-import { raf } from '../../helpers/raf';
+import StateSaver from '../util/StateSaver';
 import memoize from '../../helpers/memoize';
-
-interface ActionExpandStatus {
-    id: number;
-    isExpanded: boolean;
-}
+import { raf } from '../../helpers/raf';
+import { isCheckpoint } from '../../helpers/actionType';
+import { createExpandTreePath, updateExpandTree, createExpandTree, getSubTree } from '../../helpers/tree';
 
 interface ActionTreeOwnProps {
     action: ActionNode;
@@ -55,65 +53,21 @@ interface ActionTreeDispatchProps {
     messageSelectHandler: (id: number, status: StatusType) => any;
 }
 
-interface ActionTreeProps extends ActionTreeOwnProps, ActionTreeStateProps, ActionTreeDispatchProps {}
+interface ActionTreeContainerProps extends ActionTreeOwnProps, ActionTreeStateProps, ActionTreeDispatchProps {}
 
-interface ActionTreeState {
-    expandTree: Tree<ActionExpandStatus>;
+// Omit is just omitting property from interface
+type ActionTreeProps = Omit<ActionTreeContainerProps, 'expandedTreePath'> & { 
+    expandState: Tree<ActionExpandStatus>,
+    saveState: (state: Tree<ActionExpandStatus>) => any; 
 }
 
-class ActionTreeBase extends React.PureComponent<ActionTreeProps, ActionTreeState> {
+/**
+ * This component use context to save action's expand status.
+ * We can't use state for this, because the state is destroyed after each unmount due virtualization.
+ */
+class ActionTreeBase extends React.PureComponent<ActionTreeProps> {
 
     private treeElements: React.ReactNode[] = [];
-
-    constructor(props: ActionTreeProps) {
-        super(props);
-
-        const { action }  = props;
-
-        this.state = {
-            expandTree: isAction(action) ? this.createExpandTree(action, props.expandedTreePath) : createNode({ id: null, isExpanded: false })
-        }
-    }
-
-    createExpandTree(action: Action, treePath: Tree<number>): Tree<ActionExpandStatus> {
-        const expandState: ActionExpandStatus = {
-            id: action.id,
-            isExpanded: treePath ? treePath.value === action.id : false
-        }
-
-        if (action.subNodes.length === 0) {
-            return createNode(expandState);
-        }
-
-        return createNode(
-            expandState,
-            action.subNodes.map(
-                actionNode => isAction(actionNode) ? 
-                    this.createExpandTree(actionNode, treePath && treePath.nodes.find(node => node.value === actionNode.id)) : 
-                    null
-            ).filter(node => node)
-        );
-    }
-
-    updateExpandTree(tree: Tree<ActionExpandStatus>, nextPath: Tree<number>) {
-        if (!nextPath) {
-            return tree;
-        }
-
-        const nextState: ActionExpandStatus = {
-            id: tree.value.id,
-            isExpanded: nextPath.value === tree.value.id ? true : tree.value.isExpanded
-        }
-
-        if (tree.nodes.length === 0 || nextPath.nodes.length === 0) {
-            return createNode(nextState, tree.nodes);
-        }
-
-        return createNode(
-            nextState,
-            tree.nodes.map(node => this.updateExpandTree(node, nextPath.nodes.find(({ value }) => value === node.value.id)))
-        );
-    }
 
     // scrolling to action, selected by url sharing
     componentDidMount() {
@@ -138,20 +92,6 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps, ActionTreeStat
         }
     }
 
-    componentWillReceiveProps(nextProps: ActionTreeProps) {
-        if (nextProps.expandedTreePath !== this.props.expandedTreePath && nextProps.expandedTreePath !== null) {
-            this.setState({
-                expandTree: this.updateExpandTree(this.state.expandTree, nextProps.expandedTreePath)
-            });
-        }
-    }
-
-    getSubTree(action: ActionNode, expandTree: Tree<ActionExpandStatus>): Tree<ActionExpandStatus> {
-        return isAction(action) ?
-            expandTree && expandTree.nodes.find(({ value }) => value.id == action.id) : 
-            null;
-    }
-
     scrollToAction(actionId: number) {
         if (this.treeElements[actionId]) {
             //this.treeElements[actionId].base.scrollIntoView({ block: 'center' });
@@ -159,7 +99,7 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps, ActionTreeStat
     }
 
     render() {
-        return this.renderNode(this.props, true, this.state.expandTree);
+        return this.renderNode(this.props, true, this.props.expandState);
     }    
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<ActionExpandStatus> = null, parentAction: Action = null): JSX.Element {
@@ -192,7 +132,7 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps, ActionTreeStat
                                 childAction => this.renderNode(
                                     { ...props, action: childAction },
                                     false, 
-                                    this.getSubTree(childAction, expandTreePath),
+                                    getSubTree(childAction, expandTreePath),
                                     action
                                 )) : null
                         }
@@ -261,40 +201,79 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps, ActionTreeStat
     }
 
     private onExpandFor = (actionId: number) => (isExpanded: boolean) => {
-        this.setState({
-            expandTree: mapTree(
-                (expandStatus: ActionExpandStatus) => expandStatus.id === actionId ? ({ ...expandStatus, isExpanded }) : expandStatus, 
-                this.state.expandTree
-            )
-        });
+        this.props.saveState(mapTree(
+            (expandStatus: ActionExpandStatus) => expandStatus.id === actionId ? ({ ...expandStatus, isExpanded }) : expandStatus, 
+            this.props.expandState
+        ))
 
         this.props.onExpand && this.props.onExpand();
     }
 }
 
-const getExpandedTreePath = memoize((actionNode: ActionNode, targetActionsId: number[]): Tree<number> => {
+type ActionTreeRecoveredState = [Tree<ActionExpandStatus>, Tree<number>];
 
-    if (!isAction(actionNode)) {
-        return null;
-    }
+interface ActionTreeExpandPathUpdaterProps extends ActionTreeContainerProps {
+    recoveredState: ActionTreeRecoveredState;
+    stateSaver: (state: ActionTreeRecoveredState) => any;
+}
 
-    const treeNode = createNode(actionNode.id);
+/**
+ * This component is responsible for updating expanded state when some actions was selected by any message 
+ * and we recieve new expand path.
+ * @param props expandTreePath - current path to selected acitons
+ */
+const ActionTreeExpandPathUpdater = ({ expandedTreePath, recoveredState, stateSaver, ...props }: ActionTreeExpandPathUpdaterProps) => {
+    let [expandState, lastTreePath] = recoveredState;
 
-    if (actionNode.subNodes) {
-        actionNode.subNodes.forEach(actionSubNode => {
-            if (isAction(actionSubNode)) {
-                const subNodePath = getExpandedTreePath(actionSubNode, targetActionsId);
+     // updating state on tree path change (same as componentDidMount / componentDidUpdate)
+     React.useEffect(() => {
+        if (lastTreePath !== expandedTreePath) {
+            expandState = updateExpandTree(expandState, expandedTreePath);
+            stateSaver([expandState, expandedTreePath]);
+            props.onExpand();
+        }
+    });
 
-                subNodePath && treeNode.nodes.push(subNodePath);
-            }
-        })
-    }
+    return (
+        <ActionTreeBase
+            expandState={expandState}
+            saveState={expandState => stateSaver([expandState, lastTreePath])}
+            {...props}/>
+    )
+}
 
-    // checking wheather the current action is the one of target acitons OR some of action's sub nodes is the target aciton
-    return targetActionsId.includes(actionNode.id) || treeNode.nodes.length != 0 ? 
-            treeNode : 
-            null;
-}, (actionNode: ActionNode) => isAction(actionNode) ? actionNode.id.toString() : 'not-action');
+/**
+ * State saver for ActionTree component. Responsible for creating default state value and updating state in context.
+ * @param props 
+ */
+const RecoverableActionTree = (props: ActionTreeContainerProps) => {
+    const stateKey = 'action-' + (isAction(props.action) ? props.action.id : props.action.actionNodeType),
+        defaultState: ActionTreeRecoveredState = [
+            isAction(props.action) ? 
+                createExpandTree(props.action, props.expandedTreePath) : 
+                createNode({ id: null, isExpanded: false }),
+            null
+        ];
+
+    return (
+        <StateSaver 
+            stateKey={stateKey}
+            defaultState={defaultState}>
+            {(recoveredState: ActionTreeRecoveredState, stateSaver: (state: ActionTreeRecoveredState) => any) =>(
+                <ActionTreeExpandPathUpdater
+                    {...props}
+                    recoveredState={recoveredState}
+                    stateSaver={stateSaver}/>
+            )}
+        </StateSaver>
+    )
+}
+
+// we need memoization here not to recalculate expand tree for each virtualized render call
+const getExpandedTreePath = memoize(
+    createExpandTreePath, 
+    (actionNode: ActionNode) => isAction(actionNode) ? actionNode.id.toString() : 'not-action'
+);
 
 export const ActionTree = connect(
     (state: AppState, ownProps: ActionTreeOwnProps): ActionTreeStateProps => ({
@@ -308,4 +287,4 @@ export const ActionTree = connect(
         actionSelectHandler: action => dispatch(selectAction(action)),
         messageSelectHandler: (id, status) => dispatch(selectVerification(id, status))
     })
-)(ActionTreeBase);
+)(RecoverableActionTree);

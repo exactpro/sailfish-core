@@ -20,32 +20,27 @@ export interface RecoverableElementProps {
     stateKey: string;
 }
 
-export interface StatesMap {
-    [key: string]: any;
-}
-
 export interface StateSaverContext {
-    states: StatesMap;
+    states: Map<string, any>;
     saveState: (stateId: string, nextState: any) => any;
 }
 
 export const { Provider, Consumer } = React.createContext({});
 
-export interface StateSaverProps extends RecoverableElementProps {
-    children: (state: any, stateHandler: (nextState: any) => any) => JSX.Element;
+export interface StateSaverProps<S> extends RecoverableElementProps {
+    children: (state: S, stateHandler: (nextState: S) => any) => JSX.Element;
+    defaultState?: S;
 }
 
 /**
  * This wrapper saves component's state after unmount and recover it by key.
  * @param props renderChild - child render function that recieves recovered state, stateKey - key for recovering state from store 
  */
-const StateSaver = ({ children, stateKey }: StateSaverProps) => (
+const StateSaver = <S extends {}>({ children, stateKey, defaultState }: StateSaverProps<S>) => (
     <Consumer>
         {
-            // at preact children's always is array, so if we need to use render prop as a child, we need to get first child in childrens array
-            // https://github.com/developit/preact/issues/45#issuecomment-182326000
             ({ states, saveState }: StateSaverContext) => children(
-                states[stateKey], 
+                states.has(stateKey) ? states.get(stateKey) : defaultState, 
                 (nextState) => saveState(stateKey, nextState)
             )
         }
