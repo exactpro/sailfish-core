@@ -22,6 +22,7 @@ import static com.exactpro.sf.scriptrunner.StatusType.FAILED;
 import static com.exactpro.sf.scriptrunner.StatusType.PASSED;
 import static com.exactpro.sf.scriptrunner.StatusType.SKIPPED;
 import static java.util.Comparator.comparingLong;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -148,8 +149,7 @@ public class HtmlReport implements IScriptReport {
 
     private Report report;
     private TestCase testCase;
-    private Action action;
-    private final Deque<ActionGroup> actionGroups = new ArrayDeque<>();
+    private Deque<Action> actions = new ArrayDeque<>();
 
     private int totalTestCases;
     private int passedTestCases;
@@ -371,28 +371,38 @@ public class HtmlReport implements IScriptReport {
     }
 
     @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
-        logger.debug("createAction - name: {}, service: {}, action: {}, message: {}, description: {}, parameters: {}, tag: {}", name, serviceName, action, msg, description, inputParameters, tag);
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters, CheckPoint checkPoint, String tag, int hash,
+            List<String> verificationsOrder, String outcome) {
+        logger.debug("createAction - name: {}, service: {}, action: {}, message: {}, description: {}, parameters: {}, tag: {}", id, serviceName, name, messageType, description, parameters, tag);
 
-        checkContext(ContextType.TESTCASE);
+        checkContext(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
 
-        this.action = new Action();
+        Action action = new Action();
 
-        this.action.setId(++sequenceId);
-        this.action.setName(name);
-        this.action.setMessageName(msg);
-        this.action.setDescription(StringUtils.trimToNull(description));
-        this.action.setParameters(convert(inputParameters, String.valueOf(this.action.getId())));
-        this.action.setStartTime(System.currentTimeMillis());
-        this.action.setCheckPoint(checkPoint);
-        this.action.setVerificationsOrder(verificationsOrder);
+        action.setId(++sequenceId);
+        action.setMatrixId(id);
+        action.setServiceName(serviceName);
+        action.setName(name);
+        action.setMessageName(messageType);
+        action.setDescription(StringUtils.trimToNull(description));
+        action.setParameters(convert(parameters, String.valueOf(action.getId())));
+        action.setStartTime(System.currentTimeMillis());
+        action.setCheckPoint(checkPoint);
+        action.setVerificationsOrder(verificationsOrder);
+        action.setOutcome(outcome);
+
+        if(currentContext == ContextType.ACTION) {
+            actions.peek().addElement(action);
+        } else if(currentContext == ContextType.ACTIONGROUP) {
+            actions.peek().getGroups().peek().addElement(action);
+        }
+
+        actions.push(action);
 
         currentContext = ContextType.ACTION;
 
-        if (Objects.nonNull(inputParameters) && inputParameters instanceof IMessage) {
-
-            ComparisonResult result = getInitialComparisonResult((IMessage) inputParameters);
+        if(parameters != null) {
+            ComparisonResult result = getInitialComparisonResult(parameters);
             addMachineLearningData(null, result, false);
         }
 
@@ -413,61 +423,47 @@ public class HtmlReport implements IScriptReport {
 
     @Override
     public boolean isActionCreated() throws UnsupportedOperationException {
-        return currentContext == ContextType.ACTION;
-    }
-
-    @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description,
-            List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
-
-        logger.debug("createAction - name: {}, service: {}, action: {}, message: {}, description: {}, parameters: {}, tag: {}", name, serviceName, action, msg, description, inputParameters, tag);
-
-        checkContext(ContextType.TESTCASE);
-
-        this.action = new Action();
-
-        this.action.setId(++sequenceId);
-        this.action.setName(name);
-        this.action.setMessageName(msg);
-        this.action.setDescription(StringUtils.trimToNull(description));
-        this.action.setParameters(convert(inputParameters, String.valueOf(this.action.getId())));
-        this.action.setStartTime(System.currentTimeMillis());
-        this.action.setCheckPoint(checkPoint);
-        this.action.setVerificationsOrder(verificationsOrder);
-
-        currentContext = ContextType.ACTION;
-
-        if (Objects.nonNull(inputParameters) && !inputParameters.isEmpty()) {
-
-            Object expected = inputParameters.get(0);
-            if (Objects.nonNull(expected) && expected instanceof IMessage) {
-
-                ComparisonResult result = getInitialComparisonResult((IMessage) inputParameters);
-
-                addMachineLearningData(null, result, false);
-            }
-        }
+        return !actions.isEmpty();
     }
 
     @Override
     public void closeAction(StatusDescription status, Object actionResult) {
+        checkContext(ContextType.ACTION);
+        Action action = actions.pop();
+
         logger.debug("closeAction - name: {}, status: {}", action.getName(), status.getStatus());
 
-        checkContext(ContextType.ACTION);
-
-        if(!actionGroups.isEmpty()) {
-            String groups = actionGroups.stream().map(ActionGroup::getName).collect(Collectors.joining(", "));
+        if(!action.getGroups().isEmpty()) {
+            String groups = action.getGroups().stream().map(ActionGroup::getName).collect(Collectors.joining(", "));
             throw new ScriptRunException("Cannot close action due to presence of unclosed groups: " + groups);
         }
 
-        long finishTime = System.currentTimeMillis();
+        action.setStatus(status);
+        action.setResult(actionResult);
+        action.setFinishTime(System.currentTimeMillis());
+
+        if(actions.isEmpty()) {
+            writeAction(action);
+        }
+
+        if(actions.isEmpty()) {
+            currentContext = ContextType.TESTCASE;
+        } else {
+            currentContext = actions.peek().getGroups().isEmpty() ? ContextType.ACTION : ContextType.ACTIONGROUP;
+        }
+    }
+
+    private void writeAction(Action action) {
+        StatusDescription status = action.getStatus();
+        long finishTime = action.getFinishTime();
         double duration = (finishTime - action.getStartTime()) / 1000.0;
-        String nodeTitle = String.format("Action: %s (%s) [%ss]", action.getName(), status.getStatus(), duration);
+        String actionName = (defaultString(action.getMatrixId()) + " " + defaultString(action.getServiceName()) + " " + action.getName() + " " + defaultString(action.getMessageName())).trim();
+        String nodeTitle = String.format("Action: %s (%s) [%ss]", actionName, status.getStatus(), duration);
 
         try {
-            createNode(testCaseWriter, nodeTitle, generateDescription(action.getDescription(), actionResult),
-                       NodeType.ACTION, status.getStatus(), null, 5, action.getCheckPoint(), null,
-                       action.getVerificationsOrder(), null, true);
+            createNode(testCaseWriter, nodeTitle, generateDescription(action.getDescription(), action.getOutcome(), action.getResult()),
+                    NodeType.ACTION, status.getStatus(), null, 5, action.getCheckPoint(), null,
+                    action.getVerificationsOrder(), null, true);
 
             String messageName = action.getMessageName();
             List<ActionParameter> parameters = action.getParameters();
@@ -503,9 +499,6 @@ public class HtmlReport implements IScriptReport {
             data.setPeriodEnd(finishTime);
             dataMap.put(action.getId(), data);
         }
-
-        action = null;
-        currentContext = ContextType.TESTCASE;
     }
 
     private void writeParametersTable(int id, String messageName, List<ActionParameter> parameters, boolean hasHeaders) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, IOException, TemplateException {
@@ -532,7 +525,7 @@ public class HtmlReport implements IScriptReport {
 
         actionGroup.setName(name);
         actionGroup.setDescription(description);
-        actionGroups.push(actionGroup);
+        actions.peek().getGroups().push(actionGroup);
 
         this.currentContext = ContextType.ACTIONGROUP;
     }
@@ -541,14 +534,15 @@ public class HtmlReport implements IScriptReport {
     public void closeGroup(StatusDescription status) {
         checkContext(ContextType.ACTIONGROUP);
 
-        ActionGroup actionGroup = actionGroups.pop();
-        BaseEntity parent = actionGroups.isEmpty() ? action : actionGroups.peek();
+        Action action = actions.peek();
+        ActionGroup actionGroup = action.getGroups().pop();
+        BaseEntity parent = action.getGroups().isEmpty() ? action : action.getGroups().peek();
 
         parent.addElement(actionGroup.copyWithStatus(status.getStatus()));
         parent.addAllKnownBugs(actionGroup.getAllKnownBugs());
         parent.addReproducedBugs(actionGroup.getReproducedBugs());
 
-        if(actionGroups.isEmpty()) {
+        if(action.getGroups().isEmpty()) {
             this.currentContext = ContextType.ACTION;
         }
     }
@@ -590,7 +584,9 @@ public class HtmlReport implements IScriptReport {
                     verifications.clear();
                 }
 
-                writeTable(writer, null, (ReportTable) element, indentSize);
+                writeTable(writer, null, (ReportTable)element, indentSize);
+            } else if(element instanceof Action) {
+                writeAction((Action)element);
             } else if (element instanceof ActionGroup) {
                 ActionGroup group = (ActionGroup) element;
                 createNode(testCaseWriter, group.getName(), group.getDescription(), NodeType.ACTION, group.getStatus(),
@@ -620,6 +616,8 @@ public class HtmlReport implements IScriptReport {
     }
 
     private void writeVerifications(Writer writer, List<Verification> verifications, int indentSize) {
+        Action action = actions.peek();
+
         if(action != null) {
             logger.debug("writeVerifications - action: {}, count: {}", action.getName(), verifications.size());
         } else {
@@ -871,11 +869,12 @@ public class HtmlReport implements IScriptReport {
         testCase.addReproducedBugs(reproducedBugs);
 
         if (currentContext == ContextType.ACTION) {
+            Action action = actions.peek();
             action.addElement(verification);
             action.addAllKnownBugs(allKnownBugs);
             action.addReproducedBugs(reproducedBugs);
         } else if (currentContext == ContextType.ACTIONGROUP) {
-            ActionGroup actionGroup = actionGroups.peek();
+            ActionGroup actionGroup = actions.peek().getGroups().peek();
             actionGroup.addElement(verification);
             actionGroup.addAllKnownBugs(allKnownBugs);
             actionGroup.addReproducedBugs(reproducedBugs);
@@ -889,6 +888,7 @@ public class HtmlReport implements IScriptReport {
             return;
         }
 
+        Action action = actions.peek();
         MachineLearningData data = action.getMachineLearningData();
 
         if(data == null) {
@@ -976,10 +976,10 @@ public class HtmlReport implements IScriptReport {
         logger.debug("addMessage - context: {}, message: {}", currentContext, message);
         switch(currentContext) {
         case ACTION:
-            action.addElement(message);
+            actions.peek().addElement(message);
             break;
         case ACTIONGROUP:
-            actionGroups.peek().addElement(message);
+            actions.peek().getGroups().peek().addElement(message);
             break;
         case TESTCASE:
             testCase.addElement(message);
@@ -995,10 +995,10 @@ public class HtmlReport implements IScriptReport {
 
         switch(currentContext) {
         case ACTION:
-            action.addElement(cause);
+            actions.peek().addElement(cause);
             break;
         case ACTIONGROUP:
-            actionGroups.peek().addElement(cause);
+            actions.peek().getGroups().peek().addElement(cause);
             break;
         case TESTCASE:
             testCase.addElement(cause);
@@ -1077,10 +1077,10 @@ public class HtmlReport implements IScriptReport {
             }
             break;
         case ACTION:
-            action.addElement(table);
+            actions.peek().addElement(table);
             break;
         case ACTIONGROUP:
-            actionGroups.peek().addElement(table);
+            actions.peek().getGroups().peek().addElement(table);
             break;
         default:
             throw new ScriptRunException("Cannot cannot create table in context: " + currentContext);
@@ -1112,8 +1112,8 @@ public class HtmlReport implements IScriptReport {
     }
 
     @Override
-    public void createParametersTable(String messageName, Object message) {
-        logger.debug("createParametersTable - messageName: {}, message: {}", messageName, message);
+    public void createParametersTable(IMessage message) {
+        logger.debug("createParametersTable - message: {}", message);
 
         if(currentContext != ContextType.ACTION && currentContext != ContextType.ACTIONGROUP) {
             throw new ScriptRunException(String.format("Invalid context: %s", currentContext));
@@ -1121,21 +1121,17 @@ public class HtmlReport implements IScriptReport {
 
         Objects.requireNonNull(message, "message cannot be null");
 
-        if(StringUtils.isBlank(messageName)) {
-            throw new IllegalArgumentException("messageName cannot be null");
-        }
-
         int id = ++sequenceId;
         List<ActionParameter> parameters = convert(message, String.valueOf(id));
         boolean hasHeaders = parameters.stream().skip(1).anyMatch(ActionParameter::isHeader);
-        ParametersTable table = new ParametersTable(id, messageName, parameters, hasHeaders);
+        ParametersTable table = new ParametersTable(id, message.getName(), parameters, hasHeaders);
 
         switch(currentContext) {
         case ACTION:
-            action.addElement(table);
+            actions.peek().addElement(table);
             break;
         case ACTIONGROUP:
-            actionGroups.peek().addElement(table);
+            actions.peek().getGroups().peek().addElement(table);
             break;
         default:
             throw new ScriptRunException("Cannot cannot create table in context: " + currentContext);
@@ -1154,10 +1150,10 @@ public class HtmlReport implements IScriptReport {
 
         switch(currentContext) {
         case ACTION:
-            action.setLinkToReport(linkToReport);
+            actions.peek().setLinkToReport(linkToReport);
             break;
         case ACTIONGROUP:
-            actionGroups.peek().setLinkToReport(linkToReport);
+            actions.peek().getGroups().peek().setLinkToReport(linkToReport);
             break;
         default:
             throw new ScriptRunException("Cannot cannot create link to report in context: " + currentContext);
@@ -1337,25 +1333,22 @@ public class HtmlReport implements IScriptReport {
         }
     }
 
-    private List<ActionParameter> convert(Object value, String actionId) {
-        if(value == null) {
+    private List<ActionParameter> convert(IMessage message, String actionId) {
+        if(message == null) {
             return null;
         }
 
-        if(value instanceof IMessage) {
-            IMessage message = (IMessage)value;
-            IMessageStructure messageStructure = getMessageStructure(message.getMetaData());
+        IMessageStructure messageStructure = getMessageStructure(message.getMetaData());
 
-                    if(messageStructure != null) {
-                try {
-                        value = EnumReplacer.replaceEnums(message, messageStructure);
-                } catch(Exception e) {
-                    logger.debug("Enum replacement has failed", e);
-                }
+        if(messageStructure != null) {
+            try {
+                message = EnumReplacer.replaceEnums(message, messageStructure);
+            } catch(Exception e) {
+                logger.debug("Enum replacement has failed", e);
             }
         }
 
-        return convert(new ReportEntity("Parameters", value), actionId, 0, -1);
+        return convert(new ReportEntity("Parameters", message), actionId, 0, -1);
     }
 
     private List<ActionParameter> convert(ReportEntity reportEntity, String parentRaw, int counter, int nestingLevel) {
@@ -1446,13 +1439,17 @@ public class HtmlReport implements IScriptReport {
         return rejectedTable;
     }
 
-    private void checkContext(ContextType expectedContext) {
-        if(currentContext != expectedContext) {
-            throw new ScriptRunException(String.format("Invalid context: %s (expected: %s)", currentContext, expectedContext));
+    private void checkContext(ContextType... expectedContexts) {
+        if(!ArrayUtils.contains(expectedContexts, currentContext)) {
+            throw new ScriptRunException(String.format("Invalid context: %s (expected: %s)", currentContext, Arrays.toString(expectedContexts)));
         }
     }
 
-    private String generateDescription(String originalDescription, Object returnedValue) {
+    private String generateDescription(String originalDescription, String outcome, Object returnedValue) {
+        if(outcome != null) {
+            originalDescription = (defaultString(originalDescription) + " " + outcome).trim();
+        }
+
         if(!(returnedValue instanceof IMessage)) {
             return originalDescription;
         }
@@ -1490,13 +1487,15 @@ public class HtmlReport implements IScriptReport {
         }
 
         if(originalDescription != null) {
-            if(generatedDescription.length() > 0) {
+            boolean generatedDescriptionIsNotEmpty = generatedDescription.length() > 0;
+
+            if(generatedDescriptionIsNotEmpty) {
                 generatedDescription.append(" (");
             }
 
             generatedDescription.append(originalDescription);
 
-            if(generatedDescription.length() > 0) {
+            if(generatedDescriptionIsNotEmpty) {
                 generatedDescription.append(")");
             }
         }

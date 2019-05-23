@@ -34,9 +34,12 @@ export type ActionNode = Action | UserMessage | Verification | Link | UserTable;
 
 export default interface Action {
     id?: number;
+    matrixId?: string;
+    serviceName?: string;
     actionNodeType: ActionNodeType;
     bugs: any[];
     name: string;
+    messageType: string;
     description: string;
     parameters?: ActionParameter[];
     relatedMessages: number[];
@@ -46,4 +49,5 @@ export default interface Action {
     status: Status;
     subNodes?: ActionNode[];
     checkPointId?: number;
+    outcome?: string;
 }

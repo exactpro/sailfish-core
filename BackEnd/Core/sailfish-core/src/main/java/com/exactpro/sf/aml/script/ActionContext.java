@@ -15,19 +15,26 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.script;
 
+import static com.exactpro.sf.aml.script.ActionNameRetriever.getMethodName;
+
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jooq.lambda.fi.util.function.CheckedSupplier;
 import org.slf4j.Logger;
 
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.impl.messages.BaseMessage;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDataManager;
@@ -36,18 +43,26 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.scriptrunner.DebugController;
 import com.exactpro.sf.scriptrunner.IScriptConfig;
 import com.exactpro.sf.scriptrunner.ScriptContext;
+import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.ConsumerAction;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.ConsumerActionWithParameters;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.FunctionAction;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.FunctionActionWithParameters;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionServiceManager;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl.ActionReport;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl.ActionServiceManager;
+import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionCallException;
 import com.exactpro.sf.storage.MessageFilter;
 import com.exactpro.sf.storage.MessageRow;
 import com.exactpro.sf.util.KnownBugException;
 import com.exactpro.sf.util.MessageKnownBugException;
 import com.google.common.collect.ImmutableSet;
 
-public class DefaultSettings implements IActionContext {
+public class ActionContext implements IActionContext {
 	/** Service name */
 	private String serviceName;
 	/** Timeout in milliseconds */
@@ -62,8 +77,10 @@ public class DefaultSettings implements IActionContext {
     private final ScriptContext scriptContext;
 	/** Control add message to report or not */
 	private boolean addToReport = true;
+    private boolean continueOnFailed;
 	/** Count messages to check that no unnecessary messages received. */
-	private MessageCount messageCount;
+    @Deprecated
+    private MessageCount messageCount;
     private IFilter messageCountFilter;
 	private String description;
 	private String id;
@@ -82,13 +99,15 @@ public class DefaultSettings implements IActionContext {
 	private Map<String, Boolean> negativeMap = Collections.emptyMap();
     private boolean reorderGroups;
 	private Set<String> uncheckedFields = Collections.emptySet();
-	private final IActionReport report;
+    private ActionReport report;
 	private final IActionServiceManager serviceManager;
     private final IDataManager dataManager;
     private final Map<String, ClassLoader> pluginClassLoaders;
+    private final boolean updateStatus;
 
-    public DefaultSettings(ScriptContext scriptContext, boolean updateStatus) {
+    public ActionContext(ScriptContext scriptContext, boolean updateStatus) {
         this.scriptContext = Objects.requireNonNull(scriptContext, "script context cannot be null");
+        this.updateStatus = updateStatus;
         IScriptConfig scriptConfig = Objects.requireNonNull(scriptContext.getScriptConfig(), "script config cannot be null");
         report = new ActionReport(scriptContext.getReport(), scriptConfig.getReportFolder(), updateStatus, scriptContext.getWorkspaceDispatcher());
         IEnvironmentManager environmentManager = Objects.requireNonNull(scriptContext.getEnvironmentManager(), "environment manager cannot be null");
@@ -106,6 +125,13 @@ public class DefaultSettings implements IActionContext {
 		return serviceName;
 	}
 
+    @Override
+    public IActionContext withServiceName(String serviceName) {
+        ActionContext clone = clone();
+        clone.serviceName = serviceName;
+        return clone;
+    }
+
     public void setServiceName(String serviceName) {
 		this.serviceName = serviceName;
 	}
@@ -120,7 +146,14 @@ public class DefaultSettings implements IActionContext {
 		return timeout;
 	}
 
-	public void setTimeout(long timeout) {
+    @Override
+    public IActionContext withTimeout(long timeout) {
+        ActionContext clone = clone();
+        clone.timeout = timeout;
+        return clone;
+    }
+
+    public void setTimeout(long timeout) {
 		this.timeout = timeout;
 	}
 
@@ -129,7 +162,14 @@ public class DefaultSettings implements IActionContext {
 		return checkPoint;
 	}
 
-	public void setCheckPoint(CheckPoint checkPoint) {
+    @Override
+    public IActionContext withCheckPoint(CheckPoint checkPoint) {
+        ActionContext clone = clone();
+        clone.checkPoint = checkPoint;
+        return clone;
+    }
+
+    public void setCheckPoint(CheckPoint checkPoint) {
 		this.checkPoint = checkPoint;
 	}
 
@@ -138,7 +178,14 @@ public class DefaultSettings implements IActionContext {
 		return reference;
 	}
 
-	public void setReference(String reference) {
+    @Override
+    public IActionContext withReference(String reference) {
+        ActionContext clone = clone();
+        clone.reference = reference;
+        return clone;
+    }
+
+    public void setReference(String reference) {
 		this.reference = reference;
 	}
 
@@ -152,7 +199,7 @@ public class DefaultSettings implements IActionContext {
 
     @Override
     public IActionReport getReport() {
-        return report;
+        return report.getLastChild();
     }
 
     @Override
@@ -230,7 +277,30 @@ public class DefaultSettings implements IActionContext {
 		return addToReport;
 	}
 
-	public void setMessageCount(MessageCount messageCount) {
+    @Override
+    public IActionContext withAddToReport(boolean addToReport) {
+        ActionContext clone = clone();
+        clone.addToReport = addToReport;
+        return clone;
+    }
+
+    @Override
+    public boolean isContinueOnFailed() {
+        return false;
+    }
+
+    public void setContinueOnFailed(boolean continueOnFailed) {
+        this.continueOnFailed = continueOnFailed;
+    }
+
+    @Override
+    public IActionContext withContinueOnFailed(boolean continueOnFailed) {
+        ActionContext clone = clone();
+        clone.continueOnFailed = continueOnFailed;
+        return clone;
+    }
+
+    public void setMessageCount(MessageCount messageCount) {
 		this.messageCount = messageCount;
 	}
 
@@ -244,6 +314,13 @@ public class DefaultSettings implements IActionContext {
         return messageCountFilter;
     }
 
+    @Override
+    public IActionContext withMessageCountFilter(IFilter messageCountFilter) {
+        ActionContext clone = clone();
+        clone.messageCountFilter = messageCountFilter;
+        return clone;
+    }
+
     public void setMessageCountFilter(IFilter messageCountFilter) {
         this.messageCountFilter = messageCountFilter;
     }
@@ -253,7 +330,14 @@ public class DefaultSettings implements IActionContext {
 		return description;
 	}
 
-	public void setDescription(String s) {
+    @Override
+    public IActionContext withDescription(String description) {
+        ActionContext clone = clone();
+        clone.description = description;
+        return clone;
+    }
+
+    public void setDescription(String s) {
 		this.description = s;
 	}
 
@@ -262,7 +346,14 @@ public class DefaultSettings implements IActionContext {
 		return id;
 	}
 
-	public void setId(String id) {
+    @Override
+    public IActionContext withId(String id) {
+        ActionContext clone = clone();
+        clone.id = id;
+        return clone;
+    }
+
+    public void setId(String id) {
 		this.id = id;
 	}
 
@@ -288,7 +379,14 @@ public class DefaultSettings implements IActionContext {
 		return dictionaryURI;
 	}
 
-	public void setDictionaryURI(SailfishURI dictionaryURI) {
+    @Override
+    public IActionContext withDictionaryURI(SailfishURI dictionaryURI) {
+        ActionContext clone = clone();
+        clone.dictionaryURI = dictionaryURI;
+        return clone;
+    }
+
+    public void setDictionaryURI(SailfishURI dictionaryURI) {
 		this.dictionaryURI = dictionaryURI;
 	}
 
@@ -299,7 +397,7 @@ public class DefaultSettings implements IActionContext {
     }
 
 	public void setMessages(Map<String, Object> messages) {
-		this.messages = messages;
+        this.messages = Objects.requireNonNull(messages, "messages cannot be null");
 	}
 
 	@Override
@@ -307,7 +405,14 @@ public class DefaultSettings implements IActionContext {
         return metaContainer;
 	}
 
-	public void setMetaContainer(MetaContainer metaContainer) {
+    @Override
+    public IActionContext withMetaContainer(MetaContainer metaContainer) {
+        ActionContext clone = clone();
+        clone.metaContainer = metaContainer.clone(true);
+        return clone;
+    }
+
+    public void setMetaContainer(MetaContainer metaContainer) {
 		this.metaContainer = metaContainer;
 	}
 
@@ -316,13 +421,20 @@ public class DefaultSettings implements IActionContext {
         return checkGroupsOrder;
     }
 
+    @Override
+    public IActionContext withCheckGroupsOrder(boolean checkGroupsOrder) {
+        ActionContext clone = clone();
+        clone.checkGroupsOrder = checkGroupsOrder;
+        return clone;
+    }
+
     public void setCheckGroupsOrder(boolean checkGroupsOrder) {
         this.checkGroupsOrder = checkGroupsOrder;
     }
 
     @Deprecated // In AML3 we use 'x != 2'
 	public void setNegativeMap(Map<String, Boolean> negativeMap) {
-		this.negativeMap = negativeMap;
+        this.negativeMap = Objects.requireNonNull(negativeMap, "negativeMap cannot be null");
 	}
 
 	@Override
@@ -334,6 +446,13 @@ public class DefaultSettings implements IActionContext {
     @Override
     public boolean isReorderGroups() {
         return reorderGroups;
+    }
+
+    @Override
+    public IActionContext withReorderGroups(boolean reorderGroups) {
+        ActionContext clone = clone();
+        clone.reorderGroups = reorderGroups;
+        return clone;
     }
 
     public void setReorderGroups(boolean reorderGroups) {
@@ -358,6 +477,13 @@ public class DefaultSettings implements IActionContext {
     @Override
     public Set<String> getUncheckedFields() {
         return uncheckedFields;
+    }
+
+    @Override
+    public IActionContext withUncheckedFields(Set<String> uncheckedFields) {
+        ActionContext clone = clone();
+        clone.setUncheckedFields(uncheckedFields);
+        return clone;
     }
 
     public void setUncheckedFields(Set<String> uncheckedFields) {
@@ -392,5 +518,150 @@ public class DefaultSettings implements IActionContext {
         scriptContext.getKnownBugs().addAll(e.getPotentialDescriptions());
 
         return Optional.ofNullable(message);
+    }
+
+    @Override
+    public <T extends IActionCaller> void callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) throws Throwable {
+        callAction(() -> {
+            action.accept(actionClass, this);
+            return null;
+        }, getMethodName(actionClass.getClass(), action), null, tag, verificationOrder);
+    }
+
+    @Override
+    public <T extends IActionCaller, R> R callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Throwable {
+        return callAction(() -> action.apply(actionClass, this), getMethodName(actionClass.getClass(), action), null, tag, verificationOrder);
+    }
+
+    @Override
+    public <T extends IActionCaller, P> void callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) throws Throwable {
+        callAction(() -> {
+            action.accept(actionClass, this, parameters);
+            return null;
+        }, getMethodName(actionClass.getClass(), action), parameters, tag, verificationOrder);
+    }
+
+    @Override
+    public <T extends IActionCaller, P, R> R callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Throwable {
+        return callAction(() -> action.apply(actionClass, this, parameters), getMethodName(actionClass.getClass(), action), parameters, tag, verificationOrder);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <P, R> R callAction(CheckedSupplier<R> action, String methodName, P parameters, String tag, List<String> verificationOrder) throws Throwable {
+        IMessage message = null;
+
+        if(parameters instanceof Map<?, ?>) {
+            message = MessageUtil.convertToIMessage((Map<?, ?>)parameters, null, "Namespace", "Message");
+        } else if(parameters instanceof BaseMessage) {
+            message = ((BaseMessage)parameters).getMessage();
+        } else if(parameters instanceof IMessage) {
+            message = (IMessage)parameters;
+        } else if(parameters != null) {
+            throw new ActionCallException("Unsupported parameters type: " + parameters.getClass().getCanonicalName());
+        }
+
+        ActionReport report = this.report.getLastChild();
+        boolean actionCreated = false;
+        int hashCode = action.hashCode();
+        String messageType = "";
+
+        if(message != null) {
+            messageType = message.getName();
+        }
+
+        try {
+            if(addToReport) {
+                report.createAction(id, serviceName, methodName, messageType, description, message, checkPoint, tag, hashCode, verificationOrder, null);
+                actionCreated = true;
+            }
+
+            Object returnValue = action.get();
+
+            if(returnValue != null) {
+                scriptContext.getReceivedMessages().add(returnValue);
+
+                if(StringUtils.isNotEmpty(reference)) {
+                    messages.put(reference, returnValue);
+                }
+            }
+
+            if(addToReport) {
+                report.closeAction(new StatusDescription(StatusType.PASSED, ""), returnValue);
+            }
+
+            return (R)returnValue;
+        } catch(KnownBugException e) {
+            getLogger().warn(e.getMessage(), e);
+            Object containedMessage = null;
+
+            if(e instanceof MessageKnownBugException) {
+                containedMessage = ((MessageKnownBugException)e).getContainedMessage();
+                scriptContext.getReceivedMessages().add(containedMessage);
+
+                if(StringUtils.isNotBlank(reference)) {
+                    messages.put(reference, containedMessage);
+                }
+            }
+
+            if(StringUtils.isNotBlank(reference)) {
+                scriptContext.addExecutedAction(reference);
+            }
+
+            scriptContext.setConditionallyPassed(true);
+            scriptContext.getKnownBugs().addAll(e.getPotentialDescriptions());
+
+            if(!actionCreated) {
+                report.createAction(id, serviceName, methodName, messageType, description, message, checkPoint, tag, hashCode, verificationOrder, null);
+            }
+
+            report.closeAction(new StatusDescription(StatusType.CONDITIONALLY_PASSED, e.getMessage(), e.getPotentialDescriptions()), containedMessage);
+
+            return (R)containedMessage;
+        } catch(Exception e) {
+            getLogger().warn(e.getMessage(), e);
+            scriptContext.setInterrupt(e instanceof InterruptedException);
+            scriptContext.setException(e);
+
+            if(!actionCreated) {
+                report.createAction(id, serviceName, methodName, messageType, description, message, checkPoint, tag, hashCode, verificationOrder, null);
+            }
+
+            report.closeAction(new StatusDescription(StatusType.FAILED, e.getMessage(), e), null);
+
+            if(!continueOnFailed || e instanceof InterruptedException) {
+                throw e;
+            }
+
+            return null;
+        }
+    }
+
+    @Override
+    protected ActionContext clone() {
+        ActionContext cloned = new ActionContext(scriptContext, updateStatus);
+
+        cloned.serviceName = serviceName;
+        cloned.timeout = timeout;
+        cloned.checkPoint = checkPoint;
+        cloned.reference = reference;
+        cloned.referenceToFilter = referenceToFilter;
+        cloned.addToReport = addToReport;
+        cloned.continueOnFailed = continueOnFailed;
+        cloned.messageCount = messageCount;
+        cloned.messageCountFilter = messageCountFilter;
+        cloned.description = description;
+        cloned.id = id;
+        cloned.line = line;
+        cloned.failUnexpected = failUnexpected;
+        cloned.dictionaryURI = dictionaryURI;
+        cloned.messages = new HashMap<>(messages);
+        cloned.metaContainer = metaContainer.clone(true);
+        cloned.checkGroupsOrder = checkGroupsOrder;
+        cloned.negativeMap = new HashMap<>(negativeMap);
+        cloned.reorderGroups = reorderGroups;
+        cloned.uncheckedFields = ImmutableSet.copyOf(uncheckedFields);
+        cloned.report = report;
+
+        return cloned;
     }
 }

@@ -17,6 +17,7 @@ package com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -32,6 +33,11 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.ConsumerAction;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.ConsumerActionWithParameters;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.FunctionAction;
+import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.FunctionActionWithParameters;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionServiceManager;
@@ -40,6 +46,10 @@ import com.exactpro.sf.storage.MessageRow;
 import com.exactpro.sf.util.KnownBugException;
 import com.google.common.collect.ImmutableSet;
 
+/**
+ * Deprecated and will be removed in future release. To modify existing context use {@link IActionContext}{@code .with*()} methods instead
+ */
+@Deprecated
 @SuppressWarnings("deprecation")
 public class ActionContextWrapper implements IActionContext{
     private final IActionContext actionContext;
@@ -82,6 +92,12 @@ public class ActionContextWrapper implements IActionContext{
         return checkPoint;
     }
 
+    @Override
+    public IActionContext withCheckPoint(CheckPoint checkPoint) {
+        return actionContext.withCheckPoint(checkPoint);
+    }
+
+    @Deprecated
     public ActionContextWrapper setCheckPoint(CheckPoint checkPoint) {
         this.checkPoint = checkPoint;
         return this;
@@ -92,16 +108,28 @@ public class ActionContextWrapper implements IActionContext{
         return description;
     }
 
+    @Override
+    public IActionContext withDescription(String description) {
+        return actionContext.withDescription(description);
+    }
+
+    @Deprecated
     public ActionContextWrapper setDescription(String description) {
         this.description = description;
         return this;
     }
-    
+
     @Override
     public SailfishURI getDictionaryURI() {
         return dictionaryURI;
     }
-    
+
+    @Override
+    public IActionContext withDictionaryURI(SailfishURI dictionaryURI) {
+        return actionContext.withDictionaryURI(dictionaryURI);
+    }
+
+    @Deprecated
     public ActionContextWrapper setDictionaryURI(SailfishURI dictionaryURI) {
         this.dictionaryURI = dictionaryURI;
         return this;
@@ -118,15 +146,22 @@ public class ActionContextWrapper implements IActionContext{
     }
 
     @Override
+    public IActionContext withId(String id) {
+        return actionContext.withId(id);
+    }
+
+    @Override
     public Object getMessage(String reference) {
         return actionContext.getMessage(reference);
     }
 
     @Override
+    @Deprecated
     public MessageCount getMessageCount() {
         return messageCount;
     }
 
+    @Deprecated
     public ActionContextWrapper setMessageCount(MessageCount messageCount) {
         this.messageCount = messageCount;
         return this;
@@ -137,6 +172,12 @@ public class ActionContextWrapper implements IActionContext{
         return messageCountFilter;
     }
 
+    @Override
+    public IActionContext withMessageCountFilter(IFilter messageCountFilter) {
+        return actionContext.withMessageCountFilter(messageCountFilter);
+    }
+
+    @Deprecated
     public ActionContextWrapper setMessageCountFilter(IFilter messageCountFilter) {
         this.messageCountFilter = messageCountFilter;
         return this;
@@ -147,36 +188,52 @@ public class ActionContextWrapper implements IActionContext{
         return metaContainer;
     }
 
+    @Override
+    public IActionContext withMetaContainer(MetaContainer metaContainer) {
+        return actionContext.withMetaContainer(metaContainer);
+    }
+
+    @Deprecated
     public ActionContextWrapper setMetaContainer(MetaContainer metaContainer) {
         this.metaContainer = metaContainer;
         return this;
     }
 
     @Override
+    @Deprecated
     public Map<String, Boolean> getNegativeMap() {
         return Collections.unmodifiableMap(negativeMap);
     }
 
+    @Deprecated
     public ActionContextWrapper setNegativeMap(Map<String, Boolean> values) {
         negativeMap.clear();
         return putNegativeMap(values);
     }
-    
+
+    @Deprecated
     public ActionContextWrapper putNegativeMap(Map<String, Boolean> values) {
         negativeMap.putAll(values);
         return this;
     }
-    
+
+    @Deprecated
     public ActionContextWrapper putNegativeMap(String key, Boolean value) {
         negativeMap.put(key, value);
         return this;
     }
-    
+
     @Override
     public String getReference() {
         return reference;
     }
 
+    @Override
+    public IActionContext withReference(String reference) {
+        return actionContext.withReference(reference);
+    }
+
+    @Deprecated
     public ActionContextWrapper setReference(String reference) {
         this.reference = reference;
         return this;
@@ -187,6 +244,7 @@ public class ActionContextWrapper implements IActionContext{
         return report;
     }
 
+    @Deprecated
     public void setReport(IActionReport report) {
         this.report = report;
     }
@@ -241,6 +299,12 @@ public class ActionContextWrapper implements IActionContext{
         return serviceName;
     }
 
+    @Override
+    public IActionContext withServiceName(String serviceName) {
+        return actionContext.withServiceName(serviceName);
+    }
+
+    @Deprecated
     public ActionContextWrapper setServiceName(ServiceName serviceName) {
         this.serviceName = serviceName.toString();
         return this;
@@ -256,6 +320,12 @@ public class ActionContextWrapper implements IActionContext{
         return timeout;
     }
 
+    @Override
+    public IActionContext withTimeout(long timeout) {
+        return actionContext.withTimeout(timeout);
+    }
+
+    @Deprecated
     public ActionContextWrapper setTimeout(long timeout) {
         this.timeout = timeout;
         return this;
@@ -267,8 +337,28 @@ public class ActionContextWrapper implements IActionContext{
     }
 
     @Override
+    public IActionContext withAddToReport(boolean addToReport) {
+        return actionContext.withAddToReport(addToReport);
+    }
+
+    @Override
+    public boolean isContinueOnFailed() {
+        return actionContext.isContinueOnFailed();
+    }
+
+    @Override
+    public IActionContext withContinueOnFailed(boolean continueOnFailed) {
+        return actionContext.withContinueOnFailed(continueOnFailed);
+    }
+
+    @Override
     public boolean isCheckGroupsOrder() {
         return actionContext.isCheckGroupsOrder();
+    }
+
+    @Override
+    public IActionContext withCheckGroupsOrder(boolean checkGroupsOrder) {
+        return actionContext.withCheckGroupsOrder(checkGroupsOrder);
     }
 
     @Override
@@ -277,21 +367,30 @@ public class ActionContextWrapper implements IActionContext{
     }
 
     @Override
+    public IActionContext withReorderGroups(boolean reorderGroups) {
+        return actionContext.withReorderGroups(reorderGroups);
+    }
+
+    @Override
+    @Deprecated
     @SuppressWarnings("unchecked")
     public <T> T getSystemColumn(String fieldName) {
         return (T) systemColumn.getOrDefault(fieldName, actionContext.getSystemColumn(fieldName));
     }
 
+    @Deprecated
     public ActionContextWrapper setSystemColumns(Map<String, Object> values) {
         systemColumn.clear();
         return putSystemColumns(values);
     }
-    
+
+    @Deprecated
     public ActionContextWrapper putSystemColumns(Map<String, Object> values) {
         systemColumn.putAll(values);
         return this;
     }
-    
+
+    @Deprecated
     public ActionContextWrapper putSystemColumn(String key, Object value) {
         systemColumn.put(key, value);
         return this;
@@ -307,9 +406,20 @@ public class ActionContextWrapper implements IActionContext{
         return unchekedFields;
     }
 
+    @Override
+    public IActionContext withUncheckedFields(Set<String> uncheckedFields) {
+        return actionContext.withUncheckedFields(uncheckedFields);
+    }
+
+    @Deprecated
     public ActionContextWrapper setUncheckedFields(Set<String> uncheckedFields) {
         this.unchekedFields = ImmutableSet.copyOf(uncheckedFields);
         return this;
+    }
+
+    @Override
+    public ClassLoader getPluginClassLoader(String pluginAlias) {
+        return actionContext.getPluginClassLoader(pluginAlias);
     }
 
     @Override
@@ -318,7 +428,22 @@ public class ActionContextWrapper implements IActionContext{
     }
 
     @Override
-    public ClassLoader getPluginClassLoader(String pluginAlias) {
-        return actionContext.getPluginClassLoader(pluginAlias);
+    public <T extends IActionCaller> void callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) {
+        throw new UnsupportedOperationException("Wrappers do not support action calling");
+    }
+
+    @Override
+    public <T extends IActionCaller, R> R callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) {
+        throw new UnsupportedOperationException("Wrappers do not support action calling");
+    }
+
+    @Override
+    public <T extends IActionCaller, P> void callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) {
+        throw new UnsupportedOperationException("Wrappers do not support action calling");
+    }
+
+    @Override
+    public <T extends IActionCaller, P, R> R callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) {
+        throw new UnsupportedOperationException("Wrappers do not support action calling");
     }
 }

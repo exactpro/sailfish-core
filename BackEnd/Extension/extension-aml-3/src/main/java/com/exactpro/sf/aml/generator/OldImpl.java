@@ -39,10 +39,11 @@ import com.exactpro.sf.aml.generator.matrix.JavaStatement;
 import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
-import com.exactpro.sf.aml.script.DefaultSettings;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -163,7 +164,7 @@ public class OldImpl {
 				return sb.toString();
 			}
 
-			Variable settings = getVariable(DefaultSettings.class, "settings");
+            Variable settings = getVariable(ActionContext.class, "actionContext");
             String s = codeGenerator.createFillSettings(tc, action, null, settings, alertCollector);
 			sb.append(s);
 			sb.append(TAB2+LOGGER_NAME+".debug(\"start action: "+action.getActionURI()+", line:"+action.getLine()+"\");"+EOL);
@@ -188,7 +189,7 @@ public class OldImpl {
 
             CodeGenerator_new.addExecutedActionReferences(sb, action, TAB3);
 
-            if(action.getOutcome() != null) {
+            if(action.hasOutcome()) {
                 sb.append(TAB3 + CONTEXT_NAME + ".getOutcomeCollector().storeOutcome(settings.getOutcome());" + EOL);
             }
 
@@ -238,11 +239,6 @@ public class OldImpl {
         }
 
         return sb.toString();
-    }
-
-	private String getReturnTypeName(AMLAction action) {
-        ActionInfo actionInfo = action.getActionInfo();
-        return actionInfo != null ? getSimpleName(actionInfo.getReturnType(), null) : null;
     }
 
 	private Variable getVariable(Class<?> type, String varNameOrig)
@@ -596,21 +592,21 @@ public class OldImpl {
 			}
 
             String description = toJavaString(action.getDescrption());
-			if (action.getOutcome() != null) {
-				description = action.getOutcome()+" "+description;
-			}
-			sb.append(TAB2+REPORT_NAME+".createAction(\""
-					+id+serviceName+action.getActionURI()+"\", "
+
+            sb.append(TAB2 + REPORT_NAME + ".createAction(\""
+                    + id + "\", "
 
 					+ "\""+ serviceName + "\", "
 					+ "\""+ action.getActionURI() + "\", "
-					+ "\""+ getReturnTypeName(action) + "\", "
-
-					+ "\""+description+"\", ");
+                    + "\"\", "
+                    + "\""+description+"\", ");
 
 			if(inputVariable != null) {
+                sb.append(MessageUtil.class.getSimpleName());
+                sb.append(".convertToIMessage(");
 			    sb.append(inputVariable.getName());
 			    sb.append(method);
+                sb.append(", null, \"Namespace\", \"Message\")");
 			} else {
 			    sb.append("null");
 			}
@@ -628,7 +624,13 @@ public class OldImpl {
             String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
             sb.append("Arrays.asList(");
             sb.append(verificationsOrder);
-            sb.append(")");
+            sb.append("), ");
+
+            if(action.hasOutcome()) {
+                sb.append(enclose(toJavaString(action.getOutcome())));
+            } else {
+                sb.append("null");
+            }
 
             sb.append(");");
             sb.append(EOL);
@@ -653,7 +655,7 @@ public class OldImpl {
 
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB2);
 
-		if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -680,7 +682,7 @@ public class OldImpl {
 		sb.append(TAB3+LOGGER_NAME+".warn(e);"+EOL);
 		sb.append(TAB3+CONTEXT_NAME+".setInterrupt(e instanceof InterruptedException);"+EOL);
 
-		if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB3);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -697,23 +699,19 @@ public class OldImpl {
         String serviceName = action.hasServiceName() ? action.getServiceName() + " " : "";
         String description = toJavaString(action.getDescrption());
 
-        if(action.getOutcome() != null) {
-            description = action.getOutcome() + " " + description;
-        }
-
         NewImpl.writeCreateTestCase(tc, sb);
         writeCreateAction(action, sb, id, serviceName, description);
 
         sb.append(TAB3 + REPORT_NAME + ".closeAction(new StatusDescription(StatusType.FAILED, e.getMessage(), e");
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(", false");
         }
 
         sb.append("), null);");
         sb.append(EOL);
 
-        if(continueOnFailed || action.getOutcome() != null) {
+        if(continueOnFailed || action.hasOutcome()) {
             sb.append(TAB3+"if (e instanceof InterruptedException) {"+EOL);
             sb.append(TAB4+"throw e;"+EOL);
             sb.append(TAB3+"}"+EOL);
@@ -736,16 +734,17 @@ public class OldImpl {
 
         sb.append(TAB3 + "if (!" + REPORT_NAME + ".isActionCreated()) {" + EOL);
         sb.append(TAB4 + REPORT_NAME + ".createAction(\""
-                + id + serviceName + action.getActionURI() + "\", "
+                + id + "\", "
 
                 + "\"" + serviceName + "\", "
                 + "\"" + action.getActionURI() + "\", "
-                + "\"" + getReturnTypeName(action) + "\", "
+                + "\"\", "
 
                 + "\"" + description + "\" , null, null, "
                 + (action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null") + ", "
                 + action.getHash()  + ", "
-                + "Arrays.asList( " + verificationsOrder + ")"
+                + "Arrays.asList( " + verificationsOrder + "), "
+                + (action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null")
                 + ");" + EOL);
         sb.append(TAB3 + "}" + EOL);
     }

@@ -62,6 +62,8 @@ public interface IAction extends Cloneable {
 	String getOutcome();
 	void setOutcome(String cell);
 
+    boolean hasOutcome();
+
 	String getSystemPrecision();
 	void setSystemPrecision(String precision);
 

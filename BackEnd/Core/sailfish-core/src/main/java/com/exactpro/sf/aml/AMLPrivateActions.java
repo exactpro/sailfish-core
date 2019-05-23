@@ -87,7 +87,7 @@ public class AMLPrivateActions {
 		}
 		IScriptReport report = context.getReport();
         report.createAction("CheckUnexpectedMessage", null, "CheckUnexpectedMessage", null, "Check unexpected message",
-                            null, null, null, 0, Collections.emptyList());
+                null, null, null, 0, Collections.emptyList(), null);
         if (unexpectedMessages.isEmpty()) {
             report.closeAction(new StatusDescription(StatusType.PASSED, ""), null);
         } else {

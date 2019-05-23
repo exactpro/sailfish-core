@@ -15,14 +15,49 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.actionmanager.actioncontext;
 
-public interface IActionReport extends IGroupReport {
-    /**
-     * @deprecated Please use {@link #createEmbeddedReport(String, String)}
-     */
-    @Deprecated
-    default IGroupReport createActionGroup(String name, String description) {
-        return createEmbeddedReport(name, description);
-    }
+import java.io.File;
 
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
+import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
+import com.exactpro.sf.scriptrunner.MessageLevel;
+import com.exactpro.sf.scriptrunner.StatusDescription;
+import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.scriptrunner.impl.ReportTable;
+import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
+import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
+
+public interface IActionReport extends AutoCloseable {
     IActionReport createEmbeddedReport(String name, String description);
+
+    // from IScriptReport
+    void createVerification(StatusType status, String name, String description, String statusDescription);
+
+    void createVerification(StatusType status, String name, String description, String statusDescription,
+            ComparisonResult result);
+
+    void createVerification(StatusType status, String name, String description, String statusDescription,
+            ComparisonResult result, Throwable cause);
+
+    void createMessage(StatusType status, MessageLevel level, String... messages);
+
+    void createMessage(StatusType status, MessageLevel level, Throwable e, String... messages);
+
+    void createMessage(TextColor color, TextStyle style, String... messages);
+
+    void createTable(StatusType status, ReportTable table);
+
+    void createLinkToReport(StatusType status, String linkToReport);
+
+    void createParametersTable(IMessage message);
+
+    File createFile(StatusType status, String... pathElements)
+            throws WorkspaceStructureException, WorkspaceSecurityException;
+
+    void createException(Throwable cause);
+
+    StatusType getTestCaseStatus();
+
+    StatusDescription getStatusDescription();
 }

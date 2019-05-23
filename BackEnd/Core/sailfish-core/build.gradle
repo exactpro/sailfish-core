@@ -129,6 +129,8 @@ dependencies {
 
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.7'
 
+    compile 'org.jooq:jool-java-8:0.9.14'
+
     runtimeOnly 'commons-collections:commons-collections:3.2.2' // for commons-configuration
 
     testRuntime 'org.apache.derby:derby:10.14.2.0'

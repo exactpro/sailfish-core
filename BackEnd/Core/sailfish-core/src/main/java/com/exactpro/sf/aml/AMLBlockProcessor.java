@@ -150,7 +150,7 @@ public class AMLBlockProcessor {
             Map<String, AMLAction> groupFinished = new HashMap<>();
 
             for(AMLAction action : testCase.getActions()) {
-                if(action.getOutcome() != null) {
+                if(action.hasOutcome()) {
                     lastOutcome.put(action.getOutcome(), action);
                     groupFinished.put(action.getOutcomeGroup(), action);
                 }

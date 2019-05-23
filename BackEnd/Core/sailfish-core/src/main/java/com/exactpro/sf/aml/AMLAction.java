@@ -493,7 +493,12 @@ public class AMLAction implements IAction, Cloneable, Serializable {
 		this.outcome = cell;
 	}
 
-	public String getOutcomeGroup() {
+    @Override
+    public boolean hasOutcome() {
+        return StringUtils.isNotEmpty(outcome);
+    }
+
+    public String getOutcomeGroup() {
 		return outcomeGroup;
 	}
 

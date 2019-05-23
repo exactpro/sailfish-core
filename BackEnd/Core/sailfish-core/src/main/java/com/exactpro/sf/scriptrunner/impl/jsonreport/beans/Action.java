@@ -28,9 +28,12 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 public class Action implements IJsonReportNode {
 
     private long id;
+    private String matrixId;
+    private String serviceName;
     private Long checkPointId;
     private List<IJsonReportNode> subNodes;
     private String name;
+    private String messageType;
     private String description;
     private Set<Bug> bugs;
     private Set<Long> relatedMessages;
@@ -39,6 +42,7 @@ public class Action implements IJsonReportNode {
     private List<LogEntry> logs;
     private Instant startTime;
     private Instant finishTime;
+    private String outcome;
 
     public Action() {
         this.bugs = new HashSet<>();
@@ -83,6 +87,22 @@ public class Action implements IJsonReportNode {
         this.id = id;
     }
 
+    public String getMatrixId() {
+        return matrixId;
+    }
+
+    public void setMatrixId(String matrixId) {
+        this.matrixId = matrixId;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
     public Long getCheckPointId() {
         return checkPointId;
     }
@@ -105,6 +125,14 @@ public class Action implements IJsonReportNode {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(String messageType) {
+        this.messageType = messageType;
     }
 
     public String getDescription() {
@@ -169,5 +197,13 @@ public class Action implements IJsonReportNode {
 
     public void setFinishTime(Instant finishTime) {
         this.finishTime = finishTime;
+    }
+
+    public String getOutcome() {
+        return outcome;
+    }
+
+    public void setOutcome(String outcome) {
+        this.outcome = outcome;
     }
 }

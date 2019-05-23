@@ -38,12 +38,16 @@ interface CardProps {
 
 export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded }: CardProps) => {
     const {
+        matrixId,
+        serviceName,
         name,
+        messageType,
         status,
         description,
         parameters,
         startTime,
-        finishTime
+        finishTime,
+        outcome
     } = action;
     const rootClassName = createSelector(
         "action-card",
@@ -78,10 +82,10 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 <div class={headerClassName}>
                     <div class="ac-header__title">
                         <div class="ac-header__name">
-                            <h3>{name}</h3>
+                            <h3>{matrixId} {serviceName} {name} {messageType}</h3>
                         </div>
                         <div class="ac-header__description">
-                            <h3>{description}</h3>
+                            <h3>{description} {outcome}</h3>
                         </div>
                     </div>
                     {

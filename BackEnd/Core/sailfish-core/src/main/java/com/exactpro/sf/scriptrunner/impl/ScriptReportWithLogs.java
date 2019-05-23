@@ -159,15 +159,9 @@ public class ScriptReportWithLogs implements IScriptReport {
     }
 
 	@Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
-        report.createAction(name, serviceName, action, msg, description, inputParameters, checkPoint, tag, hash, verificationsOrder);
-	}
-
-    @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
-        report.createAction(name, serviceName, action, msg, description, inputParameters, checkPoint, tag, hash, verificationsOrder);
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters, CheckPoint checkPoint, String tag, int hash,
+            List<String> verificationsOrder, String outcome) {
+        report.createAction(id, serviceName, name, messageType, description, parameters, checkPoint, tag, hash, verificationsOrder, outcome);
     }
 
 	@Override
@@ -221,8 +215,8 @@ public class ScriptReportWithLogs implements IScriptReport {
 	}
 
     @Override
-    public void createParametersTable(String messageName, Object message) {
-        report.createParametersTable(messageName, message);
+    public void createParametersTable(IMessage message) {
+        report.createParametersTable(message);
     }
 
 	@Override

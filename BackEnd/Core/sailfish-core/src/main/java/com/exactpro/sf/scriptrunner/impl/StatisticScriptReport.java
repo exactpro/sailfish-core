@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.embedded.statistics.StatisticsService;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
@@ -122,25 +123,12 @@ public class StatisticScriptReport extends DefaultScriptReport {
 	}
 
 	@Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters, CheckPoint checkPoint, String tag, int hash,
+            List<String> verificationsOrder, String outcome) {
 
-        if(statisticsService != null) {
+		if(statisticsService != null) {
 
-            statisticsService.actionStarted(matrixName, serviceName, action, msg, description, actionCouter++, tag,
-                                                 hash);
-
-		}
-
-	}
-
-	@Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
-
-        if(statisticsService != null) {
-
-            statisticsService.actionStarted(matrixName, serviceName, action, msg, description, actionCouter++, tag,
+            statisticsService.actionStarted(matrixName, serviceName, name, messageType, description, actionCouter++, tag,
                                                  hash);
 
 		}

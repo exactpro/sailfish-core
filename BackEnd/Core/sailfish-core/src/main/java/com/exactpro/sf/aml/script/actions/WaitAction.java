@@ -48,7 +48,6 @@ import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
-import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IGroupReport;
 import com.exactpro.sf.services.CSHIterator;
 import com.exactpro.sf.services.ICSHIterator;
 import com.exactpro.sf.services.IInitiatorService;
@@ -142,7 +141,7 @@ public class WaitAction {
             IServiceHandler handler,
             ISession isession,
             CheckPoint checkPoint,
-            IGroupReport report,
+            IActionReport report,
             long waitTime,
             boolean returnExactOnly,
             boolean addToReport,
@@ -297,11 +296,11 @@ public class WaitAction {
 		IActionReport report = actionContext.getReport();
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " of " + expected,
+        try(IActionReport embeddedReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " of " + expected,
                 description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+            embeddedReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : reportMessages) {
-                groupReport.createMessage(status, MessageLevel.INFO, message.toString());
+                embeddedReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
         } catch (Exception e) {
             throw new EPSCommonException("Failed to close ActionGroupReport", e);
@@ -433,7 +432,7 @@ public class WaitAction {
         return messageCount;
     }
 
-    public static boolean addResultToReport(IGroupReport report,
+    public static boolean addResultToReport(IActionReport report,
             Object expectedMessageCount,
             String description,
             List<Pair<IMessage, ComparisonResult>> allResults, int messageCount, boolean exceptionOnFail)
@@ -554,10 +553,10 @@ public class WaitAction {
         StatusType status = ComparisonUtil.getStatusType(result);
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected, description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+        try(IActionReport embeddedReport = report.createEmbeddedReport("Received messages: " + receivedMessages + " from " + expected, description)) {
+            embeddedReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : messages) {
-                groupReport.createMessage(status, MessageLevel.INFO, message.toString());
+                embeddedReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
         } catch (Exception e) {
             throw new EPSCommonException("Failed to close ActionGroupReport", e);
@@ -606,10 +605,10 @@ public class WaitAction {
         IActionReport report = actionContext.getReport();
         String expected = Formatter.formatExpected(result);
 
-        try(IGroupReport groupReport = report.createEmbeddedReport("Received messages: " + actualCount + " from " + expected, description)) {
-            groupReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
+        try(IActionReport embeddedReport = report.createEmbeddedReport("Received messages: " + actualCount + " from " + expected, description)) {
+            embeddedReport.createVerification(status, "Count messages", description, status != StatusType.PASSED ? result.getExceptionMessage() : "", result, result.getException());
             for (IMessage message : messages) {
-                groupReport.createMessage(status, MessageLevel.INFO, message.toString());
+                embeddedReport.createMessage(status, MessageLevel.INFO, message.toString());
             }
         } catch (Exception e) {
             throw new EPSCommonException("Failed to close ActionGroupReport", e);
@@ -637,7 +636,7 @@ public class WaitAction {
         return compSettings;
     }
 
-    public static IMessage processResults(IGroupReport report, ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> results, IMessage messageFilter,
+    public static IMessage processResults(IActionReport report, ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> results, IMessage messageFilter,
             String serviceName, boolean returnExactOnly, boolean addToReport, String description) {
         if (results.size() == 1)
     	{
@@ -689,7 +688,7 @@ public class WaitAction {
         throw new EPSCommonException("Timeout");
     }
 
-    public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IGroupReport report,
+    public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IActionReport report,
                                      String serviceName, String description, boolean addToReport) {
         int iMessage = 0;
         int countFailed = 0;

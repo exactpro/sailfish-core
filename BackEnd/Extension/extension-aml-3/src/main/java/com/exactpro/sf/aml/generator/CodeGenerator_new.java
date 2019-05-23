@@ -63,8 +63,8 @@ import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.TypeHelper;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.CheckPoint;
-import com.exactpro.sf.aml.script.DefaultSettings;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.common.adapting.IAdapterManager;
@@ -603,7 +603,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 		StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
 		sb.append(EOL);
-		sb.append(TAB2+varName+" = new "+settings.getType().getCanonicalName()+"(" + CONTEXT_NAME + ", " + (action.getOutcome() == null) + ");"+EOL);
+        sb.append(TAB2 + varName + " = new " + settings.getType().getCanonicalName() + "(" + CONTEXT_NAME + ", " + !action.hasOutcome() + ");" + EOL);
 
 		if (action.getTimeout() != null)
 		{
@@ -612,7 +612,7 @@ public class CodeGenerator_new implements ICodeGenerator {
             try {
                 NewImplHelper.substituteReference(tc, action, alertCollector, Column.Timeout.getName(), timeout, definedReferences, dictionaryManager, actionManager, utilityManager);
 
-                getMethod(alertCollector, DefaultSettings.class, "setTimeout", action, Column.Timeout.getName(), long.class);
+                getMethod(alertCollector, ActionContext.class, "setTimeout", action, Column.Timeout.getName(), long.class);
 
                 String timeoutStr = timeout.isReference() ? "(long)" + NewImpl.generateEval(action.getLine(), Column.Timeout.getName(), timeout, TAB3) : timeout.getValue();
                 sb.append(TAB2 + varName + ".setTimeout(" + timeoutStr + ");" + EOL);
@@ -622,35 +622,35 @@ public class CodeGenerator_new implements ICodeGenerator {
 		}
 		if (action.getServiceName() != null)
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setServiceName", action, Column.ServiceName.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setServiceName", action, Column.ServiceName.getName(), String.class);
 			sb.append(TAB2+varName+".setServiceName(\""+ServiceName.toString(scriptContext.getEnvironmentName(), action.getServiceName())+"\");"+EOL);
 		}
 		if (action.hasReference())
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setReference", action, Column.Reference.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setReference", action, Column.Reference.getName(), String.class);
 			sb.append(TAB2+varName+".setReference(\""+action.getReference()+"\");"+EOL);
 		}
 		if (action.hasReferenceToFilter())
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setReferenceToFilter", action, Column.ReferenceToFilter.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setReferenceToFilter", action, Column.ReferenceToFilter.getName(), String.class);
 			sb.append(TAB2+varName+".setReferenceToFilter(\""+action.getReferenceToFilter()+"\");"+EOL);
 		}
 		if (action.hasId())
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setId", action, Column.Id.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setId", action, Column.Id.getName(), String.class);
 			sb.append(TAB2+varName+".setId(\""+action.getId()+"\");"+EOL);
 		}
-		getMethod(alertCollector, DefaultSettings.class, "setLine", action, null, long.class);
+        getMethod(alertCollector, ActionContext.class, "setLine", action, null, long.class);
         sb.append(TAB2+varName+".setLine("+action.getLine()+");"+EOL);
 		if (action.hasDictionaryURI())
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setDictionaryURI", action, Column.Dictionary.getName(), SailfishURI.class);
+            getMethod(alertCollector, ActionContext.class, "setDictionaryURI", action, Column.Dictionary.getName(), SailfishURI.class);
 			sb.append(TAB2+varName+".setDictionaryURI(SailfishURI.parse(\""+action.getDictionaryURI()+"\"));"+EOL);
             sb.append(TAB2+varName+".setUncheckedFields("+ CONTEXT_NAME + ".getDictionaryManager().getMessageFactory(" + SailfishURI.class.getSimpleName()  + ".parse(\"" + action.getDictionaryURI() + "\")).getUncheckedFields());"+EOL);
         }
 		if (action.getMessageCount() != null)
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setMessageCount", action, Column.MessageCount.getName(), MessageCount.class);
+            getMethod(alertCollector, ActionContext.class, "setMessageCount", action, Column.MessageCount.getName(), MessageCount.class);
 
 			String count = action.getMessageCount();
 			Value countValue = new Value(count);
@@ -691,18 +691,18 @@ public class CodeGenerator_new implements ICodeGenerator {
 			}
 		}
 
-		getMethod(alertCollector, DefaultSettings.class, "setMetaContainer", action, null, MetaContainer.class);
+        getMethod(alertCollector, ActionContext.class, "setMetaContainer", action, null, MetaContainer.class);
 		sb.append(TAB2+varName+".setMetaContainer(metaContainer);"+EOL);
 
         if(!"".equals(action.getFailUnexpected()))
 		{
-			getMethod(alertCollector, DefaultSettings.class, "setFailUnexpected", action, Column.FailUnexpected.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setFailUnexpected", action, Column.FailUnexpected.getName(), String.class);
 			String s = action.getFailUnexpected();
             if("Y".equalsIgnoreCase(s) || "A".equalsIgnoreCase(s)) {
                 sb.append(TAB2 + varName + ".setFailUnexpected(\"" + s + "\");" + EOL);
             }
 		} else {
-			getMethod(alertCollector, DefaultSettings.class, "setFailUnexpected", action, Column.FailUnexpected.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setFailUnexpected", action, Column.FailUnexpected.getName(), String.class);
 			String s = environmentManager.getEnvironmentSettings().getFailUnexpected();
             if("Y".equalsIgnoreCase(s) || "A".equalsIgnoreCase(s)) {
                 sb.append(TAB2 + varName + ".setFailUnexpected(\"" + s + "\");" + EOL);
@@ -711,7 +711,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 
         if(!"".equals(action.getDescrption()))
 		{
-            getMethod(alertCollector, DefaultSettings.class, "setDescription", action, Column.Description.getName(), String.class);
+            getMethod(alertCollector, ActionContext.class, "setDescription", action, Column.Description.getName(), String.class);
 
             sb.append(TAB2+varName+".setDescription("+NewImpl.getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, definedReferences, dictionaryManager, actionManager, utilityManager)+");"+EOL);
 		}
@@ -719,7 +719,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 		if (action.getCheckPoint() != null)
 		{
 		    String oldCp = action.getCheckPoint();
-			getMethod(alertCollector, DefaultSettings.class, "setCheckPoint", action, Column.CheckPoint.getName(), CheckPoint.class);
+            getMethod(alertCollector, ActionContext.class, "setCheckPoint", action, Column.CheckPoint.getName(), CheckPoint.class);
 
 			logger.debug("find reference for checkpoint: {}", oldCp);
 			String newCp = NewImpl.getMvelString(tc, action, oldCp, Column.CheckPoint, alertCollector, definedReferences, dictionaryManager, actionManager, utilityManager);
@@ -746,16 +746,24 @@ public class CodeGenerator_new implements ICodeGenerator {
 			sb.append(TAB2+varName+".setCheckPoint(("+CheckPoint.class.getSimpleName()+")"+MAP_NAME+".get("+newCp+"));"+EOL);
 		}
 
-		getMethod(alertCollector, DefaultSettings.class, "setCheckGroupsOrder", action, null, boolean.class);
+        getMethod(alertCollector, ActionContext.class, "setCheckGroupsOrder", action, null, boolean.class);
         sb.append(TAB2+varName+".setCheckGroupsOrder("+action.isCheckGroupsOrder()+");"+EOL);
 
-		getMethod(alertCollector, DefaultSettings.class, "setAddToReport", action, null, boolean.class);
+        getMethod(alertCollector, ActionContext.class, "setAddToReport", action, null, boolean.class);
 		sb.append(TAB2+varName+".setAddToReport("+action.isAddToReport()+");"+EOL);
 
-		getMethod(alertCollector, DefaultSettings.class, "setMessages", action, null, Map.class);
+        getMethod(alertCollector, ActionContext.class, "setContinueOnFailed", action, null, boolean.class);
+        sb.append(TAB2);
+        sb.append(varName);
+        sb.append(".setContinueOnFailed(");
+        sb.append(action.getContinueOnFailed() || amlSettings.getContinueOnFailed());
+        sb.append(");");
+        sb.append(EOL);
+
+        getMethod(alertCollector, ActionContext.class, "setMessages", action, null, Map.class);
 		sb.append(TAB2+varName+".setMessages(messages);"+EOL);
 
-		getMethod(alertCollector, DefaultSettings.class, "setReorderGroups", action, null, boolean.class);
+        getMethod(alertCollector, ActionContext.class, "setReorderGroups", action, null, boolean.class);
 		sb.append(TAB2+varName+".setReorderGroups("+action.getReorderGroups()+");"+EOL);
 
 		sb.append(EOL);

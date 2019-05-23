@@ -166,16 +166,29 @@ public class MetaContainer {
 	 * Create clone without children
 	 */
 	@Override
-	public MetaContainer clone() {
-		MetaContainer result = new MetaContainer();
+    public MetaContainer clone() {
+        return clone(false);
+    }
 
-        result.setFailUnexpected(failUnexpected);
-        result.setAlternateValue(alternateValue);
-        result.doublePrecision.putAll(doublePrecision);
-        result.systemPrecision.putAll(systemPrecision);
+    public MetaContainer clone(boolean withChildren) {
+        MetaContainer result = new MetaContainer();
 
-		return result;
-	}
+        result.setFailUnexpected(this.failUnexpected);
+        result.setAlternateValue(this.alternateValue);
+        result.doublePrecision.putAll(this.doublePrecision);
+        result.systemPrecision.putAll(this.systemPrecision);
+        result.systemColumns.putAll(this.systemColumns);
+
+        if(withChildren) {
+            children.forEach((name, list) -> {
+                for(MetaContainer child : list) {
+                    result.add(name, child.clone(true));
+                }
+            });
+        }
+
+        return result;
+    }
 
 	@Override
 	public String toString() {
