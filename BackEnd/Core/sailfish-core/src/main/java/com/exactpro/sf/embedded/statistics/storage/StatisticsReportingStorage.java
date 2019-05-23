@@ -561,19 +561,31 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
     public SortedMap<Long, List<Long>> getMatrixRunAndTestCaseRunIDs(AggregateReportParameters params) {
         boolean tagsFilter = CollectionUtils.isNotEmpty(params.getTags());
         boolean sfInstancesFilter = CollectionUtils.isNotEmpty(params.getSfInstances());
+        boolean fromFilter = params.getFrom() != null;
+        boolean toFilter = params.getTo() != null;
 
         String queryString = "select MR.id, TCR.id "
                 + "from TestCaseRun as TCR "
                 + "right join TCR.matrixRun as MR "
                 + "join MR.sfInstance as SF "
-                + "where MR.startTime >= :from and MR.finishTime <= :to ";
+                + "where ";
 
-        if (sfInstancesFilter) {
-            queryString += "and SF.id in (:ids) ";
+        String whereClause = "";
+        String and = " ";
+        if (fromFilter) {
+            whereClause += " MR.startTime >= :from ";
+            and = " and ";
         }
-
+        if (toFilter) {
+            whereClause += and + "MR.finishTime <= :to";
+            and = " and ";
+        }
+        if (sfInstancesFilter) {
+            whereClause += and + " SF.id in (:ids) ";
+            and = " and ";
+        }
         if (tagsFilter) {
-            queryString += "and (exists (select MR2.id from "
+            whereClause += and + " (exists (select MR2.id from "
                     + "MatrixRun as MR2 "
                     + "join MR2.tags as T "
                     + "where MR2.id = MR.id "
@@ -587,13 +599,18 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                     + "and TCRT.tag.id in (:tcrTags) "
                     + "group by TCR2.id )) ";
         }
-        queryString += "order by MR.startTime, MR.id";
+        queryString += whereClause;
+        queryString += " order by MR.startTime, MR.id";
 
         Session session = sessionFactory.openSession();
         try (AutoCloseable ignore = session::close) {
             Query query = session.createQuery(queryString);
-            query.setParameter("from", params.getFrom());
-            query.setParameter("to", params.getTo());
+            if (fromFilter) {
+                query.setParameter("from", params.getFrom());
+            }
+            if (toFilter) {
+                query.setParameter("to", params.getTo());
+            }
             if (sfInstancesFilter) {
                 query.setParameterList("ids", toIds(params.getSfInstances()));
             }
