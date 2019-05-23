@@ -1,3 +1,4 @@
+#!/bin/sh
 #*****************************************************************************
 # Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
 #
@@ -33,6 +34,6 @@ export JAVA_OPTS="$JAVA_OPTS $DEPLOYER_JAVA_OPTS"
 
 export ADDITIONAL_SCRIPTS_DIR="$CATALINA_HOME/../../AdditionalScripts"
 
-if [[ -r "$ADDITIONAL_SCRIPTS_DIR/set_env_ext.sh" ]]; then
+if [ -r "$ADDITIONAL_SCRIPTS_DIR/set_env_ext.sh" ]; then
   . "$ADDITIONAL_SCRIPTS_DIR/set_env_ext.sh"
 fi
