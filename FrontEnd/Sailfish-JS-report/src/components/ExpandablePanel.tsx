@@ -35,11 +35,16 @@ export const ExpandablePanel = ({ header, body, children, expandedHeader, isExpa
         isExpanded ? "expanded" : "hidden"
     );
 
+    const onClick = (e: React.MouseEvent) => {
+        onExpand(!isExpanded);
+        e.stopPropagation();
+    }
+
     return (
         <div className="expandable-panel">
             <div className="expandable-panel__header">
                 <div className={iconClass} 
-                    onClick={() => onExpand(!isExpanded)}/>
+                    onClick={onClick}/>
                 { (isExpanded && expandedHeader) || header || children[0] }
             </div>
             {

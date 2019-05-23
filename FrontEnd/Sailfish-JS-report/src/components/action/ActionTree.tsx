@@ -18,11 +18,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import Action, { ActionNode, ActionNodeType, isAction } from '../../models/Action';
 import { ActionCard } from './ActionCard';
-import UserMessage from '../../models/UserMessage';
-import Verification from '../../models/Verification'
-import Link from '../../models/Link';
 import { StatusType } from '../../models/Status';
-import UserTable from '../../models/UserTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode, mapTree } from '../../models/util/Tree';
 import AppState from '../../state/models/AppState';
@@ -34,6 +30,7 @@ import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
 import '../../styles/action.scss';
 import { raf } from '../../helpers/raf';
+import memoize from '../../helpers/memoize';
 
 interface ActionExpandStatus {
     id: number;
@@ -64,7 +61,7 @@ interface ActionTreeState {
     expandTree: Tree<ActionExpandStatus>;
 }
 
-class ActionTreeBase extends React.Component<ActionTreeProps, ActionTreeState> {
+class ActionTreeBase extends React.PureComponent<ActionTreeProps, ActionTreeState> {
 
     private treeElements: React.ReactNode[] = [];
 
@@ -74,14 +71,14 @@ class ActionTreeBase extends React.Component<ActionTreeProps, ActionTreeState> {
         const { action }  = props;
 
         this.state = {
-            expandTree: isAction(action) ? this.getExpandTree(action, props.expandedTreePath) : createNode({ id: null, isExpanded: false })
+            expandTree: isAction(action) ? this.createExpandTree(action, props.expandedTreePath) : createNode({ id: null, isExpanded: false })
         }
     }
 
-    getExpandTree(action: Action, treePath: Tree<number>): Tree<ActionExpandStatus> {
+    createExpandTree(action: Action, treePath: Tree<number>): Tree<ActionExpandStatus> {
         const expandState: ActionExpandStatus = {
             id: action.id,
-            isExpanded: treePath && treePath.value === action.id
+            isExpanded: treePath ? treePath.value === action.id : false
         }
 
         if (action.subNodes.length === 0) {
@@ -92,9 +89,29 @@ class ActionTreeBase extends React.Component<ActionTreeProps, ActionTreeState> {
             expandState,
             action.subNodes.map(
                 actionNode => isAction(actionNode) ? 
-                    this.getExpandTree(actionNode, treePath && treePath.nodes.find(node => node.value === actionNode.id)) : 
+                    this.createExpandTree(actionNode, treePath && treePath.nodes.find(node => node.value === actionNode.id)) : 
                     null
             ).filter(node => node)
+        );
+    }
+
+    updateExpandTree(tree: Tree<ActionExpandStatus>, nextPath: Tree<number>) {
+        if (!nextPath) {
+            return tree;
+        }
+
+        const nextState: ActionExpandStatus = {
+            id: tree.value.id,
+            isExpanded: nextPath.value === tree.value.id ? true : tree.value.isExpanded
+        }
+
+        if (tree.nodes.length === 0 || nextPath.nodes.length === 0) {
+            return createNode(nextState, tree.nodes);
+        }
+
+        return createNode(
+            nextState,
+            tree.nodes.map(node => this.updateExpandTree(node, nextPath.nodes.find(({ value }) => value === node.value.id)))
         );
     }
 
@@ -121,74 +138,18 @@ class ActionTreeBase extends React.Component<ActionTreeProps, ActionTreeState> {
         }
     }
 
-
-
-    // shouldComponentUpdate(nextProps: ActionTreeProps) {
-    //     if (nextProps.action !== this.props.action) return true;
-
-    //     if (isAction(nextProps.action)) {
-    //         const nextAction = nextProps.action;
-
-    //         if (this.props.actionsFilter !== nextProps.actionsFilter) {
-    //             return true;
-    //         }
-
-    //         // compare current action id and selected action id
-    //         return this.shouldActionUpdate(nextAction, nextProps, this.props);
-    //     } else {
-    //         return true;
-    //     }
-    // }
-
-    shouldActionUpdate(action: Action, nextProps: ActionTreeProps, prevProps: ActionTreeProps): boolean {
-
-        // hadnling scrolled action change
-        if (nextProps.scrolledActionId != prevProps.scrolledActionId && action.id === +nextProps.scrolledActionId) {
-            return true;
-        }
-
-        // the first condition - current action is selected and we should update to show it
-        // the second condition - current action was selected and we should disable selection
-        if (nextProps.selectedActionsId != prevProps.selectedActionsId && (
-                nextProps.selectedActionsId.includes(action.id) || prevProps.selectedActionsId.includes(action.id))) {
-            return true;
-        }
-
-        // here we check verification selection
-        if (nextProps.selectedVerififcationId !== prevProps.selectedVerififcationId &&
-            action.relatedMessages &&
-            (action.relatedMessages.some(msgId => msgId == nextProps.selectedVerififcationId || msgId == prevProps.selectedVerififcationId))) {
-            return true;
-        }
-
-        if (action.subNodes) {
-            // if at least one of the subactions needs an update, we update the whole action
-            return action.subNodes.some(action => {
-                if (isAction(action)) {
-                    return this.shouldActionUpdate(action, nextProps, prevProps)
-                } else {
-                    return false;
-                }
+    componentWillReceiveProps(nextProps: ActionTreeProps) {
+        if (nextProps.expandedTreePath !== this.props.expandedTreePath && nextProps.expandedTreePath !== null) {
+            this.setState({
+                expandTree: this.updateExpandTree(this.state.expandTree, nextProps.expandedTreePath)
             });
-        }
-
-        return false;
-    }
-
-    componentWillReceiveProps(nextProps: ActionTreeProps, nextState: ActionTreeState) {
-        if (nextProps.expandedTreePath !== this.props.expandedTreePath) {
-            // this.setState({
-            //     expandTree: nextProps.expandedTreePath
-            // });
         }
     }
 
     getSubTree(action: ActionNode, expandTree: Tree<ActionExpandStatus>): Tree<ActionExpandStatus> {
-        if (isAction(action)) {
-            return expandTree && expandTree.nodes.find(subNode => subNode.value.id == action.id);
-        } else {
-            return null;
-        }
+        return isAction(action) ?
+            expandTree && expandTree.nodes.find(({ value }) => value.id == action.id) : 
+            null;
     }
 
     scrollToAction(actionId: number) {
@@ -311,7 +272,7 @@ class ActionTreeBase extends React.Component<ActionTreeProps, ActionTreeState> {
     }
 }
 
-function getExpandedTreePath(actionNode: ActionNode, targetActionsId: number[]): Tree<number> {
+const getExpandedTreePath = memoize((actionNode: ActionNode, targetActionsId: number[]): Tree<number> => {
 
     if (!isAction(actionNode)) {
         return null;
@@ -333,7 +294,7 @@ function getExpandedTreePath(actionNode: ActionNode, targetActionsId: number[]):
     return targetActionsId.includes(actionNode.id) || treeNode.nodes.length != 0 ? 
             treeNode : 
             null;
-}
+}, (actionNode: ActionNode) => isAction(actionNode) ? actionNode.id.toString() : 'not-action');
 
 export const ActionTree = connect(
     (state: AppState, ownProps: ActionTreeOwnProps): ActionTreeStateProps => ({
