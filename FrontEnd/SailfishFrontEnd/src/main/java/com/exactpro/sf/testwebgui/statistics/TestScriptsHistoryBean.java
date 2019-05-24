@@ -89,7 +89,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 
     private List<AggregatedReportRow> selectedRows;
 
-    private List<Tag> allCustomerTags;
+    private List<Tag> allCustomerTags = Collections.emptyList();
 
     private List<Tag> customerTags = new ArrayList<>();
 
@@ -225,11 +225,11 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	public void init() {
         super.init();
 
-        this.allCustomerTags = new ArrayList<>(allTags);
-
 		this.statisticsDbAvailable = BeanUtil.getSfContext().getStatisticsService().isConnected();
 
         if(statisticsDbAvailable) {
+
+            this.allCustomerTags = new ArrayList<>(allTags);
 
 			this.allRunStatuses = BeanUtil.getSfContext().getStatisticsService().getStorage().getAllRunStatuses();
 
