@@ -108,7 +108,7 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                             <p>{msgName}</p>
                         </div>
                         <div class="mc-header__timestamp">
-                            <p>{formatTime(timestamp)}</p>
+                            <p>{timestamp}</p>
                         </div>
                         <div class="mc-header__session">
                             <span>Session</span>
