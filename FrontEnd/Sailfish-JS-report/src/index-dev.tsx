@@ -19,11 +19,32 @@ import { App } from "./components/App-dev";
 import { Provider } from 'preact-redux';
 import { createAppStore } from './store/store-dev';
 import { testReport } from './test/testReport';
+import { resetTestCase } from "./actions/actionCreators";
+import { storeEventHandler } from "./helpers/storeEventHadnler";
+import { isStateAction } from "./actions/stateActions";
 // enable react-devtools compatibility, APP WORKNIG SLOW WITH THIS
 //import 'preact/devtools';
 
+const store = createAppStore(testReport);
+
+// handling goBack and goForward browser history actions
+top.window.onpopstate = storeEventHandler(store, (dispatch, e: PopStateEvent) => {
+    // states contains redux action, recived
+    const action = e.state;
+
+    if (!action) {
+        dispatch(resetTestCase());
+        return;
+    }
+
+    if (isStateAction(action)) {
+        dispatch(action);
+    }
+});
+
 render(
-    <Provider store={createAppStore(testReport)}>
+    <Provider store={store}>
         <App/>
     </Provider>, 
-    document.getElementById("index"));
+    document.getElementById("index")
+);

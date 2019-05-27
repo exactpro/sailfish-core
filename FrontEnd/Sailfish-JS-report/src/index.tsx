@@ -18,9 +18,30 @@ import { h, render } from "preact";
 import { App } from "./components/App";
 import { Provider } from 'preact-redux';
 import { createAppStore } from './store/store';
+import { storeEventHandler } from "./helpers/storeEventHadnler";
+import { resetTestCase } from "./actions/actionCreators";
+import { isStateAction } from './actions/stateActions';
+
+const store = createAppStore(null);
+
+// handling goBack and goForward browser history actions
+top.window.onpopstate = storeEventHandler(store, (dispatch, e: PopStateEvent) => {
+    // states contains redux action, recived
+    const action = e.state;
+
+    if (!action) {
+        dispatch(resetTestCase());
+        return;
+    }
+
+    if (isStateAction(action)) {
+        dispatch(action);
+    }
+});
 
 render(
-    <Provider store={createAppStore(null)}>
+    <Provider store={store}>
         <App/>
     </Provider>, 
-    document.getElementById("index"));
+    document.getElementById("index")
+);

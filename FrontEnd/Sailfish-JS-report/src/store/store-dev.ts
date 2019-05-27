@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware, combineReducers, Store } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import { initialAppState } from '../state/initial/initialAppState';
 import Report from '../models/Report';
@@ -25,8 +25,10 @@ import { viewReducer } from '../reducers/viewReducer';
 import { filterReducer } from '../reducers/filterReducer';
 import initialReportState from '../state/initial/initialReportState';
 import { machineLearningReducer } from '../reducers/machineLearningReducer';
+import AppState from '../state/models/AppState';
+import { StateActionType } from '../actions/stateActions';
 
-export const createAppStore = (report: Report) => createStore(
+export const createAppStore = (report: Report): Store<AppState, StateActionType>  => createStore(
     combineReducers({
         report: reportReducer,
         selected: selectedReducer,

@@ -21,6 +21,7 @@ import Report from '../models/Report';
 import { Panel } from "../helpers/Panel";
 import Message from "../models/Message";
 import { SubmittedData } from "../models/MlServiceResponse";
+
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
     NEXT_TEST_CASE = 'NEXT_TEST_CASE',
@@ -177,4 +178,8 @@ export type StateActionType =
     SetMlTokenStateAction |
     SetSubmittedMlDataStateAction |
     AddSubmittedMlDataStateAction |
-    RemoveSubmittedMlDataStateAction
+    RemoveSubmittedMlDataStateAction;
+
+export function isStateAction(action: any): action is StateActionType {
+    return action && typeof action.type === 'string' && action.type in StateActionTypes;
+}

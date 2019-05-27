@@ -40,12 +40,12 @@ export const urlHandler = store =>  next => (action: StateActionType) => {
         result = next(action),
         nextState = store.getState() as AppState;
 
-    hadnleStateUpdate(prevState, nextState);
+    hadnleStateUpdate(prevState, nextState, action);
 
     return result;
 }
 
-function hadnleStateUpdate(prevState : AppState, nextState : AppState) {
+function hadnleStateUpdate(prevState : AppState, nextState : AppState, action: any) {
     // we use top.window instared of window to work with real window url, not iframe url
 
     if (prevState.selected.actionsId == nextState.selected.actionsId && 
@@ -60,7 +60,12 @@ function hadnleStateUpdate(prevState : AppState, nextState : AppState) {
         nextSearchParams = getNextSearchParams(searchParams, prevState, nextState),
         nextUrl = getNextUrl(top.window.location.href, searchString, nextSearchParams);
 
-    top.window.history.pushState({}, "", nextUrl);
+    // handle goBack and goForward browswer buttons clicks - we don't need to update current url
+    const currentUrl = top.window.location.href;
+
+    if (currentUrl !== nextUrl) {
+        top.window.history.pushState(action, "", nextUrl);
+    }
 }
 
 // returns new search params, based on state change

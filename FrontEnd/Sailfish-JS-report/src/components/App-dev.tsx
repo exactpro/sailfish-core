@@ -91,7 +91,11 @@ class AppBase extends Component<AppProps> {
                 currentTestCase = report.testCases.find(testCase => testCase.name === currentMetadata.name);
 
             updateTestCase(currentTestCase)
-            return null;
+            return (
+                <div class="root">
+                    Loading...
+                </div>
+            );
         }
 
         return (
