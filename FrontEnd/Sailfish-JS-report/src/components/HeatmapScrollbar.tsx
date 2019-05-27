@@ -63,6 +63,7 @@ export class HeatmapScrollbar extends Component<HeatmapScrollbarProps, HeatmapSc
                     renderTrackVertical={({ style, ...props }) =>
                         <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }} />
                     }
+                    onScrollStart={this.onScrollStart}
                     ref={ref => this.scrollbar = ref}
                 >
                     <div class="heatmap-wrapper">
@@ -78,6 +79,25 @@ export class HeatmapScrollbar extends Component<HeatmapScrollbarProps, HeatmapSc
                 </div>
             </div>
         )
+    }
+
+    private onScrollStart = () => {
+        // '(p)react-custom-scrollbars library is using document.addEventListenter('mouseup', ...) to handle user's LMB release,
+        // but it doesn't work when scrollbars displayed in iframe and user releases LMB out of iframe window.
+        // https://github.com/malte-wessel/react-custom-scrollbars/blob/b353cc4956d6154d6a100f34c3a6202c75434186/src/Scrollbars/index.js#L328
+        // Using 'top.window.document' instead of 'document' to handle mouse events can be a solution. 
+
+        // Also, we need 'ts-ignore' here because type declarations for this library doesn't allow us to access private properties.
+        // @ts-ignore
+        if (this.scrollbar.dragging) {
+            top.window.document.addEventListener('mouseup', this.onMouseUp);
+        }
+    }
+
+    private onMouseUp = () => {
+        // @ts-ignore
+        this.scrollbar.handleDragEnd();
+        top.window.document.removeEventListener('mouseup', this.onMouseUp);
     }
 }
 
