@@ -112,6 +112,6 @@ export const App = connect(
         updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
         updateTestCasePath: (testCasePath: string) => dispatch(setTestCasePath(testCasePath)),
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
-        selectMessage: (messageId: number) => dispatch(selectVerification(messageId))
+        selectMessage: (messageId: number, actionId: number) => dispatch(selectVerification(messageId, actionId))
     })
 )(AppBase)

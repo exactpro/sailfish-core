@@ -17,9 +17,16 @@ import { InitResponse, SubmittedData } from "../models/MlServiceResponse"
 
 const BASE_ML_API_PATH = "sfgui/sfapi/machinelearning/v2"
 
-export function submitEntry(token: string, dataToSubmit: SubmittedData, updateMlDataAction: (data: SubmittedData) => any): void {
+export const EMPTY_MESSAGE_ID = -1
+
+export function submitEntry(token: string, dataToSubmit: SubmittedData,
+     deleteMlDataAction: (data: SubmittedData) => any, updateMlDataAction: (data: SubmittedData) => any): void {
 
     let currentHost = new URL(window.location.href).host;
+
+    if (dataToSubmit.messageId !== EMPTY_MESSAGE_ID) {
+        deleteEntry(token, { actionId: dataToSubmit.actionId, messageId: EMPTY_MESSAGE_ID }, deleteMlDataAction)
+    }
 
     fetch(`http://${currentHost}/${BASE_ML_API_PATH}/${token}`, {
         method: 'PUT',
@@ -44,7 +51,7 @@ export function submitEntry(token: string, dataToSubmit: SubmittedData, updateMl
         .catch(err => console.error("unable to submit ml data entry\n" + err));
 }
 
-export function deleteEntry(token: string, dataToDelete: SubmittedData, updateMlDataAction: (data: SubmittedData) => any): void {
+export function deleteEntry(token: string, dataToDelete: SubmittedData, deleteMlDataAction: (data: SubmittedData) => any): void {
 
     let currentHost = new URL(window.location.href).host;
 
@@ -62,7 +69,7 @@ export function deleteEntry(token: string, dataToDelete: SubmittedData, updateMl
     })
         .then(response => {
             if (response.ok) {
-                updateMlDataAction(dataToDelete)
+                deleteMlDataAction(dataToDelete)
             }
             else {
                 throw new Error(`ml service responded with (${response.status})`);

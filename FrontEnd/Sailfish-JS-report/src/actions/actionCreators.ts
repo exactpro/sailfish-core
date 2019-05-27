@@ -78,9 +78,10 @@ export const selectMessage = (message: Message, status: StatusType = null): Mess
     status: status
 })
 
-export const selectVerification = (messageId: number, status: StatusType = 'NA'): VerificationSelectStateAction => ({
+export const selectVerification = (messageId: number, actionId: number, status: StatusType = 'NA'): VerificationSelectStateAction => ({
     type: StateActionTypes.SELECT_VERIFICATION,
     messageId: messageId,
+    actionId: actionId,
     status: status
 })
 

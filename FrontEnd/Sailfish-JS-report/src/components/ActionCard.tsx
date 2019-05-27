@@ -24,6 +24,7 @@ import { getSecondsPeriod, formatTime } from "../helpers/dateFormatter";
 import { ExceptionChain } from "./ExceptionChain";
 import { Chip } from "./Chip";
 import { createSelector } from '../helpers/styleCreators';
+import { ActionMlUploadButton } from "./ActionMlUploadButton";
 
 interface CardProps {
     action: Action;
@@ -34,6 +35,7 @@ interface CardProps {
     isTransaparent?: boolean;
     isExpanded?: boolean;
     ref?: Function;
+    rootActionId: number;
 }
 
 export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded }: CardProps) => {
@@ -107,10 +109,12 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                             action.relatedMessages.length > 0 ? (
                                 <div class="ac-header__chips">
                                     <Chip
-                                        count={action.relatedMessages.length}/>
+                                        count={action.relatedMessages.length} />
                                 </div>
                             ) : null
                         }
+                        <ActionMlUploadButton actionId={action.id}/>
+
                     </div>
                 </div>
                 <div class="ac-body">

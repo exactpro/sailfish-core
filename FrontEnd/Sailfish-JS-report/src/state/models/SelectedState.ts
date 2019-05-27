@@ -34,5 +34,5 @@ export default interface SelectedState {
     // Objects and reference comparison is the only way to handle numbers changing in this case.
     scrolledActionId: Number;
     scrolledMessageId: Number;
-    activeActionId: Number;
+    activeActionId: number;
 }

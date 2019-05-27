@@ -47,8 +47,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 testCase: initialSelectedState.testCase
             }
         }
-    
-        case StateActionTypes.RESET_TEST_CASE: 
+
+        case StateActionTypes.RESET_TEST_CASE:
         case StateActionTypes.PREV_TEST_CASE:
         case StateActionTypes.NEXT_TEST_CASE: {
             return {
@@ -105,10 +105,11 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 messagesId: [stateAction.message.id],
                 status: stateAction.status,
-                actionsId: relatedActions,
                 scrolledActionId: new Number(scrolledAction),
                 scrolledMessageId: initialSelectedState.scrolledMessageId,
+                actionsId: relatedActions,
                 activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId
+
             }
         }
 
@@ -118,7 +119,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 messagesId: [stateAction.messageId],
                 status: stateAction.status,
                 actionsId: initialSelectedState.actionsId,
-                scrolledMessageId: new Number(stateAction.messageId)
+                scrolledMessageId: new Number(stateAction.messageId),
+                activeActionId: stateAction.actionId
+
             }
         }
 
