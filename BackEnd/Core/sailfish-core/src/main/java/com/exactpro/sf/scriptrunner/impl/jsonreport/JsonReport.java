@@ -71,7 +71,6 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
@@ -133,10 +132,19 @@ public class JsonReport implements IScriptReport {
         return isActionCreated;
     }
 
-    private void assertState(ContextType... states) {
-        if(Arrays.stream(states).noneMatch(i -> context.cur == i)) {
-            throw new RuntimeException(String.format("Incorrect report state '%s' ('%s' expected)", context.cur, Arrays.toString(states)));
+    private void assertState(boolean throwException, ContextType... states) {
+        if (Arrays.stream(states).noneMatch(i -> context.cur == i)) {
+            String msg = String.format("Incorrect report state '%s' ('%s' expected)", context.cur, Arrays.toString(states));
+            if (throwException) {
+                throw new RuntimeException(msg);
+            } else {
+                logger.error("{} - ignoring", msg);
+            }
         }
+    }
+
+    private void assertState(ContextType... states) {
+        assertState(true, states);
     }
 
     private File getFile(String fileName, String extension) {
@@ -481,7 +489,7 @@ public class JsonReport implements IScriptReport {
     }
 
     public void closeReport() {
-        assertState(null, ContextType.SCRIPT);
+        assertState(false, null, ContextType.SCRIPT);
         reportRoot.setFinishTime(Instant.now());
         initProperties();
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
