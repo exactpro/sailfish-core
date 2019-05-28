@@ -67,28 +67,22 @@ class MessagesVirtualizedListBase extends React.Component<MessagesVirtualizedLis
         )
     }
 
-    private rowRenderer = (index: number): JSX.Element => {
+    private rowRenderer = (index: number, measure: () => void): JSX.Element => {
         const state = this.messagesCardStates[index];
 
         return this.props.messageRenderer(
             index,
             state,
-            (nextState: MessageCardExpandState) => this.messageCardStateHandler(nextState, index)
+            (nextState: MessageCardExpandState) => {
+                this.messagesCardStates[index] = nextState;
+                measure();
+            }
         );
     }
 
     private updateMessagesStates(messagesCount: number) {
         // init message cards states 
         this.messagesCardStates = new Array<MessageCardExpandState>(messagesCount).fill({});
-    }
-
-    private measureElement(index: number) {
-        this.list.remeasureRow(index);
-    }
-
-    private messageCardStateHandler(nextState: MessageCardExpandState, elementIndex: number) {
-        this.messagesCardStates[elementIndex] = nextState;
-        this.measureElement(elementIndex);
     }
 }
 

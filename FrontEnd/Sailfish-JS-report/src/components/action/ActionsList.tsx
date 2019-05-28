@@ -91,13 +91,13 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
         )
     }
 
-    private renderAction = (idx: number): JSX.Element => {
+    private renderAction = (idx: number, measure: () => void): JSX.Element => {
         const action = this.props.actions[idx];
 
         return (
             <ActionTree 
                 action={action}
-                onExpand={() => this.list.current.remeasureRow(idx)}/>
+                onExpand={measure}/>
         )
     }
 }   

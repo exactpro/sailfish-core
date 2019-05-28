@@ -20,7 +20,7 @@ import { raf } from '../helpers/raf';
 import RemeasureHandler from './util/RemeasureHandler';
 
 interface VirtualizedListProps {
-    elementRenderer: (idx: number) => JSX.Element;
+    elementRenderer: (idx: number, measure?: () => void) => React.ReactNode;
     rowCount: number;
     itemSpacing?: number;
 
@@ -40,7 +40,6 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
     private lastWidth = 0
     private forceUpdateList : Function;
     private scrollToIndex: (idx: number) => any;
-    private remeasureHandler: (idx: number) => any;
 
     public updateList() {
         this.forceUpdateList && this.forceUpdateList();
@@ -85,23 +84,25 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         )
     }
 
-    private rowRenderer = ({ index, key, parent, style }) => {
-        return (
-            <CellMeasurer
-                cache={this.measurerCache}
-                columnIndex={0}
-                rowIndex={index}
-                parent={parent}
-                key={key}>
+    private rowRenderer = ({ index, key, parent, style }) => (
+        <CellMeasurer
+            cache={this.measurerCache}
+            columnIndex={0}
+            rowIndex={index}
+            parent={parent}
+            key={key}>
+            {
+                ({ measure }) => (
                     <RemeasureHandler 
                         itemSpacing={this.props.itemSpacing}
                         style={style}
-                        measureHandler={() => this.remeasureHandler && this.remeasureHandler(index)}>
-                        {this.props.elementRenderer(index)}
+                        measureHandler={measure}>
+                        {this.props.elementRenderer(index, measure)}
                     </RemeasureHandler>
-            </CellMeasurer>
-        )
-    }
+                )
+            }
+        </CellMeasurer>
+    )
 
     private onResize = ({width}) => {
         if (width !== this.lastWidth) {
@@ -134,9 +135,5 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         raf(() => { 
             this.remeasureAll();
         }, 2);
-
-        this.remeasureHandler = (index) => {
-            this.remeasureRow(index);
-        }
     }
 }
