@@ -17,7 +17,7 @@
 const OFFSET_END = 9,
       HEXADECIMAL_START = 10,
       HEXADECIMAL_END = 49,
-      CONTENT_START = 52;
+      CONTENT_START = 51;
  
 /**
  * Splits a raw content into 3 lines : offset, hexadecimal representation and human-readable string.
