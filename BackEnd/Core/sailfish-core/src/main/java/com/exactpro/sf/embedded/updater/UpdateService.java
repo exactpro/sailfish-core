@@ -61,6 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class UpdateService implements IEmbeddedService {
     private static final Logger logger = LoggerFactory.getLogger(UpdateService.class);
 
+    private static final long DEFAULT_COLLECT_DATA_TIMEOUT = 3;
     private static final String DEPLOYER_CFG_FILE = "deployer.cfg.xml";
     private static final String PATH_PARAMETER = "Path";
     private static final String SERVER_URL_PARAMETER = "ServerURL";
@@ -155,6 +156,20 @@ public class UpdateService implements IEmbeddedService {
                 return;
             }
 
+            logger.info("Collecting data...");
+            String collectDataParameters = createCollectDataParameters();
+            logger.debug("Exec {} with params {}", deployerFile.getAbsolutePath(), collectDataParameters);
+            Process collectDataProcess = Runtime.getRuntime().exec(String.format("%s %s", deployerFile.getAbsolutePath(), collectDataParameters));
+            boolean isFinished = collectDataProcess.waitFor(DEFAULT_COLLECT_DATA_TIMEOUT, TimeUnit.HOURS);
+            int exitCode = isFinished ? collectDataProcess.exitValue() : -1;
+            if (exitCode != 0) {
+                if (isFinished) {
+                    logger.error("Error during collecting sailfish data. Exit code: {}", exitCode);
+                } else {
+                    logger.error("The time limit for collecting data has been exceeded");
+                }
+            }
+
             logger.info("Checking for updates");
 
             String checkUpdateParameters = createCheckUpdateParameters();
@@ -164,7 +179,7 @@ public class UpdateService implements IEmbeddedService {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(updateProcess.getInputStream()))) {
                 line = reader.readLine();
             }
-            int exitCode = updateProcess.waitFor();
+            exitCode = updateProcess.waitFor();
             if (exitCode != 0) {
                 throw new RuntimeException("Deployer got an error during checking for updates; Exit code: " + exitCode);
             }
@@ -219,6 +234,10 @@ public class UpdateService implements IEmbeddedService {
         StringBuilder builder = createCommonParameters("actualize");
         addParameter(builder, "moveDest", tmpDir.getAbsolutePath());
         return builder.toString();
+    }
+
+    private String createCollectDataParameters() {
+        return createCommonParameters("collect").toString();
     }
 
     private StringBuilder createCommonParameters(String mode) {
@@ -420,10 +439,11 @@ public class UpdateService implements IEmbeddedService {
                     throw new EPSCommonException("Can't actualize deployer; Exit code: " + exitCode);
                 }
 
+                Path actualDeployerPath = tempDirectory.resolve(deployerFile.getName()).toAbsolutePath();
+
                 logger.info("Updating Sailfish...");
                 String updateParameters = createUpdateParameters();
 
-                Path actualDeployerPath = tempDirectory.resolve(deployerFile.getName()).toAbsolutePath();
                 logger.debug("Exec {} with params {}", actualDeployerPath, updateParameters);
                 Process updateSailfish = Runtime.getRuntime().exec(String.format("%s %s", actualDeployerPath.toString(), updateParameters));
                 exitCode = updateSailfish.waitFor();
