@@ -5,13 +5,14 @@
   "main": "intex.tsx",
   "private": true,
   "scripts": {
-    "build": "NODE_ENV=production webpack --config webpack.config.js",
-    "dev-build": "NODE_ENV=development webpack --config webpack.config.js",
-    "dev-server": "NODE_ENV=development webpack-dev-server --config webpack.dev.config.js -d --history-api-fallback"
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "dev-build": "cross-env NODE_ENV=development webpack --config webpack.config.js",
+    "dev-server": "cross-env NODE_ENV=development webpack-dev-server --config webpack.dev.config.js -d --history-api-fallback"
   },
   "author": "vladislav.kotelnikov",
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.1",
+    "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
     "cssnano": "^4.1.10",
     "file-loader": "^2.0.0",
