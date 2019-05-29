@@ -15,6 +15,7 @@
  ******************************************************************************/
  
 @import "./common/vars";
+@import "./machinelearning.scss";
 
 .header {
     @include status-card;
@@ -88,7 +89,11 @@
         span {
             color: $secondaryTextColor;
             padding-right: 9px;
-        }    
+        }
+        
+        .ml__submit {
+            @include ml-indicator;
+        }
     }
 }
 

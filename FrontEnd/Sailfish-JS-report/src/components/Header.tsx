@@ -31,6 +31,7 @@ import {
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { createSelector } from '../helpers/styleCreators';
+import { MLUploadIndicator } from './MLUploadIndicator';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -79,25 +80,25 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
         } = testCase;
 
         const rootClass = createSelector(
-                "header",
-                status.status
-            ), 
+            "header",
+            status.status
+        ),
             mainClass = createSelector(
-                "header-main", 
+                "header-main",
                 status.status
             ),
             infoClass = createSelector(
-                "header__info", 
+                "header__info",
                 showFilter ? "filter-enabled" : null
             ),
             prevButtonClass = createSelector(
                 "header-main-name-icon",
-                "left", 
+                "left",
                 prevTestCaseHandler ? "enabled" : "disabled"
             ),
             nextButtonClass = createSelector(
                 "header-main-name-icon",
-                "right", 
+                "right",
                 nextTestCaseHandler ? "enabled" : "disabled"
             );
 
@@ -114,14 +115,14 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
                     <div class="header-main__name ">
                         <div class="header-button"
                             onClick={prevTestCaseHandler}>
-                            <div class="header-button__icon left"/>
+                            <div class="header-button__icon left" />
                         </div>
                         <div class="header-main__title">
                             {(name || 'Test Case')} — {status.status} — {period}
                         </div>
                         <div class="header-button"
                             onClick={nextTestCaseHandler}>
-                            <div class="header-button__icon right"/>
+                            <div class="header-button__icon right" />
                         </div>
                     </div>
                     <div class="header-button   header-main__contol-button" onClick={() => this.switchFilter()}>
@@ -148,6 +149,9 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
                     <div class="header__info-element">
                         <span>Hash:</span>
                         <p>{hash}</p>
+                    </div>
+                    <div class="header__info-element">
+                        <MLUploadIndicator />
                     </div>
                 </div>
                 {
