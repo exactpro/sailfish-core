@@ -19,11 +19,12 @@ import { VirtualizedList } from '../VirtualizedList';
 import MessageCardExpandState from '../../models/view/MessageCardExpandState';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import Message from '../../models/Message';
+import { StatusType } from '../../models/Status';
 
 interface MessagesVirtualizedListOwnProps {
     messagesCount: number;
     scrolledIndex?: Number;
+    selectedElements: Map<number, StatusType>;
     messageRenderer: (
         index: number, 
         messageState: MessageCardExpandState,
@@ -54,10 +55,11 @@ class MessagesVirtualizedListBase extends React.Component<MessagesVirtualizedLis
     }
 
     render() {
-        const { messagesCount, scrolledIndex } = this.props;
+        const { messagesCount, scrolledIndex, selectedElements } = this.props;
 
         return (
             <VirtualizedList
+                selectedElements={selectedElements}
                 rowCount={messagesCount}
                 elementRenderer={this.rowRenderer}
                 itemSpacing={6}

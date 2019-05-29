@@ -18,13 +18,17 @@ import * as React from 'react';
 import Scrollbars from 'react-custom-scrollbars';
 import { StatusType } from '../models/Status';
 import '../styles/heatmap.scss';
+import { isNumber } from 'util';
 
 const MIN_HEATMAP_ELEMENT_HEIGHT = 8;
 const SCROLLBAR_TRACK_WIDTH = 11;
 
 interface HeatmapScrollbarProps {
-    children: JSX.Element[];
     selectedElements: Map<number, StatusType>;
+    elementsCount: number;
+    height?: number;
+    width?: number;
+    onScroll?: React.UIEventHandler<any>;
 }
 
 interface HeatmapScrollbarState {
@@ -33,8 +37,8 @@ interface HeatmapScrollbarState {
 
 export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
 
-    private scrollbar: Scrollbars;
-    private root: HTMLElement;
+    private scrollbar = React.createRef<Scrollbars>();
+    private root = React.createRef<HTMLDivElement>();
 
     constructor(props) {
         super(props);
@@ -43,7 +47,15 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
     }
 
     scrollToTop() {
-        this.scrollbar && this.scrollbar.scrollToTop();
+        this.scrollbar.current && this.scrollbar.current.scrollToTop();
+    }
+
+    scrollTop(top: number = 0) {
+        this.scrollbar.current && this.scrollbar.current.scrollTop(top);
+    }
+
+    setScrollTop(value: number) {
+        this.scrollbar.current && this.scrollbar.current.scrollTop(value);
     }
 
     componentDidMount() {
@@ -51,22 +63,25 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
         // so we need to rerender component with new root element scroll height
 
         this.setState({
-            rootHeight: this.root && this.root.scrollHeight
+            rootHeight: this.root && this.root.current.scrollHeight
         });
     }
 
     render() {
-        const { children, selectedElements } = this.props, 
-            { rootHeight } = this.state;
+        const { children, selectedElements, elementsCount, height, width, onScroll } = this.props, 
+            rootHeight = height !== undefined ? height : this.state.rootHeight,
+            style = height !== undefined || width !== undefined ? { height, width } : undefined;
 
         return (
-            <div className="heatmap" ref={ref => this.root = ref}>
+            <div className="heatmap" ref={this.root} style={style}> 
                 <Scrollbars
+                    style={style}
                     renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb" />}
                     renderTrackVertical={({ style, ...props }) =>
                         <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }} />
                     }
-                    ref={ref => this.scrollbar = ref}
+                    onScroll={onScroll}
+                    ref={this.scrollbar}
                 >
                     <div className="heatmap-wrapper">
                         {children}
@@ -75,7 +90,7 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
                 <div className="heatmap-scrollbar">
                     {
                         rootHeight ? 
-                            renderHeatmap(children.length, selectedElements, rootHeight) : 
+                            renderHeatmap(elementsCount, selectedElements, rootHeight) : 
                             null
                     }
                 </div>
@@ -84,7 +99,7 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
     }
 }
 
-function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, rootHeight: number): JSX.Element[] {
+function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, rootHeight: number): React.ReactNode[] {
     // here we calculate how much heatmap elements we can render without overlaping
     const maxElementsCount = rootHeight / MIN_HEATMAP_ELEMENT_HEIGHT;
 
@@ -93,8 +108,8 @@ function renderHeatmap(elementsCount: number, selectedElements: Map<number, Stat
         renderSmallHeatmap(elementsCount, selectedElements);
 }
 
-function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): JSX.Element[] {
-    let resultHeatmap: JSX.Element[] = [];
+function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): React.ReactNode[] {
+    let resultHeatmap: React.ReactNode[] = [];
 
     for (let i = 0; i < elementsCount; i++) {
         resultHeatmap.push(
@@ -105,7 +120,7 @@ function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number,
     return resultHeatmap;
 }
 
-function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, chunkSize: number): JSX.Element[] {
+function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, chunkSize: number): React.ReactNode[] {
     // this fucntion is used for rendering heatmap only for big lists
     // the idea is that we divide the list of elements into chunks and render only one heatmap element for each chunk
 
@@ -114,7 +129,7 @@ function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, S
     // it will render ONLY FIRST status element in a chunk
     // In current version several selected elements can't have different statuses, so we can safely use this trick
 
-    let resultHeatmap: JSX.Element[] = [];
+    let resultHeatmap: React.ReactNode[] = [];
 
     for (let i = 0; i < elementsCount; i++) {
         if (selectedElements.get(i)) {

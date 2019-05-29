@@ -113,7 +113,8 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
             </div>
             <div className="report__testcases">
                 <HeatmapScrollbar
-                    selectedElements={testCasesHeatmap(report.metadata)}>
+                    selectedElements={testCasesHeatmap(report.metadata)}
+                    elementsCount={report.metadata.length}>
                     {
                         report.metadata.map((metadata, index) => (
                             <TestCaseCard

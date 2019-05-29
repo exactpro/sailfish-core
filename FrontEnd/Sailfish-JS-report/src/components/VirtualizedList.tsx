@@ -15,15 +15,20 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { AutoSizer, List, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
+import { AutoSizer, List, CellMeasurer, CellMeasurerCache, OnScrollParams } from 'react-virtualized';
 import { raf } from '../helpers/raf';
 import RemeasureHandler from './util/RemeasureHandler';
+import { StatusType } from '../models/Status';
+import { HeatmapScrollbar } from './HeatmapScrollbar';
 
 interface VirtualizedListProps {
     elementRenderer: (idx: number, measure?: () => void) => React.ReactNode;
     rowCount: number;
     itemSpacing?: number;
 
+    // for heatmap scrollbar
+    selectedElements: Map<number, StatusType>;
+    
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.
@@ -37,12 +42,14 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         fixedWidth: true
     });
 
+    private list = React.createRef<List>();
+    private scrollbar = React.createRef<HeatmapScrollbar>();
+
     private lastWidth = 0
-    private forceUpdateList : Function;
-    private scrollToIndex: (idx: number) => any;
+    private lastScrollTop = 0;
 
     public updateList() {
-        this.forceUpdateList && this.forceUpdateList();
+        this.list.current && this.list.current.forceUpdateGrid();
     }
 
     public remeasureRow(index: number) {
@@ -56,30 +63,32 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
     }
 
     render() {
-        const { rowCount, scrolledIndex } = this.props;
+        const { rowCount, scrolledIndex, selectedElements } = this.props;
 
         return (
             <AutoSizer onResize={this.onResize}>
                 {({ height, width }) => (
-                    <List
+                    <HeatmapScrollbar
                         height={height}
                         width={width}
-                        rowCount={rowCount}
-                        deferredMeasurementCache={this.measurerCache}
-                        rowHeight={this.measurerCache.rowHeight}
-                        rowRenderer={this.rowRenderer}
-                        scrollToAlignment="center"
-                        scrollToIndex={scrolledIndex != null ? +scrolledIndex : undefined}
-                        ref={ref => {
-                            if (!ref) {
-                                return;
-                            }
-
-                            this.forceUpdateList = ref.forceUpdateGrid.bind(ref);
-                            this.scrollToIndex = ref.scrollToRow.bind(ref);
-                        }}/>
-                    )
-                }
+                        elementsCount={rowCount}
+                        selectedElements={selectedElements}
+                        onScroll={this.scrollbarOnScroll}
+                        ref={this.scrollbar}>
+                        <List
+                            height={height}
+                            width={width}
+                            rowCount={rowCount}
+                            deferredMeasurementCache={this.measurerCache}
+                            rowHeight={this.measurerCache.rowHeight}
+                            rowRenderer={this.rowRenderer}
+                            onScroll={this.listOnScroll}
+                            scrollToAlignment="center"
+                            scrollToIndex={scrolledIndex != null ? +scrolledIndex : undefined}
+                            ref={this.list}
+                            style={{ overflowX: "visible", overflowY: "visible", paddingRight: 15 }}/>
+                    </HeatmapScrollbar>
+                )}
             </AutoSizer>
         )
     }
@@ -104,7 +113,7 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         </CellMeasurer>
     )
 
-    private onResize = ({width}) => {
+    private onResize = ({ width }) => {
         if (width !== this.lastWidth) {
             this.lastWidth = width;
             this.measurerCache.clearAll();
@@ -112,28 +121,26 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         }
     }
 
+    private scrollbarOnScroll = ({ target }) => {
+        const { scrollTop, scrollLeft } = target;
+
+        this.lastScrollTop = scrollTop;
+        this.list.current.Grid.handleScrollEvent({ scrollTop, scrollLeft });
+    }
+
+    private listOnScroll = ({ scrollTop }: OnScrollParams) => {
+        // Updating scrollTop for scrollbar when scroll trriggered by scrolledIndex change
+        if (scrollTop !== this.lastScrollTop) {
+            this.scrollbar.current && this.scrollbar.current.scrollTop(scrollTop);
+        }
+    }
+
     componentDidUpdate(prevProps: VirtualizedListProps) {
         // Here we handle a situation, when primitive value of Number object doesn't changed 
         // and passing new index value in List doesn't make any effect (because it requires primitive value).
         // So we need to scroll List manually.
-
         if (prevProps.scrolledIndex !== this.props.scrolledIndex && +prevProps.scrolledIndex === +this.props.scrolledIndex) {
-            this.scrollToIndex(+this.props.scrolledIndex);
+            this.list.current.scrollToRow(+this.props.scrolledIndex);
         }
-    }
-
-    componentDidMount() {
-        // We need to recalculate cells height after the DOM actual render, 
-        // because it looks like in chromium browsers element's width with 'break-word' 
-        // property calculating after react-virtualized measured row's heights.
-        // After double RAF we can be shure, that DOM is fully rendered, and react-virtaulized can measure rows correct.
-
-        // Related issue: https://github.com/bvaughn/react-virtualized/issues/896
-
-        // Besides that, it fixes bug, related with invallid rendering, when data (test case) is changed (but it looks realy bad) 
-
-        raf(() => { 
-            this.remeasureAll();
-        }, 2);
     }
 }

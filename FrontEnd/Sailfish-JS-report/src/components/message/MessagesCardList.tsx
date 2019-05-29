@@ -24,15 +24,17 @@ import AppState from '../../state/models/AppState';
 import { CheckpointMessage } from '../Checkpoint';
 import { isCheckpoint, isAdmin } from '../../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
-import { HeatmapScrollbar } from '../HeatmapScrollbar';
 import { selectMessage } from '../../actions/actionCreators';
 import { MessagesVirtualizedList } from './MessagesVirtualizedList';
 import MessageCardExpandState from '../../models/view/MessageCardExpandState';
+import { messagesHeatmap } from '../../helpers/heatmapCreator';
 
 interface MessagesListStateProps {
     messages: Message[];
     scrolledMessageId: Number;
     selectedCheckpointId: number;
+    selectedMessages: number[];
+    selectedStatus: StatusType;
 }
 
 interface MessagesListDispatchProps {
@@ -79,13 +81,16 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
     }
 
     render() {
+        const { messages, selectedMessages, selectedStatus } = this.props,
+            { scrolledIndex } = this.state;
 
         return (
             <div className="messages-list">
                 <MessagesVirtualizedList
-                    messagesCount={this.props.messages.length}
-                    scrolledIndex={this.state.scrolledIndex}
-                    messageRenderer={(index, ...renderProps) => this.renderMessage(this.props.messages[index], ...renderProps)}/>
+                    selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
+                    messagesCount={messages.length}
+                    scrolledIndex={scrolledIndex}
+                    messageRenderer={(index, ...renderProps) => this.renderMessage(messages[index], ...renderProps)}/>
             </div>
         );
     }
@@ -127,7 +132,9 @@ export const MessagesCardList = connect(
     (state: AppState): MessagesListStateProps => ({
         messages: state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
-        selectedCheckpointId: state.selected.checkpointMessageId
+        selectedCheckpointId: state.selected.checkpointMessageId,
+        selectedMessages: state.selected.messagesId,
+        selectedStatus: state.selected.status
     }),
     (dispatch): MessagesListDispatchProps => ({
         messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))

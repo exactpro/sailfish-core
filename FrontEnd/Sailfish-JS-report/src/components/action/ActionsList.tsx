@@ -17,15 +17,17 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import '../../styles/action.scss';
-import Action, { ActionNode, ActionNodeType, isAction } from '../../models/Action';
+import { ActionNode, isAction } from '../../models/Action';
 import { ActionTree } from './ActionTree';
-import { HeatmapScrollbar } from '../HeatmapScrollbar';
 import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
+import { actionsHeatmap } from '../../helpers/heatmapCreator';
+import { getActions } from '../../helpers/actionType';
 
 interface ListProps {
     actions: Array<ActionNode>;
+    selectedActions: number[];
     scrolledActionId: Number;
 }
 
@@ -71,7 +73,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
     }
 
     render() {
-        const { actions } = this.props,
+        const { actions, selectedActions } = this.props,
             { scrolledIndex } = this.state;
 
         return (
@@ -84,6 +86,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
                             ref={this.list}
                             elementRenderer={this.renderAction}
                             scrolledIndex={scrolledIndex}
+                            selectedElements={actionsHeatmap(getActions(actions), selectedActions)}
                         />
                     </StateSaverProvider>
                 </div>
@@ -105,6 +108,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
 export const ActionsList = connect(
     (state: AppState): ListProps => ({
         actions: state.selected.testCase.actions,
+        selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId
     }),
     dispatch => ({ }),
