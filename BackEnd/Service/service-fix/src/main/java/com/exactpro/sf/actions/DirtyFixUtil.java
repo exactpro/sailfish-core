@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -114,22 +116,22 @@ public class DirtyFixUtil {
 		Map<String, String> mutateMap = new HashMap<>();
 
 		if (inputData.containsKey(DIRTY_BEGIN_STRING)) {
-			mutateMap.put(DIRTY_BEGIN_STRING, inputData.remove(DIRTY_BEGIN_STRING).toString());
+            mutateMap.put(DIRTY_BEGIN_STRING, unwrapFilters(inputData.remove(DIRTY_BEGIN_STRING)).toString());
 		}
 		if (inputData.containsKey(DOUBLE_TAG)) {
-			mutateMap.put(DOUBLE_TAG, inputData.remove(DOUBLE_TAG).toString());
+            mutateMap.put(DOUBLE_TAG, unwrapFilters(inputData.remove(DOUBLE_TAG)).toString());
 		}
 		if (inputData.containsKey(DUPLICATE_TAG)) {
-			mutateMap.put(DUPLICATE_TAG, inputData.remove(DUPLICATE_TAG).toString());
+            mutateMap.put(DUPLICATE_TAG, unwrapFilters(inputData.remove(DUPLICATE_TAG)).toString());
 		}
 		if (inputData.containsKey(DIRTY_CHECK_SUM)) {
-			mutateMap.put(DIRTY_CHECK_SUM, inputData.remove(DIRTY_CHECK_SUM).toString());
+            mutateMap.put(DIRTY_CHECK_SUM, unwrapFilters(inputData.remove(DIRTY_CHECK_SUM)).toString());
 		}
 		if (inputData.containsKey(DIRTY_BODY_LENGTH)) {
-			mutateMap.put(DIRTY_BODY_LENGTH, inputData.remove(DIRTY_BODY_LENGTH).toString());
+            mutateMap.put(DIRTY_BODY_LENGTH, unwrapFilters(inputData.remove(DIRTY_BODY_LENGTH)).toString());
 		}
 		if (inputData.containsKey(DIRTY_MSG_SEQ_NUM)) {
-			mutateMap.put(DIRTY_MSG_SEQ_NUM, inputData.remove(DIRTY_MSG_SEQ_NUM).toString());
+            mutateMap.put(DIRTY_MSG_SEQ_NUM, unwrapFilters(inputData.remove(DIRTY_MSG_SEQ_NUM)).toString());
 		}
 
 		return mutateMap;
@@ -208,7 +210,7 @@ public class DirtyFixUtil {
 
         for(Entry<?, ?> entry : inputData.entrySet()) {
 			String tagName = entry.getKey().toString();
-			Object tagValue = entry.getValue();
+            Object tagValue = unwrapFilters(entry.getValue());
 
 			int tagInt = appDict.getFieldTag(tagName);
 			String tagValueString = tagValue.toString();

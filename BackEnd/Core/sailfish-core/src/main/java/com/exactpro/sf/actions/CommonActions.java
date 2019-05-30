@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -184,7 +186,7 @@ public class CommonActions extends AbstractCaller {
     @CustomColumns(@CustomColumn(value = WAIT_TILL_TIME_ARG_DATE, required = true))
     @ActionMethod
 	public void WaitTillTime(IActionContext actionContext, HashMap<?, ?> inputData) throws InterruptedException {
-        Object o = inputData.get(WAIT_TILL_TIME_ARG_DATE);
+        Object o = unwrapFilters(inputData.get(WAIT_TILL_TIME_ARG_DATE));
         LocalDateTime date;
         if (o instanceof TemporalAccessor) {
             date = DateTimeUtility.toLocalDateTime((TemporalAccessor) o);
@@ -297,8 +299,8 @@ public class CommonActions extends AbstractCaller {
 	@ActionMethod
 	public void Compare(IActionContext actionContext, HashMap<?, ?> inputData) throws InterruptedException
 	{
-		Object first = inputData.get(FIRST_ARG);
-		Object second = inputData.get(SECOND_ARG);
+        Object first = unwrapFilters(inputData.get(FIRST_ARG));
+        Object second = unwrapFilters(inputData.get(SECOND_ARG));
 
 		if(first == null) {
 			throw new IllegalArgumentException("Field " + FIRST_ARG + " have no value");
@@ -351,7 +353,7 @@ public class CommonActions extends AbstractCaller {
         int m_ms = 60000;
         int h_ms = 3600000;
 
-		String value = ((String) inputData.get("TimeSync")).trim();
+        String value = ((String)unwrapFilters(inputData.get("TimeSync"))).trim();
         StringTokenizer t = new StringTokenizer(value, "+");
 
         List<String> tokens = new ArrayList<>();
@@ -445,7 +447,7 @@ public class CommonActions extends AbstractCaller {
     @CustomColumns(@CustomColumn(value = "PathArgs", required = true))
 	@ActionMethod
 	public void RunScript(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
-        String command = (String) inputData.get("PathArgs");
+        String command = unwrapFilters(inputData.get("PathArgs"));
         command = preparePath(command);
         String[] pathArgs = toPathArgs(command);
 
@@ -513,7 +515,7 @@ public class CommonActions extends AbstractCaller {
     @ActionMethod
     public void SaveBase64Content(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
 
-        String content = (String) inputData.get("Content");
+        String content = unwrapFilters(inputData.get("Content"));
 
         try (InputStream bais = new ByteArrayInputStream(content.getBytes());
                 InputStream b64 = new Base64InputStream(bais, false)) {
@@ -542,7 +544,7 @@ public class CommonActions extends AbstractCaller {
             + "If specified \"Append\" param (y, yes) then content will be appended, by default overwritten")
     public void SaveContent(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
 
-        String content = (String) inputData.get("Content");
+        String content = unwrapFilters(inputData.get("Content"));
 
         try (InputStream bais = new ByteArrayInputStream(content.getBytes())) {
             saveContent(actionContext, inputData, bais);
@@ -568,8 +570,8 @@ public class CommonActions extends AbstractCaller {
     @ActionMethod
     public String LoadBase64Content(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
 
-        String fileAlias = (String) inputData.get("FileAlias");
-        Boolean compress = BooleanUtils.toBoolean((String) inputData.get("Compress"));
+        String fileAlias = unwrapFilters(inputData.get("FileAlias"));
+        Boolean compress = BooleanUtils.toBoolean((String)unwrapFilters(inputData.get("Compress")));
         IDataManager dataManager = actionContext.getDataManager();
         SailfishURI target = SailfishURI.parse(fileAlias);
 
@@ -595,9 +597,9 @@ public class CommonActions extends AbstractCaller {
 
     private void saveContent(IActionContext actionContext, HashMap<?, ?> inputData, InputStream source) throws Exception {
 
-        String fileAlias = (String) inputData.get("FileAlias");
-        boolean compress = BooleanUtils.toBoolean((String) inputData.get("Compress"));
-	    boolean append = BooleanUtils.toBoolean((String) inputData.get("Append"));
+        String fileAlias = unwrapFilters(inputData.get("FileAlias"));
+        boolean compress = BooleanUtils.toBoolean((String)unwrapFilters(inputData.get("Compress")));
+        boolean append = BooleanUtils.toBoolean((String)unwrapFilters(inputData.get("Append")));
 
         IDataManager dataManager = actionContext.getDataManager();
 
@@ -690,14 +692,14 @@ public class CommonActions extends AbstractCaller {
     @CustomColumns(@CustomColumn(value = "Command", required = true))
     @ActionMethod
     public void RunScriptWithArgs(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
-        String command = preparePath((String) inputData.get("Command"));
+        String command = preparePath(unwrapFilters(inputData.get("Command")));
         List<String> pathArgs = new ArrayList<>();
 
         pathArgs.add(command);
 
         for(Object arg:inputData.keySet()) {
-            if(!"Command".equals((String)arg)) {
-                pathArgs.add((String)arg + "=" +inputData.get(arg));
+            if (!"Command".equals(arg)) {
+                pathArgs.add(arg + "=" + unwrapFilters(inputData.get(arg)));
             }
         }
 
@@ -747,12 +749,13 @@ public class CommonActions extends AbstractCaller {
 
         for(Entry<?, ?> entry : filterData.entrySet()) {
             ComparisonResult curResult = new ComparisonResult(entry.getKey().toString());
+            Object value = unwrapFilters(entry.getValue());
 
 			curResult.setExpected("True");
-            curResult.setActual(entry.getValue());
+            curResult.setActual(value);
 
 			try {
-				Boolean result = (Boolean)MVEL.eval(entry.getValue().toString());
+                Boolean result = (Boolean)MVEL.eval(value.toString());
 
                 if(result) {
                     curResult.setStatus(StatusType.PASSED);
@@ -800,6 +803,6 @@ public class CommonActions extends AbstractCaller {
     @Description("Create message with pair column / value. Value will have type String if it is not contain AML constructions.")
     @ActionMethod
     public HashMap<?, ?> SetVariables(IActionContext actionContext, HashMap<?, ?> message) throws Exception {
-        return message.isEmpty() ? null : message;
+        return message.isEmpty() ? null : unwrapFilters(message);
     }
 }

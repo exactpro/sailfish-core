@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
 import java.io.File;
@@ -364,7 +365,7 @@ public class TestActions extends AbstractCaller {
 
     @ActionMethod
     public HashMap<?,?> initMap(IActionContext actionContext, HashMap<?,?> inputData) {
-        return inputData;
+        return unwrapFilters(inputData);
     }
 
     @MessageDirection(direction=Direction.SEND)
@@ -396,9 +397,9 @@ public class TestActions extends AbstractCaller {
     })
     @ActionMethod
     public void countFilter(IActionContext actionContext, HashMap<?,?> inputData) throws InterruptedException {
-        Boolean isAdmin = Boolean.valueOf(inputData.get("IsAdmin").toString());
-        Boolean isIgnore = Boolean.valueOf(inputData.get("IsIgnore").toString());
-        String types = (String)inputData.get("MessageTypes");
+        Boolean isAdmin = Boolean.valueOf(unwrapFilters(inputData.get("IsAdmin")).toString());
+        Boolean isIgnore = Boolean.valueOf(unwrapFilters(inputData.get("IsIgnore")).toString());
+        String types = unwrapFilters(inputData.get("MessageTypes"));
 
         List<String> messageTypes = new ArrayList<>();
 
@@ -460,6 +461,7 @@ public class TestActions extends AbstractCaller {
             + "</ul>"
             + "Action parameters are accessible through the <b>ScriptArgs</b> field.")
     public HashMap<?, ?> exec(IActionContext actionContext, HashMap<?, ?> inputData) throws SailfishURIException, IOException {
+        inputData = unwrapFilters(inputData);
         String systemColumn = actionContext.getSystemColumn(SCRIPT_URIS_COLUMN);
         IDataManager dataManager = actionContext.getDataManager();
         List<SailfishURI> scriptURIs = Arrays.stream(systemColumn.split(",")).map(SailfishURI::unsafeParse).collect(Collectors.toList());

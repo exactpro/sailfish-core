@@ -17,9 +17,9 @@ package com.exactpro.sf.aml.generator;
 
 import static com.exactpro.sf.common.util.StringUtil.enclose;
 import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-import static org.apache.commons.lang3.ClassUtils.getSimpleName;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -42,8 +42,11 @@ import com.exactpro.sf.aml.generator.matrix.Variable;
 import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
+import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageUtil;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
+import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -292,19 +295,9 @@ public class OldImpl {
 			Value v = e.getValue();
 
 			try {
-				IGetterSetterGenerator gsFactory = (IGetterSetterGenerator)
-                        adapterManager.getAdapter(action.getActionInfo().getMessageType(), IGetterSetterGenerator.class);
-
-				if (gsFactory == null)
-				{
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), "Cannot find getter&setter generator instance for type '"
-							+action.getActionInfo().getMessageType().getCanonicalName()+"'"));
-					continue;
-				}
-
 				if (AMLLangUtil.isSubmessage(v.getValue()))
 				{
-					expandSubmessage(tc, action, variable, column, v, sb, gsFactory, subMessages);
+                    expandSubmessage(tc, action, variable, column, v, sb, subMessages);
 				}
 				else if (AMLLangUtil.isArray(v.getValue()))
 				{
@@ -313,13 +306,13 @@ public class OldImpl {
 
 					for (String val : values)
 					{
-						expandSetter(action, gsFactory, sb, column, v, val, variable.getName());
+                        expandSetter(action, sb, column, v, val, variable.getName());
 					}
 				}
 				else
 				{
 				    OldImplHelper.substituteReference(tc, action, alertCollector, column, v, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
-					expandSetter(action, gsFactory, sb, column, v, v.getValue(), variable.getName());
+                    expandSetter(action, sb, column, v, v.getValue(), variable.getName());
 				}
 			} catch (AMLException | SailfishURIException ex) {
                 alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "': " + ex.getMessage()));
@@ -339,27 +332,23 @@ public class OldImpl {
 		return sb1.toString();
 	}
 
-	private void expandSetter(AMLAction action, IGetterSetterGenerator gsFactory, StringBuilder sb, String column, Value v, String val, String variable) throws AMLException {
-		if (v.isReference()) {
-		    Value tempValue = new Value(val);
+    private void expandSetter(AMLAction action, StringBuilder sb, String column, Value v, String val, String variable) throws AMLException {
+        Value tempValue = new Value(val);
 
-		    for(RefParameter p : v.getParameters()) {
-		        tempValue.addParameter(p);
-            }
+        for (RefParameter p : v.getParameters()) {
+            tempValue.addParameter(p);
+        }
 
-		    val = NewImpl.generateEval(action.getLine(), column, tempValue, TAB3);
-		}
+        if (v.isReference()) {
+            val = NewImpl.generateFilter(action.getLine(), column, tempValue, TAB3);
+        } else {
+            IFieldStructure structure = new FieldStructure(column, null, null, null, null, null, JavaType.JAVA_LANG_STRING, false, false, false, null);
+            val = NewImpl.createFilterExpression(structure, tempValue.getOrigValue(), action.getLine(), action.getUID(), column, alertCollector);
+        }
 
-		String setter = gsFactory.getSetter(action.getActionInfo().getMessageType(), column, val, v.isReference() || v.isJava());
-		if (setter == null)
-		{
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot set value '" + val + "' of type '"
-					+column+"' for message '"+action.getActionInfo().getMessageType().getCanonicalName()+"'"));
-			return;
-		}
+        String setter = ".put(\"" + column + "\", " + val + ")";
 
-		//TODO: Add isCheck for IGetterSetterGenerator (for example HashMap)
-		if (v.isCheck())
+        if (v.isCheck())
 		{
 			String code = "new "+action.getActionInfo().getMessageType().getCanonicalName()+"()"+setter;
 			action.getSetters().add(new Pair<>(column, code));
@@ -367,7 +356,7 @@ public class OldImpl {
 		sb.append(TAB2+variable+setter+";"+EOL);
 	}
 
-	private void expandSubmessage(AMLTestCase tc, AMLAction action, Variable variable, String column, Value v, StringBuilder sb, IGetterSetterGenerator gsFactory, List<String> subMessages)
+    private void expandSubmessage(AMLTestCase tc, AMLAction action, Variable variable, String column, Value v, StringBuilder sb, List<String> subMessages)
 	throws AMLException
 	{
 		String[] references = AMLLangUtil.getReferences(v.getValue());
@@ -476,22 +465,15 @@ public class OldImpl {
 			    subAction.setActionInfo(action.getActionInfo().clone());
 			}
 
-			Class<?> type = gsFactory.getSubmessageClass(action.getActionInfo().getMessageType(), column, subAction.getActionInfo().getMessageType());
+            Class<?> type = subAction.getActionInfo().getMessageType() == IMessage.class ? IMessage.class : HashMap.class;
 
-			if (type == null)
-			{
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Cannot find submessage " + column + " in message '" + action.getActionInfo().getMessageType().getCanonicalName() + "'."));
-				continue;
-			}
-
-			subAction.getActionInfo().setMessageType(type);
+            subAction.getActionInfo().setMessageType(type);
 			subAction.getActionInfo().setReturnType(type);
 
 			if (subAction.getMessageTypeColumn() != null
                     && !"".equals(subAction.getMessageTypeColumn()))
 			{
-                if(!type.equals(List.class)
-                        && !type.equals(IMessage.class)
+                if (!type.equals(IMessage.class)
                         && !type.getCanonicalName().equals(subAction.getMessageTypeColumn())
                         && !type.getSimpleName().equals(subAction.getMessageTypeColumn()))
 				{

@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.normalizeFilters;
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
+
 import java.util.HashMap;
 import java.util.Set;
 
@@ -85,7 +88,7 @@ public class ConnectivityActions extends AbstractCaller {
             service.connect();
         }
 
-        IMessage outgoingMessage = MessageUtil.convertToIMessage(inputData, DefaultMessageFactory.getFactory(),
+        IMessage outgoingMessage = MessageUtil.convertToIMessage(unwrapFilters(inputData), DefaultMessageFactory.getFactory(),
                 TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.OUTGOING_MESSAGE_NAME_AND_NAMESPACE);
 
         service.getSession().send(outgoingMessage);
@@ -102,7 +105,8 @@ public class ConnectivityActions extends AbstractCaller {
     public HashMap<?, ?> WaitMessage(IActionContext actionContext, HashMap<?, ?> mapFilter) throws Exception {
         IInitiatorService service = getClient(actionContext);
 
-        IMessage incomingMessage = MessageUtil.convertToIMessage(mapFilter, DefaultMessageFactory.getFactory(), TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE);
+        IMessage incomingMessage = MessageUtil
+                .convertToIMessage(normalizeFilters(mapFilter), DefaultMessageFactory.getFactory(), TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE);
 
         if (actionContext.getUncheckedFields() == null || actionContext.getUncheckedFields().isEmpty()) {
             ActionContextWrapper actionContextWrapper = new ActionContextWrapper(actionContext);
@@ -139,14 +143,14 @@ public class ConnectivityActions extends AbstractCaller {
             throw new EPSCommonException("Can not get session from service:" + serviceName + "(session is null)");
         }
 
-        return session.send(inputData.get("RawData"));
+        return session.send(unwrapFilters(inputData.get("RawData")));
     }
 
     @CustomColumns(@CustomColumn(value = "AutoConnect", required = true))
     @ActionMethod
     public void Configure(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
 
-        autoConnect = BooleanUtils.toBoolean(inputData.get("AutoConnect").toString());
+        autoConnect = BooleanUtils.toBoolean(unwrapFilters(inputData.get("AutoConnect")).toString());
     }
 
     private static IInitiatorService getClient(IActionContext actionContext) {

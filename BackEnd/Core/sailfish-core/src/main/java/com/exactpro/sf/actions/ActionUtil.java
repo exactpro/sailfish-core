@@ -15,6 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
@@ -42,4 +50,60 @@ public class ActionUtil {
 
         return service;
 	}
+
+    public static <T> T normalizeFilters(Object o) {
+        return processFilters(o, filter -> {
+            if (filter.hasValue()) {
+                Object value = normalizeFilters(filter.getValue());
+
+                if (value != filter.getValue()) {
+                    return value;
+                }
+            }
+
+            return filter;
+        });
+    }
+
+    public static <T> T unwrapFilters(Object o) {
+        return processFilters(o, filter -> {
+            if (filter.hasValue()) {
+                return unwrapFilters(filter.getValue());
+            }
+
+            throw new EPSCommonException("Cannot unwrap filter: " + filter);
+        });
+    }
+
+    public static <T> T tryUnwrapFilters(Object o) {
+        return processFilters(o, filter -> filter.hasValue() ? tryUnwrapFilters(filter.getValue()) : filter);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T processFilters(Object o, Function<IFilter, Object> filterHandler) {
+        if (o instanceof List<?>) {
+            List<?> list = (List<?>)o;
+            return (T)list.stream()
+                    .map(e -> processFilters(e, filterHandler))
+                    .collect(Collectors.toList());
+        } else if (o instanceof IMessage) {
+            IMessage message = (IMessage)o;
+            IMessage copy = message.cloneMessage();
+
+            for (String fieldName : message.getFieldNames()) {
+                copy.addField(fieldName, processFilters(message.getField(fieldName), filterHandler));
+            }
+
+            return (T)copy;
+        } else if (o instanceof Map<?, ?>) {
+            Map<?, ?> map = (Map<?, ?>)o;
+            Map<Object, Object> copy = new HashMap<>();
+            map.forEach((key, value) -> copy.put(key, processFilters(value, filterHandler)));
+            return (T)copy;
+        } else if (o instanceof IFilter) {
+            return (T)filterHandler.apply((IFilter)o);
+        }
+
+        return (T)o;
+    }
 }

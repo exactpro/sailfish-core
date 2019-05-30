@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
+
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -287,7 +289,7 @@ public class FakeActions extends AbstractCaller
 	    for (Entry<?, ?> entry : hashMap.entrySet()) {
 	        System.out.printf("Name {} Value {}", entry.getKey(), entry.getValue());
         }
-	    return hashMap;
+        return unwrapFilters(hashMap);
 	}
 
 	private static BaseMessage send(IActionContext actionContext, BaseMessage message) throws Exception
