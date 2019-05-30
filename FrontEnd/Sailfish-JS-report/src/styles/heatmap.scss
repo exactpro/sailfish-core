@@ -37,6 +37,10 @@
         grid-auto-rows: 1fr;
         z-index: 1;
 
+        &.smart {
+            display: block;
+        }
+
         &-track {
             background-color: $scrollbarTrackBackground;
             width: 10px;
@@ -56,6 +60,13 @@
             border: 2px solid transparent;
             border-radius: 4px;
             opacity: 0.7;
+
+            &.smart {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+            }
 
             &.passed {
                 background-color: $passedBackgroundColor;

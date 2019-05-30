@@ -14,23 +14,24 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNode, ActionNodeType, isAction } from "../models/Action";
-import Action from '../models/Action';
-import { StatusType } from "../models/Status";
+import * as React from 'react';
+import { StatusType } from '../../models/Status';
+import range from '../../helpers/range';
+import { createSelector } from '../../helpers/styleCreators';
 
-const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
-
-export function getActions(actionNodes: ActionNode[]) : Action[] {
-    return actionNodes.filter(isAction);
+interface HeatmapProps  {
+    elementsCount: number;
+    selectedElements: Map<number, StatusType>;
 }
 
-export function isCheckpoint(action: Action): boolean {
-    return action.name.includes(ACTION_CHECKPOINT_NAME);
-}
+const Heatmap = ({ elementsCount, selectedElements }: HeatmapProps) => (
+    <div className="heatmap-scrollbar">
+        {
+            range(0, elementsCount).map(index => (
+                <div className={createSelector("heatmap-scrollbar-item", selectedElements.get(index))} />
+            ))
+        }
+    </div>
+)
 
-export function getStatusChipDescription(status: StatusType): string {
-    const statusFormatted = status.toLowerCase().replace('_', ' '),
-        statusCapitalized = statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1);
-
-    return `${statusCapitalized} actions count. Click to select related ${statusFormatted} actions.`;
-}
+export default Heatmap;

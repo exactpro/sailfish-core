@@ -14,23 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNode, ActionNodeType, isAction } from "../models/Action";
-import Action from '../models/Action';
-import { StatusType } from "../models/Status";
+const range = (start: number, end: number): Array<number> => 
+    new Array(end - start + 1).fill(undefined).map((_, i) => start + i);
 
-const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
+export const rangeSum = (start: number, end: number, mapper: (idx: number) => number) =>
+    range(start, end).map(mapper).reduce((sum, current) => sum + current, 0);
 
-export function getActions(actionNodes: ActionNode[]) : Action[] {
-    return actionNodes.filter(isAction);
-}
 
-export function isCheckpoint(action: Action): boolean {
-    return action.name.includes(ACTION_CHECKPOINT_NAME);
-}
-
-export function getStatusChipDescription(status: StatusType): string {
-    const statusFormatted = status.toLowerCase().replace('_', ' '),
-        statusCapitalized = statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1);
-
-    return `${statusCapitalized} actions count. Click to select related ${statusFormatted} actions.`;
-}
+export default range;

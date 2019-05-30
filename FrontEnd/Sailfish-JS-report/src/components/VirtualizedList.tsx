@@ -19,7 +19,7 @@ import { AutoSizer, List, CellMeasurer, CellMeasurerCache, OnScrollParams } from
 import { raf } from '../helpers/raf';
 import RemeasureHandler from './util/RemeasureHandler';
 import { StatusType } from '../models/Status';
-import { HeatmapScrollbar } from './HeatmapScrollbar';
+import { HeatmapScrollbar } from './heatmap/HeatmapScrollbar';
 
 interface VirtualizedListProps {
     elementRenderer: (idx: number, measure?: () => void) => React.ReactNode;
@@ -74,6 +74,7 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
                         elementsCount={rowCount}
                         selectedElements={selectedElements}
                         onScroll={this.scrollbarOnScroll}
+                        heightMapper={index => this.measurerCache.rowHeight({ index })}
                         ref={this.scrollbar}>
                         <List
                             height={height}

@@ -16,15 +16,20 @@
 
 import * as React from 'react';
 import Scrollbars from 'react-custom-scrollbars';
-import { StatusType } from '../models/Status';
-import '../styles/heatmap.scss';
-import { isNumber } from 'util';
+import { StatusType } from '../../models/Status';
+import '../../styles/heatmap.scss';
+import { rangeSum } from '../../helpers/range';
+import { createSelector } from '../../helpers/styleCreators';
+import SmartHeatmap from './SmartHeatmap';
+import ChunkedHeatmap from './ChunkedHeatmap';
+import Heatmap from './Heatmap';
 
 const MIN_HEATMAP_ELEMENT_HEIGHT = 8;
 const SCROLLBAR_TRACK_WIDTH = 11;
 
 interface HeatmapScrollbarProps {
     selectedElements: Map<number, StatusType>;
+    heightMapper?: (index: number) => number;
     elementsCount: number;
     height?: number;
     width?: number;
@@ -68,7 +73,7 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
     }
 
     render() {
-        const { children, selectedElements, elementsCount, height, width, onScroll } = this.props, 
+        const { children, selectedElements, elementsCount, height, width, onScroll, heightMapper } = this.props, 
             rootHeight = height !== undefined ? height : this.state.rootHeight,
             style = height !== undefined || width !== undefined ? { height, width } : undefined;
 
@@ -87,65 +92,32 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
                         {children}
                     </div>
                 </Scrollbars>
-                <div className="heatmap-scrollbar">
-                    {
+                {
+                    heightMapper ?
+                        <SmartHeatmap
+                            elementsCount={elementsCount}
+                            selectedElements={selectedElements}
+                            rootHeight={rootHeight}
+                            elementHeightMapper={heightMapper}/> : 
                         rootHeight ? 
                             renderHeatmap(elementsCount, selectedElements, rootHeight) : 
-                            null
-                    }
-                </div>
+                            <div/>
+                }
             </div>
         )
     }
 }
 
-function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, rootHeight: number): React.ReactNode[] {
+function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, rootHeight: number): React.ReactNode {
     // here we calculate how much heatmap elements we can render without overlaping
     const maxElementsCount = rootHeight / MIN_HEATMAP_ELEMENT_HEIGHT;
 
     return elementsCount > maxElementsCount ?
-        renderBigHeatmap(elementsCount, selectedElements, Math.ceil(elementsCount / maxElementsCount)) :
-        renderSmallHeatmap(elementsCount, selectedElements);
-}
-
-function renderSmallHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>): React.ReactNode[] {
-    let resultHeatmap: React.ReactNode[] = [];
-
-    for (let i = 0; i < elementsCount; i++) {
-        resultHeatmap.push(
-            <div className={"heatmap-scrollbar-item " + (selectedElements.get(i) || "").toLowerCase()} />
-        );
-    }
-
-    return resultHeatmap;
-}
-
-function renderBigHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, chunkSize: number): React.ReactNode[] {
-    // this fucntion is used for rendering heatmap only for big lists
-    // the idea is that we divide the list of elements into chunks and render only one heatmap element for each chunk
-
-    // WARNING : we can render only one element in a chunk,
-    // so if chunk contains multiple selected elements with different status,
-    // it will render ONLY FIRST status element in a chunk
-    // In current version several selected elements can't have different statuses, so we can safely use this trick
-
-    let resultHeatmap: React.ReactNode[] = [];
-
-    for (let i = 0; i < elementsCount; i++) {
-        if (selectedElements.get(i)) {
-            resultHeatmap.push(
-                <div className={"heatmap-scrollbar-item " + selectedElements.get(i).toLowerCase()} />
-            );
-
-            // after we added heatmap element to the list, we should skip other elements in chunk
-            i += chunkSize - ((i + 1) % chunkSize);
-        } else if ((i + 1) % chunkSize == 0) {
-            // no selected elements in current chunk, render empty heatmap element
-            resultHeatmap.push(
-                <div className="heatmap-scrollbar-item" />
-            );
-        }
-    }
-
-    return resultHeatmap;
+        <ChunkedHeatmap
+            elementsCount={elementsCount}
+            selectedElements={selectedElements}
+            chunkSize={Math.ceil(elementsCount / maxElementsCount)}/> :
+        <Heatmap
+            elementsCount={elementsCount}
+            selectedElements={selectedElements}/>
 }

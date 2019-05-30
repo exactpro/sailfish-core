@@ -23,7 +23,7 @@ import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
 import TestCaseCard from './TestCaseCard';
-import { HeatmapScrollbar } from './HeatmapScrollbar';
+import { HeatmapScrollbar } from './heatmap/HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
 import { createSelector } from '../helpers/styleCreators';
 import { loadTestCase } from '../thunks/loadTestCase';
