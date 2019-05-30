@@ -15,27 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
-
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
@@ -48,6 +27,26 @@ import com.exactpro.sf.externalapi.IServiceProxy;
 import com.exactpro.sf.externalapi.ISettingsProxy;
 import com.exactpro.sf.externalapi.ServiceFactory;
 import com.exactpro.sf.externalapi.impl.EmptyListener;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * @author sergey.smirnov
@@ -56,7 +55,7 @@ import com.exactpro.sf.externalapi.impl.EmptyListener;
 @RunWith(Parameterized.class)
 public class TestExternalApi {
 
-    private final File writableLayer = Paths.get("build", "tmp", "test_external_api").toFile();
+    private final File writableLayer = Paths.get("build", "tmp", "test_external_api", RandomStringUtils.randomAlphanumeric(16)).toFile();
     private final ServiceName serviceName = new ServiceName("env", "serviceName");
     private SailfishURI serviceType;
     private SailfishURI testServiceType;
@@ -76,10 +75,7 @@ public class TestExternalApi {
 
     @Before
     public void before() throws SailfishURIException, IOException {
-        if (writableLayer.exists()) {
-            FileUtils.deleteDirectory(writableLayer);
-        }
-        
+
         this.serviceType = new SailfishURI(IVersion.GENERAL, null, "FAKE_CLIENT_SERVICE");
         this.dictionary = new SailfishURI(IVersion.GENERAL, null, "TestAML");
         this.testServiceType = new SailfishURI(IVersion.GENERAL, null, "TEST_SERVICE");
@@ -88,7 +84,7 @@ public class TestExternalApi {
     
     private IServiceFactory createServiceFactory(boolean useResourceLayer, boolean useTestLayer) throws Exception {
         File[] layers = useTestLayer 
-                ? new File[] { new File("src/test/workspace"), writableLayer } 
+                ? new File[] { new File("src/test/workspace"), writableLayer }
                 : new File[] { writableLayer };
         return new ServiceFactory(0, 2, 2, useResourceLayer,strict, layers);
     }

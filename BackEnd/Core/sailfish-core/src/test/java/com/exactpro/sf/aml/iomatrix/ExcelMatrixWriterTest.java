@@ -15,18 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.iomatrix;
 
-import static org.junit.Assert.fail;
-
-import java.awt.Color;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Random;
-
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -34,13 +25,27 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 
+import java.awt.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Random;
+
+import static org.junit.Assert.fail;
+
 public class ExcelMatrixWriterTest {
 
-    private final String tmpDir = System.getProperty("java.io.tmpdir");
-    private final String fileName = tmpDir + File.separator + "test.xls";
-    private final String fileNameX = tmpDir + File.separator + "test.xlsx";
-    private final File tmpFile = new File(fileName);
-    private final File tmpFileX = new File(fileNameX);
+    private final File file;
+    private final File fileX;
+    private final String fileName;
+    private final String fileNameX;
+
+    public ExcelMatrixWriterTest() throws IOException {
+        file = File.createTempFile("test", ".xsls", new File("build"));
+        fileX = File.createTempFile("test", ".xslsx", new File("build"));
+        fileName = file.getAbsolutePath();
+        fileNameX = fileX.getAbsolutePath();
+    }
 
     @Test
     public void testExcelMatrixWriterStringBoolean() {
@@ -66,7 +71,7 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testExcelMatrixWriterOutputStreamBoolean() {
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFile), false)) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(file), false)) {
 
         } catch (IOException ex) {
             fail(ex.getMessage());
@@ -77,7 +82,7 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testExcelMatrixWriterOutputStreamBooleanXlsx() {
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFileX), true)) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(fileX), true)) {
 
         } catch (IOException ex) {
             fail(ex.getMessage());
@@ -110,7 +115,7 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testExcelMatrixWriterOutputStreamBooleanString() {
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFile), false, "someName")) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(file), false, "someName")) {
 
         } catch (IOException ex) {
             fail(ex.getMessage());
@@ -121,7 +126,7 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testExcelMatrixWriterOutputStreamBooleanStringXlsx() {
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFileX), true, "someName")) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(fileX), true, "someName")) {
 
         } catch (IOException ex) {
             fail(ex.getMessage());
@@ -136,7 +141,7 @@ public class ExcelMatrixWriterTest {
         CellStyle style = fakeWorkbook.createCellStyle();
         HSSFColor myColor = HSSFColorPredefined.RED.getColor();
 
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFile), false, "someName")) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(file), false, "someName")) {
             SimpleCell[] cells = new SimpleCell[10];
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
@@ -161,7 +166,7 @@ public class ExcelMatrixWriterTest {
         }
 
         try {
-            short bg = WorkbookFactory.create(tmpFile).getSheet("someName").getRow(0).getCell(0).getCellStyle()
+            short bg = WorkbookFactory.create(file).getSheet("someName").getRow(0).getCell(0).getCellStyle()
                     .getFillForegroundColor();
             if (bg != HSSFColorPredefined.RED.getIndex()) {
                 fail("wrong color");
@@ -177,7 +182,7 @@ public class ExcelMatrixWriterTest {
         CellStyle style = fakeWorkbook.createCellStyle();
         XSSFColor myColor = new XSSFColor(Color.RED, fakeWorkbook.getStylesSource().getIndexedColors());
 
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFileX), true, "someName")) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(fileX), true, "someName")) {
             SimpleCell[] cells = new SimpleCell[10];
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
@@ -218,7 +223,7 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testWrite() {
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFile), false, "someName")) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(file), false, "someName")) {
             String[] cells = new String[10];
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
@@ -235,7 +240,7 @@ public class ExcelMatrixWriterTest {
         }
 
         try {
-            WorkbookFactory.create(tmpFile);
+            WorkbookFactory.create(file);
         } catch (IOException e1) {
             fail(e1.getMessage());
         }
@@ -243,7 +248,7 @@ public class ExcelMatrixWriterTest {
 
     @Test
     public void testWriteXlsx() {
-        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(tmpFileX), true, "someName")) {
+        try (ExcelMatrixWriter e = new ExcelMatrixWriter(new FileOutputStream(fileX), true, "someName")) {
             String[] cells = new String[10];
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
@@ -260,7 +265,7 @@ public class ExcelMatrixWriterTest {
         }
 
         try {
-            WorkbookFactory.create(tmpFileX);
+            WorkbookFactory.create(fileX);
         } catch (IOException e1) {
             fail(e1.getMessage());
         }
