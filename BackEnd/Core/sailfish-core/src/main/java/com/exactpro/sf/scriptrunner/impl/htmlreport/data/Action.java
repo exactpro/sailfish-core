@@ -15,24 +15,34 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.impl.htmlreport.data;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.scriptrunner.StatusDescription;
 
 public class Action extends BaseEntity {
     private static final int NEXT_AFTER_ROOT = 1;
     private int id;
+    private String matrixId;
+    private String serviceName;
     private String messageName;
     private List<ActionParameter> parameters;
     private long startTime;
+    private long finishTime;
     private String linkToReport;
     private boolean hasHeaders;
     private MachineLearningData machineLearningData;
     private CheckPoint checkPoint;
     private List<String> verificationsOrder;
+    private String outcome;
+    private Deque<ActionGroup> groups = new ArrayDeque<>();
+    private StatusDescription status;
+    private Object result;
 
     public int getId() {
         return id;
@@ -40,6 +50,22 @@ public class Action extends BaseEntity {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public String getMatrixId() {
+        return matrixId;
+    }
+
+    public void setMatrixId(String matrixId) {
+        this.matrixId = matrixId;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getMessageName() {
@@ -72,6 +98,14 @@ public class Action extends BaseEntity {
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
+    }
+
+    public long getFinishTime() {
+        return finishTime;
+    }
+
+    public void setFinishTime(long finishTime) {
+        this.finishTime = finishTime;
     }
 
     public String getLinkToReport() {
@@ -114,19 +148,54 @@ public class Action extends BaseEntity {
         this.verificationsOrder = verificationsOrder;
     }
 
+    public String getOutcome() {
+        return outcome;
+    }
+
+    public void setOutcome(String outcome) {
+        this.outcome = outcome;
+    }
+
+    public Deque<ActionGroup> getGroups() {
+        return groups;
+    }
+
+    public StatusDescription getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusDescription status) {
+        this.status = status;
+    }
+
+    public Object getResult() {
+        return result;
+    }
+
+    public void setResult(Object result) {
+        this.result = result;
+    }
+
     @Override
     public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 
         builder.append("id", id);
+        builder.append("matrixId", matrixId);
+        builder.append("serviceName", serviceName);
         builder.append("messageName", messageName);
         builder.append("parameters", parameters.size());
         builder.append("startTime", startTime);
+        builder.append("finishTime", finishTime);
         builder.append("linkToReport", linkToReport);
         builder.append("hasHeaders", hasHeaders);
         builder.append("machineLearningData", machineLearningData);
         builder.append("checkPoint", checkPoint);
         builder.append("verificationsOrder", verificationsOrder);
+        builder.append("outcome", outcome);
+        builder.append("groups", groups);
+        builder.append("status", status);
+        builder.append("result", result);
         builder.append(super.toString());
 
         return builder.toString();

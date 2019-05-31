@@ -20,7 +20,9 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 
 public interface IMatrixConverterContext {
-    
+
+    SailfishURI getConverterURI();
+
     IWorkspaceDispatcher getWorkspaceDispatcher();
     
     IDictionaryManager getDictionaryManager();

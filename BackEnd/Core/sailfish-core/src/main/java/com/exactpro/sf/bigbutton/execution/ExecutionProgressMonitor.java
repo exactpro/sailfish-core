@@ -111,10 +111,10 @@ public class ExecutionProgressMonitor {
 
 	private void doTearDown() {
 
-        writeReport();
         identifyExecutionStatus();
 
         if(reportExporter != null) {
+            writeReport();
             reportExporter.writeCompleted();
 		}
 

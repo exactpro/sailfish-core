@@ -43,6 +43,7 @@ import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -70,7 +71,6 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
@@ -132,10 +132,19 @@ public class JsonReport implements IScriptReport {
         return isActionCreated;
     }
 
-    private void assertState(ContextType... states) {
-        if(Arrays.stream(states).noneMatch(i -> context.cur == i)) {
-            throw new RuntimeException(String.format("Incorrect report state '%s' ('%s' expected)", context.cur, Arrays.toString(states)));
+    private void assertState(boolean throwException, ContextType... states) {
+        if (Arrays.stream(states).noneMatch(i -> context.cur == i)) {
+            String msg = String.format("Incorrect report state '%s' ('%s' expected)", context.cur, Arrays.toString(states));
+            if (throwException) {
+                throw new RuntimeException(msg);
+            } else {
+                logger.error("{} - ignoring", msg);
+            }
         }
+    }
+
+    private void assertState(ContextType... states) {
+        assertState(true, states);
     }
 
     private File getFile(String fileName, String extension) {
@@ -282,28 +291,25 @@ public class JsonReport implements IScriptReport {
         reportStats.updateTestCaseStatus(status.getStatus());
     }
 
-    public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters,
-            CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters,
+            CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder, String outcome) {
 
-        createAction(name, serviceName, action, msg, description, Collections.singletonList(inputParameters), checkPoint, tag, hash,
-                verificationsOrder);
-    }
-
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters,
-            CheckPoint checkPoint, String tag, int hash, List<String> verificationsOrder) {
-
-        assertState(ContextType.TESTCASE, ContextType.ACTION);
+        assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
 
         Action curAction = new Action();
         getCurrentContextNode().addSubNodes(curAction);
 
         curAction.setId(actionIdCounter++);
+        curAction.setMatrixId(id);
+        curAction.setServiceName(serviceName);
         curAction.setStartTime(Instant.now());
         curAction.setName(name);
+        curAction.setMessageType(messageType);
         curAction.setDescription(description);
         curAction.setCheckPointId(checkPoint != null ? checkPoint.getId() : null);
-        if (inputParameters != null) {
-            curAction.setParameters(inputParameters.stream().map(p -> new Parameter(new ReportEntity("Parameter", p))).collect(Collectors.toList()));
+        curAction.setOutcome(outcome);
+        if(parameters != null) {
+            curAction.setParameters(Collections.singletonList(new Parameter(new ReportEntity("Parameter", parameters))));
         }
         setContext(ContextType.ACTION, curAction);
         isActionCreated = true;
@@ -483,7 +489,7 @@ public class JsonReport implements IScriptReport {
     }
 
     public void closeReport() {
-        assertState(null, ContextType.SCRIPT);
+        assertState(false, null, ContextType.SCRIPT);
         reportRoot.setFinishTime(Instant.now());
         initProperties();
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);

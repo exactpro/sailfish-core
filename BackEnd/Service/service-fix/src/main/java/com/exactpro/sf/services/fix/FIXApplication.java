@@ -213,7 +213,8 @@ public class FIXApplication implements FIXClientApplication {
                 textMessage = "Received Logout has text (58) tag: " + text;
 
 				if (StringUtil.containsAll(text, "MsgSeqNum", "too low, expecting")
-				        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">."))
+				        || StringUtil.containsAll(text, "Wrong sequence number!", "Too small to recover. Received: ", "Expected: ", ">.")
+                        || StringUtil.containsAll(text, "Sequence Number", "<", "expected"))
 				{
 					incorrectSenderMsgSeqNum = true;
 					// extract 4 from the text: MsgSeqNum too low, expecting 4 but received 1

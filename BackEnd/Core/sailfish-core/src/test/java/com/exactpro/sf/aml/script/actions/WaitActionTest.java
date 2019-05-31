@@ -18,8 +18,8 @@ package com.exactpro.sf.aml.script.actions;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.CheckPoint;
-import com.exactpro.sf.aml.script.DefaultSettings;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
@@ -46,7 +46,7 @@ public class WaitActionTest extends AbstractTest {
 	@Before
 	public void init() {
 		this.messageFactory = DefaultMessageFactory.getFactory();
-		this.actionContext = new DefaultSettings(getScriptContext(), true);
+        this.actionContext = new ActionContext(getScriptContext(), true);
 	}
 
 	@Test

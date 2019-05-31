@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +35,12 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import com.exactpro.sf.common.util.EPSCommonException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -706,6 +712,27 @@ public class TestToolsAPI {
     public List<String> getEnvNames(){
         IConnectionManager conManager = context.getConnectionManager();
         return conManager.getEnvironmentList();
+    }
+
+    public void zipMlFolder(IWorkspaceDispatcher workspaceDispatcher, OutputStream output, boolean removeAfter) throws IOException {
+
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
+
+            for (String mlFileName : workspaceDispatcher.listFiles(File::isFile, FolderType.ML, true)) {
+
+                File file = workspaceDispatcher.getFile(FolderType.ML, mlFileName);
+
+                zipOutputStream.putNextEntry(new ZipEntry(mlFileName));
+                try (InputStream data = new FileInputStream(file)) {
+                    IOUtils.copy(data, zipOutputStream);
+                }
+                zipOutputStream.closeEntry();
+            }
+
+            if (removeAfter) {
+                FileUtils.cleanDirectory(workspaceDispatcher.getFolder(FolderType.ML));
+            }
+        }
     }
 
 	private void notifyAddMatrixListeners(IMatrixNotifier notifier, IMatrix matrix) {

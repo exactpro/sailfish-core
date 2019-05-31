@@ -43,9 +43,7 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
-import com.exactpro.sf.common.messages.IHumanMessage;
-import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityManagerException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -54,8 +52,10 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.Dictionaries;
 import com.exactpro.sf.aml.Dictionary;
 import com.exactpro.sf.aml.DictionarySettings;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.PluginLoader;
+import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.DummyMessageFactory;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -72,6 +72,7 @@ import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
+import com.exactpro.sf.scriptrunner.ManagerUtils;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityClass;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityInfo;
@@ -166,11 +167,19 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 			    }
 
 			    for (String className : dict.getUtilityClassName()){
+			        try {
 			        UtilityClass utilityClass = utilityManager.load(loader, className, version);
 
 			        for(String utilityClassAlias : utilityClass.getClassAliases()) {
 			            SailfishURI utilityClassURI = new SailfishURI(version.getAlias(), utilityClassAlias);
 			            settings.addUtilityClassURI(utilityClassURI);
+                        }
+                    } catch (UtilityManagerException e) {
+                        if (context.getVersion().isLightweight()) {
+                            logger.warn("Can't load utility class '{}'", className, e);
+                        } else {
+                            throw e;
+                        }
 			        }
                 }
 
@@ -448,6 +457,20 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	    return null;
 	}
 
+    @Override
+    public UtilityInfo getUtilityInfo(SailfishURI dictionaryURI, SailfishURI utilityURI, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes) throws SailfishURIException {
+        if (utilityURI.isAbsolute()) {
+            return utilityManager.getUtilityInfo(utilityURI, argTypes);
+        }
+
+        DictionarySettings settings = SailfishURIUtils.getMatchingValue(dictionaryURI, dictSettings, SailfishURIRule.REQUIRE_RESOURCE);
+
+        if (settings == null) {
+            return null;
+        }
+
+        return ManagerUtils.getUtilityInfo(settings.getUtilityClassURIs(), utilityManager, utilityURI, line, uid, column, alertCollector, argTypes);
+    }
 
     @Override
     public Set<SailfishURI> getUtilityURIs(SailfishURI dictionaryURI) {

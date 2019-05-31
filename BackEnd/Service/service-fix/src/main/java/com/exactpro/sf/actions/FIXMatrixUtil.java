@@ -357,6 +357,7 @@ public class FIXMatrixUtil extends AbstractCaller {
     public static int extractSeqNum(String text) {
         String value = StringUtils.substringBetween(text, "expecting ", " but received");
         value = value == null ? StringUtils.substringBetween(text, "Expected: ", ">") : value;
+        value = value == null ? StringUtils.substringBetween(text, "expected (", ")") : value;
         return Integer.parseInt(value);
     }
 

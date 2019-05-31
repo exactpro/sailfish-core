@@ -80,6 +80,7 @@ export interface MessageSelectStateAction {
 export interface VerificationSelectStateAction {
     type: StateActionTypes.SELECT_VERIFICATION;
     messageId: number;
+    actionId: number;
     status: StatusType;
 }
 

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.scriptrunner.IReportStats;
 import com.exactpro.sf.scriptrunner.IScriptReport;
@@ -131,12 +132,12 @@ public class BroadcastScriptReport implements IScriptReport {
     }
 
     @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, Object inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
+    public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters, CheckPoint checkPoint, String tag, int hash,
+            List<String> verificationsOrder, String outcome) {
 		try {
     		for (IScriptReport listener: listeners) {
     			try {
-                    listener.createAction(name, serviceName, action, msg, description, inputParameters, checkPoint, tag, hash, verificationsOrder);
+                    listener.createAction(id, serviceName, name, messageType, description, parameters, checkPoint, tag, hash, verificationsOrder, outcome);
 			    } catch (Exception e) {
 				    logger.error("Error while firing create action with {} listener", listener.getClass().getName(), e);
 			    }
@@ -149,22 +150,6 @@ public class BroadcastScriptReport implements IScriptReport {
 	@Override
 	public boolean isActionCreated() {
         return actionCreated;
-	}
-
-    @Override
-    public void createAction(String name, String serviceName, String action, String msg, String description, List<Object> inputParameters, CheckPoint checkPoint, String tag, int hash,
-                             List<String> verificationsOrder) {
-		try {
-			for (IScriptReport listener: listeners) {
-				try {
-                    listener.createAction(name, serviceName, action, msg, description, inputParameters, checkPoint, tag, hash, verificationsOrder);
-				} catch (Exception e) {
-					logger.error("Error while firing create action with {} listener", listener.getClass().getName(), e);
-				}
-			}
-		} finally {
-			this.actionCreated = true;
-		}
 	}
 
 	@Override
@@ -271,10 +256,10 @@ public class BroadcastScriptReport implements IScriptReport {
 	}
 
 	@Override
-    public void createParametersTable(String messageName, Object message) {
+    public void createParametersTable(IMessage message) {
         for(IScriptReport listener : listeners) {
             try {
-                listener.createParametersTable(messageName, message);
+                listener.createParametersTable(message);
             } catch(Exception e) {
                 logger.error("Error while firing create parameters table with {} listener", listener.getClass().getName(), e);
             }

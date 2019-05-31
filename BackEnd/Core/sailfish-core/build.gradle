@@ -129,6 +129,8 @@ dependencies {
 
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.7'
 
+    compile 'org.jooq:jool-java-8:0.9.14'
+
     runtimeOnly 'commons-collections:commons-collections:3.2.2' // for commons-configuration
 
     testRuntime 'org.apache.derby:derby:10.14.2.0'
@@ -248,7 +250,7 @@ task generateJavaFromXsd (dependsOn: 'createDir') {
 task jamonGenerate {
 	inputs.files fileTree(templatesDir).include('**/*.jamon')
 	inputs.files.each { fileName ->
-		def shortName = "${fileName.absolutePath}".replaceAll(file(templatesDir).absolutePath, '').replaceAll('.jamon', '')
+		def shortName = "${fileName.absolutePath}".replace(file(templatesDir).absolutePath, '').replace('.jamon', '')
 		outputs.file file("${genJavaDir}${shortName}Impl.java")
 		outputs.file file("${genJavaDir}${shortName}.java")
 	}

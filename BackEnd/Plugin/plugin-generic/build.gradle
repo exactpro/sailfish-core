@@ -28,13 +28,6 @@ test {
     println "Test args ${allJvmArgs}"
 }
 
-generateVersionClass {
-	plugin	= true
-	alias 	= plugin_alias
-}
-
-compileKotlin.dependsOn.add('generateVersionClass')
-
 validateDictionary {
     validate(NTG_VALIDATOR, 'NTG_GENERIC.xml')
     validate(ITCH_VALIDATOR, 'ITCH_GENERIC.xml')

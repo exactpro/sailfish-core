@@ -28,22 +28,29 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
 
 public class MatrixConverterManager {
-	private final Map<SailfishURI, Class<? extends IMatrixConverter>> uriToClass;
+    private final IWorkspaceDispatcher workspaceDispatcher;
+    private final IDictionaryManager dictionaryManager;
+    private final IConnectionManager connectionManager;
+
+    private final Map<SailfishURI, Class<? extends IMatrixConverter>> uriToClass;
     private final Map<SailfishURI, Class<? extends IMatrixConverterSettings>> uriToSettingsClass;
-	private final IMatrixConverterContext context;
 
 	protected MatrixConverterManager(IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager,
             IConnectionManager connectionManager, Map<SailfishURI, Class<? extends IMatrixConverter>> uriToClass,
             Map<SailfishURI, Class<? extends IMatrixConverterSettings>> uriToSettingsClass) {
-	    this.uriToClass = Collections.unmodifiableMap(uriToClass);
+        this.workspaceDispatcher = workspaceDispatcher;
+        this.dictionaryManager = dictionaryManager;
+        this.connectionManager = connectionManager;
+        this.uriToClass = Collections.unmodifiableMap(uriToClass);
         this.uriToSettingsClass = Collections.unmodifiableMap(uriToSettingsClass);
-	    this.context = new MatrixConverterContext(workspaceDispatcher, dictionaryManager, connectionManager);
     }
 
     public IMatrixConverter getMatrixConverter(SailfishURI converterURI) {
         try {
-            Class<? extends IMatrixConverter> clazz = SailfishURIUtils.getMatchingValue(converterURI, uriToClass, SailfishURIRule.REQUIRE_RESOURCE);
+            SailfishURI uri = SailfishURIUtils.getMatchingURI(converterURI, uriToClass.keySet(), SailfishURIRule.REQUIRE_RESOURCE);
+            Class<? extends IMatrixConverter> clazz = uriToClass.get(uri);
             IMatrixConverter converter = clazz.newInstance();
+            IMatrixConverterContext context = new MatrixConverterContext(uri, workspaceDispatcher, dictionaryManager, connectionManager);
             converter.init(context);
             return converter;
         } catch (InstantiationException | IllegalAccessException e) {

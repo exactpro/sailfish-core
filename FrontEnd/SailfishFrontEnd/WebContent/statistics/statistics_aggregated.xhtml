@@ -40,14 +40,12 @@
 	    			<h:panelGrid columns="8" cellpadding="5">
 		    			<h:outputLabel for="from" value="From" />
 		    			<p:calendar id="from" value="#{statReportingBean.from}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
-                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
-                                    requiredMessage="'From' is empty"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="false"
                                     timeZone="UTC"/>
 
 		    			<h:outputLabel for="to" value="To" />
 		    			<p:calendar id="to" value="#{statReportingBean.to}" pattern="yyyy-MM-dd HH:mm:ss" mode="popup" style="width:22em"
-                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="true"
-                                    requiredMessage="'To' is empty"
+                                    onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="false"
                                     timeZone="UTC"/>
 
 		    			<h:outputLabel for="sfInstancesMenu" value="SF Instances" />

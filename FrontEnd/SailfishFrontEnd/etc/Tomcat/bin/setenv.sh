@@ -1,3 +1,4 @@
+#!/bin/sh
 #*****************************************************************************
 # Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
 #
@@ -23,6 +24,7 @@ export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError" #Option tells the 
 #export JAVA_OPTS="$JAVA_OPTS -Duser.timezone=UTC" #Use the user.timezone property value as the default time zone ID if it's available.
 #export JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addresses preferred over IPv6 addresses
 #export JAVA_OPTS="$JAVA_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" #Use for configure jvm FlightRecorder
+export JAVA_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError" # Option tells that JVM should terminate process if OutOfMemoryError had been thrown
 
 #Deployer Jvm arguments:
 export DEPLOYER_JAVA_OPTS=""

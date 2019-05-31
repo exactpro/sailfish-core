@@ -33,6 +33,7 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.AjaxBehaviorEvent;
 
 import com.exactpro.sf.embedded.statistics.StatisticsUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +96,9 @@ public class StatisticsReportingBean implements Serializable {
 
         if(statisticsDbAvailable) {
 		
-			this.from = DateUtils.truncate( new Date(), Calendar.DATE );
+			this.from = null;
 			
-			this.to = new Date();
+			this.to = null;
 			
 			this.allSfInstances = statisticsService.getStorage().getAllSfInstances();
 
@@ -124,35 +125,32 @@ public class StatisticsReportingBean implements Serializable {
     }
 	
 	public void generateReport() {
-
         logger.debug("Generate {} - {}; {}", from, to, selectedSfInstances);
-
-        AggregateReportParameters params = getAggregateReportParameters();
-
         try {
+            AggregateReportParameters params = getAggregateReportParameters();
             this.lastResult = Collections.emptyList();
             StatisticsUtils.generateAggregatedReport(BeanUtil.getSfContext().getStatisticsService(),
                     params, statisticsReportHandler);
             this.lastResult = statisticsReportHandler.getReportRows();
-			
 			this.loadedFrom = from;
 			this.loadedTo = to;
-			
 		} catch(Exception e) {
-			
 			logger.error(e.getMessage(), e);
-			
 			BeanUtil.addErrorMessage(e.getMessage(), "");
-			
 		}
-		
 	}
 
     private AggregateReportParameters getAggregateReportParameters() {
         AggregateReportParameters params = new AggregateReportParameters();
-
-        params.setFrom(from);
-        params.setTo(to);
+        if (from == null && to == null && CollectionUtils.isEmpty(tags)) {
+            throw new IllegalArgumentException("Neither from/to nor tags are not set. Please set from/to or(and) tags");
+        }
+        if (from != null) {
+            params.setFrom(from);
+        }
+        if (to != null) {
+            params.setTo(to);
+        }
         params.setSfInstances(new ArrayList<>(selectedSfInstances));
         params.setTags(new ArrayList<>(tags));
         return params;

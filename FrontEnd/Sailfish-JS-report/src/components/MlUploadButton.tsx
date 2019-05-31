@@ -18,75 +18,74 @@ import { h, Component } from 'preact';
 import '../styles/messages.scss';
 import { SubmittedData } from '../models/MlServiceResponse'
 import AppState from '../state/models/AppState';
-import { setSubmittedMlData, addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCreators";
+import { addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCreators";
 import { connect } from 'preact-redux';
 import { submitEntry, deleteEntry } from '../helpers/machineLearning';
 import Action from "../models/Action";
 
-interface MlUploadButtonProps {
+interface MessageMlUploadButtonProps {
     messageId: number;
+    show?: boolean;
     token: string;
     submittedData: SubmittedData[];
-    selectedActionIds: number[];
+    activeActionId: number;
     actionMap: Map<number, Action>;
-    setSubmittedMlData: (data: SubmittedData[]) => any;
     addSubmittedMlData: (data: SubmittedData) => any;
     removeSubmittedMlData: (data: SubmittedData) => any;
 }
 
-export class MlUploadButtonBase extends Component<MlUploadButtonProps, {}> {
-    render({ submittedData, messageId, token, selectedActionIds, actionMap }: MlUploadButtonProps) {
+export class MessageMlUploadButtonBase extends Component<MessageMlUploadButtonProps, {}> {
 
-        let selectedActionId = selectedActionIds.length === 1 ? selectedActionIds[0] : null
+    render({ submittedData, messageId, token, activeActionId, actionMap, show }: MessageMlUploadButtonProps) {
 
         let isAvailable = token !== null
-            && selectedActionId !== null
-            && actionMap.get(selectedActionId).status.status === "FAILED";
+            && (show == null || show)
+            && activeActionId != null
+            && actionMap.get(activeActionId).status.status === "FAILED";
 
         let isSubmitted = isAvailable && submittedData.some((entry) => {
             return entry.messageId === messageId
-                && entry.actionId === selectedActionId
+                && entry.actionId === activeActionId
         });
 
         // default one (message cannot be submitted or ml servie is unavailable)
-        let mlButton = <div class="mc-header__submit-icon inactive" />;
+        let mlButton = <div class="ml__submit-icon inactive" />;
 
         if (isAvailable) {
             mlButton = isSubmitted
 
-                ? <div class="mc-header__submit-icon submitted" 
+                ? <div class="ml__submit-icon submitted"
                     title="Revoke ML data"
                     onClick={(e) => {
-                        deleteEntry(token, { messageId: messageId, actionId: selectedActionId }, this.props.removeSubmittedMlData);
+                        deleteEntry(token, { messageId: messageId, actionId: activeActionId }, this.props.removeSubmittedMlData);
                         e.cancelBubble = true;
                     }} />
 
-                : <div class="mc-header__submit-icon active" 
+                : <div class="ml__submit-icon active"
                     title="Submit ML data"
                     onClick={(e) => {
-                        submitEntry(token, { messageId: messageId, actionId: selectedActionId }, this.props.addSubmittedMlData);
+                        submitEntry(token, { messageId: messageId, actionId: activeActionId }, this.props.removeSubmittedMlData, this.props.addSubmittedMlData);
                         e.cancelBubble = true;
                     }} />
         }
 
         return (
-            <div class="mc-header__submit" title="Unable to submit ML data">
+            <div class="ml__submit" title="Unable to submit ML data">
                 {mlButton}
             </div>
         )
     }
 }
 
-export const MlUploadButton = connect(
+export const MessageMlUploadButton = connect(
     (state: AppState) => ({
         token: state.machineLearning.token,
         submittedData: state.machineLearning.submittedData,
-        selectedActionIds: state.selected.actionsId,
+        activeActionId: state.selected.activeActionId,
         actionMap: state.selected.actionsMap
     }),
     (dispatch) => ({
-        setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
         addSubmittedMlData: (data: SubmittedData) => dispatch(addSubmittedMlData(data)),
         removeSubmittedMlData: (data: SubmittedData) => dispatch(removeSubmittedMlData(data))
     })
-)(MlUploadButtonBase);
+)(MessageMlUploadButtonBase);

@@ -51,7 +51,7 @@ public class TestAML3_0 extends TestAML3Base {
 		AML aml = executeTest(VALID_TEST_PATH + "validTests.csv");
 
 		Assert.assertEquals(0, aml.getAlertCollector().getCount(AlertType.ERROR));
-        Assert.assertEquals(34, aml.getTestCases().size());
+        Assert.assertEquals(35, aml.getTestCases().size());
 		int n = 0;
 		Assert.assertEquals(3, aml.getTestCases().get(n++).getActions().size());
 		Assert.assertEquals(3, aml.getTestCases().get(n++).getActions().size());
@@ -87,16 +87,19 @@ public class TestAML3_0 extends TestAML3Base {
         Assert.assertEquals(31, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(29, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(28, aml.getTestCases().get(n++).getActions().size());
+        Assert.assertEquals(28, aml.getTestCases().get(n++).getActions().size());
         Assert.assertEquals(n, aml.getTestCases().size());
 
 		Collection<Alert> source = aml.getAlertCollector().getAlerts();
-        Assert.assertEquals("List errors size", 3, source.size());
+        Assert.assertEquals("List errors size", 4, source.size());
 
         Alert alert = new Alert(141, "", "#check_point", "Unable to check checkpoint at compile time", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
         alert = new Alert(292, "", "FInteger", "Reference to unknown column 'idleTimeout' is found in column 'FInteger': '${settings.idleTimeout}'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
         alert = new Alert(306, "", "MessageArray", "Reference to unknown column 'MessageArray[0]' is found in column 'MessageArray': '[${block4.MessageArray[0]}]'.", AlertType.WARNING);
+        Assert.assertTrue(alert.toString(), source.remove(alert));
+        alert = new Alert(320, null, "DateTime", "Ambiguous utility function URI: getDateTime (matches: [General:DateUtil.getDateTime, General:FakeUtils.getDateTime])", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));
 
         Assert.assertEquals("List errors size", 0, source.size());

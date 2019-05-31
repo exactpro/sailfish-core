@@ -35,26 +35,19 @@ interface ListProps {
     selectedCheckpointId: number;
     actionsFilter: StatusType[];
     filterFields: StatusType[];
+    activeActionId: number;
     onSelect: (messages: Action) => any;
-    onMessageSelect: (id: number, status: StatusType) => any;
+    onVerificationSelect: (messageId: number, actionId: number, status: StatusType) => any;
     setSelectedCheckpoint: (action: Action) => any;
 }
 
 export class ActionsListBase extends Component<ListProps, {}> {
 
-    private elements: ActionTree[] = [];
+    private elements: any[] = [];
     private scrollbar: HeatmapScrollbar;
 
     scrollToTop() {
         this.scrollbar && this.scrollbar.scrollToTop();
-    }
-
-    scrollToAction(actionId: number) {
-        if (this.elements[actionId]) {
-            // smooth behavior is disabled here
-            // base - get HTMLElement by ref
-            this.elements[actionId].base.scrollIntoView({block: 'center'});
-        }    
     }
 
     shouldComponentUpdate(nextProps: ListProps) {
@@ -80,7 +73,7 @@ export class ActionsListBase extends Component<ListProps, {}> {
             nextProps.selectedMessageId !== this.props.selectedMessageId;
     }
 
-    render({ actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onMessageSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
+    render({ activeActionId, actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onVerificationSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
 
         return (
             <div class="actions">
@@ -89,39 +82,41 @@ export class ActionsListBase extends Component<ListProps, {}> {
                         selectedElements={actionsHeatmap(getActions(actions), selectedActionId)}
                         ref={ref => this.scrollbar = ref}>
                         {actions.map(action => (
-                            <ActionTree 
+                            <ActionTree
+                                rootActionId={action.id}
                                 action={action}
                                 selectedActionsId={selectedActionId}
                                 selectedMessageId={selectedMessageId}
                                 selectedCheckpointId={selectedCheckpointId}
                                 scrolledActionId={scrolledActionId}
                                 actionSelectHandler={onSelect}
-                                messageSelectHandler={onMessageSelect}
+                                verificationSelectHandler={onVerificationSelect}
                                 actionsFilter={actionsFilter}
-                                filterFields={filterFields} 
+                                filterFields={filterFields}
                                 checkpoints={checkpointActions}
-                                checkpointSelectHandler={action => setSelectedCheckpoint(action)} 
-                                ref={ref => this.elements[action.id] = ref}/>))}
+                                checkpointSelectHandler={action => setSelectedCheckpoint(action)}
+                                ref={ref => this.elements[action.id] = ref} />))}
                     </HeatmapScrollbar>
                 </div>
-            </div> 
+            </div>
         )
     }
-}   
+}
 
 export const ActionsList = connect((state: AppState) => ({
-        actions: state.selected.testCase.actions,
-        selectedActionId: state.selected.actionsId,
-        scrolledActionId: state.selected.scrolledActionId,
-        selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
-        selectedCheckpointId: state.selected.checkpointActionId,
-        actionsFilter: state.filter.actionsFilter,
-        filterFields: state.filter.fieldsFilter,
-        checkpointActions: state.selected.checkpointActions
-    }),
+    actions: state.selected.testCase.actions,
+    selectedActionId: state.selected.actionsId,
+    scrolledActionId: state.selected.scrolledActionId,
+    selectedMessageId: state.selected.actionsId.length == 0 ? state.selected.messagesId[0] : null,
+    selectedCheckpointId: state.selected.checkpointActionId,
+    actionsFilter: state.filter.actionsFilter,
+    filterFields: state.filter.fieldsFilter,
+    checkpointActions: state.selected.checkpointActions,
+    activeActionId: state.selected.activeActionId
+}),
     dispatch => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),
-        onMessageSelect: (id: number, status: StatusType) => dispatch(selectVerification(id, status)),
+        onVerificationSelect: (messageId: number, actionId: number, status: StatusType) => dispatch(selectVerification(messageId, actionId, status)),
         setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpoint(checkpointAction))
     }),
     null,

@@ -32,7 +32,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.exactpro.sf.aml.script.DefaultSettings;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
@@ -743,7 +743,7 @@ public class TestMessageComparator extends AbstractTest {
         MetaContainer metaContainer = new MetaContainer();
 		metaContainer.addDoublePrecision("CurrentGross=10");
 
-        DefaultSettings settings = new DefaultSettings(getScriptContext(), true);
+        ActionContext settings = new ActionContext(getScriptContext(), true);
 		settings.setMetaContainer(metaContainer);
 		settings.setFailUnexpected("N");
 		settings.setDescription("check CGC in database");

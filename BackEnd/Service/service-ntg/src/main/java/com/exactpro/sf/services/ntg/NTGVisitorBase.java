@@ -86,17 +86,6 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
                     fieldName, NTGProtocolAttribute.Length.toString()));
 		}
 
-        if (!fldStruct.getAttributes().containsKey(NTGProtocolAttribute.Format.toString()))
-		{
-			if (!errMessage.toString().isEmpty())
-			{
-				errMessage.append("\r\n");
-			}
-			errMessage.append(String.format(
-									"In the protocol attributes map for the field '%s' mandatory key '%s' is missed.",
-                    fieldName, NTGProtocolAttribute.Format.toString()));
-		}
-
 		if (errMessage.length() > 0)
 		{
 			logger.error("{}", errMessage);

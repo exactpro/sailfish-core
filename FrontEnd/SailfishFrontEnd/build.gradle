@@ -311,7 +311,7 @@ task writeWebXML(type: com.exactpro.sf.WriteFileTask) {
 
     line ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
     line ("<Context>")
-    line ("<Parameter name=\"workspace\" value=\"${sharedWorkspaceDir}:${tmpWorkspaceDir}\" override=\"true\"/>")
+    line ("<Parameter name=\"workspace\" value=\"${sharedWorkspaceDir}${File.pathSeparatorChar}${tmpWorkspaceDir}\" override=\"true\"/>")
     line ("</Context>")
 
     fileName    = "${deployPath}.xml"
@@ -338,7 +338,7 @@ cargo {
         // The home directory of your local container installation.
         //homeDir
         // The timeout (in ms) in which to determine if the container is successfully started or stopped (defaults to 120000ms).
-        timeout     = 30000
+        timeout     = 60000
         installer {
             installUrl = tomcatUrl
             downloadDir = downloadFolder
@@ -437,7 +437,7 @@ collectDependencies {
 }
 
 def getReleaseName() {
-    return "sf_${artifactCoreVersion}_b${build_number}.zip"
+    return "sf_${sailfishVersion}.${revision}_b${build_number}.zip"
 }
 
 def getReleaseDir(buildDir) {

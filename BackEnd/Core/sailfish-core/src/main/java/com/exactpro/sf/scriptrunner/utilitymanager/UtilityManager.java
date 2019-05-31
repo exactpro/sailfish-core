@@ -17,12 +17,17 @@ package com.exactpro.sf.scriptrunner.utilitymanager;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
+import com.exactpro.sf.aml.generator.Alert;
+import com.exactpro.sf.aml.generator.AlertCollector;
+import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -154,6 +159,27 @@ public class UtilityManager implements IUtilityManager {
     @Override
     public UtilityInfo getUtilityInfo(SailfishURI uri, Class<?>... argTypes) {
         return SailfishURIUtils.getMatchingValue(uri, uriToInfos, SailfishURIRule.REQUIRE_RESOURCE);
+    }
+
+    @Override
+    public UtilityInfo getUtilityInfo(SailfishURI uri, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes) {
+        Collection<UtilityInfo> infos = SailfishURIUtils.getMatchingValues(uri, uriToInfos, SailfishURIRule.REQUIRE_RESOURCE);
+
+        if (infos.isEmpty()) {
+            return null;
+        }
+
+        if (infos.size() > 1) {
+            Set<SailfishURI> uris = infos.stream()
+                    .map(UtilityInfo::getURI)
+                    .collect(Collectors.toSet());
+
+            if (uris.size() > 1) {
+                alertCollector.add(new Alert(line, uid, null, column, String.format("Ambiguous utility function URI: %s (matches: %s)", uri, uris), AlertType.WARNING));
+            }
+        }
+
+        return infos.iterator().next();
     }
 
     // TODO: add argTypes check

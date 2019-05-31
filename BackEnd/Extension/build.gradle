@@ -16,10 +16,6 @@ subprojects {
                    file("${mainPluginDir}/cfg"), 
                    file("${genPluginDir}/cfg"), 
                    file("${externalPluginDir}/cfg")]
-        versionFile = writeFile.outputFile
         silent = silent_check
     }
-    
-    publishPlugin.dependsOn.add('checkCompatibility')
-    zipRelease.dependsOn.add('checkCompatibility')
 }

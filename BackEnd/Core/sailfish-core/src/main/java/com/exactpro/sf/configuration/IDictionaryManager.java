@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.exactpro.sf.aml.DictionarySettings;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -105,6 +106,26 @@ public interface IDictionaryManager {
      * @return utility info or {@code null}
      */
 	UtilityInfo getUtilityInfo(SailfishURI dictionaryURI, SailfishURI utilityURI, Class<?>... argTypes) throws SailfishURIException;
+
+    /**
+     * Retrieves utility info by specified utility URI and argument types.
+     * Search is scoped by utility classes assigned to a dictionary specified by dictionary URI.
+     * If utility URI is absolute then search isn't scoped.
+     * <br><br>
+     * The only difference from {@link #getUtilityInfo(SailfishURI, SailfishURI, Class[])} is that in case of a lookup ambiguity
+     * a warning with a list of matching URIs of utility classes will be added to a provided {@link AlertCollector}.
+     *
+     * @param dictionaryURI  dictionary URI (must contain at least class alias)
+     * @param utilityURI     utility URI (must contain at least resource name)
+     * @param line           action line
+     * @param uid            action UID
+     * @param column         action column
+     * @param alertCollector alert collector
+     * @param argTypes       utility argument types
+     *
+     * @return utility info or {@code null}
+     */
+    UtilityInfo getUtilityInfo(SailfishURI dictionaryURI, SailfishURI utilityURI, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes) throws SailfishURIException;
 
     /**
      * @param dictionaryURI

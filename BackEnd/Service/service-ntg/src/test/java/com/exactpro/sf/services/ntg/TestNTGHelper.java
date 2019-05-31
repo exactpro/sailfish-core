@@ -110,6 +110,14 @@ public final class TestNTGHelper extends AbstractTest {
         return loadDictionary("ntg_InvalidFieldLength.xml");
 	}
 
+    public static IDictionaryStructure getTestValidDictionary() throws IOException {
+        return loadDictionary("ntg_valid.xml");
+    }
+
+    public static IDictionaryStructure getTestInvalidDictionary() throws IOException {
+        return loadDictionary("ntg_errors.xml");
+    }
+
     public static NTGMessageHelper getMessageHelper(boolean isDirty) throws IOException {
         NTGMessageHelper messageHelper = new NTGMessageHelper();
 		messageHelper.init(

@@ -43,7 +43,7 @@ import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
-import com.exactpro.sf.aml.script.DefaultSettings;
+import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
@@ -216,7 +216,7 @@ public class NewImpl {
 			Variable inputVariable) {
 		StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
-        Variable settings = getVariable(DefaultSettings.class, "settings");
+        Variable settings = getVariable(ActionContext.class, "actionContext");
         String s = codeGenerator.createFillSettings(tc, action, action.getMessageTypeColumn(), settings, alertCollector);
         sb.append(s);
 
@@ -233,13 +233,11 @@ public class NewImpl {
 		if (action.isAddToReport())
 		{
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
-			if (action.getOutcome() != null) {
-			    description = "\""+action.getOutcome()+" \"+"+description;
-			}
+
 			if (inputVariable != null)
 			{
 				sb.append(TAB2+REPORT_NAME+".createAction(\""
-						+id+serviceName+action.getActionURI()+messageType+"\", "
+                        + id + "\", "
 
 						+ "\""+ serviceName.trim() + "\", "
 						+ "\""+ action.getActionURI() + "\", "
@@ -250,7 +248,7 @@ public class NewImpl {
 			else
 			{
 				sb.append(TAB2+REPORT_NAME+".createAction(\""
-						+id+serviceName+action.getActionURI()+messageType+"\", "
+                        + id + "\", "
 
 						+ "\""+ serviceName.trim() + "\", "
 						+ "\""+ action.getActionURI() + "\", "
@@ -272,7 +270,13 @@ public class NewImpl {
             String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
             sb.append("Arrays.asList(");
             sb.append(verificationsOrder);
-            sb.append(")");
+            sb.append("), ");
+
+            if(action.hasOutcome()) {
+                sb.append(enclose(toJavaString(action.getOutcome())));
+            } else {
+                sb.append("null");
+            }
 
             sb.append(");");
             sb.append(EOL);
@@ -309,7 +313,7 @@ public class NewImpl {
 
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB2);
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -906,7 +910,7 @@ public class NewImpl {
 			Variable inputVariable) {
 		StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
-        Variable settings = getVariable(DefaultSettings.class, "settings");
+        Variable settings = getVariable(ActionContext.class, "actionContext");
         String s = codeGenerator.createFillSettings(tc, action, action.getMessageTypeColumn(), settings, alertCollector);
         sb.append(s);
 
@@ -922,11 +926,9 @@ public class NewImpl {
 		if (action.isAddToReport())
 		{
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
-			if (action.getOutcome() != null) {
-				description = "\""+action.getOutcome()+" \"+"+description;
-			}
-			sb.append(TAB2+REPORT_NAME+".createAction(\""
-					+id+serviceName+action.getActionURI()+messageType+"\", "
+
+            sb.append(TAB2 + REPORT_NAME + ".createAction(\""
+                    + id + "\", "
 
 					+ "\""+ serviceName.trim() + "\", "
 					+ "\""+ action.getActionURI() + "\", "
@@ -947,7 +949,13 @@ public class NewImpl {
             String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
             sb.append("Arrays.asList(");
             sb.append(verificationsOrder);
-            sb.append(")");
+            sb.append("), ");
+
+            if(action.hasOutcome()) {
+                sb.append(enclose(toJavaString(action.getOutcome())));
+            } else {
+                sb.append("null");
+            }
 
             sb.append(");");
             sb.append(EOL);
@@ -971,7 +979,7 @@ public class NewImpl {
 
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB2);
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -1009,7 +1017,7 @@ public class NewImpl {
         sb.append(TAB3 + "}" + EOL);
         CodeGenerator_new.addExecutedActionReferences(sb, action, TAB4);
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB2);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -1028,7 +1036,7 @@ public class NewImpl {
 		sb.append(TAB3+LOGGER_NAME+".warn(e);"+EOL);
 		sb.append(TAB3+CONTEXT_NAME+".setInterrupt(e instanceof InterruptedException);"+EOL);
 
-		if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(TAB3);
             sb.append(CONTEXT_NAME);
             sb.append(".getOutcomeCollector().storeOutcome(new Outcome(\"");
@@ -1043,7 +1051,7 @@ public class NewImpl {
 
         addFailedActionToReport(tc, action, sb, id, serviceName, messageType, description);
 
-		if(continueOnFailed || action.getOutcome() != null) {
+        if(continueOnFailed || action.hasOutcome()) {
             sb.append(TAB3+"if (e instanceof InterruptedException) {"+EOL);
 			sb.append(TAB4+"throw e;"+EOL);
             sb.append(TAB3+"}"+EOL);
@@ -1115,7 +1123,7 @@ public class NewImpl {
         String verificationsOrder = action.getVerificationsOrder().stream().map(StringUtil::enclose).collect(Collectors.joining(", "));
 
         sb.append(TAB3 + "if (!" + REPORT_NAME + ".isActionCreated()) {" + EOL);
-        sb.append(TAB4 + REPORT_NAME + ".createAction(\"" + id + serviceName + action.getActionURI() + messageType + "\", "
+        sb.append(TAB4 + REPORT_NAME + ".createAction(\"" + id + "\", "
 
                 + "\"" + serviceName.trim() + "\", "
                 + "\"" + action.getActionURI() + "\", "
@@ -1124,7 +1132,8 @@ public class NewImpl {
                 + description + " , null, null, "
                 + (action.hasTag() ? enclose(toJavaString(action.getTag()), '"') : "null") + ", "
                 + action.getHash() + ", "
-                + "Arrays.asList( " + verificationsOrder + ")"
+                + "Arrays.asList( " + verificationsOrder + "), "
+                + (action.hasOutcome() ? enclose(toJavaString(action.getOutcome())) : "null")
                 +");" + EOL);
         sb.append(TAB3 + "}" + EOL);
     }
@@ -1158,7 +1167,7 @@ public class NewImpl {
 
         sb.append(TAB3 + REPORT_NAME + ".closeAction(new StatusDescription(StatusType.FAILED, e.getMessage(), e");
 
-        if(action.getOutcome() != null) {
+        if(action.hasOutcome()) {
             sb.append(", false");
         }
 

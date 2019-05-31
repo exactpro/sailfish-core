@@ -24,6 +24,7 @@ rem set "JAVA_OPTS=%JAVA_OPTS% -XX:HeapDumpPath=" rem For example -XX:HeapDumpPa
 rem set "JAVA_OPTS=%JAVA_OPTS% -Duser.timezone=UTC" rem Use the user.timezone property value as the default time zone ID if it's available.
 rem set "JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
 rem set "JAVA_OPTS=%JAVA_OPTS% -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" rem Use for configure jvm FlightRecorder
+set "JAVA_OPTS=%JAVA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
 
 rem Deployer Jvm arguments:
 set "DEPLOYER_JAVA_OPTS="

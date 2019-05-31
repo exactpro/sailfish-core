@@ -31,12 +31,15 @@ import { CustomTable } from './CustomTable';
 import { CustomMessage } from './CustomMessage';
 import Tree, { createNode } from '../models/util/Tree';
 import { createSelector } from '../helpers/styleCreators';
+import { MessageMlUploadButton } from './MlUploadButton';
+import { connect } from 'preact-redux';
+import AppState from "../state/models/AppState";
 
 
 export interface ActionTreeProps {
     action: ActionNode;
     actionSelectHandler: (action: Action) => any;
-    messageSelectHandler: (id: number, status: StatusType) => any;
+    verificationSelectHandler: (messageId: number, actionId: number, status: StatusType) => any;
     checkpointSelectHandler: (action: Action) => any;
     selectedMessageId: number;
     selectedActionsId: number[];
@@ -45,9 +48,11 @@ export interface ActionTreeProps {
     checkpoints: Action[];
     actionsFilter: StatusType[];
     filterFields: StatusType[];
+    rootActionId: number;
+    activeActionId: number;
 }
 
-export class ActionTree extends Component<ActionTreeProps> {
+export class ActionTreeBase extends Component<ActionTreeProps> {
 
     private expandedTreePath: Tree<number> = null;
     private treeElements: Component[] = [];
@@ -93,6 +98,9 @@ export class ActionTree extends Component<ActionTreeProps> {
     shouldComponentUpdate(nextProps: ActionTreeProps) {
         if (nextProps.action !== this.props.action) return true;
 
+        if (nextProps.rootActionId === nextProps.activeActionId && this.props.rootActionId !== this.props.activeActionId
+            || nextProps.rootActionId !== nextProps.activeActionId && this.props.rootActionId === this.props.activeActionId) return true;
+
         if (nextProps.action.actionNodeType === ActionNodeType.ACTION) {
             const nextAction = nextProps.action as Action;
 
@@ -120,7 +128,7 @@ export class ActionTree extends Component<ActionTreeProps> {
         // the first condition - current action is selected and we should update to show it
         // the second condition - current action was selected and we should disable selection
         if (nextProps.selectedActionsId != prevProps.selectedActionsId && (
-                nextProps.selectedActionsId.includes(action.id) || prevProps.selectedActionsId.includes(action.id))) {
+            nextProps.selectedActionsId.includes(action.id) || prevProps.selectedActionsId.includes(action.id))) {
             return true;
         }
 
@@ -174,9 +182,9 @@ export class ActionTree extends Component<ActionTreeProps> {
         }
 
         // checking wheather the current action is the one of target acitons OR some of action's sub nodes is the target aciton
-        return targetActionsId.includes(action.id) || treeNode.nodes.length != 0 ? 
-                treeNode : 
-                null;
+        return targetActionsId.includes(action.id) || treeNode.nodes.length != 0 ?
+            treeNode :
+            null;
     }
 
     getSubTree(action: ActionNode, expandTree: Tree<number>): Tree<number> {
@@ -198,7 +206,7 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     renderNode(props: ActionTreeProps, isRoot = false, expandTreePath: Tree<number> = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedMessageId, selectedCheckpointId, actionsFilter, filterFields, checkpoints, checkpointSelectHandler } = props;
+        const { actionSelectHandler, verificationSelectHandler, selectedActionsId, selectedMessageId, actionsFilter, checkpoints } = props;
 
         switch (props.action.actionNodeType) {
             case ActionNodeType.ACTION: {
@@ -212,7 +220,9 @@ export class ActionTree extends Component<ActionTreeProps> {
                 const isExpanded = expandTreePath ? expandTreePath.value == action.id : undefined;
 
                 return (
-                    <ActionCard action={action}
+                    <ActionCard
+                        rootActionId={props.rootActionId}
+                        action={action}
                         isSelected={selectedActionsId.includes(action.id)}
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={actionSelectHandler}
@@ -223,7 +233,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                             action.subNodes ? action.subNodes.map(
                                 action => this.renderNode(
                                     { ...props, action: action },
-                                    false, 
+                                    false,
                                     this.getSubTree(action, expandTreePath)
                                 )) : null
                         }
@@ -235,12 +245,12 @@ export class ActionTree extends Component<ActionTreeProps> {
                 const messageAction = props.action as UserMessage;
 
                 if (!messageAction.message && !messageAction.exception) {
-                    return <div/>;
+                    return <div />;
                 }
 
                 return (
                     <CustomMessage
-                        userMessage={messageAction}/>
+                        userMessage={messageAction} />
                 );
             }
 
@@ -249,7 +259,7 @@ export class ActionTree extends Component<ActionTreeProps> {
                 const isSelected = verification.messageId === selectedMessageId;
                 const isTransparent = !actionsFilter.includes(verification.status.status);
 
-                return this.renderVerification(verification, messageSelectHandler, isSelected, isTransparent, filterFields)
+                return this.renderVerification(verification, verificationSelectHandler, isSelected, isTransparent)
             }
 
             case ActionNodeType.LINK: {
@@ -309,7 +319,8 @@ export class ActionTree extends Component<ActionTreeProps> {
     }
 
     renderVerification({ name, status, entries, messageId }: Verification,
-        selectHandelr: Function, isSelected: boolean, isTransaparent, filterFields: StatusType[]) {
+        selectHandler: (messageId: number, actionId: number, status: StatusType) => any,
+        isSelected: boolean, isTransaparent) {
 
         const className = createSelector(
             "ac-body__verification",
@@ -322,15 +333,21 @@ export class ActionTree extends Component<ActionTreeProps> {
             <div class="action-card">
                 <div class={className}
                     onClick={e => {
-                        selectHandelr(messageId, status.status);
+                        selectHandler(messageId, this.props.rootActionId, status.status);
                         // here we cancel handling by parent divs
                         e.cancelBubble = true;
                     }}>
                     <ExpandablePanel>
-                        <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
-                        <VerificationTable 
-                            params={entries} 
-                            status={status.status}/>
+                        <div class="ac-body__verification-title-wrapper">
+                            <div class="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
+                            <MessageMlUploadButton
+                                messageId={messageId}
+                                show={this.props.activeActionId === this.props.rootActionId}
+                            />
+                        </div>
+                        <VerificationTable
+                            params={entries}
+                            status={status.status} />
                     </ExpandablePanel>
                 </div>
             </div>
@@ -364,3 +381,10 @@ export class ActionTree extends Component<ActionTreeProps> {
         )
     }
 }
+
+export const ActionTree = connect(
+    (state: AppState) => ({
+        activeActionId: state.selected.activeActionId
+    }),
+    dispatch => ({})
+)(ActionTreeBase);

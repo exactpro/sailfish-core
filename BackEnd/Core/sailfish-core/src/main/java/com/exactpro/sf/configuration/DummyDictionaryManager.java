@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.exactpro.sf.aml.DictionarySettings;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -105,6 +106,11 @@ public class DummyDictionaryManager implements IDictionaryManager {
 
     @Override
     public UtilityInfo getUtilityInfo(SailfishURI dictionaryURI, SailfishURI utilityURI, Class<?>... argTypes) throws SailfishURIException {
+        return null;
+    }
+
+    @Override
+    public UtilityInfo getUtilityInfo(SailfishURI dictionaryURI, SailfishURI utilityURI, long line, long uid, String column, AlertCollector alertCollector, Class<?>... argTypes) throws SailfishURIException {
         return null;
     }
 
