@@ -15,20 +15,18 @@
  ******************************************************************************/
 import { InitResponse, SubmittedData } from "../models/MlServiceResponse"
 
-const BASE_ML_API_PATH = "sfgui/sfapi/machinelearning/v2"
+const BASE_ML_API_PATH = "sfapi/machinelearning/v2"
 
 export const EMPTY_MESSAGE_ID = -1
 
 export function submitEntry(token: string, dataToSubmit: SubmittedData,
-     deleteMlDataAction: (data: SubmittedData) => any, updateMlDataAction: (data: SubmittedData) => any): void {
-
-    let currentHost = new URL(window.location.href).host;
+    deleteMlDataAction: (data: SubmittedData) => any, updateMlDataAction: (data: SubmittedData) => any): void {
 
     if (dataToSubmit.messageId !== EMPTY_MESSAGE_ID) {
         deleteEntry(token, { actionId: dataToSubmit.actionId, messageId: EMPTY_MESSAGE_ID }, deleteMlDataAction)
     }
 
-    fetch(`http://${currentHost}/${BASE_ML_API_PATH}/${token}`, {
+    fetch(`${getApiPath()}/${token}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -52,10 +50,7 @@ export function submitEntry(token: string, dataToSubmit: SubmittedData,
 }
 
 export function deleteEntry(token: string, dataToDelete: SubmittedData, deleteMlDataAction: (data: SubmittedData) => any): void {
-
-    let currentHost = new URL(window.location.href).host;
-
-    fetch(`http://${currentHost}/${BASE_ML_API_PATH}/${token}`, {
+    fetch(`${getApiPath()}/${token}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
@@ -84,7 +79,7 @@ export function fetchToken(workFolder: string, updateTokenAction: (token: string
     let currentUrl = new URL(window.location.href);
     let reportZipUrl = currentUrl.href.replace(/index\.html[^/]*$/g, workFolder + ".zip");
 
-    fetch(`http://${currentUrl.host}/${BASE_ML_API_PATH}/init?reportLink=${reportZipUrl}`, {
+    fetch(`${getApiPath()}/init?reportLink=${reportZipUrl}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json'
@@ -104,4 +99,9 @@ export function fetchToken(workFolder: string, updateTokenAction: (token: string
             updateMlDataAction(data.active);
         })
         .catch(err => console.error("unable to fetch ml token\n" + err));
+}
+
+function getApiPath() {
+    const url = new URL(window.top.location.href)
+    return `${url.origin}/${url.pathname.split('/')[1]}/${BASE_ML_API_PATH}`
 }
