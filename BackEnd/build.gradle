@@ -77,8 +77,10 @@ subprojects {
                 destinationDir = getReleaseDir(project.buildDir, project.plugin_name)
             }
 
-            doLast {
-                createLink(destinationDir, archiveName, 'last_build')
+            if (project.hasProperty('link_last_build')) {
+                doLast {
+                    createLink(destinationDir, archiveName, 'last_build')
+                }
             }
         }
 

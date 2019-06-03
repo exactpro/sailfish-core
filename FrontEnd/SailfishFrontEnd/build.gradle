@@ -384,10 +384,12 @@ task zipRelease(type: Zip) {
         from "${webContentGen}/cfg/hibernate.cfg.xml"
     }
 
-    doLast {
-        exec {
-            workingDir getReleaseDir(project.buildDir)
-            commandLine 'ln', '-s', getReleaseName(), 'last_build.zip'
+    if (project.hasProperty('link_last_build')) {
+        doLast {
+            exec {
+                workingDir getReleaseDir(project.buildDir)
+                commandLine 'ln', '-s', getReleaseName(), 'last_build.zip'
+            }
         }
     }
 }
