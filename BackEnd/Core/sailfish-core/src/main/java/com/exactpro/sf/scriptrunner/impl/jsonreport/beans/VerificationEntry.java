@@ -17,6 +17,7 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.comparison.Formatter;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 
@@ -41,7 +42,7 @@ public class VerificationEntry {
     public VerificationEntry(ComparisonResult result) {
         this.name = result.getName();
         this.actual = Objects.toString(result.getActual(), null);
-        this.expected = Objects.toString(result.getExpected(), null);
+        this.expected = Formatter.formatExpected(result.getExpected());
         this.precision = result.getDoublePrecision();
         this.systemPrecision = result.getSystemPrecision();
         this.status = result.getStatus();

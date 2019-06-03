@@ -387,7 +387,7 @@ public class JsonReport implements IScriptReport {
                 curVerification.setMessageId(result.getMetaData().getId());
             }
             else {
-                logger.warn("comparison result does not contain metadata");
+                logger.warn("comparison result does not contain metadata - name='{}', description='{}'", name, description);
             }
             Set<BugDescription> reproduced = result.getReproducedBugs();
             Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
