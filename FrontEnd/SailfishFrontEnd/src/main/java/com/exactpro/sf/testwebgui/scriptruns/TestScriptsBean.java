@@ -704,31 +704,6 @@ public class TestScriptsBean implements Serializable, IView {
 		}
 	}
 
-	public void goEditGuiMatrix()
-	{
-		long id = Long.parseLong(BeanUtil.getRequestParam("id"));
-		logger.info("goEditGuiMatrix invoked {} id[{}]", BeanUtil.getUser(), id);
-
-		MatrixAdapter matrixAdapter = getMatrixAdapterById(id);
-
-		if (matrixAdapter == null) {
-			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Matrix not found", "");
-			return;
-		}
-		/*if (MatrixFileTypes.detectFileType(matrixAdapter.getFilePath()) != MatrixFileTypes.CSV) {
-			BeanUtil.showMessage(FacesMessage.SEVERITY_INFO, "Info", "Only CSV matrixes can be opened by GUI Editor");
-			return;
-		}*/
-		try {
-			onChange(matrixAdapter);
-			setMatrixToEdit(matrixAdapter);
-			FacesContext.getCurrentInstance().getExternalContext().redirect(GUI_EDITOR);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", e.getMessage());
-		}
-	}
-
 	public void goEditMatrix() {
 
 		long id = Long.parseLong(BeanUtil.getRequestParam("id"));

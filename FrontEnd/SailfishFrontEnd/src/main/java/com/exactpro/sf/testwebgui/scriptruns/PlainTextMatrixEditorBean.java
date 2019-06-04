@@ -50,7 +50,7 @@ public class PlainTextMatrixEditorBean implements Serializable {
 
 	private static final long serialVersionUID = 8163712043639871248L;
 
-	private static final Logger logger = LoggerFactory.getLogger(MatrixEditorBean.class);
+	private static final Logger logger = LoggerFactory.getLogger(PlainTextMatrixEditorBean.class);
 
 	private static final String charset = "UTF-8";
 

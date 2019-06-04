@@ -29,7 +29,6 @@ public class SFAPIEntryPoint extends ResourceConfig {
         register(ServiceResource.class);
         register(MatrixResource.class);
         register(DictionaryResource.class);
-        register(MatrixEditorResource.class);
         register(SFRestApiListener.class);
         register(ResponseResolver.class);
         register(TestscriptRunResource.class);
