@@ -28,7 +28,7 @@
 	    		<div class="eps-params-header">Parameters</div>
 	    		
 	    		<h:form id="params-form">
-                    <h:panelGrid columns="2" cellpadding="5">
+                    <h:panelGrid columns="4" cellpadding="5">
                         <h:outputLabel for="report-uri" value="Report type"/>
                         <p:selectOneMenu id="report-uri" style="width: 26em;"
                                          value="#{statReportingBean.currentReportURI}">
@@ -36,6 +36,12 @@
                             <f:ajax event="change" render="results-form"
                                     listener="#{statReportingBean.reportTypeChanged}"/>
                         </p:selectOneMenu>
+                        <h:outputLabel for="sfInstancesMenu" value="SF Instances" />
+                        <p:selectCheckboxMenu id="sfInstancesMenu" value="#{statReportingBean.selectedSfInstances}" label="Select"
+                                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
+                                              required="true" requiredMessage="Select at least one SF instance">
+                            <f:selectItems value="#{statReportingBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
+                        </p:selectCheckboxMenu>
                     </h:panelGrid>
 	    			<h:panelGrid columns="8" cellpadding="5">
 		    			<h:outputLabel for="from" value="From" />
@@ -48,12 +54,12 @@
                                     onfocus="$(this).mask('9999-99-99 99:99:99');" showButtonPanel="true" required="false"
                                     timeZone="UTC"/>
 
-		    			<h:outputLabel for="sfInstancesMenu" value="SF Instances" />
-		    			<p:selectCheckboxMenu id="sfInstancesMenu" value="#{statReportingBean.selectedSfInstances}" label="Select"
-	                              filter="true" filterMatchMode="startsWith" panelStyle="width:250px" converter="#{sfInstanceConverter}"
-	                               required="true" requiredMessage="Select at least one SF instance">
-				            <f:selectItems value="#{statReportingBean.allSfInstances}" itemLabel="#{sf.host}:#{sf.port}#{sf.name}" var="sf"/>
-				        </p:selectCheckboxMenu>
+                        <p:tooltip id="operatorToolTip" for="operatorForReport" value="Logical operator between date conditions and tags" position="top"/>
+                        <p:selectOneMenu id="operatorForReport" style="width: 5em; display: block;"
+                                         value="#{statReportingBean.currentOperator}">
+                            <f:selectItems value="#{statReportingBean.availableOperators}"/>
+                        </p:selectOneMenu>
+
                         <h:outputLabel for="tags-autocomplete" value="Tags" />
                         <p:autoComplete id="tags-autocomplete" value="#{statReportingBean.tagToAdd}"
                                         completeMethod="#{statReportingBean.completeTag}"

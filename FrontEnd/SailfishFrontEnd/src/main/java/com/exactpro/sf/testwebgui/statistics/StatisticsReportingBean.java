@@ -47,6 +47,7 @@ import com.exactpro.sf.embedded.statistics.handlers.IStatisticsReportHandler;
 import com.exactpro.sf.embedded.statistics.handlers.ReportRow;
 import com.exactpro.sf.embedded.statistics.storage.StatisticsReportingStorage;
 import com.exactpro.sf.embedded.statistics.storage.reporting.AggregateReportParameters;
+import com.exactpro.sf.embedded.statistics.storage.reporting.LogicalOperator;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.general.SessionStored;
 
@@ -86,6 +87,8 @@ public class StatisticsReportingBean implements Serializable {
     private List<SailfishURI> reportHandlers;
 
     private SailfishURI currentReportURI;
+
+    private LogicalOperator currentOperator = LogicalOperator.AND;
 
 	@PostConstruct
 	public void init() {
@@ -153,6 +156,7 @@ public class StatisticsReportingBean implements Serializable {
         }
         params.setSfInstances(new ArrayList<>(selectedSfInstances));
         params.setTags(new ArrayList<>(tags));
+        params.setLogicalOperator(currentOperator);
         return params;
     }
 
@@ -288,5 +292,17 @@ public class StatisticsReportingBean implements Serializable {
 
     public void setCurrentReportURI(SailfishURI currentReportURI) {
         this.currentReportURI = currentReportURI;
+    }
+
+    public LogicalOperator getCurrentOperator() {
+        return currentOperator;
+    }
+
+    public void setCurrentOperator(LogicalOperator currentOperator) {
+        this.currentOperator = currentOperator;
+    }
+
+    public LogicalOperator[] getAvailableOperators() {
+        return LogicalOperator.values();
     }
 }

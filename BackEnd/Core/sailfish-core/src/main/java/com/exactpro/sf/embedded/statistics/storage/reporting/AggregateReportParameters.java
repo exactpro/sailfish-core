@@ -66,6 +66,8 @@ public class AggregateReportParameters {
 
     private String reportType;
 
+    private LogicalOperator logicalOperator = LogicalOperator.AND;
+
 	public LocalDateTime getFrom() {
 		return from;
 	}
@@ -218,5 +220,13 @@ public class AggregateReportParameters {
 
     public void setReportType(String reportType) {
         this.reportType = reportType;
+    }
+
+    public LogicalOperator getLogicalOperator() {
+        return logicalOperator;
+    }
+
+    public void setLogicalOperator(LogicalOperator logicalOperator) {
+        this.logicalOperator = logicalOperator;
     }
 }

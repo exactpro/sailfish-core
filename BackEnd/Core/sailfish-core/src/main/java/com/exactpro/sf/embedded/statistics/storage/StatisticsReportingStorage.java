@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.embedded.statistics.storage;
 
+import static com.exactpro.sf.embedded.statistics.storage.utils.Conditions.*;
+
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -56,6 +58,7 @@ import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedComparisonRow
 import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedComparisonRow.TaggedComparisonSet;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TaggedSetsComparisonParameters;
 import com.exactpro.sf.embedded.statistics.storage.reporting.TestCasesDisplayMode;
+import com.exactpro.sf.embedded.statistics.storage.utils.ICondition;
 import com.exactpro.sf.embedded.storage.HibernateStorageSettings;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.util.DateTimeUtility;
@@ -570,36 +573,36 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
                 + "join MR.sfInstance as SF "
                 + "where ";
 
-        String whereClause = "";
-        String and = " ";
+        ICondition whereClause = null;
         if (fromFilter) {
-            whereClause += " MR.startTime >= :from ";
-            and = " and ";
+            whereClause = create("MR.startTime >= :from");
         }
         if (toFilter) {
-            whereClause += and + "MR.finishTime <= :to";
-            and = " and ";
-        }
-        if (sfInstancesFilter) {
-            whereClause += and + " SF.id in (:ids) ";
-            and = " and ";
+            whereClause = and(whereClause, create("MR.finishTime <= :to"));
         }
         if (tagsFilter) {
-            whereClause += and + " (exists (select MR2.id from "
-                    + "MatrixRun as MR2 "
-                    + "join MR2.tags as T "
-                    + "where MR2.id = MR.id "
-                    + "and T.id in (:mrTags) "
-                    + "group by MR2.id ) "
-                    + "or "
-                    + "exists (select TCR2.id from "
-                    + "TestCaseRun as TCR2 "
-                    + "join TCR2.tags as TCRT "
-                    + "where TCR2.id = TCR.id "
-                    + "and TCRT.tag.id in (:tcrTags) "
-                    + "group by TCR2.id )) ";
+            ICondition tagCondition = create("(exists (select MR2.id from "
+                            + "MatrixRun as MR2 "
+                            + "join MR2.tags as T "
+                            + "where MR2.id = MR.id "
+                            + "and T.id in (:mrTags) "
+                            + "group by MR2.id ) "
+                            + "or "
+                            + "exists (select TCR2.id from "
+                            + "TestCaseRun as TCR2 "
+                            + "join TCR2.tags as TCRT "
+                            + "where TCR2.id = TCR.id "
+                            + "and TCRT.tag.id in (:tcrTags) "
+                            + "group by TCR2.id ))");
+            whereClause = params.getLogicalOperator().create(whereClause, tagCondition);
         }
-        queryString += whereClause;
+        if ((fromFilter || toFilter) && tagsFilter) {
+            whereClause = wrap(whereClause);
+        }
+        if (sfInstancesFilter) {
+            whereClause = and(whereClause, create("SF.id in (:ids)"));
+        }
+        queryString += whereClause == null ? "" : whereClause.getCondition();
         queryString += " order by MR.startTime, MR.id";
 
         Session session = sessionFactory.openSession();
