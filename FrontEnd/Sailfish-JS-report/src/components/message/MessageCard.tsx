@@ -29,6 +29,7 @@ import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
 import { isRejected } from '../../helpers/messageType';
+import SearchableContent from '../search/SearchableContent';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -120,7 +121,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     }
                     <div className="mc-body__human">
                         <div>
-                            {contentHumanReadable}
+                            <SearchableContent content={contentHumanReadable}/>
                             {
                                 (raw && raw !== 'null') ? (
                                     <div className="mc-show-raw"

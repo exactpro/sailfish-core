@@ -113,6 +113,12 @@ export const removeSubmittedMlData = (data: SubmittedData) => (<const>{
     type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA,
     data: data
 })
+
+export const setSearchString = (searchString: string) => (<const>{
+    type: StateActionTypes.SET_SEARCH_STRING,
+    searchString
+})
+
 export const setIsLoading = (isLoading: boolean) => (<const>{
     type: StateActionTypes.SET_IS_LOADING,
     isLoading

@@ -31,6 +31,7 @@ import { createSelector } from '../helpers/styleCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
+import SearchInput from './search/SearchInput';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -89,6 +90,7 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
                         <div className="header-button__icon right"/>
                     </div>
                 </div>
+                <SearchInput/>
                 <div className="header-button   header-main__contol-button" onClick={() => setShowFilter(!showFilter)}>
                     <div className="header-button__icon filter" />
                     <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>

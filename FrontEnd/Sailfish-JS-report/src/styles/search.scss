@@ -14,10 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from "../../models/Status";
+.found {
+    background-color: yellow;
 
-export default interface FilterState {
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
-    searchString: string;
+    &.current {
+        background-color: orange; 
+    }
 }

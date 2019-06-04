@@ -49,6 +49,13 @@ export function filterReducer(state: FilterState = initialFilterState, stateActi
             }
         }
 
+        case StateActionTypes.SET_SEARCH_STRING: {
+            return {
+                ...state,
+                searchString: stateAction.searchString
+            }
+        }
+
         default: {
             return state;
         }
