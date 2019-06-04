@@ -22,6 +22,11 @@
         <settingsClassName>com.exactpro.sf.services.fix.FIXClientSettings</settingsClassName>
         <dictionaryValidatorFactoryName>com.exactpro.sf.configuration.dictionary.FIXDictionaryValidatorFactory</dictionaryValidatorFactoryName>
 	</Service>
+    <Service name="FIX_Server">
+        <className>com.exactpro.sf.services.fix.FIXServer</className>
+        <settingsClassName>com.exactpro.sf.services.fix.FIXServerSettings</settingsClassName>
+        <dictionaryValidatorFactoryName>com.exactpro.sf.configuration.dictionary.FIXDictionaryValidatorFactory</dictionaryValidatorFactoryName>
+    </Service>
 	<Service name="TCPIPClientService">
         <className>com.exactpro.sf.services.tcpip.TCPIPClient</className>
         <settingsClassName>com.exactpro.sf.services.tcpip.TCPIPSettings</settingsClassName>
