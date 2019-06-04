@@ -14,12 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import '../styles/messages.scss';
 import { SubmittedData } from '../models/MlServiceResponse'
 import AppState from '../state/models/AppState';
 import { setSubmittedMlData, addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCreators";
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import { submitEntry, deleteEntry } from '../helpers/machineLearning';
 import Action from "../models/Action";
 
@@ -34,8 +34,10 @@ interface MlUploadButtonProps {
     removeSubmittedMlData: (data: SubmittedData) => any;
 }
 
-export class MlUploadButtonBase extends Component<MlUploadButtonProps, {}> {
-    render({ submittedData, messageId, token, activeActionId, actionMap }: MlUploadButtonProps) {
+export class MlUploadButtonBase extends React.Component<MlUploadButtonProps, {}> {
+    render() {
+
+        const { submittedData, messageId, token, activeActionId, actionMap } = this.props;
 
         let isAvailable = token !== null
             && activeActionId !== null
@@ -47,28 +49,28 @@ export class MlUploadButtonBase extends Component<MlUploadButtonProps, {}> {
         });
 
         // default one (message cannot be submitted or ml servie is unavailable)
-        let mlButton = <div class="mc-header__submit-icon inactive" />;
+        let mlButton = <div className="mc-header__submit-icon inactive" />;
 
         if (isAvailable) {
             mlButton = isSubmitted
 
-                ? <div class="mc-header__submit-icon submitted" 
+                ? <div className="mc-header__submit-icon submitted" 
                     title="Revoke ML data"
                     onClick={(e) => {
                         deleteEntry(token, { messageId: messageId, actionId: activeActionId }, this.props.removeSubmittedMlData);
-                        e.cancelBubble = true;
+                        e.preventDefault();
                     }} />
 
-                : <div class="mc-header__submit-icon active" 
+                : <div className="mc-header__submit-icon active" 
                     title="Submit ML data"
                     onClick={(e) => {
                         submitEntry(token, { messageId: messageId, actionId: activeActionId }, this.props.addSubmittedMlData);
-                        e.cancelBubble = true;
+                        e.preventDefault();
                     }} />
         }
 
         return (
-            <div class="mc-header__submit" title="Unable to submit ML data">
+            <div className="mc-header__submit" title="Unable to submit ML data">
                 {mlButton}
             </div>
         )

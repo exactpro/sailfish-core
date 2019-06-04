@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import MachineLearningState from '../state/models/MachineLearningState';
 import initialMachineLearningState from '../state/initial/initialMachineLearningState';
 import { setSubmittedMlData } from '../actions/actionCreators';
