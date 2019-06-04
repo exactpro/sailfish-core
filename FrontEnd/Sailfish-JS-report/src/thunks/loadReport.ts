@@ -16,10 +16,9 @@
 
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import { AnyAction } from "redux";
-import AppState from "../state/models/AppState";
 import { fetchReport } from "../helpers/jsonp";
 import { setReport, setIsLoading } from "../actions/actionCreators";
-import { StateActionType } from "../actions/stateActions";
+import StateActionType from "../actions/stateActions";
 
 export function loadReport(): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>) => {

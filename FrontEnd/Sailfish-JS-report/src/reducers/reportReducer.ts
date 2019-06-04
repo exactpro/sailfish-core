@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import Report from '../models/Report';
 
 export function reportReducer(state : Report = null, stateAction : StateActionType): Report {

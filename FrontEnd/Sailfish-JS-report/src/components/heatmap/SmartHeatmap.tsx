@@ -32,6 +32,7 @@ const SmartHeatmap = ({ selectedElements, ...props }: SmartHeatmapProps) =>  (
             Array.from(selectedElements).map(([index, status]) => (
                 <SmartHeatmapElement
                     {...props}
+                    key={index}
                     index={index}
                     status={status}/>
             ))

@@ -28,7 +28,7 @@ import { testCasesHeatmap } from '../helpers/heatmapCreator';
 import { createSelector } from '../helpers/styleCreators';
 import { loadTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
-import { StateActionType } from '../actions/stateActions';
+import StateActionType from '../actions/stateActions';
 
 const OLD_REPORT_PATH = 'report.html';
 

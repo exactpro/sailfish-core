@@ -16,7 +16,7 @@
 
 import SelectedState from '../state/models/SelectedState';
 import { initialSelectedState } from '../state/initial/initialSelectedState';
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import { nextCyclicItem } from '../helpers/array';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';

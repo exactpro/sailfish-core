@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import AppState from "../state/models/AppState";
-import { StateActionType } from "../actions/stateActions";
+import StateActionType from "../actions/stateActions";
 import { Middleware } from "redux";
 
 export const TEST_CASE_PARAM_KEY = 'tc',

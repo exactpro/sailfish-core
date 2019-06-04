@@ -26,7 +26,7 @@ import { viewReducer } from '../reducers/viewReducer';
 import { filterReducer } from '../reducers/filterReducer';
 import { machineLearningReducer } from '../reducers/machineLearningReducer';
 import AppState from '../state/models/AppState';
-import { StateActionType } from '../actions/stateActions';
+import StateActionType from '../actions/stateActions';
 
 export const createAppStore = () => createStore<AppState, StateActionType, {}, {}>(
     combineReducers({

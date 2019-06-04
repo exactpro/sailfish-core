@@ -14,13 +14,8 @@
 * limitations under the License.
 ******************************************************************************/
 
-import TestCase from "../models/TestCase";
-import Action from '../models/Action';
-import { StatusType } from "../models/Status";
-import Report from '../models/Report';
-import { Panel } from "../util/Panel";
-import Message from "../models/Message";
-import { SubmittedData } from "../models/MlServiceResponse";
+import * as actions from './actionCreators';
+
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
     SET_TEST_CASE = 'SET_TEST_CASE',
@@ -34,7 +29,6 @@ export enum StateActionTypes {
     SET_ADMIN_MSG_ENABLED = 'SET_ADMIN_MSG_ENABLED',
     SWITCH_ACTIONS_FILTER = 'SWITCH_ACTIONS_FILTER',
     SWITCH_FIELDS_FILTER = 'SWITCH_FIELDS_FILTER',
-    SWITCH_SPLIT_MODE = 'SWITCH_SPLIT_MODE',
     SET_LEFT_PANE = 'SET_LEFT_PANE',
     SET_RIGHT_PANE = 'SET_RIGHT_PANE',
     SET_ML_TOKEN = 'SET_ML_TOKEN',
@@ -44,125 +38,15 @@ export enum StateActionTypes {
     SET_IS_LOADING = 'SET_IS_LOADING'
 }
 
-export interface SetReportStateAction {
-    type: StateActionTypes.SET_REPORT;
-    report: Report;
-}
+// How it works:
+// https://habr.com/ru/company/alfa/blog/452620/
 
-export interface SetTestCaseStateAction { 
-    type: StateActionTypes.SET_TEST_CASE;
-    testCase: TestCase;
-}
+// This type helper returns union of all types in generic type
+type InferValueTypes<T> = T extends { [key: string]: infer U }
+    ? U
+    : never;
 
-export interface ResetTestCaseStateAction {
-    type: StateActionTypes.RESET_TEST_CASE;
-}
+// ReturnType is used here to extract all function's return types from every action creator
+type StateAction = ReturnType<InferValueTypes<typeof actions>>;
 
-export interface ActionSelectStateAction {
-    type: StateActionTypes.SELECT_ACTION;
-    action: Action;
-}
-
-export interface ActionSelectByIdStateAction {
-    type: StateActionTypes.SELECT_ACTION_BY_ID;
-    actionId: number;
-}
-
-export interface MessageSelectStateAction {
-    type: StateActionTypes.SELECT_MESSAGE;
-    message: Message;
-    status: StatusType;
-}
-
-export interface VerificationSelectStateAction {
-    type: StateActionTypes.SELECT_VERIFICATION;
-    messageId: number;
-    status: StatusType;
-}
-
-export interface CheckpointSelectStateAction {
-    type: StateActionTypes.SELECT_CHECKPOINT;
-    checkpointAction: Action;
-}
-
-export interface RejectedMessageSelectStateAction {
-    type: StateActionTypes.SELECT_REJECTED_MESSAGE;
-    messageId: number;
-}
-
-export interface SetAdminMessageEnabledStateAction {
-    type: StateActionTypes.SET_ADMIN_MSG_ENABLED;
-    adminEnabled: boolean;
-}
-
-export interface SwitchActionFilterStateAction {
-    type: StateActionTypes.SWITCH_ACTIONS_FILTER;
-    status: StatusType;
-}
-
-export interface SwitchFieldsFilterStateAction {
-    type: StateActionTypes.SWITCH_FIELDS_FILTER;
-    status: StatusType;
-}
-
-export interface SwitchSplitModeStateAction {
-    type: StateActionTypes.SWITCH_SPLIT_MODE;
-}
-
-export interface SetLeftPaneStateActions {
-    type: StateActionTypes.SET_LEFT_PANE;
-    pane: Panel;
-}
-
-export interface SetRightPaneStateAction {
-    type: StateActionTypes.SET_RIGHT_PANE;
-    pane: Panel;
-}
-
-export interface SetMlTokenStateAction {
-    type: StateActionTypes.SET_ML_TOKEN;
-    token: string;
-}
-
-export interface SetSubmittedMlDataStateAction {
-    type: StateActionTypes.SET_SUBMITTED_ML_DATA;
-    data: SubmittedData[];
-}
-
-export interface AddSubmittedMlDataStateAction {
-    type: StateActionTypes.ADD_SUBMITTED_ML_DATA;
-    data: SubmittedData;
-}
-
-export interface RemoveSubmittedMlDataStateAction {
-    type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA;
-    data: SubmittedData;
-}
-
-export interface SetIsLoadingStateAction {
-    type: StateActionTypes.SET_IS_LOADING;
-    isLoading: boolean;
-}
-
-export type StateActionType = SetReportStateAction |
-    SetTestCaseStateAction | 
-    ResetTestCaseStateAction |
-    ActionSelectStateAction |
-    ActionSelectByIdStateAction |
-    MessageSelectStateAction | 
-    VerificationSelectStateAction |
-    CheckpointSelectStateAction |
-    RejectedMessageSelectStateAction | 
-    SetTestCaseStateAction | 
-    SetAdminMessageEnabledStateAction |
-    SwitchSplitModeStateAction | 
-    SwitchActionFilterStateAction | 
-    SwitchFieldsFilterStateAction | 
-    SetRightPaneStateAction | 
-    SetLeftPaneStateActions |
-    SetMlTokenStateAction |
-    SetSubmittedMlDataStateAction |
-    AddSubmittedMlDataStateAction |
-    RemoveSubmittedMlDataStateAction |
-    SetLeftPaneStateActions | 
-    SetIsLoadingStateAction;
+export default StateAction;

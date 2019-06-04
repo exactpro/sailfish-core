@@ -33,7 +33,7 @@ import { fetchToken } from "../helpers/machineLearning";
 import { SubmittedData } from "../models/MlServiceResponse" 
 import { loadReport } from '../thunks/loadReport';
 import { ThunkDispatch } from 'redux-thunk';
-import { StateActionType } from '../actions/stateActions';
+import StateActionType from '../actions/stateActions';
 import { loadTestCase } from '../thunks/loadTestCase';
 import SplashScreen from './SplashScreen';
 

@@ -18,7 +18,7 @@ import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import { AnyAction } from "redux";
 import { fetchTestCase } from "../helpers/jsonp";
 import { setTestCase, setIsLoading } from "../actions/actionCreators";
-import { StateActionType } from "../actions/stateActions";
+import StateActionType from "../actions/stateActions";
 import AppState from '../state/models/AppState';
 import { findNextCyclicItem, findPrevCyclicItem } from "../helpers/array";
 

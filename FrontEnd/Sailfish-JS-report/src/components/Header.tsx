@@ -23,14 +23,13 @@ import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import {
     resetTestCase,
-    switchSplitMode,
     switchActionsFilter,
     switchFieldsFilter
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { createSelector } from '../helpers/styleCreators';
 import { ThunkDispatch } from 'redux-thunk';
-import { StateActionType } from '../actions/stateActions';
+import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 
 interface HeaderProps {
@@ -175,7 +174,6 @@ export const Header = connect(
         nextTestCaseHandler: () => dispatch(loadNextTestCase()),
         prevTestCaseHandler: () => dispatch(loadPrevTestCase()),
         backToListHandler: () => dispatch(resetTestCase()),
-        switchSplitMode: () => dispatch(switchSplitMode()),
         switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),
         switchActionsFilter: (status: StatusType) => dispatch(switchActionsFilter(status))
     })

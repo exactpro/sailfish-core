@@ -14,31 +14,8 @@
 * limitations under the License.
 ******************************************************************************/
 
-import {
-    SetTestCaseStateAction,
-    StateActionTypes,
-    ActionSelectStateAction,
-    MessageSelectStateAction,
-    SetReportStateAction,
-    ResetTestCaseStateAction,
-    SwitchSplitModeStateAction,
-    SwitchActionFilterStateAction,
-    SwitchFieldsFilterStateAction,
-    SetLeftPaneStateActions,
-    SetRightPaneStateAction,
-    CheckpointSelectStateAction,
-    RejectedMessageSelectStateAction,
-    ActionSelectByIdStateAction,
-    SetAdminMessageEnabledStateAction,
-    VerificationSelectStateAction,
-    SetMlTokenStateAction,
-    SetSubmittedMlDataStateAction,
-    AddSubmittedMlDataStateAction,
-    RemoveSubmittedMlDataStateAction,
-    SetIsLoadingStateAction
-} from "./stateActions";
-
 import TestCase from "../models/TestCase";
+import { StateActionTypes } from "./stateActions";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
@@ -46,101 +23,97 @@ import { Panel } from "../util/Panel";
 import Message from '../models/Message';
 import { SubmittedData } from "../models/MlServiceResponse";
 
-export const setReport = (report: Report): SetReportStateAction => ({
+export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
-    report: report
+    report
 })
 
-export const setTestCase = (testCase: TestCase): SetTestCaseStateAction => ({
+export const setTestCase = (testCase: TestCase) => (<const>{
     type: StateActionTypes.SET_TEST_CASE,
-    testCase: testCase
+    testCase
 })
 
-export const resetTestCase = (): ResetTestCaseStateAction => ({
+export const resetTestCase = () => (<const>{
     type: StateActionTypes.RESET_TEST_CASE
 })
 
-export const selectAction = (action: Action): ActionSelectStateAction => ({
+export const selectAction = (action: Action) => (<const>{
     type: StateActionTypes.SELECT_ACTION,
-    action: action
+    action
 })
 
-export const selectActionById = (actionId: number): ActionSelectByIdStateAction => ({
+export const selectActionById = (actionId: number) => (<const>{
     type: StateActionTypes.SELECT_ACTION_BY_ID,
-    actionId: actionId
+    actionId
 })
 
-export const selectMessage = (message: Message, status: StatusType = null): MessageSelectStateAction => ({
+export const selectMessage = (message: Message, status: StatusType = null) => (<const>{
     type: StateActionTypes.SELECT_MESSAGE,
-    message: message,
-    status: status
+    message,
+    status
 })
 
-export const selectVerification = (messageId: number, status: StatusType = 'NA'): VerificationSelectStateAction => ({
+export const selectVerification = (messageId: number, status: StatusType = 'NA') => (<const>{
     type: StateActionTypes.SELECT_VERIFICATION,
-    messageId: messageId,
-    status: status
+    messageId,
+    status
 })
 
-export const selectCheckpoint = (checkpointAction: Action): CheckpointSelectStateAction => ({
+export const selectCheckpoint = (checkpointAction: Action) => (<const>{
     type: StateActionTypes.SELECT_CHECKPOINT,
-    checkpointAction: checkpointAction
+    checkpointAction
 })
 
-export const selectRejectedMessageId = (messageId: number): RejectedMessageSelectStateAction => ({
+export const selectRejectedMessageId = (messageId: number) => (<const>{
     type: StateActionTypes.SELECT_REJECTED_MESSAGE,
-    messageId: messageId
+    messageId
 })
 
-export const switchActionsFilter = (status: StatusType): SwitchActionFilterStateAction => ({
+export const switchActionsFilter = (status: StatusType) => (<const>{
     type: StateActionTypes.SWITCH_ACTIONS_FILTER,
-    status: status
+    status
 })
 
-export const switchFieldsFilter = (status: StatusType): SwitchFieldsFilterStateAction => ({
+export const switchFieldsFilter = (status: StatusType) => (<const>{
     type: StateActionTypes.SWITCH_FIELDS_FILTER,
-    status: status
+    status
 })
 
-export const switchSplitMode = (): SwitchSplitModeStateAction => ({
-    type: StateActionTypes.SWITCH_SPLIT_MODE
-})
-
-export const setAdminMsgEnabled = (isEnabled: boolean) : SetAdminMessageEnabledStateAction => ({
+export const setAdminMsgEnabled = (adminEnabled: boolean) => (<const>{
     type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
-    adminEnabled: isEnabled
+    adminEnabled
 })
 
-export const setLeftPane = (pane: Panel): SetLeftPaneStateActions => ({
+export const setLeftPane = (pane: Panel) => (<const>{
     type: StateActionTypes.SET_LEFT_PANE,
-    pane: pane
+    pane
 })
 
-export const setRightPane = (pane: Panel): SetRightPaneStateAction => ({
+export const setRightPane = (pane: Panel) => (<const>{
     type: StateActionTypes.SET_RIGHT_PANE,
-    pane: pane
+    pane
 })
 
-export const setMlToken = (token: string): SetMlTokenStateAction => ({
+export const setMlToken = (token: string) => (<const>{
     type: StateActionTypes.SET_ML_TOKEN,
     token: token
 })
 
-export const setSubmittedMlData = (data: SubmittedData[]): SetSubmittedMlDataStateAction => ({
+export const setSubmittedMlData = (data: SubmittedData[]) => (<const>{
     type: StateActionTypes.SET_SUBMITTED_ML_DATA,
     data: data
 })
 
-export const addSubmittedMlData = (data: SubmittedData): AddSubmittedMlDataStateAction => ({
+export const addSubmittedMlData = (data: SubmittedData) => (<const>{
     type: StateActionTypes.ADD_SUBMITTED_ML_DATA,
     data: data
 })
 
-export const removeSubmittedMlData = (data: SubmittedData): RemoveSubmittedMlDataStateAction => ({
+export const removeSubmittedMlData = (data: SubmittedData) => (<const>{
     type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA,
     data: data
 })
-export const setIsLoading = (isLoading: boolean): SetIsLoadingStateAction => ({
+export const setIsLoading = (isLoading: boolean) => (<const>{
     type: StateActionTypes.SET_IS_LOADING,
     isLoading
 })
