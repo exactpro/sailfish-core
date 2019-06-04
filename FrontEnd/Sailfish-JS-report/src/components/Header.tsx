@@ -43,124 +43,89 @@ interface HeaderProps {
     switchFieldsFilter: (status: StatusType) => any;
 }
 
-interface HeaderState {
-    showFilter: boolean;
-}
+const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler, switchActionsFilter, switchFieldsFilter }: HeaderProps) => {
+        
+    const [ showFilter, setShowFilter ] = React.useState(false);
 
-class HeaderBase extends React.Component<HeaderProps, HeaderState> {
+    const {
+        name,
+        status,
+        startTime,
+        finishTime,
+        id,
+        hash,
+        description,
+    } = testCase;
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            showFilter: false
-        }
-    }
-
-    render() {
-        const { testCase, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler, switchActionsFilter, switchFieldsFilter } = this.props,
-            { showFilter } = this.state;
-
-        const {
-            name,
-            status,
-            startTime,
-            finishTime,
-            id,
-            hash,
-            description,
-        } = testCase;
-
-        const rootClass = createSelector(
-                "header",
-                status.status
-            ), 
-            mainClass = createSelector(
-                "header-main", 
-                status.status
-            ),
-            infoClass = createSelector(
-                "header__info", 
-                showFilter ? "filter-enabled" : null
-            ),
-            prevButtonClass = createSelector(
-                "header-main-name-icon",
-                "left", 
-                prevTestCaseHandler ? "enabled" : "disabled"
-            ),
-            nextButtonClass = createSelector(
-                "header-main-name-icon",
-                "right", 
-                nextTestCaseHandler ? "enabled" : "disabled"
-            );
-
-        const period = getSecondsPeriod(startTime, finishTime);
-
-        return (
-            <div className={rootClass}>
-                <div className="header__main   header-main">
-                    <div className="header-button   header-main__contol-button"
-                        onClick={backToListHandler}>
-                        <div className="header-button__icon go-back" />
-                        <div className="header-button__title">Back to list</div>
-                    </div>
-                    <div className="header-main__name ">
-                        <div className="header-button"
-                            onClick={prevTestCaseHandler}>
-                            <div className="header-button__icon left"/>
-                        </div>
-                        <div className="header-main__title">
-                            {(name || 'Test Case')} — {status.status} — {period}
-                        </div>
-                        <div className="header-button"
-                            onClick={nextTestCaseHandler}>
-                            <div className="header-button__icon right"/>
-                        </div>
-                    </div>
-                    <div className="header-button   header-main__contol-button" onClick={() => this.switchFilter()}>
-                        <div className="header-button__icon filter" />
-                        <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
-                    </div>
-                </div>
-                <div className={infoClass}>
-                    <div className="header__info-element">
-                        <span>Start:</span>
-                        <p>{formatTime(startTime)}</p>
-                    </div>
-                    <div className="header__info-element">
-                        <span>Finish:</span>
-                        <p>{formatTime(finishTime)}</p>
-                    </div>
-                    <div className="header__description">
-                        {description}
-                    </div>
-                    <div className="header__info-element">
-                        <span>ID:</span>
-                        <p>{id}</p>
-                    </div>
-                    <div className="header__info-element">
-                        <span>Hash:</span>
-                        <p>{hash}</p>
-                    </div>
-                </div>
-                {
-                    showFilter ?
-                        <FilterPanel
-                            actionsFilters={actionsFilter}
-                            fieldsFilters={fieldsFilter}
-                            actionFilterHandler={switchActionsFilter}
-                            fieldsFilterHandler={switchFieldsFilter} />
-                        : null
-                }
-            </div>
+    const rootClass = createSelector(
+            "header",
+            status.status
+        ), 
+        infoClass = createSelector(
+            "header__info", 
+            showFilter ? "filter-enabled" : null
         );
-    }
 
-    private switchFilter() {
-        this.setState({
-            showFilter: !this.state.showFilter
-        })
-    }
+    const period = getSecondsPeriod(startTime, finishTime);
+
+    return (
+        <div className={rootClass}>
+            <div className="header__main   header-main">
+                <div className="header-button   header-main__contol-button"
+                    onClick={backToListHandler}>
+                    <div className="header-button__icon go-back" />
+                    <div className="header-button__title">Back to list</div>
+                </div>
+                <div className="header-main__name ">
+                    <div className="header-button"
+                        onClick={prevTestCaseHandler}>
+                        <div className="header-button__icon left"/>
+                    </div>
+                    <div className="header-main__title">
+                        {(name || 'Test Case')} — {status.status} — {period}
+                    </div>
+                    <div className="header-button"
+                        onClick={nextTestCaseHandler}>
+                        <div className="header-button__icon right"/>
+                    </div>
+                </div>
+                <div className="header-button   header-main__contol-button" onClick={() => setShowFilter(!showFilter)}>
+                    <div className="header-button__icon filter" />
+                    <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
+                </div>
+            </div>
+            <div className={infoClass}>
+                <div className="header__info-element">
+                    <span>Start:</span>
+                    <p>{formatTime(startTime)}</p>
+                </div>
+                <div className="header__info-element">
+                    <span>Finish:</span>
+                    <p>{formatTime(finishTime)}</p>
+                </div>
+                <div className="header__description">
+                    {description}
+                </div>
+                <div className="header__info-element">
+                    <span>ID:</span>
+                    <p>{id}</p>
+                </div>
+                <div className="header__info-element">
+                    <span>Hash:</span>
+                    <p>{hash}</p>
+                </div>
+            </div>
+            {
+                showFilter ?
+                    <FilterPanel
+                        actionsFilters={actionsFilter}
+                        fieldsFilters={fieldsFilter}
+                        actionFilterHandler={switchActionsFilter}
+                        fieldsFilterHandler={switchFieldsFilter} />
+                    : null
+            }
+        </div>
+    );
 }
 
 export const Header = connect(
