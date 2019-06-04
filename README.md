@@ -14,10 +14,10 @@ Sailfish has a modular structure whereby a shared framework is used in conjuncti
 
 ## build and run instructions
 
-Build and publish JavaScript Matrix Editor to the local repository (shared folder in the repository root).
-Execute command from the FrontEnd/JSMatrixEditor folder
+Build and publish the Sailfish-JS-report to the local repository (shared folder in the repository root).
+Execute command from the FrontEnd/Sailfish-JS-report folder
 ```
-$ ./iAmNotFrontendDev.sh clean uploadArchives -x test
+$ ./gradlew clean build uploadArchives
 ```
 
 Build all the java projects included in the Sailfish
@@ -38,3 +38,5 @@ Execute command from the repository root folder
 $ ./gradlew cargoRunLocal -PquickStart
 ```
 Note: The 'quickStart' property enables the ability to run Sailfish without connecting to a DBMS.
+
+And then, open http://localhost:8080/sfgui
