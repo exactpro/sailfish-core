@@ -17,33 +17,63 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { setSearchString } from '../../actions/actionCreators';
+import { setSearchString, nextSearchResult, prevSearchResult } from '../../actions/actionCreators';
 
 interface StateProps {
     searchString: string;
+    currentIndex: number;
+    resultsCount: number;
 }
 
 interface DispatchProps {
     updateSearchString: (searchString: string) => any;
+    nextSearchResult: () => any;
+    prevSearchResult: () => any;
 }
 
-interface Props extends StateProps, DispatchProps {}
+interface Props extends StateProps, DispatchProps { }
 
-const SearchInputBase = ({ searchString, updateSearchString }: Props) => (
-    <div className="search-input">
-        <input 
-            type="text" 
-            value={searchString} 
-            onChange={e => updateSearchString(e.target.value)}/>
-    </div>
-)
+const SearchInputBase = ({ searchString, updateSearchString, nextSearchResult, prevSearchResult, currentIndex, resultsCount }: Props) => {
+    
+    return (
+        <div className="search-input">
+            <input
+                type="text"
+                value={searchString}
+                onChange={e => updateSearchString(e.target.value)}
+                onKeyDown={e => {
+                    if (e.keyCode == 13 && e.shiftKey) {
+                        prevSearchResult();
+                        return;
+                    }
+
+                    if (e.keyCode == 13) {
+                        nextSearchResult();
+                    }
+                }}/>
+            <div>{currentIndex != null ? currentIndex + 1 : 0} / {resultsCount}</div>
+        </div>
+    )
+}
 
 const SearchInput = connect(
-    (state: AppState): StateProps => ({
-        searchString: state.filter.searchString
+    (state: AppState) => ({
+        searchString: state.selected.searchString,
+        testCase: state.selected.testCase,
+        resultsCount: [...state.selected.searchResults.values()].reduce((sum, results) => sum + results, 0),
+        currentIndex: state.selected.searchIndex
     }),
-    (dispatch): DispatchProps => ({
-        updateSearchString: searchString => dispatch(setSearchString(searchString))
+    (dispatch) => ({
+        updateSearchString: (searchString, testCase) => dispatch(setSearchString(searchString, testCase)),
+        nextSearchResult: () => dispatch(nextSearchResult()),
+        prevSearchResult: () => dispatch(prevSearchResult())
+    }),
+    (stateProps, dispatchProps, ownProps): StateProps & DispatchProps => ({
+        ...dispatchProps,
+        resultsCount: stateProps.resultsCount,
+        currentIndex: stateProps.currentIndex,
+        searchString: stateProps.searchString,
+        updateSearchString: searchString => dispatchProps.updateSearchString(searchString, stateProps.testCase)
     })
 )(SearchInputBase);
 

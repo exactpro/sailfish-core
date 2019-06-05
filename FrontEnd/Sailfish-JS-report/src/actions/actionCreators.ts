@@ -114,9 +114,18 @@ export const removeSubmittedMlData = (data: SubmittedData) => (<const>{
     data: data
 })
 
-export const setSearchString = (searchString: string) => (<const>{
+export const setSearchString = (searchString: string, testCase: TestCase) => (<const>{
     type: StateActionTypes.SET_SEARCH_STRING,
-    searchString
+    searchString,
+    testCase
+})
+
+export const nextSearchResult = () => (<const>{
+    type: StateActionTypes.NEXT_SEARCH_RESULT
+})
+
+export const prevSearchResult = () => (<const>{
+    type: StateActionTypes.PREV_SEARCH_RESULT
 })
 
 export const setIsLoading = (isLoading: boolean) => (<const>{

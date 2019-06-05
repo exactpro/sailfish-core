@@ -21,6 +21,7 @@ import { nextCyclicItem } from '../helpers/array';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/actionType';
+import { findAll } from '../helpers/searchEngine';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -134,6 +135,57 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 rejectedMessageId: stateAction.messageId,
                 scrolledMessageId: new Number(stateAction.messageId)
+            }
+        }
+
+        case StateActionTypes.SET_SEARCH_STRING: {
+            const searchResults = findAll(stateAction.searchString, stateAction.testCase, state.searchIndex),
+                searchResultsCount = [...searchResults.entries()].reduce((sum, [key, result]) => sum + result, 0),  
+                searchIndex = state.searchIndex > searchResultsCount ? searchResultsCount - 1 : state.searchIndex;
+
+            return {
+                ...state,
+                searchString: stateAction.searchString,
+                searchResults,
+                searchIndex
+            }
+        }
+
+        case StateActionTypes.NEXT_SEARCH_RESULT: {
+            let count = 0;
+
+            // TODO - need to share this code beetwen next and prev action handlers
+            const searchResultsCount = [...state.searchResults.entries()].reduce((sum, [key, result]) => sum + result, 0), 
+                nextIndex = (state.searchIndex + 1) % searchResultsCount,
+                [currentKey] = [...state.searchResults.entries()].find(([key, result]) => {
+                    count += result;
+                    return nextIndex < count;
+                }),
+                msgId = currentKey.split('-')[1];;
+
+            return {
+                ...state,
+                searchIndex: nextIndex,
+                scrolledMessageId: new Number(msgId)
+            }
+        }
+
+        case StateActionTypes.PREV_SEARCH_RESULT: {
+            let count = 0;
+            
+            // TODO - need to share this code beetwen next and prev action handlers
+            const searchResultsCount = [...state.searchResults.entries()].reduce((sum, [key, result]) => sum + result, 0),  
+                prevIndex = (searchResultsCount + state.searchIndex - 1) % searchResultsCount,
+                [currentKey] = [...state.searchResults.entries()].find(([key, result]) => {
+                    count += result;
+                    return prevIndex < count;
+                }),
+                msgId = currentKey.split('-')[1];
+
+            return {
+                ...state,
+                searchIndex: prevIndex,
+                scrolledMessageId: new Number(msgId)
             }
         }
 

@@ -17,6 +17,7 @@
 import FilterState from '../state/models/FiltersState';
 import initialFilterState from '../state/initial/initialFilterState';
 import StateActionType, { StateActionTypes } from '../actions/stateActions';
+import { findAll } from '../helpers/searchEngine';
 
 export function filterReducer(state: FilterState = initialFilterState, stateAction: StateActionType): FilterState {
     switch(stateAction.type) {
@@ -46,13 +47,6 @@ export function filterReducer(state: FilterState = initialFilterState, stateActi
             return {
                 ...state,
                 fieldsFilter: [ ...state.fieldsFilter, stateAction.status ]
-            }
-        }
-
-        case StateActionTypes.SET_SEARCH_STRING: {
-            return {
-                ...state,
-                searchString: stateAction.searchString
             }
         }
 

@@ -19,8 +19,7 @@ import { statusValues } from '../../models/Status';
 
 const initialFilterState : FilterState = {
     actionsFilter: statusValues,
-    fieldsFilter: statusValues,
-    searchString: ''
+    fieldsFilter: statusValues
 }
 
 export default initialFilterState;

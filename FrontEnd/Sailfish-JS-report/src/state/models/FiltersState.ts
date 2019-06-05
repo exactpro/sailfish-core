@@ -19,5 +19,4 @@ import { StatusType } from "../../models/Status";
 export default interface FilterState {
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
-    searchString: string;
 }

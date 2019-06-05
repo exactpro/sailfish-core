@@ -14,24 +14,25 @@
  * limitations under the License.
  ******************************************************************************/
 
-import SelectedState from '../models/SelectedState';
-import Action from '../../models/Action';
+import TestCase from '../models/TestCase';
 
-export const initialSelectedState: SelectedState = {
-    testCase: null,
-    actionsId: [],
-    scrolledActionId: null,
-    messagesId: [],
-    scrolledMessageId: null,
-    verificationId: null,
-    status: 'NA',
-    checkpointMessageId: null,
-    checkpointActionId: null,
-    rejectedMessageId: null,
-    actionsMap: new Map<number, Action>(),
-    checkpointActions: [],
-    activeActionId: null,
-    searchString: '',
-    searchResults: new Map(),
-    searchIndex: null
+export function findAll(searchString: string, testCase: TestCase, currentIndex: number): Map<string, number> {
+    const searchResults = new Map<string, number>();
+
+    if (searchString) {
+        testCase.messages.forEach(({ contentHumanReadable, msgName, id }) => {
+            const contentCount = contentHumanReadable.split(searchString).length - 1,
+                nameCount = msgName.split(searchString).length - 1;
+
+            if (nameCount > 0) {
+                searchResults.set(`msg-${id}-name`, nameCount);
+            }
+
+            if (contentCount > 0) {
+                searchResults.set(`msg-${id}-content`, contentCount);
+            }
+        })
+    }
+
+    return searchResults;
 }

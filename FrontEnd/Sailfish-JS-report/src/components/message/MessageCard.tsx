@@ -53,7 +53,7 @@ interface MessageCardDispatchProps {
 export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps { }
 
 export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
-    const { msgName, timestamp, from, to, contentHumanReadable, raw } = message;
+    const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
         labelsCount = getLabelsCount(message);
@@ -87,7 +87,9 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                         <span>Name</span>
                     </div>
                     <div className="mc-header__name-value">
-                        <p>{msgName}</p>
+                        <SearchableContent  
+                            content={msgName}
+                            contentKey={`msg-${id}-name`}/>
                     </div>
                     <div className="mc-header__timestamp">
                         <p>{formatTime(timestamp)}</p>
@@ -121,7 +123,9 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     }
                     <div className="mc-body__human">
                         <div>
-                            <SearchableContent content={contentHumanReadable}/>
+                            <SearchableContent 
+                                content={contentHumanReadable} 
+                                contentKey={`msg-${id}-content`}/>
                             {
                                 (raw && raw !== 'null') ? (
                                     <div className="mc-show-raw"

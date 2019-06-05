@@ -21,46 +21,66 @@ import '../../styles/search.scss';
 
 interface OwnProps {
     content: string;
+    contentKey: string;
 }
 
 interface StateProps {
+    targetIndex: number;
+    startIndex: number;
     searchString: string;
 }
 
-interface Props extends OwnProps, StateProps {}
+interface Props extends Omit<OwnProps, 'contentKey'>, StateProps {}
 
-const SearchableContentBase = ({ content, searchString }: Props) => {
+const SearchableContentBase = ({ content, startIndex, targetIndex, searchString }: Props) => {
 
-    if (!searchString) {
+    const splittedContent = content.split(searchString)
+
+    if (splittedContent.length === 1) {
         return (
             <span>{content}</span>
         )
     }
 
-    const splittedContent = content.split(searchString);
-
-    if (splittedContent.length == 1) {
-        return (
-            <span>{splittedContent[0]}</span>
-        )
-    }
+    const internalTargetIndex = targetIndex - startIndex;
 
     return (
-        <React.Fragment>
+        <span>
             {
                 splittedContent.map((content, index) => [
                     <span key={index}>{content}</span>,
-                    index !== splittedContent.length - 1 ? <span  className="found">{searchString}</span> : null
+                    index !== splittedContent.length - 1    
+                        ? <span  className={'found' + (index === internalTargetIndex ? ' target' : '')} key={splittedContent.length + index}>{searchString}</span> : 
+                        null
                 ])
             }
-        </React.Fragment>
+        </span>
     )
 }
 
 const SearchableContent = connect(
-    (state: AppState): StateProps => ({
-        searchString: state.filter.searchString
-    })
+    ({ selected: state }: AppState, ownProps: OwnProps): StateProps => {
+        const containsSearchResult = state.searchResults.has(ownProps.contentKey);
+
+        if (!containsSearchResult) {
+            return {
+                searchString: null,
+                targetIndex: null,
+                startIndex: null
+            }
+        }
+
+        const searchResults = [...state.searchResults.entries()],
+            startIndex = searchResults
+                .slice(0, searchResults.findIndex(([key]) => key === ownProps.contentKey))
+                .reduce((acc, [key, result]) => acc + result, 0);
+
+        return {
+            searchString: state.searchString,
+            targetIndex: state.searchIndex,
+            startIndex
+        }
+    }
 )(SearchableContentBase);
 
 export default SearchableContent;
