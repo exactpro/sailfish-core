@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.normalizeFilters;
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
 import static com.exactpro.sf.services.fix.FixUtil.convertToNumber;
 
 import java.nio.charset.StandardCharsets;
@@ -125,10 +127,10 @@ public class FixConnectivityActions extends AbstractCaller
 		actionContext.getLogger().info("[{}] started", serviceName);
 		actionContext.getLogger().info("actionContext=[{}]", actionContext);
 
-		int repeatCount = Integer.parseInt(inputData.get( "RepeatCount" ).toString());
-		int startMSN = Integer.parseInt(inputData.get( "StartSeqNum" ).toString());
-		String nameOrder = inputData.get( "OrderNameStart" ).toString();
-		String instrum = inputData.get( "OrderInstrument" ).toString();
+        int repeatCount = Integer.parseInt(unwrapFilters(inputData.get("RepeatCount")).toString());
+        int startMSN = Integer.parseInt(unwrapFilters(inputData.get("StartSeqNum")).toString());
+        String nameOrder = unwrapFilters(inputData.get("OrderNameStart")).toString();
+        String instrum = unwrapFilters(inputData.get("OrderInstrument")).toString();
 
 		TCPIPClient tcpipClient = getClient(actionContext);
 
@@ -139,7 +141,8 @@ public class FixConnectivityActions extends AbstractCaller
 		for (int i=0;i<repeatCount;i++)
 		{
 			int tmp = startMSN + i;
-			String zOrder = "8=FIXT.1.1!9=10!35=D!34="+ tmp +"!49=" + inputData.get("SenderCompID") +  "!52=10!56=TRADX!11=" + nameOrder + tmp + "!38=1000000!40=2!44=1!54=1!55=[N/A]!59=0!60="+dateFormat.format(new Date())+"!9303=M!48=" + instrum +"!22=101!423=6!";
+            String zOrder = "8=FIXT.1.1!9=10!35=D!34=" + tmp + "!49=" + unwrapFilters(inputData.get("SenderCompID")) + "!52=10!56=TRADX!11=" + nameOrder + tmp + "!38=1000000!40=2!44=1!54=1!55=[N/A]!59=0!60=" + dateFormat.format(new Date())
+                    + "!9303=M!48=" + instrum + "!22=101!423=6!";
 
 
 			FIXPacket fpacket = new FIXPacket( "","" );
@@ -188,6 +191,7 @@ public class FixConnectivityActions extends AbstractCaller
     })
     @ActionMethod
     public HashMap<?, ?> SendFixMessage(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
+        inputData = unwrapFilters(inputData);
         applyHeaderAndTrailer((Map<String, Object>)inputData, sendHeaders, sendTrailers, sendSeqNums, actionContext.getServiceName());
 	    return connectivityActions.SendMessage(actionContext, inputData);
 	}
@@ -217,6 +221,7 @@ public class FixConnectivityActions extends AbstractCaller
             throw new Exception("RawMessage column hasn't been specified in your matrix");
         }
 
+        inputData = unwrapFilters(inputData);
 		String messageString = inputData.get("RawMessage").toString();
 
 		logger.debug("RawMessage to be sent: {}", messageString);
@@ -256,6 +261,7 @@ public class FixConnectivityActions extends AbstractCaller
     })
     @ActionMethod
     public HashMap<?, ?> WaitFixMessage(IActionContext actionContext, HashMap<?, ?> mapFilter) throws Exception {
+        mapFilter = normalizeFilters(mapFilter);
         applyHeaderAndTrailer((Map<String, Object>)mapFilter, receiveHeaders, receiveTrailers, receiveSeqNums, actionContext.getServiceName());
         return connectivityActions.WaitMessage(actionContext, mapFilter);
 	}
@@ -272,6 +278,7 @@ public class FixConnectivityActions extends AbstractCaller
 	@ActionMethod
     public void CountMessages(IActionContext actionContext, HashMap<?,?> mapFilter) throws Exception
 	{
+        mapFilter = normalizeFilters(mapFilter);
 	    IMessage incomingMessage = MessageUtil.convertToIMessage(mapFilter, DefaultMessageFactory.getFactory(), TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE, TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE);
 		WaitAction.countMessages(actionContext, incomingMessage, true);
 	}
@@ -394,7 +401,7 @@ public class FixConnectivityActions extends AbstractCaller
     @CustomColumns(@CustomColumn(IS_RECEIVE_FIELD))
     @ActionMethod
     public int GetSeqNum(IActionContext actionContext, HashMap<?, ?> hashMap) {
-        boolean isReceive = YES.equalsIgnoreCase(String.valueOf(hashMap.get(IS_RECEIVE_FIELD)));
+        boolean isReceive = YES.equalsIgnoreCase(String.valueOf((Object)unwrapFilters(hashMap.get(IS_RECEIVE_FIELD))));
         Map<String, Integer> seqNums = isReceive ? receiveSeqNums : sendSeqNums;
         Integer value = seqNums.get(actionContext.getServiceName());
         return value == null ? 0 : value;
@@ -408,8 +415,8 @@ public class FixConnectivityActions extends AbstractCaller
     })
     @ActionMethod
     public void SetSeqNum(IActionContext actionContext, HashMap<?, ?> hashMap) {
-        boolean isReceive = YES.equalsIgnoreCase(String.valueOf(hashMap.get(IS_RECEIVE_FIELD)));
-        Object seqNumObject = hashMap.get(FixMessageHelper.MSG_SEQ_NUM_FIELD);
+        boolean isReceive = YES.equalsIgnoreCase(String.valueOf((Object)unwrapFilters(hashMap.get(IS_RECEIVE_FIELD))));
+        Object seqNumObject = unwrapFilters(hashMap.get(FixMessageHelper.MSG_SEQ_NUM_FIELD));
 
         int seqNum = convertToNumber(FixMessageHelper.MSG_SEQ_NUM_FIELD, seqNumObject).intValue();
 
@@ -425,8 +432,8 @@ public class FixConnectivityActions extends AbstractCaller
     })
     @ActionMethod
     public void AddSeqNum(IActionContext actionContext, HashMap<?, ?> hashMap) {
-        boolean isReceive = YES.equalsIgnoreCase(String.valueOf(hashMap.get(IS_RECEIVE_FIELD)));
-        Object seqNumObject = hashMap.get(FixMessageHelper.MSG_SEQ_NUM_FIELD);
+        boolean isReceive = YES.equalsIgnoreCase(String.valueOf((Object)unwrapFilters(hashMap.get(IS_RECEIVE_FIELD))));
+        Object seqNumObject = unwrapFilters(hashMap.get(FixMessageHelper.MSG_SEQ_NUM_FIELD));
 
         int seqNum = convertToNumber(FixMessageHelper.MSG_SEQ_NUM_FIELD, seqNumObject).intValue();
 
@@ -455,7 +462,7 @@ public class FixConnectivityActions extends AbstractCaller
     @ActionMethod
     public void SetHeader(IActionContext actionContext, HashMap<?, ?> hashMap) {
         Map<String, Object> header = extractMap(HEADER_FIELDS, hashMap, null);
-        boolean isReceive = YES.equalsIgnoreCase(String.valueOf(hashMap.get(IS_RECEIVE_FIELD)));
+        boolean isReceive = YES.equalsIgnoreCase(String.valueOf((Object)unwrapFilters(hashMap.get(IS_RECEIVE_FIELD))));
         Map<String, Map<String, Object>> targetMap = isReceive ? receiveHeaders : sendHeaders;
         targetMap.put(actionContext.getServiceName(), header);
     }
@@ -469,7 +476,7 @@ public class FixConnectivityActions extends AbstractCaller
     @ActionMethod
     public void SetTrailer(IActionContext actionContext, HashMap<?, ?> hashMap) {
         Map<String, Object> trailer = extractMap(TRAILER_FIELDS, hashMap, null);
-        boolean isReceive = YES.equalsIgnoreCase(String.valueOf(hashMap.get(IS_RECEIVE_FIELD)));
+        boolean isReceive = YES.equalsIgnoreCase(String.valueOf((Object)unwrapFilters(hashMap.get(IS_RECEIVE_FIELD))));
         Map<String, Map<String, Object>> targetMap = isReceive ? receiveTrailers : sendTrailers;
         targetMap.put(actionContext.getServiceName(), trailer);
     }
@@ -550,7 +557,7 @@ public class FixConnectivityActions extends AbstractCaller
 
 		if ( messageFilter.containsKey( "WaitingTags" ) )
 		{
-			String[] waitingTags = ((String) messageFilter.get( "WaitingTags" )).split(";");
+            String[] waitingTags = ((String)unwrapFilters(messageFilter.get("WaitingTags"))).split(";");
 
 			for (int i = 0; i < waitingTags.length; i++ )
 			{
@@ -560,7 +567,7 @@ public class FixConnectivityActions extends AbstractCaller
 
 		if ( messageFilter.containsKey( "WaitingGroup" ) )
 		{
-			String[] waitingTags = ((String) messageFilter.get( "WaitingGroup" )).split(";");
+            String[] waitingTags = ((String)unwrapFilters(messageFilter.get("WaitingGroup"))).split(";");
 
 			groupHeader = waitingTags[ 0 ];
 			groupDelimiter = waitingTags[ 1 ];

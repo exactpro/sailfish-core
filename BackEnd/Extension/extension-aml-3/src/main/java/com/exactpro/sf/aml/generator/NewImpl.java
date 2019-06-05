@@ -715,7 +715,7 @@ public class NewImpl {
 		}
 	}
 
-	private String castReceiveValue(Object object, JavaType valueType, AlertCollector alertCollector, long line, long uid, String column)
+    private static String castReceiveValue(Object object, JavaType valueType, AlertCollector alertCollector, long line, long uid, String column)
 	{
 		switch (valueType)
 		{
@@ -1295,7 +1295,7 @@ public class NewImpl {
 				        String strValue = value.getValue();
 
 				        if(strValue.equals(CONV_VALUE_MISSING) || strValue.equals(CONV_VALUE_PRESENT)) {
-	                        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", " + createFilterExpression(fStruct, strValue, action.getLine(), action.getUID(), value.getFieldName()) + ");"+EOL);
+                            sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, strValue, action.getLine(), action.getUID(), value.getFieldName(), alertCollector) + ");" + EOL);
 	                        continue;
 	                    }
 
@@ -1325,7 +1325,7 @@ public class NewImpl {
     	                    sb.append(");//reference enum receive"+EOL);
     				    } else {
         					String v = prepareEnum(value.getOrigValue(), fStruct, action.getLine(), action.getUID(), value.getFieldName());
-        					String filterExpression = createFilterExpression(fStruct, v, action.getLine(), action.getUID(), value.getFieldName());
+                            String filterExpression = createFilterExpression(fStruct, v, action.getLine(), action.getUID(), value.getFieldName(), alertCollector);
 
         					sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", "+filterExpression+");//enum receive"+EOL);
     				    }
@@ -1335,7 +1335,8 @@ public class NewImpl {
 				{
 				    if(fStruct.isCollection()) {
 				        if(value.getValue().equals(CONV_VALUE_MISSING) || value.getValue().equals(CONV_VALUE_PRESENT)) {
-	                        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", " + createFilterExpression(fStruct, value.getValue(), action.getLine(), action.getUID(), value.getFieldName()) + ");"+EOL);
+                            sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, value.getValue(), action.getLine(), action.getUID(), value.getFieldName(), alertCollector) + ");"
+                                    + EOL);
 	                        continue;
 	                    }
 
@@ -1353,7 +1354,7 @@ public class NewImpl {
 	                        sb.append(generateFilter(line, fieldName, value, TAB3));
 	                        sb.append(");//simple reference receive"+EOL);
 				        } else {
-				            String filterExpression = createFilterExpression(fStruct, value.getOrigValue(), action.getLine(), action.getUID(), value.getFieldName());
+                            String filterExpression = createFilterExpression(fStruct, value.getOrigValue(), action.getLine(), action.getUID(), value.getFieldName(), alertCollector);
 
 				            sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", "+filterExpression+");//simple receive"+EOL);
 				        }
@@ -1367,7 +1368,8 @@ public class NewImpl {
                     }
 
                     if(value.getValue().equals(CONV_VALUE_MISSING) || value.getValue().equals(CONV_VALUE_PRESENT)) {
-                        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", " + createFilterExpression(fStruct, value.getValue(), action.getLine(), action.getUID(), value.getFieldName()) + ");"+EOL);
+                        sb.append(
+                                TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, value.getValue(), action.getLine(), action.getUID(), value.getFieldName(), alertCollector) + ");" + EOL);
                         continue;
                     }
 
@@ -1618,7 +1620,7 @@ public class NewImpl {
         return "filter";
     }
 
-	private String createFilterExpression(IFieldStructure fType, String origValue, long line, long uid, String column) {
+    public static String createFilterExpression(IFieldStructure fType, String origValue, long line, long uid, String column, AlertCollector alertCollector) {
 		String v = origValue;
 
 		if (origValue.equals(CONV_VALUE_PRESENT)) {

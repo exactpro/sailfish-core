@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,14 +29,14 @@ import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.aml.CommonColumn;
 import com.exactpro.sf.aml.CommonColumns;
 import com.exactpro.sf.aml.CustomColumn;
 import com.exactpro.sf.aml.CustomColumns;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -68,7 +70,7 @@ public class ServiceActions extends AbstractCaller {
     public void createService(IActionContext actionContext, HashMap<?, ?> message) {
 		try {
 		    ServiceName serviceName = ServiceName.parse(actionContext.getServiceName());
-	        SailfishURI serviceURI = SailfishURI.parse((String)message.get(SERVICE_TYPE));
+            SailfishURI serviceURI = SailfishURI.parse(unwrapFilters(message.get(SERVICE_TYPE)));
 
 			if (StringUtils.isEmpty(serviceName.getServiceName())) {
 				throw new EPSCommonException("service_name is empty");
@@ -149,7 +151,7 @@ public class ServiceActions extends AbstractCaller {
 				String property = convertProperty(entry.getKey().toString());
 				if (beanMap.containsKey(property)){
 					try {
-						BeanUtils.setProperty(serviceSettings, property, converter.get().convert(entry.getValue(), beanMap.getType(property)));
+                        BeanUtils.setProperty(serviceSettings, property, converter.get().convert((Object)unwrapFilters(entry.getValue()), beanMap.getType(property)));
 					} catch (IllegalAccessException e) {
 						throw new EPSCommonException(e);
 					} catch (InvocationTargetException e) {
