@@ -60,7 +60,7 @@ const SearchInput = connect(
     (state: AppState) => ({
         searchString: state.selected.searchString,
         testCase: state.selected.testCase,
-        resultsCount: [...state.selected.searchResults.values()].reduce((sum, results) => sum + results, 0),
+        resultsCount: state.selected.searchResultsCount,
         currentIndex: state.selected.searchIndex
     }),
     (dispatch) => ({

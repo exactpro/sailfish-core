@@ -17,6 +17,7 @@
 import { StatusType } from "../../models/Status";
 import TestCase from '../../models/TestCase';
 import Action from "../../models/Action";
+import SearchResult from "../../helpers/search/SearchResult";
 
 export default interface SelectedState {
     testCase: TestCase;
@@ -31,7 +32,8 @@ export default interface SelectedState {
     checkpointActions: Action[];
 
     searchString: string;
-    searchResults: Map<string, number>;
+    searchResults: SearchResult;
+    searchResultsCount: number;
     searchIndex: number;
     
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)

@@ -14,10 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import TestCase from '../models/TestCase';
+import TestCase from '../../models/TestCase';
+import SearchResult from './SearchResult';
 
-export function findAll(searchString: string, testCase: TestCase, currentIndex: number): Map<string, number> {
-    const searchResults = new Map<string, number>();
+export function findAll(searchString: string, testCase: TestCase): SearchResult {
+    const searchResults = new SearchResult();
 
     if (searchString) {
         testCase.messages.forEach(({ contentHumanReadable, msgName, id }) => {

@@ -16,6 +16,7 @@
 
 import SelectedState from '../models/SelectedState';
 import Action from '../../models/Action';
+import SearchResult from '../../helpers/search/SearchResult';
 
 export const initialSelectedState: SelectedState = {
     testCase: null,
@@ -32,6 +33,7 @@ export const initialSelectedState: SelectedState = {
     checkpointActions: [],
     activeActionId: null,
     searchString: '',
-    searchResults: new Map(),
+    searchResults: new SearchResult(),
+    searchResultsCount: null,
     searchIndex: null
 }
