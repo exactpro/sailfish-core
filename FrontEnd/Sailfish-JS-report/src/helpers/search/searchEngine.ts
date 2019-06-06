@@ -16,24 +16,54 @@
 
 import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
+import Message from '../../models/Message';
+
+// list of fields that will be used to search (order is important!)
+const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'];
 
 export function findAll(searchString: string, testCase: TestCase): SearchResult {
-    const searchResults = new SearchResult();
+    const searchResults = new Array<[string, number]>();
 
     if (searchString) {
-        testCase.messages.forEach(({ contentHumanReadable, msgName, id }) => {
-            const contentCount = contentHumanReadable.split(searchString).length - 1,
-                nameCount = msgName.split(searchString).length - 1;
-
-            if (nameCount > 0) {
-                searchResults.set(`msg-${id}-name`, nameCount);
-            }
-
-            if (contentCount > 0) {
-                searchResults.set(`msg-${id}-content`, contentCount);
-            }
-        })
+        searchResults.push(...testCase.messages.reduce((acc, message) => [...acc, ...findAllInObject(
+            message,
+            MESSAGE_FIELDS,
+            searchString,
+            `msg-${message.id}`
+        )], []))
     }
 
-    return searchResults;
+    return new SearchResult(searchResults);
+}
+
+/**
+ * This funciton perfoms a search in a specific fields of target object 
+ * and returns result as array of ["prefix - field name", number of search results] 
+ * @param target target object
+ * @param fieldsList list of fields of target object that will be used to search in them
+ * @param searchString target search string
+ * @param resultKeyPrefix prefix for search result key
+ */
+function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchString: string, resultKeyPrefix: string): Array<[string, number]> {
+    let results = new Array<[string, number]>();
+
+    fieldsList.forEach(fieldName => {
+        const targetField = target[fieldName];
+
+        if (typeof targetField !== 'string') {
+            if (targetField !== null) {
+                console.warn(`Trying to search on field that doesn\'t look like string (${fieldName})`);
+            }
+
+            return;
+        }
+
+        const searchResultsCount = targetField.split(searchString).length - 1;
+
+        if (searchResultsCount > 0) {
+            results.push([`${resultKeyPrefix}-${fieldName}`, searchResultsCount]);
+        }
+    });
+
+    return results;
 }

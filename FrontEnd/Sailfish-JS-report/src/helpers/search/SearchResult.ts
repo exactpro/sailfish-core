@@ -16,7 +16,11 @@
 
 export default class SearchResult {
 
-    private results = new Map<string, number>();
+    private results: Map<string, number>;
+
+    constructor(initMap: Iterable<[string, number]> = null) {
+        this.results = new Map(initMap);
+    }
 
     set = (key: string, value: number) => this.results.set(key, value);
 

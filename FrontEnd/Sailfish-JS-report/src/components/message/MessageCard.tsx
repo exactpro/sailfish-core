@@ -89,7 +89,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     <div className="mc-header__name-value">
                         <SearchableContent  
                             content={msgName}
-                            contentKey={`msg-${id}-name`}/>
+                            contentKey={`msg-${id}-msgName`}/>
                     </div>
                     <div className="mc-header__timestamp">
                         <p>{formatTime(timestamp)}</p>
@@ -98,7 +98,9 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                         <span>Session</span>
                     </div>
                     <div className="mc-header__from">
-                        <p>{from}</p>
+                        <SearchableContent
+                            content={from}
+                            contentKey={`msg-${id}-from`}/>
                     </div>
                     {
                         from && to ?
@@ -107,7 +109,9 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                             : null
                     }
                     <div className="mc-header__to">
-                        <p>{to}</p>
+                        <SearchableContent
+                            content={to}
+                            contentKey={`msg-${id}-to`}/>
                     </div>
                     <MlUploadButton messageId={message.id}/>
                 </div>
@@ -125,7 +129,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                         <div>
                             <SearchableContent 
                                 content={contentHumanReadable} 
-                                contentKey={`msg-${id}-content`}/>
+                                contentKey={`msg-${id}-contentHumanReadable`}/>
                             {
                                 (raw && raw !== 'null') ? (
                                     <div className="mc-show-raw"
