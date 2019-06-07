@@ -40,3 +40,5 @@ $ ./gradlew cargoRunLocal -PquickStart
 Note: The 'quickStart' property enables the ability to run Sailfish without connecting to a DBMS.
 
 And then, open http://localhost:8080/sfgui
+
+The updated version of Exactpro Sailfish Manual 1.0 is available here: exactpro.com/sailfish/sailfish_manual.pdf
