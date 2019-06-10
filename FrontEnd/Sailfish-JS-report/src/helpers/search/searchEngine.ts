@@ -27,14 +27,9 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
     const searchResults = new Array<[string, number]>();
 
     if (searchString) {
-        searchResults.push(...testCase.actions
+        testCase.actions
             .filter(isAction)
-            .reduce((acc, action) => [...acc, ...findAllInObject(
-                action,
-                ACTION_FIELDS,
-                searchString,
-                `action-${action.id}`
-            )], []));
+            .forEach(action => searchResults.push(...findAllInAction(action, searchString)));
 
         searchResults.push(...testCase.messages.reduce((acc, message) => [...acc, ...findAllInObject(
             message,
@@ -45,6 +40,18 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
     }
 
     return new SearchResult(searchResults);
+}
+
+function findAllInAction(action: Action, searchString: string): Array<[string, number]> {
+    let results = new Array<[string, number]>();
+
+    results.push(...findAllInObject(action, ACTION_FIELDS, searchString, `action-${action.id}`));
+
+    action.subNodes
+        .filter(isAction)
+        .forEach(subAction => results.push(...findAllInAction(subAction, searchString)));
+
+    return results;
 }
 
 /**

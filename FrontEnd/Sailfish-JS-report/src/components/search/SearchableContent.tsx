@@ -49,7 +49,11 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString 
                 splittedContent.map((content, index) => [
                     <span key={index}>{content}</span>,
                     index !== splittedContent.length - 1 ? 
-                        <span  className={'found' + (index === internalTargetIndex ? ' target' : '')} key={splittedContent.length + index}>{searchString}</span> : 
+                        <span 
+                            className={'found' + (index === internalTargetIndex ? ' target' : '')} 
+                            key={splittedContent.length + index}>
+                            {searchString}
+                        </span> : 
                         null
                 ])
             }

@@ -28,7 +28,7 @@ import SearchableContent from '../search/SearchableContent';
 
 interface CardProps {
     action: Action;
-    children?: JSX.Element[];
+    children?: React.ReactNodeArray;
     isSelected?: boolean;
     isRoot?: boolean;
     isTransaparent?: boolean;

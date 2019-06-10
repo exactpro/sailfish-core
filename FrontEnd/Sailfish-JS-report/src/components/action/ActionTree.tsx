@@ -208,9 +208,7 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps> {
         this.props.saveState(mapTree(
             (expandStatus: ActionExpandStatus) => expandStatus.id === actionId ? ({ ...expandStatus, isExpanded }) : expandStatus, 
             this.props.expandState
-        ))
-
-        this.props.onExpand();
+        ));
     }
 }
 
@@ -255,7 +253,7 @@ export const ActionTree = connect(
         selectedActionsId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         actionsFilter: state.filter.actionsFilter,
-        expandedTreePath: getExpandedTreePath(ownProps.action, state.selected.actionsId)
+        expandedTreePath: getExpandedTreePath(ownProps.action, [...state.selected.actionsId, +state.selected.scrolledActionId])
     }),
     (dispatch, ownProps: ActionTreeOwnProps): ActionTreeDispatchProps => ({
         actionSelectHandler: action => dispatch(selectAction(action)),
