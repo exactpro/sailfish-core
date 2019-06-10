@@ -19,6 +19,7 @@ import UserTable, { isUserTable } from '../../models/UserTable';
 import Action from '../../models/Action';
 import { RecoverableExpandablePanel } from '../ExpandablePanel';
 import { CustomTable } from './CustomTable';
+import { keyForUserTable } from '../../helpers/keys';
 
 interface UserTableCardProps {
     table: UserTable;
@@ -26,22 +27,16 @@ interface UserTableCardProps {
     onExpand: () => void;
 }
 
-const UserTableCard = ({ parent, table, onExpand }: UserTableCardProps) => {
-    const stateKey = parent.id + '-user-table-' + parent.subNodes
-        .filter(isUserTable)
-        .indexOf(table).toString();
-
-    return (
-        <div className="ac-body__table">
-            <RecoverableExpandablePanel
-                stateKey={stateKey}
-                onExpand={onExpand}>
-                <div className="ac-body__item-title">{table.name || "Custom table"}</div>
-                <CustomTable
-                    content={table.content} />
-            </RecoverableExpandablePanel>
-        </div>
-    )
-}
+const UserTableCard = ({ parent, table, onExpand }: UserTableCardProps) => (
+    <div className="ac-body__table">
+        <RecoverableExpandablePanel
+            stateKey={keyForUserTable(table, parent)}
+            onExpand={onExpand}>
+            <div className="ac-body__item-title">{table.name || "Custom table"}</div>
+            <CustomTable
+                content={table.content} />
+        </RecoverableExpandablePanel>
+    </div>
+)
 
 export default UserTableCard;

@@ -22,6 +22,7 @@ import { createSelector } from '../../helpers/styleCreators';
 import '../../styles/action.scss';
 import Action, { ActionNodeType } from '../../models/Action';
 import { FontWeightProperty } from 'csstype';
+import { keyForUserMessage } from '../../helpers/keys';
 
 interface CustomMessageProps {
     userMessage: UserMessage;
@@ -32,10 +33,6 @@ interface CustomMessageProps {
 export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessageProps) => {
 
     const { message, color, style, level, exception } = userMessage;
-
-    const stateKey = parent.id + '-user-message-' + parent.subNodes && parent.subNodes
-        .filter(isUserMessage)
-        .indexOf(userMessage).toString();
 
     // italic style value - only for fontStyle css property
     // bold style value - only for fontWeight css property
@@ -53,7 +50,7 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
     if (exception) {
         return (
             <RecoverableExpandablePanel
-                stateKey={stateKey}
+                stateKey={keyForUserMessage(userMessage, parent)}
                 onExpand={onExpand}>
                 <div className={rootClass}>
                     <div className="ac-body__item-title" style={messageStyle}>{message}</div>

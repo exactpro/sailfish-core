@@ -34,6 +34,7 @@ import memoize from '../../helpers/memoize';
 import { raf } from '../../helpers/raf';
 import { isCheckpoint } from '../../helpers/actionType';
 import { createExpandTreePath, createExpandTree, getSubTree } from '../../helpers/tree';
+import { keyForAction } from '../../helpers/keys';
 
 interface ActionTreeOwnProps {
     action: ActionNode;
@@ -219,7 +220,7 @@ type ActionTreeRecoveredState = [Tree<ActionExpandStatus>, Tree<number>];
  * @param props 
  */
 const RecoverableActionTree = (props: ActionTreeContainerProps) => {
-    const stateKey = 'action-' + (isAction(props.action) ? props.action.id : props.action.actionNodeType),
+    const stateKey = isAction(props.action) ? keyForAction(props.action.id) : props.action.actionNodeType,
         defaultState: ActionTreeRecoveredState = [
             isAction(props.action) ? 
                 createExpandTree(props.action, props.expandedTreePath) : 

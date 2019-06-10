@@ -30,6 +30,7 @@ import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
 import { isRejected } from '../../helpers/messageType';
 import SearchableContent from '../search/SearchableContent';
+import { keyForMessage } from '../../helpers/keys';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -89,7 +90,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     <div className="mc-header__name-value">
                         <SearchableContent  
                             content={msgName}
-                            contentKey={`msg-${id}-msgName`}/>
+                            contentKey={keyForMessage(id, 'msgName')}/>
                     </div>
                     <div className="mc-header__timestamp">
                         <p>{formatTime(timestamp)}</p>
@@ -100,7 +101,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     <div className="mc-header__from">
                         <SearchableContent
                             content={from}
-                            contentKey={`msg-${id}-from`}/>
+                            contentKey={keyForMessage(id, 'from')}/>
                     </div>
                     {
                         from && to ?
@@ -111,7 +112,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     <div className="mc-header__to">
                         <SearchableContent
                             content={to}
-                            contentKey={`msg-${id}-to`}/>
+                            contentKey={keyForMessage(id, 'to')}/>
                     </div>
                     <MlUploadButton messageId={message.id}/>
                 </div>
@@ -129,7 +130,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                         <div>
                             <SearchableContent 
                                 content={contentHumanReadable} 
-                                contentKey={`msg-${id}-contentHumanReadable`}/>
+                                contentKey={keyForMessage(id, 'contentHumanReadable')}/>
                             {
                                 (raw && raw !== 'null') ? (
                                     <div className="mc-show-raw"

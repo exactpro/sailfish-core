@@ -18,6 +18,7 @@ import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
 import Action, { isAction } from '../../models/Action';
+import { keyForMessage, keyForAction } from '../keys';
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -35,7 +36,7 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
             message,
             MESSAGE_FIELDS,
             searchString,
-            `msg-${message.id}`
+            keyForMessage(message.id)
         )], []));
     }
 
@@ -45,7 +46,7 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
 function findAllInAction(action: Action, searchString: string): Array<[string, number]> {
     let results = new Array<[string, number]>();
 
-    results.push(...findAllInObject(action, ACTION_FIELDS, searchString, `action-${action.id}`));
+    results.push(...findAllInObject(action, ACTION_FIELDS, searchString, keyForAction(action.id)));
 
     action.subNodes
         .filter(isAction)

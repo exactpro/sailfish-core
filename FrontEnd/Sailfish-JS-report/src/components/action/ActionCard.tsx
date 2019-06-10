@@ -25,6 +25,7 @@ import { ExceptionChain } from "../ExceptionChain";
 import { Chip } from "../Chip";
 import { createSelector } from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
+import { keyForAction } from '../../helpers/keys';
 
 interface CardProps {
     action: Action;
@@ -90,13 +91,13 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                             <span>{matrixId} {serviceName} </span>
                             <SearchableContent
                                 content={name} 
-                                contentKey={`action-${id}-name`}/>
+                                contentKey={keyForAction(id, 'name')}/>
                             <span> {messageType}</span>
                         </div>
                         <div className="ac-header__description">
                             <SearchableContent 
                                 content={description}
-                                contentKey={`action-${id}-description`}/>
+                                contentKey={keyForAction(id, 'description')}/>
                             <span> {outcome}</span>
                         </div>
                     </div>
@@ -128,7 +129,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 <div className="ac-body">
                     <div className={inputParametersClassName}>
                         <RecoverableExpandablePanel
-                            stateKey={action.id + '-input-params'}
+                            stateKey={keyForAction(id, 'parameters')}
                             onExpand={onExpand}>
                             <div className="ac-body__item-title">Input parameters</div>
                             <RecoverableParamsTable
@@ -146,7 +147,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         action.status.status == 'FAILED' ? (
                             <div className="action-card-status">
                                 <RecoverableExpandablePanel
-                                    stateKey={action.id + '-status'}
+                                    stateKey={keyForAction(id, 'status')}
                                     onExpand={onExpand}>
                                     <div className="ac-body__item-title">Status</div>
                                     <ExceptionChain exception={action.status.cause} />

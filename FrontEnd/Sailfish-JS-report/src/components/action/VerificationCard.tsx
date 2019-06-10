@@ -21,6 +21,7 @@ import { createSelector } from '../../helpers/styleCreators';
 import { RecoverableExpandablePanel } from "../ExpandablePanel";
 import { RecoverableVerificationTable } from "./VerificationTable";
 import '../../styles/action.scss';
+import { keyForVerification } from '../../helpers/keys';
 
 interface VerificactionCardProps {
     verification: Verification;
@@ -42,6 +43,8 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
         isTransparent && !isSelected ? "transparent" : null
     );
 
+    const stateKey = keyForVerification(parentActionId, messageId);
+
     return (
         <div className="action-card">
             <div className={className}
@@ -51,11 +54,11 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
                     e.stopPropagation();
                 }}>
                 <RecoverableExpandablePanel
-                    stateKey={parentActionId + '-' + messageId}
+                    stateKey={stateKey}
                     onExpand={onExpand}>
                     <div className="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
                     <RecoverableVerificationTable 
-                        stateKey={parentActionId + '-' + messageId + '-nodes'}
+                        stateKey={stateKey + '-nodes'}
                         params={entries} 
                         status={status.status}
                         onExpand={onExpand}/>
