@@ -33,7 +33,7 @@ import StateSaver from '../util/StateSaver';
 import memoize from '../../helpers/memoize';
 import { raf } from '../../helpers/raf';
 import { isCheckpoint } from '../../helpers/actionType';
-import { createExpandTreePath, updateExpandTree, createExpandTree, getSubTree } from '../../helpers/tree';
+import { createExpandTreePath, createExpandTree, getSubTree } from '../../helpers/tree';
 
 interface ActionTreeOwnProps {
     action: ActionNode;
@@ -89,6 +89,10 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps> {
         // reference comparison works here because scrolledActionId is a Number object 
         if (prevProps.scrolledActionId != this.props.scrolledActionId) {
             this.scrollToAction(+this.props.scrolledActionId);
+        }
+
+        if (prevProps.expandState !== this.props.expandState) {
+           this.props.onExpand();
         }
     }
 
@@ -206,41 +210,11 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps> {
             this.props.expandState
         ))
 
-        this.props.onExpand && this.props.onExpand();
+        this.props.onExpand();
     }
 }
 
 type ActionTreeRecoveredState = [Tree<ActionExpandStatus>, Tree<number>];
-
-interface ActionTreeExpandPathUpdaterProps extends ActionTreeContainerProps {
-    recoveredState: ActionTreeRecoveredState;
-    stateSaver: (state: ActionTreeRecoveredState) => any;
-}
-
-/**
- * This component is responsible for updating expanded state when some actions was selected by any message 
- * and we recieve new expand path.
- * @param props expandTreePath - current path to selected acitons
- */
-const ActionTreeExpandPathUpdater = ({ expandedTreePath, recoveredState, stateSaver, ...props }: ActionTreeExpandPathUpdaterProps) => {
-    let [expandState, lastTreePath] = recoveredState;
-
-     // updating state on tree path change (same as componentDidMount / componentDidUpdate)
-     React.useEffect(() => {
-        if (lastTreePath !== expandedTreePath) {
-            expandState = updateExpandTree(expandState, expandedTreePath);
-            stateSaver([expandState, expandedTreePath]);
-            props.onExpand();
-        }
-    });
-
-    return (
-        <ActionTreeBase
-            expandState={expandState}
-            saveState={expandState => stateSaver([expandState, lastTreePath])}
-            {...props}/>
-    )
-}
 
 /**
  * State saver for ActionTree component. Responsible for creating default state value and updating state in context.
@@ -259,11 +233,11 @@ const RecoverableActionTree = (props: ActionTreeContainerProps) => {
         <StateSaver 
             stateKey={stateKey}
             defaultState={defaultState}>
-            {(recoveredState: ActionTreeRecoveredState, stateSaver: (state: ActionTreeRecoveredState) => any) =>(
-                <ActionTreeExpandPathUpdater
+            {([expandState, lastTreePath]: ActionTreeRecoveredState, stateSaver: (state: ActionTreeRecoveredState) => any) => (
+                <ActionTreeBase
                     {...props}
-                    recoveredState={recoveredState}
-                    stateSaver={stateSaver}/>
+                    expandState={expandState}
+                    saveState={nextExpandState => stateSaver([nextExpandState, lastTreePath])}/>
             )}
         </StateSaver>
     )
