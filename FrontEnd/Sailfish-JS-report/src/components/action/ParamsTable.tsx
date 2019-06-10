@@ -87,41 +87,45 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
     }
     
     render() {
-        return (<div className="params-table">
-            <table>
-                <tbody>
-                    <tr>
-                        <th colSpan={2}>{this.props.name}</th>
-                    </tr>
-                    {this.state.collapseParams.map((param) => this.renderNodes(param))}
-                </tbody>
-            </table>
-        </div>);
+        return (
+            <div className="params-table">
+                <table>
+                    <tbody>
+                        <tr>
+                            <th colSpan={2}>{this.props.name}</th>
+                        </tr>
+                        {this.state.collapseParams.map(nodes => this.renderNodes(nodes))}
+                    </tbody>
+                </table>
+            </div>
+        );
     }
 
-    private renderNodes(node: TableNode, paddingLevel: number = 1) : JSX.Element[] {
+    private renderNodes(node: TableNode, paddingLevel: number = 1, index = 0) : JSX.Element[] {
         if (node.subParameters && node.subParameters.length !== 0) {
             const subNodes = node.isExpanded ? 
-                node.subParameters.reduce((list, node) => list.concat(this.renderNodes(node, paddingLevel + 1)), []) : 
-                [];
+                node.subParameters.reduce(
+                    (list, node, index) => list.concat(this.renderNodes(node, paddingLevel + 1, index)), []
+                ) 
+                : [];
 
             return [
-                this.renderTooglerNode(node, paddingLevel),
+                this.renderTooglerNode(node, paddingLevel, index),
                 ...subNodes
             ]
         } else {
-            return [this.renderValueNode(node.name, node.value, paddingLevel)];
+            return [this.renderValueNode(node.name, node.value, paddingLevel, index)];
         }
     }
 
-    private renderValueNode(name: string, value: string, paddingLevel: number) : JSX.Element {
+    private renderValueNode(name: string, value: string, paddingLevel: number, index = 0) : JSX.Element {
 
         const cellStyle = {
             paddingLeft: PADDING_LEVEL_VALUE * paddingLevel
         };
 
         return (
-            <tr className="params-table-row-value">
+            <tr className="params-table-row-value" key={`${paddingLevel}-${index}`}>
                 <td style={cellStyle}> 
                     {name}
                 </td>
@@ -132,7 +136,7 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
         )
     }
 
-    private renderTooglerNode(node: TableNode, paddingLevel: number) : JSX.Element {
+    private renderTooglerNode(node: TableNode, paddingLevel: number, index = 0) : JSX.Element {
 
         const rootClass = createSelector(
                 "params-table-row-toogler",
@@ -143,7 +147,7 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
             };
 
         return (
-            <tr className={rootClass}>
+            <tr className={rootClass} key={`${paddingLevel}-${index}`}>
                 <td onClick={() => this.tooglerClick(node)}
                     colSpan={2}>
                     <p style={nameStyle}>
