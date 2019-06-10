@@ -154,27 +154,31 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
 
         case StateActionTypes.NEXT_SEARCH_RESULT: {
             // TODO - need to share this code beetwen next and prev action handlers
-            const nextIndex = (state.searchIndex + 1) % state.searchResultsCount,
-                [currentKey] = state.searchResults.getByIndex(nextIndex),
-                msgId = currentKey.split('-')[1];
+            const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
+                [currentKey] = state.searchResults.getByIndex(targetIndex),
+                msgId = currentKey.split('-')[0] === 'msg' ? new Number(currentKey.split('-')[1]) : state.scrolledMessageId,
+                actionId = currentKey.split('-')[0] === 'action' ? new Number(currentKey.split('-')[1]) : state.scrolledActionId;
 
             return {
                 ...state,
-                searchIndex: nextIndex,
-                scrolledMessageId: new Number(msgId)
+                searchIndex: targetIndex,
+                scrolledMessageId: msgId,
+                scrolledActionId: actionId
             }
         }
 
         case StateActionTypes.PREV_SEARCH_RESULT: {            
             // TODO - need to share this code beetwen next and prev action handlers
-            const prevIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
-                [currentKey] = state.searchResults.getByIndex(prevIndex),
-                msgId = currentKey.split('-')[1];
+            const targetIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
+                [currentKey] = state.searchResults.getByIndex(targetIndex),
+                msgId = currentKey.split('-')[0] === 'msg' ? new Number(currentKey.split('-')[1]) : state.scrolledMessageId,
+                actionId = currentKey.split('-')[0] === 'action' ? new Number(currentKey.split('-')[1]) : state.scrolledActionId;
 
             return {
                 ...state,
-                searchIndex: prevIndex,
-                scrolledMessageId: new Number(msgId)
+                searchIndex: targetIndex,
+                scrolledMessageId: msgId,
+                scrolledActionId: actionId
             }
         }
 

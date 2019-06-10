@@ -17,20 +17,31 @@
 import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
+import Action, { isAction } from '../../models/Action';
 
 // list of fields that will be used to search (order is important!)
-const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'];
+const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
+    ACTION_FIELDS: Array<keyof Action> = ['name', 'description'];
 
 export function findAll(searchString: string, testCase: TestCase): SearchResult {
     const searchResults = new Array<[string, number]>();
 
     if (searchString) {
+        searchResults.push(...testCase.actions
+            .filter(isAction)
+            .reduce((acc, action) => [...acc, ...findAllInObject(
+                action,
+                ACTION_FIELDS,
+                searchString,
+                `action-${action.id}`
+            )], []));
+
         searchResults.push(...testCase.messages.reduce((acc, message) => [...acc, ...findAllInObject(
             message,
             MESSAGE_FIELDS,
             searchString,
             `msg-${message.id}`
-        )], []))
+        )], []));
     }
 
     return new SearchResult(searchResults);
@@ -52,7 +63,7 @@ function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchString:
 
         if (typeof targetField !== 'string') {
             if (targetField !== null) {
-                console.warn(`Trying to search on field that doesn\'t look like string (${fieldName})`);
+                console.warn(`Trying to search on field that doesn't look like string (${fieldName})`);
             }
 
             return;

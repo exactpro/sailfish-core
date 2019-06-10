@@ -24,6 +24,7 @@ import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";
 import { ExceptionChain } from "../ExceptionChain";
 import { Chip } from "../Chip";
 import { createSelector } from '../../helpers/styleCreators';
+import SearchableContent from '../search/SearchableContent';
 
 interface CardProps {
     action: Action;
@@ -40,6 +41,7 @@ interface CardProps {
 
 export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onExpand, onRootExpand }: CardProps) => {
     const {
+        id,
         matrixId,
         serviceName,
         name,
@@ -85,10 +87,17 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 <div className={headerClassName}>
                     <div className="ac-header__title">
                         <div className="ac-header__name">
-                            <h3>{matrixId} {serviceName} {name} {messageType}</h3>
+                            <span>{matrixId} {serviceName} </span>
+                            <SearchableContent
+                                content={name} 
+                                contentKey={`action-${id}-name`}/>
+                            <span> {messageType}</span>
                         </div>
                         <div className="ac-header__description">
-                            <h3>{description} {outcome}</h3>
+                            <SearchableContent 
+                                content={description}
+                                contentKey={`action-${id}-description`}/>
+                            <span> {outcome}</span>
                         </div>
                     </div>
                     {
@@ -100,11 +109,11 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         ) : null
                     }
                     <div className="ac-header__elapsed-time">
-                        <h3>{elapsedTime}</h3>
+                        <span>{elapsedTime}</span>
                     </div>
                     <div className="ac-header__controls">
                         <div className="ac-header__status">
-                            <h3>{action.status.status.toUpperCase()}</h3>
+                            <span>{action.status.status.toUpperCase()}</span>
                         </div>
                         {
                             action.relatedMessages.length > 0 ? (
