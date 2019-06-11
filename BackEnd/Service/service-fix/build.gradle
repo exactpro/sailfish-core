@@ -10,5 +10,5 @@ dependencies {
         compile project(':BackEnd:Service:service-tcpip')
     }
 
-    testRuntime group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin', version: '3.2', transitive: false
+    testRuntime group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin', version: '3.2.11', transitive: false
 }

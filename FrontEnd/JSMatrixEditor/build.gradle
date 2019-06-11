@@ -21,7 +21,7 @@ buildscript {
         classpath 'com.moowork.gradle:gradle-node-plugin:1.2.0'
         //classpath 'com.github.robfletcher:compass-gradle-plugin:2.0.6'
         classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:4.4.12'
-        classpath group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin', version: '3.2', changing: true
+        classpath group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin', version: '3.2.11', changing: true
     }
 
     configurations.all {
