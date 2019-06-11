@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import Action from "../../models/Action";
-import ParamsTable, { RecoverableParamsTable } from "./ParamsTable";
+import ParamsTable from './ParamsTable';
 import { RecoverableExpandablePanel, ExpandablePanel } from "../ExpandablePanel";
 import { StatusType } from "../../models/Status";
 import "../../styles/action.scss";
@@ -132,7 +132,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                             stateKey={keyForAction(id, 'parameters')}
                             onExpand={onExpand}>
                             <div className="ac-body__item-title">Input parameters</div>
-                            <RecoverableParamsTable
+                            <ParamsTable
                                 actionId={action.id}
                                 stateKey={action.id + '-input-params-nodes'}
                                 params={parameters}

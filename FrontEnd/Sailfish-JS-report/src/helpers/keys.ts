@@ -38,7 +38,7 @@ export function keyForUserMessage(userMessage: UserMessage, parent: Action): str
             .indexOf(userMessage)
     ) : '';
 
-    return `${parent.id}-user-message-${index}`;
+    return `${parent.id}-user_message-${index}`;
 }
 
 export function keyForUserTable(table: UserTable, parent: Action): string {
@@ -48,7 +48,7 @@ export function keyForUserTable(table: UserTable, parent: Action): string {
             .indexOf(table)
     ) : '';
 
-    return `${parent.id}-user-table-${index}`;
+    return `${parent.id}-user_table-${index}`;
 }
 
 export function keyForActionParamter(actionId: number, index: number): string {

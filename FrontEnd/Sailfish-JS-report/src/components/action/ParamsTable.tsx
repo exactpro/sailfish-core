@@ -21,50 +21,47 @@ import { createSelector } from '../../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
 import { keyForActionParamter } from '../../helpers/keys';
+import { connect } from 'react-redux';
+import AppState from '../../state/models/AppState';
+import SearchResult from '../../helpers/search/SearchResult';
 
 const PADDING_LEVEL_VALUE = 10;
 
-interface ParamsTableOwnProps {
+interface OwnProps {
     actionId: number;
     params: ActionParameter[];
     name: string;
     onExpand: () => void;
 }
 
-interface ParamTableProps {
-    actionId: number;
+interface StateProps {
+    expandPath: number[];
+}
+
+interface RecoveredProps {
     nodes: TableNode[];
-    name: string;
-    onExpand: () => void;
     saveState: (state: TableNode[]) => void;
 }
 
-interface ParamTableState {
-    collapseParams: TableNode[];
-}
+interface Props extends Omit<OwnProps, 'params'>, StateProps, RecoveredProps {}
 
-interface RecoverableTableProps extends ParamsTableOwnProps, RecoverableElementProps {}
+interface State {
+    nodes: TableNode[];
+}
 
 interface TableNode extends ActionParameter {
     // is subnodes visible
     isExpanded?: boolean;
 }
 
-export default class ParamsTable extends React.Component<ParamTableProps, ParamTableState> {
+class ParamsTableBase extends React.Component<Props, State> {
 
-    constructor(props: ParamTableProps) {
+    constructor(props: Props) {
         super(props);
         this.state = {
-            collapseParams: props.nodes
+            nodes: props.nodes
         }
     }
-
-    tooglerClick(targetNode: TableNode) {
-        this.setState({
-            ...this.state,
-            collapseParams: this.state.collapseParams.map(node => this.findNode(node, targetNode))
-        });
-    }    
 
     findNode(node: TableNode, targetNode: TableNode): TableNode {
         if (node === targetNode) {
@@ -80,14 +77,30 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
         };
     }
 
-    componentDidUpdate(prevProps, prevState: ParamTableState) {
-        if (prevState.collapseParams !== this.state.collapseParams) {
+    updateExpandPath([currentIndex, ...expandPath]: number[], prevState: TableNode[]): TableNode[] {
+        return prevState.map(
+            (node, index) => index === currentIndex ? {
+                ...node,
+                isExpanded: true,
+                subParameters: node.subParameters && this.updateExpandPath(expandPath, node.subParameters)
+            } : node
+        )
+    }
+
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        if (prevState.nodes !== this.state.nodes) {
             this.props.onExpand();
+        }
+
+        if (prevProps.expandPath !== this.props.expandPath && this.props.expandPath && this.props.expandPath.length > 0) {
+            this.setState({
+                nodes: this.updateExpandPath(this.props.expandPath, this.state.nodes)
+            });      
         }
     }
 
     componentWillUnmount() {
-        this.props.saveState(this.state.collapseParams);
+        this.props.saveState(this.state.nodes);
     }
     
     render() {
@@ -99,7 +112,7 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
                             <th colSpan={2}>{this.props.name}</th>
                         </tr>
                         {
-                            this.state.collapseParams.map((nodes, index) => 
+                            this.state.nodes.map((nodes, index) => 
                                 this.renderNodes(nodes, 0, keyForActionParamter(this.props.actionId, index))
                             )
                         }
@@ -161,7 +174,7 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
 
         return (
             <tr className={rootClass} key={key}>
-                <td onClick={() => this.tooglerClick(node)}
+                <td onClick={this.tooglerClickHandler(node)}
                     colSpan={2}>
                     <p style={nameStyle}>
                         <SearchableContent
@@ -173,16 +186,25 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
             </tr>
         )
     }
+    
+    private tooglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
+        this.setState({
+            ...this.state,
+            nodes: this.state.nodes.map(node => this.findNode(node, targetNode))
+        });
+
+        e.stopPropagation();
+    }    
 }
 
-export const RecoverableParamsTable = ({ stateKey, ...props }: RecoverableTableProps) => (
+export const RecoverableParamsTable = ({ stateKey, ...props }: OwnProps & StateProps & {stateKey: string}) => (
     // at first table render, we need to generate table nodes if we don't find previous table's state 
     <StateSaver
         stateKey={stateKey}
         getDefaultState={() => props.params ? props.params.map(param => paramsToNodes(param)) : []}>
         {
             (state: TableNode[], stateSaver) => (
-                <ParamsTable
+                <ParamsTableBase
                     {...props}
                     saveState={stateSaver}
                     nodes={state}/> 
@@ -198,3 +220,27 @@ function paramsToNodes(root: ActionParameter) : TableNode {
         isExpanded: true
     } : root)
 }
+
+function getExpandPath(searchResults: SearchResult, index: number, actionId: number): number[] {
+    const [currentKey] = searchResults.getByIndex(index);
+
+    if (!currentKey) {
+        return [];
+    }
+
+    const [resultType, id, field, ...path] = currentKey.split('-');
+
+    if (resultType === 'action' && +id === actionId && field === 'parameters') {
+        return path != null ? 
+            path.map(pathSegment => +pathSegment) : 
+            [];
+    }
+}
+
+const ParamsTable = connect(
+    (state: AppState, ownProps: OwnProps): StateProps => ({
+        expandPath: getExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId)
+    })
+)(RecoverableParamsTable);
+
+export default ParamsTable;

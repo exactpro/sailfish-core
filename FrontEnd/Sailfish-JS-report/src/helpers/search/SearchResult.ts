@@ -55,10 +55,12 @@ export default class SearchResult {
     getByIndex(index: number): [string, number] {
         let count = 0;
 
-        return this.entries.find(([key, result]) => {
+        const targetEntry = this.entries.find(([key, result]) => {
             count += result;
             return index < count;
         });
+
+        return targetEntry || [null, null];
     }
 
     /**
