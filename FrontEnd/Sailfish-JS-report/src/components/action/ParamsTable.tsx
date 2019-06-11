@@ -19,16 +19,20 @@ import ActionParameter from "../../models/ActionParameter";
 import '../../styles/tables.scss';
 import { createSelector } from '../../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "../util/StateSaver";
+import SearchableContent from '../search/SearchableContent';
+import { keyForActionParamter } from '../../helpers/keys';
 
 const PADDING_LEVEL_VALUE = 10;
 
 interface ParamsTableOwnProps {
+    actionId: number;
     params: ActionParameter[];
     name: string;
     onExpand: () => void;
 }
 
 interface ParamTableProps {
+    actionId: number;
     nodes: TableNode[];
     name: string;
     onExpand: () => void;
@@ -94,49 +98,58 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
                         <tr>
                             <th colSpan={2}>{this.props.name}</th>
                         </tr>
-                        {this.state.collapseParams.map(nodes => this.renderNodes(nodes))}
+                        {
+                            this.state.collapseParams.map((nodes, index) => 
+                                this.renderNodes(nodes, 0, keyForActionParamter(this.props.actionId, index))
+                            )
+                        }
                     </tbody>
                 </table>
             </div>
         );
     }
 
-    private renderNodes(node: TableNode, paddingLevel: number = 1, index = 0) : JSX.Element[] {
+    private renderNodes(node: TableNode, paddingLevel: number = 1, key: string) : React.ReactNodeArray {
         if (node.subParameters && node.subParameters.length !== 0) {
             const subNodes = node.isExpanded ? 
                 node.subParameters.reduce(
-                    (list, node, index) => list.concat(this.renderNodes(node, paddingLevel + 1, index)), []
+                    (list, node, index) => 
+                        list.concat(this.renderNodes(node, paddingLevel + 1, `${key}-${index}`)), []
                 ) 
                 : [];
 
             return [
-                this.renderTooglerNode(node, paddingLevel, index),
+                this.renderTooglerNode(node, paddingLevel, key),
                 ...subNodes
             ]
         } else {
-            return [this.renderValueNode(node.name, node.value, paddingLevel, index)];
+            return [this.renderValueNode(node.name, node.value, paddingLevel, key)];
         }
     }
 
-    private renderValueNode(name: string, value: string, paddingLevel: number, index = 0) : JSX.Element {
+    private renderValueNode(name: string, value: string, paddingLevel: number, key: string) : React.ReactNode {
 
         const cellStyle = {
             paddingLeft: PADDING_LEVEL_VALUE * paddingLevel
         };
 
         return (
-            <tr className="params-table-row-value" key={`${paddingLevel}-${index}`}>
+            <tr className="params-table-row-value" key={key}>
                 <td style={cellStyle}> 
-                    {name}
+                    <SearchableContent
+                        content={name}
+                        contentKey={`${key}-name`}/>
                 </td>
                 <td style={cellStyle}>
-                    {value}
+                    <SearchableContent
+                        content={value}
+                        contentKey={`${key}-value`}/>
                 </td>
             </tr>
         )
     }
 
-    private renderTooglerNode(node: TableNode, paddingLevel: number, index = 0) : JSX.Element {
+    private renderTooglerNode(node: TableNode, paddingLevel: number, key: string) : React.ReactNode {
 
         const rootClass = createSelector(
                 "params-table-row-toogler",
@@ -147,11 +160,13 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
             };
 
         return (
-            <tr className={rootClass} key={`${paddingLevel}-${index}`}>
+            <tr className={rootClass} key={key}>
                 <td onClick={() => this.tooglerClick(node)}
                     colSpan={2}>
                     <p style={nameStyle}>
-                        {node.name}
+                        <SearchableContent
+                            content={node.name}
+                            contentKey={`${key}-name`}/>
                     </p>
                     <span className="params-table-row-toogler-count">{node.subParameters.length}</span>
                 </td>
@@ -161,19 +176,17 @@ export default class ParamsTable extends React.Component<ParamTableProps, ParamT
 }
 
 export const RecoverableParamsTable = ({ stateKey, ...props }: RecoverableTableProps) => (
+    // at first table render, we need to generate table nodes if we don't find previous table's state 
     <StateSaver
-        stateKey={stateKey}>
+        stateKey={stateKey}
+        getDefaultState={() => props.params ? props.params.map(param => paramsToNodes(param)) : []}>
         {
-            (state, stateSaver) => state ? 
+            (state: TableNode[], stateSaver) => (
                 <ParamsTable
                     {...props}
                     saveState={stateSaver}
-                    nodes={state as TableNode[]}/> 
-                :
-                <ParamsTable
-                    {...props}
-                    saveState={stateSaver}
-                    nodes={props.params ? props.params.map(param => paramsToNodes(param)) : []}/>
+                    nodes={state}/> 
+            )
         }
     </StateSaver>
 )

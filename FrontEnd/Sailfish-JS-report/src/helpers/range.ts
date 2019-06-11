@@ -20,5 +20,4 @@ const range = (start: number, end: number): Array<number> =>
 export const rangeSum = (start: number, end: number, mapper: (idx: number) => number) =>
     range(start, end).map(mapper).reduce((sum, current) => sum + current, 0);
 
-
 export default range;

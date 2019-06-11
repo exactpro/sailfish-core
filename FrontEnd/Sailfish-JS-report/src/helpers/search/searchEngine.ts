@@ -18,11 +18,14 @@ import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
 import Action, { isAction } from '../../models/Action';
-import { keyForMessage, keyForAction } from '../keys';
+import { keyForMessage, keyForAction, keyForActionParamter } from '../keys';
+import ActionParameter from '../../models/ActionParameter';
+
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
-    ACTION_FIELDS: Array<keyof Action> = ['name', 'description'];
+    ACTION_FIELDS: Array<keyof Action> = ['name', 'description'],
+    INPUT_PARAMS_FIELDS: Array<keyof ActionParameter> = ['name', 'value'];
 
 export function findAll(searchString: string, testCase: TestCase): SearchResult {
     const searchResults = new Array<[string, number]>();
@@ -51,6 +54,22 @@ function findAllInAction(action: Action, searchString: string): Array<[string, n
     action.subNodes
         .filter(isAction)
         .forEach(subAction => results.push(...findAllInAction(subAction, searchString)));
+
+    action.parameters && action.parameters.forEach((param, index) => 
+        results.push(...findAllInParams(param, searchString, keyForActionParamter(action.id, index)))
+    )
+
+    return results;
+}
+
+function findAllInParams(param: ActionParameter, searchString: string, keyPrefix: string): Array<[string, number]> {
+    let results = new Array<[string, number]>();
+
+    results.push(...findAllInObject(param, INPUT_PARAMS_FIELDS, searchString, keyPrefix));
+
+    param.subParameters && param.subParameters.forEach((param, index) => {
+        results.push(...findAllInParams(param, searchString, keyPrefix + `-${index}`));
+    })
 
     return results;
 }

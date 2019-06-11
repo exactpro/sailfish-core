@@ -50,3 +50,7 @@ export function keyForUserTable(table: UserTable, parent: Action): string {
 
     return `${parent.id}-user-table-${index}`;
 }
+
+export function keyForActionParamter(actionId: number, index: number): string {
+    return `${keyForAction(actionId, 'parameters')}-${index}`;
+}

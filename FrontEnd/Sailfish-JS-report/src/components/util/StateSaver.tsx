@@ -29,19 +29,19 @@ export const { Provider, Consumer } = React.createContext({});
 
 export interface StateSaverProps<S> extends RecoverableElementProps {
     children: (state: S, stateHandler: (nextState: S) => any) => JSX.Element;
-    defaultState?: S;
+    getDefaultState?: () => S;
 }
 
 /**
  * This wrapper saves component's state after unmount and recover it by key.
  * @param props renderChild - child render function that recieves recovered state, stateKey - key for recovering state from store 
  */
-const StateSaver = <S extends {}>({ children, stateKey, defaultState }: StateSaverProps<S>) => (
+const StateSaver = <S extends {}>({ children, stateKey, getDefaultState }: StateSaverProps<S>) => (
     <Consumer>
         {
             ({ states, saveState }: StateSaverContext) => children(
-                states.has(stateKey) ? states.get(stateKey) : defaultState, 
-                (nextState) => saveState(stateKey, nextState)
+                states.has(stateKey) ? states.get(stateKey) : getDefaultState && getDefaultState(), 
+                nextState => saveState(stateKey, nextState)
             )
         }
     </Consumer>

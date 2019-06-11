@@ -216,25 +216,21 @@ export const VerificationTable = connect(
     dispatch => ({})
 )(VerificationTableBase);
 
-export const RecoverableVerificationTable = ({ stateKey, ...props }: RecoverableVerificationTableProps) => {
-    return (
-        <StateSaver
-            stateKey={stateKey}>
-            {
-                // at first table render, we need to generate table nodes if we don't find previous table's state 
-                (state, stateHandler) => state ? 
-                    <VerificationTable
-                        {...props}
-                        nodes={state as TableNode[]}
-                        stateSaver={stateHandler}/> :
-                    <VerificationTable
-                        {...props}
-                        nodes={props.params ? props.params.map(param => paramsToNodes(param)) : []}
-                        stateSaver={stateHandler}/>
-            }
-        </StateSaver>
-    )
-}
+export const RecoverableVerificationTable = ({ stateKey, ...props }: RecoverableVerificationTableProps) => (
+    // at first table render, we need to generate table nodes if we don't find previous table's state 
+    <StateSaver
+        stateKey={stateKey}
+        getDefaultState={() => props.params ? props.params.map(param => paramsToNodes(param)) : []}>
+        {
+            (state: TableNode[], stateHandler) => (
+                <VerificationTable
+                    {...props}
+                    nodes={state}
+                    stateSaver={stateHandler}/>
+            )
+        }
+    </StateSaver>
+)
 
 function paramsToNodes(root: Entry): TableNode {
     return root.subEntries ? {

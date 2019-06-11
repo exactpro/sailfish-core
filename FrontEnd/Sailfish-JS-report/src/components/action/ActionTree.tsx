@@ -221,7 +221,7 @@ type ActionTreeRecoveredState = [Tree<ActionExpandStatus>, Tree<number>];
  */
 const RecoverableActionTree = (props: ActionTreeContainerProps) => {
     const stateKey = isAction(props.action) ? keyForAction(props.action.id) : props.action.actionNodeType,
-        defaultState: ActionTreeRecoveredState = [
+        getDefaultState: () => ActionTreeRecoveredState = () => [
             isAction(props.action) ? 
                 createExpandTree(props.action, props.expandedTreePath) : 
                 createNode({ id: null, isExpanded: false }),
@@ -231,7 +231,7 @@ const RecoverableActionTree = (props: ActionTreeContainerProps) => {
     return (
         <StateSaver 
             stateKey={stateKey}
-            defaultState={defaultState}>
+            getDefaultState={getDefaultState}>
             {([expandState, lastTreePath]: ActionTreeRecoveredState, stateSaver: (state: ActionTreeRecoveredState) => any) => (
                 <ActionTreeBase
                     {...props}

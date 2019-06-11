@@ -133,6 +133,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                             onExpand={onExpand}>
                             <div className="ac-body__item-title">Input parameters</div>
                             <RecoverableParamsTable
+                                actionId={action.id}
                                 stateKey={action.id + '-input-params-nodes'}
                                 params={parameters}
                                 name={name} 
