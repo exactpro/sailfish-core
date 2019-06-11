@@ -18,6 +18,9 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { setSearchString, nextSearchResult, prevSearchResult } from '../../actions/actionCreators';
+import { ThunkDispatch } from 'redux-thunk';
+import StateAction from '../../actions/stateActions';
+import { reactiveSearch } from '../../thunks/search';
 
 interface StateProps {
     searchString: string;
@@ -57,23 +60,15 @@ const SearchInputBase = ({ searchString, updateSearchString, nextSearchResult, p
 }
 
 const SearchInput = connect(
-    (state: AppState) => ({
+    (state: AppState): StateProps => ({
         searchString: state.selected.searchString,
-        testCase: state.selected.testCase,
         resultsCount: state.selected.searchResultsCount,
         currentIndex: state.selected.searchIndex
     }),
-    (dispatch) => ({
-        updateSearchString: (searchString, testCase) => dispatch(setSearchString(searchString, testCase)),
+    (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
+        updateSearchString: searchString => dispatch(reactiveSearch(searchString)),
         nextSearchResult: () => dispatch(nextSearchResult()),
         prevSearchResult: () => dispatch(prevSearchResult())
-    }),
-    (stateProps, dispatchProps, ownProps): StateProps & DispatchProps => ({
-        ...dispatchProps,
-        resultsCount: stateProps.resultsCount,
-        currentIndex: stateProps.currentIndex,
-        searchString: stateProps.searchString,
-        updateSearchString: searchString => dispatchProps.updateSearchString(searchString, stateProps.testCase)
     })
 )(SearchInputBase);
 

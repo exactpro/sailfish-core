@@ -22,6 +22,7 @@ import Report from "../models/Report";
 import { Panel } from "../util/Panel";
 import Message from '../models/Message';
 import { SubmittedData } from "../models/MlServiceResponse";
+import SearchResult from '../helpers/search/SearchResult';
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -114,10 +115,14 @@ export const removeSubmittedMlData = (data: SubmittedData) => (<const>{
     data: data
 })
 
-export const setSearchString = (searchString: string, testCase: TestCase) => (<const>{
+export const setSearchString = (searchString: string) => (<const>{
     type: StateActionTypes.SET_SEARCH_STRING,
-    searchString,
-    testCase
+    searchString
+})
+
+export const setSearchResults = (searchResults: SearchResult) => (<const>{
+    type: StateActionTypes.SET_SEARCH_RESULTS,
+    searchResults
 })
 
 export const nextSearchResult = () => (<const>{

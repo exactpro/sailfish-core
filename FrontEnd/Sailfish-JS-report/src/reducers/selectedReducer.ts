@@ -22,6 +22,7 @@ import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/actionType';
 import { findAll } from '../helpers/search/searchEngine';
+import SearchResult from '../helpers/search/SearchResult';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -139,16 +140,25 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         }
 
         case StateActionTypes.SET_SEARCH_STRING: {
-            const searchResults = findAll(stateAction.searchString, stateAction.testCase),
+            return {
+                ...state,
+                searchString: stateAction.searchString,
+                searchResults: new SearchResult(),
+                searchResultsCount: 0,
+                searchIndex: null
+            }
+        }
+
+        case StateActionTypes.SET_SEARCH_RESULTS: {
+            const { searchResults } = stateAction, 
                 searchResultsCount = searchResults.sum(),  
                 searchIndex = state.searchIndex > searchResultsCount ? searchResultsCount - 1 : state.searchIndex;
 
             return {
                 ...state,
-                searchString: stateAction.searchString,
                 searchResults,
-                searchResultsCount,
-                searchIndex
+                searchIndex,
+                searchResultsCount
             }
         }
 
