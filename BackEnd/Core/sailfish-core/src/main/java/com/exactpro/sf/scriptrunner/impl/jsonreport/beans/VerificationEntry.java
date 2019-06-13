@@ -42,7 +42,7 @@ public class VerificationEntry {
     public VerificationEntry(ComparisonResult result) {
         this.name = result.getName();
         this.actual = Objects.toString(result.getActual(), null);
-        this.expected = Formatter.formatExpected(result.getExpected());
+        this.expected = Formatter.formatExpected(result);
         this.precision = result.getDoublePrecision();
         this.systemPrecision = result.getSystemPrecision();
         this.status = result.getStatus();
