@@ -93,7 +93,7 @@ public class MachineLearningResourceV2 {
     @Path("/{token}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response tokenGet(@QueryParam("testCaseId") @NotNull Integer testCaseId, @PathParam("token") String token) {
+    public Response tokenGet(@QueryParam("testCaseId") Integer testCaseId, @PathParam("token") String token) {
 
         HttpSession session = httpRequest.getSession();
         String sessionKey = token;

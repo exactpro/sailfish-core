@@ -19,6 +19,8 @@ package com.exactpro.sf.testwebgui.restapi.machinelearning;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.model.PredictionResultEntry;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMessageDescriptor;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 
@@ -28,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class SessionStorage {
 
@@ -35,8 +39,12 @@ public class SessionStorage {
 
     private final File sessionTempDir = Files.createTempDir();
 
-    private volatile List<PredictionResultEntry> predictions;
-    private final String reportLink ;
+    private volatile Cache<Integer, List<PredictionResultEntry>> cache = CacheBuilder.newBuilder()
+            .concurrencyLevel(4)
+            .maximumSize(32)
+            .expireAfterAccess(30, TimeUnit.MINUTES)
+            .build();
+    private final String reportLink;
 
     public SessionStorage(String reportLink, MLPersistenceManager mlPersistenceManager) {
         this.reportLink = reportLink;
@@ -45,37 +53,33 @@ public class SessionStorage {
 
     public List<PredictionResultEntry> getPredictions(Integer testCaseId) {
 
-        List<PredictionResultEntry> local = predictions;
-
-        if (local == null) {
-
-            synchronized (this) {
-                local = predictions;
-                if (local == null) {
-                    predictions = local = new ArrayList<>();
-                }
-            
-
-            	MLWorker worker = new MLWorker();
-            
-                InputStream reportStream = persistenceManager.getReport(reportLink);
-                File reportArchive = null;
-                if (reportStream == null) {
-                    reportArchive = ReportDownloadUtil.download(reportLink, (attachmentName) -> new File(sessionTempDir, attachmentName));
-                }
-
-                try (InputStream is = (reportStream != null ? reportStream : new FileInputStream(reportArchive))) {
-                    List<PredictionResultEntry> results = worker.processReport(testCaseId, is);
-                    local.addAll(results);
-                } catch (IOException e) {
-                    throw new EPSCommonException("Can't parse report file", e);
-                } finally {
-                    FileUtils.deleteQuietly(reportArchive);
-                }
-            }
+        if (testCaseId == null) {
+            return new ArrayList<>(getPredictions0(testCaseId));
         }
 
-        return new ArrayList<>(predictions);
+        try {
+            return cache.get(testCaseId, () -> getPredictions0(testCaseId));
+        } catch (ExecutionException e) {
+            throw new EPSCommonException(e);
+        }
+    }
+
+    private List<PredictionResultEntry> getPredictions0(Integer testCaseId) {
+        MLWorker worker = new MLWorker();
+
+        InputStream reportStream = persistenceManager.getReport(reportLink);
+        File reportArchive = null;
+        if (reportStream == null) {
+            reportArchive = ReportDownloadUtil.download(reportLink, (attachmentName) -> new File(sessionTempDir, attachmentName));
+        }
+
+        try (InputStream is = (reportStream != null ? reportStream : new FileInputStream(reportArchive))) {
+            return worker.processReport(testCaseId, is);
+        } catch (IOException e) {
+            throw new EPSCommonException("Can't parse report file", e);
+        } finally {
+            FileUtils.deleteQuietly(reportArchive);
+        }
     }
 
     public List<ReportMessageDescriptor> getCheckedMessages() {

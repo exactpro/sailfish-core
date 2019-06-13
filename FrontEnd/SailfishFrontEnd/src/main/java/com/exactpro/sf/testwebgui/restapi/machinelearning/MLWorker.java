@@ -44,6 +44,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.io.FileUtils;
+import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,10 +110,14 @@ public class MLWorker {
 
             for (TestCaseMetadata testCaseMetadata : jsonReport.getMetadata()) {
 
-                analyzeTestCase(reportData, testCaseMetadata, testCaseId)
+                if (testCaseId != null &&  !testCaseId.equals(Integer.valueOf(testCaseMetadata.getId()))) {
+                    continue;
+                }
+
+                analyzeTestCase(reportData, testCaseMetadata)
                         .stream()
-                        .map(predictor::classifyFailedAction)
-                        .flatMap(predictorOut -> getPredictionResultEntries(Integer.parseInt(testCaseMetadata.getId()), predictorOut))
+                        .map(failedAction -> new Tuple2<>(failedAction, predictor.classifyFailedAction(failedAction)))
+                        .flatMap(tuple2 -> getPredictionResultEntries((int)tuple2.v1.getId(), tuple2.v2))
                         .forEach(predictions::add);
             }
 
@@ -124,17 +129,17 @@ public class MLWorker {
         }
     }
 
-    private Stream<PredictionResultEntry> getPredictionResultEntries(Integer tcId, Map<?, ?> map) {
+    private Stream<PredictionResultEntry> getPredictionResultEntries(Integer actionId, Map<?, ?> map) {
         logger.info("mlplugin returns prediction {}", map);
-        return map.entrySet().stream().map(entry -> convertOldFormatPrediction(tcId, entry));
+        return map.entrySet().stream().map(entry -> convertOldFormatPrediction(actionId, entry));
     }
 
-    private PredictionResultEntry convertOldFormatPrediction(Integer tcId, Map.Entry<?,?> entry) {
+    private PredictionResultEntry convertOldFormatPrediction(Integer actionId, Map.Entry<?,?> entry) {
         int id = ((Number) entry.getKey()).intValue();
         Map<?, ?> stats = (Map<?, ?>) entry.getValue();
 
         PredictionResultEntry predictionResult = new PredictionResultEntry();
-        predictionResult.setActionId(tcId);
+        predictionResult.setActionId(actionId);
         predictionResult.setMessageId(id);
         predictionResult.setClassValue(ClassValueEnum.fromValue((String) stats.get("classValue")));
         predictionResult.setPredictedClassProbability(Float.parseFloat((String) stats.get(predictionResult.getClassValue().value())));
@@ -142,7 +147,7 @@ public class MLWorker {
         return predictionResult;
     }
 
-    private List<FailedAction> analyzeTestCase(File reportData, TestCaseMetadata testCaseMetadata, Integer testcaseId) throws IOException {
+    private List<FailedAction> analyzeTestCase(File reportData, TestCaseMetadata testCaseMetadata) throws IOException {
 
         TestCase testCase = OBJECT_MAPPER.readValue(new File(reportData, testCaseMetadata.getJsonFileName()), TestCase.class);
         File checkedFile = new File(reportData, MLPersistenceManager.ML_SUBMITS_FOR_REPORT);
@@ -155,7 +160,6 @@ public class MLWorker {
                 .stream()
                 .filter(node -> node instanceof Action)
                 .map(node -> (Action)node )
-                .filter(action -> testcaseId == null || action.getId() == testcaseId)
                 .filter(this::checkActionApplicable)
                 .map(action -> convertJsonActionToMLFailedAction(testCase, checkedMessages, action))
                 .collect(Collectors.toList());
@@ -184,7 +188,10 @@ public class MLWorker {
                 .map(msg -> buildMessageParticipant(checkedMessages, realAction, msg))
                 .toArray(MessageParticipant[]::new);
 
-        return new FailedAction(expected, actualMessages);
+        FailedAction failedAction = new FailedAction(expected, actualMessages);
+        failedAction.setId(realAction.getId());
+
+        return failedAction;
     }
 
     private String getMessageProtocol(Message message) {
