@@ -22,6 +22,9 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import { reactiveSearch } from '../../thunks/search';
 
+const F_KEY_CODE = 70,
+    F3_KEY_CODE = 114;
+
 interface StateProps {
     searchString: string;
     currentIndex: number;
@@ -37,10 +40,26 @@ interface DispatchProps {
 interface Props extends StateProps, DispatchProps { }
 
 const SearchInputBase = ({ searchString, updateSearchString, nextSearchResult, prevSearchResult, currentIndex, resultsCount }: Props) => {
+
+    const input = React.useRef<HTMLInputElement>();
+
+    // same as componentDidMount
+    React.useEffect(() => {
+        // we need to use 'top' in case of working in iframe
+        top.document.addEventListener("keydown", e => {
+            if (e.keyCode === F3_KEY_CODE || (e.keyCode === F_KEY_CODE && e.ctrlKey)) {
+                // cancel browser search opening
+                e.preventDefault();
+
+                input.current.focus();
+            }
+        })
+    }, []);
     
     return (
         <div className="search-input">
             <input
+                ref={input}
                 type="text"
                 value={searchString}
                 onChange={e => updateSearchString(e.target.value)}
