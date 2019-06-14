@@ -303,11 +303,11 @@ public class FIXApplication implements FIXClientApplication {
 	}
 
 	@Override
-	public void onMessageRejected(Message message, SessionID sessionID) {
+	public void onMessageRejected(Message message, SessionID sessionID, String reason) {
 		logger.debug("onMessageRejected: {}", message);
 		try {
             IMessage iMsg = convert(message, sessionID.getTargetCompID(), serviceStringName, message.isAdmin(), false, true);
-            iMsg.getMetaData().setRejectReason(message.getException() != null ? message.getException().getMessage() : "Unknown");
+            iMsg.getMetaData().setRejectReason(reason);
 
             if (!isPerformance) {
                 storeMessage(sessionID, iMsg);
