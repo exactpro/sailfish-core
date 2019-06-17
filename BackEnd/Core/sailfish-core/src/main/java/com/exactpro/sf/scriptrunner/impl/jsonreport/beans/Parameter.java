@@ -19,6 +19,7 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.comparison.Formatter;
 import com.exactpro.sf.scriptrunner.ReportEntity;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.ClassUtils;
@@ -40,7 +41,7 @@ public class Parameter {
 
     public Parameter(ReportEntity e) {
         this.name = e.getName();
-        this.value = Objects.toString(e.getValue());
+        this.value = Formatter.formatForHtml(e.getValue(), true);
         this.subParameters = e.getFields().stream().map(Parameter::new).collect(Collectors.toList());
         if (e.getValue() instanceof IMessage) {
             msgMetadata = ((IMessage) e.getValue()).getMetaData();
