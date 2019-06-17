@@ -21,10 +21,12 @@ import Action from '../models/Action';
 import { ActionTree } from './ActionTree';
 import { StatusType } from '../models/Status';
 import AppState from '../state/models/AppState';
-import { selectAction, selectCheckpoint, selectVerification } from '../actions/actionCreators';
+import { selectAction, selectCheckpoint, selectVerification, saveMlData } from '../actions/actionCreators';
 import { HeatmapScrollbar } from './HeatmapScrollbar';
 import { actionsHeatmap } from '../helpers/heatmapCreator';
 import { getActions } from '../helpers/actionType';
+import { PredictionData } from '../models/MlServiceResponse';
+import { fetchPredictions } from '../helpers/machineLearning';
 
 interface ListProps {
     actions: Array<Action>;
@@ -36,9 +38,12 @@ interface ListProps {
     actionsFilter: StatusType[];
     filterFields: StatusType[];
     activeActionId: number;
+    token: string;
+    mlDataActionIds: Set<number>;
     onSelect: (messages: Action) => any;
     onVerificationSelect: (messageId: number, actionId: number, status: StatusType) => any;
     setSelectedCheckpoint: (action: Action) => any;
+    saveMlData: (data: PredictionData[]) => any;
 }
 
 export class ActionsListBase extends Component<ListProps, {}> {
@@ -68,12 +73,21 @@ export class ActionsListBase extends Component<ListProps, {}> {
             return true;
         }
 
+        if (nextProps.token !== this.props.token) {
+            return true;
+        }
+
+        // size check is enough since there is no way ml prediction data could be removed from the storage
+        if (nextProps.mlDataActionIds.size !== this.props.mlDataActionIds.size) {
+            return true;
+        }
+
         return nextProps.actions !== this.props.actions ||
             nextProps.selectedActionId !== this.props.selectedActionId ||
             nextProps.selectedMessageId !== this.props.selectedMessageId;
     }
 
-    render({ activeActionId, actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onVerificationSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
+    render({ mlDataActionIds, saveMlData, token, actions, selectedCheckpointId, selectedActionId, scrolledActionId, selectedMessageId, onSelect, actionsFilter, filterFields, onVerificationSelect, setSelectedCheckpoint, checkpointActions }: ListProps) {
 
         return (
             <div class="actions">
@@ -89,8 +103,19 @@ export class ActionsListBase extends Component<ListProps, {}> {
                                 selectedMessageId={selectedMessageId}
                                 selectedCheckpointId={selectedCheckpointId}
                                 scrolledActionId={scrolledActionId}
-                                actionSelectHandler={onSelect}
-                                verificationSelectHandler={onVerificationSelect}
+                                actionSelectHandler={(action) => {
+                                    if (action.status.status == 'FAILED' && !mlDataActionIds.has(action.id)) {
+                                        fetchPredictions(token, saveMlData, action.id);
+                                    }
+                                    onSelect(action);
+                                }}
+                                verificationSelectHandler={ (messageId, actionId, status) => {
+                                    if (status == 'FAILED' && !mlDataActionIds.has(actionId)) {
+                                        fetchPredictions(token, saveMlData, actionId);
+                                    }
+                                    onVerificationSelect(messageId, actionId, status);
+
+                                }}
                                 actionsFilter={actionsFilter}
                                 filterFields={filterFields}
                                 checkpoints={checkpointActions}
@@ -112,10 +137,13 @@ export const ActionsList = connect((state: AppState) => ({
     actionsFilter: state.filter.actionsFilter,
     filterFields: state.filter.fieldsFilter,
     checkpointActions: state.selected.checkpointActions,
-    activeActionId: state.selected.activeActionId
+    activeActionId: state.selected.activeActionId,
+    token: state.machineLearning.token,
+    mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map((item) => { return item.actionId }))
 }),
     dispatch => ({
         onSelect: (action: Action) => dispatch(selectAction(action)),
+        saveMlData: (data: PredictionData[]) => dispatch(saveMlData(data)),
         onVerificationSelect: (messageId: number, actionId: number, status: StatusType) => dispatch(selectVerification(messageId, actionId, status)),
         setSelectedCheckpoint: (checkpointAction: Action) => dispatch(selectCheckpoint(checkpointAction))
     }),

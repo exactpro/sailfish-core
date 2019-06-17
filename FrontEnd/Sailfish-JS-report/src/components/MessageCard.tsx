@@ -26,6 +26,7 @@ import { MessageMlUploadButton } from './MlUploadButton';
 import '../styles/messages.scss';
 import { createSelector, createBemElement } from '../helpers/styleCreators';
 import { createBemBlock } from '../helpers/styleCreators';
+import { MessagePredictionIndicator } from './MlPredictionIndicator';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -84,86 +85,90 @@ export class MessageCard extends Component<MessageCardProps, MessageCardState> {
                 <div class="message-card__labels">
                     {this.renderMessageTypeLabels(message)}
                 </div>
-                    <div class="mc-header default" 
-                        data-lb-count={labelsCount}
-                        onClick={() => selectHandler(message)}>
-                        {
-                            rejectedMessagesCount && actions.length == 0 ?
-                                (
-                                    <div class="mc-header__info rejected">
-                                        <p>Rejected {rejectedMessagesCount}</p>
-                                    </div>
-                                )
-                                : (
-                                    <MessageCardActionChips
-                                        actions={actions}
-                                        selectedStatus={status}
-                                        selectHandler={status => selectHandler(message, status)} />
-                                )
-                        }
-                        <div class="mc-header__name">
-                            <span>Name</span>
-                        </div>
-                        <div class="mc-header__name-value">
-                            <p>{msgName}</p>
-                        </div>
-                        <div class="mc-header__timestamp">
-                            <p>{timestamp}</p>
-                        </div>
-                        <div class="mc-header__session">
-                            <span>Session</span>
-                        </div>
-                        <div class="mc-header__from">
-                            <p>{from}</p>
-                        </div>
-                        {
-                            from && to ?
-                                <div class="mc-header__session-icon"
-                                    style={{ filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)` }} />
-                                : null
-                        }
-                        <div class="mc-header__to">
-                            <p>{to}</p>
-                        </div>
-                        <MessageMlUploadButton messageId={message.id}/>
+                <div class="mc-header default" 
+                    data-lb-count={labelsCount}
+                    onClick={() => selectHandler(message)}>
+                    {
+                        rejectedMessagesCount && actions.length == 0 ?
+                            (
+                                <div class="mc-header__info rejected">
+                                    <p>Rejected {rejectedMessagesCount}</p>
+                                </div>
+                            )
+                            : (
+                                <MessageCardActionChips
+                                    actions={actions}
+                                    selectedStatus={status}
+                                    selectHandler={status => selectHandler(message, status)} />
+                            )
+                    }
+                    <div class="mc-header__name">
+                        <span>Name</span>
                     </div>
-                    <div class="message-card__body   mc-body">
-                        {
-                            (message.content.rejectReason !== null) ?
-                                (
-                                    <div class="mc-body__title">
-                                        <p>{rejectedTitle}</p>
-                                    </div>
-                                )
-                                : null
-                        }
-                        <div class="mc-body__human">
-                            <p>
-                                {contentHumanReadable}
-                                {
-                                    (raw && raw !== 'null') ? (
-                                        <div class="mc-show-raw"
-                                            onClick={e => this.showRaw()}>
-                                            <div class="mc-show-raw__title">RAW</div>
-                                            <div class={showRawClass} />
-                                        </div>
-                                    ) : null
-                                }
-                            </p>
-                        </div>
-                        {
-                            showRaw ?
-                                <MessageRaw
-                                    rawContent={raw} />
-                                : null
-                        }
+                    <div class="mc-header__name-value">
+                        <p>{msgName}</p>
                     </div>
+                    <div class="mc-header__timestamp">
+                        <p>{timestamp}</p>
+                    </div>
+                    <div class="mc-header__session">
+                        <span>Session</span>
+                    </div>
+                    <div class="mc-header__from">
+                        <p>{from}</p>
+                    </div>
+                    {
+                        from && to ?
+                            <div class="mc-header__session-icon"
+                                style={{ filter: `invert(1) sepia(1) saturate(5) hue-rotate(${hueValue}deg)` }} />
+                            : null
+                    }
+                    <div class="mc-header__to">
+                        <p>{to}</p>
+                    </div>
+                    <MessageMlUploadButton messageId={message.id}/>
                 </div>
+                <div class="message-card__body   mc-body">
+                    {
+                        (message.content.rejectReason !== null) ?
+                            (
+                                <div class="mc-body__title">
+                                    <p>{rejectedTitle}</p>
+                                </div>
+                            )
+                            : null
+                    }
+                    <div class="mc-body__human">
+                        <p>
+                            {contentHumanReadable}
+                            {
+                                (raw && raw !== 'null') ? (
+                                    <div class="mc-show-raw"
+                                        onClick={e => this.showRaw()}>
+                                        <div class="mc-show-raw__title">RAW</div>
+                                        <div class={showRawClass} />
+                                    </div>
+                                ) : null
+                            }
+                        </p>
+                    </div>
+                    {
+                        showRaw ?
+                            <MessageRaw
+                                rawContent={raw} />
+                            : null
+                    }
+                </div>
+            </div>
         );
     }
 
     private renderMessageTypeLabels(message: Message): JSX.Element[] {
         let labels = [];
+
+        labels.push(
+            <MessagePredictionIndicator className="mc-label" messageId={message.id} />
+        )
 
         if (message.content.rejectReason !== null) {
             labels.push(

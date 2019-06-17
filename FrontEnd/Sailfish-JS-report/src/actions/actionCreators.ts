@@ -36,8 +36,10 @@ import {
     VerificationSelectStateAction,
     SetMlTokenStateAction,
     SetSubmittedMlDataStateAction,
+    SaveMlDataStateAction,
     AddSubmittedMlDataStateAction,
-    RemoveSubmittedMlDataStateAction
+    RemoveSubmittedMlDataStateAction,
+    TogglePredictionsAction
 } from "./stateActions";
 
 import TestCase from "../models/TestCase";
@@ -46,7 +48,7 @@ import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import { Panel } from "../helpers/Panel";
 import Message from '../models/Message';
-import { SubmittedData } from "../models/MlServiceResponse";
+import { SubmittedData, PredictionData } from "../models/MlServiceResponse";
 
 export const setReport = (report: Report): SetReportStateAction => ({
     type: StateActionTypes.SET_REPORT,
@@ -147,6 +149,11 @@ export const setSubmittedMlData = (data: SubmittedData[]): SetSubmittedMlDataSta
     data: data
 })
 
+export const saveMlData = (data: PredictionData[]): SaveMlDataStateAction => ({
+    type: StateActionTypes.SAVE_ML_DATA,
+    data: data
+})
+
 export const addSubmittedMlData = (data: SubmittedData): AddSubmittedMlDataStateAction => ({
     type: StateActionTypes.ADD_SUBMITTED_ML_DATA,
     data: data
@@ -155,4 +162,8 @@ export const addSubmittedMlData = (data: SubmittedData): AddSubmittedMlDataState
 export const removeSubmittedMlData = (data: SubmittedData): RemoveSubmittedMlDataStateAction => ({
     type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA,
     data: data
+})
+
+export const togglePredictions = (): TogglePredictionsAction => ({
+    type: StateActionTypes.TOGGLE_PREDICTIONS
 })

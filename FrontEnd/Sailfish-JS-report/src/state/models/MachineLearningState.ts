@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-import { SubmittedData } from "../../models/MlServiceResponse"
+import { SubmittedData, PredictionData } from "../../models/MlServiceResponse"
 
 export default interface MachineLearningState {
     token: string;
     submittedData: SubmittedData[];
+    predictionData: PredictionData[];
+    predictionsEnabled: boolean;
 }

@@ -24,14 +24,14 @@ import { ActionNode } from '../models/Action';
 import Action from '../models/Action'
 import { isAction } from '../helpers/actionType'
 
-interface MLUploadIndicatorProps {
+interface MlUploadIndicatorProps {
     submittedData: SubmittedData[];
     testCase: TestCase;
     token: string;
 }
 
-export class MLUploadIndicatorBase extends Component<MLUploadIndicatorProps, {}> {
-    render({ submittedData, testCase, token }: MLUploadIndicatorProps) {
+export class MlUploadIndicatorBase extends Component<MlUploadIndicatorProps, {}> {
+    render({ submittedData, testCase, token }: MlUploadIndicatorProps) {
         const failedActionIds: number[] = []
 
         function addSubActions(action: ActionNode) {
@@ -96,10 +96,10 @@ export class MLUploadIndicatorBase extends Component<MLUploadIndicatorProps, {}>
     }
 }
 
-export const MLUploadIndicator = connect(
+export const MlUploadIndicator = connect(
     (state: AppState) => ({
         token: state.machineLearning.token,
         submittedData: state.machineLearning.submittedData,
         testCase: state.selected.testCase,
     })
-)(MLUploadIndicatorBase);
+)(MlUploadIndicatorBase);

@@ -20,7 +20,7 @@ import { StatusType } from "../models/Status";
 import Report from '../models/Report';
 import { Panel } from "../helpers/Panel";
 import Message from "../models/Message";
-import { SubmittedData } from "../models/MlServiceResponse";
+import { SubmittedData, PredictionData } from "../models/MlServiceResponse";
 
 export enum StateActionTypes {
     SET_REPORT = 'SET_REPORT', 
@@ -43,8 +43,10 @@ export enum StateActionTypes {
     SET_RIGHT_PANE = 'SET_RIGHT_PANE',
     SET_ML_TOKEN = 'SET_ML_TOKEN',
     SET_SUBMITTED_ML_DATA = "SET_SUBMITTED_ML_DATA",
+    SAVE_ML_DATA = "SAVE_ML_DATA",
     ADD_SUBMITTED_ML_DATA = "ADD_SUBMITTED_ML_DATA",
-    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA"
+    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA",
+    TOGGLE_PREDICTIONS = "TOGGLE_PREDICTIONS"
 }
 
 export interface SetReportStateAction {
@@ -146,6 +148,11 @@ export interface SetSubmittedMlDataStateAction {
     data: SubmittedData[];
 }
 
+export interface SaveMlDataStateAction {
+    type: StateActionTypes.SAVE_ML_DATA;
+    data: PredictionData[];
+}
+
 export interface AddSubmittedMlDataStateAction {
     type: StateActionTypes.ADD_SUBMITTED_ML_DATA;
     data: SubmittedData;
@@ -156,6 +163,9 @@ export interface RemoveSubmittedMlDataStateAction {
     data: SubmittedData;
 }
 
+export interface TogglePredictionsAction {
+    type: StateActionTypes.TOGGLE_PREDICTIONS;
+}
 export type StateActionType = 
     SetReportStateAction |
     SetTestCaseStateAction | 
@@ -178,8 +188,10 @@ export type StateActionType =
     SetLeftPaneStateActions |
     SetMlTokenStateAction |
     SetSubmittedMlDataStateAction |
+    SaveMlDataStateAction |
     AddSubmittedMlDataStateAction |
-    RemoveSubmittedMlDataStateAction;
+    RemoveSubmittedMlDataStateAction |
+    TogglePredictionsAction
 
 export function isStateAction(action: any): action is StateActionType {
     return action && typeof action.type === 'string' && action.type in StateActionTypes;

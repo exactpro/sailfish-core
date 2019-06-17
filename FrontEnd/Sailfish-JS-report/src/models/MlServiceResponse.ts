@@ -19,7 +19,20 @@ export interface InitResponse {
     active: SubmittedData[]
 }
 
+export interface PredictionResponse {
+    token: string;
+    predictions: PredictionData[];
+    userMarks: SubmittedData[];
+}
+
 export interface SubmittedData {
     actionId: number;
     messageId: number;
+}
+
+export interface PredictionData {
+    actionId: number;
+    messageId: number;
+    classValue: string;
+    predictedClassProbability: number;
 }

@@ -31,7 +31,7 @@ import {
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { createSelector } from '../helpers/styleCreators';
-import { MLUploadIndicator } from './MLUploadIndicator';
+import { MlUploadIndicator } from './MlUploadIndicator';
 
 interface HeaderProps {
     testCase: TestCase;
@@ -151,7 +151,7 @@ class HeaderBase extends Component<HeaderProps, HeaderState> {
                         <p>{hash}</p>
                     </div>
                     <div class="header__info-element">
-                        <MLUploadIndicator />
+                        <MlUploadIndicator />
                     </div>
                 </div>
                 {

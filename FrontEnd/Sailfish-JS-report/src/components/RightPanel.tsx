@@ -19,15 +19,17 @@ import { connect } from 'preact-redux';
 import '../styles/layout.scss';
 import { Panel } from '../helpers/Panel';
 import Message from '../models/Message';
+import Action from '../models/Action';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';
 import { LogsPane } from './LogsPane';
 import AppState from '../state/models/AppState';
 import { isAdmin } from '../helpers/messageType';
 import { isRejected } from '../helpers/messageType';
-import { setRightPane, selectRejectedMessageId, setAdminMsgEnabled } from '../actions/actionCreators';
+import { setRightPane, selectRejectedMessageId, setAdminMsgEnabled, togglePredictions } from '../actions/actionCreators';
 import { prevCyclicItemByIndex, nextCyclicItemByIndex } from '../helpers/array';
-import { createSelector } from '../helpers/styleCreators';
+import { createSelector, createTriStateControlClassName } from '../helpers/styleCreators';
+import { ActionNodeType } from '../models/Action';
 
 interface RightPanelStateProps {
     panel: Panel;
@@ -35,12 +37,15 @@ interface RightPanelStateProps {
     adminMessages: Message[];
     selectedRejectedMessageId: number;
     adminMessagesEnabled: boolean;
+    predictionsEnabled: boolean;
+    predictionsAvailable: boolean;
 }
 
 interface RightPanelDispatchProps {
     panelSelectHandler: (panel: Panel) => any;
     selectRejectedMessageHandler: (messageId: number) => any;
     adminEnabledHandler: (adminEnabled: boolean) => any;
+    togglePredictions: () => any;
 }
 
 interface RightPanelProps extends RightPanelStateProps, RightPanelDispatchProps {}
@@ -62,31 +67,26 @@ class RightPanelBase extends Component<RightPanelProps> {
         }
     }
 
-    render({panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler}: RightPanelProps) {
-
-        const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
+    render({ predictionsEnabled, predictionsAvailable, panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler }: RightPanelProps) {
+        const 
+            currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
             rejectedEnabled = rejectedMessages.length != 0,
             adminControlEnabled = adminMessages.length != 0,
             controlShowTitles = true;
 
-        const adminRootClass = createSelector(
-                "layout-control",
-                "selectable",
-                adminControlEnabled ? null : "disabled"
-            ),
-            adminIconClass = createSelector(
-                "layout-control__icon",
-                "admin",
-                adminMessagesEnabled ? "active" : null
-            ),
-            adminTitleClass = createSelector(
-                "layout-control__title",
-                adminMessagesEnabled ? "admin" : null
-            ),
-            rejectedRootClass = createSelector(
-                "layout-control",
-                rejectedEnabled ? null : "disabled"
-            );
+        const 
+            adminRootClass = createTriStateControlClassName("layout-control", adminMessagesEnabled, adminControlEnabled),
+            adminIconClass = createTriStateControlClassName("layout-control__icon admin", adminMessagesEnabled, adminControlEnabled),
+            adminTitleClass = createTriStateControlClassName("layout-control__title selectable", adminMessagesEnabled, adminControlEnabled),
+
+            rejectedRootClass = createTriStateControlClassName("layout-control", true, rejectedEnabled),
+            rejectedIconClass = createTriStateControlClassName("layout-control__icon rejected", true, rejectedEnabled),
+            rejectedTitleClass = createTriStateControlClassName("layout-control__title", true, rejectedEnabled),
+            
+            predictionRootClass = createTriStateControlClassName("layout-control", predictionsEnabled, predictionsAvailable),
+            predictionIconClass = createTriStateControlClassName("layout-control__icon prediction", predictionsEnabled, predictionsAvailable),
+            predictionTitleClass = createTriStateControlClassName("layout-control__title selectable", predictionsEnabled, predictionsAvailable);
+
 
         return (
             <div class="layout-panel">
@@ -108,20 +108,19 @@ class RightPanelBase extends Component<RightPanelProps> {
                             text="Known bugs"/>
                     </div>
                     <div class={adminRootClass}
-                        onClick={adminControlEnabled && (() => adminEnabledHandler(!adminMessagesEnabled))}
-                        title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
+                        onClick={() => { if (adminControlEnabled) adminEnabledHandler(!adminMessagesEnabled); }}
+                        title={(adminMessagesEnabled ? "Hide admin messages" : "Show admin messages")}>
                         <div class={adminIconClass} />
                         <div class={adminTitleClass}>
-                            {controlShowTitles ? <p>{adminControlEnabled ? "" : "No"} Admin Messages</p> : null}
+                            {controlShowTitles ? <p>{adminControlEnabled ? "Admin messages" : "No admin messages"}</p> : null}
                         </div>
                     </div>
                     <div class={rejectedRootClass}>
-                        <div class="layout-control__icon rejected"
-                            onClick={() => this.currentRejectedHandler(currentRejectedIndex)}
-                            style={{ cursor: rejectedEnabled ? 'pointer' : 'unset' }}
+                        <div class={rejectedIconClass}
+                            onClick={() => { if (rejectedEnabled) this.currentRejectedHandler(currentRejectedIndex); }}
                             title={ rejectedEnabled ? "Scroll to current rejected message" : null }/>
-                        <div class="layout-control__title">
-                            {controlShowTitles ? <p>{rejectedEnabled ? "" : "No "}Rejected</p> : null}
+                        <div class={rejectedTitleClass}>
+                            {controlShowTitles ? <p>{rejectedEnabled ? "Rejected" : "No rejected"}</p> : null}
                         </div>
                         {
                             rejectedEnabled ? 
@@ -140,11 +139,12 @@ class RightPanelBase extends Component<RightPanelProps> {
                             ) : null
                         }
                     </div>
-                    <div class="layout-control disabled"
-                        title="Show predictions (Not implemented)">
-                        <div class="layout-control__icon ml"/>
-                        <div class="layout-control__title">
-                            {controlShowTitles ? <p>Predictions</p> : null}
+                    <div class={predictionRootClass}
+                        title={predictionsEnabled ? "Hide predictions" : "Show predictions"}
+                        onClick={() => { if (predictionsAvailable) this.props.togglePredictions(); }}>
+                        <div class={predictionIconClass} />
+                        <div class={predictionTitleClass}>
+                            {controlShowTitles ? <p>{predictionsAvailable ? "Predictions" : "No predictions"}</p> : null}
                         </div>
                     </div>
                 </div>
@@ -214,11 +214,21 @@ export const RightPanel = connect(
         rejectedMessages: state.selected.testCase.messages.filter(isRejected),
         adminMessagesEnabled: state.view.adminMessagesEnabled,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
-        panel: state.view.rightPanel
+        panel: state.view.rightPanel,
+
+        predictionsAvailable:
+            state.machineLearning.token != null
+            && state.selected.testCase.messages.length > 0
+            && state.selected.testCase.actions.some((action) => {
+                return action.actionNodeType == ActionNodeType.ACTION && (action as Action).status.status == 'FAILED';
+            }),
+
+        predictionsEnabled: state.machineLearning.predictionsEnabled
     }),
     (dispatch) : RightPanelDispatchProps => ({
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),
         selectRejectedMessageHandler: (messageId: number) => dispatch(selectRejectedMessageId(messageId)),
-        adminEnabledHandler: (adminEnabled: boolean) => dispatch(setAdminMsgEnabled(adminEnabled))
+        adminEnabledHandler: (adminEnabled: boolean) => dispatch(setAdminMsgEnabled(adminEnabled)),
+        togglePredictions: () => dispatch(togglePredictions())
     })
 )(RightPanelBase);
