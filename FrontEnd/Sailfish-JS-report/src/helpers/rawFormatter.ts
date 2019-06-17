@@ -44,3 +44,33 @@ export function splitRawContent(raw: string): string[] {
 export function getUnformattedContent(content: string): string {
     return content.replace(/\r|\n/g, '');
 }
+
+/**
+ * Converts HEX content to raw using 'String.fromCharCode' (may contain unreadable symbols).
+ * @param hexString HEX string
+ */
+export function getRawContentByHex(hexString: string): string {
+    // filter out line breaks
+    const unforamttedString = hexString.replace(/\r|\n/g, ' '),
+        // split hex string to array of string - pairs of char codes
+        hexSymbols = unforamttedString.split(' '),
+        filtredSymbols  = hexSymbols.filter(Boolean),
+        // splitting pairs of char codes in single char codes array
+        charCodes = filtredSymbols.reduce(
+            (acc, charCodes) => {
+                const firstCode = charCodes.substring(0, 2),
+                    secondCode = charCodes.substring(2),
+                    result = secondCode ? [firstCode, secondCode] : [firstCode];
+
+                return acc.concat(result);
+            },
+            []
+        ),
+        // converting hex char code to string
+        charsArray = charCodes.map(
+            hexCharCode => String.fromCharCode(parseInt(hexCharCode, 16))
+        ),
+        resultString = charsArray.join('');
+
+    return resultString;
+}
