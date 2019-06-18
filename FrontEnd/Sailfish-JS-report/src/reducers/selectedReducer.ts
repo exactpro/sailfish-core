@@ -152,7 +152,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         case StateActionTypes.SET_SEARCH_RESULTS: {
             const { searchResults } = stateAction, 
                 searchResultsCount = searchResults.sum(),  
-                searchIndex = state.searchIndex > searchResultsCount ? searchResultsCount - 1 : state.searchIndex;
+                searchIndex = searchResultsCount > 0 ? 0 : null;
 
             return {
                 ...state,
@@ -166,8 +166,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             // TODO - need to share this code beetwen next and prev action handlers
             const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
                 [currentKey] = state.searchResults.getByIndex(targetIndex),
-                msgId = currentKey.split('-')[0] === 'msg' ? new Number(currentKey.split('-')[1]) : state.scrolledMessageId,
-                actionId = currentKey.split('-')[0] === 'action' ? new Number(currentKey.split('-')[1]) : state.scrolledActionId;
+                [keyType, keyId] = currentKey.split('-'),
+                msgId = keyType === 'msg' ? new Number(keyId) : state.scrolledMessageId,
+                actionId = keyType === 'action' ? new Number(keyId) : state.scrolledActionId;
 
             return {
                 ...state,
@@ -181,8 +182,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             // TODO - need to share this code beetwen next and prev action handlers
             const targetIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
                 [currentKey] = state.searchResults.getByIndex(targetIndex),
-                msgId = currentKey.split('-')[0] === 'msg' ? new Number(currentKey.split('-')[1]) : state.scrolledMessageId,
-                actionId = currentKey.split('-')[0] === 'action' ? new Number(currentKey.split('-')[1]) : state.scrolledActionId;
+                [keyType, keyId] = currentKey.split('-'),
+                msgId = keyType === 'msg' ? new Number(keyId) : state.scrolledMessageId,
+                actionId = keyType === 'action' ? new Number(keyId) : state.scrolledActionId;
 
             return {
                 ...state,

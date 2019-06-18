@@ -41,7 +41,18 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString 
     }
 
     const splittedContent = content.split(searchString),
-        internalTargetIndex = targetIndex - startIndex;
+        internalTargetIndex = targetIndex != null && targetIndex - startIndex;
+
+    // we are using 'useRef' instead of 'createRef' in functional components
+    // because 'createRef' creates new Ref object for each call, when 'useRef' does not
+    const targetElement = React.useRef<HTMLSpanElement>();
+
+    // fires only if target index has been changed
+    React.useEffect(() => {
+        if (targetElement.current) {
+            targetElement.current.scrollIntoView({ block: 'center', inline: 'nearest' });
+        }
+    }, [targetIndex]);
 
     return (
         <span>
@@ -51,7 +62,8 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString 
                     index !== splittedContent.length - 1 ? 
                         <span 
                             className={'found' + (index === internalTargetIndex ? ' target' : '')} 
-                            key={splittedContent.length + index}>
+                            key={splittedContent.length + index}
+                            ref={index === internalTargetIndex ? targetElement : undefined}>
                             {searchString}
                         </span> : 
                         null
