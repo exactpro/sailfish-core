@@ -69,7 +69,7 @@ function findAllInParams(param: ActionParameter, searchString: string, keyPrefix
 
     results.push(...findAllInObject(
         param, 
-        param.subParameters ? INPUT_PARAM_NODE_FIELD : INPUT_PARAM_VALUE_FIELDS, 
+        param.subParameters && param.subParameters.length > 0 ? INPUT_PARAM_NODE_FIELD : INPUT_PARAM_VALUE_FIELDS, 
         searchString, 
         keyPrefix
     ));

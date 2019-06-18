@@ -18,6 +18,8 @@ import * as React from 'react';
 import "../styles/expandablePanel.scss"
 import { createSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
+import { connect } from 'react-redux';
+import AppState from '../state/models/AppState';
 
 interface PanelProps {
     header?: React.ReactNode;
@@ -65,7 +67,7 @@ export const RecoverableExpandablePanel = (props: RecoverablePanelProps) => (
             (isExpanded: boolean, stateSaver) => (
                 <ExpandablePanel
                     {...props}
-                    isExpanded={isExpanded}
+                    isExpanded={props.isExpanded !== undefined ? props.isExpanded : isExpanded}
                     onExpand={isExpanded => {
                         stateSaver(isExpanded);
                         props.onExpand && props.onExpand(isExpanded)
@@ -74,3 +76,16 @@ export const RecoverableExpandablePanel = (props: RecoverablePanelProps) => (
         }
     </StateSaver>
 )
+
+interface SearchExpandablePanelOwnProps extends RecoverablePanelProps {
+    searchKeyPrefix: string;
+}
+
+export const SearchExpandablePanel = connect(
+    (state: AppState, ownProps: SearchExpandablePanelOwnProps) => {
+        const [currentKey] = state.selected.searchResults.getByIndex(state.selected.searchIndex),
+            isExpanded = currentKey && currentKey.startsWith(ownProps.searchKeyPrefix) ? true : undefined;        
+
+        return { isExpanded };
+    }
+)(RecoverableExpandablePanel);

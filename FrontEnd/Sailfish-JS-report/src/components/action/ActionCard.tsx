@@ -25,7 +25,8 @@ import { ExceptionChain } from "../ExceptionChain";
 import { Chip } from "../Chip";
 import { createSelector } from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
-import { keyForAction } from '../../helpers/keys';
+import { keyForAction, keyForActionParamter } from '../../helpers/keys';
+import { SearchExpandablePanel } from '../ExpandablePanel';
 
 interface CardProps {
     action: Action;
@@ -128,7 +129,8 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 </div>
                 <div className="ac-body">
                     <div className={inputParametersClassName}>
-                        <RecoverableExpandablePanel
+                        <SearchExpandablePanel
+                            searchKeyPrefix={keyForAction(id, 'parameters')}
                             stateKey={keyForAction(id, 'parameters')}
                             onExpand={onExpand}>
                             <div className="ac-body__item-title">Input parameters</div>
@@ -138,7 +140,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                                 params={parameters}
                                 name={name} 
                                 onExpand={onExpand} />
-                        </RecoverableExpandablePanel>
+                        </SearchExpandablePanel>
                     </div>
                     {
                         // rendering inner nodes
