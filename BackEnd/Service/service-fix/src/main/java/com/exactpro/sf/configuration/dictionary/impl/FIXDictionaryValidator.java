@@ -46,6 +46,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -261,6 +262,8 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
 
                 if(messageTypeAttribute != null) {
 
+
+
                     if(!messageTypes.add(messageTypeAttribute)) {
                         errors.add(new DictionaryValidationError(message.getName(), null,
                                 MESSAGE_TYPE_ATTR_NAME + " attribute is not unique in <strong>\""
@@ -279,6 +282,17 @@ public class FIXDictionaryValidator extends AbstractDictionaryValidator {
 
                 }
             }
+        }
+
+        IFieldStructure field = dictionary.getFields().get(MSG_TYPE_FIELD);
+        Collection<IAttributeStructure> msgMessageTypes = field.getValues().values();
+        for (IAttributeStructure msgMessageType : msgMessageTypes) {
+            if (messageTypes.contains(msgMessageType.getValue())) {
+                continue;
+            }
+            errors.add(new DictionaryValidationError(null, MSG_TYPE_FIELD, "Message for value ["
+                    + msgMessageType.getValue() + "] name [" + msgMessageType.getName() + "] in " + MSG_TYPE_FIELD + " is  missing in dictonary",
+                    DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_VALUES));
         }
 
     }

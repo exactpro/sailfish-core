@@ -103,7 +103,8 @@ public class TestFIXDictionaryValidator extends AbstractTest {
                 "Duplicated tag 8 in filed FieldWithDupTagInMessage in message headerInvalidName",
                 "Duplicated tag 386 in filed NoTradingSessionsDup in message TrdgSesGrp_Dup",
                 "Duplicated tag 386 in filed NoTradingSessions in message TrdgSesGrp",
-                "Duplicated tag 386 in filed NoTradingSessions"
+                "Duplicated tag 386 in filed NoTradingSessions",
+                "Message for value [2] name [TAG_NOT_DEFINED_FOR_THIS_MESSAGE_TYPE] in MsgType is  missing in dictonary"
         };
 
         Assert.assertEquals(errorMessages.length, errors.size());
