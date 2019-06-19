@@ -19,8 +19,10 @@ import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
 import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.aml.script.actions.exceptions.WaitMessageException;
 import com.exactpro.sf.aml.scriptutil.ExpressionResult;
 import com.exactpro.sf.aml.scriptutil.LegReorder;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
@@ -663,7 +666,7 @@ public class WaitAction {
 
     		IMessage message = result.getFirst();
     		if (countFailed != 0) {
-    			throw new EPSCommonException("Timeout");
+    			throw new WaitMessageException("Timeout", Collections.singletonList(message));
             } else if (countCP != 0) {
                 Throwable exception = result.getSecond().getException();
                 if (exception instanceof KnownBugException) {
@@ -671,7 +674,7 @@ public class WaitAction {
                     throw new MessageKnownBugException(StringUtils.defaultString(knownBugException.getMessage()),
                             getReorderMessage(message, settings, messageFilter), knownBugException.getPotentialDescriptions());
                 } else {
-                    throw new EPSCommonException(StringUtils.defaultString(exception.getMessage()));
+                    throw new WaitMessageException(StringUtils.defaultString(exception.getMessage()), Collections.singletonList(message));
                 }
             }
 
@@ -685,7 +688,7 @@ public class WaitAction {
 
         processFailed(results, report, serviceName, description, addToReport);
 
-        throw new EPSCommonException("Timeout");
+        throw new WaitMessageException("Timeout", results.stream().map(Pair::getFirst).collect(Collectors.toList()));
     }
 
     public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IActionReport report,
