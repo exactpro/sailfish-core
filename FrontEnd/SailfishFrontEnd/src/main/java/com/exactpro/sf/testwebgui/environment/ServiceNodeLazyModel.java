@@ -561,7 +561,7 @@ public class ServiceNodeLazyModel<T extends EnvironmentNode> extends LazyDataMod
 
         for (String name : proxy.getParameterNames()) {
 
-            if (proxy.haveWriteMethod(name)) {
+            if (proxy.isShowElement(name) && proxy.haveWriteMethod(name)) {
 
                 EnvironmentNode paramNode = new EnvironmentNode(
                         Type.PARAMETER,
