@@ -49,6 +49,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -164,6 +165,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
             boolean skipOptional = commandLine.hasOption("skip-optional");
             File variableSetsFile = (File)commandLine.getParsedOptionValue("variable-sets");
             String environmentVariableSet = commandLine.getOptionValue("environment-variable-set");
+            File tempDirectory = (File)commandLine.getParsedOptionValue("temp-directory");
 
             if(!reportDir.exists() && !reportDir.mkdirs()) {
                 throw new Exception("Report directory cannot be created: " + reportDir.getCanonicalPath());
@@ -194,7 +196,15 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 throw new Exception("Variable sets is not a file: " + variableSetsFile.getCanonicalPath());
             }
 
-            File lastWorkspaceLayer = Files.createTempDirectory("statictest").toFile();
+            if (tempDirectory == null) {
+                tempDirectory = FileUtils.getTempDirectory();
+            } else if (tempDirectory.exists() && !tempDirectory.isDirectory()) {
+                throw new Exception("Temp directory is not a directory: " + tempDirectory.getCanonicalPath());
+            }
+
+            tempDirectory.mkdirs();
+
+            File lastWorkspaceLayer = Files.createTempDirectory(tempDirectory.toPath(), "statictest").toFile();
             File logsFolder = new File(lastWorkspaceLayer, "logs");
 
             logsFolder.mkdirs();
@@ -220,7 +230,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 System.out.println("--------------------------------");
             }
 
-            File services = Files.createTempFile("services", ".zip").toFile();
+            File services = Files.createTempFile(tempDirectory.toPath(), "services", ".zip").toFile();
 
             try (AutoCloseable closeable = context::dispose) {
                 loadServices(servicesPaths, context);
@@ -340,6 +350,14 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .desc("name of variable set to apply to environment")
                 .build();
 
+        Option tempDirOption = Option.builder("td")
+                .longOpt("temp-directory")
+                .hasArg()
+                .argName("directory")
+                .type(File.class)
+                .desc("path to temp directory")
+                .build();
+
         options.addOption(workspacePathOption);
         options.addOption(matricesPathOption);
         options.addOption(servicesPathOption);
@@ -349,6 +367,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         options.addOption(skipOptionalOption);
         options.addOption(variableSetsFileOption);
         options.addOption(environmentVariableSetOption);
+        options.addOption(tempDirOption);
 
         try {
             return new DefaultParser().parse(options, args);
