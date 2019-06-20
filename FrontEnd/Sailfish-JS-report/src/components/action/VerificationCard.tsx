@@ -18,10 +18,11 @@ import * as React from 'react';
 import Verification from '../../models/Verification';
 import { StatusType } from "../../models/Status";
 import { createSelector } from '../../helpers/styleCreators';
-import { RecoverableExpandablePanel } from "../ExpandablePanel";
-import { RecoverableVerificationTable } from "./VerificationTable";
+import { SearchExpandablePanel } from "../ExpandablePanel";
+import { VerificationTable } from "./VerificationTable";
 import '../../styles/action.scss';
 import { keyForVerification } from '../../helpers/keys';
+import SearchableContent from '../search/SearchableContent';
 
 interface VerificactionCardProps {
     verification: Verification;
@@ -43,7 +44,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
         isTransparent && !isSelected ? "transparent" : null
     );
 
-    const stateKey = keyForVerification(parentActionId, messageId);
+    const key = keyForVerification(parentActionId, messageId);
 
     return (
         <div className="action-card">
@@ -53,16 +54,26 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
                     // here we cancel handling by parent divs
                     e.stopPropagation();
                 }}>
-                <RecoverableExpandablePanel
-                    stateKey={stateKey}
+                <SearchExpandablePanel
+                    searchKeyPrefix={key}
+                    stateKey={key}
                     onExpand={onExpand}>
-                    <div className="ac-body__verification-title">{"Verification — " + name + " — " + status.status}</div>
-                    <RecoverableVerificationTable 
-                        stateKey={stateKey + '-nodes'}
+                    <div className="ac-body__verification-title">
+                        <span>{"Verification — "}</span>
+                        <SearchableContent
+                            contentKey={`${key}-name`}
+                            content={name}/>
+                         <span>{" — " + status.status}</span>
+                    </div>
+                    <VerificationTable 
+                        keyPrefix={key}
+                        actionId={parentActionId}
+                        messageId={messageId}
+                        stateKey={key + '-nodes'}
                         params={entries} 
                         status={status.status}
                         onExpand={onExpand}/>
-                </RecoverableExpandablePanel>
+                </SearchExpandablePanel>
             </div>
         </div>
     )

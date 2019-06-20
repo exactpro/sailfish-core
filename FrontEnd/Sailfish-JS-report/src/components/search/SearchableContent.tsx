@@ -34,7 +34,7 @@ interface Props extends Omit<OwnProps, 'contentKey'>, StateProps {}
 
 const SearchableContentBase = ({ content, startIndex, targetIndex, searchString }: Props) => {
 
-    if (!searchString) {
+    if (!searchString || !content) {
         return (
             <span>{content}</span>
         )

@@ -53,7 +53,7 @@ const SearchInputBase = ({ searchString, updateSearchString, nextSearchResult, p
 
                 input.current.focus();
             }
-        })
+        });
     }, []);
     
     return (

@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import Status from './Status';
-import Entry from './Entry';
+import VerificationEntry from './VerificationEntry';
 import { ActionNodeType, ActionNode } from './Action';
 
 export default interface Verification {
@@ -24,7 +24,7 @@ export default interface Verification {
     name: string;
     description: string;
     status: Status;
-    entries: Entry[];
+    entries: VerificationEntry[];
 }
 
 export function isVerification(actionNode: ActionNode): actionNode is Verification {

@@ -14,16 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Exception from './Exception';
 import { StatusType } from './Status';
 
-export default interface Entry {
+export default interface VerificationEntry {
     name: string;
     actual: string;
     expected: string;
     status?: StatusType;
     precision?: string;
     systemPrecision?: string;
-    subEntries?: Entry[];
+    subEntries?: VerificationEntry[];
     exception: any;
 }

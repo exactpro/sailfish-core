@@ -32,6 +32,7 @@ export function reactiveSearch(searchString: string): ThunkAction<void, {}, {}, 
             // here we comparing previous and current search string not to execute unnecessary search
             if (getState().selected.searchString === searchString) {
                 const results = findAll(searchString, testCase);
+                console.log(results)
 
                 dispatch(setSearchResults(results));
             }

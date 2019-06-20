@@ -15,55 +15,55 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import Entry from "../../models/Entry";
+import VerificationEntry from "../../models/VerificationEntry";
 import { StatusType } from "../../models/Status";
 import "../../styles/tables.scss";
 import { connect } from 'react-redux';
 import AppState from "../../state/models/AppState";
 import { createSelector } from '../../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./../util/StateSaver";
+import SearchableContent from '../search/SearchableContent';
+import { getVerificationExpandPath } from '../../helpers/search/getExpandPath';
 
 const PADDING_LEVEL_VALUE = 15;
 
-interface VerificationTableOwnProps {
-    params: Entry[];
+interface OwnProps {
+    actionId: number;
+    messageId: number;
+    params: VerificationEntry[];
     status: StatusType;
+    keyPrefix: string;
     onExpand: () => void;
 }
 
-interface VerificationTableProps {
-    nodes: TableNode[];
+interface StateProps {
     fieldsFilter: StatusType[];
-    status: StatusType;
-    onExpand: () => void;
+    expandPath: number[];
+}
+
+interface Props extends Omit<OwnProps, 'params'>, StateProps {
+    nodes: TableNode[];
     stateSaver: (state: TableNode[]) => void;
 }
 
-interface RecoverableVerificationTableProps extends VerificationTableOwnProps, RecoverableElementProps {}
+interface RecoveredProps extends OwnProps, RecoverableElementProps, StateProps {}
 
-interface VerificationTableState {
+interface State {
     nodes: TableNode[];
 }
 
-interface TableNode extends Entry {
+interface TableNode extends VerificationEntry {
     //is subnodes visible
     isExpanded?: boolean;
 }
 
-class VerificationTableBase extends React.Component<VerificationTableProps, VerificationTableState> {
+class VerificationTableBase extends React.Component<Props, State> {
 
-    constructor(props: VerificationTableProps) {
+    constructor(props: Props) {
         super(props);
         this.state = {
             nodes: props.nodes
         }
-    }
-
-    tooglerClick(targetNode: TableNode) {
-        this.setState({
-            ...this.state,
-            nodes: this.state.nodes.map(rootNode => this.findNode(rootNode, targetNode))
-        });
     }
 
     findNode(node: TableNode, targetNode: TableNode): TableNode {
@@ -91,16 +91,22 @@ class VerificationTableBase extends React.Component<VerificationTableProps, Veri
         return {
             ...node,
             isExpanded: isExpanded,
-            subEntries: node.subEntries ? node.subEntries.map(
-                subNode => subNode.subEntries ? this.setNodeExpandStatus(subNode, isExpanded) :
-                    subNode) : null
+            subEntries: node.subEntries && node.subEntries.map(
+                subNode => subNode.subEntries ? this.setNodeExpandStatus(subNode, isExpanded) : subNode
+            )
         }
     }
 
-    componentDidUpdate(prevProps: VerificationTableProps, prevState: VerificationTableState) {
+    componentDidUpdate(prevProps: Props, prevState: State) {
         // handle expand state changing to remeasure card size
         if (this.state.nodes !== prevState.nodes) {
             this.props.onExpand();
+        }
+
+        if (this.props.expandPath !== prevProps.expandPath && this.props.expandPath.length > 0) {
+            this.setState({
+                nodes: this.updateExpandPath(this.props.expandPath, this.state.nodes)
+            });
         }
     }
 
@@ -108,8 +114,18 @@ class VerificationTableBase extends React.Component<VerificationTableProps, Veri
         this.props.stateSaver(this.state.nodes);
     }
 
+    updateExpandPath([currentIndex, ...expandPath]: number[], prevState: TableNode[]): TableNode[] {
+        return prevState.map(
+            (node, index) => index === currentIndex ? {
+                ...node,
+                isExpanded: true,
+                subParameters: node.subEntries && this.updateExpandPath(expandPath, node.subEntries)
+            } : node
+        )
+    }
+
     render() {
-        const { fieldsFilter, status } = this.props,
+        const { fieldsFilter, status, keyPrefix } = this.props,
             { nodes } = this.state;
 
         const rootClass = createSelector("ver-table", status);
@@ -141,28 +157,29 @@ class VerificationTableBase extends React.Component<VerificationTableProps, Veri
                         <th>Status</th>
                     </thead>
                     <tbody>
-                        {nodes.map((param) => this.renderTableNodes(param, fieldsFilter))}
+                        {nodes.map((param, index) => this.renderTableNodes(param, fieldsFilter, `${keyPrefix}-${index}`))}
                     </tbody>
                 </table>
             </div>
         )
     }
 
-    private renderTableNodes(node: TableNode, fieldsFilter: StatusType[], paddingLevel: number = 1) : JSX.Element[] {
+    private renderTableNodes(node: TableNode, fieldsFilter: StatusType[], key: string, paddingLevel: number = 1) : React.ReactNodeArray {
 
         if (node.subEntries) {
 
             const subNodes = node.isExpanded ? 
-                node.subEntries.reduce((lsit, node) => lsit.concat(this.renderTableNodes(node, fieldsFilter, paddingLevel + 1)), []) :
-                [];
+                node.subEntries.reduce(
+                    (lsit, node, index) => lsit.concat(this.renderTableNodes(node, fieldsFilter, `${key}-${index}`, paddingLevel + 1)), []
+                ) : [];
 
-            return [this.renderTooglerNode(node, paddingLevel), ...subNodes];
+            return [this.renderTooglerNode(node, paddingLevel, key), ...subNodes];
         } else {
-            return [this.renderValueNode(node, fieldsFilter, paddingLevel)];
+            return [this.renderValueNode(node, fieldsFilter, paddingLevel, key)];
         }
     }
 
-    private renderValueNode({ name, expected, actual, status }: TableNode, fieldsFilter: StatusType[], paddingLevel: number): JSX.Element {
+    private renderValueNode({ name, expected, actual, status }: TableNode, fieldsFilter: StatusType[], paddingLevel: number, key: string): React.ReactNode {
 
         const rootClassName = createSelector(
                 "ver-table-row-value",
@@ -171,24 +188,32 @@ class VerificationTableBase extends React.Component<VerificationTableProps, Veri
             statusClassName = createSelector("ver-table-row-value-status", status);
 
         return (
-            <tr className={rootClassName}>
+            <tr className={rootClassName} key={key}>
                 <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
-                    {name}
+                    <SearchableContent
+                        contentKey={`${key}-name`}
+                        content={name}/>
                 </td>
                 <td className="ver-table-row-value-expected">
-                    {expected}
+                    <SearchableContent
+                        contentKey={`${key}-expected`}
+                        content={expected}/>
                 </td>
                 <td className="ver-table-row-value-actual">
-                    {actual}
+                    <SearchableContent
+                        contentKey={`${key}-actual`}
+                        content={actual}/>
                 </td>
                 <td className={statusClassName}>
-                    {status}
+                    <SearchableContent
+                        contentKey={`${key}-status`}
+                        content={status}/>
                 </td>
             </tr>
         );
     }
 
-    private renderTooglerNode(node: TableNode, paddingLevel: number): JSX.Element {
+    private renderTooglerNode(node: TableNode, paddingLevel: number, key: string): React.ReactNode {
 
         const className = createSelector(
             "ver-table-row-toggler",
@@ -196,34 +221,39 @@ class VerificationTableBase extends React.Component<VerificationTableProps, Veri
         );
 
         return (
-            <tr className={className}>
-                <td onClick={() => this.tooglerClick(node)}
+            <tr className={className} key={key}>
+                <td onClick={this.togglerClickHandler(node)}
                     colSpan={4}>
                     <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
-                        {node.name}
+                        <SearchableContent
+                            contentKey={`${key}-name`}
+                            content={node.name}/>
                     </p>
                     <span className="ver-table-row-toggler-count">{node.subEntries.length}</span>
                 </td>
             </tr>
         )
     }
+
+    private togglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
+        this.setState({
+            ...this.state,
+            nodes: this.state.nodes.map(node => this.findNode(node, targetNode))
+        });
+
+        e.stopPropagation();
+    }
 }
 
-export const VerificationTable = connect(
-    (state: AppState) => ({
-        fieldsFilter: state.filter.fieldsFilter
-    }),
-    dispatch => ({})
-)(VerificationTableBase);
 
-export const RecoverableVerificationTable = ({ stateKey, ...props }: RecoverableVerificationTableProps) => (
+export const RecoverableVerificationTable = ({ stateKey, ...props }: RecoveredProps) => (
     // at first table render, we need to generate table nodes if we don't find previous table's state 
     <StateSaver
         stateKey={stateKey}
         getDefaultState={() => props.params ? props.params.map(param => paramsToNodes(param)) : []}>
         {
             (state: TableNode[], stateHandler) => (
-                <VerificationTable
+                <VerificationTableBase
                     {...props}
                     nodes={state}
                     stateSaver={stateHandler}/>
@@ -232,10 +262,18 @@ export const RecoverableVerificationTable = ({ stateKey, ...props }: Recoverable
     </StateSaver>
 )
 
-function paramsToNodes(root: Entry): TableNode {
+function paramsToNodes(root: VerificationEntry): TableNode {
     return root.subEntries ? {
         ...root,
         subEntries: root.subEntries.map((param) => paramsToNodes(param)),
         isExpanded: true
     } : root;
 }
+
+export const VerificationTable = connect(
+    (state: AppState, ownProps: OwnProps): StateProps => ({
+        fieldsFilter: state.filter.fieldsFilter,
+        expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId)
+    }),
+    dispatch => ({})
+)(RecoverableVerificationTable);

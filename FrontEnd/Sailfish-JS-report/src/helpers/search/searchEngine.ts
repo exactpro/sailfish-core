@@ -17,17 +17,21 @@
 import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
-import Action, { isAction } from '../../models/Action';
-import { keyForMessage, keyForAction, keyForActionParamter } from '../keys';
+import Action, { isAction, ActionNodeType } from '../../models/Action';
+import { keyForMessage, keyForAction, keyForActionParamter, keyForVerification } from '../keys';
 import ActionParameter from '../../models/ActionParameter';
-
+import VerificationEntry from '../../models/VerificationEntry';
+import Verification, { isVerification } from '../../models/Verification';
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
     ACTION_FIELDS: Array<keyof Action> = ['name', 'description'],
+    VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
-    // we neeed to ignore 'value' filed in param nodes because it doesn't render
-    INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
+    VERIFICATION_VALUE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status'],
+    // we neeed to ignore all fileds besides 'name' in parent nodes because it doesn't render
+    INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'],
+    VERIFICATION_NODE_FEILDS: Array<keyof VerificationEntry> = ['name'];
 
 export function findAll(searchString: string, testCase: TestCase): SearchResult {
     const searchResults = new Array<[string, number]>();
@@ -53,13 +57,33 @@ function findAllInAction(action: Action, searchString: string): Array<[string, n
 
     results.push(...findAllInObject(action, ACTION_FIELDS, searchString, keyForAction(action.id)));
 
-    action.subNodes
-        .filter(isAction)
-        .forEach(subAction => results.push(...findAllInAction(subAction, searchString)));
+    action.subNodes.forEach(subAction => {
+        switch(subAction.actionNodeType) { 
+            case ActionNodeType.ACTION: {
+                results.push(...findAllInAction(subAction, searchString));
+                return;
+            }
+
+            case ActionNodeType.VERIFICATION: {
+                results.push(...findAllInVerification(subAction, searchString, action.id));
+                return;
+            }
+
+            default: {
+                return;
+            }
+        }
+    });
 
     action.parameters && action.parameters.forEach((param, index) => 
         results.push(...findAllInParams(param, searchString, keyForActionParamter(action.id, index)))
-    )
+    );
+
+    action.subNodes && action.subNodes
+        .filter(isVerification)
+        .forEach(verification => {
+            verification.entries && verification.entries.forEach
+        })
 
     return results;
 }
@@ -76,7 +100,42 @@ function findAllInParams(param: ActionParameter, searchString: string, keyPrefix
 
     param.subParameters && param.subParameters.forEach((param, index) => {
         results.push(...findAllInParams(param, searchString, keyPrefix + `-${index}`));
-    })
+    });
+
+    return results;
+}
+
+function findAllInVerification(verification: Verification, searchString: string, parentActionId: number): Array<[string, number]> {
+    let results = new Array<[string, number]>(),
+        key = keyForVerification(parentActionId, verification.messageId);
+
+    results.push(...findAllInObject(
+        verification,
+        VERIFICATION_FIELDS,
+        searchString,
+        key
+    ));
+
+    verification.entries && verification.entries.forEach((entry, index) => {
+        results.push(...findAllInVerificationEntries(entry, searchString, `${key}-${index}`));
+    });
+
+    return results;
+}
+
+function findAllInVerificationEntries(entry: VerificationEntry, searchString: string, keyPrefix: string): Array<[string, number]> {
+    let results = new Array<[string, number]>();
+
+    results.push(...findAllInObject(
+        entry,
+        entry.subEntries && entry.subEntries.length !== 0 ? VERIFICATION_NODE_FEILDS : VERIFICATION_VALUE_FIELDS,
+        searchString,
+        keyPrefix
+    ));
+
+    entry.subEntries && entry.subEntries.forEach((entry, index) => {
+        results.push(...findAllInVerificationEntries(entry, searchString, `${keyPrefix}-${index}`));
+    });
 
     return results;
 }

@@ -24,6 +24,7 @@ import { keyForActionParamter } from '../../helpers/keys';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import SearchResult from '../../helpers/search/SearchResult';
+import { getParamsExpandPath } from '../../helpers/search/getExpandPath';
 
 const PADDING_LEVEL_VALUE = 10;
 
@@ -174,7 +175,7 @@ class ParamsTableBase extends React.Component<Props, State> {
 
         return (
             <tr className={rootClass} key={key}>
-                <td onClick={this.tooglerClickHandler(node)}
+                <td onClick={this.togglerClickHandler(node)}
                     colSpan={2}>
                     <p style={nameStyle}>
                         <SearchableContent
@@ -187,7 +188,7 @@ class ParamsTableBase extends React.Component<Props, State> {
         )
     }
     
-    private tooglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
+    private togglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
         this.setState({
             ...this.state,
             nodes: this.state.nodes.map(node => this.findNode(node, targetNode))
@@ -221,25 +222,9 @@ function paramsToNodes(root: ActionParameter) : TableNode {
     } : root)
 }
 
-function getExpandPath(searchResults: SearchResult, index: number, actionId: number): number[] {
-    const [currentKey] = searchResults.getByIndex(index);
-
-    if (!currentKey) {
-        return [];
-    }
-
-    const [resultType, id, field, ...path] = currentKey.split('-');
-
-    if (resultType === 'action' && +id === actionId && field === 'parameters') {
-        return path != null ? 
-            path.map(pathSegment => +pathSegment) : 
-            [];
-    }
-}
-
 const ParamsTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
-        expandPath: getExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId)
+        expandPath: getParamsExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId)
     })
 )(RecoverableParamsTable);
 
