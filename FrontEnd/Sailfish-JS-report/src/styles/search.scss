@@ -14,10 +14,51 @@
  * limitations under the License.
  ******************************************************************************/
 
+ @import "./common/vars";
+
 .found {
     background-color: yellow;
 
     &.target {
         background-color: orange; 
+    }
+}
+
+.search-field {
+
+    height: 27px;
+    width: 230px;
+    
+    display: flex;
+    align-items: center;
+
+    background: white;
+    border: 1px solid $primaryTextColor;
+    border-radius: 3px;
+    padding: 0 5px;
+
+    &__counter {
+        color: $primaryTextColor;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    &__icon {
+        background-image: url(../../resources/icons/search.svg);
+        background-size: 100%;
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 16px;
+    }
+
+    &__input {
+        border: 0;
+        background: unset;
+        width: 100%;
+        color: $primaryTextColor;
+
+        &:focus {
+            outline: unset;
+        }
     }
 }

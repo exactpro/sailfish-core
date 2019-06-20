@@ -133,6 +133,10 @@ export const prevSearchResult = () => (<const>{
     type: StateActionTypes.PREV_SEARCH_RESULT
 })
 
+export const clearSearch = () => (<const>{
+    type: StateActionTypes.CLEAR_SEARCH
+})
+
 export const setIsLoading = (isLoading: boolean) => (<const>{
     type: StateActionTypes.SET_IS_LOADING,
     isLoading

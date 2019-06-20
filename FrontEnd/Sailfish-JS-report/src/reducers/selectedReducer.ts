@@ -162,6 +162,16 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
+        case StateActionTypes.CLEAR_SEARCH: {
+            return {
+                ...state,
+                searchResults: new SearchResult(),
+                searchIndex: null,
+                searchString: '',
+                searchResultsCount: null
+            }
+        }
+
         case StateActionTypes.NEXT_SEARCH_RESULT: {
             // TODO - need to share this code beetwen next and prev action handlers
             const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
