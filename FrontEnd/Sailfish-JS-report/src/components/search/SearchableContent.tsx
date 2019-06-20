@@ -18,6 +18,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import '../../styles/search.scss';
+import { createIgnoringRegexp } from '../../helpers/regexp';
 
 interface OwnProps {
     content: string;
@@ -37,10 +38,10 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString 
     if (!searchString || !content) {
         return (
             <span>{content}</span>
-        )
+        );
     }
 
-    const splittedContent = content.split(searchString),
+    const splittedContent = content.split(createIgnoringRegexp(searchString, 'i')),
         internalTargetIndex = targetIndex != null && targetIndex - startIndex;
 
     // we are using 'useRef' instead of 'createRef' in functional components
@@ -54,20 +55,32 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString 
         }
     }, [targetIndex]);
 
+    let contentCounter = 0;
+
     return (
         <span>
             {
-                splittedContent.map((content, index) => [
-                    <span key={index}>{content}</span>,
-                    index !== splittedContent.length - 1 ? 
-                        <span 
-                            className={'found' + (index === internalTargetIndex ? ' target' : '')} 
-                            key={splittedContent.length + index}
-                            ref={index === internalTargetIndex ? targetElement : undefined}>
-                            {searchString}
-                        </span> : 
-                        null
-                ])
+                splittedContent.map((contentPart, index) => {
+                    contentCounter += contentPart.length;
+
+                    const foundContent = content.substring(contentCounter, contentCounter + searchString.length);
+
+                    contentCounter += searchString.length;
+
+                    return [
+                        <span key={index}>
+                            {contentPart}
+                        </span>,
+                        index !== splittedContent.length - 1 ? 
+                            <span 
+                                className={'found' + (index === internalTargetIndex ? ' target' : '')} 
+                                key={splittedContent.length + index}
+                                ref={index === internalTargetIndex ? targetElement : undefined}>
+                                {foundContent}
+                            </span> : 
+                            null
+                    ]
+                })
             }
         </span>
     )

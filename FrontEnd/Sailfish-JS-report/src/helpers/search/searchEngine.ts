@@ -22,6 +22,7 @@ import { keyForMessage, keyForAction, keyForActionParamter, keyForVerification }
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification, { isVerification } from '../../models/Verification';
+import { createIgnoringRegexp } from '../regexp';
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -162,7 +163,7 @@ function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchString:
             return;
         }
 
-        const searchResultsCount = targetField.split(searchString).length - 1;
+        const searchResultsCount = targetField.split(createIgnoringRegexp(searchString, 'i')).length - 1;
 
         if (searchResultsCount > 0) {
             results.push([`${resultKeyPrefix}-${fieldName}`, searchResultsCount]);
