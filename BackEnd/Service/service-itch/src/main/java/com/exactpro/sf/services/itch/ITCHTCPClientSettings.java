@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
+import com.exactpro.sf.aml.Description;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -25,8 +27,10 @@ public class ITCHTCPClientSettings extends ITCHClientSettings {
 
 	private byte flag1;
 
+    @Description("Enable the feature to send heartbeat automatically. You can specify a time interval in 'Heartbeat Timeout' option.")
 	private boolean sendHeartBeats;
 
+    @Description("Send Heartbeat every specified seconds. This feature may be enabled by 'Send Heart Beats' option")
 	private int heartbeatTimeout = 5;
 
 	private String username;

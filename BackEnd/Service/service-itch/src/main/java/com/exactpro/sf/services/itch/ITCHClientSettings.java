@@ -41,9 +41,6 @@ public class ITCHClientSettings extends AbstractMINASettings
 			"Should be set in case of several NICs is setup on machine.")
 	private String networkInterface;
 
-	@Description("Send Heartbeat every idleTimeout seconds")
-	private int idleTimeout;
-
 	@RequiredParam
 	@Description("ID of target Market Data Group should be used in UnitHeader")
 	private byte marketDataGroup;
@@ -96,14 +93,6 @@ public class ITCHClientSettings extends AbstractMINASettings
 
 	public void setNetworkInterface(String networkInterface) {
 		this.networkInterface = networkInterface;
-	}
-
-	public int getIdleTimeout() {
-		return idleTimeout;
-	}
-
-	public void setIdleTimeout(int idleTimeout) {
-		this.idleTimeout = idleTimeout;
 	}
 
 	@Override

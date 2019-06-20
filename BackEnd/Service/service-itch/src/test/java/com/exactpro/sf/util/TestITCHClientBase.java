@@ -80,7 +80,6 @@ public abstract class TestITCHClientBase extends TestClientBase {
         settingsClient.setDictionaryName(dictionaryName);
         settingsClient.setAddress(host);
         settingsClient.setPort(port);
-        settingsClient.setIdleTimeout(1);
         settingsClient.setDoLoginOnStart(doLoginOnStart);
         settingsClient.setHeartbeatTimeout(timeout);
         settingsClient.setUsername("Test");

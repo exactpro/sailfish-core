@@ -62,7 +62,6 @@ public class TestITCHClientNegative extends TestITCHClientBase {
         settingsClient.setDictionaryName(dictionaryName);
         settingsClient.setAddress(host);
         settingsClient.setPort(port);
-        settingsClient.setIdleTimeout(1);
         settingsClient.setDoLoginOnStart(false);
         settingsClient.setHeartbeatTimeout(WAITING_TIMEOUT);
         settingsClient.setUsername("Test");
