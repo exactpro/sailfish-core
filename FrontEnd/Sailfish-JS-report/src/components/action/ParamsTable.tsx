@@ -24,6 +24,7 @@ import { keyForActionParamter } from '../../helpers/keys';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { getParamsExpandPath } from '../../helpers/search/getExpandPath';
+import SearchResult from '../../helpers/search/SearchResult';
 
 const PADDING_LEVEL_VALUE = 10;
 
@@ -36,6 +37,7 @@ interface OwnProps {
 
 interface StateProps {
     expandPath: number[];
+    searchResults: SearchResult;
 }
 
 interface RecoveredProps {
@@ -149,14 +151,10 @@ class ParamsTableBase extends React.Component<Props, State> {
         return (
             <tr className="params-table-row-value" key={key}>
                 <td style={cellStyle}> 
-                    <SearchableContent
-                        content={name}
-                        contentKey={`${key}-name`}/>
+                    {this.renderContent(`${key}-name`, name)}
                 </td>
                 <td style={cellStyle}>
-                    <SearchableContent
-                        content={value}
-                        contentKey={`${key}-value`}/>
+                    {this.renderContent(`${key}-value`, value)}
                 </td>
             </tr>
         )
@@ -177,14 +175,25 @@ class ParamsTableBase extends React.Component<Props, State> {
                 <td onClick={this.togglerClickHandler(node)}
                     colSpan={2}>
                     <p style={nameStyle}>
-                        <SearchableContent
-                            content={node.name}
-                            contentKey={`${key}-name`}/>
+                        {this.renderContent(`${key}-name`, node.name)}
                     </p>
                     <span className="params-table-row-toogler-count">{node.subParameters.length}</span>
                 </td>
             </tr>
         )
+    }
+
+    // we need this for optimization - render SearchableContent component only if it contains some search results
+    private renderContent(contentKey: string, content: string): React.ReactNode {
+        if (this.props.searchResults.size && this.props.searchResults.get(contentKey)) {
+            return (
+                <SearchableContent
+                    contentKey={contentKey}
+                    content={content}/>
+            )
+        } else {
+            return content;
+        }
     }
     
     private togglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
@@ -223,7 +232,8 @@ function paramsToNodes(root: ActionParameter) : TableNode {
 
 const ParamsTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
-        expandPath: getParamsExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId)
+        expandPath: getParamsExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId),
+        searchResults: state.selected.searchResults
     })
 )(RecoverableParamsTable);
 

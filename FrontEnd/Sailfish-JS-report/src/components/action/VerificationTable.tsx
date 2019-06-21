@@ -24,6 +24,7 @@ import { createSelector } from '../../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
 import { getVerificationExpandPath } from '../../helpers/search/getExpandPath';
+import SearchResult from '../../helpers/search/SearchResult';
 
 const PADDING_LEVEL_VALUE = 15;
 
@@ -39,6 +40,7 @@ interface OwnProps {
 interface StateProps {
     fieldsFilter: StatusType[];
     expandPath: number[];
+    searchResults: SearchResult;
 }
 
 interface Props extends Omit<OwnProps, 'params'>, StateProps {
@@ -192,24 +194,16 @@ class VerificationTableBase extends React.Component<Props, State> {
         return (
             <tr className={rootClassName} key={key}>
                 <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
-                    <SearchableContent
-                        contentKey={`${key}-name`}
-                        content={name}/>
+                    {this.renderContent(`${key}-name`, name)}
                 </td>
                 <td className="ver-table-row-value-expected">
-                    <SearchableContent
-                        contentKey={`${key}-expected`}
-                        content={expected}/>
+                    {this.renderContent(`${key}-expected`, expected)}
                 </td>
                 <td className="ver-table-row-value-actual">
-                    <SearchableContent
-                        contentKey={`${key}-actual`}
-                        content={actual}/>
+                    {this.renderContent(`${key}-actual`, actual)}
                 </td>
                 <td className={statusClassName}>
-                    <SearchableContent
-                        contentKey={`${key}-status`}
-                        content={status}/>
+                    {this.renderContent(`${key}-status`, status)}
                 </td>
             </tr>
         );
@@ -227,14 +221,25 @@ class VerificationTableBase extends React.Component<Props, State> {
                 <td onClick={this.togglerClickHandler(node)}
                     colSpan={4}>
                     <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
-                        <SearchableContent
-                            contentKey={`${key}-name`}
-                            content={node.name}/>
+                        {this.renderContent(`${key}-name`, node.name)}
                     </p>
                     <span className="ver-table-row-toggler-count">{node.subEntries.length}</span>
                 </td>
             </tr>
         )
+    }
+
+    // we need this for optimization - render SearchableContent component only if it contains some search results
+    private renderContent(contentKey: string, content: string): React.ReactNode {
+        if (this.props.searchResults.size && this.props.searchResults.get(contentKey)) {
+            return (
+                <SearchableContent
+                    contentKey={contentKey}
+                    content={content}/>
+            )
+        } else {
+            return content;
+        }
     }
 
     private togglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
@@ -275,7 +280,8 @@ function paramsToNodes(root: VerificationEntry): TableNode {
 export const VerificationTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
         fieldsFilter: state.filter.fieldsFilter,
-        expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId)
+        expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId),
+        searchResults: state.selected.searchResults
     }),
     dispatch => ({})
 )(RecoverableVerificationTable);

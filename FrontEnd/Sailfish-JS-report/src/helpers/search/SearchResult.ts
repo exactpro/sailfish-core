@@ -28,6 +28,10 @@ export default class SearchResult {
 
     get = (key: string) => this.results.get(key);
 
+    get size() {
+        return this.results.size;
+    }
+
     get entries() { 
         return [...this.results.entries()];
     }
