@@ -267,7 +267,6 @@
             <value name="BID_REQUEST">k</value>
             <value name="BID_RESPONSE">l</value>
             <value name="LIST_STRIKE_PRICE">m</value>
-            <value name="XML_MESSAGE">n</value>
             <value name="REGISTRATION_INSTRUCTIONS">o</value>
             <value name="REGISTRATION_INSTRUCTIONS_RESPONSE">p</value>
             <value name="ORDER_MASS_CANCEL_REQUEST">q</value>
