@@ -19,23 +19,20 @@ import StateAction from "../actions/stateActions";
 import { setSearchString, setSearchResults } from "../actions/actionCreators";
 import { findAll } from "../helpers/search/searchEngine";
 import AppState from "../state/models/AppState";
+import { batch } from "react-redux";
 
-const REACTIVE_SEARCH_DELAY = 500;
-
-export function reactiveSearch(searchString: string): ThunkAction<void, {}, {}, StateAction> {
+export function performSearch(searchString: string): ThunkAction<void, {}, {}, StateAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateAction>, getState: () => AppState) => {
         const { testCase } = getState().selected;
-
-        dispatch(setSearchString(searchString));
-
+        
+        // async code
         setTimeout(() => {
-            // here we comparing previous and current search string not to execute unnecessary search
-            if (getState().selected.searchString === searchString) {
-                const results = findAll(searchString, testCase);
-                console.log(results)
-
+            const results = findAll(searchString, testCase);
+            
+            batch(() => {
+                dispatch(setSearchString(searchString));
                 dispatch(setSearchResults(results));
-            }
-        }, REACTIVE_SEARCH_DELAY);
+            });
+        }, 1);
     }
 }

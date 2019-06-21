@@ -20,12 +20,14 @@ import AppState from '../../state/models/AppState';
 import { nextSearchResult, prevSearchResult, clearSearch } from '../../actions/actionCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
-import { reactiveSearch } from '../../thunks/search';
+import { performSearch } from '../../thunks/search';
 
 const F_KEY_CODE = 70,
     F3_KEY_CODE = 114,
     ENTER_KEY_CODE = 13,
     ECS_KEY_CODE = 27;
+
+const REACTIVE_SEARCH_DELAY = 500;
 
 interface StateProps {
     searchString: string;
@@ -42,9 +44,23 @@ interface DispatchProps {
 
 interface Props extends StateProps, DispatchProps { }
 
-class SearchInputBase extends React.PureComponent<Props> {
+interface State {
+    inputValue: string;
+    isLoading: boolean;
+}
+
+class SearchInputBase extends React.PureComponent<Props, State> {
 
     private inputElement = React.createRef<HTMLInputElement>();
+    
+    constructor(props: Props) {
+        super(props);
+
+        this.state = {
+            inputValue: props.searchString,
+            isLoading: false
+        }
+    }
 
     componentDidMount() {
         // we need to use 'top' in case of working in iframe
@@ -54,9 +70,20 @@ class SearchInputBase extends React.PureComponent<Props> {
     componentWillUnmount() {
         top.document.removeEventListener("keydown", this.documentOnKeyDown);
     }
+
+    componentDidUpdate(prevProps: Props) {
+        if (this.props.searchString !== prevProps.searchString) {
+            // search string and search results updated, so we need to stop loader
+            this.setState({
+                isLoading: false,
+                inputValue: this.props.searchString
+            });
+        }
+    }
     
     render() {
-        const { searchString, updateSearchString, currentIndex, resultsCount } = this.props;
+        const { currentIndex, resultsCount } = this.props,
+            { inputValue, isLoading } = this.state;
         
         return (
             <div className="search-field">
@@ -64,14 +91,18 @@ class SearchInputBase extends React.PureComponent<Props> {
                     className="search-field__input"
                     ref={this.inputElement}
                     type="text"
-                    value={searchString}
-                    onChange={e => updateSearchString(e.target.value)}
+                    value={inputValue}
+                    onChange={this.inputOnChange}
                     onKeyDown={this.onKeyDown}/>
                 {
-                    searchString ? (
-                        <div className="search-field__counter">
-                            {currentIndex != null ? currentIndex + 1 : 0} / {resultsCount}
-                        </div> 
+                    inputValue ? (
+                        isLoading ? (
+                            <div className="loader"/>
+                        ) : (
+                            <div className="search-field__counter">
+                                {currentIndex != null ? currentIndex + 1 : 0} / {resultsCount}
+                            </div> 
+                        )
                     ) : (
                         <div className="search-field__icon"/>
                     ) 
@@ -105,6 +136,21 @@ class SearchInputBase extends React.PureComponent<Props> {
             this.inputElement.current.focus();
         }
     }
+
+    private inputOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const currentValue = e.target.value;
+
+        this.setState({
+            inputValue: currentValue,
+            isLoading: true
+        });
+
+        setTimeout(() => {
+            if (this.state.inputValue === currentValue) {
+                this.props.updateSearchString(currentValue);
+            }
+        }, REACTIVE_SEARCH_DELAY)
+    }
 }
 
 const SearchInput = connect(
@@ -114,7 +160,7 @@ const SearchInput = connect(
         currentIndex: state.selected.searchIndex
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
-        updateSearchString: searchString => dispatch(reactiveSearch(searchString)),
+        updateSearchString: searchString => dispatch(performSearch(searchString)),
         nextSearchResult: () => dispatch(nextSearchResult()),
         prevSearchResult: () => dispatch(prevSearchResult()),
         clear: () => dispatch(clearSearch())

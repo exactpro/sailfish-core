@@ -33,12 +33,12 @@ const RemeasureHandler = ({ style, measureHandler, children, itemSpacing }: Prop
     const outerRef = React.useRef<HTMLDivElement>(),
         innerRef = React.useRef<HTMLDivElement>();
 
-    // same as componentDidMount
+    // same as componentDidMount / componentDidUpdate
     React.useEffect(() => {
         if (outerRef.current.offsetHeight !== innerRef.current.offsetHeight) {
             measureHandler();
         }
-    }, []);
+    });
 
     return (
         <div style={style} ref={outerRef}>

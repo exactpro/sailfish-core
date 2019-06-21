@@ -29,13 +29,13 @@ interface StateProps {
     targetIndex: number;
     startIndex: number;
     searchString: string;
+    resultsCount: number;
 }
 
 interface Props extends Omit<OwnProps, 'contentKey'>, StateProps {}
 
-const SearchableContentBase = ({ content, startIndex, targetIndex, searchString }: Props) => {
-
-    if (!searchString || !content) {
+const SearchableContentBase = ({ content, startIndex, targetIndex, searchString, resultsCount }: Props) => {
+    if (!searchString || !content || !resultsCount) {
         return (
             <span>{content}</span>
         );
@@ -90,7 +90,8 @@ const SearchableContent = connect(
     ({ selected: state }: AppState, ownProps: OwnProps): StateProps => ({
         searchString: state.searchString,
         targetIndex: state.searchIndex,
-        startIndex: state.searchResults.getStartIndexForKey(ownProps.contentKey)
+        startIndex: state.searchResults.getStartIndexForKey(ownProps.contentKey),
+        resultsCount: state.searchResults.get(ownProps.contentKey)
     })
 )(SearchableContentBase);
 
