@@ -143,17 +143,17 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                                     {
                                         rejectedEnabled ?
                                             (
-                                                [
+                                                <React.Fragment>
                                                     <div className="layout-control__icon prev"
                                                         title="Scroll to previous rejected message"
-                                                        onClick={rejectedEnabled && (() => this.prevRejectedHandler(currentRejectedIndex))} />,
+                                                        onClick={rejectedEnabled && (() => this.prevRejectedHandler(currentRejectedIndex))} />
                                                     <div className="layout-control__counter">
                                                         <p>{currentRejectedIndex + 1} of {rejectedMessages.length}</p>
-                                                    </div>,
+                                                    </div>
                                                     <div className="layout-control__icon next"
                                                         title="Scroll to next rejected message"
                                                         onClick={rejectedEnabled && (() => this.nextRejectedHandler(currentRejectedIndex))} />
-                                                ]
+                                                </React.Fragment>
                                             ) : null
                                     }
                                 </div>
@@ -179,7 +179,7 @@ class RightPanelBase extends React.Component<RightPanelProps> {
         )
     }
 
-    private renderPanels(selectedPanel: Panel): JSX.Element[] {
+    private renderPanels(selectedPanel: Panel): React.ReactNode {
         const messagesRootClass = createSelector(
             "layout-panel__content-wrapper",
             selectedPanel == Panel.Messages ? "" : "disabled"
@@ -193,18 +193,20 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                 selectedPanel == Panel.Logs ? "" : "disabled"
             );
 
-        return [
-            <div className={messagesRootClass}>
-                <MessagesCardList
-                    ref={this.messagesPanel} />
-            </div>,
-            <div className={logsRootClass}>
-                <LogsPane />
-            </div>,
-            <div className={knownBugsRootClass}>
-                {/* Known bugs panel */}
-            </div>
-        ];
+        return (
+            <React.Fragment>
+                <div className={messagesRootClass}>
+                    <MessagesCardList
+                        ref={this.messagesPanel} />
+                </div>
+                <div className={logsRootClass}>
+                    <LogsPane />
+                </div>
+                <div className={knownBugsRootClass}>
+                    {/* Known bugs panel */}
+                </div>
+            </React.Fragment>
+        );
     }
 
     private selectPanel(panel: Panel) {

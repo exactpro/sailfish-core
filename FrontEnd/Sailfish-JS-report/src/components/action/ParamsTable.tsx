@@ -18,12 +18,11 @@ import * as React from 'react';
 import ActionParameter from "../../models/ActionParameter";
 import '../../styles/tables.scss';
 import { createSelector } from '../../helpers/styleCreators';
-import StateSaver, { RecoverableElementProps } from "../util/StateSaver";
+import StateSaver from "../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
 import { keyForActionParamter } from '../../helpers/keys';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import SearchResult from '../../helpers/search/SearchResult';
 import { getParamsExpandPath } from '../../helpers/search/getExpandPath';
 
 const PADDING_LEVEL_VALUE = 10;

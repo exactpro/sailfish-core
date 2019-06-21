@@ -31,7 +31,6 @@ import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
 import StateSaver from '../util/StateSaver';
 import memoize from '../../helpers/memoize';
-import { raf } from '../../helpers/raf';
 import { isCheckpoint } from '../../helpers/actionType';
 import { createExpandTreePath, createExpandTree, getSubTree } from '../../helpers/tree';
 import { keyForAction } from '../../helpers/keys';
@@ -68,38 +67,9 @@ type ActionTreeProps = Omit<ActionTreeContainerProps, 'expandedTreePath'> & {
  */
 class ActionTreeBase extends React.PureComponent<ActionTreeProps> {
 
-    private treeElements: React.ReactNode[] = [];
-
-    // scrolling to action, selected by url sharing
-    componentDidMount() {
-        if (!this.treeElements[+this.props.scrolledActionId]) {
-            return;
-        }
-
-        // https://stackoverflow.com/questions/26556436/react-after-render-code/28748160#comment64053397_34999925
-        // At his point (componentDidMount) DOM havn't fully rendered, so, we calling RAF twice:
-        // At this point React passed components tree to DOM, however it still could be not redered.
-        // First callback will be called before actual render
-        // Second callback will be called when DOM is fully rendered.
-       raf(() => {
-            this.scrollToAction(+this.props.scrolledActionId);
-        }, 2);
-    }
-
     componentDidUpdate(prevProps: ActionTreeProps) {
-        // reference comparison works here because scrolledActionId is a Number object 
-        if (prevProps.scrolledActionId != this.props.scrolledActionId) {
-            this.scrollToAction(+this.props.scrolledActionId);
-        }
-
         if (prevProps.expandState !== this.props.expandState) {
            this.props.onExpand();
-        }
-    }
-
-    scrollToAction(actionId: number) {
-        if (this.treeElements[actionId]) {
-            //this.treeElements[actionId].base.scrollIntoView({ block: 'center' });
         }
     }
 
@@ -130,8 +100,7 @@ class ActionTreeBase extends React.PureComponent<ActionTreeProps> {
                         isRoot={isRoot}
                         isExpanded={expandTreePath.value.isExpanded}
                         onExpand={onExpand}
-                        onRootExpand={this.onExpandFor(action.id)}
-                        ref={ref => this.treeElements[action.id] = ref}>
+                        onRootExpand={this.onExpandFor(action.id)}>
                         {
                             action.subNodes ? action.subNodes.map(
                                 childAction => this.renderNode(

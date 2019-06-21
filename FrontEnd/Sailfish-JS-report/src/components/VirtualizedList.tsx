@@ -16,7 +16,6 @@
 
 import * as React from 'react';
 import { AutoSizer, List, CellMeasurer, CellMeasurerCache, OnScrollParams } from 'react-virtualized';
-import { raf } from '../helpers/raf';
 import RemeasureHandler from './util/RemeasureHandler';
 import { StatusType } from '../models/Status';
 import { HeatmapScrollbar } from './heatmap/HeatmapScrollbar';

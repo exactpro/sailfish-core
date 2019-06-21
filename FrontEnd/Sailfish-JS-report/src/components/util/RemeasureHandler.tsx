@@ -30,8 +30,8 @@ interface Props {
  */
 const RemeasureHandler = ({ style, measureHandler, children, itemSpacing }: Props) => {
 
-    const outerRef = React.createRef<HTMLDivElement>(),
-        innerRef = React.createRef<HTMLDivElement>();
+    const outerRef = React.useRef<HTMLDivElement>(),
+        innerRef = React.useRef<HTMLDivElement>();
 
     // same as componentDidMount
     React.useEffect(() => {

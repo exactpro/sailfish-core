@@ -151,10 +151,12 @@ class VerificationTableBase extends React.Component<Props, State> {
                 </div>
                 <table>
                     <thead>
-                        <th>Name</th>
-                        <th className="ver-table-flexible">Expected</th>
-                        <th className="ver-table-flexible">Actual</th>
-                        <th>Status</th>
+                        <tr>
+                            <th>Name</th>
+                            <th className="ver-table-flexible">Expected</th>
+                            <th className="ver-table-flexible">Actual</th>
+                            <th>Status</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {nodes.map((param, index) => this.renderTableNodes(param, fieldsFilter, `${keyPrefix}-${index}`))}

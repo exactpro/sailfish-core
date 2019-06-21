@@ -18,14 +18,13 @@ import * as React from 'react';
 import Action from "../../models/Action";
 import ParamsTable from './ParamsTable';
 import { RecoverableExpandablePanel, ExpandablePanel } from "../ExpandablePanel";
-import { StatusType } from "../../models/Status";
 import "../../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";
 import { ExceptionChain } from "../ExceptionChain";
 import { Chip } from "../Chip";
 import { createSelector } from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
-import { keyForAction, keyForActionParamter } from '../../helpers/keys';
+import { keyForAction } from '../../helpers/keys';
 import { SearchExpandablePanel } from '../ExpandablePanel';
 
 interface CardProps {
@@ -35,7 +34,6 @@ interface CardProps {
     isRoot?: boolean;
     isTransaparent?: boolean;
     isExpanded?: boolean;
-    ref?: Function;
     onSelect?: (action: Action) => void;
     onExpand: () => void;
     onRootExpand: (isExpanded: boolean) => void;

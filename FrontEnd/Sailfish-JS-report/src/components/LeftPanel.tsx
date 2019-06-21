@@ -89,15 +89,15 @@ class LeftPanelBase extends React.Component<LeftPanelProps> {
                         {
                             cpEnabled ? 
                             (
-                                [
+                                <React.Fragment>
                                     <div className="layout-control__icon prev"
-                                        onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>,
+                                        onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>
                                     <div className="layout-control__counter">
                                         <p>{cpIndex + 1} of {checkpointActions.length}</p>
-                                    </div>,
+                                    </div>
                                     <div className="layout-control__icon next"
                                         onClick={cpEnabled && (() => this.nextCpHandler(cpIndex))}/>
-                                ]
+                                </React.Fragment>
                             ) : null
                         }
                     </div>
@@ -109,7 +109,7 @@ class LeftPanelBase extends React.Component<LeftPanelProps> {
         )
     }
 
-    private renderPanels(selectedPanel: Panel): JSX.Element[] {
+    private renderPanels(selectedPanel: Panel): React.ReactNode {
         const actionRootClass = createSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.Actions ? null : "disabled"
@@ -119,15 +119,17 @@ class LeftPanelBase extends React.Component<LeftPanelProps> {
                 selectedPanel == Panel.Status ? null : "disabled"
             );
     
-        return [
-            <div className={actionRootClass}>
-                <ActionsList
-                    ref={this.actionPanel}/>
-            </div>,
-            <div className={statusRootClass}>
-                <StatusPanel/>
-            </div>
-        ]
+        return (
+            <React.Fragment>
+                <div className={actionRootClass}>
+                    <ActionsList
+                        ref={this.actionPanel}/>
+                </div>
+                <div className={statusRootClass}>
+                    <StatusPanel/>
+                </div>
+            </React.Fragment>
+        )
     }
 
     private selectPanel(panel: Panel) {
