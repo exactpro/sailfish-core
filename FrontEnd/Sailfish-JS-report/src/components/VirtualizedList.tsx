@@ -19,6 +19,7 @@ import { AutoSizer, List, CellMeasurer, CellMeasurerCache, OnScrollParams } from
 import RemeasureHandler from './util/RemeasureHandler';
 import { StatusType } from '../models/Status';
 import { HeatmapScrollbar } from './heatmap/HeatmapScrollbar';
+import { raf } from '../helpers/raf';
 
 interface VirtualizedListProps {
     elementRenderer: (idx: number, measure?: () => void) => React.ReactNode;
@@ -61,8 +62,26 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         this.updateList();
     }
 
+    componentDidUpdate(prevProps: VirtualizedListProps) {
+        // Here we handle a situation, when primitive value of Number object doesn't changed 
+        // and passing new index value in List doesn't make any effect (because it requires primitive value).
+        // So we need to scroll List manually.
+        if (prevProps.scrolledIndex !== this.props.scrolledIndex) {
+            this.list.current.scrollToRow(+this.props.scrolledIndex);
+        }
+    }
+
+    componentDidMount() {
+        if (this.props.scrolledIndex != null) {
+            // we need raf here, because in componentDidMount virtualized list is not complete its render
+            raf(() => {
+                this.list.current.scrollToRow(+this.props.scrolledIndex);
+            });
+        }
+    }
+
     render() {
-        const { rowCount, scrolledIndex, selectedElements } = this.props;
+        const { rowCount, selectedElements } = this.props;
 
         return (
             <AutoSizer onResize={this.onResize}>
@@ -84,7 +103,6 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
                             rowRenderer={this.rowRenderer}
                             onScroll={this.listOnScroll}
                             scrollToAlignment="center"
-                            scrollToIndex={scrolledIndex != null ? +scrolledIndex : undefined}
                             ref={this.list}
                             style={{ overflowX: "visible", overflowY: "visible", paddingRight: 15 }}/>
                     </HeatmapScrollbar>
@@ -132,15 +150,6 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         // Updating scrollTop for scrollbar when scroll trriggered by scrolledIndex change
         if (scrollTop !== this.lastScrollTop) {
             this.scrollbar.current && this.scrollbar.current.scrollTop(scrollTop);
-        }
-    }
-
-    componentDidUpdate(prevProps: VirtualizedListProps) {
-        // Here we handle a situation, when primitive value of Number object doesn't changed 
-        // and passing new index value in List doesn't make any effect (because it requires primitive value).
-        // So we need to scroll List manually.
-        if (prevProps.scrolledIndex !== this.props.scrolledIndex && +prevProps.scrolledIndex === +this.props.scrolledIndex) {
-            this.list.current.scrollToRow(+this.props.scrolledIndex);
         }
     }
 }
