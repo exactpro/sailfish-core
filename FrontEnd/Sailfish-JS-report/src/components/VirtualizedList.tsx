@@ -66,8 +66,14 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         // Here we handle a situation, when primitive value of Number object doesn't changed 
         // and passing new index value in List doesn't make any effect (because it requires primitive value).
         // So we need to scroll List manually.
-        if (prevProps.scrolledIndex !== this.props.scrolledIndex) {
-            this.list.current.scrollToRow(+this.props.scrolledIndex);
+        if (prevProps.scrolledIndex !== this.props.scrolledIndex && this.props.scrolledIndex != null) {
+            // We need raf here because in some cases scroling happened before remeasuring row heights,
+            // so we need to wait until component is complete rerender after remeasuring changed rows, 
+            // and then scroll to selected row.
+            // Without it List will calculate wrong scrollTop because it contains outdated information about row's heights.
+            raf(() => {
+                this.list.current.scrollToRow(+this.props.scrolledIndex);
+            });
         }
     }
 

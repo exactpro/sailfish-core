@@ -17,19 +17,14 @@
 import * as React from 'react';
 import { Provider, StateSaverContext } from './StateSaver';
 
-interface ProviderProps {
-    children: JSX.Element | JSX.Element[];
-}
-
-interface ProviderState {
+interface State {
     statesMap: Map<string, any>;
 }
-
 
 /**
  * Context provider for StateSaver
  */
-export default class StateSaverProvider extends React.Component<ProviderProps, ProviderState> {
+export default class StateSaverProvider extends React.Component<{}, State> {
 
     constructor(props) {
         super(props);
@@ -40,14 +35,14 @@ export default class StateSaverProvider extends React.Component<ProviderProps, P
     }
 
     private stateHandler = (stateKey: string, nextState: any) => {
-        if (this.state.statesMap[stateKey] !== nextState) {
-            const nextStatesMap = new Map(this.state.statesMap);
+        if (this.state.statesMap.get(stateKey) !== nextState) {
+            // todo(we realy need to do something with it)
+            
+            // using 'setState(state)' is an anti-pattern, but we can't create new state on each call, 
+            // because in some cases component recievs too many updates and it updates state only for last call.
+            this.state.statesMap.set(stateKey, nextState);
 
-            nextStatesMap.set(stateKey, nextState);
-
-            this.setState({
-                statesMap: nextStatesMap
-            });
+            this.setState(this.state);
         }
     }
 

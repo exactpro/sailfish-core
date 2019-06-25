@@ -51,6 +51,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
             <div className={className}
                 onClick={e => {
                     onSelect(messageId, status.status);
+                    
                     // here we cancel handling by parent divs
                     e.stopPropagation();
                 }}>

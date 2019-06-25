@@ -34,7 +34,7 @@ interface CardProps {
     isRoot?: boolean;
     isTransaparent?: boolean;
     isExpanded?: boolean;
-    onSelect?: (action: Action) => void;
+    onSelect: (action: Action) => void;
     onExpand: () => void;
     onRootExpand: (isExpanded: boolean) => void;
 }
@@ -71,8 +71,8 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
     const clickHandler = (e: React.MouseEvent) => {
-        if (!onSelect) return;
         onSelect(action);
+
         // here we cancel handling by parent divs
         e.stopPropagation();
     };

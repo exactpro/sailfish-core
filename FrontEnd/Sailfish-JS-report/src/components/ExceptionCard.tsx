@@ -36,40 +36,42 @@ export default class ExceptionCard extends React.Component<Props, State> {
         }
     }
 
-    toggle() {
-        this.setState({isExpanded: !this.state.isExpanded})
-    }
-
     render() {
         const { exception, drawDivider } = this.props,
             { isExpanded } = this.state;
 
         const divider = (
-                <div className="status-panel-exception-divider">
-                    <div className="status-panel-exception-divider-icon"/>
-                </div>
+            <div className="status-panel-exception-divider">
+                <div className="status-panel-exception-divider-icon"/>
+            </div>
         )
 
         return (
             <div>
                 {drawDivider? divider : null}
                 <div className="status-panel failed">
-                        <div className="status-panel-exception-wrapper">
-                            <div className="status-panel-exception-header">
-                                <div>{isExpanded? exception.class + ": " : null}</div>
-                                <div>{exception.message}</div>
-                            </div>
-                            <div className="status-panel-exception-expand" onClick={e => this.toggle()}>
-                                <div className="status-panel-exception-expand-title">More</div>
-                                <div className={"status-panel-exception-expand-icon " + (isExpanded ? "expanded" : "hidden")}/>
-                            </div>
+                    <div className="status-panel-exception-wrapper">
+                        <div className="status-panel-exception-header">
+                            <div>{isExpanded? exception.class + ": " : null}</div>
+                            <div>{exception.message}</div>
                         </div>
-                        <div style={{ display: isExpanded ? null : "none"}} className="status-panel-exception-stacktrace">
-                            <pre>{exception.stacktrace}</pre>
+                        <div className="status-panel-exception-expand" onClick={this.onTogglerClick}>
+                            <div className="status-panel-exception-expand-title">More</div>
+                            <div className={"status-panel-exception-expand-icon " + (isExpanded ? "expanded" : "hidden")}/>
                         </div>
+                    </div>
+                    <div style={{ display: isExpanded ? null : "none"}} className="status-panel-exception-stacktrace">
+                        <pre>{exception.stacktrace}</pre>
+                    </div>
                 </div>
             </div>
         )
+    }
+
+    private onTogglerClick = (e: React.MouseEvent) => {
+        this.setState({isExpanded: !this.state.isExpanded});
+
+        e.stopPropagation();
     }
 }
 

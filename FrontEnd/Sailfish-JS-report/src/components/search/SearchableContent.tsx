@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import '../../styles/search.scss';
 import { createIgnoringRegexp } from '../../helpers/regexp';
+import { raf } from '../../helpers/raf';
 
 interface OwnProps {
     content: string;
@@ -37,7 +38,7 @@ interface Props extends Omit<OwnProps, 'contentKey'>, StateProps {}
 const SearchableContentBase = ({ content, startIndex, targetIndex, searchString, resultsCount }: Props) => {
     if (!searchString || !content || !resultsCount) {
         return (
-            <span>{content}</span>
+            <React.Fragment>{content}</React.Fragment>
         );
     }
 
@@ -50,9 +51,12 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString,
 
     // fires only if target index has been changed
     React.useEffect(() => {
-        if (targetElement.current) {
-            targetElement.current.scrollIntoView({ block: 'center', inline: 'nearest' });
-        }
+        // we neeed to scroll to target element after VirtualizedList scrolled to current row
+        raf(() => {
+            if (targetElement.current) {
+                targetElement.current.scrollIntoView({ block: 'center', inline: 'nearest' });
+            }
+        });
     }, [targetIndex]);
 
     let contentCounter = 0;

@@ -118,10 +118,10 @@ class VerificationTableBase extends React.Component<Props, State> {
 
     updateExpandPath([currentIndex, ...expandPath]: number[], prevState: TableNode[]): TableNode[] {
         return prevState.map(
-            (node, index) => index === currentIndex ? {
+            (node, index): TableNode => index === currentIndex ? {
                 ...node,
                 isExpanded: true,
-                subParameters: node.subEntries && this.updateExpandPath(expandPath, node.subEntries)
+                subEntries: node.subEntries && this.updateExpandPath(expandPath, node.subEntries)
             } : node
         )
     }
@@ -140,12 +140,12 @@ class VerificationTableBase extends React.Component<Props, State> {
                     </div>
                     <div className="ver-table-header-control">
                         <span className="ver-table-header-control-button"
-                            onClick={() => this.setExpandStatus(false)}>
+                            onClick={this.onControlButtonClick(false)}>
                             Collapse
                         </span>
                         <span> | </span>
                         <span className="ver-table-header-control-button"
-                            onClick={() => this.setExpandStatus(true)}>
+                            onClick={this.onControlButtonClick(true)}>
                             Expand
                         </span>
                         <span> all groups</span>
@@ -218,7 +218,7 @@ class VerificationTableBase extends React.Component<Props, State> {
 
         return (
             <tr className={className} key={key}>
-                <td onClick={this.togglerClickHandler(node)}
+                <td onClick={this.onTogglerClick(node)}
                     colSpan={4}>
                     <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
                         {this.renderContent(`${key}-name`, node.name)}
@@ -242,12 +242,17 @@ class VerificationTableBase extends React.Component<Props, State> {
         }
     }
 
-    private togglerClickHandler = (targetNode: TableNode) => (e: React.MouseEvent) => {
+    private onTogglerClick = (targetNode: TableNode) => (e: React.MouseEvent) => {
         this.setState({
             ...this.state,
             nodes: this.state.nodes.map(node => this.findNode(node, targetNode))
         });
 
+        e.stopPropagation();
+    }
+
+    private onControlButtonClick = (expandStatus: boolean) => (e: React.MouseEvent) => {
+        this.setExpandStatus(expandStatus);
         e.stopPropagation();
     }
 }

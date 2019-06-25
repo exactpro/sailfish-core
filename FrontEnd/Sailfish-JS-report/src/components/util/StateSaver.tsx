@@ -28,7 +28,7 @@ export interface StateSaverContext {
 export const { Provider, Consumer } = React.createContext({});
 
 export interface StateSaverProps<S> extends RecoverableElementProps {
-    children: (state: S, stateHandler: (nextState: S) => any) => JSX.Element;
+    children: (state: S, stateHandler: (nextState: S) => any) => React.ReactNode;
     getDefaultState?: () => S;
 }
 
@@ -39,12 +39,39 @@ export interface StateSaverProps<S> extends RecoverableElementProps {
 const StateSaver = <S extends {}>({ children, stateKey, getDefaultState }: StateSaverProps<S>) => (
     <Consumer>
         {
-            ({ states, saveState }: StateSaverContext) => children(
-                states.has(stateKey) ? states.get(stateKey) : getDefaultState && getDefaultState(), 
-                nextState => saveState(stateKey, nextState)
-            )
+            ({ states, saveState }: StateSaverContext) => {
+                const saveNextState = nextState => saveState(stateKey, nextState);
+
+                if (states.has(stateKey) || !getDefaultState) {
+                    return children(states.get(stateKey), saveNextState)
+                } else {
+                    const defaultState = getDefaultState();
+
+                    return (
+                        <DefaultStateSaver
+                            saveState={saveNextState}
+                            defaultState={defaultState}>
+                            {children(defaultState, saveNextState)}
+                        </DefaultStateSaver>
+                    )
+                }
+            }
         }
     </Consumer>
 )
+
+interface DefaultStateSaverProps<S> {
+    saveState: (nextState: S) => any;
+    defaultState: S;
+    children: React.ReactNode;
+}
+
+const DefaultStateSaver = <S extends {}>({ saveState, defaultState, children }: DefaultStateSaverProps<S>) => {
+    React.useEffect(() => {
+        saveState(defaultState);
+    }, []);
+
+    return <React.Fragment>{children}</React.Fragment>;
+}
 
 export default StateSaver;
