@@ -16,6 +16,7 @@
 
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import { AnyAction } from "redux";
+import { batch } from "react-redux";
 import { fetchReport } from "../helpers/jsonp";
 import { setReport, setIsLoading } from "../actions/actionCreators";
 import StateActionType from "../actions/stateActions";
@@ -25,8 +26,12 @@ export function loadReport(): ThunkAction<void, {}, {}, AnyAction> {
         dispatch(setIsLoading(true));
 
         fetchReport()
-            .then(report => dispatch(setReport(report)))
-            .catch(err => console.error(err))
-            .finally(() => dispatch(setIsLoading(false)));
+            .then(report => {
+                batch(() => {
+                    dispatch(setReport(report));
+                    dispatch(setIsLoading(false));
+                });
+            })
+            .catch(err => console.error(err));
     }
 }

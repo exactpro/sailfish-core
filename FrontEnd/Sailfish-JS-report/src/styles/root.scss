@@ -48,12 +48,13 @@ p, h1, h2, h3, h4, h5, pre {
     width: 100%;
     height: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 
-    &__title {
-        font-size: 20px;
-        font-weight: bold;
-        color: $primaryTextColor;
+    &__spinner {
+        @include spinner(5px, lightgray, darkgray, 2s);
+        height: 40px;
+        width: 40px;
     }
 }

@@ -19,7 +19,7 @@ import '../styles/root.scss';
 
 const SplashScreen = () => (
     <div className="splash-screen"> 
-        <p className="splash-screen__title">Loading...</p>
+        <div className="splash-screen__spinner"/>
     </div>
 )
 
