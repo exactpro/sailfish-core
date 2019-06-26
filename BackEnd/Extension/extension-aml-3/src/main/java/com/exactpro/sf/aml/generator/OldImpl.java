@@ -341,9 +341,11 @@ public class OldImpl {
 
         if (v.isReference()) {
             val = NewImpl.generateFilter(action.getLine(), column, tempValue, TAB3);
-        } else {
+        } else if (NewImpl.isNotASimpleFilter(val)) {
             IFieldStructure structure = new FieldStructure(column, null, null, null, null, null, JavaType.JAVA_LANG_STRING, false, false, false, null);
             val = NewImpl.createFilterExpression(structure, tempValue.getOrigValue(), action.getLine(), action.getUID(), column, alertCollector);
+        } else {
+            val = enclose(val);
         }
 
         String setter = ".put(\"" + column + "\", " + val + ")";

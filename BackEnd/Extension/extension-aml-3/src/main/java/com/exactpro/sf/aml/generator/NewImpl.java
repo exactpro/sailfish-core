@@ -1620,6 +1620,13 @@ public class NewImpl {
         return "filter";
     }
 
+    public static boolean isNotASimpleFilter(String value) {
+        return value.equals(CONV_VALUE_PRESENT) ||
+                value.equals(CONV_VALUE_MISSING) ||
+                checkValue(value) ||
+                isRegex(value);
+    }
+
     public static String createFilterExpression(IFieldStructure fType, String origValue, long line, long uid, String column, AlertCollector alertCollector) {
 		String v = origValue;
 
