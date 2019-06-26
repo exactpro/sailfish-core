@@ -153,7 +153,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
     );
 }
 
-function renderMessageTypeLabels(message: Message): JSX.Element[] {
+function renderMessageTypeLabels(message: Message): React.ReactNodeArray {
     let labels = [];
 
     if (message.content.rejectReason !== null) {

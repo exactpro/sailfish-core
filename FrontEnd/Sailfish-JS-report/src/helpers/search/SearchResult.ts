@@ -64,7 +64,7 @@ export default class SearchResult {
             return index < count;
         });
 
-        return targetEntry || [null, null];
+        return targetEntry || [undefined, undefined];
     }
 
     /**

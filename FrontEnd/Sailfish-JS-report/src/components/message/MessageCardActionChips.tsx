@@ -66,7 +66,7 @@ const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: 
     )
 }
 
-function renderChip(status: StatusType, statusActions: Action[], selectedStatus: StatusType, selectHandeler: SelectHandler): JSX.Element {
+function renderChip(status: StatusType, statusActions: Action[], selectedStatus: StatusType, selectHandeler: SelectHandler): React.ReactNode {
 
     if (!statusActions || statusActions.length == 0) {
         return null;

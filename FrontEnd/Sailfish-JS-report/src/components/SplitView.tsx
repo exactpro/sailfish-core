@@ -37,7 +37,7 @@ export interface SplitViewProps {
     /**
      * Panel for compoentns : first child - for left panel, second child - for right panel, other childs will be ignored
      */
-    children: JSX.Element[];
+    children: React.ReactNodeArray;
 }
 
 interface SplitState {

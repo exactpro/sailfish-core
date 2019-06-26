@@ -130,7 +130,7 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
     )
 }
 
-function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): JSX.Element {
+function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): React.ReactNode {
     const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
         valueClassName = createSelector(
             "report-summary__element-value",

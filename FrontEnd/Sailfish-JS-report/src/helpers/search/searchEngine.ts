@@ -23,6 +23,7 @@ import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification, { isVerification } from '../../models/Verification';
 import { createIgnoringRegexp } from '../regexp';
+import { isCheckpoint } from '../actionType';
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -39,8 +40,8 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
 
     if (searchString) {
         testCase.actions
-            .filter(isAction)
-            .forEach(action => searchResults.push(...findAllInAction(action, searchString)));
+            .filter(actionNode => isAction(actionNode) && !isCheckpoint(actionNode))
+            .forEach(action => searchResults.push(...findAllInAction(action as Action, searchString)));
 
         searchResults.push(...testCase.messages.reduce((acc, message) => [...acc, ...findAllInObject(
             message,

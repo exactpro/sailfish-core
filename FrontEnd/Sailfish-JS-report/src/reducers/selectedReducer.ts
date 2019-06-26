@@ -23,6 +23,7 @@ import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/actionType';
 import { findAll } from '../helpers/search/searchEngine';
 import SearchResult from '../helpers/search/SearchResult';
+import getScrolledIndex from '../helpers/search/getScrolledIndex';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -152,13 +153,16 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         case StateActionTypes.SET_SEARCH_RESULTS: {
             const { searchResults } = stateAction, 
                 searchResultsCount = searchResults.sum(),  
-                searchIndex = searchResultsCount > 0 ? 0 : null;
+                searchIndex = searchResultsCount > 0 ? 0 : null,
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(searchResults, searchIndex);
 
             return {
                 ...state,
                 searchResults,
                 searchIndex,
-                searchResultsCount
+                searchResultsCount,
+                scrolledActionId: actionId,
+                scrolledMessageId: msgId
             }
         }
 
@@ -173,12 +177,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         }
 
         case StateActionTypes.NEXT_SEARCH_RESULT: {
-            // TODO - need to share this code beetwen next and prev action handlers
             const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
-                [currentKey] = state.searchResults.getByIndex(targetIndex),
-                [keyType, keyId] = currentKey.split('-'),
-                msgId = keyType === 'msg' ? new Number(keyId) : state.scrolledMessageId,
-                actionId = keyType === 'action' ? new Number(keyId) : state.scrolledActionId;
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
 
             return {
                 ...state,
@@ -189,12 +189,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         }
 
         case StateActionTypes.PREV_SEARCH_RESULT: {            
-            // TODO - need to share this code beetwen next and prev action handlers
             const targetIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
-                [currentKey] = state.searchResults.getByIndex(targetIndex),
-                [keyType, keyId] = currentKey.split('-'),
-                msgId = keyType === 'msg' ? new Number(keyId) : state.scrolledMessageId,
-                actionId = keyType === 'action' ? new Number(keyId) : state.scrolledActionId;
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
 
             return {
                 ...state,

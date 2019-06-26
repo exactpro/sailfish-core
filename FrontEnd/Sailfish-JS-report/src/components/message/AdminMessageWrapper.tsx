@@ -73,7 +73,7 @@ const AdminMessageWrapperBase = (props: WrapperProps) => {
     );
 }
 
-function renderMessageTypeLabels(message: Message): JSX.Element[] {
+function renderMessageTypeLabels(message: Message): React.ReactNodeArray {
     let labels = [];
 
     if (message.content.rejectReason !== null) {

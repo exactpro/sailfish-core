@@ -29,7 +29,7 @@ interface MessagesVirtualizedListOwnProps {
         index: number, 
         messageState: MessageCardExpandState,
         messageStateHandler: (nextState: MessageCardExpandState) => any
-    ) => JSX.Element;
+    ) => React.ReactNode;
 }
 
 interface MessagesVirtualizedListStateProps {
@@ -69,7 +69,7 @@ class MessagesVirtualizedListBase extends React.Component<MessagesVirtualizedLis
         )
     }
 
-    private rowRenderer = (index: number, measure: () => void): JSX.Element => {
+    private rowRenderer = (index: number, measure: () => void): React.ReactNode => {
         const state = this.messagesCardStates[index];
 
         return this.props.messageRenderer(
