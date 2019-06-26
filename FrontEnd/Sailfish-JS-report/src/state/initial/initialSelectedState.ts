@@ -35,5 +35,6 @@ export const initialSelectedState: SelectedState = {
     searchString: '',
     searchResults: new SearchResult(),
     searchResultsCount: null,
-    searchIndex: null
+    searchIndex: null,
+    shouldScrollToSearchItem: false
 }

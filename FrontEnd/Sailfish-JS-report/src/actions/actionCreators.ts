@@ -137,6 +137,11 @@ export const clearSearch = () => (<const>{
     type: StateActionTypes.CLEAR_SEARCH
 })
 
+export const setShouldScrollToSearchItem = (isNeedsScroll: boolean) => (<const>{
+    type: StateActionTypes.SET_SHOULD_SCROLL_TO_SEARCH_ITEM,
+    isNeedsScroll
+}) 
+
 export const setIsLoading = (isLoading: boolean) => (<const>{
     type: StateActionTypes.SET_IS_LOADING,
     isLoading

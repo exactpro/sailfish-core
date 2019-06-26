@@ -162,7 +162,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 searchIndex,
                 searchResultsCount,
                 scrolledActionId: actionId,
-                scrolledMessageId: msgId
+                scrolledMessageId: msgId,
+                shouldScrollToSearchItem: true
             }
         }
 
@@ -184,7 +185,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 searchIndex: targetIndex,
                 scrolledMessageId: msgId,
-                scrolledActionId: actionId
+                scrolledActionId: actionId,
+                shouldScrollToSearchItem: true
             }
         }
 
@@ -196,7 +198,15 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 searchIndex: targetIndex,
                 scrolledMessageId: msgId,
-                scrolledActionId: actionId
+                scrolledActionId: actionId,
+                shouldScrollToSearchItem: true
+            }
+        }
+
+        case StateActionTypes.SET_SHOULD_SCROLL_TO_SEARCH_ITEM: {
+            return {
+                ...state,
+                shouldScrollToSearchItem: stateAction.isNeedsScroll 
             }
         }
 

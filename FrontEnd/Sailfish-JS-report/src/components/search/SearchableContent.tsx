@@ -20,6 +20,7 @@ import AppState from '../../state/models/AppState';
 import '../../styles/search.scss';
 import { createIgnoringRegexp } from '../../helpers/regexp';
 import { raf } from '../../helpers/raf';
+import { setShouldScrollToSearchItem } from '../../actions/actionCreators';
 
 interface OwnProps {
     content: string;
@@ -31,11 +32,16 @@ interface StateProps {
     startIndex: number;
     searchString: string;
     resultsCount: number;
+    needsScroll: boolean;
 }
 
-interface Props extends Omit<OwnProps, 'contentKey'>, StateProps {}
+interface DispatchProps {
+    onScrolled: () => any;
+}
 
-const SearchableContentBase = ({ content, startIndex, targetIndex, searchString, resultsCount }: Props) => {
+interface Props extends Omit<OwnProps, 'contentKey'>, StateProps, DispatchProps {}
+
+const SearchableContentBase = ({ content, startIndex, targetIndex, searchString, resultsCount, needsScroll, onScrolled }: Props) => {
     if (!searchString || !content || !resultsCount) {
         return (
             <React.Fragment>{content}</React.Fragment>
@@ -53,8 +59,11 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString,
     React.useEffect(() => {
         // we neeed to scroll to target element after VirtualizedList scrolled to current row
         raf(() => {
-            if (targetElement.current) {
+            // 'needsScroll' flag is used here not to scroll to target in case of second render after virtualized row unmount.
+            // TODO - it's realy bad solution to store some flags in redux - we need to think how to handle this situation without it.
+            if (targetElement.current && needsScroll) {
                 targetElement.current.scrollIntoView({ block: 'center', inline: 'nearest' });
+                onScrolled();
             }
         });
     }, [targetIndex]);
@@ -95,7 +104,11 @@ const SearchableContent = connect(
         searchString: state.searchString,
         targetIndex: state.searchIndex,
         startIndex: state.searchResults.getStartIndexForKey(ownProps.contentKey),
-        resultsCount: state.searchResults.get(ownProps.contentKey)
+        resultsCount: state.searchResults.get(ownProps.contentKey),
+        needsScroll: state.shouldScrollToSearchItem
+    }),
+    (dispatch): DispatchProps => ({
+        onScrolled: () => dispatch(setShouldScrollToSearchItem(false))
     })
 )(SearchableContentBase);
 

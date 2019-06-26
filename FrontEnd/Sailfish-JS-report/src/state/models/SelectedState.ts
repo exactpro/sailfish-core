@@ -35,6 +35,7 @@ export default interface SelectedState {
     searchResults: SearchResult;
     searchResultsCount: number;
     searchIndex: number;
+    shouldScrollToSearchItem: boolean;
     
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
