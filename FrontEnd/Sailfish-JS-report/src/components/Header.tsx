@@ -90,10 +90,12 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
                         <div className="header-button__icon right"/>
                     </div>
                 </div>
-                <SearchInput/>
                 <div className="header-button   header-main__contol-button" onClick={() => setShowFilter(!showFilter)}>
                     <div className="header-button__icon filter" />
                     <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
+                </div>
+                <div className="header-main__search">
+                    <SearchInput/>
                 </div>
             </div>
             <div className={infoClass}>
