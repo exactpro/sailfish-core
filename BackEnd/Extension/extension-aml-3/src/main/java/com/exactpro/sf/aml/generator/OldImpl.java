@@ -344,7 +344,7 @@ public class OldImpl {
         } else if (NewImpl.isNotASimpleFilter(val)) {
             IFieldStructure structure = new FieldStructure(column, null, null, null, null, null, JavaType.JAVA_LANG_STRING, false, false, false, null);
             val = NewImpl.createFilterExpression(structure, tempValue.getOrigValue(), action.getLine(), action.getUID(), column, alertCollector);
-        } else {
+        } else if (!v.isJava()) {
             val = enclose(val);
         }
 
