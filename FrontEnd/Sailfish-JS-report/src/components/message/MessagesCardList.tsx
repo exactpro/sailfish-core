@@ -17,7 +17,7 @@
 import * as React from 'react';
 import '../../styles/messages.scss';
 import Message from '../../models/Message';
-import { MessageCard } from './MessageCard';
+import MessageCard from './MessageCard';
 import { StatusType } from '../../models/Status';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
@@ -25,14 +25,13 @@ import { CheckpointMessage } from '../Checkpoint';
 import { isCheckpoint, isAdmin } from '../../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { selectMessage } from '../../actions/actionCreators';
-import { MessagesVirtualizedList } from './MessagesVirtualizedList';
-import MessageCardExpandState from '../../models/view/MessageCardExpandState';
 import { messagesHeatmap } from '../../helpers/heatmapCreator';
+import StateSaverProvider from '../util/StateSaverProvider';
+import { VirtualizedList } from '../VirtualizedList';
 
 interface MessagesListStateProps {
     messages: Message[];
     scrolledMessageId: Number;
-    selectedCheckpointId: number;
     selectedMessages: number[];
     selectedStatus: StatusType;
 }
@@ -66,10 +65,10 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
         });
     }
 
-    componentWillReceiveProps(nextProps: MessagesListProps) {
-        if (this.props.scrolledMessageId !== nextProps.scrolledMessageId && nextProps.scrolledMessageId != null) {
+    componentDidUpdate(prevProps: MessagesListProps) {
+        if (this.props.scrolledMessageId !== prevProps.scrolledMessageId && prevProps.scrolledMessageId != null) {
             this.setState({ 
-                scrolledIndex: this.getScrolledIndex(nextProps.scrolledMessageId, nextProps.messages)
+                scrolledIndex: this.getScrolledIndex(this.props.scrolledMessageId, this.props.messages)
             });
         }
     }
@@ -86,45 +85,42 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
 
         return (
             <div className="messages-list">
-                <MessagesVirtualizedList
-                    selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
-                    messagesCount={messages.length}
-                    scrolledIndex={scrolledIndex}
-                    messageRenderer={(index, ...renderProps) => this.renderMessage(messages[index], ...renderProps)}/>
+                <StateSaverProvider>
+                    <VirtualizedList
+                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
+                        rowCount={messages.length}
+                        elementRenderer={this.renderMessage}
+                        itemSpacing={6}
+                        scrolledIndex={scrolledIndex}
+                    />
+                </StateSaverProvider>
             </div>
         );
     }
 
-    private renderMessage(message: Message, expandState: MessageCardExpandState, messageStateHandler: (nextState: MessageCardExpandState) => any) {
+    private renderMessage = (index: number, onMeasure: () => void) => {
+
+        const message = this.props.messages[index];
 
         if (isCheckpoint(message)) {
             return <CheckpointMessage message={message}/>;
         }
 
         if (isAdmin(message)) {
-            return this.renderAdmin(message, expandState, messageStateHandler);
+            return (
+                <AdminMessageWrapper
+                    onExpand={onMeasure}
+                    key={message.id}
+                    message={message}/>
+            )
         }
 
         return (
             <MessageCard
-                message={message}
-                showRaw={expandState.showRaw}
-                showRawHandler={showRaw => messageStateHandler({ showRaw: showRaw })}
-            />
-        );
-    }
-
-    private renderAdmin(message: Message, expandState: MessageCardExpandState, messageStateHandler: (nextState: MessageCardExpandState) => any) {        
-        return (
-            <AdminMessageWrapper
-                message={message}
+                onExpand={onMeasure}
                 key={message.id}
-                showRaw={expandState.showRaw}
-                showRawHandler={showRaw => messageStateHandler({ ...expandState, showRaw: showRaw })}
-                isExpanded={expandState.adminExpanded}
-                expandHandler={isExpanded => messageStateHandler({ ...expandState, adminExpanded: isExpanded })}
-            />
-        )
+                message={message}/>
+        );
     }
 }
 
@@ -132,7 +128,6 @@ export const MessagesCardList = connect(
     (state: AppState): MessagesListStateProps => ({
         messages: state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
-        selectedCheckpointId: state.selected.checkpointMessageId,
         selectedMessages: state.selected.messagesId,
         selectedStatus: state.selected.status
     }),

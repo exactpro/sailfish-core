@@ -23,7 +23,7 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
         case StateActionTypes.SET_ADMIN_MSG_ENABLED: {
             return {
                 ...state,
-                adminMessagesEnabled: stateAction.adminEnabled
+                adminMessagesEnabled: new Boolean(stateAction.adminEnabled)
             }
         }
 

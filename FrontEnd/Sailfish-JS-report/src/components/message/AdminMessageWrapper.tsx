@@ -16,20 +16,27 @@
 
 import * as React from 'react';
 import "../../styles/messages.scss";
-import { MessageCardProps, MessageCardContainer, MessageCardBase } from "./MessageCard";
+import { MessageCardContainer, RecoverableMessageCard, MessageCardStateProps, MessageCardDispatchProps, MessageCardOwnProps } from "./MessageCard";
 import Message from '../../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
 import { createBemBlock } from '../../helpers/styleCreators';
+import StateSaver from '../util/StateSaver';
 
-interface WrapperProps extends MessageCardProps {
+interface RecoveredProps {
     isExpanded: boolean;
     expandHandler: (isExpanded: boolean) => any;
 }
 
-const AdminMessageWrapperBase = (props: WrapperProps) => {
+interface MessageCardOuterProps extends MessageCardStateProps, MessageCardDispatchProps, MessageCardOwnProps {}
 
-    if (props.isExpanded) {
+interface WrapperProps extends MessageCardOuterProps, RecoveredProps {}
 
+const AdminMessageWrapperBase = ({ isExpanded, expandHandler, ...props }: WrapperProps) => {
+
+    // we need to remeasure card's height when 'isExpanded' state changed
+    React.useEffect(props.onExpand, [isExpanded]);
+
+    if (isExpanded) {
         const expandButtonClass = createBemBlock(
             "mc-expand-btn", 
             props.message.content.rejectReason != null ? "rejected" : null
@@ -37,9 +44,9 @@ const AdminMessageWrapperBase = (props: WrapperProps) => {
 
         return (
             <div style={{position: "relative"}}>
-                <MessageCardBase {...props}/>
+                <RecoverableMessageCard {...props}/>
                 <div className={expandButtonClass}>
-                    <div className="mc-expand-btn__icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
+                    <div className="mc-expand-btn__icon" onClick={() => expandHandler(!isExpanded)}/>
                 </div>
             </div>
         );
@@ -66,7 +73,7 @@ const AdminMessageWrapperBase = (props: WrapperProps) => {
                 <div className="mc-header__name">Name</div>
                 <div className="mc-header__name-value">{props.message.msgName}</div>
                 <div className="mc-header__expand">
-                    <div className="mc-header__expand-icon" onClick={() => props.expandHandler(!props.isExpanded)}/>
+                    <div className="mc-header__expand-icon" onClick={() => expandHandler(!isExpanded)}/>
                 </div>
             </div>
         </div>
@@ -109,5 +116,26 @@ function getLabelsCount(message: Message) {
     return count;
 }
 
+interface RecoverableState {
+    isExpanded: boolean;
+    lastAdminEnabled: Boolean;
+};
 
-export const AdminMessageWrapper = MessageCardContainer(AdminMessageWrapperBase);
+const RecoverableAdminMessageWrapper = (props: MessageCardOuterProps) => (
+    <StateSaver
+        stateKey={`msg-${props.message.id}-admin`}
+        getDefaultState={() : RecoverableState => ({ isExpanded: false, lastAdminEnabled: props.adminEnabled })}>
+        {({ isExpanded, lastAdminEnabled }: RecoverableState, saveState) => (
+            // We pass in adminEnabled flag only if it was changed since last component update.
+            // It works because adminEnabled is Boolean object and we can use reference comparison.
+            // (same logic in Actions / Messages lists with scrolled indexes)
+            <AdminMessageWrapperBase
+                {...props}
+                // it is important to use 'Bolean.valueOf()' because Boolean(false) is truthy
+                isExpanded={props.adminEnabled !== lastAdminEnabled ? props.adminEnabled.valueOf() : isExpanded}
+                expandHandler={nextIsExpanded => saveState({ isExpanded: nextIsExpanded, lastAdminEnabled: props.adminEnabled })}/>
+        )}
+    </StateSaver>
+)
+
+export const AdminMessageWrapper = MessageCardContainer(RecoverableAdminMessageWrapper);

@@ -234,7 +234,7 @@ export const RightPanel = connect(
     (state: AppState): RightPanelStateProps => ({
         adminMessages: state.selected.testCase.messages.filter(isAdmin),
         rejectedMessages: state.selected.testCase.messages.filter(isRejected),
-        adminMessagesEnabled: state.view.adminMessagesEnabled,
+        adminMessagesEnabled: state.view.adminMessagesEnabled.valueOf(),
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         panel: state.view.rightPanel,
 

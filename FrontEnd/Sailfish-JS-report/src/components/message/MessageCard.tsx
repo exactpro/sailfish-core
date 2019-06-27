@@ -32,29 +32,34 @@ import { isRejected } from '../../helpers/messageType';
 import SearchableContent from '../search/SearchableContent';
 import { keyForMessage } from '../../helpers/keys';
 import {MessagePredictionIndicator} from "../machinelearning/MlPredictionIndicator";
+import StateSaver from '../util/StateSaver';
 
 const HUE_SEGMENTS_COUNT = 36;
 
 export interface MessageCardOwnProps {
     message: Message;
-    showRaw?: boolean;
-    rejectedMessagesCount?: number;
-    showRawHandler?: (showRaw: boolean) => any;
+    onExpand: () => void;
 }
 
-interface MessageCardStateProps {
-    rejectedMessagesCount?: number;
-    isSelected?: boolean;
-    status?: StatusType;
+export interface RecoveredProps {
+    showRaw: boolean;
+    showRawHandler: (showRaw: boolean) => any;
 }
 
-interface MessageCardDispatchProps {
+export interface MessageCardStateProps {
+    rejectedMessagesCount: number;
+    isSelected: boolean;
+    status: StatusType;
+    adminEnabled: Boolean;
+}
+
+export interface MessageCardDispatchProps {
     selectHandler: (status?: StatusType) => any;
 }
 
-export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps { }
+export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps, RecoveredProps { }
 
-export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler }: MessageCardProps) => {
+export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler, onExpand }: MessageCardProps) => {
     const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
@@ -64,6 +69,9 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
         showRawClass = createBemElement("mc-show-raw", "icon", showRaw ? "expanded" : "hidden"),
         // session arrow color, we calculating it for each session from-to pair, based on hash 
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
+
+    // we need to remeasure card's height when 'showRaw' state changed
+    React.useEffect(onExpand, [showRaw]);
 
     return (
         <div className={rootClass}>
@@ -199,15 +207,31 @@ function calculateHueValue(from: string, to: string): number {
         % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
 }
 
+export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCardOwnProps & MessageCardDispatchProps) => (
+    <StateSaver
+        stateKey={`msg-${props.message.id}`}
+        getDefaultState={() => false}>
+        {(showRaw, saveState) => (
+            <MessageCardBase
+                {...props}
+                showRaw={showRaw}
+                showRawHandler={saveState}/>
+        )}
+    </StateSaver>
+)
+
 export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
         isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
         status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null,
-        rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null
+        rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null,
+        adminEnabled: state.view.adminMessagesEnabled
     }),
     (dispatch, ownProps: MessageCardOwnProps) : MessageCardDispatchProps => ({
         selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status))
     })
 );
 
-export const MessageCard = MessageCardContainer(MessageCardBase);
+const MessageCard = MessageCardContainer(RecoverableMessageCard);
+
+export default MessageCard;
