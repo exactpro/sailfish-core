@@ -531,11 +531,11 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 	public void visit(String fieldName, IMessage message, IFieldStructure complexField, boolean isDefault) {
 		logger.trace("Decode - field: {}", fieldName);
 
-		IMessage msg = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
-        ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, msg, msgFactory);
+		IMessage subMessage = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
+        ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, subMessage, msgFactory);
 		MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
 		messageStructureWriter.traverse(visitor, complexField.getFields());
-		msg.addField(fieldName, msg);
+        msg.addField(fieldName, subMessage);
 	}
 
 	private final void reverseBytes(byte[] data) {
