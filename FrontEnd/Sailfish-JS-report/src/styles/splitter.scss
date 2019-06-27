@@ -20,7 +20,7 @@
     width: 100%;
     height: 100%;
     display: grid;
-    //grid-template-rows: 100%;
+    // Default values. Will be overwritten by style at SplitView component.
     grid-template-columns: calc(50% - 13px) 25px calc(50% - 13px);
     grid-template-areas: "left-pane splitter-bar right-pane";
     position: relative;

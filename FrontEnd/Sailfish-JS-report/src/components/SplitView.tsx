@@ -18,16 +18,14 @@ import * as React from 'react';
 import '../styles/splitter.scss';
 import { createSelector } from '../helpers/styleCreators';
 
-const SPLITTER_WIDTH = 25;
-
 /**
  * Props for splitter component
  */
 export interface SplitViewProps {
     /**
-     * Min precentage width for all panels 
+     * Min width for both panels 
      */
-    minPanelPercentageWidth: number;
+    minPanelWidth: number;
     
     /**
      * (optional) Resize event handler, recieves left and right widths in px.
@@ -47,11 +45,11 @@ interface SplitState {
 
 export class SplitView extends React.Component<SplitViewProps, SplitState> {
 
-    private rightPanel : HTMLElement;
-    private leftPanel : HTMLElement;
-    private root : HTMLElement;
-    private splitter : HTMLElement;
-    private lastPosition : number;
+    private rightPanel  = React.createRef<HTMLDivElement>();
+    private leftPanel  = React.createRef<HTMLDivElement>();
+    private root = React.createRef<HTMLDivElement>();
+    private splitter = React.createRef<HTMLDivElement>();
+    private lastPosition : number = 0;
 
     constructor(props) {
         super(props);
@@ -59,30 +57,29 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
             leftPanelWidth: 0,
             isDragging: false
         };
-        this.onMouseMove = this.onMouseMove.bind(this)
     }
 
     componentDidMount() {
-        if (this.root) {
+        if (this.root.current) {
             this.setState({
                 ...this.state,
-                leftPanelWidth: this.root.offsetWidth / 2
+                leftPanelWidth: this.root.current.offsetWidth / 2
             });
         }
     }
 
     componentDidUpdate(prevProps: SplitViewProps, prevState: SplitState) {
         if (this.state.leftPanelWidth != prevState.leftPanelWidth && this.props.resizeHandler) {
-            this.props.resizeHandler(this.leftPanel.offsetWidth, this.rightPanel.offsetWidth);
+            this.props.resizeHandler(this.leftPanel.current.offsetWidth, this.rightPanel.current.offsetWidth);
         }
     }
     
     splitterMouseDown(e: React.MouseEvent) {
-        this.root.addEventListener("mousemove", this.onMouseMove);
-        this.root.addEventListener("mouseleave", this.onMouseUpOrLeave)
-        this.root.addEventListener("mouseup", this.onMouseUpOrLeave)
+        this.root.current.addEventListener("mousemove", this.onMouseMove);
+        this.root.current.addEventListener("mouseleave", this.onMouseUpOrLeave)
+        this.root.current.addEventListener("mouseup", this.onMouseUpOrLeave)
         this.lastPosition = e.clientX;
-        this.splitter.style.left = this.leftPanel.scrollWidth.toString() + 'px';
+        this.splitter.current.style.left = this.leftPanel.current.scrollWidth.toString() + 'px';
 
         this.setState({
             ...this.state, 
@@ -91,9 +88,9 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
     }
 
     onMouseUpOrLeave = (e: MouseEvent) => {
-        this.root.removeEventListener("mouseleave", this.onMouseUpOrLeave);
-        this.root.removeEventListener("mouseup", this.onMouseUpOrLeave);
-        this.root.removeEventListener("mousemove", this.onMouseMove);
+        this.root.current.removeEventListener("mouseleave", this.onMouseUpOrLeave);
+        this.root.current.removeEventListener("mouseup", this.onMouseUpOrLeave);
+        this.root.current.removeEventListener("mousemove", this.onMouseMove);
 
         this.stopDragging();
     }
@@ -109,7 +106,7 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
     
     resetPosition(newPosition: number) {
         const diff = newPosition - this.lastPosition;
-        this.splitter.style.left = (this.getElementStylePropAsNumber(this.splitter, 'left') + diff).toString() + 'px';
+        this.splitter.current.style.left = (this.getElementStylePropAsNumber(this.splitter.current, 'left') + diff).toString() + 'px';
         this.lastPosition = newPosition;
     }
 
@@ -117,53 +114,59 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
         this.setState({
             ...this.state,
             isDragging: false,
-            leftPanelWidth: this.getElementStylePropAsNumber(this.splitter, 'left')
+            leftPanelWidth: this.getElementStylePropAsNumber(this.splitter.current, 'left')
         });
 
-        this.splitter.style.left = null;
+        this.splitter.current.style.left = null;
     }
 
     render() {
-        const { children, minPanelPercentageWidth } = this.props,
+        const { children, minPanelWidth } = this.props,
             { leftPanelWidth, isDragging } = this.state;
 
-        let rightWidth = (this.root ?
-            (this.root.offsetWidth - leftPanelWidth) -  SPLITTER_WIDTH / 2
-            : 50);
-        let leftWidth = leftPanelWidth -  SPLITTER_WIDTH / 2;
-/*
-        if (percentageRightWidth < minPanelPercentageWidth) {
-            percentageRightWidth = minPanelPercentageWidth - splitterPercentageWidth;
-            percentageLeftWidth = 100 - minPanelPercentageWidth - splitterPercentageWidth;
-        } else if (percentageLeftWidth < minPanelPercentageWidth) {
-            percentageLeftWidth = minPanelPercentageWidth - splitterPercentageWidth;
-            percentageRightWidth = 100 - minPanelPercentageWidth - splitterPercentageWidth;
+        let rootStyle: React.CSSProperties = null;
+
+        // during first render we can't calculate panel's widths
+        if (this.root.current) {
+            let splitterWidth = this.splitter.current.offsetWidth,
+                rightWidth = (this.root.current.offsetWidth - leftPanelWidth) - splitterWidth / 2,
+                leftWidth = leftPanelWidth -  splitterWidth / 2;
+
+            if (rightWidth < minPanelWidth) {
+                rightWidth = minPanelWidth;
+                leftWidth = this.root.current.offsetWidth - rightWidth - splitterWidth;
+            } else if (leftWidth < minPanelWidth) {
+                leftWidth = minPanelWidth;
+                rightWidth = this.root.current.offsetWidth - leftWidth - splitterWidth;
+            }
+
+            rootStyle = { gridTemplateColumns: `${leftWidth}px ${splitterWidth}px ${rightWidth}px` };
         }
-*/
+
         const leftClassName = createSelector("splitter-pane-left", isDragging ? "dragging" : null),
               rightClassName = createSelector("splitter-pane-right", isDragging ? "dragging" : null),
               splitterClassName = createSelector("splitter-bar", isDragging ? "dragging" : null),
               rootClassName = createSelector("splitter", isDragging ? "dragging" : null);
 
         return (
-            <div className={rootClassName} ref={ref => this.root = ref}
-                style={{gridTemplateColumns: `${leftWidth}px ${SPLITTER_WIDTH}px ${rightWidth}px`}}>
+            <div className={rootClassName} ref={this.root}
+                style={rootStyle}>
                 <div className={leftClassName} 
-                    ref={ref => this.leftPanel = ref}>
+                    ref={this.leftPanel}>
                     {children[0]}
                 </div>
-                <div className={rightClassName} ref={pane => this.rightPanel = pane}>
+                <div className={rightClassName} ref={this.rightPanel}>
                     {children[1]}
                 </div>
                 <div className={splitterClassName} onMouseDown={(e) => this.splitterMouseDown(e)}
-                    ref={ref => this.splitter = ref}>
+                    ref={this.splitter}>
                     <div className="splitter-bar-icon"/>
                 </div>
             </div>
         )
     }
 
-    getElementStylePropAsNumber(element: HTMLElement, stylePropName: string): number {
+    private getElementStylePropAsNumber(element: HTMLElement, stylePropName: string): number {
         if (!element.style[stylePropName]) {
             return 0;
         }

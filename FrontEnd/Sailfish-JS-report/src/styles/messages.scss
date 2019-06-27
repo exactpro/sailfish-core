@@ -117,6 +117,7 @@
         grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
         grid-template-areas: "info name name-value name-value name-value prediction"
                              "timestamp session from session-icon to prediction";
+        align-items: center;
 
         &::after {
             border-bottom: 2px solid $defaultCardBackground;
@@ -214,6 +215,7 @@
         padding-left: 8px;
         font-size: 13px;
         font-weight: bold;
+        word-break: break-all;
     }
 
     &__session, &__name {

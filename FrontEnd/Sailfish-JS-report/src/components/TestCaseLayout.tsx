@@ -21,6 +21,8 @@ import { LeftPanel } from './LeftPanel';
 import { RightPanel } from './RightPanel';
 import '../styles/layout.scss';
 
+const MIN_PANEL_WIDTH = 600;
+
 const TestCaseLayout = () =>  (
     <div className="layout">
         <div className="layout__header">
@@ -28,7 +30,7 @@ const TestCaseLayout = () =>  (
         </div>
         <div className="layout__body">
             <SplitView
-                minPanelPercentageWidth={30}>
+                minPanelWidth={MIN_PANEL_WIDTH}>
                 <LeftPanel/>
                 <RightPanel/>
             </SplitView>
