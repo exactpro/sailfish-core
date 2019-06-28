@@ -36,6 +36,8 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 
 public class FileBackedList<E> extends AbstractList<E> implements RandomAccess {
+    private static final int ESTIMATED_SIZE = 131072;
+
     protected final File path;
     protected final ISerializer<E> serializer;
 
@@ -45,7 +47,11 @@ public class FileBackedList<E> extends AbstractList<E> implements RandomAccess {
         this.path = Objects.requireNonNull(path, "path cannot be null");
         this.serializer = Objects.requireNonNull(serializer, "serializer cannot be null");
 
-        initPath(path);
+        try {
+            initPath(path);
+        } catch (IOException e) {
+            throw new EPSCommonException("Failed to initialize path: " + path, e);
+        }
     }
 
     public FileBackedList(String path, ISerializer<E> serializer, IWorkspaceDispatcher dispatcher) {
@@ -79,7 +85,7 @@ public class FileBackedList<E> extends AbstractList<E> implements RandomAccess {
         }
     }
 
-    private void initPath(File path) {
+    private void initPath(File path) throws IOException {
         if(!path.isDirectory()) {
             throw new EPSCommonException("Path is not a directory: " + path);
         }
@@ -88,22 +94,22 @@ public class FileBackedList<E> extends AbstractList<E> implements RandomAccess {
             throw new EPSCommonException("Failed to create a directory: " + path);
         }
 
-        File[] files = path.listFiles();
-        BitSet indices = new BitSet(size = files.length);
+        BitSet indices = new BitSet(ESTIMATED_SIZE);
 
-        for(File file : files) {
-            if(!file.isFile()) {
+        Files.list(path.toPath()).forEach(file -> {
+            if (!Files.isRegularFile(file)) {
                 throw new EPSCommonException("Directory can contain only files: " + path);
             }
 
-            String name = file.getName();
+            String name = file.getFileName().toString();
 
             if(!StringUtils.isNumeric(name)) {
                 throw new EPSCommonException("File names should be only numeric in: " + path);
             }
 
             indices.set(Integer.valueOf(name));
-        }
+            size++;
+        });
 
         if(indices.nextClearBit(0) != size) {
             throw new EPSCommonException("Inconsistent indices in: " + path);
