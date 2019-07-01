@@ -30,6 +30,7 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.ConsumerAction;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.ConsumerActionWithParameters;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.FunctionAction;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionCaller.FunctionActionWithParameters;
+import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 
 import net.bytebuddy.ByteBuddy;
 
@@ -37,20 +38,20 @@ import net.bytebuddy.ByteBuddy;
 public class ActionNameRetriever {
     private static final ThreadLocal<Map<Class<? extends IActionCaller>, IActionCallerProxy>> CACHE = ThreadLocal.withInitial(HashMap::new);
 
-    public static <T extends IActionCaller> String getMethodName(Class<? extends IActionCaller> clazz, ConsumerAction<T> method) throws Throwable {
-        return getMethodName(clazz, caller -> method.accept((T)caller, null));
+    public static <T extends IActionCaller> String getMethodName(Class<? extends IActionCaller> clazz, ConsumerAction<T> method, IActionContext actionContext) throws Throwable {
+        return getMethodName(clazz, caller -> method.accept((T)caller, actionContext));
     }
 
-    public static <T extends IActionCaller, R> String getMethodName(Class<? extends IActionCaller> clazz, FunctionAction<T, R> method) throws Throwable {
-        return getMethodName(clazz, caller -> method.apply((T)caller, null));
+    public static <T extends IActionCaller, R> String getMethodName(Class<? extends IActionCaller> clazz, FunctionAction<T, R> method, IActionContext actionContext) throws Throwable {
+        return getMethodName(clazz, caller -> method.apply((T)caller, actionContext));
     }
 
-    public static <T extends IActionCaller, P> String getMethodName(Class<? extends IActionCaller> clazz, ConsumerActionWithParameters<T, P> method) throws Throwable {
-        return getMethodName(clazz, caller -> method.accept((T)caller, null, null));
+    public static <T extends IActionCaller, P> String getMethodName(Class<? extends IActionCaller> clazz, ConsumerActionWithParameters<T, P> method, IActionContext actionContext, P parameters) throws Throwable {
+        return getMethodName(clazz, caller -> method.accept((T)caller, actionContext, parameters));
     }
 
-    public static <T extends IActionCaller, P, R> String getMethodName(Class<? extends IActionCaller> clazz, FunctionActionWithParameters<T, P, R> method) throws Throwable {
-        return getMethodName(clazz, caller -> method.apply((T)caller, null, null));
+    public static <T extends IActionCaller, P, R> String getMethodName(Class<? extends IActionCaller> clazz, FunctionActionWithParameters<T, P, R> method, IActionContext actionContext, P parameters) throws Throwable {
+        return getMethodName(clazz, caller -> method.apply((T)caller, actionContext, parameters));
     }
 
     private static String getMethodName(Class<? extends IActionCaller> clazz, CheckedConsumer<IActionCaller> method) throws Throwable {

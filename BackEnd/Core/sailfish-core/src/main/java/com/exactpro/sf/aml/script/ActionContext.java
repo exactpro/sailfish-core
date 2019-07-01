@@ -525,12 +525,12 @@ public class ActionContext implements IActionContext {
         callAction(() -> {
             action.accept(actionClass, this);
             return null;
-        }, getMethodName(actionClass.getClass(), action), null, tag, verificationOrder);
+        }, getMethodName(actionClass.getClass(), action, this), null, tag, verificationOrder);
     }
 
     @Override
     public <T extends IActionCaller, R> R callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Throwable {
-        return callAction(() -> action.apply(actionClass, this), getMethodName(actionClass.getClass(), action), null, tag, verificationOrder);
+        return callAction(() -> action.apply(actionClass, this), getMethodName(actionClass.getClass(), action, this), null, tag, verificationOrder);
     }
 
     @Override
@@ -538,12 +538,12 @@ public class ActionContext implements IActionContext {
         callAction(() -> {
             action.accept(actionClass, this, parameters);
             return null;
-        }, getMethodName(actionClass.getClass(), action), parameters, tag, verificationOrder);
+        }, getMethodName(actionClass.getClass(), action, this, parameters), parameters, tag, verificationOrder);
     }
 
     @Override
     public <T extends IActionCaller, P, R> R callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Throwable {
-        return callAction(() -> action.apply(actionClass, this, parameters), getMethodName(actionClass.getClass(), action), parameters, tag, verificationOrder);
+        return callAction(() -> action.apply(actionClass, this, parameters), getMethodName(actionClass.getClass(), action, this, parameters), parameters, tag, verificationOrder);
     }
 
     @SuppressWarnings("unchecked")
