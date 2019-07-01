@@ -15,12 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.storage;
 
+import static org.jooq.lambda.Unchecked.consumer;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import org.apache.commons.io.FileUtils;
+import java.nio.file.Files;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -37,7 +38,7 @@ public class ServiceEventList extends FileBackedList<FileServiceEvent> {
         size = 0;
 
         try {
-            FileUtils.cleanDirectory(path);
+            Files.list(path.toPath()).forEach(consumer(Files::delete));
         } catch(IOException e) {
             throw new EPSCommonException("Failed to clean directory", e);
         }
