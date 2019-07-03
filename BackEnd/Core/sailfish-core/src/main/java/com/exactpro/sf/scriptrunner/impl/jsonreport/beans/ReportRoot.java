@@ -17,20 +17,13 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ReportRoot {
     private Instant finishTime;
     private Instant startTime;
-
     private final List<Alert> alerts = new ArrayList<>();
     //IMPORTANT: access should be synchronized
-    private Set<Bug> bugs = new HashSet<>();
     private Map<String, String> plugins = new HashMap<>();
     private String hostName;
     private String userName;
@@ -73,14 +66,6 @@ public class ReportRoot {
 
     public void setPlugins(Map<String, String> plugins) {
         this.plugins = plugins;
-    }
-
-    public Set<Bug> getBugs() {
-        return bugs;
-    }
-
-    public void setBugs(Set<Bug> bugs) {
-        this.bugs = bugs;
     }
 
     public String getHostName() {
@@ -162,5 +147,4 @@ public class ReportRoot {
     public void setReportProperties(ReportProperties reportProperties) {
         this.reportProperties = reportProperties;
     }
-
 }

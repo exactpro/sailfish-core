@@ -16,8 +16,11 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
+import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+
 import java.io.File;
 import java.time.Instant;
+import java.util.Collection;
 
 public class TestCaseMetadata {
 
@@ -29,6 +32,8 @@ public class TestCaseMetadata {
     private int hash;
     private String description;
 
+    private Collection<IJsonReportNode> bugs;
+
     private String jsonFileName;
     private String jsonpFileName;
 
@@ -36,6 +41,7 @@ public class TestCaseMetadata {
     }
 
     public TestCaseMetadata(TestCase testCase, File jsonpFile, File jsonFile) {
+        this.bugs = testCase.getBugTree();
         this.startTime = testCase.getStartTime();
         this.finishTime = testCase.getFinishTime();
         this.name = testCase.getName();
@@ -45,6 +51,15 @@ public class TestCaseMetadata {
         this.description = testCase.getDescription();
         this.jsonFileName = jsonFile.getName();
         this.jsonpFileName = jsonpFile.getName();
+    }
+
+
+    public Collection<IJsonReportNode> getBugs() {
+        return bugs;
+    }
+
+    public void setBugs(Collection<IJsonReportNode> bugs) {
+        this.bugs = bugs;
     }
 
     public Instant getStartTime() {

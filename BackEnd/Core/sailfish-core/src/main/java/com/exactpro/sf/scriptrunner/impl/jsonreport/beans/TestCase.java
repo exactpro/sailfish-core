@@ -24,13 +24,15 @@ import java.util.List;
 import java.util.Set;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TestCase implements IJsonReportNode {
     private final List<IJsonReportNode> actions;
     private final List<LogEntry> logs;
     private final List<Message> messages;
     private final List<Verification> verifications;
-    private final Set<Bug> bugs;
+    @JsonIgnore private final BugCategory bugRoot;
     private final List<OutcomeSummary> outcomes;
     private Set<String> tags;
     private Instant startTime;
@@ -50,7 +52,7 @@ public class TestCase implements IJsonReportNode {
         this.actions = new ArrayList<>();
         this.logs = new ArrayList<>();
         this.messages = new ArrayList<>();
-        this.bugs = new HashSet<>();
+        this.bugRoot = new BugCategory("root");
         this.verifications = new ArrayList<>();
         this.tags = new HashSet<>();
     }
@@ -62,7 +64,7 @@ public class TestCase implements IJsonReportNode {
             } else if (child instanceof Message) {
                 messages.add((Message)child);
             } else if (child instanceof Bug) {
-                bugs.add((Bug)child);
+                bugRoot.placeBugInTree((Bug)child);
             } else if (child instanceof LogEntry) {
                 logs.add((LogEntry)child);
             } else if (child instanceof Verification) {
@@ -95,8 +97,13 @@ public class TestCase implements IJsonReportNode {
         return verifications;
     }
 
-    public Set<Bug> getBugs() {
-        return bugs;
+    public Collection<Bug> getBugs() {
+        return bugRoot.getAllBugs();
+    }
+
+    @JsonProperty("bugs")
+    public Collection<IJsonReportNode> getBugTree() {
+        return bugRoot.getSubNodes();
     }
 
     public List<OutcomeSummary> getOutcomes() {
