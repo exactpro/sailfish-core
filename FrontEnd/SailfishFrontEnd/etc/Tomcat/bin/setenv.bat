@@ -25,6 +25,7 @@ rem set "JAVA_OPTS=%JAVA_OPTS% -Duser.timezone=UTC" rem Use the user.timezone pr
 rem set "JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
 rem set "JAVA_OPTS=%JAVA_OPTS% -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" rem Use for configure jvm FlightRecorder
 set "JAVA_OPTS=%JAVA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
+set "JAVA_OPTS=%JAVA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
 
 rem Deployer Jvm arguments:
 set "DEPLOYER_JAVA_OPTS="

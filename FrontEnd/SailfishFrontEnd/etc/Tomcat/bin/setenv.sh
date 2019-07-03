@@ -25,6 +25,7 @@ export JAVA_OPTS="$JAVA_OPTS -XX:+HeapDumpOnOutOfMemoryError" #Option tells the 
 #export JAVA_OPTS="$JAVA_OPTS -Djava.net.preferIPv4Stack=true" #IPv4 addresses preferred over IPv6 addresses
 #export JAVA_OPTS="$JAVA_OPTS -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" #Use for configure jvm FlightRecorder
 export JAVA_OPTS="$JAVA_OPTS -XX:+ExitOnOutOfMemoryError" # Option tells that JVM should terminate process if OutOfMemoryError had been thrown
+export JAVA_OPTS="$JAVA_OPTS -Duser.dir=$CATALINA_BASE/temp" # Uses to specify directory for relative paths
 
 #Deployer Jvm arguments:
 export DEPLOYER_JAVA_OPTS=""
