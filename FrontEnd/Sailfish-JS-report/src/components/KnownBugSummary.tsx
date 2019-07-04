@@ -14,31 +14,23 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
-import Status from '../models/Status';
-import { ExceptionChain } from './ExceptionChain';
-import '../styles/statusPanel.scss';
-import { connect } from 'preact-redux';
-import AppState from '../state/models/AppState';
+import { h, Component } from 'preact';
+import KnownBug from '../models/KnownBug'
+import KnownBugCategory from '../models/KnownBugCategory'
+import { ActionNodeType } from '../models/Action';
+import { KnownBugCategoryComponent } from './KnownBugCategoryComponent';
+import '../styles/knownbug.scss';
 
-interface StatusPaneProps {
-    status: Status;
+interface KnownBugSummaryProps {
+    data: (KnownBug | KnownBugCategory)[];
 }
 
-const StatusPanelBase = ({status}: StatusPaneProps) => {
-
-    return (
-        <div class="status">
-            <div class="status-container">
-                <ExceptionChain exception = {status.cause}/>
+export class KnownBugSummary extends Component<KnownBugSummaryProps, {}> {
+    render({ data }: KnownBugSummaryProps) {
+        return (
+            <div class="known-bugs">
+                <KnownBugCategoryComponent isRoot={true} category={{ actionNodeType: ActionNodeType.KNOWN_BUG_CATEGORY, name: null, subNodes: data }} />
             </div>
-        </div>
-    );
+        )
+    }
 }
-
-export const StatusPanel = connect(
-    (state: AppState) => ({
-        status: state.selected.testCase.status
-    }),
-    dispatch => ({})
-)(StatusPanelBase);

@@ -14,19 +14,31 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Status from "./Status";
-import KnownBug from "./KnownBug";
-import KnownBugCategory from "./KnownBugCategory"
+import {h} from 'preact';
+import Status from '../models/Status';
+import { ExceptionChain } from './ExceptionChain';
+import '../styles/statusPanel.scss';
+import { connect } from 'preact-redux';
+import AppState from '../state/models/AppState';
 
-export interface TestcaseMetadata {
-    startTime: string;
-    finishTime: string;
-    name: string;
+interface StatusPanelProps {
     status: Status;
-    id: string;
-    hash: number;
-    description: string;
-    jsonFileName: string;
-    jsonpFileName: string;
-    bugs: (KnownBug | KnownBugCategory) [];
 }
+
+const StatusPanelBase = ({status}: StatusPanelProps) => {
+
+    return (
+        <div class="status">
+            <div class="status-container">
+                <ExceptionChain exception = {status.cause}/>
+            </div>
+        </div>
+    );
+}
+
+export const StatusPanel = connect(
+    (state: AppState) => ({
+        status: state.selected.testCase.status
+    }),
+    dispatch => ({})
+)(StatusPanelBase);

@@ -23,7 +23,7 @@ import Action from '../models/Action';
 import { ActionsList } from './ActionsList';
 import AppState from '../state/models/AppState';
 import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
-import { StatusPanel } from './StatusPane';
+import { StatusPanel } from './StatusPanel';
 import { ActionsListBase } from './ActionsList';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 import { createSelector } from '../helpers/styleCreators';

@@ -65,6 +65,48 @@
         color: $reportTitleTextColor;
         font-weight: bold;
     }
+
+    &__known-bugs-button {
+        display: flex;
+        flex-direction: row;
+        cursor: pointer;
+
+        &.disabled {
+            cursor: default;
+            opacity: 0.4;
+        }
+
+        &__text {
+            color: $primaryTextColor;
+            font-weight: bold;
+            margin-left: 10px;
+            margin-right: 10px;
+
+            &.active {
+                color: $conditionallyPassedTextColor;
+            }
+        }
+
+        &__icon {
+            width: 22px;
+            height: 22px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            &.active {
+                background-image: url(../../resources/icons/known-bug-reproduced.svg);
+            }
+
+            &.disabled {
+                background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
+            }
+
+            &.enabled {
+                background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
+            }
+        }
+    }
 }
 
 .report-header {
@@ -113,11 +155,6 @@
         background-repeat: no-repeat;
     }
 
-    &__divider {
-        border: 1px solid $reportBorderColor;
-        margin: 10px 0;
-    }
-
     &__element {
         width: 100%;
         padding: 5px 0;
@@ -149,7 +186,9 @@
     display: grid;
     grid-template: auto auto / 55px 1fr auto;
     grid-template-areas: "index title status"
-                        "index info elapsed-time";
+                        "index info elapsed-time"
+                        "divider divider divider"
+                        "bugs-indicator bugs-summary bugs-summary";
 
     border: 2px solid var(--status-secondary-border-color);
     border-radius: 5px;
@@ -230,4 +269,18 @@
         display: flex;
         justify-content: flex-end;
     }
+
+    &__known-bug-container {
+        display: contents;
+    }
+
+    .divider {
+        grid-area: divider;
+        margin-left: 20px;
+    }
+}
+
+.divider {
+    border: 1px solid $reportBorderColor;
+    margin: 10px 0;
 }

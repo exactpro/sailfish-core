@@ -14,19 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Status from "./Status";
-import KnownBug from "./KnownBug";
-import KnownBugCategory from "./KnownBugCategory"
+import { h, Component } from 'preact';
+import KnownBug from '../models/KnownBug';
+import { KnownBugStatus } from '../models/KnownBugStatus';
+import '../styles/knownbug.scss';
 
-export interface TestcaseMetadata {
-    startTime: string;
-    finishTime: string;
-    name: string;
-    status: Status;
-    id: string;
-    hash: number;
-    description: string;
-    jsonFileName: string;
-    jsonpFileName: string;
-    bugs: (KnownBug | KnownBugCategory) [];
+interface KnownBugCardProps {
+    bug: KnownBug;
+}
+
+export class KnownBugCard extends Component<KnownBugCardProps, {}> {
+    render({ bug }: KnownBugCardProps) {
+        return (
+            <div class={"known-bugs__bug " + (bug.status === KnownBugStatus.REPRODUCED ? "reproduced" : "not-reproduced")}>
+                {bug.subject}
+            </div>
+        )
+    }
 }

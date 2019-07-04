@@ -14,7 +14,7 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from 'preact';
+import { h, Component } from 'preact';
 import Report from '../models/Report';
 import { connect } from 'preact-redux';
 import AppState from '../state/models/AppState';
@@ -35,95 +35,136 @@ interface ReportLayoutProps {
     onTestCaseSelect: (testCaseName: string) => void;
 }
 
-const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
+interface ReportLayoutState {
+    showKnownBugs: boolean;
+}
 
-    const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
-        plugins = report.plugins ? Object.entries(report.plugins) : [];
+export class ReportLayoutBase extends Component<ReportLayoutProps, ReportLayoutState> {
 
-    return (
-        <div class="report">
-            <div class="report__header   report-header">
-                <div class="report-header__title">{report.name}</div>
-                <a class="report-header__old-report-link" href={OLD_REPORT_PATH}>
-                    <p>Old Version Report</p>
-                </a>
-            </div>
-            <div class="report__summary-title   report__title">
-                <p>Report Summary</p>
-            </div>
-            <div class="report__controls">
-                <div class="report__title">Test Cases</div>
-            </div>
-            <div class="report__summary   report-summary">
-                <div class="report-summary__card">
-                    <div class="report-summary__logo" />
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Version</div>
-                        <div class="report-summary__element-value">{report.version}</div>
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            showKnownBugs: true
+        };
+    }
+
+    toggleKnownBugs() {
+        this.setState({
+            showKnownBugs: !this.state.showKnownBugs
+        })
+    }
+
+    render({ report, onTestCaseSelect }: ReportLayoutProps, { showKnownBugs }: ReportLayoutState) {
+        const knownBugsPresent = report.metadata.some(item => item.bugs.length > 0)
+
+        const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
+            plugins = report.plugins ? Object.entries(report.plugins) : [];
+
+        const knownBugsClass = showKnownBugs ? "active" : "enabled";
+
+        const knownBugsButton = (
+            knownBugsPresent ?
+                (
+                    <div class={"report__known-bugs-button " + knownBugsClass} onClick={() => this.toggleKnownBugs()}>
+                        <div class={"report__known-bugs-button__icon " + knownBugsClass} />
+                        <div class={"report__known-bugs-button__text " + knownBugsClass}>Known bugs</div>
                     </div>
-                    <div class="report-summary__divider" />
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Host</div>
-                        <div class="report-summary__element-value">{report.hostName}</div>
+                ) : (
+                    <div class="report__known-bugs-button disabled">
+                        <div class="report__known-bugs-button__icon disabled" />
+                        <div class="report__known-bugs-button__text disabled">No known bugs</div>
                     </div>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">User</div>
-                        <div class="report-summary__element-value">{report.userName}</div>
-                    </div>
-                    <div class="report-summary__divider"/>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">ScriptRun ID</div>
-                        <div class="report-summary__element-value">{report.scriptRunId}</div>
-                    </div>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Report Date</div>
-                        <div class="report-summary__element-value">{formatTime(report.startTime)}</div>
-                    </div>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Execution time</div>
-                        <div class="report-summary__element-value">{executionTime}</div>
-                    </div>
-                    <div class="report-summary__divider" />
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Test Cases</div>
-                        <div class="report-summary__element-value">{report.metadata.length}</div>
-                    </div>
-                    {
-                        statusValues.map(statusValue => renderStatusInfo(statusValue, report.metadata))
-                    }
-                    <div class="report-summary__divider" />
-                    {
-                        plugins.length ?
-                            (
-                                <div class="report-summary__element">
-                                    <div class="report-summary__element-title">Plugins</div>
-                                    <div class="report-summary__element-value">
-                                        {plugins.map(([name, version]) => <p>{name}: {version}</p>)}
+                )
+        )
+
+        return (
+            <div class="report">
+                <div class="report__header   report-header">
+                    <div class="report-header__title">{report.name}</div>
+                    <a class="report-header__old-report-link" href={OLD_REPORT_PATH}>
+                        <p>Old Version Report</p>
+                    </a>
+                </div>
+                <div class="report__summary-title   report__title">
+                    <p>Report Summary</p>
+                </div>
+                <div class="report__controls">
+                    <div class="report__title">Test Cases</div>
+                    {knownBugsButton}
+                </div>
+                <div class="report__summary   report-summary">
+                    <div class="report-summary__card">
+                        <div class="report-summary__logo" />
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">Version</div>
+                            <div class="report-summary__element-value">{report.version}</div>
+                        </div>
+                        <div class="divider" />
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">Host</div>
+                            <div class="report-summary__element-value">{report.hostName}</div>
+                        </div>
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">User</div>
+                            <div class="report-summary__element-value">{report.userName}</div>
+                        </div>
+                        <div class="divider" />
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">ScriptRun ID</div>
+                            <div class="report-summary__element-value">{report.scriptRunId}</div>
+                        </div>
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">Report Date</div>
+                            <div class="report-summary__element-value">{formatTime(report.startTime)}</div>
+                        </div>
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">Execution time</div>
+                            <div class="report-summary__element-value">{executionTime}</div>
+                        </div>
+                        <div class="divider" />
+                        <div class="report-summary__element">
+                            <div class="report-summary__element-title">Test Cases</div>
+                            <div class="report-summary__element-value">{report.metadata.length}</div>
+                        </div>
+                        {
+                            statusValues.map(statusValue => renderStatusInfo(statusValue, report.metadata))
+                        }
+                        <div class="divider" />
+                        {
+                            plugins.length ?
+                                (
+                                    <div class="report-summary__element">
+                                        <div class="report-summary__element-title">Plugins</div>
+                                        <div class="report-summary__element-value">
+                                            {plugins.map(([name, version]) => <p>{name}: {version}</p>)}
+                                        </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div class="report-summary__element">
-                                    <div class="report-summary__element-title">No plugins</div>
-                                </div>
-                            )
-                    }
+                                ) : (
+                                    <div class="report-summary__element">
+                                        <div class="report-summary__element-title">No plugins</div>
+                                    </div>
+                                )
+                        }
+                    </div>
+                </div>
+                <div class="report__testcases">
+                    <HeatmapScrollbar
+                        selectedElements={testCasesHeatmap(report.metadata)}>
+                        {
+                            report.metadata.map((metadata, index) => (
+                                <TestCaseCard
+                                    knownBugsEnabled={showKnownBugs}
+                                    metadata={metadata}
+                                    index={index + 1}
+                                    handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)} />
+                            ))
+                        }
+                    </HeatmapScrollbar>
                 </div>
             </div>
-            <div class="report__testcases">
-                <HeatmapScrollbar
-                    selectedElements={testCasesHeatmap(report.metadata)}>
-                    {
-                        report.metadata.map((metadata, index) => (
-                            <TestCaseCard
-                                metadata={metadata}
-                                index={index + 1}
-                                handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
-                        ))
-                    }
-                </HeatmapScrollbar>
-            </div>
-        </div>
-    )
+        )
+    }
 }
 
 function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): JSX.Element {

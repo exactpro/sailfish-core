@@ -14,19 +14,29 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Status from "./Status";
-import KnownBug from "./KnownBug";
-import KnownBugCategory from "./KnownBugCategory"
+import { h } from 'preact';
+import '../styles/statusPanel.scss';
+import { connect } from 'preact-redux';
+import AppState from '../state/models/AppState';
+import KnownBugCategory from '../models/KnownBugCategory';
+import KnownBug from '../models/KnownBug';
+import { KnownBugSummary } from './KnownBugSummary';
 
-export interface TestcaseMetadata {
-    startTime: string;
-    finishTime: string;
-    name: string;
-    status: Status;
-    id: string;
-    hash: number;
-    description: string;
-    jsonFileName: string;
-    jsonpFileName: string;
-    bugs: (KnownBug | KnownBugCategory) [];
+interface KnownBugPanelProps {
+    bugs: (KnownBugCategory | KnownBug)[];
 }
+
+const KnownBugPanelBase = ({ bugs }: KnownBugPanelProps) => {
+
+    return (
+        <div class="known-bugs-panel">
+            <KnownBugSummary data={bugs} />
+        </div>
+    );
+}
+
+export const KnownBugPanel = connect(
+    (state: AppState) => ({
+        bugs: state.selected.testCase.bugs
+    })
+)(KnownBugPanelBase);

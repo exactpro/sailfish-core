@@ -22,6 +22,7 @@ import Message from '../models/Message';
 import { ToggleButton } from './ToggleButton';
 import { MessagesCardList, MessagesCardListBase } from './MessagesCardList';
 import { LogsPane } from './LogsPane';
+import { KnownBugPanel } from './KnownBugPanel'
 import AppState from '../state/models/AppState';
 import { isAdmin } from '../helpers/messageType';
 import { isRejected } from '../helpers/messageType';
@@ -35,6 +36,7 @@ interface RightPanelStateProps {
     adminMessages: Message[];
     selectedRejectedMessageId: number;
     adminMessagesEnabled: boolean;
+    hasKnownBugs: boolean; 
 }
 
 interface RightPanelDispatchProps {
@@ -62,7 +64,7 @@ class RightPanelBase extends Component<RightPanelProps> {
         }
     }
 
-    render({panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler}: RightPanelProps) {
+    render({panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler, hasKnownBugs}: RightPanelProps) {
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
             rejectedEnabled = rejectedMessages.length != 0,
@@ -97,15 +99,15 @@ class RightPanelBase extends Component<RightPanelProps> {
                             onClick={() => this.selectPanel(Panel.Messages)}
                             text="Messages" />
                         <ToggleButton
-                            isToggled={false}
-                            isDisabled={true}
-                            title="Not implemeted"
-                            text="Logs"/>
+                            isToggled={panel == Panel.KnownBugs}
+                            isDisabled={!hasKnownBugs}
+                            onClick={() => this.selectPanel(Panel.KnownBugs)}
+                            text="Known bugs"/>
                         <ToggleButton
                             isToggled={false}
                             isDisabled={true}
                             title="Not implemeted"
-                            text="Known bugs"/>
+                            text="Logs"/>
                     </div>
                     <div class={adminRootClass}
                         onClick={adminControlEnabled && (() => adminEnabledHandler(!adminMessagesEnabled))}
@@ -178,7 +180,7 @@ class RightPanelBase extends Component<RightPanelProps> {
                 <LogsPane/>
             </div>,
             <div class={knownBugsRootClass}>
-                {/* Known bugs panel */}
+                <KnownBugPanel />
             </div>
         ];
     }
@@ -214,7 +216,8 @@ export const RightPanel = connect(
         rejectedMessages: state.selected.testCase.messages.filter(isRejected),
         adminMessagesEnabled: state.view.adminMessagesEnabled,
         selectedRejectedMessageId: state.selected.rejectedMessageId,
-        panel: state.view.rightPanel
+        panel: state.view.rightPanel,
+        hasKnownBugs: state.selected.testCase.bugs.length > 0
     }),
     (dispatch) : RightPanelDispatchProps => ({
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),

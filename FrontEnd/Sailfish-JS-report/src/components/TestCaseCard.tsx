@@ -19,14 +19,18 @@ import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import { formatTime, getSecondsPeriod } from '../helpers/dateFormatter';
 import '../styles/report.scss';
 import { createSelector } from '../helpers/styleCreators';
+import { KnownBugSummary } from './KnownBugSummary';
+import { KnownBugIndicator } from './KnownBugIndicator'
+import { realpathSync } from 'fs';
 
 interface TestCaseCardProps {
     metadata: TestcaseMetadata;
     index: number;
+    knownBugsEnabled: boolean;
     handleClick: (metadata: TestcaseMetadata) => any;
 }
 
-const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
+const TestCaseCard = ({ metadata, handleClick, index, knownBugsEnabled }: TestCaseCardProps) => {
 
     const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
 
@@ -43,7 +47,7 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
                 if (window.getSelection().type == 'Range') {
                     return;
                 }
-                
+
                 handleClick(metadata)
             }}>
             <div class="tc-card__index">{index}</div>
@@ -58,24 +62,33 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
             <div class="tc-card__status">
                 {metadata.status.status.toUpperCase()}
             </div>
-            <div class="tc-card__info">  
+            <div class="tc-card__info">
                 <div class="tc-card__info-element">
                     <div class="tc-card__info-title">Start</div>
                     <div class="tc-card__info-value">{formatTime(metadata.startTime)}</div>
-                </div>  
+                </div>
                 <div class="tc-card__info-element">
                     <div class="tc-card__info-title">Finish</div>
                     <div class="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
-                </div>  
+                </div>
                 <div class="tc-card__info-element">
                     <div class="tc-card__info-title">ID</div>
                     <div class="tc-card__info-value">{metadata.id}</div>
-                </div>  
+                </div>
                 <div class="tc-card__info-element">
                     <div class="tc-card__info-title">Hash</div>
                     <div class="tc-card__info-value">{metadata.hash}</div>
                 </div>
             </div>
+            
+            {(knownBugsEnabled && metadata.bugs.length > 0) ? (
+                <div class="tc-card__known-bug-container">
+                    <div class="divider" />
+                    <KnownBugIndicator data={metadata.bugs} />
+                    <KnownBugSummary data={metadata.bugs} />
+                </div>
+            ) : null}
+
             <div class="tc-card__elapsed-time">{elapsedTime}</div>
         </div>
     )
