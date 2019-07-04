@@ -152,7 +152,7 @@ public class ServiceMarshalManager {
 	    } else {
 	        try {
 	            results.add(unmarshalService(stream));
-            } catch (JAXBException | XPathExpressionException | ClassNotFoundException | SAXException | IOException | SailfishURIException e) {
+            } catch (IllegalArgumentException | JAXBException | XPathExpressionException | ClassNotFoundException | SAXException | IOException | SailfishURIException e) {
                 errors.add("Could not import service. Reason: " + e.getMessage());
                 logger.error(e.getMessage(), e);
             }
