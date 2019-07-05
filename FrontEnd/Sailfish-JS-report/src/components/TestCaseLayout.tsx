@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import { Header } from './Header';
 import { SplitView } from './SplitView'
 import { LeftPanel } from './LeftPanel';
@@ -22,11 +22,11 @@ import { RightPanel } from './RightPanel';
 import '../styles/layout.scss';
 
 const TestCaseLayout = () =>  (
-    <div class="layout">
-        <div class="layout__header">
+    <div className="layout">
+        <div className="layout__header">
             <Header/>
         </div>
-        <div class="layout__body">
+        <div className="layout__body">
             <SplitView
                 minPanelPercentageWidth={30}>
                 <LeftPanel/>

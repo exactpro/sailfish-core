@@ -14,15 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
 import Report, { isReport } from '../models/Report';
 import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
-import { setTestCase, setReport, setTestCasePath, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
+import { setTestCase, setReport, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,
@@ -31,44 +31,36 @@ import {
 } from "../middleware/urlHandler";
 import { fetchToken } from "../helpers/machineLearning";
 import { SubmittedData } from "../models/MlServiceResponse" 
+import { loadReport } from '../thunks/loadReport';
+import { ThunkDispatch } from 'redux-thunk';
+import StateActionType from '../actions/stateActions';
+import { loadTestCase } from '../thunks/loadTestCase';
+import SplashScreen from './SplashScreen';
 
 const REPORT_FILE_PATH = 'index.html';
 
-interface AppProps {
+interface AppStateProps {
     report: Report;
     testCase: TestCase;
-    testCaseFilePath: string;
     mlToken: string;
     submittedMlData: SubmittedData[];
-    updateTestCase: (testCase: TestCase) => any;
-    updateTestCasePath: (testCasePath: string) => any;
-    selectAction: (actionId: number) => any;
-    selectMessage: (messageId: number) => any;
-    updateReport: (report: Report) => any;
-    setMlToken: (token: string) => any;
-    setSubmittedMlData: (data: SubmittedData[]) => any;
+    isLoading: boolean;
 }
 
-class AppBase extends Component<AppProps, {}> {
+interface AppDispatchProps {
+    setMlToken: (token: string) => any;
+    setSubmittedMlData: (data: SubmittedData[]) => any;
+    selectAction: (actionId: number) => any;
+    selectMessage: (messageId: number) => any;
+    loadReport: () => any;
+    loadTestCase: (testCasePath: string) => any;
+}
+
+interface AppProps extends AppStateProps, AppDispatchProps {}
+
+class AppBase extends React.Component<AppProps, {}> {
 
     private searchParams : URLSearchParams;
-
-    constructor(props) {
-        super(props);
-        window['loadJsonp'] = this.loadJsonpHandler.bind(this);
-    }
-
-    loadJsonpHandler(jsonp: Report | TestCase) {
-        if (isReport(jsonp)) {
-            this.props.updateReport(jsonp as Report);
-        } else {
-            this.props.updateTestCase(jsonp as TestCase);
-        }
-    }
-
-    componentWillMount() {
-        this.validateUrl();
-    }
 
     componentDidUpdate(prevProps: AppProps) {
 
@@ -84,6 +76,11 @@ class AppBase extends Component<AppProps, {}> {
         if (!this.props.mlToken && this.props.report.reportProperties) {
             fetchToken(this.props.report.reportProperties.workFolder, this.props.setMlToken, this.props.setSubmittedMlData)
         }
+    }
+
+    componentDidMount() {
+        this.props.loadReport();
+        this.validateUrl();
     }
 
     handleSharedUrl() {
@@ -117,61 +114,63 @@ class AppBase extends Component<AppProps, {}> {
     }
 
     selectTestCaseById(testCaseId: string) {
+        if (!this.props.report) {
+            console.error("Trying to handle shared url before report load.");
+            return;
+        }
+
         const testCaseMetadata = this.props.report.metadata.find(metadata => metadata.id === testCaseId);
         
         if (testCaseMetadata) {
-            this.props.updateTestCasePath(testCaseMetadata.jsonpFileName);
+            this.props.loadTestCase(testCaseMetadata.jsonpFileName);
+        } else {
+            console.warn("Can't handle chared url: Test Case with this id not found");
         }
     }
 
-    render({report, testCase, testCaseFilePath}: AppProps, {}: {}) {
-        if (!report) return (
-            <div class="root">
-                <p>Loading json...</p>
-                <script src="reportData/report.js"></script>
-            </div>
-        );
+    render() {
+        const { testCase, isLoading } = this.props;
+
+        if (isLoading) {
+            return (
+                <div className="root">  
+                    <SplashScreen/>
+                </div>
+            )
+        }
 
         if (testCase) {
             return (
-                <div class="root">
+                <div className="root">
                     <TestCaseLayout />
                 </div>
             )
         }
 
-        if (!testCaseFilePath) {
-            return (
-                <div class="root">
-                    <ReportLayout/>
-                </div>
-            );
-        }
-
         return (
-            <div class="root">
-                <p>Loading json...</p>
-                <script src={"reportData/" + testCaseFilePath}></script>
+            <div className="root">
+                <ReportLayout/>
             </div>
-        )
+        );
     };
 }
 
-export const App = connect(
-    (state: AppState) => ({
-        report: state.report.report,
+const App = connect(
+    (state: AppState): AppStateProps => ({
+        report: state.report,
         testCase: state.selected.testCase,
-        testCaseFilePath: state.report.currentTestCasePath,
         mlToken: state.machineLearning.token,
-        submittedMlData: state.machineLearning.submittedData
+        submittedMlData: state.machineLearning.submittedData,
+        isLoading: state.view.isLoading
     }),
-    dispatch => ({
-        updateTestCase: (testCase: TestCase) => dispatch(setTestCase(testCase)),
-        updateTestCasePath: (testCasePath: string) => dispatch(setTestCasePath(testCasePath)),
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): AppDispatchProps => ({
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
-        selectMessage: (messageId: number, actionId: number) => dispatch(selectVerification(messageId, actionId)),
-        updateReport: (report: Report) => dispatch(setReport(report)),
+        selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
         setMlToken: (token: string) => dispatch(setMlToken(token)),
-        setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data))
+        setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
+        loadReport: () => dispatch(loadReport()),
+        loadTestCase: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
 )(AppBase)
+
+export default App;

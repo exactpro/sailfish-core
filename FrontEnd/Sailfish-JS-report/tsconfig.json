@@ -9,7 +9,6 @@
       "removeComments": true,
       "sourceMap": true,
       "jsx": "react",
-      "jsxFactory": "h",
       "skipLibCheck": true
     },
     "exclude": [

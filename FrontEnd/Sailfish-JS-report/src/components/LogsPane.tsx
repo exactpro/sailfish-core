@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
+import * as React from 'react';
 import Log from '../models/Log';
 
 interface LogsPaneProps {

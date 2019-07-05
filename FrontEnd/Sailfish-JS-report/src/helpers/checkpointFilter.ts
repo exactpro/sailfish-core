@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionNode } from '../models/Action';
-import { isAction, isCheckpoint } from './actionType';
+import Action, { ActionNode, isAction } from '../models/Action';
+import { isCheckpoint } from './actionType';
 
 export function getCheckpointActions(actions: ActionNode[]) {
     return actions.reduce((checkpoints, action) => [...checkpoints, ...getActionCheckpoints(action)], []);
@@ -26,13 +26,11 @@ function getActionCheckpoints(actionNode: ActionNode, checkpoints: Action[] = []
         return checkpoints;
     }
 
-    const action = actionNode as Action;
-
-    if (isCheckpoint(action)) {
-        return [...checkpoints, action];
+    if (isCheckpoint(actionNode)) {
+        return [...checkpoints, actionNode];
     }
 
-    return action.subNodes.reduce((checkpoints, subNode) => {
+    return actionNode.subNodes.reduce((checkpoints, subNode) => {
         if (isAction(subNode)) {
             return [...checkpoints, ...getActionCheckpoints(subNode, checkpoints)];
         } else {

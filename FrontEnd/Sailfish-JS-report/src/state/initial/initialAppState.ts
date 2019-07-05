@@ -15,14 +15,13 @@
  ******************************************************************************/
 
 import AppState from "../models/AppState";
-import initialReportState from './initialReportState';
 import initialFilterState from './initialFilterState';
 import initialViewState from './initialViewState';
 import { initialSelectedState } from './initialSelectedState';
 import initialMachineLearningState from './initialMachineLearningState';
 
 export const initialAppState: AppState = {
-    report: initialReportState,
+    report: null,
     selected: initialSelectedState,
     filter: initialFilterState,
     view: initialViewState,

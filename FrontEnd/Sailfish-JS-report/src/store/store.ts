@@ -14,11 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { createStore, applyMiddleware, Store } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension';
 import { initialAppState } from '../state/initial/initialAppState';
-import Report from '../models/Report';
 import { urlHandler } from '../middleware/urlHandler';
-import initialReportState from '../state/initial/initialReportState';
 import { combineReducers } from 'redux';
 import { reportReducer } from '../reducers/reportReducer';
 import { selectedReducer } from '../reducers/selectedReducer';
@@ -26,9 +26,9 @@ import { viewReducer } from '../reducers/viewReducer';
 import { filterReducer } from '../reducers/filterReducer';
 import { machineLearningReducer } from '../reducers/machineLearningReducer';
 import AppState from '../state/models/AppState';
-import { StateActionType } from '../actions/stateActions';
+import StateActionType from '../actions/stateActions';
 
-export const createAppStore = (report: Report): Store<AppState, StateActionType> => createStore(
+export const createAppStore = () => createStore<AppState, StateActionType, {}, {}>(
     combineReducers({
         report: reportReducer,
         selected: selectedReducer,
@@ -36,12 +36,6 @@ export const createAppStore = (report: Report): Store<AppState, StateActionType>
         filter: filterReducer,
         machineLearning: machineLearningReducer
     }),
-    {
-        ...initialAppState,
-        report: {
-            ...initialReportState,
-            report: report
-        }
-    },
-    applyMiddleware(urlHandler)
+    initialAppState,
+    composeWithDevTools(applyMiddleware(urlHandler, thunk))
 )

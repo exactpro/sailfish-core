@@ -36,7 +36,7 @@ export default interface Action {
     id?: number;
     matrixId?: string;
     serviceName?: string;
-    actionNodeType: ActionNodeType;
+    actionNodeType: ActionNodeType.ACTION;
     bugs: any[];
     name: string;
     messageType: string;
@@ -50,4 +50,8 @@ export default interface Action {
     subNodes?: ActionNode[];
     checkPointId?: number;
     outcome?: string;
+}
+
+export function isAction(action: ActionNode): action is Action {
+    return action.actionNodeType === ActionNodeType.ACTION;
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
+import * as React from 'react';
 import '../styles/buttons.scss';
 import { createSelector } from '../helpers/styleCreators';
 
@@ -36,8 +36,8 @@ export const ToggleButton = ({ onClick, isToggled, text, theme, isDisabled, titl
     );
 
     return (
-        <div class={className} onClick={e => onClick && onClick(text)} title={title}>
-            <div class="toggle-button__title">
+        <div className={className} onClick={e => onClick && onClick(text)} title={title}>
+            <div className="toggle-button__title">
                 <p>{text}</p>
             </div>
         </div>

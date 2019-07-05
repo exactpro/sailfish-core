@@ -5,14 +5,27 @@
   "main": "intex.tsx",
   "private": true,
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "dev-build": "cross-env NODE_ENV=development webpack --config webpack.config.js",
-    "dev-server": "cross-env NODE_ENV=development webpack-dev-server --config webpack.dev.config.js -d --history-api-fallback"
+    "build": "NODE_ENV=production webpack --config webpack.config.js",
+    "dev-build": "NODE_ENV=development webpack --config webpack.config.js --watch",
+    "dev-server": "NODE_ENV=development webpack-dev-server --config webpack.config.js -d --history-api-fallback"
   },
   "author": "vladislav.kotelnikov",
+  "dependencies": {
+    "react": "^16.8.6",
+    "react-custom-scrollbars": "^4.2.1",
+    "react-dom": "^16.8.6",
+    "react-redux": "^7.0.3",
+    "react-virtualized": "^9.21.0",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0"
+  },
   "devDependencies": {
+    "@types/react": "^16.8.17",
+    "@types/react-custom-scrollbars": "^4.0.5",
+    "@types/react-dom": "^16.8.4",
+    "@types/react-redux": "^7.0.8",
+    "@types/react-virtualized": "^9.21.1",
     "awesome-typescript-loader": "^5.2.1",
-    "cross-env": "^5.2.0",
     "css-loader": "^1.0.0",
     "cssnano": "^4.1.10",
     "file-loader": "^2.0.0",
@@ -20,9 +33,6 @@
     "icon-font-loader": "^1.5.7",
     "node-sass": "^4.9.4",
     "postcss-loader": "^3.0.0",
-    "preact": "^8.3.1",
-    "preact-redux": "2.0.3",
-    "redux": "^4.0.1",
     "redux-devtools-extension": "^2.13.7",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
@@ -31,8 +41,5 @@
     "webpack": "^4.26.0",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10"
-  },
-  "dependencies": {
-    "preact-custom-scrollbars": "^4.0.4"
   }
 }

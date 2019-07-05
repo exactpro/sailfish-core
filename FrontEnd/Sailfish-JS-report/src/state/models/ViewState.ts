@@ -14,9 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from '../../helpers/Panel';
+import { Panel } from '../../util/Panel';
 
 export default interface ViewState {
+    isLoading: boolean;
     adminMessagesEnabled: boolean;
     splitMode: boolean;
     leftPanel: Panel;

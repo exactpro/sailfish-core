@@ -1,0 +1,84 @@
+/******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
+
+ @import "./common/vars";
+
+.found {
+    background-color: yellow;
+
+    &.target {
+        background-color: orange; 
+    }
+}
+
+.search-field {
+
+    height: 27px;
+    width: 200px;
+    
+    display: flex;
+    align-items: center;
+
+    background: white;
+    border: 1px solid $primaryTextColor;
+    border-radius: 3px;
+    padding: 0 5px;
+
+    &__counter {
+        color: $primaryTextColor;
+        white-space: nowrap;
+        font-size: 12px;
+    }
+
+    &__icon {
+        background-image: url(../../resources/icons/search.svg);
+        background-size: 100%;
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 16px;
+    }
+
+    &__input {
+        border: 0;
+        background: unset;
+        width: 100%;
+        color: $primaryTextColor;
+
+        &:focus {
+            outline: unset;
+        }
+    }
+}
+
+.loader {
+    width: 16px;
+    height: 16px;
+
+    border: 3px solid lightgray;
+    border-top: 3px solid darkgray;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

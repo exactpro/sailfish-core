@@ -26,7 +26,6 @@
     border: 2px solid transparent;
     border-radius: $defaultCardBorderRadius;
     padding: 5px;
-    margin: 5px 0;
 
     &__status {
         padding-left: 10px;
@@ -79,35 +78,30 @@
         opacity: 0.3;
     }
 
-    h3 {
-        margin: 0;
-        font-size: 17px;
-    }   
-
     &__title {
         grid-area: action-title;
         display: flex;
         flex-direction: column;
     }
 
-    &__name {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
+    &__name, &__description, &__status, &__elapsed-time {
+        font-size: 17px;
+        font-weight: bold;
+    }
 
+    &__name {
         color: var(--status-primary-color);
     }
 
     &__description {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-
         color: var(--status-secondary-color);
     }
 
     &__name, &__description {
         padding-right: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
     }
 
     &__elapsed-time {

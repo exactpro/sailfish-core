@@ -77,12 +77,6 @@
 
     &-row {
         &-value {
-            span {
-                margin: 0;
-                text-decoration: none;
-                font-size: 14px;
-            }
-
             &-status {
                 font-weight: bold;
 
@@ -105,6 +99,9 @@
 
             &-expected, &-actual {
                 font-family: monospace;
+                margin: 0;
+                text-decoration: none;
+                font-size: 14px;
             }
 
             td {

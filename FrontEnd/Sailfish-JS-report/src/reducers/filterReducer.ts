@@ -16,7 +16,8 @@
 
 import FilterState from '../state/models/FiltersState';
 import initialFilterState from '../state/initial/initialFilterState';
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
+import { findAll } from '../helpers/search/searchEngine';
 
 export function filterReducer(state: FilterState = initialFilterState, stateAction: StateActionType): FilterState {
     switch(stateAction.type) {

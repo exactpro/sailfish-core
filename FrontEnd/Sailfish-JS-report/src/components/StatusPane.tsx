@@ -14,11 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h} from 'preact';
+import * as React from 'react';
 import Status from '../models/Status';
 import { ExceptionChain } from './ExceptionChain';
 import '../styles/statusPanel.scss';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 
 interface StatusPaneProps {
@@ -28,8 +28,8 @@ interface StatusPaneProps {
 const StatusPanelBase = ({status}: StatusPaneProps) => {
 
     return (
-        <div class="status">
-            <div class="status-container">
+        <div className="status">
+            <div className="status-container">
                 <ExceptionChain exception = {status.cause}/>
             </div>
         </div>
