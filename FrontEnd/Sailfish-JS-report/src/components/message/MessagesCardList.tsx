@@ -38,7 +38,7 @@ interface MessagesListStateProps {
 }
 
 interface MessagesListDispatchProps {
-    messageSelectHandler: (message: Message, status: StatusType) => any;
+    verificationSelectHandler: (message: Message, status: StatusType) => any;
 }
 
 interface MessagesListProps extends MessagesListStateProps ,MessagesListDispatchProps {}
@@ -137,7 +137,7 @@ export const MessagesCardList = connect(
         selectedStatus: state.selected.status
     }),
     (dispatch): MessagesListDispatchProps => ({
-        messageSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))
+        verificationSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))
     }),
     (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),
     {

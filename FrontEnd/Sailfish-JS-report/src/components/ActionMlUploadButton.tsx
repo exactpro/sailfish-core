@@ -14,12 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import '../styles/messages.scss';
 import { SubmittedData } from '../models/MlServiceResponse'
 import AppState from '../state/models/AppState';
-import { setSubmittedMlData, addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCreators";
-import { connect } from 'preact-redux';
+import { addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCreators";
+import { connect } from 'react-redux';
 import { submitEntry, deleteEntry, EMPTY_MESSAGE_ID, } from '../helpers/machineLearning';
 import Action from "../models/Action";
 
@@ -32,45 +32,45 @@ interface ActionMlUploadButtonProps {
     removeSubmittedMlData: (data: SubmittedData) => any;
 }
 
-export class ActionMlUploadButtonBase extends Component<ActionMlUploadButtonProps, {}> {
-    render({ submittedData, actionId, token, actionMap }: ActionMlUploadButtonProps) {
+export class ActionMlUploadButtonBase extends React.Component<ActionMlUploadButtonProps, {}> {
+    render() {
 
-        const isAvailable = token !== null
-            && actionMap.get(actionId).status.status === "FAILED"
+        const isAvailable = this.props.token !== null
+            && this.props.actionMap.get(this.props.actionId).status.status === "FAILED";
 
-        const submittedWithThisAction = submittedData.filter((entry) => {
-            return entry.actionId === actionId
-        })
+        const submittedWithThisAction = this.props.submittedData.filter((entry) => {
+            return entry.actionId === this.props.actionId
+        });
 
         const submittedMessagesCount = submittedWithThisAction.filter((entry) => {
             return entry.messageId !== EMPTY_MESSAGE_ID
-        }).length
+        }).length;
 
-        const isSubmitted = submittedWithThisAction.length > 0
+        const isSubmitted = submittedWithThisAction.length > 0;
 
         if (isAvailable) {
             const mlButton = isSubmitted
 
-                ? <div class="ml-action__submit-icon submitted"
+                ? <div className="ml-action__submit-icon submitted"
                     title="Revoke all ML data related to this action"
                     onClick={(e) => {
                         submittedWithThisAction.forEach((entry) => {
-                            deleteEntry(token, { actionId: actionId, messageId: entry.messageId }, this.props.removeSubmittedMlData);
+                            deleteEntry(this.props.token, { actionId: this.props.actionId, messageId: entry.messageId }, this.props.removeSubmittedMlData);
                         });
-                        e.cancelBubble = true;
+                        e.stopPropagation();
                     }} />
 
-                : <div class="ml-action__submit-icon active"
+                : <div className="ml-action__submit-icon active"
                     title="Submit ML data without cause message"
                     onClick={(e) => {
-                        submitEntry(token, { actionId: actionId, messageId: EMPTY_MESSAGE_ID }, this.props.removeSubmittedMlData, this.props.addSubmittedMlData);
-                        e.cancelBubble = true;
-                    }} />
+                        submitEntry(this.props.token, { actionId: this.props.actionId, messageId: EMPTY_MESSAGE_ID }, this.props.removeSubmittedMlData, this.props.addSubmittedMlData);
+                        e.stopPropagation();
+                    }} />;
 
             return (
-                <div class="ml-action__submit" title="Unable to submit ML data">
+                <div className="ml-action__submit" title="Unable to submit ML data">
                     {mlButton}
-                    <div class={`ml-action__submit-counter ${isSubmitted ? "submitted" : "active"}`}>
+                    <div className={`ml-action__submit-counter ${isSubmitted ? "submitted" : "active"}`}>
                         {submittedMessagesCount}
                     </div>
                 </div>

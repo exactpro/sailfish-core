@@ -21,7 +21,7 @@ import { MessageRaw } from './MessageRaw';
 import { getHashCode } from '../../helpers/stringHash';
 import { formatTime } from '../../helpers/dateFormatter';
 import { MessageCardActionChips } from './MessageCardActionChips';
-import { MlUploadButton } from './../MlUploadButton';
+import { MlUploadButton } from '../machinelearning/MlUploadButton';
 import '../../styles/messages.scss';
 import { createBemElement } from '../../helpers/styleCreators';
 import { createBemBlock } from '../../helpers/styleCreators';
@@ -134,7 +134,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                             {
                                 (raw && raw !== 'null') ? (
                                     <div className="mc-show-raw"
-                                        onClick={e => showRawHandler && showRawHandler(!showRaw)}>
+                                        onClick={ () => showRawHandler && showRawHandler(!showRaw)}>
                                         <div className="mc-show-raw__title">RAW</div>
                                         <div className={showRawClass} />
                                     </div>
@@ -151,7 +151,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                 </div>
             </div>
     );
-}
+};
 
 function renderMessageTypeLabels(message: Message): React.ReactNodeArray {
     let labels = [];

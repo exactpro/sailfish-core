@@ -54,10 +54,11 @@ export const selectMessage = (message: Message, status: StatusType = null) => (<
     status
 })
 
-export const selectVerification = (messageId: number, status: StatusType = 'NA') => (<const>{
+export const selectVerification = (messageId: number, rootActionId: number = null, status: StatusType = 'NA') => (<const>{
     type: StateActionTypes.SELECT_VERIFICATION,
     messageId,
-    status
+    status,
+    rootActionId
 })
 
 export const selectCheckpoint = (checkpointAction: Action) => (<const>{

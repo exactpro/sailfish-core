@@ -165,12 +165,15 @@ const App = connect(
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>): AppDispatchProps => ({
         selectAction: (actionId: number) => dispatch(selectActionById(actionId)),
+
+        //FIXME: I guess we need a dedicated action for this
         selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
+
         setMlToken: (token: string) => dispatch(setMlToken(token)),
         setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
         loadReport: () => dispatch(loadReport()),
         loadTestCase: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
-)(AppBase)
+)(AppBase);
 
 export default App;

@@ -41,7 +41,7 @@ interface OwnProps {
 }
 
 interface StateProps {
-    selectedVerififcationId: number;
+    selectedVerificationId: number;
     selectedActionsId: number[];
     scrolledActionId: Number;
     actionsFilter: StatusType[];
@@ -50,7 +50,7 @@ interface StateProps {
 
 interface DispatchProps {
     actionSelectHandler: (action: Action) => any;
-    messageSelectHandler: (id: number, status: StatusType) => any;
+    verificationSelectHandler: (messageId: number, rootActionId: number, status: StatusType) => any;
 }
 
 interface ContainerProps extends OwnProps, StateProps, DispatchProps {}
@@ -106,7 +106,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
     }    
 
     renderNode(props: Props, isRoot = false, expandTreePath: Tree<ActionExpandStatus> = null, parentAction: Action = null): JSX.Element {
-        const { actionSelectHandler, messageSelectHandler, selectedActionsId, selectedVerififcationId: selectedMessageId, actionsFilter, onExpand } = props;
+        const { actionSelectHandler, verificationSelectHandler, selectedActionsId, selectedVerificationId: selectedMessageId, actionsFilter, onExpand } = props;
 
         // https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions
         switch (props.action.actionNodeType) {
@@ -168,7 +168,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                         verification={verification}
                         isSelected={isSelected}
                         isTransparent={isTransparent}
-                        onSelect={messageSelectHandler}
+                        onSelect={verificationSelectHandler}
                         parentActionId={parentAction && parentAction.id}
                         onExpand={onExpand}/>
                 )
@@ -245,7 +245,7 @@ const getExpandedTreePath = memoize(
 
 export const ActionTree = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
-        selectedVerififcationId: state.selected.verificationId,
+        selectedVerificationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         actionsFilter: state.filter.actionsFilter,
@@ -253,6 +253,6 @@ export const ActionTree = connect(
     }),
     (dispatch, ownProps: OwnProps): DispatchProps => ({
         actionSelectHandler: action => dispatch(selectAction(action)),
-        messageSelectHandler: (id, status) => dispatch(selectVerification(id, status))
+        verificationSelectHandler: (messageId, rootActionId, status) => dispatch(selectVerification(messageId, rootActionId, status))
     })
 )(RecoverableActionTree);

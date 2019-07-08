@@ -115,7 +115,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 messagesId: [stateAction.messageId],
                 status: stateAction.status,
                 actionsId: initialSelectedState.actionsId,
-                scrolledMessageId: new Number(stateAction.messageId)
+                scrolledMessageId: new Number(stateAction.messageId),
+                activeActionId: stateAction.rootActionId
             }
         }
 

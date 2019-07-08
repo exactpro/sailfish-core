@@ -32,6 +32,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 import SearchInput from './search/SearchInput';
+import {MlUploadIndicator} from "./machinelearning/MlUploadIndicator";
 
 interface HeaderProps {
     testCase: TestCase;
@@ -118,6 +119,9 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
                     <span>Hash:</span>
                     <p>{hash}</p>
                 </div>
+                <div className="header__info-element">
+                    <MlUploadIndicator/>
+                </div>
             </div>
             {
                 showFilter ?
@@ -130,7 +134,7 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
             }
         </div>
     );
-}
+};
 
 export const Header = connect(
     (state: AppState) => ({
@@ -146,4 +150,4 @@ export const Header = connect(
         switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),
         switchActionsFilter: (status: StatusType) => dispatch(switchActionsFilter(status))
     })
-)(HeaderBase)
+)(HeaderBase);

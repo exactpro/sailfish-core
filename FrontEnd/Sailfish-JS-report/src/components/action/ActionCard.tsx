@@ -26,6 +26,7 @@ import { createSelector } from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
 import { keyForAction } from '../../helpers/keys';
 import { SearchExpandablePanel } from '../ExpandablePanel';
+import { ActionMlUploadButton } from "../ActionMlUploadButton";
 
 interface CardProps {
     action: Action;
@@ -123,6 +124,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                                 </div>
                             ) : null
                         }
+                        <ActionMlUploadButton actionId={action.id}/>
                     </div>
                 </div>
                 <div className="ac-body">

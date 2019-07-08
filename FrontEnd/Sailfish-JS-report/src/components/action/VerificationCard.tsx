@@ -16,24 +16,25 @@
 
 import * as React from 'react';
 import Verification from '../../models/Verification';
-import { StatusType } from "../../models/Status";
-import { createSelector } from '../../helpers/styleCreators';
-import { SearchExpandablePanel } from "../ExpandablePanel";
-import { VerificationTable } from "./VerificationTable";
+import {StatusType} from "../../models/Status";
+import {createSelector} from '../../helpers/styleCreators';
+import {SearchExpandablePanel} from "../ExpandablePanel";
+import {VerificationTable} from "./VerificationTable";
 import '../../styles/action.scss';
-import { keyForVerification } from '../../helpers/keys';
+import {keyForVerification} from '../../helpers/keys';
 import SearchableContent from '../search/SearchableContent';
+import {VerificationMlUploadButton} from "../machinelearning/VerificationMlUploadButton";
 
-interface VerificactionCardProps {
+interface VerificationCardProps {
     verification: Verification;
     isSelected: boolean;
     isTransparent: boolean;
     parentActionId: number;
-    onSelect: (msgId: number, status: StatusType) => any;
+    onSelect: (messageId: number, rootActionId: number, status: StatusType) => any;
     onExpand: () => void;
 }
 
-const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, parentActionId, onExpand }: VerificactionCardProps) => {
+const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, parentActionId, onExpand }: VerificationCardProps) => {
 
     const { status, messageId, entries, name } = verification;
 
@@ -50,7 +51,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
         <div className="action-card">
             <div className={className}
                 onClick={e => {
-                    onSelect(messageId, status.status);
+                    onSelect(messageId, parentActionId, status.status);
                     
                     // here we cancel handling by parent divs
                     e.stopPropagation();
@@ -59,25 +60,28 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
                     searchKeyPrefix={key}
                     stateKey={key}
                     onExpand={onExpand}>
-                    <div className="ac-body__verification-title">
-                        <span>{"Verification — "}</span>
-                        <SearchableContent
-                            contentKey={`${key}-name`}
-                            content={name}/>
-                         <span>{" — " + status.status}</span>
+                    <div className="ac-body__verification-title-wrapper">
+                        <div className="ac-body__verification-title">
+                            <span>{"Verification — "}</span>
+                            <SearchableContent
+                                contentKey={`${key}-name`}
+                                content={name}/>
+                            <span>{" — " + status.status}</span>
+                        </div>
+                        <VerificationMlUploadButton targetActionId={parentActionId} targetMessageId={messageId}/>
                     </div>
-                    <VerificationTable 
+                    <VerificationTable
                         keyPrefix={key}
                         actionId={parentActionId}
                         messageId={messageId}
                         stateKey={key + '-nodes'}
-                        params={entries} 
+                        params={entries}
                         status={status.status}
                         onExpand={onExpand}/>
                 </SearchExpandablePanel>
             </div>
         </div>
     )
-}
+};
 
 export default VerificationCard;
