@@ -31,6 +31,7 @@ import { selectMessage } from '../../actions/actionCreators';
 import { isRejected } from '../../helpers/messageType';
 import SearchableContent from '../search/SearchableContent';
 import { keyForMessage } from '../../helpers/keys';
+import {MessagePredictionIndicator} from "../machinelearning/MlPredictionIndicator";
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -155,6 +156,10 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
 
 function renderMessageTypeLabels(message: Message): React.ReactNodeArray {
     let labels = [];
+
+    labels.push(
+        <MessagePredictionIndicator className="mc-label" messageId={message.id} />
+    );
 
     if (message.content.rejectReason !== null) {
         labels.push(

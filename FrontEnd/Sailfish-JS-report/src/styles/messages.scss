@@ -64,7 +64,7 @@
     &__icon {
         height: 14px;
         width: 14px;
-        margin-top: 20px;
+        margin-top: 12px;
         background-size: 100%;
         filter: opacity(0.4);
 
@@ -83,6 +83,19 @@
 
     &.admin {
         background-color: $adminMessageLabelBackground;
+    }
+
+    .ml__prediction {
+        width: 100%;
+
+        &-icon {
+            height: 14px;
+            width: 14px;
+            margin-top: 12px;
+            background-size: 100%;
+
+            background-image: url(../../resources/icons/ml-prediction.svg)
+        }
     }
 }
 

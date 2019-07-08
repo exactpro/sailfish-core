@@ -21,7 +21,7 @@ import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import { Panel } from "../util/Panel";
 import Message from '../models/Message';
-import { SubmittedData } from "../models/MlServiceResponse";
+import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
 
 export const setReport = (report: Report) => (<const>{
@@ -146,4 +146,13 @@ export const setShouldScrollToSearchItem = (isNeedsScroll: boolean) => (<const>{
 export const setIsLoading = (isLoading: boolean) => (<const>{
     type: StateActionTypes.SET_IS_LOADING,
     isLoading
+})
+
+export const saveMlData = (data: PredictionData[]) => (<const>{
+    type: StateActionTypes.SAVE_ML_DATA,
+    data: data
+})
+
+export const togglePredictions = () => (<const>{
+    type: StateActionTypes.TOGGLE_PREDICTIONS
 })

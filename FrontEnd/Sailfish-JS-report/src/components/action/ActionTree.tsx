@@ -25,7 +25,7 @@ import ActionExpandStatus from '../../models/util/ActionExpandStatus';
 import { ActionCard } from './ActionCard';
 import { CustomMessage } from './CustomMessage';
 import { CheckpointAction } from '../Checkpoint';
-import { selectAction } from '../../actions/actionCreators';
+import {saveMlData, selectAction} from '../../actions/actionCreators';
 import { selectVerification } from '../../actions/actionCreators';
 import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
@@ -34,6 +34,8 @@ import memoize from '../../helpers/memoize';
 import { isCheckpoint } from '../../helpers/actionType';
 import { createExpandTreePath, createExpandTree, getSubTree, updateExpandTree } from '../../helpers/tree';
 import { keyForAction } from '../../helpers/keys';
+import { fetchPredictions } from "../../helpers/machineLearning";
+import {PredictionData} from "../../models/MlServiceResponse";
 
 interface OwnProps {
     action: ActionNode;
@@ -46,9 +48,12 @@ interface StateProps {
     scrolledActionId: Number;
     actionsFilter: StatusType[];
     expandedTreePath: Tree<number>;
+    token: string;
+    mlDataActionIds: Set<number>;
 }
 
 interface DispatchProps {
+    saveMlData: (data: PredictionData[]) => any;
     actionSelectHandler: (action: Action) => any;
     verificationSelectHandler: (messageId: number, rootActionId: number, status: StatusType) => any;
 }
@@ -124,7 +129,12 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                     <ActionCard action={action}
                         isSelected={selectedActionsId.includes(action.id)}
                         isTransaparent={!actionsFilter.includes(action.status.status)}
-                        onSelect={actionSelectHandler}
+                        onSelect={ (selectedAction) => {
+                            if (selectedAction.status.status == 'FAILED' && !this.props.mlDataActionIds.has(selectedAction.id)) {
+                                fetchPredictions(this.props.token, this.props.saveMlData, selectedAction.id);
+                            }
+                            actionSelectHandler(selectedAction);
+                        }}
                         isRoot={isRoot}
                         isExpanded={expandTreePath.value.isExpanded}
                         onExpand={onExpand}
@@ -168,7 +178,12 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                         verification={verification}
                         isSelected={isSelected}
                         isTransparent={isTransparent}
-                        onSelect={verificationSelectHandler}
+                        onSelect={(messageId, actionId, status) => {
+                            if (status == 'FAILED' && !this.props.mlDataActionIds.has(actionId)) {
+                                fetchPredictions(this.props.token, this.props.saveMlData, actionId);
+                            }
+                            verificationSelectHandler(messageId, actionId, status);
+                        }}
                         parentActionId={parentAction && parentAction.id}
                         onExpand={onExpand}/>
                 )
@@ -249,9 +264,12 @@ export const ActionTree = connect(
         selectedActionsId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         actionsFilter: state.filter.actionsFilter,
+        mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map((item) => { return item.actionId })),
+        token: state.machineLearning.token,
         expandedTreePath: getExpandedTreePath(ownProps.action, [...state.selected.actionsId, +state.selected.scrolledActionId])
     }),
     (dispatch, ownProps: OwnProps): DispatchProps => ({
+        saveMlData: (data: PredictionData[]) => dispatch(saveMlData(data)),
         actionSelectHandler: action => dispatch(selectAction(action)),
         verificationSelectHandler: (messageId, rootActionId, status) => dispatch(selectVerification(messageId, rootActionId, status))
     })
