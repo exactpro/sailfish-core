@@ -29,6 +29,7 @@ import {nextCyclicItemByIndex, prevCyclicItemByIndex} from '../helpers/array';
 import {createSelector, createTriStateControlClassName} from '../helpers/styleCreators';
 import {AutoSizer} from 'react-virtualized';
 import Action, {isAction} from "../models/Action";
+import {KnownBugPanel} from "./knownbugs/KnownBugPanel";
 
 const MIN_CONTROLS_WIDTH = 800,
     MIN_CONTROLS_WIDTH_WITH_REJECTED = 850;
@@ -41,6 +42,7 @@ interface RightPanelStateProps {
     adminMessagesEnabled: boolean;
     predictionsEnabled: boolean;
     predictionsAvailable: boolean;
+    hasKnownBugs: boolean;
 }
 
 interface RightPanelDispatchProps {
@@ -109,10 +111,10 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                                         title="Not implemeted"
                                         text="Logs" />
                                     <ToggleButton
-                                        isToggled={false}
-                                        isDisabled={true}
-                                        title="Not implemeted"
-                                        text="Known bugs" />
+                                        isToggled={panel == Panel.KnownBugs}
+                                        isDisabled={!this.props.hasKnownBugs}
+                                        onClick={() => this.selectPanel(Panel.KnownBugs)}
+                                        text="Known bugs"/>
                                 </div>
                                 <div className={adminRootClass}
                                     onClick={adminControlEnabled ? (() => adminEnabledHandler(!adminMessagesEnabled)) : undefined}
@@ -197,7 +199,7 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                     <LogsPane />
                 </div>
                 <div className={knownBugsRootClass}>
-                    {/* Known bugs panel */}
+                    <KnownBugPanel />
                 </div>
             </React.Fragment>
         );
@@ -243,7 +245,8 @@ export const RightPanel = connect(
                 return isAction(action) && (action as Action).status.status == 'FAILED';
             }),
 
-        predictionsEnabled: state.machineLearning.predictionsEnabled
+        predictionsEnabled: state.machineLearning.predictionsEnabled,
+        hasKnownBugs: state.selected.testCase.bugs.length > 0
     }),
     (dispatch): RightPanelDispatchProps => ({
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),

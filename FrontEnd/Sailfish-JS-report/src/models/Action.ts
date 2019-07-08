@@ -27,7 +27,9 @@ export enum ActionNodeType {
     VERIFICATION = "verification",
     CUSTOM_MESSAGE = "customMessage",
     LINK = "link",
-    TABLE = "table"
+    TABLE = "table",
+    KNOWN_BUG = "bug",
+    KNOWN_BUG_CATEGORY = "category"
 }
 
 export type ActionNode = Action | UserMessage | Verification | Link | UserTable;

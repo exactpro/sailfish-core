@@ -15,18 +15,21 @@
 ******************************************************************************/
 
 import * as React from 'react';
-import { TestcaseMetadata } from '../models/TestcaseMetadata';
-import { formatTime, getSecondsPeriod } from '../helpers/dateFormatter';
+import {TestcaseMetadata} from '../models/TestcaseMetadata';
+import {formatTime, getSecondsPeriod} from '../helpers/dateFormatter';
 import '../styles/report.scss';
-import { createSelector } from '../helpers/styleCreators';
+import {createSelector} from '../helpers/styleCreators';
+import {KnownBugIndicator} from "./knownbugs/KnownBugIndicator";
+import {KnownBugSummary} from "./knownbugs/KnownBugSummary";
 
 interface TestCaseCardProps {
     metadata: TestcaseMetadata;
     index: number;
+    knownBugsEnabled: boolean;
     handleClick: (metadata: TestcaseMetadata) => any;
 }
 
-const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
+const TestCaseCard = ({ metadata, handleClick, index, knownBugsEnabled }: TestCaseCardProps) => {
 
     const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
 
@@ -76,6 +79,15 @@ const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
                     <div className="tc-card__info-value">{metadata.hash}</div>
                 </div>
             </div>
+
+            {(knownBugsEnabled && metadata.bugs.length > 0) ? (
+                <div className="tc-card__known-bug-container">
+                    <div className="divider"/>
+                    <KnownBugIndicator data={metadata.bugs}/>
+                    <KnownBugSummary data={metadata.bugs}/>
+                </div>
+            ) : null}
+
             <div className="tc-card__elapsed-time">{elapsedTime}</div>
         </div>
     )

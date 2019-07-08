@@ -21,11 +21,11 @@ import '../styles/statusPanel.scss';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 
-interface StatusPaneProps {
+interface StatusPanelProps {
     status: Status;
 }
 
-const StatusPanelBase = ({status}: StatusPaneProps) => {
+const StatusPanelBase = ({status}: StatusPanelProps) => {
 
     return (
         <div className="status">
