@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Streams;
 
 public class Action implements IJsonReportNode {
 
@@ -35,7 +38,7 @@ public class Action implements IJsonReportNode {
     private String name;
     private String messageType;
     private String description;
-    private Set<Bug> bugs;
+    @JsonIgnore private BugCategory bugRoot;
     private Set<Long> relatedMessages;
     private Status status;
     private List<Parameter> parameters;
@@ -45,11 +48,10 @@ public class Action implements IJsonReportNode {
     private String outcome;
 
     public Action() {
-        this.bugs = new HashSet<>();
+        this.bugRoot = new BugCategory("root");
         this.subNodes = new ArrayList<>();
         this.relatedMessages = new HashSet<>();
         this.logs = new ArrayList<>();
-        this.bugs = new HashSet<>();
     }
 
     @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
@@ -59,7 +61,7 @@ public class Action implements IJsonReportNode {
             } else if (child instanceof Action || child instanceof CustomMessage || child instanceof CustomTable || child instanceof CustomLink) {
                 subNodes.add(child);
             } else if (child instanceof Bug) {
-                bugs.add((Bug)child);
+                bugRoot.placeBugInTree((Bug) child);
             } else if (child instanceof Verification) {
                 subNodes.add(child);
                 if (((Verification) child).getMessageId() != null) {
@@ -143,12 +145,13 @@ public class Action implements IJsonReportNode {
         this.description = description;
     }
 
-    public Set<Bug> getBugs() {
-        return bugs;
+    public Collection<Bug> getBugs() {
+        return bugRoot.getAllBugs();
     }
 
-    public void setBugs(Set<Bug> bugs) {
-        this.bugs = bugs;
+    @JsonProperty("bugs")
+    public Collection<IJsonReportNode> getBugTree() {
+        return bugRoot.getSubNodes();
     }
 
     public Set<Long> getRelatedMessages() {

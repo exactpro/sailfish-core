@@ -698,7 +698,6 @@ public class TestScriptDescription implements Closeable
         } else {
             return causeCause.getMessage();
         }
-
     }
 
     public String getProblem(){

@@ -34,6 +34,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -72,7 +73,11 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
 
     @Deprecated
     public static final String XML_PROPERTIES_FILE = "test_script_properties.xml";
-    private static final ObjectMapper jsonObjectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+
+    private static final ObjectMapper jsonObjectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
 
     private final ThreadLocal<Unmarshaller> xmlUnmarshaller = ThreadLocal.withInitial(() -> {
         try {
