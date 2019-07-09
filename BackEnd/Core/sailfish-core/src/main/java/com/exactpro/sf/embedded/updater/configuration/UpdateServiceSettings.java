@@ -17,6 +17,7 @@
 package com.exactpro.sf.embedded.updater.configuration;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,6 +37,19 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
     private int port;
     private long checkUpdateTimeout = 2;
     private String timeUnit = TimeUnit.HOURS.name();
+
+    private boolean enableAutoUpdate;
+    private String dayOfWeek = DayOfWeek.SUNDAY.name();
+
+    /**
+     * Lower bound of time range for auto update in format HH:mm
+     */
+    private String fromTime;
+
+    /**
+     * Upper bound of time range for auto update in format HH:mm
+     */
+    private String toTime;
 
     public String getHost() {
         return host;
@@ -67,6 +81,38 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
 
     public void setTimeUnit(String timeUnit) {
         this.timeUnit = timeUnit;
+    }
+
+    public boolean isEnableAutoUpdate() {
+        return enableAutoUpdate;
+    }
+
+    public void setEnableAutoUpdate(boolean enableAutoUpdate) {
+        this.enableAutoUpdate = enableAutoUpdate;
+    }
+
+    public String getDayOfWeek() {
+        return dayOfWeek;
+    }
+
+    public void setDayOfWeek(String dayOfWeek) {
+        this.dayOfWeek = dayOfWeek;
+    }
+
+    public String getFromTime() {
+        return fromTime;
+    }
+
+    public void setFromTime(String fromTime) {
+        this.fromTime = fromTime;
+    }
+
+    public String getToTime() {
+        return toTime;
+    }
+
+    public void setToTime(String toTime) {
+        this.toTime = toTime;
     }
 
     @Override
@@ -101,6 +147,10 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
         clone.port = port;
         clone.checkUpdateTimeout = checkUpdateTimeout;
         clone.timeUnit = timeUnit;
+        clone.enableAutoUpdate = enableAutoUpdate;
+        clone.dayOfWeek = dayOfWeek;
+        clone.fromTime = fromTime;
+        clone.toTime = toTime;
         return clone;
     }
 
@@ -118,6 +168,10 @@ public class UpdateServiceSettings implements IMapableSettings, Serializable {
                 .append(port, that.port)
                 .append(checkUpdateTimeout, that.checkUpdateTimeout)
                 .append(timeUnit, that.timeUnit)
+                .append(enableAutoUpdate, that.enableAutoUpdate)
+                .append(dayOfWeek, that.dayOfWeek)
+                .append(fromTime, that.fromTime)
+                .append(toTime, that.toTime)
                 .isEquals();
     }
 }
