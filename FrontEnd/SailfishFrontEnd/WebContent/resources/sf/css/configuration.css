@@ -349,3 +349,29 @@
     color: #E74C3C;
     font-weight: bold;
 }
+
+.eps-menu-block {
+    display: flex;
+    align-items: center;
+    width: 40%;
+    padding: 10px;
+}
+
+.eps-menu-block-content {
+    display: flex;
+    align-items: center;
+    flex-grow: 2;
+    margin-left: 10px;
+}
+
+.eps-menu-block-content>span, .eps-menu-block-content>div, .eps-menu-block-content>button, .eps-menu-block-content>label {
+    margin: 0 5px 0 5px;
+}
+
+.eps-auto-update-dialog {
+    font-size: 18px;
+}
+
+.eps-short-input>input {
+    width: 4em;
+}

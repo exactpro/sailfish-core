@@ -17,10 +17,14 @@
 package com.exactpro.sf.testwebgui.configuration;
 
 import java.io.Serializable;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
@@ -37,26 +41,47 @@ import com.exactpro.sf.embedded.updater.UpdateService.ComponentUpdateInfo;
 import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
+import com.exactpro.sf.util.DateTimeUtility;
 
 @ManagedBean(name = "updateBean")
 @ViewScoped
 public class UpdaterConfigBean implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(UpdaterConfigBean.class);
 
-    private final String[] availableTimeUnits = {
+    private static final String[] availableTimeUnits = {
             TimeUnit.MINUTES.name(), TimeUnit.HOURS.name(), TimeUnit.DAYS.name()
     };
 
+    private static final List<String> daysOfWeek = Stream.of(DayOfWeek.values()).map(DayOfWeek::name).collect(Collectors.toList());
+
     private UpdateServiceSettings settings;
     private List<ComponentInfo> currentVersions;
+    private Date from;
+    private Date to;
 
     @PostConstruct
     public void init() {
         ISFContext context = BeanUtil.getSfContext();
         this.settings = context.getUpdateService().getSettings().clone();
+        from = parseTime(settings.getFromTime());
+        to = parseTime(settings.getToTime());
         this.currentVersions = context.getPluginVersions().stream()
                 .map(ComponentInfo::new)
                 .collect(Collectors.toList());
+    }
+
+    private Date parseTime(String timeValue) {
+        if (timeValue != null) {
+            return DateTimeUtility.toDate(LocalTime.parse(timeValue, UpdateService.TIME_FORMATTER));
+        }
+        return null;
+    }
+
+    private String formatTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+        return DateTimeUtility.toLocalTime(date).format(UpdateService.TIME_FORMATTER);
     }
 
     public void checkUpdate() {
@@ -130,6 +155,7 @@ public class UpdaterConfigBean implements Serializable {
     public void applySettings() {
         if (isChangesMade()) {
             try {
+                validateSettings(settings);
                 logger.info("Applying settings...");
                 updateSettingsAndRestart();
                 BeanUtil.addInfoMessage("Settings applied", "");
@@ -140,6 +166,16 @@ public class UpdaterConfigBean implements Serializable {
             }
         } else {
             BeanUtil.addInfoMessage("No change to apply", "");
+        }
+    }
+
+    private void validateSettings(UpdateServiceSettings settings) {
+        if (settings.isEnableAutoUpdate()) {
+            LocalTime fromTime = DateTimeUtility.toLocalTime(from);
+            LocalTime toTime = DateTimeUtility.toLocalTime(to);
+            if (!fromTime.isBefore(toTime)) {
+                throw new IllegalArgumentException("'From' must be before 'To'");
+            }
         }
     }
 
@@ -182,6 +218,32 @@ public class UpdaterConfigBean implements Serializable {
 
     public void setSettings(UpdateServiceSettings settings) {
         this.settings = settings;
+    }
+
+    public List<String> getDaysOfWeek() {
+        return daysOfWeek;
+    }
+
+    public String getTimePattern() {
+        return UpdateService.TIME_PATTERN;
+    }
+
+    public Date getFrom() {
+        return from;
+    }
+
+    public void setFrom(Date from) {
+        this.from = from;
+        settings.setFromTime(formatTime(from));
+    }
+
+    public Date getTo() {
+        return to;
+    }
+
+    public void setTo(Date to) {
+        this.to = to;
+        settings.setToTime(formatTime(to));
     }
 
     public class ComponentInfo {

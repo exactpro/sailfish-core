@@ -27,7 +27,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +64,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class UpdateService implements IEmbeddedService {
     private static final Logger logger = LoggerFactory.getLogger(UpdateService.class);
 
+    public static final String TIME_PATTERN = "HH:mm";
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeUtility.createFormatter(TIME_PATTERN);
+
     private static final long DEFAULT_COLLECT_DATA_TIMEOUT = 3;
     private static final String DEPLOYER_CFG_FILE = "deployer.cfg.xml";
     private static final String PATH_PARAMETER = "Path";
@@ -85,6 +91,11 @@ public class UpdateService implements IEmbeddedService {
     private volatile String errorMsg;
     private volatile String updateErrorMsg;
     private volatile boolean updating;
+
+    private boolean enableAutoUpdate;
+    private DayOfWeek dayForUpdate;
+    private LocalTime fromTime;
+    private LocalTime toTime;
 
     private File deployerFile;
 
@@ -118,9 +129,18 @@ public class UpdateService implements IEmbeddedService {
 
             readDeployerConfiguration();
 
+            enableAutoUpdate = settings.isEnableAutoUpdate();
+            if (enableAutoUpdate) {
+                dayForUpdate = DayOfWeek.valueOf(Objects.requireNonNull(settings.getDayOfWeek(), "'Day of week ' parameter"));
+                fromTime = LocalTime.parse(Objects.requireNonNull(settings.getFromTime(), "'From time ' parameter"), TIME_FORMATTER);
+                toTime = LocalTime.parse(Objects.requireNonNull(settings.getToTime(), "'To time ' parameter"), TIME_FORMATTER);
+
+                logger.debug("Auto update is enabled. Day for update {}; Interval start: {}; Interval end: {}", dayForUpdate, fromTime, toTime);
+            }
+
             changeStatus(ServiceStatus.Connected);
 
-            checkForUpdates();
+            checkForUpdates(false);
 
             startCheckUpdateTask();
 
@@ -140,7 +160,7 @@ public class UpdateService implements IEmbeddedService {
 
     public void checkUpdates() {
         try {
-            checkForUpdates();
+            checkForUpdates(false);
         } catch (Exception e) {
             logger.error("Error during user check request", e);
             setError(e);
@@ -148,7 +168,7 @@ public class UpdateService implements IEmbeddedService {
         }
     }
 
-    private void checkForUpdates() {
+    private void checkForUpdates(boolean autoUpdateIfNeed) {
         List<ComponentUpdateInfo> updateInfos = Collections.emptyList();
         try {
             ServiceStatus prevStatus = serviceStatus.getAndUpdate(status -> ServiceStatus.Checking);
@@ -185,6 +205,10 @@ public class UpdateService implements IEmbeddedService {
             }
 
             updateInfos = Collections.unmodifiableList(mapper.readValue(line, mapper.getTypeFactory().constructCollectionType(List.class, ComponentUpdateInfo.class)));
+            if (autoUpdateIfNeed && !updateInfos.isEmpty() && isTimeForAutoUpdate(DateTimeUtility.nowLocalDateTime())) {
+                logger.info("Execute scheduled update");
+                update();
+            }
         } catch (InterruptedException e) {
             logger.warn("Check for update was interrupted", e);
         } catch (Exception e) {
@@ -208,9 +232,16 @@ public class UpdateService implements IEmbeddedService {
         }
         logger.info("Start updating...");
         this.updating = true;
-        cancelCheckUpdateTask();
 
         updateFuture = taskExecutor.addTask(new UpdateTask());
+    }
+
+    private boolean isTimeForAutoUpdate(LocalDateTime dateTime) {
+        if (!enableAutoUpdate) {
+            return false;
+        }
+        LocalTime time = dateTime.toLocalTime();
+        return DayOfWeek.from(dateTime) == dayForUpdate && time.isAfter(fromTime) && time.isBefore(toTime);
     }
 
     public LocalDateTime getLastCheckTime() {
@@ -416,7 +447,7 @@ public class UpdateService implements IEmbeddedService {
         public void run() {
             try {
                 logger.info("Scheduled run");
-                checkForUpdates();
+                checkForUpdates(true);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 setError(e);
@@ -428,6 +459,8 @@ public class UpdateService implements IEmbeddedService {
         @Override
         public void run() {
             try {
+                cancelCheckUpdateTask();
+
                 logger.info("Actualizing deployer...");
                 Path tempDirectory = Files.createTempDirectory("deployer");
                 String updateDeployerParameters = createActualizingDeployerParameters(tempDirectory.toFile());

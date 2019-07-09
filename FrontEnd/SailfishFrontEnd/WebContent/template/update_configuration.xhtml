@@ -39,14 +39,7 @@
 
     <h:form id="updateCommands">
         <div class="eps-content-block">
-            <h:panelGrid columns="3" cellpadding="5">
-                <p:commandButton value="Check" action="#{updateBean.checkUpdate()}" title="Check for updates"
-                                 disabled="#{updateBean.serviceStatus eq 'Error'}"
-                                 update="@(.eps-cfg-update-logo :sailfishComponentForm :updateForm :updateCommands :updateLogoForm :updateConnectionStatusForm)">
-                </p:commandButton>
-                <p:commandButton value="Update" onclick="PF('updateSailfishConfirmation').show()"
-                                 title="Update Sailfish"
-                                 disabled="#{(updateBean.serviceStatus eq 'Error') or (not updateBean.needsUpdate) or updateBean.updating}"/>
+            <h:panelGrid>
                 <p:commandButton value="Restart" action="#{updateBean.restart()}" title="Restart update service"
                                  rendered="#{updateBean.serviceStatus eq 'Error' and (not updateBean.criticalError)}"
                                  update="@(.eps-cfg-update-logo :sailfishComponentForm :updateForm :updateCommands :updateLogoForm :updateConnectionStatusForm)"/>
@@ -71,45 +64,71 @@
         <div class="eps-content-block">
             <h3>Update settings</h3>
 
-            <table class="eps-transparent-table" style="margin-bottom:0">
-                <tr>
-                    <td>
-                        <h:outputLabel for="server-url" value="Host" title="Update Server host name"/>
-                    </td>
-                    <td class="eps-table-divider-min">
-                        <p:inputText id="server-url" styleClass="eps-input" value="#{updateBean.settings.host}"
-                                     required="true"
-                                     disabled="#{updateBean.criticalError}"/>
-                    </td>
-                    <td class="eps-table-divider">
-                        <h:outputLabel for="update-port" value="Port" title="Update Server port"/>
-                    </td>
-                    <td>
-                        <p:spinner id="update-port" value="#{updateBean.settings.port}" min="0" styleClass="eps-input"
-                                   disabled="#{updateBean.criticalError}"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <h:outputLabel for="check-timeout" value="Update check interval"
-                                       title="Time period between checking for update"/>
-                    </td>
-                    <td class="eps-table-divider-min">
-                        <p:spinner id="check-timeout" value="#{updateBean.settings.checkUpdateTimeout}" min="1"
-                                   styleClass="eps-input"
-                                   disabled="#{updateBean.serviceStatus eq 'Error'}"/>
-                    </td>
-                    <td class="eps-table-divider">
-                        <h:outputLabel for="time-unit" value="Time unit" title="Use to define update period time"/>
-                    </td>
-                    <td class="eps-table-divider-min">
-                        <p:selectOneMenu id="time-unit" value="#{updateBean.settings.timeUnit}" styleClass="eps-input"
-                                         style="width: 90px" disabled="#{updateBean.serviceStatus eq 'Error'}">
-                            <f:selectItems value="#{updateBean.availableTimeUnits}"/>
-                        </p:selectOneMenu>
-                    </td>
-                </tr>
-            </table>
+            <p:outputPanel styleClass="eps-menu-block">
+                <h:outputLabel value="Update server:"/>
+                <div class="eps-menu-block-content">
+                    <p:inputText id="server-url" styleClass="eps-input eps-short-input" value="#{updateBean.settings.host}"
+                                 required="true"
+                                 disabled="#{updateBean.criticalError}"/>
+                    <p:watermark for="@previous" value="Host" title="Update Server host name"/>
+                    <h:outputLabel value=":"/>
+                    <p:spinner id="update-port" value="#{updateBean.settings.port}" min="0" styleClass="eps-input eps-short-input"
+                               disabled="#{updateBean.criticalError}"/>
+                    <p:watermark for="@previous" value="Port" title="Update Server port"/>
+                </div>
+            </p:outputPanel>
+            <p:outputPanel styleClass="eps-menu-block">
+                <h:outputLabel value="Checking timeout:" title="Time period between checking for update"/>
+                <div class="eps-menu-block-content">
+                    <p:spinner id="check-timeout" value="#{updateBean.settings.checkUpdateTimeout}" min="1"
+                               styleClass="eps-input eps-short-input"
+                               disabled="#{updateBean.serviceStatus eq 'Error'}"/>
+                    <p:selectOneMenu id="time-unit" value="#{updateBean.settings.timeUnit}" styleClass="eps-input"
+                                     style="width: 90px" disabled="#{updateBean.serviceStatus eq 'Error'}">
+                        <f:selectItems value="#{updateBean.availableTimeUnits}"/>
+                    </p:selectOneMenu>
+                    <p:commandButton value="Check" action="#{updateBean.checkUpdate()}" title="Check for updates"
+                                     disabled="#{updateBean.serviceStatus eq 'Error'}"
+                                     update="@(.eps-cfg-update-logo :sailfishComponentForm :updateForm :updateCommands :updateLogoForm :updateConnectionStatusForm)">
+                    </p:commandButton>
+                </div>
+            </p:outputPanel>
+            <p:outputPanel styleClass="eps-menu-block">
+                <h:outputLabel for="auto-update-checkbox" value="Auto update:" title="Sailfish will be automatically updated in specified time"/>
+                <div class="eps-menu-block-content">
+                    <p:selectBooleanCheckbox id="auto-update-checkbox" value="#{updateBean.settings.enableAutoUpdate}" update="@this"
+                                           onchange="if (#{not updateBean.settings.enableAutoUpdate}) { PF('auto-update-dlg').show() }"
+                                           disabled="#{updateBean.criticalError}">
+                        <p:ajax event="change" update="update-interval"/>
+                    </p:selectBooleanCheckbox>
+                </div>
+            </p:outputPanel>
+            <p:outputPanel id="update-interval" styleClass="eps-menu-block">
+                <h:outputText value="Update between"/>
+                <div class="eps-menu-block-content">
+                    <p:calendar id="update-from-time" value="#{updateBean.from}" timeOnly="true" pattern="#{updateBean.timePattern}"
+                                title="Start of update interval in UTC" styleClass="eps-short-input"
+                                requiredMessage="'From' is empty"
+                                required="#{updateBean.settings.enableAutoUpdate}"
+                                disabled="#{updateBean.criticalError or not updateBean.settings.enableAutoUpdate}"
+                                timeZone="UTC"/>
+                    <h:outputText value=" and "/>
+                    <p:calendar id="update-to-time" value="#{updateBean.to}" timeOnly="true" pattern="#{updateBean.timePattern}"
+                                title="End of update interval in UTC" styleClass="eps-short-input"
+                                requiredMessage="'To' is empty"
+                                required="#{updateBean.settings.enableAutoUpdate}"
+                                disabled="#{updateBean.criticalError or not updateBean.settings.enableAutoUpdate}"
+                                timeZone="UTC"/>
+                    <h:outputText value=" on "/>
+                    <p:selectOneMenu id="day-of-week" value="#{updateBean.settings.dayOfWeek}" styleClass="eps-input"
+                                     style="width: 90px" disabled="#{updateBean.criticalError or not updateBean.settings.enableAutoUpdate}">
+                        <f:selectItems value="#{updateBean.daysOfWeek}" itemDescription="Day of week for update"/>
+                    </p:selectOneMenu>
+                    <p:commandButton value="Update" onclick="PF('updateSailfishConfirmation').show()"
+                                     title="Update Sailfish"
+                                     disabled="#{(updateBean.serviceStatus eq 'Error') or (not updateBean.needsUpdate) or updateBean.updating}"/>
+                </div>
+            </p:outputPanel>
         </div>
         <div class="eps-content-block">
             <p:commandButton value="Apply" action="#{updateBean.applySettings()}" title="Apply settings"
@@ -117,6 +136,12 @@
                              update=":updateConnectionStatusForm :updateCommands :updateParameters"
                              disabled="#{updateBean.criticalError}"/>
         </div>
+
+        <p:dialog header="Auto update" modal="true" resizable="false" widgetVar="auto-update-dlg">
+            <div align="center">
+                <h:outputText styleClass="eps-auto-update-dialog" value="You enabled auto update.&lt;br /&gt;It can cause the problems if you work on Sailfish in the specified interval for update" escape="false"/>
+            </div>
+        </p:dialog>
     </h:form>
 
     <h:form id="sailfishComponentForm">
