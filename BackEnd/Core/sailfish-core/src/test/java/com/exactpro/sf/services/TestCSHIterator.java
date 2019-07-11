@@ -28,7 +28,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 
 public class TestCSHIterator {
     private static final long UPDATE_INTERVAL = 500L;
-    private static final List<Integer> SOURCE = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+    private static final List<Integer> SOURCE = Arrays.asList(1, 2, 3);
 
     @Test
     public void testTimeout() throws InterruptedException {
