@@ -800,7 +800,7 @@ public class CommonActions extends AbstractCaller {
 		}
 	}
 
-    @Description("Create message with pair column / value. Value will have type String if it is not contain AML constructions.")
+    @Description("Create message with pair column / value. Value will have type String if it doesn't contain AML constructions.")
     @ActionMethod
     public HashMap<?, ?> SetVariables(IActionContext actionContext, HashMap<?, ?> message) throws Exception {
         return message.isEmpty() ? null : unwrapFilters(message);
