@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map;
 
@@ -43,6 +44,7 @@ import org.apache.catalina.core.StandardEngine;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
@@ -171,7 +173,12 @@ public class SFContextServlet implements Servlet {
 
             settings.setThisSfName(servletContext.getContextPath());
 
-            settings.setThisSfHost(InetAddress.getLocalHost().getHostName());
+            try {
+                settings.setThisSfHost(InetAddress.getLocalHost().getHostName());
+            } catch (UnknownHostException e) {
+                logger.error(e.getMessage(), e);
+                settings.setThisSfHost(SystemUtils.getHostName());
+            }
 
             settings.setThisSfPort(Integer.toString(determineTomcatHttpPort(servletContext)));
 
