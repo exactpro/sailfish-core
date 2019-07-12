@@ -248,7 +248,7 @@
 							<div id="dictionaryTree" class="dictionary-tree">
 							
 								<p:outputPanel id="messagesTooltip" rendered="#{empty dictBean.model.tree.children}">
-									<p:commandLink value="There is no messages yet" actionListener="#{dictBean.model.preAddNewMessage}" oncomplete="PF('addMessDialog').show()" />
+									<p:commandLink value="There are no messages yet" actionListener="#{dictBean.model.preAddNewMessage}" oncomplete="PF('addMessDialog').show()" />
 								</p:outputPanel>
 							
 								<o:tree id="tree" value="#{dictBean.model.tree}" var="fieldModel" varNode="node">
@@ -309,7 +309,7 @@
 							<div id="fieldsTable">
 							
 								<p:outputPanel id="fieldsTooltip" rendered="#{empty dictBean.model.fieldModels}">
-									<p:commandLink value="There is no fields yet" actionListener="#{dictBean.model.preNewFieldAdding}" 
+									<p:commandLink value="There are no fields yet" actionListener="#{dictBean.model.preNewFieldAdding}"
 												   update=":newFieldForm" oncomplete="PF('addFieldDialog').show()" />
 								</p:outputPanel>
 							
