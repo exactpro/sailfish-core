@@ -16,13 +16,15 @@
 package com.exactpro.sf.actions;
 
 import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
+import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.apache.commons.io.FileUtils.readFileToString;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -92,6 +94,7 @@ public class CommonActions extends AbstractCaller {
 	public static final String WAIT_TILL_TIME_ARG_DATE = "till_date";
     public static final String FIRST_ARG = "firstArg";
     public static final String SECOND_ARG = "secondArg";
+    private static final long DEFAULT_EXEC_TIMEOUT = 60000L;
 
     @CommonColumns(@CommonColumn(value = Column.Reference, required = true))
 	@ActionMethod
@@ -444,41 +447,41 @@ public class CommonActions extends AbstractCaller {
 	 * Value of "PathArgs" must contain path to script and its arguments, separated by space.<br />
 	 * @throws Exception - throws an exception
 	 */
+    @CommonColumns(@CommonColumn(Column.Timeout))
     @CustomColumns(@CustomColumn(value = "PathArgs", required = true))
-	@ActionMethod
-	public void RunScript(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
+    @ActionMethod
+    public void RunScript(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
         String command = unwrapFilters(inputData.get("PathArgs"));
         command = preparePath(command);
         String[] pathArgs = toPathArgs(command);
 
         logger.debug("Script run args: {}", (Object)pathArgs);
-        execProcess(actionContext.getReport(), pathArgs);
+        execProcess(actionContext.getReport(), actionContext.getTimeout(), pathArgs);
     }
 
-    private void execProcess(IActionReport report, String... cmdarray) throws Exception {
-        Process process = Runtime.getRuntime().exec(cmdarray);
+    private void execProcess(IActionReport report, long timeout, String... cmdarray) throws Exception {
+        timeout = timeout > 0 ? timeout : DEFAULT_EXEC_TIMEOUT;
 
-        try(BufferedReader stdOutReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader stdErrReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+        File stdOutFile = File.createTempFile("stdout", ".txt");
+        File stdErrFile = File.createTempFile("stderr", ".txt");
 
-            StringBuilder stdOutBuilder = new StringBuilder();
-            StringBuilder stdErrBuilder = new StringBuilder();
+        Process process = new ProcessBuilder(cmdarray)
+                .redirectOutput(stdOutFile)
+                .redirectError(stdErrFile)
+                .start();
 
-            int exitCode = process.waitFor();
-            String line = null;
+        try (AutoCloseable stdOutFileDeleter = stdOutFile::delete;
+                AutoCloseable stdErrFileDeleter = stdErrFile::delete) {
+            boolean finished = process.waitFor(timeout, MILLISECONDS);
 
-            while((line = stdOutReader.readLine()) != null) {
-                stdOutBuilder.append(line);
-                stdOutBuilder.append(System.lineSeparator());
+            if (!finished) {
+                process.destroyForcibly();
             }
 
-            while((line = stdErrReader.readLine()) != null) {
-                stdErrBuilder.append(line);
-                stdErrBuilder.append(System.lineSeparator());
-            }
+            int exitCode = finished ? process.exitValue() : -1;
 
-            String stdOut = stdOutBuilder.toString();
-            String stdErr = stdErrBuilder.toString();
+            String stdOut = readFileToString(stdOutFile, defaultCharset());
+            String stdErr = readFileToString(stdErrFile, defaultCharset());
 
             logger.debug("Script run stdout: {}", stdOut);
             logger.debug("Script run stderr: {}", stdErr);
@@ -488,6 +491,10 @@ public class CommonActions extends AbstractCaller {
 
             if(StringUtils.isNotBlank(stdErr)) {
                 report.createMessage(StatusType.FAILED, MessageLevel.ERROR, "Script run stderr: " + stdErr);
+            }
+
+            if (!finished) {
+                throw new Exception(format("Did not finish in specified timeout: %d ms", timeout));
             }
 
             if(exitCode != 0) {
@@ -591,7 +598,7 @@ public class CommonActions extends AbstractCaller {
 
             return new String(result);
         } else {
-            throw new EPSCommonException(String.format("Specified %s file alias does not exists", fileAlias));
+            throw new EPSCommonException(format("Specified %s file alias does not exists", fileAlias));
         }
     }
 
@@ -608,10 +615,10 @@ public class CommonActions extends AbstractCaller {
         if (dataManager.exists(target)) {
             try (OutputStream dm = dataManager.getDataOutputStream(target, append); OutputStream os = compress ? new InflaterOutputStream(dm) : dm) {
                 IOUtils.copy(source, os);
-                actionContext.getReport().createMessage(StatusType.NA, MessageLevel.INFO, String.format("Content has been saved by %s", fileAlias));
+                actionContext.getReport().createMessage(StatusType.NA, MessageLevel.INFO, format("Content has been saved by %s", fileAlias));
             }
         } else {
-            throw new EPSCommonException(String.format("Specified %s file alias does not exists", fileAlias));
+            throw new EPSCommonException(format("Specified %s file alias does not exists", fileAlias));
         }
     }
 
@@ -689,6 +696,7 @@ public class CommonActions extends AbstractCaller {
      * Value of "Command" must contain path to script, its arguments must be in column with it name.<br />
      * @throws Exception - throws an exception
      */
+    @CommonColumns(@CommonColumn(Column.Timeout))
     @CustomColumns(@CustomColumn(value = "Command", required = true))
     @ActionMethod
     public void RunScriptWithArgs(IActionContext actionContext, HashMap<?, ?> inputData) throws Exception {
@@ -711,7 +719,7 @@ public class CommonActions extends AbstractCaller {
         }
 
         logger.debug("Script run args: {}", (Object)pathArgArray);
-        execProcess(actionContext.getReport(), pathArgArray);
+        execProcess(actionContext.getReport(), actionContext.getTimeout(), pathArgArray);
     }
 
 	/**
