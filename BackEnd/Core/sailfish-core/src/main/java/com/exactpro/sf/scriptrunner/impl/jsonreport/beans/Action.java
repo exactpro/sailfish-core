@@ -18,6 +18,7 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -171,8 +172,8 @@ public class Action implements IJsonReportNode {
         return parameters;
     }
 
-    public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
+    public void setParameters(Parameter... parameters) {
+        this.parameters = Arrays.asList(parameters);
     }
 
     public List<LogEntry> getLogs() {

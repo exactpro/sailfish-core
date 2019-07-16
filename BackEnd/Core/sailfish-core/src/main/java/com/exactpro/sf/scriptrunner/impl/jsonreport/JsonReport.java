@@ -24,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -308,8 +307,8 @@ public class JsonReport implements IScriptReport {
         curAction.setDescription(description);
         curAction.setCheckPointId(checkPoint != null ? checkPoint.getId() : null);
         curAction.setOutcome(outcome);
-        if(parameters != null) {
-            curAction.setParameters(Collections.singletonList(new Parameter(new ReportEntity("Parameter", parameters))));
+        if (parameters != null) {
+            curAction.setParameters(Parameter.fromMessage(parameters));
         }
         setContext(ContextType.ACTION, curAction);
         isActionCreated = true;
@@ -433,6 +432,14 @@ public class JsonReport implements IScriptReport {
                     reportRoot.setException(new ReportException(cause));
                 }
             }
+        }
+    }
+
+    public void createParametersTable(IMessage message) {
+        assertState(ContextType.ACTION, ContextType.ACTIONGROUP);
+
+        if (message != null) {
+            ((Action) getCurrentContextNode()).setParameters(Parameter.fromMessage(message));
         }
     }
 

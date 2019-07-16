@@ -24,6 +24,7 @@ import com.exactpro.sf.scriptrunner.ReportEntity;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.ClassUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,6 +48,10 @@ public class Parameter {
             msgMetadata = ((IMessage) e.getValue()).getMetaData();
         }
         this.type = getClassName(e.getValue());
+    }
+
+    public static Parameter fromMessage(IMessage message) {
+        return new Parameter(new ReportEntity("Parameter", message));
     }
 
     public String getName() {
