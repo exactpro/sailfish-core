@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class Action implements IJsonReportNode {
 
@@ -172,10 +173,7 @@ public class Action implements IJsonReportNode {
         return parameters;
     }
 
-    public void setParameters(List<Parameter> parameters) {
-        this.parameters = parameters;
-    }
-
+    @JsonSetter("parameters")
     public void setParameters(Parameter... parameters) {
         this.parameters = Arrays.asList(parameters);
     }
