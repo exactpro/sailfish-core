@@ -172,6 +172,10 @@ public class Action implements IJsonReportNode {
         return parameters;
     }
 
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
+    }
+
     public void setParameters(Parameter... parameters) {
         this.parameters = Arrays.asList(parameters);
     }
