@@ -174,6 +174,10 @@ public class Action implements IJsonReportNode {
     }
 
     @JsonSetter("parameters")
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
+    }
+
     public void setParameters(Parameter... parameters) {
         this.parameters = Arrays.asList(parameters);
     }
