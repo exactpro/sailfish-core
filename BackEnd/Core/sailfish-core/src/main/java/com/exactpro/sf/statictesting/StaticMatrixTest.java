@@ -70,6 +70,7 @@ import com.exactpro.sf.aml.generator.GeneratedScript;
 import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
+import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -233,10 +234,13 @@ public class StaticMatrixTest extends AbstractStaticTest {
             File services = Files.createTempFile(tempDirectory.toPath(), "services", ".zip").toFile();
 
             try (AutoCloseable closeable = context::dispose) {
-                loadServices(servicesPaths, context);
-
                 if(variableSetsFile != null) {
                     loadVariableSets(variableSetsFile, environmentVariableSet, context);
+                }
+
+                loadServices(servicesPaths, context);
+
+                if (variableSetsFile != null) {
                     servicesPaths.add(variableSetsFile);
                 }
 
@@ -397,12 +401,13 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
         for (ServiceDescription service : services) {
             service.setEnvironment(DEFAULT_ENVIRONMENT);
+            ServiceName serviceName = service.getServiceName();
 
-            if (connectionManager.getService(service.getServiceName()) == null) {
-                connectionManager.addService(service, null).get();
-            } else {
-                connectionManager.updateService(service, null); // update default service from plugin
+            if (connectionManager.getService(serviceName) != null) {
+                connectionManager.removeService(serviceName, null); // remove default service from plugin
             }
+
+            connectionManager.addService(service, null).get();
         }
     }
 
