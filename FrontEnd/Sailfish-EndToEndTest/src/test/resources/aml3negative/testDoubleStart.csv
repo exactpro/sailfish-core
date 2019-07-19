@@ -1,0 +1,5 @@
+#id;#description;#execute;#timeout;#service_name;#reference_to_filter;#reference;#template;#outcome;#action
+;testDoubleStart;;;;;;;;
+1;;;;;;;;;test case start
+;;;;;;;;;test case start
+;;;;;;;;;test case end

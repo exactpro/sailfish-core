@@ -1,0 +1,5 @@
+#reference,#template,#dictionary,#description,#action,#static_type,#static_value,#timeout
+,,,,test case start,,,
+s1,,,,SetStatic,Long,150,
+,,,,Sleep,,,%{s1}
+,,,,test case end,,,

@@ -1,0 +1,18 @@
+#id;#description;#execute;#timeout;#service_name;#reference_to_filter;#reference;#template;#outcome;#action;#dictionary;#message_type;#messages_count;#static_type;#static_value;#condition
+;testInvalidIf;;;;;;;;;;;;;;
+17;;;;;;;;;test case start;;;;;;
+;;;;;;;;;if;;;;;;
+;;;1;;;;;;Sleep;;;;;;
+;;;;;;;;;endif;;;;;;
+;;;;;;;;;;;;;;;
+;;;;;;;;;elif;;;;;;1==1
+;;;1;;;;;;Sleep;;;;;;
+;;;;;;;;;endif;;;;;;
+;;;;;;;;;;;;;;;
+;;;;;;;;;else;;;;;;
+;;;1;;;;;;Sleep;;;;;;
+;;;;;;;;;endif;;;;;;
+;;;;;;;;;;;;;;;
+;;;;;;;;;if;;;;;;1==1
+;;;1;;;;;;Sleep;;;;;;
+;;;;;;;;;test case end;;;;;;

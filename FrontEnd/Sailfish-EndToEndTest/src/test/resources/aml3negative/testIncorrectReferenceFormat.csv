@@ -1,0 +1,12 @@
+#id,#description,#execute,#timeout,#service_name,#reference,#check_point,#template,#outcome,#action,#dictionary,#message_type,#messages_count,#static_type,#static_value,#condition,ClOrdID,Symbol,SecurityID,SecurityIDSource,TransactTime,OrderQty,OrdType,Side,ClientBidID,BidRequestTransType,TotNoRelatedSym,BidType,BidTradeType,BasisPxType,BidDescReqGrp,NoBidDescriptors,BidDescriptorType,NoOrders,ListSeqNo,ListID,TotNoOrders,ListOrdGrp,ClOrdIDun,Symbolun,SecurityIDun,SecurityIDSourceun ,TransactTimeun,OrderQtyun,,,ClOrdIDWRONG
+,testIncorrectReferenceFormat,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+20,,,,,,,,,test case start,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,ord20,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,1,testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${ord20:ClOrdID,testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${ord23232:ClOrdID},testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${},testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${ord20:},testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${:ClOrdID},testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${:},testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,FIX_5_0_GENERIC,NewOrderSingle,,,,,${ord20:foo bar},testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,test case end,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

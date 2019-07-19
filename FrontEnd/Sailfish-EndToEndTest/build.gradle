@@ -1,0 +1,89 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'jacoco'
+
+ext{
+	mjorVersion				= '3'
+	minorVersion			= '2'
+	sailfishVersion         = "$mjorVersion.$minorVersion"
+    version_slf4j = '1.7.25'
+    jacocoVersion = '0.8.0'
+    sharedDir = file("${project.rootDir}/shared")
+}
+
+repositories {
+    maven {
+        name 'MavenLocal' // for local builds only
+        url sharedDir
+    }
+    jcenter()
+    maven {
+        name 'Artifactory-snapshot'
+        url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+    }
+}
+
+configurations {
+    runtimeClasses { transitive = false }
+    runtimeSources { transitive = false }
+    all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
+jacoco {
+    toolVersion = jacocoVersion
+}
+
+dependencies {
+    compile group: "com.exactpro.sf", name: "sailfish-core", version: "${sailfishVersion}-SNAPSHOT", transitive: false
+    compile group: "com.exactpro.sf", name: "sailfish-common", version: "${sailfishVersion}-SNAPSHOT", transitive: false
+    compile group: "com.exactpro.sf", name: "extension-aml-3", version: "${sailfishVersion}-SNAPSHOT", transitive: false
+    compile group: "com.exactpro.sf", name: "sailfish-rest-api-client", version: "${sailfishVersion}-SNAPSHOT", transitive: false
+
+    testCompile group: "com.exactpro.sf", name: "sailfish-core", version: "${sailfishVersion}-SNAPSHOT", transitive: false
+    testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7'
+    testCompile 'junit:junit:4.12'
+	testCompile 'org.hamcrest:hamcrest-core:1.3'
+    testCompile "org.slf4j:slf4j-log4j12:${version_slf4j}"
+    testCompile "com.exactpro.sf:sailfish-rest-api-client:${sailfishVersion}-SNAPSHOT"
+
+    configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact ra ->
+        ModuleVersionIdentifier id = ra.moduleVersion.id
+        if (id.group.startsWith('com.exactpro.sf')) {
+            runtimeClasses group: id.group, name: id.name,  version: id.version
+            runtimeSources group: id.group, name: id.name,  version: id.version, classifier: 'sources'
+        }
+    }
+}
+
+task download(type: Copy) {
+    into ('classes') {
+        from configurations.runtimeClasses.collect { zipTree(it)}
+    }
+    into ('sources') {
+        from configurations.runtimeSources.collect { zipTree(it)}
+    }
+    into "${buildDir}/download"
+}
+
+ext {
+    if (!project.hasProperty("sfGuiURL")) {
+        sfGuiURL = 'http://localhost:8080/sfgui/' // only for build testing
+    }
+}
+
+task buildJar(dependsOn: ['jar']) {	
+}
+
+test {
+	ignoreFailures = true	
+	println "Sailfish URL [${sfGuiURL}]"
+	environment "SF_GUI_URL": "${sfGuiURL}"
+
+    jacoco {
+        append = false
+        destinationFile = file("${buildDir}/jacoco/restAPI.exec")
+    }
+}

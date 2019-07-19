@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+<serviceDescription>
+    <type>FIX-Client</type>
+    <name>fake</name>
+    <serviceHandlerClassName>com.exactpro.sf.services.CollectorServiceHandler</serviceHandlerClassName>
+    <fixClientSettings>
+        <addNextExpectedMsgSeqNum>false</addNextExpectedMsgSeqNum>
+        <allowUnknownMsgFields>false</allowUnknownMsgFields>
+        <autorelogin>true</autorelogin>
+        <beginString>FIXT.1.1</beginString>
+        <checkLatency>false</checkLatency>
+        <defaultApplVerID>9</defaultApplVerID>
+        <dictionaryName>FIX_5_0_GENERIC</dictionaryName>
+        <doLogonOnStart>true</doLogonOnStart>
+        <duplicateTagsAllowed>false</duplicateTagsAllowed>
+        <encryptPassword>false</encryptPassword>
+        <endTime>00:00:00</endTime>
+        <fileStorePath>logs/fix/sessions</fileStorePath>
+        <heartBtInt>60</heartBtInt>
+        <idleTimeout>0</idleTimeout>
+        <ignoreAbsenceOf141tag>false</ignoreAbsenceOf141tag>
+        <internalTimestamp>false</internalTimestamp>
+        <logHeartbeats>false</logHeartbeats>
+        <logonTimeout>1000</logonTimeout>
+        <logoutTimeout>10</logoutTimeout>
+        <maxLatency>120</maxLatency>
+        <millisecondsInTimeStampFields>true</millisecondsInTimeStampFields>
+        <password>pwdu123</password>
+        <performanceMode>false</performanceMode>
+        <receiveLimit>0</receiveLimit>
+        <reconnectInterval>1</reconnectInterval>
+        <rejectInvalidMessage>true</rejectInvalidMessage>
+        <requiresOrigSendingTime>true</requiresOrigSendingTime>
+        <resetOnDisconnect>false</resetOnDisconnect>
+        <resetOnLogout>false</resetOnLogout>
+        <resetSeqNumFlag>true</resetSeqNumFlag>
+        <senderCompID>BANZAI</senderCompID>
+        <seqNumSender>0</seqNumSender>
+        <seqNumTarget>0</seqNumTarget>
+        <socketConnectHost>0.0.0.0</socketConnectHost>
+        <socketConnectPort>9881</socketConnectPort>
+        <startTime>00:00:00</startTime>
+        <targetCompID>EXEC</targetCompID>
+        <useDefaultApplVerID>true</useDefaultApplVerID>
+        <useLocalTime>false</useLocalTime>
+        <username>testUser</username>
+        <validateFieldsHaveValues>true</validateFieldsHaveValues>
+        <validateFieldsOutOfOrder>true</validateFieldsOutOfOrder>
+        <validateUserDefinedFields>false</validateUserDefinedFields>
+    </fixClientSettings>
+</serviceDescription>

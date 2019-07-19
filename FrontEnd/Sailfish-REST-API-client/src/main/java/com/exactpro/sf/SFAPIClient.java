@@ -742,32 +742,32 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public XmlTestscriptActionResponse runMatrix(Matrix mat) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(mat.getId()), "start", null, "default",
-		        "ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse runMatrix(int id) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(id), "start", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse runMatrix(String name) throws APICallException, APIResponseException {
 		return performMatrixActionInt("name_" + name, "start", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(Matrix mat) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(mat.getId()), "stop", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(int id) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(id), "stop", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(String name) throws APICallException, APIResponseException {
 		return performMatrixActionInt("name_" + name, "stop", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public List<TestScriptRun> runAllMatrices() throws APICallException, APIResponseException {

@@ -1,0 +1,15 @@
+#id;#description;#execute;#timeout;#service_name;#reference_to_filter;#reference;#template;#outcome;#action;#dictionary;#message_type;#messages_count;#static_type;#static_value;#condition;ClOrdID;Symbol;SecurityID;SecurityIDSource;TransactTime;OrderQty;OrdType;Side
+;testIncludeBlockRecursion;;;;;;;;;;;;;;;;;;;;;;
+18;;;;;;b1;;;block start;;;;;;;;;;;;;;
+;;;;fake;;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;b2;;include block;;;;;;;;;;;;;;
+;;;;;;;;;block end;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;b2;;;block start;;;;;;;;;;;;;;
+;;;;fake;;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;b1;;include block;;;;;;;;;;;;;;
+;;;;;;;;;block end;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;test case start;;;;;;;;;;;;;;
+;;;;;;c1;b1;;include block;;;;;;;;;;;;;;
+;;;;;;;;;test case end;;;;;;;;;;;;;;

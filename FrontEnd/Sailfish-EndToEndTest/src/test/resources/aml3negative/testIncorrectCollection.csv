@@ -1,0 +1,8 @@
+#description,#service_name,#reference,#action,#dictionary,#message_type,PartyID,PartyIDSource,CrossType,NoPartyIDs,PartyRole,SecurityID,NoSides
+testIncorrectCollection,,,,,,,,,,,,
+,,,Test case start,,,,,,,,,
+,,npids1,,,,1,1,,,1,,
+,,npids2,,,,1,1,,,1,,
+,,ns,,,,,,,"npids1, npids2, 1",,,
+,fake,,send,FIX_5_0_GENERIC,NewOrderCross,,,1,,,1,[ns]
+,,,Test case end,,,,,,,,,
