@@ -1994,7 +1994,7 @@ public class DictionaryEditorModel {
                 }
             }
 
-            int index = fields.indexOf(selectedLeftField.getField());
+            int index = fields.valueList().indexOf(selectedLeftField.getField());
 
             ModifiableFieldStructure toMove = fields.remove(index);
             fields.put(index + (down ? 1 : -1), toMove.getName(), toMove);
