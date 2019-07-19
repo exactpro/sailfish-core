@@ -62,7 +62,7 @@ public class <% typeName %> extends BaseMessage
 
 	public <% typeName %>(IMessageFactory messageFactory)
 	{
-		this(messageFactory.createMessage(MESSAGE_NAME, "<% namespaceName %>"));
+		 this(messageFactory.createMessage(MESSAGE_NAME, (messageFactory.getNamespace() == null) ? "<% namespaceName %>" : messageFactory.getNamespace()));
 	}
 
 	/**
