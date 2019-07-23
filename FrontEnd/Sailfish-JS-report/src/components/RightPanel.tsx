@@ -76,8 +76,7 @@ class RightPanelBase extends React.Component<RightPanelProps> {
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
             rejectedEnabled = rejectedMessages.length != 0,
-            adminControlEnabled = adminMessages.length != 0,
-            controlShowTitles = true;
+            adminControlEnabled = adminMessages.length != 0;
 
         const adminRootClass = createTriStateControlClassName("layout-control", adminMessagesEnabled, adminControlEnabled),
             adminIconClass = createTriStateControlClassName("layout-control__icon admin", adminMessagesEnabled, adminControlEnabled),
@@ -123,20 +122,23 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                                     {
                                         showTitles ?
                                             <div className={adminTitleClass}>
-                                                {controlShowTitles ? <p>{adminControlEnabled ? "" : "No"} Admin Messages</p> : null}
+                                                <p>{adminControlEnabled ? "" : "No"} Admin Messages</p>
                                             </div> :
                                             null
                                     }
                                 </div>
                                 <div className={rejectedRootClass}>
                                     <div className={rejectedIconClass}
-                                         onClick={() => {
-                                             if (rejectedEnabled) this.currentRejectedHandler(currentRejectedIndex);
-                                         }}
-                                         title={rejectedEnabled ? "Scroll to current rejected message" : null}/>
-                                    <div className={rejectedTitleClass}>
-                                        {controlShowTitles ? <p>{rejectedEnabled ? "Rejected" : "No rejected"}</p> : null}
-                                    </div>
+                                        onClick={() => this.currentRejectedHandler(currentRejectedIndex)}
+                                        style={{ cursor: rejectedEnabled ? 'pointer' : 'unset' }}
+                                        title={rejectedEnabled ? "Scroll to current rejected message" : null} />
+                                    {
+                                        showTitles ?
+                                            <div className={rejectedTitleClass}>
+                                               <p>{rejectedEnabled ? "" : "No "}Rejected</p>
+                                            </div> :
+                                            null
+                                    }
                                     {
                                         rejectedEnabled ?
                                             (
@@ -161,7 +163,11 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                                      }}>
                                     <div className={predictionIconClass}/>
                                     <div className={predictionTitleClass}>
-                                        {controlShowTitles ? <p>{this.props.predictionsAvailable ? "Predictions" : "No predictions"}</p> : null}
+                                        {
+                                            showTitles ? 
+                                                <p>{this.props.predictionsAvailable ? "Predictions" : "No predictions"}</p> : 
+                                                null
+                                        }
                                     </div>
                                 </div>
                             </div>
