@@ -19,14 +19,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -75,9 +68,7 @@ public class ExcelMatrixReader implements IMatrixReader {
         formulaEvaluator =  workbook.getCreationHelper().createFormulaEvaluator();
         sheet = workbook.getSheetAt(sheetIndex);
         rowIterator = sheet.iterator();
-        this.dataFormatter = new DataFormatter(true);
-        dataFormatter.setDefaultNumberFormat(NumberFormat.getNumberInstance(Locale.US));
-
+        this.dataFormatter = new DataFormatter(Locale.US, false, true);
         readRecord();
     }
 
@@ -146,7 +137,6 @@ public class ExcelMatrixReader implements IMatrixReader {
         for (SimpleCell sc : cells) {
             values[counter++] = sc.getValue();
         }
-
         return values;
     }
 
