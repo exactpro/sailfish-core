@@ -21,7 +21,7 @@ import Action, { isAction, ActionNodeType } from '../../models/Action';
 import { keyForMessage, keyForAction, keyForActionParamter, keyForVerification } from '../keys';
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
-import Verification, { isVerification } from '../../models/Verification';
+import Verification from '../../models/Verification';
 import { createIgnoringRegexp } from '../regexp';
 import { isCheckpoint } from '../actionType';
 
@@ -43,12 +43,14 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
             .filter(actionNode => isAction(actionNode) && !isCheckpoint(actionNode))
             .forEach(action => searchResults.push(...findAllInAction(action as Action, searchString)));
 
-        searchResults.push(...testCase.messages.reduce((acc, message) => [...acc, ...findAllInObject(
-            message,
-            MESSAGE_FIELDS,
-            searchString,
-            keyForMessage(message.id)
-        )], []));
+        testCase.messages.forEach(message => {
+            searchResults.push(...findAllInObject(
+                message,
+                MESSAGE_FIELDS,
+                searchString,
+                keyForMessage(message.id)
+            ));
+        });
     }
 
     return new SearchResult(searchResults);
@@ -58,6 +60,10 @@ function findAllInAction(action: Action, searchString: string): Array<[string, n
     let results = new Array<[string, number]>();
 
     results.push(...findAllInObject(action, ACTION_FIELDS, searchString, keyForAction(action.id)));
+
+    action.parameters && action.parameters.forEach((param, index) => 
+        results.push(...findAllInParams(param, searchString, keyForActionParamter(action.id, index)))
+    );
 
     action.subNodes.forEach(subAction => {
         switch(subAction.actionNodeType) { 
@@ -76,16 +82,6 @@ function findAllInAction(action: Action, searchString: string): Array<[string, n
             }
         }
     });
-
-    action.parameters && action.parameters.forEach((param, index) => 
-        results.push(...findAllInParams(param, searchString, keyForActionParamter(action.id, index)))
-    );
-
-    action.subNodes && action.subNodes
-        .filter(isVerification)
-        .forEach(verification => {
-            verification.entries && verification.entries.forEach
-        })
 
     return results;
 }
