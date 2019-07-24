@@ -14,71 +14,96 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from 'preact';
+import {Component, h} from 'preact';
 import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import { formatTime, getSecondsPeriod } from '../helpers/dateFormatter';
 import '../styles/report.scss';
 import { createSelector } from '../helpers/styleCreators';
+import {connect} from "preact-redux";
+import AppState from "../state/models/AppState";
+import {setSelectedTestCase} from "../actions/actionCreators";
 
 interface TestCaseCardProps {
     metadata: TestcaseMetadata;
     index: number;
     handleClick: (metadata: TestcaseMetadata) => any;
+
+    selectedTestCaseId: string;
 }
 
-const TestCaseCard = ({ metadata, handleClick, index }: TestCaseCardProps) => {
+class TestCaseCardBase extends Component<TestCaseCardProps, {}> {
 
-    const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
+    componentDidUpdate(previousProps) {
+        if (this.props.selectedTestCaseId === this.props.metadata.id && previousProps.selectedTestCaseId !== this.props.metadata.id) {
+            this.base.scrollIntoView({
+                block: 'center',
+                behavior: 'smooth',
+                inline: 'nearest'
+            });
+        }
+    }
 
-    const rootClass = createSelector(
-        "tc-card",
-        metadata.status.status
-    );
+    render({ metadata, handleClick, index, selectedTestCaseId }: TestCaseCardProps) {
 
-    return (
-        <div class={rootClass}
-            onClick={() => {
+        const isSelected = selectedTestCaseId === metadata.id;
+        const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
 
-                // Don't trigger 'click' event when user selects text
-                if (window.getSelection().type == 'Range') {
-                    return;
-                }
-                
-                handleClick(metadata)
-            }}>
-            <div class="tc-card__index">{index}</div>
-            <div class="tc-card__title">
-                <div class="tc-card__name">{metadata.name}</div>
-                {
-                    metadata.description ?
-                        <div class="tc-card__description"> — {metadata.description}</div> :
-                        null
-                }
-            </div>
-            <div class="tc-card__status">
-                {metadata.status.status.toUpperCase()}
-            </div>
-            <div class="tc-card__info">  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">Start</div>
-                    <div class="tc-card__info-value">{formatTime(metadata.startTime)}</div>
-                </div>  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">Finish</div>
-                    <div class="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
-                </div>  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">ID</div>
-                    <div class="tc-card__info-value">{metadata.id}</div>
-                </div>  
-                <div class="tc-card__info-element">
-                    <div class="tc-card__info-title">Hash</div>
-                    <div class="tc-card__info-value">{metadata.hash}</div>
+        const rootClass = createSelector(
+            "tc-card",
+            metadata.status.status,
+            isSelected ? "selected" : null
+        );
+
+        return (
+            <div class={rootClass}
+                 onClick={() => {
+
+                     // Don't trigger 'click' event when user selects text
+                     if (window.getSelection().type == 'Range') {
+                         return;
+                     }
+
+                     handleClick(metadata)
+                 }}>
+                <div class="tc-card__index">{index}</div>
+                <div class="tc-card__title">
+                    <div class="tc-card__name">{metadata.name}</div>
+                    {
+                        metadata.description ?
+                            <div class="tc-card__description"> — {metadata.description}</div> :
+                            null
+                    }
                 </div>
+                <div class="tc-card__status">
+                    {metadata.status.status.toUpperCase()}
+                </div>
+                <div class="tc-card__info">
+                    <div class="tc-card__info-element">
+                        <div class="tc-card__info-title">Start</div>
+                        <div class="tc-card__info-value">{formatTime(metadata.startTime)}</div>
+                    </div>
+                    <div class="tc-card__info-element">
+                        <div class="tc-card__info-title">Finish</div>
+                        <div class="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
+                    </div>
+                    <div class="tc-card__info-element">
+                        <div class="tc-card__info-title">ID</div>
+                        <div class="tc-card__info-value">{metadata.id}</div>
+                    </div>
+                    <div class="tc-card__info-element">
+                        <div class="tc-card__info-title">Hash</div>
+                        <div class="tc-card__info-value">{metadata.hash}</div>
+                    </div>
+                </div>
+                <div class="tc-card__elapsed-time">{elapsedTime}</div>
             </div>
-            <div class="tc-card__elapsed-time">{elapsedTime}</div>
-        </div>
-    )
+        )
+    }
 }
 
-export default TestCaseCard;
+export const TestCaseCard = connect(
+    (state: AppState) => ({
+        selectedTestCaseId: state.selected.selectedTestCaseId
+    }),
+    () => ({})
+)(TestCaseCardBase);

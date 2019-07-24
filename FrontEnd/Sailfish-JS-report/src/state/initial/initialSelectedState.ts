@@ -29,5 +29,6 @@ export const initialSelectedState: SelectedState = {
     rejectedMessageId: null,
     actionsMap: new Map<number, Action>(),
     checkpointActions: [],
-    activeActionId: null
+    activeActionId: null,
+    selectedTestCaseId: null
 }

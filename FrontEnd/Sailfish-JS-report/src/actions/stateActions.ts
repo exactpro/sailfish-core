@@ -44,7 +44,8 @@ export enum StateActionTypes {
     SET_ML_TOKEN = 'SET_ML_TOKEN',
     SET_SUBMITTED_ML_DATA = "SET_SUBMITTED_ML_DATA",
     ADD_SUBMITTED_ML_DATA = "ADD_SUBMITTED_ML_DATA",
-    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA"
+    REMOVE_SUBMITTED_ML_DATA = "REMOVE_SUBMITTED_ML_DATA",
+    SET_SELECTED_TESTCASE = "SET_SELECTED_TESTCASE"
 }
 
 export interface SetReportStateAction {
@@ -156,6 +157,11 @@ export interface RemoveSubmittedMlDataStateAction {
     data: SubmittedData;
 }
 
+export interface SetSelectedTestCaseStateAction {
+    type: StateActionTypes.SET_SELECTED_TESTCASE;
+    testCaseId: string;
+}
+
 export type StateActionType = 
     SetReportStateAction |
     SetTestCaseStateAction | 
@@ -179,7 +185,8 @@ export type StateActionType =
     SetMlTokenStateAction |
     SetSubmittedMlDataStateAction |
     AddSubmittedMlDataStateAction |
-    RemoveSubmittedMlDataStateAction;
+    RemoveSubmittedMlDataStateAction |
+    SetSelectedTestCaseStateAction;
 
 export function isStateAction(action: any): action is StateActionType {
     return action && typeof action.type === 'string' && action.type in StateActionTypes;

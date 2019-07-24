@@ -15,12 +15,12 @@
  ******************************************************************************/
 
 import SelectedState from '../state/models/SelectedState';
-import { initialSelectedState } from '../state/initial/initialSelectedState';
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
-import { nextCyclicItem } from '../helpers/array';
-import { getCheckpointActions } from '../helpers/checkpointFilter';
-import { generateActionsMap } from '../helpers/mapGenerator';
-import { getActions } from '../helpers/actionType';
+import {initialSelectedState} from '../state/initial/initialSelectedState';
+import {StateActionType, StateActionTypes} from '../actions/stateActions';
+import {nextCyclicItem} from '../helpers/array';
+import {getCheckpointActions} from '../helpers/checkpointFilter';
+import {generateActionsMap} from '../helpers/mapGenerator';
+import {getActions} from '../helpers/actionType';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -143,6 +143,13 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 rejectedMessageId: stateAction.messageId,
                 scrolledMessageId: new Number(stateAction.messageId)
+            }
+        }
+
+        case StateActionTypes.SET_SELECTED_TESTCASE: {
+            return  {
+                ...state,
+                selectedTestCaseId: stateAction.testCaseId
             }
         }
 

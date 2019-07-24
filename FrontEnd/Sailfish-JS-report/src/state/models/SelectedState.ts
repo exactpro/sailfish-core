@@ -19,6 +19,7 @@ import TestCase from '../../models/TestCase';
 import Action from "../../models/Action";
 
 export default interface SelectedState {
+    selectedTestCaseId: string;
     testCase: TestCase;
     actionsId: number[];
     messagesId: number[];

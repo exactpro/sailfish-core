@@ -14,19 +14,20 @@
 * limitations under the License.
 ******************************************************************************/
 
-import { h } from 'preact';
+import {h} from 'preact';
 import Report from '../models/Report';
-import { connect } from 'preact-redux';
+import {connect} from 'preact-redux';
 import AppState from '../state/models/AppState';
-import { setTestCasePath } from '../actions/actionCreators';
-import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
-import { TestcaseMetadata } from '../models/TestcaseMetadata';
+import {setTestCasePath} from '../actions/actionCreators';
+import {formatTime, getSecondsPeriod} from '../helpers/dateFormatter';
+import {TestcaseMetadata} from '../models/TestcaseMetadata';
 import "../styles/report.scss";
-import { StatusType, statusValues } from '../models/Status';
-import TestCaseCard from './TestCaseCard';
-import { HeatmapScrollbar } from './HeatmapScrollbar';
-import { testCasesHeatmap } from '../helpers/heatmapCreator';
-import { createSelector } from '../helpers/styleCreators';
+import {StatusType, statusValues} from '../models/Status';
+import {TestCaseCard} from './TestCaseCard';
+import {HeatmapScrollbar} from './HeatmapScrollbar';
+import {testCasesHeatmap} from '../helpers/heatmapCreator';
+import {createSelector} from '../helpers/styleCreators';
+import {SelectionCarouselControl} from "./SelectionCarouselControl";
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -39,6 +40,8 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
 
     const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
         plugins = report.plugins ? Object.entries(report.plugins) : [];
+
+    const testCaseIds = (report.metadata || []).filter(item => item.status.status === 'FAILED').map(item => item.id);
 
     return (
         <div class="report">
@@ -53,6 +56,7 @@ const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
             </div>
             <div class="report__controls">
                 <div class="report__title">Test Cases</div>
+                <SelectionCarouselControl failedTestCaseIds={testCaseIds}/>
             </div>
             <div class="report__summary   report-summary">
                 <div class="report-summary__card">

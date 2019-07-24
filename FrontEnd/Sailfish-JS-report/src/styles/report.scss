@@ -46,6 +46,11 @@
         align-items: center;
         justify-content: space-between;
         padding-left: 20px;
+
+      .carousel-control {
+        @include carousel-control
+
+      }
     }
 
     &__summary {
@@ -229,5 +234,9 @@
         font-weight: bold;
         display: flex;
         justify-content: flex-end;
+    }
+
+    &.selected {
+        @include selectable-card;
     }
 }

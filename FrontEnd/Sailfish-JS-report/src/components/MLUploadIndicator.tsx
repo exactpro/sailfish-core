@@ -32,7 +32,7 @@ interface MLUploadIndicatorProps {
 
 export class MLUploadIndicatorBase extends Component<MLUploadIndicatorProps, {}> {
     render({ submittedData, testCase, token }: MLUploadIndicatorProps) {
-        const failedActionIds: number[] = []
+        const failedActionIds: number[] = [];
 
         function addSubActions(action: ActionNode) {
             if (isAction(action) && (action as Action).status.status === 'FAILED') {

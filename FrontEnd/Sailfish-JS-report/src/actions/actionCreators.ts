@@ -37,7 +37,8 @@ import {
     SetMlTokenStateAction,
     SetSubmittedMlDataStateAction,
     AddSubmittedMlDataStateAction,
-    RemoveSubmittedMlDataStateAction
+    RemoveSubmittedMlDataStateAction,
+    SetSelectedTestCaseStateAction
 } from "./stateActions";
 
 import TestCase from "../models/TestCase";
@@ -155,4 +156,9 @@ export const addSubmittedMlData = (data: SubmittedData): AddSubmittedMlDataState
 export const removeSubmittedMlData = (data: SubmittedData): RemoveSubmittedMlDataStateAction => ({
     type: StateActionTypes.REMOVE_SUBMITTED_ML_DATA,
     data: data
+})
+
+export const setSelectedTestCase = (testCaseId: string): SetSelectedTestCaseStateAction => ({
+    type: StateActionTypes.SET_SELECTED_TESTCASE,
+    testCaseId: testCaseId
 })
