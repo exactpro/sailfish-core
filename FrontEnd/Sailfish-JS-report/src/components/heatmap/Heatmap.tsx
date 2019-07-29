@@ -27,7 +27,7 @@ interface HeatmapProps  {
 const Heatmap = ({ elementsCount, selectedElements }: HeatmapProps) => (
     <div className="heatmap-scrollbar">
         {
-            range(0, elementsCount).map(index => (
+            range(0, elementsCount - 1).map(index => (
                 <div className={createSelector("heatmap-scrollbar-item", selectedElements.get(index))} key={index} />
             ))
         }

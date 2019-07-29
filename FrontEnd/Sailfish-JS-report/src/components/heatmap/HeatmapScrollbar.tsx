@@ -18,13 +18,9 @@ import * as React from 'react';
 import Scrollbars from 'react-custom-scrollbars';
 import { StatusType } from '../../models/Status';
 import '../../styles/heatmap.scss';
-import { rangeSum } from '../../helpers/range';
-import { createSelector } from '../../helpers/styleCreators';
 import SmartHeatmap from './SmartHeatmap';
-import ChunkedHeatmap from './ChunkedHeatmap';
 import Heatmap from './Heatmap';
 
-const MIN_HEATMAP_ELEMENT_HEIGHT = 8;
 const SCROLLBAR_TRACK_WIDTH = 11;
 
 interface HeatmapScrollbarProps {
@@ -40,7 +36,7 @@ interface HeatmapScrollbarState {
     rootHeight: number;
 }
 
-export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
+export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
 
     private scrollbar = React.createRef<Scrollbars>();
     private root = React.createRef<HTMLDivElement>();
@@ -99,25 +95,11 @@ export class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, Hea
                             selectedElements={selectedElements}
                             rootHeight={rootHeight}
                             elementHeightMapper={heightMapper}/> : 
-                        rootHeight ? 
-                            renderHeatmap(elementsCount, selectedElements, rootHeight) : 
-                            <div/>
+                        <Heatmap
+                            elementsCount={elementsCount}
+                            selectedElements={selectedElements}/>
                 }
             </div>
         )
     }
-}
-
-function renderHeatmap(elementsCount: number, selectedElements: Map<number, StatusType>, rootHeight: number): React.ReactNode {
-    // here we calculate how much heatmap elements we can render without overlaping
-    const maxElementsCount = rootHeight / MIN_HEATMAP_ELEMENT_HEIGHT;
-
-    return elementsCount > maxElementsCount ?
-        <ChunkedHeatmap
-            elementsCount={elementsCount}
-            selectedElements={selectedElements}
-            chunkSize={Math.ceil(elementsCount / maxElementsCount)}/> :
-        <Heatmap
-            elementsCount={elementsCount}
-            selectedElements={selectedElements}/>
 }
