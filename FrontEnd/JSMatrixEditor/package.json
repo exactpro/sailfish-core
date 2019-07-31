@@ -31,8 +31,6 @@
     "react-addons-test-utils": "^15.0.0",
     "css-loader": "^0.12.0",
     "emmett": "^3.0.0",
-    "eslint": "^1.2.1",
-    "eslint-plugin-react": "^3.2.3",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
     "gulp": "^3.9.0",
