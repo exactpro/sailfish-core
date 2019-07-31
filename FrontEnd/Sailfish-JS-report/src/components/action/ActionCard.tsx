@@ -27,6 +27,7 @@ import SearchableContent from '../search/SearchableContent';
 import { keyForAction } from '../../helpers/keys';
 import { SearchExpandablePanel } from '../ExpandablePanel';
 import { ActionMlUploadButton } from "../ActionMlUploadButton";
+import { StatusType } from '../../models/Status';
 
 interface CardProps {
     action: Action;
@@ -147,7 +148,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         children
                     }
                     {
-                        action.status.status == 'FAILED' ? (
+                        action.status.status == StatusType.FAILED ? (
                             <div className="action-card-status">
                                 <RecoverableExpandablePanel
                                     stateKey={keyForAction(id, 'status')}

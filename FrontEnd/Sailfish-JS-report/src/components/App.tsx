@@ -22,7 +22,7 @@ import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
-import { setTestCase, setReport, selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
+import { selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,

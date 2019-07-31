@@ -22,6 +22,7 @@ import { addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCrea
 import { connect } from 'react-redux';
 import { submitEntry, deleteEntry, EMPTY_MESSAGE_ID, } from '../helpers/machineLearning';
 import Action from "../models/Action";
+import { StatusType } from '../models/Status';
 
 interface ActionMlUploadButtonProps {
     actionId: number;
@@ -36,7 +37,7 @@ export class ActionMlUploadButtonBase extends React.Component<ActionMlUploadButt
     render() {
 
         const isAvailable = this.props.token !== null
-            && this.props.actionMap.get(this.props.actionId).status.status === "FAILED";
+            && this.props.actionMap.get(this.props.actionId).status.status === StatusType.FAILED;
 
         const submittedWithThisAction = this.props.submittedData.filter((entry) => {
             return entry.actionId === this.props.actionId

@@ -18,11 +18,12 @@
 
 import * as React from 'react';
 import '../../styles/messages.scss';
-import {SubmittedData} from '../../models/MlServiceResponse'
+import { SubmittedData } from '../../models/MlServiceResponse'
 import AppState from '../../state/models/AppState';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import TestCase from '../../models/TestCase';
-import Action, {ActionNode, ActionNodeType} from '../../models/Action';
+import { ActionNode, isAction } from '../../models/Action';
+import { StatusType } from '../../models/Status';
 
 interface MlUploadIndicatorProps {
     submittedData: SubmittedData[];
@@ -35,9 +36,9 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
         const failedActionIds: number[] = [];
 
         function addSubActions(action: ActionNode) {
-            if (action.actionNodeType === ActionNodeType.ACTION && (action as Action).status.status === 'FAILED') {
-                failedActionIds.push((action as Action).id);
-                (action as Action).subNodes.forEach((item) => { addSubActions(item) });
+            if (isAction(action) && action.status.status === StatusType.FAILED) {
+                failedActionIds.push(action.id);
+                action.subNodes.forEach((item) => { addSubActions(item) });
             }
         }
 
@@ -60,10 +61,10 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
 
         if (submittedActionIds.size === failedActionIds.length && failedActionIds.length > 0) {
             return (
-                < div className="ml__submit-indicator" >
+                <div className="ml__submit-indicator" >
                     <div className="ml__submit-indicator-icon submitted" />
                     <p className="ml__submit-indicator-text submitted">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
-                </div >
+                </div>
             )
         }
 

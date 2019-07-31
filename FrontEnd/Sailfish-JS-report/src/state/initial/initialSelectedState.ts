@@ -17,6 +17,7 @@
 import SelectedState from '../models/SelectedState';
 import Action from '../../models/Action';
 import SearchResult from '../../helpers/search/SearchResult';
+import { StatusType } from '../../models/Status';
 
 export const initialSelectedState: SelectedState = {
     testCase: null,
@@ -25,7 +26,7 @@ export const initialSelectedState: SelectedState = {
     messagesId: [],
     scrolledMessageId: null,
     verificationId: null,
-    status: 'NA',
+    status: StatusType.NA,
     checkpointMessageId: null,
     checkpointActionId: null,
     rejectedMessageId: null,

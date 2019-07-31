@@ -130,7 +130,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                         isSelected={selectedActionsId.includes(action.id)}
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={ (selectedAction) => {
-                            if (selectedAction.status.status == 'FAILED' && !this.props.mlDataActionIds.has(selectedAction.id)) {
+                            if (selectedAction.status.status == StatusType.FAILED && !this.props.mlDataActionIds.has(selectedAction.id)) {
                                 fetchPredictions(this.props.token, this.props.saveMlData, selectedAction.id);
                             }
                             actionSelectHandler(selectedAction);
@@ -179,7 +179,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                         isSelected={isSelected}
                         isTransparent={isTransparent}
                         onSelect={(messageId, actionId, status) => {
-                            if (status == 'FAILED' && !this.props.mlDataActionIds.has(actionId)) {
+                            if (status == StatusType.FAILED && !this.props.mlDataActionIds.has(actionId)) {
                                 fetchPredictions(this.props.token, this.props.saveMlData, actionId);
                             }
                             verificationSelectHandler(messageId, actionId, status);

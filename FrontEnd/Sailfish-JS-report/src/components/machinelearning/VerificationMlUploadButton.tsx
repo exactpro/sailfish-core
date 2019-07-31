@@ -38,5 +38,5 @@ export const VerificationMlUploadButton = connect(
     (state: AppState) => ({
         activeActionId: state.selected.activeActionId
     }),
-    () => {}
+    () => ({})
 )(VerificationMlUploadButtonBase);

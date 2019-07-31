@@ -30,6 +30,7 @@ import {createSelector, createTriStateControlClassName} from '../helpers/styleCr
 import {AutoSizer} from 'react-virtualized';
 import Action, {isAction} from "../models/Action";
 import {KnownBugPanel} from "./knownbugs/KnownBugPanel";
+import { StatusType } from '../models/Status';
 
 const MIN_CONTROLS_WIDTH = 800,
     MIN_CONTROLS_WIDTH_WITH_REJECTED = 850;
@@ -248,7 +249,7 @@ export const RightPanel = connect(
             state.machineLearning.token != null
             && state.selected.testCase.messages.length > 0
             && state.selected.testCase.actions.some((action) => {
-                return isAction(action) && (action as Action).status.status == 'FAILED';
+                return isAction(action) && action.status.status == StatusType.FAILED;
             }),
 
         predictionsEnabled: state.machineLearning.predictionsEnabled,

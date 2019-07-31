@@ -53,14 +53,14 @@ const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: 
         <div className={className}>
             {
                 actions.length ? 
-                statusValues.map(status => renderChip(
-                        status, 
-                        actions.filter(action => action.status.status == status), 
-                        selectedStatus,
-                        selectHandler
-                    )
-                ) : 
-                <p>Not related to any actions</p>
+                    statusValues.map(status => renderChip(
+                            status, 
+                            actions.filter(action => action.status.status == status), 
+                            selectedStatus,
+                            selectHandler
+                        )
+                    ) : 
+                    <p>Not related to any actions</p>
             }
         </div>
     )
