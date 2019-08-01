@@ -55,6 +55,23 @@
         }
     }
 
+    &__link {
+        padding-left: 33px;
+        
+        a {
+            text-decoration: none;
+            padding-bottom: 1px;
+            font-weight: bold;
+            font-size: 16px;
+            color: $linkTextColor;
+
+            // https://kirkizh.ru/2018/03/underline/
+            // we can't use standart underline and before pseudoelement with text-shadow
+            background-image: linear-gradient(to top, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px,  $linkUnderlineColor 1px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 100px);
+            text-shadow: 2px 0px #fff, -2px 0px #fff;
+        }
+    }
+
     &.root {
         border-color: var(--status-secondary-border-color);
     }

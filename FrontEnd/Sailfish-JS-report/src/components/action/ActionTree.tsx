@@ -194,7 +194,11 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
 
                 return (
                     <div className="action-card">
-                        <h3>{"Link : " + link}</h3>
+                        <div className="action-card__link">
+                            <a href={link}>
+                                Link to {link}
+                            </a>
+                        </div>
                     </div>
                 );
             }
