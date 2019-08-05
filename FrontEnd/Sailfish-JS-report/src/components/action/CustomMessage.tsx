@@ -56,8 +56,7 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
                     <div className="ac-body__item-title" style={messageStyle}>{message}</div>
                 </div>
                 <ExceptionCard
-                    exception={exception}
-                    drawDivider={false}/>
+                    exception={exception}/>
             </RecoverableExpandablePanel>
         )
     }

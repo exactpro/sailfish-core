@@ -23,15 +23,13 @@ import AppState from '../state/models/AppState';
 
 interface PanelProps {
     header?: React.ReactNode;
-    // shows, when panel is expanded
-    expandedHeader?: React.ReactNode;
     body?: React.ReactNode;
     isExpanded?: boolean;
     onExpand?: (isExpanded: boolean) => any;
     children: React.ReactNode[];
 }
 
-export const ExpandablePanel = ({ header, body, children, expandedHeader, isExpanded, onExpand }: PanelProps) => {
+export const ExpandablePanel = ({ header, body, children, isExpanded, onExpand }: PanelProps) => {
     const iconClass = createSelector(
         "expandable-panel__icon", 
         isExpanded ? "expanded" : "hidden"
@@ -47,7 +45,7 @@ export const ExpandablePanel = ({ header, body, children, expandedHeader, isExpa
             <div className="expandable-panel__header">
                 <div className={iconClass} 
                     onClick={onClick}/>
-                { (isExpanded && expandedHeader) || header || children[0] }
+                { header || children[0] }
             </div>
             {
                 isExpanded ? 

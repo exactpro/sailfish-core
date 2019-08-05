@@ -29,6 +29,7 @@ import { createSelector } from '../helpers/styleCreators';
 import { loadTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
+import { ExceptionChain } from './ExceptionChain';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -58,9 +59,13 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
     }
 
     render() {
-        const knownBugsPresent = this.props.report.metadata.some(item => item.bugs != null && item.bugs.length > 0);
 
-        const knownBugsClass = this.state.showKnownBugs ? "active" : "enabled";
+        const { onTestCaseSelect, report } = this.props,
+            { showKnownBugs } = this.state;
+
+        const knownBugsPresent = report.metadata.some(item => item.bugs != null && item.bugs.length > 0);
+
+        const knownBugsClass = showKnownBugs ? "active" : "enabled";
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -77,8 +82,8 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                 )
         )
 
-        const executionTime = getSecondsPeriod(this.props.report.startTime, this.props.report.finishTime),
-            plugins = this.props.report.plugins ? Object.entries(this.props.report.plugins) : [];
+        const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
+            plugins = report.plugins ? Object.entries(report.plugins) : [];
 
         return (
             <div className="report">
@@ -100,25 +105,25 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                         <div className="report-summary__logo"/>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">Version</div>
-                            <div className="report-summary__element-value">{this.props.report.version}</div>
+                            <div className="report-summary__element-value">{report.version}</div>
                         </div>
                         <div className="report-summary__divider"/>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">Host</div>
-                            <div className="report-summary__element-value">{this.props.report.hostName}</div>
+                            <div className="report-summary__element-value">{report.hostName}</div>
                         </div>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">User</div>
-                            <div className="report-summary__element-value">{this.props.report.userName}</div>
+                            <div className="report-summary__element-value">{report.userName}</div>
                         </div>
                         <div className="report-summary__divider"/>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">ScriptRun ID</div>
-                            <div className="report-summary__element-value">{this.props.report.scriptRunId}</div>
+                            <div className="report-summary__element-value">{report.scriptRunId}</div>
                         </div>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">Report Date</div>
-                            <div className="report-summary__element-value">{formatTime(this.props.report.startTime)}</div>
+                            <div className="report-summary__element-value">{formatTime(report.startTime)}</div>
                         </div>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">Execution time</div>
@@ -127,10 +132,10 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                         <div className="report-summary__divider"/>
                         <div className="report-summary__element">
                             <div className="report-summary__element-title">Test Cases</div>
-                            <div className="report-summary__element-value">{this.props.report.metadata.length}</div>
+                            <div className="report-summary__element-value">{report.metadata.length}</div>
                         </div>
                         {
-                            statusValues.map(statusValue => renderStatusInfo(statusValue, this.props.report.metadata))
+                            statusValues.map(statusValue => this.renderStatusInfo(statusValue, report.metadata))
                         }
                         <div className="report-summary__divider"/>
                         {
@@ -151,44 +156,51 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                     </div>
                 </div>
                 <div className="report__testcases">
-                    <HeatmapScrollbar
-                        selectedElements={testCasesHeatmap(this.props.report.metadata)}
-                        elementsCount={this.props.report.metadata.length}>
-                        {
-                            this.props.report.metadata.map((metadata, index) => (
-                                <TestCaseCard
-                                    knownBugsEnabled={this.state.showKnownBugs}
-                                    key={index}
-                                    metadata={metadata}
-                                    index={index + 1}
-                                    handleClick={metadata => this.props.onTestCaseSelect(metadata.jsonpFileName)}/>
-                            ))
-                        }
-                    </HeatmapScrollbar>
+                    {
+                        report.metadata.length > 0 ? (
+                            <HeatmapScrollbar
+                                selectedElements={testCasesHeatmap(report.metadata)}
+                                elementsCount={report.metadata.length}>
+                                {
+                                    report.metadata.map((metadata, index) => (
+                                        <TestCaseCard
+                                            knownBugsEnabled={showKnownBugs}
+                                            key={index}
+                                            metadata={metadata}
+                                            index={index + 1}
+                                            handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
+                                    ))
+                                }
+                            </HeatmapScrollbar>
+                        ) : (
+                            <ExceptionChain
+                                exception={report.exception}/>
+                        )
+                    }
                 </div>
             </div>
         )
     }
-}
 
-function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): React.ReactNode {
-    const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
-        valueClassName = createSelector(
-            "report-summary__element-value",
-            "bold",
-            status.toLowerCase()
-        );
-
-    if (!testCasesCount) {
-        return null;
+    private renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): React.ReactNode {
+        const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
+            valueClassName = createSelector(
+                "report-summary__element-value",
+                "bold",
+                status.toLowerCase()
+            );
+    
+        if (!testCasesCount) {
+            return null;
+        }
+    
+        return (
+            <div className="report-summary__element" key={status}>
+                <div className={valueClassName}>{status.toUpperCase()}</div>
+                <div className={valueClassName}>{testCasesCount}</div>
+            </div>
+        )
     }
-
-    return (
-        <div className="report-summary__element" key={status}>
-            <div className={valueClassName}>{status.toUpperCase()}</div>
-            <div className={valueClassName}>{testCasesCount}</div>
-        </div>
-    )
 }
 
 const ReportLayout = connect(

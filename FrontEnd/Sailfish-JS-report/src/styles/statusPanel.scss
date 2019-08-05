@@ -93,6 +93,12 @@
             &-header {
                 word-break: break-all;
                 font-weight: bold;
+
+                &-message {
+                    &.disabled {
+                        color: $secondaryTextColor;
+                    }
+                }
             }
 
             &-expand {

@@ -16,10 +16,10 @@
 
 import * as React from 'react';
 import Exception from '../models/Exception';
+import { createSelector } from '../helpers/styleCreators';
 
 interface Props {
     exception: Exception;
-    drawDivider: boolean;
 }
 
 interface State {
@@ -37,33 +37,34 @@ export default class ExceptionCard extends React.Component<Props, State> {
     }
 
     render() {
-        const { exception, drawDivider } = this.props,
+        const { exception } = this.props,
             { isExpanded } = this.state;
 
-        const divider = (
-            <div className="status-panel-exception-divider">
-                <div className="status-panel-exception-divider-icon"/>
-            </div>
-        )
-
         return (
-            <div>
-                {drawDivider? divider : null}
-                <div className="status-panel failed">
-                    <div className="status-panel-exception-wrapper">
-                        <div className="status-panel-exception-header">
-                            <div>{isExpanded? exception.class + ": " : null}</div>
-                            <div>{exception.message}</div>
-                        </div>
-                        <div className="status-panel-exception-expand" onClick={this.onTogglerClick}>
-                            <div className="status-panel-exception-expand-title">More</div>
-                            <div className={"status-panel-exception-expand-icon " + (isExpanded ? "expanded" : "hidden")}/>
+            <div className="status-panel failed">
+                <div className="status-panel-exception-wrapper">
+                    <div className="status-panel-exception-header">
+                        {
+                            isExpanded ? (
+                                <div>{exception.class}: </div>
+                            ) : null
+                        }
+                        <div className={createSelector("status-panel-exception-header-message", exception.message ? "" : "disabled")}>
+                            {exception.message || "No exception message"}
                         </div>
                     </div>
-                    <div style={{ display: isExpanded ? null : "none"}} className="status-panel-exception-stacktrace">
-                        <pre>{exception.stacktrace}</pre>
+                    <div className="status-panel-exception-expand" onClick={this.onTogglerClick}>
+                        <div className="status-panel-exception-expand-title">More</div>
+                        <div className={createSelector("status-panel-exception-expand-icon", (isExpanded ? "expanded" : "hidden"))}/>
                     </div>
                 </div>
+                {
+                    isExpanded ? (
+                        <div className="status-panel-exception-stacktrace">
+                            <pre>{exception.stacktrace}</pre>
+                        </div> 
+                    ) : null
+                }
             </div>
         )
     }
