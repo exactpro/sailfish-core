@@ -24,11 +24,11 @@ import static org.apache.commons.io.FilenameUtils.concat;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -53,6 +53,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
@@ -71,6 +72,7 @@ import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IConnectionManager;
@@ -89,18 +91,32 @@ import io.qameta.allure.Allure;
 public class StaticMatrixTest extends AbstractStaticTest {
     private static final ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
 
+    private static final String WORKSPACES_LONG_OPT = "workspaces";
+    private static final String MATRICES_LONG_OPT = "matrices";
+    private static final String SERVICES_LONG_OPT = "services";
+    private static final String REPORT_LONG_OPT = "report";
+    private static final String LOGGER_CONFIG_LONG_OPT = "logger-config";
+    private static final String LOGS_ZIP_LONG_OPT = "logs-zip";
+    private static final String SKIP_OPTIONAL_LONG_OPT = "skip-optional";
+    private static final String VARIABLE_SETS_LONG_OPT = "variable-sets";
+    private static final String ENVIRONMENT_VARIABLE_SET_LONG_OPT = "environment-variable-set";
+    private static final String TEMP_DIRECTORY_LONG_OPT = "temp-directory";
+    private static final String LANGUAGE_URI_LONG_OPT = "language-uri";
+
     private static List<Object[]> testData = Collections.emptyList();
 
     private final ISFContext context;
     private final File matrix;
     private final File services;
     private final boolean skipOptional;
+    private final SailfishURI languageUri;
 
-    public StaticMatrixTest(ISFContext context, File matrix, File services, boolean skipOptional) {
+    public StaticMatrixTest(ISFContext context, File matrix, File services, boolean skipOptional, SailfishURI languageUri) {
         this.context = context;
         this.matrix = matrix;
         this.services = services;
         this.skipOptional = skipOptional;
+        this.languageUri = languageUri;
     }
 
     @Parameters(name = "{1}")
@@ -113,7 +129,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         System.out.println("Testing matrix: " + matrix.getCanonicalPath());
 
         try {
-            compileMatrix(context, matrix, skipOptional);
+            compileMatrix(context, matrix, skipOptional, languageUri);
         } catch (AMLException e) {
             attachFiles();
 
@@ -130,7 +146,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         }
     }
 
-    private void attachFiles() throws IOException, FileNotFoundException {
+    private void attachFiles() throws IOException {
         try(InputStream stream = new FileInputStream(matrix)) {
             String name = matrix.getName();
             Allure.addAttachment(name, Files.probeContentType(matrix.toPath()), stream, FilenameUtils.getExtension(name));
@@ -149,24 +165,25 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 return;
             }
 
-            List<File> workspacePaths = stream(commandLine.getOptionValues("workspaces"))
+            List<File> workspacePaths = stream(commandLine.getOptionValues(WORKSPACES_LONG_OPT))
                     .map(File::new)
                     .distinct()
                     .collect(toList());
 
-            File matricesPath = (File) commandLine.getParsedOptionValue("matrices");
+            File matricesPath = (File)commandLine.getParsedOptionValue(MATRICES_LONG_OPT);
 
-            Set<File> servicesPaths = stream(commandLine.getOptionValues("services"))
+            Set<File> servicesPaths = stream(commandLine.getOptionValues(SERVICES_LONG_OPT))
                     .map(File::new)
                     .collect(Collectors.toSet());
 
-            File reportDir = (File) commandLine.getParsedOptionValue("report");
-            File loggerConfigFile = (File)commandLine.getParsedOptionValue("logger-config");
-            File logsZipFile = (File)commandLine.getParsedOptionValue("logs-zip");
-            boolean skipOptional = commandLine.hasOption("skip-optional");
-            File variableSetsFile = (File)commandLine.getParsedOptionValue("variable-sets");
-            String environmentVariableSet = commandLine.getOptionValue("environment-variable-set");
-            File tempDirectory = (File)commandLine.getParsedOptionValue("temp-directory");
+            File reportDir = (File)commandLine.getParsedOptionValue(REPORT_LONG_OPT);
+            File loggerConfigFile = (File)commandLine.getParsedOptionValue(LOGGER_CONFIG_LONG_OPT);
+            File logsZipFile = (File)commandLine.getParsedOptionValue(LOGS_ZIP_LONG_OPT);
+            boolean skipOptional = commandLine.hasOption(SKIP_OPTIONAL_LONG_OPT);
+            File variableSetsFile = (File)commandLine.getParsedOptionValue(VARIABLE_SETS_LONG_OPT);
+            String environmentVariableSet = commandLine.getOptionValue(ENVIRONMENT_VARIABLE_SET_LONG_OPT);
+            File tempDirectory = (File)commandLine.getParsedOptionValue(TEMP_DIRECTORY_LONG_OPT);
+            SailfishURI languageUri = ObjectUtils.defaultIfNull(SailfishURI.parse(commandLine.getOptionValue(LANGUAGE_URI_LONG_OPT)), AutoLanguageFactory.URI);
 
             if(!reportDir.exists() && !reportDir.mkdirs()) {
                 throw new Exception("Report directory cannot be created: " + reportDir.getCanonicalPath());
@@ -234,6 +251,10 @@ public class StaticMatrixTest extends AbstractStaticTest {
             File services = Files.createTempFile(tempDirectory.toPath(), "services", ".zip").toFile();
 
             try (AutoCloseable closeable = context::dispose) {
+                if (languageUri != AutoLanguageFactory.URI && !context.getLanguageManager().containsLanguage(languageUri)) {
+                    throw new Exception("Unknown language URI: " + languageUri);
+                }
+
                 if(variableSetsFile != null) {
                     loadVariableSets(variableSetsFile, environmentVariableSet, context);
                 }
@@ -249,7 +270,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 testData = new ArrayList<>();
 
                 for (File matrix : getMatrices(matricesPath)) {
-                    testData.add(ArrayUtils.toArray(context, matrix, services, skipOptional));
+                    testData.add(ArrayUtils.toArray(context, matrix, services, skipOptional, languageUri));
                 }
 
                 System.setProperty("allure.results.directory", reportDir.getCanonicalPath());
@@ -280,7 +301,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         Options options = new Options();
 
         Option workspacePathOption = Option.builder("w")
-                .longOpt("workspaces")
+                .longOpt(WORKSPACES_LONG_OPT)
                 .hasArg()
                 .argName("path")
                 .required()
@@ -290,7 +311,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option matricesPathOption = Option.builder("m")
-                .longOpt("matrices")
+                .longOpt(MATRICES_LONG_OPT)
                 .hasArg()
                 .argName("path")
                 .required()
@@ -299,7 +320,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option servicesPathOption = Option.builder("s")
-                .longOpt("services")
+                .longOpt(SERVICES_LONG_OPT)
                 .hasArg()
                 .argName("paths")
                 .required()
@@ -309,7 +330,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option reportDirOption = Option.builder("r")
-                .longOpt("report")
+                .longOpt(REPORT_LONG_OPT)
                 .hasArg()
                 .argName("path")
                 .required()
@@ -318,7 +339,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option loggerConfigFileOption = Option.builder("l")
-                .longOpt("logger-config")
+                .longOpt(LOGGER_CONFIG_LONG_OPT)
                 .hasArg()
                 .argName("file")
                 .type(File.class)
@@ -326,7 +347,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option logsZipFileOption = Option.builder("z")
-                .longOpt("logs-zip")
+                .longOpt(LOGS_ZIP_LONG_OPT)
                 .hasArg()
                 .argName("file")
                 .required()
@@ -335,12 +356,12 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option skipOptionalOption = Option.builder("so")
-                .longOpt("skip-optional")
+                .longOpt(SKIP_OPTIONAL_LONG_OPT)
                 .desc("skip optional actions")
                 .build();
 
         Option variableSetsFileOption = Option.builder("vs")
-                .longOpt("variable-sets")
+                .longOpt(VARIABLE_SETS_LONG_OPT)
                 .hasArg()
                 .argName("file")
                 .type(File.class)
@@ -348,18 +369,25 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .build();
 
         Option environmentVariableSetOption = Option.builder("ev")
-                .longOpt("environment-variable-set")
+                .longOpt(ENVIRONMENT_VARIABLE_SET_LONG_OPT)
                 .hasArg()
                 .argName("name")
                 .desc("name of variable set to apply to environment")
                 .build();
 
         Option tempDirOption = Option.builder("td")
-                .longOpt("temp-directory")
+                .longOpt(TEMP_DIRECTORY_LONG_OPT)
                 .hasArg()
                 .argName("directory")
                 .type(File.class)
                 .desc("path to temp directory")
+                .build();
+
+        Option languageUriOption = Option.builder("lu")
+                .longOpt(LANGUAGE_URI_LONG_OPT)
+                .hasArg()
+                .argName("uri")
+                .desc("sailfish URI for desired matrix language")
                 .build();
 
         options.addOption(workspacePathOption);
@@ -372,6 +400,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         options.addOption(variableSetsFileOption);
         options.addOption(environmentVariableSetOption);
         options.addOption(tempDirOption);
+        options.addOption(languageUriOption);
 
         try {
             return new DefaultParser().parse(options, args);
@@ -444,7 +473,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 .collect(toList());
     }
 
-    private static void compileMatrix(ISFContext context, File matrix, boolean skipOptional) throws Exception {
+    private static void compileMatrix(ISFContext context, File matrix, boolean skipOptional, SailfishURI languageUri) throws Exception {
         IWorkspaceDispatcher dispatcher = context.getWorkspaceDispatcher();
         File reportFolder = dispatcher.getFolder(FolderType.REPORT);
         File copiedMatrix = new File(reportFolder, matrix.getName());
@@ -454,7 +483,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         settings.setAutoStart(true);
         settings.setBaseDir(matrix.getName() + System.currentTimeMillis());
         settings.setContinueOnFailed(true);
-        settings.setLanguageURI(AutoLanguageFactory.URI);
+        settings.setLanguageURI(languageUri);
         settings.setMatrixPath(matrix.getName());
         settings.setSkipOptional(skipOptional);
 
@@ -470,7 +499,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 context.getCompilerClassPath());
 
         ScriptContext scriptContext = new ScriptContext(context, null, null, null, System.getProperty("user.name"), 0, DEFAULT_ENVIRONMENT);
-        GeneratedScript script = aml.run(scriptContext, "UTF-8");
+        GeneratedScript script = aml.run(scriptContext, StandardCharsets.UTF_8.name());
 
         if(aml.getAlertCollector().getCount(AlertType.ERROR) != 0) {
             throw new AMLException("Errors detected", aml.getAlertCollector());
