@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.util.TimeUtils;
 
 public class TestCSHIterator {
     private static final long UPDATE_INTERVAL = 500L;
@@ -56,11 +57,11 @@ public class TestCSHIterator {
         Thread updateThread = new Thread(new UpdateTask(SOURCE, target, UPDATE_INTERVAL));
         CSHIterator<Integer> it = new CSHIterator<>(target, checkPoint);
         List<Integer> result = new ArrayList<>();
-        long waitUntil = System.currentTimeMillis() + timeout;
+        long waitUntil = TimeUtils.jvmTimeInMillis() + timeout;
 
         updateThread.start();
 
-        while(it.hasNext(waitUntil - System.currentTimeMillis())) {
+        while(it.hasNext(waitUntil - TimeUtils.jvmTimeInMillis())) {
             result.add(it.next());
         }
 
@@ -89,18 +90,13 @@ public class TestCSHIterator {
         @Override
         public void run() {
             while(source.hasNext()) {
-                try {
-                    Thread.sleep(interval / 2);
+                TimeUtils.reliableSleep(interval / 2);
 
-                    synchronized(target) {
-                        target.add(source.next());
-                        target.notifyAll();
-                    }
-
-                    Thread.sleep(interval / 2);
-                } catch(InterruptedException e) {
-                    throw new EPSCommonException(e);
+                synchronized(target) {
+                    target.add(source.next());
+                    target.notifyAll();
                 }
+                TimeUtils.reliableSleep(interval / 2);
             }
         }
     }
