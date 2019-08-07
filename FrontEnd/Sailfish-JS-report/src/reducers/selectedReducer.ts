@@ -21,7 +21,6 @@ import { nextCyclicItem } from '../helpers/array';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/actionType';
-import { findAll } from '../helpers/search/searchEngine';
 import SearchResult from '../helpers/search/SearchResult';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
 
