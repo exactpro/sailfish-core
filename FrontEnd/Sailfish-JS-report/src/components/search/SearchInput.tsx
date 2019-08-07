@@ -63,12 +63,22 @@ class SearchInputBase extends React.PureComponent<Props, State> {
     }
 
     componentDidMount() {
-        // we need to use 'top' in case of working in iframe
-        top.document.addEventListener("keydown", this.documentOnKeyDown);
+        // we need to subscribe to events in both top window's document and inner iframe document events, 
+        // because in some cases (e.g. user pressed tab key) browser focuses on iframe and events from top.document doesn't trigger        
+        if (top.document !== document) {
+            top.document.addEventListener("keydown", this.documentOnKeyDown);
+        }
+
+        document.addEventListener("keydown", this.documentOnKeyDown);
     }
 
     componentWillUnmount() {
-        top.document.removeEventListener("keydown", this.documentOnKeyDown);
+        // same as subscribing in componentDidMount
+        if (top.document !== document) {
+            top.document.removeEventListener("keydown", this.documentOnKeyDown);
+        }
+
+        document.removeEventListener("keydown", this.documentOnKeyDown);
     }
 
     componentDidUpdate(prevProps: Props) {
