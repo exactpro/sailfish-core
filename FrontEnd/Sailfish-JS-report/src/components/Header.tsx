@@ -34,10 +34,14 @@ import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 import SearchInput from './search/SearchInput';
 import {MlUploadIndicator} from "./machinelearning/MlUploadIndicator";
 
-interface HeaderProps {
+interface StateProps {
     testCase: TestCase;
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
+    isNavigationEnabled: boolean;
+}
+
+interface DispatchProps {
     nextTestCaseHandler: () => any;
     prevTestCaseHandler: () => any;
     backToListHandler: () => any;
@@ -45,7 +49,19 @@ interface HeaderProps {
     switchFieldsFilter: (status: StatusType) => any;
 }
 
-const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler, prevTestCaseHandler, backToListHandler, switchActionsFilter, switchFieldsFilter }: HeaderProps) => {
+interface Props extends StateProps, DispatchProps {}
+
+export const HeaderBase = ({ 
+    testCase, 
+    actionsFilter, 
+    fieldsFilter,
+    isNavigationEnabled,
+    nextTestCaseHandler, 
+    prevTestCaseHandler, 
+    backToListHandler, 
+    switchActionsFilter,
+    switchFieldsFilter
+}: Props) => {
         
     const [ showFilter, setShowFilter ] = React.useState(false);
 
@@ -66,6 +82,10 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
         infoClass = createSelector(
             "header__info", 
             showFilter ? "filter-enabled" : null
+        ),
+        navButtonClass = createSelector(
+            "header-button",
+            isNavigationEnabled ? '' : 'disabled'
         );
 
     const period = getSecondsPeriod(startTime, finishTime);
@@ -79,15 +99,15 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
                     <div className="header-button__title">Back to list</div>
                 </div>
                 <div className="header-main__name ">
-                    <div className="header-button"
-                        onClick={prevTestCaseHandler}>
+                    <div className={navButtonClass}
+                        onClick={isNavigationEnabled && prevTestCaseHandler}>
                         <div className="header-button__icon left"/>
                     </div>
                     <div className="header-main__title">
                         {(name || 'Test Case')} — {status.status} — {period}
                     </div>
-                    <div className="header-button"
-                        onClick={nextTestCaseHandler}>
+                    <div className={navButtonClass}
+                        onClick={isNavigationEnabled && nextTestCaseHandler}>
                         <div className="header-button__icon right"/>
                     </div>
                 </div>
@@ -124,26 +144,26 @@ const HeaderBase = ({ testCase, actionsFilter, fieldsFilter, nextTestCaseHandler
                 </div>
             </div>
             {
-                showFilter ?
+                showFilter ? (
                     <FilterPanel
                         actionsFilters={actionsFilter}
                         fieldsFilters={fieldsFilter}
                         actionFilterHandler={switchActionsFilter}
                         fieldsFilterHandler={switchFieldsFilter} />
-                    : null
+                ) : null
             }
         </div>
     );
 };
 
 export const Header = connect(
-    (state: AppState) => ({
+    (state: AppState): StateProps => ({
         testCase: state.selected.testCase,
-        splitMode: state.view.splitMode,
         actionsFilter: state.filter.actionsFilter,
-        fieldsFilter: state.filter.fieldsFilter
+        fieldsFilter: state.filter.fieldsFilter,
+        isNavigationEnabled: state.report.metadata.length > 1
     }),
-    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         nextTestCaseHandler: () => dispatch(loadNextTestCase()),
         prevTestCaseHandler: () => dispatch(loadPrevTestCase()),
         backToListHandler: () => dispatch(resetTestCase()),
