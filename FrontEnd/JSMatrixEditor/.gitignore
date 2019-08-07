@@ -1,7 +1,0 @@
-node_modules/
-nodejs/
-public/.sass-cache/
-.idea/
-.sass-cache/
-execStubs/
-package-lock.json
