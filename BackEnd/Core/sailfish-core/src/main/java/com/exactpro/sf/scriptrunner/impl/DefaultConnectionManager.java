@@ -88,6 +88,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultConnectionManager.class);
 
+	private static final IServiceNotifyListener EMPTY_NOTIFY_LISTENER = new ServiceNotifyListener();
 	private final ExecutorService serviceExecutor;
 	private final IServiceFactory staticServiceFactory;
 	private final IEnvironmentMonitor environmentMonitor;
@@ -158,10 +159,17 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	public <Service extends IService> Service getService(ServiceName serviceName) {
         try {
             lock.readLock().lock();
-
             ServiceContainer serviceContainer = services.get(serviceName);
-
-            return serviceContainer != null ? (Service) serviceContainer.getService() : null;
+            if (serviceContainer != null) {
+                try {
+                    initServiceWithoutNewThread(serviceName, EMPTY_NOTIFY_LISTENER);
+                } catch (Exception e) {
+                    // TODO check all places where getService() used and throw exception instead of processing here
+                    logger.warn("Could not init service {}", serviceName, e);
+                }
+                return (Service) serviceContainer.getService();
+            }
+            return null;
         } finally {
             lock.readLock().unlock();
         }
@@ -1174,6 +1182,18 @@ public final class DefaultConnectionManager implements IConnectionManager {
             return supplier.get();
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    private static class ServiceNotifyListener implements IServiceNotifyListener {
+        @Override
+        public void onErrorProcessing(String message) {
+            logger.error(message);
+        }
+
+        @Override
+        public void onInfoProcessing(String message) {
+            logger.info(message);
         }
     }
 }

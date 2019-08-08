@@ -225,7 +225,6 @@ public class ExecutorClient {
             }
             apiClient.setStatisticsDBSettings(xmlConfig);
             uploadVariableSets();
-            uploadExecutorServices();
 
             if(prepareExecutorServices().stream().anyMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
                 logger.debug("Setting variable set for executor '{}' to '{}'", executor.getName(), executor.getVariableSet());
@@ -233,6 +232,7 @@ public class ExecutorClient {
             } else {
                 logger.debug("Skipped setting variable set for executor '{}' to '{}'", executor.getName(), executor.getVariableSet());
             }
+            uploadExecutorServices();
 
             serviceCommand(executorServicesUploaded.values().stream(), apiClient::startService, "start", StartMode.EXECUTOR);
             return true;
@@ -480,13 +480,12 @@ public class ExecutorClient {
 		private boolean beforeListRun() {
 			
 			try {
-                uploadScriptListServices();
-
                 if(!prepareScriptListServices().isEmpty() &&
                         prepareExecutorServices().stream().noneMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
                     logger.debug("Setting variable set before script list '{}' run to '{}'", currentList.getName(), currentList.getVariableSet());
                     setVariableSet(currentList.getVariableSet());
                 }
+                uploadScriptListServices();
 
                 Stream<Service> uploaded = Stream.concat(
                         executorServicesUploaded.values().stream(),

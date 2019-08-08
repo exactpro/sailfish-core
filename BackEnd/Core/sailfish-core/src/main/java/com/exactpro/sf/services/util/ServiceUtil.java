@@ -200,7 +200,6 @@ public class ServiceUtil {
                             Thread.sleep(serviceSettings.getWaitingTimeBeforeStarting());
                         }
 
-                        conManager.initService(service.getServiceName(), null).get();
                         conManager.startService(service.getServiceName(), null);
 
                         long expectedTimeOfStarting = serviceSettings.getExpectedTimeOfStarting();
