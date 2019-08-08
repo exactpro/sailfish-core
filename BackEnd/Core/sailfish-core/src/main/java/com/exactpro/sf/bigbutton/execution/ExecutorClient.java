@@ -15,38 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.execution;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.SFAPIClient;
 import com.exactpro.sf.Service.Status;
 import com.exactpro.sf.ServiceImportResult;
@@ -82,6 +50,36 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.util.EMailUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterators;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class ExecutorClient {
 	
@@ -225,6 +223,7 @@ public class ExecutorClient {
             }
             apiClient.setStatisticsDBSettings(xmlConfig);
             uploadVariableSets();
+            uploadExecutorServices();
 
             if(prepareExecutorServices().stream().anyMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
                 logger.debug("Setting variable set for executor '{}' to '{}'", executor.getName(), executor.getVariableSet());
@@ -232,7 +231,6 @@ public class ExecutorClient {
             } else {
                 logger.debug("Skipped setting variable set for executor '{}' to '{}'", executor.getName(), executor.getVariableSet());
             }
-            uploadExecutorServices();
 
             serviceCommand(executorServicesUploaded.values().stream(), apiClient::startService, "start", StartMode.EXECUTOR);
             return true;
@@ -480,12 +478,13 @@ public class ExecutorClient {
 		private boolean beforeListRun() {
 			
 			try {
+                uploadScriptListServices();
+
                 if(!prepareScriptListServices().isEmpty() &&
                         prepareExecutorServices().stream().noneMatch(service -> service.getStartMode() == StartMode.EXECUTOR)) {
                     logger.debug("Setting variable set before script list '{}' run to '{}'", currentList.getName(), currentList.getVariableSet());
                     setVariableSet(currentList.getVariableSet());
                 }
-                uploadScriptListServices();
 
                 Stream<Service> uploaded = Stream.concat(
                         executorServicesUploaded.values().stream(),
