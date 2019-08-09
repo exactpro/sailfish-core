@@ -87,6 +87,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 public final class DefaultConnectionManager implements IConnectionManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultConnectionManager.class);
+    private static final IServiceNotifyListener EMPTY_NOTIFY_LISTENER = new ServiceNotifyListener();
 
 	private final ExecutorService serviceExecutor;
 	private final IServiceFactory staticServiceFactory;
@@ -516,7 +517,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
         }
     }
 
-	@Override
+    @Override
     public Future<?> startService(ServiceName serviceName, IServiceNotifyListener notifyListener) {
 	    if (serviceName == null) {
             throw new ServiceException("serviceName is null");
@@ -765,22 +766,26 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	}
 
     private List<ServiceName> getStartedServices(String environmentName) {
-        return withReadLock(() -> {
-            List<ServiceName> names = new ArrayList<>();
+        return withReadLock(() ->
+                getServices(environmentName)
+                    .stream()
+                    .filter(service -> service.getStatus() == ServiceStatus.STARTED
+                                    || service.getStatus() == ServiceStatus.WARNING)
+                    .map(IService::getServiceName)
+                    .collect(Collectors.toList())
+        );
+    }
 
+    private List<IService> getServices(String environmentName) {
+        return withReadLock(() -> {
+            List<IService> environmentServices = new ArrayList<>();
             services.forEach((name, container) -> {
                 if(!name.getEnvironment().equals(environmentName)) {
                     return;
                 }
-
-                ServiceStatus status = container.getService().getStatus();
-
-                if(status == ServiceStatus.STARTED || status == ServiceStatus.WARNING) {
-                    names.add(name);
-                }
+                environmentServices.add(container.getService());
             });
-
-            return names;
+            return environmentServices;
         });
     }
 
@@ -1080,8 +1085,14 @@ public final class DefaultConnectionManager implements IConnectionManager {
             if(!services.isEmpty()) {
                 throw new StorageException(format("Cannot change variable set for environment '%s' because it has running services: %s", environmentName, services));
             }
-
             envStorage.setVariableSet(environmentName, variableSetName);
+            for (IService service : getServices(environmentName)) {
+                try {
+                    initServiceWithoutNewThread(service.getServiceName(), EMPTY_NOTIFY_LISTENER);
+                } catch (Exception e) {
+                    logger.warn("Could not init service {}", service.getServiceName(), e);
+                }
+            }
             return this;
         });
     }
@@ -1174,6 +1185,18 @@ public final class DefaultConnectionManager implements IConnectionManager {
             return supplier.get();
         } finally {
             lock.writeLock().unlock();
+        }
+    }
+
+    private static class ServiceNotifyListener implements IServiceNotifyListener {
+        @Override
+        public void onErrorProcessing(String message) {
+            logger.error(message);
+        }
+
+        @Override
+        public void onInfoProcessing(String message) {
+            logger.info(message);
         }
     }
 }
