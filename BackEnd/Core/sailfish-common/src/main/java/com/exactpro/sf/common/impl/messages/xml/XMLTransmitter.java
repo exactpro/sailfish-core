@@ -54,8 +54,16 @@ public class XMLTransmitter {
 	private static final Logger logger = LoggerFactory.getLogger(XMLTransmitter.class);
 
 	private static final XMLTransmitter instance = new XMLTransmitter();
+    public static final String PROPRIETARY_COPYRIGHT =
+            "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
+            + "  ~ Copyright (c) 2009-" + DateTimeFormatter.ofPattern("yyyy").format(DateTimeUtility.nowLocalDate()) + ", Exactpro Systems LLC\r\n"
+            + "  ~ www.exactpro.com\r\n"
+            + "  ~ Build Software to Test Software\r\n" + "  ~ \r\n" + "  ~ All rights reserved.\r\n"
+            + "  ~ This is unpublished, licensed software, confidential and proprietary\r\n"
+            + "  ~ information which is the property of Exactpro Systems LLC or its licensors.\r\n"
+            + "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n";
 
-	private final Map<Package, JAXBContext> contexts = new HashMap<>();
+    private final Map<Package, JAXBContext> contexts = new HashMap<>();
 
 	private XMLTransmitter(){}
 
@@ -267,16 +275,7 @@ public class XMLTransmitter {
     	    try {
     	        xmlStreamWriter.writeStartDocument(Charset.defaultCharset().name(), "1.0");
     	        xmlStreamWriter.writeCharacters("\r\n");
-    	        xmlStreamWriter.writeComment("\r\n" +
-                        "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n" +
-                        "  ~ Copyright (c) 2009-" + DateTimeFormatter.ofPattern("yyyy").format(DateTimeUtility.nowLocalDate()) + ", Exactpro Systems LLC\r\n" +
-                        "  ~ www.exactpro.com\r\n" +
-                        "  ~ Build Software to Test Software\r\n" +
-                        "  ~ \r\n" +
-                        "  ~ All rights reserved.\r\n" +
-                        "  ~ This is unpublished, licensed software, confidential and proprietary\r\n" +
-                        "  ~ information which is the property of Exactpro Systems LLC or its licensors.\r\n" +
-                        "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n");
+    	        xmlStreamWriter.writeComment("\r\n" + PROPRIETARY_COPYRIGHT);
     	    } finally {
     	        xmlStreamWriter.flush();
                 xmlStreamWriter.close();
