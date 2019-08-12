@@ -15,24 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
-import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-import static java.lang.String.format;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AMLException;
@@ -64,6 +46,23 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+import static java.lang.String.format;
 
 public class NewImpl {
 
@@ -1004,7 +1003,7 @@ public class NewImpl {
         Variable variable = new Variable("containedMessage", Object.class);
 
         sb.append(TAB2 + "} catch (KnownBugException e) {" + EOL);
-        sb.append(TAB3 + LOGGER_NAME + ".warn(e);" + EOL);
+        sb.append(TAB3 + LOGGER_NAME + ".warn(e.getMessage(), e);" + EOL);
         sb.append(TAB3 + variable.getType().getSimpleName() + " ");
         sb.append(variable.getName() + " = null;" + EOL);
         sb.append(TAB3 + "if(e instanceof MessageKnownBugException) {" + EOL);
@@ -1033,7 +1032,7 @@ public class NewImpl {
 
     private void writeCatch(AMLTestCase tc, AMLAction action, StringBuilder sb, boolean continueOnFailed, String id, String serviceName, String messageType, String description) {
 		sb.append(TAB2+"} catch (Exception e) {"+EOL);
-		sb.append(TAB3+LOGGER_NAME+".warn(e);"+EOL);
+		sb.append(TAB3+LOGGER_NAME+".warn(e.getMessage(), e);"+EOL);
 		sb.append(TAB3+CONTEXT_NAME+".setInterrupt(e instanceof InterruptedException);"+EOL);
 
         if(action.hasOutcome()) {

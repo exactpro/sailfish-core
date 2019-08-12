@@ -92,7 +92,7 @@ public class TestCaseCodeBuilder extends AbstractCodeBuilder {
     @Override
     public void writeCatchClause(TextOutputStream stream, String loggerName, String contextName) throws IOException {
         stream.writeLine(2, "} catch(Throwable e) {");
-        stream.writeLine(3, "%s.warn(e);", loggerName);
+        stream.writeLine(3, "%s.warn(e.getMessage(), e);", loggerName);
         stream.writeLine();
         stream.writeLine(3, "if(getReport().isActionCreated()) {");
         stream.writeLine(4, "getReport().closeAction(new StatusDescription(StatusType.FAILED, e.getMessage(), e), null);");
