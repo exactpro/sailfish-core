@@ -343,8 +343,8 @@ public class TestDefaultWorkspaceDispatcher {
      * @param expected
      * @param actual
      */
-    private static void compareFiles(File expected, File actual) {
-        Assert.assertEquals(expected.getAbsolutePath(), actual.getAbsolutePath());
+    private static void compareFiles(File expected, File actual) throws IOException {
+        Assert.assertEquals(expected.getCanonicalPath(), actual.getCanonicalPath());
         Assert.assertTrue(actual.exists());
         Assert.assertEquals(expected.isDirectory(), actual.isDirectory());
         Assert.assertEquals(expected.isFile(), actual.isFile());

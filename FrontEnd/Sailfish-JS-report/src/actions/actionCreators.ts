@@ -156,3 +156,8 @@ export const saveMlData = (data: PredictionData[]) => (<const>{
 export const togglePredictions = () => (<const>{
     type: StateActionTypes.TOGGLE_PREDICTIONS
 })
+
+export const setSelectedTestCase = (testCaseId: string) => (<const>{
+    type: StateActionTypes.SET_SELECTED_TESTCASE,
+    testCaseId: testCaseId
+})

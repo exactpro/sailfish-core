@@ -20,6 +20,7 @@ import Action from "../../models/Action";
 import SearchResult from "../../helpers/search/SearchResult";
 
 export default interface SelectedState {
+    selectedTestCaseId: string;
     testCase: TestCase;
     actionsId: number[];
     messagesId: number[];

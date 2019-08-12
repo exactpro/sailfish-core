@@ -106,11 +106,11 @@ public abstract class AbstractInitiatorService implements IInitiatorService {
                 throw new ServiceException("Service should be initialized before starting");
             }
             
-            changeStatus(ServiceStatus.STARTING, "Staring service");
+            changeStatus(ServiceStatus.STARTING, "Starting service");
             loggingConfigurator.createIndividualAppender(logger.getName(), getServiceName());
             latency = 0;
             internalStart();
-            changeStatus(ServiceStatus.STARTED, "Staring service");
+            changeStatus(ServiceStatus.STARTED, "Started service");
         } catch(Throwable e) {
             startCleanup();
             changeStatus(ServiceStatus.ERROR, "Failed to start service", e);

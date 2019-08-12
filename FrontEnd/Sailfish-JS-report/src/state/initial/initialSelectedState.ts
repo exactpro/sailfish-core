@@ -37,5 +37,6 @@ export const initialSelectedState: SelectedState = {
     searchResults: new SearchResult(),
     searchResultsCount: null,
     searchIndex: null,
-    shouldScrollToSearchItem: false
+    shouldScrollToSearchItem: false,
+    selectedTestCaseId: null
 }

@@ -209,6 +209,13 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 shouldScrollToSearchItem: stateAction.isNeedsScroll 
             }
         }
+        
+        case StateActionTypes.SET_SELECTED_TESTCASE: {
+            return  {
+                ...state,
+                selectedTestCaseId: stateAction.testCaseId
+            }
+        }
 
         default: {
             return state;

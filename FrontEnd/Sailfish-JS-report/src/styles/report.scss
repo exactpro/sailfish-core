@@ -46,6 +46,11 @@
         align-items: center;
         justify-content: space-between;
         padding-left: 20px;
+
+      .carousel-control {
+        @include carousel-control
+
+      }
     }
 
     &__summary {
@@ -64,11 +69,13 @@
         font-size:  17px;
         color: $reportTitleTextColor;
         font-weight: bold;
+        width: 100%;
     }
 
     &__known-bugs-button {
         display: flex;
         flex-direction: row;
+        padding-left: 10px;
         cursor: pointer;
 
         &.disabled {
@@ -81,6 +88,7 @@
             font-weight: bold;
             margin-left: 10px;
             margin-right: 10px;
+            white-space: nowrap;
 
             &.active {
                 color: $conditionallyPassedTextColor;
@@ -283,4 +291,7 @@
 .divider {
     border: 1px solid $reportBorderColor;
     margin: 10px 0;
+    &.selected {
+        @include selectable-card;
+    }
 }

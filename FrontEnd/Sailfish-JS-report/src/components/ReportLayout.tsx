@@ -22,7 +22,6 @@ import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
-import TestCaseCard from './TestCaseCard';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
 import { createSelector } from '../helpers/styleCreators';
@@ -30,6 +29,8 @@ import { loadTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { ExceptionChain } from './ExceptionChain';
+import { TestCaseCard } from './TestCaseCard';
+import { SelectionCarouselControl } from './SelectionCarouselControl';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -98,6 +99,7 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                 </div>
                 <div className="report__controls">
                     <div className="report__title">Test Cases</div>
+                    <SelectionCarouselControl/>
                     {knownBugsButton}
                 </div>
                 <div className="report__summary   report-summary">

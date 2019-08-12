@@ -17,10 +17,13 @@ package com.exactpro.sf.statictesting;
 
 import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
 import static com.google.common.collect.Lists.reverse;
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.concat;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.isExtension;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +36,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +63,8 @@ import org.junit.runner.RunWith;
 import org.junit.runner.notification.RunListener;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.AML;
 import com.exactpro.sf.aml.AMLException;
@@ -89,6 +93,7 @@ import io.qameta.allure.Allure;
 
 @RunWith(Parameterized.class)
 public class StaticMatrixTest extends AbstractStaticTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaticMatrixTest.class);
     private static final ObjectReader VARIABLE_SET_READER = new ObjectMapper(new YAMLFactory()).readerFor(new TypeReference<Map<String, Map<String, String>>>() {});
 
     private static final String WORKSPACES_LONG_OPT = "workspaces";
@@ -126,11 +131,15 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
     @Test
     public void testMatrix() throws Exception {
-        System.out.println("Testing matrix: " + matrix.getCanonicalPath());
+        String canonicalPath = matrix.getCanonicalPath();
+
+        LOGGER.info("Testing matrix: {}", canonicalPath);
+        System.out.println("Testing matrix: " + canonicalPath);
 
         try {
             compileMatrix(context, matrix, skipOptional, languageUri);
         } catch (AMLException e) {
+            LOGGER.error("Failed to compile matrix: {}", canonicalPath, e);
             attachFiles();
 
             String errors = e.getAlertCollector()
@@ -141,12 +150,19 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             throw new AssertionError("Failed to compile matrix. Errors: " + System.lineSeparator() + errors, e);
         } catch(Throwable e) {
+            LOGGER.error("Failed to compile matrix: {}", canonicalPath, e);
             attachFiles();
             throw e;
         }
+
+        LOGGER.info("Tested matrix: {}", canonicalPath);
     }
 
     private void attachFiles() throws IOException {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Attaching files for matrix: {}", matrix.getCanonicalPath());
+        }
+
         try(InputStream stream = new FileInputStream(matrix)) {
             String name = matrix.getName();
             Allure.addAttachment(name, Files.probeContentType(matrix.toPath()), stream, FilenameUtils.getExtension(name));
@@ -155,6 +171,11 @@ public class StaticMatrixTest extends AbstractStaticTest {
         try(InputStream stream = new FileInputStream(services)) {
             Allure.addAttachment("Services.zip", Files.probeContentType(services.toPath()), stream, "zip");
         }
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Attached files for matrix: {}", matrix.getCanonicalPath());
+        }
+
     }
 
     public static void main(String[] args) throws Exception {
@@ -230,22 +251,36 @@ public class StaticMatrixTest extends AbstractStaticTest {
             PropertyConfigurator.configure(loggerConfigFile.toURI().toURL());
             workspacePaths.add(lastWorkspaceLayer);
 
+            LOGGER.info("Initializing SF context with following workspace layers: {}", workspacePaths);
             ISFContext context = initContext(workspacePaths);
+            LOGGER.info("Initialized SF context with following workspace layers: {}", workspacePaths);
 
             try(PrintWriter writer = new PrintWriter(new File(reportDir, "environment.properties"))) {
+                String coreVersion = context.getVersion();
+
                 System.out.println("--------------------------------");
                 System.out.println("Components:");
                 System.out.println("--------------------------------");
-                System.out.println("Core - " + context.getVersion());
+                System.out.println("Core - " + coreVersion);
 
-                writer.printf("core=%s", context.getVersion()).println();
+                LOGGER.info("--------------------------------");
+                LOGGER.info("Components:");
+                LOGGER.info("--------------------------------");
+                LOGGER.info("Core - {}", coreVersion);
+
+                writer.printf("core=%s", coreVersion).println();
 
                 for(IVersion version : context.getPluginVersions()) {
-                    System.out.println(version.getAlias() + " - " + version.buildVersion());
-                    writer.printf("%s=%s", version.getAlias(), version.buildVersion()).println();
+                    String pluginAlias = version.getAlias();
+                    String pluginVersion = version.buildVersion();
+
+                    System.out.println(pluginAlias + " - " + pluginVersion);
+                    LOGGER.info("{} - {}", pluginAlias, pluginVersion);
+                    writer.printf("%s=%s", pluginAlias, pluginVersion).println();
                 }
 
                 System.out.println("--------------------------------");
+                LOGGER.info("--------------------------------");
             }
 
             File services = Files.createTempFile(tempDirectory.toPath(), "services", ".zip").toFile();
@@ -255,7 +290,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
                     throw new Exception("Unknown language URI: " + languageUri);
                 }
 
-                if(variableSetsFile != null) {
+                if (variableSetsFile != null) {
                     loadVariableSets(variableSetsFile, environmentVariableSet, context);
                 }
 
@@ -270,20 +305,39 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 testData = new ArrayList<>();
 
                 for (File matrix : getMatrices(matricesPath)) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Adding test data for matrix: {}", matrix.getCanonicalPath());
+                    }
+
                     testData.add(ArrayUtils.toArray(context, matrix, services, skipOptional, languageUri));
                 }
 
                 System.setProperty("allure.results.directory", reportDir.getCanonicalPath());
 
+                LOGGER.info("Initializing Allure");
                 RunListener listener = new ExtendedAllureJunit4();
-                JUnitCore core = new JUnitCore();
 
+                LOGGER.info("Initializing JUnit");
+                JUnitCore core = new JUnitCore();
                 core.addListener(listener);
+
+                LOGGER.info("Launching test");
                 core.run(StaticMatrixTest.class);
+                LOGGER.info("Test completed");
+            } catch (Exception e) {
+                LOGGER.error("Failed to launch test", e);
+                throw e;
             } finally {
                 try {
                     if(logsZipFile.exists()) {
-                        throw new Exception("Logs zip file already exists: " + logsZipFile.getCanonicalPath());
+                        File newLogsZipFile = new File(logsZipFile.getParentFile(), getBaseName(logsZipFile.getName()) + System.currentTimeMillis() + ".zip");
+
+                        if (LOGGER.isErrorEnabled()) {
+                            LOGGER.error("Logs zip file already exists: {}", logsZipFile.getCanonicalPath());
+                            LOGGER.error("Saving logs into this file instead: {}", newLogsZipFile.getCanonicalPath());
+                        }
+
+                        logsZipFile = newLogsZipFile;
                     }
 
                     zipFile(Collections.singleton(logsFolder), logsZipFile);
@@ -411,15 +465,25 @@ public class StaticMatrixTest extends AbstractStaticTest {
     }
 
     private static void loadServices(Set<File> paths, ISFContext context) throws Exception {
+        LOGGER.info("Loading services from: {}", paths);
+
         ServiceMarshalManager manager = new ServiceMarshalManager(context.getStaticServiceManager(), context.getDictionaryManager());
         IConnectionManager connectionManager = context.getConnectionManager();
         List<ServiceDescription> services = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
         for(File path : paths) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Loading service path: {}", path.getCanonicalPath());
+            }
+
             for(File service : getServices(path)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Loading service from: {}", service.getCanonicalPath());
+                }
+
                 try(InputStream stream = new FileInputStream(service)) {
-                    manager.unmarshalServices(stream, FilenameUtils.isExtension(service.getName(), "zip"), services, errors);
+                    manager.unmarshalServices(stream, isExtension(service.getName(), "zip"), services, errors);
                 }
             }
         }
@@ -432,12 +496,18 @@ public class StaticMatrixTest extends AbstractStaticTest {
             service.setEnvironment(DEFAULT_ENVIRONMENT);
             ServiceName serviceName = service.getServiceName();
 
+            LOGGER.info("Adding service: {}", serviceName);
+
             if (connectionManager.getService(serviceName) != null) {
+                LOGGER.info("Service already exists, removing: {}", serviceName);
                 connectionManager.removeService(serviceName, null); // remove default service from plugin
             }
 
             connectionManager.addService(service, null).get();
+            LOGGER.info("Added service: {}", serviceName);
         }
+
+        LOGGER.info("Loaded services from: {}", paths);
     }
 
     private static void loadVariableSets(File variableSetsFile, String environmentVariableSet, ISFContext context) throws IOException {
@@ -445,11 +515,19 @@ public class StaticMatrixTest extends AbstractStaticTest {
             return;
         }
 
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Loading variable sets from file: {}", variableSetsFile.getCanonicalPath());
+        }
+
         IConnectionManager connectionManager = context.getConnectionManager();
         Map<String, Map<String, String>> variableSets = VARIABLE_SET_READER.readValue(variableSetsFile);
 
         variableSets.forEach(connectionManager::putVariableSet);
         connectionManager.setEnvironmentVariableSet(DEFAULT_ENVIRONMENT, environmentVariableSet);
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Loaded variable sets from file: {}", variableSetsFile.getCanonicalPath());
+        }
     }
 
     private static List<File> getMatrices(File path) throws IOException {
@@ -460,9 +538,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
     }
 
     private static List<File> getServices(File path) throws IOException {
-        return getFiles(path, file -> {
-            return FilenameUtils.isExtension(file.getName(), Arrays.asList("zip", "xml"));
-        });
+        return getFiles(path, file -> isExtension(file.getName(), asList("zip", "xml")));
     }
 
     private static List<File> getFiles(File path, Predicate<File> filter) throws IOException {
@@ -474,6 +550,10 @@ public class StaticMatrixTest extends AbstractStaticTest {
     }
 
     private static void compileMatrix(ISFContext context, File matrix, boolean skipOptional, SailfishURI languageUri) throws Exception {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Compiling matrix: {}", matrix.getCanonicalPath());
+        }
+
         IWorkspaceDispatcher dispatcher = context.getWorkspaceDispatcher();
         File reportFolder = dispatcher.getFolder(FolderType.REPORT);
         File copiedMatrix = new File(reportFolder, matrix.getName());
@@ -506,6 +586,10 @@ public class StaticMatrixTest extends AbstractStaticTest {
         }
 
         AML.compileScript(script, new File(reportFolder, settings.getBaseDir()), null, context.getCompilerClassPath());
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Compiled matrix: {}", matrix.getCanonicalPath());
+        }
     }
 
     private static void zipFile(Set<File> sourceFiles, File zipFile) throws IOException {

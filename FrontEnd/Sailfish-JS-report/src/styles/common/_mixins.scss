@@ -187,3 +187,43 @@
     }
 }
 
+@mixin carousel-control {
+  display: flex;
+  flex-direction: row;
+
+  font-size: 15px;
+  font-weight: bold;
+  white-space: nowrap;
+
+  &__icon {
+    filter: opacity(0.7);
+    height: 20px;
+    width: 20px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin: 0 7px;
+    cursor: pointer;
+
+    &.prev {
+      background-image: url(../../resources/icons/arr1-left.svg);
+    }
+
+    &.next {
+      background-image: url(../../resources/icons/arr1-right.svg)
+    }
+
+    &.disabled {
+      filter: opacity(0.5);
+      cursor: default;
+    }
+  }
+
+  &__title {
+    color: $failedTextColor;
+
+    &.disabled {
+      color: $primaryTextColor;
+      filter: opacity(0.5);
+    }
+  }
+}

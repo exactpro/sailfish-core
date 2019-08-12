@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -54,7 +55,6 @@ import com.exactpro.sf.util.DateTimeUtility;
  *
  */
 public class TestDateUtil {
-
     private DateUtil dateUtil;
 
     LocalDateTime sub = LocalDateTime.of(2000, 1, 2, 3, 4, 5, 106_107_108);
@@ -560,18 +560,17 @@ public class TestDateUtil {
     public void getDateTimeByZoneId() {
         for (int hoursDiff = -1; hoursDiff <= 1; hoursDiff += 1) {
             for (int minutsDiff = -10; minutsDiff <= 10; minutsDiff += 10) {
-                
-                int defaultOffsetSeconds = ZonedDateTime.now().getOffset().getTotalSeconds();
-                String unsignedOffset = LocalTime.ofSecondOfDay(Math.abs(defaultOffsetSeconds))
-                        .plusHours(hoursDiff)
-                        .plusMinutes(minutsDiff)
-                        .format(DateTimeFormatter.ofPattern("HH:mm"));
-                String signedOffset = (defaultOffsetSeconds < 0 ? '-' : '+') +  unsignedOffset;
-                
+
+                long defaultOffsetSeconds = TimeUnit.HOURS.toSeconds(3);
+                long offsetSeconds = defaultOffsetSeconds + TimeUnit.HOURS.toSeconds(hoursDiff)  + TimeUnit.MINUTES.toSeconds(minutsDiff);
+
+                String unsignedOffset = LocalTime.ofSecondOfDay(Math.abs(offsetSeconds)).format(DateTimeFormatter.ofPattern("HH:mm"));
+                String signedOffset = (offsetSeconds < 0 ? '-' : '+') + unsignedOffset;
+
                 // Create date type using modify pattern for UTC time zone
                 LocalDateTime dateTime = dateUtil.getDateTime("Y=2018:M=3:D=7:s=10:ns=123456789" +
                         // Apply shift between time zone 
-                        ":h=" + (12 - hoursDiff) + 
+                        ":h=" + (12 - hoursDiff) +
                         ":m=" + (30 - minutsDiff))
                         .minusSeconds(defaultOffsetSeconds);
                 LocalDateTime dateTimeByZoneId = dateUtil.getDateTimeByZoneId("Y=2018:M=3:D=7:h=12:m=30:s=10:ns=123456789", signedOffset);
@@ -579,7 +578,7 @@ public class TestDateUtil {
                 assertEquals("Diff hours = " + hoursDiff + ", minuts = " + minutsDiff, dateTime, dateTimeByZoneId);
             }
         }
-        
+
     }
     
     @Test(expected=DateTimeException.class)
