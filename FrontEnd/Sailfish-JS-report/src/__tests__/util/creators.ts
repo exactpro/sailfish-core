@@ -15,6 +15,9 @@
  ******************************************************************************/
 
 import Action, { ActionNode, ActionNodeType } from "../../models/Action";
+import TestCase from "../../models/TestCase";
+import Message from "../../models/Message";
+import { StatusType } from "../../models/Status";
 
 export function createAction(id: number = 0, subNodes: ActionNode[] = [], name = ''): Action {
     return {
@@ -23,4 +26,23 @@ export function createAction(id: number = 0, subNodes: ActionNode[] = [], name =
         id,
         subNodes
     } as Action;
+}
+
+export function createTestCase(id: string = '0', actions: ActionNode[] = [], messages: Message[] = [], status: StatusType = StatusType.PASSED): TestCase {
+    return {
+        actionNodeType: 'testCase',
+        id, 
+        actions,
+        messages,
+        logs: [],
+        bugs: [],
+        type: '',
+        order: 0,
+        matrixOrder: 0,
+        description: '',
+        hash: 0,
+        status: { status },
+        startTime: new Date().toString(),
+        finishTime: new Date().toString()
+    }
 }

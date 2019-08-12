@@ -14,33 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionNode } from "./Action";
-import Message from "./Message";
-import Log from "./Log";
-import Status from './Status';
-import Report from "./Report";
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16'
 
-export default interface TestCase {
-    actionNodeType: 'testCase';
-    name?: string;
-    actions: ActionNode[];
-    logs: Log[];
-    messages: Message[];
-    bugs: any[];
-    type: string;
-    reference?: any;
-    order: number;
-    outcomes?: any[];
-    matrixOrder: number;
-    id: string;
-    hash: number;
-    description: string;
-    status: Status;
-    startTime: string;
-    finishTime: string;
-    verifications?: any[];
-}
-
-export function isTestCase(testCase: TestCase | Report): testCase is TestCase {
-    return (testCase as TestCase).actionNodeType === 'testCase';  
-}
+configure({ adapter: new Adapter() });
