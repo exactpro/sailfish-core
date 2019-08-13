@@ -392,8 +392,8 @@ public class JsonReport implements IScriptReport {
             Set<BugDescription> reproduced = result.getReproducedBugs();
             Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
 
-            curNode.addSubNodes(reproduced.stream().map(d -> new Bug(d).markAsReproduced()).collect(Collectors.toList()));
-            curNode.addSubNodes(notReproduced.stream().map(Bug::new).collect(Collectors.toList()));
+            curNode.addSubNodes(reproduced.stream().map(d -> new Bug(d, "").markAsReproduced()).collect(Collectors.toList()));
+            curNode.addSubNodes(notReproduced.stream().map(it -> new Bug(it, "")).collect(Collectors.toList()));
 
             curVerification.setEntries(result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList()));
         }

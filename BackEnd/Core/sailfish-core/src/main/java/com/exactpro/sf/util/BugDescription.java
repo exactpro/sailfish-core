@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -37,7 +39,7 @@ public class BugDescription implements Comparable<BugDescription> {
     private final String subject;
 
     @JsonCreator
-    public BugDescription(@JsonProperty("description") String subject, @JsonProperty("category")Category categories) {
+    public BugDescription(@JsonProperty("subject") String subject, @JsonProperty("category") Category categories, @JsonProperty("categories") Category fake) {
 
         this.subject = subject;
         this.category = categories;
@@ -54,7 +56,8 @@ public class BugDescription implements Comparable<BugDescription> {
     public String getSubject() {
         return subject;
     }
-    
+
+    @JsonProperty("categories")
     public Category getCategories() {
         return category;
     }
@@ -114,11 +117,16 @@ public class BugDescription implements Comparable<BugDescription> {
         }
         return builder.toString();
     }
-    
+
     public static class Category implements Comparable<Category> {
 
         @JsonProperty("categories")
         private final List<String> categories;
+
+        @JsonSetter("categories")
+        public void setCategories() {
+
+        }
 
         @JsonCreator
         public Category(@JsonProperty("categories") String... categories) {
@@ -168,7 +176,7 @@ public class BugDescription implements Comparable<BugDescription> {
 
             return builder.isEquals();
         }
-        
+
         @Override
         public int hashCode() {
             HashCodeBuilder builder = new HashCodeBuilder();
@@ -177,7 +185,7 @@ public class BugDescription implements Comparable<BugDescription> {
 
             return builder.toHashCode();
         }
-        
+
         public String toString() {
             if(categories.isEmpty()) {
                 return "";

@@ -21,13 +21,14 @@ import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class Bug implements IJsonReportNode {
     @JsonIgnore private final BugDescription description;
     private KnownBugStatus status;
 
     @JsonCreator
-    public Bug(@JsonProperty("description") BugDescription description) {
+    public Bug(@JsonProperty("description") BugDescription description, @JsonProperty("subject") String fake) {
         this.description = description;
         this.status = KnownBugStatus.NOT_REPRODUCED;
     }
