@@ -17,8 +17,12 @@ package com.exactpro.sf.statictesting;
 
 import static com.exactpro.sf.common.services.ServiceName.DEFAULT_ENVIRONMENT;
 import static com.google.common.collect.Lists.reverse;
+import static java.lang.String.format;
+import static java.lang.String.join;
+import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.io.FileUtils.deleteQuietly;
 import static org.apache.commons.io.FilenameUtils.concat;
@@ -37,6 +41,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -146,9 +151,9 @@ public class StaticMatrixTest extends AbstractStaticTest {
                     .getAlerts(AlertType.ERROR)
                     .stream()
                     .map(Alert::toString)
-                    .collect(Collectors.joining(System.lineSeparator()));
+                    .collect(joining(lineSeparator()));
 
-            throw new AssertionError("Failed to compile matrix. Errors: " + System.lineSeparator() + errors, e);
+            throw new AssertionError("Failed to compile matrix. Errors: " + lineSeparator() + errors, e);
         } catch(Throwable e) {
             LOGGER.error("Failed to compile matrix: {}", canonicalPath, e);
             attachFiles();
@@ -470,6 +475,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
         ServiceMarshalManager manager = new ServiceMarshalManager(context.getStaticServiceManager(), context.getDictionaryManager());
         IConnectionManager connectionManager = context.getConnectionManager();
         List<ServiceDescription> services = new ArrayList<>();
+        Map<String, List<String>> serviceLocations = new HashMap<>();
         List<String> errors = new ArrayList<>();
 
         for(File path : paths) {
@@ -477,19 +483,33 @@ public class StaticMatrixTest extends AbstractStaticTest {
                 LOGGER.info("Loading service path: {}", path.getCanonicalPath());
             }
 
-            for(File service : getServices(path)) {
+            for (File file : getServices(path)) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Loading service from: {}", service.getCanonicalPath());
+                    LOGGER.info("Loading service from: {}", file.getCanonicalPath());
                 }
 
-                try(InputStream stream = new FileInputStream(service)) {
-                    manager.unmarshalServices(stream, isExtension(service.getName(), "zip"), services, errors);
+                List<ServiceDescription> list = new ArrayList<>();
+
+                try (InputStream stream = new FileInputStream(file)) {
+                    manager.unmarshalServices(stream, isExtension(file.getName(), "zip"), list, errors);
+                }
+
+                for (ServiceDescription service : list) {
+                    services.add(service);
+                    serviceLocations.computeIfAbsent(service.getName(), it -> new ArrayList<>()).add(file.getCanonicalPath());
                 }
             }
         }
 
+        serviceLocations.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().size() > 1)
+                .forEach(entry -> {
+                    errors.add(format("Service %s is defined in multiple locations: %s", entry.getKey(), join(", ", entry.getValue())));
+                });
+
         if (!errors.isEmpty()) {
-            throw new Exception("Failed to load services. Errors: " + System.lineSeparator() + String.join(System.lineSeparator(), errors));
+            throw new Exception("Failed to load services. Errors: " + lineSeparator() + join(lineSeparator(), errors));
         }
 
         for (ServiceDescription service : services) {
@@ -500,7 +520,7 @@ public class StaticMatrixTest extends AbstractStaticTest {
 
             if (connectionManager.getService(serviceName) != null) {
                 LOGGER.info("Service already exists, removing: {}", serviceName);
-                connectionManager.removeService(serviceName, null); // remove default service from plugin
+                connectionManager.removeService(serviceName, null).get(); // remove default service from plugin
             }
 
             connectionManager.addService(service, null).get();
