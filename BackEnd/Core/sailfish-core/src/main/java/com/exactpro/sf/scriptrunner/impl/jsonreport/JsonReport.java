@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -101,7 +102,7 @@ public class JsonReport implements IScriptReport {
     private ScriptContext scriptContext;
     private Context context;
     private IReportStats reportStats;
-    private boolean isActionCreated;
+    private AtomicLong isActionCreated = new AtomicLong(0);
     private final Map<Long, Set<Long>> messageToActionIdMap;
     private final IWorkspaceDispatcher dispatcher;
     private final String reportRootDirectoryPath;
@@ -128,7 +129,7 @@ public class JsonReport implements IScriptReport {
     }
 
     @JsonIgnore public boolean isActionCreated() throws UnsupportedOperationException {
-        return isActionCreated;
+        return isActionCreated.get() > 0;
     }
 
     private void assertState(boolean throwException, ContextType... states) {
@@ -310,7 +311,7 @@ public class JsonReport implements IScriptReport {
             curAction.setParameters(Parameter.fromMessage(parameters));
         }
         setContext(ContextType.ACTION, curAction);
-        isActionCreated = true;
+        isActionCreated.incrementAndGet();
     }
 
     public void closeAction(StatusDescription status, Object actionResult) {
@@ -324,7 +325,7 @@ public class JsonReport implements IScriptReport {
             reportStats.updateActions(status.getStatus());
         }
 
-        isActionCreated = false;
+        isActionCreated.decrementAndGet();
 
         revertContext();
 

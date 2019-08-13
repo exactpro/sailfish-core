@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class BroadcastScriptReport implements IScriptReport {
 
 	private final List<IScriptReport> listeners;
 
-    private boolean actionCreated;
+    private AtomicLong actionCreated = new AtomicLong(0);
 
     private boolean testCaseCreated;
 
@@ -143,13 +144,13 @@ public class BroadcastScriptReport implements IScriptReport {
 			    }
     		}
 		} finally {
-            this.actionCreated = true;
+            actionCreated.incrementAndGet();
         }
 	}
 
 	@Override
 	public boolean isActionCreated() {
-        return actionCreated;
+        return actionCreated.get() > 0;
 	}
 
 	@Override
@@ -163,7 +164,7 @@ public class BroadcastScriptReport implements IScriptReport {
 			    }
     		}
 	    } finally {
-            this.actionCreated = false;
+            this.actionCreated.decrementAndGet();
         }
 	}
 
