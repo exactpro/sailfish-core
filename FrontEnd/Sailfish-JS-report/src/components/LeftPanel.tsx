@@ -14,17 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
-import { connect } from 'preact-redux';
+import * as React from 'react';
+import { connect } from 'react-redux';
 import '../styles/layout.scss';
-import { Panel } from '../helpers/Panel';
+import { Panel } from '../util/Panel';
 import { ToggleButton } from './ToggleButton';
 import Action from '../models/Action';
-import { ActionsList } from './ActionsList';
+import { ActionsList } from './action/ActionsList';
 import AppState from '../state/models/AppState';
 import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
-import { StatusPanel } from './StatusPane';
-import { ActionsListBase } from './ActionsList';
+import { StatusPanel } from './StatusPanel';
+import { ActionsListBase } from './action/ActionsList';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 import { createSelector } from '../helpers/styleCreators';
 
@@ -37,14 +37,14 @@ interface LeftPanelProps {
     setSelectedCheckpoint: (checkpointAciton: Action) => any;
 }
 
-class LeftPanelBase extends Component<LeftPanelProps> {
+class LeftPanelBase extends React.Component<LeftPanelProps> {
 
-    private actionPanel: ActionsListBase;
+    private actionPanel = React.createRef<ActionsListBase>();
     
     scrollPanelToTop(panel: Panel) {
         switch (panel) {
             case Panel.Actions: {
-                this.actionPanel && this.actionPanel.scrollToTop();
+                this.actionPanel.current && this.actionPanel.current.scrollToTop();
                 break;
             }
             default: {
@@ -53,7 +53,8 @@ class LeftPanelBase extends Component<LeftPanelProps> {
         }
     }
 
-    render({ panel, checkpointActions, selectedCheckpointId, statusEnabled }: LeftPanelProps) {
+    render() {
+        const { panel, checkpointActions, selectedCheckpointId, statusEnabled } = this.props;
 
         const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
             cpEnabled = checkpointActions.length != 0,
@@ -63,9 +64,9 @@ class LeftPanelBase extends Component<LeftPanelProps> {
             );
 
         return (
-            <div class="layout-panel">
-                <div class="layout-panel__controls">
-                    <div class="layout-panel__tabs">
+            <div className="layout-panel">
+                <div className="layout-panel__controls">
+                    <div className="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.Actions}
                             onClick={() => this.selectPanel(Panel.Actions)}
@@ -73,42 +74,42 @@ class LeftPanelBase extends Component<LeftPanelProps> {
                         <ToggleButton
                             isToggled={panel == Panel.Status}
                             isDisabled={!statusEnabled}
-                            onClick={statusEnabled && (() => this.selectPanel(Panel.Status))}
+                            onClick={statusEnabled ? (() => this.selectPanel(Panel.Status)) : undefined}
                             text="Status" 
                             title={statusEnabled ? null : "No status info"}/>
                     </div>
-                    <div class={cpRootClass}>
-                        <div class="layout-control__icon cp"
+                    <div className={cpRootClass}>
+                        <div className="layout-control__icon cp"
                             onClick={() => this.currentCpHandler(cpIndex)}
                             style={{ cursor: cpEnabled ? 'pointer' : 'unset' }}
                             title={ cpEnabled ? "Scroll to current checkpoint" : null }/>
-                        <div class="layout-control__title">
+                        <div className="layout-control__title">
                             <p>{cpEnabled ? "" : "No "}Checkpoints</p>
                         </div>
                         {
                             cpEnabled ? 
                             (
-                                [
-                                    <div class="layout-control__icon prev"
-                                        onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>,
-                                    <div class="layout-control__counter">
+                                <React.Fragment>
+                                    <div className="layout-control__icon prev"
+                                        onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>
+                                    <div className="layout-control__counter">
                                         <p>{cpIndex + 1} of {checkpointActions.length}</p>
-                                    </div>,
-                                    <div class="layout-control__icon next"
+                                    </div>
+                                    <div className="layout-control__icon next"
                                         onClick={cpEnabled && (() => this.nextCpHandler(cpIndex))}/>
-                                ]
+                                </React.Fragment>
                             ) : null
                         }
                     </div>
                 </div>
-                <div class="layout-panel__content">
+                <div className="layout-panel__content">
                     {this.renderPanels(panel)}
                 </div>
             </div>
         )
     }
 
-    private renderPanels(selectedPanel: Panel): JSX.Element[] {
+    private renderPanels(selectedPanel: Panel): React.ReactNode {
         const actionRootClass = createSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.Actions ? null : "disabled"
@@ -118,15 +119,17 @@ class LeftPanelBase extends Component<LeftPanelProps> {
                 selectedPanel == Panel.Status ? null : "disabled"
             );
     
-        return [
-            <div class={actionRootClass}>
-                <ActionsList
-                    ref={ref => this.actionPanel = ref ? ref.wrappedInstance : null}/>
-            </div>,
-            <div class={statusRootClass}>
-                <StatusPanel/>
-            </div>
-        ]
+        return (
+            <React.Fragment>
+                <div className={actionRootClass}>
+                    <ActionsList
+                        ref={this.actionPanel}/>
+                </div>
+                <div className={statusRootClass}>
+                    <StatusPanel/>
+                </div>
+            </React.Fragment>
+        )
     }
 
     private selectPanel(panel: Panel) {

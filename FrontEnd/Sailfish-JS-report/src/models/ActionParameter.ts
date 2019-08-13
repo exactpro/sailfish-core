@@ -14,8 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-export default interface IActionParameter {
+export default interface ActionParameter {
     name: string;
-    subParameters?: Array<IActionParameter>;
+    subParameters?: Array<ActionParameter>;
     value?: string;
 }

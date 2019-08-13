@@ -15,6 +15,8 @@
  ******************************************************************************/
 
 import Status from "./Status";
+import KnownBug from "./KnownBug";
+import KnownBugCategory from "./KnownBugCategory"
 
 export interface TestcaseMetadata {
     startTime: string;
@@ -26,4 +28,5 @@ export interface TestcaseMetadata {
     description: string;
     jsonFileName: string;
     jsonpFileName: string;
+    bugs: (KnownBug | KnownBugCategory) [];
 }

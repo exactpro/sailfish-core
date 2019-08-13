@@ -14,20 +14,23 @@
 * limitations under the License.
 ******************************************************************************/
 
-import {h} from 'preact';
+import * as React from 'react';
 import Report from '../models/Report';
-import {connect} from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
-import {setTestCasePath} from '../actions/actionCreators';
-import {formatTime, getSecondsPeriod} from '../helpers/dateFormatter';
-import {TestcaseMetadata} from '../models/TestcaseMetadata';
+import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
+import { TestcaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
-import {StatusType, statusValues} from '../models/Status';
-import {TestCaseCard} from './TestCaseCard';
-import {HeatmapScrollbar} from './HeatmapScrollbar';
-import {testCasesHeatmap} from '../helpers/heatmapCreator';
-import {createSelector} from '../helpers/styleCreators';
-import {SelectionCarouselControl} from "./SelectionCarouselControl";
+import { StatusType, statusValues } from '../models/Status';
+import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
+import { testCasesHeatmap } from '../helpers/heatmapCreator';
+import { createSelector } from '../helpers/styleCreators';
+import { loadTestCase } from '../thunks/loadTestCase';
+import { ThunkDispatch } from 'redux-thunk';
+import StateActionType from '../actions/stateActions';
+import { ExceptionChain } from './ExceptionChain';
+import { TestCaseCard } from './TestCaseCard';
+import { SelectionCarouselControl } from './SelectionCarouselControl';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -36,126 +39,178 @@ interface ReportLayoutProps {
     onTestCaseSelect: (testCaseName: string) => void;
 }
 
-const ReportLayoutBase = ({ report, onTestCaseSelect }: ReportLayoutProps) => {
+interface ReportLayoutState {
+    showKnownBugs: boolean;
+}
 
-    const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
-        plugins = report.plugins ? Object.entries(report.plugins) : [];
+export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportLayoutState> {
 
-    const testCaseIds = (report.metadata || []).filter(item => item.status.status === 'FAILED').map(item => item.id);
+    constructor(props) {
+        super(props);
 
-    return (
-        <div class="report">
-            <div class="report__header   report-header">
-                <div class="report-header__title">{report.name}</div>
-                <a class="report-header__old-report-link" href={OLD_REPORT_PATH}>
-                    <p>Old Version Report</p>
-                </a>
-            </div>
-            <div class="report__summary-title   report__title">
-                <p>Report Summary</p>
-            </div>
-            <div class="report__controls">
-                <div class="report__title">Test Cases</div>
-                <SelectionCarouselControl failedTestCaseIds={testCaseIds}/>
-            </div>
-            <div class="report__summary   report-summary">
-                <div class="report-summary__card">
-                    <div class="report-summary__logo" />
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Version</div>
-                        <div class="report-summary__element-value">{report.version}</div>
+        this.state = {
+            showKnownBugs: true
+        };
+    }
+
+    toggleKnownBugs() {
+        this.setState({
+            showKnownBugs: !this.state.showKnownBugs
+        })
+    }
+
+    render() {
+
+        const { onTestCaseSelect, report } = this.props,
+            { showKnownBugs } = this.state;
+
+        const knownBugsPresent = report.metadata.some(item => item.bugs != null && item.bugs.length > 0);
+
+        const knownBugsClass = showKnownBugs ? "active" : "enabled";
+
+        const knownBugsButton = (
+            knownBugsPresent ?
+                (
+                    <div className={"report__known-bugs-button " + knownBugsClass} onClick={() => this.toggleKnownBugs()}>
+                        <div className={"report__known-bugs-button__icon " + knownBugsClass} />
+                        <div className={"report__known-bugs-button__text " + knownBugsClass}>Known bugs</div>
                     </div>
-                    <div class="report-summary__divider" />
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Host</div>
-                        <div class="report-summary__element-value">{report.hostName}</div>
+                ) : (
+                    <div className="report__known-bugs-button disabled">
+                        <div className="report__known-bugs-button__icon disabled" />
+                        <div className="report__known-bugs-button__text disabled">No known bugs</div>
                     </div>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">User</div>
-                        <div class="report-summary__element-value">{report.userName}</div>
-                    </div>
-                    <div class="report-summary__divider"/>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">ScriptRun ID</div>
-                        <div class="report-summary__element-value">{report.scriptRunId}</div>
-                    </div>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Report Date</div>
-                        <div class="report-summary__element-value">{formatTime(report.startTime)}</div>
-                    </div>
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Execution time</div>
-                        <div class="report-summary__element-value">{executionTime}</div>
-                    </div>
-                    <div class="report-summary__divider" />
-                    <div class="report-summary__element">
-                        <div class="report-summary__element-title">Test Cases</div>
-                        <div class="report-summary__element-value">{report.metadata.length}</div>
-                    </div>
-                    {
-                        statusValues.map(statusValue => renderStatusInfo(statusValue, report.metadata))
-                    }
-                    <div class="report-summary__divider" />
-                    {
-                        plugins.length ?
-                            (
-                                <div class="report-summary__element">
-                                    <div class="report-summary__element-title">Plugins</div>
-                                    <div class="report-summary__element-value">
-                                        {plugins.map(([name, version]) => <p>{name}: {version}</p>)}
+                )
+        )
+
+        const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
+            plugins = report.plugins ? Object.entries(report.plugins) : [];
+
+        return (
+            <div className="report">
+                <div className="report__header   report-header">
+                    <div className="report-header__title">{this.props.report.name}</div>
+                    <a className="report-header__old-report-link" href={OLD_REPORT_PATH}>
+                        <p>Old Version Report</p>
+                    </a>
+                </div>
+                <div className="report__summary-title   report__title">
+                    <p>Report Summary</p>
+                </div>
+                <div className="report__controls">
+                    <div className="report__title">Test Cases</div>
+                    <SelectionCarouselControl/>
+                    {knownBugsButton}
+                </div>
+                <div className="report__summary   report-summary">
+                    <div className="report-summary__card">
+                        <div className="report-summary__logo"/>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">Version</div>
+                            <div className="report-summary__element-value">{report.version}</div>
+                        </div>
+                        <div className="report-summary__divider"/>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">Host</div>
+                            <div className="report-summary__element-value">{report.hostName}</div>
+                        </div>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">User</div>
+                            <div className="report-summary__element-value">{report.userName}</div>
+                        </div>
+                        <div className="report-summary__divider"/>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">ScriptRun ID</div>
+                            <div className="report-summary__element-value">{report.scriptRunId}</div>
+                        </div>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">Report Date</div>
+                            <div className="report-summary__element-value">{formatTime(report.startTime)}</div>
+                        </div>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">Execution time</div>
+                            <div className="report-summary__element-value">{executionTime}</div>
+                        </div>
+                        <div className="report-summary__divider"/>
+                        <div className="report-summary__element">
+                            <div className="report-summary__element-title">Test Cases</div>
+                            <div className="report-summary__element-value">{report.metadata.length}</div>
+                        </div>
+                        {
+                            statusValues.map(statusValue => this.renderStatusInfo(statusValue, report.metadata))
+                        }
+                        <div className="report-summary__divider"/>
+                        {
+                            plugins.length ?
+                                (
+                                    <div className="report-summary__element">
+                                        <div className="report-summary__element-title">Plugins</div>
+                                        <div className="report-summary__element-value">
+                                            {plugins.map(([name, version], index) => <p key={index}>{name}: {version}</p>)}
+                                        </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <div class="report-summary__element">
-                                    <div class="report-summary__element-title">No plugins</div>
-                                </div>
-                            )
+                                ) : (
+                                    <div className="report-summary__element">
+                                        <div className="report-summary__element-title">No plugins</div>
+                                    </div>
+                                )
+                        }
+                    </div>
+                </div>
+                <div className="report__testcases">
+                    {
+                        report.metadata.length > 0 ? (
+                            <HeatmapScrollbar
+                                selectedElements={testCasesHeatmap(report.metadata)}
+                                elementsCount={report.metadata.length}>
+                                {
+                                    report.metadata.map((metadata, index) => (
+                                        <TestCaseCard
+                                            knownBugsEnabled={showKnownBugs}
+                                            key={index}
+                                            metadata={metadata}
+                                            index={index + 1}
+                                            handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
+                                    ))
+                                }
+                            </HeatmapScrollbar>
+                        ) : (
+                            <ExceptionChain
+                                exception={report.exception}/>
+                        )
                     }
                 </div>
             </div>
-            <div class="report__testcases">
-                <HeatmapScrollbar
-                    selectedElements={testCasesHeatmap(report.metadata)}>
-                    {
-                        report.metadata.map((metadata, index) => (
-                            <TestCaseCard
-                                metadata={metadata}
-                                index={index + 1}
-                                handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
-                        ))
-                    }
-                </HeatmapScrollbar>
-            </div>
-        </div>
-    )
-}
-
-function renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): JSX.Element {
-    const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
-        valueClassName = createSelector(
-            "report-summary__element-value",
-            "bold",
-            status.toLowerCase()
-        );
-
-    if (!testCasesCount) {
-        return null;
+        )
     }
 
-    return (
-        <div class="report-summary__element">
-            <div class={valueClassName}>{status.toUpperCase()}</div>
-            <div class={valueClassName}>{testCasesCount}</div>
-        </div>
-    )
+    private renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): React.ReactNode {
+        const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
+            valueClassName = createSelector(
+                "report-summary__element-value",
+                "bold",
+                status.toLowerCase()
+            );
+    
+        if (!testCasesCount) {
+            return null;
+        }
+    
+        return (
+            <div className="report-summary__element" key={status}>
+                <div className={valueClassName}>{status.toUpperCase()}</div>
+                <div className={valueClassName}>{testCasesCount}</div>
+            </div>
+        )
+    }
 }
 
 const ReportLayout = connect(
     (state: AppState) => ({
-        report: state.report.report
+        report: state.report
     }),
-    dispatch => ({
-        onTestCaseSelect: (testCaseLink: string) => dispatch(setTestCasePath(testCaseLink))
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+        onTestCaseSelect: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
 )(ReportLayoutBase);
 

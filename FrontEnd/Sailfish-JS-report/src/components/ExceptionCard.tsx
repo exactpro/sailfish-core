@@ -14,51 +14,65 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h, Component} from 'preact';
+import * as React from 'react';
 import Exception from '../models/Exception';
+import { createSelector } from '../helpers/styleCreators';
 
 interface Props {
     exception: Exception;
-    drawDivider: boolean;
 }
 
 interface State {
     isExpanded: boolean;
 }
 
-export default class ExceptionCard extends Component<Props, State> {
-    toggle() {
-        this.setState({isExpanded: !this.state.isExpanded})
+export default class ExceptionCard extends React.Component<Props, State> {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            isExpanded: false
+        }
     }
 
-    render({ exception, drawDivider }: Props, { isExpanded }: State) {
-
-        const divider = (
-                <div class="status-panel-exception-divider">
-                    <div class="status-panel-exception-divider-icon"/>
-                </div>
-        )
+    render() {
+        const { exception } = this.props,
+            { isExpanded } = this.state;
 
         return (
-            <div>
-                {drawDivider? divider : null}
-                <div class="status-panel failed">
-                        <div class="status-panel-exception-wrapper">
-                            <div class="status-panel-exception-header">
-                                <div>{isExpanded? exception.class + ": " : null}</div>
-                                <div>{exception.message}</div>
-                            </div>
-                            <div class="status-panel-exception-expand" onClick={e => this.toggle()}>
-                                <div class="status-panel-exception-expand-title">More</div>
-                                <div class={"status-panel-exception-expand-icon " + (isExpanded ? "expanded" : "hidden")}/>
-                            </div>
+            <div className="status-panel failed">
+                <div className="status-panel-exception-wrapper">
+                    <div className="status-panel-exception-header">
+                        {
+                            isExpanded ? (
+                                <div>{exception.class}: </div>
+                            ) : null
+                        }
+                        <div className={createSelector("status-panel-exception-header-message", exception.message ? "" : "disabled")}>
+                            {exception.message || "No exception message"}
                         </div>
-                        <div style={isExpanded ? null : "display: none"} class="status-panel-exception-stacktrace">
-                            <pre>{exception.stacktrace}</pre>
-                        </div>
+                    </div>
+                    <div className="status-panel-exception-expand" onClick={this.onTogglerClick}>
+                        <div className="status-panel-exception-expand-title">More</div>
+                        <div className={createSelector("status-panel-exception-expand-icon", (isExpanded ? "expanded" : "hidden"))}/>
+                    </div>
                 </div>
+                {
+                    isExpanded ? (
+                        <div className="status-panel-exception-stacktrace">
+                            <pre>{exception.stacktrace}</pre>
+                        </div> 
+                    ) : null
+                }
             </div>
         )
+    }
+
+    private onTogglerClick = (e: React.MouseEvent) => {
+        this.setState({isExpanded: !this.state.isExpanded});
+
+        e.stopPropagation();
     }
 }
 

@@ -16,9 +16,11 @@
 
 import MachineLearningState from '../models/MachineLearningState';
 
-const initialMachineLearningState : MachineLearningState = {
+const initialMachineLearningState: MachineLearningState = {
     token: null,
-    submittedData: []
-} 
+    submittedData: [],
+    predictionData: [],
+    predictionsEnabled: true
+}
 
 export default initialMachineLearningState;

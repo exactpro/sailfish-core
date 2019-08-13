@@ -281,7 +281,6 @@ public class JsonReport implements IScriptReport {
         TestCase curTestCase = getCurrentContextNode();
         curTestCase.setStatus(new Status(status));
         curTestCase.setFinishTime(Instant.now());
-        reportRoot.getBugs().addAll(curTestCase.getBugs());
 
         exportToFile(curTestCase, curTestCase.getName());
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
@@ -388,6 +387,7 @@ public class JsonReport implements IScriptReport {
             else {
                 logger.warn("comparison result does not contain metadata - name='{}', description='{}'", name, description);
             }
+
             Set<BugDescription> reproduced = result.getReproducedBugs();
             Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
 
@@ -461,7 +461,7 @@ public class JsonReport implements IScriptReport {
 
             if (currentNode instanceof TestCase) {
                 for (Message message : messages) {
-                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
+                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent (message.getId(), k -> new HashSet<>()));
                 }
             }
             currentNode.addSubNodes(messages);

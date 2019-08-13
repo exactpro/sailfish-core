@@ -20,8 +20,6 @@
 .message-card {
     @include status-card;
     position: relative;
-    margin: 5px 0;
-    border-radius: 5px;
     display: grid;
     grid-template: auto auto / auto 1fr;
     grid-template-areas: "mc-labels mc-header"
@@ -66,7 +64,7 @@
     &__icon {
         height: 14px;
         width: 14px;
-        margin-top: 20px;
+        margin-top: 12px;
         background-size: 100%;
         filter: opacity(0.4);
 
@@ -86,6 +84,19 @@
     &.admin {
         background-color: $adminMessageLabelBackground;
     }
+
+    .ml__prediction {
+        width: 100%;
+
+        &-icon {
+            height: 14px;
+            width: 14px;
+            margin-top: 12px;
+            background-size: 100%;
+
+            background-image: url(../../resources/icons/ml-prediction.svg)
+        }
+    }
 }
 
 .mc-header {
@@ -99,7 +110,6 @@
     &[data-lb-count="2"] { --lb-count: 2; }
 
     &.default {
-        display: grid;
         padding: 7px 5px 9px 10px;
         position: relative;
         display: grid;
@@ -107,6 +117,7 @@
         grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
         grid-template-areas: "info name name-value name-value name-value prediction"
                              "timestamp session from session-icon to prediction";
+        align-items: center;
 
         &::after {
             border-bottom: 2px solid $defaultCardBackground;
@@ -204,6 +215,7 @@
         padding-left: 8px;
         font-size: 13px;
         font-weight: bold;
+        word-break: break-all;
     }
 
     &__session, &__name {
@@ -393,13 +405,8 @@
     }
 }
 
-.messages {
-
+.messages-list {
     height: 100%;
-
-    &-list {
-        height: 100%;
-        padding: 0 5px;
-        word-wrap: break-word;
-    }
+    padding: 0 5px;
+    word-wrap: break-word;
 }

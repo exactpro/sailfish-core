@@ -170,6 +170,23 @@
     }
 }
 
+@mixin spinner($thikness, $outer-color, $inner-color, $duration: 1s) {
+    border: $thikness solid $outer-color;
+    border-top: $thikness solid $inner-color;
+    border-radius: 50%;
+    animation: spin $duration linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
 @mixin carousel-control {
   display: flex;
   flex-direction: row;

@@ -16,9 +16,16 @@
 
 import Exception from './Exception';
 
-export type StatusType = 'PASSED' | 'FAILED' | 'CONDITIONALLY_PASSED' | 'NA' | 'SKIPPED' | 'CONDITIONALLY_FAILED';
+export enum StatusType {
+    PASSED = 'PASSED',
+    FAILED = 'FAILED',
+    CONDITIONALLY_PASSED = 'CONDITIONALLY_PASSED',
+    NA = 'NA',
+    SKIPPED = 'SKIPPED',
+    CONDITIONALLY_FAILED = 'CONDITIONALLY_FAILED'
+}
 
-export const statusValues : StatusType[] = ['PASSED', 'FAILED', 'CONDITIONALLY_PASSED', 'NA', 'SKIPPED', 'CONDITIONALLY_FAILED'];
+export const statusValues : StatusType[] = Object.values(StatusType);
 
 export default interface Status {
     status: StatusType;

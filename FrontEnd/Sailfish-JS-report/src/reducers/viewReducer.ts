@@ -16,30 +16,14 @@
 
 import ViewState from '../state/models/ViewState';
 import initialViewState from '../state/initial/initialViewState';
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
-import { Panel } from '../helpers/Panel';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
 
 export function viewReducer(state : ViewState = initialViewState, stateAction: StateActionType) : ViewState {
     switch(stateAction.type) {
         case StateActionTypes.SET_ADMIN_MSG_ENABLED: {
             return {
                 ...state,
-                adminMessagesEnabled: stateAction.adminEnabled
-            }
-        }
-
-        case StateActionTypes.SWITCH_SPLIT_MODE: {
-            if (state.splitMode) {
-                return {
-                    ...state,
-                    splitMode: false
-                }
-            }
-
-            return {
-                ...state,
-                splitMode: true,
-                leftPanel: Panel.Actions
+                adminMessagesEnabled: new Boolean(stateAction.adminEnabled)
             }
         }
 
@@ -71,6 +55,13 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
                 ...state,
                 leftPanel: initialViewState.leftPanel,
                 rightPanel: initialViewState.rightPanel
+            }
+        }
+
+        case StateActionTypes.SET_IS_LOADING: {
+            return {
+                ...state,
+                isLoading: stateAction.isLoading
             }
         }
 

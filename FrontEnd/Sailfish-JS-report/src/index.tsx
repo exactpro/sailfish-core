@@ -14,33 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, render } from "preact";
-import { App } from "./components/App";
-import { Provider } from 'preact-redux';
+import *  as React from 'react';
+import * as ReactDOM from 'react-dom';
+import App from "./components/App";
+import { Provider } from 'react-redux';
 import { createAppStore } from './store/store';
-import { storeEventHandler } from "./helpers/storeEventHadnler";
-import { resetTestCase } from "./actions/actionCreators";
-import { isStateAction } from './actions/stateActions';
 
-const store = createAppStore(null);
-
-// handling goBack and goForward browser history actions
-top.window.onpopstate = storeEventHandler(store, (dispatch, e: PopStateEvent) => {
-    // states contains redux action, recived
-    const action = e.state;
-
-    if (!action) {
-        dispatch(resetTestCase());
-        return;
-    }
-
-    if (isStateAction(action)) {
-        dispatch(action);
-    }
-});
-
-render(
-    <Provider store={store}>
+ReactDOM.render(
+    <Provider store={createAppStore()}>
         <App/>
     </Provider>, 
     document.getElementById("index")

@@ -89,7 +89,7 @@ task fixSass(type: NpmTask, dependsOn: 'npmInstall') {
 	args = ['rebuild', 'node-sass']
 }
 
-task buildProd(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
+task buildProd(type: NpmTask, dependsOn: ['npmInstall', 'fixSass', 'runTests']) {
 	args = ['run', 'build']
 }
 
@@ -99,6 +99,10 @@ task buildDev(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
 
 task devServer(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
 	args = ['run', 'dev-server']
+}
+
+task runTests(type: NpmTask, dependsOn: ['npmInstall']) {
+    args = ['test']
 }
 
 task zipData(type: Zip, dependsOn: 'buildProd') {

@@ -15,14 +15,18 @@
  ******************************************************************************/
 
 import Status from './Status';
-import Entry from './Entry';
-import { ActionNodeType } from './Action';
+import VerificationEntry from './VerificationEntry';
+import { ActionNodeType, ActionNode } from './Action';
 
 export default interface Verification {
-    actionNodeType: ActionNodeType;
+    actionNodeType: ActionNodeType.VERIFICATION;
     messageId: number;
     name: string;
     description: string;
     status: Status;
-    entries: Entry[];
+    entries: VerificationEntry[];
+}
+
+export function isVerification(actionNode: ActionNode): actionNode is Verification {
+    return actionNode.actionNodeType === ActionNodeType.VERIFICATION;
 }

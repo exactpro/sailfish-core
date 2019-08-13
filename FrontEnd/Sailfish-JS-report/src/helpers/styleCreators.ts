@@ -28,6 +28,10 @@ export function createSelector(className: string, ...modifiers: string[]): strin
     ].join(' ');
 }
 
+export function createTriStateControlClassName(baseName: string, isActive: boolean, isEnabled?: boolean) {
+    return createSelector(baseName, (isEnabled != null && !isEnabled) ? "disabled" : ( isActive ? "active" : "inactive" ))
+}
+
 export function joinModifiers(...modifiers: string[]): string {
     return modifiers
         .filter(modifier => !!modifier)

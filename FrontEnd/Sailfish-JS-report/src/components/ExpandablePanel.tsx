@@ -14,60 +14,76 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from "preact";
+import * as React from 'react';
 import "../styles/expandablePanel.scss"
 import { createSelector } from '../helpers/styleCreators';
+import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
+import { connect } from 'react-redux';
+import AppState from '../state/models/AppState';
 
 interface PanelProps {
-    header?: JSX.Element;
-    // shows, when panel is expanded
-    expandedHeader?: JSX.Element;
-    body?: JSX.Element;
+    header?: React.ReactNode;
+    body?: React.ReactNode;
     isExpanded?: boolean;
-    children: JSX.Element[];
+    onExpand?: (isExpanded: boolean) => any;
+    children: React.ReactNode[];
 }
 
-interface PanelState {
-    isExpanded: boolean;
-}
+export const ExpandablePanel = ({ header, body, children, isExpanded, onExpand }: PanelProps) => {
+    const iconClass = createSelector(
+        "expandable-panel__icon", 
+        isExpanded ? "expanded" : "hidden"
+    );
 
-export default class ExpandablePanel extends Component<PanelProps, PanelState> {
-    constructor(props: PanelProps) {
-        super(props);
-        this.state = {
-            isExpanded: props.isExpanded != null ? props.isExpanded : false
-        };
+    const onClick = (e: React.MouseEvent) => {
+        onExpand(!isExpanded);
+        e.stopPropagation();
     }
 
-    expandPanel() {
-        this.setState({isExpanded: !this.state.isExpanded})
-    }
-
-    componentWillReceiveProps(nextProps: PanelProps) {
-        if (nextProps.isExpanded != null) {
-            this.setState({isExpanded: nextProps.isExpanded});
-        }
-    }
-
-    render({ header, body, children, expandedHeader }: PanelProps, { isExpanded }: PanelState) {
-        const iconClass = createSelector(
-            "expandable-panel__icon", 
-            isExpanded ? "expanded" : "hidden"
-        );
-
-        return (
-            <div class="expandable-panel">
-                <div class="expandable-panel__header">
-                    <div class={iconClass} 
-                        onClick={e => this.expandPanel()}/>
-                    { (expandedHeader && isExpanded) || header || children[0] }
-                </div>
-                {
-                    isExpanded ? 
-                        body || children.slice(1)
-                        : null
-                }
+    return (
+        <div className="expandable-panel">
+            <div className="expandable-panel__header">
+                <div className={iconClass} 
+                    onClick={onClick}/>
+                { header || children[0] }
             </div>
-        )
-    }
+            {
+                isExpanded ? 
+                    body || children.slice(1)
+                    : null
+            }
+        </div>
+    )
 }
+
+interface RecoverablePanelProps extends PanelProps, RecoverableElementProps {}
+
+export const RecoverableExpandablePanel = (props: RecoverablePanelProps) => (
+    <StateSaver
+        stateKey={props.stateKey}>
+        {
+            (isExpanded: boolean, stateSaver) => (
+                <ExpandablePanel
+                    {...props}
+                    isExpanded={props.isExpanded !== undefined ? props.isExpanded : isExpanded}
+                    onExpand={isExpanded => {
+                        stateSaver(isExpanded);
+                        props.onExpand && props.onExpand(isExpanded)
+                    }}/>
+            )
+        }
+    </StateSaver>
+)
+
+interface SearchExpandablePanelOwnProps extends RecoverablePanelProps {
+    searchKeyPrefix: string;
+}
+
+export const SearchExpandablePanel = connect(
+    (state: AppState, ownProps: SearchExpandablePanelOwnProps) => {
+        const [currentKey] = state.selected.searchResults.getByIndex(state.selected.searchIndex),
+            isExpanded = currentKey && currentKey.startsWith(ownProps.searchKeyPrefix) ? true : undefined;        
+
+        return { isExpanded };
+    }
+)(RecoverableExpandablePanel);

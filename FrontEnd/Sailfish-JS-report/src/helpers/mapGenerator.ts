@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Action, { ActionNode } from '../models/Action';
+import Action, { ActionNode, isAction } from '../models/Action';
 
 /**
  * This function returns map, where key is the action id and value is the action, including nested actions
@@ -29,14 +29,13 @@ export const generateActionsMap = (actions: Action[]) : Map<number, Action> => {
 }
 
 const appendMapByActionNode = (actionNode: ActionNode, actionsMapRef: Map<number, Action>) => {
-    if (actionNode.actionNodeType !== 'action') {
+    if (!isAction(actionNode)) {
         return;
     }
 
-    const action = actionNode as Action;
-    actionsMapRef.set(action.id, action);
+    actionsMapRef.set(actionNode.id, actionNode);
 
-    if (action.subNodes) {
-        action.subNodes.forEach(subNode => appendMapByActionNode(subNode, actionsMapRef));
+    if (actionNode.subNodes) {
+        actionNode.subNodes.forEach(subNode => appendMapByActionNode(subNode, actionsMapRef));
     }
 }

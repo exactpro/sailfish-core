@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h } from 'preact';
+import * as React from 'react';
 import { StatusType, } from '../models/Status';
 import { getStatusChipDescription } from '../helpers/actionType';
 import '../styles/chip.scss';
@@ -24,7 +24,7 @@ interface ChipProps {
     count: number;
     status?: StatusType;
     isSelected?: boolean;
-    clickHandler?: (e: MouseEvent) => any;
+    clickHandler?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => any;
 }
 
 export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => {
@@ -39,10 +39,10 @@ export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => 
     const description = status ? getStatusChipDescription(status) : "";
 
     return (
-        <div class={rootClass} 
+        <div className={rootClass} 
             title={description}
             onClick={e => clickHandler && clickHandler(e)}>
-            <div class="chip__title">
+            <div className="chip__title">
                 <p>{count}</p>
             </div>
         </div>

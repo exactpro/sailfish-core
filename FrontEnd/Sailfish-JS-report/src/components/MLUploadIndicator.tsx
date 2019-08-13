@@ -14,15 +14,15 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import '../styles/messages.scss';
 import { SubmittedData } from '../models/MlServiceResponse'
 import AppState from '../state/models/AppState';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import TestCase from '../models/TestCase';
-import { ActionNode } from '../models/Action';
+import { ActionNode, isAction } from '../models/Action';
 import Action from '../models/Action'
-import { isAction } from '../helpers/actionType'
+import { StatusType } from '../models/Status';
 
 interface MLUploadIndicatorProps {
     submittedData: SubmittedData[];
@@ -30,69 +30,67 @@ interface MLUploadIndicatorProps {
     token: string;
 }
 
-export class MLUploadIndicatorBase extends Component<MLUploadIndicatorProps, {}> {
-    render({ submittedData, testCase, token }: MLUploadIndicatorProps) {
-        const failedActionIds: number[] = [];
+export const MLUploadIndicatorBase = ({ submittedData, testCase, token }: MLUploadIndicatorProps) => {
+    const failedActionIds: number[] = [];
 
-        function addSubActions(action: ActionNode) {
-            if (isAction(action) && (action as Action).status.status === 'FAILED') {
-                failedActionIds.push((action as Action).id);
-                (action as Action).subNodes.forEach((item) => { addSubActions(item) });
-            }
+    function addSubActions(action: ActionNode) {
+        if (isAction(action) && action.status.status === StatusType.FAILED) {
+            failedActionIds.push(action.id);
+            action.subNodes.forEach((item) => addSubActions(item));
         }
+    }
 
-        testCase.actions.forEach((item) => { addSubActions(item) });
+    testCase.actions.forEach((item) => addSubActions(item));
 
-        const mlEnabled = token != null
+    const mlEnabled = token != null;
 
-        const submittedActionIds = new Set(submittedData
-            .filter((item) => { return failedActionIds.includes(item.actionId) })
-            .map((item) => { return item.actionId }))
+    const submittedActionIds = new Set(submittedData
+        .filter((item) => failedActionIds.includes(item.actionId))
+        .map((item) => item.actionId))
 
-        if (!mlEnabled) {
-            return (
-                <div class="ml__submit-indicator">
-                    <div class="ml__submit-indicator-icon inactive" />
-                    <p class="ml__submit-indicator-text unavailable">ML unavailable</p>
-                </div>
-            )
-        }
+    if (!mlEnabled) {
+        return (
+            <div className="ml__submit-indicator">
+                <div className="ml__submit-indicator-icon inactive" />
+                <p className="ml__submit-indicator-text unavailable">ML unavailable</p>
+            </div>
+        )
+    }
 
-        if (submittedActionIds.size === failedActionIds.length && failedActionIds.length > 0) {
-            return (
-                < div class="ml__submit-indicator" >
-                    <div class="ml__submit-indicator-icon submitted" />
-                    <p class="ml__submit-indicator-text submitted">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
-                </div >
-            )
-        }
+    if (submittedActionIds.size === failedActionIds.length && failedActionIds.length > 0) {
+        return (
+            < div className="ml__submit-indicator" >
+                <div className="ml__submit-indicator-icon submitted" />
+                <p className="ml__submit-indicator-text submitted">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
+            </div >
+        )
+    }
 
-        if (submittedActionIds.size > 0) {
-            return (
-                <div class="ml__submit-indicator">
-                    <div class="ml__submit-indicator-icon active" />
-                    <p class="ml__submit-indicator-text ready">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
-                </div>
-            )
-        }
+    if (submittedActionIds.size > 0) {
+        return (
+            <div className="ml__submit-indicator">
+                <div className="ml__submit-indicator-icon active" />
+                <p className="ml__submit-indicator-text ready">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
+            </div>
+        )
+    }
 
-        if (failedActionIds.length > 0 && testCase.messages.length > 0) {
-            return (
-                <div class="ml__submit-indicator">
-                    <div class="ml__submit-indicator-icon active" />
-                    <p class="ml__submit-indicator-text ready">Ready to submit</p>
-                </div>
-            )
-        }
+    if (failedActionIds.length > 0 && testCase.messages.length > 0) {
+        return (
+            <div className="ml__submit-indicator">
+                <div className="ml__submit-indicator-icon active" />
+                <p className="ml__submit-indicator-text ready">Ready to submit</p>
+            </div>
+        )
+    }
 
-        if (failedActionIds.length === 0 || testCase.messages.length === 0) {
-            return (
-                <div class="ml__submit-indicator">
-                    <div class="ml__submit-indicator-icon not-required" />
-                    <p class="ml__submit-indicator-text not-required">Nothing to submit</p>
-                </div>
-            )
-        }
+    if (failedActionIds.length === 0 || testCase.messages.length === 0) {
+        return (
+            <div className="ml__submit-indicator">
+                <div className="ml__submit-indicator-icon not-required" />
+                <p className="ml__submit-indicator-text not-required">Nothing to submit</p>
+            </div>
+        )
     }
 }
 

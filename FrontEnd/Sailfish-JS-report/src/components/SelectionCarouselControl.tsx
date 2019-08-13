@@ -14,28 +14,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {Component, h} from 'preact';
-import {connect} from "preact-redux";
+import * as React from 'react';
+import { connect } from "react-redux";
 import AppState from "../state/models/AppState";
-import {nextCyclicItemByIndex, prevCyclicItemByIndex} from "../helpers/array";
-import {setSelectedTestCase} from "../actions/actionCreators";
+import { nextCyclicItemByIndex, prevCyclicItemByIndex } from "../helpers/array";
+import { setSelectedTestCase } from "../actions/actionCreators";
+import { StatusType } from '../models/Status';
 
-interface SelectionCarouselControlProps {
+interface StateProps {
     failedTestCaseIds: string[];
     selectedTestCaseId: string;
+}
 
+interface DispatchProps {
     setSelectedTestCase: (testCaseId: string) => any;
 }
 
-class SelectionCarouselControlBase extends Component<SelectionCarouselControlProps, {}> {
+interface SelectionCarouselControlProps extends StateProps, DispatchProps { }
+
+class SelectionCarouselControlBase extends React.Component<SelectionCarouselControlProps, {}> {
 
     private selectNextTestCase(currentId: string) {
         this.selectTestCase(nextCyclicItemByIndex(this.props.failedTestCaseIds, this.props.failedTestCaseIds.indexOf(currentId)));
     }
 
     private selectPrevTestCase(currentId: string) {
-       this.selectTestCase(prevCyclicItemByIndex(this.props.failedTestCaseIds, this.props.failedTestCaseIds.indexOf(currentId)));
-
+        this.selectTestCase(prevCyclicItemByIndex(this.props.failedTestCaseIds, this.props.failedTestCaseIds.indexOf(currentId)));
     }
 
     private selectTestCase(newId: string) {
@@ -43,27 +47,29 @@ class SelectionCarouselControlBase extends Component<SelectionCarouselControlPro
     }
 
     render() {
-        const selectedTestCaseId = this.props.selectedTestCaseId;
-        const failedTestCaseCount = this.props.failedTestCaseIds.length;
-        const hasFailedTestCases = failedTestCaseCount > 0;
+        const { selectedTestCaseId, failedTestCaseIds } = this.props,
+            failedTestCaseCount = failedTestCaseIds.length,
+            hasFailedTestCases = failedTestCaseCount > 0;
 
         return (
-            <div class="carousel-control">
-                <div class={"carousel-control__title" + (hasFailedTestCases ? " enabled" : " disabled")}>
+            <div className="carousel-control">
+                <div className={"carousel-control__title" + (hasFailedTestCases ? " enabled" : " disabled")}>
                     {hasFailedTestCases ? "Failed" : "No failed"}
                 </div>
                 {
-                    hasFailedTestCases ? ([
-                        <div class={"carousel-control__icon prev enabled"}
-                             title="Go to previous"
-                             onClick={() => this.selectPrevTestCase(selectedTestCaseId)}/>,
-                        <div class={"layout-control__counter enabled"}>
-                            <p>{this.props.failedTestCaseIds.indexOf(selectedTestCaseId) + 1} of {failedTestCaseCount}</p>
-                        </div>,
-                        <div class={"carousel-control__icon next enabled"}
-                             title="Go to next"
-                             onClick={() => this.selectNextTestCase(selectedTestCaseId)}/>
-                    ]) : null
+                    hasFailedTestCases ? (
+                        <React.Fragment>
+                            <div className={"carousel-control__icon prev enabled"}
+                                title="Go to previous"
+                                onClick={() => this.selectPrevTestCase(selectedTestCaseId)} />
+                            <div className={"layout-control__counter enabled"}>
+                                <p>{this.props.failedTestCaseIds.indexOf(selectedTestCaseId) + 1} of {failedTestCaseCount}</p>
+                            </div>
+                            <div className={"carousel-control__icon next enabled"}
+                                title="Go to next"
+                                onClick={() => this.selectNextTestCase(selectedTestCaseId)} />
+                        </React.Fragment>
+                    ) : null
                 }
             </div>
         )
@@ -71,10 +77,11 @@ class SelectionCarouselControlBase extends Component<SelectionCarouselControlPro
 }
 
 export const SelectionCarouselControl = connect(
-    (state: AppState) => ({
-        selectedTestCaseId: state.selected.selectedTestCaseId
+    (state: AppState): StateProps => ({
+        selectedTestCaseId: state.selected.selectedTestCaseId,
+        failedTestCaseIds: (state.report.metadata || []).filter(item => item.status.status === StatusType.FAILED).map(item => item.id)
     }),
-    (dispatch) => ({
+    (dispatch): DispatchProps => ({
         setSelectedTestCase: (testCaseId: string) => dispatch(setSelectedTestCase(testCaseId)),
     })
 )(SelectionCarouselControlBase);

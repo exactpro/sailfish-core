@@ -17,6 +17,7 @@
 import TestCase from "./TestCase";
 import { TestcaseMetadata } from "./TestcaseMetadata";
 import { ReportProperties } from "./ReportProperties";
+import Exception from "./Exception";
 
 export default interface Report {
     alerts?: any[];
@@ -32,7 +33,7 @@ export default interface Report {
     version: string;
     branchName: string;
     description: string;
-    exception?: string;
+    exception?: Exception;
     outcomes?: any;
     reportProperties?: ReportProperties;
     metadata: TestcaseMetadata[];

@@ -13,36 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-import {h} from 'preact';
+import * as React from 'react';
 import ExceptionCard from './ExceptionCard';
 import Exception from '../models/Exception';
 import '../styles/statusPanel.scss';
-import { getHashCode } from '../helpers/stringHash';
 import { treeToList } from '../helpers/exceptionTreeToListConverter'
 
 interface ExceptionCardProps {
     exception: Exception;
 }
 
-export const ExceptionChain = ({exception}: ExceptionCardProps) => {
-      
-    const rootExceptionCard = (exception == null) ? null :
-        <ExceptionCard 
-            key={getHashCode(exception.stacktrace + exception.message + exception.class)} 
-            exception={exception} 
-            drawDivider={false}/>;
+export const ExceptionChain = ({ exception }: ExceptionCardProps) => {
 
-    const exceptions = (exception == null) ? null : 
-        treeToList(exception.cause).map((ex) => 
-            <ExceptionCard 
-                key={getHashCode(ex.stacktrace + ex.message + ex.class)} 
-                exception={ex} 
-                drawDivider={true}/>);
+    if (!exception) {
+        return null;
+    }
 
     return (
         <div>
-            {rootExceptionCard}
-            {exceptions}
+            <ExceptionCard 
+                exception={exception}/>
+            {
+                treeToList(exception.cause).map((ex, index) => (
+                    <React.Fragment>
+                        <div className="status-panel-exception-divider">
+                            <div className="status-panel-exception-divider-icon"/>
+                        </div>
+                        <ExceptionCard 
+                            key={index} 
+                            exception={ex}/>
+                    </React.Fragment>
+                ))
+            }
         </div>
     );
 }

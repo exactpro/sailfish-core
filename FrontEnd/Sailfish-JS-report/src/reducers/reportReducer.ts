@@ -14,52 +14,14 @@
  * limitations under the License.
  ******************************************************************************/
 
-import ReportState from '../state/models/ReportState';
-import initialReportState from '../state/initial/initialReportState';
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
-import { findNextCyclicItem, findPrevCyclicItem } from '../helpers/array';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
+import Report from '../models/Report';
 
-export function reportReducer(state : ReportState = initialReportState, stateAction : StateActionType): ReportState {
+export function reportReducer(state : Report = null, stateAction : StateActionType): Report {
     switch(stateAction.type) {
 
         case StateActionTypes.SET_REPORT: {
-            return {
-                ...state,
-                report: stateAction.report,
-                currentTestCasePath: initialReportState.currentTestCasePath
-            }
-        }
-
-        case StateActionTypes.SET_TEST_CASE_PATH: {
-            return {
-                ...state, 
-                currentTestCasePath: stateAction.testCasePath
-            }
-        }
-
-        case StateActionTypes.RESET_TEST_CASE: {
-            return {
-                ...state, 
-                currentTestCasePath: initialReportState.currentTestCasePath
-            }
-        }
-
-        case StateActionTypes.NEXT_TEST_CASE: {
-            const nextTestCase = findNextCyclicItem(state.report.metadata, metadata => metadata.jsonpFileName === state.currentTestCasePath);
-
-            return {
-                ...state,
-                currentTestCasePath: nextTestCase ? nextTestCase.jsonpFileName : initialReportState.currentTestCasePath
-            }
-        }
-
-        case StateActionTypes.PREV_TEST_CASE: {
-            const prevTestCase = findPrevCyclicItem(state.report.metadata, metadata => metadata.jsonpFileName === state.currentTestCasePath);
-
-            return {
-                ...state,
-                currentTestCasePath: prevTestCase ? prevTestCase.jsonpFileName : initialReportState.currentTestCasePath
-            }
+            return stateAction.report;
         }
 
         default: {
