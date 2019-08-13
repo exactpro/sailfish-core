@@ -108,7 +108,20 @@ public class ScriptContext
         this.dataManager = context.getDataManager();
         this.pluginClassLoaders = context.getPluginClassLoaders();
         this.environmentName = environmentName;
-        this.environmentVariableSet = context.getConnectionManager().getEnvironmentVariableSet(environmentName);
+
+        IConnectionManager connectionManager = context.getConnectionManager();
+
+        /*
+         HOTFIX: for the case when we try to load variable set for environment that doesn't exist anymore (e.g. bb__automation).
+         This could happen, for example, when we're loading test script description from file. Ideally, environment's variable set
+         should be serialized alongside environment name and passed as a parameter too, because even if environment exists it
+         could have a different variable set than it had when test script description was serialized.
+        */
+        if (connectionManager.getEnvironmentList().contains(environmentName)) {
+            this.environmentVariableSet = connectionManager.getEnvironmentVariableSet(environmentName);
+        } else {
+            this.environmentVariableSet = null;
+        }
 
 		reset();
 	}
