@@ -95,7 +95,7 @@
         <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
     </dictionary>
 
-    <dictionary title="FIX_ORCHESTRA_GENERIC">
+    <!--dictionary title="FIX_ORCHESTRA_GENERIC">
         <resource>FIX50SP2.GENERIC.xml</resource>
         <utilityClassName>com.exactpro.sf.actions.FIXMatrixUtil</utilityClassName>
         <utilityClassName>com.exactpro.sf.actions.NTGMatrixUtil</utilityClassName>
@@ -103,6 +103,6 @@
         <utilityClassName>com.exactpro.sf.actions.BugsUtils</utilityClassName>
         <utilityClassName>com.exactpro.sf.actions.ExtendedConvertUtil</utilityClassName>
         <factoryClassName>com.exactpro.sf.configuration.factory.FixMessageFactory</factoryClassName>
-    </dictionary>
+    </dictionary-->
 
 </dictionaries>
