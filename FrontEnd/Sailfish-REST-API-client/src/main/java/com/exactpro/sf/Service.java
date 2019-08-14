@@ -46,7 +46,8 @@ public class Service {
 		DISPOSING,
 		DISPOSED,
 		WARNING,
-		ERROR
+		ERROR,
+        DISABLED
 	}
 
     private final Map<String, String> settings = new HashMap<>();
