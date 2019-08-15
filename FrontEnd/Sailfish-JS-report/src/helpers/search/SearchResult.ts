@@ -32,6 +32,10 @@ export default class SearchResult {
         return this.results.size;
     }
 
+    get isEmpty() {
+        return this.results.size < 1;
+    }
+
     get entries() { 
         return [...this.results.entries()];
     }

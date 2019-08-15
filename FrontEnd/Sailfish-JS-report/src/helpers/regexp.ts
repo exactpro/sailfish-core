@@ -19,10 +19,10 @@
   * @param str target string
   * @param flags RegExp flags
   */
-export function createIgnoringRegexp(str: string, ...flags: string[]): RegExp {
+export function createCaseInsensitiveRegexp(str: string): RegExp {
     const escapedStr = escapeSpecialSymbols(str);
 
-    return new RegExp(escapedStr, ...flags);
+    return new RegExp(escapedStr, 'gi');
 }
 
 /**
@@ -31,4 +31,13 @@ export function createIgnoringRegexp(str: string, ...flags: string[]): RegExp {
  */
 export function escapeSpecialSymbols(str: string): string {
     return str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+/**
+ * Tagged template function for creating RegExp
+ * @param regExp 
+ * @param options 
+ */
+export function createRegExp(regExp: TemplateStringsArray, ...options: string[]): RegExp {
+    return new RegExp(regExp.raw[0].replace(/\s/gm, ""), options.join(''))
 }

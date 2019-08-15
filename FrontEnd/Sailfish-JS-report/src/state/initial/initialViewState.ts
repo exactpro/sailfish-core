@@ -21,8 +21,7 @@ const initialViewState : ViewState = {
     isLoading: true,
     adminMessagesEnabled: new Boolean(false),
     leftPanel: Panel.Actions,
-    rightPanel: Panel.Messages,
-    splitMode: false 
+    rightPanel: Panel.Messages
 }
 
 export default initialViewState;

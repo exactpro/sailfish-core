@@ -14,13 +14,31 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from '../../util/Panel';
+import { replaceNonPrintableChars } from "../../helpers/stringUtils";
 
-export default interface ViewState {
-    isLoading: boolean;
-    leftPanel: Panel;
-    rightPanel: Panel;
+const MIDDLE_DOT = '\u00b7',
+    WHITE_SQUARE = '\u25a1';
 
-    // We use Boolean object here. It's the way we handle flag chages after component unmount.
-    adminMessagesEnabled: Boolean;
-}
+describe('[Helpers] stringUtil tests', () => {
+
+    test('replaceNonPrintableChars() with spaces', () => {
+        const str = '  test  ';
+
+        const result = replaceNonPrintableChars(str);
+
+        const excpectedResult = `${MIDDLE_DOT.repeat(2)}test${MIDDLE_DOT.repeat(2)}`;
+
+        expect(result).toBe(excpectedResult);
+    })
+    
+    test('replaceNonPrintableChars() with unprintable chars', () => {
+        const str = '\uFEFF';
+
+        const result = replaceNonPrintableChars(str);
+
+        const expectedResult = `${WHITE_SQUARE}`;
+
+        expect(result).toBe(expectedResult);
+    })
+    
+})

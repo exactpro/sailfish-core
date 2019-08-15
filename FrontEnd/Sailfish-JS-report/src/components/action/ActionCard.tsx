@@ -89,17 +89,21 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                 <div className={headerClassName}>
                     <div className="ac-header__title">
                         <div className="ac-header__name">
-                            <span>{matrixId} {serviceName} </span>
-                            <SearchableContent
-                                content={name} 
-                                contentKey={keyForAction(id, 'name')}/>
-                            <span> {messageType}</span>
+                            <span>
+                                <span>{matrixId} {serviceName} </span>
+                                <SearchableContent
+                                    content={name} 
+                                    contentKey={keyForAction(id, 'name')}/>
+                                <span> {messageType}</span>
+                            </span>
                         </div>
                         <div className="ac-header__description">
-                            <SearchableContent 
-                                content={description}
-                                contentKey={keyForAction(id, 'description')}/>
-                            <span> {outcome}</span>
+                            <span>
+                                <SearchableContent 
+                                    content={description}
+                                    contentKey={keyForAction(id, 'description')}/>
+                                <span> {outcome}</span>
+                            </span>
                         </div>
                     </div>
                     {
