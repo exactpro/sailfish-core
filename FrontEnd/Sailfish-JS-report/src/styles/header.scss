@@ -208,4 +208,9 @@
         -webkit-margin-after:0em;
         padding-left: 15px;
     }
+
+    &.disabled {
+        cursor: default;
+        opacity: 0.6;
+    }
 }

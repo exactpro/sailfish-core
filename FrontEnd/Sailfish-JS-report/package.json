@@ -21,6 +21,8 @@
     "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.10.3",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jest": "^24.0.17",
     "@types/react": "^16.8.17",
     "@types/react-custom-scrollbars": "^4.0.5",
@@ -31,10 +33,14 @@
     "awesome-typescript-loader": "^5.2.1",
     "css-loader": "^1.0.0",
     "cssnano": "^4.1.10",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
     "file-loader": "^2.0.0",
     "html-webpack-plugin": "^3.2.0",
     "icon-font-loader": "^1.5.7",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^24.8.0",
+    "jest-enzyme": "^7.1.0",
     "node-sass": "^4.9.4",
     "postcss-loader": "^3.0.0",
     "redux-devtools-extension": "^2.13.7",

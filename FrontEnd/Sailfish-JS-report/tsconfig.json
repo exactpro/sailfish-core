@@ -9,7 +9,8 @@
       "removeComments": true,
       "sourceMap": true,
       "jsx": "react",
-      "skipLibCheck": true
+      "skipLibCheck": true,
+      "esModuleInterop": true
     },
     "exclude": [
       "node_modules"

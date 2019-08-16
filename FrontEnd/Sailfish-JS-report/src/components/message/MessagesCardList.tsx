@@ -66,7 +66,7 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
     }
 
     componentDidUpdate(prevProps: MessagesListProps) {
-        if (this.props.scrolledMessageId !== prevProps.scrolledMessageId && prevProps.scrolledMessageId != null) {
+        if (this.props.scrolledMessageId !== prevProps.scrolledMessageId && this.props.scrolledMessageId != null) {
             this.setState({ 
                 scrolledIndex: this.getScrolledIndex(this.props.scrolledMessageId, this.props.messages)
             });
