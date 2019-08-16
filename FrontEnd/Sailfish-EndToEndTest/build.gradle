@@ -4,9 +4,9 @@ apply plugin: 'eclipse'
 apply plugin: 'jacoco'
 
 ext{
-	mjorVersion				= '3'
+	majorVersion			= '3'
 	minorVersion			= '2'
-	sailfishVersion         = "$mjorVersion.$minorVersion"
+	sailfishVersion         = "$majorVersion.$minorVersion"
     version_slf4j = '1.7.25'
     jacocoVersion = '0.8.0'
     sharedDir = file("${project.rootDir}/shared")
