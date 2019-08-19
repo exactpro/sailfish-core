@@ -41,4 +41,4 @@ Note: The 'quickStart' property enables the ability to run Sailfish without conn
 
 And then, open http://localhost:8080/sfgui
 
-The updated version of Exactpro Sailfish Manual 7.0 is available here: [exactpro.com/sailfish/sailfish_manual.pdf](https://exactpro.com/sailfish/sailfish_manual.pdf)
+The updated version of Exactpro Sailfish Manual 8.0 is available here: [exactpro.com/sailfish/sailfish_manual.pdf](https://exactpro.com/sailfish/sailfish_manual.pdf)
