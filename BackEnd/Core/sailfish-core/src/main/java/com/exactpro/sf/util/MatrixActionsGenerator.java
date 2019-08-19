@@ -28,7 +28,6 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
-import com.exactpro.sf.common.messages.structures.loaders.XsdDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
 
 public class MatrixActionsGenerator {
@@ -102,8 +101,6 @@ public class MatrixActionsGenerator {
 		
 		if(dictionaryFile.toLowerCase().endsWith(".xml")){
 			loader = new XmlDictionaryStructureLoader();
-		}else if (dictionaryFile.toLowerCase().endsWith("xsd")) {
-			loader = new XsdDictionaryStructureLoader();
 		}else {
 			throw new EPSCommonException("This parameter is not supported.");
 		}

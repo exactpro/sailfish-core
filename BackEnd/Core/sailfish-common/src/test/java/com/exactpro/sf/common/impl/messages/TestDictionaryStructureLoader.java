@@ -32,7 +32,6 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
-import com.exactpro.sf.common.messages.structures.loaders.XsdDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.util.EPSTestCase;
 
@@ -40,68 +39,8 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
 	
     @Rule
     public final ExpectedException exception = ExpectedException.none();
-    
-	@Test
-	public void testCreateXsdDictionary() throws Exception {
 
-		IDictionaryStructureLoader loader = new XsdDictionaryStructureLoader();
-		
-		String dictionaryFile = getBaseDir() + File.separator + "src"
-				+ File.separator + "test" + File.separator + "resources" + File.separator + "example.xsd";
-
-		IDictionaryStructure dictionary;
-		
-		try (InputStream in = new FileInputStream(dictionaryFile)) {
-			dictionary = loader.load(in);
-    	}
-
-		System.out.println(dictionary.getNamespace());
-		Assert.assertEquals(dictionary.getNamespace(), "Example");
-
-        Assert.assertEquals(dictionary.getFields().size(), 2);
-        Assert.assertEquals(dictionary.getMessages().size(), 6);
-		
-		List<String> fields = new ArrayList<>();
-		fields.add("ReceivedSequenceNumberType");
-		fields.add("MessageType");
-		
-		List<String> messages = new ArrayList<>();
-		messages.add("BroadcastMessageHeaderType");
-		messages.add("BroadcastHeaderType");
-		messages.add("Alphas_Betas");
-		messages.add("Alphas_BetasType");
-		messages.add("LoginRequest");
-		messages.add("Alphas_Betas1");
-
-        List<String> attributes = new ArrayList<>();
-        attributes.add("DictionaryAttr");
-		
-		System.out.println("Fields:");
-
-        for(IFieldStructure fieldStructure : dictionary.getFields().values()) {
-			System.out.println("\t" + fieldStructure.getName());
-			Assert.assertTrue(fields.contains(fieldStructure.getName()));
-		}
-
-		System.out.println("Messages:");
-
-        for(IMessageStructure msgStruct : dictionary.getMessages().values()) {
-			System.out.println("\t" + msgStruct.getName());
-			Assert.assertTrue(messages.contains(msgStruct.getName()));
-		}
-
-        System.out.println("Attributes:");
-        for (String attrName : dictionary.getAttributes().keySet()) {
-            System.out.println("\t" + attrName);
-            Assert.assertTrue(attributes.contains(attrName));
-        }
-		
-		try (InputStream in = new FileInputStream(dictionaryFile)) {
-            Assert.assertEquals(dictionary.getNamespace(), loader.extractNamespace(in));
-        }
-	}
-	
-	@Test
+    @Test
 	public void testCreateXmlDictionary() throws Exception {
 
 		IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
