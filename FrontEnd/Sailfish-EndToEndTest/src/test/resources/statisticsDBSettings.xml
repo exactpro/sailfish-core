@@ -17,10 +17,10 @@
 <dbsettings>
     <connectionOptionsQuery>useUnicode=true&amp;characterEncoding=UTF-8&amp;useFastDateParsing=false&amp;socketTimeout=15000</connectionOptionsQuery>
     <dbms>MySql</dbms>
-    <dbName>statisticDb</dbName>
+    <dbName>sfstatistics</dbName>
     <host>127.0.0.1</host>
-    <password>my-secret-pw</password>
+    <password>999</password>
     <port>3306</port>
     <statisticsServiceEnabled>true</statisticsServiceEnabled>
-    <username>root</username>
+    <username>sailfish</username>
 </dbsettings>
