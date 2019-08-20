@@ -73,10 +73,9 @@ artifactory {
     }
 }
 
-
 node {
     version = '10.1.0'
-    npmVersion = '5.6.0'
+    npmVersion = '6.10.3'
     distBaseUrl = 'http://nodejs.org/dist'
     // If true, it will download node using above parameters.
     // If false, it will try to use globally installed node.
@@ -85,23 +84,24 @@ node {
     workDir = npmDir
 }
 
-task fixSass(type: NpmTask, dependsOn: 'npmInstall') {
-	args = ['rebuild', 'node-sass']
+task installDependencies(type: NpmTask) {
+    // running 'npm ci', same as 'npm install', but uses package-lock.json instead of package.json
+    args = ['ci']
 }
 
-task buildProd(type: NpmTask, dependsOn: ['npmInstall', 'fixSass', 'runTests']) {
+task buildProd(type: NpmTask, dependsOn: ['installDependencies', 'runTests']) {
 	args = ['run', 'build']
 }
 
-task buildDev(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
+task buildDev(type: NpmTask, dependsOn: 'installDependencies') {
 	args = ['run', 'dev-build']
 }
 
-task devServer(type: NpmTask, dependsOn: ['npmInstall', 'fixSass']) {
-	args = ['run', 'dev-server']
+task devServer(type: NpmTask, dependsOn: 'installDependencies') {
+	args = ['start']
 }
 
-task runTests(type: NpmTask, dependsOn: ['npmInstall']) {
+task runTests(type: NpmTask, dependsOn: 'installDependencies') {
     args = ['test']
 }
 

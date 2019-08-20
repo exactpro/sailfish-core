@@ -64,10 +64,10 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
         return scrolledIndex !== -1 ? new Number(scrolledIndex) : null;
     }
 
-    componentWillReceiveProps(nextProps: ListProps) {
-        if (this.props.scrolledActionId !== nextProps.scrolledActionId && nextProps.scrolledActionId != null) {
+    componentDidUpdate(prevProps: ListProps) {
+        if (this.props.scrolledActionId !== prevProps.scrolledActionId && this.props.scrolledActionId != null) {
             this.setState({
-                scrolledIndex: this.getScrolledIndex(nextProps.scrolledActionId, nextProps.actions)
+                scrolledIndex: this.getScrolledIndex(this.props.scrolledActionId, this.props.actions)
             });
         }
     }
@@ -94,7 +94,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
         )
     }
 
-    private renderAction = (idx: number, onExpand: () => void): React.ReactNode => (
+    private renderAction = (idx: number, onExpand: () => void): React.ReactElement => (
         <ActionTree 
             action={this.props.actions[idx]}
             onExpand={onExpand}/>
