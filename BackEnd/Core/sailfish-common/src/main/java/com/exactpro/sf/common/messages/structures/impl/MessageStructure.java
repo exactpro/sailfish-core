@@ -30,7 +30,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
  */
 public class MessageStructure extends FieldStructure implements IMessageStructure {
     private final Map<String, IFieldStructure> fields;
-
+    private final boolean fromField;
     private final IMessageStructure reference;
 
 	public MessageStructure(String name, String namespace, boolean isCollection, IMessageStructure reference) {
@@ -43,18 +43,28 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 	}
 
     public MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
-			Map<String, IAttributeStructure> attributes) {
-		this(name, namespace, description, fields, false, false, attributes, null);
+            Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+        this(name, namespace, description, fields, false, false, attributes, reference);
 	}
 
     private MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
 			boolean isRequired, boolean isCollection, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
 		super(name, namespace, description, reference != null ? reference.getName() : null, attributes,
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
-        this.fields = fields != null ? Collections.unmodifiableMap(fields) : Collections.emptyMap();
-		this.reference = reference;
+        if (fields != null) {
+            this.fields = Collections.unmodifiableMap(fields); // no reference, message-to-message reference
+            this.fromField = false;
+        } else if (reference != null) {
+            this.fields = reference.getFields(); // field-to-message reference
+            this.fromField = true;
+        } else {
+            this.fields = Collections.emptyMap(); // probably should not happen :(
+            this.fromField = false;
+        }
 
-		this.fields.forEach((fName, fStructure) -> {
+        this.reference = reference;
+
+        this.fields.forEach((fName, fStructure) -> {
 		    if (fStructure instanceof IMessageStructure) {
                 Map<String, IFieldStructure> structureFields = fStructure.getFields();
                 if (structureFields != null && !structureFields.isEmpty() && fStructure.getReferenceName() == null) {
@@ -66,7 +76,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
     public Map<String, IFieldStructure> getFields() {
-        return reference != null ? reference.getFields() : fields;
+        return fields;
     }
 
 	@Override
@@ -81,7 +91,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public boolean isRequired() {
-        if(reference != null) {
+        if (fromField) {
 			return super.isRequired();
 		}
 
@@ -90,7 +100,7 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 
 	@Override
 	public boolean isCollection() {
-        if(reference != null) {
+        if (fromField) {
 			return super.isCollection();
 		}
 

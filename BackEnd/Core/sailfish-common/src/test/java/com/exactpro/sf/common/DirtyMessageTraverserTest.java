@@ -10,6 +10,19 @@
 
 package com.exactpro.sf.common;
 
+import static org.hamcrest.CoreMatchers.is;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.DefaultMessageStructureVisitor;
@@ -23,18 +36,6 @@ import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureType;
 import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import com.exactpro.sf.common.messages.structures.impl.MessageStructure;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.hamcrest.CoreMatchers.is;
 
 public class DirtyMessageTraverserTest {
 
@@ -49,7 +50,7 @@ public class DirtyMessageTraverserTest {
         Map<String, IFieldStructure> fields = new LinkedHashMap<>();
         fields.put(firstField.getName(), firstField);
         fields.put(secondField.getName(), secondField);
-        byDictionary = new MessageStructure("test", "test", "", fields, Collections.emptyMap());
+        byDictionary = new MessageStructure("test", "test", "", fields, Collections.emptyMap(), null);
     }
 
     /**
