@@ -37,9 +37,8 @@ validateDictionary {
 
 convertFixOrchestraToSailfishDictionary {
 
-    enabled = false
-
-    orchestraXml = uri('https://github.com/FIXTradingCommunity/fix-orchestra/raw/master/model-quickfix/src/test/resources/mit_2016.xml')
+    fixtXml = uri('https://raw.githubusercontent.com/quickfix/quickfix/master/spec/FIXT11.xml')
+    orchestraXml = uri('https://raw.githubusercontent.com/FIXTradingCommunity/orchestrations/master/FIX%20Standard/FixRepository50SP2.xml')
     fileSuffix = 'GENERIC'
     outputDirectory = genDictionaryDir
 }
