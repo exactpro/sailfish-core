@@ -16,16 +16,17 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
-import com.exactpro.sf.common.messages.MsgMetaData;
-import com.exactpro.sf.configuration.IDictionaryManager;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import com.exactpro.sf.messages.sailfisherrors.SailfishMessageSerializationError;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonRawValueDeserializer;
 import com.exactpro.sf.storage.util.JsonMessageConverter;
 import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
-import java.util.Map;
-import java.util.Set;
 
 public class Message implements IJsonReportNode {
     private long id;
@@ -49,13 +50,22 @@ public class Message implements IJsonReportNode {
     public Message(Map<String, String> data) {
         this.id = Long.parseLong(data.get("Id"));
         this.contentHumanReadable = data.get("Content");
-        this.content = data.get("ContentJson");
         this.checkPoint = data.get("UnderCheckPoint").isEmpty() ? null : data.get("UnderCheckPoint");
         this.raw = data.get("RawMessage");
         this.from = data.get("From");
         this.to = data.get("To");
         this.msgName = data.get("MsgName");
         this.timestamp = data.get("Timestamp");
+
+        String rawMessageData = data.get("ContentJson");
+
+        try {
+            new ObjectMapper().readTree(rawMessageData);
+            this.content = rawMessageData;
+        } catch (IOException e) {
+            this.content = JsonMessageConverter.toJson(
+                    new SailfishMessageSerializationError().setErrorDescription("message content is damaged").setRawData(rawMessageData).getMessage());
+        }
     }
 
     public long getId() {

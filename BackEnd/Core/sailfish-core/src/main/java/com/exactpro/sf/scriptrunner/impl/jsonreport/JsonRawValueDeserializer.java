@@ -27,7 +27,7 @@ import java.io.IOException;
 public class JsonRawValueDeserializer extends JsonDeserializer<String> {
 
     @Override
-    public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         TreeNode tree = p.getCodec().readTree(p);
         return tree.toString();
     }
