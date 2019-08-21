@@ -21,10 +21,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.stream.Collectors;
 
+import com.exactpro.sf.storage.util.UnlimitedMessageColumnsMigration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -230,12 +231,16 @@ public class SFLocalContext implements ISFContext {
         IStorage storage = null;
 
         if(envSettings.getStorageType() == StorageType.DB) {
-            sessionFactory = HibernateFactory.getInstance().getSessionFactory(workspaceDispatcher);
+            HibernateFactory hibernateFactory = HibernateFactory.getInstance();
+            Configuration configuration = hibernateFactory.getConfiguration(workspaceDispatcher);
+            sessionFactory = hibernateFactory.getSessionFactory(workspaceDispatcher, configuration);
             Session session = null;
 
             try {
                 session = sessionFactory.openSession();
                 session.createQuery("from StoredOption where optionName = 'test'").uniqueResult();
+                // TODO remove this in the next version after current 3.2
+                tryToMigrate(configuration, session);
             } catch(Exception e) {
                 throw new EPSCommonException("Failed to establish connection to database", e);
             } finally {
@@ -369,7 +374,17 @@ public class SFLocalContext implements ISFContext {
         embeddedServices.add(machineLearningService);
     }
 
-	private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
+    private void tryToMigrate(Configuration configuration, Session session) throws Exception {
+        try {
+            UnlimitedMessageColumnsMigration migration = new UnlimitedMessageColumnsMigration(session, configuration);
+            migration.migrate();
+        } catch (Exception e) {
+            logger.error("Could not migrate database to set unlimited raw/json/human message columns.", e);
+            throw e;
+        }
+    }
+
+    private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
 		switch (envSettings.getStorageType()) {
         case DB:
             return new DatabaseMessageStorage(new DBStorageSettings(workspaceDispatcher, sessionFactory, dictionaryManager, envSettings));

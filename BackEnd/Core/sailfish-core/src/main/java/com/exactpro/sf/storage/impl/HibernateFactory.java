@@ -23,6 +23,7 @@ import java.util.Map;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,21 +58,24 @@ public class HibernateFactory {
 		return instance;
 	}
 
+    public SessionFactory getSessionFactory(IWorkspaceDispatcher workspaceDispatcher)
+            throws FileNotFoundException, WorkspaceStructureException {
+        return getSessionFactory(workspaceDispatcher, getConfiguration(workspaceDispatcher));
+    }
+
     @SuppressWarnings("deprecation")
-    public SessionFactory getSessionFactory(IWorkspaceDispatcher workspaceDispatcher) throws WorkspaceStructureException, FileNotFoundException {
+    public SessionFactory getSessionFactory(IWorkspaceDispatcher workspaceDispatcher, Configuration config)
+            throws WorkspaceStructureException, FileNotFoundException {
 
 		SessionFactory sessionFactory = null;
 
 		synchronized (sessionFactories) {
 
             File cfgFolder = workspaceDispatcher.getFolder(FolderType.CFG);
-            File fDescr = workspaceDispatcher.getFile(FolderType.CFG, HIBERNATE_CFG);
             sessionFactory = sessionFactories.get(cfgFolder);
 
 			if (sessionFactory == null) {
 				try {
-					Configuration config = new Configuration()
-                            .configure(fDescr);
                     logger.info("Initializing new session factory for user [{}]; URL: {}",
                             config.getProperty(AvailableSettings.USER), config.getProperty(AvailableSettings.URL));
                     sessionFactory = config.buildSessionFactory();
@@ -86,4 +90,10 @@ public class HibernateFactory {
 
 	}
 
+    @NotNull
+    public Configuration getConfiguration(IWorkspaceDispatcher workspaceDispatcher) throws FileNotFoundException {
+        File fDescr = workspaceDispatcher.getFile(FolderType.CFG, HIBERNATE_CFG);
+        Configuration config = new Configuration().configure(fDescr);
+        return config;
+    }
 }
