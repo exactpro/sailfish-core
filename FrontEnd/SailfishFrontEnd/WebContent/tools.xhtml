@@ -1,0 +1,138 @@
+<!--
+  ~ Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:o="http://omnifaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+    <link rel="shortcut icon" href="#{resource['sf:images/SFicon.ico']}" type="image/x-icon"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Configuration :: Exactpro Systems LLC :: Sailfish #{generalBean.version}</title>
+
+    <h:outputStylesheet library="sf" name="css/reset.css"/>
+    <h:outputStylesheet library="sf" name="css/estyles.css"/>
+    <h:outputStylesheet library="sf" name="css/menu.css"/>
+    <h:outputStylesheet library="sf" name="css/configuration.css"/>
+    <h:outputStylesheet library="sf" name="css/sf.css"/>
+    <h:outputStylesheet library="sf" name="css/jqueryui/theme.css"/>
+    <h:outputStylesheet library="sf" name="css/custom.css"/>
+
+    <script>
+
+		function getContextPath() {
+			return "#{request.contextPath}";
+		};
+
+		window.onload = function(){
+		    let currentSection = window.localStorage.getItem('selectedSection');
+		    if (currentSection == undefined) {
+		        currentSection = 'matrixMerger'
+            }
+		    setSectionVisible(currentSection);
+		}
+
+		function changeSection(section){
+		    setSectionVisible(section);
+		    if (typeof(Storage) !== "undefined") {
+                window.localStorage.setItem('selectedSection', section);
+            } else {
+                console.log('Local storage unsupported');
+            }
+		}
+
+    </script>
+
+
+</h:head>
+<h:body styleClass="eps-application">
+
+    <ui:insert name="menu">
+        <ui:include src="template/menu.xhtml"/>
+    </ui:insert>
+
+    <div class="eps-container">
+
+
+        <h:form prependId="false">
+
+        </h:form>
+
+        <div class="eps-content-panel">
+            <div class="eps-config-navigation">
+                <ul>
+                    <div onclick="changeSection('matrixMerger');" class="eps-dot">
+                        <li id="matrixMergerNavItem">Matix merger</li>
+                    </div>
+                    <!--div onclick="changeSection('test');" class="eps-dot">
+                        <li id="testNavItem">test</li>
+                    </div-->
+                </ul>
+            </div>
+
+            <div class="eps-config-content-wrapper">
+                <div class="eps-config-content-inner">
+                    <div id="matrixMergerConfig" class="eps-config-container">
+
+                        <p:tooltip />
+                        <h:form id="messagesForm">
+                            <p:messages id="messages" showDetail="true" closable="true" autoupdate="true"/>
+                        </h:form>
+
+                        <h:form>
+                            <p:fileUpload fileUploadListener="#{toolsBean.handleFileUpload}" mode="advanced" dragDropSupport="true"
+                                          multiple="true" update="@(#filesToConvert)" allowTypes="/(\.|\/)(xls?x|csv)$/" />
+                        </h:form>
+                        <p:dataTable id="filesToConvert" var="file" value="#{toolsBean.uploadedFiles}">
+                            <p:column headerText="name">
+                                <h:outputText value="#{file.name}" />
+                            </p:column>
+                        </p:dataTable>
+                        <h:form id="convertForm">
+                            <p:remoteCommand name="stop" update=":filesToConvert"/>
+                            <p:commandButton value="convert" ajax="false" style="margin-right:20px;" styleClass="ui-priority-primary" onclick="PrimeFaces.monitorDownload(null, stop)">
+                                <p:fileDownload value="#{toolsBean.converted}"/>
+                            </p:commandButton>
+                            <p:commandButton value="clear" style="margin-right:20px;" styleClass="ui-priority-primary" update="@(#filesToConvert)" actionListener="#{toolsBean.clearUploads}"/>
+                        </h:form>
+
+                    </div>
+
+                    <!--div id="testConfig" class="eps-config-container">
+
+                        <h2>test management</h2>
+
+
+                    </div-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ui:insert name="footer">
+        <ui:include src="template/footer.xhtml"/>
+    </ui:insert>
+
+    <h:outputScript library="sf" name="js/menu.js"/>
+    <h:outputScript library="sf" name="js/configuration.js"/>
+
+</h:body>
+</html>
