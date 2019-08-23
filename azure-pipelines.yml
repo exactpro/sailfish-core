@@ -23,7 +23,7 @@ steps:
   inputs:
     workingDirectory: 'FrontEnd/Sailfish-JS-report'
     gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m'
+    gradleOptions: '-Xmx3072m -Dhttp.socketTimeout=60000 -Dhttp.connectionTimeout=60000'
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
