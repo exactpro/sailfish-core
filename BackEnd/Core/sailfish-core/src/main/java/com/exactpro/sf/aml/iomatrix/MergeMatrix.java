@@ -21,9 +21,9 @@ import static java.util.stream.Collectors.joining;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -105,13 +105,17 @@ public class MergeMatrix {
     }
 
     private static List<SimpleCell> readHeaderAllMatrix(List<File> files) throws Exception {
-        Set<SimpleCell> setHeader = new LinkedHashSet<>();
+        Stream<SimpleCell> stream = Stream.of();
+
         for (File file : files) {
             try (AdvancedMatrixReader matrixReader = new AdvancedMatrixReader(file)) {
-                setHeader.addAll(matrixReader.getHeader());
+                stream = Stream.concat(stream, matrixReader.getHeader().stream());
             }
         }
-        return Collections.unmodifiableList(new ArrayList<>(setHeader));
+        return stream.map(SimpleCell::getValue)
+                    .distinct()
+                    .map(SimpleCell::new)
+                    .collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
     }
 
     private static String outFileName(List<File> files, File outputDir) {
@@ -126,3 +130,4 @@ public class MergeMatrix {
     }
 
 }
+
