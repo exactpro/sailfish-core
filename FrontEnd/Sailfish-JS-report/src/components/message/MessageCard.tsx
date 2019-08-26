@@ -27,12 +27,14 @@ import { createBemElement } from '../../helpers/styleCreators';
 import { createBemBlock } from '../../helpers/styleCreators';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { selectMessage } from '../../actions/actionCreators';
+import { selectMessage, toggleMessageBeautifier } from '../../actions/actionCreators';
 import { isRejected } from '../../helpers/messageType';
 import SearchableContent from '../search/SearchableContent';
 import { keyForMessage } from '../../helpers/keys';
 import {MessagePredictionIndicator} from "../machinelearning/MlPredictionIndicator";
 import StateSaver from '../util/StateSaver';
+import ErrorBoundary from '../util/ErrorBoundary';
+import BeautifiedContent from '../action/BeautifiedContent';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -51,15 +53,29 @@ export interface MessageCardStateProps {
     isSelected: boolean;
     status: StatusType;
     adminEnabled: Boolean;
+    isContentBeautified: boolean;
 }
 
 export interface MessageCardDispatchProps {
     selectHandler: (status?: StatusType) => any;
+    toggleBeautify: () => void;
 }
 
 export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps, RecoveredProps { }
 
-export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesCount, selectHandler, showRaw, showRawHandler, onExpand }: MessageCardProps) => {
+export const MessageCardBase = ({ 
+        message, 
+        isSelected, 
+        status, 
+        rejectedMessagesCount, 
+        selectHandler, 
+        showRaw, 
+        showRawHandler, 
+        isContentBeautified, 
+        toggleBeautify, 
+        onExpand 
+    }: MessageCardProps) => {
+
     const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
@@ -67,90 +83,98 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
 
     const rootClass = createBemBlock("message-card", status, isSelected ? "selected" : null), 
         showRawClass = createBemElement("mc-show-raw", "icon", showRaw ? "expanded" : "hidden"),
+        beautifyIconClass = createBemElement("mc-beautify", "icon", isContentBeautified ? "plain" : "beautify"),
         // session arrow color, we calculating it for each session from-to pair, based on hash 
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
 
-    // we need to remeasure card's height when 'showRaw' state changed
-    React.useEffect(onExpand, [showRaw]);
+    // we need to remeasure card's height when 'showRaw' or 'isContentBeautified' state changed
+    React.useEffect(onExpand, [showRaw, isContentBeautified]);
 
     return (
-        <div className={rootClass}>
+        <div className={rootClass} data-lb-count={labelsCount}>
             <div className="message-card__labels">
                 {renderMessageTypeLabels(message)}
             </div>
-                <div className="mc-header default" 
-                    data-lb-count={labelsCount}
-                    onClick={() => selectHandler()}>
-                    {
-                        rejectedMessagesCount && message.relatedActions.length == 0 ?
-                            (
-                                <div className="mc-header__info rejected">
-                                    <p>Rejected {rejectedMessagesCount}</p>
-                                </div>
-                            )
-                            : (
-                                <MessageCardActionChips
-                                    message={message} />
-                            )
-                    }
-                    <div className="mc-header__name">
-                        <span>Name</span>
-                    </div>
-                    <div className="mc-header__name-value">
-                        <SearchableContent  
-                            content={msgName}
-                            contentKey={keyForMessage(id, 'msgName')}/>
-                    </div>
-                    <div className="mc-header__timestamp">
-                        <p>{formatTime(timestamp)}</p>
-                    </div>
-                    <div className="mc-header__session">
-                        <span>Session</span>
-                    </div>
-                    <div className="mc-header__from">
-                        <SearchableContent
-                            content={from}
-                            contentKey={keyForMessage(id, 'from')}/>
-                    </div>
-                    {
-                        from && to ?
-                            <div className="mc-header__session-icon"
-                                style={sessionArrowStyle} />
-                            : null
-                    }
-                    <div className="mc-header__to">
-                        <SearchableContent
-                            content={to}
-                            contentKey={keyForMessage(id, 'to')}/>
-                    </div>
-                    <MlUploadButton messageId={message.id}/>
+            <div className="mc-header default" 
+                onClick={() => selectHandler()}>
+                {
+                    rejectedMessagesCount && message.relatedActions.length == 0 ?
+                        (
+                            <div className="mc-header__info rejected">
+                                <p>Rejected {rejectedMessagesCount}</p>
+                            </div>
+                        ) : (
+                            <MessageCardActionChips
+                                message={message} />
+                        )
+                }
+                <div className="mc-header__name">
+                    <span>Name</span>
                 </div>
-                <div className="message-card__body   mc-body">
+                <div className="mc-header__name-value">
+                    <SearchableContent  
+                        content={msgName}
+                        contentKey={keyForMessage(id, 'msgName')}/>
+                </div>
+                <div className="mc-header__timestamp">
+                    <p>{formatTime(timestamp)}</p>
+                </div>
+                <div className="mc-header__session">
+                    <span>Session</span>
+                </div>
+                <div className="mc-header__from">
+                    <SearchableContent
+                        content={from}
+                        contentKey={keyForMessage(id, 'from')}/>
+                </div>
+                {
+                    from && to ?
+                        <div className="mc-header__session-icon"
+                            style={sessionArrowStyle} />
+                        : null
+                }
+                <div className="mc-header__to">
+                    <SearchableContent
+                        content={to}
+                        contentKey={keyForMessage(id, 'to')}/>
+                </div>
+                <MlUploadButton messageId={message.id}/>
+            </div>
+            <div className="message-card__body   mc-body">
+                {
+                    message.content.rejectReason !== null ? (
+                        <div className="mc-body__title">
+                            <p>{rejectedTitle}</p>
+                        </div>
+                    ) : null
+                }
+                <div className="mc-body__human">
+                    <div className="mc-beautify" onClick={() => toggleBeautify()}>
+                        <div className={beautifyIconClass}/>
+                    </div>
                     {
-                        (message.content.rejectReason !== null) ?
-                            (
-                                <div className="mc-body__title">
-                                    <p>{rejectedTitle}</p>
-                                </div>
-                            )
-                            : null
-                    }
-                    <div className="mc-body__human">
-                        <div>
+                        isContentBeautified ? (
+                            <ErrorBoundary
+                                errorMessage="Can't parse message.">
+                                <BeautifiedContent
+                                    content={contentHumanReadable}
+                                    msgId={id}/>
+                            </ErrorBoundary>
+                        ) : (
                             <SearchableContent 
                                 content={contentHumanReadable} 
                                 contentKey={keyForMessage(id, 'contentHumanReadable')}/>
-                            {
-                                (raw && raw !== 'null') ? (
-                                    <div className="mc-show-raw"
-                                        onClick={ () => showRawHandler && showRawHandler(!showRaw)}>
-                                        <div className="mc-show-raw__title">RAW</div>
-                                        <div className={showRawClass} />
-                                    </div>
-                                ) : null
-                            }
-                        </div>
-                    </div>
+                        )
+                    }
+                    {
+                        (raw && raw !== 'null') ? (
+                            <div className="mc-show-raw"
+                                onClick={() => showRawHandler(!showRaw)}>
+                                <div className="mc-show-raw__title">RAW</div>
+                                <div className={showRawClass} />
+                            </div>
+                        ) : null
+                    }
                     {
                         showRaw ?
                             <MessageRaw
@@ -159,6 +183,7 @@ export const MessageCardBase = ({ message, isSelected, status, rejectedMessagesC
                     }
                 </div>
             </div>
+        </div>
     );
 };
 
@@ -211,10 +236,10 @@ export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCar
     <StateSaver
         stateKey={`msg-${props.message.id}`}
         getDefaultState={() => false}>
-        {(showRaw, saveState) => (
+        {(state, saveState) => (
             <MessageCardBase
                 {...props}
-                showRaw={showRaw}
+                showRaw={state}
                 showRawHandler={saveState}/>
         )}
     </StateSaver>
@@ -225,10 +250,12 @@ export const MessageCardContainer = connect(
         isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
         status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null,
         rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null,
-        adminEnabled: state.view.adminMessagesEnabled
+        adminEnabled: state.view.adminMessagesEnabled,
+        isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id)
     }),
     (dispatch, ownProps: MessageCardOwnProps) : MessageCardDispatchProps => ({
-        selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status))
+        selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status)),
+        toggleBeautify: () => dispatch(toggleMessageBeautifier(ownProps.message.id))
     })
 );
 

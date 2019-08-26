@@ -65,6 +65,27 @@ export function viewReducer(state : ViewState = initialViewState, stateAction: S
             }
         }
 
+        case StateActionTypes.TOGGLE_MESSAGE_BEAUTIFIER: {
+            if (state.beautifiedMessages.includes(stateAction.messageId)) {
+                return {
+                    ...state,
+                    beautifiedMessages: state.beautifiedMessages.filter(msgId => msgId !== stateAction.messageId)
+                }
+            }
+
+            return {
+                ...state,
+                beautifiedMessages: [...state.beautifiedMessages, stateAction.messageId]
+            }
+        }
+
+        case StateActionTypes.UGLIFY_ALL_MESSAGES: {
+            return {
+                ...state,
+                beautifiedMessages: initialViewState.beautifiedMessages
+            }
+        }
+
         default: {
             return state
         }

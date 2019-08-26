@@ -14,15 +14,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Panel } from "../../util/Panel";
-import ViewState from '../models/ViewState';
+import * as React from 'react';
+import beautify from '../../helpers/contentBeautifier';
+import { keyForMessage } from '../../helpers/keys';
+import SearchableContent from '../search/SearchableContent';
 
-const initialViewState : ViewState = {
-    isLoading: true,
-    adminMessagesEnabled: new Boolean(false),
-    beautifiedMessages: [],
-    leftPanel: Panel.Actions,
-    rightPanel: Panel.Messages
+interface Props {
+    content: string;
+    msgId: number;
 }
 
-export default initialViewState;
+const BeautifiedContent = ({content, msgId}: Props) => (
+    <pre className="mc-body__beautify-wrapper">
+        <SearchableContent 
+            content={beautify(content)} 
+            contentKey={keyForMessage(msgId, 'contentHumanReadable')}/>
+    </pre>
+)
+
+export default BeautifiedContent;

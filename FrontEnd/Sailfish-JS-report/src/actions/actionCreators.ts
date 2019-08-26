@@ -150,7 +150,7 @@ export const setIsLoading = (isLoading: boolean) => (<const>{
 
 export const saveMlData = (data: PredictionData[]) => (<const>{
     type: StateActionTypes.SAVE_ML_DATA,
-    data: data
+    data
 })
 
 export const togglePredictions = () => (<const>{
@@ -159,5 +159,14 @@ export const togglePredictions = () => (<const>{
 
 export const setSelectedTestCase = (testCaseId: string) => (<const>{
     type: StateActionTypes.SET_SELECTED_TESTCASE,
-    testCaseId: testCaseId
+    testCaseId
+})
+
+export const toggleMessageBeautifier = (messageId: number) => (<const>{
+    type: StateActionTypes.TOGGLE_MESSAGE_BEAUTIFIER,
+    messageId
+})
+
+export const uglifyAllMessages = () => (<const>{
+    type: StateActionTypes.UGLIFY_ALL_MESSAGES
 })
