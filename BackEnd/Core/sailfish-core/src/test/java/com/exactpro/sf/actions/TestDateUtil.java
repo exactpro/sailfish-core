@@ -748,6 +748,23 @@ public class TestDateUtil {
     }
 
     @Test
+    public void testBusinessGetDateWithCustomWeekends() {
+        LocalDateTime currentTime = dateUtil.getDateTime();
+        DayOfWeek dayOfWeek = currentTime.getDayOfWeek();
+        DayOfWeek customWeekend = DayOfWeek.SUNDAY;
+        int toSunday = customWeekend.getValue() - dayOfWeek.getValue();
+        String nearestSundayInFuture = "D+" + toSunday;
+
+
+        LocalDateTime businessDateTime = dateUtil.getBusinessDateTime(nearestSundayInFuture, customWeekend.name());
+        assertEquals(DayOfWeek.MONDAY, businessDateTime.getDayOfWeek());
+
+        String nearestSundayInPast = "D-" + Math.min(dayOfWeek.getValue(), 6);
+        businessDateTime = dateUtil.getBusinessDateTime(nearestSundayInPast, customWeekend.name());
+        assertEquals(DayOfWeek.SATURDAY, businessDateTime.getDayOfWeek());
+    }
+
+    @Test
     public void testCreateAndModifyAndFormat() {
 
         LocalDateTime dateTime = dateUtil.getDateTime("Y=2025:M=2:D=13:h=8:m=24:s=5:ns=111222333");
