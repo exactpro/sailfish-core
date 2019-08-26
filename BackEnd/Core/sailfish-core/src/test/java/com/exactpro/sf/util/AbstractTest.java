@@ -58,6 +58,7 @@ import com.exactpro.sf.scriptrunner.IReportStats;
 import com.exactpro.sf.scriptrunner.IScriptConfig;
 import com.exactpro.sf.scriptrunner.IScriptReport;
 import com.exactpro.sf.scriptrunner.ScriptContext;
+import com.exactpro.sf.scriptrunner.ScriptProgress;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.services.IServiceContext;
@@ -204,6 +205,7 @@ public class AbstractTest {
         IServiceStorage serviceStorage = Mockito.mock(IServiceStorage.class);
         IDataManager dataManager = Mockito.mock(IDataManager.class);
         Logger logger = Mockito.mock(Logger.class);
+        ScriptProgress progress = Mockito.mock(ScriptProgress.class);
 
         Mockito.when(scriptContext.getScriptConfig()).thenReturn(scriptConfig);
         Mockito.when(scriptContext.getReport()).thenReturn(scriptReport);
@@ -212,6 +214,7 @@ public class AbstractTest {
         Mockito.when(scriptContext.getDebugController()).thenReturn(debugController);
         Mockito.when(scriptContext.getDictionaryManager()).thenReturn(dictionaryManager);
         Mockito.when(scriptContext.getDataManager()).thenReturn(dataManager);
+        Mockito.when(scriptContext.getScriptProgress()).thenReturn(progress);
         Mockito.when(environmentManager.getConnectionManager()).thenReturn(connectionManager);
         Mockito.when(environmentManager.getMessageStorage()).thenReturn(messageStorage);
         Mockito.when(environmentManager.getServiceStorage()).thenReturn(serviceStorage);

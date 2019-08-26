@@ -19,21 +19,23 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Streams;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BugCategory implements IJsonReportNode {
 
     private String name;
 
-    @JsonIgnore private Set<BugCategory> subCategories = new HashSet<>();
-    @JsonIgnore private Set<Bug> bugs = new HashSet<>();
+    @JsonIgnore
+    private Set<BugCategory> subCategories = new HashSet<>();
+
+    @JsonIgnore
+    private Set<Bug> bugs = new HashSet<>();
 
     public BugCategory(String name) {
         this.name = name;
@@ -44,20 +46,6 @@ public class BugCategory implements IJsonReportNode {
         this.name = name;
         this.bugs = subNodes.stream().filter(item -> item instanceof Bug).map(item -> (Bug) item).collect(Collectors.toSet());
         this.subCategories = subNodes.stream().filter(item -> item instanceof BugCategory).map(item -> (BugCategory) item).collect(Collectors.toSet());
-    }
-
-    public static BugCategory fromBugDescription(BugDescription... bugs) {
-        return buildTree(bugs);
-    }
-
-    public static BugCategory buildTree(BugDescription... bugs) {
-        return buildTree(KnownBugStatus.NOT_REPRODUCED, bugs);
-    }
-
-    public static BugCategory buildTree(KnownBugStatus status, BugDescription... bugs) {
-        BugCategory root = new BugCategory("root");
-        Arrays.stream(bugs).forEach(bugDescription -> placeBugInATreeRecursive(new ArrayList<>(), root, new Bug(bugDescription, status)));
-        return root;
     }
 
     public void placeBugInTree(Bug bug) {
@@ -107,7 +95,7 @@ public class BugCategory implements IJsonReportNode {
 
     @JsonProperty("subNodes")
     public List<IJsonReportNode> getSubNodes() {
-        return Streams.concat(bugs.stream(), subCategories.stream()).collect(Collectors.toList());
+        return Stream.concat(bugs.stream(), subCategories.stream()).collect(Collectors.toList());
     }
 
     public String getName() {
@@ -120,10 +108,6 @@ public class BugCategory implements IJsonReportNode {
 
     public Collection<BugCategory> getSubCategories() {
         return subCategories;
-    }
-
-    public Collection<Bug> getCurrentNodeBugs() {
-        return bugs;
     }
 
     public Collection<Bug> getAllBugs() {

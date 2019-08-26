@@ -21,28 +21,28 @@ import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class Bug implements IJsonReportNode {
-    @JsonIgnore private final BugDescription description;
-    private KnownBugStatus status;
+    @JsonIgnore
+    private final BugDescription description;
+
+    private final KnownBugStatus status;
+    private final String subject;
 
     @JsonCreator
-    public Bug(@JsonProperty("description") BugDescription description, @JsonProperty("subject") String fake) {
-        this.description = description;
-        this.status = KnownBugStatus.NOT_REPRODUCED;
+    public Bug(@JsonProperty("status") KnownBugStatus status, @JsonProperty("subject") String subject) {
+        this.status = status;
+        this.subject = subject;
+        this.description = null;
     }
 
     public Bug(BugDescription description, KnownBugStatus status) {
         this.description = description;
         this.status = status;
+        this.subject = description.getSubject();
     }
 
-    public Bug markAsReproduced() {
-        this.status = KnownBugStatus.REPRODUCED;
-        return this;
-    }
-
+    @JsonIgnore
     public BugDescription getDescription() {
         return description;
     }
@@ -51,12 +51,7 @@ public class Bug implements IJsonReportNode {
         return status;
     }
 
-    @JsonProperty("subject")
-    public String getBugDescription() {
-        return description.getSubject();
-    }
-
-    public void setStatus(KnownBugStatus status) {
-        this.status = status;
+    public String getSubject() {
+        return subject;
     }
 }

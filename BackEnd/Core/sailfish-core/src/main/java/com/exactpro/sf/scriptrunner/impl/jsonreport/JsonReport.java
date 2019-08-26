@@ -55,7 +55,6 @@ import com.exactpro.sf.scriptrunner.IScriptReport;
 import com.exactpro.sf.scriptrunner.LoggerRow;
 import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.OutcomeCollector;
-import com.exactpro.sf.scriptrunner.ReportEntity;
 import com.exactpro.sf.scriptrunner.ReportUtils;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
@@ -72,6 +71,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.KnownBugStatus;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
@@ -394,8 +394,8 @@ public class JsonReport implements IScriptReport {
             Set<BugDescription> reproduced = result.getReproducedBugs();
             Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
 
-            curNode.addSubNodes(reproduced.stream().map(d -> new Bug(d, "").markAsReproduced()).collect(Collectors.toList()));
-            curNode.addSubNodes(notReproduced.stream().map(it -> new Bug(it, "")).collect(Collectors.toList()));
+            curNode.addSubNodes(reproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.REPRODUCED)).collect(Collectors.toList()));
+            curNode.addSubNodes(notReproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.NOT_REPRODUCED)).collect(Collectors.toList()));
 
             curVerification.setEntries(result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList()));
         }
