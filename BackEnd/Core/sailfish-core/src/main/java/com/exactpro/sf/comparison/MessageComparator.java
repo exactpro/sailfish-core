@@ -341,6 +341,11 @@ public class MessageComparator {
         result.setActual(getValue(actual));
         result.setExpected(getValue(expected));
 
+        if (settings.getIgnoredFields().contains(name)) {
+            //TODO NA status must be set for nested structures
+            return addToResult(actual, result, StatusType.NA, structure, metaContainers, settings, true);
+        }
+
         if(expected instanceof IFilter) {
             IFilter filter = (IFilter)expected;
 

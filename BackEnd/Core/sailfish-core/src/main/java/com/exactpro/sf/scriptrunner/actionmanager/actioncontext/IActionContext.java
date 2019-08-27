@@ -149,6 +149,10 @@ public interface IActionContext {
 
     IActionContext withUncheckedFields(Set<String> uncheckedFields);
 
+    Set<String> getIgnoredFields();
+
+    IActionContext withIgnoredFields(Set<String> ignoredFields);
+
     ClassLoader getPluginClassLoader(String pluginAlias);
 
     default Optional<Object> handleKnownBugException(KnownBugException e, String reference) {

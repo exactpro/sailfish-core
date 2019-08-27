@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.mina.filter.codec.ProtocolCodecException;
+import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -978,6 +980,41 @@ public class TestMessageComparator extends AbstractTest {
 
         Assert.assertEquals(1, ComparisonUtil.getResultCount(result, StatusType.PASSED));
         Assert.assertEquals(0, ComparisonUtil.getResultCount(result, StatusType.FAILED));
+    }
+
+    @Test
+    public void testIgnoredFields() throws Exception {
+        ComparatorSettings settings = new ComparatorSettings().setIgnoredFields(Collections.singleton("filler"));
+
+        IMessage message = new MapMessage("TEST", "TestMessage");
+        IMessage filter = message.cloneMessage();
+
+        message.addField("valid", "a");
+        message.addField("filler", " ");
+
+        filter.addField("valid", "a");
+        filter.addField("filler", "failed");
+
+        ComparisonResult result = MessageComparator.compare(message, filter, settings);
+
+        Assert.assertThat(result.getResult("valid").getStatus(), CoreMatchers.is(StatusType.PASSED));
+        Assert.assertThat(result.getResult("filler").getStatus(), CoreMatchers.is(StatusType.NA));
+
+        message = new MapMessage("TEST", "TestMessage");
+        filter = message.cloneMessage();
+
+        IMessage subMessage = new MapMessage("TEST", "filler");
+        subMessage.addField("a", "a");
+        message.addField("filler", subMessage);
+
+        IMessage filterSubMessage = new MapMessage("TEST", "filler");
+        filterSubMessage.addField("a", "b");
+        filter.addField("filler", filterSubMessage);
+
+        result = MessageComparator.compare(message, filter, settings);
+        Assert.assertThat(result.getResult("filler").getStatus(), CoreMatchers.is(StatusType.NA));
+        result = result.getResult("filler");
+        Assert.assertThat(result.getResult("a").getStatus(), CoreMatchers.is(StatusType.NA));
     }
 
 	private enum FilterType {
