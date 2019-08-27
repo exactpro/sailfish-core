@@ -18,7 +18,10 @@ package com.exactpro.sf.configuration.factory;
 import java.util.Set;
 
 import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
+import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IHumanMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.google.common.collect.ImmutableSet;
 
@@ -55,5 +58,10 @@ public class FixMessageFactory extends AbstractMessageFactory {
     @Override
     public String getProtocol() {
         return FixMessageHelper.PROTOCOL;
+    }
+
+    @Override
+    public IMessage createMessage(long id, String name, String namespace) {
+        return super.createMessage(id, name, namespace);
     }
 }

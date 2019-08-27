@@ -24,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
 // all custom message factories should extend this one
@@ -49,6 +50,15 @@ public abstract class AbstractMessageFactory implements IMessageFactory {
         message.getMetaData().setProtocol(getProtocol());
 
         return message;
+    }
+
+    protected IMessage createMessage(long id, String name, String namespace) {
+        MsgMetaData metaData = new MsgMetaData(namespace, name, id);
+
+        metaData.setDictionaryURI(dictionaryURI);
+        metaData.setProtocol(getProtocol());
+
+        return new MapMessage(metaData);
     }
 
     @Override

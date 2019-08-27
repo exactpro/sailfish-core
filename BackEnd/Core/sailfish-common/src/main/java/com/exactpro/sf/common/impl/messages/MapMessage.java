@@ -51,6 +51,12 @@ public class MapMessage implements IMessage
 	private String namespace;
 	private String name;
 
+	public MapMessage(MsgMetaData metaData) {
+	    this.msgMetaData = metaData;
+	    this.namespace = metaData.getMsgNamespace();
+	    this.name = metaData.getMsgName();
+    }
+
 	@JsonCreator
 	public MapMessage(@JsonProperty("namespace") String namespace, @JsonProperty("name") String name)
 	{

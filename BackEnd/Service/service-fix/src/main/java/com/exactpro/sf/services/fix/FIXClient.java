@@ -47,6 +47,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -396,7 +397,14 @@ public class FIXClient implements IInitiatorService {
         FIXCommonSettings commonSettings = (FIXCommonSettings) serviceSettings;
         IDictionaryManager dictionaryManager = this.serviceContext.getDictionaryManager();
         IDictionaryStructure dictionary = dictionaryManager.getDictionary(dictionaryName);
-        IMessageFactory messageFactory = dictionaryManager.getMessageFactory(dictionaryName);
+
+        IMessageFactory iMessageFactory = dictionaryManager.getMessageFactory(dictionaryName);
+
+        if (!(iMessageFactory instanceof FixMessageFactory)) {
+            throw new ServiceException(String.format("FixClient requires FixMessageFactory, but got '%s' instead", iMessageFactory.getClass().getCanonicalName()));
+        }
+
+        FixMessageFactory messageFactory = (FixMessageFactory) iMessageFactory;
 
         this.dictionaryProvider = new FixDataDictionaryProvider(dictionaryManager, dictionaryName);
         this.converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, !commonSettings.isAllowUnknownMsgFields(),

@@ -18,7 +18,6 @@ package com.exactpro.sf.common.messages;
 import java.util.Arrays;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -26,10 +25,11 @@ import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class MsgMetaData implements Cloneable {
     // unique (during SailFish run time). Mapped to 'StoredId' in StoredMessage
-    private final long id = MessageUtil.generateId();
+    private final long id;
     private final Date msgTimestamp;
     private final String msgNamespace;
     private final String msgName;
@@ -47,15 +47,24 @@ public class MsgMetaData implements Cloneable {
     private String protocol;
 
 	@JsonCreator
-	public MsgMetaData(@JsonProperty("namespace") String namespace, @JsonProperty("name") String name, @JsonProperty("msgTimestamp") Date msgTimestamp) {
+	public MsgMetaData(@JsonProperty("namespace") String namespace, @JsonProperty("name") String name, @JsonProperty("msgTimestamp") Date msgTimestamp, @JsonProperty("id") long id) {
 	    this.msgNamespace = namespace;
 	    this.msgName = name;
 	    this.msgTimestamp = msgTimestamp;
+        this.id = id;
 	}
 
+    public MsgMetaData(String namespace, String name, Date msgTimestamp) {
+        this(namespace, name, msgTimestamp, MessageUtil.generateId());
+    }
+
     public MsgMetaData(String namespace, String name) {
-		this(namespace, name, new Date());
+		this(namespace, name, new Date(), MessageUtil.generateId());
 	}
+
+    public MsgMetaData(String namespace, String name, long id) {
+        this(namespace, name, new Date(), id);
+    }
 
 	public long getId() {
 		return id;
@@ -152,9 +161,11 @@ public class MsgMetaData implements Cloneable {
         this.protocol = protocol;
     }
 
+
+    // FIXME: find all the usages of MsgMetaData.clone() and copy id as well if it doesn't break anything
     @Override
     public MsgMetaData clone() {
-	    MsgMetaData metaData = new MsgMetaData(msgNamespace, msgName, msgTimestamp);
+	    MsgMetaData metaData = new MsgMetaData(msgNamespace, msgName, msgTimestamp, MessageUtil.generateId());
 
         metaData.setAdmin(isAdmin);
         metaData.setRejected(isRejected);
