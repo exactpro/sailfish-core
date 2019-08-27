@@ -89,7 +89,8 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
 		INT8("Int8"),
 		INT16("Int16"),
 		INT32("Int32"),
-		INT64("Int64");
+		INT64("Int64"),
+        UINTXX("UIntXX");
 
 		ProtocolType(String type) {
 		}
@@ -136,6 +137,8 @@ public class ITCHVisitorBase extends DefaultMessageStructureVisitor {
 				return INT32;
 			case "Int64":
 				return INT64;
+            case "UIntXX":
+                return UINTXX;
 			default:
 				throw new EPSCommonException("Unknown type = [" + type + "]");
 			}

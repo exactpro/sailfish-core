@@ -28,7 +28,11 @@ import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -292,7 +296,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		}
 	}
 
-	@Override
+    @Override
 	public void visit(String fieldName, BigDecimal value, IFieldStructure fldStruct, boolean isDefault) {
         ProtocolType type = ProtocolType.getEnum(getAttributeValue(fldStruct, TYPE_ATTRIBUTE));
 		logger.trace("Visit fieldname = [{}]; fieldType [{}]", fieldName, type);
@@ -378,13 +382,20 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 			msg.addField(fieldName, valBD.divide(BD_PRICE_DEVIDER));
 		} else if (type == ProtocolType.UDT) {
-			byte[] longArray = new byte[length];
+            byte[] longArray = new byte[length];
 
-			buffer.get(longArray);
+            buffer.get(longArray);
 
-			BigDecimal pvalue = new BigDecimal(ByteBuffer.wrap(longArray).order(byteOrder).getLong());
-			msg.addField(fieldName, pvalue.divide(BD_UDT_DEVIDER));
-		} else {
+            BigDecimal pvalue = new BigDecimal(ByteBuffer.wrap(longArray).order(byteOrder).getLong());
+            msg.addField(fieldName, pvalue.divide(BD_UDT_DEVIDER));
+        } else if (type == ProtocolType.UINTXX) {
+            byte[] parts = new byte[length];
+            buffer.get(parts);
+            if (buffer.equals(ByteOrder.LITTLE_ENDIAN)) {
+                reverseBytes(parts);
+            }
+            msg.addField(fieldName, new BigDecimal(new BigInteger(1, parts)));
+        } else {
 			throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
 		}
 
