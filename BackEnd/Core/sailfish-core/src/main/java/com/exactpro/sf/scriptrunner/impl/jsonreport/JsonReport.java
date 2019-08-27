@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -309,6 +310,7 @@ public class JsonReport implements IScriptReport {
         curAction.setOutcome(outcome);
         if (parameters != null) {
             curAction.setParameters(Parameter.fromMessage(parameters));
+            curAction.getRelatedMessages().add(parameters.getMetaData().getId());
         }
         setContext(ContextType.ACTION, curAction);
         isActionCreated.incrementAndGet();
@@ -441,6 +443,7 @@ public class JsonReport implements IScriptReport {
 
         if (message != null) {
             ((Action) getCurrentContextNode()).setParameters(Parameter.fromMessage(message));
+            ((Action) getCurrentContextNode()).getRelatedMessages().add(message.getMetaData().getId());
         }
     }
 

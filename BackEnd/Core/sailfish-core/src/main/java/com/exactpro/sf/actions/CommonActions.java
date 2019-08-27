@@ -116,6 +116,8 @@ public class CommonActions extends AbstractCaller {
 
         actionContext.storeMessage(checkpointMsg);
 
+        actionContext.getReport().createParametersTable(checkpointMsg);
+
 		CheckPoint checkPoint = new CheckPoint(actionContext.getReference().startsWith("!"), checkpointMsg.getMetaData().getId());
 		for (IService client : clients)
 		{

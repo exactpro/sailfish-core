@@ -51,6 +51,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -229,6 +230,11 @@ public class NewImpl {
 		String messageType = (action.getMessageTypeColumn() == null) ? "" : " "+action.getMessageTypeColumn();
         String description = "null";
 
+        if (inputVariable != null) {
+            sb.append(MessageFormat.format(TAB2 + "{0} = ({1})stripFilter({0});" + EOL, inputVariable.getName(), inputType));
+        }
+
+
 		if (action.isAddToReport())
 		{
             description = getMvelString(tc, action, action.getDescrption(), Column.Description, alertCollector, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
@@ -285,12 +291,13 @@ public class NewImpl {
         String mainCallArgs = format("%s.parse(\"%s\"), %s", SailfishURI.class.getSimpleName(), actionInfo.getURI(), settings.getName());
         Variable outputVariable = null;
 
+
 		if (returnType != void.class) {
             outputVariable = getVariable(returnType, MESSAGE_PREFIX + returnType.getSimpleName());
 			if (inputType != null)
 			{
 				sb.append(TAB2 + outputVariable.getName() + " = " +
-						CodeGenerator_new.ACTION_MANAGER_CALL + "(" + mainCallArgs + ", (" + inputType +")stripFilter(" + inputVariable.getName() + "));"+EOL);
+						CodeGenerator_new.ACTION_MANAGER_CALL + "(" + mainCallArgs + ", " + inputVariable.getName() + ");" + EOL);
 			}
 			else {
 				sb.append(TAB2 + outputVariable.getName() + " = " +
@@ -301,7 +308,7 @@ public class NewImpl {
 			if (inputType != null)
 			{
 				sb.append(TAB2 +
-				        CodeGenerator_new.ACTION_MANAGER_CALL + "(" + mainCallArgs + ", (" + inputType +")stripFilter(" + inputVariable.getName() + "));"+EOL);
+				        CodeGenerator_new.ACTION_MANAGER_CALL + "(" + mainCallArgs +  ", " + inputVariable.getName() + ");" + EOL);
 			}
 			else
 			{
