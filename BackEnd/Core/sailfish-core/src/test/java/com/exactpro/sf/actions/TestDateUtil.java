@@ -15,7 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
-import static org.junit.Assert.assertEquals;
+import com.exactpro.sf.actions.data.DateComponent;
+import com.exactpro.sf.util.DateTimeUtility;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -41,14 +47,7 @@ import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import com.exactpro.sf.actions.data.DateComponent;
-import com.exactpro.sf.util.DateTimeUtility;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author alexey.suknatov
@@ -248,24 +247,24 @@ public class TestDateUtil {
 
     @Test
     public void testFormatTimeByZoneId() {
-        String resultTime = "19700101-14:05:23.000";
+        String resultTime = "19700101-15:05:23.000";
 
         LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
         LocalDateTime localDateTime2 = LocalDateTime.of(2019, 4, 1, 14, 5, 23, 0);
         LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
         LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0);
 
-        Assert.assertTrue(resultTime.equals(dateUtil.formatTimeByZoneId(localDateTime1.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(resultTime.equals(dateUtil.formatTimeByZoneId(localDateTime2.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(resultTime.equals(dateUtil.formatTimeByZoneId(localDateTime3.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(resultTime.equals(dateUtil.formatTimeByZoneId(localDateTime4.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
+        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime1.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime2.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime3.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        Assert.assertEquals(resultTime, dateUtil.formatTimeByZoneId(localDateTime4.toLocalTime(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
     }
 
     @Test
     public void testFormatDateByZoneId() {
         String resultTime1 = "20190311-00:00:00.000";
-        String resultTime2 = "20190401-00:00:00.000";
-        String resultTime3 = "20191026-00:00:00.000";
+        String resultTime2 = "20190401-01:00:00.000";
+        String resultTime3 = "20191026-01:00:00.000";
         String resultTime4 = "20191028-00:00:00.000";
 
         LocalDateTime localDateTime1 = LocalDateTime.of(2019, 3, 11, 14, 5, 23, 0);
@@ -273,10 +272,10 @@ public class TestDateUtil {
         LocalDateTime localDateTime3 = LocalDateTime.of(2019, 10, 26, 14, 5, 23, 0);
         LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 28, 14, 5, 23, 0);
 
-        Assert.assertTrue(resultTime1.equals(dateUtil.formatDateByZoneId(localDateTime1.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(resultTime2.equals(dateUtil.formatDateByZoneId(localDateTime2.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(resultTime3.equals(dateUtil.formatDateByZoneId(localDateTime3.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
-        Assert.assertTrue(resultTime4.equals(dateUtil.formatDateByZoneId(localDateTime4.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London")));
+        Assert.assertEquals(resultTime1, dateUtil.formatDateByZoneId(localDateTime1.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        Assert.assertEquals(resultTime2, dateUtil.formatDateByZoneId(localDateTime2.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        Assert.assertEquals(resultTime3, dateUtil.formatDateByZoneId(localDateTime3.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
+        Assert.assertEquals(resultTime4, dateUtil.formatDateByZoneId(localDateTime4.toLocalDate(), "yyyyMMdd-HH:mm:ss.SSS", "Y+0:M+0:D+0:h+0:m+0:s+0:ns+0", "Europe/London"));
     }
 
     @Test
@@ -287,8 +286,8 @@ public class TestDateUtil {
         LocalDateTime localDateTime4 = LocalDateTime.of(2019, 10, 27, 14, 5, 23, 0); // end of summer time | 2019-10-27T14:05:23 2019-10-27T14:05:23Z[Europe/London] 2019-10-27T14:05:23+03:00[Europe/Moscow]
 
         Assert.assertEquals("20190311-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime1, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
-        Assert.assertEquals("20190331-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime2, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
-        Assert.assertEquals("20191026-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime3, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
+        Assert.assertEquals("20190331-15:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime2, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
+        Assert.assertEquals("20191026-15:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime3, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
         Assert.assertEquals("20191027-14:05:23.000", dateUtil.formatDateTimeByZoneId(localDateTime4, "yyyyMMdd-HH:mm:ss.SSS", "h+0", "Europe/London"));
     }
 
