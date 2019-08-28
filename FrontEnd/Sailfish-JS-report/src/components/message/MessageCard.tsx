@@ -117,7 +117,7 @@ export const MessageCardBase = ({
                         contentKey={keyForMessage(id, 'msgName')}/>
                 </div>
                 <div className="mc-header__timestamp">
-                    <p>{formatTime(timestamp)}</p>
+                    <p>{timestamp}</p>
                 </div>
                 <div className="mc-header__session">
                     <span>Session</span>
