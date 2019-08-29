@@ -119,16 +119,27 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
-        case StateActionTypes.SELECT_CHECKPOINT: {
-
-            const checkpointMessageId = stateAction.checkpointAction.relatedMessages[0] || null;
+        case StateActionTypes.SELECT_CHECKPOINT_ACTION: {
+            const { relatedMessages, id } = stateAction.action;
 
             return {
                 ...state,
-                checkpointMessageId: checkpointMessageId,
-                scrolledMessageId: new Number(checkpointMessageId),
-                checkpointActionId: stateAction.checkpointAction.id,
-                scrolledActionId: new Number(stateAction.checkpointAction.id)
+                checkpointMessageId: relatedMessages[0] || null,
+                scrolledMessageId: relatedMessages[0] != null ? new Number(relatedMessages[0]) : null,
+                checkpointActionId: id,
+                scrolledActionId: new Number(stateAction.action.id)
+            }
+        }
+
+        case StateActionTypes.SELECT_CHECKPOINT_MESSAGE: {
+            const { relatedActions, id } = stateAction.message;
+
+            return {
+                ...state,
+                checkpointMessageId: id,
+                scrolledMessageId: new Number(id),
+                checkpointActionId: relatedActions[0] || null,
+                scrolledActionId: relatedActions[0] != null ? new Number(relatedActions[0]) : null
             }
         }
 

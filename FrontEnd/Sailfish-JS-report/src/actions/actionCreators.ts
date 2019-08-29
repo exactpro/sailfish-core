@@ -61,9 +61,14 @@ export const selectVerification = (messageId: number, rootActionId: number = nul
     rootActionId
 })
 
-export const selectCheckpoint = (checkpointAction: Action) => (<const>{
-    type: StateActionTypes.SELECT_CHECKPOINT,
-    checkpointAction
+export const selectCheckpointAction = (action: Action) => (<const>{
+    type: StateActionTypes.SELECT_CHECKPOINT_ACTION,
+    action
+})
+
+export const selectCheckpointMessage = (message: Message) => (<const>{
+    type: StateActionTypes.SELECT_CHECKPOINT_MESSAGE,
+    message
 })
 
 export const selectRejectedMessageId = (messageId: number) => (<const>{
