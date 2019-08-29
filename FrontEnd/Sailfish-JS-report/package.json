@@ -5,9 +5,9 @@
   "main": "intex.tsx",
   "private": true,
   "scripts": {
-    "build": "NODE_ENV=production webpack --config webpack.config.js",
-    "dev-build": "NODE_ENV=development webpack --config webpack.config.js --watch",
-    "start": "NODE_ENV=development webpack-dev-server --config webpack.config.js -d --history-api-fallback",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "dev-build": "cross-env NODE_ENV=development webpack --config webpack.config.js --watch",
+    "start": "cross-env NODE_ENV=development webpack-dev-server --config webpack.config.js -d --history-api-fallback",
     "test": "jest"
   },
   "author": "vladislav.kotelnikov",
@@ -21,6 +21,7 @@
     "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
+    "cross-env": "^5.2.0",
     "@types/enzyme": "^3.10.3",
     "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jest": "^24.0.18",
@@ -49,7 +50,7 @@
     "style-loader": "^1.0.0",
     "terser": "^4.2.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.5.3",
+    "typescript": "~3.5.3",
     "webpack": "^4.39.2",
     "webpack-cli": "^3.3.7",
     "webpack-dev-server": "^3.8.0"
