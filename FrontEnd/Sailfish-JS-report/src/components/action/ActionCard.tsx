@@ -20,7 +20,7 @@ import ParamsTable from './ParamsTable';
 import { RecoverableExpandablePanel, ExpandablePanel } from "../ExpandablePanel";
 import "../../styles/action.scss";
 import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";
-import { ExceptionChain } from "../ExceptionChain";
+import { RecoverableExceptionChain } from "../ExceptionChain";
 import { Chip } from "../Chip";
 import { createSelector } from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
@@ -68,7 +68,6 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
         "ac-body__input-params",
         isTransaparent && !isSelected ? "transparent" : null
     );
-
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
@@ -152,13 +151,16 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         children
                     }
                     {
-                        action.status.status == StatusType.FAILED ? (
+                        action.status.status == StatusType.FAILED && action.status.cause != null ? (
                             <div className="action-card-status">
                                 <RecoverableExpandablePanel
                                     stateKey={keyForAction(id, 'status')}
                                     onExpand={onExpand}>
                                     <div className="ac-body__item-title">Status</div>
-                                    <ExceptionChain exception={action.status.cause} />
+                                    <RecoverableExceptionChain 
+                                        exception={action.status.cause}
+                                        stateKey={`${keyForAction(id, 'status')}-exception`}
+                                        onExpand={onExpand}/>
                                 </RecoverableExpandablePanel>
                             </div>
                         ) : null

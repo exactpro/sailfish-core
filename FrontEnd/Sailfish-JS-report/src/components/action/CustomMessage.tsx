@@ -17,12 +17,12 @@
 import * as React from 'react';
 import UserMessage, { isUserMessage } from '../../models/UserMessage';
 import { RecoverableExpandablePanel } from './../ExpandablePanel';
-import ExceptionCard from './../ExceptionCard';
 import { createSelector } from '../../helpers/styleCreators';
 import '../../styles/action.scss';
 import Action, { ActionNodeType } from '../../models/Action';
 import { FontWeightProperty } from 'csstype';
 import { keyForUserMessage } from '../../helpers/keys';
+import { ExceptionChain } from '../ExceptionChain';
 
 interface CustomMessageProps {
     userMessage: UserMessage;
@@ -55,7 +55,7 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
                 <div className={rootClass}>
                     <div className="ac-body__item-title" style={messageStyle}>{message}</div>
                 </div>
-                <ExceptionCard
+                <ExceptionChain
                     exception={exception}/>
             </RecoverableExpandablePanel>
         )
