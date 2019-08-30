@@ -83,6 +83,11 @@ public class MLWorker {
      */
     public List<PredictionResultEntry> processReport(Integer testCaseId, InputStream streamOfZip) {
 
+        if (predictor == null) {
+            logger.error("Predictor is not available. Make sure that ML extension is installed.");
+            throw new PredictorNotAvailableException();
+        }
+
         Path tmpDir = null;
 
         try {
