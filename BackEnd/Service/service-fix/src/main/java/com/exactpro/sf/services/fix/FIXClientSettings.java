@@ -19,13 +19,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
-import com.exactpro.sf.aml.EnumeratedValues;
 import com.exactpro.sf.aml.Description;
-import com.exactpro.sf.aml.InputMask;
 import com.exactpro.sf.configuration.netdumper.NetDumperListenHost;
 import com.exactpro.sf.configuration.netdumper.NetDumperListenPort;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.services.AbstractServiceSettings;
 import com.exactpro.sf.services.RequiredParam;
 
 @XmlRootElement
@@ -127,6 +123,9 @@ public class FIXClientSettings extends FIXCommonSettings {
 	        + "\t * if lower than expected SeqNum , logout\n"
 	        + "\t * if higher, send a resend request")
 	private boolean validateSequenceNumbers = true;
+
+	@Description("Response To Resend Request By Heartbeats")
+	private boolean fakeResendRequest = true;
 
     @Override
 	public void load(HierarchicalConfiguration config)
@@ -351,4 +350,12 @@ public class FIXClientSettings extends FIXCommonSettings {
     public void setValidateSequenceNumbers(boolean validateSequenceNumbers) {
         this.validateSequenceNumbers = validateSequenceNumbers;
     }
+
+    public boolean getFakeResendRequest(){
+    	return fakeResendRequest;
+	}
+
+	public void setFakeResendRequest(boolean fakeResendRequest){
+    	this.fakeResendRequest = fakeResendRequest;
+	}
 }
