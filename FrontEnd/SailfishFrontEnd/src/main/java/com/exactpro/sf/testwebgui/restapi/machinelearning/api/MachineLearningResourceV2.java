@@ -16,12 +16,7 @@
 
 package com.exactpro.sf.testwebgui.restapi.machinelearning.api;
 
-import com.exactpro.sf.testwebgui.BeanUtil;
-import com.exactpro.sf.testwebgui.restapi.machinelearning.SessionStorage;
-import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMLResponse;
-import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMessageDescriptor;
-import com.exactpro.sf.testwebgui.restapi.machinelearning.model.TokenWrapperResponse;
-import org.apache.commons.codec.digest.DigestUtils;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -39,54 +34,73 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import java.util.List;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.testwebgui.BeanUtil;
+import com.exactpro.sf.testwebgui.restapi.machinelearning.SessionStorage;
+import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMLResponse;
+import com.exactpro.sf.testwebgui.restapi.machinelearning.model.ReportMessageDescriptor;
+import com.exactpro.sf.testwebgui.restapi.machinelearning.model.TokenWrapperResponse;
 
 @Path("machinelearning/v2")
 public class MachineLearningResourceV2 {
+    private static final Logger logger = LoggerFactory.getLogger(MachineLearningResourceV2.class);
 
-    @Context private HttpServletRequest httpRequest;
+    @Context
+    private HttpServletRequest httpRequest;
 
     @GET
     @Path("/init")
     @Produces(MediaType.APPLICATION_JSON)
     public Response initGet(@QueryParam("reportLink") @NotNull String reportLink) {
+        try {
+            HttpSession session = httpRequest.getSession();
+            String sessionKey = DigestUtils.md5Hex(reportLink);
 
-        HttpSession session = httpRequest.getSession();
-        String sessionKey = DigestUtils.md5Hex(reportLink);
+            SessionStorage sessionStorage;
 
-        SessionStorage sessionStorage;
+            if (session.getAttribute(sessionKey) == null) {
+                sessionStorage = new SessionStorage(reportLink, BeanUtil.getMLPersistenceManager());
+                session.setAttribute(sessionKey, sessionStorage);
+            } else {
+                sessionStorage = (SessionStorage)session.getAttribute(sessionKey);
+            }
 
-        if (session.getAttribute(sessionKey) == null) {
-            sessionStorage = new SessionStorage(reportLink, BeanUtil.getMLPersistenceManager());
-            session.setAttribute(sessionKey, sessionStorage);
-        } else {
-            sessionStorage = (SessionStorage) session.getAttribute(sessionKey);
+            TokenWrapperResponse initResponse = new TokenWrapperResponse();
+            initResponse.setToken(DigestUtils.md5Hex(reportLink));
+            initResponse.setActive(sessionStorage.getCheckedMessages());
+
+            return Response.ok().entity(initResponse).build();
+        } catch (Exception ex) {
+            logger.error("unable to initialize ml session", ex);
+            return Response.serverError().entity("server error: " + ex.toString()).build();
         }
-
-        TokenWrapperResponse initResponse = new TokenWrapperResponse();
-        initResponse.setToken(DigestUtils.md5Hex(reportLink));
-        initResponse.setActive(sessionStorage.getCheckedMessages());
-
-        return Response.ok().entity(initResponse).build();
     }
 
     @DELETE
     @Path("/{token}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response tokenDelete(@PathParam("token") String token, @Valid List<ReportMessageDescriptor> body) {
+        try {
+            HttpSession session = httpRequest.getSession();
+            String sessionKey = token;
 
-        HttpSession session = httpRequest.getSession();
-        String sessionKey = token;
+            SessionStorage sessionStorage = (SessionStorage)session.getAttribute(sessionKey);
 
-        SessionStorage sessionStorage = (SessionStorage) session.getAttribute(sessionKey);
+            if (sessionStorage == null) {
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
 
-        if (sessionStorage == null) {
-            return Response.status(Status.UNAUTHORIZED).build();
+            body.forEach(descriptor -> sessionStorage.removeUserMark((int)descriptor.getActionId(), (int)descriptor.getMessageId()));
+
+            return Response.ok().build();
+        } catch (Exception ex) {
+            logger.error("unable to remove ml data", ex);
+            return Response.serverError().entity("server error: " + ex.toString()).build();
         }
-
-        body.forEach( descriptor -> sessionStorage.removeUserMark((int)descriptor.getActionId(), (int)descriptor.getMessageId()));
-
-        return Response.ok().build();
     }
 
     @GET
@@ -94,22 +108,26 @@ public class MachineLearningResourceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response tokenGet(@QueryParam("testCaseId") Integer testCaseId, @PathParam("token") String token) {
+        try {
+            HttpSession session = httpRequest.getSession();
+            String sessionKey = token;
 
-        HttpSession session = httpRequest.getSession();
-        String sessionKey = token;
+            SessionStorage sessionStorage = (SessionStorage)session.getAttribute(sessionKey);
 
-        SessionStorage sessionStorage = (SessionStorage) session.getAttribute(sessionKey);
+            if (sessionStorage == null) {
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
 
-        if (sessionStorage == null) {
-            return Response.status(Status.UNAUTHORIZED).build();
+            ReportMLResponse response = new ReportMLResponse();
+            response.setPredictions(sessionStorage.getPredictions(testCaseId));
+            response.setUserMarks(sessionStorage.getCheckedMessages());
+            response.setToken(token);
+
+            return Response.ok().entity(response).build();
+        } catch (Exception ex) {
+            logger.error("unable to generate a response with ml data", ex);
+            return Response.serverError().entity("server error: " + ex.toString()).build();
         }
-
-        ReportMLResponse response = new ReportMLResponse();
-        response.setPredictions(sessionStorage.getPredictions(testCaseId));
-        response.setUserMarks(sessionStorage.getCheckedMessages());
-        response.setToken(token);
-
-        return Response.ok().entity(response).build();
     }
 
     @PUT
@@ -117,19 +135,23 @@ public class MachineLearningResourceV2 {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response tokenPut(@PathParam("token") String token, @Valid List<ReportMessageDescriptor> body) {
+        try {
+            HttpSession session = httpRequest.getSession();
+            String sessionKey = token;
 
-        HttpSession session = httpRequest.getSession();
-        String sessionKey = token;
+            SessionStorage sessionStorage = (SessionStorage)session.getAttribute(sessionKey);
 
-        SessionStorage sessionStorage = (SessionStorage) session.getAttribute(sessionKey);
+            if (sessionStorage == null) {
+                return Response.status(Status.UNAUTHORIZED).build();
+            }
 
-        if (sessionStorage == null) {
-            return Response.status(Status.UNAUTHORIZED).build();
+            sessionStorage.addUserMark(body);
+
+            return Response.ok().build();
+        } catch (Exception ex) {
+            logger.error("unable to process ml data", ex);
+            return Response.serverError().entity("server error: " + ex.toString()).build();
         }
-
-        sessionStorage.addUserMark(body);
-
-        return Response.ok().build();
     }
 
 }
