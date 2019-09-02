@@ -24,16 +24,16 @@ import {MessagesCardList, MessagesCardListBase} from './message/MessagesCardList
 import {LogsPane} from './LogsPane';
 import AppState from '../state/models/AppState';
 import {isAdmin, isRejected} from '../helpers/messageType';
-import {selectRejectedMessageId, setAdminMsgEnabled, setRightPane, togglePredictions} from '../actions/actionCreators';
+import {selectRejectedMessageId, setAdminMsgEnabled, setRightPane, togglePredictions, uglifyAllMessages} from '../actions/actionCreators';
 import {nextCyclicItemByIndex, prevCyclicItemByIndex} from '../helpers/array';
 import {createSelector, createTriStateControlClassName} from '../helpers/styleCreators';
 import {AutoSizer} from 'react-virtualized';
-import Action, {isAction} from "../models/Action";
+import {isAction} from "../models/Action";
 import {KnownBugPanel} from "./knownbugs/KnownBugPanel";
 import { StatusType } from '../models/Status';
 
-const MIN_CONTROLS_WIDTH = 800,
-    MIN_CONTROLS_WIDTH_WITH_REJECTED = 850;
+const MIN_CONTROLS_WIDTH = 850,
+    MIN_CONTROLS_WIDTH_WITH_REJECTED = 900;
 
 interface RightPanelStateProps {
     panel: Panel;
@@ -44,6 +44,7 @@ interface RightPanelStateProps {
     predictionsEnabled: boolean;
     predictionsAvailable: boolean;
     hasKnownBugs: boolean;
+    beautifiedMessagesEnabled: boolean;
 }
 
 interface RightPanelDispatchProps {
@@ -51,6 +52,7 @@ interface RightPanelDispatchProps {
     selectRejectedMessageHandler: (messageId: number) => any;
     adminEnabledHandler: (adminEnabled: boolean) => any;
     togglePredictions: () => any;
+    uglifyAllHandler: () => any;
 }
 
 interface RightPanelProps extends RightPanelStateProps, RightPanelDispatchProps { }
@@ -73,7 +75,8 @@ class RightPanelBase extends React.Component<RightPanelProps> {
     }
 
     render() {
-        const { panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler } = this.props;
+        const { panel, rejectedMessages, adminMessages, selectedRejectedMessageId, adminMessagesEnabled, adminEnabledHandler, 
+            predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler } = this.props;
 
         const currentRejectedIndex = rejectedMessages.findIndex(msg => msg.id === selectedRejectedMessageId),
             rejectedEnabled = rejectedMessages.length != 0,
@@ -87,9 +90,9 @@ class RightPanelBase extends React.Component<RightPanelProps> {
             rejectedIconClass = createTriStateControlClassName("layout-control__icon rejected", true, rejectedEnabled),
             rejectedTitleClass = createTriStateControlClassName("layout-control__title", true, rejectedEnabled),
 
-            predictionRootClass = createTriStateControlClassName("layout-control", this.props.predictionsEnabled, this.props.predictionsAvailable),
-            predictionIconClass = createTriStateControlClassName("layout-control__icon prediction", this.props.predictionsEnabled, this.props.predictionsAvailable),
-            predictionTitleClass = createTriStateControlClassName("layout-control__title selectable", this.props.predictionsEnabled, this.props.predictionsAvailable);
+            predictionRootClass = createTriStateControlClassName("layout-control", predictionsEnabled, predictionsAvailable),
+            predictionIconClass = createTriStateControlClassName("layout-control__icon prediction", predictionsEnabled, predictionsAvailable),
+            predictionTitleClass = createTriStateControlClassName("layout-control__title selectable", predictionsEnabled, predictionsAvailable);
 
 
         return (
@@ -116,6 +119,15 @@ class RightPanelBase extends React.Component<RightPanelProps> {
                                         onClick={() => this.selectPanel(Panel.KnownBugs)}
                                         text="Known bugs"/>
                                 </div>
+                                {
+                                    beautifiedMessagesEnabled ? (
+                                        <div className="layout-control"
+                                            title="Back to plain text"
+                                            onClick={() => uglifyAllHandler()}>
+                                            <div className="layout-control__icon beautifier"/>
+                                        </div>
+                                    ) : null
+                                }
                                 <div className={adminRootClass}
                                     onClick={adminControlEnabled ? (() => adminEnabledHandler(!adminMessagesEnabled)) : undefined}
                                     title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
@@ -244,6 +256,7 @@ export const RightPanel = connect(
         adminMessagesEnabled: state.view.adminMessagesEnabled.valueOf(),
         selectedRejectedMessageId: state.selected.rejectedMessageId,
         panel: state.view.rightPanel,
+        beautifiedMessagesEnabled: state.view.beautifiedMessages.length > 0,
 
         predictionsAvailable:
             state.machineLearning.token != null
@@ -259,7 +272,7 @@ export const RightPanel = connect(
         panelSelectHandler: (panel: Panel) => dispatch(setRightPane(panel)),
         selectRejectedMessageHandler: (messageId: number) => dispatch(selectRejectedMessageId(messageId)),
         adminEnabledHandler: (adminEnabled: boolean) => dispatch(setAdminMsgEnabled(adminEnabled)),
-        togglePredictions: () => dispatch(togglePredictions())
-
+        togglePredictions: () => dispatch(togglePredictions()),
+        uglifyAllHandler: () => dispatch(uglifyAllMessages())
     })
 )(RightPanelBase);

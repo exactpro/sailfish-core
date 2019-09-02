@@ -20,9 +20,9 @@ import ViewState from '../models/ViewState';
 const initialViewState : ViewState = {
     isLoading: true,
     adminMessagesEnabled: new Boolean(false),
+    beautifiedMessages: [],
     leftPanel: Panel.Actions,
-    rightPanel: Panel.Messages,
-    splitMode: false 
+    rightPanel: Panel.Messages
 }
 
 export default initialViewState;

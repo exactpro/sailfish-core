@@ -22,7 +22,7 @@ import Message from "../models/Message";
 import AppState from '../state/models/AppState';
 import { isCheckpoint } from "../helpers/messageType";
 import Action from '../models/Action';
-import { selectCheckpoint } from '../actions/actionCreators';
+import { selectCheckpointAction, selectCheckpointMessage } from '../actions/actionCreators';
 
 interface CheckpointMessageOwnProps {
     message: Message;
@@ -70,7 +70,9 @@ export const CheckpointMessage = connect(
         count : state.selected.testCase.messages.filter(isCheckpoint).indexOf(ownProps.message) + 1,
         description : ownProps.message.content["message"] ? ownProps.message.content["message"]["Description"] : ""
     }), 
-    dispatch => ({})
+    (dispatch, ownProps: CheckpointMessageOwnProps): CheckpointDispatchProps => ({
+        clickHandler: () => dispatch(selectCheckpointMessage(ownProps.message))
+    })
 )(Checkpoint);
 
 export const CheckpointAction = connect(
@@ -80,6 +82,6 @@ export const CheckpointAction = connect(
         count: state.selected.checkpointActions.indexOf(ownProps.action) + 1
     }),
     (dispatch, ownProps: CheckpointActionOwnProps): CheckpointDispatchProps => ({
-        clickHandler: () => dispatch(selectCheckpoint(ownProps.action))
+        clickHandler: () => dispatch(selectCheckpointAction(ownProps.action))
     })
 )(Checkpoint);

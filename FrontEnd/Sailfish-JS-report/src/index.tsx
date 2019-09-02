@@ -17,12 +17,15 @@
 import *  as React from 'react';
 import * as ReactDOM from 'react-dom';
 import App from "./components/App";
+import ErrorBoundary from './components/util/ErrorBoundary';
 import { Provider } from 'react-redux';
 import { createAppStore } from './store/store';
 
 ReactDOM.render(
     <Provider store={createAppStore()}>
-        <App/>
+        <ErrorBoundary>
+            <App/>
+        </ErrorBoundary>
     </Provider>, 
     document.getElementById("index")
 );

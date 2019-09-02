@@ -14,10 +14,31 @@
  * limitations under the License.
  ******************************************************************************/
 
-export default interface Exception {
-    actionNodeType: string;
-    message: string;
-    cause?: Exception;
-    stacktrace?: string;
-    class?: string;
-}
+import { replaceNonPrintableChars } from "../../helpers/stringUtils";
+
+const MIDDLE_DOT = '\u00b7',
+    WHITE_SQUARE = '\u25a1';
+
+describe('[Helpers] stringUtil tests', () => {
+
+    test('replaceNonPrintableChars() with spaces', () => {
+        const str = '  test  ';
+
+        const result = replaceNonPrintableChars(str);
+
+        const excpectedResult = `${MIDDLE_DOT.repeat(2)}test${MIDDLE_DOT.repeat(2)}`;
+
+        expect(result).toBe(excpectedResult);
+    })
+    
+    test('replaceNonPrintableChars() with unprintable chars', () => {
+        const str = '\uFEFF';
+
+        const result = replaceNonPrintableChars(str);
+
+        const expectedResult = `${WHITE_SQUARE}`;
+
+        expect(result).toBe(expectedResult);
+    })
+    
+})

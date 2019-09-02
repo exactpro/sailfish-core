@@ -110,7 +110,7 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
                             onScroll={this.listOnScroll}
                             scrollToAlignment="center"
                             ref={this.list}
-                            style={{ overflowX: "visible", overflowY: "visible", paddingRight: 15 }}/>
+                            style={{ overflowX: "visible", overflowY: "visible", paddingRight: 18 }}/>
                     </HeatmapScrollbar>
                 )}
             </AutoSizer>

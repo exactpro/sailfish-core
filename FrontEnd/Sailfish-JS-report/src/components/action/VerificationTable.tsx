@@ -25,6 +25,8 @@ import StateSaver, { RecoverableElementProps } from "./../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
 import { getVerificationExpandPath } from '../../helpers/search/getExpandPath';
 import SearchResult from '../../helpers/search/SearchResult';
+import { replaceNonPrintableChars } from '../../helpers/stringUtils';
+import { copyTextToClipboard } from '../../helpers/copyHandler';
 
 const PADDING_LEVEL_VALUE = 15;
 
@@ -184,23 +186,29 @@ class VerificationTableBase extends React.Component<Props, State> {
     }
 
     private renderValueNode({ name, expected, actual, status }: TableNode, fieldsFilter: StatusType[], paddingLevel: number, key: string): React.ReactNode {
+        
+        const expectedReplaced = replaceNonPrintableChars(expected),
+            actualReplaced = replaceNonPrintableChars(actual);
 
         const rootClassName = createSelector(
                 "ver-table-row-value",
                 !fieldsFilter.includes(status) ? "transparent" : null
             ),
-            statusClassName = createSelector("ver-table-row-value-status", status);
+            statusClassName = createSelector(
+                "ver-table-row-value-status", 
+                status
+            );
 
         return (
             <tr className={rootClassName} key={key}>
                 <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
                     {this.renderContent(`${key}-name`, name)}
                 </td>
-                <td className="ver-table-row-value-expected">
-                    {this.renderContent(`${key}-expected`, expected)}
+                <td className="ver-table-row-value-expected" onCopy={this.onCopyFor(expected)}>
+                    {this.renderContent(`${key}-expected`, expected, expectedReplaced)}
                 </td>
-                <td className="ver-table-row-value-actual">
-                    {this.renderContent(`${key}-actual`, actual)}
+                <td className="ver-table-row-value-actual" onCopy={this.onCopyFor(actual)}>
+                    {this.renderContent(`${key}-actual`, actual, actualReplaced)}                  
                 </td>
                 <td className={statusClassName}>
                     {this.renderContent(`${key}-status`, status)}
@@ -229,17 +237,31 @@ class VerificationTableBase extends React.Component<Props, State> {
         )
     }
 
-    // we need this for optimization - render SearchableContent component only if it contains some search results
-    private renderContent(contentKey: string, content: string): React.ReactNode {
-        if (this.props.searchResults.size && this.props.searchResults.get(contentKey)) {
+    /**
+     * We need this for optimization - render SearchableContent component only if it contains some search results
+     * @param contentKey for SearchableContetn component 
+     * @param content 
+     * @param fakeContent This text will be rendered when there is no search results found - 
+     *     it's needed to render fake dots and squares instead of real non-printable characters
+     */
+    private renderContent(contentKey: string, content: string, fakeContent: string = content): React.ReactNode {
+        if (!this.props.searchResults.isEmpty && this.props.searchResults.get(contentKey)) {
             return (
                 <SearchableContent
                     contentKey={contentKey}
                     content={content}/>
             )
         } else {
-            return content;
+            return fakeContent;
         }
+    }
+
+    private onCopyFor = (realText: string) => (e: React.ClipboardEvent<HTMLDivElement>) => {
+        const selectionRange = window.getSelection().getRangeAt(0),
+            copiedText = realText.substring(selectionRange.startOffset, selectionRange.endOffset);
+
+        e.preventDefault();
+        copyTextToClipboard(copiedText);
     }
 
     private onTogglerClick = (targetNode: TableNode) => (e: React.MouseEvent) => {

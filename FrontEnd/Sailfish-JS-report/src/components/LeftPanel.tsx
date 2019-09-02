@@ -22,7 +22,7 @@ import { ToggleButton } from './ToggleButton';
 import Action from '../models/Action';
 import { ActionsList } from './action/ActionsList';
 import AppState from '../state/models/AppState';
-import { setLeftPane, selectCheckpoint } from '../actions/actionCreators';
+import { setLeftPane, selectCheckpointAction } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPanel';
 import { ActionsListBase } from './action/ActionsList';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
@@ -166,6 +166,6 @@ export const LeftPanel = connect(
     }),
     dispatch => ({
         panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),
-        setSelectedCheckpoint: (checkpointAciton: Action) => dispatch(selectCheckpoint(checkpointAciton))
+        setSelectedCheckpoint: (checkpointAciton: Action) => dispatch(selectCheckpointAction(checkpointAciton))
     })
 )(LeftPanelBase)

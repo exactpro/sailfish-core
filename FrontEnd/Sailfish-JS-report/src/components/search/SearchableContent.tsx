@@ -18,7 +18,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import '../../styles/search.scss';
-import { createIgnoringRegexp } from '../../helpers/regexp';
+import { createCaseInsensitiveRegexp } from '../../helpers/regexp';
 import { raf } from '../../helpers/raf';
 import { setShouldScrollToSearchItem } from '../../actions/actionCreators';
 
@@ -48,7 +48,7 @@ const SearchableContentBase = ({ content, startIndex, targetIndex, searchString,
         );
     }
 
-    const splittedContent = content.split(createIgnoringRegexp(searchString, 'i')),
+    const splittedContent = content.split(createCaseInsensitiveRegexp(searchString)),
         internalTargetIndex = targetIndex != null && targetIndex - startIndex;
 
     // we are using 'useRef' instead of 'createRef' in functional components

@@ -58,9 +58,9 @@ export const ExpandablePanel = ({ header, body, children, isExpanded, onExpand }
 
 interface RecoverablePanelProps extends PanelProps, RecoverableElementProps {}
 
-export const RecoverableExpandablePanel = (props: RecoverablePanelProps) => (
+export const RecoverableExpandablePanel = ({ stateKey, ...props }: RecoverablePanelProps) => (
     <StateSaver
-        stateKey={props.stateKey}>
+        stateKey={stateKey}>
         {
             (isExpanded: boolean, stateSaver) => (
                 <ExpandablePanel

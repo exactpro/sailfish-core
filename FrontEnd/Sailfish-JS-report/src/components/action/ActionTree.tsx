@@ -110,7 +110,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
         return this.renderNode(this.props, true, this.state.expandTree);
     }    
 
-    renderNode(props: Props, isRoot = false, expandTreePath: Tree<ActionExpandStatus> = null, parentAction: Action = null): JSX.Element {
+    renderNode(props: Props, isRoot = false, expandTreePath: Tree<ActionExpandStatus> = null, parentAction: Action = null): React.ReactElement {
         const { actionSelectHandler, verificationSelectHandler, selectedActionsId, selectedVerificationId: selectedMessageId, actionsFilter, onExpand } = props;
 
         // https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions

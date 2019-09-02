@@ -159,7 +159,7 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                 </div>
                 <div className="report__testcases">
                     {
-                        report.metadata.length > 0 ? (
+                        report.metadata.length > 0 || report.exception == null ? (
                             <HeatmapScrollbar
                                 selectedElements={testCasesHeatmap(report.metadata)}
                                 elementsCount={report.metadata.length}>

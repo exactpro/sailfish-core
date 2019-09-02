@@ -22,7 +22,8 @@ const mode = process.env.NODE_ENV || 'production';
 module.exports = {
   devServer: {
     watchOptions : {
-      poll: true
+      poll: true,
+      ignored: [/node_modules/, 'src/__tests__/']
     },
     watchContentBase: true,
     contentBase: [path.join(__dirname, 'src'), path.join(__dirname, 'build', 'out')],

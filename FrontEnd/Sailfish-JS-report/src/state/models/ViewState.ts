@@ -18,9 +18,9 @@ import { Panel } from '../../util/Panel';
 
 export default interface ViewState {
     isLoading: boolean;
-    splitMode: boolean;
     leftPanel: Panel;
     rightPanel: Panel;
+    beautifiedMessages: number[];
 
     // We use Boolean object here. It's the way we handle flag chages after component unmount.
     adminMessagesEnabled: Boolean;

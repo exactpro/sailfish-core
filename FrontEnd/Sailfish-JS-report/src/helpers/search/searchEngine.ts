@@ -22,7 +22,7 @@ import { keyForMessage, keyForAction, keyForActionParamter, keyForVerification }
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
-import { createIgnoringRegexp } from '../regexp';
+import { createCaseInsensitiveRegexp } from '../regexp';
 import { isCheckpoint } from '../actionType';
 
 // list of fields that will be used to search (order is important!)
@@ -39,15 +39,17 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
     const searchResults = new Array<[string, number]>();
 
     if (searchString) {
+        const searchPattern = createCaseInsensitiveRegexp(searchString);
+
         testCase.actions
             .filter(actionNode => isAction(actionNode) && !isCheckpoint(actionNode))
-            .forEach(action => searchResults.push(...findAllInAction(action as Action, searchString)));
+            .forEach(action => searchResults.push(...findAllInAction(action as Action, searchPattern)));
 
         testCase.messages.forEach(message => {
             searchResults.push(...findAllInObject(
                 message,
                 MESSAGE_FIELDS,
-                searchString,
+                searchPattern,
                 keyForMessage(message.id)
             ));
         });
@@ -56,24 +58,24 @@ export function findAll(searchString: string, testCase: TestCase): SearchResult 
     return new SearchResult(searchResults);
 }
 
-function findAllInAction(action: Action, searchString: string): Array<[string, number]> {
+function findAllInAction(action: Action, searchPattern: RegExp): Array<[string, number]> {
     let results = new Array<[string, number]>();
 
-    results.push(...findAllInObject(action, ACTION_FIELDS, searchString, keyForAction(action.id)));
+    results.push(...findAllInObject(action, ACTION_FIELDS, searchPattern, keyForAction(action.id)));
 
     action.parameters && action.parameters.forEach((param, index) => 
-        results.push(...findAllInParams(param, searchString, keyForActionParamter(action.id, index)))
+        results.push(...findAllInParams(param, searchPattern, keyForActionParamter(action.id, index)))
     );
 
     action.subNodes.forEach(subAction => {
         switch(subAction.actionNodeType) { 
             case ActionNodeType.ACTION: {
-                results.push(...findAllInAction(subAction, searchString));
+                results.push(...findAllInAction(subAction, searchPattern));
                 return;
             }
 
             case ActionNodeType.VERIFICATION: {
-                results.push(...findAllInVerification(subAction, searchString, action.id));
+                results.push(...findAllInVerification(subAction, searchPattern, action.id));
                 return;
             }
 
@@ -86,53 +88,53 @@ function findAllInAction(action: Action, searchString: string): Array<[string, n
     return results;
 }
 
-function findAllInParams(param: ActionParameter, searchString: string, keyPrefix: string): Array<[string, number]> {
+function findAllInParams(param: ActionParameter, searchPattern: RegExp, keyPrefix: string): Array<[string, number]> {
     let results = new Array<[string, number]>();
 
     results.push(...findAllInObject(
         param, 
         param.subParameters && param.subParameters.length > 0 ? INPUT_PARAM_NODE_FIELD : INPUT_PARAM_VALUE_FIELDS, 
-        searchString, 
+        searchPattern, 
         keyPrefix
     ));
 
     param.subParameters && param.subParameters.forEach((param, index) => {
-        results.push(...findAllInParams(param, searchString, keyPrefix + `-${index}`));
+        results.push(...findAllInParams(param, searchPattern, keyPrefix + `-${index}`));
     });
 
     return results;
 }
 
-function findAllInVerification(verification: Verification, searchString: string, parentActionId: number): Array<[string, number]> {
+function findAllInVerification(verification: Verification, searchPattern: RegExp, parentActionId: number): Array<[string, number]> {
     let results = new Array<[string, number]>(),
         key = keyForVerification(parentActionId, verification.messageId);
 
     results.push(...findAllInObject(
         verification,
         VERIFICATION_FIELDS,
-        searchString,
+        searchPattern,
         key
     ));
 
     verification.entries && verification.entries.forEach((entry, index) => {
-        results.push(...findAllInVerificationEntries(entry, searchString, `${key}-${index}`));
+        results.push(...findAllInVerificationEntries(entry, searchPattern, `${key}-${index}`));
     });
 
     return results;
 }
 
-function findAllInVerificationEntries(entry: VerificationEntry, searchString: string, keyPrefix: string): Array<[string, number]> {
+function findAllInVerificationEntries(entry: VerificationEntry, searchPattern: RegExp, keyPrefix: string): Array<[string, number]> {
     let results = new Array<[string, number]>();
 
     results.push(...findAllInObject(
         entry,
         entry.subEntries && entry.subEntries.length !== 0 ? VERIFICATION_NODE_FEILDS : VERIFICATION_VALUE_FIELDS,
-        searchString,
+        searchPattern,
         keyPrefix
     ));
 
     entry.subEntries && entry.subEntries.forEach((entry, index) => {
-        results.push(...findAllInVerificationEntries(entry, searchString, `${keyPrefix}-${index}`));
+        results.push(...findAllInVerificationEntries(entry, searchPattern, `${keyPrefix}-${index}`));
     });
 
     return results;
@@ -143,10 +145,10 @@ function findAllInVerificationEntries(entry: VerificationEntry, searchString: st
  * and returns result as array of ["prefix - field name", number of search results] 
  * @param target target object
  * @param fieldsList list of fields of target object that will be used to search in them
- * @param searchString target search string
+ * @param searchPattern target search string
  * @param resultKeyPrefix prefix for search result key
  */
-function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchString: string, resultKeyPrefix: string): Array<[string, number]> {
+function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchPattern: RegExp, resultKeyPrefix: string): Array<[string, number]> {
     let results = new Array<[string, number]>();
 
     fieldsList.forEach(fieldName => {
@@ -160,7 +162,7 @@ function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchString:
             return;
         }
 
-        const searchResultsCount = targetField.split(createIgnoringRegexp(searchString, 'i')).length - 1;
+        const searchResultsCount = targetField.split(searchPattern).length - 1;
 
         if (searchResultsCount > 0) {
             results.push([`${resultKeyPrefix}-${fieldName}`, searchResultsCount]);

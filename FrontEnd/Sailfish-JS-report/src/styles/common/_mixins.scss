@@ -227,3 +227,12 @@
     }
   }
 }
+
+@mixin clickable {
+    cursor: pointer;
+    border-radius: 2px;
+
+    &:hover {
+        background-color: $clickableHoverBackground;
+    }
+}

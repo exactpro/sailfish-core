@@ -14,10 +14,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-export default interface Exception {
-    actionNodeType: string;
-    message: string;
-    cause?: Exception;
-    stacktrace?: string;
-    class?: string;
+import * as React from 'react';
+import beautify from '../../helpers/contentBeautifier';
+import { keyForMessage } from '../../helpers/keys';
+import SearchableContent from '../search/SearchableContent';
+
+interface Props {
+    content: string;
+    msgId: number;
 }
+
+const BeautifiedContent = ({content, msgId}: Props) => (
+    <pre className="mc-body__beautify-wrapper">
+        <SearchableContent 
+            content={beautify(content)} 
+            contentKey={keyForMessage(msgId, 'contentHumanReadable')}/>
+    </pre>
+)
+
+export default BeautifiedContent;

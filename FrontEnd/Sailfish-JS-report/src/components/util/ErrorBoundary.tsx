@@ -15,34 +15,42 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import Status from '../models/Status';
-import { ExceptionChain } from './ExceptionChain';
-import '../styles/statusPanel.scss';
-import { connect } from 'react-redux';
-import AppState from '../state/models/AppState';
 
-interface StatusPanelProps {
-    status: Status;
+interface Props {
+    errorMessage?: string;
 }
 
-const StatusPanelBase = ({ status }: StatusPanelProps) => {
+interface State {
+    hasError: boolean;
+}
 
-    if (status.cause == null) {
-        return null;
+export default class ErrorBoundary extends React.Component<Props, State> {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            hasError: false
+        }
     }
 
-    return (
-        <div className="status">
-            <div className="status-container">
-                <ExceptionChain exception = {status.cause}/>
-            </div>
-        </div>
-    );
-}
+    static getDerivedStateFromError(): State {
+        return {
+            hasError: true
+        }
+    }
 
-export const StatusPanel = connect(
-    (state: AppState) => ({
-        status: state.selected.testCase.status
-    }),
-    dispatch => ({})
-)(StatusPanelBase);
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error(`${error.stack}, component stack: ${errorInfo.componentStack}`);
+    }
+
+    render() {
+        const errorMessge = this.props.errorMessage || 'Something went wrong...',
+            { hasError } = this.state;
+
+        if (hasError) {
+            return errorMessge;
+        }
+
+        return this.props.children;
+    }
+}

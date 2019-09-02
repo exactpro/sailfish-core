@@ -60,12 +60,12 @@ const AdminMessageWrapperBase = ({ isExpanded, expandHandler, ...props }: Wrappe
 
     return (
         <div className={rootClass}
+            data-lb-count={getLabelsCount(props.message)}
             onClick={() => props.selectHandler()}>
             <div className="message-card__labels">
                 {renderMessageTypeLabels(props.message)}
             </div>
-            <div className="message-card__header   mc-header small"
-                data-lb-count={getLabelsCount(props.message)}>
+            <div className="message-card__header   mc-header small">
                 <div className="mc-header__info">
                     <MessageCardActionChips
                         message={props.message}/>
