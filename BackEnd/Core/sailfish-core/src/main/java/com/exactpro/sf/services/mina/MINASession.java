@@ -74,14 +74,14 @@ public class MINASession implements ISession {
 
         if(future.await(timeout)) {
             if(!future.isDone()) {
-                throw new SendMessageFailedException("Send operation is not done. Session: " + this);
+                throw new SendMessageFailedException("Send operation is not done. Session: " + this, future.getException());
             }
 
             if(!future.isWritten()) {
-                throw new SendMessageFailedException("Write operation is not done. Session: " + this);
+                throw new SendMessageFailedException("Write operation is not done. Session: " + this, future.getException());
             }
         } else {
-            throw new SendMessageFailedException("Send operation is not completed. Session: " + this);
+            throw new SendMessageFailedException("Send operation is not completed. Session: " + this, future.getException());
         }
 
         if(future.getException() != null) {
