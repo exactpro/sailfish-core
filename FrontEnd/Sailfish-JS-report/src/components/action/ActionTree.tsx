@@ -25,7 +25,7 @@ import ActionExpandStatus from '../../models/util/ActionExpandStatus';
 import { ActionCard } from './ActionCard';
 import { CustomMessage } from './CustomMessage';
 import { CheckpointAction } from '../Checkpoint';
-import {saveMlData, selectAction} from '../../actions/actionCreators';
+import { selectAction } from '../../actions/actionCreators';
 import { selectVerification } from '../../actions/actionCreators';
 import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
@@ -34,8 +34,9 @@ import memoize from '../../helpers/memoize';
 import { isCheckpoint } from '../../helpers/actionType';
 import { createExpandTreePath, createExpandTree, getSubTree, updateExpandTree } from '../../helpers/tree';
 import { keyForAction } from '../../helpers/keys';
-import { fetchPredictions } from "../../helpers/machineLearning";
-import {PredictionData} from "../../models/MlServiceResponse";
+import { fetchPredictions } from "../../thunks/machineLearning";
+import { ThunkDispatch } from 'redux-thunk';
+import StateAction from '../../actions/stateActions';
 
 interface OwnProps {
     action: ActionNode;
@@ -53,7 +54,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    saveMlData: (data: PredictionData[]) => any;
+    fetchPredictions: (actionId: number) => any;
     actionSelectHandler: (action: Action) => any;
     verificationSelectHandler: (messageId: number, rootActionId: number, status: StatusType) => any;
 }
@@ -131,7 +132,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                         isTransaparent={!actionsFilter.includes(action.status.status)}
                         onSelect={ (selectedAction) => {
                             if (selectedAction.status.status == StatusType.FAILED && !this.props.mlDataActionIds.has(selectedAction.id)) {
-                                fetchPredictions(this.props.token, this.props.saveMlData, selectedAction.id);
+                                this.props.fetchPredictions(selectedAction.id);
                             }
                             actionSelectHandler(selectedAction);
                         }}
@@ -180,7 +181,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                         isTransparent={isTransparent}
                         onSelect={(messageId, actionId, status) => {
                             if (status == StatusType.FAILED && !this.props.mlDataActionIds.has(actionId)) {
-                                fetchPredictions(this.props.token, this.props.saveMlData, actionId);
+                                this.props.fetchPredictions(actionId);
                             }
                             verificationSelectHandler(messageId, actionId, status);
                         }}
@@ -272,8 +273,8 @@ export const ActionTree = connect(
         token: state.machineLearning.token,
         expandedTreePath: getExpandedTreePath(ownProps.action, [...state.selected.actionsId, +state.selected.scrolledActionId])
     }),
-    (dispatch, ownProps: OwnProps): DispatchProps => ({
-        saveMlData: (data: PredictionData[]) => dispatch(saveMlData(data)),
+    (dispatch: ThunkDispatch<AppState, never, StateAction>, ownProps: OwnProps): DispatchProps => ({
+        fetchPredictions: (actionId: number) => dispatch(fetchPredictions(actionId)),
         actionSelectHandler: action => dispatch(selectAction(action)),
         verificationSelectHandler: (messageId, rootActionId, status) => dispatch(selectVerification(messageId, rootActionId, status))
     })

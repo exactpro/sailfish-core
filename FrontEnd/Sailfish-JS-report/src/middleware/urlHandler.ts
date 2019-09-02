@@ -23,24 +23,20 @@ export const TEST_CASE_PARAM_KEY = 'tc',
     ACTION_PARAM_KEY = 'ac',
     MESSAGE_PARAM_KEY = 'message';
 
- // we can't use window.location.search because URL can contain another search params
-export function getUrlSearchString(url: string) {
-    // removing previous search params
-    const urlEnd = url.slice(url.lastIndexOf('/'));
-    
-    if (urlEnd.indexOf('?') == -1) {
-        return "";
-    }
+// we can't use window.location.search because URL can contain another search params
 
-    return urlEnd.slice(urlEnd.lastIndexOf('?'));
+export function getUrlSearchString(url: string) {
+    return url.includes('?') ? 
+        url.substring(url.lastIndexOf('?')) : 
+        '';
 }
 
 // redux middleware
-export const urlHandler: Middleware = store =>  next => (action: StateActionType) => {
+export const urlHandler: Middleware<never, AppState> = store =>  next => (action: StateActionType) => {
 
-    const prevState = store.getState() as AppState,
+    const prevState = store.getState(),
         result = next(action),
-        nextState = store.getState() as AppState;
+        nextState = store.getState();
 
     hadnleStateUpdate(prevState, nextState, action);
 

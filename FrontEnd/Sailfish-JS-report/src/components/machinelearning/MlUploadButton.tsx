@@ -20,76 +20,84 @@ import * as React from 'react';
 import '../../styles/messages.scss';
 import { SubmittedData } from '../../models/MlServiceResponse'
 import AppState from '../../state/models/AppState';
-import { addSubmittedMlData, removeSubmittedMlData } from "../../actions/actionCreators";
 import { connect } from 'react-redux';
-import { submitEntry, deleteEntry } from '../../helpers/machineLearning';
+import { mlSubmitEntry, mlDeleteEntry } from '../../thunks/machineLearning';
 import Action from "../../models/Action";
 import { StatusType } from '../../models/Status';
+import { ThunkDispatch } from 'redux-thunk';
+import StateAction from '../../actions/stateActions';
 
-interface MlUploadButtonProps {
+interface OwnProps {
     messageId: number;
     show?: boolean;
+}
+
+interface StateProps {
     token: string;
     submittedData: SubmittedData[];
     activeActionId: number;
     actionMap: Map<number, Action>;
-    addSubmittedMlData: (data: SubmittedData) => any;
-    removeSubmittedMlData: (data: SubmittedData) => any;
 }
 
-export class MlUploadButtonBase extends React.Component<MlUploadButtonProps, {}> {
+interface  DispatchProps {
+    submitEntry: (data: SubmittedData) => any;
+    deleteEntry: (data: SubmittedData) => any;
+}
 
-    render() {
-        const activeAction = this.props.actionMap.get(this.props.activeActionId);
+interface Props extends OwnProps, StateProps, DispatchProps { }
 
-        let isAvailable = this.props.token !== null
-            && (this.props.show == null || this.props.show)
-            && activeAction != null
-            && activeAction.status.status === StatusType.FAILED;
+export const MlUploadButtonBase = ({ messageId, show, token, submittedData, activeActionId, actionMap, submitEntry, deleteEntry }: Props) => {
 
-        let isSubmitted = isAvailable && this.props.submittedData.some((entry) => {
-            return entry.messageId === this.props.messageId
-                && entry.actionId === this.props.activeActionId
-        });
+    const activeAction = actionMap.get(activeActionId);
 
-        // default one (message cannot be submitted or ml servie is unavailable)
-        let mlButton = <div className="ml__submit-icon inactive" />;
+    let isAvailable = token !== null
+        && (show == null || show)
+        && activeAction != null
+        && activeAction.status.status === StatusType.FAILED;
 
-        if (isAvailable) {
-            mlButton = isSubmitted
+    let isSubmitted = isAvailable && submittedData.some((entry) => {
+        return entry.messageId === messageId
+            && entry.actionId === activeActionId
+    });
 
-                ? <div className="ml__submit-icon submitted"
-                       title="Revoke ML data"
-                       onClick={(e) => {
-                           deleteEntry(this.props.token, { messageId: this.props.messageId, actionId: this.props.activeActionId }, this.props.removeSubmittedMlData);
-                           e.stopPropagation();
-                       }} />
+    // default one (message cannot be submitted or ml servie is unavailable)
+    let mlButton = <div className="ml__submit-icon inactive" />;
 
-                : <div className="ml__submit-icon active"
-                       title="Submit ML data"
-                       onClick={(e) => {
-                           submitEntry(this.props.token, { messageId: this.props.messageId, actionId: this.props.activeActionId }, this.props.removeSubmittedMlData, this.props.addSubmittedMlData);
-                           e.stopPropagation();
-                       }} />
-        }
+    if (isAvailable) {
+        mlButton = isSubmitted
 
-        return (
-            <div className="ml__submit" title="Unable to submit ML data">
-                {mlButton}
-            </div>
-        )
+            ? <div className="ml__submit-icon submitted"
+                    title="Revoke ML data"
+                    onClick={(e) => {
+                        deleteEntry({ messageId: messageId, actionId: activeActionId });
+                        e.stopPropagation();
+                    }} />
+
+            : <div className="ml__submit-icon active"
+                    title="Submit ML data"
+                    onClick={(e) => {
+                        submitEntry({ messageId: messageId, actionId: activeActionId });
+                        e.stopPropagation();
+                    }} />
     }
+
+    return (
+        <div className="ml__submit" title="Unable to submit ML data">
+            {mlButton}
+        </div>
+    )
 }
+
 
 export const MlUploadButton = connect(
-    (state: AppState) => ({
+    (state: AppState): StateProps => ({
         token: state.machineLearning.token,
         submittedData: state.machineLearning.submittedData,
         activeActionId: state.selected.activeActionId,
         actionMap: state.selected.actionsMap
     }),
-    (dispatch) => ({
-        addSubmittedMlData: (data: SubmittedData) => dispatch(addSubmittedMlData(data)),
-        removeSubmittedMlData: (data: SubmittedData) => dispatch(removeSubmittedMlData(data))
+    (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
+        submitEntry: (data: SubmittedData) => dispatch(mlSubmitEntry(data)),
+        deleteEntry: (data: SubmittedData) => dispatch(mlDeleteEntry(data))
     })
 )(MlUploadButtonBase);

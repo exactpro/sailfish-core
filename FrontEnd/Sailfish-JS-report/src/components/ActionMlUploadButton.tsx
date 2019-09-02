@@ -18,77 +18,85 @@ import * as React from 'react';
 import '../styles/messages.scss';
 import { SubmittedData } from '../models/MlServiceResponse'
 import AppState from '../state/models/AppState';
-import { addSubmittedMlData, removeSubmittedMlData } from "../actions/actionCreators";
 import { connect } from 'react-redux';
-import { submitEntry, deleteEntry, EMPTY_MESSAGE_ID, } from '../helpers/machineLearning';
+import { mlSubmitEntry, mlDeleteEntry, EMPTY_MESSAGE_ID, } from '../thunks/machineLearning';
 import Action from "../models/Action";
 import { StatusType } from '../models/Status';
+import { ThunkDispatch } from 'redux-thunk';
+import StateAction from '../actions/stateActions';
 
-interface ActionMlUploadButtonProps {
+interface OwnProps {
     actionId: number;
+}
+
+interface StateProps {
     token: string;
     submittedData: SubmittedData[];
     actionMap: Map<number, Action>;
-    addSubmittedMlData: (data: SubmittedData) => any;
-    removeSubmittedMlData: (data: SubmittedData) => any;
 }
 
-export class ActionMlUploadButtonBase extends React.Component<ActionMlUploadButtonProps, {}> {
-    render() {
+interface DispatchProps {
+    submitEntry: (data: SubmittedData) => any;
+    deleteEntry: (data: SubmittedData) => any;
+}
 
-        const isAvailable = this.props.token !== null
-            && this.props.actionMap.get(this.props.actionId).status.status === StatusType.FAILED;
+interface Props extends OwnProps, StateProps, DispatchProps {}
 
-        const submittedWithThisAction = this.props.submittedData.filter((entry) => {
-            return entry.actionId === this.props.actionId
-        });
+export const ActionMlUploadButtonBase = ({ actionId, token, submittedData, actionMap, submitEntry, deleteEntry }: Props) => {
 
-        const submittedMessagesCount = submittedWithThisAction.filter((entry) => {
-            return entry.messageId !== EMPTY_MESSAGE_ID
-        }).length;
+    const isAvailable = token !== null
+        && actionMap.get(actionId).status.status === StatusType.FAILED;
 
-        const isSubmitted = submittedWithThisAction.length > 0;
+    const submittedWithThisAction = submittedData.filter((entry) => {
+        return entry.actionId === actionId
+    });
 
-        if (isAvailable) {
-            const mlButton = isSubmitted
+    const submittedMessagesCount = submittedWithThisAction.filter((entry) => {
+        return entry.messageId !== EMPTY_MESSAGE_ID
+    }).length;
 
-                ? <div className="ml-action__submit-icon submitted"
-                    title="Revoke all ML data related to this action"
-                    onClick={(e) => {
-                        submittedWithThisAction.forEach((entry) => {
-                            deleteEntry(this.props.token, { actionId: this.props.actionId, messageId: entry.messageId }, this.props.removeSubmittedMlData);
-                        });
-                        e.stopPropagation();
-                    }} />
+    const isSubmitted = submittedWithThisAction.length > 0;
 
-                : <div className="ml-action__submit-icon active"
-                    title="Submit ML data without cause message"
-                    onClick={(e) => {
-                        submitEntry(this.props.token, { actionId: this.props.actionId, messageId: EMPTY_MESSAGE_ID }, this.props.removeSubmittedMlData, this.props.addSubmittedMlData);
-                        e.stopPropagation();
-                    }} />;
+    if (isAvailable) {
+        const mlButton = isSubmitted
 
-            return (
-                <div className="ml-action__submit" title="Unable to submit ML data">
-                    {mlButton}
-                    <div className={`ml-action__submit-counter ${isSubmitted ? "submitted" : "active"}`}>
-                        {submittedMessagesCount}
-                    </div>
+            ? <div className="ml-action__submit-icon submitted"
+                title="Revoke all ML data related to this action"
+                onClick={(e) => {
+                    submittedWithThisAction.forEach((entry) => {
+                        deleteEntry({ actionId: actionId, messageId: entry.messageId });
+                    });
+                    e.stopPropagation();
+                }} />
+
+            : <div className="ml-action__submit-icon active"
+                title="Submit ML data without cause message"
+                onClick={(e) => {
+                    submitEntry({ actionId: actionId, messageId: EMPTY_MESSAGE_ID });
+                    e.stopPropagation();
+                }} />;
+
+        return (
+            <div className="ml-action__submit" title="Unable to submit ML data">
+                {mlButton}
+                <div className={`ml-action__submit-counter ${isSubmitted ? "submitted" : "active"}`}>
+                    {submittedMessagesCount}
                 </div>
-            )
-        }
-        return null;
+            </div>
+        )
     }
+
+    return null;
 }
 
 export const ActionMlUploadButton = connect(
-    (state: AppState) => ({
+    (state: AppState): StateProps => ({
         token: state.machineLearning.token,
         submittedData: state.machineLearning.submittedData,
         actionMap: state.selected.actionsMap
     }),
-    (dispatch) => ({
-        addSubmittedMlData: (data: SubmittedData) => dispatch(addSubmittedMlData(data)),
-        removeSubmittedMlData: (data: SubmittedData) => dispatch(removeSubmittedMlData(data))
+    (dispatch: ThunkDispatch<AppState, never, StateAction>): DispatchProps => ({
+        submitEntry: (data: SubmittedData) => dispatch(mlSubmitEntry(data)),
+        deleteEntry: (data: SubmittedData) => dispatch(mlDeleteEntry(data))
     })
 )(ActionMlUploadButtonBase);

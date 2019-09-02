@@ -17,19 +17,19 @@
 import * as React from 'react';
 import "../styles/root.scss";
 import TestCaseLayout from "./TestCaseLayout";
-import Report, { isReport } from '../models/Report';
+import Report from '../models/Report';
 import TestCase from "../models/TestCase";
 import ReportLayout from '../components/ReportLayout';
 import { connect } from 'react-redux';
 import AppState from "../state/models/AppState";
-import { selectActionById, selectVerification, setMlToken, setSubmittedMlData } from "../actions/actionCreators";
+import { selectActionById, selectVerification, setSubmittedMlData } from "../actions/actionCreators";
 import { 
     getUrlSearchString,
     ACTION_PARAM_KEY,
     MESSAGE_PARAM_KEY,
     TEST_CASE_PARAM_KEY
 } from "../middleware/urlHandler";
-import { fetchToken } from "../helpers/machineLearning";
+import { fetchToken } from "../thunks/machineLearning";
 import { SubmittedData } from "../models/MlServiceResponse" 
 import { loadReport } from '../thunks/loadReport';
 import { ThunkDispatch } from 'redux-thunk';
@@ -49,7 +49,7 @@ interface AppStateProps {
 }
 
 interface AppDispatchProps {
-    setMlToken: (token: string) => any;
+    fetchToken: () => any;
     setSubmittedMlData: (data: SubmittedData[]) => any;
     selectAction: (actionId: number) => any;
     selectMessage: (messageId: number) => any;
@@ -75,7 +75,7 @@ class AppBase extends React.Component<AppProps, {}> {
         }
 
         if (!this.props.mlToken && this.props.report.reportProperties) {
-            fetchToken(this.props.report.reportProperties.workFolder, this.props.setMlToken, this.props.setSubmittedMlData)
+            this.props.fetchToken();
         }
     }
 
@@ -170,7 +170,7 @@ const App = connect(
         //FIXME: I guess we need a dedicated action for this
         selectMessage: (messageId: number) => dispatch(selectVerification(messageId)),
 
-        setMlToken: (token: string) => dispatch(setMlToken(token)),
+        fetchToken: () => dispatch(fetchToken()),
         setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
         loadReport: () => dispatch(loadReport()),
         loadTestCase: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
