@@ -14,6 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 import { InitResponse, PredictionResponse, SubmittedData, PredictionData } from "../models/MlServiceResponse"
+import topWindow from "./getWindow";
 
 const BASE_ML_API_PATH = "sfapi/machinelearning/v2"
 
@@ -127,6 +128,6 @@ export function fetchPredictions(token: string, updatePredictionAction: (data: P
 }
 
 function getApiPath() {
-    const url = new URL(window.top.location.href)
+    const url = new URL(topWindow.location.href)
     return `${url.origin}/${url.pathname.split('/')[1]}/${BASE_ML_API_PATH}`
 }

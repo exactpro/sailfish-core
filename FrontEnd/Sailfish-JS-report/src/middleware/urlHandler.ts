@@ -17,6 +17,7 @@
 import AppState from "../state/models/AppState";
 import StateActionType from "../actions/stateActions";
 import { Middleware } from "redux";
+import topWindow from "../helpers/getWindow";
 
 export const TEST_CASE_PARAM_KEY = 'tc',
     ACTION_PARAM_KEY = 'action',
@@ -56,16 +57,16 @@ function hadnleStateUpdate(prevState : AppState, nextState : AppState, action: a
         return;
     }
 
-    const searchString = getUrlSearchString(top.window.location.href), 
+    const searchString = getUrlSearchString(topWindow.location.href), 
         searchParams = new URLSearchParams(searchString),
         nextSearchParams = getNextSearchParams(searchParams, prevState, nextState),
-        nextUrl = getNextUrl(top.window.location.href, searchString, nextSearchParams);
+        nextUrl = getNextUrl(topWindow.location.href, searchString, nextSearchParams);
 
     // handle goBack and goForward browswer buttons clicks - we don't need to update current url
-    const currentUrl = top.window.location.href;
+    const currentUrl = topWindow.location.href;
 
     if (currentUrl !== nextUrl) {
-        top.window.history.pushState(action, "", nextUrl);
+        topWindow.window.history.pushState(action, "", nextUrl);
     }
 }
 

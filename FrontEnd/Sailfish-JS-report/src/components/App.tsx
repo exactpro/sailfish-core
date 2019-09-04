@@ -36,6 +36,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadTestCase } from '../thunks/loadTestCase';
 import SplashScreen from './SplashScreen';
+import topWindow from '../helpers/getWindow';
 
 const REPORT_FILE_PATH = 'index.html';
 
@@ -69,7 +70,7 @@ class AppBase extends React.Component<AppProps, {}> {
         // We can't use componentDidMount for this, because report file not yet loaded.
         // Only first funciton call will use it.
         if (!this.searchParams) {
-            this.searchParams = new URLSearchParams(getUrlSearchString(top.window.location.href));
+            this.searchParams = new URLSearchParams(getUrlSearchString(topWindow.location.href));
             this.handleSharedUrl();
         }
 
@@ -105,11 +106,11 @@ class AppBase extends React.Component<AppProps, {}> {
      * This function replaces url file path to index.html when we go to the new report from the old
      */
     validateUrl() {
-        const href = top.window.location.href,
+        const href = topWindow.location.href,
             filePath = href.slice(href.lastIndexOf('/'));
 
         if (!filePath.includes(REPORT_FILE_PATH)) {
-            top.window.history.pushState({}, "", href.replace(filePath, '/' + REPORT_FILE_PATH));
+            topWindow.history.pushState({}, "", href.replace(filePath, '/' + REPORT_FILE_PATH));
         }
     }
 
