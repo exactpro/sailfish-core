@@ -33,56 +33,32 @@
         height: 100%;
     }
 
+    &-wrapper {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 0 20px;
+    }
+
     &-panel {
-        box-sizing: border-box;
-        height: auto;
-        border: 2px solid transparent;
+        @include status-card;
+        width: 100%;
+        border: 2px solid var(--status-primary-border-color);
+        background-color: var(--status-secondary-background-color);
         border-radius: 5px;
         padding: 5px;
-        margin: 0px 20px;
-
-        &.passed {
-            background-color: $passedBackgroundColor;
-            border-color: $passedBorderColor;
-        }
-
-        &.failed {
-            background-color: $failedBackgroundColor;
-            border-color: $failedBorderColor;
-        }
-
-        &.conditionally_passed {
-            border-color: $conditionallyPassedBorderColor;
-            background-color: $conditionallyPassedBackgroundColor;
-        }
-
-        &.conditionally_failed {
-            border-color: $conditionallyFailedBorderColor;
-            background-color: $conditionallyFailedBackgroundColor;
-        }
-
-        &-wrapper {
-            padding-top: 60px;
-        }
-
-        &-header {
-            word-break: break-all;
-            @include status-text;
-        }
 
         &-exception {
             padding: 20px;
 
             &-divider {
-                text-align: center;
-
-                &-icon {
-                    display: inline-block;
-                    height: 24px;
-                    width: 24px;
-                    background-size: 24px;
-                    background-image: url(../../resources/icons/arr4-up.svg);
-                }
+                display: inline-block;
+                height: 24px;
+                width: 24px;
+                background-size: 24px;
+                background-image: url(../../resources/icons/arr4-up.svg);
             }
 
             &-wrapper {
@@ -93,6 +69,12 @@
             &-header {
                 word-break: break-all;
                 font-weight: bold;
+
+                &-message {
+                    &.disabled {
+                        color: $secondaryTextColor;
+                    }
+                }
             }
 
             &-expand {
@@ -128,7 +110,7 @@
                 @include scrollbar;
                 overflow-x: scroll;
                 overflow-y: hidden;
-                margin-top: 10px;
+                padding-top: 10px;
             }
         }
     }

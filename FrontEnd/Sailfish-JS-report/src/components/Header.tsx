@@ -14,29 +14,34 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { h, Component } from 'preact';
+import * as React from 'react';
 import TestCase from '../models/TestCase';
 import '../styles/header.scss';
 import { StatusType } from '../models/Status';
 import { FilterPanel } from './FilterPanel';
-import { connect } from 'preact-redux';
+import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import {
-    nextTestCase,
-    prevTestCase,
     resetTestCase,
-    switchSplitMode,
     switchActionsFilter,
     switchFieldsFilter
 } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { createSelector } from '../helpers/styleCreators';
-import { MLUploadIndicator } from './MLUploadIndicator';
+import { ThunkDispatch } from 'redux-thunk';
+import StateActionType from '../actions/stateActions';
+import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
+import SearchInput from './search/SearchInput';
+import {MlUploadIndicator} from "./machinelearning/MlUploadIndicator";
 
-interface HeaderProps {
+interface StateProps {
     testCase: TestCase;
     actionsFilter: StatusType[];
     fieldsFilter: StatusType[];
+    isNavigationEnabled: boolean;
+}
+
+interface DispatchProps {
     nextTestCaseHandler: () => any;
     prevTestCaseHandler: () => any;
     backToListHandler: () => any;
@@ -44,149 +49,125 @@ interface HeaderProps {
     switchFieldsFilter: (status: StatusType) => any;
 }
 
-interface HeaderState {
-    showFilter: boolean;
-}
+interface Props extends StateProps, DispatchProps {}
 
-class HeaderBase extends Component<HeaderProps, HeaderState> {
+export const HeaderBase = ({ 
+    testCase, 
+    actionsFilter, 
+    fieldsFilter,
+    isNavigationEnabled,
+    nextTestCaseHandler, 
+    prevTestCaseHandler, 
+    backToListHandler, 
+    switchActionsFilter,
+    switchFieldsFilter
+}: Props) => {
+        
+    const [ showFilter, setShowFilter ] = React.useState(false);
 
-    constructor(props) {
-        super(props);
+    const {
+        name,
+        status,
+        startTime,
+        finishTime,
+        id,
+        hash,
+        description,
+    } = testCase;
 
-        this.state = {
-            showFilter: false
-        }
-    }
-
-    render({
-        testCase,
-        actionsFilter,
-        fieldsFilter,
-        nextTestCaseHandler,
-        prevTestCaseHandler,
-        backToListHandler,
-        switchActionsFilter,
-        switchFieldsFilter
-    }: HeaderProps, { showFilter }: HeaderState) {
-
-        const {
-            name,
-            status,
-            startTime,
-            finishTime,
-            id,
-            hash,
-            description,
-        } = testCase;
-
-        const rootClass = createSelector(
+    const rootClass = createSelector(
             "header",
             status.status
+        ), 
+        infoClass = createSelector(
+            "header__info", 
+            showFilter ? "filter-enabled" : null
         ),
-            mainClass = createSelector(
-                "header-main",
-                status.status
-            ),
-            infoClass = createSelector(
-                "header__info",
-                showFilter ? "filter-enabled" : null
-            ),
-            prevButtonClass = createSelector(
-                "header-main-name-icon",
-                "left",
-                prevTestCaseHandler ? "enabled" : "disabled"
-            ),
-            nextButtonClass = createSelector(
-                "header-main-name-icon",
-                "right",
-                nextTestCaseHandler ? "enabled" : "disabled"
-            );
-
-        const period = getSecondsPeriod(startTime, finishTime);
-
-        return (
-            <div class={rootClass}>
-                <div class="header__main   header-main">
-                    <div class="header-button   header-main__contol-button"
-                        onClick={backToListHandler}>
-                        <div class="header-button__icon go-back" />
-                        <div class="header-button__title">Back to list</div>
-                    </div>
-                    <div class="header-main__name ">
-                        <div class="header-button"
-                            onClick={prevTestCaseHandler}>
-                            <div class="header-button__icon left" />
-                        </div>
-                        <div class="header-main__title">
-                            {(name || 'Test Case')} — {status.status} — {period}
-                        </div>
-                        <div class="header-button"
-                            onClick={nextTestCaseHandler}>
-                            <div class="header-button__icon right" />
-                        </div>
-                    </div>
-                    <div class="header-button   header-main__contol-button" onClick={() => this.switchFilter()}>
-                        <div class="header-button__icon filter" />
-                        <div class="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
-                    </div>
-                </div>
-                <div class={infoClass}>
-                    <div class="header__info-element">
-                        <span>Start:</span>
-                        <p>{formatTime(startTime)}</p>
-                    </div>
-                    <div class="header__info-element">
-                        <span>Finish:</span>
-                        <p>{formatTime(finishTime)}</p>
-                    </div>
-                    <div class="header__description">
-                        {description}
-                    </div>
-                    <div class="header__info-element">
-                        <span>ID:</span>
-                        <p>{id}</p>
-                    </div>
-                    <div class="header__info-element">
-                        <span>Hash:</span>
-                        <p>{hash}</p>
-                    </div>
-                    <div class="header__info-element">
-                        <MLUploadIndicator />
-                    </div>
-                </div>
-                {
-                    showFilter ?
-                        <FilterPanel
-                            actionsFilters={actionsFilter}
-                            fieldsFilters={fieldsFilter}
-                            actionFilterHandler={switchActionsFilter}
-                            fieldsFilterHandler={switchFieldsFilter} />
-                        : null
-                }
-            </div>
+        navButtonClass = createSelector(
+            "header-button",
+            isNavigationEnabled ? '' : 'disabled'
         );
-    }
 
-    private switchFilter() {
-        this.setState({
-            showFilter: !this.state.showFilter
-        })
-    }
-}
+    const period = getSecondsPeriod(startTime, finishTime);
+
+    return (
+        <div className={rootClass}>
+            <div className="header__main   header-main">
+                <div className="header-button   header-main__contol-button"
+                    onClick={backToListHandler}>
+                    <div className="header-button__icon go-back" />
+                    <div className="header-button__title">Back to list</div>
+                </div>
+                <div className="header-main__name ">
+                    <div className={navButtonClass}
+                        onClick={isNavigationEnabled && prevTestCaseHandler}>
+                        <div className="header-button__icon left"/>
+                    </div>
+                    <div className="header-main__title">
+                        {(name || 'Test Case')} — {status.status} — {period}
+                    </div>
+                    <div className={navButtonClass}
+                        onClick={isNavigationEnabled && nextTestCaseHandler}>
+                        <div className="header-button__icon right"/>
+                    </div>
+                </div>
+                <div className="header-button   header-main__contol-button" onClick={() => setShowFilter(!showFilter)}>
+                    <div className="header-button__icon filter" />
+                    <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
+                </div>
+                <div className="header-main__search">
+                    <SearchInput/>
+                </div>
+            </div>
+            <div className={infoClass}>
+                <div className="header__info-element">
+                    <span>Start:</span>
+                    <p>{formatTime(startTime)}</p>
+                </div>
+                <div className="header__info-element">
+                    <span>Finish:</span>
+                    <p>{formatTime(finishTime)}</p>
+                </div>
+                <div className="header__description">
+                    {description}
+                </div>
+                <div className="header__info-element">
+                    <span>ID:</span>
+                    <p>{id}</p>
+                </div>
+                <div className="header__info-element">
+                    <span>Hash:</span>
+                    <p>{hash}</p>
+                </div>
+                <div className="header__info-element">
+                    <MlUploadIndicator/>
+                </div>
+            </div>
+            {
+                showFilter ? (
+                    <FilterPanel
+                        actionsFilters={actionsFilter}
+                        fieldsFilters={fieldsFilter}
+                        actionFilterHandler={switchActionsFilter}
+                        fieldsFilterHandler={switchFieldsFilter} />
+                ) : null
+            }
+        </div>
+    );
+};
 
 export const Header = connect(
-    (state: AppState) => ({
+    (state: AppState): StateProps => ({
         testCase: state.selected.testCase,
-        splitMode: state.view.splitMode,
         actionsFilter: state.filter.actionsFilter,
-        fieldsFilter: state.filter.fieldsFilter
+        fieldsFilter: state.filter.fieldsFilter,
+        isNavigationEnabled: state.report.metadata.length > 1
     }),
-    dispatch => ({
-        nextTestCaseHandler: () => dispatch(nextTestCase()),
-        prevTestCaseHandler: () => dispatch(prevTestCase()),
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
+        nextTestCaseHandler: () => dispatch(loadNextTestCase()),
+        prevTestCaseHandler: () => dispatch(loadPrevTestCase()),
         backToListHandler: () => dispatch(resetTestCase()),
-        switchSplitMode: () => dispatch(switchSplitMode()),
         switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),
         switchActionsFilter: (status: StatusType) => dispatch(switchActionsFilter(status))
     })
-)(HeaderBase)
+)(HeaderBase);

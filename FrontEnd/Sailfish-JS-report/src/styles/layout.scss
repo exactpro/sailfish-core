@@ -90,8 +90,17 @@
     }
 
     &__title {
-        &.admin {
-            color: $adminMessageLabelBackground;
+
+        &.selectable {
+            cursor: pointer;
+            
+            &.disabled {
+                cursor: default;
+            }
+        }
+
+        &.disabled {
+            filter: opacity(0.5);
         }
     }
 
@@ -120,34 +129,55 @@
         }
 
         &.admin {
-            background-image: url(../../resources/icons/admin-icon.svg);
-            filter: opacity(0.5);
-        }
+            &.disabled {
+                background-image: url(../../resources/icons/admin-icon-inactive.svg);
+                filter: opacity(0.5);
+                cursor: default;
+            }
 
-        &.admin.active {
-            background-image: url(../../resources/icons/admin-icon-active.svg);
+            &.inactive {
+                background-image: url(../../resources/icons/admin-icon-inactive.svg);
+            }
+
+            &.active {
+                background-image: url(../../resources/icons/admin-icon-active.svg);
+            }
         }
 
         &.rejected {
-            background-image: url(../../resources/icons/rejected-icon.svg);
+            &.disabled {
+                background-image: url(../../resources/icons/rejected-icon-inactive.svg);
+                filter: opacity(0.5);
+                cursor: default;
+            }
+
+            &.inactive {
+                background-image: url(../../resources/icons/rejected-icon-inactive.svg);
+            }
+
+            &.active {
+                background-image: url(../../resources/icons/rejected-icon.svg);
+            }
         }
 
-        &.ml {
-            background-image: url(../../resources/icons/ml-control-icon-active.svg);
-            padding-left: 0;
+        &.prediction {
+            &.disabled {
+                background-image: url(../../resources/icons/ml-control-icon-inactive.svg);
+                filter: opacity(0.5);
+                cursor: default;
+            }
+
+            &.inactive {
+                background-image: url(../../resources/icons/ml-control-icon-inactive.svg);
+            }
+
+            &.active {
+                background-image: url(../../resources/icons/ml-control-icon-active.svg);
+            }        
         }
 
-        &:hover {
-            filter: none;
+        &.beautifier {
+            background-image: url(../../resources/icons/plain-text.svg);
         }
-    }
-
-    &.selectable {
-        cursor: pointer;
-    }
-
-    &.disabled {
-        filter: opacity(0.5);
-        cursor: default;
     }
 }

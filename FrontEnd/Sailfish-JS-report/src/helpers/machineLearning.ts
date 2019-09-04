@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-import { InitResponse, SubmittedData } from "../models/MlServiceResponse"
+import { InitResponse, PredictionResponse, SubmittedData, PredictionData } from "../models/MlServiceResponse"
+import topWindow from "./getWindow";
 
 const BASE_ML_API_PATH = "sfapi/machinelearning/v2"
 
@@ -101,7 +102,32 @@ export function fetchToken(workFolder: string, updateTokenAction: (token: string
         .catch(err => console.error("unable to fetch ml token\n" + err));
 }
 
+export function fetchPredictions(token: string, updatePredictionAction: (data: PredictionData[]) => any, actionId?: number) {
+
+    const actionIdParameter = actionId != null ? `?actionId=${actionId}` : null
+
+    fetch(`${getApiPath()}/${token}${actionIdParameter}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        },
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.json()
+            }
+            else {
+                throw new Error(`ml service responded with (${response.status})`);
+            }
+        })
+        .then(json => {
+            let data: PredictionResponse = json;
+            updatePredictionAction(data.predictions);
+        })
+        .catch(err => console.error("unable to get ml predictions\n" + err));
+}
+
 function getApiPath() {
-    const url = new URL(window.top.location.href)
+    const url = new URL(topWindow.location.href)
     return `${url.origin}/${url.pathname.split('/')[1]}/${BASE_ML_API_PATH}`
 }

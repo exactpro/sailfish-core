@@ -15,7 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
-import static com.exactpro.sf.util.DateTimeUtility.toZonedDateTime;
+import com.exactpro.sf.actions.data.DateComponent;
+import com.exactpro.sf.actions.data.DateModificator;
+import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.ResourceAliases;
+import com.exactpro.sf.scriptrunner.AbstractCaller;
+import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
+import com.exactpro.sf.util.DateTimeUtility;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -27,20 +37,16 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.exactpro.sf.actions.data.DateComponent;
-import com.exactpro.sf.actions.data.DateModificator;
-import com.exactpro.sf.aml.Description;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.configuration.ResourceAliases;
-import com.exactpro.sf.scriptrunner.AbstractCaller;
-import com.exactpro.sf.scriptrunner.utilitymanager.UtilityMethod;
-import com.exactpro.sf.util.DateTimeUtility;
+import static com.exactpro.sf.util.DateTimeUtility.toZonedDateTime;
 
 /**
  *
@@ -172,7 +178,12 @@ public class DateUtil extends AbstractCaller {
         "Thе &plusmn; means either a plus or a minus symbol.<br/>" +
         "The maximum supported range is from +18:00 to -18:00 inclusive.<br/><br/>" +
         "For example, <code>+03:30</code><br/>";
-    
+
+    private static final String WEEKEND_DAYS_OF_WEEK = "By default, weekends are SATURDAY and SUNDAY. If you want to specify custom weekends, please list them by comma.<br>"
+            + "The available days are SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY and SATURDAY.<br>";
+
+    private static final Set<DayOfWeek> DEFAULT_WEEKENDS = Collections.unmodifiableSet(EnumSet.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY));
+
     @Description("Returns the current time in the UTC time zone<br/>Example: #{getTime()}")
     @UtilityMethod
     public LocalTime getTime() {
@@ -275,29 +286,41 @@ public class DateUtil extends AbstractCaller {
         return DateTimeUtility.toLocalDateTime(modifyTemporal(DateTimeUtility.nowZonedDateTime(timeZoneId), modifyPattern));
     }
 
-    @Description("Returns the current date/time in the UTC time zone modified according to a pattern (weekends are skipped during modification)." + MODIFY_HELP + "Example: #{getBusinessDateTime(modifyPattern)}")
+    @Description("Returns the current date/time in the UTC time zone modified according to a pattern (weekends are skipped during modification).<br>"
+            + WEEKEND_DAYS_OF_WEEK
+            + MODIFY_HELP + "Example: #{getBusinessDateTime(\"modifyPattern\")} - default weekends.<br>"
+            + "#{getBusinessDateTime(\"modifyPattern\", \"SUNDAY\")} - custom weekends")
     @UtilityMethod
-    public final LocalDateTime getBusinessDateTime(String modifyPattern) {
-        return modifyBusinessDateTime(getDateTime(), modifyPattern);
+    public final LocalDateTime getBusinessDateTime(String modifyPattern, String... weekends) {
+        return modifyBusinessDateTime(getDateTime(), modifyPattern, weekends);
     }
 
-    @Description("Returns the current date/time in the UTC time zone modified according to a pattern after applying time zone offset (DST aware). weekends are skipped during modification." + MODIFY_HELP + "Example: #{getBusinessDateTimeByZoneId(modifyPattern, timeZoneId)}")
+    @Description("Returns the current date/time in the UTC time zone modified according to a pattern after applying time zone offset (DST aware). Weekends are skipped during modification.<br>"
+            + WEEKEND_DAYS_OF_WEEK
+            + MODIFY_HELP + "Example: #{getBusinessDateTimeByZoneId(\"modifyPattern\", \"timeZoneId\")} - default weekends.<br>"
+            + "#{getBusinessDateTimeByZoneId(\"modifyPattern\", \"timeZoneId\", \"SUNDAY\")} - custom weekends")
     @UtilityMethod
-    public final LocalDateTime getBusinessDateTimeByZoneId(String modifyPattern, String timeZoneId) {
-        return modifyBusinessDateTimeByZoneId(getDateTime(), modifyPattern, timeZoneId);
+    public final LocalDateTime getBusinessDateTimeByZoneId(String modifyPattern, String timeZoneId, String... weekends) {
+        return modifyBusinessDateTimeByZoneId(getDateTime(), modifyPattern, timeZoneId, weekends);
     }
 
-    @Description("Modifies provided date time in the UTC time zone modified according to a pattern (weekends are skipped during modification)" + MODIFY_HELP + "Usage: #{modifyBusinessDateTime(dateTime, modifyPattern)}")
+    @Description("Modifies provided date time in the UTC time zone modified according to a pattern (weekends are skipped during modification).<br>"
+            + WEEKEND_DAYS_OF_WEEK
+            + MODIFY_HELP + "Usage: #{modifyBusinessDateTime(dateTime, \"modifyPattern\")} - default weekends.<br>"
+            + "#{modifyBusinessDateTime(dateTime, \"modifyPattern\", \"SUNDAY\")} - custom weekends")
     @UtilityMethod
-    public final LocalDateTime modifyBusinessDateTime(LocalDateTime dateTime, String modifyPattern) {
-        return getBusinessDateTime(dateTime, modifyDateTime(dateTime, modifyPattern));
+    public final LocalDateTime modifyBusinessDateTime(LocalDateTime dateTime, String modifyPattern, String... weekends) {
+        return getBusinessDateTime(dateTime, modifyDateTime(dateTime, modifyPattern), weekends);
     }
 
-    @Description("Modifies provided date time in the UTC time zone modified according to a pattern after applying time zone offset (DST aware). weekends are skipped during modification." + MODIFY_HELP + "Usage: #{modifyBusinessDateTimeByZoneId(dateTime, modifyPattern, timeZoneId)}")
+    @Description("Modifies provided date time in the UTC time zone modified according to a pattern after applying time zone offset (DST aware). Weekends are skipped during modification.<br>"
+            + WEEKEND_DAYS_OF_WEEK
+            + MODIFY_HELP + "Usage: #{modifyBusinessDateTimeByZoneId(dateTime, \"modifyPattern\", \"timeZoneId\")} - default weekends.<br>"
+            + "#{modifyBusinessDateTimeByZoneId(dateTime, \"modifyPattern\", \"timeZoneId\", \"SUNDAY\")} - custom weekends")
     @UtilityMethod
-    public final LocalDateTime modifyBusinessDateTimeByZoneId(LocalDateTime dateTime, String modifyPattern, String timeZoneId) {
+    public final LocalDateTime modifyBusinessDateTimeByZoneId(LocalDateTime dateTime, String modifyPattern, String timeZoneId, String... weekends) {
         LocalDateTime originalConverted = ZonedDateTime.of(dateTime, ZoneOffset.UTC).withZoneSameInstant(ZoneId.of(timeZoneId)).toLocalDateTime();
-        LocalDateTime targetTimezoneZoneResult = getBusinessDateTime(originalConverted, modifyTemporal(originalConverted, modifyPattern));
+        LocalDateTime targetTimezoneZoneResult = getBusinessDateTime(originalConverted, modifyTemporal(originalConverted, modifyPattern), weekends);
         return ZonedDateTime.of(targetTimezoneZoneResult, ZoneId.of(timeZoneId)).withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
     }
 
@@ -580,9 +603,10 @@ public class DateUtil extends AbstractCaller {
     @Description("Formats time in the UTC time zone modified according to a pattern into a string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatTimeByZoneId(time, formatPattern, modifyPattern, timeZoneId)}")
     @UtilityMethod
     public String formatTimeByZoneId(LocalTime time, String formatPattern, String modifyPattern, String timeZoneId) {
-        LocalDateTime localDateTime = toDateTime(time);
-        localDateTime = modifyDateTimeByZoneId(localDateTime, modifyPattern, timeZoneId);
-        return formatDateTime(localDateTime, formatPattern);
+        LocalDateTime dateTime = toDateTime(time);
+        dateTime = modifyDateTimeByZoneId(dateTime, modifyPattern, timeZoneId);
+
+        return formatDateTimeByZoneId(dateTime, formatPattern, timeZoneId);
     }
 
     @Description("Formats date in the UTC time zone into a string using format pattern." + FORMAT_HELP + "Example: #{formatDate(date, formatPattern)}")
@@ -600,9 +624,10 @@ public class DateUtil extends AbstractCaller {
     @Description("Formats date in the UTC time zone modified according to a pattern into a string using format pattern after applying time zone offset (DST aware)." + FORMAT_HELP + MODIFY_HELP + "Example: #{formatDateByZoneId(date, formatPattern, modifyPattern, timeZoneId)}")
     @UtilityMethod
     public String formatDateByZoneId(LocalDate date, String formatPattern, String modifyPattern, String timeZoneId) {
-        LocalDateTime time = toDateTime(date);
-        time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
-        return formatDateTime(time, formatPattern);
+        LocalDateTime dateTime = toDateTime(date);
+        dateTime = modifyDateTimeByZoneId(dateTime, modifyPattern, timeZoneId);
+
+        return formatDateTimeByZoneId(dateTime, formatPattern, timeZoneId);
     }
 
     @Description("Formats date/time in the UTC time zone into a string using format pattern." + FORMAT_HELP + "Example: #{formatDateTime(dateTime, formatPattern)}")
@@ -621,7 +646,8 @@ public class DateUtil extends AbstractCaller {
     @UtilityMethod
     public String formatDateTimeByZoneId(LocalDateTime dateTime, String formatPattern, String modifyPattern, String timeZoneId) {
         dateTime = modifyDateTimeByZoneId(dateTime, modifyPattern, timeZoneId);
-        return formatDateTime(dateTime, formatPattern);
+
+        return formatDateTimeByZoneId(dateTime, formatPattern, timeZoneId);
     }
 
     @Description("Merges date and time into date/time in the UTC time zone<br/>Example: #{mergeDateTime(date, time)}")
@@ -714,7 +740,9 @@ public class DateUtil extends AbstractCaller {
     public String formatDateTimeByZoneId(String formatPattern, String modifyPattern, String timeZoneId) {
         LocalDateTime time = getDateTime();
         time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
-        return formatDateTime(time, formatPattern);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatPattern).withZone(ZoneId.of(timeZoneId));
+        return time.format(formatter);
     }
 
     @Description("Modifies a date/time string using format and modify patterns." + FORMAT_HELP + MODIFY_HELP + "Example; #{modifyDateTime(source, formatPattern, modifyPattern)}")
@@ -728,7 +756,9 @@ public class DateUtil extends AbstractCaller {
     public String modifyDateTimeByZoneId(String source, String formatPattern, String modifyPattern, String timeZoneId) {
         LocalDateTime time = toDateTime(source);
         time = modifyDateTimeByZoneId(time, modifyPattern, timeZoneId);
-        return formatDateTime(time, formatPattern);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatPattern).withZone(ZoneId.of(timeZoneId));
+        return time.format(formatter);
     }
 
     @Description("Modifies time in the UTC time zone according to a pattern." + MODIFY_HELP + "Example: #{modifyTime(time, modifyPattern)}")
@@ -831,6 +861,21 @@ public class DateUtil extends AbstractCaller {
         return getComponent(source, dateComponent);
     }
 
+    /**
+     * Formats date/time in the UTC time zone into a string using format pattern after applying time zone offset (DST aware).
+     * @param dateTime LocalDateTime in UTC timeZone
+     * @param formatPattern Format pattern
+     * @param timeZoneId Target time zone offset
+     * @return
+     */
+    @NotNull
+    private String formatDateTimeByZoneId(LocalDateTime dateTime, String formatPattern, String timeZoneId) {
+        return DateTimeFormatter
+                .ofPattern(formatPattern)
+                .withZone(ZoneId.of(timeZoneId))
+                .format(ZonedDateTime.of(dateTime, ZoneOffset.UTC));
+    }
+
     private int getComponent(Temporal source, String dateComponent) {
         Objects.requireNonNull(source, "source argument is null");
         Objects.requireNonNull(dateComponent, "dataComponent parameter is null");
@@ -852,7 +897,21 @@ public class DateUtil extends AbstractCaller {
         return formatter.format(source);
     }
 
-    private LocalDateTime getBusinessDateTime(LocalDateTime original, LocalDateTime modified) {
+    private static Set<DayOfWeek> parseWeekends(String[] weekends) {
+        if (weekends != null && weekends.length > 0) {
+            return Stream.of(weekends)
+                    .map(String::toUpperCase)
+                    .map(DayOfWeek::valueOf)
+                    .collect(Collectors.collectingAndThen(Collectors.toSet(), Collections::unmodifiableSet));
+        }
+        return DEFAULT_WEEKENDS;
+    }
+
+    private LocalDateTime getBusinessDateTime(LocalDateTime original, LocalDateTime modified, String[] weekends) {
+        return getBusinessDateTime(original, modified, parseWeekends(weekends));
+    }
+
+    private LocalDateTime getBusinessDateTime(LocalDateTime original, LocalDateTime modified, Collection<DayOfWeek> weekends) {
         LocalDateTime after = DateTimeUtility.toLocalDateTime(modified);
         LocalDateTime iter = DateTimeUtility.toLocalDateTime(original);
 
@@ -867,7 +926,7 @@ public class DateUtil extends AbstractCaller {
         while (past ? !iter.toLocalDate().isBefore(after.toLocalDate()) : !iter.toLocalDate().isAfter(after.toLocalDate())) {
 
             DayOfWeek dayOfWeek = iter.getDayOfWeek();
-            if(dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            if(weekends.contains(dayOfWeek)) {
                 after = after.plusDays(counter);
             }
 

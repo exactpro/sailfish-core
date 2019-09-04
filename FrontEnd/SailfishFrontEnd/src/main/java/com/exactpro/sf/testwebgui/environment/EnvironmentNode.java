@@ -191,14 +191,17 @@ public class EnvironmentNode implements Serializable, Comparable<Object> {
 	public String toString() {
         ToStringBuilder builder = new ToStringBuilder(this, SHORT_PREFIX_STYLE);
 
+        List<String> nodeNames = nodes.stream()
+                .map(EnvironmentNode::getName)
+                .collect(Collectors.toList());
+
         builder.append("name", name);
         builder.append("description", description);
         builder.append("value", value);
         builder.append("variable", variable);
-        builder.append("variableSet", variableSet);
         builder.append("type", type);
         builder.append("id", id);
-        builder.append("nodes", nodes);
+        builder.append("nodes", nodeNames);
         builder.append("status", status);
 
         return builder.toString();

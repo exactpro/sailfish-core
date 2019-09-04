@@ -35,6 +35,7 @@ public class ComparatorSettings {
     private boolean reorderGroups;
     private IDictionaryStructure dictionaryStructure;
     private Set<String> uncheckedFields = Collections.emptySet();
+    private Set<String> ignoredFields = Collections.emptySet();
 
     public IPostValidation getPostValidation() {
         return postValidation;
@@ -116,6 +117,18 @@ public class ComparatorSettings {
     public ComparatorSettings setUncheckedFields(Set<String> uncheckedFields) {
         if(uncheckedFields != null) {
             this.uncheckedFields = ImmutableSet.copyOf(uncheckedFields);
+        }
+
+        return this;
+    }
+
+    public Set<String> getIgnoredFields() {
+        return ignoredFields;
+    }
+
+    public ComparatorSettings setIgnoredFields(Set<String> ignoredFields) {
+        if(ignoredFields != null) {
+            this.ignoredFields = ImmutableSet.copyOf(ignoredFields);
         }
 
         return this;

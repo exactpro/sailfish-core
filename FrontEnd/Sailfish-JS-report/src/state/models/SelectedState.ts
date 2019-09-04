@@ -17,17 +17,26 @@
 import { StatusType } from "../../models/Status";
 import TestCase from '../../models/TestCase';
 import Action from "../../models/Action";
+import SearchResult from "../../helpers/search/SearchResult";
 
 export default interface SelectedState {
+    selectedTestCaseId: string;
     testCase: TestCase;
     actionsId: number[];
     messagesId: number[];
+    verificationId: number;
     checkpointMessageId: number;
     checkpointActionId: number;
     rejectedMessageId: number;
     status: StatusType;
     actionsMap: Map<number, Action>;
     checkpointActions: Action[];
+
+    searchString: string;
+    searchResults: SearchResult;
+    searchResultsCount: number;
+    searchIndex: number;
+    shouldScrollToSearchItem: boolean;
     
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.

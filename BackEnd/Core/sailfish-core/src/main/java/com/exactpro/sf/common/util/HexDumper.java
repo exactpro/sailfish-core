@@ -18,6 +18,8 @@ package com.exactpro.sf.common.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import org.apache.mina.core.buffer.IoBuffer;
 
 public class HexDumper {
@@ -152,5 +154,9 @@ public class HexDumper {
         String result = new HexDumper(data).getBytes();
 
         return truncate ? result + "..." : result;
+    }
+
+    public static String getHexdump(ByteBuf byteBuf){
+        return getHexdump(ByteBufUtil.getBytes(byteBuf));
     }
 }

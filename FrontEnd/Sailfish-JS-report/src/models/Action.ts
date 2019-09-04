@@ -27,7 +27,9 @@ export enum ActionNodeType {
     VERIFICATION = "verification",
     CUSTOM_MESSAGE = "customMessage",
     LINK = "link",
-    TABLE = "table"
+    TABLE = "table",
+    KNOWN_BUG = "bug",
+    KNOWN_BUG_CATEGORY = "category"
 }
 
 export type ActionNode = Action | UserMessage | Verification | Link | UserTable;
@@ -36,7 +38,7 @@ export default interface Action {
     id?: number;
     matrixId?: string;
     serviceName?: string;
-    actionNodeType: ActionNodeType;
+    actionNodeType: ActionNodeType.ACTION;
     bugs: any[];
     name: string;
     messageType: string;
@@ -50,4 +52,8 @@ export default interface Action {
     subNodes?: ActionNode[];
     checkPointId?: number;
     outcome?: string;
+}
+
+export function isAction(action: ActionNode): action is Action {
+    return action.actionNodeType === ActionNodeType.ACTION;
 }

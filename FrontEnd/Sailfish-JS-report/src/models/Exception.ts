@@ -15,9 +15,9 @@
  ******************************************************************************/
 
 export default interface Exception {
-    actionNodeType?: string;
+    actionNodeType: string;
     message: string;
-    cause?: any;
+    cause?: Exception;
     stacktrace?: string;
     class?: string;
 }

@@ -636,6 +636,8 @@ public class WaitAction {
     	compSettings.setNegativeMap(actionContext.getNegativeMap());
     	compSettings.setReorderGroups(actionContext.isReorderGroups());
     	compSettings.setUncheckedFields(actionContext.getUncheckedFields());
+    	compSettings.setIgnoredFields(actionContext.getIgnoredFields());
+
         return compSettings;
     }
 

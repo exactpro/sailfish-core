@@ -21,6 +21,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,6 +200,8 @@ public class TestITCHClientPositive extends TestITCHClientBase {
     }
 
 
+    //FIXME: Flaky test should be refactored to improve its reliability
+    @Ignore("Flaky test should be refactored to improve its reliability")
     @Test
     public void testReconnectionSetting() throws Exception{
         logger.info("Start testReconnectionSetting()");

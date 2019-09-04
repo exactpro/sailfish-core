@@ -19,7 +19,20 @@ export default interface Tree<T> {
     readonly nodes?: Array<Tree<T>>;
 }
 
-export const createNode = <T>(value: T): Tree<T> => ({
+export const createNode = <T>(value: T, nodes: Array<Tree<T>> = []): Tree<T> => ({
     value: value,
-    nodes: []
+    nodes: nodes
 });
+
+export function mapTree<IN, OUT>(fn: (node: IN) => OUT, tree: Tree<IN>): Tree<OUT> {
+    const newValue = fn(tree.value);
+
+    if (tree.nodes.length === 0) {
+        return createNode(newValue);
+    }
+
+    return createNode(
+        newValue,
+        tree.nodes.map(node => mapTree(fn, node))
+    );
+}

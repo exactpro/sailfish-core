@@ -22,23 +22,24 @@
 export function createSelector(className: string, ...modifiers: string[]): string {
     // we filter out empty modifiers to create selector without insignificant spaces
 
-    return [
-        className,
-        ...modifiers.filter(Boolean).map(modifier => modifier.toLowerCase())
-    ].join(' ');
+    return className + joinModifiers(modifiers);
 }
 
-export function joinModifiers(...modifiers: string[]): string {
+export function createTriStateControlClassName(baseName: string, isActive: boolean, isEnabled?: boolean) {
+    return createSelector(baseName, (isEnabled != null && !isEnabled) ? "disabled" : ( isActive ? "active" : "inactive" ))
+}
+
+export function joinModifiers(modifiers: string[]): string {
     return modifiers
-        .filter(modifier => !!modifier)
+        .filter(Boolean)
         .map(modifier => ' ' + modifier.toLowerCase())
         .join('');
 }
 
-export function createBemBlock(name: string, ...modifiers: string[]): string {
-    return name + joinModifiers(...modifiers);
+export function createBemBlock(blockName: string, ...modifiers: string[]): string {
+    return blockName + joinModifiers(modifiers);
 } 
 
 export function createBemElement(blockName: string, elementName: string, ...modifiers: string[]): string {
-    return `${blockName}__${elementName}${joinModifiers(...modifiers)}`;
+    return `${blockName}__${elementName}${joinModifiers(modifiers)}`;
 }

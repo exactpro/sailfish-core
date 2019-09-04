@@ -290,12 +290,14 @@ task generateTest_aml_Dictionaries{
 task generateService_Dictionaries{
 	def dictionaries = fileTree ("${dictionaryDir}") {
         include 'service_dictionary.xml'
+        include 'sailfish_errors_dictionary.xml'
     }
 
     configureGenerateSailfishMessage(dictionaries, inputs, outputs)
 
     doLast {
         println " Use service_dictionary.xml"
+        println " Use sailfish_errors_dictionary.xml"
         generateSailfishMessage(dictionaries)
     }
 }

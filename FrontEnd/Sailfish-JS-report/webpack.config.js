@@ -17,16 +17,29 @@
 const path = require("path");
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 
+const mode = process.env.NODE_ENV || 'production';
+
 module.exports = {
-  resolve: {
-    extensions: ['.ts', '.js', '.tsx', '.scss']
+  devServer: {
+    watchOptions : {
+      poll: true,
+      ignored: [/node_modules/, 'src/__tests__/']
+    },
+    watchContentBase: true,
+    contentBase: [path.join(__dirname, 'src'), path.join(__dirname, 'build', 'out')],
+    compress: true,
+    port: 9001,
+    host: "0.0.0.0"
   },
   output: {
     path: path.resolve(__dirname, './build/out/'),
     filename: 'bundle.js'
   },
   entry: path.resolve("./src/index.tsx"),
-  mode: process.env.NODE_ENV || 'production',
+  mode: mode,
+  resolve: {
+    extensions: ['.ts', '.tsx', '.scss', '.js', '.jsx']
+  },
   module: {
     rules: [
       { 
@@ -40,16 +53,16 @@ module.exports = {
         use: [
           'style-loader',
           'css-loader',
-          {
+          mode == 'production' ? {
             loader: 'postcss-loader',
             options: {
               config: {
                 path: path.resolve(__dirname, './postcss.config.js')
               }
             }
-          },
+          } : null,
           'sass-loader'
-        ]
+        ].filter(loader => loader)
       },
       {
         test: /\.(woff(2)?|ttf|eot|svg|jpg)(\?v=\d+\.\d+\.\d+)?$/,
@@ -70,6 +83,7 @@ module.exports = {
     })
   ],
   optimization: {
-    usedExports: true
-  }
+    usedExports: mode == 'production'
+  },
+  devtool: mode == 'production' ? undefined : 'eval'
 };

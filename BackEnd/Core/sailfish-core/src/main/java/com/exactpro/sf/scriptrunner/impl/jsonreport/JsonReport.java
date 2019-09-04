@@ -24,12 +24,14 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -53,7 +55,6 @@ import com.exactpro.sf.scriptrunner.IScriptReport;
 import com.exactpro.sf.scriptrunner.LoggerRow;
 import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.OutcomeCollector;
-import com.exactpro.sf.scriptrunner.ReportEntity;
 import com.exactpro.sf.scriptrunner.ReportUtils;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.ScriptRunException;
@@ -70,6 +71,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.KnownBugStatus;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
@@ -101,7 +103,7 @@ public class JsonReport implements IScriptReport {
     private ScriptContext scriptContext;
     private Context context;
     private IReportStats reportStats;
-    private boolean isActionCreated;
+    private AtomicLong isActionCreated = new AtomicLong(0);
     private final Map<Long, Set<Long>> messageToActionIdMap;
     private final IWorkspaceDispatcher dispatcher;
     private final String reportRootDirectoryPath;
@@ -128,7 +130,7 @@ public class JsonReport implements IScriptReport {
     }
 
     @JsonIgnore public boolean isActionCreated() throws UnsupportedOperationException {
-        return isActionCreated;
+        return isActionCreated.get() > 0;
     }
 
     private void assertState(boolean throwException, ContextType... states) {
@@ -281,7 +283,6 @@ public class JsonReport implements IScriptReport {
         TestCase curTestCase = getCurrentContextNode();
         curTestCase.setStatus(new Status(status));
         curTestCase.setFinishTime(Instant.now());
-        reportRoot.getBugs().addAll(curTestCase.getBugs());
 
         exportToFile(curTestCase, curTestCase.getName());
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
@@ -309,9 +310,10 @@ public class JsonReport implements IScriptReport {
         curAction.setOutcome(outcome);
         if (parameters != null) {
             curAction.setParameters(Parameter.fromMessage(parameters));
+            curAction.getRelatedMessages().add(parameters.getMetaData().getId());
         }
         setContext(ContextType.ACTION, curAction);
-        isActionCreated = true;
+        isActionCreated.incrementAndGet();
     }
 
     public void closeAction(StatusDescription status, Object actionResult) {
@@ -325,7 +327,7 @@ public class JsonReport implements IScriptReport {
             reportStats.updateActions(status.getStatus());
         }
 
-        isActionCreated = false;
+        isActionCreated.decrementAndGet();
 
         revertContext();
 
@@ -388,11 +390,12 @@ public class JsonReport implements IScriptReport {
             else {
                 logger.warn("comparison result does not contain metadata - name='{}', description='{}'", name, description);
             }
+
             Set<BugDescription> reproduced = result.getReproducedBugs();
             Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
 
-            curNode.addSubNodes(reproduced.stream().map(d -> new Bug(d).markAsReproduced()).collect(Collectors.toList()));
-            curNode.addSubNodes(notReproduced.stream().map(Bug::new).collect(Collectors.toList()));
+            curNode.addSubNodes(reproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.REPRODUCED)).collect(Collectors.toList()));
+            curNode.addSubNodes(notReproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.NOT_REPRODUCED)).collect(Collectors.toList()));
 
             curVerification.setEntries(result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList()));
         }
@@ -440,6 +443,7 @@ public class JsonReport implements IScriptReport {
 
         if (message != null) {
             ((Action) getCurrentContextNode()).setParameters(Parameter.fromMessage(message));
+            ((Action) getCurrentContextNode()).getRelatedMessages().add(message.getMetaData().getId());
         }
     }
 
@@ -461,7 +465,7 @@ public class JsonReport implements IScriptReport {
 
             if (currentNode instanceof TestCase) {
                 for (Message message : messages) {
-                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent(message.getId(), k -> new HashSet<>()));
+                    message.setRelatedActions(messageToActionIdMap.computeIfAbsent (message.getId(), k -> new HashSet<>()));
                 }
             }
             currentNode.addSubNodes(messages);

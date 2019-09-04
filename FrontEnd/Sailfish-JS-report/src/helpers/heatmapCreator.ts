@@ -47,7 +47,7 @@ export function testCasesHeatmap(testCases: TestcaseMetadata[]): Map<number, Sta
 
     testCases.forEach((metadata, idx) => {
         // skip only passed testcases on heatmap
-        if (metadata.status.status != 'PASSED') {
+        if (metadata.status.status != StatusType.PASSED) {
             heatmap.set(idx, metadata.status.status);
         }
     });

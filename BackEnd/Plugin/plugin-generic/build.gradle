@@ -29,6 +29,16 @@ test {
 }
 
 validateDictionary {
+    dependsOn(convertFixOrchestraToSailfishDictionary)
+  
     validate(NTG_VALIDATOR, 'NTG_GENERIC.xml')
     validate(ITCH_VALIDATOR, 'ITCH_GENERIC.xml')
+}
+
+convertFixOrchestraToSailfishDictionary {
+
+    fixtXml = uri('https://raw.githubusercontent.com/quickfix/quickfix/master/spec/FIXT11.xml')
+    orchestraXml = uri('https://raw.githubusercontent.com/FIXTradingCommunity/orchestrations/master/FIX%20Standard/FixRepository50SP2.xml')
+    fileSuffix = 'GENERIC'
+    outputDirectory = genDictionaryDir
 }

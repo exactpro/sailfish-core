@@ -23,6 +23,7 @@ import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureType;
+import com.exactpro.sf.common.util.EPSCommonException;
 
 /**
  * This structure should be immutable
@@ -52,6 +53,15 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
         this.fields = fields != null ? Collections.unmodifiableMap(fields) : Collections.emptyMap();
 		this.reference = reference;
+
+		this.fields.forEach((fName, fStructure) -> {
+		    if (fStructure instanceof IMessageStructure) {
+                Map<String, IFieldStructure> structureFields = fStructure.getFields();
+                if (structureFields != null && !structureFields.isEmpty() && fStructure.getReferenceName() == null) {
+                    throw new EPSCommonException("Message structure cant have a fields. Put it over reference");
+                }
+            }
+        });
 	}
 
 	@Override

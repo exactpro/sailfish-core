@@ -169,3 +169,70 @@
         background: $tableBodyBackground;
     }
 }
+
+@mixin spinner($thikness, $outer-color, $inner-color, $duration: 1s) {
+    border: $thikness solid $outer-color;
+    border-top: $thikness solid $inner-color;
+    border-radius: 50%;
+    animation: spin $duration linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@mixin carousel-control {
+  display: flex;
+  flex-direction: row;
+
+  font-size: 15px;
+  font-weight: bold;
+  white-space: nowrap;
+
+  &__icon {
+    filter: opacity(0.7);
+    height: 20px;
+    width: 20px;
+    background-size: 100%;
+    background-repeat: no-repeat;
+    margin: 0 7px;
+    cursor: pointer;
+
+    &.prev {
+      background-image: url(../../resources/icons/arr1-left.svg);
+    }
+
+    &.next {
+      background-image: url(../../resources/icons/arr1-right.svg)
+    }
+
+    &.disabled {
+      filter: opacity(0.5);
+      cursor: default;
+    }
+  }
+
+  &__title {
+    color: $failedTextColor;
+
+    &.disabled {
+      color: $primaryTextColor;
+      filter: opacity(0.5);
+    }
+  }
+}
+
+@mixin clickable {
+    cursor: pointer;
+    border-radius: 2px;
+
+    &:hover {
+        background-color: $clickableHoverBackground;
+    }
+}

@@ -16,11 +16,13 @@
 
 import SelectedState from '../state/models/SelectedState';
 import { initialSelectedState } from '../state/initial/initialSelectedState';
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import { nextCyclicItem } from '../helpers/array';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/actionType';
+import SearchResult from '../helpers/search/SearchResult';
+import getScrolledIndex from '../helpers/search/getScrolledIndex';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -40,17 +42,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsMap: generateActionsMap(getActions(stateAction.testCase.actions))
             }
         }
-
-        case StateActionTypes.SET_TEST_CASE_PATH: {
-            return {
-                ...state,
-                testCase: initialSelectedState.testCase
-            }
-        }
-
-        case StateActionTypes.RESET_TEST_CASE:
-        case StateActionTypes.PREV_TEST_CASE:
-        case StateActionTypes.NEXT_TEST_CASE: {
+    
+        case StateActionTypes.RESET_TEST_CASE: {
             return {
                 ...initialSelectedState,
             }
@@ -71,6 +64,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 actionsId: [stateAction.action.id],
                 status: stateAction.action.status.status,
                 messagesId: stateAction.action.relatedMessages,
+                verificationId: initialSelectedState.verificationId,
                 scrolledActionId: initialSelectedState.scrolledActionId,
                 scrolledMessageId: new Number(scrolledMessageId),
                 activeActionId: stateAction.action.id
@@ -105,36 +99,47 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 messagesId: [stateAction.message.id],
                 status: stateAction.status,
+                actionsId: relatedActions,
+                verificationId: stateAction.message.id,
                 scrolledActionId: new Number(scrolledAction),
                 scrolledMessageId: initialSelectedState.scrolledMessageId,
-                actionsId: relatedActions,
                 activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId
-
             }
         }
 
         case StateActionTypes.SELECT_VERIFICATION: {
             return {
                 ...state,
+                verificationId: stateAction.messageId,
                 messagesId: [stateAction.messageId],
                 status: stateAction.status,
                 actionsId: initialSelectedState.actionsId,
                 scrolledMessageId: new Number(stateAction.messageId),
-                activeActionId: stateAction.actionId
-
+                activeActionId: stateAction.rootActionId
             }
         }
 
-        case StateActionTypes.SELECT_CHECKPOINT: {
-
-            const checkpointMessageId = stateAction.checkpointAction.relatedMessages[0] || null;
+        case StateActionTypes.SELECT_CHECKPOINT_ACTION: {
+            const { relatedMessages, id } = stateAction.action;
 
             return {
                 ...state,
-                checkpointMessageId: checkpointMessageId,
-                scrolledMessageId: new Number(checkpointMessageId),
-                checkpointActionId: stateAction.checkpointAction.id,
-                scrolledActionId: new Number(stateAction.checkpointAction.id)
+                checkpointMessageId: relatedMessages[0] || null,
+                scrolledMessageId: relatedMessages[0] != null ? new Number(relatedMessages[0]) : null,
+                checkpointActionId: id,
+                scrolledActionId: new Number(stateAction.action.id)
+            }
+        }
+
+        case StateActionTypes.SELECT_CHECKPOINT_MESSAGE: {
+            const { relatedActions, id } = stateAction.message;
+
+            return {
+                ...state,
+                checkpointMessageId: id,
+                scrolledMessageId: new Number(id),
+                checkpointActionId: relatedActions[0] || null,
+                scrolledActionId: relatedActions[0] != null ? new Number(relatedActions[0]) : null
             }
         }
 
@@ -143,6 +148,83 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 rejectedMessageId: stateAction.messageId,
                 scrolledMessageId: new Number(stateAction.messageId)
+            }
+        }
+
+        case StateActionTypes.SET_SEARCH_STRING: {
+            return {
+                ...state,
+                searchString: stateAction.searchString,
+                searchResults: new SearchResult(),
+                searchResultsCount: 0,
+                searchIndex: null
+            }
+        }
+
+        case StateActionTypes.SET_SEARCH_RESULTS: {
+            const { searchResults } = stateAction, 
+                searchResultsCount = searchResults.sum(),  
+                searchIndex = searchResultsCount > 0 ? 0 : null,
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(searchResults, searchIndex);
+
+            return {
+                ...state,
+                searchResults,
+                searchIndex,
+                searchResultsCount,
+                scrolledActionId: actionId,
+                scrolledMessageId: msgId,
+                shouldScrollToSearchItem: true
+            }
+        }
+
+        case StateActionTypes.CLEAR_SEARCH: {
+            return {
+                ...state,
+                searchResults: new SearchResult(),
+                searchIndex: null,
+                searchString: '',
+                searchResultsCount: null
+            }
+        }
+
+        case StateActionTypes.NEXT_SEARCH_RESULT: {
+            const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
+
+            return {
+                ...state,
+                searchIndex: targetIndex,
+                scrolledMessageId: msgId,
+                scrolledActionId: actionId,
+                shouldScrollToSearchItem: true
+            }
+        }
+
+        case StateActionTypes.PREV_SEARCH_RESULT: {            
+            const targetIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
+
+            return {
+                ...state,
+                searchIndex: targetIndex,
+                scrolledMessageId: msgId,
+                scrolledActionId: actionId,
+                shouldScrollToSearchItem: true
+            }
+        }
+
+        case StateActionTypes.SET_SHOULD_SCROLL_TO_SEARCH_ITEM: {
+            return {
+                ...state,
+                shouldScrollToSearchItem: stateAction.isNeedsScroll 
+            }
+        }
+        
+        case StateActionTypes.SET_SELECTED_TESTCASE: {
+            return  {
+                ...state,
+                selectedTestCaseId: stateAction.testCaseId
             }
         }
 

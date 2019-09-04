@@ -45,6 +45,7 @@ import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.services.tcpip.MessageParseException;
@@ -104,7 +105,7 @@ public class FixCodecTest extends AbstractTest {
 
         TCPIPSettings settings = new TCPIPSettings();
 
-        this.msgFactory = DefaultMessageFactory.getFactory();
+        this.msgFactory = new FixMessageFactory();
 
         this.codec = new FIXCodec();
         codec.init(serviceContext, settings, msgFactory, dictionary);

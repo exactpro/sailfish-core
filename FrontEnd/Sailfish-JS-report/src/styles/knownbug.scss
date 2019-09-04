@@ -1,0 +1,62 @@
+@import "./common/vars";
+
+.known-bugs__indicator {
+    grid-area: bugs-indicator;
+
+    background-size: 22px;
+    background-repeat: no-repeat;
+    background-position: center;
+    
+    height: 35px;
+    width: 55px; 
+
+    &.reproduced {
+        background-image: url(../../resources/icons/known-bug-reproduced.svg);
+    }
+
+    &.not-reproduced {
+        background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
+    }
+}
+
+.known-bugs {
+    grid-area: bugs-summary;
+
+    &__category {
+        display: grid;
+        grid-template: auto / auto 1fr;
+        grid-template-areas: "title container";
+
+        &__name {
+            grid-area: title;
+            padding: 5px;
+        }
+
+        &__container {
+            grid-area: container;
+
+            &__bugs {
+                display: flex;
+            }
+        }
+    }
+
+    &__bug {
+        border-radius: 2px;
+        height: 32px;
+        line-height: 22px;
+
+        padding: 5px;
+        margin: 2px;
+
+        &.reproduced {
+            color: $conditionallyPassedTextColor;
+            background-color: $conditionallyPassedHeaderSecondaryBackground;
+        }
+
+        &.not-reproduced {
+            color: $primaryTextColor;
+            background-color: $defaultCardBackground;
+        }
+    }
+}

@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages;
 
+import java.util.Collections;
 import java.util.Set;
 
 import com.exactpro.sf.configuration.suri.SailfishURI;
@@ -31,7 +32,19 @@ public interface IMessageFactory
 
 	void fillMessageType(IMessage message);
 
+    /***
+     * Set of fields will be ignored when fail unxpected used
+     * @return set as described
+     */
 	Set<String> getUncheckedFields();
+
+    /***
+     * Set of fields which will be excluded from comparison when {@link com.exactpro.sf.comparison.MessageComparator} will be invoked
+     * @return set of ignored fields
+     */
+	default Set<String> getIgnoredFields() {
+	    return Collections.emptySet();
+    }
 
     String getNamespace();
 

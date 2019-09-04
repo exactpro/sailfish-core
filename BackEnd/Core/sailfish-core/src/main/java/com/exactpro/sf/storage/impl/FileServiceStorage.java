@@ -55,8 +55,11 @@ import com.exactpro.sf.storage.StorageFilter;
 import com.exactpro.sf.storage.StorageResult;
 import com.exactpro.sf.storage.util.ServiceStorageHelper;
 import com.google.common.collect.ImmutableList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileServiceStorage implements IServiceStorage {
+    private static final Logger logger = LoggerFactory.getLogger(FileServiceStorage.class);
     private static final String EVENTS_DIR = "events";
     private static final String SERVICES_DIR = "services";
     private static final int BUFFER_SIZE = 50;
@@ -156,7 +159,9 @@ public class FileServiceStorage implements IServiceStorage {
                 eventsLock.writeLock().unlock();
             }
         } catch(Exception e) {
-            throw new StorageException("Failed to add service: " + serviceName, e);
+            rollbackPartiallyCreatedService(serviceName);
+            throw new StorageException(
+                    String.format("Failed to add service: %s. Reason: %s", serviceName, e.getMessage()), e);
         } finally {
             descriptionLock.writeLock().unlock();
         }
@@ -374,6 +379,18 @@ public class FileServiceStorage implements IServiceStorage {
             flusherLock.writeLock().unlock();
             eventsLock.writeLock().unlock();
             descriptionLock.writeLock().unlock();
+        }
+    }
+
+    private void rollbackPartiallyCreatedService(ServiceName serviceName) {
+        descriptionMap.remove(serviceName);
+        if (dispatcher.exists(FolderType.ROOT, path, SERVICES_DIR, serviceName.toString())) {
+            try {
+                dispatcher.removeFile(FolderType.ROOT, path, SERVICES_DIR, serviceName.toString());
+            } catch (IOException e) {
+                logger.error("Could not remove [{}/{}/{}] service file of partially created service",
+                        path, SERVICES_DIR, serviceName, e);
+            }
         }
     }
 

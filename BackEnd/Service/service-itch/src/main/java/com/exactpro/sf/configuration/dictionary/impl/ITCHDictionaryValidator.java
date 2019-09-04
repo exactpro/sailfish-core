@@ -370,6 +370,14 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                         }
 
                         break;
+                case UINTXX:
+                    checkJavaType(errors, message, field, JavaType.JAVA_MATH_BIG_DECIMAL, javaType);
+
+                    if (length == null) {
+                        addProtocolTypeError(errors, message, field, type, "non null and greater than zero", String.valueOf(length));
+                    }
+
+                    break;
                 }
             }
         } catch (Exception e) {
@@ -381,6 +389,12 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
                                       int expectedLength, int actualLength) {
+        addProtocolTypeError(errors, message, field, type, String.valueOf(expectedLength), String.valueOf(actualLength));
+
+    }
+
+    private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
+            String expectedLength, String actualLength) {
         errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
                 "Attribute <strong>\"Length\"</strong> for type <strong>\"" + type
                         + "\"</strong> has incorrect value = [" + actualLength + "]. Must be [" + expectedLength + "]",

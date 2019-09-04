@@ -42,7 +42,6 @@ import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.ErrorUtil;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -90,7 +89,7 @@ public class ServiceUtil {
         }
 
         if (e != null && logger.isErrorEnabled()) {
-            logger.error("Service {} have got error {}", service, ErrorUtil.formatException(e));
+            logger.error("Service {} have got error {}", service, e.getMessage(), e);
         }
 
         logger.info("Service {} status is {}", service, status);

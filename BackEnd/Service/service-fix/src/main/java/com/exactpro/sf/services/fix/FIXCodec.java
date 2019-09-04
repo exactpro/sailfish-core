@@ -51,8 +51,10 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.ICommonSettings;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.messages.service.ErrorMessage;
 import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.converter.dirty.struct.RawMessage;
@@ -76,7 +78,7 @@ public class FIXCodec extends AbstractCodec {
 	public static final String SUB_CONDITIONS_DELIMETER = ",";
 
 	private TCPIPSettings settings;
-	private IMessageFactory msgFactory;
+	private FixMessageFactory msgFactory;
 	private IFieldConverter fieldConverter;
     private IDictionaryStructure dictionary;
     private DirtyQFJIMessageConverter qfjConverter;
@@ -87,25 +89,26 @@ public class FIXCodec extends AbstractCodec {
     private final DocumentBuilderFactory documentFactory = DocumentBuilderFactory.newInstance();
 
     @Override
-	public void init(IServiceContext serviceContext, ICommonSettings settings,
-			IMessageFactory msgFactory, IDictionaryStructure dictionary) {
+    public void init(IServiceContext serviceContext, ICommonSettings settings, IMessageFactory msgFactory, IDictionaryStructure dictionary) {
         if (!(settings instanceof TCPIPSettings)) {
             throw new IllegalStateException("settings is not TCPIPSettings. settings is " + settings.getClass().getName());
         }
-		if (msgFactory == null) {
-		    throw new IllegalStateException("MessageFactory can not be null");
-		}
 
-		this.settings = (TCPIPSettings)settings;
+        this.settings = (TCPIPSettings)settings;
 
-		FixPropertiesReader.loadAndSetCharset(serviceContext);
+        FixPropertiesReader.loadAndSetCharset(serviceContext);
 
-        this.msgFactory = msgFactory;
-		this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
-		this.fieldConverter = new FixFieldConverter();
+        if (!(msgFactory instanceof FixMessageFactory)) {
+            throw new ServiceException(String.format("FixCodec requires FixMessageFactory, but got '%s' instead", msgFactory.getClass().getCanonicalName()));
+        }
+
+        this.msgFactory = (FixMessageFactory) msgFactory;
+
+        this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
+        this.fieldConverter = new FixFieldConverter();
         fieldConverter.init(dictionary, dictionary.getNamespace());
-		this.qfjConverter = new DirtyQFJIMessageConverter(dictionary, msgFactory, false, false, false);
-		this.msgStructures = new HashMap<>();
+        this.qfjConverter = new DirtyQFJIMessageConverter(dictionary, this.msgFactory, false, false, false);
+        this.msgStructures = new HashMap<>();
 
         messagesWithXmlField.clear();
 
@@ -125,7 +128,7 @@ public class FIXCodec extends AbstractCodec {
 
         String filterValues = this.settings.getFilterMessages();
         messageFilter = StringUtils.isNotEmpty(filterValues) ? new TagValueFilter(filterValues) : new FakeFilter();
-	}
+    }
 
 	public static String getFixString(IoBuffer in) throws MessageParseException {
 	    int offset = in.position();

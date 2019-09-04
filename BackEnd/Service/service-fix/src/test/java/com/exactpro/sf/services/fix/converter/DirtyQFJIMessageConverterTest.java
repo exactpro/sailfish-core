@@ -40,6 +40,7 @@ import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.converter.dirty.FieldConst;
 import com.exactpro.sf.services.fix.converter.dirty.struct.Field;
@@ -64,7 +65,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
-    private final IMessageFactory messageFactory = DefaultMessageFactory.getFactory();
+    private final FixMessageFactory messageFactory = new FixMessageFactory();
 
     private static DataDictionary dataDictionary;
     private static IDictionaryStructure dictionary;

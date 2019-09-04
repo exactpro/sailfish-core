@@ -58,6 +58,7 @@ public class ActionContextWrapper implements IActionContext{
     private MetaContainer metaContainer;
     private long timeout;
     private Set<String> unchekedFields = Collections.emptySet();
+    private Set<String> ignoredFields = Collections.emptySet();
     private String reference;
     private String serviceName;
     private IFilter messageCountFilter;
@@ -409,6 +410,16 @@ public class ActionContextWrapper implements IActionContext{
     @Override
     public IActionContext withUncheckedFields(Set<String> uncheckedFields) {
         return actionContext.withUncheckedFields(uncheckedFields);
+    }
+
+    @Override
+    public Set<String> getIgnoredFields() {
+        return ignoredFields;
+    }
+
+    @Override
+    public IActionContext withIgnoredFields(Set<String> ignoredFields) {
+        return actionContext.withIgnoredFields(ignoredFields);
     }
 
     @Deprecated

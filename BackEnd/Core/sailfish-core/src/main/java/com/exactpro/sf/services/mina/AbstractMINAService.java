@@ -56,7 +56,8 @@ public abstract class AbstractMINAService extends AbstractInitiatorService imple
         MINASession session = getSession();
 
         if(session != null && !session.waitClose(getDisconnectTimeout())) {
-            throw new ServiceException(String.format("Service is still connected to - %s:%s", getHostname(), getPort()));
+            logger.error("Service is still connected to - {}:{}", getHostname(), getPort());
+            this.session = null;
         }
     }
 

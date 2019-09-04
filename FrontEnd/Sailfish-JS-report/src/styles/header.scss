@@ -114,6 +114,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        padding-left: 230px;
     }
 
     &__contol-button {
@@ -127,6 +128,10 @@
         -webkit-margin-after:0em;
         font-size: 20px;
         padding: 0 10px;
+    }
+
+    &__search {
+        padding-right: 10px;
     }
 }
 
@@ -202,5 +207,10 @@
         -webkit-margin-before:0em;
         -webkit-margin-after:0em;
         padding-left: 15px;
+    }
+
+    &.disabled {
+        cursor: default;
+        opacity: 0.6;
     }
 }

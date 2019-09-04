@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.exactpro.sf.center.impl.PluginLoader;
+import com.exactpro.sf.center.impl.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,7 +197,7 @@ public class MachineLearningService implements IEmbeddedService {
             // FIXME: Several ML extensions in one Sailfish
             mlPredictor = ServiceLoader.load(MLPredictor.class, extensionML).iterator().next();
             mlPredictor.init(dataManager, dictionaryManager);
-            mlVersion = ServiceLoader.load(IVersion.class, extensionML).iterator().next();
+            mlVersion = PluginLoader.extractVersion(workspaceDispatcher, "ml");
             predictorStatus = ServiceStatus.Connected;
         } catch (Throwable e) {
             logger.error(e.getMessage(), e);

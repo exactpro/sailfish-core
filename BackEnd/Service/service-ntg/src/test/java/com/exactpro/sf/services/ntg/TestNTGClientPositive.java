@@ -20,6 +20,7 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -265,6 +266,8 @@ public class TestNTGClientPositive extends TestNTGClientBase {
     /**
      * Test timeout of waiting any message from server before sending heartbeat
      */
+    //FIXME: Flaky test should be refactored to improve its reliability
+    @Ignore("Flaky test should be refactored to improve its reliability")
     @Test
     public void testHeartbeatTimeout() throws InterruptedException {
         try {

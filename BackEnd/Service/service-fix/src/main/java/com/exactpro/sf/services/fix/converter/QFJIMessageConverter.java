@@ -37,9 +37,11 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.FixUtil;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
@@ -74,7 +76,7 @@ public class QFJIMessageConverter
 	protected final int[] fieldOrderTrailer;
 	
 	protected final IDictionaryStructure dictionary;
-	protected final IMessageFactory factory;
+	protected final FixMessageFactory factory;
 	private final boolean verifyTags;
 	protected final boolean includeMilliseconds;
 	protected final boolean includeMicroseconds;
@@ -87,16 +89,16 @@ public class QFJIMessageConverter
 
 	private final List<Integer> tagsToSkip = Arrays.asList(MsgSeqNum.FIELD, BodyLength.FIELD, CheckSum.FIELD);
 
-	public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
+	public QFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
 	    this(dictionary, factory, verifyTags, includeMilliseconds, false, skipTags);
 	}
 
-	public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
+	public QFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
             boolean verifyTags, boolean includeMilliseconds, boolean includeMicroseconds, boolean skipTags) {
 	    this(dictionary, factory, verifyTags, includeMilliseconds, includeMicroseconds, skipTags, false);
 	}
 	
-    public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
+    public QFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
                                 boolean verifyTags, boolean includeMilliseconds, boolean includeMicroseconds, boolean skipTags, boolean orderingFields) {
         this.dictionary = dictionary;
         this.factory = factory;
@@ -164,48 +166,53 @@ public class QFJIMessageConverter
 
     public IMessage convert(Message message, Boolean verifyTagsOverride, Boolean skipTagsOverride,
             boolean ignoreFieldType) throws MessageConvertException {
-		if(message == null) {
-		    return null;
-		}
 
-		String messageType = null;
+        if(message == null) {
+            return null;
+        }
 
-		try {
-			messageType = message.getHeader().getString(MsgType.FIELD);
-		} catch (FieldNotFound e) {
-			throw new MessageConvertException(message, "Failed to get message type", e);
-		}
+        String messageType = null;
 
-		IMessageStructure messageStructure = typeToStructure.get(messageType);
+        try {
+            messageType = message.getHeader().getString(MsgType.FIELD);
+        } catch (FieldNotFound e) {
+            throw new MessageConvertException(message, "Failed to get message type", e);
+        }
 
-		if(messageStructure == null) {
-			throw new MessageConvertException(message, "Unknown message type: " + messageType);
-		}
+        IMessageStructure messageStructure = typeToStructure.get(messageType);
 
-		IMessage resultMessage = factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
-		IMessage messageHeader = factory.createMessage(FixMessageHelper.HEADER, messageStructure.getNamespace());
-		IMessage messageTrailer = factory.createMessage(FixMessageHelper.TRAILER, messageStructure.getNamespace());
+        if(messageStructure == null) {
+            throw new MessageConvertException(message, "Unknown message type: " + messageType);
+        }
 
-		resultMessage.addField(FixMessageHelper.HEADER, messageHeader);
-		resultMessage.addField(FixMessageHelper.TRAILER, messageTrailer);
+        IMessage resultMessage = message instanceof SailfishQuickfixMessage
+                ? factory.createMessage(((SailfishQuickfixMessage)message).id, messageStructure.getName(), messageStructure.getNamespace())
+                : factory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
 
-		boolean verifyTags = ObjectUtils.defaultIfNull(verifyTagsOverride, this.verifyTags);
-		boolean skipTags = ObjectUtils.defaultIfNull(skipTagsOverride, this.skipTags);
+        IMessage messageHeader = factory.createMessage(FixMessageHelper.HEADER, messageStructure.getNamespace());
+        IMessage messageTrailer = factory.createMessage(FixMessageHelper.TRAILER, messageStructure.getNamespace());
 
-		traverseMessage(resultMessage, message, factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
-		traverseMessage(resultMessage, message.getHeader(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
-		traverseMessage(resultMessage, message.getTrailer(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+        resultMessage.addField(FixMessageHelper.HEADER, messageHeader);
+        resultMessage.addField(FixMessageHelper.TRAILER, messageTrailer);
 
-		// dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
-		resultMessage.getMetaData().setAdmin(message.isAdmin());
-		resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
+        boolean verifyTags = ObjectUtils.defaultIfNull(verifyTagsOverride, this.verifyTags);
+        boolean skipTags = ObjectUtils.defaultIfNull(skipTagsOverride, this.skipTags);
+
+        traverseMessage(resultMessage, message, factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+        traverseMessage(resultMessage, message.getHeader(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+        traverseMessage(resultMessage, message.getTrailer(), factory, resultMessage, verifyTags, skipTags, ignoreFieldType);
+
+
+        // dictionaryName, environment, fromService, toService - will be filled in FixToImessageConvertingHandler
+        resultMessage.getMetaData().setAdmin(message.isAdmin());
+        resultMessage.getMetaData().setRawMessage(FixUtil.getRawMessage(message));
 
         if (message.getException() != null) {
             resultMessage.getMetaData().setRejectReason(message.getException().getMessage());
         }
 
-		return resultMessage;
-	}
+        return resultMessage;
+    }
 
     protected void traverseMessage(IMessage resultMessage, FieldMap message, IMessageFactory factory,
             IMessage rootMessage, boolean verifyTags,
@@ -354,7 +361,7 @@ public class QFJIMessageConverter
 		}
 
         try {
-            Message resultMessage = createInstance(message.getName(), messageClass);
+            Message resultMessage = createInstance(message.getName(), messageClass, message.getMetaData());
 
             traverseIMessage(resultMessage, message);
 
@@ -373,13 +380,15 @@ public class QFJIMessageConverter
         }
     }
 
-    protected Message createInstance(String messageName, Class<? extends Message> messageClass) throws InstantiationException, IllegalAccessException {
-        if(orderingFields && messageClass == Message.class) {
-            IMessageStructure messageStructure = dictionary.getMessages().get(messageName);
-            int[] fieldOrder = getFieldOrderPrimitive(messageStructure);
-            return new SailfishQuickfixMessage(fieldOrder, fieldOrderHeader, fieldOrderTrailer);
-        }
-        return messageClass.newInstance();
+    protected Message createInstance(String messageName, Class<? extends Message> messageClass, MsgMetaData metadata) throws InstantiationException, IllegalAccessException {
+
+        int[] fieldOrder = orderingFields
+                ? getFieldOrderPrimitive(dictionary.getMessages().get(messageName))
+                : null;
+
+        return (messageClass == Message.class)
+                ? new SailfishQuickfixMessage(fieldOrder, fieldOrderHeader, fieldOrderTrailer, metadata.getId())
+                : messageClass.newInstance();
     }
 
     protected void traverseIMessage(FieldMap resultMessage, IMessage message) throws MessageConvertException {

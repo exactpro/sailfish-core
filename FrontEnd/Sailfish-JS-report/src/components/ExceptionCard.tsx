@@ -14,51 +14,87 @@
  * limitations under the License.
  ******************************************************************************/
 
-import {h, Component} from 'preact';
+import * as React from 'react';
 import Exception from '../models/Exception';
+import { createSelector } from '../helpers/styleCreators';
+import StateSaver, { RecoverableElementProps } from './util/StateSaver';
 
 interface Props {
     exception: Exception;
-    drawDivider: boolean;
 }
 
-interface State {
+interface BaseProps extends Props {
     isExpanded: boolean;
+    onExpand: () => any;
 }
 
-export default class ExceptionCard extends Component<Props, State> {
-    toggle() {
-        this.setState({isExpanded: !this.state.isExpanded})
+const ExceptionCardBase = ({ exception, isExpanded, onExpand }: BaseProps) => {
+
+    const expandHandler = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        onExpand();
     }
 
-    render({ exception, drawDivider }: Props, { isExpanded }: State) {
-
-        const divider = (
-                <div class="status-panel-exception-divider">
-                    <div class="status-panel-exception-divider-icon"/>
+    return (
+        <div className="status-panel failed">
+            <div className="status-panel-exception-wrapper">
+                <div className="status-panel-exception-header">
+                    {
+                        isExpanded ? (
+                            <div>{exception.class}: </div>
+                        ) : null
+                    }
+                    <div className={createSelector("status-panel-exception-header-message", exception.message ? "" : "disabled")}>
+                        {exception.message || "No exception message"}
+                    </div>
                 </div>
-        )
-
-        return (
-            <div>
-                {drawDivider? divider : null}
-                <div class="status-panel failed">
-                        <div class="status-panel-exception-wrapper">
-                            <div class="status-panel-exception-header">
-                                <div>{isExpanded? exception.class + ": " : null}</div>
-                                <div>{exception.message}</div>
-                            </div>
-                            <div class="status-panel-exception-expand" onClick={e => this.toggle()}>
-                                <div class="status-panel-exception-expand-title">More</div>
-                                <div class={"status-panel-exception-expand-icon " + (isExpanded ? "expanded" : "hidden")}/>
-                            </div>
-                        </div>
-                        <div style={isExpanded ? null : "display: none"} class="status-panel-exception-stacktrace">
-                            <pre>{exception.stacktrace}</pre>
-                        </div>
+                <div className="status-panel-exception-expand" onClick={expandHandler}>
+                    <div className="status-panel-exception-expand-title">More</div>
+                    <div className={createSelector("status-panel-exception-expand-icon", (isExpanded ? "expanded" : "hidden"))} />
                 </div>
             </div>
-        )
-    }
+            {
+                isExpanded ? (
+                    <div className="status-panel-exception-stacktrace">
+                        <pre>{exception.stacktrace}</pre>
+                    </div>
+                ) : null
+            }
+        </div>
+    )
 }
 
+export const ExceptionCard = ({ exception }: Props) => {
+    const [isExpanded, setIsExpanded] = React.useState(false);
+
+    return (
+        <ExceptionCardBase
+            exception={exception}
+            isExpanded={isExpanded}
+            onExpand={() => setIsExpanded(!isExpanded)}/>
+    )
+}
+
+interface RecoverableProps extends Props, RecoverableElementProps {
+    onExpand?: () => any;
+}
+
+export const RecoverableExceptionCard = ({ stateKey, ...props }: RecoverableProps) => (
+    <StateSaver
+        stateKey={stateKey}
+        getDefaultState={() => false}>
+        {
+            (isExpanded: boolean, setIsExpanded: (boolean) => any) => (
+                <ExceptionCardBase
+                    {...props}
+                    isExpanded={isExpanded}
+                    onExpand={() => {
+                        setIsExpanded(!isExpanded);
+                        props.onExpand && props.onExpand();
+                    }}/>
+            )
+        }
+    </StateSaver>
+)
+
+export default ExceptionCard;

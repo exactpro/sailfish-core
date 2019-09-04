@@ -19,11 +19,17 @@
 
 .message-card {
     @include status-card;
+
+    // lb-count - number of displaying labels - to make offset for name and session 
+    --lb-count: 0;
+    // lb-count variable assgnment through the custom html property
+    &[data-lb-count="0"] { --lb-count: 0; }
+    &[data-lb-count="1"] { --lb-count: 1; }
+    &[data-lb-count="2"] { --lb-count: 2; }
+
     position: relative;
-    margin: 5px 0;
-    border-radius: 5px;
     display: grid;
-    grid-template: auto auto / auto 1fr;
+    grid-template: auto auto / auto calc(100% - var(--lb-count) * 20px);
     grid-template-areas: "mc-labels mc-header"
                          "mc-labels mc-body";
     width: 100%;
@@ -66,7 +72,7 @@
     &__icon {
         height: 14px;
         width: 14px;
-        margin-top: 20px;
+        margin-top: 12px;
         background-size: 100%;
         filter: opacity(0.4);
 
@@ -86,20 +92,25 @@
     &.admin {
         background-color: $adminMessageLabelBackground;
     }
+
+    .ml__prediction {
+        width: 100%;
+
+        &-icon {
+            height: 14px;
+            width: 14px;
+            margin-top: 12px;
+            background-size: 100%;
+
+            background-image: url(../../resources/icons/ml-prediction.svg)
+        }
+    }
 }
 
 .mc-header {
     grid-area: mc-header;
 
-    // lb-count - number of displaying labels - to make offset for name and session 
-    --lb-count: 0;
-    // lb-count variable assgnment through the custom html property
-    &[data-lb-count="0"] { --lb-count: 0; }
-    &[data-lb-count="1"] { --lb-count: 1; }
-    &[data-lb-count="2"] { --lb-count: 2; }
-
     &.default {
-        display: grid;
         padding: 7px 5px 9px 10px;
         position: relative;
         display: grid;
@@ -107,6 +118,7 @@
         grid-template-columns: calc(220px - (var(--lb-count) * 20px)) 40px auto 40px 1fr 40px;
         grid-template-areas: "info name name-value name-value name-value prediction"
                              "timestamp session from session-icon to prediction";
+        align-items: center;
 
         &::after {
             border-bottom: 2px solid $defaultCardBackground;
@@ -204,6 +216,7 @@
         padding-left: 8px;
         font-size: 13px;
         font-weight: bold;
+        word-break: break-all;
     }
 
     &__session, &__name {
@@ -236,8 +249,7 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    
-    
+      
     &__title {
         color: $primaryTextColor;
         font-size: 14px;
@@ -257,16 +269,23 @@
     &__raw {
         width: 100%
     }
+
+    &__beautify-wrapper {
+        @include scrollbar;
+        overflow-x: scroll;
+    }
 }
 
 .mc-show-raw {
     @include unselectable;
+    @include clickable;
+
     float: right;
     display: flex;
     align-items: center;
-    cursor: pointer;
     font-size: 13px;
     color: $primaryTextColor;
+    padding: 0 4px;
 
     &__title {
         font-weight: bold;
@@ -284,6 +303,31 @@
 
         &.hidden {
             background-image: url(../../resources/icons/arr4-down.svg);
+        }
+    }
+}
+
+.mc-beautify {
+    @include clickable;
+
+    float: right;
+    height: 26px;
+    width: 26px;
+    padding: 2px;
+    margin: 0 0 5px 10px;
+
+    &__icon {
+        background-size: 100%;
+        background-repeat: no-repeat;
+        height: 100%;
+        width: 100%;
+
+        &.beautify {
+            background-image: url(../../resources/icons/beautified-text.svg);
+        }
+
+        &.plain {
+            background-image: url(../../resources/icons/plain-text.svg);
         }
     }
 }
@@ -393,13 +437,8 @@
     }
 }
 
-.messages {
-
+.messages-list {
     height: 100%;
-
-    &-list {
-        height: 100%;
-        padding: 0 5px;
-        word-wrap: break-word;
-    }
+    padding: 0 5px;
+    word-wrap: break-word;
 }

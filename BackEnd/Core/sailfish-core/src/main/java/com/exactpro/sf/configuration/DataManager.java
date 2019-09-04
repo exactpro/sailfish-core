@@ -179,7 +179,7 @@ public class DataManager implements IDataManager, ILoadableManager {
         Objects.requireNonNull(context, "Context can't be null");
         IVersion versionClass = context.getVersion();
         registerPluginPath(versionClass.getAlias(), Paths.get(context.getResourceFolder()));
-        storeClassloaderForPlugin(versionClass.getAlias(), versionClass.getClass().getClassLoader());
+        storeClassloaderForPlugin(versionClass.getAlias(), context.getClassLoaders()[0]);
     }
 
     @Override

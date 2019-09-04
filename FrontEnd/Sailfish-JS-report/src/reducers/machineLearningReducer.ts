@@ -14,13 +14,12 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StateActionType, StateActionTypes } from '../actions/stateActions';
+import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import MachineLearningState from '../state/models/MachineLearningState';
 import initialMachineLearningState from '../state/initial/initialMachineLearningState';
-import { setSubmittedMlData } from '../actions/actionCreators';
 
-export function machineLearningReducer(state : MachineLearningState = initialMachineLearningState, stateAction : StateActionType): MachineLearningState {
-    switch(stateAction.type) {
+export function machineLearningReducer(state: MachineLearningState = initialMachineLearningState, stateAction: StateActionType): MachineLearningState {
+    switch (stateAction.type) {
 
         case StateActionTypes.SET_ML_TOKEN: {
             return {
@@ -43,13 +42,31 @@ export function machineLearningReducer(state : MachineLearningState = initialMac
                     return !(entry.actionId === stateAction.data.actionId && entry.messageId === stateAction.data.messageId)
                 })
             }
-            
+
         }
 
         case StateActionTypes.SET_SUBMITTED_ML_DATA: {
             return {
                 ...state,
                 submittedData: stateAction.data
+            }
+        } 
+
+        case StateActionTypes.SAVE_ML_DATA: {
+            return {
+                ...state,
+                predictionData: state.predictionData.concat(stateAction.data.filter((newItem) => {
+                    return (!state.predictionData.some((existingItem) => {
+                        return (existingItem.actionId === newItem.actionId && existingItem.messageId === newItem.messageId)
+                    }))    
+                }))
+            }
+        }
+
+        case StateActionTypes.TOGGLE_PREDICTIONS: {
+            return {
+                ...state,
+                predictionsEnabled: !state.predictionsEnabled
             }
         }
 

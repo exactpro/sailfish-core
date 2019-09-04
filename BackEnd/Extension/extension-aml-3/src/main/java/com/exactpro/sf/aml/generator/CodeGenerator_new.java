@@ -647,6 +647,7 @@ public class CodeGenerator_new implements ICodeGenerator {
             getMethod(alertCollector, ActionContext.class, "setDictionaryURI", action, Column.Dictionary.getName(), SailfishURI.class);
 			sb.append(TAB2+varName+".setDictionaryURI(SailfishURI.parse(\""+action.getDictionaryURI()+"\"));"+EOL);
             sb.append(TAB2+varName+".setUncheckedFields("+ CONTEXT_NAME + ".getDictionaryManager().getMessageFactory(" + SailfishURI.class.getSimpleName()  + ".parse(\"" + action.getDictionaryURI() + "\")).getUncheckedFields());"+EOL);
+            sb.append(TAB2+varName+".setIgnoredFields("+ CONTEXT_NAME + ".getDictionaryManager().getMessageFactory(" + SailfishURI.class.getSimpleName()  + ".parse(\"" + action.getDictionaryURI() + "\")).getIgnoredFields());"+EOL);
         }
 		if (action.getMessageCount() != null)
 		{

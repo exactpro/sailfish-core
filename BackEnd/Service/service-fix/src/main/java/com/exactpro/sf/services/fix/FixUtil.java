@@ -22,8 +22,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -46,6 +49,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.util.DateTimeUtility;
 
+import kotlin.sequences.FlatteningSequence;
 import quickfix.BooleanField;
 import quickfix.CharField;
 import quickfix.DataDictionary;
@@ -64,6 +68,7 @@ import quickfix.InvalidMessage;
 import quickfix.Message;
 import quickfix.StringField;
 import quickfix.field.BeginString;
+import quickfix.field.CheckSum;
 import quickfix.field.converter.BooleanConverter;
 import quickfix.field.converter.UtcDateOnlyConverter;
 import quickfix.field.converter.UtcTimeOnlyConverter;
@@ -416,5 +421,38 @@ public class FixUtil {
         return (message.getMessageData() != null) ?
                 message.getMessageData().getBytes(CharsetSupport.getCharsetInstance()) :
                 message.toString().getBytes(CharsetSupport.getCharsetInstance());
+    }
+
+    public static boolean equals(FieldMap first, FieldMap second) {
+        return checkFieldMapEqualityRecursive(first, second);
+    }
+
+    private static boolean checkFieldMapEqualityRecursive(FieldMap first, FieldMap second) {
+
+        Map<Integer, Object> firstMap = new HashMap<>();
+        first.iterator().forEachRemaining(it -> firstMap.put(it.getTag(), it.getObject()));
+
+        Map<Integer, Object> secondMap = new HashMap<>();
+        second.iterator().forEachRemaining(it -> secondMap.put(it.getTag(), it.getObject()));
+
+        if (!firstMap.keySet().equals(secondMap.keySet())) {
+            return false;
+        }
+
+        for (Map.Entry<Integer, Object> entry : firstMap.entrySet()) {
+            if (!entry.getValue().getClass().equals(secondMap.get(entry.getKey()).getClass())) {
+                return false;
+            }
+
+            if (entry.getValue() instanceof FieldMap && !checkFieldMapEqualityRecursive((FieldMap)entry.getValue(), (FieldMap)secondMap.get(entry.getKey()))) {
+                return false;
+            }
+
+            if (!entry.getValue().equals(secondMap.get(entry.getKey()))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

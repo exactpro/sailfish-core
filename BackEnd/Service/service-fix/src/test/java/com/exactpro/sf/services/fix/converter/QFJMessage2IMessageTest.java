@@ -35,7 +35,9 @@ import com.exactpro.sf.comparison.ComparatorSettings;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.ComparisonUtil;
 import com.exactpro.sf.comparison.MessageComparator;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.scriptrunner.StatusType;
+import com.exactpro.sf.services.fix.FixUtil;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import com.exactpro.sf.util.ConverterTest;
 import com.exactpro.sf.util.DateTimeUtility;
@@ -51,27 +53,26 @@ import quickfix.StringField;
 
 //@Ignore
 public class QFJMessage2IMessageTest extends ConverterTest {
-    private final IMessageFactory messageFactory = DefaultMessageFactory.getFactory();
+    private final FixMessageFactory messageFactory = new FixMessageFactory();
 
     @Test
-    public void testRepeatingGroupOrderedFields()
-            throws FileNotFoundException, IOException, ConfigError, InvalidMessage, MessageConvertException {
+    public void testRepeatingGroupOrderedFields() throws IOException, InvalidMessage, MessageConvertException {
+        String source = "8=FIXT.1.1\u00019=155\u000135=Z\u000149=FIX_CSV_ds1\u000156=FGW\u000134=1152\u000152=20151005-15:47:02.785\u00011166=1444060022986\u0001298=4\u00011461=1\u00011462=FIX_CSV_ds1\u00011463=D\u00011464=76\u0001295=1\u0001299=test\u000148=7219943\u000122=8\u000110=169\u0001";
+
         Message fixMessageSrc = new Message();
-        DataDictionary dataDict = getFixDictionary("FIX50.xml");
-        fixMessageSrc.fromString(
-                "8=FIXT.1.19=14635=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169",
-                dataDict, true);
-        if(fixMessageSrc.getException() != null) {
+        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
+
+        DataDictionary dataDict = new QFJDictionaryAdapter(dictionary);
+        fixMessageSrc.fromString(source, dataDict, true);
+        if (fixMessageSrc.getException() != null) {
             throw fixMessageSrc.getException();
         }
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+
+        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, true, true, false, false, true);
         IMessage iMessage = converter.convert(fixMessageSrc);
 
         Message fixMessageTarget = converter.convert(iMessage, true);
-        Assert.assertEquals(
-                "8=FIXT.1.19=15535=Z34=115249=FIX_CSV_ds152=20151005-15:47:02.78556=FGW298=41166=1444060022986295=1299=test48=721994322=81461=11462=FIX_CSV_ds11463=D1464=7610=169",
-                fixMessageTarget.toString());
+        Assert.assertEquals(source, fixMessageTarget.toString());
     }
 
     @Test
@@ -189,8 +190,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
     }
 
     @Test
-    public void testFixToIMessageAndBack()
-            throws FileNotFoundException, IOException, MessageConvertException, InvalidMessage, ConfigError {
+    public void testFixToIMessageAndBack() throws IOException, MessageConvertException, InvalidMessage, ConfigError {
         DataDictionary dataDictionary = getFixDictionary("FIX50.xml");
         Message message = new Message(
                 "8=FIXT.1.19=17035=X34=78943=Y49=Sender52=20160630-10:37:21.00156=Target262=SomeReqID268=1279=0270=876.543271=123.5272=20160630273=10:37:21.003278=SomeEntryID711=1311=ABC10=090",
@@ -207,7 +207,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         System.out.println(iMessage);
         System.out.println(newMessage);
 
-        Assert.assertEquals(message.toString(), newMessage.toString());
+        Assert.assertTrue(FixUtil.equals(message, newMessage));
     }
 
     @Test

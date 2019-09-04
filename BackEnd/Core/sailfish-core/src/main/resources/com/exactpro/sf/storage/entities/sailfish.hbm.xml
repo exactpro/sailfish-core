@@ -91,18 +91,18 @@
         <property name="arrived" column="MSG_TIMESTAMP" index="IDX_ARRIVED"
                   type="com.exactpro.sf.storage.TimestampToString"/>
 		<property name="admin" column="IS_ADMIN" type="boolean" index="IDX_ADMIN" />
-		<property name="humanMessage" column="HUMAN_MSG" length="32672" >
-            <type name="com.exactpro.sf.storage.TruncatedString">
-                <param name="length">32672</param>
-            </type>
-		</property>
+		<property name="humanMessage" column="HUMAN_MSG" type="text"/>
         <property name="rejectReason" column="REJECT_REASON" length="512"/>
-		<property name="jsonMessage" column="JSON_MSG" length="32672" >
-            <type name="com.exactpro.sf.storage.TruncatedString">
-                <param name="length">32672</param>
-            </type>
-		</property>
-		<property name="rawMessage" column="RAW_MSG" length="32672" />
+		<property name="jsonMessage" column="JSON_MSG" type="text"/>
+		<!--
+			About rawMessage: Hibernate type 'image' matches to jdbc 'LONGVARBINARY' type
+			https://docs.jboss.org/hibernate/core/3.6/reference/en-US/html/types.html
+			'length' attribute presents here to set 'longblob' instead of 'mediumblob' for MySql
+			'mediumblob' created in case when length is omitted or less than 16777215
+			(see org.hibernate.dialect.MySQLDialect)
+			Postgres create 'bytea' type with 1GB max size limit and 'length' attribute has no effect here
+		-->
+		<property name="rawMessage" column="RAW_MSG" type="image" length="100000000"/>
 		<property name="subMessage" column="IS_SUBMESSAGE" type="boolean"/>
 		<property name="serviceId" column="service_id"/>
 		<property name="storedId" column="STORED_ID" type="long"/>

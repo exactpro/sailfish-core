@@ -149,6 +149,10 @@ public interface IActionContext {
 
     IActionContext withUncheckedFields(Set<String> uncheckedFields);
 
+    Set<String> getIgnoredFields();
+
+    IActionContext withIgnoredFields(Set<String> ignoredFields);
+
     ClassLoader getPluginClassLoader(String pluginAlias);
 
     default Optional<Object> handleKnownBugException(KnownBugException e, String reference) {
@@ -175,7 +179,7 @@ public interface IActionContext {
      * @param action action method reference
      * @param tag action tag
      * @param verificationOrder verification order for report
-     * @throws Throwable
+     * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
     <T extends IActionCaller> void callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) throws Throwable;
 
@@ -198,8 +202,8 @@ public interface IActionContext {
      * @param action action method reference
      * @param tag action tag
      * @param verificationOrder verification order for report
-     * @return action's return value
-     * @throws Throwable
+     * @return action's return value or null if it's failed and {@link #isContinueOnFailed()} = true
+     * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
     <T extends IActionCaller, R> R callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Throwable;
 
@@ -224,7 +228,7 @@ public interface IActionContext {
      * @param parameters action parameters
      * @param tag action tag
      * @param verificationOrder verification order for report
-     * @throws Throwable
+     * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
     <T extends IActionCaller, P> void callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) throws Throwable;
 
@@ -249,8 +253,8 @@ public interface IActionContext {
      * @param parameters action parameters
      * @param tag action tag
      * @param verificationOrder verification order for report
-     * @return action's return value
-     * @throws Throwable
+     * @return action's return value or null if it's failed and {@link #isContinueOnFailed()} = true
+     * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
     <T extends IActionCaller, P, R> R callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Throwable;
 }

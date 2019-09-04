@@ -99,6 +99,7 @@ public class ActionContext implements IActionContext {
 	private Map<String, Boolean> negativeMap = Collections.emptyMap();
     private boolean reorderGroups;
 	private Set<String> uncheckedFields = Collections.emptySet();
+    private Set<String> ignoredFields = Collections.emptySet();
     private ActionReport report;
 	private final IActionServiceManager serviceManager;
     private final IDataManager dataManager;
@@ -491,6 +492,22 @@ public class ActionContext implements IActionContext {
     }
 
     @Override
+    public Set<String> getIgnoredFields() {
+        return ignoredFields;
+    }
+
+    @Override
+    public IActionContext withIgnoredFields(Set<String> ignoredFields) {
+        ActionContext clone = clone();
+        clone.setIgnoredFields(ignoredFields);
+        return clone;
+    }
+  
+    public void setIgnoredFields(Set<String> ignoredFields) {
+        this.ignoredFields = ImmutableSet.copyOf(ignoredFields);
+    }
+
+    @Override
     public ClassLoader getPluginClassLoader(String pluginAlias) {
         if(!pluginClassLoaders.containsKey(pluginAlias)) {
             throw new EPSCommonException("Unknown plugin: " + pluginAlias);
@@ -660,6 +677,7 @@ public class ActionContext implements IActionContext {
         cloned.negativeMap = new HashMap<>(negativeMap);
         cloned.reorderGroups = reorderGroups;
         cloned.uncheckedFields = ImmutableSet.copyOf(uncheckedFields);
+        cloned.ignoredFields = ImmutableSet.copyOf(ignoredFields);
         cloned.report = report;
 
         return cloned;

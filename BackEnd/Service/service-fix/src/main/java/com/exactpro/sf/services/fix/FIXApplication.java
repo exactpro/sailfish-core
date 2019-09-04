@@ -119,6 +119,7 @@ public class FIXApplication implements FIXClientApplication {
 	private boolean autorelogin = true;
 
     private FIXLatencyCalculator latencyCalculator;
+    private FIXClientSettings fixSettings;
 
     public FIXApplication() {
         this.sessionMap = new HashMap<>();
@@ -127,7 +128,7 @@ public class FIXApplication implements FIXClientApplication {
     @Override
     public void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName) {
         this.applicationContext = Objects.requireNonNull(applicationContext, "Application context can't be null");
-        FIXClientSettings fixSettings = (FIXClientSettings) this.applicationContext.getServiceSettings();
+        this.fixSettings = (FIXClientSettings) this.applicationContext.getServiceSettings();
         this.serviceStringName = serviceName.toString();
         this.serviceName = serviceName;
         this.logConfigurator = serviceContext.getLoggingConfigurator();
@@ -259,7 +260,7 @@ public class FIXApplication implements FIXClientApplication {
                         Type.INFO, textMessage, null);
                 serviceMonitor.onEvent(event);
             }
-		} else if (MsgType.RESEND_REQUEST.equals(msgType)) {
+		} else if (fixSettings.getFakeResendRequest() && MsgType.RESEND_REQUEST.equals(msgType)) {
 			MessageFactory messageFactory = session.getMessageFactory();
 			String beginString = sessionID.getBeginString();
 

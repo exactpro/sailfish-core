@@ -17,19 +17,27 @@ package com.exactpro.sf.services.tcpip;
 
 import java.net.InetSocketAddress;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.support.SimpleTriggerContext;
+
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.IServiceMonitor;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ITaskExecutor;
+import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.fix.handler.ClientSideIoHandler;
 import com.exactpro.sf.storage.IMessageStorage;
 
 public class FixProxy extends TCPIPProxy {
+    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+
     private DirtyQFJIMessageConverter converter;
 
     @Override
@@ -46,6 +54,11 @@ public class FixProxy extends TCPIPProxy {
     protected void internalInit(ServiceName serviceName, IDictionaryManager dictionaryManager, IServiceHandler handler, IServiceSettings settings,
             IMessageStorage storage, IServiceMonitor serviceMonitor, ILoggingConfigurator logConfigurator, ITaskExecutor taskExecutor,
             IDataManager dataManager) {
-        converter = new DirtyQFJIMessageConverter(dictionary, factory, false, false, false);
+
+        if (!(factory instanceof FixMessageFactory)) {
+            throw new ServiceException(String.format("FixProxy requires FixMessageFactory, but got '%s' instead", factory.getClass().getCanonicalName()));
+        }
+
+        converter = new DirtyQFJIMessageConverter(dictionary, (FixMessageFactory) factory, false, false, false);
     }
 }

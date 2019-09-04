@@ -20,11 +20,22 @@ import java.math.BigDecimal;
 import java.nio.ByteOrder;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.messages.structures.IAttributeStructure;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
+import com.exactpro.sf.common.messages.structures.impl.AttributeStructure;
+import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
+import org.hamcrest.CoreMatchers;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -425,5 +436,26 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 			Assert.fail(e.getMessage());
 		}
 	}
+
+    @Test
+    public void testVariableLength() {
+        IoBuffer buffer = IoBuffer.allocate(8);
+        buffer.putLong(Long.MAX_VALUE);
+        buffer.position(0);
+
+        IMessage msg = new MapMessage("TEST", "result");
+        ITCHVisitorDecode itchVisitorDecode = new ITCHVisitorDecode(buffer, ByteOrder.nativeOrder(), msg, DefaultMessageFactory.getFactory());
+
+        Map<String, IAttributeStructure> attributes = new HashMap<>();
+        attributes.put("Length", new AttributeStructure("Length", "8", 8, JavaType.JAVA_LANG_INTEGER));
+        attributes.put("Type", new AttributeStructure("Type", "UIntXX", "UIntXX", JavaType.JAVA_LANG_INTEGER));
+
+        IFieldStructure fieldStructure = new FieldStructure("", "", "", "", attributes,
+                Collections.emptyMap(), JavaType.JAVA_MATH_BIG_DECIMAL, false, false, false, null);
+
+        itchVisitorDecode.visit("test", BigDecimal.ZERO, fieldStructure, false);
+
+        Assert.assertThat(msg.getField("test"), CoreMatchers.is(BigDecimal.valueOf(Long.MAX_VALUE)));
+    }
 
 }

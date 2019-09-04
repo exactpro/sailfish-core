@@ -61,7 +61,8 @@ subprojects {
         dependsOn.add('jar')
         dependsOn.add('copyFromData')
 
-    	sourceDir([file("${mainPluginDir}/cfg/dictionaries"), file("${mainWorkspaceDir}/cfg/dictionaries"), file("${genPluginDir}/cfg/dictionaries")])
+    	sourceDir([file("${mainPluginDir}/cfg/dictionaries"), file("${mainWorkspaceDir}/cfg/dictionaries"),
+                   file("${genPluginDir}/cfg/dictionaries"), file("${genDictionaryDir}")])
     	setDefault(DEFAULT_VALIDATOR)
 
         validate(ITCH_VALIDATOR, 'itch.*.xml')

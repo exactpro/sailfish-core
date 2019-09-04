@@ -30,15 +30,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.actions.DirtyFixUtil;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.fix.FixFieldConverter;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
@@ -56,21 +58,23 @@ import quickfix.field.converter.UtcTimeOnlyConverter;
 import quickfix.field.converter.UtcTimestampConverter;
 
 public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
+    private static final Logger logger = LoggerFactory.getLogger(DirtyQFJIMessageConverter.class);
+
     private List<String> headerFields;
     private List<String> trailerFields;
     private FixFieldConverter fieldConverter;
 
-    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
+    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
         this(dictionary, factory, verifyTags, includeMilliseconds, false, skipTags);
     }
 
-    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
+    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
             boolean verifyTags, boolean includeMilliseconds,
             boolean includeMicroseconds, boolean skipTags) {
         this(dictionary, factory, verifyTags, includeMilliseconds, includeMicroseconds, skipTags, false);
     }
     
-    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
+    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
                                      boolean verifyTags, boolean includeMilliseconds,
                                      boolean includeMicroseconds, boolean skipTags, boolean orderingFields) {
         super(dictionary, factory, verifyTags, includeMilliseconds,  includeMicroseconds, skipTags, orderingFields);

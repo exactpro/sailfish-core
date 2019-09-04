@@ -15,27 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.AML;
 import com.exactpro.sf.aml.AMLAction;
@@ -78,6 +57,26 @@ import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionCallException
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.util.KnownBugException;
 import com.exactpro.sf.util.MessageKnownBugException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 
 public abstract class AbstractCodeBuilder {
     public static final String TAB1 = "\t";
@@ -271,7 +270,7 @@ public abstract class AbstractCodeBuilder {
 
             if(continueOnFailed) {
                 stream.writeLine(3, "} catch(Exception e) {");
-                stream.writeLine(4, "logger.warn(e);");
+                stream.writeLine(4, "logger.warn(e.getMessage(), e);");
                 stream.writeLine(4, "%s.setException(e);", contextName);
                 stream.writeLine();
                 stream.writeLine(4, "if(e instanceof InterruptedException) {");

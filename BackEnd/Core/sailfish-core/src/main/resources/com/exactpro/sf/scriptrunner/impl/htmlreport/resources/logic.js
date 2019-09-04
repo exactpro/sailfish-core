@@ -105,7 +105,7 @@ function treetable_toggleRow(rowId, tableId, state, force) {
         } else {
             if (force == 1 || treetable_rowstate[rowId] != -1) {
                 treetable_showRow(rowChildren[i]);
-                treetable_toggleRow(rowChildren[i], tableId, row_state, -1);
+                treetable_toggleRow(rowChildren[i], tableId, row_state, -1);                
             }
         }
     }
@@ -1386,8 +1386,6 @@ function submitForPrediction(actionID, actionBodyDivID) {
  */
 function parseAjaxResponse(response, idToNameMap, actionID, predicitionsDiv, predictionsSpan) {
 
-    let count = 10; //max show result
-
     class Predict {
         constructor(id, messageName, classValue, percentage) {
             this.id = id; this.messageName = messageName;
@@ -1413,10 +1411,6 @@ function parseAjaxResponse(response, idToNameMap, actionID, predicitionsDiv, pre
     sortable.sort(function (a, b) {
         return b.percentage - a.percentage;
     });
-
-    if (sortable.length > count) {
-        sortable =  sortable.slice(0, count)
-    }
 
     let rgbColors = {
         100: 'FF8080',
