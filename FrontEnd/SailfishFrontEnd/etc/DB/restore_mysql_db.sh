@@ -50,10 +50,26 @@ readParameters()
 
 createDatabase()
 {
+    mysql --host=${HOST} --port=${PORT} --user=${SUPERUSER} --password=${SUPERPASSWORD} -e 'SELECT VERSION();' | grep '| 5'
+    local IS_FIFTH_VERSION=$?
+
     QUERY="drop database if exists $DATABASE;
-    create database $DATABASE character set $CHAR;
-    grant all on $DATABASE.* to '$USER'@'localhost' identified by '$PASSWORD' with grant option;
-    grant all on $DATABASE.* to '$USER'@'localhost.localdomain' identified by '$PASSWORD' with grant option;"
+    create database $DATABASE character set $CHAR;"
+
+    if [ "$IS_FIFTH_VERSION" -eq "0" ]; then
+        echo "Build query for MySQL 5"
+        QUERY="$QUERY
+            grant all on $DATABASE.* to '$USER'@'localhost' identified by '$PASSWORD' with grant option;
+            grant all on $DATABASE.* to '$USER'@'localhost.localdomain' identified by '$PASSWORD' with grant option;"
+    else
+        echo "Build query for MySQL 8 or higher"
+        QUERY="$QUERY
+            create user if not exists '$USER'@'localhost' identified with mysql_native_password by '$PASSWORD';
+            create user if not exists '$USER'@'localhost.localdomain' identified with mysql_native_password by '$PASSWORD';
+
+            grant all on $DATABASE.* to '$USER'@'localhost';
+            grant all on $DATABASE.* to '$USER'@'localhost.localdomain';"
+    fi
 
     mysql --host=${HOST} --port=${PORT} --user=$1 --password=$2 -e "$QUERY"
 }

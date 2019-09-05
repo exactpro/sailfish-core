@@ -87,7 +87,7 @@ if /I "!errorlevel!" NEQ "0" (
     if /I "!errorlevel!" NEQ "0" (
         echo Creating database '%DATABASE%'
         call :createDatabase
-        
+
     ) else (
         echo Database '%DATABASE%' already exist for another user. The script will not be changing existing DB. Do all changes by yourself
         exit /b 3
@@ -100,9 +100,24 @@ goto :EFO
 :checkDatabaseAvailability
     "%MYSQL%\mysql" %DATABASE% --host=%HOST% --port=%PORT% --user=%1 --password=%2 -e "select 1;"
     exit /b !errorlevel!
-
 :createDatabase
-    set QUERY=drop database if exists %DATABASE%; create database %DATABASE% character set %CHAR%; grant all on %DATABASE%.* to '%USER%'@'localhost' identified by '%PASSWORD%' with grant option; grant all on %DATABASE%.* to '%USER%'@'localhost.localdomain' identified by '%PASSWORD%' with grant option;
+    set "version_query_file=%tmp%\bat~%RANDOM%.tmp"
+    "%MYSQL%\mysql" --host=%HOST% --port=%PORT% --user=%SUPERUSER% --password=%SUPERPASSWORD% -e "select version();" | findstr "^5" > %version_query_file%
+    set "is_fifth_version="
+    set /p is_fifth_version=<%version_query_file%
+
+    if "%is_fifth_version%"=="" (
+        echo build query for MySQL 8 or higher
+        set "CREATE_USER_QUERY=create user if not exists '%USER%'@'localhost' identified with mysql_native_password by '%PASSWORD%';"
+        set "CREATE_USER_QUERY=!CREATE_USER_QUERY! create user if not exists '%USER%'@'localhost.localdomain' identified with mysql_native_password by '%PASSWORD%';"
+        set "CREATE_USER_QUERY=!CREATE_USER_QUERY! grant all on %DATABASE%.* to '%USER%'@'localhost';"
+        set "CREATE_USER_QUERY=!CREATE_USER_QUERY! grant all on %DATABASE%.* to '%USER%'@'localhost.localdomain';"
+    ) else (
+        echo build query for MySQL 5
+        set "CREATE_USER_QUERY=grant all on %DATABASE%.* to '%USER%'@'localhost' identified by '%PASSWORD%' with grant option; grant all on %DATABASE%.* to '%USER%'@'localhost.localdomain' identified by '%PASSWORD%' with grant option;"
+    )
+
+    set "QUERY=drop database if exists %DATABASE%; create database %DATABASE% character set %CHAR%; %CREATE_USER_QUERY%"
     "%MYSQL%\mysql" --host=%HOST% --port=%PORT% --user=%SUPERUSER% --password=%SUPERPASSWORD% -e "%QUERY%"
     exit /b !errorlevel!
 

@@ -1,0 +1,6 @@
+#id,#description,#execute,#timeout,#service_name,#reference,#check_point,#template,#outcome,#action,#dictionary,#message_type,#messages_count,#static_type,#static_value,#condition,ClOrdID,Symbol,SecurityID,SecurityIDSource,TransactTime,OrderQty,OrdType,Side,#itsnotacolumnmrDurden
+,testIncorrectDefineHeader,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,test case start,,,,,,,,,,,,,,,
+,,,,,,,,,DefineHeader,,,,,,,Symbol,,#itsnotacolumnmrDurden,,,,,,
+,,,,fake,,,,,send,TRD_FIX_5_0,NewOrderSingle,,,,,2,testSymbol,1,1,java:LocalDateTime.now(),1,1,1,
+,,,,,,,,,test case end,,,,,,,,,,,,,,,

@@ -1,0 +1,5 @@
+#id;#description;#execute;#timeout;#service_name;#reference_to_filter;#reference;#template;#outcome;#action;#dictionary;#message_type;#messages_count;#static_type;#static_value;#condition;ClOrdID;Symbol;SecurityID;SecurityIDSource;TransactTime;OrderQty;OrdType;Side
+;testForbiddenReference;;;;;;;;;;;;;;;;;;;;;;
+14;;;;;;;;;test case start;;;;;;;;;;;;;;
+;;;1;;;ref;;;Sleep;;;;;;;;;;;;;;
+;;;;;;;;;test case end;;;;;;;;;;;;;;

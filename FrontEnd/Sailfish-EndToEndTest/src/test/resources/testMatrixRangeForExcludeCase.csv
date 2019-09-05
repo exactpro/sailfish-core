@@ -1,0 +1,25 @@
+#id,#action,#timeout,OrderQty,#service_name,Text,OrdType,ClOrdID,SecurityIDSource,TransactTime,#reference,#dictionary,Side,#reference_to_filter,#message_type,SecurityID,#execute,#fail_on_unexpected_message,#description
+1,test case start,,,,,,,,,,,,,,,y,,First
+,Sleep,2000,,,,,,,,,,,,,,n,,
+,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord1,FIX_5_0_GENERIC,1,ford1,NewOrderSingle,1,,,
+,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord2,FIX_5_0_GENERIC,1,,NewOrderSingle,1,,,
+,GetCheckPoint,5000,,,,,,,,checkPoint1,,,,,,,,
+,receive,5000,,fake,"#{Expected(""S"").Bug(""Issue1"",${ord1.Text},""TestCategory1"",""TestCategory2"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,,,
+,receive,5000,,fake,"#{Expected(""S"").Bug(""Issue2"",${ord1.Text},""TestCategory1"", ""TestCategory2"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,,,
+,test case end,,,,,,,,,,,,,,,,,
+2,test case start,,,,,,,,,,,,,,,n,,Second
+,Sleep,2000,,,,,,,,,,,,,,n,,
+,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord1,FIX_5_0_GENERIC,1,ford1,NewOrderSingle,1,,,
+,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord2,FIX_5_0_GENERIC,1,,NewOrderSingle,1,,,
+,GetCheckPoint,5000,,,,,,,,checkPoint1,,,,,,,,
+,receive,5000,,fake,"#{Expected(""S"").Bug(""Issssue1"",${ord1.Text},""TestCatsssegory1"",""TestCategssory2"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,,,
+,receive,5000,,fake,"#{Expected(""S"").Bug(""Isssssue2"",${ord1.Text},""TestCssategory1"", ""TestCategory2"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,,,
+,test case end,,,,,,,,,,,,,,,,,
+3,test case start,,,,,,,,,,,,,,,y,n,Third
+,Sleep,2000,,,,,,,,,,,,,,n,,
+,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord1,FIX_5_0_GENERIC,1,ford1,NewOrderSingle,1,y,,
+,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord2,FIX_5_0_GENERIC,1,,NewOrderSingle,1,y,,
+,GetCheckPoint,5000,,,,,,,,checkPoint1,,,,,,y,,
+,receive,5000,,fake,"#{Expected(""S"").Bug(""Test"",${ord1.Text},""Test0"",""Test1"",""Test2"",""Test3"",""Test4"",""Test5"",""Test6"",""Test7"",""Test8"",""Test9"",""Test10"",""Test11"",""Test12"",""Test13"",""Test14"",""Test15"",""Test16"",""Test17"",""Test18"",""Test19"",""Test20"",""Test21"",""Test22"",""Test23"",""Test24"",""Test25"",""Test26"",""Test27"",""Test28"",""Test29"",""Test30"",""Test31"",""Test32"",""Test33"",""Test34"",""Test,35"",""Test36"",""Test37"",""Test38"",""Test39"",""Test40"",""Test41"",""Test42"",""Test43"",""Test44"",""Test45"",""Test46"",""Test47"",""Test48"",""Test49"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,y,,
+,receive,5000,,fake,${ford1:Text},,${ford1:ClOrdID},,,,FIX_5_0_GENERIC,${ford1:Side},,ExecutionReport,,y,,
+,test case end,,,,,,,,,,,,,,,,,

@@ -1,0 +1,8 @@
+#id,#description,#execute,#timeout,#service_name,#reference,#template,#outcome,#action,#dictionary,#message_type,#messages_count,#static_type,#static_value,#condition
+,emptyTest,,,,,,,,,,,,,
+1,,,,,,,,test case start,,,,,,
+,,,,,,,,test case end,,,,,,
+,commentedTest,,,,,,,,,,,,,
+2,,,,,,,,test case start,,,,,,
+,,n,4,,,,,Sleep,,,,,,
+,,,,,,,,test case end,,,,,,

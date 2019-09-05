@@ -1,0 +1,26 @@
+#id;#description;#execute;#timeout;#service_name;#reference_to_filter;#reference;#template;#outcome;#action;#dictionary;#message_type;#messages_count;#static_type;#static_value;#condition;ClOrdID;Symbol;SecurityID;SecurityIDSource;TransactTime;OrderQty;OrdType;Side
+;testIncorrectDefineService;;;;;;;;;;;;;;;;;;;;;;
+11;;;;;;;;;Test case start;;;;;;;;;;;;;;
+;;;;;;serviceName;;;DefineServiceName;;;;;;;;;;;;;;
+;;;;%{serviceName};;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;;;Test case end;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;Test case start;;;;;;;;;;;;;;
+;;;;;;%{serviceName;;;DefineServiceName;;;;;;;;;;;;;;
+;;;;%{serviceName};;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;;;Test case end;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;Test case start;;;;;;;;;;;;;;
+;;;;;;${serviceName};;;DefineServiceName;;;;;;;;;;;;;;
+;;;;%{serviceName};;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;;;Test case end;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;Test case start;;;;;;;;;;;;;;
+;;;;;;#{serviceName};;;DefineServiceName;;;;;;;;;;;;;;
+;;;;%{serviceName};;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;;;Test case end;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;Test case start;;;;;;;;;;;;;;
+;;;;%{serviceName};;;;;send;FIX_5_0_GENERIC;NewOrderSingle;;;;;1;testSymbol;1;1;java:LocalDateTime.now();1;1;1
+;;;;;;;;;Test case end;;;;;;;;;;;;;;

@@ -282,12 +282,14 @@
             <value name="ORDER_CANCEL_REJECT">9</value>
             <value name="LOGON">A</value>
             <value name="ORDER_SINGLE">D</value>
+            <value name="ORDER_LIST">E</value>
             <value name="ORDER_CANCEL_REQUEST">F</value>
             <value name="ORDER_CANCEL_REPLACE_REQUEST">G</value>
             <value name="QUOTE">S</value>
             <value name="QUOTE_CANCEL">Z</value>
             <value name="MASS_QUOTE_ACKNOWLEDGEMENT">b</value>
             <value name="BUSINESS_MESSAGE_REJECT">j</value>
+            <value name="BID_REQUEST">k</value>
             <value name="ORDER_MASS_CANCEL_REQUEST">q</value>
             <value name="ORDER_MASS_CANCEL_REPORT">r</value>
             <value name="NEW_ORDER_CROSS">s</value>
@@ -7244,6 +7246,20 @@
             <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
             <field name="TradingSessionID" reference="field-TradingSessionID" required="false"/>
         </message>
+        <message name="ListOrdGrp_NoOrders" id="group-ListOrdGrp_NoOrders">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">73</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="ClOrdID" reference="field-ClOrdID" required="true"/>
+            <field name="Side" reference="field-Side" required="true"/>
+            <field name="ListSeqNo" reference="field-ListSeqNo" required="false"/>
+        </message>
+        <message name="BidDescReqGrp_NoBidDescriptors" id="group-BidDescReqGrp_NoBidDescriptors">
+            <attribute name="entity_type" type="java.lang.String">Group</attribute>
+            <attribute name="tag" type="java.lang.Integer">398</attribute>
+            <attribute name="fixtype" type="java.lang.String">NUMINGROUP</attribute>
+            <field name="BidDescriptorType" reference="field-BidDescriptorType" required="false"/>
+        </message>
         <message name="NewOrderSingle">
             <attribute name="entity_type" type="java.lang.String">Message</attribute>
             <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
@@ -7273,6 +7289,32 @@
             <field name="ClOrdLinkID" reference="field-ClOrdLinkID" required="false"/>
             <field name="PassiveOnlyOrder" reference="field-PassiveOnlyOrder" required="false"/>
             <field name="MinQty" reference="field-MinQty" required="false"/>
+            <field name="Text" reference="field-Text" required="false"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="NewOrderList">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">E</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ListID" reference="field-ListID" required="true"/>
+            <field name="BidType" reference="field-BidType" required="true"/>
+            <field name="TotNoOrders" reference="field-TotNoOrders" required="true"/>
+            <field name="ListOrdGrp" reference="component-ListOrdGrp" required="true"/>
+            <field name="trailer" reference="trailer" required="true"/>
+        </message>
+        <message name="BidRequest">
+            <attribute name="entity_type" type="java.lang.String">Message</attribute>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+            <attribute name="MessageType" type="java.lang.String">k</attribute>
+            <field name="header" reference="header" required="true"/>
+            <field name="ClientBidID" reference="field-ClientBidID" required="true"/>
+            <field name="BidRequestTransType" reference="field-BidRequestTransType" required="true"/>
+            <field name="TotNoRelatedSym" reference="field-TotNoRelatedSym" required="true"/>
+            <field name="BidType" reference="field-BidType" required="true"/>
+            <field name="BidTradeType" reference="field-BidTradeType" required="true"/>
+            <field name="BasisPxType" reference="field-BasisPxType" required="true"/>
+            <field name="BidDescReqGrp" reference="component-BidDescReqGrp" required="true"/>
             <field name="trailer" reference="trailer" required="true"/>
         </message>
         <message name="OrderCancelRequest">
@@ -7664,6 +7706,14 @@
             <field name="NoTradingSessions" reference="group-TradingSession_NoTradingSessions" isCollection="true"
                    required="false"/>
         </message>
+        <message id="component-ListOrdGrp" name="ListOrdGrp">
+            <attribute name="entity_type" type="java.lang.String">Component</attribute>
+            <field name="NoOrders" reference="group-ListOrdGrp_NoOrders" isCollection="true" required="false"/>
+        </message>
+        <message id="component-BidDescReqGrp" name="BidDescReqGrp">
+            <attribute name="entity_type" type="java.lang.String">Component</attribute>
+            <field name="NoBidDescriptors" reference="group-BidDescReqGrp_NoBidDescriptors" isCollection="true" required="false"/>
+        </message>
         <message id="header" name="header">
             <attribute name="entity_type" type="java.lang.String">Header</attribute>
             <field name="BeginString" reference="field-BeginString" required="true"/>
@@ -7692,6 +7742,7 @@
             <field name="EncryptMethod" reference="field-EncryptMethod" required="true"/>
             <field name="HeartBtInt" reference="field-HeartBtInt" required="true"/>
             <field name="ResetSeqNumFlag" reference="field-ResetSeqNumFlag" required="false"/>
+            <field name="Username" reference="field-Username" required="false"/>
             <field name="Password" reference="field-Password" required="false"/>
             <field name="NewPassword" reference="field-NewPassword" required="false"/>
             <field name="SessionStatus" reference="field-SessionStatus" required="false"/>

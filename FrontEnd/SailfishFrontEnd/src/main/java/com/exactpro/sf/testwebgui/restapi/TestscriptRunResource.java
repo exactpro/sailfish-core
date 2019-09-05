@@ -297,7 +297,7 @@ public class TestscriptRunResource {
                         errorMessage = "the run of the matrix did not end";
                     }else {
                         logger.info("Wait unlock report: " + testScriptRunId);
-                        Thread.sleep(1000);
+                        Thread.sleep(2000);
 
                         if(testScriptRun.isLocked()){
                             errorMessage = "the run of the matrix did not end";

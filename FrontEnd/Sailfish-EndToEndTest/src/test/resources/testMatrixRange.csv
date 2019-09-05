@@ -1,0 +1,8 @@
+#id,#execute,#description,#service_name,#dictionary,#reference,#template,#timeout,#action,#message_type,#check_point,#messages_count,#static_type,#static_value
+test,,1,,,,,,test case start,,,,,
+1,y,,,,,,100,Sleep,,,,,
+,,,,,,,,test case end,,,,,
+,,,,,,,,,,,,,
+test,,2,,,,,,test case start,,,,,
+2,y,,,,,,100,Sleep,,,,,
+,,,,,,,,test case end,,,,,

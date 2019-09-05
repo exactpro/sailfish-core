@@ -1,0 +1,5 @@
+#id,#description,#execute,#timeout,#service_name,#reference,#check_point,#template,#outcome,#action,#dictionary,#message_type,#messages_count,#static_type,#static_value,#condition,ClOrdID,Symbol,SecurityID,SecurityIDSource,TransactTime,OrderQty,OrdType,Side,ClientBidID,BidRequestTransType,TotNoRelatedSym,BidType,BidTradeType,BasisPxType,BidDescReqGrp,NoBidDescriptors,BidDescriptorType,NoOrders,ListSeqNo,ListID,TotNoOrders,ListOrdGrp,ClOrdIDun,Symbolun,SecurityIDun,SecurityIDSourceun ,TransactTimeun,OrderQtyun,,,ClOrdIDWRONG
+,testIncorrectDictionaryName,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,Test case start,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,fake,,,,,send,unknown_dictionaty,NewOrderSingle,,,,,1,testSymbol,1,1,java:LocalDateTime.now(),1,1,1,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,Test case end,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

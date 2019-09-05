@@ -14,6 +14,7 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,11 +29,9 @@ import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.Pair;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.IServiceContext;
@@ -49,10 +48,8 @@ import quickfix.ConfigError;
 import quickfix.DataDictionaryProvider;
 import quickfix.DoNotSend;
 import quickfix.FieldConvertError;
-import quickfix.FieldMap;
 import quickfix.FieldNotFound;
 import quickfix.FixVersions;
-import quickfix.Group;
 import quickfix.IncorrectDataFormat;
 import quickfix.IncorrectTagValue;
 import quickfix.LogUtil;
@@ -63,13 +60,10 @@ import quickfix.Session;
 import quickfix.SessionID;
 import quickfix.SessionNotFound;
 import quickfix.SessionSettings;
-import quickfix.StringField;
 import quickfix.UnsupportedMessageType;
 import quickfix.field.ApplVerID;
-import quickfix.field.ExecID;
 import quickfix.field.MsgSeqNum;
 import quickfix.field.OrdType;
-import quickfix.field.OrderID;
 
 public class FIXTESTApplication implements FIXServerApplication {
 
@@ -158,15 +152,14 @@ public class FIXTESTApplication implements FIXServerApplication {
         }
     }
 
-    private void fillFixHeader(IMessage msg) {
+    private void fillFixHeader(IMessage msg, IMessageStructure msgStructure) {
         IMessage header = (IMessage) msg.getField(FIELD_HEADER);
         if (header == null) {
             header = messageHelper.getMessageFactory().createMessage(FIELD_HEADER,
                     messageHelper.getNamespace());
             msg.addField(FIELD_HEADER, header);
         }
-        String messageType = getAttributeValue(messageHelper.getDictionaryStructure()
-                .getMessages().get(msg.getName()), MessageHelper.FIELD_MESSAGE_TYPE);
+        String messageType = getAttributeValue(msgStructure, MessageHelper.FIELD_MESSAGE_TYPE);
         header.addField(MSG_TYPE, messageType);
 
         msg.addField(FIELD_TRAILER, messageHelper.getMessageFactory()
@@ -174,40 +167,33 @@ public class FIXTESTApplication implements FIXServerApplication {
 
     }
 
-    public void fillMandatoryFields(IMessage message) {
+    public void fillMandatoryFields(IMessage message, IMessageStructure msgStructure) {
+        if (msgStructure.getFields().containsKey(FixMessageHelper.HEADER)) {
+            fillFixHeader(message, msgStructure);
+        }
 
-        fillFixHeader(message);
-
-        IMessageStructure msgStructure = messageHelper.getDictionaryStructure()
-                .getMessages().get(message.getName());
-
-        for(IFieldStructure field : msgStructure.getFields().values()) {
-
+        msgStructure.getFields().forEach((name, field) -> {
             // exclude header and trailer
-            if (FIELD_HEADER.equals(field.getName()) || FIELD_TRAILER.equals(field.getName())) {
-                continue;
+            if (FIELD_HEADER.equals(name) || FIELD_TRAILER.equals(name)) {
+                return;
             }
 
-            if (!message.isFieldSet(field.getName()) && field.isRequired()) {
-                if (field.isSimple()) {
-                    message.addField(field.getName(),
-                            getRandomObjectByJavaType(field.getJavaType()));
-                } else if (field.isCollection()) {
-                    ArrayList<Object> l = new ArrayList<>(1);
-                    l.add(getRandomObjectByJavaType(field.getJavaType()));
-                    message.addField(field.getName(), l);
-                } else if (field.isComplex()) {
-                    IMessage nested = messageHelper.getMessageFactory()
-                            .createMessage(field.getName(), field.getNamespace());
-                    fillMandatoryFields(nested);
-                    message.addField(field.getName(), nested);
+            if (!message.isFieldSet(name) && field.isRequired()) {
+                Object value = null;
+
+                if (field.isComplex()) {
+                    IMessage nested = messageHelper.getMessageFactory().createMessage(field.getReferenceName(), field.getNamespace());
+                    fillMandatoryFields(nested, (IMessageStructure)field);
+                    value = nested;
                 } else if (field.isEnum()) {
-                    message.addField(field.getName(),
-                            field.getValues().values().iterator().next().getCastValue());
+                    value = field.getValues().values().iterator().next().getCastValue();
+                } else {
+                    value = getRandomObjectByJavaType(field.getJavaType());
                 }
 
+                message.addField(name, field.isCollection() ? Collections.singletonList(value) : value);
             }
-        }
+        });
     }
 
     public Object getRandomObjectByJavaType(JavaType javaType) {
@@ -261,17 +247,12 @@ public class FIXTESTApplication implements FIXServerApplication {
             answer.addField("Side", epMessage.getField("Side"));
             answer.addField("LeavesQty", epMessage.getField("OrderQty"));
             answer.addField("CumQty", BigDecimal.ZERO);
-            answer.addField("Symbol", epMessage.getField("Symbol"));
+            answer.addField("Text", epMessage.getField("Text"));
             answer.addField("ClOrdID", epMessage.getField("ClOrdID"));
 
-            fillMandatoryFields(answer);
-            Message qfjMessage = null;
-            try {
-                qfjMessage = convertToFix(answer);
-            } catch (InterruptedException e) {
-
-                e.printStackTrace();
-            }
+            IMessageStructure msgStructure = messageHelper.getDictionaryStructure().getMessages().get(answer.getName());
+            fillMandatoryFields(answer, msgStructure);
+            Message qfjMessage = converter.convert(answer, true);
             sendMessage(sessionID, qfjMessage);
 
             if (isOrderExecutable(epMessage, price)) {
@@ -285,38 +266,37 @@ public class FIXTESTApplication implements FIXServerApplication {
                 answer.addField("CumQty", orderQty);
                 answer.addField("LeavesQty", BigDecimal.ZERO);
                 answer.addField("ClOrdID", epMessage.getField("ClOrdID"));
-                answer.addField("Symbol", epMessage.getField("Symbol"));
+                answer.addField("Text", epMessage.getField("Text"));
                 answer.addField("OrderQty", orderQty);
                 answer.addField("LastPx", price);
                 answer.addField("AvgPx", price);
 
-                fillMandatoryFields(answer);
-                try {
-                    qfjMessage = convertToFix(answer);
-                    System.out.println(qfjMessage);
-                } catch (InterruptedException e) {
-                    logger.error(e.getMessage(), e);
-                }
+                fillMandatoryFields(answer, msgStructure);
+                qfjMessage = converter.convert(answer, true);
 
                 sendMessage(sessionID, qfjMessage);
             }
 
-        } catch (RuntimeException e) {
+        } catch (RuntimeException | MessageConvertException e) {
             LogUtil.logThrowable(sessionID, e.getMessage(), e);
         }
     }
 
-    private boolean isOrderExecutable(IMessage order, BigDecimal price) throws FieldNotFound {
+    private boolean isOrderExecutable(IMessage order, BigDecimal price) {
+        if (Objects.equals(order.getField("OrdType"), '2')) {
+            String orderPrice = order.getField("Price");
+            Character orderSide = order.getField("Side");
 
-        if (Character.valueOf('2').equals(order.getField("OrdType"))) {
-            BigDecimal limitPrice = new BigDecimal((String) order.getField("Price"));
-            char side = (char) order.getField("Side");
-            BigDecimal thePrice = new BigDecimal("" + price);
+            if (orderPrice == null || orderSide == null) {
+                return false;
+            }
 
-            return (Character.valueOf('1').equals(side) && thePrice.compareTo(limitPrice) <= 0)
-                    || ((Character.valueOf('2').equals(side) || Character.valueOf('5').equals(side))
-                            && thePrice.compareTo(limitPrice) >= 0);
+            BigDecimal limitPrice = new BigDecimal(orderPrice);
+
+            return (orderSide == '1' && price.compareTo(limitPrice) <= 0)
+                    || (orderSide == '2' || orderSide == '5') && price.compareTo(limitPrice) >= 0;
         }
+
         return true;
     }
 
@@ -352,12 +332,12 @@ public class FIXTESTApplication implements FIXServerApplication {
         }
     }
 
-    public OrderID genOrderID() {
-        return new OrderID(String.valueOf(++m_orderID));
+    public String genOrderID() {
+        return String.valueOf(++m_orderID);
     }
 
-    public ExecID genExecID() {
-        return new ExecID(String.valueOf(++m_execID));
+    public String genExecID() {
+        return String.valueOf(++m_execID);
     }
 
     private void initializeMarketDataProvider(SessionSettings settings)
@@ -648,116 +628,6 @@ public class FIXTESTApplication implements FIXServerApplication {
         meta.setToService(to);
         meta.setAdmin(isAdmin);
         return msg;
-    }
-
-    private Message convertToFix(IMessage message) throws InterruptedException {
-
-        message = fixFieldConverter.convertFields(message, messageHelper.getMessageFactory(),
-                false);
-
-        Message qfjMessage = new Message();
-        Object subMessage = message.removeField(FIELD_HEADER);
-        if (subMessage instanceof IMessage) {
-            fillMessage(qfjMessage.getHeader(), (IMessage) subMessage);
-        } else if (subMessage instanceof List) {
-            if (((List<?>) subMessage).size() == 1) {
-                fillMessage(qfjMessage.getHeader(), (IMessage) ((List<?>) subMessage).get(0));
-            } else {
-                throw new RuntimeException(
-                        "Message can't be conatins more then one " + FIELD_HEADER);
-            }
-        }
-        subMessage = message.removeField(FIELD_TRAILER);
-        if (subMessage instanceof IMessage) {
-            fillMessage(qfjMessage.getTrailer(), (IMessage) subMessage);
-        } else if (subMessage instanceof List) {
-            if (((List<?>) subMessage).size() == 1) {
-                fillMessage(qfjMessage.getTrailer(), (IMessage) ((List<?>) subMessage).get(0));
-            } else {
-                throw new RuntimeException(
-                        "Message can't be conatins more then one " + FIELD_TRAILER);
-            }
-        }
-
-        Object field = message.removeField("8");
-        if (field != null) {
-            qfjMessage.getHeader().setField(new StringField(8, field.toString()));
-        }
-        field = message.removeField("35");
-        if (field != null) {
-            qfjMessage.getHeader().setField(new StringField(35, field.toString()));
-        }
-        field = message.removeField("34");
-        if (field != null) {
-            qfjMessage.getHeader().setField(new StringField(34, field.toString()));
-        }
-        field = message.removeField("9");
-        if (field != null) {
-            qfjMessage.getHeader().setField(new StringField(9, field.toString()));
-        }
-        field = message.removeField("10");
-        if (field != null) {
-            qfjMessage.getTrailer().setField(new StringField(10, field.toString()));
-        }
-
-        fillMessage(qfjMessage, message);
-
-        return qfjMessage;
-    }
-
-    private void fillMessage(FieldMap fieldMap, IMessage inputMessage) {
-        Object value = null;
-        for (String fieldName : inputMessage.getFieldNames()) {
-            value = inputMessage.getField(fieldName);
-
-            if (!FIELD_GROUP_DELIMITER.equals(fieldName)) {
-                try {
-                    Integer key = Integer.valueOf(fieldName);
-
-                    if (value instanceof List<?>) {
-                        for (Object element : (List<?>) value) {
-                            if (element instanceof IMessage) {
-                                fieldMap.addGroup(fillGroup(fieldMap, key, (IMessage) element));
-                            } else {
-                                throw new EPSCommonException(
-                                        "Incorrect type of sub message " + element);
-                            }
-                        }
-                    } else if (value instanceof IMessage) {
-                        fieldMap.addGroup(fillGroup(fieldMap, key, (IMessage) value));
-                    } else {
-                        fieldMap.setField(new StringField(key, value.toString()));
-                    }
-
-                } catch (NumberFormatException e) {
-                    throw new EPSCommonException("Unknown field " + fieldName);
-                }
-            }
-        }
-    }
-
-    private Group fillGroup(FieldMap fieldMap, Integer groupField, IMessage inputMessage) {
-        Object delimiter = inputMessage.removeField(FIELD_GROUP_DELIMITER);
-        if (delimiter != null) {
-            try {
-                int groupDelimiter = Integer.parseInt(delimiter.toString());
-
-                if (inputMessage.isFieldSet(delimiter.toString())) {
-                    Group group = new Group(groupField, groupDelimiter);
-                    fillMessage(group, inputMessage);
-                    return group;
-                } else {
-                    throw new EPSCommonException("Sub message [" + inputMessage
-                            + "] does not contain required field (" + delimiter + ")");
-                }
-            } catch (NumberFormatException e) {
-                throw new EPSCommonException(
-                        FIELD_GROUP_DELIMITER + " " + delimiter + " should has integer type");
-            }
-        } else {
-            throw new EPSCommonException("Group [" + inputMessage + "] does not contain "
-                    + FIELD_GROUP_DELIMITER + " field");
-        }
     }
 
     @Override

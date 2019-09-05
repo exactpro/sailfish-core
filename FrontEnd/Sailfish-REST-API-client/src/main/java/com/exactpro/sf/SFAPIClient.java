@@ -15,31 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf;
 
-import static java.lang.String.valueOf;
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.text.ParseException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.exceptions.APICallException;
+import com.exactpro.sf.exceptions.APIResponseException;
+import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixLinkUploadResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlRunReference;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlStatisticStatusResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlVariableSets;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -58,20 +48,31 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.exceptions.APICallException;
-import com.exactpro.sf.exceptions.APIResponseException;
-import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixLinkUploadResponse;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlRunReference;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlVariableSets;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.stream.StreamSource;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import static java.lang.String.valueOf;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
 public class SFAPIClient implements AutoCloseable {
 	
@@ -262,6 +263,18 @@ public class SFAPIClient implements AutoCloseable {
         }
     }
 
+    public XmlStatisticStatusResponse getStatisticsStatus() throws  APICallException {
+        HttpGet status = new  HttpGet(rootUrl + "statistics/status");
+        try {
+            try (CloseableHttpResponse statusResponse = http.execute(status)) {
+                checkHttpResponse(statusResponse);
+                return unmarshal(XmlStatisticStatusResponse.class, statusResponse);
+            }
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
     public void runBB(long id) throws  APICallException, APIResponseException {
         HttpGet runBB = new  HttpGet(rootUrl + "bb/run/"+id);
         try {
@@ -307,7 +320,7 @@ public class SFAPIClient implements AutoCloseable {
         try {
             CloseableHttpResponse runResponse = http.execute(runBB);
             checkHttpResponse(runResponse);
-            return unmarshall(XmlBbExecutionStatus.class, runResponse);
+            return unmarshal(XmlBbExecutionStatus.class, runResponse);
         } catch (IOException e) {
             throw new APICallException(e);
         } catch (JAXBException e) {
@@ -337,7 +350,7 @@ public class SFAPIClient implements AutoCloseable {
             CloseableHttpResponse response = http.execute(uploadDescription);
             checkHttpResponse(response);
 
-            return unmarshall(XmlLibraryImportResult.class, response);
+            return unmarshal(XmlLibraryImportResult.class, response);
 
         } catch  (IOException e) {
             throw new APICallException(e);
@@ -432,7 +445,7 @@ public class SFAPIClient implements AutoCloseable {
 			req.setEntity(mpb.build());
             try (CloseableHttpResponse res = http.execute(req)) {
                 checkHttpResponse(res);
-                return unmarshall(XmlResponse.class, res);
+                return unmarshal(XmlResponse.class, res);
             }
 		} catch (APIResponseException e) {
 			throw new APIResponseException("URL: "+url,e);
@@ -452,7 +465,7 @@ public class SFAPIClient implements AutoCloseable {
 
             try (CloseableHttpResponse res = http.execute(req)) {
                 checkHttpResponse(res);
-                return unmarshall(XmlMatrixUploadResponse.class, res);
+                return unmarshal(XmlMatrixUploadResponse.class, res);
             }
         } catch (APIResponseException e) {
 			throw new APIResponseException("URL: "+url,e);
@@ -480,7 +493,7 @@ public class SFAPIClient implements AutoCloseable {
             HttpPost req = new HttpPost(url);
             try (CloseableHttpResponse res = http.execute(req)) {
                 checkHttpResponse(res);
-                return unmarshall(XmlMatrixLinkUploadResponse.class, res);
+                return unmarshal(XmlMatrixLinkUploadResponse.class, res);
             }
         } catch (APIResponseException e) {
             throw new APIResponseException("URL: " + url, e);
@@ -742,32 +755,32 @@ public class SFAPIClient implements AutoCloseable {
 	
 	public XmlTestscriptActionResponse runMatrix(Matrix mat) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(mat.getId()), "start", null, "default",
-		        "ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse runMatrix(int id) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(id), "start", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse runMatrix(String name) throws APICallException, APIResponseException {
 		return performMatrixActionInt("name_" + name, "start", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(Matrix mat) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(mat.getId()), "stop", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(int id) throws APICallException, APIResponseException {
         return performMatrixActionInt(valueOf(id), "stop", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public XmlTestscriptActionResponse stopMatrix(String name) throws APICallException, APIResponseException {
 		return performMatrixActionInt("name_" + name, "stop", null, "default",
-				"ISO-8859-1", 2, false, false, true, true, null, null, null);
+                "ISO-8859-1", 3, false, false, true, true, null, null, null);
 	}
 	
 	public List<TestScriptRun> runAllMatrices() throws APICallException, APIResponseException {
@@ -1018,7 +1031,7 @@ public class SFAPIClient implements AutoCloseable {
 
             try(CloseableHttpResponse response = http.execute(request)) {
                 checkHttpResponse(response);
-                return unmarshall(XmlVariableSets.class, response);
+                return unmarshal(XmlVariableSets.class, response);
             }
         } catch(APIResponseException e) {
             throw new APIResponseException("URL: " + url, e);
@@ -1057,7 +1070,7 @@ public class SFAPIClient implements AutoCloseable {
             req.setEntity(new StringEntity(xmlConfig));
             CloseableHttpResponse res = http.execute(req);
             checkHttpResponse(res);
-            xmlResponse = unmarshall(XmlResponse.class, res);
+            xmlResponse = unmarshal(XmlResponse.class, res);
             res.close();
             return xmlResponse;
         } catch (Exception e) {
@@ -1078,7 +1091,7 @@ public class SFAPIClient implements AutoCloseable {
 
             CloseableHttpResponse res = http.execute(req);
             checkHttpResponse(res);
-            xmlResponse = unmarshall(XmlResponse.class, res);
+            xmlResponse = unmarshal(XmlResponse.class, res);
             res.close();
             return xmlResponse;
         } catch (Exception e) {
@@ -1094,7 +1107,7 @@ public class SFAPIClient implements AutoCloseable {
 
             CloseableHttpResponse res = http.execute(req);
             checkHttpResponse(res);
-            xmlResponse = unmarshall(XmlResponse.class, res);
+            xmlResponse = unmarshal(XmlResponse.class, res);
             res.close();
             return xmlResponse;
         } catch (Exception e) {
@@ -1110,7 +1123,7 @@ public class SFAPIClient implements AutoCloseable {
 
             CloseableHttpResponse res = http.execute(req);
             checkHttpResponse(res);
-            xmlResponse = unmarshall(XmlResponse.class, res);
+            xmlResponse = unmarshal(XmlResponse.class, res);
             res.close();
             return xmlResponse;
         } catch (Exception e) {
@@ -1157,7 +1170,7 @@ public class SFAPIClient implements AutoCloseable {
 			XmlResponse xmlResponse =null;
 			
 			try{
-				xmlResponse =unmarshall(XmlResponse.class, res);
+				xmlResponse = unmarshal(XmlResponse.class, res);
 			}catch(UnmarshalException e){
 				xmlResponse = new XmlResponse();
 			}
@@ -1171,7 +1184,7 @@ public class SFAPIClient implements AutoCloseable {
 		CloseableHttpResponse response=getHttpResponse(url);
 		T xmlResponse;
 		try {
-			xmlResponse = unmarshall(clazz, response);
+			xmlResponse = unmarshal(clazz, response);
 			response.close();
             return xmlResponse;
         } catch (Exception e) {
@@ -1200,10 +1213,12 @@ public class SFAPIClient implements AutoCloseable {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> T unmarshall(Class<T> clazz, HttpResponse response) throws JAXBException, IOException {
+	private <T> T unmarshal(Class<T> clazz, HttpResponse response) throws JAXBException, IOException {
         if (response != null) {
 			Unmarshaller unmarshaller = getUnmarshaller(clazz);
-            return (T) unmarshaller.unmarshal(response.getEntity().getContent());
+            StreamSource streamSource = new StreamSource(response.getEntity().getContent());
+            JAXBElement<T> unmarshalledElement = unmarshaller.unmarshal(streamSource, clazz);
+            return unmarshalledElement.getValue();
 		}
 		return null;
 	}
