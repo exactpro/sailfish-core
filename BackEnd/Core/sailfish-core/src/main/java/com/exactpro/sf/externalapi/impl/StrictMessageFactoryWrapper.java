@@ -44,6 +44,11 @@ public class StrictMessageFactoryWrapper implements IMessageFactory {
     }
 
     @Override
+    public IMessage createMessage(long id, String name, String namespace) {
+        return msgFactory.createMessage(id,name, namespace);
+    }
+
+    @Override
     public IMessage createMessage(String name, String namespace) {
         if (!Objects.equals(namespace, getNamespace())) {
             throw new EPSCommonException(String.format("Unexpected namespace: [%s]. Expected: [%s]", namespace, getNamespace()));

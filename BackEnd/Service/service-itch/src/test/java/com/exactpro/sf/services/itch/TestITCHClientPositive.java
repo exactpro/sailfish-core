@@ -242,6 +242,8 @@ public class TestITCHClientPositive extends TestITCHClientBase {
 
 
 
+    //FIXME: Flaky test should be refactored to improve its reliability
+    @Ignore("Flaky test should be refactored to improve its reliability")
     @Test
     public void testReconnectingTimeout() throws Exception{
         logger.info("Start testReconnectingTimeout()");

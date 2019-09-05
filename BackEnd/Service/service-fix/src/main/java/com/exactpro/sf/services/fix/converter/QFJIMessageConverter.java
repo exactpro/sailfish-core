@@ -76,7 +76,7 @@ public class QFJIMessageConverter
 	protected final int[] fieldOrderTrailer;
 	
 	protected final IDictionaryStructure dictionary;
-	protected final FixMessageFactory factory;
+	protected final IMessageFactory factory;
 	private final boolean verifyTags;
 	protected final boolean includeMilliseconds;
 	protected final boolean includeMicroseconds;
@@ -89,16 +89,15 @@ public class QFJIMessageConverter
 
 	private final List<Integer> tagsToSkip = Arrays.asList(MsgSeqNum.FIELD, BodyLength.FIELD, CheckSum.FIELD);
 
-	public QFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
+	public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
 	    this(dictionary, factory, verifyTags, includeMilliseconds, false, skipTags);
 	}
-
-	public QFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
+	public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
             boolean verifyTags, boolean includeMilliseconds, boolean includeMicroseconds, boolean skipTags) {
 	    this(dictionary, factory, verifyTags, includeMilliseconds, includeMicroseconds, skipTags, false);
 	}
 	
-    public QFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
+    public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
                                 boolean verifyTags, boolean includeMilliseconds, boolean includeMicroseconds, boolean skipTags, boolean orderingFields) {
         this.dictionary = dictionary;
         this.factory = factory;

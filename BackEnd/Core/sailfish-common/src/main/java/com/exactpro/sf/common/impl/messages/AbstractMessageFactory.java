@@ -52,7 +52,8 @@ public abstract class AbstractMessageFactory implements IMessageFactory {
         return message;
     }
 
-    protected IMessage createMessage(long id, String name, String namespace) {
+    @Override
+    public IMessage createMessage(long id, String name, String namespace) {
         MsgMetaData metaData = new MsgMetaData(namespace, name, id);
 
         metaData.setDictionaryURI(dictionaryURI);

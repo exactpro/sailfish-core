@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.actions.DirtyFixUtil;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -64,17 +65,17 @@ public class DirtyQFJIMessageConverter extends QFJIMessageConverter {
     private List<String> trailerFields;
     private FixFieldConverter fieldConverter;
 
-    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
+    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
         this(dictionary, factory, verifyTags, includeMilliseconds, false, skipTags);
     }
 
-    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
+    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
             boolean verifyTags, boolean includeMilliseconds,
             boolean includeMicroseconds, boolean skipTags) {
         this(dictionary, factory, verifyTags, includeMilliseconds, includeMicroseconds, skipTags, false);
     }
     
-    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, FixMessageFactory factory,
+    public DirtyQFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
                                      boolean verifyTags, boolean includeMilliseconds,
                                      boolean includeMicroseconds, boolean skipTags, boolean orderingFields) {
         super(dictionary, factory, verifyTags, includeMilliseconds,  includeMicroseconds, skipTags, orderingFields);

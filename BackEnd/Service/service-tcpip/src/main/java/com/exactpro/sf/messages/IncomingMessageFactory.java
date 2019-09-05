@@ -42,6 +42,13 @@ public class IncomingMessageFactory implements IMessageFactory {
     }
 
     @Override
+    public IMessage createMessage(long id, String name, String namespace) {
+        return delegateFactory.createMessage(id,
+                TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE,
+                TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE);
+    }
+
+    @Override
     public IMessage createMessage(String name, String namespace) {
         return delegateFactory.createMessage(TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE,
                                             TCPIPMessageHelper.INCOMING_MESSAGE_NAME_AND_NAMESPACE);

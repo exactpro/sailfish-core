@@ -398,13 +398,7 @@ public class FIXClient implements IInitiatorService {
         IDictionaryManager dictionaryManager = this.serviceContext.getDictionaryManager();
         IDictionaryStructure dictionary = dictionaryManager.getDictionary(dictionaryName);
 
-        IMessageFactory iMessageFactory = dictionaryManager.getMessageFactory(dictionaryName);
-
-        if (!(iMessageFactory instanceof FixMessageFactory)) {
-            throw new ServiceException(String.format("FixClient requires FixMessageFactory, but got '%s' instead", iMessageFactory.getClass().getCanonicalName()));
-        }
-
-        FixMessageFactory messageFactory = (FixMessageFactory) iMessageFactory;
+        IMessageFactory messageFactory = dictionaryManager.getMessageFactory(dictionaryName);
 
         this.dictionaryProvider = new FixDataDictionaryProvider(dictionaryManager, dictionaryName);
         this.converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, !commonSettings.isAllowUnknownMsgFields(),

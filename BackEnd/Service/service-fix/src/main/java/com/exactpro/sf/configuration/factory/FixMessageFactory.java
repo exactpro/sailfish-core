@@ -59,9 +59,4 @@ public class FixMessageFactory extends AbstractMessageFactory {
     public String getProtocol() {
         return FixMessageHelper.PROTOCOL;
     }
-
-    @Override
-    public IMessage createMessage(long id, String name, String namespace) {
-        return super.createMessage(id, name, namespace);
-    }
 }

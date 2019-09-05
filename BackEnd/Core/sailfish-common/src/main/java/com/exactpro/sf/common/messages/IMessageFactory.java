@@ -24,6 +24,12 @@ public interface IMessageFactory
 {
     void init(String namespace, SailfishURI dictionaryURI);
 
+    /***
+     * creates new message with the id parameter passed to its metadata
+     * @return a message with specified metadata id
+     */
+    IMessage createMessage(long id, String name, String namespace);
+
 	IMessage createMessage(String name, String namespace);
 
     IMessage createMessage(String name);

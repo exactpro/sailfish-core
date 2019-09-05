@@ -78,7 +78,7 @@ public class FIXCodec extends AbstractCodec {
 	public static final String SUB_CONDITIONS_DELIMETER = ",";
 
 	private TCPIPSettings settings;
-	private FixMessageFactory msgFactory;
+	private IMessageFactory msgFactory;
 	private IFieldConverter fieldConverter;
     private IDictionaryStructure dictionary;
     private DirtyQFJIMessageConverter qfjConverter;
@@ -98,11 +98,7 @@ public class FIXCodec extends AbstractCodec {
 
         FixPropertiesReader.loadAndSetCharset(serviceContext);
 
-        if (!(msgFactory instanceof FixMessageFactory)) {
-            throw new ServiceException(String.format("FixCodec requires FixMessageFactory, but got '%s' instead", msgFactory.getClass().getCanonicalName()));
-        }
-
-        this.msgFactory = (FixMessageFactory) msgFactory;
+        this.msgFactory = msgFactory;
 
         this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
         this.fieldConverter = new FixFieldConverter();

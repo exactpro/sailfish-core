@@ -55,10 +55,6 @@ public class FixProxy extends TCPIPProxy {
             IMessageStorage storage, IServiceMonitor serviceMonitor, ILoggingConfigurator logConfigurator, ITaskExecutor taskExecutor,
             IDataManager dataManager) {
 
-        if (!(factory instanceof FixMessageFactory)) {
-            throw new ServiceException(String.format("FixProxy requires FixMessageFactory, but got '%s' instead", factory.getClass().getCanonicalName()));
-        }
-
-        converter = new DirtyQFJIMessageConverter(dictionary, (FixMessageFactory) factory, false, false, false);
+        converter = new DirtyQFJIMessageConverter(dictionary, factory, false, false, false);
     }
 }
