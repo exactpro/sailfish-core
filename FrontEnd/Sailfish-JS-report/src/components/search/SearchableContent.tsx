@@ -17,10 +17,10 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import '../../styles/search.scss';
 import { createCaseInsensitiveRegexp } from '../../helpers/regexp';
 import { raf } from '../../helpers/raf';
 import { setShouldScrollToSearchItem } from '../../actions/actionCreators';
+import '../../styles/search.scss';
 
 interface OwnProps {
     content: string;

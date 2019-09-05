@@ -22,6 +22,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import { performSearch } from '../../thunks/search';
 import topWindow from '../../helpers/getWindow';
+import SearchCounter from './SearchCounter';
+import '../../styles/search.scss';
 
 const F_KEY_CODE = 70,
     F3_KEY_CODE = 114,
@@ -93,8 +95,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
     }
     
     render() {
-        const { currentIndex, resultsCount } = this.props,
-            { inputValue, isLoading } = this.state;
+        const { inputValue, isLoading } = this.state;
         
         return (
             <div className="search-field">
@@ -110,9 +111,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
                         isLoading ? (
                             <div className="loader"/>
                         ) : (
-                            <div className="search-field__counter">
-                                {currentIndex != null ? currentIndex + 1 : 0} / {resultsCount}
-                            </div> 
+                            <SearchCounter/>
                         )
                     ) : (
                         <div className="search-field__icon"/>

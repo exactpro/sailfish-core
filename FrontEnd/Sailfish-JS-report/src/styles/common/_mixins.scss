@@ -170,7 +170,9 @@
     }
 }
 
-@mixin spinner($thikness, $outer-color, $inner-color, $duration: 1s) {
+@mixin spinner($thikness, $outer-color, $inner-color, $size: 16px ,$duration: 1s) {
+    height: $size;
+    width: $size;
     border: $thikness solid $outer-color;
     border-top: $thikness solid $inner-color;
     border-radius: 50%;
@@ -235,4 +237,22 @@
     &:hover {
         background-color: $clickableHoverBackground;
     }
+}
+
+@mixin icon($image, $height: 16px, $width: 16px) {
+    height: $height;
+    width: $width;
+
+    background: {
+        image: $image;
+        repeat: no-repeat;
+        size: 100%;
+    }
+}
+
+@mixin round-button($image, $size: 20px) {
+    @include clickable;
+    @include icon($image, $size, $size);
+    
+    border-radius: 50%;
 }

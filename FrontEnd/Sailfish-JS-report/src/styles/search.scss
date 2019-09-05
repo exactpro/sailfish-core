@@ -26,9 +26,7 @@
 }
 
 .search-field {
-
     height: 27px;
-    width: 200px;
     
     display: flex;
     align-items: center;
@@ -38,34 +36,53 @@
     border-radius: 3px;
     padding: 0 5px;
 
-    &__counter {
-        color: $primaryTextColor;
-        white-space: nowrap;
-        font-size: 12px;
-    }
-
     &__icon {
-        background-image: url(../../resources/icons/search.svg);
-        background-size: 100%;
-        background-repeat: no-repeat;
-        width: 16px;
-        height: 16px;
+        @include icon(url(../../resources/icons/search.svg));
     }
 
     &__input {
         border: 0;
         background: unset;
-        width: 100%;
+        width: 170px;
         color: $primaryTextColor;
+        padding-right: 5px;
 
         &:focus {
             outline: unset;
         }
     }
+
+    &.active {
+        width: 260px;
+    }
+}
+
+.search-counter {
+    color: $primaryTextColor;
+    white-space: nowrap;
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+
+    &__index {
+        padding-right: 5px;
+    }
+
+    &__prev {
+        @include round-button(url(../../resources/icons/prev-search-result.svg));
+    }
+
+    &__next {
+        @include round-button(url(../../resources/icons/next-search-result.svg));
+    }
+
+    &__clear {
+        @include round-button(url(../../resources/icons/clear-search.svg));
+    }
 }
 
 .loader {
     @include spinner(3px, lightgray, darkgray);
-    width: 16px;
-    height: 16px;
 }

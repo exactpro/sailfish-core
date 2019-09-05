@@ -189,6 +189,10 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         }
 
         case StateActionTypes.NEXT_SEARCH_RESULT: {
+            if (state.searchResultsCount < 1) {
+                return state;
+            } 
+
             const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
                 [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
 
@@ -201,7 +205,11 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
-        case StateActionTypes.PREV_SEARCH_RESULT: {            
+        case StateActionTypes.PREV_SEARCH_RESULT: { 
+            if (state.searchResultsCount < 1) {
+                return state;
+            }
+            
             const targetIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
                 [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
 
