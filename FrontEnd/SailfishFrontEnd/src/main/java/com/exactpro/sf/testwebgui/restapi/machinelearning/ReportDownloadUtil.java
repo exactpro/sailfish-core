@@ -37,10 +37,10 @@ public class ReportDownloadUtil {
     private static final String FILENAME_HEADER_PARAM = "filename";
     private static final String DEFAULT_REPORT_NAME_ZIP = "defaultReportName.zip";
 
-    public static File download(String reportLink, Function<String, File> fileProvider) {
+    public static File download(URL reportLink, Function<String, File> fileProvider) {
 
         try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
-            HttpGet get = new HttpGet(new URL(reportLink).toURI());
+            HttpGet get = new HttpGet(reportLink.toURI());
             return httpclient.execute(get, response -> {
                 String attachmentName = DEFAULT_REPORT_NAME_ZIP;
 

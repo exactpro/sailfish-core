@@ -16,6 +16,7 @@
 
 package com.exactpro.sf.testwebgui.restapi.machinelearning.api;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -55,10 +56,10 @@ public class MachineLearningResourceV2 {
     @GET
     @Path("/init")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response initGet(@QueryParam("reportLink") @NotNull String reportLink) {
+    public Response initGet(@QueryParam("reportLink") @NotNull URL reportLink) {
         try {
             HttpSession session = httpRequest.getSession();
-            String sessionKey = DigestUtils.md5Hex(reportLink);
+            String sessionKey = DigestUtils.md5Hex(reportLink.toString());
 
             SessionStorage sessionStorage;
 
@@ -70,7 +71,7 @@ public class MachineLearningResourceV2 {
             }
 
             TokenWrapperResponse initResponse = new TokenWrapperResponse();
-            initResponse.setToken(DigestUtils.md5Hex(reportLink));
+            initResponse.setToken(DigestUtils.md5Hex(reportLink.toString()));
             initResponse.setActive(sessionStorage.getCheckedMessages());
 
             return Response.ok().entity(initResponse).build();

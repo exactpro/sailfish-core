@@ -30,6 +30,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
@@ -54,6 +58,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +66,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
@@ -79,6 +85,7 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
+import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings.RelevantMessagesSortingMode;
 import com.exactpro.sf.scriptrunner.IReportStats;
 import com.exactpro.sf.scriptrunner.IScriptReport;
@@ -142,6 +149,7 @@ public class HtmlReport implements IScriptReport {
     private final IDictionaryManager dictionaryManager;
     private final TemplateWrapperFactory templateWrapperFactory;
     private final ReportTable warningsTable;
+    private final SfInstance currentSfInstance;
 
     private ContextType currentContext = ContextType.NONE;
 
@@ -168,13 +176,14 @@ public class HtmlReport implements IScriptReport {
     private Map<Integer, MachineLearningData> dataMap;
     private final RelevantMessagesSortingMode relevantMessagesSortingMode;
 
-    public HtmlReport(String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
+    public HtmlReport(SfInstance currentSfInstance, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
         this.reportFolder = reportFolder;
         this.workspaceDispatcher = workspaceDispatcher;
         this.dictionaryManager = dictionaryManager;
         this.templateWrapperFactory = new TemplateWrapperFactory(TEMPLATE_PACKAGE_PATH);
         this.warningsTable = new ReportTable("Warnings", Arrays.asList("Line", "Column", "Message"));
         this.relevantMessagesSortingMode = relevantMessagesSortingMode;
+        this.currentSfInstance = currentSfInstance;
     }
 
     @Override
@@ -1519,6 +1528,14 @@ public class HtmlReport implements IScriptReport {
 
             TemplateWrapper reportHeaderTemplate = templateWrapperFactory.createWrapper("report_header.ftlh");
 
+            try {
+                reportHeaderTemplate.setData("mlQueryParameter", currentSfInstance != null ? ("?mlapi=" + URLEncoder.encode(getMlApiPath(currentSfInstance).toString())) : "");
+            }
+            catch (Exception e) {
+                logger.error("unable to get ml api path", e);
+                reportHeaderTemplate.setData("mlQueryParameter", "");
+            }
+
             reportHeaderTemplate.setData("name", report.getName());
             reportHeaderTemplate.write(reportWriter, 3);
 
@@ -1718,5 +1735,19 @@ public class HtmlReport implements IScriptReport {
         public void write(Writer writer) {
             report.addElement(table);
         }
+    }
+
+
+    // This is a complete copy of BeanUtil.getMlApiPath()
+    private static URL getMlApiPath(SfInstance thisInstance) throws MalformedURLException, URISyntaxException {
+
+        return new URIBuilder()
+                .setScheme("http")
+                .setHost(thisInstance.getHost())
+                .setPort(thisInstance.getPort())
+                .setPath(thisInstance.getName() + "/")
+                .build()
+                .resolve("sfapi/machinelearning/v2/")
+                .toURL();
     }
 }

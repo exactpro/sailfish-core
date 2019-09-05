@@ -35,7 +35,6 @@ public class SFAPIEntryPoint extends ResourceConfig {
         register(EnvironmentResource.class);
         register(ActionsResource.class);
         register(StatisticsResource.class);
-        register(CORSFilter.class);
         register(MachineLearningResource.class);
         register(MachineLearningResourceV2.class);
         register(BigButtonResource.class);

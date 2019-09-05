@@ -15,6 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui;
 
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.faces.application.FacesMessage;
@@ -24,10 +29,14 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
-import com.exactpro.sf.common.util.StringUtil;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.storage.CommonReportRow;
 import com.exactpro.sf.storage.auth.User;
@@ -192,13 +201,8 @@ public class BeanUtil {
                 : customReportsPath.substring(0, customReportsPath.lastIndexOf("/"));
     }
 
-    public static String getReportRequest(String customReportsPath, CommonReportRow row, boolean button) {
-        StringBuilder sb = new StringBuilder(getContextPath(customReportsPath, button));
-
-        sb.append("/report.xhtml?report=");
-        sb.append(buildReportUrl(customReportsPath, row, true));
-
-        return sb.toString();
+    public static String getReportRequest(String customReportsPath, CommonReportRow row) {
+        return buildReportUrl(customReportsPath, row, true).toString();
     }
 
     public static String getZipReport(String customReportsPath, CommonReportRow row, boolean button) {
@@ -211,39 +215,91 @@ public class BeanUtil {
         return sb.toString();
     }
 
-    public static String buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) {
+    private static URL buildReportUrl(
+            String reportDirectoryPath,
+            String customReportsPath,
+            SfInstance reportInstance,
+            SfInstance mlInstance,
+            boolean report,
+            String testCaseId,
+            String matrixName) {
 
-        StringBuilder sb = new StringBuilder();
+        try {
+            URI baseUri = (StringUtils.isNotEmpty(customReportsPath)
+                    ? new URI(customReportsPath)
 
-        if(StringUtils.isNotEmpty(customReportsPath)) {
-            sb.append(customReportsPath).append("/");
-        } else {
-            SfInstance instance = row.getSfCurrentInstance();
-            if (instance == null) {
-                instance = row.getSfInstance();
+                    : new URIBuilder()
+                    .setScheme("http")
+                    .setHost(reportInstance.getHost())
+                    .setPort(reportInstance.getPort())
+                    .setPath(String.format("/%s/%s/", reportInstance.getName(), ReportServlet.REPORT_URL_PREFIX))
+                    .build()
+
+            ).resolve(new URIBuilder().setPath(reportDirectoryPath + "/").build());
+
+            if (report) {
+                URIBuilder relativeReportFileUriBuilder = new URIBuilder("index.html");
+
+                if (StringUtils.isNotEmpty(testCaseId)) {
+                    relativeReportFileUriBuilder.setParameter("tc", testCaseId);
+                }
+                relativeReportFileUriBuilder.setParameter("mlapi", getMlApiPath(mlInstance).toString());
+
+                return baseUri.resolve(relativeReportFileUriBuilder.build()).toURL();
+
+            } else {
+                return baseUri.resolve(new URIBuilder().setPath(matrixName).build()).toURL();
             }
-            sb.append("http://");
-            sb.append(instance.getHost())
-                    .append(":")
-                    .append(instance.getPort())
-                    .append(instance.getName())
-                    .append("/");
-            sb.append(ReportServlet.REPORT_URL_PREFIX + "/"); // see web.xml > servlet-mapping
+
+        } catch (URISyntaxException | MalformedURLException e) {
+            throw new EPSCommonException(String.format("unable to get report uri with custom path '%s'", customReportsPath), e);
+        }
+    }
+
+    public static URL buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) {
+
+        SfInstance reportInstance = row.getSfCurrentInstance();
+        if (reportInstance == null) {
+            reportInstance = row.getSfInstance();
         }
 
-        sb.append(StringUtil.escapeURL(row.getReportFolder())).append("/");
+        return buildReportUrl(
+                row.getReportFolder(),
+                customReportsPath,
+                reportInstance,
+                reportInstance,
+                report,
+                row.getTestCaseId(),
+                row.getMatrixName());
 
-        if(report) {
+    }
 
-            sb.append(row.getReportFile()).append(".html");
+    public static URL buildReportUrl(String reportDirectory, SfInstance instance) {
 
-        } else {
+        return buildReportUrl(
+                reportDirectory,
+                null,
+                instance,
+                instance,
+                true,
+                null,
+                null);
+    }
 
-            sb.append(StringUtil.escapeURL(row.getMatrixName()));
+    public static URL buildReUrl(String reportDirectory) {
 
-        }
+        return buildReportUrl(reportDirectory, SFLocalContext.getDefault().getStatisticsService().getThisSfInstance());
+    }
 
-        return sb.toString();
+    private static URL getMlApiPath(SfInstance thisInstance) throws MalformedURLException, URISyntaxException {
 
+        return new URIBuilder()
+                .setScheme("http")
+                .setHost(thisInstance.getHost())
+                .setPort(thisInstance.getPort())
+                .setPath(thisInstance.getName() + "/")
+                .build()
+                .resolve("sfapi/machinelearning/v2/")
+                .toURL();
     }
 }

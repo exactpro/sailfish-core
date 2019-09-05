@@ -42,9 +42,9 @@ module.exports = {
   },
   module: {
     rules: [
-      { 
-        test: /\.tsx?$/, 
-        loader: "awesome-typescript-loader", 
+      {
+        test: /\.tsx?$/,
+        loader: "awesome-typescript-loader",
         exclude: /node_modules/
       },
       {
@@ -78,8 +78,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebPackPlugin({
-      title: "Sailfish reports",
-      template: "src/index.html"
+      title: "Sailfish report",
+      template: "src/index.html",
+      favicon: "src/favicon.png"
     })
   ],
   optimization: {

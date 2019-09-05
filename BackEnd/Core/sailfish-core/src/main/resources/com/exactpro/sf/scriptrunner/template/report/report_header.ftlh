@@ -2,7 +2,8 @@
     <tr>
         <td style="width:33%">
             <div>
-                <a href="index.html"> new report available </a>
+                <#-- e.g. index.html?mlapi=<some encoded url> -->
+                <a href="index.html${mlQueryParameter}">new report available</a>
             </div>
         </td>
 

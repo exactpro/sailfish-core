@@ -407,7 +407,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
 	}
 
     public String getReportRequest(AggregatedReportRow row) {
-        return BeanUtil.getReportRequest(customReportsPath, row, false);
+        return BeanUtil.getReportRequest(customReportsPath, row);
     }
 
     public String getZipReport(AggregatedReportRow row) {
@@ -424,7 +424,7 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
     }
 
 	public String buildReportUrl(AggregatedReportRow row, boolean report) {
-        return BeanUtil.buildReportUrl(customReportsPath, row, report);
+        return BeanUtil.buildReportUrl(customReportsPath, row, report).toString();
 	}
 
     @PreDestroy

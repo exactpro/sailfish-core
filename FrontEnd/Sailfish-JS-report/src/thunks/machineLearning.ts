@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-import { InitResponse, PredictionResponse, SubmittedData, PredictionData } from "../models/MlServiceResponse"
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import { AnyAction } from 'redux';
+import {InitResponse, PredictionResponse, SubmittedData} from "../models/MlServiceResponse"
+import {ThunkAction, ThunkDispatch} from "redux-thunk";
+import {AnyAction} from 'redux';
 import StateAction from "../actions/stateActions";
 import AppState from "../state/models/AppState";
-import { removeSubmittedMlData, addSubmittedMlData, setMlToken, setSubmittedMlData, saveMlData } from "../actions/actionCreators";
-import { batch } from "react-redux";
+import {addSubmittedMlData, removeSubmittedMlData, saveMlData, setMlToken, setSubmittedMlData} from "../actions/actionCreators";
+import {batch} from "react-redux";
 
 const API_PATH_SEARCH_KEY = "mlapi";
 
-export const EMPTY_MESSAGE_ID = -1
+export const EMPTY_MESSAGE_ID = -1;
 
 export function mlSubmitEntry(dataToSubmit: SubmittedData): ThunkAction<void, never, never, AnyAction> {
     return (dispatch: ThunkDispatch<never, never, StateAction>, getState: () => AppState) => {
@@ -39,6 +39,7 @@ export function mlSubmitEntry(dataToSubmit: SubmittedData): ThunkAction<void, ne
 
         fetch(`${getApiPath()}${token}`, {
             method: 'PUT',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -68,6 +69,7 @@ export function mlDeleteEntry(dataToDelete: SubmittedData): ThunkAction<void, ne
 
         fetch(`${getApiPath()}${token}`, {
             method: 'DELETE',
+            credentials: 'include',
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -95,7 +97,7 @@ export function fetchToken(): ThunkAction<void, never, never, AnyAction> {
         const { workFolder } = getState().report.reportProperties;
 
         const currentUrl = new URL(window.location.href);
-        const reportZipUrl = currentUrl.href.replace(/index\.html[^/]*$/g, workFolder + ".zip");
+        const reportZipUrl = currentUrl.href.replace(/index\.html[^/]*$/g, currentUrl.pathname.endsWith(".zip/index.html") ?  "" :  (workFolder + ".zip"));
         const apiPath = getApiPath();
 
         if (!apiPath) {
@@ -103,8 +105,9 @@ export function fetchToken(): ThunkAction<void, never, never, AnyAction> {
             return;
         }
 
-        fetch(`${apiPath}init?reportLink=${reportZipUrl}`, {
+        fetch(`${apiPath}init?reportLink=${encodeURIComponent(reportZipUrl)}`, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Accept': 'application/json'
             }
@@ -135,6 +138,7 @@ export function fetchPredictions(actionId: number): ThunkAction<void, never, nev
 
         fetch(`${getApiPath()}${token}${actionIdParameter}`, {
             method: 'GET',
+            credentials: 'include',
             headers: {
                 'Accept': 'application/json',
             },
@@ -158,8 +162,7 @@ function getApiPath(): string {
     const url = window.location.href,
         searchParamsString = url.substring(url.lastIndexOf('?')),
         searchParams = new URLSearchParams(searchParamsString),
-        apiPathParam = searchParams.get(API_PATH_SEARCH_KEY),
-        apiPath = decodeURI(apiPathParam);
+        apiPathParam = searchParams.get(API_PATH_SEARCH_KEY);
 
-    return apiPath;
+    return decodeURI(apiPathParam);
 }

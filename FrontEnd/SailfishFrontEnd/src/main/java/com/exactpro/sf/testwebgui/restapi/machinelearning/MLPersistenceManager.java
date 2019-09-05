@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -57,7 +58,7 @@ public class MLPersistenceManager {
         this.workspaceDispatcher = workspaceDispatcher;
     }
 
-    public void add(String reportLink, List<ReportMessageDescriptor> descriptors) {
+    public void add(URL reportLink, List<ReportMessageDescriptor> descriptors) {
 
         Function<SubmitMetadataDTO, SubmitMetadataDTO> decorate = (dto) -> {
             dto.getCheckedMessages().addAll(descriptors);
@@ -67,7 +68,7 @@ public class MLPersistenceManager {
         CompletableFuture.runAsync(() -> updateMetadataOnDisk(decorate, reportLink));
     }
 
-    public Collection<ReportMessageDescriptor> get(String reportLink) {
+    public Collection<ReportMessageDescriptor> get(URL reportLink) {
 
         try {
             rwLock.readLock().lock();
@@ -79,7 +80,7 @@ public class MLPersistenceManager {
     }
 
 
-    public void remove(String reportLink, long actionId, long messageId) {
+    public void remove(URL reportLink, long actionId, long messageId) {
 
         Function<SubmitMetadataDTO, SubmitMetadataDTO> decorate = (dto) -> {
 
@@ -95,7 +96,7 @@ public class MLPersistenceManager {
         CompletableFuture.runAsync(() -> updateMetadataOnDisk(decorate, reportLink));
     }
 
-    private void updateMetadataOnDisk(Function<SubmitMetadataDTO, SubmitMetadataDTO> updater, String reportLink) {
+    private void updateMetadataOnDisk(Function<SubmitMetadataDTO, SubmitMetadataDTO> updater, URL reportLink) {
         try {
             rwLock.writeLock().lock();
 
@@ -125,7 +126,7 @@ public class MLPersistenceManager {
         }
     }
 
-    public InputStream getReport(String reportLink) {
+    public InputStream getReport(URL reportLink) {
         try {
             SubmitMetadataDTO submitMetadataDTO = readExplanations(getMlFolder(reportLink));
             return new FileInputStream(
@@ -135,8 +136,8 @@ public class MLPersistenceManager {
         }
     }
 
-    private String getMlFolder(String reportLink) {
-        return DigestUtils.md5Hex(reportLink);
+    private String getMlFolder(URL reportLink) {
+        return DigestUtils.md5Hex(reportLink.toString());
     }
 
     private SubmitMetadataDTO readExplanations(String mlFolder) {

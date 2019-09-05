@@ -186,11 +186,11 @@ public class TaggedComparisonRow implements Serializable {
         secondSet.setStartTime(secondStartTime);
 	}
 
-	public Long getFirstTestCaseId() {
+	public String getFirstTestCaseId() {
 		return firstSet.getTestCaseId();
 	}
 
-	public void setFirstTestCaseId(Long firstTestCaseId) {
+	public void setFirstTestCaseId(String firstTestCaseId) {
         firstSet.setTestCaseId(firstTestCaseId);
 	}
 
@@ -218,11 +218,11 @@ public class TaggedComparisonRow implements Serializable {
         firstSet.setRawHash(firstRawHash);
 	}
 
-	public Long getSecondTestCaseId() {
+	public String getSecondTestCaseId() {
 		return secondSet.getTestCaseId();
 	}
 
-	public void setSecondTestCaseId(Long secondTestCaseId) {
+	public void setSecondTestCaseId(String secondTestCaseId) {
         secondSet.setTestCaseId(secondTestCaseId);
 	}
 
@@ -308,7 +308,7 @@ public class TaggedComparisonRow implements Serializable {
 
     public static class TaggedComparisonSet extends CommonReportRow {
 
-        private Long testCaseId;
+        private String testCaseId;
 
         private Long testCaseRunId;
 
@@ -354,11 +354,11 @@ public class TaggedComparisonRow implements Serializable {
             return instance;
         }
 
-        public Long getTestCaseId() {
+        public String getTestCaseId() {
             return testCaseId;
         }
 
-        public void setTestCaseId(Long testCaseId) {
+        public void setTestCaseId(String testCaseId) {
             this.testCaseId = testCaseId;
         }
 

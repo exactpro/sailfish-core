@@ -31,4 +31,6 @@ public abstract class CommonReportRow implements Serializable {
 
     public abstract SfInstance getSfInstance();
 
+    public abstract String getTestCaseId();
+
 }

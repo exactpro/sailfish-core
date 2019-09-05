@@ -36,12 +36,12 @@ public class TestIsActionCreated  extends AbstractTest {
     private final IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
 
     /***
-     * Check that nested opened actions reported as alredy created
+     * Check that nested opened actions reported as already created
      */
     @Test
     public void test() {
 
-        HtmlReport htmlReport = new HtmlReport("", workspaceDispatcher, serviceContext.getDictionaryManager(),
+        HtmlReport htmlReport = new HtmlReport(null, "", workspaceDispatcher, serviceContext.getDictionaryManager(),
                 EnvironmentSettings.RelevantMessagesSortingMode.ARRIVAL_TIME);
         JsonReport jsonReport = new JsonReport("", workspaceDispatcher, Mockito.mock(TestScriptDescription.class));
         ZipReport zipReport = new ZipReport("", workspaceDispatcher, Mockito.mock(TestScriptDescription.class), EnvironmentSettings.ReportOutputFormat.ZIP);

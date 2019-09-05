@@ -42,6 +42,7 @@ import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
 import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
 import com.exactpro.sf.scriptrunner.ZipReport;
+import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.servlets.ReportServlet;
 import com.exactpro.sf.util.DateTimeUtility;
 
@@ -168,17 +169,17 @@ public class ScriptrunEventHTMLBuilder {
 	private static String formatReportLink(TestScriptDescription descr, ISFContext context) {
         String folderName = descr.getWorkFolder();
         if(!descr.isLocked()) {
-			String link = folderName + "/report.html";
             String zipLink = folderName + "/" + folderName + ZipReport.ZIP;
+            String reportLink = folderName + "/index.html";
+
             IWorkspaceDispatcher workspaceDispatcher = context.getWorkspaceDispatcher();
 
-            if(!workspaceDispatcher.exists(FolderType.REPORT, link) && workspaceDispatcher.exists(FolderType.REPORT, zipLink)){
-                link =  folderName + "/" + folderName + "/report.html";
-            }
+            String reportDirectoryPath = (!workspaceDispatcher.exists(FolderType.REPORT, reportLink) && workspaceDispatcher.exists(FolderType.REPORT, zipLink))
+                    ? folderName + "/" + folderName
+                    : folderName;
 
-            link = ReportServlet.REPORT_URL_PREFIX + "/" + link;
             return "<div title='View report' class='eps-result-report-link'> "
-                    + "<a class='eps-outer-link eps-event-link' href=\"report.xhtml?report=" + StringUtil.escapeURL(link)
+                    + "<a class='eps-outer-link eps-event-link' href=\"" + getReportHref(reportDirectoryPath, context)
                     + "\" class=\"text-link\" target=\"_blank\"> Report </a></div>";
 		}
 		return "";
@@ -486,8 +487,7 @@ public class ScriptrunEventHTMLBuilder {
 				int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
 				progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-				String report = ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(descr.getWorkFolder()) + "/report.html";
-				progressBlock = "<a href=\"report.xhtml?report="+ report +"\">" + formatProgressBar(progress, progressText) + "</a>";
+				progressBlock = "<a href=\""+ getReportHref(descr.getWorkFolder(), context) +"\">" + formatProgressBar(progress, progressText) + "</a>";
 			}
 			else {
 				String progress = descr.getProgress();
@@ -586,8 +586,7 @@ public class ScriptrunEventHTMLBuilder {
 				int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
 				progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-				String report = ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(descr.getWorkFolder())+ "/report.html";
-				progressBlock ="<a href=\"report.xhtml?report="+ report +"\">" + formatProgressBar(progress, progressText) + "</a>";
+				progressBlock ="<a href=\""+ getReportHref(descr.getWorkFolder(), context) +"\">" + formatProgressBar(progress, progressText) + "</a>";
 			}
 			else {
 				String progress = descr.getProgress();
@@ -662,8 +661,7 @@ public class ScriptrunEventHTMLBuilder {
 			int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
             String progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-			String report = ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(descr.getWorkFolder()) + "/report.html";
-            String progressBlock = "<a href=\"report.xhtml?report=" + report + "\">" + formatProgressBar(progress, progressText) + "</a>";
+            String progressBlock = "<a href=\"" + getReportHref(descr.getWorkFolder(), context) + "\">" + formatProgressBar(progress, progressText) + "</a>";
 
 			String postfix = descr.getPauseTimeout() == 0 ? PERMANENT_PAUSED_CLASS_POSTFIX : TIME_PAUSED_CLASS_POSTFIX;
 
@@ -790,4 +788,7 @@ public class ScriptrunEventHTMLBuilder {
     	return hasProblem(descr) || hasWarning(descr);
     }
 
+    private static String getReportHref(String reportDir, ISFContext context) {
+        return BeanUtil.buildReportUrl(reportDir, context.getStatisticsService().getThisSfInstance()).toString();
+    }
 }

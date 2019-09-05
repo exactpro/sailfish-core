@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -44,9 +45,9 @@ public class SessionStorage {
             .maximumSize(32)
             .expireAfterAccess(30, TimeUnit.MINUTES)
             .build();
-    private final String reportLink;
+    private final URL reportLink;
 
-    public SessionStorage(String reportLink, MLPersistenceManager mlPersistenceManager) {
+    public SessionStorage(URL reportLink, MLPersistenceManager mlPersistenceManager) {
         this.reportLink = reportLink;
         persistenceManager = mlPersistenceManager;
     }
@@ -86,7 +87,7 @@ public class SessionStorage {
         return new ArrayList<>(persistenceManager.get(reportLink));
     }
 
-    public String getReportLink() {
+    public URL getReportLink() {
         return reportLink;
     }
 

@@ -267,11 +267,11 @@ public class TaggedSetsComparisonBean implements Serializable {
     }
 
     public String getReportRequest(TaggedComparisonSet set) {
-        return BeanUtil.getReportRequest(customReportsPath, set, false);
+        return BeanUtil.getReportRequest(customReportsPath, set);
     }
 
     public String buildReportUrl(TaggedComparisonSet set, boolean report) {
-        return BeanUtil.buildReportUrl(customReportsPath, set, report);
+        return BeanUtil.buildReportUrl(customReportsPath, set, report).toString();
     }
 	
 	private List<Tag> completeTag(String query, List<Tag> alreadySelected) {
