@@ -28,38 +28,19 @@ const COLOR_LIGHTNESS_MIN_PERCENTAGE = 95;
 const VALUE_THRESHOLD = 0.5;
 const VALUE_STEP_COUNT = 10;
 
-interface MessagePredictionIndicatorProps {
-    messageId: number;
-    className: string;
-    activeActionId: number;
-    predictions: PredictionData[];
-    predictionsEnabled: boolean;
+interface Props {
+    className?: string;
+    prediction: PredictionData;
 }
 
-export class MessagePredictionIndicatorBase extends React.Component<MessagePredictionIndicatorProps, {}> {
-
-    render() {
-        if (!this.props.predictionsEnabled) {
-            return null
-        }
-
-        const predictedValue = this.props.predictions
-            .find((prediction) => {
-                return prediction.messageId === this.props.messageId && prediction.actionId === this.props.activeActionId;
-            });
-
-        if (predictedValue) {
-            return (
-                <div
-                    className={this.props.className}
-                    style={{backgroundColor: `hsl(${COLOR_HUE}, ${COLOR_SATURATION_PERCENTAGE}%, ${getLightness(predictedValue.predictedClassProbability)}%)`}}>
-                    <div className="ml__prediction-icon"/>
-                </div>
-            )
-        } else {
-            return null;
-        }
-    }
+export const MessagePredictionIndicator = ({ prediction, className = "mc-label" }: Props) => {
+    return (
+        <div
+            className={className} 
+            style={{backgroundColor: `hsl(${COLOR_HUE}, ${COLOR_SATURATION_PERCENTAGE}%, ${getLightness(prediction.predictedClassProbability)}%)`}}>
+            <div className="ml__prediction-icon"/>
+        </div>
+    )
 }
 
 function getLightness(value: number) {
@@ -67,13 +48,5 @@ function getLightness(value: number) {
         ? Math.round(((value - VALUE_THRESHOLD) / VALUE_THRESHOLD) * VALUE_STEP_COUNT) / VALUE_STEP_COUNT
         : 0;
 
-    return COLOR_LIGHTNESS_MIN_PERCENTAGE - (valueFiltered * (COLOR_LIGHTNESS_MIN_PERCENTAGE - COLOR_LIGHTNESS_MAX_PERCENTAGE))
+    return COLOR_LIGHTNESS_MIN_PERCENTAGE - (valueFiltered * (COLOR_LIGHTNESS_MIN_PERCENTAGE - COLOR_LIGHTNESS_MAX_PERCENTAGE));
 }
-
-export const MessagePredictionIndicator = connect(
-    (state: AppState) => ({
-        predictions: state.machineLearning.predictionData,
-        predictionsEnabled: state.machineLearning.predictionsEnabled,
-        activeActionId: state.selected.activeActionId
-    })
-)(MessagePredictionIndicatorBase);

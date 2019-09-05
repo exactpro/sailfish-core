@@ -20,7 +20,7 @@ import { Middleware } from "redux";
 import topWindow from "../helpers/getWindow";
 
 export const TEST_CASE_PARAM_KEY = 'tc',
-    ACTION_PARAM_KEY = 'action',
+    ACTION_PARAM_KEY = 'ac',
     MESSAGE_PARAM_KEY = 'message';
 
  // we can't use window.location.search because URL can contain another search params

@@ -35,6 +35,7 @@ import {MessagePredictionIndicator} from "../machinelearning/MlPredictionIndicat
 import StateSaver from '../util/StateSaver';
 import ErrorBoundary from '../util/ErrorBoundary';
 import BeautifiedContent from '../action/BeautifiedContent';
+import { PredictionData } from '../../models/MlServiceResponse';
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -54,6 +55,7 @@ export interface MessageCardStateProps {
     status: StatusType;
     adminEnabled: Boolean;
     isContentBeautified: boolean;
+    prediction: PredictionData;
 }
 
 export interface MessageCardDispatchProps {
@@ -73,13 +75,15 @@ export const MessageCardBase = ({
         showRawHandler, 
         isContentBeautified, 
         toggleBeautify, 
-        onExpand 
+        onExpand ,
+        prediction
     }: MessageCardProps) => {
 
     const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
     const rejectedTitle = message.content.rejectReason,
-        labelsCount = getLabelsCount(message);
+        labels = renderMessageTypeLabels(message, prediction),
+        labelsCount = labels.length;
 
     const rootClass = createBemBlock("message-card", status, isSelected ? "selected" : null), 
         showRawClass = createBemElement("mc-show-raw", "icon", showRaw ? "expanded" : "hidden"),
@@ -93,7 +97,7 @@ export const MessageCardBase = ({
     return (
         <div className={rootClass} data-lb-count={labelsCount}>
             <div className="message-card__labels">
-                {renderMessageTypeLabels(message)}
+                {labels}
             </div>
             <div className="mc-header default" 
                 onClick={() => selectHandler()}>
@@ -187,12 +191,15 @@ export const MessageCardBase = ({
     );
 };
 
-function renderMessageTypeLabels(message: Message): React.ReactNodeArray {
+function renderMessageTypeLabels(message: Message, prediction: PredictionData): React.ReactNodeArray {
     let labels = [];
 
-    labels.push(
-        <MessagePredictionIndicator className="mc-label" messageId={message.id} />
-    );
+    if (prediction) {
+        labels.push(
+            <MessagePredictionIndicator 
+                prediction={prediction} />
+        );
+    }
 
     if (message.content.rejectReason !== null) {
         labels.push(
@@ -211,20 +218,6 @@ function renderMessageTypeLabels(message: Message): React.ReactNodeArray {
     }
 
     return labels;
-}
-
-function getLabelsCount(message: Message) {
-    let count = 0;
-
-    if (message.content.rejectReason != null) {
-        count++;
-    }
-
-    if (message.content.admin) {
-        count++;
-    }
-
-    return count;
 }
 
 function calculateHueValue(from: string, to: string): number {
@@ -251,7 +244,12 @@ export const MessageCardContainer = connect(
         status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null,
         rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null,
         adminEnabled: state.view.adminMessagesEnabled,
-        isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id)
+        isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id),
+        prediction: state.machineLearning.predictionsEnabled ? 
+            state.machineLearning.predictionData.find(prediction => 
+                prediction.actionId == state.selected.activeActionId && prediction.messageId == ownProps.message.id
+            ) 
+            : null
     }),
     (dispatch, ownProps: MessageCardOwnProps) : MessageCardDispatchProps => ({
         selectHandler: (status?: StatusType) => dispatch(selectMessage(ownProps.message, status)),
