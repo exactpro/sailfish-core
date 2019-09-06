@@ -15,15 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast;
 
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.Objects;
-
+import com.exactpro.sf.common.codecs.AbstractCodec;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MsgMetaData;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
+import com.exactpro.sf.common.util.ICommonSettings;
+import com.exactpro.sf.configuration.IDataManager;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.connectivity.mina.net.IoBufferWithAddress;
+import com.exactpro.sf.services.IServiceContext;
+import com.exactpro.sf.services.fast.converter.ConverterException;
+import com.exactpro.sf.services.fast.converter.FastToIMessageConverter;
+import com.exactpro.sf.services.fast.converter.IMessageToFastConverter;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
@@ -33,27 +38,16 @@ import org.openfast.IntegerValue;
 import org.openfast.Message;
 import org.openfast.MessageOutputStream;
 import org.openfast.template.TemplateRegistry;
-import org.openfast.template.loader.XMLMessageTemplateLoader;
 import org.openfast.template.type.codec.TypeCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.codecs.AbstractCodec;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.common.messages.MsgMetaData;
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.ICommonSettings;
-import com.exactpro.sf.configuration.IDataManager;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.connectivity.mina.net.IoBufferWithAddress;
-import com.exactpro.sf.services.IServiceContext;
-import com.exactpro.sf.services.fast.converter.ConverterException;
-import com.exactpro.sf.services.fast.converter.FastToIMessageConverter;
-import com.exactpro.sf.services.fast.converter.IMessageToFastConverter;
-import com.exactpro.sf.services.fast.fixup.EofCheckedStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
+
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
 public class FASTCodec extends AbstractCodec {
 
@@ -64,14 +58,11 @@ public class FASTCodec extends AbstractCodec {
 
 	private IServiceContext serviceContext;
 	private IDictionaryStructure msgDictionary;
-	private IMessageFactory msgFactory;
 	private FastToIMessageConverter converter;
-
 	private FASTCodecSettings settings;
-
 	private TemplateRegistry registry;
-
 	private IMessageToFastConverter iMsgToFastConverter;
+	private FastToIMessageDecoder decoder;
 
 	@Override
 	public void init(
@@ -79,53 +70,17 @@ public class FASTCodec extends AbstractCodec {
 			ICommonSettings settings,
 			IMessageFactory msgFactory, IDictionaryStructure dictionary) {
 
-	    this.serviceContext = Objects.requireNonNull(serviceContext, "'Service context' parameter cannot be null");
-		this.msgDictionary = Objects.requireNonNull(dictionary, "'dictionary' parameter cannot be null");
+        this.serviceContext = Objects.requireNonNull(serviceContext, "'Service context' parameter cannot be null");
+        this.msgDictionary = Objects.requireNonNull(dictionary, "'dictionary' parameter cannot be null");
         String fastTemplate = Objects.requireNonNull(getAttributeValue(dictionary, FASTMessageHelper.TEMPLATE_ATTRIBYTE), "'Template attribute' parameter");
-		this.msgFactory = msgFactory;
-
-		if ( settings != null )
-		{
-			this.settings = (FASTCodecSettings) settings;
-		}
-
+        this.settings = (FASTCodecSettings)Objects.requireNonNull(settings, "'settings' parameter cannot be null");
         SailfishURI dictionaryName = Objects.requireNonNull(this.settings.getDictionaryName(), "'Dictionary name' parameter");
         IDataManager dataManager = Objects.requireNonNull(this.serviceContext.getDataManager(), "'Data manager' parameter");
-
-        loadFastTemplates(dataManager, dictionaryName.getPluginAlias(), fastTemplate);
-
-		createConverter();
-	}
-
-
-	private void createConverter() {
-        if(converter == null) {
-			FastToIMessageConverter converter = new FastToIMessageConverter(
-					msgFactory,
-					msgDictionary.getNamespace()
-			);
-			this.converter = converter;
-		}
-	}
-
-    private void loadFastTemplates(IDataManager dataManager, String pluginAlias, String templateName) {
-		XMLMessageTemplateLoader loader = new XMLMessageTemplateLoader();
-		loader.setLoadTemplateIdFromAuxId(true);
-
-		try (InputStream templateStream = dataManager.getDataInputStream(pluginAlias, FASTMessageHelper.getTemplatePath(templateName))) {
-			loader.load(templateStream);
-		} catch (IOException e) {
-			logger.warn("Can not read template {} from resources", templateName, e);
-			throw new EPSCommonException("Can not read template " + templateName + " from resources", e);
-		}
-
-        setRegistry(loader.getTemplateRegistry());
-	}
-
-	private void setRegistry(TemplateRegistry registry) {
-		this.registry = registry;
-	}
-
+        FastTemplateLoader templateLoader = new FastTemplateLoader();
+        this.registry = templateLoader.loadFastTemplates(dataManager, dictionaryName.getPluginAlias(), fastTemplate);
+        this.converter = new FastToIMessageConverter(msgFactory, msgDictionary.getNamespace());
+        this.decoder = new FastToIMessageDecoder(converter, this.settings.getSkipInitialByteAmount());
+    }
 
 	private TemplateRegistry getRegistry() {
 		return registry;
@@ -149,7 +104,6 @@ public class FASTCodec extends AbstractCodec {
 			IoSession session,
 			IoBuffer in,
 			ProtocolDecoderOutput out) throws Exception {
-
 		if (!in.hasRemaining()) {
 			return false;
 		}
@@ -180,40 +134,24 @@ public class FASTCodec extends AbstractCodec {
 			IoSession session,
 			IoBuffer in,
 			ProtocolDecoderOutput out) throws IOException, ConverterException {
-		int position = in.position();
+        int startPosition = in.position();
         byte[] data = new byte[in.remaining()];
-		in.get(data);
-
-        try(InputStream is = new EofCheckedStream(new ByteArrayInputStream(data))) {
-            int msgLen = TypeCodec.UINT.decode(is).toInt();
-            if(is.available() < msgLen) {
-                return false;
-            }
-            FASTMessageInputStream msgStream = new FASTMessageInputStream(is, getInputContext(session));
-            Message msg = msgStream.readMessage(settings.getSkipInitialByteAmount());
-
-            IMessage imsg = converter.convert(msg);
-
-            int available = is.available();
-            int size = data.length - available;
-            byte[] rawMessage = Arrays.copyOf(data, size);
-            position += size;
-            in.position(position);
-
-            fillMessageMetadata(session, in, imsg, rawMessage);
-
-            out.write(imsg);
-		}
-
-		return true;
+        in.get(data);
+        DecodeResult decodeResult = decoder.decode(data, getInputContext(session));
+        boolean isSuccessDecoded = decodeResult.isSuccess();
+        if (isSuccessDecoded) {
+            IMessage decodedMessage = decodeResult.getDecodedMessage();
+            fillMessageMetadata(session, in, decodedMessage);
+            out.write(decodedMessage);
+        }
+        in.position(startPosition + decodeResult.getProcessedDataLength());
+        return isSuccessDecoded;
 	}
-
 
 	private void fillMessageMetadata(
 			IoSession session,
 			IoBuffer in,
-			IMessage imsg,
-			byte[] rawMessage) {
+			IMessage imsg) {
         IMessageStructure msgStructure = msgDictionary.getMessages().get(imsg.getName());
         Boolean isAdmin = getAttributeValue(msgStructure, "IsAdmin");
 		if (isAdmin == null) {
@@ -227,8 +165,6 @@ public class FASTCodec extends AbstractCodec {
         String packetAddress = in instanceof IoBufferWithAddress ? ((IoBufferWithAddress)in).getAddress() : session.getRemoteAddress().toString();
 
         metaData.setFromService(packetAddress);
-
-		metaData.setRawMessage(rawMessage);
 	}
 
 
