@@ -31,6 +31,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.XMLConfiguration;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,7 +179,7 @@ public class UpdateService implements IEmbeddedService {
             }
 
             logger.info("Collecting data...");
-            String collectDataParameters = createCollectDataParameters();
+            String collectDataParameters = String.join(StringUtils.SPACE, createCollectDataParameters());
             logger.debug("Exec {} with params {}", deployerFile.getAbsolutePath(), collectDataParameters);
             Process collectDataProcess = Runtime.getRuntime().exec(String.format("%s %s", deployerFile.getAbsolutePath(), collectDataParameters));
             boolean isFinished = collectDataProcess.waitFor(DEFAULT_COLLECT_DATA_TIMEOUT, TimeUnit.HOURS);
@@ -192,7 +194,7 @@ public class UpdateService implements IEmbeddedService {
 
             logger.info("Checking for updates");
 
-            String checkUpdateParameters = createCheckUpdateParameters();
+            String checkUpdateParameters = String.join(StringUtils.SPACE, createCheckUpdateParameters());
             logger.debug("Exec {} with params {}", deployerFile.getAbsolutePath(), checkUpdateParameters);
             Process updateProcess = Runtime.getRuntime().exec(String.format("%s %s", deployerFile.getAbsolutePath(), checkUpdateParameters));
             String line;
@@ -248,43 +250,43 @@ public class UpdateService implements IEmbeddedService {
         return lastCheckTime;
     }
 
-    private String createCheckUpdateParameters() {
-        StringBuilder builder = createCommonParameters("check");
-        return builder.toString();
+    private List<String> createCheckUpdateParameters() {
+        List<String> builder = createCommonParameters("check");
+        return builder;
     }
 
-    private String createUpdateParameters() {
-        StringBuilder builder = createCommonParameters("update");
+    private List<String> createUpdateParameters() {
+        List<String> builder = createCommonParameters("update");
 
         addParameter(builder, "startTomcat");
         addParameter(builder, "checkTomcat");
-        return builder.toString();
+        return builder;
     }
 
-    private String createActualizingDeployerParameters(File tmpDir) {
-        StringBuilder builder = createCommonParameters("actualize");
+    private List<String> createActualizingDeployerParameters(File tmpDir) {
+        List<String> builder = createCommonParameters("actualize");
         addParameter(builder, "moveDest", tmpDir.getAbsolutePath());
-        return builder.toString();
+        return builder;
     }
 
-    private String createCollectDataParameters() {
-        return createCommonParameters("collect").toString();
+    private List<String> createCollectDataParameters() {
+        return createCommonParameters("collect");
     }
 
-    private StringBuilder createCommonParameters(String mode) {
+    private List<String> createCommonParameters(String mode) {
         try {
             File deployerCfg = wd.getFile(FolderType.CFG, DEPLOYER_CFG_FILE);
             File logsFolder = wd.getFolder(FolderType.LOGS);
             File reportDir = wd.getFolder(FolderType.REPORT);
-            StringBuilder builder = new StringBuilder();
-            addParameter(builder, "cfg", deployerCfg.getAbsolutePath());
-            addParameter(builder, "log", logsFolder.getAbsolutePath());
-            addParameter(builder, "report", reportDir.getAbsolutePath());
-            addParameter(builder, "serverUrl", getServerURL());
+            List<String> parameters = new ArrayList<>();
+            addParameter(parameters, "cfg", deployerCfg.getAbsolutePath());
+            addParameter(parameters, "log", logsFolder.getAbsolutePath());
+            addParameter(parameters, "report", reportDir.getAbsolutePath());
+            addParameter(parameters, "serverUrl", getServerURL());
 
-            addParameter(builder, "mode", mode);
-            addParameter(builder, "quiet");
-            return builder;
+            addParameter(parameters, "mode", mode);
+            addParameter(parameters, "quiet");
+            return parameters;
         } catch (FileNotFoundException e) {
             throw new EPSCommonException("Can't set parameters", e);
         }
@@ -294,16 +296,16 @@ public class UpdateService implements IEmbeddedService {
         return PROTOCOL_PREFIX + settings.getHost() + ":" + settings.getPort();
     }
 
-    private void addParameter(StringBuilder builder, String paramName) {
-        addParameter(builder, paramName, null);
+    private void addParameter(List<String> parameters, String paramName) {
+        addParameter(parameters, paramName, null);
     }
 
-    private void addParameter(StringBuilder builder, String paramName, String paramValue) {
-        Objects.requireNonNull(builder, "'Builder' parameter");
+    private void addParameter(List<String> parameters, String paramName, String paramValue) {
+        Objects.requireNonNull(parameters, "'Builder' parameter");
         Objects.requireNonNull(paramName, "'Parameter name' parameter");
-        builder.append(StringUtils.SPACE).append('-').append(paramName);
+        parameters.add("-" + paramName);
         if (paramValue != null) {
-            builder.append(StringUtils.SPACE).append(paramValue);
+            parameters.add(paramValue);
         }
     }
 
@@ -463,7 +465,7 @@ public class UpdateService implements IEmbeddedService {
 
                 logger.info("Actualizing deployer...");
                 Path tempDirectory = Files.createTempDirectory("deployer");
-                String updateDeployerParameters = createActualizingDeployerParameters(tempDirectory.toFile());
+                String updateDeployerParameters = String.join(StringUtils.SPACE, createActualizingDeployerParameters(tempDirectory.toFile()));
 
                 logger.debug("Exec {} with params {}", deployerFile.getAbsolutePath(), updateDeployerParameters);
                 Process actualizeDeployer = Runtime.getRuntime().exec(String.format("%s %s", deployerFile.getAbsolutePath(), updateDeployerParameters));
@@ -475,10 +477,17 @@ public class UpdateService implements IEmbeddedService {
                 Path actualDeployerPath = tempDirectory.resolve(deployerFile.getName()).toAbsolutePath();
 
                 logger.info("Updating Sailfish...");
-                String updateParameters = createUpdateParameters();
+                List<String> updateParameters = createUpdateParameters();
 
                 logger.debug("Exec {} with params {}", actualDeployerPath, updateParameters);
-                Process updateSailfish = Runtime.getRuntime().exec(String.format("%s %s", actualDeployerPath.toString(), updateParameters));
+                File err = Files.createTempFile("err", null).toFile().getAbsoluteFile();
+                File out = Files.createTempFile("out", null).toFile().getAbsoluteFile();
+                logger.debug("Out: {}; Err: {}", out, err);
+                Process updateSailfish = new ProcessBuilder(
+                        ArrayUtils.insert(0, updateParameters.toArray(new String[0]), actualDeployerPath.toString()))
+                        .redirectError(err)
+                        .redirectOutput(out)
+                        .start();
                 exitCode = updateSailfish.waitFor();
                 if (exitCode != 0) {
                     throw new EPSCommonException("Problem during updating Sailfish; Exit code: " + exitCode);
