@@ -129,7 +129,7 @@ export const MessagesCardList = connect(
         messages: state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
         selectedMessages: state.selected.messagesId,
-        selectedStatus: state.selected.status
+        selectedStatus: state.selected.selectedActionStatus
     }),
     (dispatch): MessagesListDispatchProps => ({
         verificationSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))

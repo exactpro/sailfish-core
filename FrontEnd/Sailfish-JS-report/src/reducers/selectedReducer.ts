@@ -20,7 +20,7 @@ import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import { nextCyclicItem } from '../helpers/array';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
-import { getActions } from '../helpers/actionType';
+import { getActions, removeNonexistingRelatedMessages } from '../helpers/action';
 import SearchResult from '../helpers/search/SearchResult';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
 
@@ -35,17 +35,23 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         }
 
         case StateActionTypes.SET_TEST_CASE: {
+            const messagesIds = stateAction.testCase.messages.map(message => message.id),
+                actions = stateAction.testCase.actions.map(action => removeNonexistingRelatedMessages(action, messagesIds));
+
             return {
                 ...state,
-                testCase: stateAction.testCase,
-                checkpointActions: getCheckpointActions(stateAction.testCase.actions),
-                actionsMap: generateActionsMap(getActions(stateAction.testCase.actions))
+                checkpointActions: getCheckpointActions(actions),
+                actionsMap: generateActionsMap(getActions(actions)),
+                testCase: {
+                    ...stateAction.testCase,
+                    actions
+                }
             }
         }
     
         case StateActionTypes.RESET_TEST_CASE: {
             return {
-                ...initialSelectedState,
+                ...initialSelectedState
             }
         }
 
@@ -62,7 +68,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             return {
                 ...state,
                 actionsId: [stateAction.action.id],
-                status: stateAction.action.status.status,
+                selectedActionStatus: stateAction.action.status.status,
                 messagesId: stateAction.action.relatedMessages,
                 verificationId: initialSelectedState.verificationId,
                 scrolledActionId: initialSelectedState.scrolledActionId,
@@ -75,7 +81,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             return {
                 ...state,
                 actionsId: [stateAction.actionId],
-                status: initialSelectedState.status,
+                selectedActionStatus: initialSelectedState.selectedActionStatus,
                 scrolledActionId: new Number(stateAction.actionId),
                 activeActionId: stateAction.actionId
             }
@@ -98,7 +104,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             return {
                 ...state,
                 messagesId: [stateAction.message.id],
-                status: stateAction.status,
+                selectedActionStatus: stateAction.status,
                 actionsId: relatedActions,
                 verificationId: stateAction.message.id,
                 scrolledActionId: new Number(scrolledAction),
@@ -112,7 +118,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 verificationId: stateAction.messageId,
                 messagesId: [stateAction.messageId],
-                status: stateAction.status,
+                selectedActionStatus: stateAction.status,
                 actionsId: initialSelectedState.actionsId,
                 scrolledMessageId: new Number(stateAction.messageId),
                 activeActionId: stateAction.rootActionId

@@ -14,7 +14,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { getActions, getStatusChipDescription } from "../../helpers/actionType";
+import { getActions, getStatusChipDescription } from "../../helpers/action";
 import { ActionNode, ActionNodeType } from "../../models/Action";
 import Action from '../../models/Action';
 import { StatusType } from "../../models/Status";

@@ -17,6 +17,7 @@
 import { ActionNode, ActionNodeType, isAction } from "../models/Action";
 import Action from '../models/Action';
 import { StatusType } from "../models/Status";
+import { intersection } from "./array";
 
 const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
 
@@ -33,4 +34,16 @@ export function getStatusChipDescription(status: StatusType): string {
         statusCapitalized = statusFormatted.charAt(0).toUpperCase() + statusFormatted.slice(1);
 
     return `${statusCapitalized} actions count. Click to select related ${statusFormatted} actions.`;
+}
+
+export function removeNonexistingRelatedMessages(action: ActionNode, messagesIds: number[]): ActionNode {
+    if (!isAction(action)) {
+        return action;
+    }
+
+    return {
+        ...action,
+        relatedMessages: intersection(action.relatedMessages, messagesIds),
+        subNodes: action.subNodes.map(action => removeNonexistingRelatedMessages(action, messagesIds))
+    }
 }

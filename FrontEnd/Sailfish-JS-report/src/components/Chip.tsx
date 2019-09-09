@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { StatusType, } from '../models/Status';
-import { getStatusChipDescription } from '../helpers/actionType';
+import { getStatusChipDescription } from '../helpers/action';
 import '../styles/chip.scss';
 import { createSelector } from '../helpers/styleCreators';
 

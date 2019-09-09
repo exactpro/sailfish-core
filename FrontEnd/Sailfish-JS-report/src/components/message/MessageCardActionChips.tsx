@@ -88,7 +88,7 @@ function renderChip(status: StatusType, statusActions: Action[], selectedStatus:
 export const MessageCardActionChips = connect(
     (state: AppState, ownProps: ActionChipsOwnProps): ActionChipsStateProps => ({
         actions: ownProps.message.relatedActions.map(actionId => state.selected.actionsMap.get(actionId)),
-        selectedStatus: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null
+        selectedStatus: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null
     }),
     (dispatch, ownProps: ActionChipsOwnProps): ActionChipsDispatchProps => ({
         selectHandler: (status: StatusType) => dispatch(selectMessage(ownProps.message, status))

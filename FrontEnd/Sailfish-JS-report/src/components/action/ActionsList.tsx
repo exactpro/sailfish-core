@@ -23,7 +23,7 @@ import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { actionsHeatmap } from '../../helpers/heatmapCreator';
-import { getActions } from '../../helpers/actionType';
+import { getActions } from '../../helpers/action';
 
 interface ListProps {
     actions: Array<ActionNode>;

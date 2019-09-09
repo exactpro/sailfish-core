@@ -28,7 +28,10 @@ export default interface SelectedState {
     checkpointMessageId: number;
     checkpointActionId: number;
     rejectedMessageId: number;
-    status: StatusType;
+    selectedActionStatus: StatusType;
+    /**
+     * Map (id -> action)
+     */
     actionsMap: Map<number, Action>;
     checkpointActions: Action[];
 

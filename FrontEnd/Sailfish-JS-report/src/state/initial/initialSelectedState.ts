@@ -26,7 +26,7 @@ export const initialSelectedState: SelectedState = {
     messagesId: [],
     scrolledMessageId: null,
     verificationId: null,
-    status: StatusType.NA,
+    selectedActionStatus: StatusType.NA,
     checkpointMessageId: null,
     checkpointActionId: null,
     rejectedMessageId: null,

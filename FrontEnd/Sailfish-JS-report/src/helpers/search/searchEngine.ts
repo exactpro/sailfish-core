@@ -23,7 +23,7 @@ import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
 import { createCaseInsensitiveRegexp } from '../regexp';
-import { isCheckpoint } from '../actionType';
+import { isCheckpoint } from '../action';
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],

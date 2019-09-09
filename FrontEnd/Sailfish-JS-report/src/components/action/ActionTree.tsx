@@ -31,7 +31,7 @@ import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
 import StateSaver from '../util/StateSaver';
 import memoize from '../../helpers/memoize';
-import { isCheckpoint } from '../../helpers/actionType';
+import { isCheckpoint } from '../../helpers/action';
 import { createExpandTreePath, createExpandTree, getSubTree, updateExpandTree } from '../../helpers/tree';
 import { keyForAction } from '../../helpers/keys';
 import { fetchPredictions } from "../../thunks/machineLearning";

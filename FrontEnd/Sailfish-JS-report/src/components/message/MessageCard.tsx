@@ -241,7 +241,7 @@ export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCar
 export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
         isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
-        status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.status : null,
+        status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null,
         rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null,
         adminEnabled: state.view.adminMessagesEnabled,
         isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id),
