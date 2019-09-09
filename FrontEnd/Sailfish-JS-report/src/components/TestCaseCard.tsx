@@ -25,18 +25,16 @@ import '../styles/report.scss';
 import {connect} from "react-redux";
 import AppState from "../state/models/AppState";
 
-interface TestCaseCardProps {
+interface Props {
     metadata: TestcaseMetadata;
     index: number;
     knownBugsEnabled: boolean;
+    isSelected: boolean;
     handleClick: (metadata: TestcaseMetadata) => any;
-
-    selectedTestCaseId: string;
 }
 
-const TestCaseCardBase = ({ metadata, handleClick, index, knownBugsEnabled, selectedTestCaseId }: TestCaseCardProps) => {
+const TestCaseCard = ({ metadata, handleClick, index, knownBugsEnabled, isSelected }: Props) => {
 
-    const isSelected = selectedTestCaseId === metadata.id;
     const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
     const baseRef = React.useRef<HTMLDivElement>();
 
@@ -109,9 +107,4 @@ const TestCaseCardBase = ({ metadata, handleClick, index, knownBugsEnabled, sele
     )
 }
 
-export const TestCaseCard = connect(
-    (state: AppState) => ({
-        selectedTestCaseId: state.selected.selectedTestCaseId
-    }),
-    () => ({})
-)(TestCaseCardBase);
+export default TestCaseCard;

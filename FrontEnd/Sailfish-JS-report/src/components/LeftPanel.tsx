@@ -25,19 +25,18 @@ import AppState from '../state/models/AppState';
 import { setLeftPane, selectCheckpointAction } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPanel';
 import { ActionsListBase } from './action/ActionsList';
-import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 import { createSelector } from '../helpers/styleCreators';
+import CheckpointCarousel from './CheckpointCarousel';
 
-interface LeftPanelProps {
+interface Props {
     panel: Panel;
-    checkpointActions: Action[]
-    selectedCheckpointId: number;
+    isCheckpointsEnabled: boolean;
     statusEnabled: boolean;
     panelSelectHandler: (panel: Panel) => any;
-    setSelectedCheckpoint: (checkpointAciton: Action) => any;
+    currentCheckpointHandler: () => any;
 }
 
-class LeftPanelBase extends React.Component<LeftPanelProps> {
+class LeftPanelBase extends React.Component<Props> {
 
     private actionPanel = React.createRef<ActionsListBase>();
     
@@ -54,13 +53,11 @@ class LeftPanelBase extends React.Component<LeftPanelProps> {
     }
 
     render() {
-        const { panel, checkpointActions, selectedCheckpointId, statusEnabled } = this.props;
+        const { panel, isCheckpointsEnabled, statusEnabled, currentCheckpointHandler } = this.props;
 
-        const cpIndex = checkpointActions.findIndex(action => action.id == selectedCheckpointId),
-            cpEnabled = checkpointActions.length != 0,
-            cpRootClass = createSelector(
+        const cpRootClass = createSelector(
                 "layout-control",
-                cpEnabled ? null : "disabled"
+                isCheckpointsEnabled ? null : "disabled"
             );
 
         return (
@@ -78,29 +75,22 @@ class LeftPanelBase extends React.Component<LeftPanelProps> {
                             text="Status" 
                             title={statusEnabled ? null : "No status info"}/>
                     </div>
-                    <div className={cpRootClass}>
-                        <div className="layout-control__icon cp"
-                            onClick={() => this.currentCpHandler(cpIndex)}
-                            style={{ cursor: cpEnabled ? 'pointer' : 'unset' }}
-                            title={ cpEnabled ? "Scroll to current checkpoint" : null }/>
-                        <div className="layout-control__title">
-                            <p>{cpEnabled ? "" : "No "}Checkpoints</p>
-                        </div>
-                        {
-                            cpEnabled ? 
-                            (
-                                <React.Fragment>
-                                    <div className="layout-control__icon prev"
-                                        onClick={cpEnabled && (() => this.prevCpHandler(cpIndex))}/>
-                                    <div className="layout-control__counter">
-                                        <p>{cpIndex + 1} of {checkpointActions.length}</p>
-                                    </div>
-                                    <div className="layout-control__icon next"
-                                        onClick={cpEnabled && (() => this.nextCpHandler(cpIndex))}/>
-                                </React.Fragment>
-                            ) : null
-                        }
-                    </div>
+                    {
+                        isCheckpointsEnabled ? (
+                            <div className="layout-control">
+                                <div className="layout-control__icon cp"
+                                    onClick={() => currentCheckpointHandler()}
+                                    title="Scroll to current checkpoint"/>
+                                <div className="layout-control__title">Checkpoints</div>
+                                <CheckpointCarousel/>
+                            </div>
+                        ) : (
+                            <div className="layout-control disabled">
+                                <div className="layout-control__icon cp"/>
+                                <div className="layout-control__title">No Checkpoints</div>
+                            </div>
+                        )
+                    }
                 </div>
                 <div className="layout-panel__content">
                     {this.renderPanels(panel)}
@@ -139,22 +129,6 @@ class LeftPanelBase extends React.Component<LeftPanelProps> {
             this.props.panelSelectHandler(panel);
         }
     }
-
-    private nextCpHandler(currentCpIndex: number) {
-        this.props.setSelectedCheckpoint(nextCyclicItemByIndex(this.props.checkpointActions, currentCpIndex));
-    }
-
-    private prevCpHandler(currentCpIndex: number) {
-        this.props.setSelectedCheckpoint(prevCyclicItemByIndex(this.props.checkpointActions, currentCpIndex));
-    }
-
-    private currentCpHandler(cpIndex: number) {
-        const cp = this.props.checkpointActions[cpIndex];
-
-        if (cp) {
-            this.props.setSelectedCheckpoint(cp);
-        }
-    }
 }
 
 export const LeftPanel = connect(
@@ -162,10 +136,17 @@ export const LeftPanel = connect(
         panel: state.view.leftPanel,
         selectedCheckpointId: state.selected.checkpointActionId,
         checkpointActions: state.selected.checkpointActions,
-        statusEnabled: !!state.selected.testCase.status.cause
+        statusEnabled: !!state.selected.testCase.status.cause,
+        isCheckpointsEnabled: state.selected.checkpointActions.length > 0
     }),
     dispatch => ({
         panelSelectHandler: (panel: Panel) => dispatch(setLeftPane(panel)),
         setSelectedCheckpoint: (checkpointAciton: Action) => dispatch(selectCheckpointAction(checkpointAciton))
+    }),
+    ({ checkpointActions, selectedCheckpointId, ...stateProps }, { setSelectedCheckpoint, ...dispatchProps}, ownProps): Props => ({
+        ...stateProps,
+        ...dispatchProps, 
+        ...ownProps,
+        currentCheckpointHandler: () => setSelectedCheckpoint(checkpointActions.find(action => action.id === selectedCheckpointId))
     })
 )(LeftPanelBase)

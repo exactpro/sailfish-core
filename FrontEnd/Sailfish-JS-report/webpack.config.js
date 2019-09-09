@@ -80,7 +80,7 @@ module.exports = {
     new HtmlWebPackPlugin({
       title: "Sailfish report",
       template: "src/index.html",
-      favicon: "src/favicon.png"
+      favicon: "resources/icons/favicon.png"
     })
   ],
   optimization: {

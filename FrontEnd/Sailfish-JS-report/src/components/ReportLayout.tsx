@@ -24,26 +24,33 @@ import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
-import { createSelector } from '../helpers/styleCreators';
+import { createSelector, createBemElement } from '../helpers/styleCreators';
 import { loadTestCase } from '../thunks/loadTestCase';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { ExceptionChain } from './ExceptionChain';
-import { TestCaseCard } from './TestCaseCard';
-import { SelectionCarouselControl } from './SelectionCarouselControl';
+import TestCaseCard from './TestCaseCard';
+import { FailedTestCaseCarousel } from './FailedTestCaseCarousel';
 
 const OLD_REPORT_PATH = 'report.html';
 
-interface ReportLayoutProps {
+interface StateProps {
     report: Report;
+    failedTestCasesEnabled: boolean;
+    selectedTestCaseId: string;
+}
+
+interface DispatchProps {
     onTestCaseSelect: (testCaseName: string) => void;
 }
 
-interface ReportLayoutState {
+interface Props extends StateProps, DispatchProps { }
+
+interface State {
     showKnownBugs: boolean;
 }
 
-export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportLayoutState> {
+export class ReportLayoutBase extends React.Component<Props, State> {
 
     constructor(props) {
         super(props);
@@ -61,12 +68,12 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
 
     render() {
 
-        const { onTestCaseSelect, report } = this.props,
+        const { onTestCaseSelect, report, failedTestCasesEnabled, selectedTestCaseId } = this.props,
             { showKnownBugs } = this.state;
 
-        const knownBugsPresent = report.metadata.some(item => item.bugs != null && item.bugs.length > 0);
-
-        const knownBugsClass = showKnownBugs ? "active" : "enabled";
+        const knownBugsPresent = report.metadata.some(item => item.bugs != null && item.bugs.length > 0),
+            knownBugsClass = showKnownBugs ? "active" : "enabled",
+            failedTcTitleClass = createBemElement('report', 'title', 'failed', failedTestCasesEnabled ? null : 'disabled');
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -99,7 +106,10 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                 </div>
                 <div className="report__controls">
                     <div className="report__title">Test Cases</div>
-                    <SelectionCarouselControl/>
+                    <div className={failedTcTitleClass}>
+                        { failedTestCasesEnabled ? 'Failed' : 'No Failed' }
+                    </div>
+                    <FailedTestCaseCarousel/>
                     {knownBugsButton}
                 </div>
                 <div className="report__summary   report-summary">
@@ -167,6 +177,7 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
                                     report.metadata.map((metadata, index) => (
                                         <TestCaseCard
                                             knownBugsEnabled={showKnownBugs}
+                                            isSelected={metadata.id === selectedTestCaseId}
                                             key={index}
                                             metadata={metadata}
                                             index={index + 1}
@@ -206,10 +217,12 @@ export class ReportLayoutBase extends React.Component<ReportLayoutProps, ReportL
 }
 
 const ReportLayout = connect(
-    (state: AppState) => ({
-        report: state.report
+    (state: AppState): StateProps => ({
+        report: state.report,
+        failedTestCasesEnabled: (state.report.metadata || []).length > 0,
+        selectedTestCaseId: state.selected.selectedTestCaseId
     }),
-    (dispatch: ThunkDispatch<AppState, {}, StateActionType>) => ({
+    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         onTestCaseSelect: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
 )(ReportLayoutBase);

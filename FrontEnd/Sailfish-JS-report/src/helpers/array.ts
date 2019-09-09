@@ -20,6 +20,10 @@
  * @param item Current item
  */
 export function nextCyclicItemByIndex<T>(array: Array<T>, index: number): T {
+    if (index < 0) {
+        return array[0];
+    }
+
     return array[(index + 1) % array.length];
 }
 
@@ -29,6 +33,10 @@ export function nextCyclicItemByIndex<T>(array: Array<T>, index: number): T {
  * @param item Current item
  */
 export function prevCyclicItemByIndex<T>(array: Array<T>, index: number): T {
+    if (index < 0) {
+        return array[array.length - 1];
+    }
+
     return array[(array.length + index - 1) % array.length];
 }
 

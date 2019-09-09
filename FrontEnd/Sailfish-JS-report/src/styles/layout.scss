@@ -81,6 +81,10 @@
     align-items: center;
     padding: 5px;
 
+    &.disabled {
+        opacity: 0.5;
+    }
+
     &__title, &__counter {
         @include unselectable;
         font-size: 15px;
@@ -98,17 +102,10 @@
                 cursor: default;
             }
         }
-
-        &.disabled {
-            filter: opacity(0.5);
-        }
     }
 
     &__icon {
-        height: 20px;
-        width: 20px;
-        background-size: 100%;
-        background-repeat: no-repeat;
+        @include icon(null, 20px, 20px);
         margin: 0 7px;
         cursor: pointer;
 
@@ -131,7 +128,6 @@
         &.admin {
             &.disabled {
                 background-image: url(../../resources/icons/admin-icon-inactive.svg);
-                filter: opacity(0.5);
                 cursor: default;
             }
 
@@ -147,7 +143,6 @@
         &.rejected {
             &.disabled {
                 background-image: url(../../resources/icons/rejected-icon-inactive.svg);
-                filter: opacity(0.5);
                 cursor: default;
             }
 
@@ -163,7 +158,6 @@
         &.prediction {
             &.disabled {
                 background-image: url(../../resources/icons/ml-control-icon-inactive.svg);
-                filter: opacity(0.5);
                 cursor: default;
             }
 

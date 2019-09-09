@@ -46,11 +46,6 @@
         align-items: center;
         justify-content: space-between;
         padding-left: 20px;
-
-      .carousel-control {
-        @include carousel-control
-
-      }
     }
 
     &__summary {
@@ -70,6 +65,20 @@
         color: $reportTitleTextColor;
         font-weight: bold;
         width: 100%;
+        white-space: nowrap;
+
+        &.disabled {
+            opacity: 0.7;
+        }
+
+        &.failed {
+            width: auto;
+            color: $failedTextColor;
+
+            &.disabled {
+                color: $reportTitleTextColor;
+            }
+        }
     }
 
     &__known-bugs-button {
@@ -207,6 +216,11 @@
     cursor: pointer;
 
     &:hover {
+        background-color: var(--status-secondary-background-color);
+    }
+
+    &.selected {
+        border-color: var(--status-primary-border-color);
         background-color: var(--status-secondary-background-color);
     }
 
