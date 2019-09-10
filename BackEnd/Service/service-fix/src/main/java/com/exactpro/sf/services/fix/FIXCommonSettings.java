@@ -10,6 +10,7 @@
 package com.exactpro.sf.services.fix;
 
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.aml.EnumeratedValues;
 import com.exactpro.sf.aml.InputMask;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.AbstractServiceSettings;
@@ -28,6 +29,7 @@ public class FIXCommonSettings extends AbstractServiceSettings {
             + "    <tr bgcolor=\"#eeeeff\"><td><code>FIX.4.4</code>"
             + "    <tr bgcolor=\"#eeeeff\"><td><code>FIXT.1.1</code>"
             + "</table>")
+    @EnumeratedValues({"FIX.4.0", "FIX.4.1", "FIX.4.2", "FIX.4.3", "FIX.4.4", "FIXT.1.1"})
     protected String BeginString;
 
     @RequiredParam
@@ -68,6 +70,7 @@ public class FIXCommonSettings extends AbstractServiceSettings {
             + "    <tr bgcolor=\"#eeeeff\"><td><code>8</code><td>FIX50SP1"
             + "    <tr bgcolor=\"#eeeeff\"><td><code>9</code><td>FIX50SP2"
             + "</table>")
+    @EnumeratedValues({"2", "3", "4", "5", "6", "7", "8", "9"})
     protected String DefaultApplVerID = "9";
 
     @RequiredParam

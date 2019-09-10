@@ -44,6 +44,7 @@ public class ITCHClientSettings extends AbstractMINASettings
 	@RequiredParam
 	@Description("ID of target Market Data Group should be used in UnitHeader")
 	private byte marketDataGroup;
+
 	@RequiredParam
     @Description("The number of bytes for length field (1 or 2)")
 	private int msgLength = 1;
