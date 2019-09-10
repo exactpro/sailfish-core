@@ -30,7 +30,7 @@ ext {
     tomcatContextDir    = file("${cargoDir}/tomcat")
 
     deployPath          = 'sfgui'
-    tomcatUrl           = 'http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.5/bin/apache-tomcat-8.5.5.zip'
+    tomcatUrl           = 'http://archive.apache.org/dist/tomcat/tomcat-9/v9.0.24/bin/apache-tomcat-9.0.24.zip'
     tpmcatPort          = 8080
 }
 archivesBaseName = 'sailfish-frontend'
@@ -307,7 +307,7 @@ task writeWebXML(type: com.exactpro.sf.WriteFileTask) {
 }
 
 cargo {
-    containerId = 'tomcat8x'
+    containerId = 'tomcat9x'
     port        = tpmcatPort
 
     deployable {
