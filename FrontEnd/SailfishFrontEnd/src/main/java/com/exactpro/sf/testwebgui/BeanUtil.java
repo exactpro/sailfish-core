@@ -19,11 +19,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
@@ -53,6 +52,7 @@ import com.exactpro.sf.testwebgui.servlets.ReportServlet;
 import com.exactpro.sf.testwebgui.servlets.SessionModelsMapper;
 
 public class BeanUtil {
+    private static final Logger logger = LoggerFactory.getLogger(BeanUtil.class);
 
     public static final String WORKSPACE_DISPATCHER = "workspaceDispatcher";
     public static final String KEY_USER = "user";
@@ -276,6 +276,18 @@ public class BeanUtil {
 
     public static URL buildReportUrl(String reportDirectory, SfInstance instance) {
 
+        if (instance == null) {
+            logger.warn("SfInstance is null - trying to construct it from ExternalContext data");
+
+            ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
+
+            instance = new SfInstance();
+            instance.setId(0L);
+            instance.setHost(context.getRequestServerName());
+            instance.setPort(context.getRequestServerPort());
+            instance.setName(context.getRequestContextPath());
+        }
+
         return buildReportUrl(
                 reportDirectory,
                 null,
@@ -284,11 +296,6 @@ public class BeanUtil {
                 true,
                 null,
                 null);
-    }
-
-    public static URL buildReUrl(String reportDirectory) {
-
-        return buildReportUrl(reportDirectory, SFLocalContext.getDefault().getStatisticsService().getThisSfInstance());
     }
 
     private static URL getMlApiPath(SfInstance thisInstance) throws MalformedURLException, URISyntaxException {

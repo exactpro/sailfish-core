@@ -206,7 +206,8 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 
             initStorage(settings.getStorageSettings());
 
-            this.thisSfInstance = storage.loadSfInstance(settings.getThisSfHost(),
+            this.thisSfInstance = storage.loadSfInstance(
+                    settings.getThisSfHost(),
                     settings.getThisSfPort(),
                     settings.getThisSfName());
 
@@ -239,6 +240,12 @@ public class StatisticsService extends StatisticsReportHandlerLoader implements 
 			logger.info("Statistics service initialized");
 
 		} else {
+
+            thisSfInstance = new SfInstance();
+            thisSfInstance.setId(0L);
+            thisSfInstance.setHost(settings.getThisSfHost());
+            thisSfInstance.setPort(Integer.parseInt(settings.getThisSfPort()));
+            thisSfInstance.setName(settings.getThisSfName());
 
 			this.errorMsg = "";
 
