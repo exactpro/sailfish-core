@@ -444,7 +444,7 @@
 
                 <p:column style="width:25%;background-color:#ffffff">
                 	<ui:fragment rendered="#{envParam.type == null}">
-	                    <p:inputText value="#{envParam.paramValue}" styleClass="eps-input" validatorMessage="Not valid (validator)">
+	                    <p:inputText value="#{envParam.paramValue}" styleClass="eps-input" validatorMessage="'#{envParam.paramName}': wrong value (validated by regex '#{envParam.paramValidateRegex}')">
 	                    	<o:validator validatorId="javax.faces.RegularExpression" disabled="#{envParam.paramValidateRegex == null}" pattern="#{envParam.paramValidateRegex}" />
 	                        <p:ajax event="blur" execute="@this" />
 	                    </p:inputText>
