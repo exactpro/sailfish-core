@@ -28,6 +28,7 @@ import javax.faces.context.FacesContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
@@ -261,7 +262,7 @@ public class BeanUtil {
 
         try {
             URI baseUri = (StringUtils.isNotEmpty(customReportsPath)
-                    ? new URI(customReportsPath)
+                    ? new URI(customReportsPath.endsWith("/") ? customReportsPath : (customReportsPath + "/"))
 
                     : new URIBuilder()
                     .setScheme("http")
@@ -270,7 +271,7 @@ public class BeanUtil {
                     .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
                     .build()
 
-            ).resolve(new URIBuilder().setPath(reportDirectoryPath + "/").build());
+            ).resolve(new URIBuilder().setPath(FilenameUtils.separatorsToUnix(reportDirectoryPath) + "/").build());
 
             if (report) {
                 URIBuilder relativeReportFileUriBuilder = new URIBuilder("index.html");
