@@ -55,6 +55,7 @@ import com.exactpro.sf.center.SFContextSettings;
 import com.exactpro.sf.center.SFException;
 import com.exactpro.sf.center.impl.CoreVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.comparison.MessageComparator;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceDispatcherBuilder;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
@@ -160,27 +161,19 @@ public class SFContextServlet implements Servlet {
 
 	}
 
-	private void initServices(ISFContext sFcontext, ServletContext servletContext) {
+    private void initServices(ISFContext sFcontext) {
 
         try {
             Map<String, String> allStoredOptions = sFcontext.getOptionsStorage().getAllOptions();
-
             StatisticsServiceSettings settings = new StatisticsServiceSettings();
 
             if (!loadMappableSettingsFromFile(settings, sFcontext.getWorkspaceDispatcher())) {
                 settings.fillFromMap(allStoredOptions);
             }
 
-            settings.setThisSfName(servletContext.getContextPath());
-
-            try {
-                settings.setThisSfHost(InetAddress.getLocalHost().getHostName());
-            } catch (UnknownHostException e) {
-                logger.error(e.getMessage(), e);
-                settings.setThisSfHost(SystemUtils.getHostName());
-            }
-
-            settings.setThisSfPort(Integer.toString(determineTomcatHttpPort(servletContext)));
+            settings.setThisSfHost(sFcontext.getSfInstanceInfo().getHostname());
+            settings.setThisSfPort(Integer.toString(sFcontext.getSfInstanceInfo().getPort()));
+            settings.setThisSfName(sFcontext.getSfInstanceInfo().getContextPath());
 
             StatisticsService statisticsService = sFcontext.getStatisticsService();
 
@@ -379,8 +372,20 @@ public class SFContextServlet implements Servlet {
     		logger.debug("Before create context");
     		logger.debug("workspace: {}", workspacePath);
 
-    		try {
-    		    sfLocalContext = SFLocalContext.createContext(wd, sfContextSettings);
+            try {
+                String hostname;
+
+                try {
+                    hostname = InetAddress.getLocalHost().getHostName();
+                } catch (UnknownHostException e) {
+                    logger.error(e.getMessage(), e);
+                    hostname = SystemUtils.getHostName();
+                }
+
+
+                sfLocalContext = SFLocalContext.createContext(wd, sfContextSettings,
+                        new SfInstanceInfo(hostname, determineTomcatHttpPort(config.getServletContext()), config.getServletContext().getContextPath()));
+
                 EnvironmentSettings environmentSettings = sfLocalContext.getEnvironmentManager().getEnvironmentSettings();
                 BigDecimal comparisonPrecision = environmentSettings.getComparisonPrecision();
                 MathProcessor.COMPARISON_PRECISION = comparisonPrecision;
@@ -409,7 +414,7 @@ public class SFContextServlet implements Servlet {
     		initAuthentication(sfLocalContext.getAuthStorage());
 
     		// Hibernate DB service init
-            initServices(sfLocalContext, config.getServletContext());
+            initServices(sfLocalContext);
 
     		// ---------- subscribe SFWebApplication to events
     		sfLocalContext.getMatrixStorage().subscribeForUpdates((MatrixUpdateListener)SFWebApplication.getInstance().getMatrixUpdateRetriever());

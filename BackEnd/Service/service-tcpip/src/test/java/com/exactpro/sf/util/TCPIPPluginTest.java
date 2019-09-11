@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.center.SFContextSettings;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
@@ -105,7 +106,7 @@ public class TCPIPPluginTest {
                     settings.setConfig(loadDefaultEnvironment(wd));
                     settings.setCompilerClassPath(System.getProperty("java.class.path"));
 
-					SFLocalContext.createContext(wd, settings);
+                    SFLocalContext.createContext(wd, settings, new SfInstanceInfo("localhost", 80, "sfgui"));
 				}
 			} catch (Throwable e) {
 				System.err.println(e);

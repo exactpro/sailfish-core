@@ -18,6 +18,7 @@ package com.exactpro.sf.center;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.aml.IPreprocessor;
 import com.exactpro.sf.aml.IValidator;
@@ -111,4 +112,6 @@ public interface ISFContext {
     ITaskExecutor getTaskExecutor();
     ILoggingConfigurator getLoggingConfigurator();
     IServiceStorage getServiceStorage();
+
+    SfInstanceInfo getSfInstanceInfo();
 }

@@ -66,9 +66,9 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.generator.AggregateAlert;
 import com.exactpro.sf.aml.script.CheckPoint;
-import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageUtil;
@@ -85,7 +85,6 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
-import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings.RelevantMessagesSortingMode;
 import com.exactpro.sf.scriptrunner.IReportStats;
 import com.exactpro.sf.scriptrunner.IScriptReport;
@@ -149,7 +148,7 @@ public class HtmlReport implements IScriptReport {
     private final IDictionaryManager dictionaryManager;
     private final TemplateWrapperFactory templateWrapperFactory;
     private final ReportTable warningsTable;
-    private final SfInstance currentSfInstance;
+    private final SfInstanceInfo currentSfInstance;
 
     private ContextType currentContext = ContextType.NONE;
 
@@ -176,7 +175,7 @@ public class HtmlReport implements IScriptReport {
     private Map<Integer, MachineLearningData> dataMap;
     private final RelevantMessagesSortingMode relevantMessagesSortingMode;
 
-    public HtmlReport(SfInstance currentSfInstance, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
+    public HtmlReport(SfInstanceInfo currentSfInstance, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
         this.reportFolder = reportFolder;
         this.workspaceDispatcher = workspaceDispatcher;
         this.dictionaryManager = dictionaryManager;
@@ -1739,13 +1738,13 @@ public class HtmlReport implements IScriptReport {
 
 
     // This is a complete copy of BeanUtil.getMlApiPath()
-    private static URL getMlApiPath(SfInstance thisInstance) throws MalformedURLException, URISyntaxException {
+    private static URL getMlApiPath(SfInstanceInfo thisInstance) throws MalformedURLException, URISyntaxException {
 
         return new URIBuilder()
                 .setScheme("http")
-                .setHost(thisInstance.getHost())
+                .setHost(thisInstance.getHostname())
                 .setPort(thisInstance.getPort())
-                .setPath(thisInstance.getName() + "/")
+                .setPath(thisInstance.getContextPath() + "/")
                 .build()
                 .resolve("sfapi/machinelearning/v2/")
                 .toURL();

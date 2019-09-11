@@ -18,6 +18,7 @@ package com.exactpro.sf.statictesting;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.SFContextSettings;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceDispatcherBuilder;
 import com.exactpro.sf.configuration.workspace.DefaultWorkspaceLayout;
 
@@ -55,13 +57,11 @@ public abstract class AbstractStaticTest {
             builder.addWorkspaceLayer(workspaceLayer, DefaultWorkspaceLayout.getInstance());
         }
 
-        SFLocalContext context = SFLocalContext.createContext(builder.build(), settings);
+        SFLocalContext context = SFLocalContext.createContext(builder.build(), settings, new SfInstanceInfo("localhost", 80, "sfgui"));
         String separator = System.getProperty("path.separator");
         Set<String> classPathElements = new LinkedHashSet<>();
 
-        for(String classPathElement : System.getProperty("java.class.path").split(separator)) {
-            classPathElements.add(classPathElement);
-        }
+        Collections.addAll(classPathElements, System.getProperty("java.class.path").split(separator));
 
         for(ClassLoader classLoader : context.getPluginClassLoaders().values()) {
             URL[] urls = ((URLClassLoader)classLoader).getURLs();

@@ -34,9 +34,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 import com.exactpro.sf.embedded.statistics.storage.CommonReportRow;
 import com.exactpro.sf.storage.auth.User;
 import com.exactpro.sf.testwebgui.configuration.ConfigBean;
@@ -215,11 +216,45 @@ public class BeanUtil {
         return sb.toString();
     }
 
+    public static URL buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) {
+
+        SfInstanceInfo reportInstance = SfInstanceInfo.fromSfInstance(row.getSfCurrentInstance());
+        if (reportInstance == null) {
+            reportInstance = SfInstanceInfo.fromSfInstance(row.getSfInstance());
+        }
+
+        return buildReportUrl(
+                row.getReportFolder(),
+                customReportsPath,
+                reportInstance,
+                SFLocalContext.getDefault().getSfInstanceInfo(),
+                report,
+                row.getTestCaseId(),
+                row.getMatrixName());
+
+    }
+
+    public static URL buildReportUrl(String reportDirectory, SfInstanceInfo instance) {
+
+        if (instance == null) {
+            instance = SFLocalContext.getDefault().getSfInstanceInfo();
+        }
+
+        return buildReportUrl(
+                reportDirectory,
+                null,
+                instance,
+                instance,
+                true,
+                null,
+                null);
+    }
+
     private static URL buildReportUrl(
             String reportDirectoryPath,
             String customReportsPath,
-            SfInstance reportInstance,
-            SfInstance mlInstance,
+            SfInstanceInfo reportInstance,
+            SfInstanceInfo mlInstance,
             boolean report,
             String testCaseId,
             String matrixName) {
@@ -230,9 +265,9 @@ public class BeanUtil {
 
                     : new URIBuilder()
                     .setScheme("http")
-                    .setHost(reportInstance.getHost())
+                    .setHost(reportInstance.getHostname())
                     .setPort(reportInstance.getPort())
-                    .setPath(String.format("/%s/%s/", reportInstance.getName(), ReportServlet.REPORT_URL_PREFIX))
+                    .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
                     .build()
 
             ).resolve(new URIBuilder().setPath(reportDirectoryPath + "/").build());
@@ -256,55 +291,13 @@ public class BeanUtil {
         }
     }
 
-    public static URL buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) {
-
-        SfInstance reportInstance = row.getSfCurrentInstance();
-        if (reportInstance == null) {
-            reportInstance = row.getSfInstance();
-        }
-
-        return buildReportUrl(
-                row.getReportFolder(),
-                customReportsPath,
-                reportInstance,
-                reportInstance,
-                report,
-                row.getTestCaseId(),
-                row.getMatrixName());
-
-    }
-
-    public static URL buildReportUrl(String reportDirectory, SfInstance instance) {
-
-        if (instance == null) {
-            logger.warn("SfInstance is null - trying to construct it from ExternalContext data");
-
-            ExternalContext context = FacesContext.getCurrentInstance().getExternalContext();
-
-            instance = new SfInstance();
-            instance.setId(0L);
-            instance.setHost(context.getRequestServerName());
-            instance.setPort(context.getRequestServerPort());
-            instance.setName(context.getRequestContextPath());
-        }
-
-        return buildReportUrl(
-                reportDirectory,
-                null,
-                instance,
-                instance,
-                true,
-                null,
-                null);
-    }
-
-    private static URL getMlApiPath(SfInstance thisInstance) throws MalformedURLException, URISyntaxException {
+    private static URL getMlApiPath(SfInstanceInfo thisInstance) throws MalformedURLException, URISyntaxException {
 
         return new URIBuilder()
                 .setScheme("http")
-                .setHost(thisInstance.getHost())
+                .setHost(thisInstance.getHostname())
                 .setPort(thisInstance.getPort())
-                .setPath(thisInstance.getName() + "/")
+                .setPath(thisInstance.getContextPath() + "/")
                 .build()
                 .resolve("sfapi/machinelearning/v2/")
                 .toURL();

@@ -171,6 +171,8 @@ public class SFLocalContext implements ISFContext {
 	private final List<IVersion> pluginVersions;
     private final Map<String, ClassLoader> pluginClassLoaders;
 
+    private final SfInstanceInfo sfInstanceInfo;
+
     private final IVersion version;
 	private final String branchName;
 
@@ -192,13 +194,13 @@ public class SFLocalContext implements ISFContext {
 		}
 	}
 
-	public static SFLocalContext createContext(IWorkspaceDispatcher wd, SFContextSettings settings) throws Exception {
-	    SFLocalContext localContext = context;
-	    if (localContext == null) {
+    public static SFLocalContext createContext(IWorkspaceDispatcher wd, SFContextSettings settings, SfInstanceInfo instanceInfo) throws Exception {
+        SFLocalContext localContext = context;
+        if (localContext == null) {
             synchronized (SFLocalContext.class) {
                 localContext = context;
                 if (localContext == null) {
-                    context = localContext = new SFLocalContext(wd, settings);
+                    context = localContext = new SFLocalContext(wd, settings, instanceInfo);
                     return localContext;
                 } else {
                     throw new SFException("SFContext can be created only once");
@@ -206,12 +208,14 @@ public class SFLocalContext implements ISFContext {
             }
         }
         return localContext;
-	}
+    }
 
-	private SFLocalContext(IWorkspaceDispatcher wd, SFContextSettings settings) throws Exception {
+	private SFLocalContext(IWorkspaceDispatcher wd, SFContextSettings settings, SfInstanceInfo instanceInfo) throws Exception {
 		// Initialization:
 		// 1) Workspace is ready
 		this.workspaceDispatcher = wd;
+
+        this.sfInstanceInfo = instanceInfo;
 
 		// 2) Read configs
 		EnvironmentSettings envSettings = new EnvironmentSettings(settings.getEnvironmentConfig());
@@ -679,5 +683,10 @@ public class SFLocalContext implements ISFContext {
     @Override
     public IServiceStorage getServiceStorage() {
         return serviceStorage;
+    }
+
+    @Override
+    public SfInstanceInfo getSfInstanceInfo() {
+        return sfInstanceInfo;
     }
 }

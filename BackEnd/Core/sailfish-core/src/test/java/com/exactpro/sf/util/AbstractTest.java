@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.aml.script.ActionContext;
 import com.exactpro.sf.center.SFContextSettings;
 import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
@@ -140,7 +141,7 @@ public class AbstractTest {
 					SFContextSettings settings = new SFContextSettings();
                     settings.setConfig(loadDefaultEnvironment(workspaceDispatcher));
                     settings.setCompilerClassPath(System.getProperty("java.class.path"));
-                    serviceContext = SFLocalContext.createContext(workspaceDispatcher, settings).getServiceContext();
+                    serviceContext = SFLocalContext.createContext(workspaceDispatcher, settings, new SfInstanceInfo("localhost", 80, "sfgui")).getServiceContext();
                     serviceContext = Mockito.spy(serviceContext);
 
                     Mockito.when(serviceContext.lookupService(ArgumentMatchers.any(ServiceName.class))).thenAnswer(invocation -> {
