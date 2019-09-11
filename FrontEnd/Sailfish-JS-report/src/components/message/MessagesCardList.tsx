@@ -21,13 +21,13 @@ import MessageCard from './MessageCard';
 import { StatusType } from '../../models/Status';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { CheckpointMessage } from '../Checkpoint';
 import { isCheckpoint, isAdmin } from '../../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { selectMessage } from '../../actions/actionCreators';
 import { messagesHeatmap } from '../../helpers/heatmapCreator';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { VirtualizedList } from '../VirtualizedList';
+import CheckpointMessage from './CheckpointMessage';
 
 interface MessagesListStateProps {
     messages: Message[];

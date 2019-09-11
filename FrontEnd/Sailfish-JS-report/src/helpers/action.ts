@@ -47,3 +47,11 @@ export function removeNonexistingRelatedMessages(action: ActionNode, messagesIds
         subNodes: action.subNodes.map(action => removeNonexistingRelatedMessages(action, messagesIds))
     }
 }
+
+export function getActionCheckpointName(action: Action): string {
+    const checkpointParam = action.parameters.find(param => param.name == 'Checkpoint'),
+        nameParam = checkpointParam && checkpointParam.subParameters.find(param => param.name == 'Name'),
+        name = nameParam != null ? nameParam.value : '';
+
+    return name;
+}

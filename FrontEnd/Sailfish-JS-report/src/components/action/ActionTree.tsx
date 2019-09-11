@@ -24,7 +24,6 @@ import AppState from '../../state/models/AppState';
 import ActionExpandStatus from '../../models/util/ActionExpandStatus';
 import { ActionCard } from './ActionCard';
 import { CustomMessage } from './CustomMessage';
-import { CheckpointAction } from '../Checkpoint';
 import { selectAction } from '../../actions/actionCreators';
 import { selectVerification } from '../../actions/actionCreators';
 import VerificationCard from './VerificationCard';
@@ -37,6 +36,7 @@ import { keyForAction } from '../../helpers/keys';
 import { fetchPredictions } from "../../thunks/machineLearning";
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
+import CheckpointAction from './CheckpointAction';
 
 interface OwnProps {
     action: ActionNode;
