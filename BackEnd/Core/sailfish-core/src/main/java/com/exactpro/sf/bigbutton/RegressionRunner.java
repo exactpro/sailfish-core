@@ -329,44 +329,51 @@ public class RegressionRunner implements AutoCloseable {
 		
 		@Override
 		public void run() {
-			
-			logger.info("BB initiator started");
 
-			library.normalize();
+            try {
+                logger.info("BB initiator started");
 
-			checkReportsFolder();
-				
-			//fillQueue();
-				
-			List<ExecutorClient> exClients = executorClients;
-				
-			String dbSettings = RegressionRunnerUtils.getStatisticsDBSettings();
-				
-            List<ExecutorClient> preparedClients = new ArrayList<>();
+                library.normalize();
 
-				for(ExecutorClient client : exClients) {
-                if (client.prepareExecutor(dbSettings)) {
+                checkReportsFolder();
+
+                //fillQueue();
+
+                List<ExecutorClient> exClients = executorClients;
+
+                String dbSettings = RegressionRunnerUtils.getStatisticsDBSettings();
+
+                List<ExecutorClient> preparedClients = new ArrayList<>();
+
+                logger.info("Preparing executor clients...");
+                for (ExecutorClient client : exClients) {
+                    if (client.prepareExecutor(dbSettings)) {
                         preparedClients.add(client);
                     }
-				}
-				
-            // TODO May be register tags in master instance, because all SF
-            // should be connected to the same Statistics DB
+                }
 
-            if (!registerTags(preparedClients)) {
-                monitor.error("Tags can't be registered");
-                return;
+                // TODO May be register tags in master instance, because all SF
+                // should be connected to the same Statistics DB
+
+                logger.info("Registering tags...");
+                if (!registerTags(preparedClients)) {
+                    monitor.error("Tags can't be registered");
+                    return;
+                }
+
+                logger.info("Starting the executor clients...");
+                for (ExecutorClient client : preparedClients) {
+                            client.start();
+                }
+
+                monitor.started();
+
+                logger.info("BB initiator finished");
+            } catch (Exception e) {
+                logger.error("Can not execute BB initiator: {}", e.getMessage(), e);
+                throw e;
             }
-
-            for (ExecutorClient client : preparedClients) {
-                        client.start();
-            }
-
-				monitor.started();
-			
-			logger.info("BB initiator finished");
-			
-		}
+        }
 		
 		@Override
 		public String toString() {
