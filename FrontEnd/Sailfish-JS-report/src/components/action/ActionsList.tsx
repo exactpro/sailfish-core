@@ -24,25 +24,27 @@ import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
 import { actionsHeatmap } from '../../helpers/heatmapCreator';
 import { getActions } from '../../helpers/action';
+import { memoizeLast } from '../../helpers/memoize';
+import { StatusType } from '../../models/Status';
 
-interface ListProps {
+interface Props {
     actions: Array<ActionNode>;
     selectedActions: number[];
     scrolledActionId: Number;
 }
 
-interface ListState {
+interface State {
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.
     scrolledIndex: Number;
 }
 
-export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
+export class ActionsListBase extends React.PureComponent<Props, State> {
 
     private list = React.createRef<VirtualizedList>();
 
-    constructor(props: ListProps) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
@@ -64,7 +66,7 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
         return scrolledIndex !== -1 ? new Number(scrolledIndex) : null;
     }
 
-    componentDidUpdate(prevProps: ListProps) {
+    componentDidUpdate(prevProps: Props) {
         if (this.props.scrolledActionId !== prevProps.scrolledActionId && this.props.scrolledActionId != null) {
             this.setState({
                 scrolledIndex: this.getScrolledIndex(this.props.scrolledActionId, this.props.actions)
@@ -101,9 +103,13 @@ export class ActionsListBase extends React.PureComponent<ListProps, ListState> {
     )
 }   
 
+const applyActionsFilter = memoizeLast((actions: ActionNode[], filter: Set<StatusType>) => {
+    return actions.filter(action => isAction(action) ? filter.has(action.status.status) : true)
+});
+
 export const ActionsList = connect(
-    (state: AppState): ListProps => ({
-        actions: state.selected.testCase.actions,
+    (state: AppState): Props => ({
+        actions: applyActionsFilter(state.selected.testCase.actions, state.filter.actionsFilter),
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId
     }),

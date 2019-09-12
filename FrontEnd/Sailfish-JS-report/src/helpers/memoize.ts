@@ -1,3 +1,5 @@
+import { areArraysEqual } from "./array";
+
 /******************************************************************************
  * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
@@ -16,11 +18,14 @@
 
 /**
  * This function can be used to save target function call results, it use Map to save it.
+ * It's something like 'upgraded' memoization function - it saves results of each call, not only the last one.
  * The key in Map is calculating using target function parameters through key mapper funcitons.
  * @param fn target function
  * @param keyMappers optional key mapper for each target fn argument
  */
 function memoize<T extends unknown[], R>(fn: (...args: T) => R, ...keyMappers: ((obj: T[number]) => string)[]): (...args: T) => R {
+    // T[number] - is a union of all types from array 
+    // (e.g. for args like '[string, number, string]' it will be 'string | number')
     const callResultsMap = new Map<string, R>();
 
     return (...args: T) => {
@@ -35,6 +40,26 @@ function memoize<T extends unknown[], R>(fn: (...args: T) => R, ...keyMappers: (
 
         return result;
     };
+}
+
+/**
+ * This funciton can be used to save target funciton's call results 
+ * and recalculate it only if function's input has been changed since last call.
+ * @param fn target funciton
+ */
+export function memoizeLast<T extends unknown[], R>(fn: (...args: T) => R): (...args: T) => R {
+    let lastArgs: T,
+        lastResult: R;
+
+    return (...args: T) => {
+        if (lastArgs && areArraysEqual(lastArgs, args)) {
+            return lastResult;
+        }
+        
+        lastResult = fn(...args);
+        lastArgs = args;
+        return lastResult;
+    }
 }
 
 export default memoize;
