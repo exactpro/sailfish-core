@@ -20,6 +20,7 @@ import { createSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
+import { stopPropagationHandler } from '../helpers/react';
 
 interface PanelProps {
     header?: React.ReactNode;
@@ -35,16 +36,11 @@ export const ExpandablePanel = ({ header, body, children, isExpanded, onExpand }
         isExpanded ? "expanded" : "hidden"
     );
 
-    const onClick = (e: React.MouseEvent) => {
-        onExpand(!isExpanded);
-        e.stopPropagation();
-    }
-
     return (
         <div className="expandable-panel">
             <div className="expandable-panel__header">
                 <div className={iconClass} 
-                    onClick={onClick}/>
+                    onClick={stopPropagationHandler(onExpand, !isExpanded)}/>
                 { header || children[0] }
             </div>
             {

@@ -14,11 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from "../../models/Status";
-
-export default interface FilterState {
-    actionsTransparencyFilter: Set<StatusType>;
-    fieldsTransparencyFilter: Set<StatusType>;
-    actionsFilter: Set<StatusType>;
-    fieldsFilter: Set<StatusType>;
+export function toggleItem<T>(set: Set<T>, item: T): Set<T> {
+    if (set.has(item)) {
+        return new Set([...set].filter(i => i !== item));
+    } else {
+        return new Set([...set, item]);
+    }
 }

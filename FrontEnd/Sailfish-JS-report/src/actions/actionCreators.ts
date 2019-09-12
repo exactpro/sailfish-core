@@ -86,6 +86,16 @@ export const switchFieldsFilter = (status: StatusType) => (<const>{
     status
 })
 
+export const switchActionsTransparencyFilter = (status: StatusType) => (<const>{
+    type: StateActionTypes.SWITCH_ACTIONS_TRANSPARENCY_FILTER,
+    status
+})
+
+export const switchFieldsTransparencyFilter = (status: StatusType) => (<const>{
+    type: StateActionTypes.SWITCH_FIELDS_TRANSPARENCY_FILTER,
+    status
+})
+
 export const setAdminMsgEnabled = (adminEnabled: boolean) => (<const>{
     type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
     adminEnabled

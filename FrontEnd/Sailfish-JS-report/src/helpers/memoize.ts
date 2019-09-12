@@ -20,21 +20,21 @@
  * @param fn target function
  * @param keyMappers optional key mapper for each target fn argument
  */
-function memoize<F extends (...args: any[]) => any>(fn: F, ...keyMappers: ((obj: any) => string)[]): F {
-    const argsMap = new Map<string, any>();
+function memoize<T extends unknown[], R>(fn: (...args: T) => R, ...keyMappers: ((obj: T[number]) => string)[]): (...args: T) => R {
+    const callResultsMap = new Map<string, R>();
 
-    return ((...args: any[]) => {
-        const key = args.reduce((key, arg, index) =>  key + '-' + (keyMappers[index] ? keyMappers[index](arg) : arg.toString()), '');
+    return (...args: T) => {
+        const key = args.reduce((key, arg, index) =>  key + '-' + (keyMappers[index] ? keyMappers[index](arg) : arg.toString()), '') as string;
 
-        if (argsMap.has(key)) {
-            return argsMap.get(key);
+        if (callResultsMap.has(key)) {
+            return callResultsMap.get(key);
         }
 
         const result = fn(...args);
-        argsMap.set(key, result);
+        callResultsMap.set(key, result);
 
         return result;
-    }) as F;
+    };
 }
 
 export default memoize;

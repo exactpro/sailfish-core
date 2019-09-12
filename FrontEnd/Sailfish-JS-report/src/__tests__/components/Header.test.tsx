@@ -18,7 +18,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { HeaderBase } from '../../components/Header';
 import { createTestCase } from '../util/creators';
-import { FilterPanel } from '../../components/FilterPanel';
+import FilterPanel from '../../components/FilterPanel';
 
 describe('[React] <HeaderBase/>', () => {
 
@@ -27,10 +27,6 @@ describe('[React] <HeaderBase/>', () => {
         prevTestCaseHandler: jest.fn(),
         nextTestCaseHandler: jest.fn(),
         testCase: createTestCase(),
-        actionsFilter: [],
-        fieldsFilter: [],
-        switchActionsFilter: jest.fn(),
-        switchFieldsFilter: jest.fn(),
         backToListHandler: jest.fn(),
         isNavigationEnabled: true
     };

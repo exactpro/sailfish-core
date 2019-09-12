@@ -18,6 +18,7 @@ import * as React from 'react';
 import Exception from '../models/Exception';
 import { createSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from './util/StateSaver';
+import { stopPropagationHandler } from '../helpers/react';
 
 interface Props {
     exception: Exception;
@@ -29,12 +30,6 @@ interface BaseProps extends Props {
 }
 
 const ExceptionCardBase = ({ exception, isExpanded, onExpand }: BaseProps) => {
-
-    const expandHandler = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        onExpand();
-    }
-
     return (
         <div className="status-panel failed">
             <div className="status-panel-exception-wrapper">
@@ -48,7 +43,7 @@ const ExceptionCardBase = ({ exception, isExpanded, onExpand }: BaseProps) => {
                         {exception.message || "No exception message"}
                     </div>
                 </div>
-                <div className="status-panel-exception-expand" onClick={expandHandler}>
+                <div className="status-panel-exception-expand" onClick={stopPropagationHandler(onExpand)}>
                     <div className="status-panel-exception-expand-title">More</div>
                     <div className={createSelector("status-panel-exception-expand-icon", (isExpanded ? "expanded" : "hidden"))} />
                 </div>

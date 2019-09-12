@@ -28,6 +28,7 @@ import { keyForAction } from '../../helpers/keys';
 import { SearchExpandablePanel } from '../ExpandablePanel';
 import { ActionMlUploadButton } from "../ActionMlUploadButton";
 import { StatusType } from '../../models/Status';
+import { stopPropagationHandler } from '../../helpers/react';
 
 interface CardProps {
     action: Action;
@@ -71,16 +72,9 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
-    const clickHandler = (e: React.MouseEvent) => {
-        if (!onSelect) return;
-        onSelect(action);
-        // here we cancel handling by parent divs
-        e.stopPropagation();
-    };
-
     return (
         <div className={rootClassName}
-            onClick={clickHandler}
+            onClick={stopPropagationHandler(onSelect, action)}
             key={action.id}>
             <ExpandablePanel
                 isExpanded={isExpanded}

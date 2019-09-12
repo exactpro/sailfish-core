@@ -18,7 +18,7 @@ import * as React from 'react';
 import '../styles/buttons.scss';
 import { createSelector } from '../helpers/styleCreators';
 
-interface ButtonProps {
+interface Props {
     onClick?: Function;
     isToggled?: boolean;
     isDisabled?: boolean;
@@ -27,16 +27,16 @@ interface ButtonProps {
     theme?: string;
 }
 
-export const ToggleButton = ({ onClick, isToggled, text, theme, isDisabled, title }: ButtonProps) => {
+export const ToggleButton = ({ onClick = () => {}, isToggled = false, text, theme = 'default', isDisabled = false, title = '' }: Props) => {
     const className = createSelector(
         "toggle-button", 
-        theme || "default", 
+        theme, 
         isDisabled ? "disabled" : null,
         isToggled ? "toggled" : null
     );
 
     return (
-        <div className={className} onClick={e => onClick && onClick(text)} title={title}>
+        <div className={className} onClick={() => onClick(text)} title={title}>
             <div className="toggle-button__title">
                 <p>{text}</p>
             </div>

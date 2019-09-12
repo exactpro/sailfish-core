@@ -20,6 +20,10 @@
 .header {
     @include status-card;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
 
     &__main {
         background-color: var(--status-primary-header-background-color);
@@ -40,23 +44,6 @@
         border-bottom-right-radius: 7px;
 
         background-color: var(--status-secondary-header-background-color);
-
-        &.filter-enabled {
-           border-radius: 0;
-        }
-    }
-
-    &__filter {
-        width: 100%;
-        margin: 3px 0;
-        padding: 3px 0;
-        background-color: $filterBackground;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border: 2px solid $filterBackground;
-        border-bottom-right-radius: 7px;
-        border-bottom-left-radius: 7px;
     }
 
     &__description {
@@ -136,8 +123,6 @@
 }
 
 .header-filter {
-    width: 100%;
-    margin: 3px 0;
     padding: 3px 0;
     background-color: $filterBackground;
     display: flex;
@@ -158,7 +143,48 @@
         color: $primaryTextColor;
         margin-right: 10px;
         font-size: 14px;
-        font-weight: normal;
+        font-weight: bold;
+    }
+}
+
+.filter-toggler {
+    @include status-card;
+    height: 30px;
+    color: var(--status-primary-color);
+    //border-color: var(--status-primary-border-color);
+    padding: 3px 5px;
+    margin: 0 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: rgb(255, 255, 255);
+    border: 2px solid var(--status-primary-color);
+    border-radius: 7px;
+    cursor: pointer;
+
+    &.transparent {
+        background: rgba(255, 255, 255, 0.3);
+        color: var(--status-secondary-color);
+        border-color: var(--status-secondary-color);
+    }
+    
+    &__title {
+        @include unselectable;
+        font-weight: bold;
+        font-size: 15px;
+        text-transform: uppercase;
+        padding-bottom: 2px;
+    }
+
+    &__icon {
+        @include round-button(url(../../resources/icons/eye.svg), 21px);
+        margin-left: 5px;
+        padding: 2px;
+        background-size: 90%;
+
+        &.hidden {
+            background-image: url(../../resources/icons/eye-closed.svg);
+        }
     }
 }
 

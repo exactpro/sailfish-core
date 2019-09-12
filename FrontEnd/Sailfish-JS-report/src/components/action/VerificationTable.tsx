@@ -40,7 +40,8 @@ interface OwnProps {
 }
 
 interface StateProps {
-    fieldsFilter: StatusType[];
+    transparencyFilter: Set<StatusType>;
+    visibilityFilter: Set<StatusType>;
     expandPath: number[];
     searchResults: SearchResult;
 }
@@ -103,7 +104,7 @@ class VerificationTableBase extends React.Component<Props, State> {
 
     componentDidUpdate(prevProps: Props, prevState: State) {
         // handle expand state changing to remeasure card size
-        if (this.state.nodes !== prevState.nodes) {
+        if (this.state.nodes !== prevState.nodes || this.props.visibilityFilter !== prevProps.visibilityFilter) {
             this.props.onExpand();
         }
 
@@ -129,7 +130,7 @@ class VerificationTableBase extends React.Component<Props, State> {
     }
 
     render() {
-        const { fieldsFilter, status, keyPrefix } = this.props,
+        const { status, keyPrefix } = this.props,
             { nodes } = this.state;
 
         const rootClass = createSelector("ver-table", status);
@@ -163,36 +164,41 @@ class VerificationTableBase extends React.Component<Props, State> {
                         </tr>
                     </thead>
                     <tbody>
-                        {nodes.map((param, index) => this.renderTableNodes(param, fieldsFilter, `${keyPrefix}-${index}`))}
+                        {nodes.map((param, index) => this.renderTableNodes(param, `${keyPrefix}-${index}`))}
                     </tbody>
                 </table>
             </div>
         )
     }
 
-    private renderTableNodes(node: TableNode, fieldsFilter: StatusType[], key: string, paddingLevel: number = 1) : React.ReactNodeArray {
-
+    private renderTableNodes(node: TableNode, key: string, paddingLevel: number = 1) : React.ReactNodeArray {
         if (node.subEntries) {
 
             const subNodes = node.isExpanded ? 
                 node.subEntries.reduce(
-                    (lsit, node, index) => lsit.concat(this.renderTableNodes(node, fieldsFilter, `${key}-${index}`, paddingLevel + 1)), []
+                    (lsit, node, index) => lsit.concat(this.renderTableNodes(node, `${key}-${index}`, paddingLevel + 1)), []
                 ) : [];
 
             return [this.renderTooglerNode(node, paddingLevel, key), ...subNodes];
         } else {
-            return [this.renderValueNode(node, fieldsFilter, paddingLevel, key)];
+            return [this.renderValueNode(node, paddingLevel, key)];
         }
     }
 
-    private renderValueNode({ name, expected, actual, status }: TableNode, fieldsFilter: StatusType[], paddingLevel: number, key: string): React.ReactNode {
+    private renderValueNode({ name, expected, actual, status }: TableNode, paddingLevel: number, key: string): React.ReactNode {
         
+        const { transparencyFilter, visibilityFilter } = this.props;
+
+        if (!visibilityFilter.has(status)) {
+            return null;
+        }
+
         const expectedReplaced = replaceNonPrintableChars(expected),
             actualReplaced = replaceNonPrintableChars(actual);
 
         const rootClassName = createSelector(
                 "ver-table-row-value",
-                !fieldsFilter.includes(status) ? "transparent" : null
+                !transparencyFilter.has(status) ? "transparent" : null
             ),
             statusClassName = createSelector(
                 "ver-table-row-value-status", 
@@ -306,7 +312,8 @@ function paramsToNodes(root: VerificationEntry): TableNode {
 
 export const VerificationTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
-        fieldsFilter: state.filter.fieldsFilter,
+        transparencyFilter: state.filter.fieldsTransparencyFilter,
+        visibilityFilter: state.filter.fieldsFilter,
         expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId),
         searchResults: state.selected.searchResults
     }),

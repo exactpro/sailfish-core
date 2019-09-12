@@ -17,35 +17,36 @@
 import FilterState from '../state/models/FiltersState';
 import initialFilterState from '../state/initial/initialFilterState';
 import StateActionType, { StateActionTypes } from '../actions/stateActions';
+import { toggleItem } from '../helpers/set';
 
 export function filterReducer(state: FilterState = initialFilterState, stateAction: StateActionType): FilterState {
     switch(stateAction.type) {
 
-        case StateActionTypes.SWITCH_ACTIONS_FILTER: {
-            if (state.actionsFilter.includes(stateAction.status)) {
-                return {
-                    ...state,
-                    actionsFilter: state.actionsFilter.filter(status => status != stateAction.status)
-                }
-            }
-
+        case StateActionTypes.SWITCH_ACTIONS_TRANSPARENCY_FILTER: {
             return {
                 ...state,
-                actionsFilter: [ ...state.actionsFilter, stateAction.status]
+                actionsTransparencyFilter: toggleItem(state.actionsTransparencyFilter, stateAction.status)
+            }
+        }
+
+        case StateActionTypes.SWITCH_FIELDS_TRANSPARENCY_FILTER: {
+            return {
+                ...state,
+                fieldsTransparencyFilter: toggleItem(state.fieldsTransparencyFilter, stateAction.status)
+            }
+        }
+
+        case StateActionTypes.SWITCH_ACTIONS_FILTER: {
+            return {
+                ...state,
+                actionsFilter: toggleItem(state.actionsFilter, stateAction.status)
             }
         }
 
         case StateActionTypes.SWITCH_FIELDS_FILTER: {
-            if (state.fieldsFilter.includes(stateAction.status)) {
-                return {
-                    ...state,
-                    fieldsFilter: state.fieldsFilter.filter(status => status != stateAction.status)
-                }
-            }
-
             return {
                 ...state,
-                fieldsFilter: [ ...state.fieldsFilter, stateAction.status ]
+                fieldsFilter: toggleItem(state.fieldsFilter, stateAction.status)
             }
         }
 

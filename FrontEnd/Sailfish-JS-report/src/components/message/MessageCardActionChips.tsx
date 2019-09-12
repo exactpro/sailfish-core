@@ -24,6 +24,7 @@ import Message from '../../models/Message';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
+import { stopPropagationHandler } from '../../helpers/react';
 
 type SelectHandler = (status: StatusType) => any;
 
@@ -78,10 +79,7 @@ function renderChip(status: StatusType, statusActions: Action[], selectedStatus:
             count={statusActions.length}
             status={status}
             isSelected={status == selectedStatus} 
-            clickHandler={e => { 
-                selectHandeler(status);
-                e.stopPropagation();
-            }}/>
+            clickHandler={stopPropagationHandler(selectHandeler, status)}/>
     )
 }
 

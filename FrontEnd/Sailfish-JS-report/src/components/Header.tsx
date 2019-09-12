@@ -17,27 +17,20 @@
 import * as React from 'react';
 import TestCase from '../models/TestCase';
 import '../styles/header.scss';
-import { StatusType } from '../models/Status';
-import { FilterPanel } from './FilterPanel';
+import FilterPanel from './FilterPanel';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
-import {
-    resetTestCase,
-    switchActionsFilter,
-    switchFieldsFilter
-} from '../actions/actionCreators';
+import { resetTestCase } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
 import { createSelector } from '../helpers/styleCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 import SearchInput from './search/SearchInput';
-import {MlUploadIndicator} from "./machinelearning/MlUploadIndicator";
+import { MlUploadIndicator } from "./machinelearning/MlUploadIndicator";
 
 interface StateProps {
     testCase: TestCase;
-    actionsFilter: StatusType[];
-    fieldsFilter: StatusType[];
     isNavigationEnabled: boolean;
 }
 
@@ -45,22 +38,16 @@ interface DispatchProps {
     nextTestCaseHandler: () => any;
     prevTestCaseHandler: () => any;
     backToListHandler: () => any;
-    switchActionsFilter: (status: StatusType) => any;
-    switchFieldsFilter: (status: StatusType) => any;
 }
 
 interface Props extends StateProps, DispatchProps {}
 
 export const HeaderBase = ({ 
     testCase, 
-    actionsFilter, 
-    fieldsFilter,
     isNavigationEnabled,
     nextTestCaseHandler, 
     prevTestCaseHandler, 
-    backToListHandler, 
-    switchActionsFilter,
-    switchFieldsFilter
+    backToListHandler
 }: Props) => {
         
     const [ showFilter, setShowFilter ] = React.useState(false);
@@ -79,10 +66,6 @@ export const HeaderBase = ({
             "header",
             status.status
         ), 
-        infoClass = createSelector(
-            "header__info", 
-            showFilter ? "filter-enabled" : null
-        ),
         navButtonClass = createSelector(
             "header-button",
             isNavigationEnabled ? '' : 'disabled'
@@ -119,7 +102,7 @@ export const HeaderBase = ({
                     <SearchInput/>
                 </div>
             </div>
-            <div className={infoClass}>
+            <div className="header__info">
                 <div className="header__info-element">
                     <span>Start:</span>
                     <p>{formatTime(startTime)}</p>
@@ -145,11 +128,7 @@ export const HeaderBase = ({
             </div>
             {
                 showFilter ? (
-                    <FilterPanel
-                        actionsFilters={actionsFilter}
-                        fieldsFilters={fieldsFilter}
-                        actionFilterHandler={switchActionsFilter}
-                        fieldsFilterHandler={switchFieldsFilter} />
+                    <FilterPanel />
                 ) : null
             }
         </div>
@@ -159,15 +138,11 @@ export const HeaderBase = ({
 export const Header = connect(
     (state: AppState): StateProps => ({
         testCase: state.selected.testCase,
-        actionsFilter: state.filter.actionsFilter,
-        fieldsFilter: state.filter.fieldsFilter,
         isNavigationEnabled: state.report.metadata.length > 1
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         nextTestCaseHandler: () => dispatch(loadNextTestCase()),
         prevTestCaseHandler: () => dispatch(loadPrevTestCase()),
-        backToListHandler: () => dispatch(resetTestCase()),
-        switchFieldsFilter: (status: StatusType) => dispatch(switchFieldsFilter(status)),
-        switchActionsFilter: (status: StatusType) => dispatch(switchActionsFilter(status))
+        backToListHandler: () => dispatch(resetTestCase())
     })
 )(HeaderBase);

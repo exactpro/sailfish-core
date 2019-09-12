@@ -18,51 +18,87 @@ import * as React from 'react';
 import { StatusType } from '../models/Status';
 import '../styles/header.scss';
 import { ToggleButton } from './ToggleButton';
+import { connect } from 'react-redux';
+import AppState from '../state/models/AppState';
+import { switchActionsFilter, switchFieldsFilter, switchActionsTransparencyFilter, switchFieldsTransparencyFilter } from '../actions/actionCreators';
+import StatusFilterToggler from './StatusFilterToggler';
 
-interface FilterPanelProps {
-    actionFilterHandler: (status: StatusType) => void;
-    fieldsFilterHandler: (status: StatusType) => void;
-    actionsFilters: StatusType[];
-    fieldsFilters: StatusType[];
+const ACTIONS_STATUSES = [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED],
+    FIELDS_STATUSES = [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED, StatusType.NA];
+
+interface StateProps {
+    actionsFilters: Set<StatusType>;
+    fieldsFilters: Set<StatusType>;
+    actionsTransparencyFilters: Set<StatusType>;
+    fieldsTransparencyFilters: Set<StatusType>;
 }
 
-export const FilterPanel = ({ actionFilterHandler, fieldsFilterHandler, actionsFilters, fieldsFilters }: FilterPanelProps) => {
+interface DispatchProps {
+    actionFilterHandler: (status: StatusType) => void;
+    fieldsFilterHandler: (status: StatusType) => void;
+    actionsTransparencyFilterHandler: (status: StatusType) => void;
+    fieldsTrancparencyFilterHandler: (status: StatusType) => void;
+}
+
+interface Props extends StateProps, DispatchProps {}
+
+const FilterPanelBase = ({ 
+    actionFilterHandler, 
+    fieldsFilterHandler, 
+    actionsTransparencyFilterHandler,
+    fieldsTrancparencyFilterHandler,
+    actionsFilters, 
+    fieldsFilters,
+    actionsTransparencyFilters,
+    fieldsTransparencyFilters
+}: Props) => {
     return (
         <div className="header-filter">
             <div className="header-filter__togglers">
                 <div className="header-filter__togglers-title">Actions</div>
-                <ToggleButton text="Passed"
-                    isToggled={actionsFilters.includes(StatusType.PASSED)}
-                    onClick={() => actionFilterHandler(StatusType.PASSED)}
-                    theme="green" />
-                <ToggleButton text="Failed"
-                    isToggled={actionsFilters.includes(StatusType.FAILED)}
-                    onClick={() => actionFilterHandler(StatusType.FAILED)}
-                    theme="green" />
-                <ToggleButton text="Conditioanlly passed"
-                    isToggled={actionsFilters.includes(StatusType.CONDITIONALLY_PASSED)}
-                    onClick={() => actionFilterHandler(StatusType.CONDITIONALLY_PASSED)}
-                    theme="green" />
+                {
+                    ACTIONS_STATUSES.map((status, index) => (
+                        <StatusFilterToggler
+                            key={index}
+                            status={status}
+                            transparencyFilter={actionsTransparencyFilters.has(status)}
+                            visibilityFilter={actionsFilters.has(status)}
+                            transparencyFilterHandler={() => actionsTransparencyFilterHandler(status)}
+                            visibilityFilterHandler={() => actionFilterHandler(status)}/>
+                    ))
+                }
             </div>
             <div className="header-filter__togglers">
                 <div className="header-filter__togglers-title">Fields</div>
-                <ToggleButton text="Passed"
-                    isToggled={fieldsFilters.includes(StatusType.PASSED)}
-                    onClick={() => fieldsFilterHandler(StatusType.PASSED)}
-                    theme="green" />
-                <ToggleButton text="Failed"
-                    isToggled={fieldsFilters.includes(StatusType.FAILED)}
-                    onClick={() => fieldsFilterHandler(StatusType.FAILED)}
-                    theme="green" />
-                <ToggleButton text="Conditioanlly passed"
-                    isToggled={fieldsFilters.includes(StatusType.CONDITIONALLY_PASSED)}
-                    onClick={() => fieldsFilterHandler(StatusType.CONDITIONALLY_PASSED)}
-                    theme="green" />
-                <ToggleButton text="N/A"
-                    isToggled={fieldsFilters.includes(StatusType.NA)}
-                    onClick={() => fieldsFilterHandler(StatusType.NA)}
-                    theme="green" />
+                {
+                    FIELDS_STATUSES.map((status, index) => (
+                        <StatusFilterToggler
+                            key={index}
+                            status={status}
+                            transparencyFilter={fieldsTransparencyFilters.has(status)}
+                            visibilityFilter={fieldsFilters.has(status)}
+                            transparencyFilterHandler={() => fieldsTrancparencyFilterHandler(status)}
+                            visibilityFilterHandler={() => fieldsFilterHandler(status)}/>
+                    ))
+                }
             </div>
         </div>
     )
 }
+
+const FilterPanel = connect(
+    ({ filter: state }: AppState): StateProps => ({
+        actionsFilters: state.actionsFilter,
+        fieldsFilters: state.fieldsFilter,
+        actionsTransparencyFilters: state.actionsTransparencyFilter,
+        fieldsTransparencyFilters: state.fieldsTransparencyFilter
+    }),
+    (dispatch): DispatchProps => ({
+        actionFilterHandler: status => dispatch(switchActionsFilter(status)),
+        fieldsFilterHandler: status => dispatch(switchFieldsFilter(status)),
+        actionsTransparencyFilterHandler: status => dispatch(switchActionsTransparencyFilter(status)),
+        fieldsTrancparencyFilterHandler: status => dispatch(switchFieldsTransparencyFilter(status))
+    })
+)(FilterPanelBase);
+
+export default FilterPanel;

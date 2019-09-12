@@ -24,6 +24,7 @@ import '../../styles/action.scss';
 import {keyForVerification} from '../../helpers/keys';
 import SearchableContent from '../search/SearchableContent';
 import {VerificationMlUploadButton} from "../machinelearning/VerificationMlUploadButton";
+import { stopPropagationHandler } from '../../helpers/react';
 
 interface VerificationCardProps {
     verification: Verification;
@@ -50,12 +51,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
     return (
         <div className="action-card">
             <div className={className}
-                onClick={e => {
-                    onSelect(messageId, parentActionId, status.status);
-                    
-                    // here we cancel handling by parent divs
-                    e.stopPropagation();
-                }}>
+                onClick={stopPropagationHandler(onSelect, messageId, parentActionId, status.status)}>
                 <SearchExpandablePanel
                     searchKeyPrefix={key}
                     stateKey={key}

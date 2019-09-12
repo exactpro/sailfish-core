@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import configureStore from "redux-mock-store";
-import { switchActionsFilter, switchFieldsFilter } from "../../../actions/actionCreators";
+import { switchActionsTransparencyFilter, switchFieldsTransparencyFilter } from "../../../actions/actionCreators";
 import { StatusType } from "../../../models/Status";
 import { filterReducer } from "../../../reducers/filterReducer";
 import initialFilterState from '../../../state/initial/initialFilterState';
@@ -23,44 +23,44 @@ import FilterState from '../../../state/models/FiltersState';
 
 describe('[Redux] Filter reducer', () => {
     test('SWITCH_ACTIONS_FILTER: enable filter', () => {
-        const action = switchActionsFilter(StatusType.PASSED),
+        const action = switchActionsTransparencyFilter(StatusType.PASSED),
             initialState: FilterState = {
                 ...initialFilterState,
-                actionsFilter: []
+                actionsTransparencyFilter: new Set()
             };
 
         const state = filterReducer(initialState, action);
 
         const expectedState: FilterState = {
             ...initialFilterState,
-            actionsFilter: [StatusType.PASSED]
+            actionsTransparencyFilter: new Set([StatusType.PASSED])
         }
 
         expect(state).toEqual(expectedState);
     });
 
     test('SWITCH_ACTIONS_FILTER: disable filter', () => {
-        const action = switchActionsFilter(StatusType.PASSED),
+        const action = switchActionsTransparencyFilter(StatusType.PASSED),
             initialState: FilterState = {
                 ...initialFilterState,
-                actionsFilter: [StatusType.PASSED]
+                actionsTransparencyFilter: new Set([StatusType.PASSED])
             };
 
         const state = filterReducer(initialState, action);
 
         const expectedState: FilterState = {
             ...initialFilterState,
-            actionsFilter: []
+            actionsTransparencyFilter: new Set()
         }
 
         expect(state).toEqual(expectedState);
     });
 
     test('SWITCH_ACTIONS_FILTER: enable, then disable filter', () => {
-        const action = switchActionsFilter(StatusType.PASSED),
+        const action = switchActionsTransparencyFilter(StatusType.PASSED),
             initialState: FilterState = {
                 ...initialFilterState,
-                actionsFilter: []
+                actionsTransparencyFilter: new Set()
             };
 
         const enabledFilterState = filterReducer(initialState, action),
@@ -68,17 +68,17 @@ describe('[Redux] Filter reducer', () => {
 
         const expectedState: FilterState = {
             ...initialFilterState,
-            actionsFilter: []
+            actionsTransparencyFilter: new Set()
         }
 
         expect(disabledFilterState).toEqual(expectedState);
     });
 
     test('SWITCH_FIELDS_FILTER: enable, then disable filter', () => {
-        const action = switchFieldsFilter(StatusType.PASSED),
+        const action = switchFieldsTransparencyFilter(StatusType.PASSED),
             initialState: FilterState = {
                 ...initialFilterState,
-                fieldsFilter: []
+                fieldsTransparencyFilter: new Set()
             };
 
         const enabledFilterState = filterReducer(initialState, action),
@@ -86,10 +86,10 @@ describe('[Redux] Filter reducer', () => {
 
         const enabledExcpectedState: FilterState = {
             ...initialFilterState,
-            fieldsFilter: [StatusType.PASSED]
+            fieldsTransparencyFilter: new Set([StatusType.PASSED])
         };
 
-        expect(enabledFilterState).toEqual(enabledExcpectedState);
+        expect(enabledFilterState.fieldsTransparencyFilter).toEqual(enabledExcpectedState.fieldsTransparencyFilter);
         expect(disabledFilterState).toEqual(initialState);
     });
     

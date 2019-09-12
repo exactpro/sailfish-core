@@ -18,8 +18,10 @@ import FilterState from '../models/FiltersState';
 import { statusValues } from '../../models/Status';
 
 const initialFilterState : FilterState = {
-    actionsFilter: statusValues,
-    fieldsFilter: statusValues
+    actionsTransparencyFilter: new Set(statusValues),
+    fieldsTransparencyFilter: new Set(statusValues),
+    actionsFilter: new Set(statusValues),
+    fieldsFilter: new Set(statusValues)
 }
 
 export default initialFilterState;

@@ -14,11 +14,19 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from "../../models/Status";
+import * as React from 'react';
 
-export default interface FilterState {
-    actionsTransparencyFilter: Set<StatusType>;
-    fieldsTransparencyFilter: Set<StatusType>;
-    actionsFilter: Set<StatusType>;
-    fieldsFilter: Set<StatusType>;
+/**
+ * Creates 'onClick' property handler, that will capture event and cancel event bubbling for parent divs
+ * @param callbackfn callback for handler
+ * @param args callback arguments
+ */
+export function stopPropagationHandler<T extends unknown[], R>(callbackfn: (...args: T) => R, ...args: T) {
+    return (e: React.MouseEvent) => {
+        e.stopPropagation();
+
+        if (callbackfn) {
+            callbackfn(...args);
+        }
+    }
 }

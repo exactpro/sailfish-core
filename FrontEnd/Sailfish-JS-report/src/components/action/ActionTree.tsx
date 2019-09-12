@@ -47,7 +47,7 @@ interface StateProps {
     selectedVerificationId: number;
     selectedActionsId: number[];
     scrolledActionId: Number;
-    actionsFilter: StatusType[];
+    actionsFilter: Set<StatusType>;
     expandedTreePath: Tree<number>;
     token: string;
     mlDataActionIds: Set<number>;
@@ -129,7 +129,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                 return (
                     <ActionCard action={action}
                         isSelected={selectedActionsId.includes(action.id)}
-                        isTransaparent={!actionsFilter.includes(action.status.status)}
+                        isTransaparent={!actionsFilter.has(action.status.status)}
                         onSelect={ (selectedAction) => {
                             if (selectedAction.status.status == StatusType.FAILED && !this.props.mlDataActionIds.has(selectedAction.id)) {
                                 this.props.fetchPredictions(selectedAction.id);
@@ -171,7 +171,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
             case ActionNodeType.VERIFICATION: {
                 const verification = props.action;
                 const isSelected = verification.messageId === selectedMessageId;
-                const isTransparent = !actionsFilter.includes(verification.status.status);
+                const isTransparent = !actionsFilter.has(verification.status.status);
 
                 return (
                     <VerificationCard
@@ -268,8 +268,8 @@ export const ActionTree = connect(
         selectedVerificationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
-        actionsFilter: state.filter.actionsFilter,
-        mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map((item) => { return item.actionId })),
+        actionsFilter: state.filter.actionsTransparencyFilter,
+        mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map(item => item.actionId)),
         token: state.machineLearning.token,
         expandedTreePath: getExpandedTreePath(ownProps.action, [...state.selected.actionsId, +state.selected.scrolledActionId])
     }),

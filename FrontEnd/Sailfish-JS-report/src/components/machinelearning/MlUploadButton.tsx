@@ -26,6 +26,7 @@ import Action from "../../models/Action";
 import { StatusType } from '../../models/Status';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
+import { stopPropagationHandler } from '../../helpers/react';
 
 interface OwnProps {
     messageId: number;
@@ -68,17 +69,11 @@ export const MlUploadButtonBase = ({ messageId, show, token, submittedData, acti
 
             ? <div className="ml__submit-icon submitted"
                     title="Revoke ML data"
-                    onClick={(e) => {
-                        deleteEntry({ messageId: messageId, actionId: activeActionId });
-                        e.stopPropagation();
-                    }} />
+                    onClick={stopPropagationHandler(deleteEntry, { messageId, actionId: activeActionId })} />
 
             : <div className="ml__submit-icon active"
                     title="Submit ML data"
-                    onClick={(e) => {
-                        submitEntry({ messageId: messageId, actionId: activeActionId });
-                        e.stopPropagation();
-                    }} />
+                    onClick={stopPropagationHandler(submitEntry, { messageId, actionId: activeActionId })} />
     }
 
     return (
