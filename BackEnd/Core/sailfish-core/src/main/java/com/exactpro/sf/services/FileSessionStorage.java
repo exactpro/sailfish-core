@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.LocalDate;
@@ -113,7 +114,7 @@ public class FileSessionStorage {
     }
 
     private boolean checkType(Class<?> clazz) {
-        return clazz == String.class || ClassUtils.isPrimitiveWrapper(clazz);
+        return clazz == String.class || clazz == BigDecimal.class || ClassUtils.isPrimitiveWrapper(clazz);
     }
 
     private static class MapTypeReference extends TypeReference<Map<String, TimestampedValue<?>>> {
