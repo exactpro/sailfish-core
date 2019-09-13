@@ -16,7 +16,7 @@
 package com.exactpro.sf.aml.iomatrix;
 
 public enum MatrixFileTypes {
-    CSV("csv"), XLS("xls"), XLSX("xlsx"), UNKNOWN("?"), JSON("json");
+    CSV("csv"), XLS("xls"), XLSX("xlsx"), UNKNOWN("?"), JSON("json"), YAML("yaml");
     
     
     private final String fileType;

@@ -32,6 +32,8 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.ViewScoped;
 
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
 import org.primefaces.event.FileUploadEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,9 @@ public class UploadMatrixBean implements Serializable {
     private static final long serialVersionUID = -3447265343472567614L;
 
     private static final Logger logger = LoggerFactory.getLogger(UploadMatrixBean.class);
+
+    private static final Set<MatrixFileTypes> supportedFileTypesForUpload = Sets
+            .immutableEnumSet(MatrixFileTypes.CSV, MatrixFileTypes.XLS, MatrixFileTypes.XLSX, MatrixFileTypes.JSON, MatrixFileTypes.YAML);
 
     private SailfishURI defaultProviderURI;
 
@@ -175,13 +180,13 @@ public class UploadMatrixBean implements Serializable {
         try {
             String fileName = event.getFile().getFileName();
             MatrixFileTypes fileType = MatrixFileTypes.detectFileType(fileName);
-            if (fileType == MatrixFileTypes.CSV || fileType == MatrixFileTypes.XLS
-                    || fileType == MatrixFileTypes.XLSX) {
+            if (supportedFileTypesForUpload.contains(fileType)) {
                 wrapper.setMatrixInputStream(event.getFile().getInputstream(), fileName);
                 wrappers.add(0, wrapper);
             } else {
                 String message = fileName + " - Invalid file type";
-                BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, message, "Only csv|xls|xlsx file allowed.");
+                BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, message, "Only " + StringUtils.join(supportedFileTypesForUpload, ", ")
+                        + " file allowed.");
             }
         } catch (IOException e) {
             wrapper.setPath(null);

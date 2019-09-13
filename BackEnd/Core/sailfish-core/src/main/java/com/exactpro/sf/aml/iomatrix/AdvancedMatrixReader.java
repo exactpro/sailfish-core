@@ -15,6 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.iomatrix;
 
+import com.exactpro.sf.aml.AMLException;
+import com.exactpro.sf.aml.generator.matrix.Column;
+import com.exactpro.sf.aml.generator.matrix.JavaStatement;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,10 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import com.exactpro.sf.aml.AMLException;
-import com.exactpro.sf.aml.generator.matrix.Column;
-import com.exactpro.sf.aml.generator.matrix.JavaStatement;
 
 public class AdvancedMatrixReader implements AutoCloseable {
 
@@ -110,6 +110,9 @@ public class AdvancedMatrixReader implements AutoCloseable {
             return new ExcelMatrixReader(matrixPath.getAbsolutePath(), true);
         case CSV:
             return new CSVMatrixReader(matrixPath.getAbsolutePath());
+        case JSON:
+        case YAML:
+            return new JSONMatrixReader(matrixPath, matrixType);
         default:
             throw new IllegalStateException("Unknown matrix type: " + matrixType);
         }
@@ -124,6 +127,9 @@ public class AdvancedMatrixReader implements AutoCloseable {
             return new ExcelMatrixReader(matrixPath.getAbsolutePath(), true);
         case CSV:
             return new CSVMatrixReader(matrixPath.getAbsolutePath(), encoding);
+        case JSON:
+        case YAML:
+            return new JSONMatrixReader(matrixPath, matrixType);
         default:
             throw new IllegalStateException("Unknown matrix type: " + matrixType);
         }
