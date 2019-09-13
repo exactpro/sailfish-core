@@ -18,6 +18,7 @@ package com.exactpro.sf.testwebgui.statistics;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -423,9 +424,14 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
         return sb.toString();
     }
 
-	public String buildReportUrl(AggregatedReportRow row, boolean report) {
-        return BeanUtil.buildReportUrl(customReportsPath, row, report).toString();
-	}
+    public String buildReportUrl(AggregatedReportRow row, boolean report) {
+        try {
+            return BeanUtil.buildReportUrl(customReportsPath, row, report).toString();
+        } catch (MalformedURLException | IllegalArgumentException e) {
+            logger.error("unable to get a report url", e);
+            return "";
+        }
+    }
 
     @PreDestroy
     public void destroy() {

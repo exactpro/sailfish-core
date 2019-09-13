@@ -16,6 +16,7 @@
 package com.exactpro.sf.testwebgui.statistics;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -271,7 +272,12 @@ public class TaggedSetsComparisonBean implements Serializable {
     }
 
     public String buildReportUrl(TaggedComparisonSet set, boolean report) {
-        return BeanUtil.buildReportUrl(customReportsPath, set, report).toString();
+        try {
+            return BeanUtil.buildReportUrl(customReportsPath, set, report).toString();
+        } catch (MalformedURLException | IllegalArgumentException e) {
+            logger.error("unable to generate a report link", e);
+            return "";
+        }
     }
 	
 	private List<Tag> completeTag(String query, List<Tag> alreadySelected) {

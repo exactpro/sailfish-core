@@ -204,7 +204,12 @@ public class BeanUtil {
     }
 
     public static String getReportRequest(String customReportsPath, CommonReportRow row) {
-        return buildReportUrl(customReportsPath, row, true).toString();
+        try {
+            return buildReportUrl(customReportsPath, row, true).toString();
+        } catch (MalformedURLException | IllegalArgumentException e) {
+            logger.error("unable to generate a report link", e);
+            return "";
+        }
     }
 
     public static String getZipReport(String customReportsPath, CommonReportRow row, boolean button) {
@@ -217,7 +222,7 @@ public class BeanUtil {
         return sb.toString();
     }
 
-    public static URL buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) {
+    public static URL buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) throws MalformedURLException {
 
         SfInstanceInfo reportInstance = SfInstanceInfo.fromSfInstance(row.getSfCurrentInstance());
         if (reportInstance == null) {
@@ -231,11 +236,12 @@ public class BeanUtil {
                 SFLocalContext.getDefault().getSfInstanceInfo(),
                 report,
                 row.getTestCaseId(),
-                row.getMatrixName());
+                row.getMatrixName(),
+                false).toURL();
 
     }
 
-    public static URL buildReportUrl(String reportDirectory, SfInstanceInfo instance) {
+    public static URI buildRelativeReportUrl(String reportDirectory, SfInstanceInfo instance) {
 
         if (instance == null) {
             instance = SFLocalContext.getDefault().getSfInstanceInfo();
@@ -248,28 +254,34 @@ public class BeanUtil {
                 instance,
                 true,
                 null,
-                null);
+                null,
+                true);
     }
 
-    private static URL buildReportUrl(
+    private static URI buildReportUrl(
             String reportDirectoryPath,
             String customReportsPath,
             SfInstanceInfo reportInstance,
             SfInstanceInfo mlInstance,
             boolean report,
             String testCaseId,
-            String matrixName) {
+            String matrixName,
+            boolean useRelativePath) {
 
         try {
             URI baseUri = (StringUtils.isNotEmpty(customReportsPath)
-                    ? new URI(customReportsPath.endsWith("/") ? customReportsPath : (customReportsPath + "/"))
+                    ? (new URI(customReportsPath.endsWith("/") ? customReportsPath : (customReportsPath + "/")))
 
-                    : new URIBuilder()
-                    .setScheme("http")
-                    .setHost(reportInstance.getHostname())
-                    .setPort(reportInstance.getPort())
-                    .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
-                    .build()
+                    : (useRelativePath
+                        ? (new URI(ReportServlet.REPORT_URL_PREFIX + "/"))
+
+                        : (new URIBuilder()
+                            .setScheme("http")
+                            .setHost(reportInstance.getHostname())
+                            .setPort(reportInstance.getPort())
+                            .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
+                            .build())
+                    )
 
             ).resolve(new URIBuilder().setPath(FilenameUtils.separatorsToUnix(reportDirectoryPath) + "/").build());
 
@@ -281,10 +293,10 @@ public class BeanUtil {
                 }
                 relativeReportFileUriBuilder.setParameter("mlapi", getMlApiPath(mlInstance).toString());
 
-                return baseUri.resolve(relativeReportFileUriBuilder.build()).toURL();
+                return baseUri.resolve(relativeReportFileUriBuilder.build());
 
             } else {
-                return baseUri.resolve(new URIBuilder().setPath(matrixName).build()).toURL();
+                return baseUri.resolve(new URIBuilder().setPath(matrixName).build());
             }
 
         } catch (URISyntaxException | MalformedURLException e) {
@@ -294,13 +306,29 @@ public class BeanUtil {
 
     private static URL getMlApiPath(SfInstanceInfo thisInstance) throws MalformedURLException, URISyntaxException {
 
-        return new URIBuilder()
-                .setScheme("http")
-                .setHost(thisInstance.getHostname())
-                .setPort(thisInstance.getPort())
-                .setPath(thisInstance.getContextPath() + "/")
-                .build()
-                .resolve("sfapi/machinelearning/v2/")
-                .toURL();
+        try {
+            ExternalContext externalContext = FacesContext.getCurrentInstance().getExternalContext();
+
+            return new URIBuilder()
+                    .setScheme("http")
+                    .setHost(externalContext.getRequestServerName())
+                    .setPort(externalContext.getRequestServerPort())
+                    .setPath(externalContext.getRequestContextPath() + "/")
+                    .build()
+                    .resolve("sfapi/machinelearning/v2/")
+                    .toURL();
+
+        } catch (Exception e) {
+            logger.warn("unable to get ml api path with FacesContext - trying to use SfInstanceInfo instead");
+
+            return new URIBuilder()
+                    .setScheme("http")
+                    .setHost(thisInstance.getHostname())
+                    .setPort(thisInstance.getPort())
+                    .setPath(thisInstance.getContextPath() + "/")
+                    .build()
+                    .resolve("sfapi/machinelearning/v2/")
+                    .toURL();
+        }
     }
 }

@@ -789,6 +789,6 @@ public class ScriptrunEventHTMLBuilder {
     }
 
     private static String getReportHref(String reportDir, ISFContext context) {
-        return BeanUtil.buildReportUrl(reportDir, context.getSfInstanceInfo()).toString();
+        return BeanUtil.buildRelativeReportUrl(reportDir, context.getSfInstanceInfo()).toString();
     }
 }
