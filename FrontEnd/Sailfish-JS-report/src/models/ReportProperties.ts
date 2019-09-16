@@ -29,8 +29,7 @@ export interface ReportProperties {
     failed: number;
     total: number;
     services: string[];
-    range?: string,
-    autostart: boolean,
-    cause?: null
-    
+    range?: string;
+    autostart: boolean;
+    cause?: any;
 }

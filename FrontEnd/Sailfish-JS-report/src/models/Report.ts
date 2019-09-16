@@ -40,5 +40,5 @@ export default interface Report {
 }
 
 export function isReport(report: Report | TestCase): report is Report {
-    return (<Report>report).metadata !== undefined;
+    return (report as Report).metadata !== undefined;
 }

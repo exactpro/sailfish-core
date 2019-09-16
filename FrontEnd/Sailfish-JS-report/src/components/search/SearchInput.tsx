@@ -21,7 +21,6 @@ import { nextSearchResult, prevSearchResult, clearSearch } from '../../actions/a
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import { performSearch } from '../../thunks/search';
-import topWindow from '../../helpers/getWindow';
 import SearchCounter from './SearchCounter';
 import '../../styles/search.scss';
 
@@ -66,21 +65,10 @@ class SearchInputBase extends React.PureComponent<Props, State> {
     }
 
     componentDidMount() {
-        // we need to subscribe to events in both top window's document and inner iframe document events, 
-        // because in some cases (e.g. user pressed tab key) browser focuses on iframe and events from top.document doesn't trigger        
-        if (topWindow.document !== document) {
-            topWindow.document.addEventListener("keydown", this.documentOnKeyDown);
-        }
-
         document.addEventListener("keydown", this.documentOnKeyDown);
     }
 
     componentWillUnmount() {
-        // same as subscribing in componentDidMount
-        if (topWindow.document !== document) {
-            topWindow.document.removeEventListener("keydown", this.documentOnKeyDown);
-        }
-
         document.removeEventListener("keydown", this.documentOnKeyDown);
     }
 

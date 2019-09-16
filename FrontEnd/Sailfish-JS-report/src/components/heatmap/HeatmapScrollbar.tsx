@@ -20,7 +20,6 @@ import { StatusType } from '../../models/Status';
 import '../../styles/heatmap.scss';
 import SmartHeatmap from './SmartHeatmap';
 import Heatmap from './Heatmap';
-import topWindow, { isTopWindowAvailable } from '../../helpers/getWindow';
 
 const SCROLLBAR_TRACK_WIDTH = 11;
 
@@ -83,7 +82,6 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
                         <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }} />
                     }
                     onScroll={onScroll}
-                    onScrollStart={this.onScrollStart}
                     ref={this.scrollbar}
                 >
                     <div className="heatmap-wrapper">
@@ -103,28 +101,5 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
                 }
             </div>
         )
-    }
-
-    private onScrollStart = () => {
-        // 'react-custom-scrollbars library is using document.addEventListenter('mouseup', ...) to handle user's LMB release,
-        // but it doesn't work when scrollbars displayed in iframe and user releases LMB out of iframe window.
-        // https://github.com/malte-wessel/react-custom-scrollbars/blob/b353cc4956d6154d6a100f34c3a6202c75434186/src/Scrollbars/index.js#L328
-        // Using 'top.window.document' instead of 'document' to handle mouse events can be a solution. 
-
-        if (!isTopWindowAvailable) {
-            return;
-        }
-
-        // Also, we need 'ts-ignore' here because type declarations for this library doesn't allow us to access private properties.
-        // @ts-ignore
-        if (this.scrollbar.current.dragging) {
-            topWindow.document.addEventListener('mouseup', this.onMouseUp);
-        }
-    }
-
-    private onMouseUp = () => {
-        // @ts-ignore
-        this.scrollbar.current.handleDragEnd();
-        topWindow.document.removeEventListener('mouseup', this.onMouseUp);
     }
 }

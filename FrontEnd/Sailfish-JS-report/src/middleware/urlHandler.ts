@@ -17,7 +17,6 @@
 import AppState from "../state/models/AppState";
 import StateActionType from "../actions/stateActions";
 import { Middleware } from "redux";
-import topWindow from "../helpers/getWindow";
 
 export const TEST_CASE_PARAM_KEY = 'tc',
     ACTION_PARAM_KEY = 'ac',
@@ -44,8 +43,6 @@ export const urlHandler: Middleware<never, AppState> = store =>  next => (action
 }
 
 function hadnleStateUpdate(prevState : AppState, nextState : AppState, action: any) {
-    // we use top.window instared of window to work with real window url, not iframe url
-
     if (prevState.selected.actionsId == nextState.selected.actionsId && 
         prevState.selected.messagesId == nextState.selected.messagesId && 
         prevState.selected.testCase == nextState.selected.testCase) {
@@ -53,16 +50,16 @@ function hadnleStateUpdate(prevState : AppState, nextState : AppState, action: a
         return;
     }
 
-    const searchString = getUrlSearchString(topWindow.location.href), 
+    const searchString = getUrlSearchString(window.location.href), 
         searchParams = new URLSearchParams(searchString),
         nextSearchParams = getNextSearchParams(searchParams, prevState, nextState),
-        nextUrl = getNextUrl(topWindow.location.href, searchString, nextSearchParams);
+        nextUrl = getNextUrl(window.location.href, searchString, nextSearchParams);
 
     // handle goBack and goForward browswer buttons clicks - we don't need to update current url
-    const currentUrl = topWindow.location.href;
+    const currentUrl = window.location.href;
 
     if (currentUrl !== nextUrl) {
-        topWindow.window.history.pushState(action, "", nextUrl);
+        window.window.history.pushState(action, "", nextUrl);
     }
 }
 
