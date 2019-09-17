@@ -35,6 +35,8 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -331,13 +333,12 @@ public class TestToolsAPI {
     public void removeServices(String envName, IServiceNotifyListener notifyListener) throws  ExecutionException, InterruptedException {
 
         IConnectionManager conManager = context.getConnectionManager();
-        ServiceName[] serviceNames = conManager.getServiceNames();
 
-        for (ServiceName sName : serviceNames) {
-            if (envName.equals(sName.getEnvironment()) || (ServiceName.DEFAULT_ENVIRONMENT.equals(envName) && sName.getEnvironment() == null) ) {
-            	conManager.removeService(sName, notifyListener).get();
-            }
-        }
+        Iterator<ServiceName> toRemove = Stream.of(conManager.getServiceNames())
+                .filter(sName -> envName.equals(sName.getEnvironment()))
+                .iterator();
+
+        conManager.removeServices(toRemove, notifyListener).get();
     }
 
     public void addService(ServiceDescription serviceDescription, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
@@ -618,21 +619,19 @@ public class TestToolsAPI {
     public File getTestScriptRunZip(long id) throws FileNotFoundException {
         return ReportTask.getZip(id, context);
     }
+
     private void deleteServicesForReplace(IConnectionManager conManager, List<ServiceDescription> newServs, List<ServiceName> existServiceNames, IServiceNotifyListener notifyListener) {
         try {
-            List<ServiceName> newServStrings = new ArrayList<>();
-            for (ServiceDescription sd : newServs) {
-                newServStrings.add(new ServiceName(sd.getEnvironment(), sd.getName()));
-            }
 
-            for (ServiceName serviceName : existServiceNames) {
-                if (newServStrings.contains(serviceName)) {
-                    try {
-                    	conManager.removeService(serviceName, notifyListener).get();
-                    } catch(Exception e) {
-                        notifyListener.onErrorProcessing("Failed to remove service " + serviceName + "\n" + e.getMessage());
-                    }
-                }
+            Iterator<ServiceName> toRemove = newServs.stream()
+                    .map(ServiceDescription::getServiceName)
+                    .filter(existServiceNames::contains)
+                    .iterator();
+
+            try {
+                conManager.removeServices(toRemove, notifyListener).get();
+            } catch(Exception e) {
+                notifyListener.onErrorProcessing("Failed to remove services" + "\n" + e.getMessage());
             }
         } catch (Exception e){
             throw new ServiceException(e.getMessage(), e);
@@ -688,27 +687,6 @@ public class TestToolsAPI {
         saveSettings(settings, false, null);
     }
 
-    private void saveSettings(IMapableSettings settings, boolean saveToFile, FolderType folderType, String... relativePath) throws Exception {
-
-        Map<String, String> toSave = settings.toMap();
-
-        IOptionsStorage optionsStorage = context.getOptionsStorage();
-
-        for(Entry<String, String> entry : toSave.entrySet()) {
-
-            optionsStorage.setOption(entry.getKey(), entry.getValue());
-        }
-
-        if (saveToFile) {
-            try {
-                settingsWriter.writeMappableSettings(settings, context.getWorkspaceDispatcher(), folderType, relativePath);
-            } catch (Exception ex) {
-                logger.error("Can't save {} settings to file", settings.settingsName(), ex);
-            }
-        }
-    }
-
-
     public List<String> getEnvNames(){
         IConnectionManager conManager = context.getConnectionManager();
         return conManager.getEnvironmentList();
@@ -731,6 +709,26 @@ public class TestToolsAPI {
 
             if (removeAfter) {
                 FileUtils.cleanDirectory(workspaceDispatcher.getFolder(FolderType.ML));
+            }
+        }
+    }
+
+    private void saveSettings(IMapableSettings settings, boolean saveToFile, FolderType folderType, String... relativePath) throws Exception {
+
+        Map<String, String> toSave = settings.toMap();
+
+        IOptionsStorage optionsStorage = context.getOptionsStorage();
+
+        for(Entry<String, String> entry : toSave.entrySet()) {
+
+            optionsStorage.setOption(entry.getKey(), entry.getValue());
+        }
+
+        if (saveToFile) {
+            try {
+                settingsWriter.writeMappableSettings(settings, context.getWorkspaceDispatcher(), folderType, relativePath);
+            } catch (Exception ex) {
+                logger.error("Can't save {} settings to file", settings.settingsName(), ex);
             }
         }
     }

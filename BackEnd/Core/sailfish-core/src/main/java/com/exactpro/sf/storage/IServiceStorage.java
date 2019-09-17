@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.storage;
 
+import java.util.Iterator;
 import java.util.List;
 
 import java.time.Instant;
@@ -31,6 +32,10 @@ public interface IServiceStorage extends IDisposable {
 	void addServiceDescription(ServiceDescription description);
 
 	void removeServiceDescription(ServiceDescription description);
+
+    default void removeServiceDescriptions(Iterator<ServiceDescription> iterator) {
+        iterator.forEachRemaining(this::removeServiceDescription);
+    }
 
 	void updateServiceDescription(ServiceDescription description);
 

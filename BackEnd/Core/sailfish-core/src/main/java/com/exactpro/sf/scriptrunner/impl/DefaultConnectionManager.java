@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +39,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -328,6 +330,71 @@ public final class DefaultConnectionManager implements IConnectionManager {
 			}
 		});
 	}
+
+    @Override
+    public Future<?> removeServices(Iterator<ServiceName> serviceNames, IServiceNotifyListener notifyListener) {
+        return serviceExecutor.submit(() -> removeServicesWithoutNewThread(serviceNames, notifyListener));
+    }
+
+	protected void removeServicesWithoutNewThread(Iterator<ServiceName> serviceNames, IServiceNotifyListener notifyListener) {
+        try {
+            lock.writeLock().lock();
+
+            logger.info("Start delete services");
+
+            List<IService> toDispose = new ArrayList<>();//disposeService(serviceContainer.getService());
+            List<ServiceDescription> toRemoveFromStorage = new ArrayList<>();
+
+            while (serviceNames.hasNext()) {
+                ServiceName serviceName = serviceNames.next();
+
+                logger.info("Start delete service: {}", serviceName);
+
+                ServiceContainer serviceContainer = services.get(serviceName);
+
+                if (serviceContainer == null) {
+                    throw new ServiceException("Could not find " + serviceName + " service");
+                }
+
+                ServiceDescription description = serviceContainer.getServiceDescription();
+
+                toDispose.add(serviceContainer.getService());
+                toRemoveFromStorage.add(description);
+
+                logger.info("Start delete ServiceContainer {}", serviceName);
+                services.remove(serviceName);
+                logger.info("ServiceContainer was successfully  deleted: {}", serviceName);
+
+                logger.info("Service {} has been removed", serviceName);
+            }
+
+            toDispose.parallelStream().forEach(service -> {
+                try {
+                    //TODO dispose can throw service exception, but its batch operation.
+                    disposeService(service);
+                    ServiceEvent event = ServiceEventFactory.createServiceChangeUpdateEvent(service.getServiceName(), Level.INFO,
+                            Type.DISPOSED, "Service deleted", "", null);
+                    environmentMonitor.onEvent(event);
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+            });
+
+            String deletingServices = toRemoveFromStorage.stream().map(ServiceDescription::getName).collect(Collectors.joining(", "));
+
+            logger.info("Start delete services {} from storage", deletingServices);
+            storage.removeServiceDescriptions(toRemoveFromStorage.iterator());
+            logger.info("Services was successfully deleted from storage: {}", deletingServices);
+
+            logger.info("End delete services");
+
+        } catch (Exception e) {
+            exceptionNotify(notifyListener, e);
+            throw new ServiceException(e.getMessage(), e);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
 
 	protected void removeServiceWithoutNewThread(ServiceName serviceName, IServiceNotifyListener notifyListener) {
         try {

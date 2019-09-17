@@ -16,6 +16,7 @@
 package com.exactpro.sf.storage;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import com.exactpro.sf.common.services.ServiceInfo;

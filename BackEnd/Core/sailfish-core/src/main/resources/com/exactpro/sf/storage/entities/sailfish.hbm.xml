@@ -22,7 +22,8 @@
 <hibernate-mapping package="com.exactpro.sf.storage.entities">
 
 	<class name="StoredEnvironment" table="ENVIRONMENTS">
-		<id name="id" column="ID">
+
+        <id name="id" column="ID">
 			<generator class="native">
 				<param name="sequence">StoredEnvironmentSequence</param>
 			</generator>
@@ -31,7 +32,7 @@
 		<property name="name" column="NAME" unique="true" />
         <property name="variableSet" column="VARIABLE_SET"/>
 
-		<set name="services" inverse="true" lazy="true" cascade="all" fetch="join">
+		<set name="services" inverse="true" lazy="true" cascade="all, delete-orphan" fetch="join">
 			<key column="environment_id" />
 			<one-to-many class="StoredService" />
 		</set>
@@ -110,7 +111,7 @@
 			<key column="MESSAGE_ID" />
 			<one-to-many class="StoredField" />
 		</set>
-		
+
 	</class>
 
 	<class name="StoredField" table="FIELDS">
@@ -182,7 +183,7 @@
 			<one-to-many class="StoredScriptRun" />
 		</list>
 	</class>
-	
+
 	<class name="StoredOption" table="OPTIONS">
 		<id name="id" column="ID">
 			<generator class="native">

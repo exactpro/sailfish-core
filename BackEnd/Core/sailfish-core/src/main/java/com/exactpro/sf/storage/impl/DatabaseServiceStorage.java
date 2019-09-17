@@ -20,10 +20,19 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import com.google.common.collect.Streams;
 import org.apache.commons.beanutils.ConvertUtilsBean;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.lang3.ObjectUtils;
@@ -192,17 +201,83 @@ public class DatabaseServiceStorage implements IServiceStorage {
 
 	}
 
+    @Override
+    public void removeServiceDescriptions(Iterator<ServiceDescription> iterator) {
+
+        flusher.flush();
+
+        Session session = null;
+        Transaction tx = null;
+
+        try {
+
+            session = sessionFactory.openSession();
+            session.setFlushMode(FlushMode.COMMIT); // do not delete this line
+            // cause default mode is not declared and equal FlushMode.AUTO
+
+            tx = session.beginTransaction();
+
+            Session finalSession = session;
+            List<ServiceName> toRemove = new ArrayList<>();
+
+            Streams.stream(iterator).collect(Collectors.groupingBy(ServiceDescription::getEnvironment)).forEach((env, descriptions) -> {
+
+                StoredEnvironment storedEnvironment = (StoredEnvironment) finalSession.createCriteria(StoredEnvironment.class)
+                        .add(Restrictions.eq("name", env)).uniqueResult();
+
+                descriptions.forEach(description -> {
+
+                    synchronized (description) {
+                        StoredService storedService = getStoredService(description);
+
+                        removeServiceEvents(description);
+                        // FIXME: removing messages breaks retrieve after BB run
+                        //messageStorage.removeMessages(stored.getId());
+
+                        storedEnvironment.getServices().remove(storedService);
+
+                        toRemove.add(description.getServiceName());
+                    }
+                });
+
+                finalSession.update(storedEnvironment);
+            });
+
+            tx.commit();
+
+            synchronized (descriptionMap) {
+                //will be commited all descriptions or zero
+                toRemove.forEach(descriptionMap::remove);
+            }
+
+        } catch (RuntimeException e) {
+
+            if (tx != null) {
+                tx.rollback();
+            }
+
+            String message = "Could not delete a service descriptions";
+            logger.error(message, e);
+            throw new StorageException(message, e);
+
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
 	@Override
 	public void removeServiceDescription(ServiceDescription description) {
         flusher.flush();
-		StoredService stored = getStoredService(description);
 
 		Session session = null;
 		Transaction tx = null;
 
 		try	{
 			synchronized (description) {
-                session = sessionFactory.openSession();
+			    StoredService storedService = getStoredService(description);
+			    session = sessionFactory.openSession();
 				session.setFlushMode(FlushMode.COMMIT); // do not delete this line
 				// cause default mode is not declared and equal FlushMode.AUTO
 
@@ -211,12 +286,18 @@ public class DatabaseServiceStorage implements IServiceStorage {
                 //messageStorage.removeMessages(stored.getId());
 
 				tx = session.beginTransaction();
-				session.delete(session.load(stored.getClass(), stored.getId()));
+
+                StoredEnvironment storedEnvironment = (StoredEnvironment) session.createCriteria(StoredEnvironment.class)
+                        .add(Restrictions.eq("name", description.getEnvironment()))
+                        .uniqueResult();
+
+                storedEnvironment.getServices().remove(storedService);
+
+				session.update(storedEnvironment);
 				tx.commit();
 
                 synchronized (descriptionMap) {
-                    // String environment = stored.getEnvironment() == null ? null : stored.getEnvironment().getName();
-                    descriptionMap.remove(new ServiceName(description.getEnvironment(), stored.getName()));
+                    descriptionMap.remove(description.getServiceName());
                 }
 			}
 
