@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -36,6 +38,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,11 +105,16 @@ public class JsonReport implements IScriptReport {
     private static final ObjectMapper mapper;
     private static final String REPORT_ROOT_FILE_NAME = "report";
 
+    private static final String REPORT_DATA_DIRECTORY_NAME = "reportData";
+    private static final String LIVE_REPORT_DIRECTORY_NAME = "live";
+
     private static long actionIdCounter;
 
     private ScriptContext scriptContext;
     private Context context;
     private IReportStats reportStats;
+    private LiveTestCaseWriter liveTestCaseWriter;
+    private Path liveReportDir;
     private AtomicLong isActionCreated = new AtomicLong(0);
     private final Map<Long, Set<Long>> messageToActionIdMap;
     private final IWorkspaceDispatcher dispatcher;
@@ -133,6 +141,7 @@ public class JsonReport implements IScriptReport {
         this.dispatcher = dispatcher;
         this.reportRootDirectoryPath = reportRootDirectoryPath;
         this.testScriptDescription = testScriptDescription;
+        this.liveReportDir = Paths.get(reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, LIVE_REPORT_DIRECTORY_NAME);
         this.dictionaryManager = dictionaryManager;
     }
 
@@ -162,7 +171,7 @@ public class JsonReport implements IScriptReport {
         }
 
         try {
-            return dispatcher.createFile(FolderType.REPORT, true, reportRootDirectoryPath, "reportData", fileName);
+            return dispatcher.createFile(FolderType.REPORT, true, reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, fileName);
         } catch (WorkspaceStructureException e) {
             throw new ScriptRunException("unable to create report file", e);
         }
@@ -284,6 +293,8 @@ public class JsonReport implements IScriptReport {
         testcase.setTags(tags);
 
         setContext(ContextType.TESTCASE, testcase);
+
+        this.liveTestCaseWriter = new LiveTestCaseWriter(testcase, mapper, liveReportDir, dispatcher);
     }
 
     public void closeTestCase(StatusDescription status) {
@@ -298,6 +309,9 @@ public class JsonReport implements IScriptReport {
 
         revertContext();
         reportStats.updateTestCaseStatus(status.getStatus());
+
+        liveTestCaseWriter.clearDirectory();
+        liveTestCaseWriter = null;
     }
 
     public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters,
@@ -317,6 +331,8 @@ public class JsonReport implements IScriptReport {
         curAction.setDescription(description);
         curAction.setCheckPointId(checkPoint != null ? checkPoint.getId() : null);
         curAction.setOutcome(outcome);
+        curAction.setIsRunning(true);
+
         if (parameters != null) {
             curAction.setParameters(Parameter.fromMessage(parameters));
             curAction.getRelatedMessages().add(parameters.getMetaData().getId());
@@ -331,6 +347,7 @@ public class JsonReport implements IScriptReport {
         Action curAction = getCurrentContextNode();
         curAction.setStatus(new Status(status));
         curAction.setFinishTime(Instant.now());
+        curAction.setIsRunning(false);
 
         if (status.isUpdateTestCaseStatus()) {
             reportStats.updateActions(status.getStatus());
@@ -349,9 +366,10 @@ public class JsonReport implements IScriptReport {
         }
 
         for (Long id : curAction.getRelatedMessages()) {
-            //noinspection ConstantConditions
             messageToActionIdMap.computeIfAbsent(id, k -> new HashSet<>()).add(curAction.getId());
         }
+
+        liveTestCaseWriter.writeNode(ObjectUtils.defaultIfNull(getCurrentRootAction(), curAction));
     }
 
     public void openGroup(String name, String description) {
@@ -362,6 +380,7 @@ public class JsonReport implements IScriptReport {
         curGroup.setId(actionIdCounter++);
         curGroup.setName(name);
         curGroup.setDescription(description);
+        curGroup.setIsRunning(true);
 
         setContext(ContextType.ACTIONGROUP, curGroup);
     }
@@ -370,6 +389,7 @@ public class JsonReport implements IScriptReport {
         assertState(ContextType.ACTIONGROUP);
         Action curGroup = getCurrentContextNode();
         curGroup.setStatus(new Status(status));
+        curGroup.setIsRunning(false);
 
         revertContext();
 
@@ -380,6 +400,8 @@ public class JsonReport implements IScriptReport {
         if (parentNode instanceof Action) {
             ((Action) parentNode).getRelatedMessages().addAll(curGroup.getRelatedMessages());
         }
+
+        liveTestCaseWriter.writeNode(curGroup);
     }
 
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
@@ -527,6 +549,12 @@ public class JsonReport implements IScriptReport {
         reportRoot.setFinishTime(Instant.now());
         initProperties();
         exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
+
+        if (liveTestCaseWriter != null) {
+            logger.warn("test case was not closed properly - removing live report directory now");
+            liveTestCaseWriter.clearDirectory();
+            liveTestCaseWriter = null;
+        }
     }
 
     public void createLinkToReport(String linkToReport) {
@@ -550,4 +578,17 @@ public class JsonReport implements IScriptReport {
         }
     }
 
+    private Action getCurrentRootAction() {
+        Context context = this.context;
+
+        if (context == null || (context.cur != ContextType.ACTIONGROUP && context.cur != ContextType.ACTION)) {
+            return null;
+        }
+
+        while (context.prev != null && (context.prev.cur == ContextType.ACTIONGROUP || context.prev.cur == ContextType.ACTION)) {
+            context = context.prev;
+        }
+
+        return (Action) context.node;
+    }
 }

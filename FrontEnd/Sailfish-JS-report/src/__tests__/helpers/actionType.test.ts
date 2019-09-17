@@ -24,7 +24,7 @@ describe('[Helpers] Action type', () => {
         const actionNode: ActionNode = {
             actionNodeType: ActionNodeType.LINK,
             link: ''
-        }
+        };
 
         const action: Action = {
             actionNodeType: ActionNodeType.ACTION

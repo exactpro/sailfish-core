@@ -45,6 +45,7 @@ public class Action implements IJsonReportNode {
     private Instant startTime;
     private Instant finishTime;
     private String outcome;
+    private boolean isRunning;
 
     public Action() {
         this.bugs = new HashSet<>();
@@ -212,5 +213,13 @@ public class Action implements IJsonReportNode {
 
     public void setOutcome(String outcome) {
         this.outcome = outcome;
+    }
+
+    public boolean getIsRunning() {
+        return isRunning;
+    }
+
+    public void setIsRunning(boolean running) {
+        isRunning = running;
     }
 }
