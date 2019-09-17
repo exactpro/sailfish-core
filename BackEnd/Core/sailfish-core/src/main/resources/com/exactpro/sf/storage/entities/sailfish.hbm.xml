@@ -202,7 +202,7 @@
         <map name="variables" table="VARIABLE_SET_VARIABLES" cascade="all" lazy="false">
             <key column="id"/>
             <index column="variable_name" type="string" length="100"/>
-            <element column="variable_value" type="string" length="32762"/>
+            <element column="variable_value" type="string" length="32672"/>
         </map>
     </class>
 </hibernate-mapping>
