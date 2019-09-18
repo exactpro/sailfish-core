@@ -30,6 +30,7 @@ import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -103,7 +104,9 @@ public class FIXCodec extends AbstractCodec {
         this.dictionary = Objects.requireNonNull(dictionary, "dictionary cannot be null");
         this.fieldConverter = new FixFieldConverter();
         fieldConverter.init(dictionary, dictionary.getNamespace());
-        this.qfjConverter = new DirtyQFJIMessageConverter(dictionary, this.msgFactory, false, false, false);
+        QFJIMessageConverterSettings qfjiMessageConverterSettings = new QFJIMessageConverterSettings(dictionary, this.msgFactory);
+        this.qfjConverter = new DirtyQFJIMessageConverter(qfjiMessageConverterSettings);
+
         this.msgStructures = new HashMap<>();
 
         messagesWithXmlField.clear();

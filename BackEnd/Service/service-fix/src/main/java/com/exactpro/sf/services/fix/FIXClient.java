@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TimeZone;
 
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -47,7 +48,6 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
-import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -401,11 +401,13 @@ public class FIXClient implements IInitiatorService {
         IMessageFactory messageFactory = dictionaryManager.getMessageFactory(dictionaryName);
 
         this.dictionaryProvider = new FixDataDictionaryProvider(dictionaryManager, dictionaryName);
-        this.converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, !commonSettings.isAllowUnknownMsgFields(),
-                commonSettings.isMillisecondsInTimeStampFields(),
-                commonSettings.isMicrosecondsInTimeStampFields(),
-                false,
-                commonSettings.isOrderingFields());
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory)
+                .setVerifyTags(!commonSettings.isAllowUnknownMsgFields())
+                .setIncludeMilliseconds(commonSettings.isMillisecondsInTimeStampFields())
+                .setIncludeMicroseconds(commonSettings.isMicrosecondsInTimeStampFields())
+                .setOrderingFields(commonSettings.isOrderingFields());
+
+        this.converter = new DirtyQFJIMessageConverter(settings);
         this.messageHelper = new FixMessageHelper();
         messageHelper.init(messageFactory, dictionary);
     }

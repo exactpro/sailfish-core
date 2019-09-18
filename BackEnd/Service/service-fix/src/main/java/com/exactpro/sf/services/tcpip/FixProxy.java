@@ -17,6 +17,8 @@ package com.exactpro.sf.services.tcpip;
 
 import java.net.InetSocketAddress;
 
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverter;
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.support.SimpleTriggerContext;
@@ -55,6 +57,7 @@ public class FixProxy extends TCPIPProxy {
             IMessageStorage storage, IServiceMonitor serviceMonitor, ILoggingConfigurator logConfigurator, ITaskExecutor taskExecutor,
             IDataManager dataManager) {
 
-        converter = new DirtyQFJIMessageConverter(dictionary, factory, false, false, false);
+        QFJIMessageConverterSettings qfjiMessageConverterSettings = new QFJIMessageConverterSettings(dictionary, factory);
+        converter = new DirtyQFJIMessageConverter(qfjiMessageConverterSettings);
     }
 }

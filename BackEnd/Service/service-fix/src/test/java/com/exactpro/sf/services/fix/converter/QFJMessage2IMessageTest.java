@@ -26,9 +26,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.quickfixj.CharsetSupport;
 
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.comparison.ComparatorSettings;
@@ -54,13 +52,14 @@ import quickfix.StringField;
 //@Ignore
 public class QFJMessage2IMessageTest extends ConverterTest {
     private final FixMessageFactory messageFactory = new FixMessageFactory();
+    private final String sfDictionary = "FIX50.TEST.xml";
 
     @Test
     public void testRepeatingGroupOrderedFields() throws IOException, InvalidMessage, MessageConvertException {
         String source = "8=FIXT.1.1\u00019=155\u000135=Z\u000149=FIX_CSV_ds1\u000156=FGW\u000134=1152\u000152=20151005-15:47:02.785\u00011166=1444060022986\u0001298=4\u00011461=1\u00011462=FIX_CSV_ds1\u00011463=D\u00011464=76\u0001295=1\u0001299=test\u000148=7219943\u000122=8\u000110=169\u0001";
 
         Message fixMessageSrc = new Message();
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
+        IDictionaryStructure dictionary = getSfDictionary(sfDictionary);
 
         DataDictionary dataDict = new QFJDictionaryAdapter(dictionary);
         fixMessageSrc.fromString(source, dataDict, true);
@@ -68,7 +67,12 @@ public class QFJMessage2IMessageTest extends ConverterTest {
             throw fixMessageSrc.getException();
         }
 
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, true, true, false, false, true);
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory)
+                .setVerifyTags(true)
+                .setIncludeMilliseconds(true)
+                .setOrderingFields(true);
+
+        QFJIMessageConverter converter = new QFJIMessageConverter(settings);
         IMessage iMessage = converter.convert(fixMessageSrc);
 
         Message fixMessageTarget = converter.convert(iMessage, true);
@@ -84,8 +88,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         fixMessageSrc.fromString(fixMessage, adapter, true);
 
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
         IMessage iMessage = converter.convert(fixMessageSrc);
         Assert.assertTrue(iMessage.getMetaData().isRejected());
         Assert.assertNotNull(iMessage.getMetaData().getRejectReason());
@@ -105,7 +108,8 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         }
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
         IMessage iMessage = converter.convert(fixMessageSrc);
 
         Assert.assertFalse(iMessage.isFieldSet("MDIncGrp"));
@@ -132,7 +136,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         }
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
         IMessage iMessage = converter.convert(fixMessageSrc);
         Assert.assertEquals(false, iMessage.getMetaData().isRejected());
 
@@ -150,7 +154,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
 
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
         IMessage iMessage = converter.convert(fixMessageSrc);
 
         Message fixMessageTarget = converter.convert(iMessage, true);
@@ -159,7 +163,8 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertTrue("With millisecond", fixMessageString.contains("52=20150707-09:05:21.580"));
         Assert.assertTrue("With millisecond", fixMessageString.contains("60=20150707-09:05:21.220"));
 
-        converter = new QFJIMessageConverter(dictionary, messageFactory, false, false, false);
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory);
+        converter = new QFJIMessageConverter(settings);
 
         fixMessageTarget = converter.convert(iMessage, true);
         fixMessageString = fixMessageTarget.toString();
@@ -178,7 +183,8 @@ public class QFJMessage2IMessageTest extends ConverterTest {
                 dataDict, true);
 
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, false, true);
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory).setSkipTags(true);
+        QFJIMessageConverter converter = new QFJIMessageConverter(settings);
         IMessage iMessage = converter.convert(fixMessageSrc);
 
         IMessage msgHeader = (IMessage) iMessage.getField("header");
@@ -198,8 +204,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         System.out.println(message);
 
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
 
         IMessage iMessage = converter.convert(message);
         Message newMessage = converter.convert(iMessage, true);
@@ -260,8 +265,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         System.out.println(message);
 
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
 
         Message fixMessage = converter.convert(message, true);
         IMessage newMessage = converter.convert(fixMessage);
@@ -275,8 +279,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
     @Test
     public void testNullMessage() throws FileNotFoundException, IOException, MessageConvertException {
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
 
         Assert.assertEquals(null, converter.convert(null));
         Assert.assertEquals(null, converter.convert(null, true));
@@ -309,8 +312,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
 
         System.out.println(message);
 
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings(sfDictionary));
 
         Message fixMessage = converter.convert(message, true);
 
@@ -326,8 +328,7 @@ public class QFJMessage2IMessageTest extends ConverterTest {
     @SuppressWarnings("serial")
     @Test
     public void testUnknownAndMissingMessageType() throws FileNotFoundException, IOException {
-        IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, false, true, false);
+        QFJIMessageConverter converter = new QFJIMessageConverter(getSettings("FIX50.TEST.xml"));
 
         try {
             converter.convert(new Message());
@@ -350,7 +351,10 @@ public class QFJMessage2IMessageTest extends ConverterTest {
     @Test
     public void testUnknownAndExtraTag() throws FileNotFoundException, IOException {
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, true, true, false);
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory)
+                .setVerifyTags(true)
+                .setIncludeMilliseconds(true);
+        QFJIMessageConverter converter = new QFJIMessageConverter(settings);
 
         try {
             converter.convert(new Message() {
@@ -379,7 +383,10 @@ public class QFJMessage2IMessageTest extends ConverterTest {
     @Test
     public void testEmptyFieldValue() throws FileNotFoundException, IOException, MessageConvertException {
         IDictionaryStructure dictionary = getSfDictionary("FIX50.TEST.xml");
-        QFJIMessageConverter converter = new QFJIMessageConverter(dictionary, messageFactory, true, true, false);
+        QFJIMessageConverterSettings settings = new QFJIMessageConverterSettings(dictionary, messageFactory)
+                .setVerifyTags(true)
+                .setIncludeMilliseconds(true);
+        QFJIMessageConverter converter = new QFJIMessageConverter(settings);
 
         IMessage message = converter.convert(new Message() {
             {
@@ -391,4 +398,8 @@ public class QFJMessage2IMessageTest extends ConverterTest {
         Assert.assertFalse(message.isFieldSet("MDReqID"));
     }
 
+    private QFJIMessageConverterSettings getSettings(String sfDictionary) throws IOException {
+        IDictionaryStructure dictionary = getSfDictionary(sfDictionary);
+        return new QFJIMessageConverterSettings( dictionary, messageFactory).setIncludeMilliseconds(true);
+    }
 }

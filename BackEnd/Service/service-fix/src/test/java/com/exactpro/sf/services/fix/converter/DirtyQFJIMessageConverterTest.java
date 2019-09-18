@@ -16,7 +16,6 @@
 package com.exactpro.sf.services.fix.converter;
 
 import java.sql.Timestamp;
-import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.actions.ConvertUtil;
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.factory.FixMessageFactory;
@@ -93,8 +91,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testConvertWithInline() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage messageInline = converter.convertDirty(message, true);
             IMessage original = converter.convert(message);
             IMessage header = (IMessage) original.getField("header");
@@ -129,8 +126,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testConvertWithoutInline() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
 
             IMessage iMessage = converter.convertDirty(message, false);
             IMessage original = converter.convert(message);
@@ -153,8 +149,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testConvertIMessageToRawWithoutExtract() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, false);
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
@@ -176,8 +171,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testConvertIMessageToRawWithExtract() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, true);
             String mock = null;
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, mock, 0, mock, mock);
@@ -190,9 +184,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     }
     @Test
     public void testDirtyReplace() throws Exception{
-        DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                false);
-
+        DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
         IMessage iMessage = messageFactory.createMessage("QuoteCancel", "FIX_5_0");
         IMessage trailer = messageFactory.createMessage("trailer", "FIX_5_0");
         IMessage header = messageFactory.createMessage("header", "FIX_5_0");
@@ -245,9 +237,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testFillHeader() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
-
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = createIMessage();
             iMessage.removeField("header");
 
@@ -276,8 +266,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testFieldOrder() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, false);
 
             IMessage header = (IMessage) iMessage.getField("header");
@@ -329,8 +318,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     @Test
     public void testMultipleValues() throws Exception {
         try {
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage heartbeatTest = getAdditionalHeartbeat();
             RawMessage raw = converter.convertDirty(heartbeatTest, "Heartbeat", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
@@ -352,8 +340,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testConvertFromMessageToIMessageAndBack() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, false);
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "", 0, "", "");
             Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
@@ -374,8 +361,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     @Test
     public void testExtraField() throws Exception {
         try {
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
 
             IMessage iMessage = createIMessage();
             IMessage trailer = iMessage.getField("trailer");
@@ -414,9 +400,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     @Test
     public void testExcludeAutogeneratedTag() throws Exception {
         try {
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
-
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             Set<Entry<String, String>> fields = new LinkedHashSet<>();
             Set<Entry<String, String>> excluded = new HashSet<>();
 
@@ -506,8 +490,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testInlineWithoutExtract() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, true);
             RawMessage raw = converter.convertDirty(iMessage, "QuoteCancel", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
@@ -528,9 +511,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testGroupCounters() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
-
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, false);// createIMessage();
 
             // GroupCounters as Map<?, ?>
@@ -559,9 +540,7 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
     public void testGroupCounterExclusion() throws Exception {
         try {
             Message message = getFixMessage();
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
-
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, false);// createIMessage();
 
             Map<Object, Object> groupCounters = new ConvertUtil().toMap("1461", FieldConst.EXCLUDED_FIELD);
@@ -589,8 +568,8 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             if (message.getException() != null) {
                 throw message.getException();
             }
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
             IMessage iMessage = converter.convertDirty(message, false);
             try {
                 String groupCounters = "1461=3";
@@ -629,8 +608,9 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
             if (message.getException() != null) {
                 throw message.getException();
             }
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
+
             IMessage iMessage = converter.convertDirty(message, false);
             // Try to use Order Field, which contains integers
             try {
@@ -673,8 +653,9 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
         try {
             IMessage imessage = createNDEntries();
             String timeExpected = UtcTimestampConverter.convert(new Timestamp(System.currentTimeMillis()), false, false);
-            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(dictionary, messageFactory, false, true,
-                    false);
+
+            DirtyQFJIMessageConverter converter = new DirtyQFJIMessageConverter(getSettings());
+
             RawMessage raw = converter.convertDirty(imessage, "MDIncGrp_NoMDEntries", true, "FIXT.1.1", 1152,
                     "FIX_CSV_ds1", "FGW");
             String dateOnly = getDateFromMessage(raw, 272);
@@ -745,5 +726,10 @@ public class DirtyQFJIMessageConverterTest extends ConverterTest {
         Assert.assertTrue("Message " + message + " is different from RawMessage " + raw,
                 compareMessages(message, raw, 1461));
         Assert.assertTrue("RawMessage doesn't contain 1461=2", raw.toString().contains("1461=2"));
+    }
+
+    private QFJIMessageConverterSettings getSettings(){
+        return new QFJIMessageConverterSettings(dictionary, messageFactory).setIncludeMilliseconds(true);
+
     }
 }

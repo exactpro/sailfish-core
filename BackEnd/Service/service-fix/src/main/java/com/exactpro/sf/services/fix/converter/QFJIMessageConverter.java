@@ -41,7 +41,6 @@ import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.configuration.factory.FixMessageFactory;
 import com.exactpro.sf.services.fix.FixMessageHelper;
 import com.exactpro.sf.services.fix.FixUtil;
 import com.exactpro.sf.services.fix.QFJDictionaryAdapter;
@@ -88,24 +87,15 @@ public class QFJIMessageConverter
 	private final Table<Integer, String, IFieldStructure> tagToStructure = HashBasedTable.create();
 
 	private final List<Integer> tagsToSkip = Arrays.asList(MsgSeqNum.FIELD, BodyLength.FIELD, CheckSum.FIELD);
-
-	public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory, boolean verifyTags, boolean includeMilliseconds, boolean skipTags) {
-	    this(dictionary, factory, verifyTags, includeMilliseconds, false, skipTags);
-	}
-	public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
-            boolean verifyTags, boolean includeMilliseconds, boolean includeMicroseconds, boolean skipTags) {
-	    this(dictionary, factory, verifyTags, includeMilliseconds, includeMicroseconds, skipTags, false);
-	}
 	
-    public QFJIMessageConverter(IDictionaryStructure dictionary, IMessageFactory factory,
-                                boolean verifyTags, boolean includeMilliseconds, boolean includeMicroseconds, boolean skipTags, boolean orderingFields) {
-        this.dictionary = dictionary;
-        this.factory = factory;
-        this.verifyTags = verifyTags;
-        this.includeMilliseconds = includeMilliseconds;
-        this.includeMicroseconds = includeMicroseconds;
-        this.skipTags = skipTags;
-        this.orderingFields = orderingFields;
+    public QFJIMessageConverter(QFJIMessageConverterSettings settings) {
+        this.dictionary = settings.getDictionary();
+        this.factory = settings.getFactory();
+        this.verifyTags = settings.isVerifyTags();
+        this.includeMilliseconds = settings.isIncludeMilliseconds();
+        this.includeMicroseconds = settings.isIncludeMicroseconds();
+        this.skipTags = settings.isSkipTags();
+        this.orderingFields = settings.isOrderingFields();
         
         if (this.orderingFields) {
             this.fieldOrderHeader = getFieldOrderPrimitive(this.dictionary.getMessages().get(FixMessageHelper.HEADER));
@@ -571,11 +561,11 @@ public class QFJIMessageConverter
 
         return fieldOrder;
 	}
-	
+
 	private int[] getFieldOrderPrimitive(IFieldStructure fieldStructure) {
 	    return ArrayUtils.toPrimitive(getFieldOrder(fieldStructure).toArray(ArrayUtils.EMPTY_INTEGER_OBJECT_ARRAY));
 	}
-	
+
 
     public IDictionaryStructure getDictionary() {
         return dictionary;
