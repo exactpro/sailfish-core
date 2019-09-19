@@ -24,6 +24,8 @@ import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
 import { createCaseInsensitiveRegexp } from '../regexp';
 import { isCheckpoint } from '../action';
+import { sliceToChunks } from '../array';
+import "setimmediate";
 
 // list of fields that will be used to search (order is important!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -35,27 +37,52 @@ const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentH
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'],
     VERIFICATION_NODE_FEILDS: Array<keyof VerificationEntry> = ['name'];
 
-export function findAll(searchString: string, testCase: TestCase): SearchResult {
+export async function findAll(searchString: string, testCase: TestCase): Promise<SearchResult> {
+    
     const searchResults = new Array<[string, number]>();
 
-    if (searchString) {
-        const searchPattern = createCaseInsensitiveRegexp(searchString);
+    if (!searchString) {
+        return null;
+    }
 
-        testCase.actions
-            .filter(actionNode => isAction(actionNode) && !isCheckpoint(actionNode))
-            .forEach(action => searchResults.push(...findAllInAction(action as Action, searchPattern)));
+    const searchPattern = createCaseInsensitiveRegexp(searchString);
 
-        testCase.messages.forEach(message => {
-            searchResults.push(...findAllInObject(
-                message,
-                MESSAGE_FIELDS,
-                searchPattern,
-                keyForMessage(message.id)
-            ));
-        });
+    const filtredActions = testCase.actions.filter(actionNode => isAction(actionNode) && !isCheckpoint(actionNode)),
+        actionChunks = sliceToChunks(filtredActions, 25),
+        messagesChunks = sliceToChunks(testCase.messages, 25);
+
+    for (const chunk of actionChunks) {
+        const result = await findAllInChunk(chunk, searchPattern, findAllInAction);
+        searchResults.push(...result);
+    }
+
+    for (const chunk of messagesChunks) {
+        const result = await findAllInChunk(chunk, searchPattern, findAllInMessage);
+        searchResults.push(...result);
     }
 
     return new SearchResult(searchResults);
+}
+
+async function findAllInChunk<T>(chunk: Array<T>, searchPattern: RegExp, cb: (entity: T, searchPattern: RegExp) => Array<[string, number]>) {
+    return new Promise<Array<[string, number]>>(resolve => {
+        const result = [];
+
+        // from 'setimmediate' npm package
+        window.setImmediate(() => {
+            chunk.forEach(entity => result.push(...cb(entity, searchPattern)));
+            resolve(result);
+        });
+    });
+}
+
+function findAllInMessage(message: Message, searchPattern: RegExp): Array<[string, number]> {
+    return findAllInObject(
+        message,
+        MESSAGE_FIELDS,
+        searchPattern,
+        keyForMessage(message.id)
+    );
 }
 
 function findAllInAction(action: Action, searchPattern: RegExp): Array<[string, number]> {

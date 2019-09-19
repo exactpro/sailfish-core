@@ -45,7 +45,11 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 testCase: {
                     ...stateAction.testCase,
                     actions
-                }
+                },
+                searchString: initialSelectedState.searchString,
+                searchResults: initialSelectedState.searchResults,
+                searchIndex: initialSelectedState.searchIndex,
+                searchResultsCount: initialSelectedState.searchResultsCount
             }
         }
     
@@ -161,7 +165,6 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             return {
                 ...state,
                 searchString: stateAction.searchString,
-                searchResults: new SearchResult(),
                 searchResultsCount: 0,
                 searchIndex: null
             }

@@ -23,6 +23,7 @@ import StateAction from '../../actions/stateActions';
 import { performSearch } from '../../thunks/search';
 import SearchCounter from './SearchCounter';
 import '../../styles/search.scss';
+import SearchResult from '../../helpers/search/SearchResult';
 
 const F_KEY_CODE = 70,
     F3_KEY_CODE = 114,
@@ -35,6 +36,7 @@ interface StateProps {
     searchString: string;
     currentIndex: number;
     resultsCount: number;
+    searchResults: SearchResult;
 }
 
 interface DispatchProps {
@@ -73,7 +75,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
-        if (this.props.searchString !== prevProps.searchString) {
+        if (this.props.searchResults !== prevProps.searchResults) {
             // search string and search results updated, so we need to stop loader
             this.setState({
                 isLoading: false,
@@ -155,7 +157,8 @@ const SearchInput = connect(
     (state: AppState): StateProps => ({
         searchString: state.selected.searchString,
         resultsCount: state.selected.searchResultsCount,
-        currentIndex: state.selected.searchIndex
+        currentIndex: state.selected.searchIndex,
+        searchResults: state.selected.searchResults
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         updateSearchString: searchString => dispatch(performSearch(searchString)),

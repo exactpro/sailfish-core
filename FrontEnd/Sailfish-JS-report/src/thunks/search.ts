@@ -19,20 +19,18 @@ import StateAction from "../actions/stateActions";
 import { setSearchString, setSearchResults } from "../actions/actionCreators";
 import { findAll } from "../helpers/search/searchEngine";
 import AppState from "../state/models/AppState";
-import { batch } from "react-redux";
+
 
 export function performSearch(searchString: string): ThunkAction<void, {}, {}, StateAction> {
-    return (dispatch: ThunkDispatch<{}, {}, StateAction>, getState: () => AppState) => {
+    return async (dispatch: ThunkDispatch<{}, {}, StateAction>, getState: () => AppState) => {
         const { testCase } = getState().selected;
         
-        // async code
-        setTimeout(() => {
-            const results = findAll(searchString, testCase);
-            
-            batch(() => {
-                dispatch(setSearchString(searchString));
-                dispatch(setSearchResults(results));
-            });
-        }, 1);
+        dispatch(setSearchString(searchString));
+        const results = await findAll(searchString, testCase);
+
+        if (searchString === getState().selected.searchString) {
+            dispatch(setSearchResults(results));
+        }
+
     }
 }

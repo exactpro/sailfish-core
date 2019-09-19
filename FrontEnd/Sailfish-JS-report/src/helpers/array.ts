@@ -96,6 +96,16 @@ export function intersection<T>(arr1: T[], arr2: T[]): T[] {
     return arr1.filter(item => arr2.includes(item));
 }
 
+export function sliceToChunks<T>(arr: T[], chunkSize: number): T[][] {
+    const chunks = [];
+
+    for (let i = 0; i < arr.length; i += chunkSize) {
+        chunks.push(arr.slice(i, i + chunkSize));
+    }
+
+    return chunks;
+}
+
 export function areArraysEqual<T extends unknown[]>(arr1: T, arr2: T): boolean {
     if (arr1 === arr2) {
         return true;
