@@ -19,18 +19,23 @@
 import * as React from 'react';
 import KnownBug from '../../models/KnownBug';
 import { KnownBugStatus } from '../../models/KnownBugStatus';
+import { createBemElement } from '../../helpers/styleCreators';
 import '../../styles/knownbug.scss';
 
-interface KnownBugCardProps {
+interface Props {
     bug: KnownBug;
 }
 
-export class KnownBugCard extends React.Component<KnownBugCardProps, {}> {
-    render() {
-        return (
-            <div className={"known-bugs__bug " + (this.props.bug.status === KnownBugStatus.REPRODUCED ? "reproduced" : "not-reproduced")}>
-                {this.props.bug.subject}
-            </div>
-        )
-    }
+export function KnownBugCard({ bug }: Props) {
+    const className = createBemElement(
+        'known-bugs',
+        'bug',
+        bug.status === KnownBugStatus.REPRODUCED ? "reproduced" : "not-reproduced"
+    );
+
+    return (
+        <div className={className}>
+            {bug.subject}
+        </div>
+    )
 }

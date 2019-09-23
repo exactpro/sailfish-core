@@ -22,17 +22,22 @@ import KnownBug from '../../models/KnownBug';
 import KnownBugCategory from '../../models/KnownBugCategory';
 import { ActionNodeType } from '../../models/Action';
 import { KnownBugStatus } from '../../models/KnownBugStatus';
+import { createBemElement } from '../../helpers/styleCreators';
 
-interface KnownBugIndicatorProps {
+interface Props {
     data: (KnownBug | KnownBugCategory)[]
 }
 
-export class KnownBugIndicator extends React.Component<KnownBugIndicatorProps, {}> {
-    render() {
-        return (
-            <div className={"known-bugs__indicator " + (hasReproducedBugs(this.props.data) ? "reproduced" : "not-reproduced")} />
-        )
-    }
+export function KnownBugIndicator({ data }: Props) {
+    const className = createBemElement(
+        'known-bugs',
+        'indicator',
+        hasReproducedBugs(data) ? "reproduced" : "not-reproduced"
+    );
+
+    return (
+        <div className={className}/>
+    )
 }
 
 function hasReproducedBugs(data: (KnownBug | KnownBugCategory)[]): boolean {

@@ -29,7 +29,6 @@ interface KnownBugPanelProps {
 }
 
 const KnownBugPanelBase = ({ bugs }: KnownBugPanelProps) => {
-
     return (
         <div className="known-bugs-panel">
             <KnownBugSummary data={bugs} />

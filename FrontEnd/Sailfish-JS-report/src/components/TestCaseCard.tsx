@@ -33,7 +33,7 @@ interface Props {
     handleClick: (metadata: TestcaseMetadata) => any;
 }
 
-const TestCaseCard = ({ metadata, handleClick, index, knownBugsEnabled, isSelected }: Props) => {
+function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelected }: Props) {
 
     const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
     const baseRef = React.useRef<HTMLDivElement>();
@@ -93,16 +93,16 @@ const TestCaseCard = ({ metadata, handleClick, index, knownBugsEnabled, isSelect
                     <div className="tc-card__info-value">{metadata.hash}</div>
                 </div>
             </div>
+            <div className="tc-card__elapsed-time">{elapsedTime}</div>
             {
                 knownBugsEnabled && metadata.bugs.length > 0 ? (
-                    <div className="tc-card__known-bug-container">
-                        <div className="divider"/>
+                    <React.Fragment>
+                        <div className="tc-card__divider"/>
                         <KnownBugIndicator data={metadata.bugs}/>
                         <KnownBugSummary data={metadata.bugs}/>
-                    </div>
+                    </React.Fragment>
                 ) : null
             }
-            <div className="tc-card__elapsed-time">{elapsedTime}</div>
         </div>
     )
 }

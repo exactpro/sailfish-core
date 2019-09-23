@@ -17,50 +17,56 @@
  */
 
 import * as React from 'react';
-import KnownBug from '../../models/KnownBug'
-import KnownBugCategory from '../../models/KnownBugCategory';
-import { ActionNodeType } from '../../models/Action';
+import KnownBug, { isKnownBug } from '../../models/KnownBug'
+import KnownBugCategory, { isKnownBugCategory } from '../../models/KnownBugCategory';
 import { KnownBugCard } from './KnownBugCard';
 import '../../styles/knownbug.scss';
 import { KnownBugStatus } from '../../models/KnownBugStatus';
 
-interface KnownBugCategoryComponentProps {
+interface Props {
     category: KnownBugCategory;
     isRoot?: boolean;
     showArrows?: boolean;
-
 }
 
-export class KnownBugCategoryComponent extends React.Component<KnownBugCategoryComponentProps, {}> {
-    render() {
+export function KnownBugCategoryComponent({ category, isRoot, showArrows }: Props) {
+    const topLevelBugs = category.subNodes
+        .filter(isKnownBug)
+        .sort((a, b) =>
+            a.status === b.status
+                ? a.subject.localeCompare(b.subject)
+                : (a.status === KnownBugStatus.REPRODUCED ? -1 : 1)
+        );
 
-        const topLevelBugs = this.props.category.subNodes
-            .filter(item => item.actionNodeType === ActionNodeType.KNOWN_BUG)
-            .sort((a: KnownBug, b: KnownBug) =>
-                a.status === b.status
-                    ? a.subject.localeCompare(b.subject)
-                    : (a.status === KnownBugStatus.REPRODUCED ? -1 : 1)
-            );
+    const categories = category.subNodes
+        .filter(isKnownBugCategory)
+        .sort((a, b) => a.name.localeCompare(b.name));
 
-        const categories = this.props.category.subNodes
-            .filter(item => item.actionNodeType === ActionNodeType.KNOWN_BUG_CATEGORY)
-            .sort((a: KnownBugCategory, b: KnownBugCategory) => a.name.localeCompare(b.name));
-
-        return (
-            <div className="known-bugs__category">
-                {this.props.isRoot ? null :
-                    <div className="known-bugs__category__name">
-                        {this.props.showArrows ? "⯈ " : null} {this.props.category.name}
-                    </div>
-                }
-                <div className="known-bugs__category__container">
-                    <div className="known-bugs__category__container__bugs">
-                        {topLevelBugs.map(item => <KnownBugCard bug={item as KnownBug} />)}
-                    </div>
-                    {categories.map(item => <KnownBugCategoryComponent category={item as KnownBugCategory} showArrows={!this.props.isRoot} />)}
+    return (
+        <div className="known-bugs__category">
+            {isRoot ? null :
+                <div className="known-bugs__category__name">
+                    {showArrows ? "⯈ " : null} {category.name}
                 </div>
-
+            }
+            <div className="known-bugs__category__container">
+                <div className="known-bugs__category__container__bugs">
+                {
+                    topLevelBugs.map((item, index) => (
+                        <KnownBugCard bug={item} key={index} />
+                    ))
+                }
+                </div>
+                {
+                    categories.map((item, index) => (
+                        <KnownBugCategoryComponent 
+                            category={item} 
+                            showArrows={!isRoot}
+                            key={index} />
+                    ))
+                }
             </div>
-        )
-    }
+
+        </div>
+    )
 }

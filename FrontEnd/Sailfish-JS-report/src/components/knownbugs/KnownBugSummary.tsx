@@ -23,16 +23,22 @@ import { ActionNodeType } from '../../models/Action';
 import { KnownBugCategoryComponent } from './KnownBugCategoryComponent';
 import '../../styles/knownbug.scss';
 
-interface KnownBugSummaryProps {
+interface Props {
     data: (KnownBug | KnownBugCategory)[];
 }
 
-export class KnownBugSummary extends React.Component<KnownBugSummaryProps, {}> {
-    render() {
-        return (
-            <div className="known-bugs">
-                <KnownBugCategoryComponent isRoot={true} category={{ actionNodeType: ActionNodeType.KNOWN_BUG_CATEGORY, name: null, subNodes: this.props.data }} />
-            </div>
-        )
-    }
+export function KnownBugSummary({ data }: Props)  {
+    const category: KnownBugCategory = { 
+        actionNodeType: ActionNodeType.KNOWN_BUG_CATEGORY, 
+        name: null, 
+        subNodes: data
+    };
+
+    return (
+        <div className="known-bugs">
+            <KnownBugCategoryComponent 
+                isRoot={true} 
+                category={category} />
+        </div>
+    )
 }

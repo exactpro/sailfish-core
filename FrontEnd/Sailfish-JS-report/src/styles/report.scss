@@ -194,6 +194,11 @@
             font-weight: bold;
         }
     }
+
+    &__divider {
+        border: 1px solid $reportBorderColor;
+        margin: 10px 0;
+    }
 }
 
 .tc-card {
@@ -292,20 +297,9 @@
         justify-content: flex-end;
     }
 
-    &__known-bug-container {
-        display: contents;
-    }
-
-    .divider {
+    &__divider {
         grid-area: divider;
-        margin-left: 20px;
-    }
-}
-
-.divider {
-    border: 1px solid $reportBorderColor;
-    margin: 10px 0;
-    &.selected {
-        @include selectable-card;
+        border: 1px solid $reportBorderColor;
+        margin: 10px 0 10px 20px;
     }
 }

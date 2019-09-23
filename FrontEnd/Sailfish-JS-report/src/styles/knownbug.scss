@@ -1,24 +1,5 @@
 @import "./common/vars";
 
-.known-bugs__indicator {
-    grid-area: bugs-indicator;
-
-    background-size: 22px;
-    background-repeat: no-repeat;
-    background-position: center;
-    
-    height: 35px;
-    width: 55px; 
-
-    &.reproduced {
-        background-image: url(../../resources/icons/known-bug-reproduced.svg);
-    }
-
-    &.not-reproduced {
-        background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
-    }
-}
-
 .known-bugs {
     grid-area: bugs-summary;
 
@@ -28,6 +9,7 @@
         grid-template-areas: "title container";
 
         &__name {
+            color: $primaryTextColor;
             grid-area: title;
             padding: 5px;
         }
@@ -37,7 +19,23 @@
 
             &__bugs {
                 display: flex;
+                flex-wrap: wrap;
             }
+        }
+    }
+
+    &__indicator {
+        grid-area: bugs-indicator;
+    
+        @include icon(null, 22px, 22px);
+        margin: 7px 12px;
+    
+        &.reproduced {
+            background-image: url(../../resources/icons/known-bug-reproduced.svg);
+        }
+    
+        &.not-reproduced {
+            background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
         }
     }
 
@@ -46,7 +44,7 @@
         height: 32px;
         line-height: 22px;
 
-        padding: 5px;
+        padding: 5px 7px;
         margin: 2px;
 
         &.reproduced {
