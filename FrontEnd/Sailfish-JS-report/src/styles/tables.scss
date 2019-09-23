@@ -29,10 +29,6 @@
         padding: 3px 7px;
     }
 
-    td {
-        padding: 5px;
-    }
-
     &-header {
         position: relative;
 
@@ -76,53 +72,54 @@
     }
 
     &-row {
-        &-value {
-            &-status {
-                font-weight: bold;
+        &-status {
+            @include status-text;
+            font-weight: bold;
+        }
 
-                &.passed {
-                    color: $passedTextColor;
-                }
+        &-expected, &-actual {
+            font-family: monospace;
+            margin: 0;
+            text-decoration: none;
+            font-size: 14px;
+            white-space: pre-wrap;
+            height: 100%;
+            width: 100%;
+            position: relative;
+        }
 
-                &.failed {
-                    color: $failedTextColor;
-                }
+        td {
+            padding-left: 7px;
+            padding-right: 7px;
+        }
+        
+        &.transparent {
+            opacity: 0.3;
+        }
+        
+        &-count {
+            font-size: small;
+            color: gray;
+            padding-left: 10px;
+        }
 
-                &.conditionally_passed {
-                    color: $conditionallyPassedTextColor;
-                }
-
-                &.conditionally_failed {
-                    color: $conditionallyFailedTextColor;
-                }
-            }
-
-            &-expected, &-actual {
-                font-family: monospace;
-                margin: 0;
-                text-decoration: none;
-                font-size: 14px;
-                white-space: pre-wrap;
-                height: 100%;
-                width: 100%;
-                position: relative;
-            }
-
-            td {
-                padding: 0 7px;
-            }
-            
-            &.transparent {
-                opacity: 0.3;
-            }
+        &-count {
+            font-size: small;
+            color: gray;
+            padding-left: 10px;
         }
 
         &-toggler {
+            margin: 3px 0;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+            padding-top: 4px;
+            padding-bottom: 4px;
+            cursor: pointer;
 
-            &-count {
-                font-size: small;
-                color: gray;
-                padding-left: 10px;
+            p {
+                display: inline;
             }
 
             &.collapsed {
@@ -141,22 +138,6 @@
                 padding-right: 2px;
                 margin-left: -3px;
             }
-
-            p {
-                margin: 0;
-                text-decoration: none;
-                font-weight: bold;
-                font-size: 16px;
-                display: inline-block;
-            }
-        
-            td {
-                cursor: pointer;
-            }
-        }
-
-        td {
-            padding-right: 7px;
         }
     }
 }

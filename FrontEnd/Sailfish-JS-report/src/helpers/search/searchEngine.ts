@@ -32,10 +32,9 @@ const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentH
     ACTION_FIELDS: Array<keyof Action> = ['name', 'description'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
-    VERIFICATION_VALUE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status'],
+    VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status'],
     // we neeed to ignore all fileds besides 'name' in parent nodes because it doesn't render
-    INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'],
-    VERIFICATION_NODE_FEILDS: Array<keyof VerificationEntry> = ['name'];
+    INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
 
 export async function findAll(searchString: string, testCase: TestCase): Promise<SearchResult> {
     
@@ -155,7 +154,7 @@ function findAllInVerificationEntries(entry: VerificationEntry, searchPattern: R
 
     results.push(...findAllInObject(
         entry,
-        entry.subEntries && entry.subEntries.length !== 0 ? VERIFICATION_NODE_FEILDS : VERIFICATION_VALUE_FIELDS,
+        VERIFICATION_NODE_FIELDS,
         searchPattern,
         keyPrefix
     ));

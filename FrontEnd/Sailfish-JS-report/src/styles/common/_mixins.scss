@@ -157,7 +157,8 @@
 
     td {
         border: 1px solid $tableCellBorderColor;
-        word-break: break-word;
+        word-break: break-all;
+        white-space: pre-wrap;
     }
 
     th {

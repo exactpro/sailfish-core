@@ -172,6 +172,10 @@ class VerificationTableBase extends React.Component<Props, State> {
     }
 
     private renderTableNodes(node: TableNode, key: string, paddingLevel: number = 1) : React.ReactNodeArray {
+        if (node.status != null && !this.props.visibilityFilter.has(node.status)) {
+            return [];
+        }
+
         if (node.subEntries) {
 
             const subNodes = node.isExpanded ? 
@@ -179,41 +183,55 @@ class VerificationTableBase extends React.Component<Props, State> {
                     (lsit, node, index) => lsit.concat(this.renderTableNodes(node, `${key}-${index}`, paddingLevel + 1)), []
                 ) : [];
 
-            return [this.renderTooglerNode(node, paddingLevel, key), ...subNodes];
+            return [this.renderNode(node, paddingLevel, key), ...subNodes];
         } else {
-            return [this.renderValueNode(node, paddingLevel, key)];
+            return [this.renderNode(node, paddingLevel, key)];
         }
     }
 
-    private renderValueNode({ name, expected, actual, status }: TableNode, paddingLevel: number, key: string): React.ReactNode {
-        
-        const { transparencyFilter, visibilityFilter } = this.props;
+    private renderNode(node: TableNode, paddingLevel: number, key: string): React.ReactNode {
+        const { transparencyFilter } = this.props,
+            { name, expected, actual, status, isExpanded, subEntries } = node;
 
-        if (!visibilityFilter.has(status)) {
-            return null;
-        }
-
-        const expectedReplaced = replaceNonPrintableChars(expected),
+        const isToggler = subEntries != null && subEntries.length > 0,
+            isTransparent = status != null && !transparencyFilter.has(status),
+            expectedReplaced = replaceNonPrintableChars(expected),
             actualReplaced = replaceNonPrintableChars(actual);
 
         const rootClassName = createSelector(
-                "ver-table-row-value",
-                !transparencyFilter.has(status) ? "transparent" : null
+                "ver-table-row",
+                isTransparent ? "transparent" : null
             ),
             statusClassName = createSelector(
-                "ver-table-row-value-status", 
+                "ver-table-row-status", 
                 status
+            ),
+            togglerClassName = createSelector(
+                "ver-table-row-toggler",
+                isExpanded ? "expanded" : "collapsed"
             );
 
         return (
             <tr className={rootClassName} key={key}>
-                <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
-                    {this.renderContent(`${key}-name`, name)}
-                </td>
-                <td className="ver-table-row-value-expected" onCopy={this.onCopyFor(expected)}>
+                {
+                    isToggler ? (
+                        <td className={togglerClassName}
+                            onClick={this.onTogglerClick(node)}>
+                            <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
+                                {this.renderContent(`${key}-name`, name)}
+                            </p>
+                            <span className="ver-table-row-count">{subEntries.length}</span>
+                        </td>
+                    ) : (
+                        <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
+                            {this.renderContent(`${key}-name`, name)}
+                        </td>
+                    )
+                }
+                <td className="ver-table-row-expected" onCopy={this.onCopyFor(expected)}>
                     {this.renderContent(`${key}-expected`, expected, expectedReplaced)}
                 </td>
-                <td className="ver-table-row-value-actual" onCopy={this.onCopyFor(actual)}>
+                <td className="ver-table-row-actual" onCopy={this.onCopyFor(actual)}>
                     {this.renderContent(`${key}-actual`, actual, actualReplaced)}                  
                 </td>
                 <td className={statusClassName}>
@@ -221,26 +239,6 @@ class VerificationTableBase extends React.Component<Props, State> {
                 </td>
             </tr>
         );
-    }
-
-    private renderTooglerNode(node: TableNode, paddingLevel: number, key: string): React.ReactNode {
-
-        const className = createSelector(
-            "ver-table-row-toggler",
-            node.isExpanded ? "expanded" : "collapsed"
-        );
-
-        return (
-            <tr className={className} key={key}>
-                <td onClick={this.onTogglerClick(node)}
-                    colSpan={4}>
-                    <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
-                        {this.renderContent(`${key}-name`, node.name)}
-                    </p>
-                    <span className="ver-table-row-toggler-count">{node.subEntries.length}</span>
-                </td>
-            </tr>
-        )
     }
 
     /**
