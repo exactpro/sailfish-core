@@ -102,9 +102,17 @@ goto :EFO
     exit /b !errorlevel!
 :createDatabase
     set "version_query_file=%tmp%\bat~%RANDOM%.tmp"
-    "%MYSQL%\mysql" --host=%HOST% --port=%PORT% --user=%SUPERUSER% --password=%SUPERPASSWORD% -e "select version();" | findstr "^5" > %version_query_file%
+    "%MYSQL%\mysql" --host=%HOST% --port=%PORT% --user=%SUPERUSER% --password=%SUPERPASSWORD% -e "select version();" > %version_query_file%
+
+    if /I "!errorlevel!" NEQ "0" (
+        echo Error determining mysql version
+        exit /b 4
+    )
     set "is_fifth_version="
-    set /p is_fifth_version=<%version_query_file%
+    FINDSTR /B /C:"5." %version_query_file%>nul
+    if /I "!errorlevel!" EQU "0" (
+        set "is_fifth_version=1"
+    )
 
     if "%is_fifth_version%"=="" (
         echo build query for MySQL 8 or higher

@@ -50,7 +50,15 @@ readParameters()
 
 createDatabase()
 {
-    mysql --host=${HOST} --port=${PORT} --user=${SUPERUSER} --password=${SUPERPASSWORD} -e 'SELECT VERSION();' | grep '| 5'
+    output=$(mysql --host=${HOST} --port=${PORT} --user=${SUPERUSER} --password=${SUPERPASSWORD} -e 'SELECT VERSION();')
+    local IS_LOGIN=$?
+    if [ "$IS_LOGIN" -ne "0" ]; then
+        echo "Error determining mysql version"
+        echo $output
+        return 1
+    fi
+
+    echo "$output" | grep '^5.'
     local IS_FIFTH_VERSION=$?
 
     QUERY="drop database if exists $DATABASE;
