@@ -129,7 +129,7 @@ public class NativeDbOperations {
 
 			query.addScalar("testcaseid", StringType.INSTANCE);
 
-			query.addScalar("ftcid", StringType.INSTANCE);
+			query.addScalar("ftcid", BigIntegerType.INSTANCE);
 			query.addScalar("fmatrix", StringType.INSTANCE);
 			query.addScalar("fstatus", IntegerType.INSTANCE);
 			query.addScalar("fdescription", StringType.INSTANCE);
@@ -152,7 +152,7 @@ public class NativeDbOperations {
             query.addScalar("freportfolder", StringType.INSTANCE);
             query.addScalar("freportfile", StringType.INSTANCE);
 
-			query.addScalar("stcid", StringType.INSTANCE);
+			query.addScalar("stcid", BigIntegerType.INSTANCE);
 			query.addScalar("smatrix", StringType.INSTANCE);
 			query.addScalar("sstatus", IntegerType.INSTANCE);
 			query.addScalar("sdescription", StringType.INSTANCE);

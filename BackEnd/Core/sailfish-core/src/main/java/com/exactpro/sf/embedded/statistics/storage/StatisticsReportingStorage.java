@@ -1325,7 +1325,7 @@ public class StatisticsReportingStorage implements IAdditionalStatisticsLoader {
 	}
 
     private void addDataToTaggedComparisonSet(TaggedComparisonSet row, Object[] rsRow) {
-        row.setTestCaseId((String) rsRow[0]);
+        row.setTestCaseId(rsRow[0] == null ? null : String.valueOf(rsRow[0]));
         row.setMatrixName((String) rsRow[1]);
         row.setStatus(rsRow[2] != null ? StatusType.getStatusType((Integer) rsRow[2]) : null);
         row.setDescription((String) rsRow[3]);
