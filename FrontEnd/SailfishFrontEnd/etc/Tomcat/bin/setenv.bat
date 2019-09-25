@@ -16,20 +16,33 @@ rem  limitations under the License.
 rem *****************************************************************************
 rem set "JAVA_HOME=<...>" rem Path to java_home for running tomcat
 
+rem   CATALINA_OPTS   (Optional) Java runtime options used when the "start",
+rem                   "run" or "debug" command is executed.
+rem                   Include here and not in JAVA_OPTS all options, that should
+rem                   only be used by Tomcat itself, not by the stop process,
+rem                   the version command etc.
+rem                   Examples are heap size, GC logging, JMX ports etc.
+rem   JAVA_OPTS       (Optional) Java runtime options used when any command
+rem                   is executed.
+rem                   Include here and not in CATALINA_OPTS all options, that
+rem                   should be used by Tomcat and also by the stop process,
+rem                   the version command etc.
+rem                   Most options should go into CATALINA_OPTS.
+
 rem JVM arguments:
-set "JAVA_OPTS=%JAVA_OPTS% -Xms1024m -Xmx1024m" rem Specifies the maximum size (in bytes) of the memory allocation pool in bytes.
-set "JAVA_OPTS=%JAVA_OPTS% -XX:MaxPermSize=512m" rem Size of the Permanent Generation.
-set "JAVA_OPTS=%JAVA_OPTS% -XX:+HeapDumpOnOutOfMemoryError" rem Option tells the HotSpot VM to generate a heap dump when an allocation from the Java heap or the permanent generation cannot be satisfied.
-rem set "JAVA_OPTS=%JAVA_OPTS% -XX:HeapDumpPath=" rem For example -XX:HeapDumpPath=/disk2/dumps will cause the heap dump to be generated in the /disk2/dumps directory.
-rem set "JAVA_OPTS=%JAVA_OPTS% -Duser.timezone=UTC" rem Use the user.timezone property value as the default time zone ID if it's available.
-rem set "JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
-rem set "JAVA_OPTS=%JAVA_OPTS% -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" rem Use for configure jvm FlightRecorder
-set "JAVA_OPTS=%JAVA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
-set "JAVA_OPTS=%JAVA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
+set "CATALINA_OPTS=%CATALINA_OPTS% -Xms1024m -Xmx1024m" rem Specifies the maximum size (in bytes) of the memory allocation pool in bytes.
+set "CATALINA_OPTS=%CATALINA_OPTS% -XX:MaxPermSize=512m" rem Size of the Permanent Generation.
+set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+HeapDumpOnOutOfMemoryError" rem Option tells the HotSpot VM to generate a heap dump when an allocation from the Java heap or the permanent generation cannot be satisfied.
+rem set "CATALINA_OPTS=%CATALINA_OPTS% -XX:HeapDumpPath=" rem For example -XX:HeapDumpPath=/disk2/dumps will cause the heap dump to be generated in the /disk2/dumps directory.
+rem set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.timezone=UTC" rem Use the user.timezone property value as the default time zone ID if it's available.
+rem set "CATALINA_OPTS=%CATALINA_OPTS% -Djava.net.preferIPv4Stack=true" rem IPv4 addresses preferred over IPv6 addresses
+rem set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+UnlockCommercialFeatures -XX:+FlightRecorder" rem Use for configure jvm FlightRecorder
+set "CATALINA_OPTS=%CATALINA_OPTS% -XX:+ExitOnOutOfMemoryError" rem Option tells what JVM should terminate process if OutOfMemoryError had been thrown
+set "CATALINA_OPTS=%CATALINA_OPTS% -Duser.dir=%CATALINA_BASE%\temp" rem Uses to specify directory for relative paths
 
 rem Deployer Jvm arguments:
 set "DEPLOYER_JAVA_OPTS="
-set "JAVA_OPTS=%JAVA_OPTS% %DEPLOYER_JAVA_OPTS%"
+set "CATALINA_OPTS=%CATALINA_OPTS% %DEPLOYER_JAVA_OPTS%"
 
 rem Get extends environment variables
 set "ADDITIONAL_SCRIPTS_DIR=%CATALINA_HOME%\..\..\AdditionalScripts"
