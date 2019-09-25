@@ -16,6 +16,7 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.Formatter;
 import com.exactpro.sf.scriptrunner.StatusType;
@@ -29,9 +30,12 @@ public class VerificationEntry {
 
     //FIXME: implement some kind of container for those values. It should contain type, possible enum alias, and value
     private String actual;
+    private String actualType;
     private String expected;
+    private String expectedType;
 
     private StatusType status;
+    private String hint;
     private Double precision;
     private Double systemPrecision;
     private List<VerificationEntry> subEntries;
@@ -43,16 +47,34 @@ public class VerificationEntry {
 
     public VerificationEntry(ComparisonResult result) {
         this.name = result.getName();
+
         this.actual = Objects.toString(result.getActual(), null);
+        this.actualType = getType(result.getActual());
+
         this.expected = Formatter.formatExpected(result);
+        this.expectedType = getType(result.getExpected());
+
         this.precision = result.getDoublePrecision();
         this.systemPrecision = result.getSystemPrecision();
         this.status = result.getStatus();
         this.exception = result.getException() != null ? new ReportException(result.getException()) : null;
+        this.hint = result.getExceptionMessage();
 
         if (result.hasResults()) {
             this.subEntries = result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList());
         }
+    }
+
+    private String getType(Object object) {
+        if (object == null) {
+            return null;
+        }
+
+        if (object instanceof IFilter) {
+            return ((IFilter)object).hasValue() ? ((IFilter)object).getValue().getClass().getSimpleName() : null;
+        }
+
+        return object.getClass().getSimpleName();
     }
 
     public String getName() {
@@ -117,5 +139,29 @@ public class VerificationEntry {
 
     public void setException(ReportException exception) {
         this.exception = exception;
+    }
+
+    public String getHint() {
+        return hint;
+    }
+
+    public void setHint(String hint) {
+        this.hint = hint;
+    }
+
+    public String getActualType() {
+        return actualType;
+    }
+
+    public void setActualType(String actualType) {
+        this.actualType = actualType;
+    }
+
+    public String getExpectedType() {
+        return expectedType;
+    }
+
+    public void setExpectedType(String expectedType) {
+        this.expectedType = expectedType;
     }
 }

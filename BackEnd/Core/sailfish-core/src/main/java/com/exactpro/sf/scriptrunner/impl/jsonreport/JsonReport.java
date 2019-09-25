@@ -36,6 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,6 +243,7 @@ public class JsonReport implements IScriptReport {
             reportRoot.setHostName("n/a");
         }
 
+        reportRoot.setPrecision(MathProcessor.COMPARISON_PRECISION.toPlainString());
         reportRoot.setName(name);
         reportRoot.setUserName(userName);
         reportRoot.setScriptRunId(scriptRunId);

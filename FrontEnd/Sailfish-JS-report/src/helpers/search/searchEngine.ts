@@ -32,7 +32,7 @@ const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentH
     ACTION_FIELDS: Array<keyof Action> = ['name', 'description'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
-    VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status'],
+    VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', "actualType", "expectedType"],
     // we neeed to ignore all fileds besides 'name' in parent nodes because it doesn't render
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
 

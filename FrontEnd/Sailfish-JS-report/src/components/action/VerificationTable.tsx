@@ -16,19 +16,26 @@
 
 import * as React from 'react';
 import VerificationEntry from "../../models/VerificationEntry";
-import { StatusType } from "../../models/Status";
+import {StatusType} from "../../models/Status";
 import "../../styles/tables.scss";
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import AppState from "../../state/models/AppState";
-import { createSelector } from '../../helpers/styleCreators';
-import StateSaver, { RecoverableElementProps } from "./../util/StateSaver";
+import {createSelector} from '../../helpers/styleCreators';
+import StateSaver, {RecoverableElementProps} from "./../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
-import { getVerificationExpandPath } from '../../helpers/search/getExpandPath';
+import {getVerificationExpandPath} from '../../helpers/search/getExpandPath';
 import SearchResult from '../../helpers/search/SearchResult';
-import { replaceNonPrintableChars } from '../../helpers/stringUtils';
-import { copyTextToClipboard } from '../../helpers/copyHandler';
+import {replaceNonPrintableChars} from '../../helpers/stringUtils';
+import {copyTextToClipboard} from '../../helpers/copyHandler';
 
 const PADDING_LEVEL_VALUE = 15;
+
+const STATUS_ALIASES = new Map<StatusType, { alias: string, className: string }>([
+    [StatusType.FAILED, {alias: "F", className: "failed"}],
+    [StatusType.PASSED, {alias: "P", className: "passed"}],
+    [StatusType.CONDITIONALLY_PASSED, {alias: "CP", className: "conditionally_passed"}],
+    [StatusType.NA, {alias: "NA", className: "na"}]
+]);
 
 interface OwnProps {
     actionId: number;
@@ -40,6 +47,7 @@ interface OwnProps {
 }
 
 interface StateProps {
+    precision: string;
     transparencyFilter: Set<StatusType>;
     visibilityFilter: Set<StatusType>;
     expandPath: number[];
@@ -51,7 +59,8 @@ interface Props extends Omit<OwnProps, 'params'>, StateProps {
     stateSaver: (state: TableNode[]) => void;
 }
 
-interface RecoveredProps extends OwnProps, RecoverableElementProps, StateProps {}
+interface RecoveredProps extends OwnProps, RecoverableElementProps, StateProps {
+}
 
 interface State {
     nodes: TableNode[];
@@ -130,55 +139,56 @@ class VerificationTableBase extends React.Component<Props, State> {
     }
 
     render() {
-        const { status, keyPrefix } = this.props,
-            { nodes } = this.state;
+        const {status, keyPrefix, precision} = this.props,
+            {nodes} = this.state;
 
         const rootClass = createSelector("ver-table", status);
 
         return (
             <div className={rootClass}>
                 <div className="ver-table-header">
-                    <div className="ver-table-header-name">
-                        <h5>Comparison Table</h5>
-                    </div>
                     <div className="ver-table-header-control">
                         <span className="ver-table-header-control-button"
-                            onClick={this.onControlButtonClick(false)}>
+                              onClick={this.onControlButtonClick(false)}>
                             Collapse
                         </span>
                         <span> | </span>
                         <span className="ver-table-header-control-button"
-                            onClick={this.onControlButtonClick(true)}>
-                            Expand
+                              onClick={this.onControlButtonClick(true)}>
+                                Expand
                         </span>
                         <span> all groups</span>
+                    </div>
+                    <div className="ver-table-header-precision">
+                        <span className="ver-table-header-precision-value">{precision}</span>
                     </div>
                 </div>
                 <table>
                     <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th className="ver-table-flexible">Expected</th>
-                            <th className="ver-table-flexible">Actual</th>
-                            <th>Status</th>
-                        </tr>
+                    <tr>
+                        <th className="ver-table-indicator transparent"></th>
+                        <th>Name</th>
+                        <th className="ver-table-flexible">Expected</th>
+                        <th className="ver-table-flexible">Actual</th>
+                        <th className="ver-table-status">Status</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {nodes.map((param, index) => this.renderTableNodes(param, `${keyPrefix}-${index}`))}
+                    {nodes.map((param, index) => this.renderTableNodes(param, `${keyPrefix}-${index}`))}
                     </tbody>
                 </table>
             </div>
         )
     }
 
-    private renderTableNodes(node: TableNode, key: string, paddingLevel: number = 1) : React.ReactNodeArray {
+    private renderTableNodes(node: TableNode, key: string, paddingLevel: number = 1): React.ReactNodeArray {
         if (node.status != null && !this.props.visibilityFilter.has(node.status)) {
             return [];
         }
 
         if (node.subEntries) {
 
-            const subNodes = node.isExpanded ? 
+            const subNodes = node.isExpanded ?
                 node.subEntries.reduce(
                     (lsit, node, index) => lsit.concat(this.renderTableNodes(node, `${key}-${index}`, paddingLevel + 1)), []
                 ) : [];
@@ -190,52 +200,110 @@ class VerificationTableBase extends React.Component<Props, State> {
     }
 
     private renderNode(node: TableNode, paddingLevel: number, key: string): React.ReactNode {
-        const { transparencyFilter } = this.props,
-            { name, expected, actual, status, isExpanded, subEntries } = node;
+        const {transparencyFilter} = this.props;
+        const {name, expected, expectedType, actual, actualType, status, isExpanded, subEntries, hint} = node;
 
-        const isToggler = subEntries != null && subEntries.length > 0,
-            isTransparent = status != null && !transparencyFilter.has(status),
-            expectedReplaced = replaceNonPrintableChars(expected),
-            actualReplaced = replaceNonPrintableChars(actual);
+        const isToggler = subEntries != null && subEntries.length > 0;
+        const isTransparent = status != null && !transparencyFilter.has(status);
+        const hasHint = hint != null && hint != "";
+        const hasMismatchedTypes = expectedType != null && expectedType != actualType;
+
+        const expectedReplaced = replaceNonPrintableChars(expected);
+        const actualReplaced = replaceNonPrintableChars(actual);
+
+        const statusAlias = STATUS_ALIASES.has(status) ? STATUS_ALIASES.get(status) : {alias: status, className: ""};
 
         const rootClassName = createSelector(
-                "ver-table-row",
-                isTransparent ? "transparent" : null
-            ),
-            statusClassName = createSelector(
-                "ver-table-row-status", 
-                status
-            ),
-            togglerClassName = createSelector(
-                "ver-table-row-toggler",
-                isExpanded ? "expanded" : "collapsed"
-            );
+            "ver-table-row",
+            statusAlias.className,
+            isTransparent ? "transparent" : null
+        );
+
+        const statusClassName = createSelector(
+            "ver-table-row-status",
+            statusAlias.className
+        );
+
+        const togglerClassName = createSelector(
+            "ver-table-row-toggler",
+            statusAlias.className,
+            isExpanded ? "expanded" : "collapsed"
+        );
+
+        const actualClassName = createSelector(
+            "ver-table-row-actual",
+            statusAlias.className
+        );
+
+        const expectedClassName = createSelector(
+            "ver-table-row-expected",
+            statusAlias.className
+        );
+
+        const typeClassName = createSelector(
+            "ver-table-row-type",
+            statusAlias.className,
+            hasMismatchedTypes ? "highlighted" : null
+        );
+
+        const indicatorClassName = createSelector(
+            "ver-table-row-indicator",
+            "transparent",
+            hasHint ? "active" : null
+        );
+
+        const actualValueClassName = createSelector(
+            "ver-table-row-value",
+            isToggler ? "notype" : null
+        );
+
+        const expectedValueClassName = createSelector(
+            "ver-table-row-value",
+            isToggler ? "notype" : null,
+            expectedType == null && expected == "null" ? "novalue" : null
+        );
 
         return (
             <tr className={rootClassName} key={key}>
+                <td className={indicatorClassName}>
+                    { hasHint
+
+                        ? (<div className="ver-table-row-hint">
+                            <div className="ver-table-row-hint-inner">{hint}</div>
+                        </div>)
+
+                        : null
+                    }
+                </td>
                 {
                     isToggler ? (
                         <td className={togglerClassName}
                             onClick={this.onTogglerClick(node)}>
-                            <p style={{ marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1) }}>
+                            <p style={{marginLeft: PADDING_LEVEL_VALUE * (paddingLevel - 1)}}>
                                 {this.renderContent(`${key}-name`, name)}
                             </p>
                             <span className="ver-table-row-count">{subEntries.length}</span>
                         </td>
                     ) : (
-                        <td style={{ paddingLeft: PADDING_LEVEL_VALUE * paddingLevel }}>
+                        <td className={statusAlias.className} style={{paddingLeft: PADDING_LEVEL_VALUE * paddingLevel}}>
                             {this.renderContent(`${key}-name`, name)}
                         </td>
                     )
                 }
-                <td className="ver-table-row-expected" onCopy={this.onCopyFor(expected)}>
-                    {this.renderContent(`${key}-expected`, expected, expectedReplaced)}
+                <td className={expectedClassName} onCopy={this.onCopyFor(expected)}>
+                    <div className="ver-table-row-wrapper">
+                        {this.renderContent(`${key}-expected`, expected, expectedValueClassName, expectedReplaced)}
+                        {isToggler ? null : this.renderContent(`${key}-expectedType`, expectedType, typeClassName)}
+                    </div>
                 </td>
-                <td className="ver-table-row-actual" onCopy={this.onCopyFor(actual)}>
-                    {this.renderContent(`${key}-actual`, actual, actualReplaced)}                  
+                <td className={actualClassName} onCopy={this.onCopyFor(actual)}>
+                    <div className="ver-table-row-wrapper">
+                        {this.renderContent(`${key}-actual`, actual, actualValueClassName, actualReplaced)}
+                        {isToggler ? null : this.renderContent(`${key}-actualType`, actualType, typeClassName)}
+                    </div>
                 </td>
                 <td className={statusClassName}>
-                    {this.renderContent(`${key}-status`, status)}
+                    {this.renderContent(`${key}-status`, statusAlias.alias)}
                 </td>
             </tr>
         );
@@ -243,20 +311,30 @@ class VerificationTableBase extends React.Component<Props, State> {
 
     /**
      * We need this for optimization - render SearchableContent component only if it contains some search results
-     * @param contentKey for SearchableContetn component 
-     * @param content 
-     * @param fakeContent This text will be rendered when there is no search results found - 
+     * @param contentKey for SearchableContent component
+     * @param content
+     * @param wrapperClassName - class name of the wrapping div (wrapper won't be rendered if class name is null)
+     * @param fakeContent - this text will be rendered when there is no search results found -
      *     it's needed to render fake dots and squares instead of real non-printable characters
      */
-    private renderContent(contentKey: string, content: string, fakeContent: string = content): React.ReactNode {
+    private renderContent(contentKey: string, content: string, wrapperClassName: string = null,  fakeContent: string = content): React.ReactNode {
+        if (content == null) {
+            return wrap(wrapperClassName, null);
+        }
+
         if (!this.props.searchResults.isEmpty && this.props.searchResults.get(contentKey)) {
-            return (
+            return wrap(wrapperClassName, (
                 <SearchableContent
                     contentKey={contentKey}
-                    content={content}/>
-            )
+                    content={content}/>));
         } else {
-            return fakeContent;
+            return wrap(wrapperClassName, fakeContent);
+        }
+
+        function wrap(wrapperClassName,  data): React.ReactNode {
+            return wrapperClassName == null ? data : (
+                <div className={wrapperClassName}>{data}</div>
+            )
         }
     }
 
@@ -284,7 +362,7 @@ class VerificationTableBase extends React.Component<Props, State> {
 }
 
 
-export const RecoverableVerificationTable = ({ stateKey, ...props }: RecoveredProps) => (
+export const RecoverableVerificationTable = ({stateKey, ...props}: RecoveredProps) => (
     // at first table render, we need to generate table nodes if we don't find previous table's state 
     <StateSaver
         stateKey={stateKey}
@@ -310,6 +388,7 @@ function paramsToNodes(root: VerificationEntry): TableNode {
 
 export const VerificationTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
+        precision: state.report.precision,
         transparencyFilter: state.filter.fieldsTransparencyFilter,
         visibilityFilter: state.filter.fieldsFilter,
         expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId),

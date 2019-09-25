@@ -37,6 +37,7 @@ export default interface Report {
     outcomes?: any;
     reportProperties?: ReportProperties;
     metadata: TestcaseMetadata[];
+    precision: string;
 }
 
 export function isReport(report: Report | TestCase): report is Report {

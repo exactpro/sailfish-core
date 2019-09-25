@@ -36,7 +36,8 @@ const mockReport: Report = {
     scriptRunId: 0,
     version: '',
     branchName: 'master',
-    description: ''
+    description: '',
+    precision: '0.1'
 };
 
 describe('[Redux] Report reducer', () => {

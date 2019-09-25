@@ -19,10 +19,13 @@ import { StatusType } from './Status';
 export default interface VerificationEntry {
     name: string;
     actual: string;
+    actualType: string;
     expected: string;
+    expectedType: string;
     status?: StatusType;
     precision?: string;
     systemPrecision?: string;
     subEntries?: VerificationEntry[];
     exception: any;
+    hint: string;
 }

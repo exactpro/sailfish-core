@@ -35,6 +35,7 @@ public class ReportRoot {
     private ReportException exception;
     private List<TestCaseMetadata> metadata = new ArrayList<>();
     private ReportProperties reportProperties;
+    private String precision;
 
     /**
      * //IMPORTANT: access should be synchronized!
@@ -146,5 +147,13 @@ public class ReportRoot {
 
     public void setReportProperties(ReportProperties reportProperties) {
         this.reportProperties = reportProperties;
+    }
+
+    public String getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(String precision) {
+        this.precision = precision;
     }
 }
