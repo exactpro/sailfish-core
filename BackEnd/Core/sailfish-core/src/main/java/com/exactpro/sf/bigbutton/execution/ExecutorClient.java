@@ -829,6 +829,7 @@ public class ExecutorClient {
 								runList(); // Execute scripts
 								
 							} catch (RuntimeException e) {
+							    executorReady = false;
                                 toWarnState(e);
                                 transferScriptListToAnotherNode();
 							}
