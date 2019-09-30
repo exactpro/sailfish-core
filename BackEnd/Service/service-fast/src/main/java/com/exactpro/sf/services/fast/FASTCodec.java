@@ -137,7 +137,7 @@ public class FASTCodec extends AbstractCodec {
         int startPosition = in.position();
         byte[] data = new byte[in.remaining()];
         in.get(data);
-        DecodeResult decodeResult = decoder.decode(data, getInputContext(session));
+        DecodeResult decodeResult = decoder.decode(data, getInputContext(session), settings.isLengthPresent());
         boolean isSuccessDecoded = decodeResult.isSuccess();
         if (isSuccessDecoded) {
             IMessage decodedMessage = decodeResult.getDecodedMessage();

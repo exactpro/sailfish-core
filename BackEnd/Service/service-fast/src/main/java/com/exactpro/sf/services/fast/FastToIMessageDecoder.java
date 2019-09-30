@@ -42,13 +42,20 @@ public class FastToIMessageDecoder {
     }
 
     public DecodeResult decode(byte[] data, Context context) throws IOException, ConverterException {
+        return decode(data, context, true);
+    }
+
+    public DecodeResult decode(byte[] data, Context context, boolean isLengthPresent) throws IOException, ConverterException {
         if (logger.isDebugEnabled()) {
             logger.debug("try to parse data {}", Arrays.toString(data));
         }
+
         try (InputStream is = new EofCheckedStream(new ByteArrayInputStream(data))) {
-            int msgLen = TypeCodec.UINT.decode(is).toInt();
-            if (is.available() < msgLen) {
-                return DecodeResult.createNotEnoughDataResult();
+            if(isLengthPresent) {
+                int msgLen = TypeCodec.UINT.decode(is).toInt();
+                if (is.available() < msgLen) {
+                    return DecodeResult.createNotEnoughDataResult();
+                }
             }
             Message fastMessage = decodeDataToFastMessage(context, is);
             int processedBytes = data.length - is.available();

@@ -15,11 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast.converter;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.openfast.FieldValue;
 import org.openfast.GroupValue;
@@ -34,8 +31,9 @@ import org.openfast.template.type.StringType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class FastToIMessageConverter {
     private static final Logger logger = LoggerFactory.getLogger(FastToIMessageConverter.class);
@@ -187,7 +185,9 @@ public class FastToIMessageConverter {
 				message.addField(iMessageFieldName, longVal);
 			}
         } else if("uInt64".equals(fastFld.getType().getName())) {
-			BigDecimal bdVal = fastMsg.getBigDecimal(index);
+            // TypeCodec.UINT is parsed by UnsignedInteger class. It uses LongValue class for huge value.
+            // LongValue class unsupported getBigDecimal method
+			BigDecimal bdVal = new BigDecimal(fastMsg.getLong(index));
 			if (bdVal != null) {
 				message.addField(iMessageFieldName, bdVal);
 			}
