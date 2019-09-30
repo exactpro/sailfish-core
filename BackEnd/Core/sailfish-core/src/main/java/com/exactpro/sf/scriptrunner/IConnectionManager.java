@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public interface IConnectionManager extends IDisposable
 
 	Future<?> removeService(ServiceName serviceName, IServiceNotifyListener exceptionListener);
 
-    Future<?> removeServices(Iterator<ServiceName> serviceName, IServiceNotifyListener notifyListener);
+    Future<?> removeServices(Collection<ServiceName> serviceName, IServiceNotifyListener notifyListener);
 
     Future<?> updateService(ServiceDescription serviceDescription, IServiceNotifyListener exceptionListener);
 

@@ -36,6 +36,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -334,9 +335,9 @@ public class TestToolsAPI {
 
         IConnectionManager conManager = context.getConnectionManager();
 
-        Iterator<ServiceName> toRemove = Stream.of(conManager.getServiceNames())
+        Collection<ServiceName> toRemove = Stream.of(conManager.getServiceNames())
                 .filter(sName -> envName.equals(sName.getEnvironment()))
-                .iterator();
+                .collect(Collectors.toList());
 
         conManager.removeServices(toRemove, notifyListener).get();
     }
@@ -623,10 +624,10 @@ public class TestToolsAPI {
     private void deleteServicesForReplace(IConnectionManager conManager, List<ServiceDescription> newServs, List<ServiceName> existServiceNames, IServiceNotifyListener notifyListener) {
         try {
 
-            Iterator<ServiceName> toRemove = newServs.stream()
+            Collection<ServiceName> toRemove = newServs.stream()
                     .map(ServiceDescription::getServiceName)
                     .filter(existServiceNames::contains)
-                    .iterator();
+                    .collect(Collectors.toList());
 
             try {
                 conManager.removeServices(toRemove, notifyListener).get();
