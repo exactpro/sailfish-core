@@ -56,6 +56,7 @@ import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 import com.exactpro.sf.embedded.IEmbeddedService;
 import com.exactpro.sf.embedded.configuration.ServiceStatus;
 import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
+import com.exactpro.sf.embedded.updater.exception.UpdateInProgressException;
 import com.exactpro.sf.services.ITaskExecutor;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.util.DateTimeUtility;
@@ -163,6 +164,9 @@ public class UpdateService implements IEmbeddedService {
     public void checkUpdates() {
         try {
             checkForUpdates(false);
+        } catch (UpdateInProgressException e) {
+            logger.error("Update in progress", e);
+            throw e;
         } catch (Exception e) {
             logger.error("Error during user check request", e);
             setError(e);
@@ -171,6 +175,9 @@ public class UpdateService implements IEmbeddedService {
     }
 
     private void checkForUpdates(boolean autoUpdateIfNeed) {
+        if (updating) {
+            throw new UpdateInProgressException();
+        }
         List<ComponentUpdateInfo> updateInfos = Collections.emptyList();
         try {
             ServiceStatus prevStatus = serviceStatus.getAndUpdate(status -> ServiceStatus.Checking);
@@ -450,6 +457,8 @@ public class UpdateService implements IEmbeddedService {
             try {
                 logger.info("Scheduled run");
                 checkForUpdates(true);
+            } catch (UpdateInProgressException e) {
+                logger.error("Update in progress", e);
             } catch (Exception e) {
                 logger.error(e.getMessage(), e);
                 setError(e);
