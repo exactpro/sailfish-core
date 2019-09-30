@@ -19,7 +19,7 @@ import Action from "../../models/Action";
 import ParamsTable from './ParamsTable';
 import { RecoverableExpandablePanel, ExpandablePanel } from "../ExpandablePanel";
 import "../../styles/action.scss";
-import { getSecondsPeriod, formatTime } from "../../helpers/dateFormatter";
+import { getSecondsPeriod, formatTime } from "../../helpers/date";
 import { RecoverableExceptionChain } from "../ExceptionChain";
 import { Chip } from "../Chip";
 import { createSelector } from '../../helpers/styleCreators';

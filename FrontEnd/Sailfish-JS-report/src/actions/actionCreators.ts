@@ -16,13 +16,14 @@
 
 import TestCase from "../models/TestCase";
 import { StateActionTypes } from "./stateActions";
-import Action from '../models/Action';
+import Action, { ActionNode } from '../models/Action';
 import { StatusType } from "../models/Status";
 import Report from "../models/Report";
 import { Panel } from "../util/Panel";
 import Message from '../models/Message';
 import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
+import LiveTestCase from '../models/LiveTestCase';
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -74,6 +75,25 @@ export const selectCheckpointMessage = (message: Message) => (<const>{
 export const selectRejectedMessageId = (messageId: number) => (<const>{
     type: StateActionTypes.SELECT_REJECTED_MESSAGE,
     messageId
+})
+
+export const selectLiveTestCase = () => (<const>{
+    type: StateActionTypes.SELECT_LIVE_TESTCASE
+})
+
+export const updateLiveTestCase = (testCase: LiveTestCase) => (<const>{
+    type: StateActionTypes.UPDATE_LIVE_TEST_CASE,
+    testCase
+})
+
+export const updateLiveActions = (actions: ActionNode[]) => (<const>{
+    type: StateActionTypes.UPDATE_LIVE_ACTIONS,
+    actions
+})
+
+export const updateLiveMessages = (messages: Message[]) => (<const>{
+    type: StateActionTypes.UPDATE_LIVE_MESSAGES,
+    messages
 })
 
 export const switchActionsFilter = (status: StatusType) => (<const>{

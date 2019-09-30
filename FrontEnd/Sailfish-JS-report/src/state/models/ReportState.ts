@@ -14,24 +14,11 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ThunkDispatch, ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
-import { batch } from "react-redux";
-import { fetchReport } from "../helpers/jsonp";
-import { setReport, setIsLoading } from "../actions/actionCreators";
-import StateActionType from "../actions/stateActions";
+import Report from '../../models/Report';
+import { TestCaseMetadata } from '../../models/TestcaseMetadata';
+import LiveTestCase from '../../models/LiveTestCase';
 
-export function loadReport(): ThunkAction<void, {}, {}, AnyAction> {
-    return (dispatch: ThunkDispatch<{}, {}, StateActionType>) => {
-        dispatch(setIsLoading(true));
-
-        fetchReport()
-            .then(report => {
-                batch(() => {
-                    dispatch(setReport(report));
-                    dispatch(setIsLoading(false));
-                });
-            })
-            .catch(err => console.error(err));
-    }
+export default interface ReportState extends Omit<Report, 'metadata'> {
+    metadata: (TestCaseMetadata | LiveTestCase)[];
 }
+ 

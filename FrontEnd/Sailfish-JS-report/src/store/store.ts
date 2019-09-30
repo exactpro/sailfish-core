@@ -27,15 +27,31 @@ import { filterReducer } from '../reducers/filterReducer';
 import { machineLearningReducer } from '../reducers/machineLearningReducer';
 import AppState from '../state/models/AppState';
 import StateActionType from '../actions/stateActions';
+import { initLiveUpdateEventSource } from './eventSources/liveUpdate';
+import LiveUpdateService from '../helpers/files/LiveUpdateService';
+import ThunkExtraArgument from '../models/ThunkExtraArgument';
 
-export const createAppStore = () => createStore<AppState, StateActionType, {}, {}>(
-    combineReducers({
-        report: reportReducer,
-        selected: selectedReducer,
-        view: viewReducer,
-        filter: filterReducer,
-        machineLearning: machineLearningReducer
-    }),
-    initialAppState,
-    composeWithDevTools(applyMiddleware(urlHandler, thunk))
-)
+export function createAppStore() {
+    const liveUpdateService = new LiveUpdateService(), 
+        thunkExtra: ThunkExtraArgument = { liveUpdateService },
+        middleware = [
+            thunk.withExtraArgument(thunkExtra),
+            urlHandler
+        ];
+
+    const store = createStore<AppState, StateActionType, {}, {}>(
+        combineReducers({
+            report: reportReducer,
+            selected: selectedReducer,
+            view: viewReducer,
+            filter: filterReducer,
+            machineLearning: machineLearningReducer
+        }),
+        initialAppState,
+        composeWithDevTools(applyMiddleware(...middleware))
+    );
+
+    initLiveUpdateEventSource(store, liveUpdateService);
+
+    return store;
+}

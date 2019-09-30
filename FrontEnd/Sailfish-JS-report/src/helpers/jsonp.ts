@@ -16,60 +16,37 @@
 
 import Report, { isReport } from '../models/Report';
 import TestCase, { isTestCase } from '../models/TestCase';
+import { fetchJsonp } from './files/fetcher';
 
 const JSONP_HANDLER_NAME = "loadJsonp";
 const DATA_FOLDER_PATH = "reportData/";
 const REPORT_PATH = DATA_FOLDER_PATH + "report.js";
 
 /**
- * Creates script tag that triggers jsonp load for report
+ * Fetches report from jsonp file.
  */
 export function fetchReport(): Promise<Report> {
-    return new Promise<Report>((resolve, reject) => {
-        window[JSONP_HANDLER_NAME] = (jsonp: Report) => {
-            // reset handler
-            window[JSONP_HANDLER_NAME] = undefined;
-
-            if (isReport(jsonp)) {
-                resolve(jsonp);
+    return fetchJsonp(REPORT_PATH, JSONP_HANDLER_NAME)
+        .then((data: Report) => {
+            if (isReport(data)) {
+                return data;
             } else {
-                reject(new Error("Wrong jsonp format."))
+                throw new Error(`Invalid jsonp format at report file (${REPORT_PATH})`);
             }
-        }
-
-        loadJsonp(REPORT_PATH);
-    })
+        });
 }
 
 /**
- * Creates script tag that triggers jsonp load for report
+ * Fetches test case from jsonp file.
  * @param testCasePath jsonp filename for TestCase
  */
 export function fetchTestCase(testCasePath: string): Promise<TestCase> {
-    return new Promise<TestCase>((resolve, reject) => {
-        window[JSONP_HANDLER_NAME] = (jsonp: TestCase) => {
-            window[JSONP_HANDLER_NAME] = undefined;
-
-            if (isTestCase(jsonp)) {
-                resolve(jsonp);
+    return fetchJsonp(DATA_FOLDER_PATH + testCasePath, JSONP_HANDLER_NAME)
+        .then((data: TestCase) => {
+            if (isTestCase(data)) {
+                return data;
             } else {
-                reject(new Error("Wrong jsonp format."));
+                throw new Error(`Invalid jsonp format at test case file (${testCasePath})`);
             }
-        }
-
-        loadJsonp(DATA_FOLDER_PATH + testCasePath);
-    })
-}
-
-function loadJsonp(path: string) {
-    const jsonpLoader = <HTMLScriptElement>document.createElement('script');
-    
-    jsonpLoader.src = path;
-    jsonpLoader.async = true;
-
-    jsonpLoader.onload = () => {
-        document.body.removeChild(jsonpLoader);
-    }
-
-    document.body.appendChild(jsonpLoader);
+        });
 }

@@ -18,7 +18,7 @@
 @import "./machinelearning.scss";
 
 .header {
-    @include status-card;
+    @include status-card-with-running;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -104,13 +104,20 @@
         padding-left: 230px;
     }
 
+    &__spinner {
+        @include spinner(3px, 19px, 2s);
+        margin-right: 12px;
+    }
+
     &__contol-button {
         width: 150px;
     }
 
     &__title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-weight: bold;
-        display: inline;
         -webkit-margin-before:0em;
         -webkit-margin-after:0em;
         font-size: 20px;

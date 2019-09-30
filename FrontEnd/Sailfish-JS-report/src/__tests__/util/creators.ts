@@ -46,3 +46,18 @@ export function createTestCase(id: string = '0', actions: ActionNode[] = [], mes
         finishTime: new Date().toString()
     }
 }
+
+export function createMessage(id: number = 0, msgName: string = 'test'): Message {
+    return {
+        actionNodeType: 'message',
+        id, 
+        msgName,
+        raw: '',
+        relatedActions: [],
+        from: '',
+        to: '',
+        content: {},
+        contentHumanReadable: '',
+        timestamp: new Date().toString()
+    }
+}

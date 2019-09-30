@@ -23,6 +23,7 @@ import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions, removeNonexistingRelatedMessages } from '../helpers/action';
 import SearchResult from '../helpers/search/SearchResult';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
+import { liveUpdateReducer } from './liveUpdateReduceer';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -55,7 +56,8 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
     
         case StateActionTypes.RESET_TEST_CASE: {
             return {
-                ...initialSelectedState
+                ...initialSelectedState,
+                live: state.live
             }
         }
 
@@ -242,6 +244,74 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             return  {
                 ...state,
                 selectedTestCaseId: stateAction.testCaseId
+            }
+        }
+
+        case StateActionTypes.SELECT_LIVE_TESTCASE: {
+            return {
+                ...state,
+                testCase: {
+                    ...state.live.testCase,
+                    actionNodeType: 'testCase',
+                    actions: state.live.actions,
+                    messages: state.live.messages,
+                    bugs: [],
+                    logs: [],
+                    finishTime: null,
+                    status: {
+                        status: null,
+                        cause: null,
+                        description: null
+                    }
+                }
+            }
+        }
+
+        case StateActionTypes.UPDATE_LIVE_TEST_CASE: {
+            return {
+                ...state,
+                live:  liveUpdateReducer(state.live, stateAction)
+            }
+        }
+
+        case StateActionTypes.UPDATE_LIVE_ACTIONS: {
+            const nextLiveState = liveUpdateReducer(state.live, stateAction);
+
+            if (state.testCase != null && state.testCase.hash === nextLiveState.testCase.hash) {
+                return {
+                    ...state,
+                    live: nextLiveState,
+                    testCase: {
+                        ...state.testCase,
+                        actions: nextLiveState.actions
+                    }
+                }
+            }
+
+            return {
+                ...state,
+                live: nextLiveState
+            }
+        }
+
+        case StateActionTypes.UPDATE_LIVE_MESSAGES: {
+            const nextLiveState = liveUpdateReducer(state.live, stateAction);
+
+            if (state.testCase != null && state.testCase.hash === nextLiveState.testCase.hash) {
+
+                return {
+                    ...state,
+                    live: nextLiveState,
+                    testCase: {
+                        ...state.testCase,
+                        messages: nextLiveState.messages
+                    }
+                }
+            }
+
+            return {
+                ...state,
+                live: nextLiveState
             }
         }
 

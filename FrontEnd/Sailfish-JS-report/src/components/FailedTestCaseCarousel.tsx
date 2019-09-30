@@ -20,10 +20,12 @@ import { StatusType } from '../models/Status';
 import { setSelectedTestCase } from '../actions/actionCreators';
 import { nextCyclicItemByIndex, prevCyclicItemByIndex } from '../helpers/array';
 import SelectionCarousel, { SelectionCarouselProps } from './SelectionCarousel';
+import { isTestCaseMetadata } from '../models/TestcaseMetadata';
 
 export const FailedTestCaseCarousel = connect(
     (state: AppState) => {
         const failedTestCases = (state.report.metadata || [])
+            .filter(isTestCaseMetadata)
             .filter(item => item.status.status === StatusType.FAILED)
             .map(tc => tc.id);
 

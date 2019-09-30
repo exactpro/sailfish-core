@@ -31,16 +31,19 @@ import {
 } from "../middleware/urlHandler";
 import { fetchToken } from "../thunks/machineLearning";
 import { SubmittedData } from "../models/MlServiceResponse" 
-import { loadReport } from '../thunks/loadReport';
+import { initReport } from '../thunks/initReport';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadTestCase } from '../thunks/loadTestCase';
 import SplashScreen from './SplashScreen';
+import { isLiveTestCase } from '../models/LiveTestCase';
+import { isTestCaseMetadata } from '../models/TestcaseMetadata';
+import ReportState from '../state/models/ReportState';
 
 const REPORT_FILE_PATH = 'index.html';
 
 interface AppStateProps {
-    report: Report;
+    report: ReportState;
     testCase: TestCase;
     mlToken: string;
     submittedMlData: SubmittedData[];
@@ -122,10 +125,10 @@ class AppBase extends React.Component<AppProps, {}> {
 
         const testCaseMetadata = this.props.report.metadata.find(metadata => metadata.id === testCaseId);
         
-        if (testCaseMetadata) {
+        if (testCaseMetadata && isTestCaseMetadata(testCaseMetadata)) {
             this.props.loadTestCase(testCaseMetadata.jsonpFileName);
         } else {
-            console.warn("Can't handle chared url: Test Case with this id not found");
+            console.warn("Can't handle shared url: Test Case with this id not found");
         }
     }
 
@@ -172,7 +175,7 @@ const App = connect(
 
         fetchToken: () => dispatch(fetchToken()),
         setSubmittedMlData: (data: SubmittedData[]) => dispatch(setSubmittedMlData(data)),
-        loadReport: () => dispatch(loadReport()),
+        loadReport: () => dispatch(initReport()),
         loadTestCase: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
 )(AppBase);

@@ -96,6 +96,10 @@ $scrollbarThumbBackground: #C4C4C4;
 $scrollbarTrackBackground: #F2F2F2;
 
 $splitterColor: $scrollbarThumbBackground;
+$splitterColor: #C4C4C4;
+
+$spinnerOuterColor: $defaultCardBorderColor;
+$spinnerInnerColor: rgba(0, 0, 0, 0.2);
 
 $chipTextColor: #808080;
 
@@ -110,3 +114,11 @@ $hintShadowColor: transparentize(black, 0.5);
 $hintTextColor: black;
 
 $nullValuetextColor: $naTextColor;
+
+$liveTextColor: #696969;
+$liveSecondaryTextColor: $secondaryTextColor;
+$liveBorderColor: #666666;
+$liveBorderSecondaryColor: $defaultCardBackground;
+$liveBackgroundColor: #CCCCCC;
+$liveSecondaryBackgroundColor: #eeeeee;
+$liveHeaderSecondaryBackgroundColor: #E6E6E6;

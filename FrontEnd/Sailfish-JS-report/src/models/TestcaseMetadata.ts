@@ -17,8 +17,9 @@
 import Status from "./Status";
 import KnownBug from "./KnownBug";
 import KnownBugCategory from "./KnownBugCategory"
+import LiveTestCase from "./LiveTestCase";
 
-export interface TestcaseMetadata {
+export interface TestCaseMetadata {
     startTime: string;
     finishTime: string;
     name: string;
@@ -29,4 +30,8 @@ export interface TestcaseMetadata {
     jsonFileName: string;
     jsonpFileName: string;
     bugs: (KnownBug | KnownBugCategory) [];
+}
+
+export function isTestCaseMetadata(testCase: TestCaseMetadata | LiveTestCase): testCase is TestCaseMetadata {
+    return testCase['finishTime'] != null && testCase['status'] != null;
 }

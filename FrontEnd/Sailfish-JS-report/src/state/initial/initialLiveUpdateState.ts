@@ -14,23 +14,17 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Exception from './Exception';
+import LiveUpdateState from "../models/LiveUpdateState";
 
-export enum StatusType {
-    PASSED = 'PASSED',
-    FAILED = 'FAILED',
-    CONDITIONALLY_PASSED = 'CONDITIONALLY_PASSED',
-    NA = 'NA',
-    SKIPPED = 'SKIPPED',
-    CONDITIONALLY_FAILED = 'CONDITIONALLY_FAILED'
+const initialLiveUpdateState: LiveUpdateState = {
+    testCase: {
+        name: null,
+        id: null,
+        hash: null,
+        description: null,
+        startTime: null
+    },
+    actions: [],
+    messages: []
 }
-
-export const statusValues : StatusType[] = Object.values(StatusType);
-
-export default interface Status {
-    status: StatusType;
-    reason?: string;
-    details?: string;
-    description?: string;
-    cause?: Exception;
-}
+export default initialLiveUpdateState;

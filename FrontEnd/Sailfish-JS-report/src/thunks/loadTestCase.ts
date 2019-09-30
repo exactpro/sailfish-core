@@ -17,10 +17,11 @@
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import { AnyAction } from "redux";
 import { fetchTestCase } from "../helpers/jsonp";
-import { setTestCase, setIsLoading } from "../actions/actionCreators";
+import { setTestCase, setIsLoading, selectLiveTestCase } from "../actions/actionCreators";
 import StateActionType from "../actions/stateActions";
 import AppState from '../state/models/AppState';
 import { findNextCyclicItem, findPrevCyclicItem } from "../helpers/array";
+import { isTestCaseMetadata } from "../models/TestcaseMetadata";
 
 export function loadTestCase(testCasePath: string): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>) => {
@@ -28,7 +29,10 @@ export function loadTestCase(testCasePath: string): ThunkAction<void, {}, {}, An
 
         fetchTestCase(testCasePath)
             .then(report => dispatch(setTestCase(report)))
-            .catch(err => console.error(err))
+            .catch(err => {
+                console.error('Error catched while trying to fetch test case');
+                console.error(err);
+            })
             .finally(() => dispatch(setIsLoading(false)));
     }
 }
@@ -36,29 +40,41 @@ export function loadTestCase(testCasePath: string): ThunkAction<void, {}, {}, An
 export function loadNextTestCase(): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>, getState: () => AppState) => {
         const { report, selected } = getState(),
-            nextMetadata = findNextCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id),
-            testCasePath = nextMetadata.jsonpFileName;
+            nextMetadata = findNextCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id);
+    
+        if (isTestCaseMetadata(nextMetadata)) {
+            dispatch(setIsLoading(true));
 
-        dispatch(setIsLoading(true));
-
-        fetchTestCase(testCasePath)
-            .then(report => dispatch(setTestCase(report)))
-            .catch(err => console.error(err))
-            .finally(() => dispatch(setIsLoading(false)));
+            fetchTestCase(nextMetadata.jsonpFileName)
+                .then(report => dispatch(setTestCase(report)))
+                .catch(err => {
+                    console.error('Error catched while trying to fetch test case');
+                    console.error(err);
+                })
+                .finally(() => dispatch(setIsLoading(false)));
+        } else {
+            dispatch(selectLiveTestCase());
+        }
     }
 }
 
 export function loadPrevTestCase(): ThunkAction<void, {}, {}, AnyAction> {
     return (dispatch: ThunkDispatch<{}, {}, StateActionType>, getState: () => AppState) => {
         const { report, selected } = getState(),
-            nextMetadata = findPrevCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id),
-            testCasePath = nextMetadata.jsonpFileName;
+            nextMetadata = findPrevCyclicItem(report.metadata, metadata => metadata.id === selected.testCase.id);
 
-        dispatch(setIsLoading(true));
+        if (isTestCaseMetadata(nextMetadata)) {
+            dispatch(setIsLoading(true));
 
-        fetchTestCase(testCasePath)
-            .then(report => dispatch(setTestCase(report)))
-            .catch(err => console.error(err))
-            .finally(() => dispatch(setIsLoading(false)));
+            fetchTestCase(nextMetadata.jsonpFileName)
+                .then(report => dispatch(setTestCase(report)))
+                .catch(err => {
+                    console.error('Error catched while trying to fetch test case');
+                    console.error(err);
+                })
+                .finally(() => dispatch(setIsLoading(false)));
+        } else {
+            dispatch(selectLiveTestCase());
+        }
     }
 }

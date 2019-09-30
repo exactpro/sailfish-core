@@ -14,20 +14,18 @@
  * limitations under the License.
  ******************************************************************************/
 
-export function getSecondsPeriod(startTime: string, finishTime: string) {
+import TestCase from "./TestCase";
+import { TestCaseMetadata } from "./TestcaseMetadata";
 
-    if (!startTime || !finishTime) {
-        return '';
-    }
-
-    const diffDate =  new Date(new Date(finishTime).getTime() - new Date(startTime).getTime()),
-        seconds = diffDate.getSeconds().toString(),
-        miliseconds = diffDate.getMilliseconds().toString(),
-        milisecondsFormatted = miliseconds !== '0' ? miliseconds.padStart(3, '0') : miliseconds;
-
-    return `${seconds}.${milisecondsFormatted}s`;
+export default interface LiveTestCase {
+    name: string;
+    id: string;
+    hash: number;
+    description: string;
+    startTime: string;
 }
 
-export function formatTime(time: string) {
-    return new Date(time).toISOString().replace('T', ' ').replace('Z', '');
+export function isLiveTestCase(testCase: LiveTestCase | TestCase | TestCaseMetadata): testCase is LiveTestCase {
+    return testCase['finishTime'] == null && testCase['status'] == null;
 }
+ 

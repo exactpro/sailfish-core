@@ -53,6 +53,6 @@ p, h1, h2, h3, h4, h5, pre {
     align-items: center;
 
     &__spinner {
-        @include spinner(5px, lightgray, darkgray, 40px, 2s);
+        @include spinner(5px, 40px, 2s);
     }
 }

@@ -14,13 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { Store, AnyAction, Dispatch } from 'redux';
+import LiveUpdateService from "../helpers/files/LiveUpdateService";
 
-export function storeEventHandler<S, A extends AnyAction, ARGS extends any[]>(
-    store: Store<S, A>, 
-    handler: (dispatch: Dispatch<A>, ...args: ARGS) => any
-) {
-    return (...args: ARGS) => {
-        handler(store.dispatch, ...args);
-    }
+export default interface ThunkExtraArgument {
+    liveUpdateService: LiveUpdateService;
 }

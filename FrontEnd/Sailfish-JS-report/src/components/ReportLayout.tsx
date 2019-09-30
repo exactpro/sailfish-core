@@ -15,36 +15,29 @@
 ******************************************************************************/
 
 import * as React from 'react';
-import Report from '../models/Report';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
-import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
-import { TestcaseMetadata } from '../models/TestcaseMetadata';
+import { getSecondsPeriod, formatTime } from '../helpers/date';
+import { TestCaseMetadata, isTestCaseMetadata } from '../models/TestcaseMetadata';
 import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
 import { createSelector, createBemElement } from '../helpers/styleCreators';
-import { loadTestCase } from '../thunks/loadTestCase';
-import { ThunkDispatch } from 'redux-thunk';
-import StateActionType from '../actions/stateActions';
 import { ExceptionChain } from './ExceptionChain';
 import TestCaseCard from './TestCaseCard';
 import { FailedTestCaseCarousel } from './FailedTestCaseCarousel';
+import ReportState from '../state/models/ReportState';
 
 const OLD_REPORT_PATH = 'report.html';
 
 interface StateProps {
-    report: Report;
+    report: ReportState;
     failedTestCasesEnabled: boolean;
     selectedTestCaseId: string;
 }
 
-interface DispatchProps {
-    onTestCaseSelect: (testCaseName: string) => void;
-}
-
-interface Props extends StateProps, DispatchProps { }
+interface Props extends StateProps { }
 
 interface State {
     showKnownBugs: boolean;
@@ -68,10 +61,11 @@ export class ReportLayoutBase extends React.Component<Props, State> {
 
     render() {
 
-        const { onTestCaseSelect, report, failedTestCasesEnabled, selectedTestCaseId } = this.props,
+        const { report, failedTestCasesEnabled, selectedTestCaseId } = this.props,
             { showKnownBugs } = this.state;
 
-        const knownBugsPresent = report.metadata.some(item => item.bugs != null && item.bugs.length > 0),
+        const filtredMetadata = report.metadata.filter(isTestCaseMetadata),
+            knownBugsPresent = filtredMetadata.some(item => item.bugs != null && item.bugs.length > 0),
             knownBugsClass = showKnownBugs ? "active" : "enabled",
             failedTcTitleClass = createBemElement('report', 'title', 'failed', failedTestCasesEnabled ? null : 'disabled');
 
@@ -147,7 +141,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                             <div className="report-summary__element-value">{report.metadata.length}</div>
                         </div>
                         {
-                            statusValues.map(statusValue => this.renderStatusInfo(statusValue, report.metadata))
+                            statusValues.map(statusValue => this.renderStatusInfo(statusValue, filtredMetadata))
                         }
                         <div className="report-summary__divider"/>
                         {
@@ -180,8 +174,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                                             isSelected={metadata.id === selectedTestCaseId}
                                             key={index}
                                             metadata={metadata}
-                                            index={index + 1}
-                                            handleClick={metadata => onTestCaseSelect(metadata.jsonpFileName)}/>
+                                            index={index + 1}/>
                                     ))
                                 }
                             </HeatmapScrollbar>
@@ -195,7 +188,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         )
     }
 
-    private renderStatusInfo(status: StatusType, metadata: TestcaseMetadata[]): React.ReactNode {
+    private renderStatusInfo(status: StatusType, metadata: TestCaseMetadata[]): React.ReactNode {
         const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
             valueClassName = createSelector(
                 "report-summary__element-value",
@@ -221,9 +214,6 @@ const ReportLayout = connect(
         report: state.report,
         failedTestCasesEnabled: (state.report.metadata || []).length > 0,
         selectedTestCaseId: state.selected.selectedTestCaseId
-    }),
-    (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
-        onTestCaseSelect: (testCasePath: string) => dispatch(loadTestCase(testCasePath))
     })
 )(ReportLayoutBase);
 

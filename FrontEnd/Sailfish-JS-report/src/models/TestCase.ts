@@ -27,11 +27,11 @@ export default interface TestCase {
     logs: Log[];
     messages: Message[];
     bugs: any[];
-    type: string;
+    type?: string;
     reference?: any;
-    order: number;
+    order?: number;
     outcomes?: any[];
-    matrixOrder: number;
+    matrixOrder?: number;
     id: string;
     hash: number;
     description: string;

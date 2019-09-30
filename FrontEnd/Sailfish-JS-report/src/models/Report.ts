@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import TestCase from "./TestCase";
-import { TestcaseMetadata } from "./TestcaseMetadata";
+import { TestCaseMetadata } from "./TestcaseMetadata";
 import { ReportProperties } from "./ReportProperties";
 import Exception from "./Exception";
 
@@ -36,10 +36,10 @@ export default interface Report {
     exception?: Exception;
     outcomes?: any;
     reportProperties?: ReportProperties;
-    metadata: TestcaseMetadata[];
+    metadata: TestCaseMetadata[];
     precision: string;
 }
 
-export function isReport(report: Report | TestCase): report is Report {
+export function isReport(report: TestCase | Report): report is Report {
     return (report as Report).metadata !== undefined;
 }

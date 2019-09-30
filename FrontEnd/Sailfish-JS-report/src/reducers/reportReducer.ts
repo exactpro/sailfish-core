@@ -16,12 +16,20 @@
 
 import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import Report from '../models/Report';
+import ReportState from '../state/models/ReportState';
 
-export function reportReducer(state : Report = null, stateAction : StateActionType): Report {
+export function reportReducer(state : ReportState = null, stateAction : StateActionType): ReportState {
     switch(stateAction.type) {
 
         case StateActionTypes.SET_REPORT: {
             return stateAction.report;
+        }
+
+        case StateActionTypes.UPDATE_LIVE_TEST_CASE: {
+            return {
+                ...state,
+                metadata: [...state.metadata, stateAction.testCase]
+            }
         }
 
         default: {

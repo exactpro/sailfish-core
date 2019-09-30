@@ -95,6 +95,21 @@
     }
 }
 
+@mixin status-card-with-running {
+    @include status-card;
+
+    &.running {
+        --status-primary-color: #{$liveTextColor};
+        --status-secondary-color: #{$liveSecondaryTextColor};
+        --status-primary-border-color: #{$liveBorderColor};
+        --status-secondary-border-color: #{$liveBorderSecondaryColor};
+        --status-primary-background-color: #{$liveBackgroundColor};
+        --status-secondary-background-color: #{$liveSecondaryBackgroundColor};
+        --status-primary-header-background-color: #{$liveBackgroundColor};
+        --status-secondary-header-background-color: #{$liveHeaderSecondaryBackgroundColor};
+    }
+}
+
 @mixin status-background {
     &.passed {
         .passed {
@@ -238,7 +253,7 @@
     }
 }
 
-@mixin spinner($thikness, $outer-color, $inner-color, $size: 16px ,$duration: 1s) {
+@mixin spinner($thikness, $size: 16px ,$duration: 1s, $outer-color: $spinnerOuterColor, $inner-color: $spinnerInnerColor) {
     height: $size;
     width: $size;
     border: $thikness solid $outer-color;

@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 export default interface Message {
-    actionNodeType: string;
+    actionNodeType: 'message';
     id: number;
     checkPoint?: any;
     raw: string;

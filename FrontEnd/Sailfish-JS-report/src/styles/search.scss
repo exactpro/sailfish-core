@@ -84,5 +84,5 @@
 }
 
 .loader {
-    @include spinner(3px, lightgray, darkgray);
+    @include spinner(3px);
 }

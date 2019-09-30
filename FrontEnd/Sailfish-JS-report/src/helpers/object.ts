@@ -14,23 +14,19 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Exception from './Exception';
+/**
+ * Deep equal for two objects.
+ * @param obj1 
+ * @param obj2 
+ */
+export function isEqual(obj1: Object, obj2: Object): boolean {
+    return Object.entries(obj1).every(([key, value1]) => {
+        const value2 = obj2[key];
 
-export enum StatusType {
-    PASSED = 'PASSED',
-    FAILED = 'FAILED',
-    CONDITIONALLY_PASSED = 'CONDITIONALLY_PASSED',
-    NA = 'NA',
-    SKIPPED = 'SKIPPED',
-    CONDITIONALLY_FAILED = 'CONDITIONALLY_FAILED'
-}
+        if (typeof value1 == 'object' && typeof value2 == 'object') {
+            return isEqual(value1, value1);
+        }
 
-export const statusValues : StatusType[] = Object.values(StatusType);
-
-export default interface Status {
-    status: StatusType;
-    reason?: string;
-    details?: string;
-    description?: string;
-    cause?: Exception;
+        return value1 === value2;
+    });
 }

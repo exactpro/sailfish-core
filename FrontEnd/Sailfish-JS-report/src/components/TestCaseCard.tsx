@@ -15,28 +15,49 @@
 ******************************************************************************/
 
 import * as React from 'react';
-import {TestcaseMetadata} from '../models/TestcaseMetadata';
-import {formatTime, getSecondsPeriod} from '../helpers/dateFormatter';
+import {TestCaseMetadata, isTestCaseMetadata} from '../models/TestcaseMetadata';
+import {formatTime, getSecondsPeriod} from '../helpers/date';
 import '../styles/report.scss';
 import {createSelector} from '../helpers/styleCreators';
 import {KnownBugIndicator} from "./knownbugs/KnownBugIndicator";
 import {KnownBugSummary} from "./knownbugs/KnownBugSummary";
-import '../styles/report.scss';
 import {connect} from "react-redux";
 import AppState from "../state/models/AppState";
+import LiveTestCase from '../models/LiveTestCase';
+import { loadTestCase } from '../thunks/loadTestCase';
+import { ThunkDispatch } from 'redux-thunk';
+import StateAction from '../actions/stateActions';
+import { selectLiveTestCase } from '../actions/actionCreators';
+import LiveTimer from './LiveTimer';
 
-interface Props {
-    metadata: TestcaseMetadata;
-    index: number;
+interface OwnProps {
+    metadata: TestCaseMetadata | LiveTestCase;
     knownBugsEnabled: boolean;
+    index: number;
     isSelected: boolean;
-    handleClick: (metadata: TestcaseMetadata) => any;
 }
 
-function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelected }: Props) {
+interface DispatchProps {
+    handleClick: () => any;
+}
 
-    const elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
+interface Props extends OwnProps, DispatchProps {}
+
+function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSelected }: Props) {
+
     const baseRef = React.useRef<HTMLDivElement>();
+
+    let isLive: boolean, elapsedTime: string, status: string;
+
+    if (isTestCaseMetadata(metadata)) {
+        isLive = false;
+        elapsedTime = getSecondsPeriod(metadata.startTime, metadata.finishTime);
+        status = metadata.status.status.toUpperCase();
+    } else {
+        isLive = true;
+        elapsedTime = '';
+        status = 'RUNNING';
+    }
 
     React.useEffect(() => {
         if (isSelected) {
@@ -46,7 +67,7 @@ function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelect
     
     const rootClass = createSelector(
         "tc-card",
-        metadata.status.status,
+        status,
         isSelected ? "selected" : null
     );
 
@@ -56,7 +77,7 @@ function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelect
             return;
         }
 
-        handleClick(metadata);
+        handleClick();
     }
 
     return (
@@ -65,7 +86,14 @@ function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelect
             onClick={baseClickHandler}>
             <div className="tc-card__index">{index}</div>
             <div className="tc-card__title">
-                <div className="tc-card__name">{metadata.name}</div>
+                <div className="tc-card__name"> 
+                    { 
+                        isLive ? 
+                            <div className="tc-card__live-loader"/> : 
+                            null
+                    }
+                    {metadata.name}
+                </div>
                 {
                     metadata.description ?
                         <div className="tc-card__description"> — {metadata.description}</div> :
@@ -73,17 +101,21 @@ function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelect
                 }
             </div>
             <div className="tc-card__status">
-                {metadata.status.status.toUpperCase()}
+                {status}
             </div>
             <div className="tc-card__info">
                 <div className="tc-card__info-element">
                     <div className="tc-card__info-title">Start</div>
                     <div className="tc-card__info-value">{formatTime(metadata.startTime)}</div>
                 </div>
-                <div className="tc-card__info-element">
-                    <div className="tc-card__info-title">Finish</div>
-                    <div className="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
-                </div>
+                {
+                    isTestCaseMetadata(metadata) ? (
+                        <div className="tc-card__info-element">
+                            <div className="tc-card__info-title">Finish</div>
+                            <div className="tc-card__info-value">{formatTime(metadata.finishTime)}</div>
+                        </div>
+                    ) : null
+                }
                 <div className="tc-card__info-element">
                     <div className="tc-card__info-title">ID</div>
                     <div className="tc-card__info-value">{metadata.id}</div>
@@ -93,9 +125,15 @@ function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelect
                     <div className="tc-card__info-value">{metadata.hash}</div>
                 </div>
             </div>
-            <div className="tc-card__elapsed-time">{elapsedTime}</div>
+            <div className="tc-card__elapsed-time">
             {
-                knownBugsEnabled && metadata.bugs.length > 0 ? (
+                isLive ? 
+                    <LiveTimer startTime={metadata.startTime}/> :
+                    elapsedTime
+            }
+            </div>
+            {
+                isTestCaseMetadata(metadata) && knownBugsEnabled && metadata.bugs.length > 0 ? (
                     <React.Fragment>
                         <div className="tc-card__divider"/>
                         <KnownBugIndicator data={metadata.bugs}/>
@@ -106,5 +144,14 @@ function TestCaseCard({ metadata, handleClick, index, knownBugsEnabled, isSelect
         </div>
     )
 }
+
+const TestCaseCard = connect(
+    () => ({}),
+    (dispatch: ThunkDispatch<AppState, {}, StateAction>, ownProps: OwnProps): DispatchProps => ({
+        handleClick: () => isTestCaseMetadata(ownProps.metadata) ? 
+            dispatch(loadTestCase(ownProps.metadata.jsonpFileName)) :
+            dispatch(selectLiveTestCase())
+    })
+)(TestCaseCardBase);
 
 export default TestCaseCard;

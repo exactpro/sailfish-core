@@ -202,7 +202,7 @@
 }
 
 .tc-card {
-    @include status-card;
+    @include status-card-with-running;
 
     width: 100%;
     display: grid;
@@ -238,6 +238,11 @@
         font-weight: bold;
     }
 
+    &__live-loader {
+        @include spinner(3px, 18px, 2s);
+        margin-right: 5px;
+    }
+
     &__title {
         grid-area: title;
 
@@ -249,6 +254,9 @@
     &__name {
         color: var(--status-primary-color);
         font-weight: bold;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
     }
 
     &__description {

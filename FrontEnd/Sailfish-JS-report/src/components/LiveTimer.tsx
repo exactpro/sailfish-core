@@ -14,23 +14,32 @@
  * limitations under the License.
  ******************************************************************************/
 
-import Exception from './Exception';
+import * as React from 'react';
+import { getSecondsPeriod } from "../helpers/date";
 
-export enum StatusType {
-    PASSED = 'PASSED',
-    FAILED = 'FAILED',
-    CONDITIONALLY_PASSED = 'CONDITIONALLY_PASSED',
-    NA = 'NA',
-    SKIPPED = 'SKIPPED',
-    CONDITIONALLY_FAILED = 'CONDITIONALLY_FAILED'
+interface Props {
+    startTime: string;
 }
 
-export const statusValues : StatusType[] = Object.values(StatusType);
+function LiveTimer({ startTime }: Props) {
 
-export default interface Status {
-    status: StatusType;
-    reason?: string;
-    details?: string;
-    description?: string;
-    cause?: Exception;
+    const [currentTime, setCurrentTime] = React.useState(new Date());
+
+    React.useEffect(() => {
+        const intervalId = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 1000);
+
+        return () => {
+            clearInterval(intervalId);
+        }
+    }, []);
+
+    return (
+        <React.Fragment>
+            {getSecondsPeriod(startTime, currentTime, false)}
+        </React.Fragment>
+    )
 }
+
+export default LiveTimer;

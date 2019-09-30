@@ -21,13 +21,14 @@ import FilterPanel from './FilterPanel';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import { resetTestCase } from '../actions/actionCreators';
-import { getSecondsPeriod, formatTime } from '../helpers/dateFormatter';
+import { getSecondsPeriod, formatTime } from '../helpers/date';
 import { createSelector } from '../helpers/styleCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 import SearchInput from './search/SearchInput';
 import { MlUploadIndicator } from "./machinelearning/MlUploadIndicator";
+import LiveTimer from './LiveTimer';
 
 interface StateProps {
     testCase: TestCase;
@@ -53,8 +54,7 @@ export const HeaderBase = ({
     const [ showFilter, setShowFilter ] = React.useState(false);
 
     const {
-        name,
-        status,
+        name = 'Test Case',
         startTime,
         finishTime,
         id,
@@ -62,16 +62,18 @@ export const HeaderBase = ({
         description,
     } = testCase;
 
+    const isLive = finishTime == null,
+        status = testCase.status.status || 'RUNNING',
+        period = getSecondsPeriod(startTime, finishTime);
+
     const rootClass = createSelector(
             "header",
-            status.status
+            status
         ), 
         navButtonClass = createSelector(
             "header-button",
             isNavigationEnabled ? '' : 'disabled'
         );
-
-    const period = getSecondsPeriod(startTime, finishTime);
 
     return (
         <div className={rootClass}>
@@ -87,7 +89,16 @@ export const HeaderBase = ({
                         <div className="header-button__icon left"/>
                     </div>
                     <div className="header-main__title">
-                        {(name || 'Test Case')} — {status.status} — {period}
+                    {
+                        isLive ? (
+                            <React.Fragment>
+                                <div className="header-main__spinner"/>
+                                {name} — {status} — <LiveTimer startTime={startTime}/>
+                            </React.Fragment>
+                        ) : (
+                            `${name} — ${status} — ${period}`
+                        )
+                    }
                     </div>
                     <div className={navButtonClass}
                         onClick={isNavigationEnabled && nextTestCaseHandler}>
@@ -107,10 +118,14 @@ export const HeaderBase = ({
                     <span>Start:</span>
                     <p>{formatTime(startTime)}</p>
                 </div>
-                <div className="header__info-element">
-                    <span>Finish:</span>
-                    <p>{formatTime(finishTime)}</p>
-                </div>
+                {
+                    isLive ? null : (
+                        <div className="header__info-element">
+                            <span>Finish:</span>
+                            <p>{formatTime(finishTime)}</p>
+                        </div>
+                    )
+                }
                 <div className="header__description">
                     {description}
                 </div>
