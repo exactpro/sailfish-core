@@ -73,6 +73,10 @@ class AppBase extends React.Component<AppProps, {}> {
         if (!this.props.mlToken && this.props.report.reportProperties) {
             this.props.fetchToken();
         }
+
+        if (prevProps.report !== this.props.report && this.props.report !== null) {
+            document.title = this.props.report.name;
+        }
     }
 
     componentDidMount() {
