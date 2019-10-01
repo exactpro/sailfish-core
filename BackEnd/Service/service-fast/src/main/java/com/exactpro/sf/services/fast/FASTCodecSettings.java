@@ -27,7 +27,7 @@ public class FASTCodecSettings extends AbstractServiceSettings {
     private static final long serialVersionUID = 3426549826737983629L;
 
     private int skipInitialByteAmount;
-    private boolean isLengthPresent = true;
+    private boolean lengthPresent = true;
 	private boolean streamBlockEncoded = true;
 	private boolean resetContextAfterEachUdpPacket = true;
 	@RequiredParam
@@ -55,11 +55,11 @@ public class FASTCodecSettings extends AbstractServiceSettings {
     }
 
     public boolean isLengthPresent() {
-        return isLengthPresent;
+        return lengthPresent;
     }
 
     public void setLengthPresent(boolean lengthPresent) {
-        isLengthPresent = lengthPresent;
+        this.lengthPresent = lengthPresent;
     }
 
 	public boolean isResetContextAfterEachUdpPacket() {
