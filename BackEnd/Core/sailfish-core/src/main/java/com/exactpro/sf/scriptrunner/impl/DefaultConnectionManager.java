@@ -368,7 +368,6 @@ public final class DefaultConnectionManager implements IConnectionManager {
             List<ServiceDescription> toRemoveFromStorage = serviceNames.stream()
                     .map(this::serviceContainerMapperFun)
                     .filter(Objects::nonNull)
-                    .parallel()
                     .map(this::disposeAndPrepareToDelete)
                     .collect(Collectors.toList());
 
