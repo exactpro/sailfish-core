@@ -35,6 +35,7 @@ import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.storage.ITestScriptStorage;
+import com.exactpro.sf.storage.impl.DefaultTestScriptStorage.ScriptRunsLimit;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 
 public enum ResourceCleaner {
@@ -48,12 +49,13 @@ public enum ResourceCleaner {
 
             List<Long> ids = descriptions.stream()
                     .filter(description -> description.getTimestamp().getTime() < epochMillis)
-                    .map(description -> description.getId())
+                    .map(TestScriptDescription::getId)
                     .collect(Collectors.toList());
 
             scriptRunner.removeTestScripts(true, ids);
 
-            descriptions = scriptStorage.getTestScriptList()
+            descriptions = scriptStorage.getTestScriptList(ScriptRunsLimit.ALL.getValue())
+                    .getLoadedDescriptions()
                     .stream()
                     .filter(description -> description.getTimestamp().getTime() < epochMillis)
                     .collect(Collectors.toList());

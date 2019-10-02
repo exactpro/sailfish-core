@@ -1044,4 +1044,14 @@
     display: flex;
 }
 
+.eps-test-script-result-omitted-runs {
+    background-color: #F6F6F6;
+    border-color: #EAEAEA;
+    color: #7c7c7c;
+}
 
+.eps-test-script-result-omitted-runs-text {
+    padding-left: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}

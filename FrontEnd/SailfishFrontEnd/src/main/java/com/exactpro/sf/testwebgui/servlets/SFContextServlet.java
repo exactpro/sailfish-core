@@ -422,7 +422,7 @@ public class SFContextServlet implements Servlet {
             sfLocalContext.getTestScriptStorage().setScriptRunListener((IScriptRunListener) SFWebApplication.getInstance().getScriptrunsUpdateRetriever());
             sfLocalContext.getScriptRunner().addScriptRunListener((IScriptRunListener) SFWebApplication.getInstance().getScriptrunsUpdateRetriever());
             sfLocalContext.getScriptRunner().addScriptRunListener(sfLocalContext.getTestScriptStorage());
-            sfLocalContext.getScriptRunner().testScriptsInitFromWD();
+            sfLocalContext.getScriptRunner().loadScriptRunsFromWD();
     		WebLoggingAppender.registerSubscriber((LogSubscriber)SFWebApplication.getInstance().getEventRetriever());
     		MatrixHolder matrixHolder = new MatrixHolder(wd, sfLocalContext.getMatrixStorage(), sfLocalContext.getMatrixProviderHolder());
 

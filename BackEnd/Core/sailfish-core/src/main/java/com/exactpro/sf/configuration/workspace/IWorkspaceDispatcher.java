@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Implements UnionMount[1]-like mechanism for SF
@@ -89,9 +91,9 @@ public interface IWorkspaceDispatcher {
 
     boolean exists(FolderType folderType, String... fileName) throws WorkspaceSecurityException;
 
-    void removeFile(FolderType folderType, String... fileName) throws FileNotFoundException, IOException, WorkspaceSecurityException;
+    void removeFile(FolderType folderType, String... fileName) throws IOException, WorkspaceSecurityException;
 
-    void removeFolder(FolderType folderType, String... fileName) throws FileNotFoundException, IOException, WorkspaceSecurityException;
+    void removeFolder(FolderType folderType, String... fileName) throws IOException, WorkspaceSecurityException;
 
     /**
      *
@@ -123,6 +125,33 @@ public interface IWorkspaceDispatcher {
         }
 
         return listFiles(filter, folderType, fileName);
+    }
+
+    /**
+     * This is a convenience method that returns File objects instead of Strings. It uses {@link #listFiles(FileFilter, FolderType, boolean, String...)} and {@link #getFile(FolderType, String...)} internally.
+     * Any missing files will be filtered out, so you might get an empty collection.
+     * @param filter
+     * @param folderType
+     * @param recursive
+     * @param fileName
+     * @return
+     * @throws FileNotFoundException
+     * @throws WorkspaceSecurityException
+     */
+    Set<File> listFilesAsFiles(FileFilter filter, FolderType folderType, boolean recursive, String... fileName) throws FileNotFoundException, WorkspaceSecurityException;
+
+    /**
+     * This is a convenience method that returns File objects instead of Strings. It uses {@link #listFiles(FileFilter, FolderType, boolean, String...)} and {@link #getFile(FolderType, String...)} internally.
+     * Any missing files will be filtered out, so you might get an empty collection.
+     * @param filter
+     * @param folderType
+     * @param fileName
+     * @return
+     * @throws FileNotFoundException
+     * @throws WorkspaceSecurityException
+     */
+    default Set<File> listFilesAsFiles(FileFilter filter, FolderType folderType, String... fileName) throws FileNotFoundException, WorkspaceSecurityException {
+        return listFilesAsFiles(filter, folderType, false, fileName);
     }
 
     /**

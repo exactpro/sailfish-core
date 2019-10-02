@@ -96,10 +96,12 @@ function registerHandlers() {
         //check existing element
         if ($div.length) {
             $div.replaceWith(html);
+        } else if ($resultsWrapper.children()[0].id === scriptsOmittedCardId) {
+            $($resultsWrapper.children()[0]).after(html);
         } else {
             $resultsWrapper.prepend(html);
         }
-
+        updateCommonControls();
     });
 
     var interval = -1;

@@ -513,15 +513,18 @@ public class TestScriptsBean implements Serializable, IView {
         SFLocalContext.getDefault().getScriptRunner().removeAllTestScripts(false);
     }
 
-
-    public void reloadAllTestScript() {
-		logger.debug("reloadAllTestScript invoked {}", BeanUtil.getUser());
+    public void reloadAllTestScript(boolean loadAll) {
+        logger.debug("reloadAllTestScript invoked {}", BeanUtil.getUser());
         if (isRunningScriptsInternal()) {
             RequestContext context = RequestContext.getCurrentInstance();
             context.addCallbackParam(TEST_SCRIPTS_RUNNING, true);
-        } else{
+        } else {
             clearAllTestScriptsDescSafe();
-            SFLocalContext.getDefault().getScriptRunner().testScriptsInitFromWD();
+            if (loadAll) {
+                SFLocalContext.getDefault().getScriptRunner().forceLoadScriptsFromWD();
+            } else {
+                SFLocalContext.getDefault().getScriptRunner().loadScriptRunsFromWD();
+            }
         }
     }
 

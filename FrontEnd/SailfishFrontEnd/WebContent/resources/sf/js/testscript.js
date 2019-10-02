@@ -13,18 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-var isCtrlPressed;
-var selectColor = '#b2dfe5';
-var lastBackgroundColor = 'last-background-color';
-var background = 'background-color';
-var resultBlock = '.eps-result-block';
-var ctrlCode = 17;
-var testScriptBlockPrefix = 'eps-result-';
-var checked = 'checked';
-var checkboxType = 'checkbox';
-var labelTag = 'LABEL';
-var linkTag = 'A';
-var selectModes = Object.freeze({"all":1, "none":2, "some":3});
+
+// FIXME: This whole file should be refactored
+
+let isCtrlPressed;
+const selectColor = '#b2dfe5';
+const lastBackgroundColor = 'last-background-color';
+const background = 'background-color';
+const resultBlock = '.eps-result-block';
+const ctrlCode = 17;
+const testScriptBlockPrefix = 'eps-result-';
+const checked = 'checked';
+const checkboxType = 'checkbox';
+const labelTag = 'LABEL';
+const linkTag = 'A';
+const selectModes = Object.freeze({"all":1, "none":2, "some":3});
+const scriptsOmittedCardId = "omitted-scripts-card";
+
 
 $(document).ready(function() {
     $('body').on("keydown", function(e){
@@ -53,10 +58,7 @@ $(document).ready(function() {
             }
         }
 
-        var selectMode = getSelectStatus();
-        setCommonCheckBox(selectMode === selectModes.all);
-        setClearResultsButtonVisibility(selectMode === selectModes.all || selectMode === selectModes.some);
-
+        updateCommonControls();
     });
 
     $('.eps-res-checkbox').on("click", function(e){});
@@ -68,30 +70,20 @@ $(document).ready(function() {
 });
 
 function getSelectStatus() {
-    var totalCount = $(resultBlock).length;
-    var selectedCount = 0;
-
-    $(getSelectedScriptResults()).each(function(index, elem){
-        if(elem != undefined) {
-            selectedCount++;
-        }
-    });
+    const visibleElements = getVisibleChildrenFiltered($(resultBlock));
+    const totalCount = visibleElements.filter(item => isNotRunning($(item))).length;
+    const selectedCount = visibleElements.filter(item => isNotEmptyLastColor($(item))).length;
 
     if (totalCount === selectedCount && selectedCount > 0) return selectModes.all;
     if (selectedCount > 0) return selectModes.some;
     return selectModes.none;
 }
 
-function getSelectedScriptResults() {
-    var selectedTestScripts = $(resultBlock);
-    var arr = new Array();
-    for(var i = 0; i< selectedTestScripts.length; i++){
-        var testScript = $(selectedTestScripts[i]);
-        if(isNotEmptyLastColor(testScript)){
-            arr[i] = selectedTestScripts[i].id.substring('eps-result-'.length);
-        }
-    }
-    return arr;
+function getSelectedResultIds() {
+    const regex = /eps-result-([\d]+)/;
+    return getVisibleChildrenFiltered($(resultBlock))
+        .filter(item => item.id.match(regex)[1] && isNotEmptyLastColor($(item)))
+        .map(item => item.id.match(regex)[1]);
 }
 
 function selectTestscripts(id) {
@@ -120,7 +112,7 @@ function selectTestscripts(id) {
 }
 
 function getSelectTestscripts(fromDisk, confirmRemove) {
-    var arr = getSelectedScriptResults();
+    var arr = getSelectedResultIds();
 
     if(arr.length === 0) {
         var errorMessage = "You must select some result before deleting";
@@ -134,34 +126,36 @@ function getSelectTestscripts(fromDisk, confirmRemove) {
 }
 
 function selectAllTestscripts() {
-    var testScripts = $(resultBlock);
-    var allSelected = true;
-    for(var i = 0; i< testScripts.length; i++) {
-        var testScript = $(testScripts[i]);
-        if(isEmptyLastColor(testScript)) {
-            allSelected = false;
-            break;
-        }
-    }
+    const resultBlockWrapper = $(resultBlock);
 
-    for(var i = 0; i< testScripts.length; i++){
-        if(isNotRunning(testScripts[i])) {
-            var testScript = $(testScripts[i]);
-            if (allSelected) {
-                revertColor(testScript);
-                resetCheckBox(getId(testScripts[i]));
-            } else {
-                if (isEmptyLastColor(testScript)) {
-                    setColor(testScript);
-                    setCheckBox(getId(testScripts[i]));
-                }
+    const testScripts = getChildrenFiltered(resultBlockWrapper);
+    const allSelected = getSelectStatus() === selectModes.all;
+
+    testScripts.filter(item => isNotRunning(item)).forEach(item => {
+        const testScript = $(item);
+
+        if (allSelected) {
+            revertColor(testScript);
+            resetCheckBox(getId(item));
+        } else {
+            if (isEmptyLastColor(testScript) && !item.hidden) {
+                setColor(testScript);
+                setCheckBox(getId(item));
             }
         }
-    }
+    });
 
-    var selectMode = getSelectStatus();
+    updateCommonControls();
+}
+
+function updateCommonControls() {
+    const selectMode = getSelectStatus();
     setCommonCheckBox(selectMode === selectModes.all);
     setClearResultsButtonVisibility(selectMode === selectModes.all || selectMode === selectModes.some);
+}
+
+function getVisibleChildrenFiltered(jqueryObject) {
+    return getChildrenFiltered(jqueryObject).filter(item => !item.hidden)
 }
 
 function isEmptyLastColor(testScript){
@@ -218,7 +212,7 @@ function setClearResultsButtonVisibility(value) {
     }
 }
 
-function isSetCheckBox(checkBox){
+function isSelected(checkBox){
     return checkBox.prop(checked);
 }
 
@@ -233,4 +227,14 @@ function isTestScriptBlock(target){
 function isNotRunning(target){
     var status = $(target).find('.eps-result-status').text().trim();
     return status != 'RUNNING' && status != 'READY' && status != 'PREPARING' && status != 'INITIAL' && status != 'PAUSED (∞)';
+}
+
+function getChildrenFiltered(jqueryObject) {
+    const result = [];
+    for (let i = 0; i < jqueryObject.length; i++) {
+        if (jqueryObject[i].id !== scriptsOmittedCardId) {
+            result.push(jqueryObject[i]);
+        }
+    }
+    return result;
 }

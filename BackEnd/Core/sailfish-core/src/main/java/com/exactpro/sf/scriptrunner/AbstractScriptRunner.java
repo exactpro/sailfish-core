@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FileUtils;
@@ -81,16 +82,18 @@ import com.exactpro.sf.scriptrunner.languagemanager.LanguageManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.storage.ITestScriptStorage;
+import com.exactpro.sf.storage.LoadedTestScriptDescriptions;
 import com.exactpro.sf.storage.ScriptRun;
+import com.exactpro.sf.storage.impl.DefaultTestScriptStorage.ScriptRunsLimit;
 
 public abstract class AbstractScriptRunner implements IDisposable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractScriptRunner.class);
 
     protected static final String LS = System.getProperty("line.separator");
-    protected static final String PACKAGE_NAME = "com.exactpro.sf.testscript";
     protected static final int DEFAULT_TIMEOUT = 1000;
     protected static final String forbiddenChars = " ?#;";
+    protected static final SimpleDateFormat scriptFolderSuffix = new SimpleDateFormat("ddMMyyyy_HHmmss_SSS");
 
     protected final List<IScriptRunListener> listeners;
     protected final IScriptRunProgressListener progressListener;
@@ -106,7 +109,6 @@ public abstract class AbstractScriptRunner implements IDisposable {
     protected volatile State runnerState;
     protected volatile boolean isDisposing;
     protected volatile boolean shutdown;
-    protected final SimpleDateFormat scriptFolderSuffix;
     protected final Map<Long, TestScriptDescription> testScripts;
     protected final Deque<Long> addedTestScripts;
     protected final List<Long> pendingTestScriptsToPrepare;
@@ -127,6 +129,9 @@ public abstract class AbstractScriptRunner implements IDisposable {
     private final IAdapterManager adapterManager;
     private final IStaticServiceManager staticServiceManager;
     private final String compilerClassPath;
+
+    private AtomicInteger totalScriptRunsCount = new AtomicInteger();
+    private AtomicInteger loadedScriptRunsCount = new AtomicInteger();
 
     protected enum State {
         INIT, DISPOSING, DISPOSED
@@ -181,8 +186,6 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
         preparedTestScripts = new ArrayDeque<>();
 
-        scriptFolderSuffix = new SimpleDateFormat("ddMMyyyy_HHmmss_SSS");
-
         isDisposing = false;
 
         runnerState = State.INIT;
@@ -191,6 +194,18 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
     public TestScriptDescription getTestScriptDescription(long id) {
         return testScripts.get(id);
+    }
+
+    public int getTotalScriptRunsCount() {
+        return totalScriptRunsCount.get();
+    }
+
+    public int getLoadedScriptRunsCount() {
+        return loadedScriptRunsCount.get();
+    }
+
+    public static SimpleDateFormat getScriptFolderSuffix() {
+        return scriptFolderSuffix;
     }
 
     public long enqueueScript(String scriptSettingsPath, String scriptMatrixPath, String matrixDescription,
@@ -314,9 +329,20 @@ public abstract class AbstractScriptRunner implements IDisposable {
         return testScriptStorage.remove(deleteOnDisk, toRemove);
     }
 
-    public void testScriptsInitFromWD(){
-        List<TestScriptDescription> testScriptDescriptionList = testScriptStorage.getTestScriptList();
-        for (TestScriptDescription testScriptDescription : testScriptDescriptionList) {
+    public void loadScriptRunsFromWD() {
+        loadScriptRunsFromWD(ScriptRunsLimit.DEFAULT.getValue());
+    }
+
+    public void forceLoadScriptsFromWD() {
+        loadScriptRunsFromWD(ScriptRunsLimit.ALL.getValue());
+    }
+
+    private void loadScriptRunsFromWD(int limit) {
+        LoadedTestScriptDescriptions testScriptDescriptions = testScriptStorage.getTestScriptList(limit);
+
+        totalScriptRunsCount.set(testScriptDescriptions.getTotalDescriptionCount());
+        loadedScriptRunsCount.set(testScriptDescriptions.getLoadedDescriptionCount());
+        for (TestScriptDescription testScriptDescription : testScriptDescriptions.getLoadedDescriptions()) {
             testScripts.put(testScriptDescription.getId(), testScriptDescription);
             testScriptDescription.notifyListener();
         }

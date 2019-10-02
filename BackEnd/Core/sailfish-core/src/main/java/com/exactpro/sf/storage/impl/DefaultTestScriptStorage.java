@@ -17,27 +17,25 @@ package com.exactpro.sf.storage.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +45,7 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.IScriptRunListener;
 import com.exactpro.sf.scriptrunner.ScriptContext;
 import com.exactpro.sf.scriptrunner.ScriptProgress;
@@ -58,36 +57,43 @@ import com.exactpro.sf.scriptrunner.ZipReport;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportProperties;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ReportRoot;
 import com.exactpro.sf.storage.ITestScriptStorage;
+import com.exactpro.sf.storage.LoadedTestScriptDescriptions;
 import com.exactpro.sf.storage.entities.XmlReportProperties;
 import com.exactpro.sf.util.DirectoryFilter;
 import com.exactpro.sf.util.ReportFilter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class DefaultTestScriptStorage implements ITestScriptStorage {
+    // TODO: make those values configurable
+    public enum ScriptRunsLimit {
+        ALL(0),
+        DEFAULT(100);
+
+        private final int value;
+
+        ScriptRunsLimit(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultTestScriptStorage.class);
 
+    public static final String JSON_EXTENSION = "json";
     public static final String REPORT_DATA_DIR = "reportData";
-    public static final String ROOT_JSON_REPORT_FILE = REPORT_DATA_DIR + "/report.json";
+    public static final String ROOT_JSON_REPORT_FILE = REPORT_DATA_DIR + "/report." + JSON_EXTENSION;
 
-    @Deprecated
-    public static final String XML_PROPERTIES_FILE = "test_script_properties.xml";
+    private static final String DATETIME_PATTERN_GROUP_NAME = "datetime";
+    private static final Pattern DATETIME_PATTERN = Pattern.compile("[\\s\\S]+(?<datetime>[\\d]{8}_[\\d]{6}_[\\d]{3})");
 
     private static final ObjectMapper jsonObjectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-
-    private final ThreadLocal<Unmarshaller> xmlUnmarshaller = ThreadLocal.withInitial(() -> {
-        try {
-            return JAXBContext.newInstance(XmlReportProperties.class).createUnmarshaller();
-        } catch (JAXBException e) {
-            logger.error("Unable to create xml report properties unmarshaller", e);
-            ExceptionUtils.rethrow(e);
-        }
-        return null;
-    });
 
     private final IWorkspaceDispatcher workspaceDispatcher;
     private IScriptRunListener scriptRunListener;
@@ -105,31 +111,54 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
         this.scriptRunListener = scriptRunListener;
     }
 
-
     @Override
-    public List<TestScriptDescription> getTestScriptList() {
-    	Set<String> reportFiles;
-
-    	try {
-            reportFiles = workspaceDispatcher.listFiles(ReportFilter.getInstance(), FolderType.REPORT, true);
-    	} catch (FileNotFoundException ex) {
-    		logger.error("No REPORT folder", ex);
-    		return Collections.emptyList();
-    	}
-
-		if (reportFiles.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-        List<TestScriptDescription> result  = new ArrayList<>();
+    public LoadedTestScriptDescriptions getTestScriptList(int limit) {
 
         try {
-            return reportFiles.stream().map(this::getReport).filter(Objects::nonNull).collect(Collectors.toList());
-        } catch(Exception e) {
-            logger.error(e.getMessage(), e);
+            Path reportRootDirPath = workspaceDispatcher.getFolder(FolderType.REPORT).toPath();
+            Set<File> reportFiles = workspaceDispatcher.listFilesAsFiles(ReportFilter.getInstance(), FolderType.REPORT, true);
+            boolean limitReports = (reportFiles.size() > limit && limit != ScriptRunsLimit.ALL.getValue());
+
+            Set<File> filteredReportFiles = limitReports
+                    ? reportFiles.stream()
+                        .sorted(Comparator.comparingLong(this::extractTimestampFromReport).reversed())
+                        .limit(limit)
+                        .collect(Collectors.toSet())
+
+                    : reportFiles;
+
+            return new LoadedTestScriptDescriptions(
+                    reportFiles.size(),
+                    filteredReportFiles.size(),
+                    filteredReportFiles.stream()
+                            .map(reportFile -> getReport(reportFile, reportRootDirPath.relativize(reportFile.toPath())))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList())
+            );
+
+        } catch (Exception e) {
+            logger.error("unable to process stored reports", e);
+            return new LoadedTestScriptDescriptions(0, 0, Collections.emptyList());
+        }
+    }
+
+    private long extractTimestampFromReport(File reportFile) {
+        Matcher matcher = DATETIME_PATTERN.matcher(reportFile.getName());
+
+        if (!matcher.find()) {
+            matcher = DATETIME_PATTERN.matcher(reportFile.getParent());
         }
 
-        return result;
+        if (!matcher.find()) {
+            return reportFile.lastModified();
+        }
+
+        try {
+            return AbstractScriptRunner.getScriptFolderSuffix().parse(matcher.group(DATETIME_PATTERN_GROUP_NAME)).getTime();
+        } catch (ParseException e) {
+            logger.error("unable to extract timestamp from a file name - this is a bug!", e);
+            return reportFile.lastModified();
+        }
     }
 
 	@Override
@@ -233,37 +262,25 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
         return workFolder.listFiles(DirectoryFilter.getInstance());
     }
 
-    private TestScriptDescription getReport(String reportRootPath) {
+    private TestScriptDescription getReport(File reportFile, Path relativeReportPath) {
+        String reportRootPath = reportFile.toString();
+
         try {
-            File reportRoot = workspaceDispatcher.getFile(FolderType.REPORT, reportRootPath);
-
             if (FilenameUtils.isExtension(reportRootPath, ZipReport.ZIP_EXTENSION)) {
-                try (ZipFile zipFile = new ZipFile(reportRoot)) {
-                    ZipEntry zipXmlProperties = zipFile.getEntry(FilenameUtils.removeExtension(reportRoot.getName()) + "/" + XML_PROPERTIES_FILE);
-
-                    if (zipXmlProperties != null) {
-                        try (InputStream stream = zipFile.getInputStream(zipXmlProperties)) {
-                            return convertToTestScriptDescription(reportRootPath, (XmlReportProperties) xmlUnmarshaller.get().unmarshal(stream));
-                        }
-                    } else {
-                        ZipEntry zipJson = zipFile.getEntry(FilenameUtils.removeExtension(reportRoot.getName()) + "/" + ROOT_JSON_REPORT_FILE);
-                        try (InputStream stream = zipFile.getInputStream(zipJson)) {
-                            return convertToTestScriptDescription(reportRootPath, jsonObjectMapper.readValue(stream, ReportRoot.class));
-                        }
+                try (ZipFile zipFile = new ZipFile(reportFile)) {
+                    ZipEntry zipJson = zipFile.getEntry(FilenameUtils.removeExtension(reportFile.getName()) + "/" + ROOT_JSON_REPORT_FILE);
+                    try (InputStream stream = zipFile.getInputStream(zipJson)) {
+                        return convertToTestScriptDescription(relativeReportPath.getParent().toString(), jsonObjectMapper.readValue(stream, ReportRoot.class));
                     }
                 }
             }
-            else {
-                if (workspaceDispatcher.exists(FolderType.REPORT, reportRootPath, XML_PROPERTIES_FILE)) {
-                    File xmlPropertiesFile = workspaceDispatcher.getFile(FolderType.REPORT, reportRootPath, XML_PROPERTIES_FILE);
-                    try (InputStream stream = new FileInputStream(xmlPropertiesFile)) {
-                        return convertToTestScriptDescription(reportRootPath, (XmlReportProperties) xmlUnmarshaller.get().unmarshal(stream));
-                    }
-                } else {
-                    try (InputStream stream = new FileInputStream(workspaceDispatcher.getFile(FolderType.REPORT, reportRootPath, ROOT_JSON_REPORT_FILE))) {
-                        return convertToTestScriptDescription(reportRootPath, jsonObjectMapper.readValue(stream, ReportRoot.class));
-                    }
+            else if (FilenameUtils.isExtension(reportRootPath, JSON_EXTENSION)) {
+                try (InputStream stream = new FileInputStream(reportFile)) {
+                    return convertToTestScriptDescription(relativeReportPath.getParent().getParent().toString(), jsonObjectMapper.readValue(stream, ReportRoot.class));
                 }
+            }
+            else {
+                throw new IllegalArgumentException(String.format("Unknown file extension '%s'", FilenameUtils.getExtension(reportRootPath)));
             }
         } catch (Exception e) {
             logger.error(String.format("Unable to parse report '%s'", reportRootPath), e);

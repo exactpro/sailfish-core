@@ -29,9 +29,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -373,6 +375,20 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
 		}
 
 	}
+
+    @Override
+    public Set<File> listFilesAsFiles(FileFilter filter, FolderType folderType, boolean recursive, String... fileName) throws FileNotFoundException, WorkspaceSecurityException {
+        return listFiles(filter, folderType, recursive, fileName).stream()
+                .map(path -> {
+                    try {
+                        return getFile(folderType, path);
+                    } catch (FileNotFoundException e) {
+                        logger.error("file not found: {}", path, e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull).collect(Collectors.toSet());
+    }
 
     /**
      * Find file in workspaces (search order: form last workspace to deploy folder)

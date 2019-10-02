@@ -298,7 +298,7 @@ PrimeFaces.widget.DataTable.prototype.selectRowsInRange = function(row) {
 };
 
 function updateFilter(args) {
-    var filterButton = $('#filterTestScriptButton');
+    const filterButton = $('#filterTestScriptButton');
     if (applyFilter(args)) {
         filterButton.addClass('ui-state-default');
     } else {
@@ -307,34 +307,35 @@ function updateFilter(args) {
 }
 
 function applyFilter(args) {
-    var originalSize = $('.eps-result-block').size();
-    var nameFilter = $('.eps-filter-name-result').val();
+    const resultBlockSubnodes = getChildrenFiltered($('.eps-result-block'));
 
-    var fromArray = $("[id$='dateTimeResultFilterFrom_input']").val().split('/');
-    var dateFrom = fromArray.length === 3 ? new Date(fromArray[2], fromArray[1] - 1, fromArray[0]) : new Date(1990, 1, 1) ;
+    const nameFilter = $('.eps-filter-name-result').val();
 
-    var toArray = $("[id$='dateTimeResultFilterTo_input']").val().split('/');
-    var dateTo = toArray.length === 3 ? new Date(toArray[2], toArray[1] - 1, toArray[0]) : new Date(2100, 1, 1);
-    var underscoreCleanupRegex = /_/g;
-    var statusCleanupRegex = /\(\S*\)/g;
+    const fromArray = $("[id$='dateTimeResultFilterFrom_input']").val().split('/');
+    const dateFrom = fromArray.length === 3 ? new Date(fromArray[2], fromArray[1] - 1, fromArray[0]) : new Date(1990, 1, 1) ;
 
-    $('.eps-result-block').each(function(index, element) {
+    const toArray = $("[id$='dateTimeResultFilterTo_input']").val().split('/');
+    const dateTo = toArray.length === 3 ? new Date(toArray[2], toArray[1] - 1, toArray[0]) : new Date(2100, 1, 1);
 
-        var curDateArray = $(element).find('.eps-result-date-time').text().split(" ")[0].split('/');
-        var curDate = new Date(curDateArray[2], curDateArray[0] - 1, curDateArray[1]);
+    const underscoreCleanupRegex = /_/g;
+    const statusCleanupRegex = /\(\S*\)/g;
 
-        if (!($(element).find('.eps-script-name').text().toLowerCase().includes(nameFilter.toLowerCase()))) {
-            $(element).remove();
-        }
-        else if ((curDate.getTime() < dateFrom.getTime()) || (curDate.getTime() > dateTo.getTime())) {
-            $(element).remove();
-        }
-        else if (!args.statuses.replace(underscoreCleanupRegex, " ").includes('"' + $(element).find('.eps-result-status').text().trim().replace(underscoreCleanupRegex, " ").replace(statusCleanupRegex,"") + '"') &&
-        !hasValidExecutionStatus($(element), args.statuses)) {
-            $(element).remove();
-        }
+    resultBlockSubnodes.forEach( (element) => {
+        const wrappedElement = $(element);
+
+        const curDateArray = wrappedElement.find('.eps-result-date-time').text().split(" ")[0].split('/');
+        const curDate = new Date(curDateArray[2], curDateArray[0] - 1, curDateArray[1]);
+
+        element.hidden = !(wrappedElement.find('.eps-script-name').text().toLowerCase().includes(nameFilter.toLowerCase()))
+            || (curDate.getTime() < dateFrom.getTime()) || (curDate.getTime() > dateTo.getTime())
+            || (!args.statuses.replace(underscoreCleanupRegex, " ").includes(
+                '"' + wrappedElement.find('.eps-result-status').text().trim()
+                    .replace(underscoreCleanupRegex, " ")
+                    .replace(statusCleanupRegex, "")
+                + '"') && !hasValidExecutionStatus(wrappedElement, args.statuses));
     });
-    return originalSize !== $('.eps-result-block').size()
+
+    return resultBlockSubnodes.some( item => item.hidden);
 }
 
 function hasValidExecutionStatus(element, statuses) {

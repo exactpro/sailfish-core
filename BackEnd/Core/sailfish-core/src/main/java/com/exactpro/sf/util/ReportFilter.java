@@ -18,19 +18,14 @@ package com.exactpro.sf.util;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
-import org.apache.commons.io.FilenameUtils;
 
 import com.exactpro.sf.scriptrunner.ZipReport;
 
 import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.ROOT_JSON_REPORT_FILE;
-import static com.exactpro.sf.storage.impl.DefaultTestScriptStorage.XML_PROPERTIES_FILE;
+
+import org.apache.commons.io.FilenameUtils;
 
 public class ReportFilter implements FileFilter {
-
     private static final ReportFilter instance = new ReportFilter();
 
     public static ReportFilter getInstance() {
@@ -39,26 +34,11 @@ public class ReportFilter implements FileFilter {
 
     @Override
     public boolean accept(File file) {
-        String name = file.getName();
 
-        if(FilenameUtils.isExtension(name, ZipReport.ZIP_EXTENSION)) {
-            String baseName = FilenameUtils.getBaseName(name);
-
-
-            if(new File(file.getParentFile(), ROOT_JSON_REPORT_FILE).exists() || new File(file.getParentFile(), XML_PROPERTIES_FILE).exists()) {
-                return false;
-            }
-
-            try(ZipFile zipFile = new ZipFile(file)) {
-                ZipEntry json = zipFile.getEntry(baseName + '/' + ROOT_JSON_REPORT_FILE );
-                ZipEntry xml = zipFile.getEntry(baseName + '/' + XML_PROPERTIES_FILE );
-                return json != null || xml != null;
-            } catch(IOException e) {
-                return false;
-            }
-        }
-
-        return file.isDirectory() && (new File(file, ROOT_JSON_REPORT_FILE).exists() || new File(file, XML_PROPERTIES_FILE).exists());
+        return !file.isDirectory() && (
+                // checks that zip file has no json report file near it to avoid duplicating reports
+                (FilenameUtils.isExtension(file.getName(), ZipReport.ZIP_EXTENSION) && !(new File(file.getParentFile(), ROOT_JSON_REPORT_FILE).exists()))
+                || (file.getPath().endsWith(ROOT_JSON_REPORT_FILE))
+        );
     }
-
 }

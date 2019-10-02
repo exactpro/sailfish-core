@@ -26,7 +26,12 @@ public interface ITestScriptStorage extends IScriptRunListener {
 
     void setScriptRunListener(IScriptRunListener scriptRunListener);
 
-    List<TestScriptDescription> getTestScriptList();
+    /**
+     * Returns a list of the last few script runs stored in the workspace.
+     * @param limit defines the script run description cap. Omitted descriptions won't be parsed. 0 means that all script runs should be loaded.
+     * @return {@link LoadedTestScriptDescriptions}
+     */
+    LoadedTestScriptDescriptions getTestScriptList(int limit);
 
 	void clear(boolean deleteOnDisk);
 

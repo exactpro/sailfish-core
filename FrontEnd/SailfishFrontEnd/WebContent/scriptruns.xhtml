@@ -89,9 +89,13 @@
 
             <p:remoteCommand name="cancelConvertMatrix" action="#{converterBean.cancelConvertMatrix}"/>
 
-            <p:remoteCommand name="reloadTestScriptForm" update=":testScriptForm" oncomplete="reloadTestScriptResults()"/>
+            <p:remoteCommand name="filterTestScriptResults" action="#{testScriptsBean.addFilterCallback}" oncomplete="updateFilter(args)"/>
 
-            <p:remoteCommand name="reloadTestScriptResults" action="#{testScriptsBean.addFilterCallback}" update=":testScriptForm:test-script-results-wrapper" oncomplete="updateFilter(args)"/>
+            <p:remoteCommand name="reloadTestScriptResults" action="#{testScriptsBean.reloadAllTestScript(false)}" oncomplete="filterTestScriptResults(); if (args.isRunningScripts) {PF('clearTestScriptsErrorDialog').show()}"/>
+
+            <p:remoteCommand name="forceReloadTestScriptResults" action="#{testScriptsBean.reloadAllTestScript(true)}" oncomplete="filterTestScriptResults(); if (args.isRunningScripts) {PF('clearTestScriptsErrorDialog').show()}"/>
+
+            <p:remoteCommand name="reloadTestScriptForm" update=":testScriptForm" oncomplete="filterTestScriptResults()"/>
 
             <p:remoteCommand name="showGrowlMessage" action="#{generalBean.showGrowlMessage}"/>
 
@@ -326,13 +330,13 @@
 
                 <div class="eps-test-script-result-toolbar-buttons-middle-container">
                     <p:inputText id="filterNameResult" value="#{testScriptsBean.filterResultName}" styleClass="eps-input eps-filter-name-result">
-                        <p:ajax event="keyup" process="@this" oncomplete="reloadTestScriptResults()" />
+                        <p:ajax event="keyup" process="@this" oncomplete="filterTestScriptResults()" />
                     </p:inputText>
                     <p:watermark for="filterNameResult" value=" Matrix name filter " />
 
                     <p:selectOneMenu id="sort-by" value="#{testScriptsBean.sortBy}" styleClass="eps-filter-status-result eps-test-script-result-toolbar-sort-by">
                         <f:selectItems value="#{testScriptsBean.comparators.keySet()}" />
-                        <p:ajax event="change" process="@this" oncomplete="reloadTestScriptResults()"/>
+                        <p:ajax event="change" process="@this" update=":testScriptForm" oncomplete="filterTestScriptResults()"/>
                     </p:selectOneMenu>
                 </div>
 
@@ -341,10 +345,10 @@
                         <p:submenu id="clearAllTestScriptsDropdown" icon="eps-custom-icon eps-custom-icon-delete"
                                    class="eps-clear-test-results-dropdown eps-clear-results-button-hidden" >
                             <p:menuitem id="clearAllSafe" icon="ui-icon-document" value="Safe delete" onstart="getSelectTestscripts(false, true)" />
-                            <p:menuitem id="clearAllHard" icon="ui-icon-trash" value="Delete from disk" onstart="getSelectTestscripts(true, false)" onsuccess="if(getSelectedScriptResults().length > 0) PF('confirmClearAll').show()" />
+                            <p:menuitem id="clearAllHard" icon="ui-icon-trash" value="Delete from disk" onstart="getSelectTestscripts(true, false)" onsuccess="if(getSelectedResultIds().length > 0) PF('confirmClearAll').show()" />
                         </p:submenu>
-                        <p:menuitem id="reloadAllTestScriptButton" styleClass="eps-reload-testscript-button" action="#{testScriptsBean.reloadAllTestScript()}" oncomplete="reloadTestScriptResults(); if (args.isRunningScripts) {PF('clearTestScriptsErrorDialod').show()}" icon="eps-custom-icon eps-custom-icon-refresh"/>
-                        <p:menuitem id="selectAllTestScriptButton" icon="eps-custom-icon eps-custom-icon-checkbox-round-unchecked" onclick="selectAllTestscripts()"/>
+                        <p:menuitem id="reloadAllTestScriptButton" icon="eps-custom-icon eps-custom-icon-refresh" styleClass="eps-reload-testscript-button" onclick="reloadTestScriptResults()" />
+                        <p:menuitem id="selectAllTestScriptButton" icon="eps-custom-icon eps-custom-icon-checkbox-round-unchecked" onclick="selectAllTestscripts()" />
                     </p:menubar>
                 </div>
             </div>
@@ -354,9 +358,9 @@
                     <h:outputLabel value="Status:" class="eps-test-script-result-filter-label"/>
                     <p:selectManyMenu id="statusFilterMenu" value="#{testScriptsBean.selectedResultStatuses}"
                                       filter="true" filterMatchMode="contains" showCheckbox="true"
-                                      styleClass="eps-filter-status-result" appendTo=":testScriptForm">
+                                      styleClass="eps-filter-status-result">
                         <f:selectItems value="#{testScriptsBean.allResultStatuses}"/>
-                        <p:ajax event="change" process="@this" update="statusFilterMenu" oncomplete="reloadTestScriptResults()" />
+                        <p:ajax event="change" process="@this" oncomplete="filterTestScriptResults()" />
                     </p:selectManyMenu>
                 </div>
 
@@ -366,17 +370,17 @@
                         <div>
                             <p:outputLabel for="dateTimeResultFilterFrom" value="From " />
                             <p:calendar id="dateTimeResultFilterFrom" value="#{testScriptsBean.dateFilterFrom}" maxdate="#{testScriptsBean.dateFilterTo}" pattern="yyyy-MM-dd" onfocus="$(this).mask('9999-99-99');" readonlyInput="true" styleClass="eps-input">
-                                <p:ajax event="dateSelect" oncomplete="reloadTestScriptResults()" update="dateTimeResultFilterTo"/>
+                                <p:ajax event="dateSelect" oncomplete="filterTestScriptResults()" update="dateTimeResultFilterTo"/>
                             </p:calendar>
                         </div>
                         <div>
                             <p:outputLabel for="dateTimeResultFilterTo" value="To " />
                             <p:calendar id="dateTimeResultFilterTo" value="#{testScriptsBean.dateFilterTo}" mindate="#{testScriptsBean.dateFilterFrom}" pattern="yyyy-MM-dd" onfocus="$(this).mask('9999-99-99');" readonlyInput="true" styleClass="eps-input">
-                                <p:ajax event="dateSelect" oncomplete="reloadTestScriptResults()" update="dateTimeResultFilterFrom"/>
+                                <p:ajax event="dateSelect" oncomplete="filterTestScriptResults()" update="dateTimeResultFilterFrom"/>
                             </p:calendar>
                         </div>
                     </div>
-                    <p:commandButton action="#{testScriptsBean.restoreFilters()}" styleClass="eps-result-clear-filters-btn" icon="ui-icon-close" value="clear" update=":testScriptForm"  oncomplete="reloadTestScriptResults()"/>
+                    <p:commandButton action="#{testScriptsBean.restoreFilters()}" styleClass="eps-result-clear-filters-btn" icon="ui-icon-close" value="clear" update="statusFilterMenu dateTimeResultFilterFrom dateTimeResultFilterTo" oncomplete="filterTestScriptResults()"/>
                 </div>
             </div>
 
@@ -536,11 +540,11 @@
     </p:dialog>
 </h:form>
 
-<h:form enctype="multipart/form-data" id="clearTestScriptsErrorDialodForm" >
-    <p:dialog header="Clear test scripts error" widgetVar="clearTestScriptsErrorDialod" modal="true" resizable="false">
-        <h:outputText value="You have a running test scripts" style="font-weight:bold"/>
+<h:form enctype="multipart/form-data" id="clearTestScriptsErrorDialogForm" >
+    <p:dialog header="Clear test scripts error" widgetVar="clearTestScriptsErrorDialog" modal="true" resizable="false">
+        <h:outputText value="You have running test scripts" style="font-weight:bold"/>
         <div style="text-align: center;">
-            <p:commandButton id="closeButton" value="Close" onclick="PF('clearTestScriptsErrorDialod').hide()" />
+            <p:commandButton id="closeButton" value="Close" onclick="PF('clearTestScriptsErrorDialog').hide()" />
         </div>
     </p:dialog>
 </h:form>
@@ -606,17 +610,17 @@
                         <p:selectBooleanCheckbox id="parValueBoolean" value="#{setting.value}" style="margin-left: 10px;" styleClass="eps-input">
                         </p:selectBooleanCheckbox>
                     </ui:fragment>
-                
+
                     <ui:fragment rendered="#{setting.serviceParamRenderComponent eq 'integerTextbox'}">
                         <p:spinner id="intValue" value="#{setting.value}" min="0" style="width: 410px; margin-left: 10px;" styleClass="eps-input" placeholder="0">
                         </p:spinner>
                     </ui:fragment>
-                
+
                      <ui:fragment rendered="#{setting.serviceParamRenderComponent eq 'defaultTextbox'}">
                         <p:inputText id="parValue" value="#{setting.value}" style="width:405px; margin-left: 10px;" styleClass="eps-input">
                          </p:inputText>
                     </ui:fragment>
-                
+
                     <ui:fragment rendered="#{setting.serviceParamRenderComponent eq 'mappingDataTable'}">
 
                         <p:commandButton  icon="ui-icon-circle-plus" value="Add" id="addMappingButton" styleClass="addMappingButton"

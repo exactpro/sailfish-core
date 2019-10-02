@@ -100,27 +100,34 @@ public class ScriptrunUpdateRetriever extends DefaultUpdateRetriever implements 
 
     public String getCurrentStateSnapshot(Comparator<TestScriptDescription> comparator) {
 
-		if(context == null) {
-			return "";
-		}
+        if (context == null) {
+            return "";
+        }
 
-		List<TestScriptDescription> descriptions = context.getScriptRunner().getDescriptions();
+        List<TestScriptDescription> descriptions = context.getScriptRunner().getDescriptions();
+        int omittedRuns = context.getScriptRunner().getTotalScriptRunsCount() - context.getScriptRunner().getLoadedScriptRunsCount();
 
-		if (descriptions.isEmpty()) {
-			return ScriptrunEventHTMLBuilder.getEmptyMessage();
-		}
+        if (descriptions.isEmpty()) {
+            return ScriptrunEventHTMLBuilder.getEmptyMessage();
+        }
+
         descriptions = descriptions.stream().sorted(comparator).collect(Collectors.toList());
 
-		StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-		for(TestScriptDescription descr : descriptions) {
-			if (descr != null) {
-				sb.append(ScriptrunEventHTMLBuilder.buildHTMLEvent(descr, context));
-				sb.append("\n");
-			}
-		}
-		return sb.toString();
-	}
+        if (omittedRuns > 0) {
+            sb.append(ScriptrunEventHTMLBuilder.getScriptsOmittedCard(omittedRuns));
+            sb.append("\n");
+        }
+
+        for(TestScriptDescription descr : descriptions) {
+            if (descr != null) {
+                sb.append(ScriptrunEventHTMLBuilder.buildHTMLEvent(descr, context));
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
+    }
 
 	@Override
 	public void destroy() {

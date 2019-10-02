@@ -54,8 +54,8 @@ public class ScriptrunEventHTMLBuilder {
     private static final int MAX_STRING_LENGTH = 4000;
 
     private static final String EXECUTED_CLASS_POSTFIX = "good";
-	private static final String SOME_FAILES_CLASS_POSTFIX = "normal";
-    private static final String SOME_CONDTIONALLY_PASSED_CLASS_POSTFIX = "cpnormal";
+	private static final String SOME_FAILS_CLASS_POSTFIX = "normal";
+    private static final String SOME_CONDITIONALLY_PASSED_CLASS_POSTFIX = "cpnormal";
 	private static final String FAILED_CLASS_POSTFIX = "bad";
 	private static final String IN_PROGRESS_CLASS_POSTFIX = "running";
 	private static final String TIME_PAUSED_CLASS_POSTFIX = "time-paused";
@@ -71,9 +71,9 @@ public class ScriptrunEventHTMLBuilder {
 
     private static final String resourceFolderName = GuiVersion.BUILD + "_0";
 
-	private ScriptrunEventHTMLBuilder() {
+    private ScriptrunEventHTMLBuilder() {
 
-	}
+    }
 
     private static String formatProblemBlock(TestScriptDescription descr) {
     	StringBuilder sb = new StringBuilder();
@@ -268,10 +268,10 @@ public class ScriptrunEventHTMLBuilder {
 
 		if(descr.getStatus() == ScriptStatus.EXECUTED || descr.getStatus() == ScriptStatus.INTERRUPTED) {
             if(descr.getContext().getScriptProgress().getFailed() != 0) {
-                return SOME_FAILES_CLASS_POSTFIX;
+                return SOME_FAILS_CLASS_POSTFIX;
             }
             if(descr.getContext().getScriptProgress().getConditionallyPassed() != 0) {
-                return SOME_CONDTIONALLY_PASSED_CLASS_POSTFIX;
+                return SOME_CONDITIONALLY_PASSED_CLASS_POSTFIX;
             }
 			return EXECUTED_CLASS_POSTFIX;
 		}
@@ -315,6 +315,13 @@ public class ScriptrunEventHTMLBuilder {
 	public static String getEmptyMessage() {
 		return EMPTY_MESSAGE;
 	}
+
+    public static String getScriptsOmittedCard(int omittedRuns) {
+        return String.format("<div id=\"omitted-scripts-card\" class=\"eps-result-block eps-test-script-result-omitted-runs\">"
+                        + "<div class=\"eps-test-script-result-omitted-runs-text\">%s script runs were omitted. Click <a class=\"eps-outer-link eps-event-link\" onclick=\"forceReloadTestScriptResults();\" href=\"javascript:void(0);\">here</a> to load them. This might take a long time.</div>"
+                        + "</div>",
+                omittedRuns);
+    }
 
 	private static String buildExecuted(TestScriptDescription descr, ISFContext context) {
 
