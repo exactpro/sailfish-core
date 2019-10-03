@@ -9,6 +9,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,11 +36,16 @@ public class FixServerSessionsContainer implements ISession {
     @Override
     public IMessage send(Object message) throws InterruptedException {
         Map<ISession, String> sentErrors = new HashMap<>();
-        for(ISession session : application.getSessions()) {
+        Collection<ISession> connectedSessions = application.getSessions();
+        if (connectedSessions.isEmpty()) {
+            throw new SendMessageFailedException("No sessions to send message: " + message);
+        }
+
+        for (ISession session : connectedSessions) {
             try {
                 session.send(message);
             } catch (RuntimeException e) {
-                String errorMsg = e.getCause() != null ? String.format("%s; cause: %s", e.getMessage(), e.getCause()) : e.getMessage();
+                String errorMsg = e.getCause() == null ? e.getMessage() : String.format("%s; cause: %s", e.getMessage(), e.getCause());
                 sentErrors.put(session, errorMsg);
             }
         }
