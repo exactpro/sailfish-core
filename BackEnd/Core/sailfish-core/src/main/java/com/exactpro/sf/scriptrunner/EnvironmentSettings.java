@@ -233,7 +233,7 @@ public class EnvironmentSettings implements ICommonSettings
                     "storage type is recommended for long-term work with Sailfish.</li>" +
             "</ul><br>" +
             "NOTE: Changes of this setting will be applied only after Sailfish restart.") //TODO color highlight
-    @ValidateRegex(regex = "^(file|db)$")
+    @ValidateRegex(regex = "(?i)^(file|db)$")
     public void setStorageType(StorageType storageType) {
         this.storageType = storageType;
         update();
@@ -328,7 +328,7 @@ public class EnvironmentSettings implements ICommonSettings
                 "<li>Y or n – all fields in the message are checked.</li>" +
                 "<li>A or a – all fields in the message as well as the message structure are checked.</li>" +
             "</ul>")
-    @ValidateRegex(regex = "^(N|Y|A|n|y|a)$")
+    @ValidateRegex(regex = "(?i)^(N|Y|A)$")
 	public void setFailUnexpected(String failUnexpected) {
 		this.failUnexpected = failUnexpected;
 		update();
@@ -369,7 +369,7 @@ public class EnvironmentSettings implements ICommonSettings
             "<li>FAILED_FIELDS – similar messages will be displayed in the report sorted by the number of failed fields, " +
                 "from low to high. This function is only supported in an HTML report.</li>" +
             "</ul>")
-    @ValidateRegex(regex = "^(ARRIVAL_TIME|FAILED_FIELDS)$")
+    @ValidateRegex(regex = "(?i)^(ARRIVAL_TIME|FAILED_FIELDS)$")
     public void setRelevantMessagesSortingMode(RelevantMessagesSortingMode relevantMessagesSortingMode) {
         this.relevantMessagesSortingMode = relevantMessagesSortingMode;
     }
