@@ -15,6 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import com.exactpro.sf.aml.script.MetaContainer;
 
 /**
@@ -56,5 +62,39 @@ public class SailFishAction {
      */
     protected static MetaContainer createMetaContainer(String failUnexpected) {
         return createMetaContainer(null, null, failUnexpected, null, null);
+    }
+
+    protected static MetaContainer createMetaContainerByPath(MetaContainer parent, String failUnexpected, String... path) {
+        Objects.requireNonNull(parent, "parent cannot be null");
+
+        if (StringUtils.isBlank(failUnexpected)) {
+            throw new IllegalArgumentException("failUnexpected cannot be blank");
+        }
+
+        if (ArrayUtils.isEmpty(path)) {
+            throw new IllegalArgumentException("path cannot be empty");
+        }
+
+        MetaContainer current = parent;
+
+        for (int i = 0; i < path.length - 1; i++) {
+            String field = path[i];
+            List<MetaContainer> children = current.get(field);
+
+            if (children == null) {
+                MetaContainer child = new MetaContainer();
+                current.add(field, child);
+                current = child;
+            } else {
+                current = children.get(children.size() - 1);
+            }
+        }
+
+        MetaContainer last = new MetaContainer();
+
+        last.setFailUnexpected(failUnexpected);
+        current.add(path[path.length - 1], last);
+
+        return last;
     }
 }

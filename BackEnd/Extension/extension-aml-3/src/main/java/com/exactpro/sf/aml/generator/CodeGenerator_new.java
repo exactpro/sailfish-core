@@ -15,6 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.wrap;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,11 +35,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.util.Base64;
@@ -59,7 +62,6 @@ import com.exactpro.sf.aml.MessageDirection;
 import com.exactpro.sf.aml.generator.matrix.BoolExp;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.generator.matrix.JavaStatement;
-import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.TypeHelper;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
@@ -88,7 +90,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
-import com.exactpro.sf.scriptrunner.utilitymanager.UtilityInfo;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.google.common.collect.Iterables;
@@ -780,7 +781,7 @@ public class CodeGenerator_new implements ICodeGenerator {
                 continue;
             }
 
-            CustomColumn column = actionInfo.getCustomColumn(entry.getKey());
+            CustomColumn column = actionInfo.getCustomColumn(columnName);
 
             if(column == null) {
                 continue;
@@ -817,7 +818,52 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
     }
 
-	protected static Method getMethod(AlertCollector alertCollector,
+    protected void writeMetaContainers(StringBuilder builder, AMLTestCase testCase, AMLAction action, ActionInfo actionInfo, AlertCollector alertCollector, String... path) {
+        String failUnexpected = wrap(trimToNull(action.getFailUnexpected()), '"');
+        boolean hasCustomColumns = action.getServiceFields()
+                .keySet()
+                .stream()
+                .anyMatch(column -> Column.value(column) == null && actionInfo.getCustomColumn(column) != null);
+
+        if (ArrayUtils.isEmpty(path)) {
+            builder.append(TAB2);
+            builder.append(MetaContainer.class.getSimpleName());
+            builder.append(" metaContainer = createMetaContainer(");
+            builder.append(failUnexpected);
+            builder.append(");");
+            builder.append(EOL);
+
+            if (!action.getChildren().isEmpty()) {
+                builder.append(TAB2);
+                builder.append(MetaContainer.class.getSimpleName());
+                builder.append(" lastMetaContainer;");
+                builder.append(EOL);
+            }
+
+            putSystemColumns(builder, "metaContainer", testCase, action, actionInfo, alertCollector);
+        } else if (failUnexpected != null || hasCustomColumns) {
+            builder.append(TAB2);
+            builder.append("lastMetaContainer = createMetaContainerByPath(metaContainer, ");
+            builder.append(failUnexpected);
+
+            for (String field : path) {
+                builder.append(", ");
+                builder.append(wrap(field, '"'));
+            }
+
+            builder.append(");");
+            builder.append(EOL);
+
+            putSystemColumns(builder, "lastMetaContainer", testCase, action, actionInfo, alertCollector);
+        }
+
+        for (Pair<String, AMLAction> child : action.getChildren()) {
+            String[] newPath = ArrayUtils.add(path, child.getFirst());
+            writeMetaContainers(builder, testCase, child.getSecond(), actionInfo, alertCollector, newPath);
+        }
+    }
+
+    protected static Method getMethod(AlertCollector alertCollector,
 			Class<?> clazz,
 			String methodName,
 			AMLAction action,

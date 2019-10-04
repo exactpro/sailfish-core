@@ -104,12 +104,8 @@ public class MetaContainer {
 	}
 
 	public void add(String name, MetaContainer mc) {
-		List<MetaContainer> obj = children.get(name);
-		if (obj == null) {
-			obj = new ArrayList<>();
-            children.put(name, obj);
-		}
-		mc.propogateParentValues(this);
+        List<MetaContainer> obj = children.computeIfAbsent(name, it -> new ArrayList<>());
+        mc.propogateParentValues(this);
 		obj.add(mc);
 	}
 

@@ -15,6 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.AMLLangConst;
@@ -26,7 +40,6 @@ import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
 import com.exactpro.sf.aml.script.ActionContext;
-import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
@@ -42,19 +55,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 
 public class OldImpl {
 
@@ -157,7 +157,7 @@ public class OldImpl {
 
 		if (action.hasActionURI())
 		{
-            sb.append(writeFillMetaContainer(tc, action, action.getActionInfo(), null, getVariable(MetaContainer.class, "metaContainer"), 0, null));
+            codeGenerator.writeMetaContainers(sb, tc, action, action.getActionInfo(), alertCollector);
 			JavaStatement statement = JavaStatement.value(action.getActionURI());
 
 			if (statement != null)
@@ -216,32 +216,6 @@ public class OldImpl {
 
 		return sb.toString();
 	}
-
-    private String writeFillMetaContainer(AMLTestCase tc, AMLAction action, ActionInfo actionInfo, String field, Variable metaContainer, int index, String parentVar) {
-        StringBuilder sb = new StringBuilder(CAPACITY_128K);
-
-        sb.append(EOL);
-        String failUnexpected = null;
-
-        if(action.getFailUnexpected() != null && !"".equals(action.getFailUnexpected())) {
-            failUnexpected = TypeConverter.convert(String.class, action.getFailUnexpected());
-        }
-
-        if(parentVar != null) {
-            sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + parentVar + ", " + TypeConverter.convert(String.class, field) + ", " + failUnexpected + ");" + EOL);
-        } else {
-            sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + failUnexpected + ");" + EOL);
-        }
-
-        codeGenerator.putSystemColumns(sb, metaContainer.getName(), tc, action, actionInfo, alertCollector);
-
-        for(Pair<String, AMLAction> child : action.getChildren()) {
-            index++;
-            sb.append(writeFillMetaContainer(tc, child.getSecond(), actionInfo, child.getFirst(), getVariable(MetaContainer.class, "mc" + (child.getFirst() == null ? "" : child.getFirst()) + index), index, metaContainer.getName()));
-        }
-
-        return sb.toString();
-    }
 
 	private Variable getVariable(Class<?> type, String varNameOrig)
 	{

@@ -15,6 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+import static java.lang.String.format;
+
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AMLException;
@@ -26,7 +45,6 @@ import com.exactpro.sf.aml.generator.matrix.RefParameter;
 import com.exactpro.sf.aml.generator.matrix.Value;
 import com.exactpro.sf.aml.generator.matrix.Variable;
 import com.exactpro.sf.aml.script.ActionContext;
-import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
@@ -46,24 +64,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-import static java.lang.String.format;
 
 public class NewImpl {
 
@@ -156,63 +156,34 @@ public class NewImpl {
 			sb.append(createSendMessageDefinition(tc, action, inputVariable, isDirty));
 			addReferenceToFilter(sb, action, inputVariable);
 			action.setGenerateStatus(AMLGenerateStatus.GENERATED);
-			String def = writeFillComparisonErrorsDefinition(tc, action, isDirty);
-			sb.append(def);
+            writeFillComparisonErrorsDefinition(sb, tc, action, isDirty);
 			sb.append(createSendCall(tc,action,inputVariable));
 		}
 		else
 		{
 			sb.append(TAB2+"try {"+EOL);
 			action.setGenerateStatus(AMLGenerateStatus.GENERATED);
-			String def = writeFillComparisonErrorsDefinition(tc, action, isDirty);
-			sb.append(def);
+            writeFillComparisonErrorsDefinition(sb, tc, action, isDirty);
 			sb.append(createSendCall(tc,action, null));
 		}
 
 		return sb.toString(); // TODO: to be done
 	}
 
-	private String writeFillComparisonErrorsDefinition(AMLTestCase tc, AMLAction action, boolean isDirty)
+    private void writeFillComparisonErrorsDefinition(StringBuilder builder, AMLTestCase tc, AMLAction action, boolean isDirty)
 	{
         IDictionaryStructure dictionary = getDictionary(action.getDictionaryURI());
 
         if (dictionary == null) {
             alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(),
                     "Can't find dictionary [" + action.getDictionaryURI() + "]"));
-            return "";
+            return;
         }
 
-        return writeFillMetaContainer(tc, action, action.getActionInfo(), null, getVariable(MetaContainer.class, "metaContainer"), 0, null);
-	}
+        codeGenerator.writeMetaContainers(builder, tc, action, action.getActionInfo(), alertCollector);
+    }
 
-    private String writeFillMetaContainer(AMLTestCase tc, AMLAction action, ActionInfo actionInfo, String field, Variable metaContainer, int index, String parentVar) {
-		StringBuilder sb = new StringBuilder(CAPACITY_128K);
-
-		sb.append(EOL);
-		String failUnexpected = null;
-
-        if (action.getFailUnexpected() != null && !"".equals(action.getFailUnexpected())) // TODO: do this on per Repeating group level.
-        {
-            failUnexpected = TypeConverter.convert(String.class, action.getFailUnexpected());
-        }
-
-		if (parentVar != null) {
-            sb.append(TAB2 + metaContainer.getName() + " = createMetaContainer(" + parentVar + ", " + TypeConverter.convert(String.class, field) + ", " + failUnexpected + ");" + EOL);
-		} else {
-		    sb.append(TAB2+metaContainer.getName()+" = createMetaContainer(" + failUnexpected + ");" + EOL);
-		}
-
-        codeGenerator.putSystemColumns(sb, metaContainer.getName(), tc, action, actionInfo, alertCollector);
-
-		for (Pair<String,AMLAction> child : action.getChildren()) {
-            index++;
-            sb.append(writeFillMetaContainer(tc, child.getSecond(), actionInfo, child.getFirst(), getVariable(MetaContainer.class, "mc" + (child.getFirst() == null ? "" : child.getFirst()) + index), index, metaContainer.getName()));
-        }
-
-		return sb.toString();
-	}
-
-	private String createSendCall(AMLTestCase tc, AMLAction action,
+    private String createSendCall(AMLTestCase tc, AMLAction action,
 			Variable inputVariable) {
 		StringBuilder sb = new StringBuilder(CAPACITY_128K);
 
@@ -904,8 +875,7 @@ public class NewImpl {
 			sb.append(createReceiveMessageDefinition(tc, action, inputVariable));
 			addReferenceToFilter(sb, action, inputVariable);
 			action.setGenerateStatus(AMLGenerateStatus.GENERATED);
-			String def = writeFillComparisonErrorsDefinition(tc, action, false);
-			sb.append(def);
+            writeFillComparisonErrorsDefinition(sb, tc, action, false);
 			sb.append(createReceiveCall(tc,action,inputVariable));
 		}
 

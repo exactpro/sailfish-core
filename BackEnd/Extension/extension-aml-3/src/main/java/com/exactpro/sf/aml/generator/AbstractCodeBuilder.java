@@ -15,6 +15,27 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+
 import com.exactpro.sf.actions.ActionUtil;
 import com.exactpro.sf.aml.AML;
 import com.exactpro.sf.aml.AMLAction;
@@ -33,6 +54,7 @@ import com.exactpro.sf.aml.Tags;
 import com.exactpro.sf.aml.Type;
 import com.exactpro.sf.aml.script.AMLHashMap;
 import com.exactpro.sf.aml.script.CheckPoint;
+import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
 import com.exactpro.sf.aml.scriptutil.StaticUtil;
 import com.exactpro.sf.center.impl.SFLocalContext;
@@ -57,26 +79,6 @@ import com.exactpro.sf.scriptrunner.actionmanager.exceptions.ActionCallException
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.util.KnownBugException;
 import com.exactpro.sf.util.MessageKnownBugException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 
 public abstract class AbstractCodeBuilder {
     public static final String TAB1 = "\t";
@@ -157,6 +159,7 @@ public abstract class AbstractCodeBuilder {
         imports.add(Type.class.getCanonicalName());
         imports.add(Reference.class.getCanonicalName());
         imports.add(MessageUtil.class.getCanonicalName());
+        imports.add(MetaContainer.class.getCanonicalName());
 
         for (String imp : imports) {
             stream.writeLine("import %s;", imp);
