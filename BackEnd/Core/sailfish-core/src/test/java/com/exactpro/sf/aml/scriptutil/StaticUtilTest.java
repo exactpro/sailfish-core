@@ -15,20 +15,19 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.scriptutil;
 
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.comparison.Convention;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.common.impl.messages.MapMessage;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.comparison.Convention;
 
 public class StaticUtilTest {
 
@@ -201,6 +200,18 @@ public class StaticUtilTest {
         Assert.assertEquals("MathUtil.roundZero(Double.valueOf(\"123.456\"), x, 123, )", filter.getCondition());
     }
 
+    @Test
+    public void testSimpleFilterNotIdempotentFunction() throws Exception {
+        Counter counter = new Counter();
+        Assert.assertEquals("Counter is initialized", 0, counter.value);
+        IFilter filter = StaticUtil.simpleFilter(0, null, "v0.add()", "v0", counter);
+        Assert.assertEquals("Filter is initialized", 1, counter.value); // This is not required step. Expression may be evaluated on the first call
+        Assert.assertEquals("First call of IFilter.getValue", 1, filter.getValue());
+        Assert.assertEquals("Check counter value after first call of IFilter.getValue", 1, counter.value);
+        Assert.assertEquals("Second call of IFilter.getValue", 1, filter.getValue());
+        Assert.assertEquals("Check counter value after second call of IFilter.getValue", 1, counter.value);
+    }
+
 	@Test
 	public void testSimpleFilter_TernaryOperator() throws Exception {
 		IFilter filter = StaticUtil.simpleFilter(0, null, "2==3 ? 3 : 4");
@@ -291,5 +302,13 @@ public class StaticUtilTest {
         }
         Assert.assertEquals(ExpressionResult.EXPRESSION_RESULT_TRUE, filter.validate(Double.valueOf(actual)));
         Assert.assertEquals(ExpressionResult.EXPRESSION_RESULT_TRUE, filter.validate(new BigDecimal(actual)));
+    }
+
+    public static class Counter {
+        public int value = 0;
+
+        public int add() {
+            return ++value;
+        }
     }
 }

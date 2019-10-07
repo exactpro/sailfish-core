@@ -15,8 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.scriptutil;
 
-import static com.exactpro.sf.aml.scriptutil.ExpressionResult.EXPRESSION_RESULT_FALSE;
-import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
+import com.exactpro.sf.aml.AMLLangConst;
+import com.exactpro.sf.aml.generator.MVELInitializer;
+import com.exactpro.sf.aml.generator.matrix.Column;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.comparison.Convention;
+import com.exactpro.sf.util.LRUMap;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.mvel2.MVEL;
+import org.mvel2.PropertyAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -30,22 +43,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.mvel2.MVEL;
-import org.mvel2.PropertyAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.exactpro.sf.aml.AMLLangConst;
-import com.exactpro.sf.aml.generator.MVELInitializer;
-import com.exactpro.sf.aml.generator.matrix.Column;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.comparison.Convention;
-import com.exactpro.sf.util.LRUMap;
-import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Floats;
+import static com.exactpro.sf.aml.scriptutil.ExpressionResult.EXPRESSION_RESULT_FALSE;
+import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
 
 public class StaticUtil {
 	private static final Logger logger = LoggerFactory.getLogger(StaticUtil.class);
@@ -123,7 +122,7 @@ public class StaticUtil {
 	    } else if(value == Convention.CONV_MISSED_OBJECT) {
 	        return new NullFilter(line, column);
 	    } else {
-	        return new SimpleMvelFilter(line, column, condition, variables);
+	        return new SimpleMvelFilter(line, column, value, variables);
 	    }
 	}
 
@@ -472,6 +471,9 @@ public class StaticUtil {
 	}
 
 	public static class SimpleMvelFilter implements IFilter {
+        protected static final String SIMPLE_VALUE_ARG = "SIMPLE_VALUE";
+        private static final String SIMPLE_VALUE_EXPRESSION = "x == (" + SIMPLE_VALUE_ARG + ")";
+        private static final String SIMPLE_FLOAT_VALUE_EXPRESSION = "Objects.equals(x, " + SIMPLE_VALUE_ARG + ")";
 		private final String condition;
 		private final Map<String, Object> variables;
 		private final Serializable compiledCondition;
@@ -480,23 +482,32 @@ public class StaticUtil {
 		private final String column;
 
 		public SimpleMvelFilter(long line, String column, String simpleCondition, Map<String, Object> variables) {
-			this(line, column, simpleCondition, variables, "x == ({})");
+			this(line, column, simpleCondition, variables, SIMPLE_VALUE_EXPRESSION);
 		}
 
+        public SimpleMvelFilter(long line, String column, Object simpleValue, Map<String, Object> variables) {
+            this(line, column, simpleValue, variables, SIMPLE_VALUE_EXPRESSION);
+        }
+
         public SimpleMvelFilter(long line, String column, String simpleCondition, Map<String, Object> variables, String expression) {
+            this(line, column, eval(line, column, simpleCondition, variables), variables, expression);
+        }
+
+        public SimpleMvelFilter(long line, String column, Object simpleValue, Map<String, Object> variables, String expression) {
 			this.line = line;
 			this.column = column;
-			this.value = eval(line, column, simpleCondition, variables);
+			this.value = simpleValue;
             this.condition = String.valueOf(value);
 			this.variables = new HashMap<>(variables);
+            this.variables.put(SIMPLE_VALUE_ARG, value);
 
             if((value instanceof Double && !Doubles.isFinite((Double)value))
                     || (value instanceof Float && !Floats.isFinite((Float)value))) {
-                expression = "Objects.equals(x, {})";
+                expression = SIMPLE_FLOAT_VALUE_EXPRESSION;
             }
 
             try {
-                this.compiledCondition = compileExpression(expression.replace("{}", simpleCondition));
+                this.compiledCondition = compileExpression(expression);
             } catch(Exception e) {
                 throw new MvelException(line, column, e);
 	    	}
@@ -558,8 +569,10 @@ public class StaticUtil {
     }
 
     public static class RegexMvelFilter extends SimpleMvelFilter {
+        private static final String REGEX_VALUE_EXPRESSION = "x ~= ( " + SIMPLE_VALUE_ARG + " )";
+
         public RegexMvelFilter(long line, String column, String regex, Map<String, Object> variables) {
-            super(line, column, "'" + regex + "'", variables, "x ~= ( {} )");
+            super(line, column, "'" + regex + "'", variables, REGEX_VALUE_EXPRESSION);
         }
     }
 
