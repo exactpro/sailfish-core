@@ -42,7 +42,7 @@ public class FASTClientSettings extends FASTCodecSettings {
 	@Description("Incativity service timeout in seconds after which service will be shout down automatically. If 0 - do not shoutdown service.")
 	private int idleTimeout;
 
-	@Description("Message filter expression")
+	@Description("Message filter expression. Supported syntax: \"FieldName1 = [Value1]; FieldName1 = ![Value2]\", ! used as negation, for example \"MessageType = ![1]; ApplID = [0]\"")
 	private String messageFilterExpression;
 
 	@Description("Begin string")
