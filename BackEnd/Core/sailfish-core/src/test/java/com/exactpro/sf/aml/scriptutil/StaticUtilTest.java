@@ -15,19 +15,20 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.scriptutil;
 
-import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
-import com.exactpro.sf.common.impl.messages.MapMessage;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.comparison.Convention;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.comparison.Convention;
 
 public class StaticUtilTest {
 
@@ -279,6 +280,13 @@ public class StaticUtilTest {
         filter = StaticUtil.regexFilter(0, null, "^[\\-0-9]{0,5}$");
         Assert.assertEquals(ExpressionResult.EXPRESSION_RESULT_TRUE, filter.validate("-30"));
         Assert.assertEquals(ExpressionResult.EXPRESSION_RESULT_TRUE, filter.validate("00203"));
+    }
+
+    @Test
+    public void testFilterPassThrough() {
+        IFilter filter = StaticUtil.simpleFilter(0, "", "1");
+        Assert.assertEquals(filter, StaticUtil.simpleFilter(0, "", "f", "f", filter));
+        Assert.assertEquals(filter, StaticUtil.countFilter(0, "", "f", "f", filter));
     }
 
     private void validateSimpleFilter(String expected, String actual) {

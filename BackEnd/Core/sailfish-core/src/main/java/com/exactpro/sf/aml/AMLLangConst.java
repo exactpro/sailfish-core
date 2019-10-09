@@ -42,7 +42,8 @@ public class AMLLangConst {
     public static final SailfishURI ASK_FOR_CONTINUE_ACTION_URI = SailfishURI.unsafeParse("AskForContinue");
     public static final SailfishURI GET_CHECK_POINT_ACTION_URI = SailfishURI.unsafeParse("GetCheckPoint");
     public static final SailfishURI GET_ADMIN_CHECK_POINT_ACTION_URI = SailfishURI.unsafeParse("GetAdminCheckPoint");
-    public static final SailfishURI INIT_MAP_URI = SailfishURI.unsafeParse("initMap");
+    public static final SailfishURI INIT_BLOCK_PARAMETERS_MAP_URI = SailfishURI.unsafeParse("initBlockParametersMap");
+    public static final SailfishURI INIT_BLOCK_RESULTS_MAP_URI = SailfishURI.unsafeParse("initBlockResultsMap");
 
     public static final String YES = "y";
     public static final String NO = "n";

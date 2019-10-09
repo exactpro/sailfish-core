@@ -18,6 +18,7 @@ package com.exactpro.sf.aml;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Assert;
@@ -157,9 +158,17 @@ public class TestAML3_0 extends TestAML3Base {
 
         Assert.assertEquals("List errors size", 7, source.size());
         Assert.assertEquals("Critical errors size", 0, aml.getAlertCollector().getCount(AlertType.ERROR));
-        Assert.assertEquals(2, aml.getTestCases().size());
-        Assert.assertEquals(17, aml.getTestCases().get(0).getActions().size());
-        Assert.assertEquals(11, aml.getTestCases().get(1).getActions().size());
+
+        List<AMLTestCase> testCases = aml.getTestCases();
+
+        Assert.assertEquals(2, testCases.size());
+        Assert.assertEquals(17, testCases.get(0).getActions().size());
+
+        List<AMLAction> secondTestCaseActions = testCases.get(1).getActions();
+
+        Assert.assertEquals(11, secondTestCaseActions.size());
+        Assert.assertEquals(AMLLangConst.INIT_BLOCK_RESULTS_MAP_URI, secondTestCaseActions.get(0).getActionURI());
+        Assert.assertEquals(AMLLangConst.INIT_BLOCK_PARAMETERS_MAP_URI, secondTestCaseActions.get(1).getActionURI());
 
         Alert alert = new Alert(24, "m3", "MarketDepthLevel_2_4", "Reference to unknown column 'm2' is found in column 'MarketDepthLevel_2_4': '[include1.m2.MarketDepthLevel_2_4]'.", AlertType.WARNING);
         Assert.assertTrue(alert.toString(), source.remove(alert));

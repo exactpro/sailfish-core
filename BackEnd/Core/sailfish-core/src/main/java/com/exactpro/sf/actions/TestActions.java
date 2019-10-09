@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.tryUnwrapFilters;
 import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
@@ -366,6 +367,16 @@ public class TestActions extends AbstractCaller {
     @ActionMethod
     public HashMap<?,?> initMap(IActionContext actionContext, HashMap<?,?> inputData) {
         return unwrapFilters(inputData);
+    }
+
+    @ActionMethod
+    public HashMap<?, ?> initBlockParametersMap(IActionContext actionContext, HashMap<?, ?> parameters) {
+        return tryUnwrapFilters(parameters);
+    }
+
+    @ActionMethod
+    public HashMap<?, ?> initBlockResultsMap(IActionContext actionContext, HashMap<?, ?> parameters) {
+        return tryUnwrapFilters(parameters);
     }
 
     @MessageDirection(direction=Direction.SEND)

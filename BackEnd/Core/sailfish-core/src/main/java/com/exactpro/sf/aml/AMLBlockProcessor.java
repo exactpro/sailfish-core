@@ -227,8 +227,8 @@ public class AMLBlockProcessor {
                     continue;
                 }
 
-                action.setActionURI(AMLLangConst.INIT_MAP_URI);
-                action.setActionInfo(actionManager.getActionInfo(AMLLangConst.INIT_MAP_URI));
+                action.setActionURI(AMLLangConst.INIT_BLOCK_PARAMETERS_MAP_URI);
+                action.setActionInfo(actionManager.getActionInfo(AMLLangConst.INIT_BLOCK_PARAMETERS_MAP_URI));
 
                 String actionRef = action.getReference();
                 List<AMLAction> blockActions = includeBlock.clone().getActions();
@@ -243,6 +243,8 @@ public class AMLBlockProcessor {
 
                 AMLAction refAction = action.clone();
 
+                refAction.setActionURI(AMLLangConst.INIT_BLOCK_RESULTS_MAP_URI);
+                refAction.setActionInfo(actionManager.getActionInfo(AMLLangConst.INIT_BLOCK_RESULTS_MAP_URI));
                 refAction.getParameters().clear();
                 refAction.setTemplate(null);
                 refAction.setTag(null);

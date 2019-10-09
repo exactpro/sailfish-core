@@ -15,21 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.scriptutil;
 
-import com.exactpro.sf.aml.AMLLangConst;
-import com.exactpro.sf.aml.generator.MVELInitializer;
-import com.exactpro.sf.aml.generator.matrix.Column;
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.comparison.Convention;
-import com.exactpro.sf.util.LRUMap;
-import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Floats;
-import org.apache.commons.lang3.ClassUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.mvel2.MVEL;
-import org.mvel2.PropertyAccessException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.exactpro.sf.aml.scriptutil.ExpressionResult.EXPRESSION_RESULT_FALSE;
+import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -43,8 +30,22 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.exactpro.sf.aml.scriptutil.ExpressionResult.EXPRESSION_RESULT_FALSE;
-import static com.exactpro.sf.aml.scriptutil.ExpressionResult.create;
+import org.apache.commons.lang3.ClassUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.mvel2.MVEL;
+import org.mvel2.PropertyAccessException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.exactpro.sf.aml.AMLLangConst;
+import com.exactpro.sf.aml.generator.MVELInitializer;
+import com.exactpro.sf.aml.generator.matrix.Column;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.comparison.Convention;
+import com.exactpro.sf.util.LRUMap;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
 
 public class StaticUtil {
 	private static final Logger logger = LoggerFactory.getLogger(StaticUtil.class);
@@ -116,7 +117,9 @@ public class StaticUtil {
 	    Map<String, Object> variables = toMap(args);
 	    Object value = eval(line, column, condition, variables);
 	    if (value instanceof IKnownBug) {
-	        return new KnownBugFilter(line, column, (IKnownBug) value);
+            return new KnownBugFilter(line, column, (IKnownBug)value);
+        } else if (value instanceof IFilter) {
+            return (IFilter)value;
 	    } else if(value == Convention.CONV_PRESENT_OBJECT) {
 	        return new NotNullFilter(line, column);
 	    } else if(value == Convention.CONV_MISSED_OBJECT) {
@@ -142,6 +145,8 @@ public class StaticUtil {
             return new MessageCountFilter(line, MessageCount.fromString(value.toString()));
         } else if(value instanceof IKnownBug) {
             return new KnownBugFilter(line, column, (IKnownBug)value);
+        } else if (value instanceof IFilter) {
+            return (IFilter)value;
         }
 
         throw new MvelException(line, column, "Unsupported value type: " + ClassUtils.getSimpleName(value, null));
