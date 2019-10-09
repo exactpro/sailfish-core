@@ -288,7 +288,8 @@
                             <f:selectItem itemLabel="#{paramNode.differentValues and empty paramNode.value ? '*' : 'Select handler class name'}"
                             			  itemValue="#{null}" itemDisabled="true" />
                             <f:selectItems value="#{enumSetContainer.loadHandlerClassName()}" />
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
+                            <p:ajax event="itemSelect" process="@this" update="@(.eps-environment-calculated-value)"/>
                         </p:selectOneMenu>
                     </ui:fragment>
 
@@ -296,8 +297,8 @@
                         <p:autoComplete id="advanced" dropdown="true" value="#{paramNode.value}"
                                         style="width: 92%" styleClass="eps-input eps-autocomplete"
                                         completeMethod="#{enumSetContainer.completeDictURI}">
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
-                            <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
+                            <p:ajax event="itemSelect" process="@this" update="@(.eps-environment-calculated-value)"/>
                         </p:autoComplete>
                     </ui:fragment>
 
@@ -305,14 +306,13 @@
                         <p:autoComplete id="amlSelector" dropdown="true" value="#{paramNode.value}"
                                         style="width: 100%" styleClass="eps-input"
                                         completeMethod="#{paramNode.getEnumeratedValues()}">
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
-                            <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
                         </p:autoComplete>
                     </ui:fragment>
 
                     <ui:fragment rendered="#{paramNode.serviceParamRenderComponent eq 'booleanCheckbox'}">
                         <p:selectBooleanCheckbox id="parValueBoolean" value="#{paramNode.value}" style="width: 100%" styleClass="eps-input">
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
                         </p:selectBooleanCheckbox>
                     </ui:fragment>
 
@@ -322,7 +322,7 @@
                                      style="width: 100%" styleClass="eps-input"
                                      placeholder="#{paramNode.differentValues ? '*' : ''}"
                                      onkeypress="if(event.which &lt; 48 || event.which &gt; 57) return false;">
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
                         </p:inputText>
                     </ui:fragment>
 
@@ -331,19 +331,20 @@
                                         style="width: 92%" styleClass="eps-input eps-autocomplete" dropdown="true"
                                         placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{paramNode.hasEnumeratedValues() and (empty paramNode.inputMask)}"
                                         completeMethod="#{paramNode.completeEnumeratedValues}">
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
-                            <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process=":serviceParametersForm:display" update="@(.eps-environment-calculated-value)"/>
+                            <p:ajax event="itemSelect" process=":serviceParametersForm:display" update="@(.eps-environment-calculated-value)"/>
                         </p:autoComplete>
 
                         <p:inputText id="parValue" value="#{paramNode.value}"
                                      style="width: 100%" styleClass="eps-input"
                                      placeholder="#{paramNode.differentValues ? '*' : ''}" rendered="#{(not paramNode.hasEnumeratedValues()) and (empty paramNode.inputMask)}">
-                            <p:ajax event="change" update=":serviceParametersForm:display"/>
+                            <p:ajax event="change" process=":serviceParametersForm:display" update="@(.eps-environment-calculated-value)"/>
                         </p:inputText>
 
                         <p:inputMask id="parValueMasked" value="#{paramNode.value}" style="width: 100%;"
                                      styleClass="eps-input" placeholder="#{paramNode.differentValues ? '*' : ''}"
                                      rendered="#{not empty paramNode.inputMask}" mask="#{paramNode.inputMask}">
+                            <p:ajax event="change" process=":serviceParametersForm:display" update="@(.eps-environment-calculated-value)"/>
                         </p:inputMask>
                     </ui:fragment>
                 </p:column>
@@ -357,13 +358,13 @@
                                     style="width: 85%"
                                     styleClass="eps-input variable-autocomplete #{paramNode.differentVariables and empty paramNode.variable ? 'different-value-label' : ''}"
                                     rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}">
-                        <p:ajax event="change" update=":serviceParametersForm:display"/>
-                        <p:ajax event="itemSelect" update=":serviceParametersForm:display"/>
+                        <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
+                        <p:ajax event="itemSelect" process="@this" update="@(.eps-environment-calculated-value)"/>
                     </p:autoComplete>
                 </p:column>
 
                 <p:column headerText="Final value" style="max-width: 350px; text-overflow: ellipsis" rendered="#{environmentBean.currentVariableSet != null}">
-                    <h:outputText value="#{paramNode.finalValue}" rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}"/>
+                    <p:outputLabel styleClass="eps-environment-calculated-value" value="#{paramNode.finalValue}" rendered="#{paramNode.serviceParamRenderComponent ne 'hidden' and paramNode.serviceParamRenderComponent ne 'handlerClassNameSelect'}"/>
                 </p:column>
 
                 <p:column style="width: 20px;">
