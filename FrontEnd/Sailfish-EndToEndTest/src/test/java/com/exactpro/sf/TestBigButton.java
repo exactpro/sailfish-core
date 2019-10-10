@@ -56,6 +56,7 @@ public class TestBigButton {
         logger.info("Start positive tests of matricies");
         try {
             sfapi = new SFAPIClient(TestMatrix.SF_GUI_URL);
+            sfapi.forceMigrateStatistics();
             checkStatisticsStatus();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

@@ -22,15 +22,9 @@ dependencies {
     }
 }
 
-test {   
-    jvmArgs '-XX:MaxPermSize=256m'
-    
-    println "Test args ${allJvmArgs}"
-}
-
 validateDictionary {
     dependsOn(convertFixOrchestraToSailfishDictionary)
-  
+
     validate(NTG_VALIDATOR, 'NTG_GENERIC.xml')
     validate(ITCH_VALIDATOR, 'ITCH_GENERIC.xml')
 }

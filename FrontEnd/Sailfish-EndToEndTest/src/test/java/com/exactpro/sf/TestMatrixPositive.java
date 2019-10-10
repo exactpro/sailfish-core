@@ -18,6 +18,7 @@ package com.exactpro.sf;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,9 @@ public class TestMatrixPositive extends TestMatrix {
     private final static String matrixFileWithVariableDelay = "testMatrixTimeDelay.csv";
     private final static String matrixFileRangeForExcludeCase = "testMatrixRangeForExcludeCase.csv";
     private final String ENVIRONMENT = "testEnvironment";
+    private static final String matrixFileWithPath = System.getProperty("matrixPath") == null
+        ? TestMatrixPositive.class.getClassLoader().getResource(matrixFile).getFile()
+        : Paths.get(System.getProperty("matrixPath"), matrixFile).toString(); // for containerized environment
     private static Matrix matrix;
     private static Matrix matrixVariableDelay;
     private static Matrix amlMatrix;
@@ -120,9 +124,7 @@ public class TestMatrixPositive extends TestMatrix {
     public void testUploadMatrixLink() throws Exception {
         logger.info("Start testUploadMatrixLink()");
         try {
-
-            XmlMatrixLinkUploadResponse response = sfapi.uploadMatrixLink(
-                    TestMatrixPositive.class.getClassLoader().getResource(matrixFile).getFile());
+            XmlMatrixLinkUploadResponse response = sfapi.uploadMatrixLink(matrixFileWithPath);
             MatrixList matrixList = sfapi.getMatrixList();
             matrix = getMatrixFromList(matrixList, response.getMatrices().get(matrixFile).intValue(), matrixFile);
             Assert.assertTrue("getMatrixList(...) doesn't contain " + matrixFile, matrix != null);
@@ -140,9 +142,7 @@ public class TestMatrixPositive extends TestMatrix {
     public void testUploadMatrixLinkByProvider() throws Exception {
         logger.info("Start testUploadMatrixLinkByProvider()");
         try {
-
-            XmlMatrixLinkUploadResponse response = sfapi.uploadMatrixLink(
-                    TestMatrixPositive.class.getClassLoader().getResource(matrixFile).getFile(), SailfishURI.unsafeParse("LOCAL"));
+            XmlMatrixLinkUploadResponse response = sfapi.uploadMatrixLink(matrixFileWithPath, SailfishURI.unsafeParse("LOCAL"));
             MatrixList matrixList = sfapi.getMatrixList();
             matrix = getMatrixFromList(matrixList, response.getMatrices().get(matrixFile).intValue(), matrixFile);
             Assert.assertTrue("getMatrixList(...) doesn't contain " + matrixFile, matrix != null);

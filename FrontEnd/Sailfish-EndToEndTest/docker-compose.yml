@@ -1,0 +1,24 @@
+version: '3'
+services:
+  db:
+    image: mysql:5.6
+    restart: "no"
+    environment:
+      MYSQL_USER: sailfish
+      MYSQL_PASSWORD: '999'
+      MYSQL_ROOT_PASSWORD: 'swordfish'
+    volumes:
+      - ../../FrontEnd/SailfishFrontEnd/etc/DB/:/var/scripts:ro
+      - ./docker/db:/docker-entrypoint-initdb.d:ro
+  sailfish:
+    user: ${USERID}
+    image: tomcat:9.0.26-jdk8-openjdk-slim
+    ports:
+      - ${PORT}:8080
+    depends_on:
+      - db
+    volumes:
+      - ./docker/Catalina/:/usr/local/tomcat/conf/Catalina:ro
+      - ./build/webapps/:/usr/local/tomcat/webapps
+      - ./build/workspace/:/var/sailfish/workspace
+      - ./src/test/resources/:/var/resources:ro

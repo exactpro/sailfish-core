@@ -1,26 +1,29 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'eclipse'
-apply plugin: 'jacoco'
-
-ext{
-	majorVersion			= '3'
-	minorVersion			= '2'
-	sailfishVersion         = "$majorVersion.$minorVersion"
-    version_slf4j = '1.7.25'
-    jacocoVersion = '0.8.0'
-    sharedDir = file("${project.rootDir}/shared")
+plugins {
+    id 'com.avast.gradle.docker-compose' version '0.9.5'
 }
 
-repositories {
-    maven {
-        name 'MavenLocal' // for local builds only
-        url sharedDir
+ext {
+    port = 8080
+    if (!project.hasProperty('startPort')) {
+        startPort = port
     }
-    jcenter()
-    maven {
-        name 'Artifactory-snapshot'
-        url 'http://artifactory5.exp.exactpro.com/artifactory/libs-snapshot'
+    if (!project.hasProperty("sfGuiURL")) {
+        sfGuiURL = "http://localhost:${port}/sfgui/" // only for build testing
+    }
+    if (!project.hasProperty("artifactsPath")) {
+        sfGuiURL = "http://localhost:${port}/sfgui/" // only for build testing
+    }
+    if (incremental_build) {
+        if (project.hasProperty("artifactsPath")) {
+            pluginPath = artifactsPath
+            sfReleasePath = artifactsPath
+        } else {
+            pluginPath = sharedDir
+            sfReleasePath = sharedDir
+        }
+    } else {
+        pluginPath = "${project(':BackEnd:Plugin:plugin-generic').buildDir}/release/generic"
+        sfReleasePath = "${project(':FrontEnd:SailfishFrontEnd').buildDir}/release"
     }
 }
 
@@ -32,22 +35,18 @@ configurations {
     }
 }
 
-jacoco {
-    toolVersion = jacocoVersion
-}
-
 dependencies {
-    compile group: "com.exactpro.sf", name: "sailfish-core", version: "${sailfishVersion}-SNAPSHOT", transitive: false
-    compile group: "com.exactpro.sf", name: "sailfish-common", version: "${sailfishVersion}-SNAPSHOT", transitive: false
-    compile group: "com.exactpro.sf", name: "extension-aml-3", version: "${sailfishVersion}-SNAPSHOT", transitive: false
-    compile group: "com.exactpro.sf", name: "sailfish-rest-api-client", version: "${sailfishVersion}-SNAPSHOT", transitive: false
-
-    testCompile group: "com.exactpro.sf", name: "sailfish-core", version: "${sailfishVersion}-SNAPSHOT", transitive: false
+    if (incremental_build) {
+        testCompile group: "com.exactpro.sf", name: "sailfish-core", version: "${sailfishVersion}-SNAPSHOT"
+        testCompile group: "com.exactpro.sf", name: "sailfish-rest-api-client", version: "${sailfishVersion}-SNAPSHOT"
+    } else {
+        testCompile project(':BackEnd:Core:sailfish-core')
+        testCompile project(':FrontEnd:Sailfish-REST-API-client')
+    }
     testCompile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7'
     testCompile 'junit:junit:4.12'
-	testCompile 'org.hamcrest:hamcrest-core:1.3'
+    testCompile 'org.hamcrest:hamcrest-core:1.3'
     testCompile "org.slf4j:slf4j-log4j12:${version_slf4j}"
-    testCompile "com.exactpro.sf:sailfish-rest-api-client:${sailfishVersion}-SNAPSHOT"
 
     configurations.runtime.resolvedConfiguration.resolvedArtifacts.each { ResolvedArtifact ra ->
         ModuleVersionIdentifier id = ra.moduleVersion.id
@@ -60,28 +59,128 @@ dependencies {
 
 task download(type: Copy) {
     into ('classes') {
-        from configurations.runtimeClasses.collect { zipTree(it)}
+        from configurations.runtimeClasses.collect { zipTree(it) }
     }
     into ('sources') {
-        from configurations.runtimeSources.collect { zipTree(it)}
+        from configurations.runtimeSources.collect { zipTree(it) }
     }
     into "${buildDir}/download"
 }
 
-ext {
-    if (!project.hasProperty("sfGuiURL")) {
-        sfGuiURL = 'http://localhost:8080/sfgui/' // only for build testing
+task buildJar(dependsOn: ['jar']) {
+}
+
+task unzipRelease {
+    if (!incremental_build) {
+        dependsOn ':FrontEnd:SailfishFrontEnd:zipRelease'
+    }
+    doLast {
+        println("Looking for core artifact in ${sfReleasePath}")
+        fileTree(dir: sfReleasePath)
+            .include('sf_*.zip')
+            .each { releaseFile ->
+                println "Unpacking ${sfReleasePath}/${releaseFile.name}.."
+                def zipFile = file(releaseFile)
+                def outputDir = file("${buildDir}/webapps")
+                copy {
+                    from zipTree(zipFile)
+                    include 'sfgui.war'
+                    into outputDir
+                }
+            }
     }
 }
 
-task buildJar(dependsOn: ['jar']) {	
+task unzipPlugin {
+    if (!incremental_build) {
+        dependsOn ':BackEnd:Plugin:plugin-generic:zipRelease'
+    }
+    doLast {
+        println("Looking for plugin artifact in ${pluginPath}")
+        fileTree(dir: pluginPath)
+            .include('generic*.zip')
+            .each { releaseFile ->
+                println "Unpacking ${pluginPath}/${releaseFile.name}.."
+                def zipFile = file(releaseFile)
+                def outputDir = file("${buildDir}/workspace")
+                copy {
+                    from zipTree(zipFile)
+                    into outputDir
+                }
+            }
+    }
+}
+
+task copyConfig(type: Copy) {
+    doFirst{
+        println "Copying hibernate.cfg.xml into workspace.."
+    }
+    from "${projectDir}/docker/cfg/"
+    into "${buildDir}/workspace/cfg"
+}
+
+composeUp {
+    dependsOn unzipRelease
+    dependsOn unzipPlugin
+    dependsOn copyConfig
+    doFirst {
+        def portFree = false
+        def currentPort = startPort
+        while (!portFree) {
+            if (currentPort > startPort + 10) {
+                throw new GradleException('No port probing attempts left')
+            }
+            try {
+                println("Checking ${currentPort}...")
+                def serverSocket = new ServerSocket(currentPort.toInteger());
+                println("Port: ${currentPort} is free")
+                serverSocket.close()
+                portFree = true
+                sfGuiURL = "http://localhost:${currentPort}/sfgui"
+            } catch(exception) {
+                println("Port: ${currentPort} is busy: ${exception.getMessage()}")
+                currentPort++
+            }
+        }
+        dockerCompose {
+            projectName = currentPort
+            environment.put 'USERID', ["id", "-u"].execute().text.trim()
+            environment.put 'PORT', currentPort
+        }
+    }
+}
+
+task integrationTest (type: Test, description: 'Runs against Docker environment') {
+    doFirst {
+        println "Sailfish URL: ${sfGuiURL}"
+        environment 'SF_GUI_URL': "${sfGuiURL}"
+        environment 'SF_EXECUTOR_URL': 'http://localhost:8080/sfgui'
+        systemProperty 'matrixPath', '/var/resources/' // path to link matrices within a container
+    }
+}
+
+dockerCompose {
+    //captureContainersOutput = true
+    stopContainers = true
+    removeOrphans = true
+    isRequiredBy(integrationTest)
+    // allow to set the path of the docker-compose executable (useful if not present in PATH)
+    // executable = '/path/to/docker-compose'
+}
+
+tasks.withType(Test) {
+    maxParallelForks = 1
 }
 
 test {
-	ignoreFailures = true	
-	println "Sailfish URL [${sfGuiURL}]"
-	environment "SF_GUI_URL": "${sfGuiURL}"
-
+    onlyIf {
+        project.hasProperty('buildPipeline')
+    }
+    doFirst {
+        println "Sailfish URL [${sfGuiURL}]"
+        environment 'SF_GUI_URL': "${sfGuiURL}"
+        ignoreFailures = false
+    }
     jacoco {
         append = false
         destinationFile = file("${buildDir}/jacoco/restAPI.exec")

@@ -1,3 +1,0 @@
-[submodule "libs"]
-	path = libs
-	url = gitolite@git.exactpro.com:Sailfish-libs.git
