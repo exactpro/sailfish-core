@@ -1285,7 +1285,7 @@ public class HelpBuilder {
             }
 
             HelpJsonContainer dictionaryNode = new HelpJsonContainer(DICTIONARIES + File.separator + dictionaryResourceName + HTML,
-                    new ArrayList<HelpJsonContainer>());
+                    new ArrayList<>());
 
             buildMessagesForDictionary(dictionaryURI, dictionaryNode, true);
 

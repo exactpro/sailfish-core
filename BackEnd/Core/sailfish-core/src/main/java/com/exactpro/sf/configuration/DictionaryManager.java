@@ -291,18 +291,18 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 	@Override
 	public synchronized void invalidateDictionaries(SailfishURI ... uris) {
 	    if (uris == null || uris.length == 0) {
-            invalidateEvent(Collections.unmodifiableSet(dicts.keySet()));
             dicts.clear();
             dictionaryIds.clear();
             factories.clear();
+            invalidateEvent(Collections.unmodifiableSet(dicts.keySet()));
             logger.info("All dictionaries have been invalidated");
 	    } else {
-            invalidateEvent(new HashSet<>(Arrays.asList(uris)));
 	        for (SailfishURI uri : uris) {
                 dicts.remove(uri);
                 dictionaryIds.remove(uri);
                 factories.remove(uri);
             }
+            invalidateEvent(new HashSet<>(Arrays.asList(uris)));
             StringBuilder builder = new StringBuilder("Dictionaries ")
                 .append(Arrays.toString(uris))
                 .append(" have been invalidated");

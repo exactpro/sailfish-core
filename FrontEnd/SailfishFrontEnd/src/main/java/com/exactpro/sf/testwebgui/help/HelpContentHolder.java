@@ -23,14 +23,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiPredicate;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
@@ -199,71 +204,62 @@ public class HelpContentHolder implements IDictionaryManagerListener{
     }
 
     public void checkDictionaryListWasChanged(TreeNode mainNode, String pluginName) {
-        boolean reloadDicts = false;
-        File rootFile;
         lock.readLock().lock();
+        boolean nodesChanged;
+        TreeNode rootNode;
         try {
-            rootFile = getHelpFile(pluginName, HelpBuilder.ROOT);
-            if(rootFile == null) {
-                return;
-            }
-            Long lastModified = dictionaryModified.get(mainNode);
-
-            if (lastModified == null) {
-                dictionaryModified.put(mainNode, rootFile.lastModified());
-            } else if (!lastModified.equals(rootFile.lastModified())) {
-                dictionaryModified.put(mainNode, rootFile.lastModified());
-                reloadDicts = true;
-            }
+            rootNode = getNodeByRowKey(mainNode.getRowKey());
+            nodesChanged = rootNode != mainNode /*check that isn't the same node just in case*/
+                    && rootNode.getChildCount() != mainNode.getChildCount();
 
         } finally {
             lock.readLock().unlock();
         }
 
-        if (reloadDicts) {
+        if (nodesChanged) {
             lock.writeLock().lock();
             try {
-
-                HelpJsonContainer rootContainer = mapper.readValue(HelpBuilder.fileToJsonString(rootFile), HelpJsonContainer.class);
-
-                HelpJsonContainer dictionariesContainer = null;
-
-                for (HelpJsonContainer child : rootContainer.getChildNodes()) {
-                    if (child.getName().equals(HelpEntityName.DICTIONARIES.getValue())) {
-                        dictionariesContainer = child;
-                    }
-                }
-
-                if (dictionariesContainer != null && dictionariesContainer.getChildNodes().size() > mainNode.getChildren().size()) {
-
-                    Set<SailfishURI> uris = context.getDictionaryManager().getDictionaryURIs(pluginName);
-                    List<SailfishURI> found = new ArrayList<>();
-
-                    TreeNode rootDictionaries = getNodeByRowKey(mainNode.getRowKey());
-
-                    for (TreeNode dictNode : rootDictionaries.getChildren()) {
-                        URIJsonContainer container = (URIJsonContainer) dictNode.getData();
-                        if (uris.contains(container.getUri())) {
-                            found.add(container.getUri());
-                        }
-                    }
-
-                    for (HelpJsonContainer dictionary : dictionariesContainer.getChildNodes()) {
-
-                        if (!found.contains(((URIJsonContainer) dictionary).getUri())) {
-                            TreeNode dictionaryRootNode = new DefaultTreeNode(HelpEntityType.DICTIONARY.name(), dictionary, rootDictionaries);
-                            new DefaultTreeNode(HelpEntityType.NAMED.name(), null, dictionaryRootNode);
-
-                            TreeNode dictionaryNode = new DefaultTreeNode(HelpEntityType.DICTIONARY.name(), dictionary, mainNode);
-                            new DefaultTreeNode(HelpEntityType.NAMED.name(), null, dictionaryNode);
-                        }
-
-                    }
-                }
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
+                mainNode.getChildren().clear();
+                copyChildren(rootNode, mainNode);
             } finally {
                 lock.writeLock().unlock();
+            }
+        }
+    }
+
+    private void reloadDictionaries(File rootFile, TreeNode dictionariesNode, String pluginName) throws IOException {
+        HelpJsonContainer rootContainer = mapper.readValue(HelpBuilder.fileToJsonString(rootFile), HelpJsonContainer.class);
+
+        HelpJsonContainer dictionariesContainer = null;
+
+        for (HelpJsonContainer child : rootContainer.getChildNodes()) {
+            if (child.getName().equals(HelpEntityName.DICTIONARIES.getValue())) {
+                dictionariesContainer = child;
+                break;
+            }
+        }
+
+        if (dictionariesContainer != null && dictionariesContainer.getChildNodes().size() > dictionariesNode.getChildren().size()) {
+
+            Set<SailfishURI> uris = context.getDictionaryManager().getDictionaryURIs(pluginName);
+            List<SailfishURI> found = new ArrayList<>();
+
+            TreeNode rootDictionaries = getNodeByRowKey(dictionariesNode.getRowKey());
+
+            for (TreeNode dictNode : rootDictionaries.getChildren()) {
+                URIJsonContainer container = (URIJsonContainer) dictNode.getData();
+                if (uris.contains(container.getUri())) {
+                    found.add(container.getUri());
+                }
+            }
+
+            for (HelpJsonContainer dictionary : dictionariesContainer.getChildNodes()) {
+
+                if (!found.contains(((URIJsonContainer)dictionary).getUri())) {
+                    TreeNode dictionaryRootNode = new DefaultTreeNode(HelpEntityType.DICTIONARY.name(), dictionary, rootDictionaries);
+                    new DefaultTreeNode(HelpEntityType.NAMED.name(), null, dictionaryRootNode);
+                }
+
             }
         }
     }
@@ -432,6 +428,23 @@ public class HelpContentHolder implements IDictionaryManagerListener{
         try {
             HelpBuilder dictBuilder = new HelpBuilder(context.getWorkspaceDispatcher(), context.getDictionaryManager(), context.getUtilityManager());
             dictBuilder.buildNewDictionary(dict);
+
+            findPluginNode(dict.getPluginAlias())
+                    .flatMap(treeNode ->
+                            findNode(treeNode.getChildren(), true, (node, data) -> HelpEntityName.DICTIONARIES.getValue().equals(data.getName()))
+                    )
+                    .ifPresent(node -> {
+                        String pluginAlias = dict.getPluginAlias();
+                        File rootFile = getHelpFile(pluginAlias, HelpBuilder.ROOT);
+                        if(rootFile != null) {
+                            try {
+                                // TODO: this is still doesn't update nodes in HelpBean. That means during the search updates won't be displayed
+                                reloadDictionaries(rootFile, node, pluginAlias);
+                            } catch (IOException e) {
+                                logger.error("Can't reload dictionaries for plugin {}", pluginAlias, e);
+                            }
+                        }
+                    });
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         } finally {
@@ -439,18 +452,60 @@ public class HelpContentHolder implements IDictionaryManagerListener{
         }
     }
 
-    public void dictionaryModified(SailfishURI dict, String pluginName) {
+    /**
+     *
+     * @param dict - dictionary SURI
+     * @param pluginPath - relative path to plugin directory. If dictionary is General it point directly to the workspace
+     */
+    public void dictionaryModified(SailfishURI dict, String pluginPath) {
         lock.writeLock().lock();
         try {
             HelpBuilder rebuilder = new HelpBuilder(context.getWorkspaceDispatcher(), context.getDictionaryManager(), context.getUtilityManager());
 
-            rebuilder.rebuildDictionary(dict, pluginName);
+            rebuilder.rebuildDictionary(dict, pluginPath);
+
+            findPluginNode(dict.getPluginAlias()).flatMap(treeNode ->
+                    findNode(treeNode.getChildren(), true, (ignore, data) ->
+                            data.getType() == HelpEntityType.DICTIONARY && data.getName().equals(dict.getResourceName()))
+            ).ifPresent(node -> {
+                // clear children and add a fake node to reload tree when it required
+                // TODO: this is still doesn't update nodes in HelpBean. That means during the search updates won't be displayed
+                node.getChildren().clear();
+                new DefaultTreeNode(HelpEntityType.NAMED.name(), null, node);
+            });
         } catch (IOException | TemplateException e) {
             logger.error(e.getMessage(), e);
         } finally {
             lock.writeLock().unlock();
         }
 
+    }
+
+    private Optional<TreeNode> findPluginNode(String pluginAlias) {
+        return findNode(rootNode.getChildren(), false, (node, data) -> {
+            TreeNode parent = node.getParent();
+            return parent != null && parent.getData().equals(ROOT)
+                    && pluginAlias.equals(data.getName());
+        });
+    }
+
+    private Optional<TreeNode> findNode(List<TreeNode> root, boolean recursive, BiPredicate<TreeNode, HelpJsonContainer> filter) {
+        for (TreeNode node : ObjectUtils.defaultIfNull(root, Collections.<TreeNode>emptyList())) {
+            HelpJsonContainer data = getContainer(node);
+            if (data == null) {
+                continue;
+            }
+            if (filter.test(node, data)) {
+                return Optional.of(node);
+            }
+            if (recursive && CollectionUtils.isNotEmpty(node.getChildren())) {
+                Optional<TreeNode> treeNode = findNode(node.getChildren(), true, filter);
+                if (treeNode.isPresent()) {
+                    return treeNode;
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
