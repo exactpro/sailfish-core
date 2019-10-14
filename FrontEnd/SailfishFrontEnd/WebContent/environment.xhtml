@@ -288,8 +288,7 @@
                             <f:selectItem itemLabel="#{paramNode.differentValues and empty paramNode.value ? '*' : 'Select handler class name'}"
                             			  itemValue="#{null}" itemDisabled="true" />
                             <f:selectItems value="#{enumSetContainer.loadHandlerClassName()}" />
-                            <p:ajax event="change" process="@this" update="@(.eps-environment-calculated-value)"/>
-                            <p:ajax event="itemSelect" process="@this" update="@(.eps-environment-calculated-value)"/>
+                            <p:ajax event="valueChange" process="@this" update="@(.eps-environment-calculated-value)"/>
                         </p:selectOneMenu>
                     </ui:fragment>
 
