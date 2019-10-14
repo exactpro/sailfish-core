@@ -17,8 +17,10 @@ package com.exactpro.sf.aml.script.actions;
 
 import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
 import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
+import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +49,7 @@ import com.exactpro.sf.comparison.Formatter;
 import com.exactpro.sf.comparison.IPostValidation;
 import com.exactpro.sf.comparison.MessageComparator;
 import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.scriptrunner.MessageLevel;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
@@ -58,6 +61,8 @@ import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceHandlerRoute;
+import com.exactpro.sf.services.util.ServiceUtil;
+import com.exactpro.sf.util.DateTimeUtility;
 import com.exactpro.sf.util.KnownBugException;
 import com.exactpro.sf.util.KnownBugPostValidation;
 import com.exactpro.sf.util.MessageKnownBugException;
@@ -153,36 +158,66 @@ public class WaitAction {
             String description) throws InterruptedException
 	{
 	    Logger logger = actionContext.getLogger();
-
+        Collection<String> storedMessageTypes = getStoredMessageTypes(actionContext);
 		List<Pair<IMessage, ComparisonResult>> results = null;
+
+        IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
 
 		logger.debug("[{}]  start wait for message in {} queue", serviceName, fromApp ? "application" : "admin");
 
 		try {
-            results = waitMessage(handler, isession, fromApp ? FROM_APP : FROM_ADMIN, checkPoint, waitTime, messageFilter, settings);
+            results = waitMessage(handler, isession, fromApp ? FROM_APP : FROM_ADMIN, checkPoint, waitTime, messageFilter, settings, storedMessageTypes, client.getSettings().isInvertStoredMessageTypes());
 		} catch (InterruptedException e) {
 			logger.error("[{}]  InterruptedException:{}", serviceName, e.getMessage(), e);
 			throw e;
 		}
-
-		return processResults(report, settings, results, messageFilter, serviceName, returnExactOnly, addToReport, description);
+		return processResults(report, settings, results, messageFilter, serviceName, returnExactOnly, addToReport, description, checkPoint);
 	}
 
-	// this is public because it's used in tests
-    public static List<Pair<IMessage, ComparisonResult>> waitMessage(IServiceHandler handler, ISession session, ServiceHandlerRoute route, CheckPoint checkPoint, long timeout, IMessage filter, ComparatorSettings settings)
+    private static Collection<String> getStoredMessageTypes(IActionContext actionContext) {
+        Collection<String> storedMessageTypes = Collections.emptySet();
+        try{
+            IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
+            String rawStoredMessageTypes = client.getSettings().getStoredMessageTypes();
+            if (StringUtils.isNotBlank(rawStoredMessageTypes)) {
+                rawStoredMessageTypes = ServiceUtil.loadStringFromAlias(actionContext.getDataManager(), rawStoredMessageTypes, ",");
+                storedMessageTypes =  stream(rawStoredMessageTypes.split(","))
+                        .map(String::trim)
+                        .filter(StringUtils::isNoneEmpty)
+                        .collect(Collectors.toSet());
+            }
+        }catch(SailfishURIException e){
+            log.error("An Error occurs while getting client StoredMessageTypes property", e);
+        }
+        return storedMessageTypes;
+    }
+
+    // this is public because it's used in tests
+    public static List<Pair<IMessage, ComparisonResult>> waitMessage(IServiceHandler handler, ISession session, ServiceHandlerRoute route, CheckPoint checkPoint, long timeout, IMessage filter, ComparatorSettings settings, Collection<String> storedMessageTypes, boolean invertStoredMessageTypes)
             throws InterruptedException {
         CSHIterator<IMessage> messagesIterator = handler.getIterator(session, route, checkPoint);
-        return waitMessage(settings, filter, messagesIterator, timeout);
+        return waitMessage(settings, filter, messagesIterator, timeout, storedMessageTypes, invertStoredMessageTypes);
+    }
+
+    public static List<Pair<IMessage, ComparisonResult>> waitMessage(ComparatorSettings settings, IMessage filter, ICSHIterator<IMessage> messagesIterator, IActionContext actionContext) throws InterruptedException {
+        Collection<String> storedMessageTypes = getStoredMessageTypes(actionContext);
+        IInitiatorService client = ActionUtil.getService(actionContext, IInitiatorService.class);
+        return waitMessage(settings, filter, messagesIterator, actionContext.getTimeout(), storedMessageTypes, client.getSettings().isInvertStoredMessageTypes());
     }
 
     public static List<Pair<IMessage, ComparisonResult>> waitMessage(ComparatorSettings settings, IMessage filter,
-            ICSHIterator<IMessage> messagesIterator, long timeout) throws InterruptedException {
+            ICSHIterator<IMessage> messagesIterator, long timeout, Collection<String> storedMessageTypes, boolean invertStoredMessageTypes) throws InterruptedException {
         long endTime = System.currentTimeMillis() + timeout;
         List<Pair<IMessage, ComparisonResult>> partialList = new ArrayList<>();
         List<Pair<IMessage, ComparisonResult>> conditionallyPassedMessage = null;
+        if (!storedMessageTypes.isEmpty() && (invertStoredMessageTypes == storedMessageTypes.contains(filter.getName()))) {
+            throw new WaitMessageException(String.format("Message - '%s' is not allowed. Check the 'Stored Message Type' and 'Invert Stored Message Types' options in your service settings", filter.getName()),
+                    Collections.emptyList());
+        }
 
         while(messagesIterator.hasNext(endTime - System.currentTimeMillis())) {
             IMessage message = messagesIterator.next();
+
             ComparisonResult result = MessageComparator.compare(message, filter, settings);
 
             if(result == null) {
@@ -637,18 +672,18 @@ public class WaitAction {
     	compSettings.setReorderGroups(actionContext.isReorderGroups());
     	compSettings.setUncheckedFields(actionContext.getUncheckedFields());
     	compSettings.setIgnoredFields(actionContext.getIgnoredFields());
-
         return compSettings;
     }
 
     public static IMessage processResults(IActionReport report, ComparatorSettings settings, List<Pair<IMessage, ComparisonResult>> results, IMessage messageFilter,
-            String serviceName, boolean returnExactOnly, boolean addToReport, String description) {
+            String serviceName, boolean returnExactOnly, boolean addToReport, String description, CheckPoint checkPoint) {
         if (results.size() == 1)
     	{
     		Pair<IMessage, ComparisonResult> result = results.get(0);
             int countFailed = ComparisonUtil.getResultCount(result.getSecond(), StatusType.FAILED);
             countFailed += ComparisonUtil.getResultCount(result.getSecond(), StatusType.CONDITIONALLY_FAILED);
             int countCP = ComparisonUtil.getResultCount(result.getSecond(), StatusType.CONDITIONALLY_PASSED);
+            int countPassed = countCP + ComparisonUtil.getResultCount(result.getSecond(), StatusType.PASSED);
 
             log.debug("[{}] Result Table:\n{}", serviceName, result.getSecond());
             log.debug("[{}] failed results count: {}. Result Table:\n{}", serviceName, countFailed, result.getSecond());
@@ -668,7 +703,7 @@ public class WaitAction {
 
     		IMessage message = result.getFirst();
     		if (countFailed != 0) {
-    			throw new WaitMessageException("Timeout", Collections.singletonList(message));
+                throw new WaitMessageException(createWaitExceptionMessage(false, checkPoint), Collections.singletonList(message));
             } else if (countCP != 0) {
                 Throwable exception = result.getSecond().getException();
                 if (exception instanceof KnownBugException) {
@@ -676,10 +711,9 @@ public class WaitAction {
                     throw new MessageKnownBugException(StringUtils.defaultString(knownBugException.getMessage()),
                             getReorderMessage(message, settings, messageFilter), knownBugException.getPotentialDescriptions());
                 } else {
-                    throw new WaitMessageException(StringUtils.defaultString(exception.getMessage()), Collections.singletonList(message));
+                    throw new WaitMessageException("Timeout. Known bugs were partially reproduced, but there are also unknown bugs (" + StringUtils.defaultString(exception.getMessage()) + ')', Collections.singletonList(message));
                 }
             }
-
             return getReorderMessage(message, settings, messageFilter);
     	}
 
@@ -687,10 +721,9 @@ public class WaitAction {
     	{
     		return null;
     	}
-
         processFailed(results, report, serviceName, description, addToReport);
 
-        throw new WaitMessageException("Timeout", results.stream().map(Pair::getFirst).collect(Collectors.toList()));
+        throw new WaitMessageException(createWaitExceptionMessage(results.isEmpty(), checkPoint), results.stream().map(Pair::getFirst).collect(Collectors.toList()));
     }
 
     public static void processFailed(List<Pair<IMessage, ComparisonResult>> results, IActionReport report,
@@ -785,5 +818,39 @@ public class WaitAction {
         }
 
         return KnownBugPostValidation.process(result);
+    }
+
+    private static String createWaitExceptionMessage(boolean isEmpty, CheckPoint checkPoint){
+        StringBuilder messageBuilder = new StringBuilder("Timeout. ");
+
+        if (isEmpty) {
+            messageBuilder.append("No messages matching filter ");
+        } else {
+            messageBuilder.append("No messages fully matched the filter");
+        }
+
+        if (checkPoint != null) {
+            messageBuilder.append("from the checkpoint ");
+            if (!checkPoint.isSmart()) {
+
+                messageBuilder.append("appx ")
+                        .append(DateTimeUtility.toLocalDate(checkPoint.getTimestamp()))
+                        .append(" at ")
+                        .append(DateTimeUtility.toLocalTime(checkPoint.getTimestamp()))
+                        .append(' ');
+            }
+        } else {
+            messageBuilder.append("from test case start ");
+        }
+        messageBuilder.append("till the timeout is exceeded ");
+
+        long currentTime = System.currentTimeMillis();
+        messageBuilder.append("appx ")
+                .append(DateTimeUtility.toLocalDate(currentTime))
+                .append(" at ")
+                .append(DateTimeUtility.toLocalTime(currentTime))
+                .append(' ');
+
+        return messageBuilder.toString();
     }
 }

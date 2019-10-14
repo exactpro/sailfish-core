@@ -179,10 +179,9 @@ public class TestActions extends AbstractCaller {
         ComparatorSettings compSettings = WaitAction.createCompareSettings(actionContext, null, message);
 
         ICSHIterator<IMessage> iterator = new JsonMessageIterator(actionContext, service, message);
-        
-        List<Pair<IMessage, ComparisonResult>> results = WaitAction.waitMessage(compSettings, message, iterator, actionContext.getTimeout());
-        
-        return WaitAction.processResults(report, compSettings, results, message, actionContext.getServiceName(), false, actionContext.isAddToReport(), actionContext.getDescription());
+        List<Pair<IMessage, ComparisonResult>> results = WaitAction.waitMessage(compSettings, message, iterator, actionContext);
+
+        return WaitAction.processResults(report, compSettings, results, message, actionContext.getServiceName(), false, actionContext.isAddToReport(), actionContext.getDescription(), actionContext.getCheckPoint());
     }
 
     @Description("Count nearest messages in the past which matched with filter. <br/>"

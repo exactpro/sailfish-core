@@ -665,7 +665,7 @@ public class CommonActions extends AbstractCaller {
         IActionReport report = actionContext.getReport();
         report.createMessage(TextColor.BLACK, TextStyle.NORMAL, "First timestamp: " + DateTimeUtility.toLocalDateTime(timestampFirst)
                 + ", second timestamp: " + DateTimeUtility.toLocalDateTime(timestampSecond));
-        WaitAction.processResults(report, settings, results, expected, null, false, actionContext.isAddToReport(), actionContext.getDescription());
+        WaitAction.processResults(report, settings, results, expected, null, false, actionContext.isAddToReport(), actionContext.getDescription(), null);
 
     }
 

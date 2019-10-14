@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
@@ -179,7 +180,7 @@ public abstract class TestClientBase extends AbstractTest {
             ServiceHandlerRoute prov, SailfishURI dictionaryName, String serviceName, CheckPoint cp) {
         Pair<IMessage, ComparisonResult> result = new Pair<>(null, null);
         try {
-            List<Pair<IMessage, ComparisonResult>> list = WaitAction.waitMessage(handler, session, prov, cp, timeout, messageFilter, getCompareSettings(dictionaryName));
+            List<Pair<IMessage, ComparisonResult>> list = WaitAction.waitMessage(handler, session, prov, cp, timeout, messageFilter, getCompareSettings(dictionaryName), Collections.emptySet(), false);
             if(!list.isEmpty()) {
                 IMessage resultMessage = list.get(list.size() - 1).getFirst();
                 ComparisonResult comparision = list.get(list.size() - 1).getSecond();
