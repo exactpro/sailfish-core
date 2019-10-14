@@ -136,7 +136,8 @@
             <p:dataTable id="table" widgetVar="messagesTable" var="message" value="#{messagesBean.messageLazyModel}" lazy="true" emptyMessage="No messages found"
                          paginator="true" paginatorPosition="bottom" rows="#{messagesBean.rowsPerPage}" style="text-align: left; word-wrap:break-word;"
                          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
-                         rowsPerPageTemplate="15,50,100,250" styleClass="eps-messages-table eps-main-table" scrollable="true" scrollHeight="100%">
+                         rowsPerPageTemplate="15,50,100,250" styleClass="eps-messages-table eps-main-table" scrollable="true" scrollHeight="100%"
+                         sortBy="#{message.timestamp}" sortOrder="ascending" >
 
                 <p:ajax event="page" oncomplete="showTogglerTooltip(); wrapContent();"/>
                 <p:ajax event="filter" oncomplete="showTogglerTooltip(); wrapContent();"/>
