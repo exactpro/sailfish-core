@@ -19,7 +19,6 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.comparison.Formatter;
 import com.exactpro.sf.scriptrunner.StatusType;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.JsonReport;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,8 +26,11 @@ import java.util.stream.Collectors;
 
 public class VerificationEntry {
     private String name;
+
+    //FIXME: implement some kind of container for those values. It should contain type, possible enum alias, and value
     private String actual;
     private String expected;
+
     private StatusType status;
     private Double precision;
     private Double systemPrecision;

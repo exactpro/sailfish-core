@@ -43,7 +43,7 @@ public class TestIsActionCreated  extends AbstractTest {
 
         HtmlReport htmlReport = new HtmlReport(null, "", workspaceDispatcher, serviceContext.getDictionaryManager(),
                 EnvironmentSettings.RelevantMessagesSortingMode.ARRIVAL_TIME);
-        JsonReport jsonReport = new JsonReport("", workspaceDispatcher, Mockito.mock(TestScriptDescription.class));
+        JsonReport jsonReport = new JsonReport("", workspaceDispatcher, Mockito.mock(TestScriptDescription.class), serviceContext.getDictionaryManager());
         ZipReport zipReport = new ZipReport("", workspaceDispatcher, Mockito.mock(TestScriptDescription.class), EnvironmentSettings.ReportOutputFormat.ZIP);
 
 

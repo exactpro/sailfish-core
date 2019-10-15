@@ -45,7 +45,11 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
+import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.comparison.ComparisonResult;
+import com.exactpro.sf.configuration.DictionaryManager;
+import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
@@ -86,6 +90,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
+import com.exactpro.sf.util.EnumReplacer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -108,6 +113,8 @@ public class JsonReport implements IScriptReport {
     private final IWorkspaceDispatcher dispatcher;
     private final String reportRootDirectoryPath;
     private final TestScriptDescription testScriptDescription;
+    private final IDictionaryManager dictionaryManager;
+
 
     //Main bean of report
     private final ReportRoot reportRoot = new ReportRoot();
@@ -121,12 +128,13 @@ public class JsonReport implements IScriptReport {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
     }
 
-    public JsonReport(String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription) {
+    public JsonReport(String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription, IDictionaryManager dictionaryManager) {
         this.messageToActionIdMap = new HashMap<>();
         this.reportStats = new ReportStats();
         this.dispatcher = dispatcher;
         this.reportRootDirectoryPath = reportRootDirectoryPath;
         this.testScriptDescription = testScriptDescription;
+        this.dictionaryManager = dictionaryManager;
     }
 
     @JsonIgnore public boolean isActionCreated() throws UnsupportedOperationException {
@@ -375,6 +383,17 @@ public class JsonReport implements IScriptReport {
 
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
         assertState(ContextType.ACTION, ContextType.ACTIONGROUP, ContextType.TESTCASE);
+
+        try {
+            result = new ComparisonResult(result);
+
+            EnumReplacer.replaceEnums(result,
+                    dictionaryManager.getDictionary(result.getMetaData().getDictionaryURI())
+                            .getMessages().get(result.getMetaData().getMsgName()));
+
+        } catch (Exception e) {
+            logger.error("unable to set enum aliases", e);
+        }
 
         Verification curVerification = new Verification();
         curVerification.setName(name);

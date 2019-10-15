@@ -190,6 +190,9 @@ public class BroadcastScriptReport implements IScriptReport {
         }
     }
 
+
+    //FIXME: Comparison result mutates while being processed by HtmlReport.
+    //FIXME: There is not enough data in a comparison result object (e.g. enum aliases need to be assigned before the report generation).
 	@Override
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
 		for (IScriptReport listener: listeners) {

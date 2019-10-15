@@ -260,7 +260,7 @@ public abstract class AbstractScriptRunner implements IDisposable {
 
             List<IScriptReport> aggregateReportListeners = new ArrayList<>();
 			// json report
-            aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher, scriptDescription));
+            aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher, scriptDescription, dictionaryManager));
             // html report
             aggregateReportListeners.add(new HtmlReport(sfContext.getSfInstanceInfo(), reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
 
