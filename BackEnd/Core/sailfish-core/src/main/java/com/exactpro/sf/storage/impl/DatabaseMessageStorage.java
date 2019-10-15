@@ -15,27 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
-import java.io.FileNotFoundException;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.MessageUtil;
@@ -54,6 +33,26 @@ import com.exactpro.sf.storage.entities.StoredMessage;
 import com.exactpro.sf.storage.entities.StoredScriptRun;
 import com.exactpro.sf.util.CHMInterner;
 import com.exactpro.sf.util.Interner;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+
+import java.io.FileNotFoundException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Queue;
+import java.util.Set;
 
 public class DatabaseMessageStorage extends AbstractMessageStorage {
     private static final int REMOVE_BATCH_SIZE = 5000;
@@ -222,7 +221,7 @@ public class DatabaseMessageStorage extends AbstractMessageStorage {
             if(!where.isEmpty()) {
                 strQuery += " where " + where;
             }
-			strQuery += " order by msg.id desc, msg.arrived desc ";
+			strQuery += " order by msg.id desc ";
 
 			Query query = session.createQuery(strQuery);
 
