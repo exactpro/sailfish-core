@@ -98,10 +98,11 @@ public class CustomPropertyConfigurator extends PropertyConfigurator {
             }
         }
 
-        protected void doOnChange(File file) {
-            new PropertyConfigurator().doConfigure(file.getAbsolutePath(),
-                    LogManager.getLoggerRepository());
+    }
 
-        }
+    public static void doOnChange(File file) {
+        new PropertyConfigurator().doConfigure(file.getAbsolutePath(),
+                LogManager.getLoggerRepository());
+
     }
 }

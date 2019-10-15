@@ -30,11 +30,16 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlVariableSets;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -133,6 +138,9 @@ public class SFAPIClient implements AutoCloseable {
     private static final String RESOURCES_CLEAN_OLDERTHAN = "resources/clean?olderthan=!olderthan";
     private static final String RESOURCES_CLEAN_TARGETS = "resources/clean?targets=!targets";
     private static final String RESOURCES_CLEAN_OLDERTHAN_TARGETS = "resources/clean?olderthan=!olderthan&targets=!targets";
+
+    private static final String CONFIGURATION = "configuration/";
+    private static final String LOGGING_CONFIGURATION = CONFIGURATION + "logging/";
 
     private final CloseableHttpClient http;
 	private final String rootUrl;
@@ -1039,6 +1047,43 @@ public class SFAPIClient implements AutoCloseable {
             throw new APICallException(e);
         }
     }
+
+    //region Configuration
+
+    public void setLoggingConfiguration(File cfgFile) throws APICallException, APIResponseException {
+        String url = rootUrl + LOGGING_CONFIGURATION;
+        try {
+            HttpEntity cfgEntity = MultipartEntityBuilder.create()
+                    .addBinaryBody("file", cfgFile, ContentType.TEXT_PLAIN, cfgFile.getName())
+                    .build();
+            HttpUriRequest request = RequestBuilder.post(url)
+                    .setEntity(cfgEntity)
+                    .build();
+
+            try (CloseableHttpResponse response = http.execute(request)) {
+                checkHttpResponse(response);
+            }
+        } catch (APIResponseException e) {
+            throw new APIResponseException("URL: " + url, e);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    public InputStream getLoggingConfiguration() throws APIResponseException, APICallException {
+        String url = rootUrl + LOGGING_CONFIGURATION;
+        try {
+            CloseableHttpResponse response = http.execute(new HttpGet(url));
+            checkHttpResponse(response);
+            return response.getEntity().getContent();
+        } catch (APIResponseException e) {
+            throw new APIResponseException("URL: " + url, e);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
+
+    //endregion
 
 	// Statistics
 	
