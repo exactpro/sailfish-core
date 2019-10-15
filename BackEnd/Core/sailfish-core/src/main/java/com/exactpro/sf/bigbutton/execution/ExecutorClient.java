@@ -56,6 +56,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -213,7 +215,7 @@ public class ExecutorClient {
 		return state;
 	}
 	
-    public boolean prepareExecutor(String xmlConfig) {
+    public boolean prepareExecutor(String xmlConfig, File loggingConfiguration) {
         if(state == ExecutorState.Error) {
             return false;
         }
@@ -222,6 +224,11 @@ public class ExecutorClient {
                 createApiClient();
             }
             apiClient.setStatisticsDBSettings(xmlConfig);
+
+            if (settings.isCloneLoggingConfiguration()) {
+                apiClient.setLoggingConfiguration(loggingConfiguration);
+            }
+
             uploadVariableSets();
             uploadExecutorServices();
 

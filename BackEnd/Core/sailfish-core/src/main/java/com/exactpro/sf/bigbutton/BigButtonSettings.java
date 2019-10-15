@@ -51,6 +51,7 @@ public class BigButtonSettings implements IMapableSettings, Serializable {
     private String emailCondPassedRecipients = "";
     private String emailFailedRecipients = "";
     private boolean showPreCeanDialog = true;
+    private boolean cloneLoggingConfiguration;
 
     public BigButtonSettings() {
     }
@@ -65,8 +66,10 @@ public class BigButtonSettings implements IMapableSettings, Serializable {
         this.emailSubject = settings.emailSubject;
         this.emailRecipients = settings.emailRecipients;
         this.emailPassedRecipients = settings.emailPassedRecipients;
+        this.emailCondPassedRecipients = settings.emailCondPassedRecipients;
         this.emailFailedRecipients = settings.emailFailedRecipients;
         this.showPreCeanDialog = settings.showPreCeanDialog;
+        this.cloneLoggingConfiguration = settings.cloneLoggingConfiguration;
     }
 
     public boolean isShowPreCeanDialog() {
@@ -124,6 +127,14 @@ public class BigButtonSettings implements IMapableSettings, Serializable {
 
     public void setEmailFailedRecipients(String emailFailedRecipients) {
         this.emailFailedRecipients = StringUtils.trimToEmpty(emailFailedRecipients);
+    }
+
+    public boolean isCloneLoggingConfiguration() {
+        return cloneLoggingConfiguration;
+    }
+
+    public void setCloneLoggingConfiguration(boolean cloneLoggingConfiguration) {
+        this.cloneLoggingConfiguration = cloneLoggingConfiguration;
     }
 
     @SuppressWarnings("incomplete-switch")

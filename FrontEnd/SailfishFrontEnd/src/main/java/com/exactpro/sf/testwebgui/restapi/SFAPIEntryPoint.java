@@ -17,6 +17,8 @@ package com.exactpro.sf.testwebgui.restapi;
 
 import javax.ws.rs.ApplicationPath;
 
+import com.exactpro.sf.testwebgui.restapi.handlers.WebApplicationExceptionMapper;
+import com.exactpro.sf.testwebgui.restapi.handlers.CommonExceptionMapper;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.api.MachineLearningResourceV2;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -45,5 +47,8 @@ public class SFAPIEntryPoint extends ResourceConfig {
         register(InternalResources.class);
         register(VariableSetsResource.class);
         register(ConfigurationResource.class);
+
+        register(CommonExceptionMapper.class);
+        register(WebApplicationExceptionMapper.class);
     }
 }

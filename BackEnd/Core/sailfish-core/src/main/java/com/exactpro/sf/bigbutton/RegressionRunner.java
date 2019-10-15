@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -32,6 +34,7 @@ import com.exactpro.sf.bigbutton.library.Executor;
 import com.exactpro.sf.bigbutton.library.Library;
 import com.exactpro.sf.bigbutton.library.ScriptList;
 import com.exactpro.sf.bigbutton.library.Tag;
+import com.exactpro.sf.center.impl.PluginLoader;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
@@ -343,11 +346,13 @@ public class RegressionRunner implements AutoCloseable {
 
                 String dbSettings = RegressionRunnerUtils.getStatisticsDBSettings();
 
+                File loggingConfiguration = workspaceDispatcher.getFile(FolderType.CFG, PluginLoader.LOG4J_PROPERTIES_FILE_NAME);
+
                 List<ExecutorClient> preparedClients = new ArrayList<>();
 
                 logger.info("Preparing executor clients...");
                 for (ExecutorClient client : exClients) {
-                    if (client.prepareExecutor(dbSettings)) {
+                    if (client.prepareExecutor(dbSettings, loggingConfiguration)) {
                         preparedClients.add(client);
                     }
                 }
@@ -369,6 +374,9 @@ public class RegressionRunner implements AutoCloseable {
                 monitor.started();
 
                 logger.info("BB initiator finished");
+            } catch (FileNotFoundException e) {
+                logger.error("Cannot get logging configuration file",e);
+                throw new RuntimeException("Cannot get logging configuration file", e);
             } catch (Exception e) {
                 logger.error("Can not execute BB initiator: {}", e.getMessage(), e);
                 throw e;

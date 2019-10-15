@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Singleton;
@@ -46,6 +48,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.bigbutton.BigButtonSettings;
 import com.exactpro.sf.bigbutton.RegressionRunner;
 import com.exactpro.sf.bigbutton.execution.ProgressView;
 import com.exactpro.sf.bigbutton.importing.CsvLibraryBuilder;
@@ -54,6 +57,7 @@ import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
 import com.exactpro.sf.testwebgui.restapi.xml.BBNodeStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.BBSettings;
 import com.exactpro.sf.testwebgui.restapi.xml.BbExecutionStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
 
@@ -63,11 +67,12 @@ public class BigButtonResource {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BigButtonResource.class);
 
-    private final AtomicLong importIdCounter = new AtomicLong(0l);
+    private final AtomicLong importIdCounter = new AtomicLong();
 
     private final ConcurrentMap<Long, LibraryImportResult> importedLibraries = new ConcurrentHashMap<>();
-	
-	@POST
+    private static final String SETTINGS = "settings";
+
+    @POST
 	@Path("upload")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadFile(@FormDataParam("file") InputStream uploadedInputStream,
@@ -309,5 +314,60 @@ public class BigButtonResource {
         }
 
     }
-	
+
+    @POST
+    @Path(SETTINGS)
+    @Consumes(MediaType.APPLICATION_XML)
+    @Produces(MediaType.APPLICATION_XML)
+    public BBSettings setSettings(BBSettings settingsBean) {
+        //FIXME: should get by dependencies injection
+        RegressionRunner regressionRunner = SFLocalContext.getDefault().getRegressionRunner();
+        BigButtonSettings bbSettings = regressionRunner.getSettings();
+        setIfNotNull(bbSettings::setCloneLoggingConfiguration, settingsBean::isCloneLoggingConfiguration);
+
+        setIfNotNull(bbSettings::setEmailPassedRecipients, settingsBean::getEmailPassedRecipients);
+        setIfNotNull(bbSettings::setEmailCondPassedRecipients, settingsBean::getEmailCondPassedRecipients);
+        setIfNotNull(bbSettings::setEmailFailedRecipients, settingsBean::getEmailFailedRecipients);
+
+        setIfNotNull(bbSettings::setEmailPrefix, settingsBean::getEmailPrefix);
+        setIfNotNull(bbSettings::setEmailPostfix, settingsBean::getEmailPostfix);
+        setIfNotNull(bbSettings::setEmailSubject, settingsBean::getEmailSubject);
+        setIfNotNull(bbSettings::setEmailRecipients, settingsBean::getEmailRecipients);
+
+        regressionRunner.setSettings(bbSettings);
+        return createFrom(bbSettings);
+    }
+
+    @GET
+    @Path(SETTINGS)
+    @Produces(MediaType.APPLICATION_XML)
+    public BBSettings getSettings() {
+        //FIXME: should get by dependencies injection
+        RegressionRunner regressionRunner = SFLocalContext.getDefault().getRegressionRunner();
+        return createFrom(regressionRunner.getSettings());
+    }
+
+    private BBSettings createFrom(BigButtonSettings bbSettings) {
+        BBSettings settings = new BBSettings();
+
+        settings.setCloneLoggingConfiguration(bbSettings.isCloneLoggingConfiguration());
+
+        settings.setEmailPassedRecipients(bbSettings.getEmailPassedRecipients());
+        settings.setEmailCondPassedRecipients(bbSettings.getEmailCondPassedRecipients());
+        settings.setEmailFailedRecipients(bbSettings.getEmailFailedRecipients());
+
+        settings.setEmailPrefix(bbSettings.getEmailPrefix());
+        settings.setEmailPostfix(bbSettings.getEmailPostfix());
+        settings.setEmailSubject(bbSettings.getEmailSubject());
+        settings.setEmailRecipients(bbSettings.getEmailRecipients());
+
+        return settings;
+    }
+
+    private <T> void setIfNotNull(Consumer<T> setter, Supplier<T> getter) {
+        T value = getter.get();
+        if (value != null) {
+            setter.accept(value);
+        }
+    }
 }

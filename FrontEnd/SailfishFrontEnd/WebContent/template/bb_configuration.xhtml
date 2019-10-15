@@ -6,6 +6,14 @@
 
 <h:form id="bbForm" prependId="false">
     <div class="eps-content-block">
+      <h3>Configuration settings</h3>
+      <h:panelGrid columns = "2" styleClass="eps-transparent-table">
+        <h:outputLabel for="cloneLoggingCfg" value="Clone logging configuration" />
+        <p:selectBooleanCheckbox id="cloneLoggingCfg" value="#{bbConfig.settings.cloneLoggingConfiguration}" styleClass="eps-table-divider-min"/>
+      </h:panelGrid>
+
+      <p:tooltip value="Copy master logging configuration to slaves" for="cloneLoggingCfg" />
+
         <h3>Notification settings</h3>
         <table class="eps-transparent-table">
             <tr>
@@ -110,7 +118,7 @@
         <table class="eps-transparent-table">
         	<tr>
             	<td>
-            		<h:outputLabel for="bbNeverShowPrecleanDialog" value="Show pre-clean dialog after click Big Button start" />
+            		<h:outputLabel for="showDialog" value="Show pre-clean dialog after click Big Button start" />
             	</td>
             	<td class="eps-table-divider-min">
 	            	<p:selectBooleanCheckbox id="showDialog" value="#{bbConfig.settings.showPreCeanDialog}"/>
@@ -118,9 +126,9 @@
        		</tr>
         </table>
 
-        <p:tooltip value="Recipients for alerts all big button events" for="bbRecipients" />
-        <p:tooltip value="Recipients for alerts on passed events" for="bbPassedRecipients" />
-        <p:tooltip value="Recipients for alerts on failed events" for="bbFailedRecipients" />
+      <p:tooltip value="Recipients for alerts all big button events" for="bbRecipients" />
+      <p:tooltip value="Recipients for alerts on passed events" for="bbPassedRecipients" />
+      <p:tooltip value="Recipients for alerts on failed events" for="bbFailedRecipients" />
 
         <p:separator/>
 
