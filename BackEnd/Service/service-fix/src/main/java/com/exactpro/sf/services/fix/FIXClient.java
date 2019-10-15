@@ -345,6 +345,7 @@ public class FIXClient implements IInitiatorService {
         sessionSettings.setBool(sessionID, Session.SETTING_ALLOW_UNKNOWN_MSG_FIELDS, commonSettings.isAllowUnknownMsgFields() );
         sessionSettings.setBool(sessionID, Session.DUPLICATE_TAGS_ALLOWED, commonSettings.isDuplicateTagsAllowed() );
         sessionSettings.setBool(sessionID, Session.SETTING_REJECT_INVALID_MESSAGE,commonSettings.isRejectInvalidMessage());
+        sessionSettings.setBool(sessionID, Session.SETTING_USE_SENDER_DEFAULT_APPL_VER_ID_AS_INITIAL_TARGET, true);
 
         if (commonSettings.isUseSSL()) {
             sessionSettings.setBool(SSLSupport.SETTING_USE_SSL, commonSettings.isUseSSL());
@@ -424,8 +425,6 @@ public class FIXClient implements IInitiatorService {
 
         this.messagesLogFile = workspaceDispatcher.createFolder(FolderType.LOGS, logConfigurator.getLogsPath(serviceName)).getCanonicalPath();
         settings.setString(sessionID, FileLogFactory.SETTING_FILE_LOG_PATH, messagesLogFile);
-
-        settings.setBool(sessionID, Session.SETTING_USE_SENDER_DEFAULT_APPL_VER_ID_AS_INITIAL_TARGET, true);
         settings.setBool(sessionID, Session.SETTING_VALIDATE_SEQUENCE_NUMBERS, fixSettings.isValidateSequenceNumbers());
 
         configureSessionSettings(application, sessionID, settings, serviceName, serviceContext.getDataManager());

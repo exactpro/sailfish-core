@@ -19,8 +19,6 @@ import static quickfix.SessionSettings.TARGETSUBID;
 import static quickfix.mina.acceptor.DynamicAcceptorSessionProvider.WILDCARD;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.quickfixj.QFJException;
@@ -71,7 +69,7 @@ public class FIXAcceptorSessionProvider implements AcceptorSessionProvider {
                 }
                 SessionSettings dynamicSettings = new SessionSettings();
                 copySettings(dynamicSettings, settings.getDefaultProperties());
-                copySettings(dynamicSettings, settings.getSessionProperties(templateID));
+                copySettings(dynamicSettings, sessionID, settings.getSessionProperties(templateID));
                 dynamicSettings.setString(BEGINSTRING, sessionID.getBeginString());
                 dynamicSettings.setString(SENDERCOMPID, sessionID.getSenderCompID());
                 optionallySetValue(dynamicSettings, SENDERSUBID, sessionID.getSenderSubID());
@@ -118,8 +116,10 @@ public class FIXAcceptorSessionProvider implements AcceptorSessionProvider {
     }
 
     protected void copySettings(SessionSettings settings, Properties properties) {
-        for (Entry<Object, Object> e : properties.entrySet()) {
-            settings.setString((String) e.getKey(), e.getValue().toString());
-        }
+        properties.forEach((key, value) -> settings.setString((String)key, value.toString()));
+    }
+
+    protected void copySettings(SessionSettings settings, SessionID sessionID, Properties properties) {
+        properties.forEach((key, value) -> settings.setString(sessionID, (String)key, value.toString()));
     }
 }
