@@ -2,7 +2,7 @@ archivesBaseName = 'service-fix'
 
 dependencies {
 
-    compile 'com.exactpro.quickfixj:quickfixj-core:1.6.0.3'
+    compile 'com.exactpro.quickfixj:quickfixj-core:1.6.0.4'
 
     if (incremental_build) {
         compile "com.exactpro.sf:service-tcpip:${artifactVersion}"
