@@ -15,37 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
-import static org.apache.commons.lang3.StringUtils.trimToNull;
-import static org.apache.commons.lang3.StringUtils.wrap;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.mina.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.AML;
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLBlockType;
@@ -93,6 +62,36 @@ import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.google.common.collect.Iterables;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.mina.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.wrap;
 
 
 /**
@@ -818,7 +817,7 @@ public class CodeGenerator_new implements ICodeGenerator {
         }
     }
 
-    protected void writeMetaContainers(StringBuilder builder, AMLTestCase testCase, AMLAction action, ActionInfo actionInfo, AlertCollector alertCollector, String... path) {
+    protected void writeMetaContainers(StringBuilder builder, AMLTestCase testCase, AMLAction action, ActionInfo actionInfo, AlertCollector alertCollector, String lastActualFailUnexpected, String... path) {
         String failUnexpected = wrap(trimToNull(action.getFailUnexpected()), '"');
         boolean hasCustomColumns = action.getServiceFields()
                 .keySet()
@@ -826,6 +825,7 @@ public class CodeGenerator_new implements ICodeGenerator {
                 .anyMatch(column -> Column.value(column) == null && actionInfo.getCustomColumn(column) != null);
 
         if (ArrayUtils.isEmpty(path)) {
+            lastActualFailUnexpected = failUnexpected;
             builder.append(TAB2);
             builder.append(MetaContainer.class.getSimpleName());
             builder.append(" metaContainer = createMetaContainer(");
@@ -841,7 +841,9 @@ public class CodeGenerator_new implements ICodeGenerator {
             }
 
             putSystemColumns(builder, "metaContainer", testCase, action, actionInfo, alertCollector);
-        } else if (failUnexpected != null || hasCustomColumns) {
+        } else if ((failUnexpected != null && !failUnexpected.equals(lastActualFailUnexpected)) || hasCustomColumns) {
+            lastActualFailUnexpected = failUnexpected;
+            logger.info("Created record for line '{}' ref '{}' path '{}'", action.getLine(), action.getReference(), Arrays.toString(path));
             builder.append(TAB2);
             builder.append("lastMetaContainer = createMetaContainerByPath(metaContainer, ");
             builder.append(failUnexpected);
@@ -859,7 +861,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 
         for (Pair<String, AMLAction> child : action.getChildren()) {
             String[] newPath = ArrayUtils.add(path, child.getFirst());
-            writeMetaContainers(builder, testCase, child.getSecond(), actionInfo, alertCollector, newPath);
+            writeMetaContainers(builder, testCase, child.getSecond(), actionInfo, alertCollector, lastActualFailUnexpected, newPath);
         }
     }
 

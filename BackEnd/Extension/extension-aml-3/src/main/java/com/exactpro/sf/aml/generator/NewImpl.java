@@ -15,25 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
-import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-import static java.lang.String.format;
-
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLBlockType;
 import com.exactpro.sf.aml.AMLException;
@@ -64,6 +45,24 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.exactpro.sf.aml.AMLLangUtil.isFunction;
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
+import static java.lang.String.format;
 
 public class NewImpl {
 
@@ -180,7 +179,7 @@ public class NewImpl {
             return;
         }
 
-        codeGenerator.writeMetaContainers(builder, tc, action, action.getActionInfo(), alertCollector);
+        codeGenerator.writeMetaContainers(builder, tc, action, action.getActionInfo(), alertCollector, null);
     }
 
     private String createSendCall(AMLTestCase tc, AMLAction action,

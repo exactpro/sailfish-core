@@ -15,20 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
-import static com.exactpro.sf.common.util.StringUtil.enclose;
-import static com.exactpro.sf.common.util.StringUtil.toJavaString;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.AMLLangConst;
@@ -55,6 +41,19 @@ import com.exactpro.sf.scriptrunner.actionmanager.ActionInfo;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+import static com.exactpro.sf.common.util.StringUtil.enclose;
+import static com.exactpro.sf.common.util.StringUtil.toJavaString;
 
 public class OldImpl {
 
@@ -157,7 +156,7 @@ public class OldImpl {
 
 		if (action.hasActionURI())
 		{
-            codeGenerator.writeMetaContainers(sb, tc, action, action.getActionInfo(), alertCollector);
+            codeGenerator.writeMetaContainers(sb, tc, action, action.getActionInfo(), alertCollector, null);
 			JavaStatement statement = JavaStatement.value(action.getActionURI());
 
 			if (statement != null)
