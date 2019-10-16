@@ -30,12 +30,13 @@ interface Props {
  */
 const RemeasureHandler = ({ style, measureHandler, children, itemSpacing }: Props) => {
 
-    const outerRef = React.useRef<HTMLDivElement>(),
-        innerRef = React.useRef<HTMLDivElement>();
+    const outerRef = React.useRef<HTMLDivElement>();
+    const innerRef = React.useRef<HTMLDivElement>();
+    const heightThreshold = 5;
 
     // same as componentDidMount / componentDidUpdate
     React.useEffect(() => {
-        if (outerRef.current.offsetHeight !== innerRef.current.offsetHeight) {
+        if (Math.abs(outerRef.current.offsetHeight - innerRef.current.offsetHeight) > heightThreshold) {
             measureHandler();
         }
     });
@@ -47,6 +48,6 @@ const RemeasureHandler = ({ style, measureHandler, children, itemSpacing }: Prop
             </div>
         </div>
     )
-}
+};
 
 export default RemeasureHandler;
