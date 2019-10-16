@@ -145,6 +145,12 @@ public class FIXCommonSettings extends AbstractServiceSettings {
     @Description("Enables fields ordering in raw message by dictionary")
     protected boolean orderingFields;
 
+    @Description("Check the next expected target SeqNum against the received SeqNum. Default is checked.\n"
+            + "If a mismatch is detected, apply the following logic:\n"
+            + "\t * if lower than expected SeqNum , logout\n"
+            + "\t * if higher, send a resend request")
+    protected boolean validateSequenceNumbers = true;
+
     public String getBeginString() {
         return BeginString;
     }
@@ -385,5 +391,13 @@ public class FIXCommonSettings extends AbstractServiceSettings {
 
     public void setRejectInvalidMessage(boolean rejectInvalidMessage) {
         RejectInvalidMessage = rejectInvalidMessage;
+    }
+
+    public boolean isValidateSequenceNumbers() {
+        return validateSequenceNumbers;
+    }
+
+    public void setValidateSequenceNumbers(boolean validateSequenceNumbers) {
+        this.validateSequenceNumbers = validateSequenceNumbers;
     }
 }

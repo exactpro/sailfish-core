@@ -118,12 +118,6 @@ public class FIXClientSettings extends FIXCommonSettings {
 	@Description("If specified than we will check for OrigSendingTime in resend request")
 	private boolean requiresOrigSendingTime = true;
 
-	@Description("Check the next expected target SeqNum against the received SeqNum. Default is checked.\n"
-	        + "If a mismatch is detected, apply the following logic:\n"
-	        + "\t * if lower than expected SeqNum , logout\n"
-	        + "\t * if higher, send a resend request")
-	private boolean validateSequenceNumbers = true;
-
 	@Description("Response To Resend Request By Heartbeats")
 	private boolean fakeResendRequest = true;
 
@@ -341,14 +335,6 @@ public class FIXClientSettings extends FIXCommonSettings {
 
     public void setRequiresOrigSendingTime(boolean requiresOrigSendingTime) {
         this.requiresOrigSendingTime = requiresOrigSendingTime;
-    }
-    
-    public boolean isValidateSequenceNumbers() {
-        return validateSequenceNumbers;
-    }
-
-    public void setValidateSequenceNumbers(boolean validateSequenceNumbers) {
-        this.validateSequenceNumbers = validateSequenceNumbers;
     }
 
     public boolean getFakeResendRequest(){
