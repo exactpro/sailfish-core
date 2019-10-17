@@ -90,20 +90,21 @@ public class AdvancedMatrixWriterTest {
         }
 
         try (AdvancedMatrixReader reader = new AdvancedMatrixReader(csv)) {
+            int numberLine = 2;
             while (reader.hasNext()) {
-                Assert.assertEquals(getMap("{value=Value, #action=Action}"), reader.readCells());
-                Assert.assertEquals(getMap("{#new field=#new field, value=value, #action=DefineHeader}"),
+                Assert.assertEquals(getMap("{value=Value, #action=Action}",numberLine++), reader.readCells());
+                Assert.assertEquals(getMap("{#new field=#new field, value=value, #action=DefineHeader}",numberLine++),
                         reader.readCells());
-                Assert.assertEquals(getMap("{#new field=new, #action=nothing}"), reader.readCells());
-                Assert.assertEquals(getMap("{#new field=#new field, value=value, unknown=unknown, #action=DefineHeader}"),
+                Assert.assertEquals(getMap("{#new field=new, #action=nothing}",numberLine++), reader.readCells());
+                Assert.assertEquals(getMap("{#new field=#new field, value=value, unknown=unknown, #action=DefineHeader}",numberLine++),
                         reader.readCells());
-                Assert.assertEquals(getMap("{#new field=new2, value=Value, unknown=default value, #action=nothiing}"),
+                Assert.assertEquals(getMap("{#new field=new2, value=Value, unknown=default value, #action=nothiing}",numberLine++),
                         reader.readCells());
             }
         }
     }
 
-    private Map<String, SimpleCell> getMap(String s) {
+    private Map<String, SimpleCell> getMap(String s, int numberLine) {
 
         HashMap<String, SimpleCell> result = new HashMap<>();
 
@@ -115,7 +116,7 @@ public class AdvancedMatrixWriterTest {
             String[] kv = entry.split("=");
             switch (kv.length) {
             case 2:
-                result.put(kv[0], new SimpleCell(kv[1]));
+                result.put(kv[0], new SimpleCell(kv[1], numberLine));
                 break;
             case 1:
                 result.put(kv[0], new SimpleCell());

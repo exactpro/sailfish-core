@@ -379,8 +379,6 @@ public class NewImpl {
                     + action.getMessageTypeColumn() + "\", \"" + namespace + "\");" + EOL);
 		}
 
-		long line = action.getLine();
-
 		for (Entry<String, Value> entry : action.getParameters().entrySet())
 		{
 		    String fieldName = entry.getKey();
@@ -395,7 +393,7 @@ public class NewImpl {
 			        boolean isCollection = AMLLangUtil.isCollection(value.getValue());
 			        fStruct = new FieldStructure(null, null, null, null, null, null, null, false, isCollection, false, null);
 				} else {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '" + dm.getName() + "' in namespace '" + dm.getNamespace() + "' does not contain '" + fieldName + "' field"));
+                    alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Message '" + dm.getName() + "' in namespace '" + dm.getNamespace() + "' does not contain '" + fieldName + "' field"));
 			        continue;
 			    }
 			}
@@ -412,7 +410,7 @@ public class NewImpl {
 			    try {
 			        refs = AMLLangUtil.getReferences(value.getValue());
                 } catch (AMLException e) {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': " + e.getMessage()));
+                    alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': " + e.getMessage()));
                     continue;
                 }
 
@@ -444,12 +442,12 @@ public class NewImpl {
 			try {
                 NewImplHelper.substituteReference(tc, action, alertCollector, fieldName, value, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
             } catch(SailfishURIException e) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, e.getMessage()));
+                alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, e.getMessage()));
                 continue;
             }
 
             if(value.isJava()) {
-                String strValue = value.isReference() ? generateEval(line, fieldName, value, TAB3) : value.getValue();
+                String strValue = value.isReference() ? generateEval(value.getLineNumber(), fieldName, value, TAB3) : value.getValue();
 
                 sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + strValue + ");//java send" + EOL);
 
@@ -464,7 +462,7 @@ public class NewImpl {
 			        String strValue = value.getValue();
 
 			        if(!AMLLangUtil.isCollection(strValue)) {
-                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
+                        alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
                         continue;
                     }
 
@@ -472,24 +470,24 @@ public class NewImpl {
 			        boolean valid = true;
 
 			        for(int i = 0; i < values.length; i++) {
-			            values[i] = getEnumValue(values[i].replaceAll("^\"|\"$", ""), fStruct, action.getLine(), action.getUID(), fieldName, isDirty);
+			            values[i] = getEnumValue(values[i].replaceAll("^\"|\"$", ""), fStruct, value.getLineNumber(), action.getUID(), fieldName, isDirty);
 			            valid = valid ? values[i] != null : false;
 			        }
 
 			        if(valid) {
 			            value.setValue("[" + StringUtils.join(values, ",") + "]");
 			            sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                        sb.append(generateEval(line, fieldName, value, TAB3));
+                        sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
                         sb.append(");//enum collection send"+EOL);
 			        }
 			    } else {
 				    if(value.isReference()) {
 				        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-	                    sb.append(generateEval(line, fieldName, value, TAB3));
+	                    sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
 	                    sb.append(");//reference enum send"+EOL);
 				    } else {
                         String v = value.getOrigValue();
-                        String enumValue = getEnumValue(v, fStruct, action.getLine(), action.getUID(), fieldName, isDirty);
+                        String enumValue = getEnumValue(v, fStruct, value.getLineNumber(), action.getUID(), fieldName, isDirty);
 
                         action.getSetters().add(new Pair<>(fieldName, "Object o = " + enumValue));
 
@@ -507,7 +505,7 @@ public class NewImpl {
 
 		    	if(collection) {
 			        if(!AMLLangUtil.isCollection(value.getValue())) {
-                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
+                        alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
 			            continue;
 			        }
 
@@ -516,17 +514,17 @@ public class NewImpl {
 			        }
 
 			        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                    sb.append(generateEval(line, fieldName, value, TAB3));
+                    sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
                     sb.append(");//simple collection send"+EOL);
 			    } else {
 			        if(value.isReference()) {
 			            sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                        sb.append(generateEval(line, fieldName, value, TAB3));
+                        sb.append(generateEval(action.getLine(), fieldName, value, TAB3));
                         sb.append(");//simple reference send"+EOL);
 			        } else {
     					logger.trace("fStruct.getJavaType() = {}", fStruct.getJavaType());
 						JavaType type = isDirty ? JavaType.JAVA_LANG_STRING : fStruct.getJavaType();
-						String castValue = castValue(value.getOrigValue(), type, action.getLine(), action.getUID(), value.getFieldName());
+						String castValue = castValue(value.getOrigValue(), type, value.getLineNumber(), action.getUID(), value.getFieldName());
                         action.getSetters().add(new Pair<>(fieldName, "Object o = " + castValue));
                         sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", "+castValue+");//simple send"+EOL);
 			        }
@@ -535,13 +533,13 @@ public class NewImpl {
 			else if (fStruct.isComplex())
 			{
 				if(!AMLLangUtil.isSubmessage(value.getValue())) {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
+                    alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
 				    continue;
                 }
 
 				if (!fStruct.isCollection()) {
 					if (value.getValue().split(",").length > 1) {
-                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
+                        alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
 						continue;
 					}
 
@@ -549,7 +547,7 @@ public class NewImpl {
 				}
 
 				sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                sb.append(generateEval(line, fieldName, value, TAB3));
+                sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
                 sb.append(");//complex send"+EOL);
 			}
 		}
@@ -569,20 +567,20 @@ public class NewImpl {
         String valueString = value.getValue();
 
         if(valueString.startsWith(AMLLangConst.TAG_INTERPRET_AS_JAVA) || valueString.contains(AMLLangConst.BEGIN_FUNCTION) || valueString.contains(AMLLangConst.BEGIN_REFERENCE)) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Service name field must contain a simple value or a service name reference: " + valueString));
+            alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Service name field must contain a simple value or a service name reference: " + valueString));
             return;
         }
 
         if(fStruct.isCollection()) {
             if(!AMLLangUtil.isCollection(valueString)) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Value is not a collection: " + valueString));
+                alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Value is not a collection: " + valueString));
                 return;
             }
 
             String[] elements = AMLLangUtil.getValues(valueString);
 
             for(int i = 0; i < elements.length; i++) {
-                IService service = codeGenerator.resolveService(elements[i], action.getLine(), action.getUID(), fieldName);
+                IService service = codeGenerator.resolveService(elements[i], value.getLineNumber(), action.getUID(), fieldName);
 
                 if(service == null) {
                     return;
@@ -594,11 +592,11 @@ public class NewImpl {
             valueString = "Arrays.asList(" + StringUtils.join(elements, ", ") + ")";
         } else {
             if(AMLLangUtil.isCollection(valueString)) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Value cannot be a collection: " + valueString));
+                alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Value cannot be a collection: " + valueString));
                 return;
             }
 
-            IService service = codeGenerator.resolveService(valueString, action.getLine(), action.getUID(), fieldName);
+            IService service = codeGenerator.resolveService(valueString, value.getLineNumber(), action.getUID(), fieldName);
 
             if(service == null) {
                 return;
@@ -1187,8 +1185,6 @@ public class NewImpl {
 
 		sb.append(TAB2+inputVariable.getName()+".getMetaData().setAdmin(" + isAdmin + ");"+EOL);
 
-		long line = action.getLine();
-
 		for (Entry<String, Value> entry : action.getParameters().entrySet())
 		{
 		    String fieldName = entry.getKey();
@@ -1199,7 +1195,7 @@ public class NewImpl {
             IFieldStructure fStruct = dm.getFields().get(fieldName);
 
 			if (fStruct == null) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Message '" + dm.getName() + "' in namespace '" + dm.getNamespace() + "' does not contain '" + fieldName + "' field"));
+                alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Message '" + dm.getName() + "' in namespace '" + dm.getNamespace() + "' does not contain '" + fieldName + "' field"));
 			} else {
                 if(fStruct.isSimple() && fStruct.isServiceName()) {
                     writeServiceFieldDefinition(value, action, fieldName, fStruct, sb, inputVariable);
@@ -1214,7 +1210,7 @@ public class NewImpl {
                     try {
                         refs = AMLLangUtil.getReferences(value.getValue());
                     } catch (AMLException e) {
-                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': " + e.getMessage()));
+                        alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': " + e.getMessage()));
                         continue;
                     }
 
@@ -1246,12 +1242,12 @@ public class NewImpl {
                 try {
                     NewImplHelper.substituteReference(tc, action, alertCollector, fieldName, value, codeGenerator.getDefinedReferences(), dictionaryManager, actionManager, utilityManager);
                 } catch(SailfishURIException e) {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, e.getMessage()));
+                    alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, e.getMessage()));
                     continue;
                 }
 
                 if(value.isJava()) {
-                    String strValue = value.isReference() ? generateEval(line, fieldName, value, TAB3) : value.getValue();
+                    String strValue = value.isReference() ? generateEval(value.getLineNumber(), fieldName, value, TAB3) : value.getValue();
 
                     sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + strValue + ");//java receive" + EOL);
 
@@ -1264,12 +1260,12 @@ public class NewImpl {
 				        String strValue = value.getValue();
 
 				        if(strValue.equals(CONV_VALUE_MISSING) || strValue.equals(CONV_VALUE_PRESENT)) {
-                            sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, strValue, action.getLine(), action.getUID(), value.getFieldName(), alertCollector) + ");" + EOL);
+                            sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, strValue, value.getLineNumber(), action.getUID(), value.getFieldName(), alertCollector) + ");" + EOL);
 	                        continue;
 	                    }
 
                         if(!AMLLangUtil.isCollection(strValue)) {
-                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
+                            alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
                             continue;
                         }
 
@@ -1277,24 +1273,24 @@ public class NewImpl {
                         boolean valid = true;
 
                         for(int i = 0; i < values.length; i++) {
-                            values[i] = getEnumValue(values[i].replaceAll("^\"|\"$", ""), fStruct, action.getLine(), action.getUID(), fieldName, false);
+                            values[i] = getEnumValue(values[i].replaceAll("^\"|\"$", ""), fStruct, value.getLineNumber(), action.getUID(), fieldName, false);
                             valid = valid ? values[i] != null : false;
                         }
 
                         if(valid) {
                             value.setValue("[" + StringUtils.join(values, ",") + "]");
                             sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                            sb.append(generateEval(line, fieldName, value, TAB3));
+                            sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
                             sb.append(");//enum collection receive"+EOL);
                         }
 				    } else {
     				    if(value.isReference()) {
     				        sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-    	                    sb.append(generateFilter(line, fieldName, value, TAB3));
+    	                    sb.append(generateFilter(value.getLineNumber(), fieldName, value, TAB3));
     	                    sb.append(");//reference enum receive"+EOL);
     				    } else {
-        					String v = prepareEnum(value.getOrigValue(), fStruct, action.getLine(), action.getUID(), value.getFieldName());
-                            String filterExpression = createFilterExpression(fStruct, v, action.getLine(), action.getUID(), value.getFieldName(), alertCollector);
+        					String v = prepareEnum(value.getOrigValue(), fStruct, value.getLineNumber(), action.getUID(), value.getFieldName());
+                            String filterExpression = createFilterExpression(fStruct, v, value.getLineNumber(), action.getUID(), value.getFieldName(), alertCollector);
 
         					sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", "+filterExpression+");//enum receive"+EOL);
     				    }
@@ -1304,23 +1300,23 @@ public class NewImpl {
 				{
 				    if(fStruct.isCollection()) {
 				        if(value.getValue().equals(CONV_VALUE_MISSING) || value.getValue().equals(CONV_VALUE_PRESENT)) {
-                            sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, value.getValue(), action.getLine(), action.getUID(), value.getFieldName(), alertCollector) + ");"
+                            sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, value.getValue(), value.getLineNumber(), action.getUID(), value.getFieldName(), alertCollector) + ");"
                                     + EOL);
 	                        continue;
 	                    }
 
 				        if(!AMLLangUtil.isCollection(value.getValue())) {
-                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
+                            alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format '" + value.getValue() + "'"));
 				            continue;
                         }
 
                         sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                        sb.append(generateEval(line, fieldName, value, TAB3));
+                        sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
                         sb.append(");//simple collection receive"+EOL);
 				    } else {
 				        if(value.isReference()) {
 				            sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-	                        sb.append(generateFilter(line, fieldName, value, TAB3));
+	                        sb.append(generateFilter(action.getLine(), fieldName, value, TAB3));
 	                        sb.append(");//simple reference receive"+EOL);
 				        } else {
                             String filterExpression = createFilterExpression(fStruct, value.getOrigValue(), action.getLine(), action.getUID(), value.getFieldName(), alertCollector);
@@ -1332,24 +1328,24 @@ public class NewImpl {
 				else if (fStruct.isComplex())
 				{
                     if(isFunction(value.getOrigValue())) {
-                        sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + generateFilter(action.getLine(), value.getFieldName(), value, TAB3) + ");" + EOL);
+                        sb.append(TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + generateFilter(value.getLineNumber(), value.getFieldName(), value, TAB3) + ");" + EOL);
                         continue;
                     }
 
                     if(value.getValue().equals(CONV_VALUE_MISSING) || value.getValue().equals(CONV_VALUE_PRESENT)) {
                         sb.append(
-                                TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, value.getValue(), action.getLine(), action.getUID(), value.getFieldName(), alertCollector) + ");" + EOL);
+                                TAB2 + inputVariable.getName() + ".addField(\"" + fieldName + "\", " + createFilterExpression(fStruct, value.getValue(), value.getLineNumber(), action.getUID(), value.getFieldName(), alertCollector) + ");" + EOL);
                         continue;
                     }
 
                     if(!AMLLangUtil.isSubmessage(value.getValue())) {
-                        alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format"));
+                        alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Column '" + fieldName + "': Invalid collection format"));
                         continue;
                     }
 
                     if (!fStruct.isCollection()) {
                         if (value.getValue().split(",").length > 1) {
-                            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
+                            alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), fieldName, "Cannot set multiple values to field " + fStruct.getName()));
                             continue;
                         }
 
@@ -1357,7 +1353,7 @@ public class NewImpl {
                     }
 
                     sb.append(TAB2+inputVariable.getName()+".addField(\""+fieldName+"\", ");
-                    sb.append(generateEval(line, fieldName, value, TAB3));
+                    sb.append(generateEval(value.getLineNumber(), fieldName, value, TAB3));
                     sb.append(");//complex receive"+EOL);
 				}
 			}
@@ -1380,11 +1376,12 @@ public class NewImpl {
 	private void generateSubAction(AMLTestCase tc, AMLAction action, IFieldStructure fieldType, String fieldName, String reference, List<String> subMessages, boolean isReceive, boolean isDirty) {
 	    String[] refSplit = reference.split("[:.]");
 	    String refName = refSplit[0];
+		int lineNumber = action.get(fieldName).getLineNumber();
 
 	    AMLAction subAction = tc.findActionByRef(refName);
 
         if(subAction == null || action.equals(subAction)) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
+            alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
                     "Column '%s': Reference '%s' is not defined in matrix", fieldName, refName)));
 
             return;
@@ -1410,13 +1407,13 @@ public class NewImpl {
                 if(StringUtils.isEmpty(subMsgType)) {
                     subAction.setMessageTypeColumn(msgType);
                 } else if(!subMsgType.equals(msgType)) {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
+                    alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
                             "Subaction message type '%s' differs from action message type '%s'", subMsgType, msgType)));
 
                     return;
                 }
             } else {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
+                alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
                     "Subaction must predefined to use references to it's fields.")));
                 return;
             }
@@ -1440,20 +1437,20 @@ public class NewImpl {
             IMessageStructure msgStruct = getMessageStructure(dictURI, msgType);
 
             if(msgStruct == null) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
+                alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
                         "Column '%s': Reference to unknown message('%s')/dictionary('%s') in reference '%s'", fieldName, msgType, dictURI, reference)));
                 return;
             }
 
             if(msgStruct.getFields().get(subField) == null) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format(
+                alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format(
                         "Column '%s': Reference to unknown column '%s' in reference '%s'", fieldName, subField, reference)));
                 return;
             }
         }
 
         if(refSplit.length == 1 && fieldType.isComplex() && returnType != IMessage.class) {
-            alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), fieldName, format("Incompatible value types: cannot use %s instead of %s", returnType.getSimpleName(), IMessage.class.getSimpleName())));
+            alertCollector.add(new Alert(lineNumber, action.getUID(), action.getReference(), fieldName, format("Incompatible value types: cannot use %s instead of %s", returnType.getSimpleName(), IMessage.class.getSimpleName())));
             return;
         }
 
@@ -1502,7 +1499,7 @@ public class NewImpl {
 	       input.contains(NewImplHelper.BEGIN_STATIC)) {
 
 	        StringBuilder sb = new StringBuilder(CAPACITY_4K);
-            Value inputValue = new Value(input);
+            Value inputValue = new Value(input, (int)action.getLine()); // line might be incorrect
 
             try {
                 NewImplHelper.substituteReference(tc, action, alertCollector, column.getName(), inputValue, definedReferences, dictionaryManager, actionManager, utilityManager);

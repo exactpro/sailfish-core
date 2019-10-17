@@ -530,11 +530,11 @@ public class CodeGenerator_new implements ICodeGenerator {
 			try {
 				newValue = TypeHelper.convertValue(action.getStaticType(), newValue);
 			} catch (AMLException e) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.StaticType.getName(), e.getMessage()));
+                alertCollector.add(new Alert(value.getLineNumber(), action.getUID(), action.getReference(), Column.StaticType.getName(), e.getMessage()));
 				return null;
 			}
 		} else {
-			newValue = NewImpl.generateEval(action.getLine(), Column.StaticValue.getName(), value, TAB3);
+			newValue = NewImpl.generateEval(value.getLineNumber(), Column.StaticValue.getName(), value, TAB3);
 		}
 
 		String ref = action.getReference();
@@ -550,7 +550,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 		case BEGIN_LOOP:
             String in = "i" + cycleCount++;
             String column = Column.MessageCount.getName();
-            Value count = new Value(action.getMessageCount());
+            Value count = new Value(action.getMessageCount(), (int)action.getLine());
 
             try {
                 NewImplHelper.substituteReference(tc, action, alertCollector, column, count, definedReferences, dictionaryManager, actionManager, utilityManager);
@@ -604,7 +604,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	    StringBuilder sb = new StringBuilder(CAPACITY_4K);
 
 	    sb.append("Boolean.TRUE.equals(");
-        sb.append(NewImpl.generateEval(action.getLine(), Column.Condition.getName(), action.getCondition(), TAB4));
+        sb.append(NewImpl.generateEval(action.getCondition().getLineNumber(), Column.Condition.getName(), action.getCondition(), TAB4));
         sb.append(")");
 
         return sb.toString();
@@ -627,10 +627,10 @@ public class CodeGenerator_new implements ICodeGenerator {
 
                 getMethod(alertCollector, ActionContext.class, "setTimeout", action, Column.Timeout.getName(), long.class);
 
-                String timeoutStr = timeout.isReference() ? "(long)" + NewImpl.generateEval(action.getLine(), Column.Timeout.getName(), timeout, TAB3) : timeout.getValue();
+                String timeoutStr = timeout.isReference() ? "(long)" + NewImpl.generateEval(timeout.getLineNumber(), Column.Timeout.getName(), timeout, TAB3) : timeout.getValue();
                 sb.append(TAB2 + varName + ".setTimeout(" + timeoutStr + ");" + EOL);
             } catch(SailfishURIException e) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), Column.Timeout.getName(), e.getMessage()));
+                alertCollector.add(new Alert(timeout.getLineNumber(), action.getUID(), action.getReference(), Column.Timeout.getName(), e.getMessage()));
             }
 		}
         if (action.getServiceName() != null) {
@@ -683,7 +683,7 @@ public class CodeGenerator_new implements ICodeGenerator {
             getMethod(alertCollector, ActionContext.class, "setMessageCount", action, Column.MessageCount.getName(), MessageCount.class);
 
 			String count = action.getMessageCount();
-			Value countValue = new Value(count);
+			Value countValue = new Value(count, (int)action.getLine());
 
 			boolean isAML3Action = action.getActionInfo().isLanguageCompatible(AMLLangConst.AML3, true);
 
@@ -820,7 +820,7 @@ public class CodeGenerator_new implements ICodeGenerator {
             try {
                 NewImplHelper.substituteReference(tc, action, alertCollector, columnName, columnValue, definedReferences, dictionaryManager, actionManager, utilityManager);
             } catch(SailfishURIException e) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), columnName, e.getMessage()));
+                alertCollector.add(new Alert(columnValue.getLineNumber(), action.getUID(), action.getReference(), columnName, e.getMessage()));
                 continue;
             }
 
@@ -1023,12 +1023,13 @@ public class CodeGenerator_new implements ICodeGenerator {
                 for(Pair<String, String> setter : action.getSetters()) {
                     String column = setter.getFirst();
                     String code = setter.getSecond();
-                    String value = action.getParameters().get(column).getValue();
+                    Value element = action.getParameters().get(column);
+                    String value = element.getValue();
                     String reference = ObjectUtils.defaultIfNull(action.getReference(), action.getReferenceToFilter());
 
                     StringUtils.removeStart(value, BoolExp.NotEqualsUnary.getName());
                     value = new String(Base64.encodeBase64(value.getBytes()));
-                    SetterInfo info = new SetterInfo(column, code, value, action.getLine(), action.getUID(), reference);
+                    SetterInfo info = new SetterInfo(column, code, value, element.getLineNumber(), action.getUID(), reference);
 
                     setters.add(info);
                 }

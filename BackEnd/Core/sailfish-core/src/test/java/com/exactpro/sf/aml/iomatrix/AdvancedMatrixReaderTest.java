@@ -41,9 +41,10 @@ public class AdvancedMatrixReaderTest {
     private final String CSV_MATRIX = "Csv.csv";
     private final String YAML_MATRIX = "SystemColumns.yaml";
     private final String ERROR_YAML_MATRIX = "ErrorArrayInBlock.yaml";
+    private final String JSON_MATRIX = "JSON.json";
 
     @Rule
-    public ExpectedException thrown= ExpectedException.none();
+    public ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void testCompareReaders() throws IOException, AMLException {
@@ -90,20 +91,34 @@ public class AdvancedMatrixReaderTest {
 
     private void checkMap(File file) throws Exception {
         try (AdvancedMatrixReader reader = new AdvancedMatrixReader(file)) {
-
-            Assert.assertEquals(asList("#1", "#2", "#3", "#4", "#action", "6", "7", "8", "9", "#10"),
+            int numberLine = 2;
+            Assert.assertEquals(asListWithNumberLine(el("#1",1), el("#2", 1), el("#3",1),
+                    el("#4", 1), el("#action", 1), el("6", 1), el("7", 1),
+                    el("8", 1), el("9", 1), el("#10",1)),
                                 reader.getHeader());
-            Assert.assertEquals(asMap("20","20", "#new field", "#new field", "40", "40", "#action", "DefineHeader"),
+            Assert.assertEquals(asMap(numberLine++,"20","20", "#new field", "#new field", "40", "40", "#action", "DefineHeader"),
                                 reader.readCells());
-            Assert.assertEquals(asList("#1", "#2", "#3", "#4", "#action", "20", "", "", "40", "#10", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "#new field"),
+            Assert.assertEquals(asListWithNumberLine(el("#1", 1), el("#2", 1), el("#3", 1),
+                    el("#4", 1), el("#action", 1), el("20", 2), el("", 2),
+                    el("", 2), el("40", 2), el("#10", 1), el("", 2),
+                    el("", 2), el("", 2), el("", 2), el("", 2),
+                    el("", 2), el("", 2), el("", 2), el("", 2),
+                    el("", 2), el("", 2), el("", 2), el("", 2),
+                    el("", 2), el("", 2), el("#new field", 2)),
                                 reader.getHeader());
-            Assert.assertEquals(asMap("#1", "1", "#2", "2", "#new field", "new value", "#4", "4", "#3","3"),
+            Assert.assertEquals(asMap(numberLine++,"#1", "1", "#2", "2", "#new field", "new value", "#4", "4", "#3","3"),
                                 reader.readCells());
-            Assert.assertEquals(asMap("#1", "1", "#10", "300", "250", "250", "#2", "2", "150", "150", "#additional field", "#additional field", "200", "200", "#action", "DefineHeader", "100", "100", "#4", "4", "#3", "3"),
+            Assert.assertEquals(asMap(numberLine++,"#1", "1", "#10", "300", "250", "250", "#2", "2", "150", "150", "#additional field", "#additional field", "200", "200", "#action", "DefineHeader", "100", "100", "#4", "4", "#3", "3"),
                                 reader.readCells());
-            Assert.assertEquals(asList("#1", "#2", "#3", "#4", "#action", "100", "150", "200", "250", "#10", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "#additional field", "#new field"),
+            Assert.assertEquals(asListWithNumberLine(el("#1",1), el("#2", 1), el("#3",1),
+                    el("#4", 1), el("#action", 1), el("100", 4), el("150", 4),
+                    el("200", 4), el("250", 4), el("#10", 1), el("", 4),
+                    el("", 4), el("", 4), el("", 4), el("", 4),
+                    el("", 4), el("", 4), el("", 4), el("", 4),
+                    el("", 4), el("", 4), el("", 4), el("", 4),
+                    el("", 4), el("#additional field", 4),  el("#new field", 2)),
                                 reader.getHeader());
-            Assert.assertEquals(asMap("#additional field", "value", "#new field", "old value", "#action", "test case end"),
+            Assert.assertEquals(asMap(numberLine++,"#additional field", "value", "#new field", "old value", "#action", "test case end"),
                                 reader.readCells());
 
             boolean error = false;
@@ -118,31 +133,96 @@ public class AdvancedMatrixReaderTest {
     }
 
     @Test
-    public void testNegativErrorArrayInBlock() throws Exception {
-
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Invalid value type array field found in block block start");
-
-        new AdvancedMatrixReader(new File(PATH + ERROR_YAML_MATRIX));
-    }
-
-    @Test
     public void testSystemColumnsYaml() throws Exception {
         try (AdvancedMatrixReader reader = new AdvancedMatrixReader(new File(PATH + YAML_MATRIX))) {
 
-            Assert.assertEquals(asMap("#action", "block start", "#description", "Descr", "#reference", "block", "field", "abc"),
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "block start",17), el("#description", "Descr", 18),
+                                                    el("#reference", "block", 19), el("field", "abc", 20)),
                     reader.readCells());
-            Assert.assertEquals(asMap("#action", "send", "#reference", "sub"),
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref2", 25), el("sub4", "send4", 26)),
                     reader.readCells());
-            Assert.assertEquals(asMap("#action", "Block end"),
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref3", 27), el("sub99", "send99", 28)),
                     reader.readCells());
-            Assert.assertEquals(asMap("#action", "test case start", "#id", "test_id"),
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref4", 29), el("sub000", "send000", 30),
+                                                    el("sub111", "send111", 31)),
                     reader.readCells());
-            Assert.assertEquals(asMap("#action", "include block", "#reference", "call", "#template", "block", "#id", "123"),
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref5", 27), el("sub00", "[implicit_ref4]", 29)),
                     reader.readCells());
-            Assert.assertEquals(asMap("#action", "Test case end"),
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref6", 23), el("#action", "send2",24),
+                                                    el("sub3", "[implicit_ref2]", 25), el("sub88", "[implicit_ref3,implicit_ref5]", 27)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref7", 32), el("sub5", "send5", 33)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "sub", 21), el("#action", "send",22),
+                                                    el("sub2", "[implicit_ref6]", 23),  el("sub5", "[implicit_ref7]", 32),
+                                                    el("sub77", "[send771,send772]",34)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "sub7", 37), el("sub7", "send7",38)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "sub4", 39), el("field", "send4",40)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "Block end", 17)),
+                    reader.readCells());
+
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "test case start", 41), el("#id", "test_id", 42)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "include block", 46), el("#reference", "call", 43),
+                                                    el("#template", "block", 45),el("#id", "123", 44)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "Test case end", 41)),
                     reader.readCells());
         }
+    }
+
+    @Test
+    public void testNumberLineJson() throws Exception {
+        try (AdvancedMatrixReader reader = new AdvancedMatrixReader(new File(PATH + JSON_MATRIX))) {
+
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "block start",3), el("#description", "Descr", 3),
+                                                    el("#reference", "block", 3), el("field", "abc", 4)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref2", 9), el("sub4", "send4", 10)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref3", 12), el("sub99", "send99", 14)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref4", 17), el("sub000", "send000", 18),
+                                                    el("sub111", "send111", 19)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref5", 12), el("sub00", "[implicit_ref4]", 17)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref6", 7), el("#action", "send2",8),
+                                                    el("sub3", "[implicit_ref2]", 9), el("sub88", "[implicit_ref3,implicit_ref5]", 12)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "implicit_ref7", 24), el("sub5", "send5", 25)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "sub", 5), el("#action", "send",6),
+                                                    el("sub2", "[implicit_ref6]", 7),  el("sub5", "[implicit_ref7]", 24),
+                                                    el("sub77", "[send771,send772]",27)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "sub7", 32), el("sub7", "send7",33)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#reference", "sub4", 35), el("field", "send4",36)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "Block end", 3)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "test case start", 41), el("#id", "test_id", 42)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "include block", 46), el("#reference", "call", 43),
+                                                    el("#template", "block", 45), el("#id", "123", 44)),
+                    reader.readCells());
+            Assert.assertEquals(asMapWithNumberLine(el("#action", "Test case end", 41)),
+                    reader.readCells());
+
+        }
+    }
+
+    @Test
+    public void testNegativErrorArrayInBlock() throws Exception {
+
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("Invalid value type array field found in block block start, number line 5");
+
+        new AdvancedMatrixReader(new File(PATH + ERROR_YAML_MATRIX));
     }
 
     @Test
@@ -160,7 +240,15 @@ public class AdvancedMatrixReaderTest {
         }
     }
 
-    private Map<String, SimpleCell> asMap(String... values) {
+    private List<SimpleCell> noNumberLine(List<SimpleCell> simpleCellList) {
+        List<SimpleCell> newSimpleCellList = new ArrayList<>();
+        for (SimpleCell simpleCell: simpleCellList) {
+            newSimpleCellList.add(new SimpleCell(simpleCell.getValue(),0));
+        }
+        return newSimpleCellList;
+    }
+
+    private Map<String, SimpleCell> asMap(int numberLine, String... values) {
         if(Objects.requireNonNull(values, "values is null").length % 2 > 0) {
             throw new IllegalArgumentException("values has odd number of elements");
         }
@@ -168,13 +256,24 @@ public class AdvancedMatrixReaderTest {
         Map<String, SimpleCell> map = new HashMap<>();
 
         for(int i = 0; i < values.length; i += 2) {
-            map.put(values[i], new SimpleCell(values[i + 1]));
+            map.put(values[i], new SimpleCell(values[i + 1], numberLine));
         }
 
         return map;
     }
 
-    private List<SimpleCell> asList(String...values) {
+    private Map<String, SimpleCell> asMapWithNumberLine(ReadElement... values) {
+
+        Map<String, SimpleCell> map = new HashMap<>();
+
+        for(ReadElement readElement: values) {
+            map.put(readElement.key, new SimpleCell(readElement.value, readElement.numberLine));
+        }
+
+        return map;
+    }
+
+    private List<SimpleCell> asList(String... values) {
         Objects.requireNonNull(values, "values is null");
 
         List<SimpleCell> list = new ArrayList<>();
@@ -185,4 +284,42 @@ public class AdvancedMatrixReaderTest {
 
         return list;
     }
+
+    private List<SimpleCell> asListWithNumberLine(ReadElement... values) {
+        Objects.requireNonNull(values, "values is null");
+
+        List<SimpleCell> list = new ArrayList<>();
+
+        for(ReadElement readElement : values) {
+            list.add(new SimpleCell(readElement.value, readElement.numberLine));
+        }
+
+        return list;
+    }
+
+    private ReadElement el(String value, int numberLine){
+        return new ReadElement(value, numberLine);
+    }
+
+    private ReadElement el(String key, String value, int numberLine){
+        return new ReadElement(key, value, numberLine);
+    }
+
+    private class ReadElement{
+        final String key;
+        final String value;
+        final int numberLine;
+
+        public ReadElement(String value, int numberLine){
+            this("",value,numberLine);
+        }
+
+        public ReadElement(String key, String value, int numberLine){
+            this.key = key;
+            this.numberLine = numberLine;
+            this.value = value;
+        }
+    }
 }
+
+

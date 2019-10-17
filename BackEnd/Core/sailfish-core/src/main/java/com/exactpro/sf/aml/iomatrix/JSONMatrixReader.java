@@ -20,10 +20,6 @@ import com.exactpro.sf.aml.AMLBlockBrace;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.Pair;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Table;
@@ -33,22 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
+
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.NoSuchElementException;
+import java.util.HashMap;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,65 +50,50 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+
 public class JSONMatrixReader implements IMatrixReader {
 
+    private static final Supplier<SimpleCell[]> SUPPLIER = () -> {
+        throw new NoSuchElementException();
+    };
     private final Logger logger = LoggerFactory.getLogger(this.getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
     private final DEBUG dbg = new DEBUG();
 
-    private final Iterator<Integer> rowIterator;
-    private final Supplier<String[]> rowsSupplier;
+    private Iterator<Integer> rowIterator;
+    private Supplier<SimpleCell[]> rowsSupplier;
 
     private final AtomicInteger tableRowCounter = new AtomicInteger(1);
 
-    public JSONMatrixReader(File file, MatrixFileTypes type) throws IOException {
-        try (InputStream inputStream = new FileInputStream(file)) {
 
-            ObjectMapper objectMapper;
-            switch (type) {
-            case JSON:
-                objectMapper = new ObjectMapper();
-                break;
-            case YAML:
-                objectMapper = new ObjectMapper(new YAMLFactory());
-                break;
-            default:
-                throw new EPSCommonException("Unsupported matrix type " + type);
-            }
+    public JSONMatrixReader(File file, MatrixFileTypes type ) throws IOException {
 
-            objectMapper.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
-
-            JsonNode rootNode = objectMapper.reader().readTree(inputStream);
-            Pair<Iterator<Integer>, Supplier<String[]>> parseResult = parseToTable(rootNode);
-            rowIterator = parseResult.getFirst();
-            rowsSupplier = parseResult.getSecond();
-        }
+        Pair<Iterator<Integer>, Supplier<SimpleCell[]>> parseResult = parseToTable(JSONMatrixParser.readValue(file, type));
+        rowIterator = parseResult.getFirst();
+        rowsSupplier = parseResult.getSecond();
     }
 
-    private Pair<Iterator<Integer>, Supplier<String[]>> parseToTable(JsonNode rootNode) throws IOException {
+    private Pair<Iterator<Integer>, Supplier<SimpleCell[]>> parseToTable(CustomValue jsonNode) throws IOException {
 
-        Table<Integer, String, String> table = Reflection.newProxy(Table.class, new SafetyCheckInvocationHandler());
+        Table<Integer, String, SimpleCell> table = Reflection.newProxy(Table.class, new SafetyCheckInvocationHandler());
 
-        rootNode.elements().forEachRemaining(testCaseWrapper -> {
-            if (testCaseWrapper.size() > 1) {
+        for(CustomValue testCaseWrapper:jsonNode.getArrayValue()) {
+            if (testCaseWrapper.getObjectValue().size() > 1) {
                 throw new EPSCommonException("Too many nodes in testCase wrapper");
             }
 
-            testCaseWrapper.fields().forEachRemaining(commonBlockEntry -> {
-
-                String commonBlockType = commonBlockEntry.getKey();
-                JsonNode commonBlock = commonBlockEntry.getValue();
+            testCaseWrapper.getObjectValue().forEach((blockKey, commonBlock) -> {
+                String commonBlockType = blockKey.getKey();
                 AMLBlockBrace blockBrace = AMLBlockBrace.value(commonBlockType);
 
                 Objects.requireNonNull(commonBlock, "'AML block' node must be presented");
                 Objects.requireNonNull(blockBrace, "Unknown block type " + commonBlockType);
 
                 int localRowCounter = tableRowCounter.getAndIncrement();
-                table.put(localRowCounter , Column.Action.getName(), commonBlockType);
+                table.put(localRowCounter, Column.Action.getName(), new SimpleCell(commonBlockType,blockKey.getLine()));
 
-                commonBlock.fields().forEachRemaining(actionEntry -> {
-                    String reference = actionEntry.getKey();
-                    JsonNode actionNode = actionEntry.getValue();
+                commonBlock.getObjectValue().forEach((actionKey, actionNode) -> {
+                    String reference = actionKey.getKey();
 
                     logger.debug("reading {}", reference);
 
@@ -123,40 +101,37 @@ public class JSONMatrixReader implements IMatrixReader {
 
                         int nestedCount = countNestedReferences(actionNode);
                         int target = tableRowCounter.get() + nestedCount;
-
-                        table.put(target, Column.Reference.getName(), reference);
-                        consumeNode(actionNode, table, target);
+                        table.put(target, Column.Reference.getName(), new SimpleCell(reference, actionKey.getLine()));
+                        consumeNode(actionNode, table, target,  actionKey.getLine());
                         //FIXME will add additional empty row at last action
                         tableRowCounter.getAndIncrement();
                     } else if (!actionNode.isArray()) {
-                        table.put(localRowCounter, reference, actionNode.asText());
-                    } else {
-                        throw new IllegalStateException(String.format("Invalid value type array %s found in block %s", reference, commonBlockType));
+                        table.put(localRowCounter, reference,  new SimpleCell(actionNode.getSimpleValue().toString(), actionKey.getLine()));
+                    } else{
+                        throw new IllegalStateException(String.format("Invalid value type array %s found in block %s, number line %s", reference, commonBlockType, actionKey.getLine()));
                     }
                 });
 
-                table.put(tableRowCounter.getAndIncrement(), Column.Action.getName(), blockBrace.getInversed().getName());
+                table.put(tableRowCounter.getAndIncrement(), Column.Action.getName(), new SimpleCell(blockBrace.getInversed().getName(),blockKey.getLine()));
             });
-        });
+        }
 
         Set<String> columns = ImmutableSet.<String>builder().addAll(table.columnKeySet()).add(Column.Id.getName()).build();
-        columns.forEach(column -> table.put(0, column, column));
+        columns.forEach(column -> table.put(0, column, new SimpleCell(column)));
 
         Iterator<Integer> rowIterator = dbg.DEBUG_SORT ? table.rowKeySet().iterator() : new TreeSet<>(table.rowKeySet()).iterator();
 
-        Supplier<String[]> supplier = () -> {
-            throw new NoSuchElementException();
-        };
+        Supplier<SimpleCell[]> supplier = SUPPLIER;
         //preserve header
         if (rowIterator.hasNext()) {
 
             supplier = () -> {
                 int currentRow = rowIterator.next();
-                Map<String, String> row = new HashMap<>(table.row(currentRow));
+                Map<String, SimpleCell> row = new HashMap<>(table.row(currentRow));
 
                 return columns.stream()
-                        .map(key -> row.getOrDefault(key, ""))
-                        .toArray(String[]::new);
+                        .map(key -> row.getOrDefault(key, new SimpleCell("")))
+                        .toArray(SimpleCell[]::new);
             };
         }
 
@@ -165,16 +140,14 @@ public class JSONMatrixReader implements IMatrixReader {
 
     @Override
     public SimpleCell[] readCells() throws IOException {
-
-        return Stream.of(read())
-                .map(SimpleCell::new)
-                .toArray(SimpleCell[]::new);
+        return rowsSupplier.get();
     }
 
     @Override
     public String[] read() throws IOException {
-
-        return rowsSupplier.get();
+        return Stream.of(rowsSupplier.get())
+                .map(SimpleCell::getValue)
+                .toArray(String[]::new);
     }
 
     @Override
@@ -199,49 +172,43 @@ public class JSONMatrixReader implements IMatrixReader {
      * @param target - position of node (current pos + deps count)
      * @return generated or specified ref of action/explicit ref
      */
-    private String consumeNode(JsonNode node, Table<Integer, String, String> toTable, int target) {
+    private String consumeNode(CustomValue node, Table<Integer, String, SimpleCell> toTable, int target, int nodeNumberLine) {
 
-        if (!node.fields().hasNext()) {
-            throw new EPSCommonException("Passed node without properties");
-        }
+        node.getObjectValue().forEach((actionKey, actionFieldNode) -> {
+            String actionFieldKey = actionKey.getKey();
 
-        node.fields().forEachRemaining(actionFieldsEntry -> {
-            String actionFieldKey = actionFieldsEntry.getKey();
-            JsonNode actionFieldNode = actionFieldsEntry.getValue();
+            Consumer<SimpleCell> actionFieldPut = value -> toTable.put(target, actionFieldKey, value);
 
-            Consumer<String> actionFieldPut = value -> toTable.put(target, actionFieldKey, value);
+            logger.debug("{} consuming with {}", dbg.openTabs(),  actionFieldKey);
 
-            logger.debug("{}consuming {} with {}", dbg.openTabs(), actionFieldNode.getNodeType(), actionFieldKey);
-
-            Function<JsonNode, String> processObj = jsonNode -> {
+            Function<CustomValue, String> processObj = jsonNode -> {
                 int nestedLvls = countNestedReferences(jsonNode);
-                String ref = consumeNode(jsonNode, toTable, tableRowCounter.get() + nestedLvls);
+                String ref = consumeNode(jsonNode, toTable, tableRowCounter.get() + nestedLvls, actionKey.getLine());
                 tableRowCounter.incrementAndGet();
                 return ref;
             };
 
             if (actionFieldNode.isObject()) {
-                actionFieldPut.accept("[" + processObj.apply(actionFieldNode) + "]");
+                actionFieldPut.accept(new SimpleCell("[" + processObj.apply(actionFieldNode) + "]", actionKey.getLine()));
             } else if (actionFieldNode.isArray()) {
-                String ref = wrapIter(actionFieldNode.elements())
+                String ref = wrapIter(actionFieldNode.getArrayValue().iterator())
                         //FIXME need unwrap ref syntax? or write only ref name in json
-                        .map(elNode -> elNode.isObject() ? processObj.apply(elNode) : elNode.textValue())
+                        .map(elNode -> elNode.isObject() ? processObj.apply(elNode) : elNode.getSimpleValue().toString())
                         .collect(Collectors.joining(","));
 
-                actionFieldPut.accept("[" + ref + "]");
-            } else {
-                actionFieldPut.accept(actionFieldNode.asText());
+                actionFieldPut.accept(new SimpleCell("[" + ref + "]", actionKey.getLine()));
+            } else if (actionFieldNode.isSimple()) {
+                actionFieldPut.accept(new SimpleCell(actionFieldNode.getSimpleValue().toString(), actionKey.getLine()));
             }
 
-            logger.debug("{}consuming {} with {} done -> {}",
-                    dbg.closeTabs(), actionFieldNode.getNodeType(), actionFieldKey, toTable.get(target, Column.Reference.getName()));
+            logger.debug("{} consuming with {} done -> {}", dbg.closeTabs(), actionFieldKey, toTable.get(target, Column.Reference.getName()));
         });
 
         if (!toTable.contains(target, Column.Reference.getName())) {
-            toTable.put(target, Column.Reference.getName(), "implicit_ref" + target);
+            toTable.put(target, Column.Reference.getName(), new SimpleCell("implicit_ref" + target, nodeNumberLine));
         }
 
-        return toTable.get(target, Column.Reference.getName());
+        return toTable.get(target, Column.Reference.getName()).getValue();
     }
 
     /***
@@ -249,21 +216,21 @@ public class JSONMatrixReader implements IMatrixReader {
       * @param node - json node
      * @return count of rows to reserve
      */
-    private int countNestedReferences(JsonNode node) {
+    private int countNestedReferences(CustomValue node) {
 
         int counter = 0;
 
-        for (Iterator<JsonNode> it = node.elements(); it.hasNext(); ) {
-            JsonNode el = it.next();
-            if (el.isObject()) {
-                counter += 1 + countNestedReferences(el);
-            } else if (el.isArray()) {
-                counter += wrapIter(el.elements())
-                        .mapToInt(n -> 1 + countNestedReferences(n))
-                        .sum();
+        if(node.getObjectValue()!=null) {
+            for (Map.Entry<KeyValue, CustomValue> el : node.getObjectValue().entrySet()) {
+                if (el.getValue().isObject()) {
+                    counter += 1 + countNestedReferences(el.getValue());
+                } else if (el.getValue().isArray()) {
+                    counter += wrapIter(el.getValue().getArrayValue().iterator())
+                            .mapToInt(n -> !n.isSimple() ? 1 + countNestedReferences(n) : 0)
+                            .sum();
+                }
             }
         }
-
         return counter;
     }
 
@@ -285,9 +252,9 @@ public class JSONMatrixReader implements IMatrixReader {
                     logger.debug("{}{} -> write ['{}':'{}']", dbg.currentTabs(), args[0], args[1], args[2]);
                 }
 
-                String old = (String) result;
+                SimpleCell old = (SimpleCell) result;
 
-                if (old != null && !old.isEmpty()) {
+                if (old != null && old.getValue() != null) {
                     if (logger.isDebugEnabled()) {
                         logger.debug("\uD83D\uDCA9{}{} overrides value {} at {} column with {} position", dbg.currentTabs(), args[2], old, args[1], args[0]);
                     }

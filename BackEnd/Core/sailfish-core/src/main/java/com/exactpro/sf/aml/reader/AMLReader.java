@@ -52,8 +52,14 @@ public class AMLReader {
         int line = 0;
 
         while(matrixReader.hasNext()) {
-            line = matrixReader.getRowNumber();
             Map<String, SimpleCell> cells = matrixReader.readCells();
+            if (cells.containsKey(Column.Reference.getName())) {
+                line = cells.get(Column.Reference.getName()).getLineNumber();
+            } else if (cells.containsKey(Column.Action.getName())) {
+                line = cells.get(Column.Action.getName()).getLineNumber();
+            } else {
+                line = matrixReader.getRowNumber();
+            }
 
             if(cells.isEmpty()) {
                 continue;

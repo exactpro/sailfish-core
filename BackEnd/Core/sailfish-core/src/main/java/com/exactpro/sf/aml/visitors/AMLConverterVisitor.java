@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.exactpro.sf.aml.iomatrix.SimpleCell;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -125,6 +126,10 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
         for(String cellName : element.getCells().keySet()) {
             String cellValue = element.getValue(cellName);
+            SimpleCell cell = element.getCell(cellName);
+            int cellLineNumber = cell.getLineNumber();
+
+
 
             if(cellName.startsWith(Column.getIgnoredPrefix())) {
                 continue;
@@ -134,7 +139,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                 Column column = Column.value(cellName);
 
                 if (!cellName.toLowerCase().equals(cellName)) {
-                    addAlert(element, column, AlertType.WARNING, "System column name '%s' contains uppercase characters", cellName);
+                    addAlert(element, cell, column, AlertType.WARNING, "System column name '%s' contains uppercase characters", cellName);
                 }
 
                 if(column != null) {
@@ -156,7 +161,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         action.setCheckPoint(cellValue);
                         break;
                     case Condition:
-                        action.setCondition(new Value(cellValue));
+                        action.setCondition(new Value(cellValue,cellLineNumber));
                         break;
                     case ContinueOnFailed:
                         action.setContinueOnFailed(AMLLangConst.YES.equalsIgnoreCase(cellValue));
@@ -165,7 +170,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         List<String> dependencies = new ArrayList<>();
 
                         for(String dependency : cellValue.split("\\s*,\\s*")) {
-                            if(validateVariableName(element, column, dependency)) {
+                            if(validateVariableName(element, cell, column, dependency)) {
                                 dependencies.add(dependency);
                             }
                         }
@@ -179,7 +184,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         try {
                             action.setDictionaryURI(SailfishURI.parse(cellValue));
                         } catch(SailfishURIException e) {
-                            addError(element, Column.Dictionary, StringUtils.replace(e.getMessage(), "%", "%%"));
+                            addError(element, cell, Column.Dictionary, StringUtils.replace(e.getMessage(), "%", "%%"));
                         }
 
                         break;
@@ -203,7 +208,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         Set<String> keyFields = new HashSet<>();
 
                         for (String keyField : cellValue.split("\\s*,\\s*")) {
-                            if (validateVariableName(element, column, keyField)) {
+                            if (validateVariableName(element, cell, column, keyField)) {
                                 keyFields.add(keyField);
                             }
                         }
@@ -246,20 +251,20 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                                 MessageCount messageCount = MessageCount.fromString(cellValue);
 
                                 if(messageCount == null) {
-                                    addError(element, column, "Invalid value: %s", cellValue);
+                                    addError(element, cell, column, "Invalid value: %s", cellValue);
                                     break;
                                 }
                             } else if(JavaStatement.value(actionURI) == JavaStatement.BEGIN_LOOP) {
                                 if(!isNumeric(cellValue) && !isFunction(cellValue) && !isReference(cellValue) && !isStaticVariableReference(cellValue)) {
-                                    addError(element, column, "Invalid value: %s", cellValue);
+                                    addError(element, cell, column, "Invalid value: %s", cellValue);
                                     break;
                                 }
                             } else if(!MessageCount.isValidExpression(cellValue)) {
-                                addError(element, column, "Invalid value: %s", cellValue);
+                                addError(element, cell, column, "Invalid value: %s", cellValue);
                                 break;
                             }
                         } catch(Exception e) {
-                            addError(element, column, "Invalid value: %s", cellValue);
+                            addError(element, cell, column, "Invalid value: %s", cellValue);
                             break;
                         }
 
@@ -270,20 +275,20 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         String[] outcome = cellValue.split("\\s*:\\s*");
 
                         if(outcome.length != 2) {
-                            addError(element, column, "Invalid value: %s (expected: <group>:<name>)", cellValue);
+                            addError(element, cell, column, "Invalid value: %s (expected: <group>:<name>)", cellValue);
                             break;
                         }
 
                         String error = JavaValidator.validateVariableName(outcome[0]);
 
                         if(error != null) {
-                            addError(element, column, "Invalid outcome group: %s (%s)", outcome[0], error);
+                            addError(element, cell, column, "Invalid outcome group: %s (%s)", outcome[0], error);
                         }
 
                         error = JavaValidator.validateVariableName(outcome[1]);
 
                         if(error != null) {
-                            addError(element, column, "Invalid outcome name: %s (%s)", outcome[1], error);
+                            addError(element, cell, column, "Invalid outcome name: %s (%s)", outcome[1], error);
                             break;
                         }
 
@@ -303,18 +308,19 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                             if(isStaticVariableReference(cellValue)) {
                                 tempValue = AMLLangUtil.getStaticVariableName(cellValue);
                             } else {
-                                addError(element, column, "Invalid value: %s (expected: %sname%s)", cellValue, AMLLangConst.BEGIN_STATIC, AMLLangConst.END_STATIC);
+                                addError(element, cell, column, "Invalid value: %s (expected: %sname%s)", cellValue, AMLLangConst.BEGIN_STATIC, AMLLangConst.END_STATIC);
                                 break;
                             }
                         }
 
-                        if(validateVariableName(element, column, tempValue)) {
+                        if(validateVariableName(element, cell, column, tempValue)) {
                             action.setReference(cellValue);
                         }
 
                         break;
                     case ReferenceToFilter:
-                        if (validateVariableName(element, column, cellValue)) {
+
+                        if(validateVariableName(element, cell, column, cellValue)) {
                             action.setReferenceToFilter(cellValue);
                         }
                         break;
@@ -322,15 +328,17 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         action.setReorderGroups(AMLLangConst.YES.equalsIgnoreCase(cellValue));
                         break;
                     case ServiceName:
-                        Value serviceName = new Value(cellValue);
+                        Value serviceName = new Value(cellValue, cellLineNumber);
 
                         if (AMLLangUtil.isExpression(cellValue)) {
                             serviceName.setReference(true);
                         } else {
-                            validateVariableName(element, column, cellValue);
+                            validateVariableName(element, cell, column, cellValue);
                         }
 
                         action.setServiceName(serviceName);
+
+
 
                         break;
                     case StaticType:
@@ -339,11 +347,11 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         if (type != null) {
                             action.setStaticType(type.getSimpleName());
                         } else {
-                            addError(element, column, "Unknown type: %s", cellValue);
+                            addError(element, cell, column, "Unknown type: %s", cellValue);
                         }
                         break;
                     case StaticValue:
-                        Value value = new Value(cellValue);
+                        Value value = new Value(cellValue, cellLineNumber);
 
                         if(staticVariables != null) {
                             String newValue = staticVariables.get(element.getValue(Column.Reference));
@@ -363,29 +371,29 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         action.setTag(cellValue);
                         break;
                     case Template:
-                        if(validateVariableName(element, column, cellValue)) {
+                        if(validateVariableName(element, cell, column, cellValue)) {
                             action.setTemplate(cellValue);
                         }
                         break;
                     case Timeout:
                         try {
                             if(Long.parseLong(cellValue) < 0) {
-                                addError(element, column, "Value must be positive: %s", cellValue);
+                                addError(element, cell, column, "Value must be positive: %s", cellValue);
                                 break;
                             }
                         } catch(NumberFormatException e) {
                             if(isStaticVariableReference(cellValue)) {
                                 String variableName = AMLLangUtil.getStaticVariableName(cellValue);
-                                if(!validateVariableName(element, column, variableName)) {
+                                if(!validateVariableName(element, cell, column, variableName)) {
                                     break;
                                 }
                             } else {
-                                addError(element, column, "Value must be in long format or a static variable reference: %s", cellValue);
+                                addError(element, cell, column, "Value must be in long format or a static variable reference: %s", cellValue);
                                 break;
                             }
                         }
 
-                        action.setTimeout(new Value(cellValue));
+                        action.setTimeout(new Value(cellValue, cellLineNumber));
 
                         break;
                     case VerificationsOrder:
@@ -396,7 +404,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                                 String[] parsedOrder = order.split("\\s*:\\s*");
 
                                 if (parsedOrder.length != 2) {
-                                    addError(element, column, "Invalid value: %s (expected: <field>:<status>)", order);
+                                    addError(element, cell, column, "Invalid value: %s (expected: <field>:<status>)", order);
                                     break;
                                 }
 
@@ -406,22 +414,22 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                                 nameError = JavaValidator.validateVariableName(parsedOrder[0]);
 
                                 if (nameError != null) {
-                                    addError(element, column, "Invalid message field name: %s (%s)", fieldName,
-                                             nameError);
+                                    addError(element, cell, column, "Invalid message field name: %s (%s)", fieldName,
+                                            nameError);
                                 }
 
                                 nameError = JavaValidator.validateVariableName(statusType);
 
                                 if (nameError != null) {
-                                    addError(element, column, "Invalid status name: %s (%s)", statusType,
-                                             nameError);
+                                    addError(element, cell, column, "Invalid status name: %s (%s)", statusType,
+                                            nameError);
                                     break;
                                 }
 
                                 try {
                                     StatusType.getStatusType(statusType);
                                 } catch (EPSCommonException e) {
-                                    addError(element, column, "Invalid status name: %s (%s)", statusType, order);
+                                    addError(element, cell, column, "Invalid status name: %s (%s)", statusType, order);
                                     break;
                                 }
 
@@ -429,7 +437,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                                 nameError = JavaValidator.validateVariableName(order);
 
                                 if (nameError != null) {
-                                    addError(element, column, "Invalid message field name: %s (%s)", order,
+                                    addError(element, cell, column, "Invalid message field name: %s (%s)", order,
                                              nameError);
                                 }
 
@@ -441,14 +449,14 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
                         action.setVerificationsOrder(verificationsOrder);
                         break;
                     default:
-                        action.addDefinedServiceField(column, new Value(cellValue));
+                        action.addDefinedServiceField(column, new Value(cellValue, cellLineNumber));
                         break;
                     }
                 } else {
-                    action.putServiceField(cellName, new Value(cellValue));
+                    action.putServiceField(cellName, new Value(cellValue, cellLineNumber));
                 }
             } else {
-                action.put(cellName, new Value(cellValue));
+                action.put(cellName, new Value(cellValue, cellLineNumber));
             }
         }
 
@@ -542,7 +550,7 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
             String reference = block.getValue(Column.Reference);
 
             if(StringUtils.isNotEmpty(reference)) {
-                validateVariableName(block, Column.Reference, reference);
+                validateVariableName(block, block.getCell(Column.Reference), Column.Reference, reference);
             }
 
             boolean failOnUnexpectedMessage = AMLLangConst.YES.equalsIgnoreCase(block.getValue(Column.FailOnUnexpectedMessage));
@@ -593,13 +601,23 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
     }
 
     private void addError(AMLElement element, Column column, String message, Object... args) {
-        addAlert(element, column, AlertType.ERROR, message, args);
+        this.addError(element, null, column, message, args);
     }
 
-    private void addAlert(AMLElement element, Column column, AlertType type, String message, Object... args) {
+    private void addError(AMLElement element, SimpleCell cell, Column column, String message, Object... args) {
+        addAlert(element, cell, column, AlertType.ERROR, message, args);
+    }
+
+    private void addAlert(AMLElement element, SimpleCell cell, Column column, AlertType type, String message, Object... args) {
         String reference = StringUtils.defaultString(element.getValue(Column.Reference), element.getValue(Column.ReferenceToFilter));
         String columnName = column != null ? column.getName() : null;
-        alertCollector.add(new Alert(element.getLine(), element.getUID(), reference, columnName, String.format(message, args), type));
+        int lineNumber;
+        if (cell != null) {
+            lineNumber = cell.getLineNumber();
+        } else {
+            lineNumber = element.getLine();
+        }
+        alertCollector.add(new Alert(lineNumber, element.getUID(), reference, columnName, String.format(message, args), type));
     }
 
     public ListMultimap<AMLBlockType, AMLTestCase> getBlocks() {
@@ -610,10 +628,10 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
         return alertCollector;
     }
 
-    private boolean validateVariableName(AMLElement element, Column column, String value) {
+    private boolean validateVariableName(AMLElement element, SimpleCell cell, Column column, String value) {
         String error = JavaValidator.validateVariableName(value);
         if(error != null) {
-            addError(element, column, "%s", error);
+            addError(element, cell, column, "%s", error);
             return false;
         }
         return true;

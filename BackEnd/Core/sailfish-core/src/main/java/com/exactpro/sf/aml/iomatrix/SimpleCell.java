@@ -21,6 +21,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 
 public class SimpleCell {
     private final String value;
+    private final int lineNumber;
     private final CellStyle cellStyle;
 
     public SimpleCell() {
@@ -28,16 +29,25 @@ public class SimpleCell {
     }
 
     public SimpleCell(String value) {
-        this(value, null);
+        this(value, null,0);
     }
 
-    public SimpleCell(String value, CellStyle style) {
+    public SimpleCell(String value, int lineNumber) { this(value,null, lineNumber); }
+
+    public SimpleCell(String value, CellStyle style) { this(value, style, 0); }
+
+    public SimpleCell(String value, CellStyle style, int lineNumber) {
         this.value = value;
         this.cellStyle = style;
+        this.lineNumber = lineNumber;
     }
 
     public String getValue() {
         return value;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
     }
 
     public CellStyle getCellStyle() {
@@ -63,6 +73,7 @@ public class SimpleCell {
         EqualsBuilder builder = new EqualsBuilder();
 
         builder.append(value, that.value);
+        builder.append(lineNumber, that.lineNumber);
         builder.append(cellStyle, that.cellStyle);
 
         return builder.isEquals();
@@ -73,6 +84,7 @@ public class SimpleCell {
         HashCodeBuilder builder = new HashCodeBuilder();
 
         builder.append(value);
+        builder.append(lineNumber);
         builder.append(cellStyle);
 
         return builder.toHashCode();

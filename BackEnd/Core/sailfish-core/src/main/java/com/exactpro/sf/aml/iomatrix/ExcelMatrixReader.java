@@ -104,7 +104,7 @@ public class ExcelMatrixReader implements IMatrixReader {
 
             allEmpty &= StringUtils.isEmpty(value);
 
-            cells.add(new SimpleCell(value, currentCell.getCellStyle()));
+            cells.add(new SimpleCell(value, currentCell.getCellStyle(),currentCell.getRowIndex()));
         }
 
         readRecord();

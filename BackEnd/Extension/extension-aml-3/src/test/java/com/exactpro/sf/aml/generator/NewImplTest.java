@@ -24,15 +24,15 @@ import com.exactpro.sf.util.AML3PluginTest;
 public class NewImplTest extends AML3PluginTest {
 	@Test
 	public void test() {
-        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ?x==null:x==null")));
-        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ? x==null : x==null")));
-        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ? x == null : x == null")));
+        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ?x==null:x==null",0)));
+        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ? x==null : x==null",0)));
+        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ? x == null : x == null",0)));
 
-        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ?x==null: false")));
+        Assert.assertEquals("filter", NewImpl.getFilterType(new Value("2 == 3 ?x==null: false",0)));
 
-        Assert.assertEquals("simpleFilter", NewImpl.getFilterType(new Value(" \" x \" ")));
-        Assert.assertEquals("simpleFilter", NewImpl.getFilterType(new Value("\"x\"")));
-        Assert.assertEquals("simpleFilter", NewImpl.getFilterType(new Value("\" x \"")));
+        Assert.assertEquals("simpleFilter", NewImpl.getFilterType(new Value(" \" x \" ",0)));
+        Assert.assertEquals("simpleFilter", NewImpl.getFilterType(new Value("\"x\"",0)));
+        Assert.assertEquals("simpleFilter", NewImpl.getFilterType(new Value("\" x \"",0)));
 
 	}
 }

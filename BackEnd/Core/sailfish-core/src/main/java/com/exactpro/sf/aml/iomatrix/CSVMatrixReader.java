@@ -33,6 +33,7 @@ public class CSVMatrixReader implements IMatrixReader {
 
     private final CsvReader reader;
     private boolean hasNext;
+    private int lineNumber;
 
     public CSVMatrixReader(String fileName) throws IOException {
         this(fileName, determineCSVDelimiter(new FileInputStream(fileName), true));
@@ -89,10 +90,9 @@ public class CSVMatrixReader implements IMatrixReader {
 
         String[] cells = read();
         SimpleCell[] simpleCells = new SimpleCell[cells.length];
-
         int counter = 0;
         for (String s : cells) {
-            simpleCells[counter++] = new SimpleCell(s);
+            simpleCells[counter++] = new SimpleCell(s, lineNumber);
         }
 
         return simpleCells;
@@ -104,9 +104,11 @@ public class CSVMatrixReader implements IMatrixReader {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-
+        
         String[] values = reader.getValues();
         readRecord();
+
+        lineNumber++;
 
         // drop all values after last non-empty cell
         // otherwise a lot of empty (but styled) cells will be returned
@@ -181,7 +183,7 @@ public class CSVMatrixReader implements IMatrixReader {
 
     /**
      * Search csv delimiter in byte array
-     * @param byte array
+     * @param bytes array
      * @param size of byte array
      * @return csv delimiter
      */

@@ -1,0 +1,50 @@
+[
+  {
+    "block start": {"#description": "Descr", "#reference": "block",
+      "field": "abc",
+      "sub": {
+        "#action": "send",
+        "sub2": {
+          "#action": "send2",
+          "sub3": {
+            "sub4": "send4"
+          },
+          "sub88": [
+            {
+              "sub99": "send99"
+            },
+            {
+              "sub00": {
+                "sub000": "send000",
+                "sub111": "send111"
+              }
+            }
+          ]
+        },
+        "sub5": {
+          "sub5": "send5"
+        },
+        "sub77": [
+          "send771",
+          "send772"
+        ]
+      },
+      "sub7": {
+        "sub7": "send7"
+      },
+      "sub4": {
+        "field": "send4"
+      }
+    }
+  },
+  {
+    "test case start": {
+      "#id": "test_id",
+      "call": {
+        "#id": 123,
+        "#template": "block",
+        "#action": "include block"
+      }
+    }
+  }
+]

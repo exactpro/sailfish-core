@@ -17,7 +17,6 @@ package com.exactpro.sf.aml.generator.matrix;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -37,17 +36,18 @@ public class Value implements IField, Cloneable, Serializable {
     private boolean isJava;
 	private String fieldName;
 	private String value;
+	private final int lineNumber;
 	private final String origValue;
 	private boolean check = true;
     private int index;
     private final List<RefParameter> parameters = new ArrayList<>();
 
-	public Value(String value) {
-		setValue(value);
-		this.origValue = value;
-    }
+	public Value(String value, int lineNumber) {
+		this(value, value, lineNumber);
+	}
 
-	public Value(String origValue, String newValue) {
+	public Value(String origValue, String newValue, int lineNumber) {
+	    this.lineNumber = lineNumber;
 		setValue(newValue);
 		this.origValue = origValue;
     }
@@ -131,7 +131,9 @@ public class Value implements IField, Cloneable, Serializable {
         return check;
 	}
 
-	public void setFieldName(String name) {
+    public Integer getLineNumber() { return lineNumber; }
+
+    public void setFieldName(String name) {
 		this.fieldName = name;
 	}
 
@@ -152,7 +154,7 @@ public class Value implements IField, Cloneable, Serializable {
 	}
 
 	public Value clone() {
-	    return new Value(origValue, value);
+	    return new Value(origValue, value, lineNumber);
 	}
 
 	@Override
@@ -160,6 +162,7 @@ public class Value implements IField, Cloneable, Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).
 				append("fieldName", fieldName).
 				append("value", value).
+                append("lineNumber", lineNumber).
 				append("origValue", origValue).
 				append("isReference", isReference).
 				append("check", check).

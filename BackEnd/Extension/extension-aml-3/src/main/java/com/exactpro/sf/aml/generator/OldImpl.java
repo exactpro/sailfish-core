@@ -284,7 +284,7 @@ public class OldImpl {
                     expandSetter(action, sb, column, v, v.getValue(), variable.getName());
 				}
 			} catch (AMLException | SailfishURIException ex) {
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "': " + ex.getMessage()));
+                alertCollector.add(new Alert(v.getLineNumber(), action.getUID(), action.getReference(), column, "Column '" + column + "': " + ex.getMessage()));
 				continue;
 			}
 		}
@@ -302,17 +302,17 @@ public class OldImpl {
 	}
 
     private void expandSetter(AMLAction action, StringBuilder sb, String column, Value v, String val, String variable) throws AMLException {
-        Value tempValue = new Value(val);
+        Value tempValue = new Value(val, v.getLineNumber());
 
         for (RefParameter p : v.getParameters()) {
             tempValue.addParameter(p);
         }
 
         if (v.isReference()) {
-            val = NewImpl.generateFilter(action.getLine(), column, tempValue, TAB3);
+            val = NewImpl.generateFilter(tempValue.getLineNumber(), column, tempValue, TAB3);
         } else if (NewImpl.isNotASimpleFilter(val)) {
             IFieldStructure structure = new FieldStructure(column, null, null, null, null, null, JavaType.JAVA_LANG_STRING, false, false, false, null);
-            val = NewImpl.createFilterExpression(structure, tempValue.getOrigValue(), action.getLine(), action.getUID(), column, alertCollector);
+            val = NewImpl.createFilterExpression(structure, tempValue.getOrigValue(), tempValue.getLineNumber(), action.getUID(), column, alertCollector);
         } else if (!v.isJava()) {
             val = enclose(val);
         }
@@ -355,24 +355,24 @@ public class OldImpl {
 
 	            if (subAction == null)
 	            {
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "'"
+                    alertCollector.add(new Alert(v.getLineNumber(), action.getUID(), action.getReference(), column, "Column '" + column + "'"
 	                        +": Reference '"+ref+"' not defined in matrix."));
 	                continue;
 	            }
 
 	            if(subAction.getGenerateStatus() != AMLGenerateStatus.GENERATED) {
-	                alertCollector.add(new Alert(action.getLine(), action.getReference(), column, "Static reference to a not generated action: " + reference));
+	                alertCollector.add(new Alert(v.getLineNumber(), action.getReference(), column, "Static reference to a not generated action: " + reference));
 	                continue;
 	            }
 
 	            if(JavaStatement.SET_STATIC.getURI().equals(subAction.getActionURI())) {
 	                if(refSplit.length > 1) {
-                        alertCollector.add(new Alert(action.getLine(), action.getReference(), column,
+                        alertCollector.add(new Alert(v.getLineNumber(), action.getReference(), column,
                                 "Invalid reference format to static variable in column '" + column + "': '" + ref + "'. " + "Expected format: %{reference}."));
                         continue;
 	                }
 	            } else if(!subAction.isStaticAction()) {
-                    alertCollector.add(new Alert(action.getLine(), action.getReference(), column, "Reference to a non-static action: " + reference));
+                    alertCollector.add(new Alert(v.getLineNumber(), action.getReference(), column, "Reference to a non-static action: " + reference));
                     continue;
 	            }
 
@@ -380,7 +380,7 @@ public class OldImpl {
 		        StringBuilder eval = new StringBuilder(CAPACITY_4K);
 
 		        eval.append("eval(");
-		        eval.append(action.getLine());
+		        eval.append(v.getLineNumber());
 		        eval.append(", ");
                 eval.append(enclose(column));
 		        eval.append(", ");
@@ -412,7 +412,7 @@ public class OldImpl {
 
 			if (subAction == null)
 			{
-                alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Column '" + column + "'"
+                alertCollector.add(new Alert(v.getLineNumber(), action.getUID(), action.getReference(), column, "Column '" + column + "'"
 						+": Reference '"+reference+"' not defined in matrix."));
 				continue;
 			}
@@ -448,12 +448,12 @@ public class OldImpl {
                         && !type.getCanonicalName().equals(subAction.getMessageTypeColumn())
                         && !type.getSimpleName().equals(subAction.getMessageTypeColumn()))
 				{
-                    alertCollector.add(new Alert(action.getLine(), action.getUID(), action.getReference(), column, "Message type [" + subAction.getMessageTypeColumn() + "] for submessage [" + subAction.getReference()
+                    alertCollector.add(new Alert(v.getLineNumber(), action.getUID(), action.getReference(), column, "Message type [" + subAction.getMessageTypeColumn() + "] for submessage [" + subAction.getReference()
 							+"] does not match calculated submessage type '"+type.getCanonicalName()+"'."
 							+" Possible that reference placed in wrong column or specified submessage type is incorrect."
 							+" Make sure that value in "+Column.MessageType.getName()+" column for message in line "
 							+subAction.getLine()+" ["+subAction.getReference()+"] is equals with value in column "
-							+column+" for message in line "+action.getLine()+" ["+action.getReference()+"]"));
+							+column+" for message in line "+v.getLineNumber()+" ["+action.getReference()+"]"));
 					continue;
 				}
 			}
