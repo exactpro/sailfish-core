@@ -15,19 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty;
 
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ChannelFactory;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -41,6 +34,12 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
 
 public abstract class NettyMulticastClientService extends NettyClientService {
 
@@ -78,74 +77,71 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 
 	@Override
 	public void connect() throws Exception {
-        LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
-		String localIP = getSettings().getLocalIP();
-		String bindIp = (getSettings().getBindIp() == null) ? getSettings().getMulticastIp() : getSettings().getBindIp();
-		String mcastIp = getSettings().getMulticastIp();
-		int mcastPort = getSettings().getMulticastPort();
-		this.localNetworkInterface = NetworkInterface.getByInetAddress(Inet4Address.getByName(localIP));
-		this.multicastGroup = new InetSocketAddress(Inet4Address.getByName(mcastIp), mcastPort);
+	    try {
+	        channelLock.writeLock().lock();
+            LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
+            String localIP = getSettings().getLocalIP();
+            String bindIp = (getSettings().getBindIp() == null) ? getSettings().getMulticastIp() : getSettings().getBindIp();
+            String mcastIp = getSettings().getMulticastIp();
+            int mcastPort = getSettings().getMulticastPort();
+            this.localNetworkInterface = NetworkInterface.getByInetAddress(Inet4Address.getByName(localIP));
+            this.multicastGroup = new InetSocketAddress(Inet4Address.getByName(mcastIp), mcastPort);
 
-		Bootstrap cb = new Bootstrap();
-		// Fixme: use ITaskExecutor ?
-		cb.group(new NioEventLoopGroup());
-		cb.channelFactory(new ChannelFactory<Channel>() {
-			@Override
-			public Channel newChannel() {
-				// Force IPv4
-				return new NioDatagramChannel(InternetProtocolFamily.IPv4);
-			}
-		});
-		cb.option(ChannelOption.SO_REUSEADDR, true);
-		cb.option(ChannelOption.IP_MULTICAST_IF, localNetworkInterface);
-		cb.localAddress(new InetSocketAddress(Inet4Address.getByName(bindIp), mcastPort));
-		// we can configure java -Dio.netty.allocator.numDirectArenas=... -Dio.netty.allocator.numHeapArenas=...
-		cb.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-		cb.handler(new ChannelInitializer<Channel>() {
-			@Override
-			protected void initChannel(Channel ch) throws Exception {
-                for(Entry<String, ChannelHandler> entry : handlers.entrySet()) {
-					ch.pipeline().addLast(entry.getKey(), entry.getValue());
-				}
-				// add exception handler for inbound messages
-				// outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
-				ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
+            Bootstrap cb = new Bootstrap();
+            // Fixme: use ITaskExecutor ?
+            cb.group(new NioEventLoopGroup());
+            cb.channelFactory(new ChannelFactory<Channel>() {
+                @Override
+                public Channel newChannel() {
+                    // Force IPv4
+                    return new NioDatagramChannel(InternetProtocolFamily.IPv4);
+                }
+            });
+            cb.option(ChannelOption.SO_REUSEADDR, true);
+            cb.option(ChannelOption.IP_MULTICAST_IF, localNetworkInterface);
+            cb.localAddress(new InetSocketAddress(Inet4Address.getByName(bindIp), mcastPort));
+            // we can configure java -Dio.netty.allocator.numDirectArenas=... -Dio.netty.allocator.numHeapArenas=...
+            cb.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+            cb.handler(new ChannelInitializer<Channel>() {
+                @Override
+                protected void initChannel(Channel ch) throws Exception {
+                    for (Entry<String, ChannelHandler> entry : handlers.entrySet()) {
+                        ch.pipeline().addLast(entry.getKey(), entry.getValue());
+                    }
+                    // add exception handler for inbound messages
+                    // outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
+                    ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
 
-			}
-		});
+                }
+            });
 
-		 Channel localChannel = cb.bind()
-                 .addListener(SET_CHANNEL)
-				.addListener(new ChannelFutureListener() {
-					@Override
-					public void operationComplete(ChannelFuture bindFuture) throws Exception {
-						if (!bindFuture.isSuccess()) {
-							return;
-						}
-						DatagramChannel channel = (DatagramChannel) bindFuture.channel();
-						// TODO: heartbeat loss detection
+            Channel localChannel = cb.bind().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture bindFuture) throws Exception {
+                    if (!bindFuture.isSuccess()) {
+                        return;
+                    }
+                    DatagramChannel channel = (DatagramChannel) bindFuture.channel();
+                    // TODO: heartbeat loss detection
 
-						ChannelFuture future;
-                        String sourceIP = getSettings().getSourceIp();
-						if (sourceIP == null) {
-							future = channel.joinGroup(multicastGroup, localNetworkInterface);
-						}
-						else {
-							future = channel.joinGroup(multicastGroup.getAddress(), localNetworkInterface, Inet4Address.getByName(sourceIP));
-						}
-						future
-							.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-							.addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-					}
-				})
-				.addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
-				.syncUninterruptibly()
-				.channel();
+                    ChannelFuture future;
+                    String sourceIP = getSettings().getSourceIp();
+                    if (sourceIP == null) {
+                        future = channel.joinGroup(multicastGroup, localNetworkInterface);
+                    } else {
+                        future = channel.joinGroup(multicastGroup.getAddress(), localNetworkInterface, Inet4Address.getByName(sourceIP));
+                    }
+                    future.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+                }
+            }).addListener(ChannelFutureListener.CLOSE_ON_FAILURE).syncUninterruptibly().channel();
 
-
-        localChannel.closeFuture().addListener((ChannelFutureListener) future -> changeStatus(ServiceStatus.DISPOSED, "Connection closed", null));
+            localChannel.closeFuture().addListener((ChannelFutureListener) future -> changeStatus(ServiceStatus.DISPOSED, "Connection closed", null));
+            setChannel(localChannel);
+        } finally {
+	        channelLock.writeLock().unlock();
+        }
 	}
 
 	@Override

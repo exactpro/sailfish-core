@@ -15,17 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty;
 
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -48,7 +37,6 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -59,14 +47,22 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.LinkedHashMap;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class NettyClientService implements IInitiatorService {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
-    protected final ChannelFutureListener SET_CHANNEL = future -> setChannel(future.channel());
-
-	protected IServiceContext serviceContext;
+    protected IServiceContext serviceContext;
 	protected ServiceName serviceName;
 	protected IServiceHandler serviceHandler;
 	protected NettyClientSettings settings;
@@ -85,10 +81,13 @@ public abstract class NettyClientService implements IInitiatorService {
 	protected IMessageFactory msgFactory;
     protected Future<?> hbFuture;
 
-    private final ReadWriteLock channelLock = new ReentrantReadWriteLock();
-    private Channel channel;
+    protected final ReadWriteLock channelLock = new ReentrantReadWriteLock();
+    /**
+     * You should use {@link #channelLock} for interaction with current variable
+     */
+    protected Channel channel;
 
-	// At least it should contains:
+    // At least it should contains:
 	// * YourCodec(s)
 	// * MessagePersisterHandler
 	// * NettyServiceHandler
@@ -159,11 +158,7 @@ public abstract class NettyClientService implements IInitiatorService {
                 serviceName);
 
 			nettySession = new NettySession(this, logConfigurator);
-
-			if (nioEventLoopGroup == null) {
-			    this.nioEventLoopGroup = new NioEventLoopGroup();
-            }
-
+			nioEventLoopGroup = new NioEventLoopGroup();
 			connect();
 
 			changeStatus(ServiceStatus.STARTED, "Service " + serviceName + " started", null);
@@ -175,38 +170,44 @@ public abstract class NettyClientService implements IInitiatorService {
 
 	@Override
 	public void connect() throws Exception {
-        initChannelHandlers(serviceContext);
+        try {
+            channelLock.writeLock().lock();
 
-        LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
+            initChannelHandlers(serviceContext);
 
-		Bootstrap cb = new Bootstrap();
-		// Fixme: use ITaskExecutor ?
-		cb.group(nioEventLoopGroup);
-		cb.channel(NioSocketChannel.class);
-		cb.option(ChannelOption.SO_REUSEADDR, true);
-		// we can configure java -Dio.netty.allocator.numDirectArenas=... -Dio.netty.allocator.numHeapArenas=...
-		cb.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-		cb.handler(new ChannelInitializer<Channel>() {
-			@Override
-			protected void initChannel(Channel ch) throws Exception {
-                for(Entry<String, ChannelHandler> entry : handlers.entrySet()) {
-					ch.pipeline().addLast(entry.getKey(), entry.getValue());
-				}
-				// add exception handler for inbound messages
-				// outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
-				ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
+            LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
-			}
-		});
+            Bootstrap cb = new Bootstrap();
+            // Fixme: use ITaskExecutor ?
+            cb.group(nioEventLoopGroup);
+            cb.channel(NioSocketChannel.class);
+            cb.option(ChannelOption.SO_REUSEADDR, true);
+            // we can configure java -Dio.netty.allocator.numDirectArenas=... -Dio.netty.allocator.numHeapArenas=...
+            cb.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+            cb.handler(new ChannelInitializer<Channel>() {
+                @Override
+                protected void initChannel(Channel ch) throws Exception {
+                    for (Entry<String, ChannelHandler> entry : handlers.entrySet()) {
+                        ch.pipeline().addLast(entry.getKey(), entry.getValue());
+                    }
+                    // add exception handler for inbound messages
+                    // outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
+                    ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
 
-        Channel localChannel =  cb.connect(getHost(), getPort())
-                .addListener(SET_CHANNEL)
-				.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
-				.addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
-				.syncUninterruptibly()
-				.channel();
+                }
+            });
 
-		initChannelCloseFuture(localChannel);
+            Channel localChannel = cb.connect(getHost(), getPort())
+                    .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
+                    .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
+                    .awaitUninterruptibly()
+                    .channel();
+
+            initChannelCloseFuture(localChannel);
+            setChannel(localChannel);
+        } finally {
+            channelLock.writeLock().unlock();
+        }
 	}
 
 	protected void initChannelCloseFuture(Channel channel) {
@@ -232,28 +233,37 @@ public abstract class NettyClientService implements IInitiatorService {
 		} catch (RuntimeException e) {
             changeStatus(ServiceStatus.ERROR, "Session '" + serviceName + "'  has not been closed", e);
 		} finally {
-            Channel localChannel = getChannel();
-            if (localChannel != null) {
-                if (localChannel.isOpen()) {
-                    if (!localChannel.close().awaitUninterruptibly(5, TimeUnit.SECONDS)) {
-                        changeStatus(ServiceStatus.ERROR, "Channel '" + serviceName + "' has not been closed for 5 secons", null);
+		    try {
+                channelLock.writeLock().lock();
+                Channel localChannel = getChannel();
+                if (localChannel != null) {
+                    if (localChannel.isOpen()) {
+                        if (!localChannel.close().awaitUninterruptibly(5, TimeUnit.SECONDS)) {
+                            changeStatus(ServiceStatus.ERROR, "Channel '" + serviceName + "' has not been closed for 5 secons", null);
+                        }
+                    }
+
+                    if (!localChannel.isOpen()) {
+                        setChannel(null);
                     }
                 }
-                
-                if (!localChannel.isOpen()) {
-                    setChannel(null);
-                }
+            } finally {
+                channelLock.writeLock().unlock();
             }
                 
             NioEventLoopGroup nioEventLoopGroup = this.nioEventLoopGroup;
-            
+
             if (nioEventLoopGroup != null) {
                 if (!nioEventLoopGroup.isShutdown()) {
-                    if(!nioEventLoopGroup.shutdownGracefully().awaitUninterruptibly(5, TimeUnit.SECONDS)) {
-                        changeStatus(ServiceStatus.ERROR, "Events executor '" + serviceName + "' has not been closed for 5 secons", null);
+                    try {
+                        if (!nioEventLoopGroup.shutdownGracefully().awaitUninterruptibly(5, TimeUnit.SECONDS)) {
+                            changeStatus(ServiceStatus.ERROR, "Events executor '" + serviceName + "' has not been closed for 5 secons", null);
+                        }
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
                     }
                 }
-                
+
                 if (this.nioEventLoopGroup.isShutdown()) {
                     this.nioEventLoopGroup = null;
                 }
@@ -326,14 +336,17 @@ public abstract class NettyClientService implements IInitiatorService {
 	}
 
 	public void stop(String message, Throwable cause) {
-		channel.close().addListener(new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-			    if (!future.isSuccess()) {
-			        changeStatus(ServiceStatus.ERROR, "Failed to close channel", future.cause());
-			    }
-			}
-		});
+        Channel localChannel = getChannel();
+        if (localChannel != null) {
+            localChannel.close().addListener(new ChannelFutureListener() {
+                @Override
+                public void operationComplete(ChannelFuture future) throws Exception {
+                    if (!future.isSuccess()) {
+                        changeStatus(ServiceStatus.ERROR, "Failed to close channel", future.cause());
+                    }
+                }
+            });
+        }
 	}
 
 	public void onExceptionCaught(Throwable cause) {
@@ -358,7 +371,7 @@ public abstract class NettyClientService implements IInitiatorService {
 		}
 	}
 
-	private void setChannel(Channel channel) {
+	protected void setChannel(Channel channel) {
         try {
             channelLock.writeLock().lock();
             this.channel = channel;
