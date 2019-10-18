@@ -494,7 +494,7 @@ public class ScriptrunEventHTMLBuilder {
 				int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
 				progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-				progressBlock = "<a href=\""+ getReportHref(descr.getWorkFolder(), context) +"\">" + formatProgressBar(progress, progressText) + "</a>";
+				progressBlock = "<a target=\"_blank\" href=\""+ getReportHref(descr.getWorkFolder(), context) +"\">" + formatProgressBar(progress, progressText) + "</a>";
 			}
 			else {
 				String progress = descr.getProgress();
@@ -593,7 +593,7 @@ public class ScriptrunEventHTMLBuilder {
 				int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
 				progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-				progressBlock ="<a href=\""+ getReportHref(descr.getWorkFolder(), context) +"\">" + formatProgressBar(progress, progressText) + "</a>";
+				progressBlock = "<a target=\"_blank\" href=\""+ getReportHref(descr.getWorkFolder(), context) +"\">" + formatProgressBar(progress, progressText) + "</a>";
 			}
 			else {
 				String progress = descr.getProgress();
@@ -668,7 +668,7 @@ public class ScriptrunEventHTMLBuilder {
 			int progress = (int) Math.round(100.0 * finishedCount / loadedTC);
             String progressText = finishedCount + " of " + loadedTC + " (" + progress + "%)";
 
-            String progressBlock = "<a href=\"" + getReportHref(descr.getWorkFolder(), context) + "\">" + formatProgressBar(progress, progressText) + "</a>";
+            String progressBlock = "<a target=\"_blank\" href=\"" + getReportHref(descr.getWorkFolder(), context) + "\">" + formatProgressBar(progress, progressText) + "</a>";
 
 			String postfix = descr.getPauseTimeout() == 0 ? PERMANENT_PAUSED_CLASS_POSTFIX : TIME_PAUSED_CLASS_POSTFIX;
 
