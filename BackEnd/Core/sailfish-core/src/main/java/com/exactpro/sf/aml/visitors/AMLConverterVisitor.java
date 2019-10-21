@@ -73,12 +73,12 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
     private AMLTestCase currentBlock;
 
-    public AMLConverterVisitor(AMLSettings settings, IActionManager actionManager, AMLMatrixWrapper wrapper) {
+    public AMLConverterVisitor(AMLSettings settings, IActionManager actionManager, AMLMatrixWrapper wrapper, AlertCollector alertCollector) {
         this.settings = settings;
         this.actionManager = actionManager;
         this.wrapper = wrapper;
         this.blocks = ArrayListMultimap.create();
-        this.alertCollector = new AlertCollector();
+        this.alertCollector = alertCollector;
         this.currentBlock = null;
         this.staticVariables = settings.getStaticVariables();
         this.cache = new HashMap<>();
@@ -132,6 +132,10 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
 
             if(cellName.startsWith(Column.getSystemPrefix())) {
                 Column column = Column.value(cellName);
+
+                if (!cellName.toLowerCase().equals(cellName)) {
+                    addAlert(element, column, AlertType.WARNING, "System column name '%s' contains uppercase characters", cellName);
+                }
 
                 if(column != null) {
                     switch(column) {
@@ -569,9 +573,13 @@ public class AMLConverterVisitor implements IAMLElementVisitor {
     }
 
     private void addError(AMLElement element, Column column, String message, Object... args) {
+        addAlert(element, column, AlertType.ERROR, message, args);
+    }
+
+    private void addAlert(AMLElement element, Column column, AlertType type, String message, Object... args) {
         String reference = StringUtils.defaultString(element.getValue(Column.Reference), element.getValue(Column.ReferenceToFilter));
         String columnName = column != null ? column.getName() : null;
-        alertCollector.add(new Alert(element.getLine(), element.getUID(), reference, columnName, String.format(message, args)));
+        alertCollector.add(new Alert(element.getLine(), element.getUID(), reference, columnName, String.format(message, args), type));
     }
 
     public ListMultimap<AMLBlockType, AMLTestCase> getBlocks() {

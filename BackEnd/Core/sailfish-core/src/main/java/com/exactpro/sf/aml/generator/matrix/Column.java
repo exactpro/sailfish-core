@@ -75,7 +75,7 @@ public enum Column {
 	public static Column value(String key) {
 
 		for (Column c : Column.values()) {
-			if (c.getName() != null && c.getName().equals(key)) {
+			if (c.getName() != null && c.getName().equals(key.toLowerCase())) {
 				return c;
 			}
 		}

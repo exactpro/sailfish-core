@@ -24,18 +24,12 @@ import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.google.common.collect.ListMultimap;
 
 public class AMLConverter {
-    public static ListMultimap<AMLBlockType, AMLTestCase> convert(AMLMatrix matrix, AMLSettings settings, IActionManager actionManager) throws AMLException {
+    public static ListMultimap<AMLBlockType, AMLTestCase> convert(AMLMatrix matrix, AMLSettings settings, IActionManager actionManager, AlertCollector alertCollector) throws AMLException {
         AMLMatrixWrapper wrapper = new AMLMatrixWrapper(matrix);
-        AMLConverterVisitor visitor = new AMLConverterVisitor(settings, actionManager, wrapper);
+        AMLConverterVisitor visitor = new AMLConverterVisitor(settings, actionManager, wrapper, alertCollector);
 
         for(AMLBlock block : matrix.getBlocks()) {
             block.accept(visitor);
-        }
-
-        AlertCollector alertCollector = visitor.getAlertCollector();
-
-        if(alertCollector.getCount(AlertType.ERROR) > 0) {
-            throw new AMLException("Failed to convert blocks", alertCollector);
         }
 
         return visitor.getBlocks();

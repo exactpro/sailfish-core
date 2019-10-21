@@ -46,11 +46,9 @@ import com.exactpro.sf.aml.reader.struct.AMLBlock;
 import com.exactpro.sf.aml.reader.struct.AMLMatrix;
 import com.exactpro.sf.aml.writer.AMLWriter;
 import com.exactpro.sf.common.adapting.IAdapterManager;
-import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.IEnvironmentManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.IProgressListener;
@@ -156,7 +154,12 @@ public class AML {
         onDetermineLanguage(languageURI);
         amlSettings.setLanguageURI(languageURI);
 
-        ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, amlSettings, actionManager);
+        ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, amlSettings, actionManager, alertCollector);
+
+        if (alertCollector.getCount(AlertType.ERROR) > 0) {
+            throw new AMLException("Failed to convert blocks", alertCollector);
+        }
+
         blocks = AMLBlockProcessor.process(blocks, amlSettings, actionManager);
         this.testCases = blocks.get(AMLBlockType.TestCase);
 

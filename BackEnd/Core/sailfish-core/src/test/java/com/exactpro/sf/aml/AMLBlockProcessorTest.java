@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.exactpro.sf.aml.generator.Alert;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.aml.iomatrix.AdvancedMatrixReader;
 import com.exactpro.sf.aml.reader.AMLReader;
@@ -58,7 +59,7 @@ public class AMLBlockProcessorTest extends AbstractTest {
 
         try(AdvancedMatrixReader matrixReader = new AdvancedMatrixReader(matrixFile)) {
             AMLMatrix matrix = AMLReader.read(matrixReader);
-            ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager);
+            ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager, new AlertCollector());
             blocks = AMLBlockProcessor.process(blocks, settings, actionManager);
 
             Assert.assertTrue(blocks.get(AMLBlockType.GlobalBlock).isEmpty());
@@ -150,7 +151,7 @@ public class AMLBlockProcessorTest extends AbstractTest {
 
         try(AdvancedMatrixReader matrixReader = new AdvancedMatrixReader(matrixFile)) {
             AMLMatrix matrix = AMLReader.read(matrixReader);
-            ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager);
+            ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager, new AlertCollector());
 
             AMLBlockProcessor.process(blocks, settings, actionManager);
             Assert.fail("No errors were detected");

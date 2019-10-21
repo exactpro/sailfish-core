@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import com.exactpro.sf.aml.generator.Alert;
+import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.aml.generator.matrix.JavaStatement;
 import com.exactpro.sf.aml.iomatrix.AdvancedMatrixReader;
@@ -70,7 +71,7 @@ public class AMLConverterTest extends AbstractTest {
         try(AdvancedMatrixReader matrixReader = new AdvancedMatrixReader(matrixFile)) {
             AMLMatrix matrix = AMLReader.read(matrixReader);
 
-            ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager);
+            ListMultimap<AMLBlockType, AMLTestCase> blocks = AMLConverter.convert(matrix, settings, actionManager, new AlertCollector());
 
             Assert.assertEquals(0, blocks.get(AMLBlockType.FirstBlock).size());
             Assert.assertEquals(1, blocks.get(AMLBlockType.GlobalBlock).size());
@@ -133,10 +134,11 @@ public class AMLConverterTest extends AbstractTest {
         try(AdvancedMatrixReader matrixReader = new AdvancedMatrixReader(matrixFile)) {
             AMLMatrix matrix = AMLReader.read(matrixReader);
 
-            AMLConverter.convert(matrix, settings, actionManager);
-            Assert.fail("No errors were detected");
-        } catch(AMLException e) {
-            Collection<Alert> errors = e.getAlertCollector().getAlerts();
+            AlertCollector collector = new AlertCollector();
+
+            AMLConverter.convert(matrix, settings, actionManager, collector);
+
+            Collection<Alert> errors = collector.getAlerts();
 
             Assert.assertEquals(60, errors.size());
 
@@ -243,18 +245,18 @@ public class AMLConverterTest extends AbstractTest {
             error = new Alert(38, null, "#dependencies", "Variable '123' start with a digit", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(39, null, "#verifications_order",
-                                 "Invalid value: Value1: (expected: <field>:<status>)", AlertType.ERROR);
+                    "Invalid value: Value1: (expected: <field>:<status>)", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(40, null, "#verifications_order", "Invalid status name: FAKE (Value1:FAKE)", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(41, null, "#verifications_order",
-                                 "Invalid message field name: Va lue1 (Variable 'Va lue1' contain white space)", AlertType.ERROR);
+                    "Invalid message field name: Va lue1 (Variable 'Va lue1' contain white space)", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(42, null, "#verifications_order",
-                                 "Invalid message field name: 1Value1 (Variable '1Value1' start with a digit)", AlertType.ERROR);
+                    "Invalid message field name: 1Value1 (Variable '1Value1' start with a digit)", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(43, null, "#verifications_order",
-                                 "Invalid status name: 1PASSED (Variable '1PASSED' start with a digit)", AlertType.ERROR);
+                    "Invalid status name: 1PASSED (Variable '1PASSED' start with a digit)", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
             error = new Alert(44, null, "#messages_count", "Invalid value: -1", AlertType.ERROR);
             Assert.assertTrue(error.toString(), errors.remove(error));
@@ -266,6 +268,7 @@ public class AMLConverterTest extends AbstractTest {
             Assert.assertTrue(error.toString(), errors.remove(error));
 
             Assert.assertEquals(0, errors.size());
+
         }
     }
 }
