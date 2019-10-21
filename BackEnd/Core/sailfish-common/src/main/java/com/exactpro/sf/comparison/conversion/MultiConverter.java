@@ -19,10 +19,15 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.exactpro.sf.comparison.conversion.impl.BigDecimalConverter;
 import com.exactpro.sf.comparison.conversion.impl.BooleanConverter;
@@ -39,26 +44,43 @@ import com.exactpro.sf.comparison.conversion.impl.ShortConverter;
 import com.exactpro.sf.comparison.conversion.impl.StringConverter;
 
 public class MultiConverter {
-
+    
     private static final Map<Class<?>, IConverter<?>> CONVERTERS = initConverters();
-
+    
     public static final Set<Class<?>> SUPPORTED_TYPES = Collections.unmodifiableSet(CONVERTERS.keySet());
-
+    
     @SuppressWarnings("unchecked")
     public static <T> T convert(Object value, Class<T> clazz) {
         IConverter<?> converter = CONVERTERS.get(clazz);
-
-        if(converter == null) {
+        
+        if (converter == null) {
             throw new ConversionException("No converter for type: " + clazz.getSimpleName());
         }
-
+        
         return (T)converter.convert(value);
     }
-
+    
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public static <T, C extends Collection<T>> C convert(Collection<?> collection, Class<T> clazz, Supplier<C> supplier) {
+        if (collection == null) {
+            return null;
+        }
+        if (clazz == null) {
+            throw new ConversionException("Parameter \'clazz\' must not be null");
+        }
+        if (supplier == null) {
+            throw new ConversionException("Parameter \'supplier\' must not be null");
+        }
+        return collection.stream()
+                .map(value -> convert(value, clazz))
+                .collect(Collectors.toCollection(supplier));
+    }
+    
     protected static Map<Class<?>, IConverter<?>> initConverters() {
-
+        
         Map<Class<?>, IConverter<?>> target = new HashMap<>();
-
+        
         target.put(Boolean.class, new BooleanConverter());
         target.put(Byte.class, new ByteConverter());
         target.put(Short.class, new ShortConverter());
@@ -72,7 +94,7 @@ public class MultiConverter {
         target.put(LocalDate.class, new LocalDateConverter());
         target.put(LocalTime.class, new LocalTimeConverter());
         target.put(LocalDateTime.class, new LocalDateTimeConverter());
-
+        
         return target;
     }
 }

@@ -15,9 +15,9 @@
  ******************************************************************************/
 package com.exactpro.sf.comparison.conversion.impl;
 
-import java.math.BigDecimal;
-
 import com.exactpro.sf.comparison.conversion.ConversionException;
+
+import java.math.BigDecimal;
 
 public abstract class AbstractNumberConverter<T extends Number> extends AbstractConverter<T> {
     @Override
