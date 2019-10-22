@@ -47,6 +47,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +97,15 @@ public abstract class NettyClientService implements IInitiatorService {
 	protected abstract void initChannelHandlers(IServiceContext serviceContext);
 	protected abstract LinkedHashMap<String, ChannelHandler> getChannelHandlers();
 	protected abstract void sendHeartBeat() throws InterruptedException;
-	protected abstract void initService(IDictionaryManager dictionaryManager, IServiceSettings settings);
+
+	protected void initService(IDictionaryManager dictionaryManager, IServiceSettings settings) {}
+
+    /**
+     * This method is called before session closing.
+     * Please call super.disposeService from finally block of your implementation
+     * @param session not null session
+     */
+    protected void disposeService(@NotNull NettySession session) {}
 	// You can use it to implement multi-step connection (pre logon, load-balancers...)
 	protected abstract int getPort();
 	protected abstract String getHost();
@@ -228,6 +237,7 @@ public abstract class NettyClientService implements IInitiatorService {
             NettySession session = nettySession;
     		if (session != null) {
     		    nettySession = null;
+    		    disposeService(session);
     	        session.close();
     		}
 		} catch (RuntimeException e) {
