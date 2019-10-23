@@ -166,7 +166,7 @@ public abstract class NettyClientService implements IInitiatorService {
             logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                 serviceName);
 
-			nettySession = new NettySession(this, logConfigurator);
+			nettySession = createSession();
 			nioEventLoopGroup = new NioEventLoopGroup();
 			connect();
 
@@ -174,6 +174,10 @@ public abstract class NettyClientService implements IInitiatorService {
 		} catch (Throwable ex) {
 			changeStatus(ServiceStatus.ERROR, ex.getMessage(), ex);
 		}
+	}
+	@NotNull
+	protected NettySession createSession() {
+		return new NettySession(this, logConfigurator);
 	}
 
 
