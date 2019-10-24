@@ -35,5 +35,6 @@ public interface IServiceSettings extends ICommonSettings {
 	boolean isPerformDump();
 
 	boolean isPersistMessages();
-	
+
+    boolean isAutoStartable();
 }

@@ -33,10 +33,10 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
             + "Example: 'MessageA, MessageB, MessageC' or '"+ ServiceUtil.ALIAS_PREFIX + "dataA'")
     protected String storedMessageTypes;
 
-    @Description("Expected time of starting")
+    @Description("How long to wait in milliseconds before attempting to start next service")
     protected long expectedTimeOfStarting = 2000;
 
-    @Description("Waiting time before starting")
+    @Description("How long to wait in milliseconds before attempting to start a service")
     protected long waitingTimeBeforeStarting;
 
     @Description("User comment")
@@ -48,6 +48,9 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
     @Description("Determine will be messages stored or not. " +
             "Note: this setting will not affect mechanism of receiving message from service")
     private boolean persistMessages = true;
+
+    @Description("Determines whether or not service should be managed by auto-start feature")
+    private boolean autoStartable = true;
 
     public String getStoredMessageTypes() {
         return storedMessageTypes;
@@ -110,5 +113,14 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
 
     public void setPersistMessages(boolean persistMessages) {
         this.persistMessages = persistMessages;
+    }
+
+    @Override
+    public boolean isAutoStartable() {
+        return autoStartable;
+    }
+
+    public void setAutoStartable(boolean autoStartable) {
+        this.autoStartable = autoStartable;
     }
 }

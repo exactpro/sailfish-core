@@ -15,6 +15,38 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator;
 
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+import static org.apache.commons.lang3.StringUtils.wrap;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.mina.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.AML;
 import com.exactpro.sf.aml.AMLAction;
 import com.exactpro.sf.aml.AMLBlockType;
@@ -62,36 +94,6 @@ import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.google.common.collect.Iterables;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.mina.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import static org.apache.commons.lang3.StringUtils.trimToNull;
-import static org.apache.commons.lang3.StringUtils.wrap;
 
 
 /**
@@ -122,6 +124,7 @@ public class CodeGenerator_new implements ICodeGenerator {
 	private Set<String> definedReferences; // references defined in the current test case
     private final Map<String, String> definedServiceNames = new HashMap<>();
 	private final Set<String> resolvedServiceNames = new HashSet<>();
+    private final Set<String> autoStartableServiceNames = new HashSet<>();
 
     private int cycleCount;
 
@@ -268,14 +271,13 @@ public class CodeGenerator_new implements ICodeGenerator {
         writeTestCases(beforeTCBlocks, mainClass, script);
 
 	    scriptContext.getServiceList().addAll(resolvedServiceNames);
-        String servNames = tcCodeBuilder.getServiceNamesArray(resolvedServiceNames);
 
-        tcCodeBuilder.writeBeforeMatrixPreparations(mainClass, servNames, getAutoStart());
-        tcCodeBuilder.writeBeforeTestCasePreparations(mainClass, servNames, LOGGER_NAME, CONTEXT_NAME, amlSettings.isRunNetDumper(),
+        tcCodeBuilder.writeBeforeMatrixPreparations(mainClass, resolvedServiceNames, autoStartableServiceNames, getAutoStart());
+        tcCodeBuilder.writeBeforeTestCasePreparations(mainClass, resolvedServiceNames, LOGGER_NAME, CONTEXT_NAME, amlSettings.isRunNetDumper(),
                 environmentManager.getEnvironmentSettings().isNotificationIfServicesNotStarted());
 
         tcCodeBuilder.writeAfterTestCasePreparations(mainClass, CONTEXT_NAME, amlSettings.isRunNetDumper());
-        tcCodeBuilder.writeAfterMatrixPreparations(mainClass, servNames, getAutoStart());
+        tcCodeBuilder.writeAfterMatrixPreparations(mainClass, resolvedServiceNames, autoStartableServiceNames, getAutoStart());
 
 
 		mainClass.writeLine("}");
@@ -1173,7 +1175,12 @@ public class CodeGenerator_new implements ICodeGenerator {
             return null;
         }
 
-        resolvedServiceNames.add(serviceName.toString());
+        String serviceNameString = serviceName.toString();
+        resolvedServiceNames.add(serviceNameString);
+
+        if (service.getSettings().isAutoStartable()) {
+            autoStartableServiceNames.add(serviceNameString);
+        }
 
         return service;
     }

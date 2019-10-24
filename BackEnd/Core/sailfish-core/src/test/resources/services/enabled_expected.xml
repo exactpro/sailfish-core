@@ -5,6 +5,7 @@
     <serviceHandlerClassName>handler</serviceHandlerClassName>
     <environment>test_environment</environment>
     <enabledSettings>
+        <autoStartable>true</autoStartable>
         <comment>comment</comment>
         <dictionaryName>test_dictionary</dictionaryName>
         <expectedTimeOfStarting>555</expectedTimeOfStarting>

@@ -16,8 +16,8 @@
 package com.exactpro.sf.aml.generator;
 
 import java.io.IOException;
+import java.util.Set;
 
-import com.exactpro.sf.aml.Tags;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.aml.AMLBlockType;
@@ -30,6 +30,7 @@ import com.exactpro.sf.aml.ExecutionSequence;
 import com.exactpro.sf.aml.Hash;
 import com.exactpro.sf.aml.Id;
 import com.exactpro.sf.aml.Reference;
+import com.exactpro.sf.aml.Tags;
 import com.exactpro.sf.aml.Type;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.StringUtil;
@@ -118,33 +119,33 @@ public class TestCaseCodeBuilder extends AbstractCodeBuilder {
         stream.writeLine(2, "}");
     }
 
-    public void writeBeforeMatrixPreparations(TextOutputStream stream, String serviceNamesArray, boolean autoStart) throws IOException {
+    public void writeBeforeMatrixPreparations(TextOutputStream stream, Set<String> services, Set<String> autoStartableServices, boolean autoStart) throws IOException {
         stream.writeLine();
         stream.writeLine(1, "@%s", BeforeMatrix.class.getSimpleName());
         stream.writeLine(1, "public static void beforeMatrixPreparations() throws Exception {");
-        stream.writeLine(2, "SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().setServiceUsed(%s);", serviceNamesArray);
+        stream.writeLine(2, "SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().setServiceUsed(%s);", getServiceNamesArray(services));
         if (autoStart) {
             stream.writeLine();
-            stream.writeLine(2, "List<String> services = Arrays.<String>asList(%s);", serviceNamesArray);
+            stream.writeLine(2, "List<String> services = Arrays.<String>asList(%s);", getServiceNamesArray(autoStartableServices));
             stream.writeLine(2, "startServices(services);");
         }
         stream.writeLine(1, "}");
     }
 
-    public void writeAfterMatrixPreparations(TextOutputStream stream, String serviceNamesArray, boolean autoStart) throws IOException {
+    public void writeAfterMatrixPreparations(TextOutputStream stream, Set<String> services, Set<String> autoStartableServices, boolean autoStart) throws IOException {
         stream.writeLine();
         stream.writeLine(1, "@%s", AfterMatrix.class.getSimpleName());
         stream.writeLine(1, "public static void afterMatrixPreparations() throws Exception {");
         stream.writeLine(2, "Exception exception = null;");
         if (autoStart) {
             writeTryClause(stream);
-            stream.writeLine(3, "List<String> services = Arrays.<String>asList(%s);", serviceNamesArray);
+            stream.writeLine(3, "List<String> services = Arrays.<String>asList(%s);", getServiceNamesArray(autoStartableServices));
             stream.writeLine(3, "disposeServices(services);");
             writeCatchException(stream);
             stream.writeLine();
         }
         writeTryClause(stream);
-        stream.writeLine(3, "SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().setServiceNotUsed(%s);", serviceNamesArray);
+        stream.writeLine(3, "SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().setServiceNotUsed(%s);", getServiceNamesArray(services));
         stream.writeLine(3, "SFLocalContext.getDefault().getActionManager().reset();");
         stream.writeLine(3, "SFLocalContext.getDefault().getUtilityManager().reset();");
         writeCatchException(stream);
@@ -152,18 +153,18 @@ public class TestCaseCodeBuilder extends AbstractCodeBuilder {
         stream.writeLine(1, "}");
     }
 
-    public void writeBeforeTestCasePreparations(TextOutputStream stream, String serviceNamesArray, String loggerName, String contextName, boolean runNetDumper, boolean notificationIfServicesNotStarted) throws IOException {
+    public void writeBeforeTestCasePreparations(TextOutputStream stream, Set<String> services, String loggerName, String contextName, boolean runNetDumper, boolean notificationIfServicesNotStarted) throws IOException {
         stream.writeLine();
         stream.writeLine(1, "@%s(%s.%s)", Type.class.getSimpleName(), AMLBlockType.class.getSimpleName(), AMLBlockType.BeforeTCBlock);
         stream.writeLine(1, "public void beforeTestCasePreparations() throws Exception {");
         if (runNetDumper) {
-            stream.writeLine(2, "%s.getNetDumperService().startRecording(%s.getScriptDescriptionId(), %s);", contextName, contextName, serviceNamesArray);
+            stream.writeLine(2, "%s.getNetDumperService().startRecording(%s.getScriptDescriptionId(), %s);", contextName, contextName, getServiceNamesArray(services));
             stream.writeLine();
         }
         if (notificationIfServicesNotStarted) {
             stream.writeLine(2, "List<String> notStartedServices = new ArrayList<String>();");
             stream.writeLine(2, "try {");
-            stream.writeLine(3, "for(String serviceName : %s) {", serviceNamesArray);
+            stream.writeLine(3, "for(String serviceName : %s) {", getServiceNamesArray(services));
             stream.writeLine(4,"%s servName = %s.parse(serviceName);", ServiceName.class.getCanonicalName(), ServiceName.class.getCanonicalName());
             stream.writeLine(4, "%s service = SFLocalContext.getDefault().getEnvironmentManager().getConnectionManager().getService(servName);", IService.class.getCanonicalName());
             stream.writeLine();

@@ -88,6 +88,11 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     @Override
+    public boolean isAutoStartable() {
+        return true;
+    }
+
+    @Override
     public void load(HierarchicalConfiguration config) {
 
     }
