@@ -45,10 +45,7 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.structures.IFieldStructure;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.comparison.ComparisonResult;
-import com.exactpro.sf.configuration.DictionaryManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -385,12 +382,13 @@ public class JsonReport implements IScriptReport {
         assertState(ContextType.ACTION, ContextType.ACTIONGROUP, ContextType.TESTCASE);
 
         try {
-            result = new ComparisonResult(result);
+            if (result.getMetaData() != null) {
+                result = new ComparisonResult(result);
 
-            EnumReplacer.replaceEnums(result,
-                    dictionaryManager.getDictionary(result.getMetaData().getDictionaryURI())
-                            .getMessages().get(result.getMetaData().getMsgName()));
-
+                EnumReplacer.replaceEnums(result,
+                        dictionaryManager.getDictionary(result.getMetaData().getDictionaryURI())
+                                .getMessages().get(result.getMetaData().getMsgName()));
+            }
         } catch (Exception e) {
             logger.error("unable to set enum aliases", e);
         }
@@ -416,7 +414,9 @@ public class JsonReport implements IScriptReport {
             curNode.addSubNodes(reproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.REPRODUCED)).collect(Collectors.toList()));
             curNode.addSubNodes(notReproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.NOT_REPRODUCED)).collect(Collectors.toList()));
 
-            curVerification.setEntries(result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList()));
+            curVerification.setEntries(result.getResults().isEmpty()
+                    ? Collections.singletonList(new VerificationEntry(result))
+                    : result.getResults().values().stream().map(VerificationEntry::new).collect(Collectors.toList()));
         }
         curNode.addSubNodes(curVerification);
     }
