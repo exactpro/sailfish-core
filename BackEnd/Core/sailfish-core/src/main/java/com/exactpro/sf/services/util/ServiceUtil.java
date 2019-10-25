@@ -19,6 +19,9 @@ import static com.exactpro.sf.services.ServiceEvent.Level.ERROR;
 import static com.exactpro.sf.services.ServiceEvent.Level.INFO;
 import static com.exactpro.sf.services.ServiceEvent.Type.convert;
 import static com.exactpro.sf.services.ServiceEventFactory.createStatusUpdateEvent;
+import static java.util.Arrays.stream;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.splitByWholeSeparator;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -28,7 +31,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -177,6 +183,29 @@ public class ServiceUtil {
 		}
 
     	return sb.toString();
+    }
+
+    /**
+     * Parses comma separated values into a set by splitting input by a delimiter. Values produced by splitting are then trimmed.
+     * Values can be parsed either from an input string itself or from a text data file loaded via alias specified in the input string.
+     * When input is loaded from the file, file's lines are first joined into a string delimited by specified delimiter and then this string is parsed as usual.
+     * @param dataManager data manager used to load a text file if input is an alias
+     * @param value string with comma separated values or an alias (alias://data) to a text file with values
+     * @param delimiter delimiter to split values by
+     * @return
+     * @throws SailfishURIException
+     */
+    public static Set<String> loadValuesFromAlias(IDataManager dataManager, String value, String delimiter) throws SailfishURIException {
+        if (isBlank(value)) {
+            return Collections.emptySet();
+        }
+
+        String[] values = splitByWholeSeparator(loadStringFromAlias(dataManager, value, delimiter), delimiter);
+
+        return stream(values)
+                .map(StringUtils::stripToNull)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     public static void startServices(List<String> serviceNames) throws InterruptedException {

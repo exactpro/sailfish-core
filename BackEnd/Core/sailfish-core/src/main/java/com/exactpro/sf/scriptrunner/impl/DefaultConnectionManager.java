@@ -17,15 +17,12 @@ package com.exactpro.sf.scriptrunner.impl;
 
 import static com.exactpro.sf.storage.util.ServiceStorageHelper.copySettings;
 import static java.lang.String.format;
-import static java.util.Arrays.stream;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,8 +38,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Streams;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1198,14 +1193,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
     private Set<String> loadProcessedMessageTypes(ServiceDescription description) throws SailfishURIException {
         String value = description.getSettings().getStoredMessageTypes();
-        if (StringUtils.isNotBlank(value)) {
-            value = ServiceUtil.loadStringFromAlias(serviceContext.getDataManager(), value, ",");
-            return stream(value.split(","))
-                    .map(type -> type.trim())
-                    .filter(StringUtils::isNoneEmpty)
-                    .collect(Collectors.toSet());
-        }
-        return Collections.emptySet();
+        return ServiceUtil.loadValuesFromAlias(serviceContext.getDataManager(), value, ",");
     }
 
     private class ServiceContainer {
