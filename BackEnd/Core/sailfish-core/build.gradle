@@ -43,6 +43,7 @@ eclipse.classpath {
 configurations {
 	jamon
     jaxb
+    zip_js_report
     js_report
 }
 
@@ -54,13 +55,15 @@ dependencies {
     jaxb 'javax.xml:jsr173:1.0'
     jaxb 'javax.activation:activation:1.1.1'
 
-    js_report "com.exactpro.sf:sailfish-js-report:${artifactCoreVersion}:data@zip"
-	
     if (incremental_build) {
+        zip_js_report "com.exactpro.sf:sailfish-js-report:${artifactCoreVersion}:data@zip"
+
         compile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}"
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
         testCompile "com.exactpro.sf:sailfish-common:${artifactCoreVersion}:tests@jar"
     } else {
+        js_report files("${project(':FrontEnd:Sailfish-JS-report').buildDir}/out")
+
         compile project(':BackEnd:Core:sailfish-common')
         compile project(':FrontEnd:Sailfish-REST-API-client')
         testCompile project(path:':BackEnd:Core:sailfish-common', configuration: 'testArtifacts')
@@ -318,7 +321,8 @@ task copyNpmResources (type: Copy) {
 task unpackJsReportData (type: Copy) {
     dependsOn.add("copyNpmResources")
 
-    from { configurations.js_report.collect { zipTree(it) } }
+    from { configurations.zip_js_report.collect { zipTree(it) } }
+    from { configurations.js_report }
     into htmlResourcesProvidedDir
 }
 

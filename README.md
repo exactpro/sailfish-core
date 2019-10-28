@@ -14,12 +14,6 @@ Sailfish has a modular structure whereby a shared framework is used in conjuncti
 
 ## build and run instructions
 
-Build and publish the Sailfish-JS-report to the local repository (shared folder in the repository root).
-Execute command from the FrontEnd/Sailfish-JS-report folder
-```
-$ ./gradlew clean build uploadArchives
-```
-
 Build all the java projects included in the Sailfish
 Execute command from the repository root folder
 ```

@@ -13,3 +13,4 @@ include 'BackEnd:Extension:extension-aml-3'
 
 include 'FrontEnd:SailfishFrontEnd'
 include 'FrontEnd:Sailfish-REST-API-client'
+include 'FrontEnd:Sailfish-JS-report'
