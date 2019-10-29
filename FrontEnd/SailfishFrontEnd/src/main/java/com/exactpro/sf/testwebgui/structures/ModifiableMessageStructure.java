@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.structures;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,8 +40,8 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 	}
 
 	public ModifiableMessageStructure(String id, String name, String namespace, String description,
-            Map<String, ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes) {
-		this(id, name, namespace, description, fields, attributes, false, false, null);
+            Map<String, ModifiableFieldStructure> fields, Map<String, ModifiableAttributeStructure> attributes, ModifiableMessageStructure reference) {
+        this(id, name, namespace, description, fields, attributes, false, false, reference);
 	}
 
 	private ModifiableMessageStructure(String id, String name, String namespace, String description,
@@ -54,9 +55,16 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     @SuppressWarnings("unchecked")
 	@Override
     public Map<String, IFieldStructure> getFields() {
+        IFieldStructure reference = getImplReference();
+
         if(reference != null) {
-            return ((ModifiableMessageStructure)reference).getFields();
-		}
+            Map<String, IFieldStructure> result = new LinkedHashMap<>();
+
+            result.putAll(reference.getFields());
+            result.putAll(fields);
+
+            return result;
+        }
 
         return (Map<String, IFieldStructure>)(Map<String, ?>)fields;
 	}
@@ -98,7 +106,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public boolean isRequired() {
-        if(reference != null) {
+        if (isFromField()) {
 			return super.isRequired();
 		}
 
@@ -108,6 +116,23 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     @Override
     public boolean isComplex() {
         return true;
+    }
+
+    @Override
+    public boolean isMessage() {
+        return !isFromField();
+    }
+
+    @Override
+    public boolean isSubMessage() {
+        return isFromField();
+    }
+
+    // i could not think of a better way to determine if this message structure was created
+    // from a field that inherits a message - so we would just check if we have a reference
+    // and do not have fields because such structures should not have fields of their own
+    private boolean isFromField() {
+        return reference != null && fields.isEmpty();
     }
 
     @Override
@@ -137,7 +162,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
     
 	@Override
 	public void setRequired(boolean req) {
-        if(reference != null) {
+        if (isFromField()) {
 			super.setRequired(req);
 			return;
 		}
@@ -147,7 +172,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public boolean isCollection() {
-        if(reference != null) {
+        if (isFromField()) {
 			return super.isCollection();
 		}
 
@@ -156,7 +181,7 @@ public class ModifiableMessageStructure extends ModifiableFieldStructure impleme
 
 	@Override
 	public void setCollection(boolean col) {
-        if(reference != null) {
+        if (isFromField()) {
 			super.setCollection(col);
 			return;
 		}

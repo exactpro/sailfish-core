@@ -60,7 +60,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 
 	public static final String DEFAULT_SCHEMA_VALIDATOR = "/xsd/dictionary.xsd";
 
-	protected final boolean aggregateAttributes;
+    protected final boolean aggregate;
 
     private final Set<String> pendingMessages = new HashSet<>();
 
@@ -69,7 +69,7 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 	}
 
 	protected XmlDictionaryStructureLoader(boolean aggregate) {
-		this.aggregateAttributes = aggregate;
+        this.aggregate = aggregate;
 	}
 
 	public Dictionary loadXmlEntity(InputStream input) throws EPSCommonException {
@@ -156,8 +156,8 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 				throw new EPSCommonException("It is impossible to keep messages in fields");
 			} else {
 
-                JavaType javaType = getFieldType(field, aggregateAttributes);
-                String defVal = getDefaultValue(field, aggregateAttributes);
+                JavaType javaType = getFieldType(field, aggregate);
+                String defVal = getDefaultValue(field, aggregate);
 
 				IFieldStructure fieldStructure = createFieldStructure(
 						field, true,
@@ -224,16 +224,49 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
             throw new EPSCommonException(String.format("Recursion at message id: '%s' has been detected!", message.getId()));
         }
 
+        Field reference = (Field)message.getReference();
+
+        if (reference instanceof Message) {
+            if (builder.getMessageStructure(reference.getName()) == null) {
+                convertMessage(namespace, builder, (Message)reference);
+            }
+        } else if (reference != null) {
+            throw new EPSCommonException(String.format("Message '%s' has field '%s' as a reference", message.getName(), reference.getName()));
+        }
+
         try {
-    		IMessageStructure messageStructure = createMessageStructure(
+            Map<String, IFieldStructure> fields = createFieldStructures(builder, message, namespace);
+            Map<String, IAttributeStructure> attributes = getAttributes(message, false, null);
+            IMessageStructure referencedMessage = null;
+
+            if (reference != null) {
+                referencedMessage = builder.getMessageStructure(reference.getName());
+
+                if (aggregate) {
+                    Map<String, IFieldStructure> parentFields = new LinkedHashMap<>(referencedMessage.getFields());
+                    Map<String, IAttributeStructure> parentAttributes = new HashMap<>(referencedMessage.getAttributes());
+
+                    parentFields.putAll(fields);
+                    fields = parentFields;
+
+                    if (attributes != null) {
+                        parentAttributes.putAll(attributes);
+                    }
+
+                    attributes = parentAttributes;
+                }
+            }
+
+            IMessageStructure messageStructure = createMessageStructure(
     				message,
     				message.getId(),
     				message.getName(),
     				namespace,
     				message.getDescription(),
-    				createFieldStructures(builder, message, namespace),
-    				getAttributes(message, false, null)
-    		);
+                    fields,
+                    attributes,
+                    referencedMessage
+            );
     
     		builder.addMessageStructure(messageStructure);
         } catch (RuntimeException e) {
@@ -260,9 +293,9 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 	}
 
 	protected IMessageStructure createMessageStructure(Message message, String id, String name, String namespace, String description,
-            Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes) {
+            Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
 
-		return new MessageStructure(name, namespace, description, fields, attributes);
+        return new MessageStructure(name, namespace, description, fields, attributes, reference);
 	}
 
 	protected IMessageStructure createMessageStructure(Message message, Field field, String id, String name, String namespace,
@@ -323,8 +356,8 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
 									field.getName(), message.getName()));
 				}
 
-                JavaType javaType = getFieldType(field, aggregateAttributes);
-                String defVal = getDefaultValue(field, aggregateAttributes);
+                JavaType javaType = getFieldType(field, aggregate);
+                String defVal = getDefaultValue(field, aggregate);
 
 				fieldStructure = createFieldStructure(
 						field, false,
@@ -401,25 +434,25 @@ public class XmlDictionaryStructureLoader implements IDictionaryStructureLoader 
     }
 
 	protected void collectFieldAttributes(Field field, Collection<Attribute> attributes) {
-		collectFieldAttributesOrValues(field, attributes, field.getAttributes(), false);
+        collectFieldAttributesOrValues(field, attributes, false);
     }
 
 	protected void collectFieldValues(Field field, Collection<Attribute> values) {
-		collectFieldAttributesOrValues(field, values, field.getValues(), true);
-	}
+        collectFieldAttributesOrValues(field, values, true);
+    }
 
-	private void collectFieldAttributesOrValues(Field field, Collection<Attribute> attrOrVal, List<Attribute> attrOrValList, boolean isValue) {
+    private void collectFieldAttributesOrValues(Field field, Collection<Attribute> target, boolean isValue) {
+        List<Attribute> source = isValue ? field.getValues() : field.getAttributes();
 
-        if(aggregateAttributes) {
+        if (aggregate) {
 			Object reference = field.getReference();
 	        if (reference != null) {
-	        	collectFieldAttributesOrValues((Field) reference, attrOrVal, isValue ? ((Field)reference).getValues() : ((Field)reference).getAttributes(), isValue);
+                collectFieldAttributesOrValues((Field)reference, target, isValue);
 	        }
 		}
 
-        for (Attribute attribute : attrOrValList) {
-            
-            boolean corruptValues = replaceOrAdd(attrOrVal, attribute);
+        for (Attribute attribute : source) {
+            boolean corruptValues = replaceOrAdd(target, attribute);
             
             if (isValue && corruptValues) {
                 throw new EPSCommonException(String.format("Duplicated values at %s, attribute name is %s", field.getName(), attribute.getName()));

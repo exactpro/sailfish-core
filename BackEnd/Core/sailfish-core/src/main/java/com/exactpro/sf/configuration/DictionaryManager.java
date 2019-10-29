@@ -43,7 +43,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 
-import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityManagerException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
@@ -62,7 +61,6 @@ import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
-import com.exactpro.sf.common.messages.structures.loaders.XsdDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
@@ -77,6 +75,7 @@ import com.exactpro.sf.scriptrunner.ScriptRunException;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityClass;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityInfo;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityManager;
+import com.exactpro.sf.scriptrunner.utilitymanager.exceptions.UtilityManagerException;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
@@ -551,8 +550,6 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
 
         if ("xml".equals(extension.toLowerCase())) {
             return new XmlDictionaryStructureLoader();
-        } else if ("xsd".equals(extension.toLowerCase())) {
-            return new XsdDictionaryStructureLoader();
         }
 
         throw new EPSCommonException("Unresolved dictionary extension: '" + extension + "'");
