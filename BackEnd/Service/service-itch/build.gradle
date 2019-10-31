@@ -50,18 +50,6 @@ task generateJavaFromXsd (dependsOn: 'createDir') {
 	}
 }
 
-test {
-    include 'com/exactpro/sf/services/itch/**/Test*.class'
-
-    exclude '**/*$*.class'
-    
-    systemProperties "basedir": "${projectDir}"    
-    
-    jvmArgs '-XX:MaxPermSize=256m'    
-    
-
-}
-
 compileKotlin {
     dependsOn.add("generateJavaFromXsd")
 }

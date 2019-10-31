@@ -440,6 +440,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
     @Test
     public void testVariableLength() {
         IoBuffer buffer = IoBuffer.allocate(8);
+        buffer.order(ByteOrder.nativeOrder());
         buffer.putLong(Long.MAX_VALUE);
         buffer.position(0);
 

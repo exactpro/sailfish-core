@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.Test;
@@ -43,9 +44,7 @@ public class TestITCHDictionaryValidator extends AbstractTest {
         String sep = File.separator;
         IDictionaryStructure dictionary;
 
-        try (InputStream in = new FileInputStream("src" + sep + "test" + sep + "plugin" +
-                sep + "cfg" + sep + "dictionaries" + sep + "itch.xml")) {
-
+        try (InputStream in = new FileInputStream(Paths.get("src", "test", "workspace", "cfg", "dictionaries", "itch.xml").toFile())) {
             dictionary = loader.load(in);
         }
 
