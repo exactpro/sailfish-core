@@ -391,7 +391,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
         } else if (type == ProtocolType.UINTXX) {
             byte[] parts = new byte[length];
             buffer.get(parts);
-            if (buffer.equals(ByteOrder.LITTLE_ENDIAN)) {
+            if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
                 reverseBytes(parts);
             }
             msg.addField(fieldName, new BigDecimal(new BigInteger(1, parts)));
