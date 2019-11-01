@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -170,13 +171,14 @@ public class JsonReport implements IScriptReport {
         File jsonFile = getFile(fileName, ".json");
         File jsonpFile = getFile(fileName, ".js");
 
-        try (FileOutputStream jsonpStream = new FileOutputStream(jsonpFile); FileOutputStream jsonStream = new FileOutputStream(jsonFile)) {
+        try (FileOutputStream jsonpStream = new FileOutputStream(jsonpFile)) {
             logger.info("saving json report - writing to file: '{}'", jsonpFile);
-            byte[] jsonStringBytes = mapper.writeValueAsString(data).getBytes();
-            jsonStream.write(jsonStringBytes);
+            mapper.writeValue(jsonFile, data);
+
             jsonpStream.write("window.loadJsonp(".getBytes());
-            jsonpStream.write(jsonStringBytes);
+            Files.copy(jsonFile.toPath(), jsonpStream);
             jsonpStream.write(")".getBytes());
+
         } catch (IOException e) {
             throw new ScriptRunException("unable to export json report", e);
         }
