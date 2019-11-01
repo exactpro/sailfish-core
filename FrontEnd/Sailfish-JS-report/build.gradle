@@ -54,6 +54,9 @@ node {
 task installDependencies(type: NpmTask) {
     // running 'npm ci', same as 'npm install', but uses package-lock.json instead of package.json
     args = ['ci']
+
+    // disables core-js postinstall ads
+    environment "ADBLOCK": true
 }
 
 task buildProd(type: NpmTask, dependsOn: ['installDependencies', 'runTests']) {
