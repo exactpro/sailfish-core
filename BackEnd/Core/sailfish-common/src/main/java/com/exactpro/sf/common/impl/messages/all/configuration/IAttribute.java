@@ -13,38 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.messages.structures;
+package com.exactpro.sf.common.impl.messages.all.configuration;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import java.io.Serializable;
 
 /**
- * Java interface for attributes
+ *  <p> Java interface for dictionaries attributes
  */
-public interface IAttributeStructure {
+public interface IAttribute extends Serializable {
 
-	/**
-	 * Get the attributes name
-	 * @return {@link String}
-	 */
-	String getName();
+    /**
+     * Gets the value of the name.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    String getName();
 
-	/**
-	 * Get the attributes value
-	 * @return {@link String}
-	 */
-	String getValue();
+    /**
+     * Gets the value of the type.
+     *
+     * @return
+     *     possible object is
+     *     {@link JavaType }
+     *
+     */
+    JavaType getType();
 
-	/**
-	 * Get the attributes casted value
- 	 * @param <T> value casted to <b>type</b>
-	 * @return {@link T}
-	 */
-	<T> T getCastValue();
-
-	/**
-	 * Get the attributes type
-	 * @return {@link JavaType}
-	 */
-	JavaType getType();
-	
+    /**
+     * Gets the value of the value.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    String getValue();
 }

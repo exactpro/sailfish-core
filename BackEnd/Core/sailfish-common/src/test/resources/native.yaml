@@ -1,0 +1,66 @@
+name: native1
+attributes:
+  DictionaryAttr:
+    type: java.lang.String
+    value: test_attr
+fields:
+  Short:
+    description: Short Field
+    type: java.lang.Short
+    isServiceName: true
+    isCollection: false
+    defaultValue: 56
+    required: true
+    attributes:
+      length:
+        value: '1'
+      format:
+        value: N
+    values:
+      Hearbeat:
+        value: '0'
+  MessageType:
+    reference: Short
+    type: java.lang.Character
+    attributes:
+      Index:
+        type: java.lang.Integer
+        value: '10'
+      format:
+        value: A
+    values:
+      MissedMessageRequest:
+        value: '48'
+messages:
+  MessageHeader:
+    attributes:
+      length:
+        value: '4'
+    fields:
+      StartOfMessage:
+        reference: Short
+      MessageType1:
+        reference: MessageType
+        attributes:
+          Index:
+            type: java.lang.Integer
+            value: '20'
+  Heartbeat:
+    attributes:
+      messageType:
+        value: 48
+    fields:
+      MessageHeader1:
+        reference: MessageHeader
+        attributes:
+          inclusion:
+            value: true
+  MissedMessageRequest:
+    reference: Heartbeat
+    fields:
+      AppID:
+        defaultValue: '2'
+        reference: Short
+      LastMsgSeqNum:
+        type: java.lang.Integer
+        reference: Short

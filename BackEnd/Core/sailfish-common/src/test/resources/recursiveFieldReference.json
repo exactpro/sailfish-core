@@ -1,0 +1,17 @@
+{
+  "name": "RecursiveField",
+  "fields": {
+    "A": {
+      "type": "java.lang.Integer",
+      "reference": "B"
+    },
+    "B": {
+      "type": "java.time.LocalDate",
+      "reference": "C"
+    },
+    "C": {
+      "type": "java.lang.Integer",
+      "reference": "A"
+    }
+  }
+}

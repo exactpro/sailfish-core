@@ -148,7 +148,7 @@
         </message>
         <message name="Logout">
             <attribute type="java.lang.Byte" name="MessageType">53</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field   isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -161,7 +161,7 @@
         </message>
         <message name="Reject">
             <attribute type="java.lang.Byte" name="MessageType">51</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field   isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -184,7 +184,7 @@
         <message name="NewOrder">
             <attribute type="java.lang.Byte" name="MessageType">68</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field   isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -303,7 +303,7 @@
         <message name="Heartbeat">
             <attribute type="java.lang.Byte" name="MessageType">48</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field   isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -312,7 +312,7 @@
         <message name="Logon">
             <attribute type="java.lang.Byte" name="MessageType">65</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field  isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -340,7 +340,7 @@
         <message name="LogonReply">
             <attribute type="java.lang.Byte" name="MessageType">66</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field  isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -358,7 +358,7 @@
         <message name="ExecutionReport">
             <attribute type="java.lang.Byte" name="MessageType">56</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field  isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>
@@ -493,7 +493,7 @@
         <message name="OrderCancelReject">
             <attribute type="java.lang.Byte" name="MessageType">57</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">false</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field   isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>

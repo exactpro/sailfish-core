@@ -16,7 +16,7 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
-<dictionary name="example" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://exactprosystems.com/dictionary">
+<dictionary name="example"  xmlns="http://exactprosystems.com/dictionary">
 	<fields>
 		<field name="TBoolean" id="TBoolean" type="java.lang.Boolean"/>
 		<field name="TByte" id="TByte" type="java.lang.Byte"/>

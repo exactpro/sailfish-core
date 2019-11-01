@@ -1,0 +1,11 @@
+{
+  "name": "MessageCircularReferenceInInheritance",
+  "messages": {
+    "Message1": {
+      "reference": "Message2"
+    },
+    "Message2": {
+      "reference": "Message1"
+    }
+  }
+}

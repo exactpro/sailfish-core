@@ -27,9 +27,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.Attribute;
-import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
-import com.exactpro.sf.common.impl.messages.xml.configuration.Field;
+import com.exactpro.sf.common.impl.messages.all.configuration.IAttribute;
+import com.exactpro.sf.common.impl.messages.all.configuration.IDictionary;
+import com.exactpro.sf.common.impl.messages.all.configuration.IField;
+import com.exactpro.sf.common.impl.messages.all.configuration.IMessage;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Message;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -44,7 +45,7 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 
 	// Maps Structure/Reference Name
 	private Map<ModifiableFieldStructure, String> fieldReferencesMap;
-	private Dictionary dic;
+	private IDictionary dic;
 
 	public ModifiableXmlDictionaryStructureLoader() {
 		super(false);
@@ -55,7 +56,7 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 
 		this.fieldReferencesMap = new HashMap<>();
 
-		dic = loadXmlEntity(input);
+		dic = getDictionary(input);
 		
 		ModifiableDictionaryStructure result = (ModifiableDictionaryStructure)convert(dic);
 
@@ -99,16 +100,15 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
     }
 
 	@Override
-	protected ModifiableFieldStructure createFieldStructure(Field field, boolean isTemplate, String id, String name,
-			String namespace, String description, JavaType javaType, Boolean isRequired, Boolean isCollection,
-			Boolean isServiceName, String defaultValue) {
+	protected ModifiableFieldStructure createFieldStructure(IField field, boolean isTemplate, String id, String name,
+		String namespace, String description, JavaType javaType, Boolean isRequired, Boolean isCollection, Boolean isServiceName, String defaultValue) {
 
 		ModifiableFieldStructure struct = new ModifiableFieldStructure(id, name, namespace, description,
 				null, null, javaType, isRequired, isCollection, isServiceName, defaultValue);
 
 		if (field.getReference() != null) {
 			if (!(field.getReference() instanceof Message)) {
-				fieldReferencesMap.put(struct, ((Field)field.getReference()).getName());
+				fieldReferencesMap.put(struct, ((IField)field.getReference()).getName());
 			}
 		}
 
@@ -121,8 +121,8 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, ModifiableAttributeStructure> getAttributes(Field field, boolean isValues, JavaType javaType) {
-	    List<Attribute> attributes = new ArrayList<>();
+	private Map<String, ModifiableAttributeStructure> getAttributes(IField field, boolean isValues, JavaType javaType) {
+	    List<IAttribute> attributes = new ArrayList<>();
 
 	    if (isValues) {
 	    	collectFieldValues(field, attributes);
@@ -137,17 +137,16 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected ModifiableMessageStructure createMessageStructure(Message message, String id, String name, String namespace,
-            String description, Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+	protected ModifiableMessageStructure createMessageStructure(IMessage message, String id, String name, String namespace,
+		String description, Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
 
 		return new ModifiableMessageStructure(id, name, namespace, description,
                 (Map<String, ModifiableFieldStructure>)(Map<String, ?>)fields,
-                (Map<String, ModifiableAttributeStructure>)(Map<String, ?>)attributes,
-                (ModifiableMessageStructure)reference);
+				(Map<String, ModifiableAttributeStructure>)(Map<String, ?>)attributes, (ModifiableMessageStructure) reference);
 	}
 
 	@Override
-	protected ModifiableMessageStructure createMessageStructure(Message message, Field field, String id, String name, String namespace,
+	protected ModifiableMessageStructure createMessageStructure(IMessage message, IField field, String id, String name, String namespace,
 			String description, Boolean isRequired, Boolean isCollection, IMessageStructure reference) {
 
 	    Map<String, ModifiableAttributeStructure> attributes = getAttributes(field, false, null);
@@ -163,7 +162,7 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 
 	    Map<String, IMessageStructure> messageStructures = new LinkedHashMap<>();
         
-        for (Message m : dic.getMessages().getMessages()) {
+        for (IMessage m : dic.getMessages()) {
             messageStructures.put(m.getName(), msgStructures.remove(m.getName()));
         }
 	    

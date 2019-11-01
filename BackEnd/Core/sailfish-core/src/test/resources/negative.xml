@@ -16,7 +16,7 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
-	<dictionary name="negative_1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	<dictionary name="negative_1"
 	xmlns="http://exactprosystems.com/dictionary">
 		<fields>
 			<field id="S4">

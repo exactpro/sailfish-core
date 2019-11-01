@@ -1,0 +1,16 @@
+{
+  "name": "NAME",
+  "fields": {
+    "test": {
+      "type": "java.lang.String",
+      "values": {
+        "normal": {
+          "value": "test"
+        },
+        "normal": {
+          "value": "duplicated"
+        }
+      }
+    }
+  }
+}

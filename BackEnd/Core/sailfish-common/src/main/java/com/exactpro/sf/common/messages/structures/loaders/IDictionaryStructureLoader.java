@@ -20,9 +20,23 @@ import java.io.InputStream;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 
+/**
+ * Java interface for loading {@link IDictionaryStructure}.
+ */
 public interface IDictionaryStructureLoader {
-	
+	/**
+	 * Load {@link IDictionaryStructure} from {@link InputStream}
+	 * @param input {@link InputStream}
+	 * @return {@link IDictionaryStructure}
+	 * @throws EPSCommonException
+	 */
 	IDictionaryStructure load(InputStream input) throws EPSCommonException;
-	
+
+	/**
+	 * Extract {@link IDictionaryStructure} namespace from {@link InputStream}
+	 * @param input {@link InputStream}
+	 * @return {@link String} ({@link IDictionaryStructure} namespace).
+	 * @throws EPSCommonException
+	 */
 	String extractNamespace(InputStream input) throws EPSCommonException;
 }

@@ -1,0 +1,15 @@
+{
+  "name": "MessageCircularReferenceThroughInheritance",
+  "messages": {
+    "Message1": {
+      "reference": "Message2"
+    },
+    "Message2": {
+      "fields": {
+        "Field1": {
+          "reference": "Message1"
+        }
+      }
+    }
+  }
+}

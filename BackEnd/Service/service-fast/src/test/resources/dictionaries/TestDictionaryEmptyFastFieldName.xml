@@ -16,7 +16,7 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
-<dictionary name="FAST" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://exactprosystems.com/dictionary">
+<dictionary name="FAST"  xmlns="http://exactprosystems.com/dictionary">
 	<fields>
 		<field name="stringx" id="stringx" type="java.lang.String"/>
 	</fields>

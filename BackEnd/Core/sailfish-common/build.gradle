@@ -34,6 +34,8 @@ dependencies {
     compile 'org.jamon:jamon-runtime:2.4.1'
 
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.7'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
 
     compile 'commons-io:commons-io:2.6'
     //compile 'commons-logging:commons-logging-api:1.0.4'

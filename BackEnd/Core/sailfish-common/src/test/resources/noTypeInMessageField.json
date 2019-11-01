@@ -1,0 +1,13 @@
+{
+  "name": "NAME",
+  "messages": {
+    "Message": {
+      "fields": {
+        "NormalField": {
+          "type": "java.lang.String"
+        },
+        "FieldWithoutType": {}
+      }
+    }
+  }
+}

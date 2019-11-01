@@ -49,7 +49,7 @@
 	<message name="WrongMessage">
             <attribute type="java.lang.Byte" name="MessageType">100</attribute>
             <attribute type="java.lang.Boolean" name="IsAdmin">true</attribute>
-            <field xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="Message" isCollection="false" reference="MessageHeader" name="MessageHeader">
+            <field   isCollection="false" reference="MessageHeader" name="MessageHeader">
                 <attribute type="java.lang.Integer" name="Offset">0</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
                 <attribute type="java.lang.Boolean" name="Inclusion">true</attribute>

@@ -15,17 +15,40 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures;
 
-import java.util.List;
 import java.util.Map;
 
+/**
+ * Java interface for dictionaries
+ */
 public interface IDictionaryStructure {
+
+	/**
+	 * Get the dictionaries attributes.
+	 * @return {@link Map}<{@link String}, {@link IAttributeStructure}>
+	 */
     Map<String, IAttributeStructure> getAttributes();
-	
+
+	/**
+	 * Get the dictionaries messages.
+	 * @return {@link Map}<{@link String}, {@link IMessageStructure}>
+	 */
 	Map<String, IMessageStructure> getMessages();
-	
+
+	/**
+	 * Get the dictionaries fields.
+	 * @return {@link Map}<{@link String}, {@link IFieldStructure}>
+	 */
 	Map<String, IFieldStructure> getFields();
-	
+
+	/**
+	 * Get the dictionaries namespace.
+	 * @return {@link String}
+	 */
 	String getNamespace();
-	
+
+	/**
+	 * Get the dictionaries description.
+	 * @return {@link String}
+	 */
 	String getDescription();
 }

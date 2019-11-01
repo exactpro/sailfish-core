@@ -1,0 +1,19 @@
+{
+  "name": "NAME",
+  "messages": {
+    "message_name": {
+      "fields": {
+        "f_name": {
+          "type": "java.lang.String"
+        }
+      }
+    },
+    "message_name": {
+      "fields": {
+        "f_name": {
+          "type": "java.lang.String"
+        }
+      }
+    }
+  }
+}

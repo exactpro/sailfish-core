@@ -119,7 +119,7 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
     
     @Test
     public void testDuplicatedValuesInField() throws Exception {
-        
+
         IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
 
         String dictionaryFile = path + "sameValuesName.xml";

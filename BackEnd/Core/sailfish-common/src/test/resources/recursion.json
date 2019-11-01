@@ -1,0 +1,17 @@
+{
+  "name": "recursion",
+  "fields": {},
+  "messages": {
+    "self": {
+      "fields": {
+        "f_name": {
+          "type": "java.lang.String"
+        },
+        "s_name": {
+          "type": "java.lang.String",
+          "reference": "self"
+        }
+      }
+    }
+  }
+}

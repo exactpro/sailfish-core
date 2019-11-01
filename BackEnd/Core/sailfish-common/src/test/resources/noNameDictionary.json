@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "testAttr": {
+      "type": "java.lang.String",
+      "value": "test attribute"
+    }
+  },
+  "fields": {
+    "TestField": {
+      "type": "java.lang.String"
+    }
+  }
+}

@@ -13,38 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.messages.structures;
+package com.exactpro.sf.common.impl.messages.all.configuration;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import java.util.List;
 
 /**
- * Java interface for attributes
+ * <p> Java interface for dictionaries messages
  */
-public interface IAttributeStructure {
+public interface IMessage extends IField {
 
-	/**
-	 * Get the attributes name
-	 * @return {@link String}
-	 */
-	String getName();
-
-	/**
-	 * Get the attributes value
-	 * @return {@link String}
-	 */
-	String getValue();
-
-	/**
-	 * Get the attributes casted value
- 	 * @param <T> value casted to <b>type</b>
-	 * @return {@link T}
-	 */
-	<T> T getCastValue();
-
-	/**
-	 * Get the attributes type
-	 * @return {@link JavaType}
-	 */
-	JavaType getType();
-	
+    /**
+     * Get the messages fields
+     * @return {@link IField} or extends it
+     */
+    List<? extends IField> getFields();
 }

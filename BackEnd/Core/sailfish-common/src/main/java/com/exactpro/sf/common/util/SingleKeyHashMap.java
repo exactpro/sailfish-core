@@ -13,38 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.messages.structures;
+package com.exactpro.sf.common.util;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import java.util.HashMap;
 
-/**
- * Java interface for attributes
- */
-public interface IAttributeStructure {
+public class SingleKeyHashMap<K, V> extends HashMap<K, V> {
 
-	/**
-	 * Get the attributes name
-	 * @return {@link String}
-	 */
-	String getName();
-
-	/**
-	 * Get the attributes value
-	 * @return {@link String}
-	 */
-	String getValue();
-
-	/**
-	 * Get the attributes casted value
- 	 * @param <T> value casted to <b>type</b>
-	 * @return {@link T}
-	 */
-	<T> T getCastValue();
-
-	/**
-	 * Get the attributes type
-	 * @return {@link JavaType}
-	 */
-	JavaType getType();
-	
+    @Override
+    public V put(K key, V value) {
+        if (super.put(key, value) != null){
+            throw new IllegalArgumentException("Duplicate key \"" + key + "\"");
+        }
+        return null;
+    }
 }

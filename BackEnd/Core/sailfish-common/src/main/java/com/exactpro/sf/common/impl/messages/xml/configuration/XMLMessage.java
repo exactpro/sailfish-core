@@ -13,38 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.messages.structures;
+package com.exactpro.sf.common.impl.messages.xml.configuration;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.impl.messages.all.configuration.IMessage;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Java interface for attributes
+ * Json class for adapter for {@link Message}.
  */
-public interface IAttributeStructure {
+public class XMLMessage extends XMLField implements IMessage {
 
-	/**
-	 * Get the attributes name
-	 * @return {@link String}
-	 */
-	String getName();
+    private static final long serialVersionUID = 7511439297044045466L;
 
-	/**
-	 * Get the attributes value
-	 * @return {@link String}
-	 */
-	String getValue();
+    protected final List<XMLField> fields;
 
-	/**
-	 * Get the attributes casted value
- 	 * @param <T> value casted to <b>type</b>
-	 * @return {@link T}
-	 */
-	<T> T getCastValue();
+    public XMLMessage(Message message) {
+        super(message);
+        fields = new ArrayList<>(message.getFields().size());
+    }
 
-	/**
-	 * Get the attributes type
-	 * @return {@link JavaType}
-	 */
-	JavaType getType();
-	
+    @Override
+    public List<XMLField> getFields() {
+        return fields;
+    }
 }

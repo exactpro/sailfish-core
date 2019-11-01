@@ -16,7 +16,7 @@
   ~ limitations under the License.
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -->
-<dictionary name="fast" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://exactprosystems.com/dictionary">
+<dictionary name="fast"  xmlns="http://exactprosystems.com/dictionary">
     <attribute type="java.lang.String" name="Template">FAST.xml</attribute>
     <fields/>
     <messages>
@@ -41,7 +41,7 @@
             <field type="java.lang.Long" name="NoApplIDs" required="false">
                 <attribute name="fastName" type="java.lang.String">NoApplIDs</attribute>
             </field>
-            <field isCollection="true" xsi:type="Message" reference="ApplicationMessageRequest_IndicesRequestEntries" name="IndicesRequestEntries" required="false">
+            <field isCollection="true" reference="ApplicationMessageRequest_IndicesRequestEntries" name="IndicesRequestEntries" required="false">
                 <attribute name="fastName" type="java.lang.String">Indices Request Entries</attribute>
             </field>
             <field type="java.lang.Integer" name="IndicesRequestEntries_length">

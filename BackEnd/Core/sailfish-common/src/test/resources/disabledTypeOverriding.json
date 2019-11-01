@@ -1,0 +1,38 @@
+{
+  "name": "DisabledTypeOverriding",
+  "fields": {
+    "A": {
+      "type": "java.lang.Integer",
+      "values": {
+        "TestValueA": {
+          "value": "52"
+        }
+      }
+    },
+    "B": {
+      "reference": "A",
+      "type": "java.lang.Double",
+      "values": {
+        "TestValueB": {
+          "value": "98"
+        }
+      }
+    }
+  },
+  "messages": {
+    "MessageTest": {
+      "fields": {
+        "RefByA": {
+          "reference": "A"
+        },
+        "RefByB": {
+          "reference": "B"
+        },
+        "RefByBWithType": {
+          "reference": "B",
+          "type": "java.time.LocalDate"
+        }
+      }
+    }
+  }
+}

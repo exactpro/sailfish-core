@@ -1,0 +1,13 @@
+{
+  "name": "MessageReferenceToField",
+  "fields": {
+    "Field": {
+      "type": "java.lang.String"
+    }
+  },
+  "messages": {
+    "Message": {
+      "reference": "Field"
+    }
+  }
+}
