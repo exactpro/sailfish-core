@@ -15,25 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
-import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
-import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
-import static com.exactpro.sf.services.ServiceHandlerRoute.TO_ADMIN;
-import static com.exactpro.sf.services.ServiceHandlerRoute.TO_APP;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import org.apache.commons.lang3.BooleanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.MsgMetaData;
-import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.IServiceContext;
@@ -41,10 +23,10 @@ import com.exactpro.sf.services.IServiceHandler;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceHandlerRoute;
-import com.exactpro.sf.services.fix.converter.MessageConvertException;
-import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.storage.IMessageStorage;
-
+import org.apache.commons.lang3.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
@@ -63,7 +45,19 @@ import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 import quickfix.field.Username;
 
-public class ServerApplication implements FIXServerApplication {
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
+import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
+import static com.exactpro.sf.services.ServiceHandlerRoute.TO_ADMIN;
+import static com.exactpro.sf.services.ServiceHandlerRoute.TO_APP;
+
+public class ServerApplication extends AbstractApplication implements FIXServerApplication {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
     private ServiceName serviceName;
@@ -72,25 +66,22 @@ public class ServerApplication implements FIXServerApplication {
 
     private boolean keepMessagesInMemory;
     private final Map<SessionID, ISession> sessionMap = new HashMap<>();
-    private DirtyQFJIMessageConverter converter;
     private SessionSettings settings;
     private MessageHelper messageHelper;
     private IServiceHandler handler;
-    private ServiceInfo serviceInfo;
     private final ISession fixServerSessionsContainer = new FixServerSessionsContainer(this);
 
     @Override
     public void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName) {
+        super.init(serviceContext, applicationContext, serviceName);
         this.logConfigurator = serviceContext.getLoggingConfigurator();
         this.messageStorage = serviceContext.getMessageStorage();
         this.serviceName = serviceName;
         this.handler = Objects.requireNonNull(applicationContext.getServiceHandler(), "'Service handler' parameter");
         this.messageHelper = applicationContext.getMessageHelper();
-        this.converter = applicationContext.getConverter();
         this.settings = applicationContext.getSessionSettings();
 
         this.messageStorage = serviceContext.getMessageStorage();
-        this.serviceInfo = serviceContext.lookupService(serviceName);
 
         if (applicationContext.getServiceSettings() instanceof FIXServerSettings) {
             this.keepMessagesInMemory = ((FIXServerSettings)applicationContext.getServiceSettings()).getKeepMessagesInMemory();
@@ -232,8 +223,11 @@ public class ServerApplication implements FIXServerApplication {
     protected void storeMessage(ISession iSession, Message message, String from, String to, ServiceHandlerRoute route, String reason) {
         if (keepMessagesInMemory) {
             try {
-                IMessage iMsg = convert(message, from, to, message.isAdmin());
+                IMessage iMsg = reason != null
+                        ? convert(message, from, to, message.isAdmin(), false, true)
+                        : convert(message, from, to, message.isAdmin());
                 iMsg.getMetaData().setRejectReason(reason);
+
                 try {
                     messageStorage.storeMessage(iMsg);
                 } catch (Exception e) {
@@ -255,16 +249,6 @@ public class ServerApplication implements FIXServerApplication {
 
     protected void storeMessage(ISession iSession, Message message, String from, String to, String reason) {
         storeMessage(iSession, message, from, to, null, reason);
-    }
-
-    private IMessage convert(Message message, String from, String to, boolean isAdmin) throws MessageConvertException {
-        IMessage msg = converter.convert(message);
-        MsgMetaData meta = msg.getMetaData();
-        meta.setFromService(from);
-        meta.setToService(to);
-        meta.setAdmin(isAdmin);
-        meta.setServiceInfo(serviceInfo);
-        return msg;
     }
 
     private String getMessageType(Message message) {

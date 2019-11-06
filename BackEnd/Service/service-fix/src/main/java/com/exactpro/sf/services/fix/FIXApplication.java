@@ -15,27 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import javax.crypto.Cipher;
-
-import org.apache.mina.util.Base64;
-import org.quickfixj.CharsetSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.actions.FIXMatrixUtil;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.MsgMetaData;
-import com.exactpro.sf.common.services.ServiceInfo;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.StringUtil;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
@@ -50,9 +31,10 @@ import com.exactpro.sf.services.ServiceEventFactory;
 import com.exactpro.sf.services.ServiceHandlerException;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
-import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.storage.IMessageStorage;
-
+import org.apache.mina.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
@@ -74,7 +56,17 @@ import quickfix.field.NextExpectedMsgSeqNum;
 import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 
-public class FIXApplication implements FIXClientApplication {
+import javax.crypto.Cipher;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class FIXApplication extends AbstractApplication implements FIXClientApplication {
 
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
@@ -93,13 +85,10 @@ public class FIXApplication implements FIXClientApplication {
 	private static final String SEND_ADMIN_REJECT = "SEND_ADMIN_REJECT";
     private String serviceStringName;
     private ServiceName serviceName;
-    private ApplicationContext applicationContext;
     private ILoggingConfigurator logConfigurator;
     private IServiceMonitor serviceMonitor;
-    private ServiceInfo serviceInfo;
 	private IServiceHandler handler;
     private MessageHelper messageHelper;
-	private volatile DirtyQFJIMessageConverter converter;
 
 	private final Map<SessionID, ISession> sessionMap;
 	private IMessageStorage storage;
@@ -127,7 +116,7 @@ public class FIXApplication implements FIXClientApplication {
 
     @Override
     public void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName) {
-        this.applicationContext = Objects.requireNonNull(applicationContext, "Application context can't be null");
+        super.init(serviceContext, applicationContext, serviceName);
         this.fixSettings = (FIXClientSettings) this.applicationContext.getServiceSettings();
         this.serviceStringName = serviceName.toString();
         this.serviceName = serviceName;
@@ -135,9 +124,7 @@ public class FIXApplication implements FIXClientApplication {
         this.serviceMonitor = this.applicationContext.getServiceMonitor();
         this.handler = this.applicationContext.getServiceHandler();
         this.messageHelper = this.applicationContext.getMessageHelper();
-        this.converter = this.applicationContext.getConverter();
         this.storage = serviceContext.getMessageStorage();
-        this.serviceInfo = serviceContext.lookupService(serviceName);
         this.settings = this.applicationContext.getSessionSettings();
         if(settings.isSetting(SEND_APP_REJECT)) {
             try {
@@ -569,10 +556,6 @@ public class FIXApplication implements FIXClientApplication {
 		return null;
 	}
 
-	public ServiceInfo getServiceInfo() {
-		return serviceInfo;
-	}
-
 	@Override
 	public void addSessionId(SessionID sessionID, ISession iSession) {
         logger.info("add session: {} -> {} = {}", sessionID.getSenderCompID(),
@@ -630,7 +613,6 @@ public class FIXApplication implements FIXClientApplication {
     /**
      * @param sessionID
      * @param message
-     * @param isRejected TODO
      * @throws FieldNotFound
      */
     private void storeMessage(SessionID sessionID, IMessage message) {
@@ -647,7 +629,7 @@ public class FIXApplication implements FIXClientApplication {
             ISession iSession = sessionMap.get(sessionID);
             IMessage iMsg = null;
             try {
-                iMsg = convert(message, from, to, isAdmin, null);
+                iMsg = convert(message, from, to, isAdmin);
                 storeMessage(sessionID, iMsg);
                 handler.putMessage(iSession, route, iMsg);
 
@@ -664,28 +646,6 @@ public class FIXApplication implements FIXClientApplication {
             }
         }
     }
-
-
-    private IMessage convert(Message message, String from, String to, boolean isAdmin, Boolean verifyTags) throws MessageConvertException {
-        return convert(message, from, to, isAdmin, verifyTags, false);
-    }
-
-    private IMessage convert(Message message, String from, String to, boolean isAdmin, Boolean verifyTags, boolean isRejected) throws MessageConvertException {
-        String messageData = message.getMessageData();
-        byte[] rawMessage = messageData != null ? messageData.getBytes(CharsetSupport.getCharsetInstance()) : message.toString().getBytes(CharsetSupport.getCharsetInstance());
-		IMessage msg = isRejected
-                ? converter.convertDirty(message, verifyTags, false, false, true)
-                : converter.convert(message, verifyTags, null);
-		MsgMetaData meta = msg.getMetaData();
-
-		meta.setFromService(from);
-		meta.setToService(to);
-		meta.setAdmin(isAdmin);
-		meta.setRawMessage(rawMessage);
-		meta.setServiceInfo(serviceInfo);
-
-		return msg;
-	}
 
     @Override
     public void onConnectionProblem(String reason) {

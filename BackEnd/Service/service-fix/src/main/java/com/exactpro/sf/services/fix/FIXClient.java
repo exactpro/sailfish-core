@@ -15,28 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.TimeZone;
-
-import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.quickfixj.CharsetSupport;
-import org.quickfixj.QFJException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -63,10 +41,17 @@ import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.ServiceStatus;
+import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
-
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.quickfixj.CharsetSupport;
+import org.quickfixj.QFJException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import quickfix.ConfigError;
 import quickfix.DataDictionary;
 import quickfix.FieldConvertError;
@@ -88,6 +73,19 @@ import quickfix.SessionSettings;
 import quickfix.SocketInitiator;
 import quickfix.mina.SessionConnector;
 import quickfix.mina.ssl.SSLSupport;
+
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.TimeZone;
+
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
 /**
  *
@@ -302,8 +300,6 @@ public class FIXClient implements IInitiatorService {
         sessionSettings.setBool(sessionID, FIXApplication.ENCRYPT_PASSWORD, fixSettings.isEncryptPassword());
         sessionSettings.setBool(sessionID, FIXApplication.ADD_NEXT_EXPECTED_SEQ_NUM, fixSettings.isAddNextExpectedMsgSeqNum());
 
-        sessionSettings.setBool(sessionID, Session.SETTING_REJECT_MESSAGE_ON_UNHANDLED_EXCEPTION, true);
-
         IDictionaryStructure dictionaryStructure = dictionaryProvider.getDictionaryStructure();
         IMessageStructure logonStructure = dictionaryStructure.getMessages().get(FixMessageHelper.LOGON_MESSAGE);
         boolean sendSupportsMicros = logonStructure.getFields().values().stream()
@@ -346,6 +342,7 @@ public class FIXClient implements IInitiatorService {
         sessionSettings.setBool(sessionID, Session.DUPLICATE_TAGS_ALLOWED, commonSettings.isDuplicateTagsAllowed() );
         sessionSettings.setBool(sessionID, Session.SETTING_REJECT_INVALID_MESSAGE,commonSettings.isRejectInvalidMessage());
         sessionSettings.setBool(sessionID, Session.SETTING_USE_SENDER_DEFAULT_APPL_VER_ID_AS_INITIAL_TARGET, true);
+        sessionSettings.setBool(sessionID, Session.SETTING_REJECT_MESSAGE_ON_UNHANDLED_EXCEPTION, true);
         sessionSettings.setBool(sessionID, Session.SETTING_VALIDATE_SEQUENCE_NUMBERS, commonSettings.isValidateSequenceNumbers());
 
         if (commonSettings.isUseSSL()) {
