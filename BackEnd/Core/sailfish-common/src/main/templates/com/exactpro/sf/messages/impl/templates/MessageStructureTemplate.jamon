@@ -189,6 +189,19 @@ public class <% typeName %> extends BaseMessage
 	
 					return list;
 				}
+				<%if (field.isEnum()) %>
+                public List<<% elemType %>> getRaw<% field.getName() %>()
+                {
+                    List<<% elemType %>> value = this.msg.<List<<% elemType %>>>getField("<% field.getName() %>");
+
+                    if(value == null)
+                    {
+                        throw new FieldNotFoundException(" <% field.getName() %> ");
+                    }
+
+                    return new ArrayList<>(value);
+                }
+                </%if>
 	
 			<%else>
 				public <% typeName %> set<% field.getName() %>(<% fieldTypeName %> value)
@@ -212,13 +225,23 @@ public class <% typeName %> extends BaseMessage
 	
 				<%if (field.isEnum()) %>
 					<%java>
-						String valueType = CodeGenUtils.getEnumValueTypeName(field);
+						String valueType = CodeGenUtils.convertSimpleFieldTypeToJavaObjectType(field.getJavaType());
 					</%java>
 					public <% typeName %> set<% field.getName() %>(<% valueType %> value)
 					{
 						this.msg.addField("<% field.getName() %>", value);
 						return this;
 					}
+
+                    public <% valueType %> getRaw<% field.getName() %>()
+                    {
+                        <% valueType %> value = this.msg.getField("<% field.getName() %>");
+                        if(value == null)
+                        {
+                            throw new FieldNotFoundException(" <% field.getName() %> ");
+                        }
+                        return value;
+                    }
 				</%if>
 	
 				public <% fieldTypeName %> get<% field.getName() %>()
