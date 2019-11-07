@@ -169,8 +169,6 @@ dependencies {
 
     compile 'net.sf.json-lib:json-lib:2.4:jdk15'
 
-    compile 'com.exactpro.mvel:mvel2:2.3.2.Final.1'
-
     compile 'org.apache.poi:poi:4.0.0'
 
     compile 'org.primefaces:primefaces:5.0'
