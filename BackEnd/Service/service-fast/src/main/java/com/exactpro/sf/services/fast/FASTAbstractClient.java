@@ -333,7 +333,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 		try {
 			inputStream = connection.getInputStream();
 			inputStream = new EofCheckedStream(inputStream);
-			recordingInputStream = new RecordingInputStream(inputStream);
+			recordingInputStream = createRecordingInputStream(inputStream);
 			inputStream = recordingInputStream;
 		} catch (IOException e) {
 			closeSession();
@@ -347,6 +347,10 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 		createMsgReadThread();
 		logger.debug("initConnection exit");
 
+	}
+
+	protected RecordingInputStream createRecordingInputStream(InputStream inputStream) {
+		return new ResizableRecordingInputStream(inputStream);
 	}
 
 	protected abstract MessageBlockReader getBlockReader();
