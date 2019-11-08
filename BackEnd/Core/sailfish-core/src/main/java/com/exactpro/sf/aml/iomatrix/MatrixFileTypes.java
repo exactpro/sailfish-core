@@ -15,21 +15,40 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.iomatrix;
 
+import com.google.common.collect.ImmutableSet;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum MatrixFileTypes {
-    CSV("csv"), XLS("xls"), XLSX("xlsx"), UNKNOWN("?"), JSON("json"), YAML("yaml");
-    
+    CSV("csv"), XLS("xls"), XLSX("xlsx"), UNKNOWN("?", false), JSON("json"), YAML("yaml");
+
+    public static final Set<MatrixFileTypes> SUPPORTED_MATRIX_FILE_TYPES = Stream.of(MatrixFileTypes.values())
+            .filter(MatrixFileTypes::isSupported)
+            .collect(Collectors.collectingAndThen(Collectors.toSet(), ImmutableSet::copyOf));
     
     private final String fileType;
-    
-    MatrixFileTypes(String extension) {
+    private final boolean supported;
+
+    MatrixFileTypes(String extension, boolean supported) {
         this.fileType = extension;
+        this.supported = supported;
+    }
+
+    MatrixFileTypes(String extension) {
+        this(extension, true);
     }
     
     public String getExtension() {
         return fileType;
     }
-    
-	public static MatrixFileTypes detectFileType(String name) {
+
+    public boolean isSupported() {
+        return supported;
+    }
+
+    public static MatrixFileTypes detectFileType(String name) {
 		for (MatrixFileTypes type : MatrixFileTypes.values()) {
 			if (name.toLowerCase().endsWith(type.getExtension().toLowerCase())) {
 				return type;

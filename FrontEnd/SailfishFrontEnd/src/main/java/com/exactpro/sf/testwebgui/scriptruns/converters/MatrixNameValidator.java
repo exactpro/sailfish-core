@@ -16,14 +16,14 @@
 
 package com.exactpro.sf.testwebgui.scriptruns.converters;
 
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
+
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.validator.FacesValidator;
 import javax.faces.validator.Validator;
 import javax.faces.validator.ValidatorException;
-
-import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 
 @FacesValidator("matrixNameValidator")
 public class MatrixNameValidator implements Validator{
@@ -36,7 +36,7 @@ public class MatrixNameValidator implements Validator{
 
         MatrixFileTypes type = MatrixFileTypes.detectFileType(value.toString());
 
-        if(type == MatrixFileTypes.UNKNOWN || type == MatrixFileTypes.JSON) {
+        if(type != MatrixFileTypes.CSV && type != MatrixFileTypes.XLS && type != MatrixFileTypes.XLSX) {
             throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR, "Validation Error", "Invalid matrix file type. Only csv|xls|xlsx file allowed"));
         }
 

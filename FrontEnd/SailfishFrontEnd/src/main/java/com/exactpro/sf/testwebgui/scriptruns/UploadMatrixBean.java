@@ -15,6 +15,23 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.scriptruns;
 
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.matrixhandlers.IMatrixProviderFactory;
+import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
+import com.exactpro.sf.storage.IMatrix;
+import com.exactpro.sf.testwebgui.BeanUtil;
+import com.exactpro.sf.testwebgui.api.TestToolsAPI;
+import org.apache.commons.lang3.StringUtils;
+import org.primefaces.event.FileUploadEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ManagedProperty;
+import javax.faces.bean.ViewScoped;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -26,26 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
-import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.ViewScoped;
-
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.primefaces.event.FileUploadEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.matrixhandlers.IMatrixProviderFactory;
-import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
-import com.exactpro.sf.storage.IMatrix;
-import com.exactpro.sf.testwebgui.BeanUtil;
-import com.exactpro.sf.testwebgui.api.TestToolsAPI;
-
 @ManagedBean(name = "uploadMatrixBean")
 @ViewScoped
 public class UploadMatrixBean implements Serializable {
@@ -53,9 +50,6 @@ public class UploadMatrixBean implements Serializable {
     private static final long serialVersionUID = -3447265343472567614L;
 
     private static final Logger logger = LoggerFactory.getLogger(UploadMatrixBean.class);
-
-    private static final Set<MatrixFileTypes> supportedFileTypesForUpload = Sets
-            .immutableEnumSet(MatrixFileTypes.CSV, MatrixFileTypes.XLS, MatrixFileTypes.XLSX, MatrixFileTypes.JSON, MatrixFileTypes.YAML);
 
     private SailfishURI defaultProviderURI;
 
@@ -180,12 +174,12 @@ public class UploadMatrixBean implements Serializable {
         try {
             String fileName = event.getFile().getFileName();
             MatrixFileTypes fileType = MatrixFileTypes.detectFileType(fileName);
-            if (supportedFileTypesForUpload.contains(fileType)) {
+            if (fileType.isSupported()) {
                 wrapper.setMatrixInputStream(event.getFile().getInputstream(), fileName);
                 wrappers.add(0, wrapper);
             } else {
                 String message = fileName + " - Invalid file type";
-                BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, message, "Only " + StringUtils.join(supportedFileTypesForUpload, ", ")
+                BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, message, "Only " + StringUtils.join(MatrixFileTypes.SUPPORTED_MATRIX_FILE_TYPES, ", ")
                         + " file allowed.");
             }
         } catch (IOException e) {
