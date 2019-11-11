@@ -18,7 +18,9 @@ package com.exactpro.sf.services.fast.filter;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.junit.Assert;
@@ -47,7 +49,7 @@ import com.exactpro.sf.util.FASTServicePluginTest;
 @RunWith(Parameterized.class)
 public class TestFastFilter extends FASTServicePluginTest {
     private static final Logger logger = LoggerFactory.getLogger(TestFastFilter.class);
-    private static final String TEMPLATE_TITLE = "FAST_2";
+    private static final String TEMPLATE_TITLE = "FAST";
     private static final String CORE_ALIAS = new CoreVersion().getAlias();
     private static final SailfishURI DICTIONARY_URI = SailfishURI.unsafeParse(CORE_ALIAS + ':' + TEMPLATE_TITLE);
 
@@ -62,20 +64,32 @@ public class TestFastFilter extends FASTServicePluginTest {
     @Parameters(name = "Test #{index}:check(filterString: {0}, expected result: {1})")
     public static Iterable<Object[]> dataForTest() {
         return Arrays.asList(new Object[][] {
-                { "MessageType = 0; MessageType = 1", true },
-                { "MessageType = 0; ApplID = 0", true },
-                { "MessageType = 0; ApplID = 1", false },
-                { "MessageType = 1; ApplID = 0", false },
-                { "MessageType = ![1]; ApplID = 0", true },
-                { "MessageType = ![1]; ApplID = ![1]", true },
+                { "MsgType = 0; MsgType = 1", true },
+                { "MsgType = 0; ApplReqID = 0", true },
+                { "MsgType = 0; ApplReqID = 1", false },
+                { "MsgType = 1; ApplReqID = 0", false },
+                { "MsgType = ![1]; ApplReqID = 0", true },
+                { "MsgType = ![1]; ApplReqID = ![1]", true },
                 { "", true },
                 { null, true },
-                { "ApplID = 0", true },
-                { "ApplID = 4", false },
-                { "ApplID = [0]", true },
-                { "ApplID = [4]", false },
-                { "ApplID = ![1]", true },
-                { "ApplID = ![0]", false }
+                { "ApplReqID = 0", true },
+                { "ApplReqID = 4", false },
+                { "ApplReqID = [0]", true },
+                { "ApplReqID = [4]", false },
+                { "ApplReqID = ![1]", true },
+                { "ApplReqID = ![0]", false },
+                { "RefApplID = [TMP]", true },
+                { "RefApplID = [NOTMP]", false },
+                { "RefApplID = [TMP]; RefApplID = [NOTMP]", true },
+                { "RefApplID = [TMP]; ApplReqID = 0", true },
+                { "RefApplID = [TMP]; ApplReqID = 1", false },
+                { "RefApplID = ![TMP]", false },
+                { "RefApplID = ![NOTMP]", true },
+                { "MsgType = 0; MsgType = 1; ApplReqID = 0", true },
+                { "MsgType = 0; MsgType = 1; ApplReqID = 1", false },
+                { "MsgType1 = 0", true },
+                { "MsgType1 = ![0]", true },
+                { "MsgType1 = 0; ApplReqID = [0]", true }
         });
     }
 
@@ -93,12 +107,31 @@ public class TestFastFilter extends FASTServicePluginTest {
 
         IMessageToFastConverter converter = new IMessageToFastConverter(dictionary, registry);
 
-        IMessage message = msgFactory.createMessage("Logon", "OEquity");
-        message.addField("Password", "tnp123");
-        message.addField("Username", "MADTY0");
-        message.addField("SendingTime", "20120101-01:01:01.333");
-        message.addField("ApplID", "0");
-        message.addField("MessageType", "0");
+        IMessage message = msgFactory.createMessage("ApplicationMessageRequest", "fast");
+        message.addField("MsgType", "0");
+        message.addField("SendingTime", "20160210-07:10:06.193");
+        message.addField("ApplReqID", "0");
+        message.addField("ApplReqType", 0L);
+        message.addField("NoApplIDs", 1L);
+
+        List<IMessage> list = new ArrayList<>();
+
+        IMessage subMessage = msgFactory.createMessage("ApplicationMessageRequest_IndicesRequestEntries", "fast");
+        subMessage.addField("RefApplID", "TMP");
+        subMessage.addField("Reserved1", 6L);
+        subMessage.addField("ApplBegSeqNum", 4328L);
+        subMessage.addField("ApplEndSeqNum", 4333L);
+        list.add(subMessage);
+
+        subMessage = msgFactory.createMessage("ApplicationMessageRequest_IndicesRequestEntries", "fast");
+        subMessage.addField("RefApplID", "TMP");
+        subMessage.addField("Reserved1", 7L);
+        subMessage.addField("ApplBegSeqNum", 4329L);
+        subMessage.addField("ApplEndSeqNum", 4334L);
+        list.add(subMessage);
+
+        message.addField("IndicesRequestEntries", list);
+
         Assert.assertEquals(resultFilter, isMessageAcceptable(message, new SimpleMessageFilter(filterString), converter));
 
     }

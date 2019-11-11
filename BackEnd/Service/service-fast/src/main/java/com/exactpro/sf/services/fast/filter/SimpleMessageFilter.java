@@ -15,16 +15,17 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fast.filter;
 
-import java.util.Collection;
-import java.util.regex.Pattern;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.Sets;
 import org.openfast.GroupValue;
 import org.openfast.Message;
+import org.openfast.SequenceValue;
 import org.openfast.template.Field;
 import org.openfast.template.Group;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
+import java.util.regex.Pattern;
 
 public class SimpleMessageFilter implements IFastMessageFilter {
 
@@ -80,46 +81,56 @@ public class SimpleMessageFilter implements IFastMessageFilter {
         return checkFieldValues(fastMsg);
     }
 
+    private void getAllFields(GroupValue fastMsg, Multimap<String, String> fieldsMultimap) {
+
+        Group group = fastMsg.getGroup();
+        for (Field field : group.getFields()) {
+            switch (field.getTypeName()) {
+                case "scalar":
+                case "decimal":
+                    if (group.hasField(field.getName())) {
+                        if (fastMsg.isDefined(field.getName())) {
+                            fieldsMultimap.put(field.getName(), fastMsg.getString(field.getName()));
+                        }
+                    }
+                    break;
+                case "group":
+                    GroupValue grpValue = fastMsg.getGroup(field.getName());
+                    getAllFields(grpValue, fieldsMultimap);
+                    break;
+                case "sequence":
+                    SequenceValue sqsValue = fastMsg.getSequence(field.getName());
+                    for (GroupValue groupVal : sqsValue.getValues()) {
+                        getAllFields(groupVal, fieldsMultimap);
+                    }
+                    break;
+            }
+        }
+
+    }
+
+
     private boolean checkFieldValues(GroupValue fastMsg) {
-        for (String fieldName : requiredValues.keySet()) {
-            Group group = fastMsg.getGroup();
-            if (!group.hasField(fieldName)) {
-                continue;
-            }
-            if (!fastMsg.isDefined(fieldName)) {
-                continue;
-            }
-            Field field = group.getField(fieldName);
+        Multimap<String, String> fieldsMultimap = HashMultimap.create();
+        getAllFields(fastMsg, fieldsMultimap);
 
-            if ("scalar".equals(field.getTypeName())) {
-                String value = fastMsg.getString(field.getName());
-                Collection<String> requiredValues = this.requiredValues.get(fieldName);
-                if (!requiredValues.contains(value)) {
-                    return false;
-                }
-            }
+        if (!checkMapIntersect(fieldsMultimap, requiredValues, true)) return false;
+
+        return checkMapIntersect(fieldsMultimap, ignoreValues, false);
+    }
+
+
+    private boolean checkMapIntersect(Multimap<String, String> fieldsMultimap, Multimap<String, String> filterValues, boolean containsEntries) {
+        if (!fieldsMultimap.keySet().containsAll(filterValues.keySet())){
+            return true;
+        }
+        Multimap<String, String> intersectMultimap = Multimaps.filterEntries(fieldsMultimap, e -> filterValues.containsEntry(e.getKey(), e.getValue()));
+        if (containsEntries) {
+            return intersectMultimap.keySet().size() == filterValues.keySet().size();
+        } else {
+            return intersectMultimap.isEmpty();
         }
 
-        for (String fieldName : ignoreValues.keySet()) {
-            Group group = fastMsg.getGroup();
-            if (!group.hasField(fieldName)) {
-                continue;
-            }
-            if (!fastMsg.isDefined(fieldName)) {
-                continue;
-            }
-            Field field = group.getField(fieldName);
-
-            if ("scalar".equals(field.getTypeName())) {
-                String value = fastMsg.getString(field.getName());
-                Collection<String> ignoreValues = this.ignoreValues.get(fieldName);
-                if (ignoreValues.contains(value)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
 }
