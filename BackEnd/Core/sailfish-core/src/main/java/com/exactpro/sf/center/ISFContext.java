@@ -18,13 +18,13 @@ package com.exactpro.sf.center;
 import java.util.List;
 import java.util.Map;
 
-import com.exactpro.sf.center.impl.SfInstanceInfo;
-import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.aml.IPreprocessor;
 import com.exactpro.sf.aml.IValidator;
 import com.exactpro.sf.aml.converter.MatrixConverterManager;
 import com.exactpro.sf.aml.preprocessor.PreprocessorDefinition;
 import com.exactpro.sf.bigbutton.RegressionRunner;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
+import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.configuration.EnvironmentManager;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -45,6 +45,7 @@ import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.ITaskExecutor;
+import com.exactpro.sf.services.ServiceMarshalManager;
 import com.exactpro.sf.storage.IAuthStorage;
 import com.exactpro.sf.storage.IMatrixStorage;
 import com.exactpro.sf.storage.IMessageStorage;
@@ -114,4 +115,6 @@ public interface ISFContext {
     IServiceStorage getServiceStorage();
 
     SfInstanceInfo getSfInstanceInfo();
+
+    ServiceMarshalManager getServiceMarshalManager();
 }

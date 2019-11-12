@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import com.exactpro.sf.storage.util.UnlimitedMessageColumnsMigration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -113,6 +112,7 @@ import com.exactpro.sf.storage.impl.FileVariableSetStorage;
 import com.exactpro.sf.storage.impl.HibernateFactory;
 import com.exactpro.sf.storage.impl.HibernateStorage;
 import com.exactpro.sf.storage.impl.MemoryServiceStorage;
+import com.exactpro.sf.storage.util.UnlimitedMessageColumnsMigration;
 import com.google.common.collect.ListMultimap;
 
 public class SFLocalContext implements ISFContext {
@@ -182,6 +182,8 @@ public class SFLocalContext implements ISFContext {
     private final ILoggingConfigurator loggingConfigurator;
     private final DefaultAdapterManager adapterManager;
     private final IServiceStorage serviceStorage;
+
+    private final ServiceMarshalManager serviceMarshalManager;
 
 	/**
 	 * Note that getDefault() will return null until createContext() execution will finish.
@@ -337,7 +339,9 @@ public class SFLocalContext implements ISFContext {
                 serviceContext);
         disposables.add(connectionManager);
 
-        pluginServiceLoader.load(connectionManager, new ServiceMarshalManager(staticServiceManager, dictionaryManager));
+        this.serviceMarshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
+
+        pluginServiceLoader.load(connectionManager, this.serviceMarshalManager);
 
         this.matrixConverterManager = matrixConverterLoader.create(workspaceDispatcher, dictionaryManager, connectionManager);
 
@@ -688,5 +692,10 @@ public class SFLocalContext implements ISFContext {
     @Override
     public SfInstanceInfo getSfInstanceInfo() {
         return sfInstanceInfo;
+    }
+
+    @Override
+    public ServiceMarshalManager getServiceMarshalManager() {
+        return serviceMarshalManager;
     }
 }

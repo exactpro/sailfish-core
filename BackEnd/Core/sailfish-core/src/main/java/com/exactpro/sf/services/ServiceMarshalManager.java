@@ -21,6 +21,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,9 +58,9 @@ import com.exactpro.sf.configuration.suri.SailfishURIUtils;
 import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.storage.util.ServiceStorageHelper;
 
-
 public class ServiceMarshalManager {
-	private static final Logger logger = LoggerFactory.getLogger(ServiceMarshalManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(ServiceMarshalManager.class);
+    private static final String servicesFileExpression = ".xml";
 
 	private final DocumentBuilder domBuilder;
 	private final XPathExpression typeExpression;
@@ -77,20 +79,54 @@ public class ServiceMarshalManager {
 		}
 	}
 
+	public void serializeService(ServiceDescription description, OutputStream out) {
+        try {
+            createMarshaller(ServiceDescription.class, DisabledServiceSettings.class, getServiceSettingsClass(description.getType())).marshal(description, out);
+        } catch (JAXBException | SailfishURIException | ClassNotFoundException e) {
+            logger.error("Could not marshal service description {}", description.getName(), e);
+        }
+    }
+
+    public void serializeService(ServiceDescription description, File file) {
+	    try (OutputStream out = new FileOutputStream(file)) {
+	        serializeService(description, out);
+        } catch (IOException e) {
+	        logger.error("Could not open file for service description {}", description.getName(), e);
+        }
+    }
+
+    public void saveServices(List<ServiceDescription> descriptions, Path folderPath) {
+        logger.debug("saveServices: begin");
+
+        for (ServiceDescription descr : descriptions) {
+            try {
+                File serviceFile = folderPath.resolve(descr.getName() + servicesFileExpression).toFile();
+                if (serviceFile.createNewFile()) {
+                    serializeService(descr, serviceFile);
+                } else {
+                    logger.error("Could not create file {}", serviceFile.toPath());
+                }
+            } catch (IOException e) {
+                logger.error("Could not create file for service description {}", descr.getName(), e);
+            }
+        }
+
+        logger.debug("saveServices: end");
+    }
+
 	public Map<String, File> exportServices(List<ServiceDescription> descriptions) {
 		logger.info("exportServices: begin");
 
 		Map<String, File> services = new HashMap<>();
 
 		for (ServiceDescription descr : descriptions) {
-            try {
-                Marshaller m = createMarshaller(ServiceDescription.class, DisabledServiceSettings.class, getServiceSettingsClass(descr.getType()));
+		    try {
                 String name = descr.getName() + ".xml";
-                File f = File.createTempFile(name, null);
-                m.marshal(descr, f);
-                services.put(name, f);
-            } catch (JAXBException | IOException | SailfishURIException | ClassNotFoundException e) {
-                logger.error("Could not marshal service description {}", descr.getName(), e);
+                File serviceFile = File.createTempFile(name, null);
+                serializeService(descr, serviceFile);
+                services.put(name, serviceFile);
+            } catch (IOException e) {
+                logger.error("Could not create file for service description {}", descr.getName(), e);
             }
         }
 
@@ -98,12 +134,12 @@ public class ServiceMarshalManager {
 
 		return services;
 	}
-	
+
 	public File exportEnvironmentDescription(String fileName, EnvironmentDescription envDesc) {
 		logger.info("exportEnvironmentDescription: begin");
-		
+
 		File f = null;
-		
+
 		try {
 			f = File.createTempFile(fileName, null);
 			createMarshaller(EnvironmentDescription.class).marshal(envDesc, f);
@@ -159,7 +195,7 @@ public class ServiceMarshalManager {
 	        return null;
 	    }
 	}
-	
+
 	private ServiceDescription unmarshalService(InputStream stream) throws JAXBException, SAXException, IOException, SailfishURIException, XPathExpressionException, ClassNotFoundException {
 	    Document document = domBuilder.parse(stream);
 	    String type = (String)typeExpression.evaluate(document, XPathConstants.STRING);
@@ -184,7 +220,7 @@ public class ServiceMarshalManager {
 
 		return ServiceStorageHelper.processDescription(serviceDescription, staticServiceManager, dictionaryManager);
 	}
-	
+
 	private EnvironmentDescription unmarshalEnvironment(InputStream stream) throws JAXBException {
 		return (EnvironmentDescription)createUnmarshaller(EnvironmentDescription.class).unmarshal(stream);
 	}
@@ -208,7 +244,7 @@ public class ServiceMarshalManager {
 							ServiceDescription descr = unmarshalService(new CloseShieldInputStream(zis));
 							results.add(descr);
 						}
-						
+
 						zis.closeEntry();
 					}
 
@@ -221,7 +257,7 @@ public class ServiceMarshalManager {
 			errors.add(e.getMessage());
 			logger.error(e.getMessage(), e);
 		}
-		
+
 		return envDescr;
 	}
 

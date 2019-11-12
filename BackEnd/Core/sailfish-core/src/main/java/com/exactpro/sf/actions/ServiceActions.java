@@ -17,7 +17,9 @@ package com.exactpro.sf.actions;
 
 import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
 
+import java.io.FileOutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -26,6 +28,7 @@ import java.util.Set;
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.beanutils.Converter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
@@ -41,11 +44,13 @@ import com.exactpro.sf.configuration.ResourceAliases;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.scriptrunner.AbstractCaller;
+import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.actionmanager.ActionMethod;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionServiceManager;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
+import com.exactpro.sf.util.DateTimeUtility;
 
 /**
  * @author nikita.smirnov
@@ -54,13 +59,34 @@ import com.exactpro.sf.services.IServiceSettings;
 @ResourceAliases("ServiceActions")
 public class ServiceActions extends AbstractCaller {
 
+    private static final DateTimeFormatter FORMATTER = DateTimeUtility.createFormatter("_dd.MM.yyyy_HH:mm:ss:SSS");
+    private static final String servicesFolder = "services";
+    private static final String changingSettingFolder = "changingSetting";
+
     //TODO: change to service_uri someday
     public final String SERVICE_TYPE = "service_type";
+
+    private static class SailfishURIConverter implements Converter {
+        @Override
+        public <T> T convert(Class<T> type, Object value) {
+            if (value instanceof String) {
+                try {
+                    return (T) SailfishURI.parse((String) value);
+                } catch (SailfishURIException e) {
+                    throw new EPSCommonException("Wrong value [" + value + "] for parse to SailfishURI", e);
+                }
+            }
+
+            throw new EPSCommonException("Wrong value [" + value + "] for parse to SailfishURI");
+        }
+    }
 
 	private final ThreadLocal<ConvertUtilsBean> converter = new ThreadLocal<ConvertUtilsBean>() {
 		@Override
         protected ConvertUtilsBean initialValue() {
-			return new ConvertUtilsBean();
+		    ConvertUtilsBean convertUtilsBean = new ConvertUtilsBean();
+		    convertUtilsBean.register(new SailfishURIConverter(), SailfishURI.class);
+		    return convertUtilsBean;
 		}
 	};
 
@@ -137,6 +163,8 @@ public class ServiceActions extends AbstractCaller {
 		}
 	}
 
+    private static final String servicesFileExpression = ".xml";
+
 	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
 	@ActionMethod
     public void initService(IActionContext actionContext, HashMap<?, ?> message) {
@@ -146,12 +174,14 @@ public class ServiceActions extends AbstractCaller {
 		try {
             IServiceSettings serviceSettings = serviceManager.getServiceSettings(serviceName);
 			BeanMap beanMap = new BeanMap(serviceSettings);
+			Set<String> editedProperty = new HashSet<>();
 			Set<String> incorrectProperty = new HashSet<>();
 			for (Entry<?, ?> entry : message.entrySet()) {
 				String property = convertProperty(entry.getKey().toString());
 				if (beanMap.containsKey(property)){
 					try {
                         BeanUtils.setProperty(serviceSettings, property, converter.get().convert((Object)unwrapFilters(entry.getValue()), beanMap.getType(property)));
+                        editedProperty.add(property);
 					} catch (IllegalAccessException e) {
 						throw new EPSCommonException(e);
 					} catch (InvocationTargetException e) {
@@ -169,14 +199,18 @@ public class ServiceActions extends AbstractCaller {
 			serviceManager.updateService(serviceName, serviceSettings, null);
 
 			serviceManager.initService(serviceName, null).get();
-		} catch (EPSCommonException e) {
+
+			try (FileOutputStream out = new FileOutputStream(actionContext.getReport().createFile(StatusType.NA, servicesFolder, changingSettingFolder, serviceName + FORMATTER.format(DateTimeUtility.nowLocalDateTime()) + servicesFileExpression))) {
+                actionContext.getServiceManager().serializeServiceSettings(serviceName, out);
+            }
+        } catch (EPSCommonException e) {
 			throw e;
 		} catch (Exception e){
 			throw new EPSCommonException(e);
 		}
 	}
 
-	@CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
+    @CommonColumns(@CommonColumn(value = Column.ServiceName, required = true))
     @ActionMethod
     public HashMap<String, String> getServiceSettings(IActionContext actionContext) {
 	    IService service = SFLocalContext.getDefault().getConnectionManager().getService(ServiceName.parse(actionContext.getServiceName()));

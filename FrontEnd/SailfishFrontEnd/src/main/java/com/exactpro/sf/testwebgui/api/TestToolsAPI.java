@@ -35,13 +35,11 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.exactpro.sf.common.util.EPSCommonException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,7 +74,6 @@ import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceDescription;
 import com.exactpro.sf.services.ServiceException;
-import com.exactpro.sf.services.ServiceMarshalManager;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.storage.IMappableSettingsSerializer;
@@ -518,13 +515,12 @@ public class TestToolsAPI {
 
         int skippedCount = 0;
         List<ServiceName> existServs = Arrays.asList(conManager.getServiceNames());
-		ServiceMarshalManager marshalManager = new ServiceMarshalManager(context.getStaticServiceManager(), context.getDictionaryManager());
 		List<String> errors = new ArrayList<>();
 		List<ServiceDescription> descrs = new ArrayList<>();
 
         EnvironmentDescription envDesc = null;
         try {
-            envDesc = marshalManager.unmarshalServices(inputStream, isZip, descrs, errors);
+            envDesc = context.getServiceMarshalManager().unmarshalServices(inputStream, isZip, descrs, errors); //BeanUtil.getSfContext().getServiceMarshalManager().unmarshalServices(inputStream, isZip, descrs, errors);
         } catch (RuntimeException e) {
             notifyListener.onErrorProcessing("Service can't be import. Problem during service configuration reading (" + e.getMessage() + ")");
         }

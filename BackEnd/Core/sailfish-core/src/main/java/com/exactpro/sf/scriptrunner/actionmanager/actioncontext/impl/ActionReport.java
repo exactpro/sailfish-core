@@ -15,12 +15,18 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl;
 
+import com.exactpro.sf.services.IServiceSettings;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -40,8 +46,10 @@ import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
+import com.exactpro.sf.util.DateTimeUtility;
 
 public class ActionReport implements IActionReport {
+
     private final IScriptReport report;
     private final String reportFolder;
     private final boolean updateStatus;

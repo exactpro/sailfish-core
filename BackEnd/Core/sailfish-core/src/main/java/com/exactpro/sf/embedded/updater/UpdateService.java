@@ -53,6 +53,7 @@ import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
+import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.embedded.IEmbeddedService;
 import com.exactpro.sf.embedded.configuration.ServiceStatus;
 import com.exactpro.sf.embedded.updater.configuration.UpdateServiceSettings;
@@ -294,7 +295,7 @@ public class UpdateService implements IEmbeddedService {
             addParameter(parameters, "mode", mode);
             addParameter(parameters, "quiet");
             return parameters;
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | WorkspaceStructureException e) {
             throw new EPSCommonException("Can't set parameters", e);
         }
     }
