@@ -30,8 +30,7 @@ interface Props {
 }
 
 export function KnownBugCategoryComponent({ category, isRoot, showArrows }: Props) {
-    const topLevelBugs = category.subNodes
-        .filter(isKnownBug)
+    const topLevelBugs = filterDistinctBugs(category.subNodes.filter(isKnownBug))
         .sort((a, b) =>
             a.status === b.status
                 ? a.subject.localeCompare(b.subject)
@@ -70,3 +69,15 @@ export function KnownBugCategoryComponent({ category, isRoot, showArrows }: Prop
         </div>
     )
 }
+
+const filterDistinctBugs = (bugs: KnownBug[]): KnownBug[] => {
+    const bugMap = new Map<string, KnownBug>();
+
+    bugs.forEach((bug) => {
+       if (!bugMap.has(bug.subject) || (bugMap.get(bug.subject).status == "NOT_REPRODUCED" && bug.status == "REPRODUCED")) {
+           bugMap.set(bug.subject, bug)
+       }
+    });
+
+    return Array.from(bugMap.values())
+};
