@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jooq.lambda.fi.util.function.CheckedSupplier;
 import org.slf4j.Logger;
 
@@ -538,33 +539,33 @@ public class ActionContext implements IActionContext {
     }
 
     @Override
-    public <T extends IActionCaller> void callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) throws Throwable {
-        callAction(() -> {
+    public <T extends IActionCaller> ActionCallResult<Void> callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) throws Exception {
+        return callAction(() -> {
             action.accept(actionClass, this);
             return null;
         }, getMethodName(actionClass.getClass(), action, this), null, tag, verificationOrder);
     }
 
     @Override
-    public <T extends IActionCaller, R> R callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Throwable {
+    public <T extends IActionCaller, R> ActionCallResult<R> callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Exception {
         return callAction(() -> action.apply(actionClass, this), getMethodName(actionClass.getClass(), action, this), null, tag, verificationOrder);
     }
 
     @Override
-    public <T extends IActionCaller, P> void callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) throws Throwable {
-        callAction(() -> {
+    public <T extends IActionCaller, P> ActionCallResult<Void> callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) throws Exception {
+        return callAction(() -> {
             action.accept(actionClass, this, parameters);
             return null;
         }, getMethodName(actionClass.getClass(), action, this, parameters), parameters, tag, verificationOrder);
     }
 
     @Override
-    public <T extends IActionCaller, P, R> R callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Throwable {
+    public <T extends IActionCaller, P, R> ActionCallResult<R> callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Exception {
         return callAction(() -> action.apply(actionClass, this, parameters), getMethodName(actionClass.getClass(), action, this, parameters), parameters, tag, verificationOrder);
     }
 
     @SuppressWarnings("unchecked")
-    private <P, R> R callAction(CheckedSupplier<R> action, String methodName, P parameters, String tag, List<String> verificationOrder) throws Throwable {
+    private <P, R> ActionCallResult<R> callAction(CheckedSupplier<R> action, String methodName, P parameters, String tag, List<String> verificationOrder) throws Exception {
         IMessage message = null;
 
         if(parameters instanceof Map<?, ?>) {
@@ -592,7 +593,7 @@ public class ActionContext implements IActionContext {
                 actionCreated = true;
             }
 
-            Object returnValue = action.get();
+            R returnValue = action.get();
 
             if(returnValue != null) {
                 scriptContext.getReceivedMessages().add(returnValue);
@@ -606,13 +607,13 @@ public class ActionContext implements IActionContext {
                 report.closeAction(new StatusDescription(StatusType.PASSED, ""), returnValue);
             }
 
-            return (R)returnValue;
+            return new ActionCallResult<>(returnValue, StatusType.PASSED, Collections.emptySet(), null);
         } catch(KnownBugException e) {
             getLogger().warn(e.getMessage(), e);
-            Object containedMessage = null;
+            R containedMessage = null;
 
             if(e instanceof MessageKnownBugException) {
-                containedMessage = ((MessageKnownBugException)e).getContainedMessage();
+                containedMessage = (R)((MessageKnownBugException)e).getContainedMessage();
                 scriptContext.getReceivedMessages().add(containedMessage);
 
                 if(StringUtils.isNotBlank(reference)) {
@@ -633,7 +634,7 @@ public class ActionContext implements IActionContext {
 
             report.closeAction(new StatusDescription(StatusType.CONDITIONALLY_PASSED, e.getMessage(), e.getPotentialDescriptions()), containedMessage);
 
-            return (R)containedMessage;
+            return new ActionCallResult<>(containedMessage, StatusType.CONDITIONALLY_PASSED, e.getPotentialDescriptions(), e);
         } catch(Exception e) {
             getLogger().warn(e.getMessage(), e);
             scriptContext.setInterrupt(e instanceof InterruptedException);
@@ -649,7 +650,9 @@ public class ActionContext implements IActionContext {
                 throw e;
             }
 
-            return null;
+            return new ActionCallResult<>(null, StatusType.FAILED, Collections.emptySet(), e);
+        } catch (Throwable t) {
+            return ExceptionUtils.rethrow(t);
         }
     }
 

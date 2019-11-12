@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
+import com.exactpro.sf.aml.script.ActionCallResult;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.aml.script.MetaContainer;
 import com.exactpro.sf.aml.scriptutil.MessageCount;
@@ -179,9 +180,10 @@ public interface IActionContext {
      * @param action action method reference
      * @param tag action tag
      * @param verificationOrder verification order for report
+     * @return instance of {@link ActionCallResult} containing action status, known bugs and exception (if present)
      * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
-    <T extends IActionCaller> void callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) throws Throwable;
+    <T extends IActionCaller> ActionCallResult<Void> callAction(T actionClass, ConsumerAction<T> action, String tag, List<String> verificationOrder) throws Exception;
 
     /**
      * Executes action, performs necessary exception handling and adds it to report (optional).<br>
@@ -202,10 +204,10 @@ public interface IActionContext {
      * @param action action method reference
      * @param tag action tag
      * @param verificationOrder verification order for report
-     * @return action's return value or null if it's failed and {@link #isContinueOnFailed()} = true
+     * @return instance of {@link ActionCallResult} containing action result, status, known bugs and exception (if present)
      * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
-    <T extends IActionCaller, R> R callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Throwable;
+    <T extends IActionCaller, R> ActionCallResult<R> callAction(T actionClass, FunctionAction<T, R> action, String tag, List<String> verificationOrder) throws Exception;
 
     /**
      * Executes action, performs necessary exception handling and adds it to report (optional).<br>
@@ -228,9 +230,10 @@ public interface IActionContext {
      * @param parameters action parameters
      * @param tag action tag
      * @param verificationOrder verification order for report
+     * @return instance of {@link ActionCallResult} containing action status, known bugs and exception (if present)
      * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
-    <T extends IActionCaller, P> void callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) throws Throwable;
+    <T extends IActionCaller, P> ActionCallResult<Void> callAction(T actionClass, ConsumerActionWithParameters<T, P> action, P parameters, String tag, List<String> verificationOrder) throws Exception;
 
     /**
      * Executes action, performs necessary exception handling and adds it to report (optional).<br>
@@ -253,8 +256,8 @@ public interface IActionContext {
      * @param parameters action parameters
      * @param tag action tag
      * @param verificationOrder verification order for report
-     * @return action's return value or null if it's failed and {@link #isContinueOnFailed()} = true
+     * @return instance of {@link ActionCallResult} containing action result, status, known bugs and exception (if present)
      * @throws Throwable action's exception if it's failed and {@link #isContinueOnFailed()} = false
      */
-    <T extends IActionCaller, P, R> R callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Throwable;
+    <T extends IActionCaller, P, R> ActionCallResult<R> callAction(T actionClass, FunctionActionWithParameters<T, P, R> action, P parameters, String tag, List<String> verificationOrder) throws Exception;
 }
