@@ -21,24 +21,13 @@ pool:
 steps:
 - task: Gradle@1
   inputs:
-    workingDirectory: 'FrontEnd/Sailfish-JS-report'
-    gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m -Dhttp.socketTimeout=60000 -Dhttp.connectionTimeout=60000'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.8'
-    jdkArchitectureOption: 'x64'
-    #publishJUnitResults: true
-    #testResultsFiles: '**/TEST-*.xml'
-    tasks: 'clean build uploadArchives'
-- task: Gradle@2
-  inputs:
     workingDirectory: ''
     gradleWrapperFile: 'gradlew'
-    gradleOptions: '-Xmx3072m'
+    gradleOptions: '-Xmx3072m -Dhttp.socketTimeout=60000 -Dhttp.connectionTimeout=60000'
     javaHomeOption: 'JDKVersion'
     jdkVersionOption: '1.8'
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
     testRunTitle: $(imageName)
-    tasks: 'clean build test'
+    tasks: 'clean build'
