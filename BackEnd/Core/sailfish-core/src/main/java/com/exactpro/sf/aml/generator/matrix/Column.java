@@ -15,6 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.generator.matrix;
 
+import java.text.MessageFormat;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.exactpro.sf.common.util.StringUtil;
+import com.google.common.base.Strings;
+
 /**
  * This enumeration represent a matrix columns.
  *
@@ -53,8 +61,7 @@ public enum Column {
     Comment(Constants.SYSTEM_PREFIX + "comment", "If Y then action will be ignored"),
     Tag(Constants.SYSTEM_PREFIX + "tag", "action tag for statistics"),
     Dependencies(Constants.SYSTEM_PREFIX + "dependencies", "list of references on which this action depends"),
-    VerificationsOrder(Constants.SYSTEM_PREFIX + "verifications_order", "Field order for sorting verifications in report"),
-    _no_columns_required(null, "Used only for annotations.");
+    VerificationsOrder(Constants.SYSTEM_PREFIX + "verifications_order", "Field order for sorting verifications in report");
 
 	public String getHelpString() {
 		return helpString;
@@ -64,21 +71,31 @@ public enum Column {
     private final String helpString;
 
     Column(String colName, String helpString) {
-		this.column = colName;
-		this.helpString = helpString;
-	}
+        this.column = Objects.requireNonNull(StringUtils.stripToNull(colName), "Column name cannot be null or empty").toLowerCase();
+        this.helpString = Objects.requireNonNull(StringUtils.stripToNull(helpString), "Help string cannot be null or empty");
+    }
 
 	public String getName() {
         return column;
 	}
 
+    /**
+     * Returns Column by the provided name. If the name contains system prefix (#) case (upper or lower) would be ignored.
+     * @param key column name
+     * @return Column that matches the provided name
+     */
 	public static Column value(String key) {
+        if ( key != null
+                && key.startsWith(Constants.SYSTEM_PREFIX)) {
 
-		for (Column c : Column.values()) {
-			if (c.getName() != null && c.getName().equals(key.toLowerCase())) {
-				return c;
-			}
-		}
+            key = key.toLowerCase();
+
+            for (Column c : Column.values()) {
+                if (key.equals(c.getName())) {
+                    return c;
+                }
+            }
+        }
 
 		return null;
 	}

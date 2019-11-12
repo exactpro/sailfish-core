@@ -15,23 +15,22 @@
  ******************************************************************************/
 package com.exactpro.sf.aml.reader.struct;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.poi.ss.usermodel.CellStyle;
-
 import com.exactpro.sf.aml.AMLException;
 import com.exactpro.sf.aml.AMLLangUtil;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.iomatrix.SimpleCell;
 import com.exactpro.sf.aml.visitors.IAMLElementVisitor;
 import com.exactpro.sf.common.util.StringUtil;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AMLElement implements Cloneable {
     private static final AtomicLong UID_GENERATOR = new AtomicLong();
@@ -50,7 +49,7 @@ public class AMLElement implements Cloneable {
     }
 
     public AMLElement(int line) {
-        this(line, Collections.<String, SimpleCell>emptyMap(), false);
+        this(line, Collections.emptyMap(), false);
     }
 
     public AMLElement(int line, Map<String, SimpleCell> cells) {
@@ -65,7 +64,7 @@ public class AMLElement implements Cloneable {
         this.cells = new LinkedHashMap<>();
         this.skipOptional = skipOptional;
 
-        for(Entry<String, SimpleCell> e : cells.entrySet()) {
+        for (Entry<String, SimpleCell> e : cells.entrySet()) {
             setCell(e.getKey(), e.getValue());
         }
     }
@@ -83,7 +82,7 @@ public class AMLElement implements Cloneable {
     }
 
     public SimpleCell getCell(String name) {
-        return cells.get(checkValue(name));
+        return cells.get(getColumnName(name));
     }
 
     public SimpleCell getCell(Column column) {
@@ -104,7 +103,7 @@ public class AMLElement implements Cloneable {
     public AMLElement setCell(String name, SimpleCell cell) {
         Objects.requireNonNull(cell, NULL_CELL_MESSAGE);
         checkValue(cell.getValue());
-        cells.put(checkValue(name), cell);
+        cells.put(getColumnName(name), cell);
 
         return this;
     }
@@ -127,7 +126,7 @@ public class AMLElement implements Cloneable {
     }
 
     public AMLElement removeCell(String name) {
-        cells.remove(checkValue(name));
+        cells.remove(getColumnName(name));
         return this;
     }
 
@@ -137,7 +136,7 @@ public class AMLElement implements Cloneable {
     }
 
     public boolean containsCell(String name) {
-        return cells.containsKey(checkValue(name));
+        return cells.containsKey(getColumnName(name));
     }
 
     public boolean containsCell(Column column) {
@@ -155,11 +154,17 @@ public class AMLElement implements Cloneable {
     }
 
     private String checkValue(String value) {
-        if(value == null || !StringUtil.isStripped(value)) {
+        if (value == null || !StringUtil.isStripped(value)) {
             throw new IllegalArgumentException("Invalid value: " + value);
         }
 
         return value;
+    }
+
+    private String getColumnName(String name) {
+        checkValue(name);
+        Column column = Column.value(name);
+        return column != null ? column.getName() : name;
     }
 
     @Override
