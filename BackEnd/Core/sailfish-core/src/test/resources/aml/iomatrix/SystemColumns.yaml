@@ -1,0 +1,13 @@
+---
+- block start:
+    "#description": Descr
+    "#reference": block
+    "field": abc
+    sub:
+      "#action": send
+- test case start:
+    "#id": test_id
+    call:
+      "#id": 123
+      "#template": block
+      "#action": include block

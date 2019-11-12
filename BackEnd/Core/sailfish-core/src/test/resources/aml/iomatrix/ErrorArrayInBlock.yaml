@@ -1,0 +1,7 @@
+---
+- block start:
+    "#description": Descr
+    "#reference": block
+    "field": [ a, b]
+    sub:
+      "#action": send

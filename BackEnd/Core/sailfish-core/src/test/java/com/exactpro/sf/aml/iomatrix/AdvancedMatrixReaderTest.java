@@ -27,7 +27,9 @@ import java.util.Objects;
 
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.exactpro.sf.aml.AMLException;
 
@@ -37,7 +39,11 @@ public class AdvancedMatrixReaderTest {
     private final String XLSX_MATRIX = "Execl_2007_2013.xlsx";
     private final String XLS_MATRIX = "Execl_97_2003.xls";
     private final String CSV_MATRIX = "Csv.csv";
+    private final String YAML_MATRIX = "SystemColumns.yaml";
+    private final String ERROR_YAML_MATRIX = "ErrorArrayInBlock.yaml";
 
+    @Rule
+    public ExpectedException thrown= ExpectedException.none();
 
     @Test
     public void testCompareReaders() throws IOException, AMLException {
@@ -108,6 +114,34 @@ public class AdvancedMatrixReaderTest {
                 Assert.assertEquals("Invalid matrix structure. Detected duplicated fields at K6, Z6,  positions. Field name is #new field", e.getMessage());
             }
             Assert.assertTrue("DefineHeader command added already contains \"#new field\" field.", error);
+        }
+    }
+
+    @Test
+    public void testNegativErrorArrayInBlock() throws Exception {
+
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage("Invalid value type array field found in block block start");
+
+        new AdvancedMatrixReader(new File(PATH + ERROR_YAML_MATRIX));
+    }
+
+    @Test
+    public void testSystemColumnsYaml() throws Exception {
+        try (AdvancedMatrixReader reader = new AdvancedMatrixReader(new File(PATH + YAML_MATRIX))) {
+
+            Assert.assertEquals(asMap("#action", "block start", "#description", "Descr", "#reference", "block", "field", "abc"),
+                    reader.readCells());
+            Assert.assertEquals(asMap("#action", "send", "#reference", "sub"),
+                    reader.readCells());
+            Assert.assertEquals(asMap("#action", "Block end"),
+                    reader.readCells());
+            Assert.assertEquals(asMap("#action", "test case start", "#id", "test_id"),
+                    reader.readCells());
+            Assert.assertEquals(asMap("#action", "include block", "#reference", "call", "#template", "block", "#id", "123"),
+                    reader.readCells());
+            Assert.assertEquals(asMap("#action", "Test case end"),
+                    reader.readCells());
         }
     }
 

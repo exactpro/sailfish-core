@@ -110,7 +110,8 @@ public class JSONMatrixReader implements IMatrixReader {
                 Objects.requireNonNull(commonBlock, "'AML block' node must be presented");
                 Objects.requireNonNull(blockBrace, "Unknown block type " + commonBlockType);
 
-                table.put(tableRowCounter.getAndIncrement(), Column.Action.getName(), commonBlockType);
+                int localRowCounter = tableRowCounter.getAndIncrement();
+                table.put(localRowCounter , Column.Action.getName(), commonBlockType);
 
                 commonBlock.fields().forEachRemaining(actionEntry -> {
                     String reference = actionEntry.getKey();
@@ -118,13 +119,20 @@ public class JSONMatrixReader implements IMatrixReader {
 
                     logger.debug("reading {}", reference);
 
-                    int nestedCount = countNestedReferences(actionNode);
-                    int target = tableRowCounter.get() + nestedCount;
+                    if (actionNode.isObject()) {
 
-                    table.put(target, Column.Reference.getName(), reference);
-                    consumeNode(actionNode, table, target);
-                    //FIXME will add additional empty row at last action
-                    tableRowCounter.getAndIncrement();
+                        int nestedCount = countNestedReferences(actionNode);
+                        int target = tableRowCounter.get() + nestedCount;
+
+                        table.put(target, Column.Reference.getName(), reference);
+                        consumeNode(actionNode, table, target);
+                        //FIXME will add additional empty row at last action
+                        tableRowCounter.getAndIncrement();
+                    } else if (!actionNode.isArray()) {
+                        table.put(localRowCounter, reference, actionNode.asText());
+                    } else {
+                        throw new IllegalStateException(String.format("Invalid value type array %s found in block %s", reference, commonBlockType));
+                    }
                 });
 
                 table.put(tableRowCounter.getAndIncrement(), Column.Action.getName(), blockBrace.getInversed().getName());
@@ -145,9 +153,6 @@ public class JSONMatrixReader implements IMatrixReader {
             supplier = () -> {
                 int currentRow = rowIterator.next();
                 Map<String, String> row = new HashMap<>(table.row(currentRow));
-                if (!row.containsKey(Column.Id.getName())) {
-                    row.put(Column.Id.getName(), String.valueOf(currentRow));
-                }
 
                 return columns.stream()
                         .map(key -> row.getOrDefault(key, ""))
