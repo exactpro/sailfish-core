@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.commons.beanutils.BeanMap;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtilsBean;
+import org.apache.commons.beanutils.Converter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.WordUtils;
 
@@ -57,10 +58,27 @@ public class ServiceActions extends AbstractCaller {
     //TODO: change to service_uri someday
     public final String SERVICE_TYPE = "service_type";
 
+    private static class SailfishURIConverter implements Converter {
+        @Override
+        public <T> T convert(Class<T> type, Object value) {
+            if (value instanceof String) {
+                try {
+                    return (T) SailfishURI.parse((String) value);
+                } catch (SailfishURIException e) {
+                    throw new EPSCommonException("Wrong value [" + value + "] for parse to SailfishURI", e);
+                }
+            }
+
+            throw new EPSCommonException("Wrong value [" + value + "] for parse to SailfishURI");
+        }
+    }
+
 	private final ThreadLocal<ConvertUtilsBean> converter = new ThreadLocal<ConvertUtilsBean>() {
 		@Override
         protected ConvertUtilsBean initialValue() {
-			return new ConvertUtilsBean();
+		    ConvertUtilsBean convertUtilsBean = new ConvertUtilsBean();
+		    convertUtilsBean.register(new SailfishURIConverter(), SailfishURI.class);
+		    return convertUtilsBean;
 		}
 	};
 
@@ -146,12 +164,14 @@ public class ServiceActions extends AbstractCaller {
 		try {
             IServiceSettings serviceSettings = serviceManager.getServiceSettings(serviceName);
 			BeanMap beanMap = new BeanMap(serviceSettings);
+			Set<String> editedProperty = new HashSet<>();
 			Set<String> incorrectProperty = new HashSet<>();
 			for (Entry<?, ?> entry : message.entrySet()) {
 				String property = convertProperty(entry.getKey().toString());
 				if (beanMap.containsKey(property)){
 					try {
                         BeanUtils.setProperty(serviceSettings, property, converter.get().convert((Object)unwrapFilters(entry.getValue()), beanMap.getType(property)));
+                        editedProperty.add(property);
 					} catch (IllegalAccessException e) {
 						throw new EPSCommonException(e);
 					} catch (InvocationTargetException e) {
@@ -169,6 +189,8 @@ public class ServiceActions extends AbstractCaller {
 			serviceManager.updateService(serviceName, serviceSettings, null);
 
 			serviceManager.initService(serviceName, null).get();
+
+			actionContext.getReport().createChangingSettingsFile(serviceName.toString(), serviceSettings, editedProperty);
 		} catch (EPSCommonException e) {
 			throw e;
 		} catch (Exception e){

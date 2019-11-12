@@ -19,9 +19,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Implements UnionMount[1]-like mechanism for SF
@@ -88,6 +86,8 @@ public interface IWorkspaceDispatcher {
      * @throws FileNotFoundException
      */
     File getOrCreateFile(FolderType folderType, String... fileName) throws WorkspaceStructureException, WorkspaceSecurityException, FileNotFoundException;
+
+    File getOrCreateFolder(FolderType folderType, String... folderName) throws WorkspaceStructureException, WorkspaceSecurityException, FileNotFoundException;
 
     boolean exists(FolderType folderType, String... fileName) throws WorkspaceSecurityException;
 

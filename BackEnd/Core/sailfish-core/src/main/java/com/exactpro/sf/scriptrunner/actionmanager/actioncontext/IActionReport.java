@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.actionmanager.actioncontext;
 
+import com.exactpro.sf.services.IServiceSettings;
 import java.io.File;
 
 import com.exactpro.sf.common.messages.IMessage;
@@ -27,6 +28,10 @@ import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Set;
 
 public interface IActionReport extends AutoCloseable {
     IActionReport createEmbeddedReport(String name, String description);
@@ -51,6 +56,9 @@ public interface IActionReport extends AutoCloseable {
     void createLinkToReport(StatusType status, String linkToReport);
 
     void createParametersTable(IMessage message);
+
+    void createChangingSettingsFile(String serviceName, IServiceSettings serviceSettings, Set<String> editedProperties)
+            throws IOException, IllegalAccessException, NoSuchMethodException, InvocationTargetException;
 
     File createFile(StatusType status, String... pathElements)
             throws WorkspaceStructureException, WorkspaceSecurityException;
