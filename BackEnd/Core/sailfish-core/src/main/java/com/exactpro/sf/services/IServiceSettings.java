@@ -37,4 +37,6 @@ public interface IServiceSettings extends ICommonSettings {
 	boolean isPersistMessages();
 
     boolean isAutoStartable();
+
+    boolean isInvertStoredMessageTypes();
 }

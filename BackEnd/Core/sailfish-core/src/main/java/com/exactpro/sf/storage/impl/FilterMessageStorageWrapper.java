@@ -28,18 +28,20 @@ public class FilterMessageStorageWrapper extends MessageStorageWrapper {
     private static final Logger logger = LoggerFactory.getLogger(FilterMessageStorageWrapper.class);
 
     private final Set<String> processedMessageTypes;
+    private final boolean storeMessagesInList;
     
-    public FilterMessageStorageWrapper(IMessageStorage messageStorage, Set<String> processedMessageTypes) {
+    public FilterMessageStorageWrapper(IMessageStorage messageStorage, Set<String> processedMessageTypes, boolean storeMessagesInList) {
         super(messageStorage);
         if (processedMessageTypes == null || processedMessageTypes.isEmpty()) {
             throw new IllegalArgumentException("Processed message types can't be empty");
         }
         this.processedMessageTypes = processedMessageTypes;
+        this.storeMessagesInList = storeMessagesInList;
     }
 
     @Override
     public void storeMessage(IMessage message) {
-        if(processedMessageTypes.contains(message.getName())) {
+        if(processedMessageTypes.contains(message.getName()) == storeMessagesInList) {
             super.storeMessage(message);
         } else {
             logger.trace("Message {} skipped by service settings.", message.getName());

@@ -27,18 +27,20 @@ public class FilterServiceHandlerWrapper extends ServiceHandlerWrapper {
     private static final Logger logger = LoggerFactory.getLogger(FilterServiceHandlerWrapper.class);
 
     private final Set<String> processedMessageTypes;
+    private final boolean storeMessagesInList;
     
-    public FilterServiceHandlerWrapper(IServiceHandler serviceHandler, Set<String> processedMessageTypes) {
+    public FilterServiceHandlerWrapper(IServiceHandler serviceHandler, Set<String> processedMessageTypes, boolean storeMessagesInList) {
         super(serviceHandler);
         if (processedMessageTypes == null || processedMessageTypes.isEmpty()) {
             throw new IllegalArgumentException("Processed message types can't be empty");
         }
         this.processedMessageTypes = processedMessageTypes;
+        this.storeMessagesInList = storeMessagesInList;
     }
 
     @Override
     public void putMessage(ISession session, ServiceHandlerRoute route, IMessage message) throws ServiceHandlerException {
-        if(processedMessageTypes.contains(message.getName())) {
+        if(processedMessageTypes.contains(message.getName()) == storeMessagesInList) {
             super.putMessage(session, route, message);
         } else {
             logger.trace("Message {} skipped by service settings. Route {}, Session {}", message.getName(), route, session);

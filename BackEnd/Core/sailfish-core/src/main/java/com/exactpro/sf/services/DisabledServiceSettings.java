@@ -93,6 +93,11 @@ public class DisabledServiceSettings implements IServiceSettings, Serializable {
     }
 
     @Override
+    public boolean isInvertStoredMessageTypes() {
+        return false;
+    }
+
+    @Override
     public void load(HierarchicalConfiguration config) {
 
     }

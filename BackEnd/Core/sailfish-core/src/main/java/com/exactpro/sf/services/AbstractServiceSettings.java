@@ -30,8 +30,11 @@ import com.exactpro.sf.services.util.ServiceUtil;
 public abstract class AbstractServiceSettings implements IServiceSettings, Serializable {
 
     @Description("These message types will be stored for checking by matrix actions and presentation in report.\n"
-            + "Example: 'MessageA, MessageB, MessageC' or '"+ ServiceUtil.ALIAS_PREFIX + "dataA'")
+            + "Example: 'MessageA, MessageB, MessageC' or '"+ ServiceUtil.ALIAS_PREFIX + "dataA'. The Enable Invert Saved Message Types option changes the behavior. Listed messages will be excluded")
     protected String storedMessageTypes;
+
+    @Description("This option inverts the behavior of Stored Message Types. If selected, messages listed in Stored Message Types will be excluded.")
+    protected boolean invertStoredMessageTypes;
 
     @Description("How long to wait in milliseconds before attempting to start next service")
     protected long expectedTimeOfStarting = 2000;
@@ -58,6 +61,15 @@ public abstract class AbstractServiceSettings implements IServiceSettings, Seria
 
     public void setStoredMessageTypes(String processedMessageTypes) {
         this.storedMessageTypes = processedMessageTypes;
+    }
+
+    @Override
+    public boolean isInvertStoredMessageTypes() {
+        return invertStoredMessageTypes;
+    }
+
+    public void setInvertStoredMessageTypes(boolean invertStoredMessageTypes) {
+        this.invertStoredMessageTypes = invertStoredMessageTypes;
     }
     
     public long getExpectedTimeOfStarting() {

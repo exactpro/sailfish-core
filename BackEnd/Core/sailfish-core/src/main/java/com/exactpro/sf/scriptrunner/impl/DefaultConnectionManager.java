@@ -505,10 +505,10 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
                 Set<String> processedMessageTypes = loadProcessedMessageTypes(description);
                 if (!processedMessageTypes.isEmpty()) {
-                    serviceHandler = new FilterServiceHandlerWrapper(serviceHandler, processedMessageTypes);
+                    serviceHandler = new FilterServiceHandlerWrapper(serviceHandler, processedMessageTypes, !description.getSettings().isInvertStoredMessageTypes());
                     if (description.getSettings().isPersistMessages()) {
                         serviceContext = new DefaultServiceContext(serviceContext,
-                                new FilterMessageStorageWrapper(serviceContext.getMessageStorage(), processedMessageTypes), storage);
+                                new FilterMessageStorageWrapper(serviceContext.getMessageStorage(), processedMessageTypes, !description.getSettings().isInvertStoredMessageTypes()), storage);
                     }
                 }
                 if (!description.getSettings().isPersistMessages()) {
