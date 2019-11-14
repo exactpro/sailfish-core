@@ -73,37 +73,19 @@ export function initLiveUpdateEventSource(store: Store<AppState, StateAction>, s
         dispatch(updateLiveMessages(updatedMessages));
     }
 
-    service.setOnServiceStop = () => {
-        const selected = store.getState().selected,
-            liveTestCaseHash = selected.live.testCase.hash,
-            selectedTestCaseHash = selected.testCase && selected.testCase.hash, 
-            isLive = liveTestCaseHash != null,
-            isLiveTestCaseSelected = isLive && selectedTestCaseHash == liveTestCaseHash;
-
-        // Same as service.onTestCase, but there is no more running testcases 
-        // and we just reload report and current test case.
+    service.setOnFetchError = () => {
         fetchReport()
-            .then(async report => {
-                let testCase: TestCase = null;
+            .then(report => {
+                // root.js doesn't exist and report in no more running
+                if (report.finishTime !== null) {
+                    service.stop();                    
+                } 
 
-                if (isLiveTestCaseSelected) {
-                    const { jsonpFileName } = report.metadata
-                        .find(metadata => metadata.hash === selected.testCase.hash);
-                    
-                    testCase = await fetchTestCase(jsonpFileName);
-                }
-                
-                batch(() => {
+                // else - root.js doesn't exist, but report still running - 
+                // we dont't need to stop live update service
+                if (JSON.stringify(report) !== JSON.stringify(store.getState().report)) {
                     dispatch(setReport(report));
-
-                    if (testCase) {
-                        dispatch(setTestCase(testCase));
-                    }
-                })
-            })
-            .catch(err => {
-                console.error('Unable to fetch report after live update.')
-                console.error(err);
+                }
             });
     }
 }

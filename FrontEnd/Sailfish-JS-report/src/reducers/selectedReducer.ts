@@ -28,13 +28,6 @@ import { liveUpdateReducer } from './liveUpdateReduceer';
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
 
-        case StateActionTypes.SET_REPORT: {
-            return {
-                ...state,
-                testCase: initialSelectedState.testCase
-            }
-        }
-
         case StateActionTypes.SET_TEST_CASE: {
             const messagesIds = stateAction.testCase.messages.map(message => message.id),
                 actions = stateAction.testCase.actions.map(action => removeNonexistingRelatedMessages(action, messagesIds));

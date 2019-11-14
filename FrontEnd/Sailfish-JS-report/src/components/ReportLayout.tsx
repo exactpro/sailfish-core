@@ -67,7 +67,8 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         const filtredMetadata = report.metadata.filter(isTestCaseMetadata),
             knownBugsPresent = filtredMetadata.some(item => item.bugs != null && item.bugs.length > 0),
             knownBugsClass = showKnownBugs ? "active" : "enabled",
-            failedTcTitleClass = createBemElement('report', 'title', 'failed', failedTestCasesEnabled ? null : 'disabled');
+            failedTcTitleClass = createBemElement('report', 'title', 'failed', failedTestCasesEnabled ? null : 'disabled'),
+            isLive = report.finishTime == null;
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -90,6 +91,12 @@ export class ReportLayoutBase extends React.Component<Props, State> {
         return (
             <div className="report">
                 <div className="report__header   report-header">
+                    {
+                        isLive ? 
+                            <div className="report-header__live-loader"
+                                title="Report executing in progress"/> : 
+                            null
+                    }
                     <div className="report-header__title">{this.props.report.name}</div>
                     <a className="report-header__old-report-link" href={OLD_REPORT_PATH}>
                         <p>Old Version Report</p>

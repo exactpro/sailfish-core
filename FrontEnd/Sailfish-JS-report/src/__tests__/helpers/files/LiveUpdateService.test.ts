@@ -24,9 +24,9 @@ type Writable<T> = {
 }
 
 const fetcherModule = Fetcher as Writable<typeof Fetcher>,
-    successInitWatchFileMock = jest.fn<ReturnType<typeof Fetcher.watchFile>, Parameters<typeof Fetcher.watchFile>>(async () => true),
-    failedInitWatchFileMock = jest.fn<ReturnType<typeof Fetcher.watchFile>, Parameters<typeof Fetcher.watchFile>>(async () => false),
-    
+    successInitWatchFileMock = jest.fn<ReturnType<typeof Fetcher.watchFile>, Parameters<typeof Fetcher.watchFile>>(() => null),
+    failedInitWatchFileMock = jest.fn<ReturnType<typeof Fetcher.watchFile>, Parameters<typeof Fetcher.watchFile>>(() => null),
+
     mocks = [successInitWatchFileMock, failedInitWatchFileMock];
 
 const ROOT_JSONP_PATH = 'loadLiveReport',
@@ -51,34 +51,11 @@ describe('LiveUpdateService tests', () => {
         JSONP_PATHS.forEach(path => delete window[path]);
         mocks.forEach(mock => mock.mockClear());
     })
-    
-    test('init() success', async () => {
-        fetcherModule.watchFile = successInitWatchFileMock;
 
-        const service = new LiveUpdateService();
-
-        const result = await service.init();
-
-        expect(result).toBe(true);
-        expect(successInitWatchFileMock.mock.calls.length).toBe(1);``
-    })
-    
-    test('init() failed', async () => {
-        fetcherModule.watchFile = failedInitWatchFileMock;
-
-        const service = new LiveUpdateService();
-
-        const result = await service.init();
-
-        expect(result).toBe(false);
-        expect(failedInitWatchFileMock.mock.calls.length).toBe(1);
-    })
-    
     test('recieve TestCase update', async () => {
         fetcherModule.watchFile = successInitWatchFileMock;
 
         const service = new LiveUpdateService(),
-            result  = await service.init(),
             updateTestCaseHandler = jest.fn(),
             fileUpdate = {
                 ...testCase,
@@ -86,7 +63,8 @@ describe('LiveUpdateService tests', () => {
                 dataFiles: {}
             };
 
-        expect(result).toBe(true);
+        service.start();
+
         expect(successInitWatchFileMock.mock.calls.length).toBe(1);
 
         const testCaseCB = successInitWatchFileMock.mock.calls[0][3];
@@ -101,7 +79,7 @@ describe('LiveUpdateService tests', () => {
     test('update fetching', async () => {
         fetcherModule.watchFile = successInitWatchFileMock;
 
-        const fetchUpdateMock = jest.fn(async () => ({ 
+        const fetchUpdateMock = jest.fn(async () => ({
             [ACTION_JSONP_PATH]: [action],
             [MESSAGE_JSONP_PATH]: [message]
         }));
@@ -120,7 +98,7 @@ describe('LiveUpdateService tests', () => {
         service.setOnActionUpdate = onActionMock;
         service.setOnMessageUpdate = onMessageMock;
 
-        await service.init();
+        service.start();
 
         const rootStateInit = successInitWatchFileMock.mock.calls[0][3];
         rootStateInit({ type: 'data', data: fileUpdate });
@@ -129,7 +107,6 @@ describe('LiveUpdateService tests', () => {
         expect(fetchUpdateMock.mock.calls[0]).toEqual([
             'reportData/live/test.js', 
             [ACTION_JSONP_PATH, MESSAGE_JSONP_PATH], 
-            Number.MIN_SAFE_INTEGER, 
             1
         ]);
 
@@ -141,7 +118,7 @@ describe('LiveUpdateService tests', () => {
             expect(onMessageMock.mock.calls[0][0]).toEqual([message]);
         });
     })
-  
-    
+
+
 })
 

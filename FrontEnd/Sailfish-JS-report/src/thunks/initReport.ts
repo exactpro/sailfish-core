@@ -34,7 +34,9 @@ export function initReport(): ThunkAction<void, AppState, ThunkExtraArgument, St
                     dispatch(setIsLoading(false));
                 });
 
-                if (!await liveUpdateService.init()) {
+                if (report.finishTime == null) {
+                    liveUpdateService.start();
+                } else {
                     console.log('Live updates disabled.');
                 }
             })

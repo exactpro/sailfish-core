@@ -80,8 +80,8 @@ export async function fetchJsonp(path: string, jsonpPath: string): Promise<unkno
 export async function fetchUpdate<T extends {}>(
     filePath: string, 
     jsonpPaths: string[], 
-    prevIndex: number, 
-    currentIndex: number
+    currentIndex: number,
+    prevIndex: number = Number.MIN_SAFE_INTEGER
 ) {
     return new Promise<T>((resolve, reject) => {
         const loader = document.createElement('script'),
@@ -115,6 +115,7 @@ export async function fetchUpdate<T extends {}>(
         }
 
         loader.onerror = (err) => {
+            document.body.removeChild(loader);
             reject(err);
         }
 
@@ -126,7 +127,7 @@ export type FileWatchEvent = {
     type: 'data',
     data: unknown
 } | {
-    type: 'stop',
+    type: 'error',
     err?: Error
 }
 
@@ -140,28 +141,15 @@ export type FileWatchCallback = (e: FileWatchEvent) => unknown;
  * @param interval interval for check updates of the file.
  * @param cb Watch callback - it recieves event of 2 types: 
  *  data - fires each time when file was loaded,
- *  stop - fires when something goes wrong, e.g. file was not found.
+ *  error - fires when something goes wrong, e.g. file was not found.
+ * @returns interval id.
  */
 export function watchFile(filePath: string, jsonpPath: string, interval: number, cb: FileWatchCallback) {
-    return new Promise<boolean>(resolve => {
+    return setInterval(() => {
 
         fetchJsonp(filePath, jsonpPath)
-            .then(data => {
-                cb({ type: 'data', data });
-                resolve(true);
-            })
-            .catch(err => {
-                console.error(err);
-                resolve(false);
-            });
+            .then(data => cb({ type: 'data', data }))
+            .catch(err => cb({ type: 'error', err }));
 
-        const intervalId = setInterval(() => {
-            fetchJsonp(filePath, jsonpPath)
-                .then(data => cb({ type: 'data', data }))
-                .catch(err => {
-                    window.clearInterval(intervalId);
-                    cb({ type: 'stop', err });
-                });
-        }, interval);
-    });
+    }, interval);
 }

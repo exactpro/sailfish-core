@@ -152,6 +152,11 @@
         font-weight: bold;
         text-decoration: none;
     }
+
+    &__live-loader {
+        @include spinner(3px,20px, 2s);
+        margin-right: 5px;
+    }
 }
 
 .report-summary {

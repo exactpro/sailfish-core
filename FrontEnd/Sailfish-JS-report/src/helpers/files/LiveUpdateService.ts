@@ -30,9 +30,11 @@ const ROOT_JSONP_PATH = 'loadLiveReport',
     ACTION_JSONP_PATH = 'loadAction',
     MESSAGE_JSONP_PATH = 'loadMessage';
 
-const ROOT_WATCH_INTERVAL = 1000;
+const ROOT_WATCH_INTERVAL = 1500;
 
-type DataFiles = Record<string, number>;
+type DataFiles = {
+    [key: string]: number
+};
 
 interface RootState extends LiveTestCase {
     dataFiles: DataFiles;
@@ -50,10 +52,11 @@ type TestCaseUpdate = (tc: LiveTestCase) => unknown;
 
 export default class LiveUpdateService {
 
+    private rootFileWatchIntervalId = null
     private onActionUpdate: ActionUpdate = STUB_CALLBACK;
     private onMessageUpdate: MessageUpdate = STUB_CALLBACK;
     private onTestCaseUpdate: TestCaseUpdate = STUB_CALLBACK;
-    private onStop: () => void = STUB_CALLBACK;
+    private onError: (err: Error) => void = STUB_CALLBACK;
     private rootState: RootState = {
         startTime: '',
         name: '',
@@ -66,8 +69,17 @@ export default class LiveUpdateService {
 
     constructor(private rootFilePath: string = LIVE_UPDATE_ROOT_PATH) { }
 
-    public async init() {
-        return await watchFile(this.rootFilePath, ROOT_JSONP_PATH, ROOT_WATCH_INTERVAL, this.onRootUpdate);
+    public start() {
+        this.rootFileWatchIntervalId = watchFile(
+            this.rootFilePath, 
+            ROOT_JSONP_PATH, 
+            ROOT_WATCH_INTERVAL, 
+            this.onRootUpdate
+        );
+    }
+        
+    public stop() {
+        clearInterval(this.rootFileWatchIntervalId);
     }
 
     public set setOnActionUpdate(cb: ActionUpdate) {
@@ -82,8 +94,8 @@ export default class LiveUpdateService {
         this.onTestCaseUpdate = cb;
     }
 
-    public set setOnServiceStop(cb: () => void) {
-        this.onStop = cb;
+    public set setOnFetchError(cb: () => void) {
+        this.onError = cb;
     }
 
     private onRootUpdate: FileWatchCallback = e => {
@@ -93,8 +105,8 @@ export default class LiveUpdateService {
                 break;
             }
 
-            case 'stop': {
-                this.onStop();
+            case 'error': {
+                this.onError(e.err);
                 console.error(e.err);
                 break;
             }
@@ -117,20 +129,19 @@ export default class LiveUpdateService {
         if (lastUpdate !== this.rootState.lastUpdate) {
             if (tcInfo.hash !== this.rootState.hash) {
                 this.onTestCaseUpdate(tcInfo);
-            }
-
-            if (!isEqual(dataFiles, this.rootState.dataFiles)) {
-                this.updateWatchedFiles(state, this.rootState);
+                this.fetchFullUpdateData(state.dataFiles)
+            } else if (!isEqual(dataFiles, this.rootState.dataFiles)) {
+                this.fetchDiffUpdateData(state.dataFiles, this.rootState.dataFiles);
             }
         }
 
         this.rootState = state;
     }
 
-    private async updateWatchedFiles(nextState: RootState, prevState: RootState) {        
-        for (let [filePath, index] of Object.entries(nextState.dataFiles)) {
-            const prevIndex = typeof prevState.dataFiles[filePath] === 'number' ?
-                prevState.dataFiles[filePath] :
+    private async fetchDiffUpdateData(nextFiles: DataFiles, prevFiles: DataFiles) {        
+        for (let [filePath, index] of Object.entries(nextFiles)) {
+            const prevIndex = typeof prevFiles[filePath] === 'number' ?
+                prevFiles[filePath] :
                 Number.MIN_SAFE_INTEGER;
 
             const fileUpdate = await fetchUpdate<FileUpdate>(
@@ -138,6 +149,18 @@ export default class LiveUpdateService {
                 [ACTION_JSONP_PATH, MESSAGE_JSONP_PATH],
                 prevIndex,
                 index
+            );
+
+            this.handleFileUpdate(fileUpdate);
+        }
+    }
+
+    private async fetchFullUpdateData(dataFiles: DataFiles) {
+        for (let [filePath, currentIndex] of Object.entries(dataFiles)) {
+            const fileUpdate = await fetchUpdate<FileUpdate>(
+                LIVE_UPDATE_FOLDER_PATH + filePath,
+                [ACTION_JSONP_PATH, MESSAGE_JSONP_PATH],
+                currentIndex
             );
 
             this.handleFileUpdate(fileUpdate);
@@ -164,7 +187,7 @@ export default class LiveUpdateService {
                 }
 
                 default: {
-                    console.warn('Update with unknown jsonp path has been received.');
+                    console.warn(`Update with unknown jsonp path has been received (${path}).`);
                     break;
                 }
             }
