@@ -18,13 +18,15 @@ import Action, { ActionNode, ActionNodeType } from "../../models/Action";
 import TestCase from "../../models/TestCase";
 import Message from "../../models/Message";
 import { StatusType } from "../../models/Status";
+import ActionParameter from "../../models/ActionParameter";
 
-export function createAction(id: number = 0, subNodes: ActionNode[] = [], name = ''): Action {
+export function createAction(id: number = 0, subNodes: ActionNode[] = [], name = '', parameters: ActionParameter[] = []): Action {
     return {
         actionNodeType: ActionNodeType.ACTION,
         name,
         id,
-        subNodes
+        subNodes,
+        parameters
     } as Action;
 }
 

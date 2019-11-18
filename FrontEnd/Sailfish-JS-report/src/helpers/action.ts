@@ -19,14 +19,14 @@ import Action from '../models/Action';
 import { StatusType } from "../models/Status";
 import { intersection } from "./array";
 
-const ACTION_CHECKPOINT_NAME = "GetCheckPoint";
+const ACTION_CHECKPOINT_NAME = "Checkpoint";
 
 export function getActions(actionNodes: ActionNode[]) : Action[] {
     return actionNodes.filter(isAction);
 }
 
 export function isCheckpoint(action: Action): boolean {
-    return action.name.includes(ACTION_CHECKPOINT_NAME);
+    return action.parameters?.some(param => param.name === ACTION_CHECKPOINT_NAME);
 }
 
 export function getStatusChipDescription(status: StatusType): string {

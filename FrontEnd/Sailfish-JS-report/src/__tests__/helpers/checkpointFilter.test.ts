@@ -30,8 +30,8 @@ describe('[Helpers] checkpointFilter', () => {
     
     test('getCheckpointActions(): flat checkpoint list', () => {
         const firstAction = createAction(1, [], 'test1'),
-            secondCheckpoint = createAction(2, [], '2_GetCheckPoint'),
-            thirdCheckpoint = createAction(3, [], '3_GetCheckPoint'),
+            secondCheckpoint = createAction(2, [], '2_GetCheckPoint', [{ name: 'Checkpoint' }]),
+            thirdCheckpoint = createAction(3, [], '3_GetCheckPoint', [{ name: 'Checkpoint' }]),
             actions = [firstAction, secondCheckpoint, thirdCheckpoint];
 
         const resultCheckpoints = getCheckpointActions(actions);
@@ -42,7 +42,7 @@ describe('[Helpers] checkpointFilter', () => {
     })
     
     test('getCheckpointActions(): checkpoint in tree', () => {
-        const checkpoint = createAction(0, [], 'GetCheckPoint'),
+        const checkpoint = createAction(0, [], 'GetCheckPoint', [{ name: 'Checkpoint' }]),
             secondAction = createAction(2, [checkpoint], 'test'),
             firstAction = createAction(1, [secondAction], 'test'),
             actions = [firstAction];
