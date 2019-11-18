@@ -30,6 +30,7 @@ import StateActionType from '../actions/stateActions';
 import { initLiveUpdateEventSource } from './eventSources/liveUpdate';
 import LiveUpdateService from '../helpers/files/LiveUpdateService';
 import ThunkExtraArgument from '../models/ThunkExtraArgument';
+import initBroserHistoryEventSource from './eventSources/browserHistory';
 
 export function createAppStore() {
     const liveUpdateService = new LiveUpdateService(), 
@@ -52,6 +53,7 @@ export function createAppStore() {
     );
 
     initLiveUpdateEventSource(store, liveUpdateService);
+    initBroserHistoryEventSource(store);
 
     return store;
 }

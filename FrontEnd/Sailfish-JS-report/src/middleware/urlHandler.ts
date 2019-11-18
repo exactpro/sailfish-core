@@ -17,6 +17,7 @@
 import AppState from "../state/models/AppState";
 import StateActionType from "../actions/stateActions";
 import { Middleware } from "redux";
+import StateAction from "../actions/stateActions";
 
 export const TEST_CASE_PARAM_KEY = 'tc',
     ACTION_PARAM_KEY = 'ac',
@@ -25,13 +26,13 @@ export const TEST_CASE_PARAM_KEY = 'tc',
 // we can't use window.location.search because URL can contain another search params
 
 export function getUrlSearchString(url: string) {
-    return url.includes('?') ? 
-        url.substring(url.lastIndexOf('?')) : 
+    return url.includes('?') ?
+        url.substring(url.lastIndexOf('?')) :
         '';
 }
 
 // redux middleware
-export const urlHandler: Middleware<never, AppState> = store =>  next => (action: StateActionType) => {
+export const urlHandler: Middleware<never, AppState> = store => next => (action: StateActionType) => {
 
     const prevState = store.getState(),
         result = next(action),
@@ -42,15 +43,15 @@ export const urlHandler: Middleware<never, AppState> = store =>  next => (action
     return result;
 }
 
-function hadnleStateUpdate(prevState : AppState, nextState : AppState, action: any) {
-    if (prevState.selected.actionsId == nextState.selected.actionsId && 
-        prevState.selected.messagesId == nextState.selected.messagesId && 
+function hadnleStateUpdate(prevState: AppState, nextState: AppState, action: StateAction) {
+    if (prevState.selected.actionsId == nextState.selected.actionsId &&
+        prevState.selected.messagesId == nextState.selected.messagesId &&
         prevState.selected.testCase == nextState.selected.testCase) {
 
         return;
     }
 
-    const searchString = getUrlSearchString(window.location.href), 
+    const searchString = getUrlSearchString(window.location.href),
         searchParams = new URLSearchParams(searchString),
         nextSearchParams = getNextSearchParams(searchParams, prevState, nextState),
         nextUrl = getNextUrl(window.location.href, searchString, nextSearchParams);
@@ -64,7 +65,7 @@ function hadnleStateUpdate(prevState : AppState, nextState : AppState, action: a
 }
 
 // returns new search params, based on state change
-function getNextSearchParams(searchParams : URLSearchParams, prevState : AppState, nextState : AppState) : URLSearchParams {
+function getNextSearchParams(searchParams: URLSearchParams, prevState: AppState, nextState: AppState): URLSearchParams {
     if (prevState.selected.testCase != nextState.selected.testCase) {
         if (nextState.selected.testCase) {
             searchParams.set(TEST_CASE_PARAM_KEY, nextState.selected.testCase.id);
@@ -72,7 +73,7 @@ function getNextSearchParams(searchParams : URLSearchParams, prevState : AppStat
             searchParams.delete(TEST_CASE_PARAM_KEY);
         }
     }
-    
+
     if (prevState.selected.actionsId != nextState.selected.actionsId) {
         if (nextState.selected.actionsId.length > 0) {
             searchParams.set(ACTION_PARAM_KEY, nextState.selected.actionsId.toString());
@@ -82,9 +83,9 @@ function getNextSearchParams(searchParams : URLSearchParams, prevState : AppStat
             searchParams.delete(ACTION_PARAM_KEY);
         }
     }
-    
-     // verification message selection handling
-     if (nextState.selected.actionsId.length == 0 && prevState.selected.messagesId != nextState.selected.messagesId) {
+
+    // verification message selection handling
+    if (nextState.selected.actionsId.length == 0 && prevState.selected.messagesId != nextState.selected.messagesId) {
         if (nextState.selected.messagesId && nextState.selected.messagesId.length != 0) {
             searchParams.set(MESSAGE_PARAM_KEY, nextState.selected.messagesId[0].toString());
         } else {
@@ -95,15 +96,15 @@ function getNextSearchParams(searchParams : URLSearchParams, prevState : AppStat
     return searchParams;
 }
 
-function getNextUrl(prevUrl : string, prevSearchString : string, nextSearchParams : URLSearchParams) : string {
-    
+function getNextUrl(prevUrl: string, prevSearchString: string, nextSearchParams: URLSearchParams): string {
+
     if (prevSearchString && prevSearchString != '?') {
         return prevUrl.replace(prevSearchString, '?' + nextSearchParams.toString());
     } else {
         // search params not found or empty
 
         return [
-            prevUrl, 
+            prevUrl,
             // optional '?' - we need this  not to create two '?' symbols
             prevUrl[prevUrl.length - 1] != '?' ? '?' : null,
             nextSearchParams.toString()

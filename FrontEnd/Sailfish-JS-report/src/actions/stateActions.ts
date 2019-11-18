@@ -81,4 +81,8 @@ type InferValueTypes<T> = T extends { [key: string]: infer U }
 // ReturnType is used here to extract all function's return types from every action creator
 type StateAction = ReturnType<InferValueTypes<typeof actions>>;
 
+export function isStateAction(action: any): action is StateAction {
+    return action && typeof action.type === 'string' && action.type in StateActionTypes;
+}
+
 export default StateAction;
