@@ -21,7 +21,7 @@ interface CustomTableProps {
     content: any[];
 }
 
-export const CustomTable = ({content}: CustomTableProps) => {
+export function CustomTable({content}: CustomTableProps) {
 
     if (!content || content.length < 1) {
         return null;

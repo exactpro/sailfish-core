@@ -27,16 +27,18 @@ interface UserTableCardProps {
     onExpand: () => void;
 }
 
-const UserTableCard = ({ parent, table, onExpand }: UserTableCardProps) => (
-    <div className="ac-body__table">
-        <RecoverableExpandablePanel
-            stateKey={keyForUserTable(table, parent)}
-            onExpand={onExpand}>
-            <div className="ac-body__item-title">{table.name || "Custom table"}</div>
-            <CustomTable
-                content={table.content} />
-        </RecoverableExpandablePanel>
-    </div>
-)
+function UserTableCard({ parent, table, onExpand }: UserTableCardProps) {
+    return (
+        <div className="ac-body__table">
+            <RecoverableExpandablePanel
+                stateKey={keyForUserTable(table, parent)}
+                onExpand={onExpand}>
+                <div className="ac-body__item-title">{table.name || "Custom table"}</div>
+                <CustomTable
+                    content={table.content} />
+            </RecoverableExpandablePanel>
+        </div>
+    )
+}
 
 export default UserTableCard;
