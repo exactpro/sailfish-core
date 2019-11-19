@@ -83,12 +83,12 @@ if not exist "%POSTGRESQL%\psql.exe" (
     exit /b 1
 )
 
-if "%DATABASE%" eq "" (
+if "%DATABASE%" equ "" (
     echo Database name has not been set
     exit /b 1
 )
 
-if "%BACKUP_FILE%" eq "" (
+if "%BACKUP_FILE%" equ "" (
     echo Backup file has not been set
     exit /b 1
 )
@@ -103,12 +103,12 @@ goto :EOF
 
 :restoreFromBackup
     call :createDatabase %2 %3
-    
+
     if /I "!errorlevel!" NEQ "0" (
         echo Can't recreate database %DATABASE%
         exit /b !errorlevel!
     )
-    "%POSTGRESQL%\psql" "postgresql://%2:%3@%HOST%:%PORT%/%DATABASE%" --file=%1
+    "%POSTGRESQL%\psql" --file=%1 "postgresql://%2:%3@%HOST%:%PORT%/%DATABASE%"
     exit /b !errorlevel!
 
 :createDatabase
@@ -117,7 +117,7 @@ goto :EOF
     echo CREATE DATABASE %DATABASE% WITH ENCODING='%CHAR%' OWNER=%USER%;>> %QUERY_FILE%
     echo GRANT ALL PRIVILEGES ON DATABASE %DATABASE% TO %USER% WITH GRANT OPTION;>> %QUERY_FILE%
 
-    "%POSTGRESQL%\psql" "postgresql://%1:%2@%HOST%:%PORT%" --file=%QUERY_FILE%
+    "%POSTGRESQL%\psql" --file=%QUERY_FILE% "postgresql://%1:%2@%HOST%:%PORT%"
     exit /b !errorlevel!
 
 :EOF

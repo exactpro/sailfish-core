@@ -102,7 +102,7 @@ if /I "!errorlevel!" NEQ "0" (
 goto :EFO
 
 :checkDatabaseAvailability
-    "%POSTGRESQL%\psql" "postgresql://%1:%2@%HOST%:%PORT%/%DATABASE%" --file=%TEST_QUERY_FILE%
+    "%POSTGRESQL%\psql" --file=%TEST_QUERY_FILE% "postgresql://%1:%2@%HOST%:%PORT%/%DATABASE%"
     exit /b !errorlevel!
 
 :createDatabase
@@ -113,7 +113,7 @@ goto :EFO
     echo CREATE DATABASE %DATABASE% WITH ENCODING='%CHAR%' OWNER=%USER%;>> %QUERY_FILE%
     echo GRANT ALL PRIVILEGES ON DATABASE %DATABASE% TO %USER% WITH GRANT OPTION;>> %QUERY_FILE%
 
-    "%POSTGRESQL%\psql" "postgresql://%SUPERUSER%:%SUPERPASSWORD%@%HOST%:%PORT%" --file=%QUERY_FILE%
+    "%POSTGRESQL%\psql" --file=%QUERY_FILE% "postgresql://%SUPERUSER%:%SUPERPASSWORD%@%HOST%:%PORT%"
     exit /b !errorlevel!
 
 :EFO

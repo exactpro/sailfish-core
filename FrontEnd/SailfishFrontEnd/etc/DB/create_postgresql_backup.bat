@@ -81,7 +81,7 @@ if not exist "%POSTGRESQL%\pg_dump.exe" (
     exit /b 1
 )
 
-if "%DATABASE%" eq "" (
+if "%DATABASE%" equ "" (
     echo Database name has not been set
     exit /b 1
 )
@@ -94,7 +94,7 @@ if /I "!errorlevel!" NEQ "0" (
 goto :EOF
 
 :createBackup
-    "%POSTGRESQL%\pg_dump" "postgresql://%1:%2@%HOST%:%PORT%/%DATABASE%" --file=%BACKUP_FILE%
+    "%POSTGRESQL%\pg_dump" --file=%BACKUP_FILE% "postgresql://%1:%2@%HOST%:%PORT%/%DATABASE%"
     exit /b !errorlevel!
 
 :EOF
