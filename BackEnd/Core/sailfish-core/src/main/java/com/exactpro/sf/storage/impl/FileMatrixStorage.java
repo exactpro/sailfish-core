@@ -26,6 +26,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
@@ -34,6 +36,8 @@ import com.exactpro.sf.storage.FileBackedList;
 import com.exactpro.sf.storage.IMatrix;
 
 public class FileMatrixStorage extends AbstractMatrixStorage {
+    private static final Logger logger = LoggerFactory.getLogger(FileMatrixStorage.class);
+
     private static final String MATRICES_DIR = "matrices";
 
     private final List<DefaultMatrix> matrices;

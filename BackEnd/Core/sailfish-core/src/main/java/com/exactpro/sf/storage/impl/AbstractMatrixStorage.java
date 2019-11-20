@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -42,9 +41,12 @@ import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.storage.IMatrixStorage;
 import com.exactpro.sf.storage.MatrixUpdateListener;
 import com.exactpro.sf.storage.StorageException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public abstract class AbstractMatrixStorage implements IMatrixStorage {
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(AbstractMatrixStorage.class);
+
+    protected static final String FILE_NAME_MATRIX_METADATA = "matrix-metadata.json";
 
     protected final IWorkspaceDispatcher dispatcher;
     protected final List<MatrixUpdateListener> listeners;
@@ -132,7 +134,7 @@ public abstract class AbstractMatrixStorage implements IMatrixStorage {
         try {
             File matrixFolder = dispatcher.getFile(FolderType.MATRIX, storedMatrix.getFilePath()).getParentFile();
             String matrixDir = matrixFolder.getName();
-            File matrixMetadata = dispatcher.createFile(FolderType.MATRIX, true, matrixDir, "matrix-metadata.json");
+            File matrixMetadata = dispatcher.createFile(FolderType.MATRIX, true, matrixDir, FILE_NAME_MATRIX_METADATA);
             OBJECT_MAPPER.writeValue(matrixMetadata, storedMatrix);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

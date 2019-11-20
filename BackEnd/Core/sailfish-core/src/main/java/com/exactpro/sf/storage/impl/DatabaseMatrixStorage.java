@@ -15,15 +15,24 @@
  ******************************************************************************/
 package com.exactpro.sf.storage.impl;
 
-import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
-import com.exactpro.sf.configuration.suri.SailfishURI;
-import com.exactpro.sf.configuration.suri.SailfishURIException;
-import com.exactpro.sf.configuration.workspace.FolderType;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
-import com.exactpro.sf.storage.DefaultMatrix;
-import com.exactpro.sf.storage.IMatrix;
-import com.exactpro.sf.storage.StorageException;
-import com.exactpro.sf.storage.entities.StoredMatrix;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -31,20 +40,24 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.configuration.suri.SailfishURIException;
+import com.exactpro.sf.configuration.workspace.FolderType;
+import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
+import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
+import com.exactpro.sf.storage.DefaultMatrix;
+import com.exactpro.sf.storage.IMatrix;
+import com.exactpro.sf.storage.StorageException;
+import com.exactpro.sf.storage.entities.StoredMatrix;
 
 public class DatabaseMatrixStorage extends AbstractMatrixStorage {
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseMatrixStorage.class);
+
 	private final SessionFactory sessionFactory;
 
 	public DatabaseMatrixStorage(SessionFactory sessionFactory, IWorkspaceDispatcher workspaceDispatcher) {
@@ -257,95 +270,121 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
     @SuppressWarnings("unchecked")
     @Override
 	public List<IMatrix> getMatrixList() {
+	    try {
+            Session session = sessionFactory.openSession();
+            try (AutoCloseable sessionCloseable = session::close) {
+                Transaction transaction = session.beginTransaction();
+                try {
+                    Map<String, StoredMatrix> storedMatrixMap = loadStoredMatrices(session);
+                    List<StoredMatrix> restoredMatrixList = restoreLostMatrices(session, storedMatrixMap.keySet());
 
-		Session session = null;
-		Criteria query = null;
-		List<StoredMatrix> list  = null;
+                    transaction.commit();
+                    notifyListeners();
 
-		try {
-
-			session = sessionFactory.openSession();
-			query = session.createCriteria(StoredMatrix.class);
-			query.addOrder(Order.desc("id"));
-			list = query.list();
-
-		} catch (HibernateException e) {
-
-			logger.error(e.getMessage(), e);
-			throw new StorageException("Can't load matrix descriptor from DB", e);
-
-		} finally {
-			if (session != null) {
-				session.close();
-			}
-		}
-
-        try {
-            Set<String> matrices = dispatcher.listFiles(File::isFile, FolderType.MATRIX, true, ".").stream().filter(it -> {
-                MatrixFileTypes fileType = MatrixFileTypes.detectFileType(it);
-                return fileType.isSupported();
-            }).collect(Collectors.toSet());
-
-            for(StoredMatrix storedMatrix : list) {
-                matrices.remove(storedMatrix.getFilePath());
-            }
-
-            Transaction tx = null;
-
-            try {
-
-                session = sessionFactory.openSession();
-                tx = session.beginTransaction();
-
-                for (String matrix : matrices) {
-                    StoredMatrix storedMatrix = new StoredMatrix();
-                    File matrixFile = dispatcher.getFile(FolderType.MATRIX, matrix);
-                    storedMatrix.setFilePath(matrix);
-                    BasicFileAttributes basicFileAttributes = Files.readAttributes(matrixFile.toPath(), BasicFileAttributes.class);
-                    storedMatrix.setDate(Date.from(basicFileAttributes.creationTime().toInstant()));
-                    storedMatrix.setName(matrixFile.getName());
-
-                    session.save(storedMatrix);
-                    list.add(storedMatrix);
+                    return Stream.concat(storedMatrixMap.values().stream(), restoredMatrixList.stream())
+                            .sorted((matrixA, matrixB) -> matrixB.getDate().compareTo(matrixA.getDate()))
+                            .map(DatabaseMatrixStorage::convertFromStoredMatrix)
+                            .collect(Collectors.toList());
+                } catch (HibernateException e) {
+                    transaction.rollback();
+                    throw e;
                 }
-
-                tx.commit();
-
             } catch (HibernateException e) {
-
-                if (tx != null) {
-                    tx.rollback();
-                }
-
                 logger.error(e.getMessage(), e);
-                throw new StorageException("Can't save matrix descriptor in DB", e);
-
-            } finally {
-
-                if (session != null) {
-                    session.close();
-                }
-
+                throw new StorageException("Matrices can't be loaded from database", e);
             }
-
-            notifyListeners();
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+        } catch (StorageException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StorageException("Loading matrices failed", e);
         }
-
-        List<IMatrix> result  = new ArrayList<>();
-		for (StoredMatrix storedMatrix : list) {
-		    result.add(convertFromStoredMatrix(storedMatrix));
-		}
-
-		return result;
 	}
 
-	private StoredMatrix convertToStoredMatrix(IMatrix matrix, Session session) {
+    /**
+     *
+     * @param session Hibernate session
+     * @param storedMatrixPaths Path to stored matrices
+     * @return
+     * @throws FileNotFoundException
+     */
+    @NotNull
+    private List<StoredMatrix> restoreLostMatrices(Session session, Set<String> storedMatrixPaths) {
+	    try {
+            List<StoredMatrix> restoredMatrixList = dispatcher.listFiles(File::isFile, FolderType.MATRIX, true, ".").stream()
+                    .filter(matrixPath -> isValidMatrixPath(matrixPath) && !storedMatrixPaths.contains(matrixPath))
+                    .map(this::tryCreateStoredMatrix)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            for (StoredMatrix storedMatrix : restoredMatrixList) {
+                try {
+                    session.save(storedMatrix);
+                } catch (HibernateException e) {
+                    logger.error("Skipped matrix '{}' can't be restored", storedMatrix.getFilePath(), e);
+                }
+            }
+            return restoredMatrixList;
+        } catch (FileNotFoundException | WorkspaceSecurityException e) {
+	        logger.error("Lost matrix can't be restored from Sailfish workspace", e);
+        }
+	    return Collections.emptyList();
+    }
+
+    /**
+     * Loads stored matrices from database.
+     * Inspects passed map to contains rubbish matrices. Removes them from passed map and tries to remove from database.
+     * @param session Hibernate session
+     * @return Map matrix paths to {@link StoredMatrix} from database
+     */
+    private Map<String, StoredMatrix> loadStoredMatrices(Session session) {
+        Criteria query = session.createCriteria(StoredMatrix.class);
+
+        Map<String, StoredMatrix> storedMatrixMap = ((List<StoredMatrix>)query.list()).stream()
+                .collect(Collectors.toMap(StoredMatrix::getFilePath, Function.identity()));
+
+        for(Iterator<StoredMatrix> iterator = storedMatrixMap.values().iterator(); iterator.hasNext(); ) {
+            StoredMatrix storedMatrix = iterator.next();
+
+            if (!isValidMatrixPath(storedMatrix.getFilePath())) {
+                iterator.remove();
+
+                try {
+                    session.delete(storedMatrix);
+                } catch (HibernateException e) {
+                    logger.error("Rubbish matrix '{}' can't be deleted from database", storedMatrix.getFilePath(), e);
+                }
+            }
+        }
+
+        return storedMatrixMap;
+    }
+
+    private StoredMatrix tryCreateStoredMatrix(String matrixPath) {
+        try {
+            File matrixFile = dispatcher.getFile(FolderType.MATRIX, matrixPath);
+            BasicFileAttributes basicFileAttributes = Files.readAttributes(matrixFile.toPath(), BasicFileAttributes.class);
+
+            StoredMatrix storedMatrix = new StoredMatrix();
+            storedMatrix.setFilePath(matrixPath);
+            storedMatrix.setDate(Date.from(basicFileAttributes.creationTime().toInstant()));
+            storedMatrix.setName(matrixFile.getName());
+            return storedMatrix;
+        } catch (IOException e) {
+            logger.error("Skipped matrix '{}' can't be identified", matrixPath, e);
+        }
+        return null;
+    }
+
+    private static boolean isValidMatrixPath(String matrixPath) {
+        return !FILE_NAME_MATRIX_METADATA.equals(FilenameUtils.getName(matrixPath))
+                && MatrixFileTypes.detectFileType(matrixPath).isSupported();
+    }
+
+	private static StoredMatrix convertToStoredMatrix(IMatrix matrix, Session session) {
         return matrix.getId() == null ? new StoredMatrix() : (StoredMatrix)session.load(StoredMatrix.class, matrix.getId());
     }
 
-	private IMatrix convertFromStoredMatrix(StoredMatrix storedMatrix) {
+	private static IMatrix convertFromStoredMatrix(StoredMatrix storedMatrix) {
 		try {
             return new DefaultMatrix(storedMatrix.getId(), storedMatrix.getName(), storedMatrix.getDescription(),
                     storedMatrix.getCreator(), SailfishURI.parse(storedMatrix.getLanguage()), storedMatrix.getFilePath(),
