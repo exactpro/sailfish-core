@@ -16,6 +16,7 @@
 
 package com.exactpro.sf.util;
 
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.services.*;
@@ -35,20 +36,19 @@ public class TestStoreMessageToHandler extends AbstractTest {
     private static Set<String> processedMessageTypes;
     private static IMessage message;
     private static final String MESSAGE_NAME = "NEW_ORDER_SINGLE";
-    private static ISession session;
+    private static final ISession session = new FakeSession(new FakeClientService());
     private static CollectorServiceHandler serviceHandler;
     private static ServiceHandlerRoute serviceHandlerRoute;
 
     @BeforeClass
     public static void beforeClassFunction() {
-        session = new FakeSession(new FakeClientService());
-        message = new MapMessage("FIX_4_4", MESSAGE_NAME);
+        message = DefaultMessageFactory.getFactory().createMessage(MESSAGE_NAME, "FIX_4_4");
         message.addField("Max1", "");
         message.addField("Max2", "");
         message.addField("Max3", "");
         processedMessageTypes = new HashSet<>();
         processedMessageTypes.add(MESSAGE_NAME);
-        serviceHandlerRoute = ServiceHandlerRoute.get(true, false);
+        serviceHandlerRoute = ServiceHandlerRoute.FROM_APP;
         serviceHandler = Mockito.mock(CollectorServiceHandler.class);
     }
 

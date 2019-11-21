@@ -16,6 +16,7 @@
 
 package com.exactpro.sf.storage.impl;
 
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.storage.IMessageStorage;
@@ -38,7 +39,7 @@ public class TestStoreMessageToStorage extends AbstractTest {
 
     @BeforeClass
     public static void beforeClassFunction() {
-        message = new MapMessage("FIX_4_4", MESSAGE_NAME);
+        message = DefaultMessageFactory.getFactory().createMessage( MESSAGE_NAME, "FIX_4_4");
         message.addField("Max1", "");
         message.addField("Max2", "");
         message.addField("Max3", "");
