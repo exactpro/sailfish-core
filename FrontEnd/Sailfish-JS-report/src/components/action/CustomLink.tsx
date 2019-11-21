@@ -14,30 +14,23 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "./common/vars";
+import * as React from 'react';
+import Link from '../../models/Link';
 
-.expandable-panel {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    height: auto;
-    padding-left: 10px;
+interface Props {
+    action: Link;
+}
 
-    &__header {
-        display: flex;
-        flex-direction: row;
-        justify-content: flex-start;
-        align-items: center;
-        min-height: 40px;
-    }
+export default function CustomLink({ action }: Props) {
+    const { link } = action;
 
-    &__icon {
-        @include icon(url(../../resources/icons/expand-on.svg), 15px, 16px);
-        margin-right: 15px;
-        cursor: pointer;
-
-        &.hidden {
-            background-image: url(../../resources/icons/expand-off.svg);
-        }
-    }
+    return (
+        <div className="action-card">
+            <div className="action-card__link">
+                <a href={link}>
+                    Link to {link}
+                </a>
+            </div>
+        </div>
+    )
 }

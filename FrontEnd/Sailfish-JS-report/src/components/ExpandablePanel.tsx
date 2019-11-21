@@ -23,30 +23,32 @@ import AppState from '../state/models/AppState';
 import { stopPropagationHandler } from '../helpers/react';
 
 interface PanelProps {
-    header?: React.ReactNode;
-    body?: React.ReactNode;
     isExpanded?: boolean;
     onExpand?: (isExpanded: boolean) => any;
-    children: React.ReactNode[];
+    children: [React.ReactNode | ((onExpand: () => void) => React.ReactNode), React.ReactNode];
 }
 
-export const ExpandablePanel = ({ header, body, children, isExpanded, onExpand }: PanelProps) => {
+export const ExpandablePanel = ({ children, isExpanded, onExpand }: PanelProps) => {
     const iconClass = createSelector(
         "expandable-panel__icon", 
-        isExpanded ? "expanded" : "hidden"
+        !isExpanded ? "hidden" : null
     );
+
+    const [header, body] = children;
 
     return (
         <div className="expandable-panel">
             <div className="expandable-panel__header">
                 <div className={iconClass} 
                     onClick={stopPropagationHandler(onExpand, !isExpanded)}/>
-                { header || children[0] }
+                { 
+                    typeof header == 'function' ? 
+                        header(() => onExpand(!isExpanded)) :
+                        header
+                }
             </div>
             {
-                isExpanded ? 
-                    body || children.slice(1)
-                    : null
+                isExpanded ? body : null
             }
         </div>
     )

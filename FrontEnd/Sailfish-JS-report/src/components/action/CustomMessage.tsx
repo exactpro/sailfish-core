@@ -34,6 +34,10 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
 
     const { message, color, style, level, exception } = userMessage;
 
+    if (!message && !exception) {
+        return null;
+    }
+
     // italic style value - only for fontStyle css property
     // bold style value - only for fontWeight css property
     const messageStyle: React.CSSProperties = {

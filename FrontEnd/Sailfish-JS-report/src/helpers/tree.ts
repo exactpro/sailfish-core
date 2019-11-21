@@ -38,7 +38,7 @@ export function createExpandTree(action: Action, treePath: Tree<number>): Tree<A
     );
 }
 
-export function updateExpandTree(tree: Tree<ActionExpandStatus>, nextPath: Tree<number>) {
+export function updateExpandTree(tree: Tree<ActionExpandStatus>, nextPath: Tree<number> | null) {
     if (!nextPath) {
         return tree;
     }

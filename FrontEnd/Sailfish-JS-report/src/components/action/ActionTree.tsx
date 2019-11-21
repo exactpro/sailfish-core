@@ -15,28 +15,23 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { connect, Omit } from 'react-redux';
+import { connect } from 'react-redux';
 import '../../styles/action.scss';
-import Action, { ActionNode, ActionNodeType, isAction } from '../../models/Action';
+import Action, { ActionNode, isAction } from '../../models/Action';
 import { StatusType } from '../../models/Status';
 import Tree, { createNode, mapTree } from '../../models/util/Tree';
 import AppState from '../../state/models/AppState';
 import ActionExpandStatus from '../../models/util/ActionExpandStatus';
-import { ActionCard } from './ActionCard';
-import { CustomMessage } from './CustomMessage';
 import { selectAction } from '../../actions/actionCreators';
 import { selectVerification } from '../../actions/actionCreators';
-import VerificationCard from './VerificationCard';
-import UserTableCard from './UserTableCard';
 import StateSaver from '../util/StateSaver';
 import memoize from '../../helpers/memoize';
-import { isCheckpoint } from '../../helpers/action';
-import { createExpandTreePath, createExpandTree, getSubTree, updateExpandTree } from '../../helpers/tree';
+import { createExpandTreePath, createExpandTree, updateExpandTree } from '../../helpers/tree';
 import { keyForAction } from '../../helpers/keys';
 import { fetchPredictions } from "../../thunks/machineLearning";
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
-import CheckpointAction from './CheckpointAction';
+import ActionTreeNode from './ActionTreeNode';
 
 interface OwnProps {
     action: ActionNode;
@@ -46,24 +41,22 @@ interface OwnProps {
 interface StateProps {
     selectedVerificationId: number;
     selectedActionsId: number[];
-    scrolledActionId: Number;
     actionsFilter: Set<StatusType>;
-    expandedTreePath: Tree<number>;
-    token: string;
+    expandedTreePath: Tree<number> | null;
     mlDataActionIds: Set<number>;
 }
 
 interface DispatchProps {
-    fetchPredictions: (actionId: number) => any;
-    actionSelectHandler: (action: Action) => any;
-    verificationSelectHandler: (messageId: number, rootActionId: number, status: StatusType) => any;
+    fetchPredictions: (actionId: number) => void;
+    actionSelectHandler: (action: Action) => void;
+    verificationSelectHandler: (messageId: number, rootActionId: number, status: StatusType) => void;
 }
 
 interface ContainerProps extends OwnProps, StateProps, DispatchProps {}
 
 type Props = ContainerProps & { 
     expandState: Tree<ActionExpandStatus>,
-    saveState: (state: Tree<ActionExpandStatus>) => any; 
+    saveState: (state: Tree<ActionExpandStatus>) => void; 
 }
 
 interface State {
@@ -108,124 +101,44 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        return this.renderNode(this.props, true, this.state.expandTree);
-    }    
+        const props = this.props;
 
-    renderNode(props: Props, isRoot = false, expandTreePath: Tree<ActionExpandStatus> = null, parentAction: Action = null): React.ReactElement {
-        const { actionSelectHandler, verificationSelectHandler, selectedActionsId, selectedVerificationId: selectedMessageId, actionsFilter, onExpand } = props;
-
-        // https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions
-        switch (props.action.actionNodeType) {
-            case ActionNodeType.ACTION: {
-                const { action } = props;
-
-                if (isCheckpoint(action)) {
-                    return (
-                        <CheckpointAction
-                            action={action}/>
-                    );
-                }
-
-                return (
-                    <ActionCard action={action}
-                        isSelected={selectedActionsId.includes(action.id)}
-                        isTransaparent={!actionsFilter.has(action.status.status)}
-                        onSelect={ (selectedAction) => {
-                            if (selectedAction.status.status == StatusType.FAILED && !this.props.mlDataActionIds.has(selectedAction.id)) {
-                                this.props.fetchPredictions(selectedAction.id);
-                            }
-                            actionSelectHandler(selectedAction);
-                        }}
-                        isRoot={isRoot}
-                        isExpanded={expandTreePath.value.isExpanded}
-                        onExpand={onExpand}
-                        onRootExpand={this.onExpandFor(action.id)}>
-                        {
-                            action.subNodes ? action.subNodes.map(
-                                childAction => this.renderNode(
-                                    { ...props, action: childAction },
-                                    false, 
-                                    getSubTree(childAction, expandTreePath),
-                                    action
-                                )) : null
-                        }
-                    </ActionCard>
-                );
-            }
-
-            case ActionNodeType.CUSTOM_MESSAGE: {
-                const messageAction = props.action;
-
-                if (!messageAction.message && !messageAction.exception) {
-                    return <div/>;
-                }
-
-                return (
-                    <CustomMessage
-                        userMessage={messageAction}
-                        parent={parentAction}
-                        onExpand={onExpand}/>
-                );
-            }
-
-            case ActionNodeType.VERIFICATION: {
-                const verification = props.action;
-                const isSelected = verification.messageId === selectedMessageId;
-                const isTransparent = !actionsFilter.has(verification.status.status);
-
-                return (
-                    <VerificationCard
-                        key={verification.messageId}
-                        verification={verification}
-                        isSelected={isSelected}
-                        isTransparent={isTransparent}
-                        onSelect={(messageId, actionId, status) => {
-                            if (status == StatusType.FAILED && !this.props.mlDataActionIds.has(actionId)) {
-                                this.props.fetchPredictions(actionId);
-                            }
-                            verificationSelectHandler(messageId, actionId, status);
-                        }}
-                        parentActionId={parentAction && parentAction.id}
-                        onExpand={onExpand}/>
-                )
-            }
-
-            case ActionNodeType.LINK: {
-                const { link } = props.action;
-
-                return (
-                    <div className="action-card">
-                        <div className="action-card__link">
-                            <a href={link}>
-                                Link to {link}
-                            </a>
-                        </div>
-                    </div>
-                );
-            }
-
-            case ActionNodeType.TABLE: {
-                const table = props.action;
-
-                return (
-                    <UserTableCard
-                        table={table}
-                        parent={parentAction}
-                        onExpand={onExpand}/>
-                );
-            }
-
-            default: {
-                console.warn("WARNING: unknown action node type");
-                return <div></div>;
-            }
+        return (
+            <ActionTreeNode
+                action={props.action}
+                isRoot
+                selectedActionsId={props.selectedActionsId}
+                selectedVerificationId={props.selectedVerificationId}
+                actionsFilter={props.actionsFilter}
+                expandPath={this.state.expandTree}
+                onExpand={props.onExpand}
+                onRootExpand={this.onRootExpand}
+                onActionSelect={this.onActionSelect}
+                onVerificationSelect={this.onVerificationSelect}/>
+        )
+    }   
+    
+    private onActionSelect = (selectedAction: Action) => {
+        if (selectedAction.status.status == StatusType.FAILED && !this.props.mlDataActionIds.has(selectedAction.id)) {
+            this.props.fetchPredictions(selectedAction.id);
         }
+
+        this.props.actionSelectHandler(selectedAction);
     }
 
-    private onExpandFor = (actionId: number) => (isExpanded: boolean) => {
+    private onVerificationSelect = (messageId: number, actionId: number, status: StatusType) => {
+        if (status == StatusType.FAILED && !this.props.mlDataActionIds.has(actionId)) {
+            this.props.fetchPredictions(actionId);
+        }
+        
+        this.props.verificationSelectHandler(messageId, actionId, status);
+    }
+
+    private onRootExpand = (actionId: number, isExpanded: boolean) => {
         this.setState({
             expandTree: mapTree(
-                (expandStatus: ActionExpandStatus) => expandStatus.id === actionId ? ({ ...expandStatus, isExpanded }) : expandStatus, 
+                (expandStatus: ActionExpandStatus) => 
+                    expandStatus.id === actionId ? ({ ...expandStatus, isExpanded }) : expandStatus, 
                 this.state.expandTree
             )
         });
@@ -267,14 +180,19 @@ export const ActionTree = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
         selectedVerificationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
-        scrolledActionId: state.selected.scrolledActionId,
         actionsFilter: state.filter.actionsTransparencyFilter,
         mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map(item => item.actionId)),
-        token: state.machineLearning.token,
-        expandedTreePath: getExpandedTreePath(ownProps.action, [...state.selected.actionsId, +state.selected.scrolledActionId])
+        expandedTreePath: 
+            // scrolledActionId can be null in 2 cases:
+            // 1. there is no selected actions at all
+            // 2. user clicked on some action card
+            // For both cases we don't need to expand any nodes manually, so we pass null as expand path.
+            state.selected.scrolledActionId != null ? 
+                getExpandedTreePath(ownProps.action, [...state.selected.actionsId, state.selected.scrolledActionId.valueOf()]) : 
+                null
     }),
     (dispatch: ThunkDispatch<AppState, never, StateAction>, ownProps: OwnProps): DispatchProps => ({
-        fetchPredictions: (actionId: number) => dispatch(fetchPredictions(actionId)),
+        fetchPredictions: actionId => dispatch(fetchPredictions(actionId)),
         actionSelectHandler: action => dispatch(selectAction(action)),
         verificationSelectHandler: (messageId, rootActionId, status) => dispatch(selectVerification(messageId, rootActionId, status))
     })

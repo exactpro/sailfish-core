@@ -79,52 +79,57 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
             <ExpandablePanel
                 isExpanded={isExpanded}
                 onExpand={isExpanded => onRootExpand(isExpanded)}>
-                <div className={headerClassName}>
-                    <div className="ac-header__title">
-                        <div className="ac-header__name">
-                            <span>
-                                <span>{matrixId} {serviceName} </span>
-                                <SearchableContent
-                                    content={name} 
-                                    contentKey={keyForAction(id, 'name')}/>
-                                <span> {messageType}</span>
-                            </span>
-                        </div>
-                        <div className="ac-header__description">
-                            <span>
-                                <SearchableContent 
-                                    content={description}
-                                    contentKey={keyForAction(id, 'description')}/>
-                                <span> {outcome}</span>
-                            </span>
-                        </div>
-                    </div>
-                    {
-                        action.startTime ? (
-                            <div className="ac-header__start-time">
-                                <span>Start</span>
-                                <p>{formatTime(action.startTime)}</p>
-                            </div>
-                        ) : null
-                    }
-                    <div className="ac-header__elapsed-time">
-                        <span>{elapsedTime}</span>
-                    </div>
-                    <div className="ac-header__controls">
-                        <div className="ac-header__status">
-                            <span>{action.status.status.toUpperCase()}</span>
-                        </div>
-                        {
-                            action.relatedMessages.length > 0 ? (
-                                <div className="ac-header__chips">
-                                    <Chip
-                                        count={action.relatedMessages.length}/>
+                {
+                    toggleExpand => (
+                        <div className={headerClassName}>
+                            <div className="ac-header__title">
+                                <div className="ac-header__name"
+                                    onClick={() => toggleExpand()}>
+                                    {matrixId}
+                                    {' '}
+                                    {serviceName}
+                                    {' '}
+                                    <SearchableContent
+                                        content={name} 
+                                        contentKey={keyForAction(id, 'name')}/>
+                                    {' '}
+                                    {messageType}
                                 </div>
-                            ) : null
-                        }
-                        <ActionMlUploadButton actionId={action.id}/>
-                    </div>
-                </div>
+                                <div className="ac-header__description">
+                                    <SearchableContent 
+                                        content={description}
+                                        contentKey={keyForAction(id, 'description')}/>
+                                        {outcome}
+                                </div>
+                            </div>
+                            {
+                                action.startTime ? (
+                                    <div className="ac-header__start-time">
+                                        <span>Start</span>
+                                        <p>{formatTime(action.startTime)}</p>
+                                    </div>
+                                ) : null
+                            }
+                            <div className="ac-header__elapsed-time">
+                                <span>{elapsedTime}</span>
+                            </div>
+                            <div className="ac-header__controls">
+                                <div className="ac-header__status">
+                                    <span>{action.status.status.toUpperCase()}</span>
+                                </div>
+                                {
+                                    action.relatedMessages.length > 0 ? (
+                                        <div className="ac-header__chips">
+                                            <Chip
+                                                count={action.relatedMessages.length}/>
+                                        </div>
+                                    ) : null
+                                }
+                                <ActionMlUploadButton actionId={action.id}/>
+                            </div>
+                        </div>
+                    )
+                }
                 <div className="ac-body">
                     <div className={inputParametersClassName}>
                         <SearchExpandablePanel

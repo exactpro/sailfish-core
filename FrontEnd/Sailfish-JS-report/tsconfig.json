@@ -6,6 +6,7 @@
       "lib": ["es2017", "es2016", "dom"],
       "module": "commonjs",
       "noImplicitAny": false,
+      "noImplicitThis": true,
       "removeComments": true,
       "sourceMap": true,
       "jsx": "react",
