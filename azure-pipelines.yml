@@ -31,3 +31,9 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
     testRunTitle: $(imageName)
     tasks: 'clean build'
+
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Pipeline.Workspace)' 
+    artifactName: '$(imageName).zip'
+  condition: failed()
