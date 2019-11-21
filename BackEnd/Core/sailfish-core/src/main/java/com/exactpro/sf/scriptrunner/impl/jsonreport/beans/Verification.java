@@ -18,10 +18,6 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.StatusDescription;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.VerificationEntry;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.List;

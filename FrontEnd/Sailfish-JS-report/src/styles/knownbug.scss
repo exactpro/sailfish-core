@@ -1,5 +1,85 @@
 @import "./common/vars";
 
+.known-bug-list {
+    @include scrollbar;
+    padding-left: 5px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.known-bug-card {
+    min-height: 40px;
+
+    border: 2px solid $knownBugCardBorderColor;
+    border-radius: $defaultCardBorderRadius;
+
+    margin-bottom: 7px;
+    padding: 5px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    &.not-reproduced {
+        border-color: $defaultCardBackground;
+        color: $secondaryTextColor;
+
+        &.selected {
+            border-color: $defaultCardBorderColor;
+            background-color: $defaultSelectedCardBackground;
+        }
+    }
+
+    &.reproduced {
+        border-color: $conditionallyPassedBorderColorSecondary;
+        color: $conditionallyPassedTextColor;
+
+        &.selected {
+            border-color: $conditionallyPassedBorderColor;
+            background-color: $conditionallyPassedBackgroundColor;
+        }
+    }
+
+    &__left, &__right {
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+    }
+
+    &__left {
+        justify-content: flex-start;
+    }
+
+    &__right {
+        justify-content: flex-end;
+    }
+
+    &__categories {
+        padding-left: 5px;
+        font-size: 14px;
+        color: $secondaryTextColor;
+    }
+
+    &__name {
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    &__indicator {
+        @include icon(null, 22px, 22px);
+        margin-left: 5px;
+
+        &.reproduced {
+            background-image: url(../../resources/icons/known-bug-reproduced.svg);
+        }
+
+        &.not-reproduced {
+            opacity: 0.7;
+            background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
+        }
+    }
+}
+
 .known-bugs {
     grid-area: bugs-summary;
 
@@ -26,14 +106,14 @@
 
     &__indicator {
         grid-area: bugs-indicator;
-    
+
         @include icon(null, 22px, 22px);
         margin: 7px 12px;
-    
+
         &.reproduced {
             background-image: url(../../resources/icons/known-bug-reproduced.svg);
         }
-    
+
         &.not-reproduced {
             background-image: url(../../resources/icons/known-bug-not-reproduced.svg);
         }

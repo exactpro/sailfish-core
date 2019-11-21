@@ -107,15 +107,15 @@ class RightPanelBase extends React.Component<Props> {
                                         onClick={() => this.selectPanel(Panel.Messages)}
                                         text="Messages" />
                                     <ToggleButton
-                                        isToggled={false}
-                                        isDisabled={true}
-                                        title="Not implemeted"
-                                        text="Logs" />
-                                    <ToggleButton
                                         isToggled={panel == Panel.KnownBugs}
                                         isDisabled={!this.props.hasKnownBugs}
                                         onClick={() => this.selectPanel(Panel.KnownBugs)}
                                         text="Known bugs"/>
+                                    <ToggleButton
+                                        isToggled={false}
+                                        isDisabled={true}
+                                        title="Not implemeted"
+                                        text="Logs" />
                                 </div>
                                 {
                                     beautifiedMessagesEnabled ? (
@@ -183,16 +183,16 @@ class RightPanelBase extends React.Component<Props> {
 
     private renderPanels(selectedPanel: Panel): React.ReactNode {
         const messagesRootClass = createSelector(
-            "layout-panel__content-wrapper",
-            selectedPanel == Panel.Messages ? "" : "disabled"
-        ),
+                "layout-panel__content-wrapper",
+                selectedPanel == Panel.Messages ? null : "disabled"
+            ),
             knownBugsRootClass = createSelector(
                 "layout-panel__content-wrapper",
-                selectedPanel == Panel.KnownBugs ? "" : "disabled"
+                selectedPanel == Panel.KnownBugs ? null : "disabled"
             ),
             logsRootClass = createSelector(
                 "layout-panel__content-wrapper",
-                selectedPanel == Panel.Logs ? "" : "disabled"
+                selectedPanel == Panel.Logs ? null : "disabled"
             );
 
         return (

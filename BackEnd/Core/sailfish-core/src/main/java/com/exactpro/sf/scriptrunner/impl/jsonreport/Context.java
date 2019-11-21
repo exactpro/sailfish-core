@@ -1,4 +1,4 @@
-/******************************************************************************
+/*******************************************************************************
  * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +14,26 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ActionNodeType } from "./Action";
-import { KnownBugStatus } from "./KnownBugStatus";
-import KnownBugCategory from './KnownBugCategory';
+package com.exactpro.sf.scriptrunner.impl.jsonreport;
 
-export default interface KnownBug {
-    actionNodeType: ActionNodeType.KNOWN_BUG;
-    status: KnownBugStatus;
-    subject: string;
-    relatedActionIds: number[];
-    id: number;
-}
+public class Context {
+    final Context prev;
+    final ContextType cur;
+    final IJsonReportNode node;
 
-export function isKnownBug(bug: KnownBug | KnownBugCategory): bug is KnownBug {
-    return bug.actionNodeType === ActionNodeType.KNOWN_BUG;
+    Context(Context prev, ContextType current, IJsonReportNode node) {
+        this.prev = prev;
+        this.cur = current;
+        this.node = node;
+    }
+
+    public <T extends IJsonReportNode> T getFirstParentNode(Class<? extends IJsonReportNode> clazz) {
+        Context current = this;
+
+        while (current.node != null && !clazz.isInstance(current.node)) {
+            current = current.prev;
+        }
+
+        return (T) current.node;
+    }
 }

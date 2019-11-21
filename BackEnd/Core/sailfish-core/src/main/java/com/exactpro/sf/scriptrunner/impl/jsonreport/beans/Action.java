@@ -37,7 +37,7 @@ public class Action implements IJsonReportNode {
     private String name;
     private String messageType;
     private String description;
-    private Set<Bug> bugs;
+    private Set<Long> bugs;
     private Set<Long> relatedMessages;
     private Status status;
     private List<Parameter> parameters;
@@ -52,20 +52,20 @@ public class Action implements IJsonReportNode {
         this.subNodes = new ArrayList<>();
         this.relatedMessages = new HashSet<>();
         this.logs = new ArrayList<>();
-        this.bugs = new HashSet<>();
     }
 
-    @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
+    @Override
+    public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
         for (IJsonReportNode child : nodes) {
             if (child instanceof Message) {
                 relatedMessages.add(((Message)child).getId());
             } else if (child instanceof Action || child instanceof CustomMessage || child instanceof CustomTable || child instanceof CustomLink) {
                 subNodes.add(child);
             } else if (child instanceof Bug) {
-                bugs.add((Bug)child);
+                bugs.add(((Bug)child).getId());
             } else if (child instanceof Verification) {
                 subNodes.add(child);
-                if (((Verification) child).getMessageId() != null) {
+                if (((Verification)child).getMessageId() != null) {
                     relatedMessages.add(((Verification)child).getMessageId());
                 }
             } else if (child instanceof LogEntry) {
@@ -76,8 +76,9 @@ public class Action implements IJsonReportNode {
         }
     }
 
-    @Override public void addException(Throwable t) {
-        if(status == null) {
+    @Override
+    public void addException(Throwable t) {
+        if (status == null) {
             this.status = new Status(t);
         }
     }
@@ -146,11 +147,11 @@ public class Action implements IJsonReportNode {
         this.description = description;
     }
 
-    public Set<Bug> getBugs() {
+    public Set<Long> getBugs() {
         return bugs;
     }
 
-    public void setBugs(Set<Bug> bugs) {
+    public void setBugs(Set<Long> bugs) {
         this.bugs = bugs;
     }
 

@@ -40,7 +40,7 @@ $passedVerificationBackgroundColor: mix($passedTextColor, white,  10%);
 $passedVerificationHighlightedBackgroundColor: mix($passedTextColor, white,  20%);
 
 $conditionallyPassedTextColor: #FF822A;
-$conditionallyPassedBorderColor: #FFCDA8;
+$conditionallyPassedBorderColor: $conditionallyPassedTextColor;
 $conditionallyPassedHeaderColor: #FFD2B3;
 $conditionallyPassedBorderColorSecondary: $conditionallyPassedHeaderColor;
 $conditionallyPassedBackgroundColor: #FFF0E6;
@@ -96,7 +96,6 @@ $scrollbarThumbBackground: #C4C4C4;
 $scrollbarTrackBackground: #F2F2F2;
 
 $splitterColor: $scrollbarThumbBackground;
-$splitterColor: #C4C4C4;
 
 $spinnerOuterColor: $defaultCardBorderColor;
 $spinnerInnerColor: rgba(0, 0, 0, 0.2);
@@ -114,6 +113,7 @@ $hintShadowColor: transparentize(black, 0.5);
 $hintTextColor: black;
 
 $nullValuetextColor: $naTextColor;
+$knownBugCardBorderColor: transparentize($defaultCardBackground, 0.33);
 
 $liveTextColor: #696969;
 $liveSecondaryTextColor: $secondaryTextColor;

@@ -19,10 +19,13 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,7 +35,6 @@ public class TestCase implements IJsonReportNode {
     private final List<LogEntry> logs;
     private final List<Message> messages;
     private final List<Verification> verifications;
-    @JsonIgnore private final BugCategory bugRoot;
     private final List<OutcomeSummary> outcomes;
     private Set<String> tags;
     private Instant startTime;
@@ -47,17 +49,23 @@ public class TestCase implements IJsonReportNode {
     private String description;
     private Status status;
 
+    @JsonIgnore private final BugCategory bugRoot;
+    @JsonIgnore private Map<Bug, List<String>> bugToCategoryMap;
+
+
     public TestCase() {
         this.outcomes = new ArrayList<>();
         this.actions = new ArrayList<>();
         this.logs = new ArrayList<>();
         this.messages = new ArrayList<>();
-        this.bugRoot = new BugCategory("root");
         this.verifications = new ArrayList<>();
         this.tags = new HashSet<>();
+        this.bugRoot = new BugCategory("root");
+        this.bugToCategoryMap = new HashMap<>();
     }
 
-    @Override public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
+    @Override
+    public void addSubNodes(Collection<? extends IJsonReportNode> nodes) {
         for (IJsonReportNode child : nodes) {
             if (child instanceof Action || child instanceof CustomMessage) {
                 actions.add(child);
@@ -75,10 +83,16 @@ public class TestCase implements IJsonReportNode {
         }
     }
 
-    @Override public void addException(Throwable t) {
-        if(status == null) {
+    @Override
+    public void addException(Throwable t) {
+        if (status == null) {
             this.status = new Status(t);
         }
+    }
+
+    @JsonIgnore
+    public Map<Bug, List<String>> getBugToCategoryMap() {
+        return this.bugToCategoryMap;
     }
 
     public List<IJsonReportNode> getActions() {

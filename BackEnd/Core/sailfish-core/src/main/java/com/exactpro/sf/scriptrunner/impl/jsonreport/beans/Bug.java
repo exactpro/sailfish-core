@@ -16,6 +16,8 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
+import java.util.Set;
+
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import com.exactpro.sf.util.BugDescription;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -26,20 +28,32 @@ public class Bug implements IJsonReportNode {
     @JsonIgnore
     private final BugDescription description;
 
-    private final KnownBugStatus status;
+    private KnownBugStatus status;
     private final String subject;
+    private final Long id;
+    private final Set<Long> relatedActionIds;
 
     @JsonCreator
-    public Bug(@JsonProperty("status") KnownBugStatus status, @JsonProperty("subject") String subject) {
+    public Bug(@JsonProperty("status") KnownBugStatus status, @JsonProperty("subject") String subject, @JsonProperty("id") Long id, @JsonProperty("relatedActionIds") Set<Long> relatedActionIds) {
         this.status = status;
         this.subject = subject;
         this.description = null;
+        this.id = id;
+        this.relatedActionIds = relatedActionIds;
     }
 
-    public Bug(BugDescription description, KnownBugStatus status) {
+    public Bug(BugDescription description, KnownBugStatus status, Long id, Set<Long> relatedActionIds) {
         this.description = description;
         this.status = status;
         this.subject = description.getSubject();
+        this.id = id;
+        this.relatedActionIds = relatedActionIds;
+    }
+
+    public void updateStatus(KnownBugStatus status) {
+        if (status == KnownBugStatus.REPRODUCED) {
+            this.status = status;
+        }
     }
 
     @JsonIgnore
@@ -53,5 +67,13 @@ public class Bug implements IJsonReportNode {
 
     public String getSubject() {
         return subject;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Set<Long> getRelatedActionIds() {
+        return relatedActionIds;
     }
 }

@@ -121,7 +121,7 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                                     action.relatedMessages.length > 0 ? (
                                         <div className="ac-header__chips">
                                             <Chip
-                                                count={action.relatedMessages.length}/>
+                                                text={action.relatedMessages.length.toString()}/>
                                         </div>
                                     ) : null
                                 }

@@ -17,9 +17,9 @@
  */
 
 import * as React from 'react';
-import KnownBug, { isKnownBug } from '../../models/KnownBug'
+import KnownBug, { isKnownBug } from '../../models/KnownBug';
 import KnownBugCategory, { isKnownBugCategory } from '../../models/KnownBugCategory';
-import { KnownBugCard } from './KnownBugCard';
+import { KnownBugBadge } from './KnownBugBadge';
 import '../../styles/knownbug.scss';
 import { KnownBugStatus } from '../../models/KnownBugStatus';
 
@@ -52,7 +52,7 @@ export function KnownBugCategoryComponent({ category, isRoot, showArrows }: Prop
                 <div className="known-bugs__category__container__bugs">
                 {
                     topLevelBugs.map((item, index) => (
-                        <KnownBugCard bug={item} key={index} />
+                        <KnownBugBadge bug={item} key={index} />
                     ))
                 }
                 </div>

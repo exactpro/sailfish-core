@@ -20,20 +20,20 @@ import { getStatusChipDescription } from '../helpers/action';
 import '../styles/chip.scss';
 import { createSelector } from '../helpers/styleCreators';
 
-interface ChipProps {
-    count: number;
+interface Props {
+    text: string;
     status?: StatusType;
     isSelected?: boolean;
-    clickHandler?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => any;
+    onClick?: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 }
 
-export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => {
+export function Chip({ status, text, isSelected, onClick }: Props) {
 
     const rootClass = createSelector(
         "chip",
         status,
         isSelected ? "selected" : null,
-        clickHandler ? "clickable" : null
+        onClick ? "clickable" : null
     );
 
     const description = status ? getStatusChipDescription(status) : "";
@@ -41,9 +41,9 @@ export const Chip = ({ status, count, isSelected, clickHandler }: ChipProps) => 
     return (
         <div className={rootClass} 
             title={description}
-            onClick={e => clickHandler && clickHandler(e)}>
+            onClick={e => onClick && onClick(e)}>
             <div className="chip__title">
-                <p>{count}</p>
+                <p>{text}</p>
             </div>
         </div>
     )

@@ -25,8 +25,9 @@ import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { selectMessage } from '../../actions/actionCreators';
 import { stopPropagationHandler } from '../../helpers/react';
+import ChipsList from '../ChipsList';
 
-type SelectHandler = (status: StatusType) => any;
+type SelectHandler = (status: StatusType) => void;
 
 interface ActionChipsOwnProps {
     message: Message;
@@ -54,34 +55,15 @@ const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: 
         <div className={className}>
             {
                 actions.length ? 
-                    statusValues.map(status => renderChip(
-                            status, 
-                            actions.filter(action => action.status.status == status), 
-                            selectedStatus,
-                            selectHandler
-                        )
-                    ) : 
+                    <ChipsList
+                        actions={actions}
+                        selectedStatus={selectedStatus}
+                        onStatusSelect={selectHandler}/> : 
                     <p>Not related to any actions</p>
             }
         </div>
     )
-}
-
-function renderChip(status: StatusType, statusActions: Action[], selectedStatus: StatusType, selectHandeler: SelectHandler): React.ReactNode {
-
-    if (!statusActions || statusActions.length == 0) {
-        return null;
-    }
-
-    return (
-        <Chip
-            key={status}
-            count={statusActions.length}
-            status={status}
-            isSelected={status == selectedStatus} 
-            clickHandler={stopPropagationHandler(selectHandeler, status)}/>
-    )
-}
+};
 
 export const MessageCardActionChips = connect(
     (state: AppState, ownProps: ActionChipsOwnProps): ActionChipsStateProps => ({

@@ -91,6 +91,8 @@
     grid-template-areas: "action-title action-controls action-controls"
                             "action-title action-start-time action-elapsed-time";
 
+    word-break: break-all;
+
     &.transparent {
         opacity: 0.3;
     }

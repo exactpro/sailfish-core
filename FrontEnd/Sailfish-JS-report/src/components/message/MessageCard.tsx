@@ -19,7 +19,6 @@ import Message from '../../models/Message';
 import { StatusType } from '../../models/Status';
 import { MessageRaw } from './MessageRaw';
 import { getHashCode } from '../../helpers/stringHash';
-import { formatTime } from '../../helpers/date';
 import { MessageCardActionChips } from './MessageCardActionChips';
 import { MlUploadButton } from '../machinelearning/MlUploadButton';
 import '../../styles/messages.scss';
@@ -236,7 +235,7 @@ export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCar
                 showRawHandler={saveState}/>
         )}
     </StateSaver>
-)
+);
 
 export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({

@@ -73,7 +73,6 @@ import com.exactpro.sf.scriptrunner.impl.ReportTable;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Action;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Alert;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Bug;
-import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.ContextType;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
@@ -94,7 +93,6 @@ import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import com.exactpro.sf.util.BugDescription;
 import com.exactpro.sf.util.EnumReplacer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Sets;
@@ -104,19 +102,21 @@ public class JsonReport implements IScriptReport {
     private static final Logger logger = LoggerFactory.getLogger(JsonReport.class);
     private static final ObjectMapper mapper;
     private static final String REPORT_ROOT_FILE_NAME = "report";
-
     private static final String REPORT_DATA_DIRECTORY_NAME = "reportData";
     private static final String LIVE_REPORT_DIRECTORY_NAME = "live";
 
-    private static long actionIdCounter;
+    private long actionIdCounter;
+    private long knownBugIdCounter;
 
     private ScriptContext scriptContext;
     private Context context;
     private IReportStats reportStats;
+    private AtomicLong actionNodeDepth = new AtomicLong(0);
+
     private LiveTestCaseWriter liveTestCaseWriter;
     private Path liveReportDir;
-    private AtomicLong isActionCreated = new AtomicLong(0);
     private final Map<Long, Set<Long>> messageToActionIdMap;
+
     private final IWorkspaceDispatcher dispatcher;
     private final String reportRootDirectoryPath;
     private final TestScriptDescription testScriptDescription;
@@ -145,8 +145,8 @@ public class JsonReport implements IScriptReport {
         this.dictionaryManager = dictionaryManager;
     }
 
-    @JsonIgnore public boolean isActionCreated() throws UnsupportedOperationException {
-        return isActionCreated.get() > 0;
+    public boolean isActionCreated() throws UnsupportedOperationException {
+        return actionNodeDepth.get() > 0;
     }
 
     private void assertState(boolean throwException, ContextType... states) {
@@ -238,6 +238,24 @@ public class JsonReport implements IScriptReport {
     @SuppressWarnings("unchecked")
     private <T extends IJsonReportNode> T getCurrentContextNode() {
         return (T)context.node;
+    }
+
+    private Bug getOrSetKnownBug(TestCase testCase, BugDescription description) {
+        Map.Entry<Bug, List<String>> existingBug = testCase.getBugToCategoryMap().entrySet().stream()
+                .filter(entry ->
+                        entry.getKey().getSubject().equals(description.getSubject())
+                                && entry.getValue().equals(description.getCategories().list()))
+                .findFirst().orElse(null);
+
+        if (existingBug == null) {
+            Bug bug = new Bug(description, KnownBugStatus.NOT_REPRODUCED, knownBugIdCounter++, new HashSet<>());
+            testCase.addSubNodes(bug);
+            testCase.getBugToCategoryMap().put(bug, description.getCategories().list());
+
+            return bug;
+        }
+
+        return existingBug.getKey();
     }
 
     public void createReport(ScriptContext scriptContext, String name, String description, long scriptRunId, String environmentName,
@@ -338,7 +356,7 @@ public class JsonReport implements IScriptReport {
             curAction.getRelatedMessages().add(parameters.getMetaData().getId());
         }
         setContext(ContextType.ACTION, curAction);
-        isActionCreated.incrementAndGet();
+        actionNodeDepth.incrementAndGet();
     }
 
     public void closeAction(StatusDescription status, Object actionResult) {
@@ -353,20 +371,20 @@ public class JsonReport implements IScriptReport {
             reportStats.updateActions(status.getStatus());
         }
 
-        isActionCreated.decrementAndGet();
+        actionNodeDepth.decrementAndGet();
 
         revertContext();
 
         //content propagation
         IJsonReportNode parentNode = getCurrentContextNode();
 
-        parentNode.addSubNodes(curAction.getBugs());
         if (parentNode instanceof Action) {
             ((Action) parentNode).getRelatedMessages().addAll(curAction.getRelatedMessages());
+            ((Action) parentNode).getBugs().addAll(curAction.getBugs());
         }
 
         for (Long id : curAction.getRelatedMessages()) {
-            messageToActionIdMap.computeIfAbsent(id, k -> new HashSet<>()).add(curAction.getId());
+            messageToActionIdMap.computeIfAbsent(id, key -> new HashSet<>()).add(curAction.getId());
         }
 
         liveTestCaseWriter.writeNode(ObjectUtils.defaultIfNull(getCurrentRootAction(), curAction));
@@ -395,10 +413,10 @@ public class JsonReport implements IScriptReport {
 
         //content propagation
         IJsonReportNode parentNode = getCurrentContextNode();
-        parentNode.addSubNodes(curGroup.getBugs());
 
         if (parentNode instanceof Action) {
             ((Action) parentNode).getRelatedMessages().addAll(curGroup.getRelatedMessages());
+            ((Action) parentNode).getBugs().addAll(curGroup.getBugs());
         }
 
         liveTestCaseWriter.writeNode(curGroup);
@@ -434,11 +452,32 @@ public class JsonReport implements IScriptReport {
                 logger.warn("comparison result does not contain metadata - name='{}', description='{}'", name, description);
             }
 
-            Set<BugDescription> reproduced = result.getReproducedBugs();
-            Set<BugDescription> notReproduced = Sets.difference(result.getAllKnownBugs(), reproduced);
+            Action firstActionParent = context.getFirstParentNode(Action.class);
+            Long firstActionParentId = firstActionParent == null ? null : firstActionParent.getId();
 
-            curNode.addSubNodes(reproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.REPRODUCED)).collect(Collectors.toList()));
-            curNode.addSubNodes(notReproduced.stream().map(descr -> new Bug(descr, KnownBugStatus.NOT_REPRODUCED)).collect(Collectors.toList()));
+
+            TestCase firstTestCaseParent = context.getFirstParentNode(TestCase.class);
+
+            Set<Bug> reproduced = result.getReproducedBugs().stream()
+                    .distinct()
+                    .map(descr -> getOrSetKnownBug(firstTestCaseParent, descr))
+                    .collect(Collectors.toSet());
+
+            reproduced.forEach(bug -> bug.updateStatus(KnownBugStatus.REPRODUCED));
+
+            Set<Bug> notReproduced = Sets.difference(result.getAllKnownBugs(), result.getReproducedBugs()).stream()
+                    .distinct()
+                    .map(descr -> getOrSetKnownBug(firstTestCaseParent, descr))
+                    .collect(Collectors.toSet());
+
+            Set<Bug> combined = Sets.union(reproduced, notReproduced);
+
+            if (firstActionParentId != null) {
+                combined.forEach(bug -> bug.getRelatedActionIds().add(firstActionParentId));
+            }
+
+            firstTestCaseParent.addSubNodes(combined);
+            curNode.addSubNodes(combined);
 
             curVerification.setEntries(result.getResults().isEmpty()
                     ? Collections.singletonList(new VerificationEntry(result))
@@ -564,18 +603,6 @@ public class JsonReport implements IScriptReport {
 
     public void flush() {
         //do nothing
-    }
-
-    private class Context {
-        final Context prev;
-        final ContextType cur;
-        final IJsonReportNode node;
-
-        Context(Context prev, ContextType current, IJsonReportNode node) {
-            this.prev = prev;
-            this.cur = current;
-            this.node = node;
-        }
     }
 
     private Action getCurrentRootAction() {

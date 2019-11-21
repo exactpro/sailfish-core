@@ -36,7 +36,7 @@ export const ToggleButton = ({ onClick = () => {}, isToggled = false, text, them
     );
 
     return (
-        <div className={className} onClick={() => onClick(text)} title={title}>
+        <div className={className} onClick={() => !isDisabled && onClick(text)} title={title}>
             <div className="toggle-button__title">
                 <p>{text}</p>
             </div>

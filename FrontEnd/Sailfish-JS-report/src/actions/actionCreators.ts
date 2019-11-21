@@ -24,6 +24,7 @@ import Message from '../models/Message';
 import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
 import LiveTestCase from '../models/LiveTestCase';
+import KnownBug from '../models/KnownBug';
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -79,6 +80,12 @@ export const selectRejectedMessageId = (messageId: number) => (<const>{
 
 export const selectLiveTestCase = () => (<const>{
     type: StateActionTypes.SELECT_LIVE_TESTCASE
+})
+
+export const selectKnownBug = (knownBug: KnownBug, status: StatusType = null) => (<const>{
+    type: StateActionTypes.SELECT_KNOWN_BUG,
+    knownBug,
+    status
 })
 
 export const updateLiveTestCase = (testCase: LiveTestCase) => (<const>{

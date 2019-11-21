@@ -92,6 +92,19 @@ export function findPrevCyclicItem<T>(array: Array<T>, predicateFn: (item: T) =>
     return prevCyclicItem(array, item);
 }
 
+/**
+ * Returns scrolled id for selected items.
+ * @param array selected items ids
+ * @param prevScrolledId previous scrolled item id
+ */
+export function getScrolledId(array: Array<number>, prevScrolledId: number): Number {
+    if (array.includes(prevScrolledId)) {
+        return new Number(nextCyclicItem(array, prevScrolledId));
+    }
+
+    return new Number(array[0]);
+}
+
 export function intersection<T>(arr1: T[], arr2: T[]): T[] {
     return arr1.filter(item => arr2.includes(item));
 }

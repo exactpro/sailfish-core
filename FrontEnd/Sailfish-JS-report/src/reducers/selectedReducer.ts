@@ -17,7 +17,7 @@
 import SelectedState from '../state/models/SelectedState';
 import { initialSelectedState } from '../state/initial/initialSelectedState';
 import StateActionType, { StateActionTypes } from '../actions/stateActions';
-import { nextCyclicItem } from '../helpers/array';
+import { nextCyclicItem, getScrolledId } from '../helpers/array';
 import { getCheckpointActions } from '../helpers/checkpointFilter';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions, removeNonexistingRelatedMessages } from '../helpers/action';
@@ -60,10 +60,6 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             // and Messages list component can't understand that message was selected again, therefore scroll doesn't work.
             // Using reference comparison with Number objects, component can understand that message with the same id was selected again
 
-            const scrolledMessageId = stateAction.action.relatedMessages.includes(+state.scrolledMessageId) ?
-                nextCyclicItem(stateAction.action.relatedMessages, +state.scrolledMessageId) :
-                stateAction.action.relatedMessages[0]
-
             return {
                 ...state,
                 actionsId: [stateAction.action.id],
@@ -71,7 +67,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 messagesId: stateAction.action.relatedMessages,
                 verificationId: initialSelectedState.verificationId,
                 scrolledActionId: initialSelectedState.scrolledActionId,
-                scrolledMessageId: new Number(scrolledMessageId),
+                scrolledMessageId: getScrolledId(stateAction.action.relatedMessages, +state.messagesId),
                 activeActionId: stateAction.action.id
             }
         }
@@ -93,12 +89,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             // Using reference comparison with Number objects, component can understand that action with the same id was selected again.
 
             const relatedActions = stateAction.message.relatedActions
-                .filter(actionId => !stateAction.status || (state.actionsMap.get(actionId) && state.actionsMap.get(actionId).status.status == stateAction.status));
-
-            // re-select handling
-            const scrolledAction = relatedActions.includes(+state.scrolledActionId) ?
-                nextCyclicItem(relatedActions, +state.scrolledActionId) :
-                relatedActions[0];
+                .filter(actionId => !stateAction.status || (state.actionsMap.get(actionId)?.status.status === stateAction.status));
 
             return {
                 ...state,
@@ -106,7 +97,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 selectedActionStatus: stateAction.status,
                 actionsId: relatedActions,
                 verificationId: stateAction.message.id,
-                scrolledActionId: new Number(scrolledAction),
+                scrolledActionId: getScrolledId(relatedActions, +state.scrolledActionId),
                 scrolledMessageId: initialSelectedState.scrolledMessageId,
                 activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId
             }
@@ -257,6 +248,20 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                         description: null
                     }
                 }
+            }
+        }
+
+        case StateActionTypes.SELECT_KNOWN_BUG: {
+            const actionsId = stateAction.status != null ? 
+                stateAction.knownBug.relatedActionIds
+                    .filter(id => state.actionsMap.get(id)?.status.status === stateAction.status) : 
+                stateAction.knownBug.relatedActionIds;
+
+            return {
+                ...state,
+                selectedActionStatus: stateAction.status,
+                actionsId,
+                scrolledActionId: getScrolledId(actionsId, +state.scrolledActionId)
             }
         }
 

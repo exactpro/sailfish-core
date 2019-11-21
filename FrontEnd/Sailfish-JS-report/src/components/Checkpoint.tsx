@@ -47,6 +47,6 @@ const Checkpoint = ({ name, index, isSelected, clickHandler = () => {}, descript
             <div className="checkpoint-description">{description}</div>
         </div>
     )
-}
+};
 
 export default Checkpoint;
