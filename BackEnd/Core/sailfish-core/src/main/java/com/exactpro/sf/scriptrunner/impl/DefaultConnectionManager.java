@@ -80,12 +80,15 @@ import com.exactpro.sf.storage.IVariableSetStorage;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.impl.FakeMessageStorage;
 import com.exactpro.sf.storage.impl.FilterMessageStorageWrapper;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 public final class DefaultConnectionManager implements IConnectionManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultConnectionManager.class);
     private static final IServiceNotifyListener EMPTY_NOTIFY_LISTENER = new ServiceNotifyListener();
+    private static final Set<ServiceStatus> ALLOWED_TO_INIT_STATUSES = ImmutableSet.of(ServiceStatus.CREATED, ServiceStatus.INITIALIZED,
+            ServiceStatus.ERROR, ServiceStatus.DISPOSED);
 
 	private final ExecutorService serviceExecutor;
 	private final IServiceFactory staticServiceFactory;
@@ -109,7 +112,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 	private final Set<String> usedServices;
     private final Map<String, ServiceDescription> defaultServices;
 
-	public DefaultConnectionManager(
+    public DefaultConnectionManager(
             IServiceFactory staticServiceFactory,
             IServiceStorage storage,
             IEnvironmentStorage envStorage,
@@ -448,6 +451,8 @@ public final class DefaultConnectionManager implements IConnectionManager {
                     description.setVariables(new HashMap<>(serviceDescription.getVariables()));
 			        storage.updateServiceDescription(description);
                     messageNotify(notifyListener, serviceName + " updated");
+
+                    initServiceWithoutNewThread(serviceName, notifyListener);
 			    } catch (Exception e) {
 			        ServiceException exception = new ServiceException("Could not update service " + serviceName, e);
 			        exceptionNotify(notifyListener, exception);
@@ -497,7 +502,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
             ServiceStatus curStatus = service.getStatus();
 
-            if (curStatus != ServiceStatus.STARTED && curStatus != ServiceStatus.STARTING && curStatus != ServiceStatus.WARNING) {
+            if (ALLOWED_TO_INIT_STATUSES.contains(curStatus)) {
                 SailfishURI serviceURI = description.getType();
 
                 IServiceContext serviceContext = this.serviceContext;
@@ -568,7 +573,7 @@ public final class DefaultConnectionManager implements IConnectionManager {
                     service.init(serviceContext, environmentMonitor, serviceContainer.getHandlerWrapper(), settings, serviceName);
                 }
             } else {
-                logger.debug("Service {} is starting or already started", serviceName);
+                logger.debug("Cannot init service {} because it has status {}", serviceName, curStatus);
             }
         } catch (Exception e) {
             exceptionNotify(notifyListener, e);
