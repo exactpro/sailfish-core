@@ -56,6 +56,7 @@ import quickfix.field.MsgType;
 import quickfix.field.SessionRejectReason;
 import quickfix.field.converter.BooleanConverter;
 import quickfix.field.converter.CharConverter;
+import quickfix.field.converter.DecimalConverter;
 import quickfix.field.converter.DoubleConverter;
 import quickfix.field.converter.IntConverter;
 import quickfix.field.converter.UtcDateOnlyConverter;
@@ -384,15 +385,13 @@ public class QFJDictionaryAdapter extends DataDictionary {
 					// String, for older FIX versions
 				}
 			} else if (fieldType == FieldType.Price) {
-				DoubleConverter.convert(field.getValue());
+                DecimalConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.Int) {
 				IntConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.Amt) {
-				DoubleConverter.convert(field.getValue());
+                DecimalConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.Qty) {
-				DoubleConverter.convert(field.getValue());
-			} else if (fieldType == FieldType.Qty) {
-				// String
+				DecimalConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.MultipleValueString) {
 				// String
 			} else if (fieldType == FieldType.Exchange) {
@@ -404,9 +403,9 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			} else if (fieldType == FieldType.Data) {
 				// String
 			} else if (fieldType == FieldType.Float) {
-				DoubleConverter.convert(field.getValue());
+                DecimalConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.PriceOffset) {
-				DoubleConverter.convert(field.getValue());
+                DecimalConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.MonthYear) {
 				// String
 			} else if (fieldType == FieldType.DayOfMonth) {
@@ -420,7 +419,7 @@ public class QFJDictionaryAdapter extends DataDictionary {
 			} else if (fieldType == FieldType.NumInGroup) {
 				IntConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.Percentage) {
-				DoubleConverter.convert(field.getValue());
+                DecimalConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.SeqNum) {
 				IntConverter.convert(field.getValue());
 			} else if (fieldType == FieldType.Length) {
