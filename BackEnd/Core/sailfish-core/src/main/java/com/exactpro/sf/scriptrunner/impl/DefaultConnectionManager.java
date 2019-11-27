@@ -502,7 +502,8 @@ public final class DefaultConnectionManager implements IConnectionManager {
 
             ServiceStatus curStatus = service.getStatus();
 
-            if (ALLOWED_TO_INIT_STATUSES.contains(curStatus)) {
+            if (ALLOWED_TO_INIT_STATUSES.contains(curStatus)
+                || curStatus == null ) { //FIXME: Every service must initialise serviceStatus variable by CREATED value.
                 SailfishURI serviceURI = description.getType();
 
                 IServiceContext serviceContext = this.serviceContext;
