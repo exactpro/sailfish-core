@@ -51,8 +51,8 @@ import com.exactpro.sf.center.impl.CoreVersion;
 import com.exactpro.sf.center.impl.PluginLoader;
 import com.exactpro.sf.common.impl.messages.StrictMessageWrapper;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
-import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.DataManager;
@@ -72,6 +72,7 @@ import com.exactpro.sf.configuration.workspace.ResourceWorkspaceLayout;
 import com.exactpro.sf.configuration.workspace.WorkspaceSecurityException;
 import com.exactpro.sf.externalapi.impl.ServiceFactoryException;
 import com.exactpro.sf.externalapi.impl.StrictDictionaryManager;
+import com.exactpro.sf.externalapi.impl.StrictMessageFactoryWrapper;
 import com.exactpro.sf.scriptrunner.impl.EmptyServiceMonitor;
 import com.exactpro.sf.scriptrunner.services.DefaultStaticServiceManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.UtilityManager;
@@ -390,14 +391,11 @@ public class ServiceFactory implements IServiceFactory {
                 throw new EPSCommonException(String.format("Dictionary %s not found", dictionary.getResourceName()));
             }
 
-            IDictionaryStructure structure = dictionaryManager.getDictionary(dictionary);
-            IMessageStructure messageStructure = structure.getMessages().get(name);
-            
-            if (messageStructure == null) {
-                throw new EPSCommonException(String.format("Message %s not found in dictionary %s", name, dictionary.getResourceName()));
-            }
-            
-            return new StrictMessageWrapper(dictionaryManager.getMessageFactory(dictionary), messageStructure);
+            IDictionaryStructure dictionaryStructure = dictionaryManager.getDictionary(dictionary);
+            IMessageFactory messageFactory = dictionaryManager.getMessageFactory(dictionary);
+
+            return new StrictMessageFactoryWrapper(messageFactory, dictionaryStructure)
+                    .createMessage(name);
         }
 
     }

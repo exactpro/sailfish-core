@@ -213,7 +213,7 @@ public class TestExternalApi {
         Assume.assumeTrue(strict);
 
         exception.expect(EPSCommonException.class);
-        exception.expectMessage("Can't find structure for message Test");
+        exception.expectMessage("Dictionary 'TestAML' doesn't contain message 'Test'");
 
         IServiceProxy sp = null;
         try (IServiceFactory sf = createServiceFactory()) {

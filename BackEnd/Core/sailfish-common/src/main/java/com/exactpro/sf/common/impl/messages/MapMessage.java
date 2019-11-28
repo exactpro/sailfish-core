@@ -412,8 +412,9 @@ public class MapMessage implements IMessage
                 toString.append('|');
             }
 
-            if(getField(fldName) instanceof IMessage) {
-                toString.append((MapMessage)getField(fldName));
+            Object value = getField(fldName);
+            if(value instanceof IMessage) {
+                toString.append(value);
             } else {
                 toString.append(fldName);
                 toString.append('=');

@@ -19,23 +19,34 @@ package com.exactpro.sf.externalapi.impl;
 import java.util.Objects;
 import java.util.Set;
 
+import org.jetbrains.annotations.NotNull;
+
+import com.exactpro.sf.common.impl.messages.AbstractMessageFactory;
 import com.exactpro.sf.common.impl.messages.StrictMessageWrapper;
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
-public class StrictMessageFactoryWrapper implements IMessageFactory {
+public class StrictMessageFactoryWrapper extends AbstractMessageFactory {
 
     private final IMessageFactory msgFactory;
     private final IDictionaryStructure dictionaryStructure;
 
     public StrictMessageFactoryWrapper(IMessageFactory msgFactory, IDictionaryStructure dictionaryStructure) {
-        this.msgFactory = msgFactory;
-        this.dictionaryStructure = dictionaryStructure;
+        this.msgFactory = Objects.requireNonNull(msgFactory, "msgFactory must not be null");
+        this.dictionaryStructure = Objects.requireNonNull(dictionaryStructure, "dictionaryStructure");
+    }
+
+    @Override
+    public void init(SailfishURI dictionaryURI, IDictionaryStructure dictionary) {
+        super.init(dictionaryURI, dictionary);
+        msgFactory.init(dictionaryURI, dictionary);
     }
 
     @Override
@@ -44,22 +55,13 @@ public class StrictMessageFactoryWrapper implements IMessageFactory {
     }
 
     @Override
-    public IMessage createMessage(long id, String name, String namespace) {
-        return msgFactory.createMessage(id,name, namespace);
+    public IMessage createMessage(String name, String namespace) {
+        return wrapMessage(msgFactory.createMessage(name, namespace));
     }
 
     @Override
-    public IMessage createMessage(String name, String namespace) {
-        if (!Objects.equals(namespace, getNamespace())) {
-            throw new EPSCommonException(String.format("Unexpected namespace: [%s]. Expected: [%s]", namespace, getNamespace()));
-        }
-
-        IMessageStructure messageStructure = dictionaryStructure.getMessages().get(name);
-        if (messageStructure == null) {
-            throw new EPSCommonException("Can't find structure for message " + name);
-        }
-
-        return new StrictMessageWrapper(msgFactory, messageStructure);
+    public IMessage createMessage(long id, String name, String namespace) {
+        return wrapMessage(msgFactory.createMessage(id, name, namespace));
     }
 
     @Override
@@ -95,5 +97,35 @@ public class StrictMessageFactoryWrapper implements IMessageFactory {
     @Override
     public String getProtocol() {
         return msgFactory.getProtocol();
+    }
+
+    @Override
+    protected void addSubMessage(IFieldStructure fieldStructure, IMessage parentMessage) {
+        IMessage subMessage = parentMessage.isFieldSet(fieldStructure.getName())
+                ? parentMessage.getField(fieldStructure.getName())
+                : msgFactory.createMessage(fieldStructure.getReferenceName(), fieldStructure.getNamespace());
+
+        StrictMessageWrapper strictMessage =  wrapMessage(subMessage);
+
+        parentMessage.addField(fieldStructure.getName(), strictMessage);
+    }
+
+    private StrictMessageWrapper wrapMessage(IMessage message) {
+        IMessageStructure messageStructure = getMessageStructure(message.getNamespace(), message.getName());
+        createComplexFields(message);
+        return new StrictMessageWrapper(message, messageStructure);
+    }
+
+    @NotNull
+    private IMessageStructure getMessageStructure(@NotNull String namespace, @NotNull String name) {
+        if (!Objects.equals(namespace, getNamespace())) {
+            throw new EPSCommonException(String.format("Unexpected namespace: [%s]. Expected: [%s]",namespace, getNamespace()));
+        }
+
+        IMessageStructure messageStructure = dictionaryStructure.getMessages().get(name);
+        if (messageStructure == null) {
+            throw new EPSCommonException("Dictionary '"+ getNamespace() +"' doesn't contain message '" + name + '\'');
+        }
+        return messageStructure;
     }
 }

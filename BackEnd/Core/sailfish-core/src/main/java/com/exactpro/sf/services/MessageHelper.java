@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.exactpro.sf.common.messages.structures.DictionaryConstants;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -34,10 +35,10 @@ import com.exactpro.sf.common.messages.structures.StructureUtils;
 
 public abstract class MessageHelper {
 
-    public static final String FIELD_MESSAGE_TYPE = "MessageType";
-    public static final String ATTRIBUTE_IS_ADMIN = "IsAdmin";
+    public static final String FIELD_MESSAGE_TYPE = DictionaryConstants.FIELD_MESSAGE_TYPE;
+    public static final String ATTRIBUTE_IS_ADMIN = DictionaryConstants.ATTRIBUTE_IS_ADMIN;
     public static final String ATTRIBUTE_MESSAGE_TYPE = FIELD_MESSAGE_TYPE;
-    public static final String ATTRIBUTE_DESCRIPTION_PREFIX = "DescriptionPrefix";
+    public static final String ATTRIBUTE_DESCRIPTION_PREFIX = DictionaryConstants.ATTRIBUTE_DESCRIPTION_PREFIX;
 
     private volatile IMessageFactory messageFactory;
     private volatile IDictionaryStructure dictionaryStructure;
