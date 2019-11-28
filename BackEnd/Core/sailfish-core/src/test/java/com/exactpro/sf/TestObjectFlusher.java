@@ -16,53 +16,56 @@
 
 package com.exactpro.sf;
 
+import java.io.Closeable;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.Closeable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.storage.IMeasurable;
 import com.exactpro.sf.storage.impl.ObjectFlusher;
 
 public class TestObjectFlusher {
 
-    private static final long timeToRun = 1000 * 10;
+    private static final int COUNT_ELEMENTS = 32;
+    private static final int SIZE_OF_OBJECT = 1024 * 1024;
+    private static final int BUFFER_SIZE = COUNT_ELEMENTS * 2;
+    private static final int ADD_ELEMENTS_FACTOR = 64;
+    private static final long TASK_TIMEOUT = 5;
+
+    private static final Logger logger = LoggerFactory.getLogger(TestObjectFlusher.class);
 
     @Test
     public void testOOM() throws Exception {
 
-        ObjectFlusher<OmNomNom> objectFlusher = new ObjectFlusher<>(o -> {
-            System.out.println("try to flush objects " + o.size());
-            Assert.assertEquals(32, o.size());//check that limit is not exceeded
-            System.out.println("objects flushed");
-        }, 32*2, 32*1024*1024); //flush thereshold is 64 but limit lower (only 32 objects)
+        AtomicInteger consumerCounter = new AtomicInteger();
+        ObjectFlusher<OmNomNom> objectFlusher = new ObjectFlusher<>(
+                list -> consumerCounter.addAndGet(list.size()),
+                COUNT_ELEMENTS * 2,
+                COUNT_ELEMENTS * SIZE_OF_OBJECT,
+                TASK_TIMEOUT
+        );
+
+        objectFlusher.start();
 
         try (Closeable closeable = objectFlusher::stop) {
-
-            long startTime = System.currentTimeMillis();
-            objectFlusher.start();
-            while (System.currentTimeMillis() - startTime <= timeToRun) {
+            for (int i = 0; i < BUFFER_SIZE * ADD_ELEMENTS_FACTOR; i++) {
                 objectFlusher.add(new OmNomNom());
             }
         }
 
+        logger.debug("Counting elements: %d. Max elements: %d", consumerCounter.get(), BUFFER_SIZE * ADD_ELEMENTS_FACTOR);
+        System.out.println(consumerCounter.get());
+        Assert.assertTrue(consumerCounter.get() < BUFFER_SIZE * ADD_ELEMENTS_FACTOR);
     }
 
     private class OmNomNom implements IMeasurable {
 
-        private byte[] eatRam = new byte[1024*1024];
-
         @Override
         public long getSize() {
-            return eatRam.length;
-        }
-
-        public byte[] getEatRam() {
-            return eatRam;
-        }
-
-        public void setEatRam(byte[] eatRam) {
-            this.eatRam = eatRam;
+            return SIZE_OF_OBJECT;
         }
     }
 

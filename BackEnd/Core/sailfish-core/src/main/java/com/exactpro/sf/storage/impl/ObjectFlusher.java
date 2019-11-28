@@ -40,7 +40,9 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
     private static final Logger USER_EVENTS_LOG = CommonLoggers.USER_EVENTS_LOGGER;
 
+    private static final long DEFAULT_FLUSH_TASK_TIMEOUT = 1000;
     private static final long JOIN_TIMEOUT = 2000;
+
 
     private final Lock monitor = new ReentrantLock(true);
     private final ReadWriteLock sourceMonitor = new ReentrantReadWriteLock();
@@ -49,6 +51,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     private final int bufferSize;
 
     private final long maxStorageQueueSize;
+    private final long flushTaskTimeout;
 
     private long storageProviderQueueSize;
     private long lastThrottleNotification;
@@ -104,10 +107,15 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     }
 
     public ObjectFlusher(IFlushProvider<T> provider, int bufferSize, long maxStorageQueueSize) {
+        this(provider, bufferSize, maxStorageQueueSize, DEFAULT_FLUSH_TASK_TIMEOUT);
+    }
+
+    public ObjectFlusher(IFlushProvider<T> provider, int bufferSize, long maxStorageQueueSize, long flushTaskTimeout) {
         this.provider = Objects.requireNonNull(provider, "provider cannot be null");
         this.bufferSize = bufferSize;
         this.objects = new ArrayList<>(bufferSize + 1);
         this.maxStorageQueueSize = maxStorageQueueSize;
+        this.flushTaskTimeout = flushTaskTimeout;
     }
 
     @Override
@@ -118,7 +126,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
                 throw new EPSCommonException("Cannot start flusher. Flusher is already started");
             }
     
-            flushTask = new FlushTask();
+            flushTask = new FlushTask(flushTaskTimeout);
             flushThread = new Thread(flushTask, logger.getName());
             flushThread.setDaemon(true);
             flushThread.start();
@@ -230,7 +238,11 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     }
     
     public class FlushTask implements Runnable {
-        private static final long TIMEOUT = 1000;
+        private final long timeout;
+
+        public FlushTask(long timeout) {
+            this.timeout = timeout;
+        }
 
         @Override
         public void run() {
@@ -258,7 +270,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
                     logger.debug("monitor locked");
 
                     if (wait) {
-                        needFlush.await(TIMEOUT, TimeUnit.MILLISECONDS);
+                        needFlush.await(timeout, TimeUnit.MILLISECONDS);
                     }
 
                     temp = objects;
