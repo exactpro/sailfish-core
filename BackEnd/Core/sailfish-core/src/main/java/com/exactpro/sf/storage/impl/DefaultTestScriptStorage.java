@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +87,7 @@ public class DefaultTestScriptStorage implements ITestScriptStorage {
 
     public static final String JSON_EXTENSION = "json";
     public static final String REPORT_DATA_DIR = "reportData";
-    public static final String ROOT_JSON_REPORT_FILE = REPORT_DATA_DIR + "/report." + JSON_EXTENSION;
+    public static final Path ROOT_JSON_REPORT_FILE = Paths.get(REPORT_DATA_DIR, "report." + JSON_EXTENSION);
 
     private static final String DATETIME_PATTERN_GROUP_NAME = "datetime";
     private static final Pattern DATETIME_PATTERN = Pattern.compile("[\\s\\S]+(?<datetime>[\\d]{8}_[\\d]{6}_[\\d]{3})");

@@ -324,7 +324,7 @@ cargo {
         // The home directory of your local container installation.
         //homeDir
         // The timeout (in ms) in which to determine if the container is successfully started or stopped (defaults to 120000ms).
-        timeout     = 60000
+        timeout     = 1200000
         installer {
             installUrl = tomcatUrl
             downloadDir = downloadFolder

@@ -37,8 +37,8 @@ public class ReportFilter implements FileFilter {
 
         return !file.isDirectory() && (
                 // checks that zip file has no json report file near it to avoid duplicating reports
-                (FilenameUtils.isExtension(file.getName(), ZipReport.ZIP_EXTENSION) && !(new File(file.getParentFile(), ROOT_JSON_REPORT_FILE).exists()))
-                || (file.getPath().endsWith(ROOT_JSON_REPORT_FILE))
+                (FilenameUtils.isExtension(file.getName(), ZipReport.ZIP_EXTENSION) && !file.getParentFile().toPath().resolve(ROOT_JSON_REPORT_FILE).toFile().exists())
+                || (file.toPath().endsWith(ROOT_JSON_REPORT_FILE))
         );
     }
 }
