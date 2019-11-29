@@ -71,7 +71,8 @@ public class VerificationEntry {
         }
 
         if (object instanceof IFilter) {
-            return ((IFilter)object).hasValue() ? ((IFilter)object).getValue().getClass().getSimpleName() : null;
+            Object value = ((IFilter)object).hasValue() ? ((IFilter)object).getValue() : null;
+            return value == null ? null : value.getClass().getSimpleName();
         }
 
         return object.getClass().getSimpleName();

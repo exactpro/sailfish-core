@@ -408,7 +408,7 @@ public class JsonReport implements IScriptReport {
         assertState(ContextType.ACTION, ContextType.ACTIONGROUP, ContextType.TESTCASE);
 
         try {
-            if (result.getMetaData() != null) {
+            if (result != null && result.getMetaData() != null) {
                 result = new ComparisonResult(result);
 
                 EnumReplacer.replaceEnums(result,
