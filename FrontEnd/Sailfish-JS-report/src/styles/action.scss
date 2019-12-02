@@ -86,7 +86,7 @@
     width: 100%;
     padding: 3px;
     display: grid;
-    grid-template-columns: 1fr 180px 70px;
+    grid-template-columns: 1fr 185px 70px;
     grid-template-rows: auto 1fr;
     grid-template-areas: "action-title action-controls action-controls"
                             "action-title action-start-time action-elapsed-time";
