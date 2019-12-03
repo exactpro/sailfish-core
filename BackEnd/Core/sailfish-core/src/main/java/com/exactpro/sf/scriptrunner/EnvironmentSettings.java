@@ -346,7 +346,7 @@ public class EnvironmentSettings implements ICommonSettings
         return excludedMessages;
     }
 
-    @Description("Messages which will not be stored in the DB, and the user will not see them in the report or in the Messages page.<br>" +
+    @Description("These messages will not be presented in a report.<br>" +
             "The excluded messages must be listed separated by commas and must have the same names as the ones set in the dictionary.<br>" +
             "This feature might be useful for messages like Heartbeat – this will allow to decrease the size of the report, thus, saving memory, excluding undescriptive messages.<br><br>" +
             "NOTE: Changes of this setting will be applied only after Sailfish restart.") //TODO color highlight
