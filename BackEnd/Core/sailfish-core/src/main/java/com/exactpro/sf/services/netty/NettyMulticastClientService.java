@@ -62,7 +62,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
             logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
                     serviceName);
 
-			nettySession = new NettySession(this, logConfigurator);
+			nettySession = createSession();
 
             initChannelHandlers(serviceContext);
 
