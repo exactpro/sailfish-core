@@ -31,11 +31,7 @@ interface MessageCardOuterProps extends MessageCardStateProps, MessageCardDispat
 
 interface WrapperProps extends MessageCardOuterProps, RecoveredProps {}
 
-const AdminMessageWrapperBase = ({ isExpanded, expandHandler, ...props }: WrapperProps) => {
-
-    // we need to remeasure card's height when 'isExpanded' state changed
-    React.useEffect(props.onExpand, [isExpanded]);
-
+function AdminMessageWrapperBase({ isExpanded, expandHandler, ...props }: WrapperProps) {
     if (isExpanded) {
         const expandButtonClass = createBemBlock(
             "mc-expand-btn", 

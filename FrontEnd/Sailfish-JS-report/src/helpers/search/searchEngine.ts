@@ -168,7 +168,7 @@ function findAllInVerificationEntries(entry: VerificationEntry, searchPattern: R
 
 /**
  * This funciton perfoms a search in a specific fields of target object 
- * and returns result as array of ["prefix - field name", number of search results] 
+ * and returns result as array of ["<prefix> - <field_name>", number of search results] 
  * @param target target object
  * @param fieldsList list of fields of target object that will be used to search in them
  * @param searchPattern target search string
@@ -181,7 +181,7 @@ function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchPattern
         const targetField = target[fieldName];
 
         if (typeof targetField !== 'string') {
-            if (targetField !== null) {
+            if (targetField != null) {
                 console.warn(`Trying to search on field that doesn't look like string (${fieldName})`);
             }
 

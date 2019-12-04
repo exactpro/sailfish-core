@@ -44,7 +44,7 @@ interface ActionChipsDispatchProps {
 
 interface ActionChipsProps extends ActionChipsOwnProps, ActionChipsStateProps, ActionChipsDispatchProps {}
 
-const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: ActionChipsProps) => {
+function MessageCardActionChipsBase({ actions, selectedStatus, selectHandler }: ActionChipsProps) {
 
     const className = createSelector(
         "mc-header__info",
@@ -63,7 +63,7 @@ const MessageCardActionChipsBase = ({ actions, selectedStatus, selectHandler }: 
             }
         </div>
     )
-};
+}
 
 export const MessageCardActionChips = connect(
     (state: AppState, ownProps: ActionChipsOwnProps): ActionChipsStateProps => ({

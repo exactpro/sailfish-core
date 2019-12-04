@@ -26,7 +26,7 @@ export interface SelectionCarouselProps {
     isEnabled?: boolean;
 }
 
-const SelectionCarousel = ({ itemsCount, currentIndex, next, prev, isEnabled = true }: SelectionCarouselProps) => {
+function SelectionCarousel({ itemsCount, currentIndex, next, prev, isEnabled = true }: SelectionCarouselProps) {
     return (
         <div className={createBemBlock("carousel", isEnabled ? null : "disabled")}>
             <div className={createBemElement("carousel", "icon", "prev", isEnabled ? null : "disabled")}

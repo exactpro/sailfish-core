@@ -41,7 +41,7 @@ interface DispatchProps {
 
 interface Props extends Omit<OwnProps, 'contentKey'>, StateProps, DispatchProps {}
 
-const SearchableContentBase = ({ content, startIndex, targetIndex, searchString, resultsCount, needsScroll, onScrolled }: Props) => {
+function SearchableContentBase({ content, startIndex, targetIndex, searchString, resultsCount, needsScroll, onScrolled }: Props) {
     if (!searchString || !content || !resultsCount) {
         return (
             <React.Fragment>{content}</React.Fragment>

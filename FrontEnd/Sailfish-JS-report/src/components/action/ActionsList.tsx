@@ -96,10 +96,9 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
         )
     }
 
-    private renderAction = (idx: number, onExpand: () => void): React.ReactElement => (
+    private renderAction = (idx: number): React.ReactElement => (
         <ActionTree 
-            action={this.props.actions[idx]}
-            onExpand={onExpand}/>
+            action={this.props.actions[idx]}/>
     )
 }   
 

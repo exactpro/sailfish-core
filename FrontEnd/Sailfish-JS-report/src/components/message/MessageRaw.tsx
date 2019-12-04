@@ -26,7 +26,7 @@ export interface MessageRawProps {
     rawContent: string;
 }
 
-export const MessageRaw = ({ rawContent }: MessageRawProps) => {
+export function MessageRaw({ rawContent }: MessageRawProps) {
 
     const [offset, hexadecimal, humanReadable] = splitRawContent(rawContent);
 

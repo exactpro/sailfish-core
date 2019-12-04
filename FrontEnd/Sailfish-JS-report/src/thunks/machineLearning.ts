@@ -158,11 +158,15 @@ export function fetchPredictions(actionId: number): ThunkAction<void, never, nev
     }
 }
 
-function getApiPath(): string {
+function getApiPath(): string | null {
     const url = window.location.href,
         searchParamsString = url.substring(url.lastIndexOf('?')),
         searchParams = new URLSearchParams(searchParamsString),
         apiPathParam = searchParams.get(API_PATH_SEARCH_KEY);
 
-    return decodeURI(apiPathParam);
+    if (apiPathParam != null) {
+        return decodeURI(apiPathParam);
+    } else {
+        return null;
+    }
 }

@@ -24,15 +24,13 @@ import { keyForUserTable } from '../../helpers/keys';
 interface UserTableCardProps {
     table: UserTable;
     parent: Action;
-    onExpand: () => void;
 }
 
-function UserTableCard({ parent, table, onExpand }: UserTableCardProps) {
+function UserTableCard({ parent, table }: UserTableCardProps) {
     return (
         <div className="ac-body__table">
             <RecoverableExpandablePanel
-                stateKey={keyForUserTable(table, parent)}
-                onExpand={onExpand}>
+                stateKey={keyForUserTable(table, parent)}>
                 <div className="ac-body__item-title">{table.name || "Custom table"}</div>
                 <CustomTable
                     content={table.content} />

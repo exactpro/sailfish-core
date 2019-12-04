@@ -24,12 +24,14 @@ interface Props {
     msgId: number;
 }
 
-const BeautifiedContent = ({content, msgId}: Props) => (
-    <pre className="mc-body__beautify-wrapper">
-        <SearchableContent 
-            content={beautify(content)} 
-            contentKey={keyForMessage(msgId, 'contentHumanReadable')}/>
-    </pre>
-)
+function BeautifiedContent({ content, msgId }: Props) {
+    return (
+        <pre className="mc-body__beautify-wrapper">
+            <SearchableContent 
+                content={beautify(content)} 
+                contentKey={keyForMessage(msgId, 'contentHumanReadable')}/>
+        </pre>
+    )
+}
 
 export default BeautifiedContent;

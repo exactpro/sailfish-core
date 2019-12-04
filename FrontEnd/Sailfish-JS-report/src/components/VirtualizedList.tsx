@@ -15,54 +15,43 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { AutoSizer, List, CellMeasurer, CellMeasurerCache, OnScrollParams } from 'react-virtualized';
-import RemeasureHandler from './util/RemeasureHandler';
 import { StatusType } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { raf } from '../helpers/raf';
+import { Virtuoso, TScrollContainer } from 'react-virtuoso';
+import ResizeObserver from 'react-resize-observer';
 
-interface VirtualizedListProps {
-    elementRenderer: (idx: number, measure?: () => void) => React.ReactNode;
+const DEFAULT_ITEM_HEIGHT = 60;
+
+const { Provider, Consumer } = React.createContext({
+    rowCount: 0,
+    rowHeightMap: {},
+    selectedElements: new Map<number, StatusType>()
+});
+
+interface Props {
+    elementRenderer: (idx: number) => React.ReactElement;
     rowCount: number;
     itemSpacing?: number;
 
     // for heatmap scrollbar
     selectedElements: Map<number, StatusType>;
-    
+
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.
     scrolledIndex?: Number;
 }
 
-export class VirtualizedList extends React.Component<VirtualizedListProps> {
-    
-    private readonly measurerCache = new CellMeasurerCache({
-        defaultHeight: 50,
-        fixedWidth: true
-    });
+type State = { [index: number]: number }
 
-    private list = React.createRef<List>();
-    private scrollbar = React.createRef<HeatmapScrollbar>();
+export class VirtualizedList extends React.Component<Props, State> {
 
-    private lastWidth = 0
-    private lastScrollTop = 0;
+    state = {}
 
-    public updateList() {
-        this.list.current && this.list.current.forceUpdateGrid();
-    }
+    private virtuoso = React.createRef<Virtuoso>();
 
-    public remeasureRow(index: number) {
-        this.measurerCache.clear(index, 0);
-        this.updateList();
-    }
-
-    public remeasureAll() {
-        this.measurerCache.clearAll();
-        this.updateList();
-    }
-
-    componentDidUpdate(prevProps: VirtualizedListProps) {
+    componentDidUpdate(prevProps: Props) {
         // Here we handle a situation, when primitive value of Number object doesn't changed 
         // and passing new index value in List doesn't make any effect (because it requires primitive value).
         // So we need to scroll List manually.
@@ -71,18 +60,17 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
             // so we need to wait until component is complete rerender after remeasuring changed rows, 
             // and then scroll to selected row.
             // Without it List will calculate wrong scrollTop because it contains outdated information about row's heights.
-            raf(() => {
-                this.list.current.scrollToRow(+this.props.scrolledIndex);
-            });
+            this.virtuoso.current.scrollToIndex({ index: +this.props.scrolledIndex, align: 'center' });
         }
     }
 
     componentDidMount() {
         if (this.props.scrolledIndex != null) {
             // we need raf here, because in componentDidMount virtualized list is not complete its render
+            
             raf(() => {
-                this.list.current.scrollToRow(+this.props.scrolledIndex);
-            });
+                this.virtuoso.current.scrollToIndex({ index: +this.props.scrolledIndex, align: 'center'});
+            }, 3);
         }
     }
 
@@ -90,72 +78,58 @@ export class VirtualizedList extends React.Component<VirtualizedListProps> {
         const { rowCount, selectedElements } = this.props;
 
         return (
-            <AutoSizer onResize={this.onResize}>
-                {({ height, width }) => (
-                    <HeatmapScrollbar
-                        height={height}
-                        width={width}
-                        elementsCount={rowCount}
-                        selectedElements={selectedElements}
-                        onScroll={this.scrollbarOnScroll}
-                        heightMapper={index => this.measurerCache.rowHeight({ index })}
-                        ref={this.scrollbar}>
-                        <List
-                            height={height}
-                            width={width}
-                            rowCount={rowCount}
-                            deferredMeasurementCache={this.measurerCache}
-                            rowHeight={this.measurerCache.rowHeight}
-                            rowRenderer={this.rowRenderer}
-                            onScroll={this.listOnScroll}
-                            scrollToAlignment="center"
-                            ref={this.list}
-                            style={{ overflowX: "visible", overflowY: "visible", paddingRight: 18 }}/>
-                    </HeatmapScrollbar>
-                )}
-            </AutoSizer>
+            <Provider value={{ selectedElements, rowCount, rowHeightMap: this.state }}>
+                <Virtuoso
+                    totalCount={rowCount}
+                    ref={this.virtuoso}
+                    overscan={3}
+                    ScrollContainer={ScrollContainer}
+                    item={this.itemRenderer} />
+            </Provider>
         )
     }
 
-    private rowRenderer = ({ index, key, parent, style }) => (
-        <CellMeasurer
-            cache={this.measurerCache}
-            columnIndex={0}
-            rowIndex={index}
-            parent={parent}
-            key={key}>
+    private itemRenderer = (index: number) => {
+        return (
+            <div style={{ position: 'relative' }}>
+                <ResizeObserver
+                    onResize={this.onItemResize(index)}/>
+                {this.props.elementRenderer(index)}
+            </div>
+        )
+    }
+
+    private onItemResize = (index: number) => (rect: DOMRect) => {
+        if (this.state[index] !== rect.height) {
+            this.setState({
+                [index]: rect.height
+            })
+        }
+    }
+}
+
+
+const ScrollContainer: TScrollContainer = ({ reportScrollTop, scrollTo, children }) => {
+    const elRef = React.useRef<HeatmapScrollbar>(null);
+
+    scrollTo((scrollTop: number) => {
+        elRef.current.scrollTop(scrollTop);
+    });
+
+    return (
+        <Consumer>
             {
-                ({ measure }) => (
-                    <RemeasureHandler 
-                        itemSpacing={this.props.itemSpacing}
-                        style={style}
-                        measureHandler={measure}>
-                        {this.props.elementRenderer(index, measure)}
-                    </RemeasureHandler>
+                ({ rowCount, rowHeightMap, selectedElements }) => (
+                    <HeatmapScrollbar
+                        ref={elRef}
+                        heightMapper={index => rowHeightMap[index] ?? DEFAULT_ITEM_HEIGHT}
+                        onScroll={(e: any) => reportScrollTop(e.target.scrollTop)}
+                        selectedElements={selectedElements}
+                        elementsCount={rowCount}>
+                        {children}
+                    </HeatmapScrollbar>
                 )
             }
-        </CellMeasurer>
+        </Consumer>
     )
-
-    private onResize = ({ width }) => {
-        if (width !== this.lastWidth) {
-            this.lastWidth = width;
-            this.measurerCache.clearAll();
-            this.updateList();
-        }
-    }
-
-    private scrollbarOnScroll = ({ target }) => {
-        const { scrollTop, scrollLeft } = target;
-
-        this.lastScrollTop = scrollTop;
-        this.list.current.Grid.handleScrollEvent({ scrollTop, scrollLeft });
-    }
-
-    private listOnScroll = ({ scrollTop }: OnScrollParams) => {
-        // Updating scrollTop for scrollbar when scroll trriggered by scrolledIndex change
-        if (scrollTop !== this.lastScrollTop) {
-            this.scrollbar.current && this.scrollbar.current.scrollTop(scrollTop);
-        }
-    }
 }

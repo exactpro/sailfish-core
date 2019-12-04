@@ -33,6 +33,7 @@
     grid-template-areas: "mc-labels mc-header"
                          "mc-labels mc-body";
     width: 100%;
+    margin: 6px 0;
 
     border: 2px solid var(--status-secondary-border-color);
     border-radius: $defaultCardBorderRadius;

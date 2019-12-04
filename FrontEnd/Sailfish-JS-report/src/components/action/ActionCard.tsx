@@ -38,11 +38,10 @@ interface CardProps {
     isTransaparent?: boolean;
     isExpanded?: boolean;
     onSelect?: (action: Action) => void;
-    onExpand: () => void;
     onRootExpand: (isExpanded: boolean) => void;
 }
 
-export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onExpand, onRootExpand }: CardProps) => {
+export function ActionCard({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onRootExpand }: CardProps) {
     const {
         id,
         matrixId,
@@ -134,15 +133,13 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                     <div className={inputParametersClassName}>
                         <SearchExpandablePanel
                             searchKeyPrefix={keyForAction(id, 'parameters')}
-                            stateKey={keyForAction(id, 'parameters')}
-                            onExpand={onExpand}>
+                            stateKey={keyForAction(id, 'parameters')}>
                             <div className="ac-body__item-title">Input parameters</div>
                             <ParamsTable
                                 actionId={action.id}
                                 stateKey={action.id + '-input-params-nodes'}
                                 params={parameters}
-                                name={name} 
-                                onExpand={onExpand} />
+                                name={name} />
                         </SearchExpandablePanel>
                     </div>
                     {
@@ -153,13 +150,11 @@ export const ActionCard = ({ action, children, isSelected, onSelect, isRoot, isT
                         action.status.status == StatusType.FAILED && action.status.cause != null ? (
                             <div className="action-card-status">
                                 <RecoverableExpandablePanel
-                                    stateKey={keyForAction(id, 'status')}
-                                    onExpand={onExpand}>
+                                    stateKey={keyForAction(id, 'status')}>
                                     <div className="ac-body__item-title">Status</div>
                                     <RecoverableExceptionChain 
                                         exception={action.status.cause}
-                                        stateKey={`${keyForAction(id, 'status')}-exception`}
-                                        onExpand={onExpand}/>
+                                        stateKey={`${keyForAction(id, 'status')}-exception`}/>
                                 </RecoverableExpandablePanel>
                             </div>
                         ) : null

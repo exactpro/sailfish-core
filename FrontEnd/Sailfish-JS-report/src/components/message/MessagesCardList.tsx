@@ -98,7 +98,7 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
         );
     }
 
-    private renderMessage = (index: number, onMeasure: () => void) => {
+    private renderMessage = (index: number) => {
 
         const message = this.props.messages[index];
 
@@ -109,7 +109,6 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
         if (isAdmin(message)) {
             return (
                 <AdminMessageWrapper
-                    onExpand={onMeasure}
                     key={message.id}
                     message={message}/>
             )
@@ -117,7 +116,6 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
 
         return (
             <MessageCard
-                onExpand={onMeasure}
                 key={message.id}
                 message={message}/>
         );

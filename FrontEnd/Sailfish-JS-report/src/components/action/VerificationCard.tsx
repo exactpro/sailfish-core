@@ -32,10 +32,9 @@ interface VerificationCardProps {
     isTransparent: boolean;
     parentActionId: number;
     onSelect: (messageId: number, rootActionId: number, status: StatusType) => any;
-    onExpand: () => void;
 }
 
-const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, parentActionId, onExpand }: VerificationCardProps) => {
+const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, parentActionId }: VerificationCardProps) => {
 
     const { status, messageId, entries, name } = verification;
 
@@ -54,8 +53,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
                 onClick={stopPropagationHandler(onSelect, messageId, parentActionId, status.status)}>
                 <SearchExpandablePanel
                     searchKeyPrefix={key}
-                    stateKey={key}
-                    onExpand={onExpand}>
+                    stateKey={key}>
                     <div className="ac-body__verification-title-wrapper">
                         <div className="ac-body__verification-title">
                             <span>{"Verification — "}</span>
@@ -72,8 +70,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
                         messageId={messageId}
                         stateKey={key + '-nodes'}
                         params={entries}
-                        status={status.status}
-                        onExpand={onExpand}/>
+                        status={status.status}/>
                 </SearchExpandablePanel>
             </div>
         </div>

@@ -25,7 +25,7 @@ interface StatusPanelProps {
     status: Status;
 }
 
-const StatusPanelBase = ({ status }: StatusPanelProps) => {
+function StatusPanelBase({ status }: StatusPanelProps) {
 
     if (status.cause == null) {
         return null;
