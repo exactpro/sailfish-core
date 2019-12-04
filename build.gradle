@@ -42,7 +42,7 @@ buildscript {
         classpath(group: 'com.bmuschko',                        name: 'gradle-tomcat-plugin',               version: '2.5')
         classpath(group: 'com.github.onslip',                   name: 'gradle-one-jar',                     version: '1.0.5')
         classpath(group: 'me.champeau.gradle',                  name: 'jmh-gradle-plugin',                  version: '0.2.0')
-        classpath(group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin',             version: '3.2.15', changing: true)
+        classpath(group: 'com.exactpro.sailfish-gradle-plugin', name: 'sailfish-gradle-plugin',             version: '3.2.16', changing: true)
         classpath(group: 'javax.xml.bind',                      name: 'jaxb-api',                           version: '2.2.11')
         classpath(group: 'com.github.ben-manes',                name: 'gradle-versions-plugin',             version: '0.20.0')
         classpath(group: 'com.bmuschko',                        name: 'gradle-cargo-plugin',                version: '2.4')
