@@ -1,6 +1,6 @@
 #id,#action,#timeout,OrderQty,#service_name,Text,OrdType,ClOrdID,SecurityIDSource,TransactTime,#reference,#dictionary,Side,#reference_to_filter,#message_type,SecurityID,#execute,#fail_on_unexpected_message,#description
 1,test case start,,,,,,,,,,,,,,,y,,First
-,Sleep,2000,,,,,,,,,,,,,,n,,
+,Sleep,10,,,,,,,,,,,,,,n,,
 ,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord1,FIX_5_0_GENERIC,1,ford1,NewOrderSingle,1,,,
 ,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord2,FIX_5_0_GENERIC,1,,NewOrderSingle,1,,,
 ,GetCheckPoint,5000,,,,,,,,checkPoint1,,,,,,,,
@@ -8,7 +8,7 @@
 ,receive,5000,,fake,"#{Expected(""S"").Bug(""Issue2"",${ord1.Text},""TestCategory1"", ""TestCategory2"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,,,
 ,test case end,,,,,,,,,,,,,,,,,
 2,test case start,,,,,,,,,,,,,,,n,,Second
-,Sleep,2000,,,,,,,,,,,,,,n,,
+,Sleep,10,,,,,,,,,,,,,,n,,
 ,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord1,FIX_5_0_GENERIC,1,ford1,NewOrderSingle,1,,,
 ,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord2,FIX_5_0_GENERIC,1,,NewOrderSingle,1,,,
 ,GetCheckPoint,5000,,,,,,,,checkPoint1,,,,,,,,
@@ -16,7 +16,7 @@
 ,receive,5000,,fake,"#{Expected(""S"").Bug(""Isssssue2"",${ord1.Text},""TestCssategory1"", ""TestCategory2"")}",,${ord1:ClOrdID},,,,FIX_5_0_GENERIC,${ord1:Side},,ExecutionReport,,,,
 ,test case end,,,,,,,,,,,,,,,,,
 3,test case start,,,,,,,,,,,,,,,y,n,Third
-,Sleep,2000,,,,,,,,,,,,,,n,,
+,Sleep,10,,,,,,,,,,,,,,n,,
 ,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord1,FIX_5_0_GENERIC,1,ford1,NewOrderSingle,1,y,,
 ,send,,1,fake,testText,1,1,1,java:LocalDateTime.now(),ord2,FIX_5_0_GENERIC,1,,NewOrderSingle,1,y,,
 ,GetCheckPoint,5000,,,,,,,,checkPoint1,,,,,,y,,
