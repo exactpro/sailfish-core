@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,51 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages.json.configuration;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.exactpro.sf.common.impl.messages.all.configuration.IDictionary;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.AttributesDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.AttributesSerializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.FieldsDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.FieldsSerializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.MessagesDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.MessagesSerializeConverter;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Json class for reading IDictionary from JSON/YAML formats.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class JsonYamlDictionary implements IDictionary {
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private static final long serialVersionUID = -5925008026309305864L;
+
+    @JsonInclude(Include.NON_EMPTY)
     protected String description;
 
-    @JsonDeserialize(converter = Converters.AttributesDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.AttributesSerializeConverter.class)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonDeserialize(converter = AttributesDeserializeConverter.class)
+    @JsonSerialize(converter = AttributesSerializeConverter.class)
+    @JsonInclude(Include.NON_EMPTY)
     protected List<JsonAttribute> attributes;
 
-    @JsonDeserialize(converter = Converters.FieldsDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.FieldsSerializeConverter.class)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonDeserialize(converter = FieldsDeserializeConverter.class)
+    @JsonSerialize(converter = FieldsSerializeConverter.class)
+    @JsonInclude(Include.NON_EMPTY)
     protected List<JsonField> fields;
 
-    @JsonDeserialize(converter = Converters.MessagesDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.MessagesSerializeConverter.class)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonDeserialize(converter = MessagesDeserializeConverter.class)
+    @JsonSerialize(converter = MessagesSerializeConverter.class)
+    @JsonInclude(Include.NON_EMPTY)
     protected List<JsonMessage> messages;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(Include.NON_EMPTY)
     protected String name;
 
     @JsonCreator
@@ -104,7 +116,7 @@ public class JsonYamlDictionary implements IDictionary {
      */
     @Override
     public List<JsonAttribute> getAttributes() {
-        return attributes == null ? Collections.emptyList() : Collections.unmodifiableList(this.attributes);
+        return attributes == null ? Collections.emptyList() : Collections.unmodifiableList(attributes);
     }
 
     /**
@@ -112,7 +124,7 @@ public class JsonYamlDictionary implements IDictionary {
      *
      * @return
      *     possible object is
-     *     {@link List< JsonField > }
+     *     {@link List<JsonField> }
      *
      */
     @Override
@@ -125,7 +137,7 @@ public class JsonYamlDictionary implements IDictionary {
      *
      * @param value
      *     allowed object is
-     *     {@link List< JsonField > }
+     *     {@link List<JsonField> }
      *
      */
     public void setFields(List<JsonField> value) {
@@ -137,7 +149,7 @@ public class JsonYamlDictionary implements IDictionary {
      *
      * @return
      *     possible object is
-     *     {@link List< JsonMessage > }
+     *     {@link List<JsonMessage> }
      *
      */
     @Override
@@ -150,7 +162,7 @@ public class JsonYamlDictionary implements IDictionary {
      *
      * @param value
      *     allowed object is
-     *     {@link List< JsonMessage  >}
+     *     {@link List<JsonMessage>}
      *
      */
     public void setMessages(List<JsonMessage> value) {

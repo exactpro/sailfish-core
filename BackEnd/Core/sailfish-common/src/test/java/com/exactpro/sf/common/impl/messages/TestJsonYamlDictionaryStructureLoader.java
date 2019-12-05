@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.Map;
+
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -22,8 +41,8 @@ import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.messages.structures.StructureType;
-import com.exactpro.sf.common.messages.structures.loaders.JsonYamlDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
+import com.exactpro.sf.common.messages.structures.loaders.JsonYamlDictionaryStructureLoader;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.util.EPSTestCase;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -31,22 +50,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import java.util.Map;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
 
@@ -157,7 +160,8 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
     public void testDuplicatedValuesNameInField() throws Exception {
         exception.expect(EPSCommonException.class);
         exception.expectMessage("Wrong input format");
-        exception.expectCause(new CauseMatcher(JsonMappingException.class, "Duplicate key \"normal\" (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"fields\"]->com.exactpro.sf.common.util.SingleKeyHashMap[\"test\"]->com.exactpro.sf.common.impl.messages.json.configuration.JsonField[\"values\"]->com.exactpro.sf.common.util.SingleKeyHashMap[\"normal\"])"));
+        exception.expectCause(new CauseMatcher(JsonMappingException.class, "Duplicate field 'normal'\n"
+                + " at [Source: (FileInputStream); line: 10, column: 9] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"fields\"])"));
 
         loadDictionaryFrom("sameValuesName.json");
 
@@ -167,7 +171,9 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
     public void testDuplicatedMessagesName() throws Exception {
         exception.expect(EPSCommonException.class);
         exception.expectMessage("Wrong input format");
-        exception.expectCause(new CauseMatcher(JsonMappingException.class, "Duplicate key \"message_name\" (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"messages\"]->com.exactpro.sf.common.util.SingleKeyHashMap[\"message_name\"])"));
+        exception.expectCause(new CauseMatcher(JsonMappingException.class, "Duplicate field 'message_name'\n"
+                + " at [Source: (FileInputStream); line: 11, column: 5] (through reference chain: com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary[\"messages\"])"));
+
         loadDictionaryFrom("sameNames.json");
     }
 
@@ -251,83 +257,116 @@ public class TestJsonYamlDictionaryStructureLoader extends EPSTestCase {
 
     @Test
     public void testMessageInheritance() throws Exception {
-            Map<String, IMessageStructure> messages = loadDictionaryFrom("message-inheritance.json").getMessages();
+        Map<String, IMessageStructure> messages = loadDictionaryFrom("message-inheritance.json").getMessages();
 
-            Assert.assertEquals(newHashSet("Parent", "ChildA", "ChildB"), messages.keySet());
+        Assert.assertEquals(newHashSet("Parent", "ChildA", "ChildB"), messages.keySet());
 
-            // Parent
+        // Parent
 
-            IMessageStructure message = messages.get("Parent");
-            Map<String, IAttributeStructure> attributes = message.getAttributes();
-            Map<String, IFieldStructure> fields = message.getFields();
+        IMessageStructure message = messages.get("Parent");
+        Map<String, IAttributeStructure> attributes = message.getAttributes();
+        Map<String, IFieldStructure> fields = message.getFields();
 
-            Assert.assertEquals(singleton("AttributeA"), attributes.keySet());
-            Assert.assertEquals(singleton("FieldA"), fields.keySet());
+        Assert.assertEquals(singleton("AttributeA"), attributes.keySet());
+        Assert.assertEquals(singleton("FieldA"), fields.keySet());
 
-            IAttributeStructure attributeA = attributes.get("AttributeA");
+        IAttributeStructure attributeA = attributes.get("AttributeA");
 
-            Assert.assertEquals("AttributeA", attributeA.getName());
-            Assert.assertEquals("ValueA", attributeA.getValue());
+        Assert.assertEquals("AttributeA", attributeA.getName());
+        Assert.assertEquals("ValueA", attributeA.getValue());
 
-            IFieldStructure fieldA = fields.get("FieldA");
+        IFieldStructure fieldA = fields.get("FieldA");
 
-            Assert.assertEquals("FieldA", fieldA.getName());
-            Assert.assertEquals("String", fieldA.getReferenceName());
+        Assert.assertEquals("FieldA", fieldA.getName());
+        Assert.assertEquals("String", fieldA.getReferenceName());
 
-            // Child A <- Parent
+        // Child A <- Parent
 
-            message = messages.get("ChildA");
-            attributes = message.getAttributes();
-            fields = message.getFields();
+        message = messages.get("ChildA");
+        attributes = message.getAttributes();
+        fields = message.getFields();
 
-            Assert.assertEquals(newHashSet("AttributeA", "AttributeB"), attributes.keySet());
-            Assert.assertEquals(asList("FieldA", "FieldB"), newArrayList(fields.keySet()));
+        Assert.assertEquals(newHashSet("AttributeA", "AttributeB"), attributes.keySet());
+        Assert.assertEquals(asList("FieldA", "FieldB"), newArrayList(fields.keySet()));
 
-            attributeA = attributes.get("AttributeA");
-            IAttributeStructure attributeB = attributes.get("AttributeB");
+        attributeA = attributes.get("AttributeA");
+        IAttributeStructure attributeB = attributes.get("AttributeB");
 
-            Assert.assertEquals("AttributeA", attributeA.getName());
-            Assert.assertEquals("ValueA", attributeA.getCastValue());
-            Assert.assertEquals("AttributeB", attributeB.getName());
-            Assert.assertEquals("ValueB", attributeB.getCastValue());
+        Assert.assertEquals("AttributeA", attributeA.getName());
+        Assert.assertEquals("ValueA", attributeA.getCastValue());
+        Assert.assertEquals("AttributeB", attributeB.getName());
+        Assert.assertEquals("ValueB", attributeB.getCastValue());
 
-            fieldA = fields.get("FieldA");
-            IFieldStructure fieldB = fields.get("FieldB");
+        fieldA = fields.get("FieldA");
+        IFieldStructure fieldB = fields.get("FieldB");
 
-            Assert.assertEquals("FieldA", fieldA.getName());
-            Assert.assertEquals("String", fieldA.getReferenceName());
-            Assert.assertEquals("FieldB", fieldB.getName());
-            Assert.assertEquals("Integer", fieldB.getReferenceName());
+        Assert.assertEquals("FieldA", fieldA.getName());
+        Assert.assertEquals("String", fieldA.getReferenceName());
+        Assert.assertEquals("FieldB", fieldB.getName());
+        Assert.assertEquals("Integer", fieldB.getReferenceName());
 
-            // Child B <- Child A <- Parent
+        // Child B <- Child A <- Parent
 
-            message = messages.get("ChildB");
-            attributes = message.getAttributes();
-            fields = message.getFields();
+        message = messages.get("ChildB");
+        attributes = message.getAttributes();
+        fields = message.getFields();
 
-            Assert.assertEquals(newHashSet("AttributeA", "AttributeB", "AttributeC"), attributes.keySet());
-            Assert.assertEquals(asList("FieldA", "FieldB", "FieldC"), newArrayList(fields.keySet()));
+        Assert.assertEquals(newHashSet("AttributeA", "AttributeB", "AttributeC"), attributes.keySet());
+        Assert.assertEquals(asList("FieldA", "FieldB", "FieldC"), newArrayList(fields.keySet()));
 
-            attributeA = attributes.get("AttributeA");
-            attributeB = attributes.get("AttributeB");
-            IAttributeStructure attributeC = attributes.get("AttributeC");
+        attributeA = attributes.get("AttributeA");
+        attributeB = attributes.get("AttributeB");
+        IAttributeStructure attributeC = attributes.get("AttributeC");
 
-            Assert.assertEquals("AttributeA", attributeA.getName());
-            Assert.assertEquals(1L, (long)attributeA.getCastValue());
-            Assert.assertEquals("AttributeB", attributeB.getName());
-            Assert.assertEquals("ValueB", attributeB.getCastValue());
-            Assert.assertEquals("AttributeC", attributeC.getName());
-            Assert.assertEquals("ValueC", attributeC.getCastValue());
+        Assert.assertEquals("AttributeA", attributeA.getName());
+        Assert.assertEquals(1L, (long)attributeA.getCastValue());
+        Assert.assertEquals("AttributeB", attributeB.getName());
+        Assert.assertEquals("ValueB", attributeB.getCastValue());
+        Assert.assertEquals("AttributeC", attributeC.getName());
+        Assert.assertEquals("ValueC", attributeC.getCastValue());
 
-            fieldA = fields.get("FieldA");
-            fieldB = fields.get("FieldB");
-            IFieldStructure fieldC = fields.get("FieldC");
+        fieldA = fields.get("FieldA");
+        fieldB = fields.get("FieldB");
+        IFieldStructure fieldC = fields.get("FieldC");
 
-            Assert.assertEquals("FieldA", fieldA.getName());
-            Assert.assertEquals("Integer", fieldA.getReferenceName());
-            Assert.assertEquals("FieldB", fieldB.getName());
-            Assert.assertEquals("Integer", fieldB.getReferenceName());
-            Assert.assertEquals("FieldC", fieldC.getName());
-            Assert.assertEquals("String", fieldC.getReferenceName());
-        }
+        Assert.assertEquals("FieldA", fieldA.getName());
+        Assert.assertEquals("Integer", fieldA.getReferenceName());
+        Assert.assertEquals("FieldB", fieldB.getName());
+        Assert.assertEquals("Integer", fieldB.getReferenceName());
+        Assert.assertEquals("FieldC", fieldC.getName());
+        Assert.assertEquals("String", fieldC.getReferenceName());
+    }
+
+    private void testEmbeddedDictionary(IDictionaryStructure dictionary) {
+        Assert.assertEquals(dictionary.getNamespace(), "embeddedMessage");
+        Assert.assertEquals(dictionary.getAttributes().size(), 1);
+        Assert.assertEquals(dictionary.getAttributes().get("DictionaryAttr").getValue(), "test_attr");
+        Assert.assertEquals(dictionary.getFields().size(), 2);
+        Assert.assertEquals(dictionary.getFields().get("MessageType").getJavaType().value(), "java.lang.Short");
+        Assert.assertEquals(dictionary.getMessages().size(), 2);
+        Assert.assertTrue(dictionary.getMessages().get("Heartbeat").getFields().get("MessageHeader") instanceof IMessageStructure);
+        Assert.assertTrue(dictionary.getMessages().get("Heartbeat").getFields().get("MessageHeader").isComplex());
+        Assert.assertEquals(dictionary.getMessages().get("MissedMessageRequest").getAttributes().size(), 1);
+        Assert.assertEquals(dictionary.getMessages().get("MissedMessageRequest").getFields().size(), 3);
+    }
+
+    @Test
+    public void testEmbeddedMessageJson() throws IOException {
+        IDictionaryStructure dictionary = loadDictionaryFrom("embeddedMessage.json");
+        testEmbeddedDictionary(dictionary);
+    }
+
+    @Test
+    public void testEmbeddedMessageYaml() throws IOException {
+        IDictionaryStructure dictionary = loadDictionaryFrom("embeddedMessage.yaml");
+        testEmbeddedDictionary(dictionary);
+    }
+
+    @Test
+    public void testMessageInFields() throws Exception {
+        exception.expect(EPSCommonException.class);
+        exception.expectMessage("It is impossible to keep message 'Short' in fields");
+
+        loadDictionaryFrom("messageInFields.json");
+    }
 }

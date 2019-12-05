@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import static java.util.Collections.singleton;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -271,5 +274,19 @@ public class TestDictionaryStructureLoader extends EPSTestCase {
             Assert.assertEquals("FieldC", fieldC.getName());
             Assert.assertEquals("String", fieldC.getReferenceName());
         }
+    }
+
+    @Test
+    public void testEmbeddedMessages() throws IOException {
+        IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
+
+        IDictionaryStructure dictionaryStructure;
+        try (InputStream inputStream = new FileInputStream(Paths.get(path,"embeddedMessage.xml").toFile())) {
+            dictionaryStructure = loader.load(inputStream);
+        }
+
+        Assert.assertEquals(2, dictionaryStructure.getMessages().size());
+        Assert.assertTrue(dictionaryStructure.getMessages().get("Heartbeat").getFields().get("MessageHeader") instanceof IMessageStructure);
+
     }
 }

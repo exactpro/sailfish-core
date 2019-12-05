@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,14 +48,14 @@ public class FieldStructure implements IFieldStructure {
     }
 	
 	public FieldStructure(String name, String namespace, String description, String referenceName,
-			  Map<String, IAttributeStructure> attributes, Map<String, IAttributeStructure> values,
+			  Map<String, ? extends IAttributeStructure> attributes, Map<String, ? extends IAttributeStructure> values,
 			  JavaType javaType, boolean isRequired, boolean isCollection, boolean isServiceName, String defaultValue) throws EPSCommonException {
 		this(name, namespace, description, referenceName, attributes, values, javaType,
 				isRequired, isCollection, isServiceName, defaultValue, null);
 	}
 
 	protected FieldStructure(String name, String namespace, String description, String referenceName,
-			  Map<String, IAttributeStructure> attributes, Map<String, IAttributeStructure> values, JavaType javaType, boolean isRequired,
+			  Map<String, ? extends IAttributeStructure> attributes, Map<String, ? extends IAttributeStructure> values, JavaType javaType, boolean isRequired,
 			  boolean isCollection, boolean isServiceName, String defaultValue, StructureType structureType) throws EPSCommonException {
 		this.name = name;
 		this.namespace = namespace;

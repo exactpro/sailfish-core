@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages.xml.configuration;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.IDictionary;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.exactpro.sf.common.impl.messages.all.configuration.IDictionary;
 
 /**
  * Json class for adapter for {@link Dictionary}.
@@ -43,7 +44,7 @@ public class XMLDictionary implements IDictionary {
      * @param fieldMap {@link Map}<{@link String}, {@link XMLField}
      * @return Adapter for object <b>field</b>.
      */
-    private XMLField createBeanWithReference(Field field, List<XMLField> listOfField, List<XMLMessage> listOfMessage, Map<String, XMLField> fieldMap) {
+    private XMLField createBeanWithReference(Field field, List<XMLField> listOfField, List<? super XMLMessage> listOfMessage, Map<String, XMLField> fieldMap) {
         if (field == null) {
             return null;
         }
@@ -109,8 +110,8 @@ public class XMLDictionary implements IDictionary {
             for (Message message : dictionary.getMessages().getMessages()) {
                 XMLMessage messageAdapter = (XMLMessage) createBeanWithReference(message, fields, messages, fieldMap);
 
-                for (Field field : message.getFields()) {
-                    createBeanWithReference(field, messageAdapter.getFields(), null, fieldMap);
+                for (Field field : message.getFieldsAndMessages()) {
+                    createBeanWithReference(field, messageAdapter.getFields(), messageAdapter.getFields(), fieldMap);
                 }
             }
         } else {

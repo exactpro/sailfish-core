@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,22 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures.loaders;
 
-import com.sun.istack.NotNull;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.impl.messages.all.configuration.IAttribute;
 import com.exactpro.sf.common.impl.messages.all.configuration.IDictionary;
@@ -34,27 +48,15 @@ import com.exactpro.sf.common.messages.structures.impl.DictionaryStructure;
 import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import com.exactpro.sf.common.messages.structures.impl.MessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.sun.istack.NotNull;
 
 /**
  * Java class for implements {@link IDictionaryStructureLoader} with special rules and features.
  */
 public abstract class AbstractDictionaryStructureLoader implements IDictionaryStructureLoader{
 
-    private final boolean aggregate;
-    private final Set<String> pendingMessages = new HashSet<>();
+    protected final boolean aggregate;
+    protected final Set<String> pendingMessages = new HashSet<>();
 
     protected final Logger logger;
 
@@ -72,13 +74,25 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
      * @param inputStream {@link InputStream}
      * @return {@link IDictionary}
      */
-    public abstract IDictionary getDictionary(InputStream inputStream);
+    public abstract IDictionary getDictionary(InputStream inputStream) throws EPSCommonException;
 
+    /**
+     * Create IDictionary from specific input format
+     * @param input {@link InputStream}
+     * @return
+     * @throws EPSCommonException
+     */
     @Override
     public IDictionaryStructure load(InputStream input) throws EPSCommonException {
         return convert(getDictionary(input));
     }
 
+    /**
+     * Get IDictionary namespace from specific input format
+     * @param input {@link InputStream}
+     * @return
+     * @throws EPSCommonException
+     */
     @Override
     public String extractNamespace(InputStream input) throws EPSCommonException {
         return getDictionary(input).getName();
@@ -110,7 +124,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
             }
 
             if (isComplex(field)) {
-                throw new EPSCommonException("It is impossible to keep messages in fields");
+                throw new EPSCommonException(String.format("It is impossible to keep message '%s' in fields", field.getName()));
             } else {
 
                 JavaType javaType = getFieldType(field, true);
@@ -193,7 +207,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
 
         try {
             Map<String, IFieldStructure> fields = createFieldStructures(builder, message, namespace);
-            Map<String, IAttributeStructure> attributes = getAttributes(message, false, null);
+            Map<String, ? extends IAttributeStructure> attributes = getAttributes(message, false, null);
             IMessageStructure referencedMessage = null;
 
             if (reference != null) {
@@ -237,8 +251,8 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
         String referenceName = field.getReference() != null ? field.getReference().getName() : null;
 
         try {
-            Map<String, IAttributeStructure> attributes = getAttributes(field, false, null);
-            Map<String, IAttributeStructure> values = (!isTemplate && referenceName == null) ? null : getAttributes(field, true, javaType);
+            Map<String, ? extends IAttributeStructure> attributes = getAttributes(field, false, null);
+            Map<String, ? extends IAttributeStructure> values = (!isTemplate && referenceName == null) ? null : getAttributes(field, true, javaType);
 
             return new FieldStructure(name, namespace, description, referenceName, attributes, values,
                     defaultIfNull(javaType, JavaType.JAVA_LANG_STRING), isRequired, isCollection, isServiceName, defaultValue);
@@ -250,7 +264,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
     }
 
     protected IMessageStructure createMessageStructure(IMessage message, String id, String name, String namespace, String description,
-                                                       Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+                                                       Map<String, IFieldStructure> fields, Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 
         return new MessageStructure(name, namespace, description, fields, attributes, reference);
     }
@@ -259,7 +273,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
                                                        String description, Boolean isRequired, Boolean isCollection, IMessageStructure reference) {
 
         try {
-            Map<String, IAttributeStructure> attributes = getAttributes(field, false, null);
+            Map<String, ? extends IAttributeStructure> attributes = getAttributes(field, false, null);
 
             return new MessageStructure(name, namespace, description, isRequired, isCollection, attributes, reference);
         } catch (RuntimeException e) {
@@ -286,20 +300,24 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
         return field.getReference() != null ? getDefaultValue(field.getReference(), true) : null;
     }
 
-    private Map<String, IFieldStructure> createFieldStructures(StructureBuilder builder, IMessage message, String namespace) {
+    protected Map<String, IFieldStructure> createFieldStructures(StructureBuilder builder, IMessage message, String namespace) {
         Map<String, IFieldStructure> result = new LinkedHashMap<>();
 
         for (IField field : message.getFields()) {
 
             IFieldStructure fieldStructure;
 
-            if (field.getReference() != null && field.getReference() instanceof IMessage) {
+            if (field instanceof IMessage || field.getReference() instanceof IMessage) {
 
-                IMessageStructure struct = builder.getMessageStructure(field.getReference().getName());
+                IMessageStructure struct = null;
 
-                if (struct == null) {
-                    convertMessage(namespace, builder, (IMessage) field.getReference());
+                if (field.getReference() != null) {
                     struct = builder.getMessageStructure(field.getReference().getName());
+
+                    if (struct == null) {
+                        convertMessage(namespace, builder, (IMessage)field.getReference());
+                        struct = builder.getMessageStructure(field.getReference().getName());
+                    }
                 }
 
                 fieldStructure = createMessageStructure((IMessage) field.getReference(), field, field.getId(),
@@ -328,6 +346,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
                         field.isIsServiceName(),
                         defVal
                 );
+
             }
 
             if(result.put(fieldStructure.getName(), fieldStructure) != null) {
@@ -377,7 +396,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
         return reference != null && isComplex(reference);
     }
 
-    private Map<String, IAttributeStructure> getAttributes(IField field, boolean isValues, JavaType javaType) {
+    protected Map<String, ? extends IAttributeStructure> getAttributes(IField field, boolean isValues, JavaType javaType) {
         List<IAttribute> attributes = new ArrayList<>();
 
         if (isValues) {
@@ -438,7 +457,8 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
             }
         }
     }
-    protected static boolean replaceOrAdd(Collection<IAttribute> attributes, IAttribute attribute) {
+
+    private static boolean replaceOrAdd(Collection<IAttribute> attributes, IAttribute attribute) {
         boolean removed = false;
         Iterator<IAttribute> iterator = attributes.iterator();
         while (iterator.hasNext()) {
@@ -454,7 +474,7 @@ public abstract class AbstractDictionaryStructureLoader implements IDictionarySt
         return removed;
     }
 
-    protected static Object getAttributeValue(IAttribute attribute, JavaType javaType) {
+    private static Object getAttributeValue(IAttribute attribute, JavaType javaType) {
 
         javaType = defaultIfNull(defaultIfNull(javaType, attribute.getType()), JavaType.JAVA_LANG_STRING);
 

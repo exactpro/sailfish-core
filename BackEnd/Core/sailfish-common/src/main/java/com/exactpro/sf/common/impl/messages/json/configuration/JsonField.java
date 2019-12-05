@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,65 +15,75 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages.json.configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.BooleanUtils;
+
 import com.exactpro.sf.common.impl.messages.all.configuration.IField;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.AttributesDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.AttributesSerializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.JavaTypeDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.JavaTypeSerializeConverter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Java class for reading IField from JSON/YAML formats.
  */
 public class JsonField implements IField {
 
+    private static final long serialVersionUID = -1693691200344421640L;
+
     @JsonIgnore
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(Include.NON_EMPTY)
     protected String name;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    @JsonAlias(value = {"desc"})
+    @JsonInclude(Include.NON_EMPTY)
+    @JsonAlias("desc")
     protected String description;
 
-    @JsonDeserialize(converter = Converters.AttributesDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.AttributesSerializeConverter.class)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonDeserialize(converter = AttributesDeserializeConverter.class)
+    @JsonSerialize(converter = AttributesSerializeConverter.class)
+    @JsonInclude(Include.NON_EMPTY)
     protected List<JsonAttribute> attributes;
 
-    @JsonDeserialize(converter = Converters.AttributesDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.AttributesSerializeConverter.class)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonDeserialize(converter = AttributesDeserializeConverter.class)
+    @JsonSerialize(converter = AttributesSerializeConverter.class)
+    @JsonInclude(Include.NON_EMPTY)
     protected List<JsonAttribute> values;
 
     @JsonProperty("isServiceName")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     protected Boolean isServiceName;
 
     @JsonProperty("isCollection")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     protected Boolean isCollection;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(Include.NON_NULL)
     protected String defaultValue;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonDeserialize(converter = Converters.JavaTypeDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.JavaTypeSerializeConverter.class)
+    @JsonInclude(Include.NON_NULL)
+    @JsonDeserialize(converter = JavaTypeDeserializeConverter.class)
+    @JsonSerialize(converter = JavaTypeSerializeConverter.class)
     protected JavaType type;
 
     @JsonIgnore
     protected JsonField reference;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonAlias(value = {"ref"})
+    @JsonInclude(Include.NON_NULL)
+    @JsonAlias("ref")
     protected String referenceName;
 
     @JsonProperty("required")
-    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @JsonInclude(Include.NON_DEFAULT)
     protected Boolean required;
 
     /**
@@ -128,7 +138,7 @@ public class JsonField implements IField {
         if (attributes == null) {
             attributes = new ArrayList<>();
         }
-        return this.attributes;
+        return attributes;
     }
 
     /**
@@ -158,7 +168,7 @@ public class JsonField implements IField {
         if (values == null) {
             values = new ArrayList<>();
         }
-        return this.values;
+        return values;
     }
 
     /**
@@ -171,7 +181,7 @@ public class JsonField implements IField {
      */
     @Override
     public boolean isIsServiceName() {
-        return isServiceName != null ? isServiceName : false;
+        return BooleanUtils.isTrue(isServiceName);
     }
 
 
@@ -203,7 +213,7 @@ public class JsonField implements IField {
      */
     @Override
     public boolean isIsCollection() {
-        return isCollection != null ? isCollection : false;
+        return BooleanUtils.isTrue(isCollection);
     }
 
 
@@ -343,7 +353,7 @@ public class JsonField implements IField {
      */
     @Override
     public boolean isRequired() {
-        return required != null ? required : false;
+        return BooleanUtils.isTrue(required);
     }
 
     /**

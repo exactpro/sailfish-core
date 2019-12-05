@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,17 +38,17 @@ public class MessageStructure extends FieldStructure implements IMessageStructur
 	}
 
 	public MessageStructure(String name, String namespace, String description, boolean isRequired, boolean isCollection,
-			Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+			Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 		this(name, namespace, description, null, isRequired, isCollection, attributes, reference);
 	}
 
     public MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
-            Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+            Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
         this(name, namespace, description, fields, false, false, attributes, reference);
 	}
 
     private MessageStructure(String name, String namespace, String description, Map<String, IFieldStructure> fields,
-			boolean isRequired, boolean isCollection, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+			boolean isRequired, boolean isCollection, Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 		super(name, namespace, description, reference != null ? reference.getName() : null, attributes,
 				null, null, isRequired, isCollection, false, null, StructureType.COMPLEX);
         if (fields != null) {

@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages.xml.configuration;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.IMessage;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.exactpro.sf.common.impl.messages.all.configuration.IMessage;
 
 /**
  * Json class for adapter for {@link Message}.
@@ -30,7 +31,7 @@ public class XMLMessage extends XMLField implements IMessage {
 
     public XMLMessage(Message message) {
         super(message);
-        fields = new ArrayList<>(message.getFields().size());
+        fields = new ArrayList<>(message.getFieldsAndMessages().size());
     }
 
     @Override

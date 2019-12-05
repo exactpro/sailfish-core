@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, ModifiableAttributeStructure> getAttributes(IField field, boolean isValues, JavaType javaType) {
+	protected Map<String, ModifiableAttributeStructure> getAttributes(IField field, boolean isValues, JavaType javaType) {
 	    List<IAttribute> attributes = new ArrayList<>();
 
 	    if (isValues) {
@@ -138,7 +138,7 @@ public class ModifiableXmlDictionaryStructureLoader extends XmlDictionaryStructu
 	@SuppressWarnings("unchecked")
 	@Override
 	protected ModifiableMessageStructure createMessageStructure(IMessage message, String id, String name, String namespace,
-		String description, Map<String, IFieldStructure> fields, Map<String, IAttributeStructure> attributes, IMessageStructure reference) {
+		String description, Map<String, IFieldStructure> fields, Map<String, ? extends IAttributeStructure> attributes, IMessageStructure reference) {
 
 		return new ModifiableMessageStructure(id, name, namespace, description,
                 (Map<String, ModifiableFieldStructure>)(Map<String, ?>)fields,

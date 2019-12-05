@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@
 package com.exactpro.sf.common.impl.messages.json.configuration;
 
 import com.exactpro.sf.common.impl.messages.all.configuration.IAttribute;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.JavaTypeDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.JavaTypeSerializeConverter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -27,15 +30,17 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  */
 public class JsonAttribute implements IAttribute {
 
+    private static final long serialVersionUID = -8626993227337798955L;
+
     @JsonIgnore
     protected String name;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    @JsonDeserialize(converter = Converters.JavaTypeDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.JavaTypeSerializeConverter.class)
+    @JsonInclude(Include.NON_NULL)
+    @JsonDeserialize(converter = JavaTypeDeserializeConverter.class)
+    @JsonSerialize(converter = JavaTypeSerializeConverter.class)
     protected JavaType type;
 
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(Include.NON_EMPTY)
     protected String value;
 
     /**
