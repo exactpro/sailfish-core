@@ -21,17 +21,17 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.exactpro.sf.aml.iomatrix.MatrixFileTypes;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 
 public class LocalMatrixProviderFactory implements IMatrixProviderFactory {
 
-    public static final String CSV_POSTFIX = ".csv";
-    public static final String XLS_POSTFIX = ".xls";
-    public static final String XLSX_POSTFIX = ".xlsx";
     public static final String ALIAS = "LOCAL";
 
 	@Override
@@ -40,8 +40,9 @@ public class LocalMatrixProviderFactory implements IMatrixProviderFactory {
 
     @Override
     public Set<String> resolveLinks(String link) {
-        return getFileByMask(link).stream().map(file -> file.getAbsolutePath())
-                .filter(item -> item.endsWith(CSV_POSTFIX) || item.endsWith(XLS_POSTFIX) || item.endsWith(XLSX_POSTFIX)).collect(Collectors.toSet());
+        return getFileByMask(link).stream().map(File::getAbsolutePath)
+                .filter(this::isSupportedFileType)
+                .collect(Collectors.toSet());
     }
 
 	@Override
@@ -102,4 +103,7 @@ public class LocalMatrixProviderFactory implements IMatrixProviderFactory {
 		return "Local file";
 	}
 
+    private boolean isSupportedFileType(String file) {
+        return MatrixFileTypes.detectFileType(file).isSupported();
+    }
 }

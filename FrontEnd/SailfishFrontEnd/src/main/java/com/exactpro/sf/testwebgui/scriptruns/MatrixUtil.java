@@ -56,11 +56,15 @@ public class MatrixUtil {
             throws Exception {
 		logger.info("Upload started");
         Map<String, IMatrixProvider> matrixProviders = holder.getMatrixProviders(link, providerURI);
-        List<IMatrix> result = new ArrayList<>();
 		if (matrixProviders == null) {
             throw new IllegalStateException("Illegal provider SURI: " + providerURI );
 		}
-		
+
+        if (matrixProviders.isEmpty()) {
+            throw new IllegalArgumentException(String.format("Cannot resolve link %s by %s", link, providerURI));
+        }
+
+        List<IMatrix> result = new ArrayList<>();
         for (Entry<String, IMatrixProvider> entry : matrixProviders.entrySet()) {
             try (InputStream inputStream = entry.getValue().getMatrix()) {
                 result.add(TestToolsAPI.getInstance()

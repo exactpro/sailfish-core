@@ -21,6 +21,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
+
 public enum MatrixFileTypes {
     CSV("csv"), XLS("xls"), XLSX("xlsx"), UNKNOWN("?", false), JSON("json"), YAML("yaml");
 
@@ -32,7 +35,7 @@ public enum MatrixFileTypes {
     private final boolean supported;
 
     MatrixFileTypes(String extension, boolean supported) {
-        this.fileType = extension;
+        this.fileType = extension.toLowerCase();
         this.supported = supported;
     }
 
@@ -48,13 +51,20 @@ public enum MatrixFileTypes {
         return supported;
     }
 
-    public static MatrixFileTypes detectFileType(String name) {
-		for (MatrixFileTypes type : MatrixFileTypes.values()) {
-			if (name.toLowerCase().endsWith(type.getExtension().toLowerCase())) {
-				return type;
-			}
-		}
+    /**
+     * Determinates {@link MatrixFileTypes} according to an extension from the passed path to file
+     * @param path path to the file
+     * @return the {@link MatrixFileTypes} matched the extension. Otherwise, returns {@link MatrixFileTypes#UNKNOWN}
+     */
+    @NotNull
+    public static MatrixFileTypes detectFileType(@NotNull String path) {
+        String extension = FilenameUtils.getExtension(path).toLowerCase();
+        for (MatrixFileTypes type : MatrixFileTypes.values()) {
+            if (type.getExtension().equals(extension)) {
+                return type;
+            }
+        }
 
-		return UNKNOWN;
-	}
+        return UNKNOWN;
+    }
 }
