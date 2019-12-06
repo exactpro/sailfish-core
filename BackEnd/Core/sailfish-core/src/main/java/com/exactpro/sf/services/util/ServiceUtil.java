@@ -318,23 +318,27 @@ public class ServiceUtil {
         ServiceMessage serviceMessage = new ServiceMessage();
         serviceMessage.setText(text);
 
-        return fillMetadata(serviceMessage.getMessage(), text, from, to, serviceInfo);
+        return fillMetadata(serviceMessage.getMessage(), null, from, to, serviceInfo);
     }
 
     public static IMessage createErrorMessage(String cause, String from, String to, ServiceInfo serviceInfo, IMessageFactory factory) {
+        return createErrorMessage(cause, null, from, to, serviceInfo, factory);
+    }
+
+    public static IMessage createErrorMessage(String cause, byte[] rawMessage, String from, String to, ServiceInfo serviceInfo, IMessageFactory factory) {
         ErrorMessage errorMessage = new ErrorMessage();
         errorMessage.setCause(cause);
 
-        return fillMetadata(errorMessage.getMessage(), cause, from, to, serviceInfo);
+        return fillMetadata(errorMessage.getMessage(), rawMessage, from, to, serviceInfo);
     }
 
-    private static IMessage fillMetadata(IMessage message, String text, String from, String to, ServiceInfo serviceInfo) {
+    private static IMessage fillMetadata(IMessage message, byte[] rawMessage, String from, String to, ServiceInfo serviceInfo) {
         MsgMetaData metaData = message.getMetaData();
 
         metaData.setAdmin(true);
         metaData.setFromService(from);
         metaData.setToService(to);
-        metaData.setRawMessage(text != null ? text.getBytes() : null);
+        metaData.setRawMessage(rawMessage);
         metaData.setServiceInfo(serviceInfo);
         metaData.setDictionaryURI(SERVICE_DICTIONARY_URI);
 
