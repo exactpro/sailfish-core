@@ -34,7 +34,7 @@
 			<NotificationIfSomeServicesNotStarted>false</NotificationIfSomeServicesNotStarted>
 			<FailUnexpected>false</FailUnexpected>
 			<!-- Priority of the matrices compilation thread, values [1, 10] -->
-			<MatrixCompilerPriority>5</MatrixCompilerPriority>
+			<MatrixCompilerPriority>1</MatrixCompilerPriority>
             <!-- Format of report creation: zip - remove files after archiving; files - disable auto-archive; zip_files - do not remove files, enable auto-archive -->
 			<ReportOutputFormat>zip_files</ReportOutputFormat>
 			<!-- Set of excluded messages from information block about all messages in report. Property may have several values separated by comma character -->

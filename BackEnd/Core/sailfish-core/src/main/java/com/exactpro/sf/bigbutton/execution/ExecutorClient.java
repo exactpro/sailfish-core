@@ -27,6 +27,7 @@ import com.exactpro.sf.bigbutton.library.Globals;
 import com.exactpro.sf.bigbutton.library.IBBActionExecutor;
 import com.exactpro.sf.bigbutton.library.Library;
 import com.exactpro.sf.bigbutton.library.Script;
+import com.exactpro.sf.bigbutton.library.Script.ScriptRemoteInformation;
 import com.exactpro.sf.bigbutton.library.ScriptList;
 import com.exactpro.sf.bigbutton.library.ScriptList.ScriptListStatus;
 import com.exactpro.sf.bigbutton.library.Service;
@@ -369,6 +370,9 @@ public class ExecutorClient {
         } catch (RuntimeException e) {
             toErrorState(e);
         }
+
+        stopRunningTestScripts();
+
     }
 
 	public void registerTags(List<Tag> tags) {
@@ -535,12 +539,96 @@ public class ExecutorClient {
 			return result;
 			
 		}
-		
-		private void executeScript(Script script) throws InterruptedException {
-			
-			//SfApiOptions scriptOptions = script.getApiOptions();
 
-			SfApiOptions scriptOptions = library.getDefaultApiOptions();
+
+
+		private XmlTestScriptShortReport waitForScriptExecutionFinish(Script script, int id) throws InterruptedException {
+
+			logger.debug("Got id {}. Monitoring status...", id);
+
+			ScriptExecutionStatistics statistics = script.getStatistics();
+
+			while(true) {
+
+				try {
+
+					if(!running) {
+						logger.info("Invoking stop");
+						apiClient.stopTestScriptRun(id);
+						return null;
+					}
+
+					Thread.sleep(1000);
+
+					XmlTestScriptShortReport response = apiClient.getTestScriptRunShortReport(id);
+
+					if(response != null) {
+						logger.debug("Status: {}", response);
+					}
+
+					statistics.setNumPassed(response.getPassed());
+					statistics.setNumConditionallyPassed(response.getConditionallyPassed());
+					statistics.setNumFailed(response.getFailed());
+
+					statistics.setStatus(response.getStatus());
+
+					if (!response.isLocked()) {
+
+						script.setFinished(true);
+
+						script.setCause(TestScriptDescription.getCauseMessage(response.getCause()));
+
+						statistics.setTotal(response.getTotal());
+
+						return response;
+
+					}
+
+				} catch (InterruptedException e) {
+					throw e;
+				} catch (Exception e) {
+					logger.error(e.getMessage(), e);
+					throw new RuntimeException("Could not perform status check call", e); // TODO: replace with checked exception
+
+				}
+
+			}
+
+		}
+
+		private void executeOnFinish(StatusType statusType, Set<BigButtonAction> actionsToExecute, String subSubject, IBBActionExecutor... parameters) {
+			logger.info("executeOnFinish was triggered");
+			for (BigButtonAction action : actionsToExecute) {
+				try {
+					actions.get(action).accept(statusType, subSubject, parameters);
+				} catch (Exception e) {
+					logger.error("Exception during BBAction execute", e.getMessage());
+				}
+			}
+		}
+
+		private void executeOnFinishScript(Script script){
+			logger.info("executeOnFinishScript was triggered");
+			StatusType statusType = script.getStatusType();
+			executeOnFinish(statusType, script.getActions(), StringUtils.join("Script ", statusType.name().toLowerCase()), currentList, script);
+		}
+
+
+		private void executeOnFinishScriptList(ScriptList scriptList){
+			logger.info("executeOnFinishScriptList was triggered");
+			StatusType statusType = scriptList.getStatusType();
+			executeOnFinish(statusType, scriptList.getActions(), StringUtils.join("Script list ", statusType.name().toLowerCase()), scriptList);
+		}
+
+        /**
+         * Upload and start compile script on slave
+         * @param script
+         * @throws InterruptedException
+         */
+        private void compileScript(Script script) throws InterruptedException {
+            //SfApiOptions scriptOptions = script.getApiOptions();
+
+            SfApiOptions scriptOptions = library.getDefaultApiOptions();
             Optional<Globals> globalOptional = library.getGlobals();
 
             if(globalOptional.isPresent()){
@@ -552,211 +640,196 @@ public class ExecutorClient {
                             .mergeOptions(script.getOriginalApiOptions());
 
 
-			script.setApiOptions(scriptOptions);
-			
-			try {
-				
-				logger.debug("Uploading {}", script);
-				
-				try (InputStream matrixStream = BigButtonUtil.getStream(library.getRootFolder(),
+            script.setApiOptions(scriptOptions);
+
+            try {
+
+                logger.debug("Uploading {}", script);
+
+                try (InputStream matrixStream = BigButtonUtil.getStream(library.getRootFolder(),
                         script.getPath(), workspaceDispatcher)) {
-				
+
                     XmlMatrixUploadResponse matrix = apiClient.uploadMatrix(matrixStream, FilenameUtils.getName(script.getPath()));
-					
-					List<String> tags = tagsToNames(scriptOptions.getTags());
-					
-					String staticVariables = null;
-					
-					if(!scriptOptions.getStaticVariables().isEmpty()) {
-						staticVariables = mapper.writeValueAsString(scriptOptions.getStaticVariables());
-					}
-					
-					logger.debug("Starting {}; Tags: {}; Static vars: {}", script, tags, staticVariables);
-					
-					String targetReportFolder = null;
-					
-					if(library.getReportsFolder() != null) {
-                        targetReportFolder = relativeListReportsFolder;
-					}
-					
-					XmlTestscriptActionResponse response = apiClient.performMatrixAction((int)matrix.getId(), 
-							"start", 
-							scriptOptions.getRange(), 
-							BB_ENVIRONMENT, 
-							null, 
-							0, // aml version is deprecated 
-							scriptOptions.getContinueIfFailed(), 
-							scriptOptions.getAutoStart(), 
-							true, 
-							scriptOptions.getIgnoreAskForContinue(),
-                            scriptOptions.getRunNetDumper(),
-                            scriptOptions.getSkipOptional(),
-							tags,  // tags
-							staticVariables, 
-							targetReportFolder,
-							scriptOptions.getLanguage()); 
-					
-					long scriptRunId = response.getId();
-					
-					XmlTestScriptShortReport executionResult = waitForScriptExecutionFinish(script, (int)scriptRunId);
-					ListExecutionStatistics statistics = currentList.getExecutionStatistics();
-					
-					if(executionResult == null 
-							|| executionResult.getFailed() != 0 
-							|| executionResult.getStatus().equals(ScriptStatus.INIT_FAILED.name())
-							|| executionResult.getStatus().equals(ScriptStatus.RUN_FAILED.name())) {
-						
-                        statistics.incNumFailed();
 
-                    } else if (executionResult.getConditionallyPassed() != 0) {
+                    List<String> tags = tagsToNames(scriptOptions.getTags());
 
-                        statistics.incNumConditionallyPassed();
-						
+                    String staticVariables = null;
 
-					} else {
-						
-                        statistics.incNumPassed();
-                        statistics.setSuccessPercent(
-                                RegressionRunnerUtils.calcPercent(statistics.getNumPassed(), currentList.getScripts().size()));
-					}
-
-					boolean reportDownloadNeeded = false;
-					
-                    if (executionResult != null) {
-						
-						//downloadReport(scriptRunId);
-						
-						reportDownloadNeeded = true;
-						
-					}
-					
-                    executeOnFinishScript(script);
-                    monitor.scriptExecuted(script, (int)scriptRunId, executor, relativeListReportsFolder, reportDownloadNeeded);
-					
-					apiClient.deleteMatrix((int)matrix.getId());
-				}
-				
-			}catch (InterruptedException e){
-			    throw  e;
-            }
-			catch (Exception e) {
-                logger.error(e.getMessage(), e);
-				throw new RuntimeException("Could not perform api call", e); // TODO: replace with checked exception
-				
-			}
-			
-		}
-		
-		private XmlTestScriptShortReport waitForScriptExecutionFinish(Script script, int id) throws InterruptedException {
-			
-			logger.debug("Got id {}. Monitoring status...", id);
-			
-            ScriptExecutionStatistics statistics = script.getStatistics();
-			
-			while(true) {
-				
-				try {
-
-                    if(!running) {
-                        logger.info("Invoking stop");
-						apiClient.stopTestScriptRun(id);
-						return null;
-					}
-					
-					Thread.sleep(1000);
-
-					XmlTestScriptShortReport response = apiClient.getTestScriptRunShortReport(id);
-					
-					if(response != null) {
-						logger.debug("Status: {}", response);
-					}
-					
-					statistics.setNumPassed(response.getPassed());
-                    statistics.setNumConditionallyPassed(response.getConditionallyPassed());
-					statistics.setNumFailed(response.getFailed());
-					
-					statistics.setStatus(response.getStatus());
-					
-                    if (!response.isLocked()) {
-						
-						script.setFinished(true);
-						
-						script.setCause(TestScriptDescription.getCauseMessage(response.getCause()));
-
-                        statistics.setTotal(response.getTotal());
-
-						return response;
-						
-					}
-					
-                } catch (InterruptedException e) {
-                    throw e;
-				} catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-					throw new RuntimeException("Could not perform status check call", e); // TODO: replace with checked exception
-					
-				} 
-				
-			}
-			
-		}
-		
-        private void executeOnFinish(StatusType statusType, Set<BigButtonAction> actionsToExecute, String subSubject, IBBActionExecutor... parameters) {
-            logger.info("executeOnFinish was triggered");
-            for (BigButtonAction action : actionsToExecute) {
-                try {
-                    actions.get(action).accept(statusType, subSubject, parameters);
-                } catch (Exception e) {
-                    logger.error("Exception during BBAction execute", e.getMessage());
-                }
-            }
-        }
-
-        private void executeOnFinishScript(Script script){
-            logger.info("executeOnFinishScript was triggered");
-            StatusType statusType = script.getStatusType();
-            executeOnFinish(statusType, script.getActions(), StringUtils.join("Script ", statusType.name().toLowerCase()), currentList, script);
-        }
-
-
-        private void executeOnFinishScriptList(ScriptList scriptList){
-            logger.info("executeOnFinishScriptList was triggered");
-            StatusType statusType = scriptList.getStatusType();
-            executeOnFinish(statusType, scriptList.getActions(), StringUtils.join("Script list ", statusType.name().toLowerCase()), scriptList);
-        }
-
-		private void runList() throws InterruptedException {
-			
-			try {
-                ListExecutionStatistics statistics = currentList.getExecutionStatistics();
-				
-                currentList.setStatus(ScriptListStatus.RUNNING);
-
-				this.relativeListReportsFolder = createRelativeListRepotsFolder();
-			
-				for(int i =0; i< currentList.getScripts().size(); i++) {//Script script : currentList.getScripts()) {
-
-                    if(!running) {
-						return;
-					}
-
-                    if(runner.isPause()){
-                        state = ExecutorState.Paused;
-
-                        while (runner.isPause()) {
-                            Thread.sleep(1000);
-                        }
-
-                        state = ExecutorState.Executing;
+                    if(!scriptOptions.getStaticVariables().isEmpty()) {
+                        staticVariables = mapper.writeValueAsString(scriptOptions.getStaticVariables());
                     }
 
+                    logger.debug("Starting {}; Tags: {}; Static vars: {}", script, tags, staticVariables);
 
-					Script script = currentList.getScripts().get(i);
-					
-					currentList.setCurrentScript(script);
-					
-                    if (!currentList.getStatus().isSkipped()) {
-					executeScript(script);
+                    String targetReportFolder = null;
+
+                    if(library.getReportsFolder() != null) {
+                        targetReportFolder = relativeListReportsFolder;
+                    }
+
+                    XmlTestscriptActionResponse response = apiClient.performMatrixAction((int)matrix.getId(),
+                            "start",
+                            scriptOptions.getRange(),
+                            BB_ENVIRONMENT,
+                            null,
+                            0, // aml version is deprecated
+                            scriptOptions.getContinueIfFailed(),
+                            scriptOptions.getAutoStart(),
+                            false,
+                            scriptOptions.getIgnoreAskForContinue(),
+                            scriptOptions.getRunNetDumper(),
+                            scriptOptions.getSkipOptional(),
+                            tags,  // tags
+                            staticVariables,
+                            targetReportFolder,
+                            scriptOptions.getLanguage());
+
+                    apiClient.compileTestScriptRun((int) response.getId());
+                    script.setRemoteInformation(new ScriptRemoteInformation(response.getId(), matrix.getId()));
+                }
+            }
+            catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new RuntimeException("Could not perform api call", e); // TODO: replace with checked exception
+
+            }
+        }
+
+        /**
+         * Wait while script will be compiled
+         * @param testScriptId
+         * @throws InterruptedException
+         */
+        private void waitForCompileTestScript(int testScriptId) throws InterruptedException{
+            try {
+                while (!"READY".equals(apiClient.getTestScriptRunInfo(testScriptId).getScriptState())) {
+                    Thread.sleep(1000);
+                }
+            } catch (APICallException | APIResponseException e) {
+                throw new EPSCommonException("Could not get scripts state for test script with id + {" + testScriptId + '}', e);
+            }
+        }
+
+        /**
+         * Send request to slave to start script
+         * @param testScriptId
+         * @throws InterruptedException
+         */
+        private void startScript(int testScriptId) throws InterruptedException {
+            try {
+                apiClient.runCompiledTestScript(testScriptId);
+            } catch (APICallException | APIResponseException e) {
+                throw new EPSCommonException("Can`t start test script with id [" + testScriptId + ']', e);
+            }
+        }
+
+        /**
+         * Wait while script will be executed, then update statistic and download report
+         * @param script
+         * @param scriptRunId
+         * @param matrixId
+         * @throws InterruptedException
+         */
+        private void waitForExecutingTestScriptAndCollectStatisticAndReport(Script script, long scriptRunId, long matrixId) throws InterruptedException {
+            try {
+                XmlTestScriptShortReport executionResult = waitForScriptExecutionFinish(script, (int)scriptRunId);
+                ListExecutionStatistics statistics = currentList.getExecutionStatistics();
+
+                if (executionResult == null
+                        || executionResult.getFailed() != 0
+                        || executionResult.getStatus().equals(ScriptStatus.INIT_FAILED.name())
+                        || executionResult.getStatus().equals(ScriptStatus.RUN_FAILED.name())) {
+
+                    statistics.incNumFailed();
+
+                } else if (executionResult.getConditionallyPassed() != 0) {
+
+                    statistics.incNumConditionallyPassed();
+
+                } else {
+
+                    statistics.incNumPassed();
+                    statistics.setSuccessPercent(
+                            RegressionRunnerUtils.calcPercent(statistics.getNumPassed(), currentList.getScripts().size()));
+                }
+
+                boolean reportDownloadNeeded = false;
+
+                if (executionResult != null) {
+
+                    //downloadReport(scriptRunId);
+
+                    reportDownloadNeeded = true;
+
+                }
+                executeOnFinishScript(script);
+                monitor.scriptExecuted(script, (int)scriptRunId, executor, relativeListReportsFolder, reportDownloadNeeded);
+
+                apiClient.deleteMatrix((int)matrixId);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+                throw new RuntimeException("Could not perform api call", e); // TODO: replace with checked exception
+            }
+        }
+
+        /**
+         * Check BB is not running, or wait if BB is on pause
+         * @return True - if BB is not running, False - if BB is running
+         * @throws InterruptedException
+         */
+        private boolean checkIsNotRun() throws InterruptedException {
+            if (!running) {
+                return true;
+            }
+
+            if (runner.isPause()) {
+                state = ExecutorState.Paused;
+
+                while (runner.isPause()) {
+                    Thread.sleep(1000);
+                }
+
+                state = ExecutorState.Executing;
+            }
+
+            return false;
+        }
+
+        private void runList() throws InterruptedException {
+
+            try {
+                ListExecutionStatistics statistics = currentList.getExecutionStatistics();
+
+                currentList.setStatus(ScriptListStatus.RUNNING);
+
+                this.relativeListReportsFolder = createRelativeListRepotsFolder();
+
+                for (int i = 0; i < currentList.getScripts().size(); i++) {
+
+                    if (checkIsNotRun()){
+                        return;
+                    }
+
+                    compileScript(currentList.getScripts().get(i));
+                }
+
+                for(int i =0; i < currentList.getScripts().size(); i++) {//Script script : currentList.getScripts()) {
+
+                    if (checkIsNotRun()){
+                        return;
+                    }
+
+                    Script script = currentList.getScripts().get(i);
+
+                    currentList.setCurrentScript(script);
+
+                    if (!currentList.getStatus().isSkipped() && script.getRemoteInformation() != null) {
+
+                        waitForCompileTestScript((int) script.getRemoteInformation().getTestScriptId());
+
+                        startScript((int) script.getRemoteInformation().getTestScriptId());
+
+                        waitForExecutingTestScriptAndCollectStatisticAndReport(script, script.getRemoteInformation().getTestScriptId(), script.getRemoteInformation().getMatrixId());
                     } else {
                         script.getStatistics().setStatus("SKIPPED");
                         script.setFinished(true);
@@ -768,21 +841,20 @@ public class ExecutorClient {
                         }
                     }
 
-					statistics.setExecutionPercent(
-							RegressionRunnerUtils.calcPercent(i +1, currentList.getScripts().size()));
+                    statistics.setExecutionPercent(
+                            RegressionRunnerUtils.calcPercent(i + 1, currentList.getScripts().size()));
+                }
 
-				}
-			
-			} catch (InterruptedException e){
-			    throw  e;
-			} finally {
-				
-				currentList.setCurrentScript(null);
-				
-			}
-			
-		}
-		
+            } catch (InterruptedException e){
+                throw  e;
+            } finally {
+
+                currentList.setCurrentScript(null);
+
+            }
+
+        }
+
 		private String createRelativeListRepotsFolder() {
             return library.getReportsFolder() == null ? null : Paths.get(library.getReportsFolder(), currentList.getName()).toString();
         }
@@ -1074,5 +1146,30 @@ public class ExecutorClient {
                              settings.getFinalRecipients(status), null);
         }
 	}
+
+    private void stopRunningTestScripts() {
+        try {
+            // currentList may be null when BB end to running all test scripts.
+            // When BB execute action Interrupt currentList is not null
+            if (currentList != null) {
+                currentList
+                        .getScripts()
+                        .stream()
+                        .filter(script -> !script.isFinished())
+                        .forEach(script -> {
+                            try {
+                                apiClient.stopTestScriptRun((int)script.getRemoteInformation().getTestScriptId());
+                                apiClient.deleteTestScriptRun((int) script.getRemoteInformation().getTestScriptId());
+                                apiClient.deleteMatrix((int)script.getRemoteInformation().getMatrixId());
+                            } catch (APICallException | APIResponseException e) {
+                                throw new EPSCommonException("Could not perform api call", e);
+                            }
+                        });
+            }
+        } catch (RuntimeException e){
+            toErrorState(e);
+        }
+    }
+
 
 }

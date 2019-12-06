@@ -53,6 +53,33 @@ public class Script implements Serializable, IBBActionExecutor {
 
     private String cause;
 
+    private ScriptRemoteInformation remoteInformation = null;
+
+    public static class ScriptRemoteInformation {
+        private long testScriptId;
+        private long matrixId;
+
+        public ScriptRemoteInformation(long testScriptId, long matrixId) {
+            this.testScriptId = testScriptId;
+            this.matrixId = matrixId;
+        }
+
+        public long getTestScriptId() {
+            return testScriptId;
+        }
+
+        public void setTestScriptId(long testScriptId) {
+            this.testScriptId = testScriptId;
+        }
+
+        public long getMatrixId() {
+            return matrixId;
+        }
+
+        public void setMatrixId(long matrixId) {
+            this.matrixId = matrixId;
+        }
+    }
 
 	public Script(long lineNumber){
 	    this.lineNumber = lineNumber;
@@ -151,6 +178,14 @@ public class Script implements Serializable, IBBActionExecutor {
 
     public void setCause(String cause) {
         this.cause = cause;
+    }
+
+    public ScriptRemoteInformation getRemoteInformation() {
+        return remoteInformation;
+    }
+
+    public void setRemoteInformation(ScriptRemoteInformation remoteInformation) {
+        this.remoteInformation = remoteInformation;
     }
 
     @Override
