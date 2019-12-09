@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -111,7 +112,7 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
                 checkFunction = ((IFilter)originValue)::validate;
             } else if(originValue != null && actualValue != null) {
                 Object convertedValue = MultiConverter.convert(originValue, actualValue.getClass());
-                checkFunction = value -> ExpressionResult.create(Objects.equals(convertedValue, value));
+                checkFunction = value -> ExpressionResult.create(areEqual(convertedValue, value));
             }
         }
 
@@ -134,7 +135,7 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
                     }
                 } else if (convertible && MultiConverter.SUPPORTED_TYPES.contains(alternativeValue.getClass())) {
                     Object convertedValue = MultiConverter.convert(alternativeValue, actualValue.getClass());
-                    if (Objects.equals(convertedValue, actualValue)) {
+                    if (areEqual(convertedValue, actualValue)) {
                         actualDescriptions.addAll(descriptions);
                     }
                 }
@@ -192,5 +193,14 @@ public class BugsCheckerBuilder extends AbstractBugsChecker {
         }
 
         return true;
+    }
+
+    @SuppressWarnings("OverlyStrongTypeCast")
+    private static boolean areEqual(Object first, Object second) {
+        if (first instanceof BigDecimal && second instanceof BigDecimal) {
+            return ((BigDecimal)first).compareTo((BigDecimal)second) == 0;
+        }
+
+        return Objects.equals(first, second);
     }
 }
