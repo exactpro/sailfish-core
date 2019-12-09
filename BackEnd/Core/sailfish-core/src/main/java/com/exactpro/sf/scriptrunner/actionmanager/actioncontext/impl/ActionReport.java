@@ -15,18 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl;
 
-import com.exactpro.sf.services.IServiceSettings;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -46,13 +40,8 @@ import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionReport;
 import com.exactpro.sf.scriptrunner.impl.ReportTable;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
 import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
-import com.exactpro.sf.util.DateTimeUtility;
 
 public class ActionReport implements IActionReport {
-
-    private static final DateTimeFormatter FORMATTER = DateTimeUtility.createFormatter("dd.MM.yyyy HH:mm:ss:SSS");
-    private static final String changingSettingFolder = "changingSetting";
-
     private final IScriptReport report;
     private final String reportFolder;
     private final boolean updateStatus;
@@ -142,23 +131,6 @@ public class ActionReport implements IActionReport {
         checkEmbeddedReport();
         elementStats.add(status);
         return workspaceDispatcher.createFile(FolderType.REPORT, false, ArrayUtils.insert(0, pathElements, reportFolder));
-    }
-
-    @Override
-    public void createChangingSettingsFile(String serviceName, IServiceSettings serviceSettings, Set<String> editedProperties) throws IOException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        File changingSettingsFile = workspaceDispatcher.getOrCreateFile(FolderType.REPORT, reportFolder, changingSettingFolder, serviceName);
-
-        try (FileWriter fileWriter = new FileWriter(changingSettingsFile, true)) {
-            fileWriter.write(String.format("Date and time: {%s}\nProperties:\n", FORMATTER.format(DateTimeUtility.nowLocalDateTime())));
-
-            for (String propertyName : editedProperties) {
-
-                Object value = BeanUtils.getProperty(serviceSettings, propertyName);
-
-                fileWriter.write(String.format("\'%s\'={%s}\n", propertyName, value == null ? "NULL" : value.toString()));
-            }
-            fileWriter.write('\n');
-        }
     }
 
     @Override

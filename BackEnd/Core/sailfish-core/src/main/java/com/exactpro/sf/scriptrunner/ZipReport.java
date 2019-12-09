@@ -86,7 +86,7 @@ public class ZipReport implements IScriptReport {
         // create zip file with name generated from folder name (like 'matrixName.csv_DDMMYYYY_RANDOM.zip')
         zipFilesInFolder(path, requestUrl, dispatcher);
 
-        if (!reportOutputFormat.isEnableFiles()) {
+        if(!reportOutputFormat.isEnableFiles()){
             removeFiles(path);
         }
     }
@@ -169,10 +169,10 @@ public class ZipReport implements IScriptReport {
 
     private void zipFilesInFolder(File reportFolder, String zipName, IWorkspaceDispatcher dispatcher) throws IOException {
 
-        File report = dispatcher.createFile(FolderType.REPORT, true, zipName + ZIP);
+        File report = dispatcher.createFile(FolderType.REPORT, true, zipName, zipName + ZIP);
 
         try (ZipOutputStream zip = new ZipOutputStream(new FileOutputStream(report))) {
-            zip.setLevel(Deflater.BEST_COMPRESSION);
+            zip.setLevel(Deflater.DEFAULT_COMPRESSION);
 
             zipFolder(dispatcher, zip, zipName, null);
         }
@@ -222,6 +222,5 @@ public class ZipReport implements IScriptReport {
                 dispatcher.removeFile(FolderType.REPORT, reportFolderName, file);
             }
         }
-        dispatcher.removeFolder(FolderType.REPORT, reportFolderName);
     }
 }

@@ -23,7 +23,6 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -44,7 +43,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.util.Pair;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
@@ -182,36 +180,6 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
             }
 
             throw new WorkspaceStructureException("File {" + folderType + "}/" + toPathString(fileName) + " can't be created");
-        } finally {
-            workspacesLock.readLock().unlock();
-        }
-    }
-
-    public File getOrCreateFolder(FolderType folderType, String... folderName) throws WorkspaceStructureException, WorkspaceSecurityException, FileNotFoundException {
-        checkFolderTypeAndFileName(folderType, folderName);
-
-        try {
-            workspacesLock.readLock().lock();
-            File targetFolder = new File(Iterables.getLast(workspaces).get(folderType), toPathString(folderName));
-
-            if (targetFolder.exists()) {
-                if (targetFolder.isDirectory()) {
-                    return targetFolder;
-                } else {
-                    throw new FileNotFoundException(MessageFormat.format("Path '{'{0}'}' is not folder", targetFolder.toPath()));
-                }
-            }
-
-            WorkspaceLayer workspaceLayer = workspaces.get(workspaces.size() - 1);
-            if (workspaceLayer.layout.isEmbedded()) {
-                throw new WorkspaceLayerException(MessageFormat.format("Folder '{'{0}'}'/{1} can'''t be created, the last layer is embedded", folderType, toPathString(folderName)));
-            }
-
-            if (targetFolder.mkdirs()) {
-                return targetFolder;
-            }
-
-            throw new WorkspaceLayerException(MessageFormat.format("Folder '{'{0}'}'/{1} can'''t be created", folderType, toPathString(folderName)));
         } finally {
             workspacesLock.readLock().unlock();
         }
