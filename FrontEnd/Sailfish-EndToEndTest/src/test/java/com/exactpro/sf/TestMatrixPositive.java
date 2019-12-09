@@ -43,6 +43,7 @@ public class TestMatrixPositive extends TestMatrix {
 
     private static SFAPIClient sfapi;
     private final static String matrixFile = "testMatrix.csv";
+    private final static String longMatrixFile = "testLongMatrix.csv";
     private final static String matrixFileRange = "testMatrixRange.csv";
     private final static String matrixFileWithVariableDelay = "testMatrixTimeDelay.csv";
     private final static String matrixFileRangeForExcludeCase = "testMatrixRangeForExcludeCase.csv";
@@ -691,12 +692,13 @@ public class TestMatrixPositive extends TestMatrix {
         logger.info("Start testRunAndStopMatrix()");
         try {
             MatrixList matrixList = sfapi.getMatrixList();
-            matrix = getMatrixFromList(matrixList, matrixFile);
+            String matrixFileName = longMatrixFile;
+            matrix = getMatrixFromList(matrixList, matrixFileName);
             if (matrix == null) {
-                int matrixId = (int) sfapi.uploadMatrix(TestMatrixPositive.class.getClassLoader().getResourceAsStream(matrixFile), matrixFile)
+                int matrixId = (int) sfapi.uploadMatrix(TestMatrixPositive.class.getClassLoader().getResourceAsStream(matrixFileName), matrixFileName)
                         .getId();
                 matrixList = sfapi.getMatrixList();
-                matrix = getMatrixFromList(matrixList, matrixId, matrixFile);
+                matrix = getMatrixFromList(matrixList, matrixId, matrixFileName);
             }
             if (matrix != null) {
                 int testScriptId = (int) sfapi.runMatrix(matrix).getId();
@@ -709,7 +711,7 @@ public class TestMatrixPositive extends TestMatrix {
                 sfapi.stopMatrix(testScriptId);
                 testMatrixStop(sfapi, testScriptId);
             } else
-                Assert.fail("Matrix " + matrixFile + " hasn't been uploaded");
+                Assert.fail("Matrix " + matrixFileName + " hasn't been uploaded");
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
@@ -827,12 +829,13 @@ public class TestMatrixPositive extends TestMatrix {
         logger.info("Start testStopScript()");
         try {
             MatrixList matrixList = sfapi.getMatrixList();
-            matrix = getMatrixFromList(matrixList, matrixFile);
+            String matrixFileName = longMatrixFile;
+            matrix = getMatrixFromList(matrixList, matrixFileName);
             if (matrix == null) {
-                int matrixId = (int) sfapi.uploadMatrix(TestMatrixPositive.class.getClassLoader().getResourceAsStream(matrixFile), matrixFile)
+                int matrixId = (int) sfapi.uploadMatrix(TestMatrixPositive.class.getClassLoader().getResourceAsStream(matrixFileName), matrixFileName)
                         .getId();
                 matrixList = sfapi.getMatrixList();
-                matrix = getMatrixFromList(matrixList, matrixId, matrixFile);
+                matrix = getMatrixFromList(matrixList, matrixId, matrixFileName);
             }
             if (matrix != null) {
                 int testScriptId = (int) sfapi.runMatrix(matrix).getId();
@@ -852,7 +855,7 @@ public class TestMatrixPositive extends TestMatrix {
                 Assert.assertEquals("Wrong number of failed tests for canceled matrix", 1, xmlDescription.getFailed()); //FIXME: must be 0
                 // Assert.assertEquals("Wrong number of failed tests for canceled matrix", 0, xmlDescription.getFailed());
             } else
-                Assert.fail("Matrix " + matrixFile + " hasn't been uploaded");
+                Assert.fail("Matrix " + matrixFileName + " hasn't been uploaded");
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw e;
