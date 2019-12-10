@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.actions;
 
+import static com.exactpro.sf.actions.ActionUtil.normalizeFilters;
 import static com.exactpro.sf.actions.ActionUtil.unwrapFilters;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
@@ -40,6 +41,19 @@ import java.util.StringTokenizer;
 import java.util.zip.DeflaterInputStream;
 import java.util.zip.InflaterOutputStream;
 
+import com.exactpro.sf.aml.CommonColumn;
+import com.exactpro.sf.aml.CommonColumns;
+import com.exactpro.sf.aml.CustomColumn;
+import com.exactpro.sf.aml.CustomColumns;
+import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.aml.script.actions.WaitAction;
+import com.exactpro.sf.aml.scriptutil.StaticUtil;
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.util.Pair;
+import com.exactpro.sf.comparison.ComparatorSettings;
+import com.exactpro.sf.comparison.MessageComparator;
+import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextColor;
+import com.exactpro.sf.scriptrunner.reportbuilder.textformatter.TextStyle;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
@@ -50,11 +64,6 @@ import org.mvel2.MVEL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.aml.CommonColumn;
-import com.exactpro.sf.aml.CommonColumns;
-import com.exactpro.sf.aml.CustomColumn;
-import com.exactpro.sf.aml.CustomColumns;
-import com.exactpro.sf.aml.Description;
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.common.messages.IMessage;
@@ -90,6 +99,10 @@ import com.exactpro.sf.util.DateTimeUtility;
 public class CommonActions extends AbstractCaller {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommonActions.class);
+
+	public static final String ARGUMENT_FIRST_MESSAGE = "FirstMessage";
+	public static final String ARGUMENT_SECOND_MESSAGE = "SecondMessage";
+    public static final String ARGUMENT_CHECK_DELTA = "CheckDelta";
 
 	public static final String WAIT_TILL_TIME_ARG_DATE = "till_date";
     public static final String FIRST_ARG = "firstArg";
@@ -604,6 +617,46 @@ public class CommonActions extends AbstractCaller {
         }
     }
 
+    @Description("Checks the difference between the creation times of two messages in milliseconds.<br>" +
+            ARGUMENT_FIRST_MESSAGE + "/" + ARGUMENT_SECOND_MESSAGE + " - messages to check time delta. Example: ${ref_to_message}<br>" +
+            ARGUMENT_CHECK_DELTA + " - filter to check time delta. Example: x > 50 && x < 100")
+    @CustomColumns({
+            @CustomColumn(value = ARGUMENT_FIRST_MESSAGE, required = true),
+            @CustomColumn(value = ARGUMENT_CHECK_DELTA, required = true),
+            @CustomColumn(value = ARGUMENT_SECOND_MESSAGE, required = true)
+    })
+    @ActionMethod
+    public void CheckLatency(IActionContext actionContext, HashMap<?, ?> map) {
+
+        IMessage first = getMessage(map, ARGUMENT_FIRST_MESSAGE);
+        IMessage second = getMessage(map, ARGUMENT_SECOND_MESSAGE);
+
+        StaticUtil.IFilter deltaFilter = normalizeFilters(map.get(ARGUMENT_CHECK_DELTA)); //TODO:
+
+        long timestampFirst = first.getMetaData().getMsgTimestamp().getTime();
+        long timestampSecond = second.getMetaData().getMsgTimestamp().getTime();
+
+        long delta = timestampSecond - timestampFirst;
+
+        IMessage expected = DefaultMessageFactory.getFactory().createMessage("CheckLatency", "CheckLatency"); //TODO: Check other approaches
+        expected.addField("Latency", deltaFilter);
+
+        IMessage actual = DefaultMessageFactory.getFactory().createMessage("CheckLatency", "CheckLatency"); //TODO: Check other approaches
+        actual.addField("Latency", delta);
+
+        ComparatorSettings settings = WaitAction.createCompareSettings(actionContext, null, expected);
+        ComparisonResult result = MessageComparator.compare(actual, expected, settings);
+
+        List<Pair<IMessage, ComparisonResult>> results = new ArrayList<>();
+        results.add(new Pair<>(actual, result));
+
+        IActionReport report = actionContext.getReport();
+        report.createMessage(TextColor.BLACK, TextStyle.NORMAL, "Timestamp of first message: " + DateTimeUtility.toLocalDateTime(timestampFirst)
+                + ", timestamp of second message: " + DateTimeUtility.toLocalDateTime(timestampSecond));
+        WaitAction.processResults(report, settings, results, expected, null, false, actionContext.isAddToReport(), actionContext.getDescription());
+
+    }
+
     private void saveContent(IActionContext actionContext, HashMap<?, ?> inputData, InputStream source) throws Exception {
 
         String fileAlias = unwrapFilters(inputData.get("FileAlias"));
@@ -815,4 +868,13 @@ public class CommonActions extends AbstractCaller {
     public HashMap<?, ?> SetVariables(IActionContext actionContext, HashMap<?, ?> message) throws Exception {
         return message.isEmpty() ? null : unwrapFilters(message);
     }
+
+    private IMessage getMessage(HashMap<?, ?> map, String fieldName) {
+        try {
+            return unwrapFilters(map.get(fieldName));
+        } catch (ClassCastException e) {
+            throw new EPSCommonException("Type mismatch for "+ fieldName +" argument, expected: " + IMessage.class.getSimpleName(), e);
+        }
+    }
+
 }
