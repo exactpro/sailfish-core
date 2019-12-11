@@ -23,6 +23,8 @@ import java.nio.ByteOrder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -156,7 +158,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
             return;
         }
 
-		if (type == ProtocolType.ALPHA || type == ProtocolType.TIME || type == ProtocolType.DATE) {
+		if (type == ProtocolType.ALPHA || type == ProtocolType.TIME || type == ProtocolType.DATE || type == ProtocolType.DATE_TIME) {
 			byte[] array = new byte[length];
 
 			if (!encodeString(value, array)) {
@@ -229,6 +231,14 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 
         if (type == ProtocolType.STUB) {
             buffer.put(new byte[length]);
+        } else if (type == ProtocolType.DATE_TIME) {
+            String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
+            DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
+            ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(value);
+            String dateTimeStr = zonedDateTime.format(dateTimeFormatter);
+            byte[] dateTimeBytes = dateTimeStr.getBytes();
+            checkLength(dateTimeStr, dateTimeBytes.length, length);
+            buffer.put(dateTimeBytes);
         } else {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }
@@ -244,8 +254,13 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         if (type == ProtocolType.DAYS) {
             buffer.putShort((short)(DateTimeUtility.getMillisecond(value) / 86_400_000L));
         } else if (type == ProtocolType.DATE) {
-            String temp = value.format(dateFormatter);
-        	buffer.put(temp.getBytes());
+            String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
+            DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
+            ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(value);
+            String dateStr = zonedDateTime.format(dateTimeFormatter);
+            byte[] dateBytes = dateStr.getBytes();
+            checkLength(dateStr, dateBytes.length, length);
+            buffer.put(dateBytes);
         } else {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }
@@ -257,10 +272,15 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
         Integer length = getAttributeValue(fldStruct, LENGTH_ATTRIBUTE);
 
 		tryToFillDefaultBytes(type, value, fieldName, length);
-
+    
         if (type == ProtocolType.TIME) {
-            String temp = value.format(timeFormatter);
-        	buffer.put(temp.getBytes());        	
+            String dateTimePattern = getAttributeValue(fldStruct, DATE_TIME_FORMAT);
+            DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimePattern);
+            ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(value);
+            String timeStr = zonedDateTime.format(dateTimeFormatter);
+            byte[] timeBytes = timeStr.getBytes();
+            checkLength(timeStr, timeBytes.length, length);
+            buffer.put(timeBytes);
         } else {
             throw new EPSCommonException("Incorrect type = " + type + " for " + fieldName + " field");
         }
@@ -362,5 +382,11 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 			buffer.put(array);
 		}
 	}
-
+    
+    private void checkLength(String str, int actualLength, int expectedLength) {
+        if (actualLength != expectedLength) {
+            throw new EPSCommonException("The length of the encoded value exceeds the length specified in the dictionary."
+                    + " Encoded value: \"" + str + "\". Length in dictionary: \"" + expectedLength + "\".");
+        }
+    }
 }

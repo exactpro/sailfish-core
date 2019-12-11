@@ -42,6 +42,8 @@ import com.exactpro.sf.services.itch.ITCHVisitorBase.ProtocolType;
 public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
 
     private static final long serialVersionUID = 14671967127441418L;
+    private static final int[] TIME_CORRECT_VALUES_LENGTH = { 6, 8, 12, 14 };
+    private static final int[] DATE_TIME_CORRECT_VALUES_LENGTH = { 27 };
 
     public ITCHDictionaryValidator() {
     }
@@ -166,6 +168,11 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                 ProtocolType type =
                         ProtocolType.getEnum(getAttributeValue(field, ITCHVisitorBase.TYPE_ATTRIBUTE));
                 Integer length = getAttributeValue(field, ITCHVisitorBase.LENGTH_ATTRIBUTE);
+                if (length == null) {
+                    errors.add(new DictionaryValidationError(message.getName(), field.getName(),
+                            "Attribute \"length\" is null", DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+                    return;
+                }
 
                 JavaType javaType = field.getJavaType();
                 switch (type) {
@@ -200,14 +207,25 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                         break;
 
                     case TIME:
-                        checkJavaTypeArray(errors, message, field, new JavaType[]{
+                        checkJavaTypeArray(errors, message, field, new JavaType[] {
                                 JavaType.JAVA_LANG_STRING,
-                                JavaType.JAVA_TIME_LOCAL_DATE_TIME}, javaType);
-                        if (!ArrayUtils.contains(new int[]{8, 6, 14}, length)) {
-                            addProtocolTypeError(errors, message, field, type, 8, length);
+                                JavaType.JAVA_TIME_LOCAL_DATE_TIME }, javaType);
+                        if (!ArrayUtils.contains(TIME_CORRECT_VALUES_LENGTH, length)) {
+                            addProtocolTypeError(errors, message, field, type, TIME_CORRECT_VALUES_LENGTH, length);
                         }
-
+    
                         break;
+                        
+                    case DATE_TIME:
+                        checkJavaTypeArray(errors, message, field, new JavaType[] {
+                                JavaType.JAVA_LANG_STRING,
+                                JavaType.JAVA_TIME_LOCAL_DATE_TIME }, javaType);
+                        if (!ArrayUtils.contains(DATE_TIME_CORRECT_VALUES_LENGTH, length)) {
+                            addProtocolTypeError(errors, message, field, type, DATE_TIME_CORRECT_VALUES_LENGTH, length);
+                        }
+    
+                        break;
+                    
 
                     case PRICE:
                         checkJavaTypeArray(errors, message, field, new JavaType[]{
@@ -385,6 +403,11 @@ public class ITCHDictionaryValidator extends AbstractDictionaryValidator {
                     e.getMessage(), DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_FIELD_TYPE));
         }
 
+    }
+    
+    private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,
+            int[] expected, int actual) {
+        addProtocolTypeError(errors, message, field, type, Arrays.toString(expected), String.valueOf(actual));
     }
 
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message, IFieldStructure field, ProtocolType type,

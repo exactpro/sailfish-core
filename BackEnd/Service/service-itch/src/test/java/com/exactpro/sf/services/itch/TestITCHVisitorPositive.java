@@ -19,19 +19,13 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.ByteOrder;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
-import com.exactpro.sf.common.impl.messages.MapMessage;
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
-import com.exactpro.sf.common.messages.structures.IAttributeStructure;
-import com.exactpro.sf.common.messages.structures.IFieldStructure;
-import com.exactpro.sf.common.messages.structures.impl.AttributeStructure;
-import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.DummySession;
 import org.apache.mina.core.session.IoSession;
@@ -43,7 +37,14 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.structures.IAttributeStructure;
+import com.exactpro.sf.common.messages.structures.IFieldStructure;
+import com.exactpro.sf.common.messages.structures.impl.AttributeStructure;
+import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
 import com.exactpro.sf.services.MockProtocolDecoderOutput;
 import com.exactpro.sf.util.TestITCHHelper;
 
@@ -200,6 +201,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
 		    compareFieldsValues(result.get(1),original.get(1),"Time",String.class);
 		    compareFieldsValues(result.get(1),original.get(1),"Date",String.class);
 		    compareFieldsValues(result.get(1),original.get(1),"STUB",String.class);
+            compareFieldsValues(result.get(1), original.get(1), "Date_Time", String.class);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
@@ -430,6 +432,7 @@ public class TestITCHVisitorPositive extends TestITCHHelper {
             compareFieldsValues(result.get(1), original.get(1), "Date", LocalDate.class);
             compareFieldsValues(result.get(1), original.get(1), "Time", LocalTime.class);
             compareFieldsValues(result.get(1), original.get(1), "Days", LocalDate.class);
+            compareFieldsValues(result.get(1), original.get(1), "Date_Time", LocalDateTime.class);
 		}catch(Exception e){
 			logger.error(e.getMessage(),e);
 			e.printStackTrace(System.err);
