@@ -6,6 +6,8 @@ archivesBaseName = 'sailfish-common'
 ext {
     templatesDir    = "${mainDir}/templates"
     xsdDir			= "${mainResDir}/xsd"
+    genPackage      = "${genJavaDir}/com/exactpro/sf/common/impl/messages/xml/configuration"
+    System.setProperty('javax.xml.accessExternalSchema', 'file')
 }
 
 configurations {
@@ -16,10 +18,15 @@ configurations {
 dependencies {
     jamon 'org.jamon:jamon-anttask:2.4.2'
 
-    jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
+    jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.7'
+    jaxb 'com.sun.xml.bind:jaxb-jxc:2.2.7'
+    jaxb 'com.sun.xml.bind:jaxb-impl:2.2.7'
+    jaxb 'com.sun.xml.bind:jaxb-core:2.2.7'
+    jaxb 'javax.xml.bind:jaxb-api:2.2.7'
+
     jaxb 'javax.xml:jsr173:1.0'
     jaxb 'javax.activation:activation:1.1.1'
-    
+
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
     } else {
@@ -50,13 +57,24 @@ dependencies {
 
 task templates {
     doLast {
-	    ant.taskdef(name: 'jamon', classname: 'org.jamon.ant.JamonTask',   classpath: configurations.jamon.asPath)
-	    ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
-	    ant.jamon(destdir: "${genJavaDir}", srcdir: "${templatesDir}")
-        ant.xjc(schema: "${xsdDir}/dictionary.xsd", destdir: "${genJavaDir}", package: "com.exactpro.sf.common.impl.messages.xml.configuration", removeOldOutput: "yes") {
-            produces(dir: "${genJavaDir}/com/exactpro/common/sf/impl/messages/xml/configuration", includes: "*")
-	        arg(value: "-extension")
-	    }
+        ant.taskdef(name: 'jamon', classname: 'org.jamon.ant.JamonTask',   classpath: configurations.jamon.asPath)
+        ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
+        ant.jamon(destdir: "${genJavaDir}", srcdir: "${templatesDir}")
+        ant.xjc(schema: "${xsdDir}/dictionary.xsd", destdir: "${genJavaDir}", package: "com.exactpro.sf.common.impl.messages.xml.configuration") {
+            produces(dir: "${genPackage}", includes: "*")
+            arg(value: "-extension")
+        }
+    }
+}
+
+task schemaGen () {
+    doLast {
+        ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
+        ant.schemagen(srcdir: "${genPackage}", destdir: "${xsdDir}", includeAntRuntime:'false') {
+            schema(file: "generateddictionary.xsd", namespace:"")
+            exclude(name: 'package-info.java')
+            exclude(name: 'ObjectFactory.java')
+        }
     }
 }
 
