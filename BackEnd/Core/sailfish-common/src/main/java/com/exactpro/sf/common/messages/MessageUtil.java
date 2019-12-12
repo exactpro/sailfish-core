@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
+import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IFieldInfo.FieldType;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -126,32 +127,43 @@ public class MessageUtil
 	    return visitor.getHumanMessage();
     }
 
-	public static IMessage convertToIMessage(Map<?, ?> map, IMessageFactory messageFactory, String namespace, String name) {
-	    if (map != null) {
-	        messageFactory = messageFactory != null ? messageFactory : DefaultMessageFactory.getFactory();
-    	    IMessage result = messageFactory.createMessage(name, namespace);
+    public static IMessage convertToIMessage(Map<?, ?> map, IMessageFactory messageFactory, String namespace, String name) {
+        if (map == null) {
+            return null;
+        }
 
-            for(Entry<?, ?> entry : map.entrySet()) {
-                String key = String.class.cast(entry.getKey());
-                Object value = entry.getValue();
+        messageFactory = messageFactory != null ? messageFactory : DefaultMessageFactory.getFactory();
 
-                if(value instanceof List) {
-                    List<Object> list = new ArrayList<>();
+        IMessage result;
 
-                    for(Object element : (List<?>)value) {
-                        list.add(element instanceof Map ? convertToIMessage((Map)element, messageFactory, namespace, name) : element);
-                    }
+        if (map instanceof HashMapWrapper) {
+            HashMapWrapper wrapper = (HashMapWrapper) map;
 
-                    result.addField(key, list);
-                } else {
-                    result.addField(key, value instanceof Map ? convertToIMessage((Map)value, messageFactory, namespace, name) : value);
+            result = messageFactory.createMessage(wrapper.getMetaData().getId(), name, namespace);
+            result.getMetaData().setDirty(wrapper.getMetaData().isDirty());
+
+        } else {
+            result = messageFactory.createMessage(name, namespace);
+        }
+
+        for (Entry<?, ?> entry : map.entrySet()) {
+            String key = (String)entry.getKey();
+            Object value = entry.getValue();
+
+            if (value instanceof List) {
+                List<Object> list = new ArrayList<>();
+
+                for (Object element : (List<?>)value) {
+                    list.add(element instanceof Map ? convertToIMessage((Map)element, messageFactory, namespace, name) : element);
                 }
+
+                result.addField(key, list);
+            } else {
+                result.addField(key, value instanceof Map ? convertToIMessage((Map)value, messageFactory, namespace, name) : value);
             }
+        }
 
-            return result;
-	    }
-
-	    return null;
+        return result;
     }
 
     public static String convertMsgToHumanReadable(IMessage msg, IDictionaryStructure dict) {

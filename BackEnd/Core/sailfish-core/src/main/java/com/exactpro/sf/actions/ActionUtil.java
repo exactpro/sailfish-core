@@ -22,12 +22,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.exactpro.sf.aml.scriptutil.StaticUtil.IFilter;
+import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionContext;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.ServiceStatus;
+import com.google.common.collect.Maps;
 
 public class ActionUtil {
     public static <T extends IService> T getService(IActionContext actionContext, Class<T> clazz) {
@@ -95,6 +97,11 @@ public class ActionUtil {
             }
 
             return (T)copy;
+        } else if (o instanceof HashMapWrapper) {
+            HashMapWrapper wrapper = ((HashMapWrapper)o).clone();
+            wrapper.replaceAll((key, value) -> processFilters(value, filterHandler));
+
+            return (T)wrapper;
         } else if (o instanceof Map<?, ?>) {
             Map<?, ?> map = (Map<?, ?>)o;
             Map<Object, Object> copy = new HashMap<>();
