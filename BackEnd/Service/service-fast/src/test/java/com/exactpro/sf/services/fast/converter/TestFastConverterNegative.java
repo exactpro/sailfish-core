@@ -47,23 +47,11 @@ public class TestFastConverterNegative extends FastConverterTest {
 	@BeforeClass
 	public static void setUpClass() throws IOException,ConverterException {
 		registry=initRegistry(TEMPLATE_POSITIVE);
-		converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(), NAMESPACE);
+		converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(), initDictionary(DICTIONARY_NAME));
 		fastMessage = initMessage(registry, MESSAGE_NAME);
 		iMessage = converter.convert(fastMessage);		
 	}
 	
-	@Test
-	public void testConvertMessageWithNullNamespace(){
-		try{
-			FastToIMessageConverter converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(), null);
-			converter.convert(fastMessage);
-			Assert.fail("Convert with null namespace has been done.");
-		}catch(Exception e){
-			Assert.assertTrue(e instanceof ConverterException);
-			Assert.assertEquals("Can not create fast IMessage for template id "+MESSAGE_NAME,e.getMessage());
-		}
-	}
-
 	@Test
 	public void testSetUpIncorrectField(){
 		try{
@@ -100,7 +88,7 @@ public class TestFastConverterNegative extends FastConverterTest {
 	public void testEmptyFastFieldName(){
 		try{
 			BasicTemplateRegistry registry = initRegistry(TEMPLATE_NEGATIVE); 
-			FastToIMessageConverter converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(), "FAST");
+			FastToIMessageConverter converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(),  initDictionary(DICTIONARY_NAME));
 			Message fastMessage = new Message(registry.get(MESSAGE_NAME));
 			fastMessage.setString("stringx", "str");
 			IMessage iMessage = converter.convert(fastMessage);

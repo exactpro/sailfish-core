@@ -16,12 +16,18 @@
 package com.exactpro.sf.services.fast.converter;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+import static com.exactpro.sf.services.fast.converter.FastToIMessageConverter.getFieldTimeUnit;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import com.exactpro.sf.util.DateTimeUtility;
+import com.google.common.base.Enums;
+import org.jetbrains.annotations.NotNull;
 import org.openfast.GroupValue;
 import org.openfast.Message;
 import org.openfast.SequenceValue;
@@ -106,11 +112,11 @@ public class IMessageToFastConverter {
 					"name for field :" + fieldName + " message=" + message);
 		}
 		Object value = message.getField(fieldName);
-		setFastField(template, fastMsg, fastFieldName, value);
+		setFastField(template, fastMsg, fastFieldName, value, message, fieldName);
 	}
 
 	private void setFastField(Group template, GroupValue fastMsg, String fastFieldName,
-			Object value)
+			Object value, IMessage message, String fieldName)
 	throws ConverterException {
 		
 		if (value instanceof Byte) {
@@ -128,6 +134,21 @@ public class IMessageToFastConverter {
 		} else if (value instanceof String) {
 			String strValue = (String) value;
 			fastMsg.setString(fastFieldName, strValue);
+		} else if (value instanceof LocalDateTime) {
+			LocalDateTime localDateTimeValue = (LocalDateTime) value;
+			String unitAttrValue = getFieldTimeUnit(dictionary, message.getName(),fieldName);
+			//FAST 1.2. A unit may not exist, then the millisecond is used as the default unit.
+			FastToIMessageConverter.TIMESTAMP_UNIT timeUnit = unitAttrValue != null ? Enums.getIfPresent(FastToIMessageConverter.TIMESTAMP_UNIT.class, unitAttrValue)
+					.or(FastToIMessageConverter.TIMESTAMP_UNIT.millisecond) : FastToIMessageConverter.TIMESTAMP_UNIT.millisecond;
+			if (timeUnit == null) {
+				throw new EPSCommonException("Incorrect time unit = " + unitAttrValue + " for " + fieldName + " field");
+			}
+			BigDecimal bdValue = BigDecimal.valueOf(dateTimeToTimestamp(localDateTimeValue, timeUnit));
+			fastMsg.setDecimal(fastFieldName, bdValue);
+		} else if (value instanceof Boolean) {
+			Boolean boolValue = (Boolean) value;
+			long longValue = boolValue ? 1 : 0;
+			fastMsg.setLong(fastFieldName, longValue);
 		} else if (value instanceof Collection<?>) {
 			Collection<?> colValue = (Collection<?>) value;
 			Sequence sequence = template.getSequence(fastFieldName);
@@ -163,5 +184,22 @@ public class IMessageToFastConverter {
 			}
 		}
 
+	}
+
+	private long dateTimeToTimestamp(LocalDateTime dateTime, @NotNull FastToIMessageConverter.TIMESTAMP_UNIT unit) {
+		switch (unit) {
+			case day:
+				return TimeUnit.MILLISECONDS.toDays(DateTimeUtility.getMillisecond(dateTime));
+			case second:
+				return TimeUnit.MILLISECONDS.toSeconds(DateTimeUtility.getMillisecond(dateTime));
+			case millisecond:
+				return DateTimeUtility.getMillisecond(dateTime);
+			case microsecond:
+				return TimeUnit.MILLISECONDS.toMicros(DateTimeUtility.getMillisecond(dateTime)) + TimeUnit.NANOSECONDS.toMicros(dateTime.getNano());
+			case nanosecond:
+				return TimeUnit.MILLISECONDS.toNanos(DateTimeUtility.getMillisecond(dateTime)) + dateTime.getNano();
+
+		}
+		return DateTimeUtility.getMillisecond(dateTime);
 	}
 }

@@ -48,7 +48,7 @@ public class TestFastConverterPositive extends FastConverterTest{
 	@BeforeClass
 	public static void setUpClass() throws IOException,ConverterException {
 		registry = initRegistry(TEMPLATE_POSITIVE);
-		converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(), NAMESPACE);
+		converter = new FastToIMessageConverter(DefaultMessageFactory.getFactory(), initDictionary(DICTIONARY));
 		IDictionaryStructure dictionary = initDictionary(DICTIONARY);
 		backConverter = new IMessageToFastConverter(dictionary, registry);
 		fastMessage = initMessage(registry, MESSAGE_NAME);

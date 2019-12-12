@@ -16,6 +16,7 @@
 package com.exactpro.sf.services.fast;
 
 import java.nio.ByteOrder;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +50,10 @@ public class TestFastCodec extends FASTServicePluginTest {
     private static final String CORE_ALIAS = new CoreVersion().getAlias();
 	private static final SailfishURI DICTIONARY_URI = SailfishURI.unsafeParse(CORE_ALIAS + ":" + TEMPLATE_TITLE);
 
+	private static final String TEMPLATE_TITLE_V_1_2 = "FAST_V_1_2";
+	private static final SailfishURI DICTIONARY_URI_V_1_2 = SailfishURI.unsafeParse(CORE_ALIAS + ":" + TEMPLATE_TITLE);
+	private static final IMessageFactory msgFactory = DefaultMessageFactory.getFactory();
+
     @Before
     public void init() {
         this.session = new DummySession();
@@ -80,6 +85,90 @@ public class TestFastCodec extends FASTServicePluginTest {
 
 		session.write(lastMessage);
 		System.out.println(HexDumper.getHexdump(bytes));
+	}
+
+	@Test
+	public void testEncodeMessageV_1_2() throws Exception
+	{
+		byte[] sourceArray = {
+				(byte) 0xb3, (byte) 0xc0, (byte) 0x81, (byte) 0xb0, (byte) 0x32, (byte) 0x30, (byte) 0x31, (byte) 0x32, (byte) 0x30, (byte) 0x31, (byte) 0x30, (byte) 0x31, (byte) 0x2d, (byte) 0x30, (byte) 0x31, (byte) 0x3a,
+				(byte) 0x30, (byte) 0x31, (byte) 0x3a, (byte) 0x30, (byte) 0x31, (byte) 0x2e, (byte) 0x33, (byte) 0x33, (byte) 0xb3, (byte) 0xb0, (byte) 0x80, (byte) 0x4d, (byte) 0x41, (byte) 0x44, (byte) 0x54, (byte) 0x59,
+				(byte) 0xb0, (byte) 0x74, (byte) 0x6e, (byte) 0x70, (byte) 0x31, (byte) 0x32, (byte) 0xb3, (byte) 0x80, (byte) 0x80, (byte) 0x81, (byte) 0x15, (byte) 0x6f, (byte) 0x6a, (byte) 0x2c, (byte) 0x14, (byte) 0x75,
+				(byte) 0x3d, (byte) 0x3c, (byte) 0xab, (byte) 0x81
+		};
+		FASTCodec codec = getCodec(DICTIONARY_URI_V_1_2, TEMPLATE_TITLE_V_1_2);
+
+		ProtocolEncoderOutput output = new MockProtocolEncoderOutput();
+
+		IMessage message = msgFactory.createMessage("Logon", "Test");
+
+		message.addField("Password", "tnp123");
+		message.addField("Username", "MADTY0" );
+		message.addField("SendingTime", "20120101-01:01:01.333");
+		message.addField("ApplID", "0");
+		message.addField("MessageType", "0");
+		message.addField("EndOfTransaction", true);
+		message.addField("Timestamp", LocalDateTime.of(2019, 12, 12, 15, 30, 30, 555));
+		message.addField("DeleteReason", 0);
+
+		session.write(message);
+		codec.encode(session, message, output);
+		Queue<Object> msgQueue = ((AbstractProtocolEncoderOutput)output).getMessageQueue();
+		Object lastMessage = msgQueue.element();
+		byte[] asd = ((IoBuffer)lastMessage).array();
+		int limit = ((IoBuffer)lastMessage).limit();
+		byte[] bytes = Arrays.copyOf(asd, limit );
+
+		session.write(lastMessage);
+		System.out.println(HexDumper.getHexdump(bytes));
+		Assert.assertArrayEquals("Compare source and encoded\n" + HexDumper.getHexdump(bytes), sourceArray, bytes);
+	}
+
+	@Test
+	public void testDecodeFastMessage_V_1_2() throws Exception {
+
+		FASTCodec codec = getCodec(DICTIONARY_URI_V_1_2, TEMPLATE_TITLE_V_1_2);
+
+		byte[] sourceArray = {
+				(byte) 0xb3, (byte) 0xc0, (byte) 0x81, (byte) 0xb0, (byte) 0x32, (byte) 0x30, (byte) 0x31, (byte) 0x32, (byte) 0x30, (byte) 0x31, (byte) 0x30, (byte) 0x31, (byte) 0x2d, (byte) 0x30, (byte) 0x31, (byte) 0x3a,
+				(byte) 0x30, (byte) 0x31, (byte) 0x3a, (byte) 0x30, (byte) 0x31, (byte) 0x2e, (byte) 0x33, (byte) 0x33, (byte) 0xb3, (byte) 0xb0, (byte) 0x80, (byte) 0x4d, (byte) 0x41, (byte) 0x44, (byte) 0x54, (byte) 0x59,
+				(byte) 0xb0, (byte) 0x74, (byte) 0x6e, (byte) 0x70, (byte) 0x31, (byte) 0x32, (byte) 0xb3, (byte) 0x80, (byte) 0x80, (byte) 0x81, (byte) 0x15, (byte) 0x6f, (byte) 0x6a, (byte) 0x2c, (byte) 0x14, (byte) 0x75,
+				(byte) 0x3d, (byte) 0x3c, (byte) 0xab, (byte) 0x81
+		};
+
+		IoBuffer toDecode = IoBuffer.wrap(sourceArray);
+		toDecode.order(ByteOrder.LITTLE_ENDIAN);
+		toDecode.position(0);
+
+		IoSession decodeSession = new DummySession();
+
+		MockProtocolDecoderOutput decoderOutput = new MockProtocolDecoderOutput();
+		boolean decodableResult = codec.doDecode(decodeSession, toDecode, decoderOutput);
+		Assert.assertTrue("Decoding error.", decodableResult);
+
+		IMessage message = msgFactory.createMessage("Logon", "Test");
+
+		message.addField("Password", "tnp123");
+		message.addField("Username", "MADTY0" );
+		message.addField("SendingTime", "20120101-01:01:01.333");
+		message.addField("ApplID", "0");
+		message.addField("MessageType", "0");
+		message.addField("EndOfTransaction", true);
+		message.addField("Timestamp", LocalDateTime.of(2019, 12, 12, 15, 30, 30, 555));
+		message.addField("DeleteReason", 0);
+
+		AbstractProtocolEncoderOutput output = new MockProtocolEncoderOutput();
+
+		session.write(message);
+		codec.encode(session, message, output);
+		Queue<Object> msgQueue = output.getMessageQueue();
+		Object lastMessage = msgQueue.element();
+		byte[] asd = ((IoBuffer) lastMessage).array();
+		int limit = ((IoBuffer) lastMessage).limit();
+		byte[] bytes = Arrays.copyOf(asd, limit);
+
+		session.write(lastMessage);
+		Assert.assertArrayEquals("Compare source and encoded\n" + HexDumper.getHexdump(bytes), sourceArray, bytes);
 	}
 
     // AddOrder
