@@ -194,7 +194,8 @@
             <field isCollection="false" type="java.time.LocalDateTime" name="testDate">
                 <attribute type="java.lang.String" name="Format">S</attribute>
                 <attribute type="java.lang.Integer" name="Offset">4</attribute>
-                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Integer" name="Length">24</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">yyyyMMdd-hh:mm:ss.SSSSSS</attribute>
             </field>
         </message>
         <message id="MessageHeader" name="MessageHeader">

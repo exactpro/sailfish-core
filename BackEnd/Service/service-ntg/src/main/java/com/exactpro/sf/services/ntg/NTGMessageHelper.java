@@ -19,6 +19,8 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 import static com.exactpro.sf.services.ntg.NTGUtility.getTransactTimeAsDate;
 import static com.exactpro.sf.util.DateTimeUtility.getMillisecond;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,7 @@ import com.exactpro.sf.common.messages.MessageStructureWriter;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.common.util.GenericConverter;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ntg.exceptions.UndefinedMessageException;
@@ -137,11 +139,13 @@ public class NTGMessageHelper extends MessageHelper {
                 NTGSizeCalculator visitor = new NTGSizeCalculator();
 				writer.traverse(visitor, structure);
                 Integer messageSize = visitor.getMessageSize() - 3; // Don't include 'StartOfMessage' and 'MessageLength'
-
-                String messageType = GenericConverter.convertByteArrayToString(1, new byte[] { messageTypeCode });
-				metadata.put(
-						structure.getName(),
-                        new NTGMessageMetadata(messageType, messageSize));
+                
+                try {
+                    String messageType = NTGVisitorBase.DECODER.get().decode(ByteBuffer.wrap(new byte[] { messageTypeCode })).toString().trim();
+                    metadata.put(structure.getName(), new NTGMessageMetadata(messageType, messageSize));
+                } catch (CharacterCodingException e) {
+                    throw new EPSCommonException("Problem with decoding the messageTypeCode = \"" + messageTypeCode + "\"", e);
+                }
 			}
 		}
 	}
