@@ -15,7 +15,6 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages.all.configuration;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import java.io.Serializable;
 import java.util.List;
 

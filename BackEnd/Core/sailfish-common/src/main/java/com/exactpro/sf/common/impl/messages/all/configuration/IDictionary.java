@@ -25,38 +25,38 @@ import java.util.List;
  */
 public interface IDictionary extends Serializable {
 
-    /**
-     * Get dictionaries name.
-     *
-     * @return {@link String}
-     */
-    String getName();
+//    /**
+//     * Get dictionaries name.
+//     *
+//     * @return {@link String}
+//     */
+//    String getName();
+//
+//    /**
+//     * Get dictionaries description.
+//     *
+//     * @return {@link String}
+//     */
+//    String getDescription();
 
-    /**
-     * Get dictionaries description.
-     *
-     * @return {@link String}
-     */
-    String getDescription();
+//    /**
+//     * Get dictionaries attributes.
+//     *
+//     * @return {@link List} of {@link IAttribute} or extends it
+//     */
+//    List<? extends IAttribute> getAttributes();
 
-    /**
-     * Get dictionaries attributes.
-     *
-     * @return {@link List} of {@link IAttribute} or extends it
-     */
-    List<? extends IAttribute> getAttributes();
-
-    /**
-     * Get dictionaries fields.
-     *
-     * @return {@link List} of {@link IField} or extends it
-     */
-    List<? extends IField> getFields();
-
-    /**
-     * Get dictionaries messages.
-     *
-     * @return {@link List} of {@link IMessage} or extends it
-     */
-    List<? extends IMessage> getMessages();
+//    /**
+//     * Get dictionaries fields.
+//     *
+//     * @return {@link List} of {@link IField} or extends it
+//     */
+//    List<? extends IField> getFields();
+//
+//    /**
+//     * Get dictionaries messages.
+//     *
+//     * @return {@link List} of {@link IMessage} or extends it
+//     */
+//    List<? extends IMessage> getMessages();
 }

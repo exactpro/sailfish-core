@@ -61,7 +61,7 @@ task templates {
         ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
         ant.jamon(destdir: "${genJavaDir}", srcdir: "${templatesDir}")
         ant.xjc(schema: "${xsdDir}/dictionary.xsd", destdir: "${genJavaDir}", package: "com.exactpro.sf.common.impl.messages.xml.configuration") {
-            produces(dir: "${genPackage}", includes: "*")
+            produces(dir: "${genJavaDir}/com/exactpro/sf/common/impl/messages/xml/configuration", includes: "*")
             arg(value: "-extension")
         }
     }
@@ -69,12 +69,21 @@ task templates {
 
 task schemaGen () {
     doLast {
+        println(mainJavaDir)
         ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
-        ant.schemagen(srcdir: "${genPackage}", destdir: "${xsdDir}", includeAntRuntime:'false') {
+        ant.schemagen(srcdir: "${mainJavaDir}/com/exactpro/sf/common/impl/messages/all/configuration", destdir: "${xsdDir}", includeAntRuntime:'false') {
             schema(file: "generateddictionary.xsd", namespace:"")
-            exclude(name: 'package-info.java')
-            exclude(name: 'ObjectFactory.java')
+            exclude(name: 'Attribute.java')
+            exclude(name: 'Field.java')
+            exclude(name: 'IAttribute.java')
+            exclude(name: 'IDictionary.java')
+            exclude(name: 'IField.java')
+            exclude(name: 'IMessage.java')
+            exclude(name: 'JavaType.java')
+            exclude(name: 'Message.java')
+
         }
+
     }
 }
 
