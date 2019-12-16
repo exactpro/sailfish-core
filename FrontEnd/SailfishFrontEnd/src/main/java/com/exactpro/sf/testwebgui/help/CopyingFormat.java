@@ -26,6 +26,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.model.TreeNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.aml.generator.matrix.Column;
 import com.exactpro.sf.aml.iomatrix.CSVDelimiter;
@@ -34,13 +36,25 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.help.helpmarshaller.HelpEntityType;
 import com.exactpro.sf.help.helpmarshaller.jsoncontainers.FieldJsonContainer;
 import com.exactpro.sf.testwebgui.BeanUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class CopyingFormat {
 
+    private static final Logger logger = LoggerFactory.getLogger(HelpBean.class);
     private static final CSVDelimiter DEFAULT_SEPARATOR = CSVDelimiter.TAB;
     private static final String LINE_SEPARATOR = "\\n";
 
     private static final String REF_POSTFIX = "_ref";
+
+    private static final ObjectWriter YAML_WRITER = new ObjectMapper(new YAMLFactory())
+            .writerFor(ObjectNode.class).withDefaultPrettyPrinter();
 
     private final Set<String> header = new LinkedHashSet<>();
     private final Set<String> newColumns = new LinkedHashSet<>();
@@ -159,6 +173,27 @@ public class CopyingFormat {
         return builder.toString();
     }
 
+    public static String copyAllYamlStructure(TreeNode selectedNode) {
+        ObjectNode rootNode = new ObjectNode(JsonNodeFactory.instance);
+
+        createYamlStructure(selectedNode, rootNode);
+        try {
+
+            return YAML_WRITER
+                    .writeValueAsString(rootNode)
+                    .replace("  ", "    ")
+                    .replace("\n", "\\n    ")
+                    .replace("\t", "    ")
+                    .replace("'", "\\'")
+                    .replace("\"", "\\\"")
+                    .substring(5);
+        } catch (JsonProcessingException e) {
+            logger.warn("Can`t serialize to YAML", e);
+        }
+
+        return "";
+    }
+
     private String createAllHeader() {
 
         StringBuilder builder = new StringBuilder();
@@ -248,5 +283,41 @@ public class CopyingFormat {
 
     public int getNewColumnsCount() {
         return newColumns.size();
+    }
+
+    private static JsonNode getOrCreateNode(JsonNode node, String key, boolean getObjectNode){
+        if (node instanceof  ObjectNode) {
+            ObjectNode obj = (ObjectNode) node;
+            return obj.has(key) ? obj.get(key) : getObjectNode ? obj.putObject(key) : obj.putArray(key);
+        } else if (node instanceof ArrayNode) {
+            ArrayNode arrayNode = (ArrayNode) node;
+            return getObjectNode ? arrayNode.addObject() : arrayNode.addArray();
+        }
+
+        return null;
+    }
+
+    private static void createYamlStructure(TreeNode selectedNode, JsonNode parent) {
+        if ("MESSAGE".equals(selectedNode.getType())) {
+            FieldJsonContainer container = (FieldJsonContainer) selectedNode.getData();
+
+            JsonNode message;
+
+            if (container.isCollection()) {
+                message = getOrCreateNode(parent, container.getName(), false);
+                message = getOrCreateNode(message, null, true);
+            } else {
+                message = getOrCreateNode(parent, container.getName(), true);
+            }
+
+            for (TreeNode child : selectedNode.getChildren()) {
+                createYamlStructure(child, message);
+            }
+        } else if ("FIELD".equals(selectedNode.getType())) {
+            FieldJsonContainer container = (FieldJsonContainer) selectedNode.getData();
+            if (parent instanceof ObjectNode) {
+                ((ObjectNode) parent).put(container.getName(), container.getJavaType());
+            }
+        }
     }
 }

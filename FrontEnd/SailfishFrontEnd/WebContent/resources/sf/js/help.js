@@ -55,11 +55,12 @@ function createHiddenTarget(targetId, toCopy) {
     $(exTargetId).val(toCopy);
 }
 
-function copyToClipboard(toCopy1, toCopy2, toCopy3, toCopy4) {
+function copyToClipboard(toCopy1, toCopy2, toCopy3, toCopy4, toCopy5) {
     createHiddenTarget("_hiddenCopyText1", toCopy1);
     createHiddenTarget("_hiddenCopyText2", toCopy2);
     createHiddenTarget("_hiddenCopyText3", toCopy3);
     createHiddenTarget("_hiddenCopyText4", toCopy4);
+    createHiddenTarget("_hiddenCopyText5", toCopy5);
 }
 
 function copyProcess(targetId) {
@@ -88,6 +89,10 @@ $(document).ready(function() {
     
     $('body').on("click", "#copyAllStructure", function (e) {
         copyProcess("#_hiddenCopyText4");
+    });
+
+    $('body').on("click", "#copyAllYamlStructure", function (e) {
+        copyProcess("#_hiddenCopyText5");
     });
     
     $('body').on("click", ".eps-guide-panel a:not(.eps-redmine-attachment-link)", function(e){

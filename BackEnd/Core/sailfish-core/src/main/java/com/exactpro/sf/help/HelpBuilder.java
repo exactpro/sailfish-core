@@ -677,7 +677,7 @@ public class HelpBuilder {
 
                                 HelpJsonContainer fieldJsonNode = new FieldJsonContainer(fieldName,
                                         ACTIONS + File.separator + actionName + File.separator + FIELDS + File.separator + fieldName + HTML,
-                                        HelpJsonContainer.FIELD_ICON, HelpEntityType.FIELD, field.getType());
+                                        HelpJsonContainer.FIELD_ICON, HelpEntityType.FIELD, field.getType(), false);
 
                                 jsonParent.addChild(fieldJsonNode);
 
@@ -716,7 +716,7 @@ public class HelpBuilder {
 
                                 HelpJsonContainer messageJsonNode = new MessageJsonContainer(abstrFM.getName(),
                                         ACTIONS + File.separator + actionName + File.separator + MESSAGES + File.separator + messageName + HTML,
-                                        HelpJsonContainer.MESSAGE_ICON, HelpEntityType.MESSAGE, new ArrayList<HelpJsonContainer>());
+                                        HelpJsonContainer.MESSAGE_ICON, HelpEntityType.MESSAGE, false, new ArrayList<HelpJsonContainer>());
 
                                 jsonParent.addChild(messageJsonNode);
 
@@ -850,7 +850,7 @@ public class HelpBuilder {
 
                         HelpJsonContainer messageStructureJsonNode = new MessageJsonContainer(messageName,
                                 DICTIONARIES + File.separator + dictionaryResourceName + File.separator + MESSAGES + File.separator + messageName
-                                        + HTML, HelpJsonContainer.MESSAGE_STRUCTURE_ICON, HelpEntityType.MESSAGE, new ArrayList<HelpJsonContainer>());
+                                        + HTML, HelpJsonContainer.MESSAGE_STRUCTURE_ICON, HelpEntityType.MESSAGE, false, new ArrayList<HelpJsonContainer>());
 
                         jsonParent.addChild(messageStructureJsonNode);
 
@@ -940,13 +940,13 @@ public class HelpBuilder {
                 }
             }
             if (field.isComplex()) {
-                fieldJsonNode = new MessageJsonContainer(fieldName, fieldsPathMap.get(equalField), HelpJsonContainer.MESSAGE_ICON, fieldNodeType,
+                fieldJsonNode = new MessageJsonContainer(fieldName, fieldsPathMap.get(equalField), HelpJsonContainer.MESSAGE_ICON, fieldNodeType, field.isCollection(),
                         new ArrayList<HelpJsonContainer>());
                 buildMessageFields(field, fieldJsonNode, fieldsPathMap, dictionaryName, fieldsMap);
 
             } else {
                 fieldJsonNode = new FieldJsonContainer(fieldName, fieldsPathMap.get(equalField), HelpJsonContainer.FIELD_STRUCTURE_ICON, fieldNodeType,
-                        getJavaTypeLabel(field.getJavaType()));
+                        getJavaTypeLabel(field.getJavaType()), field.isCollection());
             }
 
             jsonParent.addChild(fieldJsonNode);
