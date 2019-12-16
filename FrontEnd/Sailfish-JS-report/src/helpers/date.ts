@@ -20,13 +20,15 @@ export function getSecondsPeriod(startTime: string | Date, finishTime: string | 
         return '';
     }
 
-    const diffDate =  new Date(toDate(finishTime).getTime() - toDate(startTime).getTime()),
-        seconds = (diffDate.getTime() / 1000).toFixed().toString(),
-        miliseconds = diffDate.getMilliseconds().toString(),
-        milisecondsFormatted = miliseconds !== '0' ? miliseconds.padStart(3, '0') : miliseconds;
+    const diff = toDate(finishTime).getTime() - toDate(startTime).getTime();
 
-    return withMiliseconds ? 
-        `${seconds}.${milisecondsFormatted}s` :
+    const seconds = Math.floor(diff / 1000);
+    const milliseconds = diff - (seconds * 1000);
+
+    const millisecondsFormatted = milliseconds === 0 ? '0': milliseconds.toString().padStart(3, '0');
+
+    return withMiliseconds ?
+        `${seconds}.${millisecondsFormatted}s` :
         `${seconds}s`;
 }
 
