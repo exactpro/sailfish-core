@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.impl.messages.all.configuration;
+package com.exactpro.sf.common.impl.messages.all.configuration.sample.iface;
 
 import java.io.Serializable;
 import java.util.List;
 
-import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.JavaType;
 
 /**
  * <p> Java interface for dictionaries fields
@@ -85,7 +85,7 @@ public interface IField extends Serializable {
      *      {@link JavaType}
      *
      */
-    JavaType getType();
+    com.exactpro.sf.common.impl.messages.all.configuration.sample.JavaType getType();
 
     /**
      * Gets the fields id.

@@ -6,7 +6,7 @@
 //
 
 
-package com.exactpro.sf.common.impl.messages.all.configuration;
+package com.exactpro.sf.common.impl.messages.all.configuration.sample;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -15,6 +15,9 @@ import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IField;
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IMessage;
 
 /**
  * <p>Java class for Message complex type.
@@ -43,7 +46,7 @@ public class Message extends Field implements IMessage, Serializable
 {
 
     private final static long serialVersionUID = -1L;
-    @XmlElement(name = "field")
+    @XmlElement(name = "field", type = Message.class)
     protected List<IField> fields;
 
     /**

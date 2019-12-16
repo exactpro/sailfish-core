@@ -6,7 +6,7 @@
 //
 
 
-package com.exactpro.sf.common.impl.messages.all.configuration;
+package com.exactpro.sf.common.impl.messages.all.configuration.sample;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -17,6 +17,8 @@ import javax.xml.bind.annotation.XmlValue;
 import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
+
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IAttribute;
 
 /**
  * <p>Java class for Attribute complex type.
@@ -40,8 +42,7 @@ import java.io.Serializable;
 @XmlType(name = "Attribute", propOrder = {
     "value"
 })
-public class Attribute
-    implements Serializable
+public class Attribute implements IAttribute, Serializable
 {
 
     private final static long serialVersionUID = -1L;
@@ -86,6 +87,7 @@ public class Attribute
      *     {@link JavaType }
      *     
      */
+    @Override
     public JavaType getType() {
         return type;
     }

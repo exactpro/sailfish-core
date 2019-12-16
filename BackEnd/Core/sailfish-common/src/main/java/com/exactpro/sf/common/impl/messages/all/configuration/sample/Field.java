@@ -6,7 +6,7 @@
 //
 
 
-package com.exactpro.sf.common.impl.messages.all.configuration;
+package com.exactpro.sf.common.impl.messages.all.configuration.sample;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -22,6 +22,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IAttribute;
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IField;
 
 /**
  * <p>Java class for Field complex type.
@@ -72,9 +75,9 @@ public class Field implements IField, Serializable
 
     private final static long serialVersionUID = -1L;
     protected String description;
-    @XmlElement(name = "attribute")
+    @XmlElement(name = "attribute", type = Attribute.class)
     protected List<IAttribute> attributes;
-    @XmlElement(name = "value")
+    @XmlElement(name = "value", type = Attribute.class)
     protected List<IAttribute> values;
     @XmlAttribute(name = "isServiceName")
     protected Boolean isServiceName;
@@ -89,10 +92,16 @@ public class Field implements IField, Serializable
     @XmlID
     @XmlSchemaType(name = "ID")
     protected String id;
+    
+    
     @XmlAttribute(name = "reference")
     @XmlIDREF
-    @XmlSchemaType(name = "IDREF")
-    protected IField reference;
+    @XmlSchemaType(name = "IDREF", type = Field.class)
+    //@XmlSchemaType(name = "IDREF")
+    //protected IField reference;
+    protected Field reference;
+    
+    
     @XmlAttribute(name = "name")
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
@@ -318,25 +327,27 @@ public class Field implements IField, Serializable
 
     /**
      * Gets the value of the reference property.
-     * 
+     *
      * @return
      *     possible object is
-     *     {@link Object }
-     *     
+     *     {@link Field }
+     *
      */
+    @Override
     public IField getReference() {
         return reference;
     }
 
     /**
      * Sets the value of the reference property.
-     * 
+     *
      * @param value
      *     allowed object is
-     *     {@link Object }
-     *     
+     *     {@link Field }
+     *
      */
-    public void setReference(IField value) {
+    public void setReference(Field value) {
+    //public void setReference(IField value) {
         this.reference = value;
     }
 

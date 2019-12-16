@@ -13,6 +13,7 @@ ext {
 configurations {
     jamon
     jaxb
+    sailfish_common
 }
 
 dependencies {
@@ -27,6 +28,8 @@ dependencies {
     jaxb 'javax.xml:jsr173:1.0'
     jaxb 'javax.activation:activation:1.1.1'
 
+    sailfish_common project(':BackEnd:Core:sailfish-common')
+    
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
     } else {
@@ -69,19 +72,18 @@ task templates {
 
 task schemaGen () {
     doLast {
-        println(mainJavaDir)
+        println("build dir" + project.buildDir)
         ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
-        ant.schemagen(srcdir: "${mainJavaDir}/com/exactpro/sf/common/impl/messages/all/configuration", destdir: "${xsdDir}", includeAntRuntime:'false') {
-            schema(file: "generateddictionary.xsd", namespace:"")
-            exclude(name: 'Attribute.java')
-            exclude(name: 'Field.java')
-            exclude(name: 'IAttribute.java')
-            exclude(name: 'IDictionary.java')
-            exclude(name: 'IField.java')
-            exclude(name: 'IMessage.java')
-            exclude(name: 'JavaType.java')
-            exclude(name: 'Message.java')
+        ant.schemagen(
+                srcdir: "${mainJavaDir}/com/exactpro/sf/common/impl/messages/all/configuration/sample",
+                destdir: "${xsdDir}",
+                includeAntRuntime:'false'
+        ) {
+            classpath {
+                pathElement(path: configurations.sailfish_common.asPath )
+            }
 
+            schema(file: "generateddictionary.xsd", namespace:"")
         }
 
     }

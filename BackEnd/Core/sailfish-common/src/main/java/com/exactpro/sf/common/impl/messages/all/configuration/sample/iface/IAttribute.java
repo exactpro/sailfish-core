@@ -13,50 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.impl.messages.all.configuration;
+package com.exactpro.sf.common.impl.messages.all.configuration.sample.iface;
 
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import java.io.Serializable;
-import java.util.List;
 
+import com.exactpro.sf.common.impl.messages.all.configuration.sample.JavaType;
 
 /**
- * Java interface for readable structure of {@link IDictionaryStructure}
+ *  <p> Java interface for dictionaries attributes
  */
-public interface IDictionary extends Serializable {
+public interface IAttribute extends Serializable {
 
     /**
-     * Get dictionaries name.
+     * Gets the value of the name.
      *
-     * @return {@link String}
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
      */
     String getName();
 
     /**
-     * Get dictionaries description.
+     * Gets the value of the type.
      *
-     * @return {@link String}
+     * @return
+     *     possible object is
+     *     {@link JavaType }
+     *
      */
-    String getDescription();
+    com.exactpro.sf.common.impl.messages.all.configuration.sample.JavaType getType();
 
     /**
-     * Get dictionaries attributes.
+     * Gets the value of the value.
      *
-     * @return {@link List} of {@link IAttribute} or extends it
-     */
-    List<? extends IAttribute> getAttributes();
-
-    /**
-     * Get dictionaries fields.
+     * @return
+     *     possible object is
+     *     {@link String }
      *
-     * @return {@link List} of {@link IField} or extends it
      */
-    List<? extends IField> getFields();
-
-    /**
-     * Get dictionaries messages.
-     *
-     * @return {@link List} of {@link IMessage} or extends it
-     */
-    List<? extends IMessage> getMessages();
+    String getValue();
 }

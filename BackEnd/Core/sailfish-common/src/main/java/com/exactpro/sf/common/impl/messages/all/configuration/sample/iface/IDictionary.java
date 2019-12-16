@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.common.impl.messages.all.configuration;
+package com.exactpro.sf.common.impl.messages.all.configuration.sample.iface;
 
-import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import java.io.Serializable;
 import java.util.List;
 
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 
 /**
  * Java interface for readable structure of {@link IDictionaryStructure}
