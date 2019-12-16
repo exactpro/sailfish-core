@@ -16,9 +16,23 @@
 
 package com.exactpro.sf.testwebgui;
 
-public class GuiUtil {
+import java.util.regex.Pattern;
 
-    public static String getReadableName(String name){
-        return (Character.toUpperCase(name.charAt(0)) + name.substring(1)).replaceAll("([A-Z0-9]+)", " $1");
+import org.apache.commons.lang3.StringUtils;
+
+public class GuiUtil {
+    private static final Pattern WORD_BOUNDARY = Pattern.compile("([a-z])([A-Z])"); // (g)(T)
+    private static final Pattern WORD_BOUNDARY_UPPERCASE = Pattern.compile("([A-Z])([A-Z][a-z])"); // (G)(Tt)
+
+    /**
+     * Converts camel-case formatted variable name into a one where words are separated by spaces
+     * @param name variable name
+     * @return reformatted variable name
+     */
+    public static String getReadableName(String name) {
+        name = StringUtils.capitalize(name); // httpMessage -> HttpMessage
+        name = WORD_BOUNDARY.matcher(name).replaceAll("$1 $2"); // HttpMessage -> Http Message
+        name = WORD_BOUNDARY_UPPERCASE.matcher(name).replaceAll("$1 $2"); // HTTPMessage -> HTTP Message
+        return name;
     }
 }
