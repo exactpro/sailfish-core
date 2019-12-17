@@ -72,20 +72,21 @@ task templates {
 
 task schemaGen () {
     doLast {
-        println("build dir" + project.buildDir)
         ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
         ant.schemagen(
-                srcdir: "${mainJavaDir}/com/exactpro/sf/common/impl/messages/all/configuration/sample",
+                srcdir: "${mainJavaDir}",
                 destdir: "${xsdDir}",
                 includeAntRuntime:'false'
         ) {
+            // jxc needs to know the package name
+            include(name: 'com/exactpro/sf/common/impl/messages/all/configuration/sample/')
+
+            // jxc needs to know other sources such as interfaces in our case
             classpath {
                 pathElement(path: configurations.sailfish_common.asPath )
             }
-
-            schema(file: "generateddictionary.xsd", namespace:"")
+            schema(file: "generateddictionary.xsd", namespace: "http://exactprosystems.com/dictionary")
         }
-
     }
 }
 

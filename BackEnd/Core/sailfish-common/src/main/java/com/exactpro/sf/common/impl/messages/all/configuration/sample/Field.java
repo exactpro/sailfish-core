@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IAttribute;
 import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IField;
 
 /**
@@ -75,10 +74,10 @@ public class Field implements IField, Serializable
 
     private final static long serialVersionUID = -1L;
     protected String description;
-    @XmlElement(name = "attribute", type = Attribute.class)
-    protected List<IAttribute> attributes;
-    @XmlElement(name = "value", type = Attribute.class)
-    protected List<IAttribute> values;
+    @XmlElement(name = "attribute")
+    protected List<Attribute> attributes;
+    @XmlElement(name = "value")
+    protected List<Attribute> values;
     @XmlAttribute(name = "isServiceName")
     protected Boolean isServiceName;
     @XmlAttribute(name = "isCollection")
@@ -92,13 +91,9 @@ public class Field implements IField, Serializable
     @XmlID
     @XmlSchemaType(name = "ID")
     protected String id;
-    
-    
     @XmlAttribute(name = "reference")
     @XmlIDREF
-    @XmlSchemaType(name = "IDREF", type = Field.class)
-    //@XmlSchemaType(name = "IDREF")
-    //protected IField reference;
+    @XmlSchemaType(name = "IDREF")
     protected Field reference;
     
     
@@ -155,7 +150,7 @@ public class Field implements IField, Serializable
      *
      *
      */
-    public List<IAttribute> getAttributes() {
+    public List<Attribute> getAttributes() {
         if (attributes == null) {
             attributes = new ArrayList<>();
         }
@@ -184,7 +179,7 @@ public class Field implements IField, Serializable
      *
      *
      */
-    public List<IAttribute> getValues() {
+    public List<Attribute> getValues() {
         if (values == null) {
             values = new ArrayList<>();
         }
@@ -330,7 +325,7 @@ public class Field implements IField, Serializable
      *
      * @return
      *     possible object is
-     *     {@link Field }
+     *     {@link IField }
      *
      */
     @Override
@@ -343,11 +338,10 @@ public class Field implements IField, Serializable
      *
      * @param value
      *     allowed object is
-     *     {@link Field }
+     *     {@link IField }
      *
      */
     public void setReference(Field value) {
-    //public void setReference(IField value) {
         this.reference = value;
     }
 

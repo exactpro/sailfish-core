@@ -16,7 +16,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IField;
 import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IMessage;
 
 /**
@@ -46,8 +45,8 @@ public class Message extends Field implements IMessage, Serializable
 {
 
     private final static long serialVersionUID = -1L;
-    @XmlElement(name = "field", type = Message.class)
-    protected List<IField> fields;
+    @XmlElement(name = "field")
+    protected List<Field> fields;
 
     /**
      * Gets the value of the fields property.
@@ -71,7 +70,7 @@ public class Message extends Field implements IMessage, Serializable
      *
      *
      */
-    public List<IField> getFields() {
+    public List<Field> getFields() {
         if (fields == null) {
             fields = new ArrayList<>();
         }

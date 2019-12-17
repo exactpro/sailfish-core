@@ -12,6 +12,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
@@ -21,10 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IAttribute;
 import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IDictionary;
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IField;
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IMessage;
 
 /**
  * <p>Java class for Dictionary complex type.
@@ -84,10 +82,18 @@ public class Dictionary implements IDictionary, Serializable
 
     private final static long serialVersionUID = -1L;
     protected String description;
+    
     @XmlElement(name = "attribute", type = Attribute.class)
-    protected List<IAttribute> attributes;
-    protected Dictionary.Fields fields;
-    protected Dictionary.Messages messages;
+    protected List<Attribute> attributes;
+    
+    @XmlElementWrapper(name = "fields")
+    @XmlElement(name = "field")
+    protected List<Field> fields;
+    
+    @XmlElementWrapper(name = "messages")
+    @XmlElement(name = "message")
+    protected List<Message> messages;
+    
     @XmlAttribute(name = "name", required = true)
     @XmlJavaTypeAdapter(CollapsedStringAdapter.class)
     @XmlSchemaType(name = "NMTOKEN")
@@ -139,7 +145,7 @@ public class Dictionary implements IDictionary, Serializable
      *
      *
      */
-    public List<IAttribute> getAttributes() {
+    public List<Attribute> getAttributes() {
         if (attributes == null) {
             attributes = new ArrayList<>();
         }
@@ -151,23 +157,23 @@ public class Dictionary implements IDictionary, Serializable
      *
      * @return
      *     possible object is
-     *     {@link Dictionary.Fields }
+     *     {@link Field }
      *
      */
-    public List<IField> getFields() {
-        return fields.getFields();
+    public List<Field> getFields() {
+        return fields;
     }
 
     /**
      * Sets the value of the fields property.
      *
-     * @param value
+     * @param fields
      *     allowed object is
-     *     {@link Dictionary.Fields }
+     *     {@link Field }
      *
      */
-    public void setFields(Dictionary.Fields value) {
-        this.fields = value;
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
     }
 
     /**
@@ -175,23 +181,23 @@ public class Dictionary implements IDictionary, Serializable
      *
      * @return
      *     possible object is
-     *     {@link Dictionary.Messages }
+     *     {@link Message }
      *
      */
-    public List<IMessage> getMessages() {
-        return messages.getMessages();
+    public List<Message> getMessages() {
+        return messages;
     }
 
     /**
      * Sets the value of the messages property.
      *
-     * @param value
+     * @param messages
      *     allowed object is
-     *     {@link Dictionary.Messages }
+     *     {@link Message }
      *
      */
-    public void setMessages(Dictionary.Messages value) {
-        this.messages = value;
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
     }
 
     /**
@@ -217,129 +223,4 @@ public class Dictionary implements IDictionary, Serializable
     public void setName(String value) {
         this.name = value;
     }
-
-
-    /**
-     * <p>Java class for anonymous complex type.
-     *
-     * <p>The following schema fragment specifies the expected content contained within this class.
-     *
-     * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;sequence>
-     *         &lt;element name="field" type="{http://exactprosystems.com/dictionary}Field" maxOccurs="unbounded" minOccurs="0"/>
-     *       &lt;/sequence>
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
-     * </pre>
-     *
-     *
-     */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "fields"
-    })
-    public static class Fields implements Serializable
-    {
-
-        private final static long serialVersionUID = -1L;
-        @XmlElement(name = "field", type = Field.class)
-        protected List<IField> fields;
-
-        /**
-         * Gets the value of the fields property.
-         *
-         * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the fields property.
-         *
-         * <p>
-         * For example, to add a new item, do as follows:
-         * <pre>
-         *    getFields().add(newItem);
-         * </pre>
-         *
-         *
-         * <p>
-         * Objects of the following type(s) are allowed in the list
-         * {@link Field }
-         *
-         *
-         */
-        public List<IField> getFields() {
-            if (fields == null) {
-                fields = new ArrayList<>();
-            }
-            return this.fields;
-        }
-
-    }
-
-
-    /**
-     * <p>Java class for anonymous complex type.
-     *
-     * <p>The following schema fragment specifies the expected content contained within this class.
-     *
-     * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;sequence>
-     *         &lt;element name="message" type="{http://exactprosystems.com/dictionary}Message" maxOccurs="unbounded" minOccurs="0"/>
-     *       &lt;/sequence>
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
-     * </pre>
-     *
-     *
-     */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "messages"
-    })
-    public static class Messages implements Serializable
-    {
-
-        private final static long serialVersionUID = -1L;
-        @XmlElement(name = "message", type = Message.class)
-        protected List<IMessage> messages;
-
-        /**
-         * Gets the value of the messages property.
-         *
-         * <p>
-         * This accessor method returns a reference to the live list,
-         * not a snapshot. Therefore any modification you make to the
-         * returned list will be present inside the JAXB object.
-         * This is why there is not a <CODE>set</CODE> method for the messages property.
-         *
-         * <p>
-         * For example, to add a new item, do as follows:
-         * <pre>
-         *    getMessages().add(newItem);
-         * </pre>
-         *
-         *
-         * <p>
-         * Objects of the following type(s) are allowed in the list
-         * {@link Message }
-         *
-         *
-         */
-        public List<IMessage> getMessages() {
-            if (messages == null) {
-                messages = new ArrayList<>();
-            }
-            return this.messages;
-        }
-
-    }
-
 }
