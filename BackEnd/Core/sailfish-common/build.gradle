@@ -6,14 +6,12 @@ archivesBaseName = 'sailfish-common'
 ext {
     templatesDir    = "${mainDir}/templates"
     xsdDir			= "${mainResDir}/xsd"
-    genPackage      = "${genJavaDir}/com/exactpro/sf/common/impl/messages/xml/configuration"
     System.setProperty('javax.xml.accessExternalSchema', 'file')
 }
 
 configurations {
     jamon
     jaxb
-    sailfish_common
 }
 
 dependencies {
@@ -27,8 +25,6 @@ dependencies {
 
     jaxb 'javax.xml:jsr173:1.0'
     jaxb 'javax.activation:activation:1.1.1'
-
-    sailfish_common project(':BackEnd:Core:sailfish-common')
     
     if (incremental_build) {
         compile "com.exactpro.sf:sailfish-rest-api-client:${artifactCoreVersion}"
@@ -71,23 +67,27 @@ task templates {
 }
 
 task schemaGen () {
+    dependsOn.add('compileKotlin')
     doLast {
         ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
         ant.schemagen(
                 srcdir: "${mainJavaDir}",
-                destdir: "${xsdDir}",
-                includeAntRuntime:'false'
+                destdir: "${genResDir}",
+                includeAntRuntime:'false',
+                verbose: 'false'
         ) {
             // jxc needs to know the package name
             include(name: 'com/exactpro/sf/common/impl/messages/all/configuration/sample/')
 
             // jxc needs to know other sources such as interfaces in our case
             classpath {
-                pathElement(path: configurations.sailfish_common.asPath )
+                pathElement(path: sourceSets.main.output.classesDirs.asPath )
             }
             schema(file: "generateddictionary.xsd", namespace: "http://exactprosystems.com/dictionary")
         }
     }
 }
+
+processResources.dependsOn 'schemaGen'
 
 compileKotlin.dependsOn.add("templates")
