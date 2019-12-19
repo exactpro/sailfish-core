@@ -19,15 +19,54 @@ import TestCase from "../../models/TestCase";
 import Message from "../../models/Message";
 import { StatusType } from "../../models/Status";
 import ActionParameter from "../../models/ActionParameter";
+import Verification from "../../models/Verification";
+import VerificationEntry from "../../models/VerificationEntry";
 
-export function createAction(id: number = 0, subNodes: ActionNode[] = [], name = '', parameters: ActionParameter[] = []): Action {
+export function createAction(
+    id: number = 0, 
+    subNodes: ActionNode[] = [], 
+    name = '', 
+    parameters: ActionParameter[] = [], 
+    status: StatusType = StatusType.PASSED
+): Action {
+
     return {
         actionNodeType: ActionNodeType.ACTION,
         name,
         id,
         subNodes,
-        parameters
-    } as Action;
+        parameters,
+        bugs: [],
+        description: '',
+        messageType: '',
+        relatedMessages: [],
+        isTruncated: false,
+        verificationCount: 0,
+        status: { status }
+    };
+}
+
+export function createVerification(messageId: number = 0, name: string = '', status: StatusType = StatusType.PASSED): Verification {
+    return {
+        actionNodeType: ActionNodeType.VERIFICATION,
+        messageId,
+        description: '',
+        entries: [],
+        name,
+        status: { status }
+    }
+}
+
+export function createVerificationEntry(name = '', actual = '', expected = '', status = StatusType.PASSED): VerificationEntry {
+    return {
+        name,
+        actual, 
+        expected,
+        status,
+        actualType: '',
+        expectedType: '',
+        hint: null
+    }
 }
 
 export function createTestCase(id: string = '0', actions: ActionNode[] = [], messages: Message[] = [], status: StatusType = StatusType.PASSED): TestCase {

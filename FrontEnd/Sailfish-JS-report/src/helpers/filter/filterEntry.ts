@@ -14,18 +14,27 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from './Status';
+import Action from "../../models/Action";
+import Message from "../../models/Message";
+import Verification from "../../models/Verification";
+import VerificationEntry from "../../models/VerificationEntry";
 
-export default interface VerificationEntry {
-    name: string;
-    actual: string;
-    actualType: string;
-    expected: string;
-    expectedType: string;
-    status?: StatusType;
-    precision?: string;
-    systemPrecision?: string;
-    subEntries?: VerificationEntry[];
-    exception?: unknown;
-    hint: string;
+type Entry = Action | Message | Verification | VerificationEntry;
+
+export default function filterEntry<T extends Entry>(entry: T, fields: (keyof T)[], values: RegExp[]) {
+    for (let field of fields) {
+        const targetField = entry[field];
+
+        if (typeof targetField != 'string') {
+            continue;
+        }
+
+        for (let value of values) {
+            if (targetField.match(value)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

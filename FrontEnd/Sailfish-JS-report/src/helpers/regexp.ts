@@ -41,3 +41,12 @@ export function escapeSpecialSymbols(str: string): string {
 export function createRegExp(regExp: TemplateStringsArray, ...options: string[]): RegExp {
     return new RegExp(regExp.raw[0].replace(/\s/gm, ""), options.join(''))
 }
+
+/**
+ * Converts pattern's string array to RegExp array.
+ * @param values pattern values
+ * @param flags RegExp flags (by default 'g' and 'i' flags are included)
+ */
+export function toRegExpArray(values: string[], flags = 'gi'): RegExp[] {
+    return values.map(val => new RegExp(escapeSpecialSymbols(val), flags));
+}

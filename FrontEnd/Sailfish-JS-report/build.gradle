@@ -72,7 +72,9 @@ task devServer(type: NpmTask, dependsOn: 'installDependencies') {
 }
 
 task runTests(type: NpmTask, dependsOn: 'installDependencies') {
-    args = ['test']
+    // we use jest with '--no-cache' option, because there are some bugs, related to invalidating jest's cache
+    // when using TS const enums
+    args = ['run', 'test:ci']
 }
 
 task zipData(type: Zip, dependsOn: 'buildProd') {

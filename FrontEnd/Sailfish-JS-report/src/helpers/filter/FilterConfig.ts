@@ -14,18 +14,24 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from './Status';
+export const enum FilterType {
+    ACTION = 'ACTION',
+    MESSAGE = 'MESSAGE',
+    VERIFICATION = 'VERIFICATION'
+}
 
-export default interface VerificationEntry {
-    name: string;
-    actual: string;
-    actualType: string;
-    expected: string;
-    expectedType: string;
-    status?: StatusType;
-    precision?: string;
-    systemPrecision?: string;
-    subEntries?: VerificationEntry[];
-    exception?: unknown;
-    hint: string;
+export const enum FilterPath {
+    ALL = 'ALL',
+    SERVICE = 'SERVICE',
+    STATUS = 'STATUS'
+}
+
+export interface FilterBlock {
+    path: FilterPath;
+    values: string[];
+}
+
+export interface FilterConfig {
+    types: FilterType[];
+    blocks: FilterBlock[];
 }

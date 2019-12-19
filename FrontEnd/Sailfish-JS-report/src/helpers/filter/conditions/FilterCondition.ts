@@ -14,18 +14,10 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { StatusType } from './Status';
+import Action from "../../../models/Action";
+import Message from "../../../models/Message";
+import Verification from "../../../models/Verification";
 
-export default interface VerificationEntry {
-    name: string;
-    actual: string;
-    actualType: string;
-    expected: string;
-    expectedType: string;
-    status?: StatusType;
-    precision?: string;
-    systemPrecision?: string;
-    subEntries?: VerificationEntry[];
-    exception?: unknown;
-    hint: string;
-}
+type FilterCondition<T extends Action | Message | Verification> = (entry: T) => boolean;
+
+export default FilterCondition;
