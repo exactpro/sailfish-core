@@ -34,6 +34,7 @@ public class TestDateTimeUtility {
 
     private final long millisecond = System.currentTimeMillis();
     private final int nanosecond = (int) ((millisecond % 1_000) * 1_000_000) + rnd.nextInt(999_999);
+    private final long second = millisecond / 1000;
 
     private final Date date = new Date(millisecond);
     private final Date dateOnly = getDateOnly(millisecond);
@@ -98,6 +99,10 @@ public class TestDateTimeUtility {
         assertEquals(DateTimeUtility.getMillisecond(localDateTime), millisecond);
         assertEquals(DateTimeUtility.getMillisecond(localDateTimeNano), millisecond);
         assertEquals(DateTimeUtility.getMillisecond(localDate), millisecond / (24 * 60 * 60 * 1_000) * (24 * 60 * 60 * 1_000));
+
+        assertEquals(DateTimeUtility.getSecond(localDateTime), second);
+        assertEquals(DateTimeUtility.getSecond(localDateTimeNano), second);
+        assertEquals(DateTimeUtility.getSecond(localDate), second / (24 * 60 * 60) * (24 * 60 * 60));
     }
 
     private Date getDateOnly(long millisecond) {

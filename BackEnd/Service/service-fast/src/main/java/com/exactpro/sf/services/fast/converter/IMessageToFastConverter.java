@@ -195,9 +195,9 @@ public class IMessageToFastConverter {
 			case millisecond:
 				return DateTimeUtility.getMillisecond(dateTime);
 			case microsecond:
-				return TimeUnit.MILLISECONDS.toMicros(DateTimeUtility.getMillisecond(dateTime)) + TimeUnit.NANOSECONDS.toMicros(dateTime.getNano());
+				return TimeUnit.SECONDS.toMicros(DateTimeUtility.getSecond(dateTime)) + TimeUnit.NANOSECONDS.toMicros(dateTime.getNano());
 			case nanosecond:
-				return TimeUnit.MILLISECONDS.toNanos(DateTimeUtility.getMillisecond(dateTime)) + dateTime.getNano();
+				return TimeUnit.SECONDS.toNanos(DateTimeUtility.getSecond(dateTime)) + dateTime.getNano();
 
 		}
 		return DateTimeUtility.getMillisecond(dateTime);

@@ -298,13 +298,13 @@ public class FastToIMessageConverter {
 			case millisecond:
 				return DateTimeUtility.toLocalDateTime(timestamp);
 			case microsecond:
-				long millis = TimeUnit.MICROSECONDS.toMillis(timestamp);
-				int nanos = (int) (TimeUnit.MICROSECONDS.toNanos(timestamp) % TimeUnit.MILLISECONDS.toNanos(1));
-				return DateTimeUtility.toLocalDateTime(millis, nanos);
+				long millisecond = TimeUnit.MICROSECONDS.toSeconds(timestamp) * TimeUnit.SECONDS.toMillis(1);
+				int nanos = (int) (TimeUnit.MICROSECONDS.toNanos(timestamp) % TimeUnit.SECONDS.toNanos(1));
+				return DateTimeUtility.toLocalDateTime(millisecond, nanos);
 			case nanosecond:
-				millis = TimeUnit.NANOSECONDS.toMillis(timestamp);
-				nanos = (int) (timestamp % TimeUnit.MILLISECONDS.toNanos(1));
-				return DateTimeUtility.toLocalDateTime(millis, nanos);
+                millisecond = TimeUnit.NANOSECONDS.toSeconds(timestamp) * TimeUnit.SECONDS.toMillis(1);
+				nanos = (int) (timestamp % TimeUnit.SECONDS.toNanos(1));
+				return DateTimeUtility.toLocalDateTime(millisecond, nanos);
 
 		}
 		return DateTimeUtility.toLocalDateTime(timestamp);

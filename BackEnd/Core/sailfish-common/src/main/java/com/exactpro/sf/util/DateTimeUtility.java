@@ -382,6 +382,29 @@ public class DateTimeUtility {
     }
 
     /**
+     * Get second from LocalDateTime in UTC time zone
+     *
+     * @param localDateTime
+     * @return the number of seconds since the epoch of
+     *         1970-01-01T00:00:00Z
+     */
+    public static long getSecond(LocalDateTime localDateTime) {
+        return localDateTime.toInstant(ZoneOffset.UTC).getEpochSecond();
+    }
+
+
+    /**
+     * Get second from LocalDateTime in UTC time zone
+     *
+     * @param localDate
+     * @return the number of seconds since the epoch of
+     *         1970-01-01T00:00:00Z
+     */
+    public static long getSecond(LocalDate localDate) {
+        return localDate.atStartOfDay(ZoneOffset.UTC).toEpochSecond();
+    }
+
+    /**
      * Create DateTimeFormatter with UTC time zone
      * 
      * @param pattern
