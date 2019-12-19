@@ -18,11 +18,11 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Arrays;
@@ -50,6 +50,7 @@ import com.exactpro.sf.aml.script.CheckPoint;
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.impl.SFLocalContext;
 import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.comparison.ComparisonResult;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.FolderType;
@@ -78,6 +79,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomLink;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomMessage;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.CustomTable;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.KnownBugStatus;
+import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.LogEntry;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Message;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.OutcomeSummary;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.beans.Parameter;
@@ -100,11 +102,15 @@ import com.google.common.collect.Sets;
 
 @SuppressWarnings("MismatchedQueryAndUpdateOfCollection, unused, FieldCanBeLocal")
 public class JsonReport implements IScriptReport {
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS");
+
     private static final Logger logger = LoggerFactory.getLogger(JsonReport.class);
     private static final ObjectMapper mapper;
     private static final String REPORT_ROOT_FILE_NAME = "report";
     private static final String REPORT_DATA_DIRECTORY_NAME = "reportData";
-    private static final String LIVE_REPORT_DIRECTORY_NAME = "live";
+    private static final String REPORT_JSONP_DIRECTORY_NAME = "jsonp";
+    private static final byte[] REPORT_JSONP_WRAPPER_START = "window.loadJsonp(".getBytes();
+    private static final byte[] REPORT_JSONP_WRAPPER_END = ")".getBytes();
 
     private long actionIdCounter;
     private long knownBugIdCounter;
@@ -114,12 +120,13 @@ public class JsonReport implements IScriptReport {
     private IReportStats reportStats;
     private AtomicLong actionNodeDepth = new AtomicLong(0);
 
-    private LiveTestCaseWriter liveTestCaseWriter;
-    private Path liveReportDir;
+    private JsonpTestcaseWriter jsonpTestcaseWriter;
+    private Path jsonpRootDir;
+    private Path reportRootDir;
     private final Map<Long, Set<Long>> messageToActionIdMap;
 
     private final IWorkspaceDispatcher dispatcher;
-    private final String reportRootDirectoryPath;
+    private final String reportDirectory;
     private final TestScriptDescription testScriptDescription;
     private final IDictionaryManager dictionaryManager;
 
@@ -135,16 +142,21 @@ public class JsonReport implements IScriptReport {
                 .withCreatorVisibility(Visibility.NONE).withSetterVisibility(Visibility.NONE)
                 .withGetterVisibility(Visibility.NONE).withIsGetterVisibility(Visibility.NONE));
         mapper.registerModule(new JavaTimeModule());
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
+        mapper.setDateFormat(DATE_FORMAT);
     }
 
     public JsonReport(int verificationLimit, String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription, IDictionaryManager dictionaryManager) {
         this.messageToActionIdMap = new HashMap<>();
         this.reportStats = new ReportStats();
         this.dispatcher = dispatcher;
-        this.reportRootDirectoryPath = reportRootDirectoryPath;
+        this.reportDirectory = reportRootDirectoryPath;
         this.testScriptDescription = testScriptDescription;
-        this.liveReportDir = Paths.get(reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, LIVE_REPORT_DIRECTORY_NAME);
+        try {
+            this.reportRootDir = dispatcher.createFolder(FolderType.REPORT, reportRootDirectoryPath).toPath();
+            this.jsonpRootDir = dispatcher.createFolder(FolderType.REPORT, reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, REPORT_JSONP_DIRECTORY_NAME).toPath();
+        } catch (WorkspaceStructureException e) {
+            throw new EPSCommonException("unable to get report directory", e);
+        }
         this.dictionaryManager = dictionaryManager;
         this.verificationLimit = verificationLimit;
         this.reportRoot.setTags(
@@ -172,37 +184,52 @@ public class JsonReport implements IScriptReport {
         assertState(true, states);
     }
 
-    private File getFile(String fileName, String extension) {
+    private File getFile(String fileName, boolean jsonp) {
+        String extension = jsonp ? ".js" : ".json";
         fileName = fileName.replaceAll("\\W", "_");
+
         if (!fileName.endsWith(extension)) {
             fileName = fileName + extension;
         }
 
         try {
-            return dispatcher.createFile(FolderType.REPORT, true, reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, fileName);
+            return jsonp
+                    ? dispatcher.createFile(FolderType.REPORT, true, reportDirectory, REPORT_DATA_DIRECTORY_NAME, REPORT_JSONP_DIRECTORY_NAME, fileName)
+                    : dispatcher.createFile(FolderType.REPORT, true, reportDirectory, REPORT_DATA_DIRECTORY_NAME, fileName);
+
         } catch (WorkspaceStructureException e) {
             throw new ScriptRunException("unable to create report file", e);
         }
     }
 
-    private void exportToFile(Object data, String fileName) {
-        File jsonFile = getFile(fileName, ".json");
-        File jsonpFile = getFile(fileName, ".js");
+    private void updateMetadata(TestCase testCase, String jsonFileName) {
+        TestCaseMetadata metadata = new TestCaseMetadata(
+                testCase,
+                getFile(jsonFileName, false).getPath(),
+                jsonpTestcaseWriter == null ? null : reportRootDir.relativize(jsonpTestcaseWriter.getTestCaseFilePath()).toString());
 
-        try (FileOutputStream jsonpStream = new FileOutputStream(jsonpFile)) {
-            logger.info("saving json report - writing to file: '{}'", jsonpFile);
+        reportRoot.getMetadataMap().put(metadata.getOrder(), metadata);
+    }
+
+    private void exportToFile(Object data, String fileName, boolean copyToJsonp) {
+        File jsonFile = getFile(fileName, false);
+
+        try {
+            logger.info("saving json report - writing to file: '{}'", jsonFile);
             mapper.writeValue(jsonFile, data);
 
-            jsonpStream.write("window.loadJsonp(".getBytes());
-            Files.copy(jsonFile.toPath(), jsonpStream);
-            jsonpStream.write(")".getBytes());
+            if (copyToJsonp) {
+                File jsonpFile = getFile(fileName, true);
+
+                try (OutputStream jsonpStream = new FileOutputStream(jsonpFile)) {
+                    jsonpStream.write(REPORT_JSONP_WRAPPER_START);
+                    Files.copy(jsonFile.toPath(), jsonpStream);
+                    jsonpStream.write(REPORT_JSONP_WRAPPER_END);
+                }
+            }
 
         } catch (IOException e) {
             throw new ScriptRunException("unable to export json report", e);
-        }
-
-        if (data instanceof TestCase) {
-            reportRoot.getMetadata().add(new TestCaseMetadata((TestCase)data, jsonpFile, jsonFile));
         }
     }
 
@@ -290,7 +317,7 @@ public class JsonReport implements IScriptReport {
 
         reportRoot.setDescription(description);
 
-        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME, true);
 
         setContext(ContextType.SCRIPT, null);
     }
@@ -322,7 +349,12 @@ public class JsonReport implements IScriptReport {
 
         setContext(ContextType.TESTCASE, testcase);
 
-        this.liveTestCaseWriter = new LiveTestCaseWriter(testcase, mapper, liveReportDir, dispatcher);
+        jsonpTestcaseWriter = new JsonpTestcaseWriter(order, jsonpRootDir, reportRootDir, dispatcher);
+        jsonpTestcaseWriter.updateTestCaseFile(testcase);
+
+        updateMetadata(testcase, testcase.getName());
+        exportToFile(testcase, testcase.getName(), false);
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME, true);
     }
 
     public void closeTestCase(StatusDescription status) {
@@ -332,14 +364,15 @@ public class JsonReport implements IScriptReport {
         curTestCase.setStatus(new Status(status));
         curTestCase.setFinishTime(Instant.now());
 
-        exportToFile(curTestCase, curTestCase.getName());
-        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
-
         revertContext();
         reportStats.updateTestCaseStatus(status.getStatus());
 
-        liveTestCaseWriter.clearDirectory();
-        liveTestCaseWriter = null;
+        updateMetadata(curTestCase, curTestCase.getName());
+        exportToFile(curTestCase, curTestCase.getName(), false);
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME, true);
+
+        jsonpTestcaseWriter.updateTestCaseFile(curTestCase);
+        jsonpTestcaseWriter = null;
     }
 
     public void createAction(String id, String serviceName, String name, String messageType, String description, IMessage parameters,
@@ -398,7 +431,7 @@ public class JsonReport implements IScriptReport {
             messageToActionIdMap.computeIfAbsent(id, key -> new HashSet<>()).add(curAction.getId());
         }
 
-        liveTestCaseWriter.writeNode(ObjectUtils.defaultIfNull(getCurrentRootAction(), curAction));
+        jsonpTestcaseWriter.write(ObjectUtils.defaultIfNull(getCurrentRootAction(), curAction));
     }
 
     public void openGroup(String name, String description) {
@@ -430,7 +463,7 @@ public class JsonReport implements IScriptReport {
             ((Action) parentNode).getBugs().addAll(curGroup.getBugs());
         }
 
-        liveTestCaseWriter.writeNode(curGroup);
+        jsonpTestcaseWriter.write(curGroup);
     }
 
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
@@ -549,6 +582,7 @@ public class JsonReport implements IScriptReport {
 
         if("Messages".equals(table.getName())) {
             List<Message> messages = table.getRows().stream().map(Message::new).collect(Collectors.toList());
+            messages.forEach(jsonpTestcaseWriter::write);
 
             if (currentNode instanceof Action) {
                 long actionId = ((Action) currentNode).getId();
@@ -570,11 +604,9 @@ public class JsonReport implements IScriptReport {
     }
 
     public void createLogTable(List<String> header, List<LoggerRow> rows) {
-//        FIXME: please rollback these changes when logs will be used on the front
-//        assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
-//
-//        List<IJsonReportNode> logs = rows.stream().map(LogEntry::new).collect(Collectors.toList());
-//        getCurrentContextNode().addSubNodes(logs);
+        assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
+
+        rows.stream().map(LogEntry::new).forEachOrdered(jsonpTestcaseWriter::write);
     }
 
     public void setOutcomes(OutcomeCollector outcomes) {
@@ -598,13 +630,7 @@ public class JsonReport implements IScriptReport {
         assertState(false, null, ContextType.SCRIPT);
         reportRoot.setFinishTime(Instant.now());
         initProperties();
-        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
-
-        if (liveTestCaseWriter != null) {
-            logger.warn("test case was not closed properly - removing live report directory now");
-            liveTestCaseWriter.clearDirectory();
-            liveTestCaseWriter = null;
-        }
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME, true);
     }
 
     public void createLinkToReport(String linkToReport) {

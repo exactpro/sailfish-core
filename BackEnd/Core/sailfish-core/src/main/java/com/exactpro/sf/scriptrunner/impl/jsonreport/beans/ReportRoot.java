@@ -17,7 +17,17 @@
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ReportRoot {
     private Instant finishTime;
@@ -32,7 +42,10 @@ public class ReportRoot {
     private String branchName;
     private String description;
     private ReportException exception;
-    private List<TestCaseMetadata> metadata = new ArrayList<>();
+
+    @JsonIgnore
+    private Map<Integer, TestCaseMetadata> metadata = new HashMap<>();
+
     private ReportProperties reportProperties;
     private String precision;
     private Set<String> tags;
@@ -129,12 +142,19 @@ public class ReportRoot {
         this.exception = exception;
     }
 
-    public List<TestCaseMetadata> getMetadata() {
-        return metadata;
+    @JsonIgnore
+    public Map<Integer, TestCaseMetadata> getMetadataMap() {
+        return this.metadata;
     }
 
-    public void setMetadata(List<TestCaseMetadata> metadata) {
-        this.metadata = metadata;
+    @JsonProperty("metadata")
+    public Collection<TestCaseMetadata> getMetadata() {
+        return metadata.values();
+    }
+
+    @JsonProperty("metadata")
+    public void setMetadata(Collection<TestCaseMetadata> metadata) {
+        this.metadata = metadata.stream().collect(Collectors.toMap(TestCaseMetadata::getOrder, Function.identity()));
     }
 
     public ReportProperties getReportProperties() {

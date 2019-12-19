@@ -330,7 +330,7 @@ public class BeanUtil {
                     .toURL();
 
         } catch (Exception e) {
-            logger.warn("unable to get ml api path with FacesContext - trying to use SfInstanceInfo instead", e);
+            logger.debug("unable to get ml api path with FacesContext - trying to use SfInstanceInfo instead", e);
 
             return new URIBuilder()
                     .setScheme("http")

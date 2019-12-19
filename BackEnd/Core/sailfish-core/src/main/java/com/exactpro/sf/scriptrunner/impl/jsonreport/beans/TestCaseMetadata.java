@@ -18,13 +18,13 @@ package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 
-import java.io.File;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Set;
 
 public class TestCaseMetadata {
 
+    private int order;
     private Instant startTime;
     private Instant finishTime;
     private String name;
@@ -42,17 +42,18 @@ public class TestCaseMetadata {
     public TestCaseMetadata() {
     }
 
-    public TestCaseMetadata(TestCase testCase, File jsonpFile, File jsonFile) {
+    public TestCaseMetadata(TestCase testCase, String jsonFileName, String jsonpFileName) {
+        this.order = testCase.getOrder();
+        this.id = testCase.getId();
         this.bugs = testCase.getBugTree();
         this.startTime = testCase.getStartTime();
         this.finishTime = testCase.getFinishTime();
         this.name = testCase.getName();
         this.status = testCase.getStatus();
-        this.id = testCase.getId();
         this.hash = testCase.getHash();
         this.description = testCase.getDescription();
-        this.jsonFileName = jsonFile.getName();
-        this.jsonpFileName = jsonpFile.getName();
+        this.jsonFileName = jsonFileName;
+        this.jsonpFileName = jsonpFileName;
         this.tags = testCase.getTags();
     }
 
@@ -105,14 +106,6 @@ public class TestCaseMetadata {
         this.jsonFileName = jsonFilePath;
     }
 
-    public String getJsonpFileName() {
-        return jsonpFileName;
-    }
-
-    public void setJsonpFileName(String jsFilePath) {
-        this.jsonpFileName = jsFilePath;
-    }
-
     public String getId() {
         return id;
     }
@@ -137,11 +130,27 @@ public class TestCaseMetadata {
         this.description = description;
     }
 
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
+    }
+
     public Set<String> getTags() {
         return tags;
     }
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
+    }
+
+    public String getJsonpFileName() {
+        return jsonpFileName;
+    }
+
+    public void setJsonpFileName(String jsonpFileName) {
+        this.jsonpFileName = jsonpFileName;
     }
 }
