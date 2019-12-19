@@ -70,9 +70,10 @@ task schemaGen () {
     dependsOn.add('compileKotlin')
     doLast {
         ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
+        mkdir genResDir
         ant.schemagen(
-                srcdir: "${mainJavaDir}",
-                destdir: "${genResDir}",
+                srcdir: mainJavaDir,
+                destdir: genResDir,
                 includeAntRuntime:'false',
                 verbose: 'false'
         ) {
