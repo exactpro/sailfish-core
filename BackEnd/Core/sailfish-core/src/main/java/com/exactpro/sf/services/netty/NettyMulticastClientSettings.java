@@ -24,11 +24,8 @@ import com.exactpro.sf.configuration.suri.SailfishURI;
 public class NettyMulticastClientSettings extends NettyClientSettings {
     private static final long serialVersionUID = -5243141927769743936L;
 
-    @Description("Specify default interface for outgoing multicast (service will resolve this IP to network interface)")
-	private String localIP;
-
-	@Description("Local IP (service will lookup this ip to determine network interface)")
-	private String bindIp;
+    @Description("Specify IP of an interface for outgoing multicast (service will resolve this IP to network interface)")
+    private String interfaceIp;
 
 	@Description("If specified - service will drop all messages receved from non-sourceIp addresses")
 	private String sourceIp;
@@ -39,20 +36,15 @@ public class NettyMulticastClientSettings extends NettyClientSettings {
 	@Description("Multicast port (service have to bind to this port in order to listen multicast)")
 	private int multicastPort;
 
-	public String getLocalIP() {
-		return localIP;
-	}
+    @Description("Specifies TTL for outgoing packets")
+    private int ttl = 1;
 
-	public void setLocalIP(String localIP) {
-		this.localIP = localIP;
-	}
+    public String getInterfaceIp() {
+        return interfaceIp;
+    }
 
-	public String getBindIp() {
-		return bindIp;
-	}
-
-	public void setBindIp(String bindIp) {
-		this.bindIp = bindIp;
+    public void setInterfaceIp(String interfaceIp) {
+        this.interfaceIp = interfaceIp;
 	}
 
 	public String getSourceIp() {
@@ -78,6 +70,14 @@ public class NettyMulticastClientSettings extends NettyClientSettings {
 	public void setMulticastPort(int multicastPort) {
 		this.multicastPort = multicastPort;
 	}
+
+    public int getTtl() {
+        return ttl;
+    }
+
+    public void setTtl(int ttl) {
+        this.ttl = ttl;
+    }
 
     @Override
     public SailfishURI getDictionaryName() {

@@ -15,16 +15,23 @@
  ******************************************************************************/
 package com.exactpro.sf.services.netty;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.util.LinkedHashMap;
+
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceException;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.netty.handlers.ExceptionInboundHandler;
+
 import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ChannelFactory;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
@@ -34,12 +41,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.InternetProtocolFamily;
 import io.netty.channel.socket.nio.NioDatagramChannel;
-
-import java.net.Inet4Address;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.util.LinkedHashMap;
-import java.util.Map.Entry;
 
 public abstract class NettyMulticastClientService extends NettyClientService {
 
@@ -63,6 +64,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
                     serviceName);
 
 			nettySession = createSession();
+            nioEventLoopGroup = new NioEventLoopGroup();
 
             initChannelHandlers(serviceContext);
 
@@ -82,16 +84,21 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 	        channelLock.writeLock().lock();
             LinkedHashMap<String, ChannelHandler> handlers = getChannelHandlers();
 
-            String localIP = getSettings().getLocalIP();
-            String bindIp = (getSettings().getBindIp() == null) ? getSettings().getMulticastIp() : getSettings().getBindIp();
+            String interfaceIp = getSettings().getInterfaceIp();
             String mcastIp = getSettings().getMulticastIp();
             int mcastPort = getSettings().getMulticastPort();
-            this.localNetworkInterface = NetworkInterface.getByInetAddress(Inet4Address.getByName(localIP));
-            this.multicastGroup = new InetSocketAddress(Inet4Address.getByName(mcastIp), mcastPort);
+
+            this.localNetworkInterface = NetworkInterface.getByInetAddress(Inet4Address.getByName(interfaceIp));
+
+            if (this.localNetworkInterface == null) {
+                throw new ServiceException("Failed to resolve network interface via IP: " + interfaceIp);
+            }
+
+            this.multicastGroup = new InetSocketAddress(InetAddress.getByName(mcastIp), mcastPort);
 
             Bootstrap cb = new Bootstrap();
             // Fixme: use ITaskExecutor ?
-            cb.group(new NioEventLoopGroup());
+            cb.group(nioEventLoopGroup);
             cb.channelFactory(new ChannelFactory<Channel>() {
                 @Override
                 public Channel newChannel() {
@@ -101,15 +108,14 @@ public abstract class NettyMulticastClientService extends NettyClientService {
             });
             cb.option(ChannelOption.SO_REUSEADDR, true);
             cb.option(ChannelOption.IP_MULTICAST_IF, localNetworkInterface);
-            cb.localAddress(new InetSocketAddress(Inet4Address.getByName(bindIp), mcastPort));
+            cb.option(ChannelOption.IP_MULTICAST_TTL, getSettings().getTtl());
+            cb.localAddress(new InetSocketAddress(InetAddress.getByName(mcastIp), mcastPort));
             // we can configure java -Dio.netty.allocator.numDirectArenas=... -Dio.netty.allocator.numHeapArenas=...
             cb.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
             cb.handler(new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel ch) throws Exception {
-                    for (Entry<String, ChannelHandler> entry : handlers.entrySet()) {
-                        ch.pipeline().addLast(entry.getKey(), entry.getValue());
-                    }
+                    handlers.forEach((key, value) -> ch.pipeline().addLast(key, value));
                     // add exception handler for inbound messages
                     // outbound exceptions will be routed here by ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE
                     ch.pipeline().addLast(new ExceptionInboundHandler(nettySession));
@@ -131,7 +137,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
                     if (sourceIP == null) {
                         future = channel.joinGroup(multicastGroup, localNetworkInterface);
                     } else {
-                        future = channel.joinGroup(multicastGroup.getAddress(), localNetworkInterface, Inet4Address.getByName(sourceIP));
+                        future = channel.joinGroup(multicastGroup.getAddress(), localNetworkInterface, InetAddress.getByName(sourceIP));
                     }
                     future.addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
                 }
@@ -143,29 +149,6 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 	        channelLock.writeLock().unlock();
         }
 	}
-
-	@Override
-	public void dispose() {
-        changeStatus(ServiceStatus.DISPOSING, "Service disposing", null);
-
-        NettySession session = nettySession;
-		if (session != null) {
-		    nettySession = null;
-		    session.close();
-		}
-
-		Channel localChannel = getChannel();
-
-		if (localChannel != null) {
-			localChannel.close().syncUninterruptibly();
-		}
-
-        changeStatus(ServiceStatus.DISPOSED, "Service disposed", null); // FIXME: the same called from closeFuture.listen
-
-        logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
-	}
-
 
 	public void stop(String message, Throwable cause) {
 		changeStatus(ServiceStatus.DISPOSING, message, cause);
