@@ -78,7 +78,7 @@ public class TestRules extends AbstractTest {
     	msg.addField("When", "OK");
     	msg.addField("Change", "ChangeValue");
     	processor.processMessage(msg);
-    	Assert.assertEquals(4, msg.getFieldNames().size());
+        Assert.assertEquals(2, msg.getFieldNames().size());
     	Assert.assertEquals("OK", msg.getField("When"));
     	Assert.assertEquals("ChangeValue", msg.getField("Change"));
         Assert.assertEquals(null, msg.<Object>getField("Load"));

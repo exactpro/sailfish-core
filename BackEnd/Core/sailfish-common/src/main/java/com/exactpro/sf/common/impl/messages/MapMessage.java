@@ -91,7 +91,10 @@ public class MapMessage implements IMessage
 		{
 			throw new IllegalArgumentException("[name] could not be null");
 		}
-		fieldsMap.put(name, value);
+
+        if (value != null) {
+            fieldsMap.put(name, value);
+        }
 	}
 
 	public Map<String, Object> getFieldsMap(){
@@ -101,8 +104,10 @@ public class MapMessage implements IMessage
 	}
 
     @JsonSetter("fieldsMap")
+    @SuppressWarnings("ControlFlowStatementWithoutBraces")
 	public void addFieldsMap(Map<String, Object> fieldsMap){
 		this.fieldsMap.putAll(fieldsMap);
+        while (this.fieldsMap.values().remove(null));
 	}
 
 	public void removeAllFields(){
