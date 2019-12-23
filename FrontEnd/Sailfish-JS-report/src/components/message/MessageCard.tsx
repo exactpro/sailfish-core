@@ -190,8 +190,7 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
 
     if (prediction) {
         labels.push(
-            <MessagePredictionIndicator 
-                prediction={prediction} />
+            <MessagePredictionIndicator prediction={prediction} />
         );
     }
 
