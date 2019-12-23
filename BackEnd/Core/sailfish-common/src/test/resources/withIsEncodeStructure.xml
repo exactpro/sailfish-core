@@ -42,5 +42,19 @@
             <field type="java.lang.String" name="SubSubSubField1" defaultvalue="SubSubSubValue1"/>
             <field type="java.lang.String" name="SubSubSubField2" defaultvalue="SubSubSubValue2"/>
         </message>
+
+        <message name="TestIsAdminTrue">
+            <description>Message for test "IsAdmin" attribute have value "true"</description>
+            <attribute name="IsAdmin" type="java.lang.Boolean">true</attribute>
+        </message>
+
+        <message name="TestIsAdminFalse">
+            <description>Message for test "IsAdmin" attribute have value "false"</description>
+            <attribute name="IsAdmin" type="java.lang.Boolean">false</attribute>
+        </message>
+
+        <message name="TestIsAdminNotSpecified">
+            <description>Message for test "IsAdmin" attribute not specified</description>
+        </message>
     </messages>
 </dictionary>

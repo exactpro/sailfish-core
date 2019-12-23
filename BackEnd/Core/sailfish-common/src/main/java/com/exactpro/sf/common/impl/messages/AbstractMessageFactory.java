@@ -16,12 +16,14 @@
 package com.exactpro.sf.common.impl.messages;
 
 import static com.exactpro.sf.common.messages.structures.DictionaryConstants.ATTRIBUTE_CREATE_DEFAULT_STRUCTURE;
+import static com.exactpro.sf.common.messages.structures.DictionaryConstants.ATTRIBUTE_IS_ADMIN;
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.exactpro.sf.common.messages.IHumanMessage;
@@ -103,6 +105,14 @@ public abstract class AbstractMessageFactory implements IMessageFactory {
         if (metaData.getMsgNamespace().equals(namespace)) {
             metaData.setDictionaryURI(dictionaryURI);
             metaData.setProtocol(getProtocol());
+    
+            if (dictionary != null) { //FIXME: Remove this check after removing init(String namespace, SailfishURI dictionaryURI) method
+                IMessageStructure messageStructure = dictionary.getMessages().get(metaData.getMsgName());
+                if (messageStructure != null) {
+                    Boolean isAdmin = getAttributeValue(messageStructure, ATTRIBUTE_IS_ADMIN);
+                    metaData.setAdmin(BooleanUtils.toBoolean(isAdmin));
+                }
+            }
         }
         IMessage message = new MapMessage(metaData);
         createComplexFields(message);

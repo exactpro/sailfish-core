@@ -64,6 +64,18 @@ public class TestMessageFactory {
         IMessage rootWithoutEncode = messageFactory.createMessage("RootWithoutEncode");
         Assert.assertNull(rootWithoutEncode.getField("SubMessage"));
     }
+    
+    @Test
+    public void testIsAdmin() {
+        IMessage msgTrue = messageFactory.createMessage("TestIsAdminTrue");
+        Assert.assertEquals(true, msgTrue.getMetaData().isAdmin());
+        
+        IMessage msgFalse = messageFactory.createMessage("TestIsAdminFalse");
+        Assert.assertEquals(false, msgFalse.getMetaData().isAdmin());
+    
+        IMessage msgNotSpecified = messageFactory.createMessage("TestIsAdminNotSpecified");
+        Assert.assertEquals(false, msgNotSpecified.getMetaData().isAdmin());
+    }
 
     private static class MessageFactory extends AbstractMessageFactory {
         @Override
