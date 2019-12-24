@@ -443,7 +443,7 @@ public class EnvironmentSettings implements ICommonSettings
 
 		this.asyncRunMatrix = config.getBoolean(ASYNC_RUN_MATRIX_KEY, false);
 
-		this.maxQueueSize = config.getLong(MAX_STORAGE_QUEUE_SIZE, 1024*1024*32);
+		this.maxQueueSize = config.getLong(MAX_STORAGE_QUEUE_SIZE, 1024*1024*512);
 
 		this.storageType = StorageType.parse(config.getString("StorageType", StorageType.DB.getName()));
 

@@ -57,7 +57,7 @@ public class ObjectFlusher<T extends IMeasurable> implements IObjectFlusher<T> {
     private long lastThrottleNotification;
     private static final long NOTIFY_COOLDOWN = 1000*30;
     private static final String STORE_OBJECT_LIMIT_EXCEEDED = "Can't store object, limit exceeded";
-    private static final long DEFAULT_STORAGE_QUEUE = 1024L * 1024L * 32L;
+    private static final long DEFAULT_STORAGE_QUEUE = 1024L * 1024L * 512L;
 
 
     private List<T> objects;
