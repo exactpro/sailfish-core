@@ -6,7 +6,7 @@
 //
 
 
-package com.exactpro.sf.common.impl.messages.all.configuration.sample;
+package com.exactpro.sf.common.impl.messages.xml.configuration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IField;
+import com.exactpro.sf.common.impl.messages.all.configuration.IField;
 
 /**
  * <p>Java class for Field complex type.

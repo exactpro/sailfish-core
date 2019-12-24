@@ -6,7 +6,7 @@
 //
 
 
-package com.exactpro.sf.common.impl.messages.all.configuration.sample;
+package com.exactpro.sf.common.impl.messages.xml.configuration;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.adapters.CollapsedStringAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.sample.iface.IAttribute;
+import com.exactpro.sf.common.impl.messages.all.configuration.IAttribute;
 
 /**
  * <p>Java class for Attribute complex type.

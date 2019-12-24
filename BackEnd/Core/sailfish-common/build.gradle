@@ -1,3 +1,7 @@
+plugins {
+    id 'com.intershop.gradle.jaxb' version '4.0.0'
+}
+
 defaultTasks 'build'
 
 archivesBaseName = 'sailfish-common'
@@ -57,12 +61,7 @@ dependencies {
 task templates {
     doLast {
         ant.taskdef(name: 'jamon', classname: 'org.jamon.ant.JamonTask',   classpath: configurations.jamon.asPath)
-        ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
         ant.jamon(destdir: "${genJavaDir}", srcdir: "${templatesDir}")
-        ant.xjc(schema: "${xsdDir}/dictionary.xsd", destdir: "${genJavaDir}", package: "com.exactpro.sf.common.impl.messages.xml.configuration") {
-            produces(dir: "${genJavaDir}/com/exactpro/sf/common/impl/messages/xml/configuration", includes: "*")
-            arg(value: "-extension")
-        }
     }
 }
 
@@ -78,7 +77,7 @@ task schemaGen () {
                 verbose: 'false'
         ) {
             // jxc needs to know the package name
-            include(name: 'com/exactpro/sf/common/impl/messages/all/configuration/sample/')
+            include(name: 'com/exactpro/sf/common/impl/messages/xml/configuration/')
 
             // jxc needs to know other sources such as interfaces in our case
             classpath {
@@ -90,5 +89,16 @@ task schemaGen () {
 }
 
 processResources.dependsOn 'schemaGen'
+
+//jaxb {
+//    //generates schema from java code
+//    schemaGen {
+//        //generates java code for project from project schema
+//        name {
+//            javaFiles = fileTree(dir: "${mainJavaDir}", include: 'com/exactpro/sf/common/impl/messages/all/configuration/sample/')
+//            namespaceconfigs = [ 'http://exactprosystems.com/dictionary' : 'feature.xsd' ]
+//        }
+//    }
+//}
 
 compileKotlin.dependsOn.add("templates")

@@ -9,4 +9,4 @@
 @javax.xml.bind.annotation.XmlSchema(
 		namespace = "http://exactprosystems.com/dictionary",
 		elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package com.exactpro.sf.common.impl.messages.all.configuration.sample;
+package com.exactpro.sf.common.impl.messages.xml.configuration;
