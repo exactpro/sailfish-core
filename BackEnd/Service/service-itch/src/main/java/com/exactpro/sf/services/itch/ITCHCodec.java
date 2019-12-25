@@ -139,6 +139,7 @@ public class ITCHCodec extends AbstractCodec {
 		IMessage unitHeader = null;
 		boolean someMsgDropped = false;
 		for (short i = 0; i < messageCount + 1; i++) {
+            int startCurMsgPosition = in.position();
 			short messageType;
 			int messageLength;
 
@@ -152,14 +153,12 @@ public class ITCHCodec extends AbstractCodec {
 				in.position(currentPos);
 			}
 
-			byte[] rawMessage = HexDumper.peakBytes(in, messageLength);
-
 			logger.debug("MsgType = [{}]", messageType);
 
 			IMessageStructure msgStructure = msgTypeToMsgStruct.get(messageType);
 
 			if (msgStructure == null) {
-				throw new EPSCommonException("Unknown messageType = [" + messageType + "]");
+				throw new EPSCommonException("Unknown messageType = [" + messageType + "]. Probably the previous message was not read correctly.");
 			}
 
 			IMessage message = msgFactory.createMessage(msgStructure.getName(), msgStructure.getNamespace());
@@ -179,7 +178,19 @@ public class ITCHCodec extends AbstractCodec {
             IMessageStructureVisitor msgStructVisitor = new ITCHVisitorDecode(in, byteOrder, message, msgFactory);
 
 			MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
-
+            
+            int endCurMsgPosition = in.position();
+            in.position(startCurMsgPosition);
+            int lengthReadByte = endCurMsgPosition - startCurMsgPosition;
+            byte[] rawCurMsg = HexDumper.peakBytes(in, Math.max(lengthReadByte, messageLength));
+            if (i != 0 && messageLength != lengthReadByte) {
+                message.getMetaData().setRejectReason("When traverse a message, more(less) bytes were read than specified. "
+                + "Expected length of message: " + messageLength + ", actual: " + lengthReadByte + " bytes were read.");
+                in.position(startCurMsgPosition + messageLength);
+            } else {
+                in.position(endCurMsgPosition);
+            }
+            
 			// RM9425, RM23982, RM25261, RM25262, RM34032
 			if (preprocessor != null) {
 				preprocessor.process(message, session, msgStructure);
@@ -215,7 +226,7 @@ public class ITCHCodec extends AbstractCodec {
 
 				metaData.setFromService(packetAddress);
 
-				metaData.setRawMessage(rawMessage);
+				metaData.setRawMessage(rawCurMsg);
 
 				messages.add(message);
 
