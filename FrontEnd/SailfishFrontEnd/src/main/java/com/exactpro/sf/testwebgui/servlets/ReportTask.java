@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -59,6 +60,12 @@ import com.google.common.collect.ImmutableMap;
 public class ReportTask implements Runnable{
 
     private static final Logger logger = LoggerFactory.getLogger(ReportTask.class);
+
+    /**
+     * It can match linux / windows file separators
+     * FIXME: Use only URL separator '/'
+     */
+    private static final Pattern REPORT_URL_SPLITTER = Pattern.compile("[\\\\/]");
 
     private final Map<String, BiConsumer<HttpServletRequest, HttpServletResponse>> handlers = ImmutableMap.of(
             "view", this::viewAction,
@@ -264,7 +271,7 @@ public class ReportTask implements Runnable{
 
         logger.debug("Extract file from zip [{}]", requestUrl);
 
-        String[] pathComponents = requestUrl.split(Matcher.quoteReplacement("/")); // url separator, not file
+        String[] pathComponents = REPORT_URL_SPLITTER.split(requestUrl);
 
         boolean found = false;
 
