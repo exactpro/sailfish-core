@@ -64,8 +64,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 		IMessage msg = msgFactory.createMessage(complexField.getName(), complexField.getNamespace());
         NTGVisitorDecode visitorNTG = new NTGVisitorDecode(buffer, msgFactory, msg);
-		MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
-        messageStructureWriter.traverse(visitorNTG, complexField.getFields());
+        MessageStructureWriter.WRITER.traverse(visitorNTG, complexField.getFields());
 
         this.message.addField(fieldName, visitorNTG.getMessage());
 		accumulatedLength += length;

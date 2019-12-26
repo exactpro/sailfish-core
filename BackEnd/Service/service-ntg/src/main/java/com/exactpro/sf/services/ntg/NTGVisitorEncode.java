@@ -56,8 +56,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
         NTGVisitorEncode visitorNTG = new NTGVisitorEncode();
 
-		MessageStructureReader messageStructureReader = new MessageStructureReader();
-        messageStructureReader.traverse(visitorNTG, complexField.getFields(), message,
+        MessageStructureReader.READER.traverse(visitorNTG, complexField.getFields(), message,
 					MessageStructureReaderHandlerImpl.instance());
 
         buffer.put(visitorNTG.getBuffer().flip());

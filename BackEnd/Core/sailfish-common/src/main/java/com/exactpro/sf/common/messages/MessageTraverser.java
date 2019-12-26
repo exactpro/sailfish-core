@@ -90,17 +90,15 @@ public class MessageTraverser extends MessageStructureReader {
         }
     }
 
-
     @Override
-    protected void visitField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessageStructureReaderHandler handler,
-            String fieldName, Object value) {
+    protected void visitField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessageStructureReaderHandler handler, IMessage message, String fieldName, Object value) {
         curField = createFieldStructure(curField, curField.getNamespace(), fieldName, value);
         // Check unsupported type
         if (!curField.isComplex() && !curField.isCollection() && curField.getJavaType() == JavaType.JAVA_LANG_STRING &&
                 value != null && !(value instanceof String)) {
             value = value.toString();
         }
-        super.visitField(curField, msgStrVisitor, handler, fieldName, value);
+        super.visitField(curField, msgStrVisitor, handler, message, fieldName, value);
     }
     
     @SuppressWarnings("unchecked")

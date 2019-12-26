@@ -85,9 +85,8 @@ public class EnumReplacer {
         Objects.requireNonNull(message, "message cannot be null");
         Objects.requireNonNull(messageStructure, "message structure cannot be null");
 
-        MessageStructureReader messageStructureReader = new MessageStructureReader();
         EnumReplacingVisitor enumReplacingVisitor = new EnumReplacingVisitor(message.cloneMessage());
-        messageStructureReader.traverse(enumReplacingVisitor, messageStructure, (IMessage)StaticUtil.stripFilter(message, true), MessageStructureReaderHandlerImpl.instance());
+        MessageStructureReader.READER.traverse(enumReplacingVisitor, messageStructure, (IMessage)StaticUtil.stripFilter(message, true), MessageStructureReaderHandlerImpl.instance());
 
         return enumReplacingVisitor.getMessage();
     }
@@ -254,10 +253,9 @@ public class EnumReplacer {
                 return;
             }
 
-            MessageStructureReader messageStructureReader = new MessageStructureReader();
             EnumReplacingVisitor visitor = new EnumReplacingVisitor(value);
 
-            messageStructureReader.traverse(visitor, complexField.getFields(), value, MessageStructureReaderHandlerImpl.instance());
+            MessageStructureReader.READER.traverse(visitor, complexField.getFields(), value, MessageStructureReaderHandlerImpl.instance());
             message.addField(fieldName, visitor.getMessage());
         }
 
@@ -275,10 +273,9 @@ public class EnumReplacer {
                     continue;
                 }
 
-                MessageStructureReader messageStructureReader = new MessageStructureReader();
                 EnumReplacingVisitor visitor = new EnumReplacingVisitor(value);
 
-                messageStructureReader.traverse(visitor, complexField.getFields(), value, MessageStructureReaderHandlerImpl.instance());
+                MessageStructureReader.READER.traverse(visitor, complexField.getFields(), value, MessageStructureReaderHandlerImpl.instance());
                 list.add(visitor.getMessage());
             }
 

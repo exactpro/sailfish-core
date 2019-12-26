@@ -271,10 +271,8 @@ public class JsonMessageConverterTest extends AbstractTest {
     }
 
     private IMessage generate() throws SailfishURIException {
-
-        MessageStructureWriter msw = new MessageStructureWriter();
         CreateIMessageVisitor visitor = new CreateIMessageVisitor(messageFactory, "ComplexMessage", messageStructure.getNamespace());
-        msw.traverse(visitor, messageStructure.getFields());
+        MessageStructureWriter.WRITER.traverse(visitor, messageStructure.getFields());
         IMessage result = visitor.getImessage();
         result.addField("Trailer", messageFactory.createMessage("Trailer", "namespace"));
         result.addField("EmptySimpleCollection", new ArrayList<String>());

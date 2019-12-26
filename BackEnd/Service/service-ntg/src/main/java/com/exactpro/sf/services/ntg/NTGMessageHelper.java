@@ -98,8 +98,7 @@ public class NTGMessageHelper extends MessageHelper {
 				IFieldStructure fldStruct, boolean isDefault) {
 
             NTGSizeCalculator visitor = new NTGSizeCalculator();
-			MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
-			messageStructureWriter.traverse(visitor, complexField.getFields());
+            MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
 
             Integer length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
 
@@ -135,9 +134,8 @@ public class NTGMessageHelper extends MessageHelper {
 
 			if (messageTypeCode != null) { // skip headers...
 				// calculate message sizes
-                MessageStructureWriter writer = new MessageStructureWriter();
                 NTGSizeCalculator visitor = new NTGSizeCalculator();
-				writer.traverse(visitor, structure);
+                MessageStructureWriter.WRITER.traverse(visitor, structure);
                 Integer messageSize = visitor.getMessageSize() - 3; // Don't include 'StartOfMessage' and 'MessageLength'
                 
                 try {

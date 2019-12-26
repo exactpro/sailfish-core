@@ -66,10 +66,9 @@ public class TestMessageStructureReader {
         message.addField("LocalTime", "01:02:03.123456789");
         message.addField("LocalDateTime", "2016-08-18T01:02:03.123456789");
         message.addField("Collection", Arrays.asList("1", "2", "3", "4"));
-        
-        MessageStructureReader reader = new MessageStructureReader();
+
         IMessageStructureVisitor visitor = new TestVisitor();
-        reader.traverse(visitor, structure, message, MessageStructureReaderHandlerImpl.instance());
+        MessageStructureReader.READER.traverse(visitor, structure, message, MessageStructureReaderHandlerImpl.instance());
         
         structure.getFields().forEach((fieldName, fldStructure) -> {
             String expectedType = fldStructure.getJavaType().value();

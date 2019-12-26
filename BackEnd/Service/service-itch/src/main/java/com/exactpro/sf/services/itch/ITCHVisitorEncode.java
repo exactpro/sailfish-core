@@ -341,10 +341,9 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 		logger.trace("Encode - field: {}, from: List<IMessage>, value: {}", fieldName, message);
 
         ITCHVisitorEncode visitorEncode = new ITCHVisitorEncode(buffer, byteOrder);
-		MessageStructureReader messageStuctureReader = new MessageStructureReader();
 
 		for (IMessage msg : message) {
-			messageStuctureReader.traverse(visitorEncode, fldType.getFields(), msg, MessageStructureReaderHandlerImpl.instance());
+            MessageStructureReader.READER.traverse(visitorEncode, fldType.getFields(), msg, MessageStructureReaderHandlerImpl.instance());
 		}
 	}
 	
@@ -358,8 +357,7 @@ public class ITCHVisitorEncode extends ITCHVisitorBase {
 		logger.trace("Encode - field: {}, from: List<IMessage>, value: {}", fieldName, message);
 
         ITCHVisitorEncode visitorEncode = new ITCHVisitorEncode(buffer, byteOrder);
-        MessageStructureReader messageStuctureReader = new MessageStructureReader();
-        messageStuctureReader.traverse(visitorEncode, fldType.getFields(), message, MessageStructureReaderHandlerImpl.instance());
+        MessageStructureReader.READER.traverse(visitorEncode, fldType.getFields(), message, MessageStructureReaderHandlerImpl.instance());
 	}
 
     private void writeDefaultValue(int length, String fieldName) {

@@ -181,14 +181,11 @@ public class MessageUtil
             return null;
         }
 
-
-		MessageStructureReader msgStructReader = new MessageStructureReader();
-
 		StringBuilder buffer = new StringBuilder(512);
 
 		MsgVisitor visitor = new MsgVisitor(buffer);
 
-		msgStructReader.traverse(visitor, msgStruct, msg, MessageStructureReaderHandlerImpl.instance());
+        MessageStructureReader.READER.traverse(visitor, msgStruct, msg, MessageStructureReaderHandlerImpl.instance());
 
 		return escapeCharacter(buffer);
 	}
@@ -338,8 +335,7 @@ public class MessageUtil
 
 		@Override
 		public void visit(String fieldName, IMessage message, IFieldStructure fldType, boolean isDefault)
-		{
-			MessageStructureReader msgStructReader = new MessageStructureReader();
+        {
 
 			if (message == null) {
 				if (showNulls)
@@ -352,7 +348,7 @@ public class MessageUtil
 			buffer.append(fieldName);
 			buffer.append("={");
 
-			msgStructReader.traverse(this, fldType.getFields(), message, MessageStructureReaderHandlerImpl.instance());
+            MessageStructureReader.READER.traverse(this, fldType.getFields(), message, MessageStructureReaderHandlerImpl.instance());
 
 			buffer.append("}; ");
 		}
@@ -364,7 +360,6 @@ public class MessageUtil
 			if (!required && !showNulls && messages == null) {
 				return;
 			}
-			MessageStructureReader msgStructReader = new MessageStructureReader();
 
 			buffer.append(fieldName);
 			buffer.append(COLLECTION_START);
@@ -373,7 +368,7 @@ public class MessageUtil
 			} else {
 				for (IMessage msg : messages) {
 					buffer.append("{");
-					msgStructReader.traverse(this, fldType.getFields(), msg, MessageStructureReaderHandlerImpl.instance());
+                    MessageStructureReader.READER.traverse(this, fldType.getFields(), msg, MessageStructureReaderHandlerImpl.instance());
 					buffer.append("}");
 				}
 			}

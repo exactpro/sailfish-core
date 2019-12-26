@@ -16,15 +16,15 @@
 package com.exactpro.sf.common.messages;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
@@ -175,8 +175,7 @@ public class EnumValidatorVisitor implements IMessageStructureVisitor {
         }
 
         path.addLast(fieldName);
-        MessageStructureReader reader = new MessageStructureReader();
-        reader.traverse(this, complexField.getFields(), message, MessageStructureReaderHandlerImpl.instance());
+        MessageStructureReader.READER.traverse(this, complexField.getFields(), message, MessageStructureReaderHandlerImpl.instance());
         path.removeLast();
     }
 
@@ -194,8 +193,7 @@ public class EnumValidatorVisitor implements IMessageStructureVisitor {
             }
 
             path.addLast(complexField.getName() + '[' + i + ']');
-            MessageStructureReader reader = new MessageStructureReader();
-            reader.traverse(this, complexField.getFields(), message, MessageStructureReaderHandlerImpl.instance());
+            MessageStructureReader.READER.traverse(this, complexField.getFields(), message, MessageStructureReaderHandlerImpl.instance());
             path.removeLast();
         }
     }

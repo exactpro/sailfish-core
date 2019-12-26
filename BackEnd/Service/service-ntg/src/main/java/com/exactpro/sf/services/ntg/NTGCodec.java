@@ -65,9 +65,6 @@ public final class NTGCodec extends AbstractCodec {
     private IMessageFactory msgFactory;
     private IDictionaryStructure dictionary;
 
-    private MessageStructureReader messageStructureReader;
-    private MessageStructureWriter messageStructureWriter;
-
 	private Map<Byte, IMessageStructure> decodeMsgTypeToStructure = new HashMap<>();
     private final Map<Long, Integer> msgIdents = new HashMap<>();
 
@@ -138,9 +135,6 @@ public final class NTGCodec extends AbstractCodec {
 
             msgIdents.put(iden, msgLength - 3);
         }
-
-		this.messageStructureReader = new MessageStructureReader();
-		this.messageStructureWriter = new MessageStructureWriter();
 
 	}
 
@@ -222,7 +216,7 @@ public final class NTGCodec extends AbstractCodec {
 
 		IMessage msg = msgFactory.createMessage(msgStructure.getName(), msgStructure.getNamespace());
         NTGVisitorDecode visitorNTGDecode = new NTGVisitorDecode(inputBuffer, msgFactory, msg);
-        messageStructureWriter.traverse(visitorNTGDecode, msgStructure);
+        MessageStructureWriter.WRITER.traverse(visitorNTGDecode, msgStructure);
         IMessage msgDecoded = visitorNTGDecode.getMessage();
 
         if(msgDecoded != null)
@@ -266,7 +260,7 @@ public final class NTGCodec extends AbstractCodec {
 					+message.getNamespace()+", MsgName="+message.getName());
 		}
 
-        messageStructureReader.traverse(visitorNTG, msgStructure, message,
+        MessageStructureReader.READER.traverse(visitorNTG, msgStructure, message,
 				MessageStructureReaderHandlerImpl.instance());
 
         byte[] rawMsg = new byte[visitorNTG.getBuffer().position()];

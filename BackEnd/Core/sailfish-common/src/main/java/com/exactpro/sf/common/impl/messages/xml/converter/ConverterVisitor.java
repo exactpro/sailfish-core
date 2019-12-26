@@ -271,13 +271,12 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 
 		if (refferedMessage == null) {
 			refferedMessage = new Message();
-			MessageStructureWriter writer = new MessageStructureWriter();
 			refferedMessage.setName(complexField.getReferenceName());
 			refferedMessage.setId(complexField.getReferenceName());
 			ConverterVisitor visitor = new ConverterVisitor(refferedMessage,
 					dictionary);
 			dictionary.getMessages().getMessages().add(refferedMessage);
-			writer.traverse(visitor, complexField.getFields());
+            MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
 		}
 
 		messageField.setReference(refferedMessage);

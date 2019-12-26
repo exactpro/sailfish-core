@@ -65,8 +65,6 @@ public class ITCHCodec extends AbstractCodec {
 	private static final int HEADER_SIZE = 8;
 
 	private final Map<Short, IMessageStructure> msgTypeToMsgStruct = new HashMap<>();
-	private final MessageStructureReader msgStructReader = new MessageStructureReader();
-    private final MessageStructureWriter msgStructWriter = new MessageStructureWriter();
     private final ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
 
 	private IDictionaryStructure msgDictionary;
@@ -180,7 +178,7 @@ public class ITCHCodec extends AbstractCodec {
 
             IMessageStructureVisitor msgStructVisitor = new ITCHVisitorDecode(in, byteOrder, message, msgFactory);
 
-			msgStructWriter.traverse(msgStructVisitor, msgStructure);
+			MessageStructureWriter.WRITER.traverse(msgStructVisitor, msgStructure);
 
 			// RM9425, RM23982, RM25261, RM25262, RM34032
 			if (preprocessor != null) {
@@ -342,7 +340,7 @@ public class ITCHCodec extends AbstractCodec {
 
 			int startpos = buffer.position();
 
-			msgStructReader.traverse(msgStructVisitor, msgStructure, message, MessageStructureReaderHandlerImpl.instance());
+            MessageStructureReader.READER.traverse(msgStructVisitor, msgStructure, message, MessageStructureReaderHandlerImpl.instance());
 
 			int endpos = buffer.position();
 			byte[] rawMessage = new byte[endpos - startpos];

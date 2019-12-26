@@ -544,8 +544,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 		for (int i = 0; i < legsCount; i++) {
 			IMessage msg = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
             ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, msg, msgFactory);
-			MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
-			messageStructureWriter.traverse(visitor, complexField.getFields());
+            MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
 			list.add(msg);
 		}
 		msg.addField(fieldName, list);
@@ -557,8 +556,7 @@ public class ITCHVisitorDecode extends ITCHVisitorBase {
 
 		IMessage subMessage = msgFactory.createMessage(complexField.getReferenceName(), complexField.getNamespace());
         ITCHVisitorDecode visitor = new ITCHVisitorDecode(buffer, byteOrder, subMessage, msgFactory);
-		MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
-		messageStructureWriter.traverse(visitor, complexField.getFields());
+        MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
         msg.addField(fieldName, subMessage);
 	}
 

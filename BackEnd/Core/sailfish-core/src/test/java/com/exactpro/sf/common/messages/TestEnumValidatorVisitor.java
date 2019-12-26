@@ -64,10 +64,9 @@ public class TestEnumValidatorVisitor extends EPSTestCase {
         message.addField("NestedMessageCollection", Arrays.asList(nested2, nested3));
 
         EnumValidatorVisitor visitor = new EnumValidatorVisitor();
-        MessageStructureReader reader = new MessageStructureReader();
         List<String> errors = visitor.getErrors();
 
-        reader.traverse(visitor, structure, message, MessageStructureReaderHandlerImpl.instance());
+        MessageStructureReader.READER.traverse(visitor, structure, message, MessageStructureReaderHandlerImpl.instance());
 
         int i = 0;
 

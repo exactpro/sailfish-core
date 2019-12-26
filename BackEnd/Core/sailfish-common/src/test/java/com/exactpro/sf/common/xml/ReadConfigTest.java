@@ -115,14 +115,12 @@ public class ReadConfigTest extends EPSTestCase {
 			dictionary = loader.load(in);
     	}
 
-		MessageStructureWriter wtraverser = new MessageStructureWriter();
-
 		TestVisitor visitor = new TestVisitor();
 
         for(IMessageStructure imstructure : dictionary.getMessages().values()) {
 
 			System.out.println(" message = " + imstructure.getName());
-			wtraverser.traverse(visitor, imstructure);
+            MessageStructureWriter.WRITER.traverse(visitor, imstructure);
 
 		}
 

@@ -35,9 +35,8 @@ public class DataMessageConverter {
 		
 		MapMessage mapMessage = new MapMessage(message.getNamespace(), message.getName());
         IMessageStructure messageStructure = dataDicionary.getMessages().get(message.getName());
-		
-		MessageStructureWriter wtraverser = new MessageStructureWriter();
-		wtraverser.traverse(new DataMessageReaderVisitor(message, mapMessage), messageStructure);
+
+        MessageStructureWriter.WRITER.traverse(new DataMessageReaderVisitor(message, mapMessage), messageStructure);
 		
 		return mapMessage;
 	}
@@ -48,9 +47,8 @@ public class DataMessageConverter {
 		DataMessage dataMessage = new DataMessage();
 		dataMessage.setName(imessage.getName());
 		dataMessage.setNamespace(imessage.getNamespace());
-		
-		MessageStructureReader rtrarverser = new MessageStructureReader();
-		rtrarverser.traverse(new DataMessageWriterVisitor(dataMessage), messageStructure, imessage, MessageStructureReaderHandlerImpl.instance());
+
+        MessageStructureReader.READER.traverse(new DataMessageWriterVisitor(dataMessage), messageStructure, imessage, MessageStructureReaderHandlerImpl.instance());
 		
 		return dataMessage;
 	}

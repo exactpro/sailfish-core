@@ -22,13 +22,24 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 
+/**
+ *  Using on decode native view to IMessage
+ *  Call IMessageStructureVisitor for each IMessageStructure`s field.
+ */
+@ThreadSafe
 public class MessageStructureWriter 
 {
+
+    public static MessageStructureWriter WRITER = new MessageStructureWriter();
+
+    protected MessageStructureWriter(){}
 
     public void traverse(IMessageStructureVisitor msgStrVisitor,
             IMessageStructure msgStructure)

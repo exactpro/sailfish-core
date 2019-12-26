@@ -16,12 +16,11 @@
 package com.exactpro.sf.storage.xml;
 
 import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.List;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.exactpro.sf.common.impl.messages.MapMessage;
 import com.exactpro.sf.common.messages.IMessage;
@@ -33,7 +32,6 @@ class DataMessageReaderVisitor implements IMessageStructureVisitor {
 
 	private final DataMessage dataMessage;
 	private final IMessage mapMessage;
-	private static final MessageStructureWriter wtraverser = new MessageStructureWriter();
 
 	public DataMessageReaderVisitor(DataMessage dataMessage, IMessage mapMessage) {
 		this.dataMessage = dataMessage;
@@ -240,7 +238,7 @@ class DataMessageReaderVisitor implements IMessageStructureVisitor {
 		IMessage imessage = new MapMessage(dataMessage.getNamespace(), fieldName);
 		DataMessageReaderVisitor dataMessageVisitor = new DataMessageReaderVisitor(
 				localDataMessage, imessage);
-		wtraverser.traverse(dataMessageVisitor, complexField.getFields());
+        MessageStructureWriter.WRITER.traverse(dataMessageVisitor, complexField.getFields());
 		mapMessage.addField(fieldName, imessage);
 	}
 
@@ -272,7 +270,7 @@ class DataMessageReaderVisitor implements IMessageStructureVisitor {
 		List<IMessage> limessages = new LinkedList<IMessage>();
 		for (DataMessage dmessage : array.getMessages()) {
 			IMessage imessage = new MapMessage(dmessage.getNamespace(), fieldName);
-			wtraverser.traverse(new DataMessageReaderVisitor(dmessage, imessage), complexField.getFields());
+            MessageStructureWriter.WRITER.traverse(new DataMessageReaderVisitor(dmessage, imessage), complexField.getFields());
 			limessages.add(imessage);
 		}
 		mapMessage.addField(fieldName, limessages);

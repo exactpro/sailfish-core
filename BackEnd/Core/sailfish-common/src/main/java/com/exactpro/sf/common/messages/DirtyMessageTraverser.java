@@ -1,12 +1,18 @@
-/*
- * Copyright (c) 2009-2019, Exactpro Systems LLC
- * www.exactpro.com
- * Build Software to Test Software
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
- * All rights reserved.
- * This is unpublished, licensed software, confidential and proprietary
- * information which is the property of Exactpro Systems LLC or its licensors.
- */
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 
 package com.exactpro.sf.common.messages;
 
@@ -70,25 +76,23 @@ public class DirtyMessageTraverser extends MessageTraverser {
     }
 
     @Override
-    public void visitSimpleField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, JavaType javaType, String fieldName, Object value,
-            boolean isDefault) {
+    protected void visitSimpleField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessage message, JavaType javaType, String fieldName, Object value, boolean isDefault) {
 
         if(dropMetaField(curField, value)) {
             return;
         }
-
-        super.visitSimpleField(curField, msgStrVisitor, javaType, fieldName, value, isDefault);
+        
+        super.visitSimpleField(curField, msgStrVisitor, message, javaType, fieldName, value, isDefault);
     }
 
     @Override
-    protected void visitField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessageStructureReaderHandler handler,
-            String fieldName, Object value) {
+    protected void visitField(IFieldStructure curField, IMessageStructureVisitor msgStrVisitor, IMessageStructureReaderHandler handler, IMessage message, String fieldName, Object value) {
 
         if(dropMetaField(curField, value)) {
             return;
         }
 
-        super.visitField(curField, msgStrVisitor, handler, fieldName, value);
+        super.visitField(curField, msgStrVisitor, handler, message, fieldName, value);
     }
 
     @Override
