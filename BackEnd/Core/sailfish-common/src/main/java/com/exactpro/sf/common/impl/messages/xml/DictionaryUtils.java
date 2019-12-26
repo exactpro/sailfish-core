@@ -27,7 +27,7 @@ public class DictionaryUtils {
     public static Field copy(Field field) {
         Field result = new Field();
         
-        result.setDefaultvalue(field.getDefaultvalue());
+        result.setDefaultValue(field.getDefaultValue());
         result.setDescription(field.getDescription());
         result.setId(field.getId());
         result.setIsCollection(field.isIsCollection());

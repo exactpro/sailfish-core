@@ -151,7 +151,7 @@ public class XmlDictionaryStructureWriter {
 		}
 		
 		if (!fieldStructure.isSubMessage()) {
-			field.setDefaultvalue(fieldStructure.getImplDefaultValue());
+			field.setDefaultValue(fieldStructure.getImplDefaultValue());
 			if (fieldStructure.getReference() != null) {
 			    //type contains in reference
 			} else {

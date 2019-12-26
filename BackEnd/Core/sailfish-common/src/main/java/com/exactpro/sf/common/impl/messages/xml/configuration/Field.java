@@ -83,7 +83,7 @@ public class Field implements IField, Serializable
     @XmlAttribute(name = "isCollection")
     protected Boolean isCollection;
     @XmlAttribute(name = "defaultvalue")
-    protected String defaultvalue;
+    protected String defaultValue;
     @XmlAttribute(name = "type")
     protected JavaType type;
     @XmlAttribute(name = "id")
@@ -230,10 +230,18 @@ public class Field implements IField, Serializable
         }
     }
     
+    /**
+     * Gets the value of the defaultvalue property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
     @Override
     public String getDefaultValue()
     {
-        return null;
+        return defaultValue;
     }
     
     /**
@@ -247,19 +255,7 @@ public class Field implements IField, Serializable
     public void setIsCollection(Boolean value) {
         this.isCollection = value;
     }
-
-    /**
-     * Gets the value of the defaultvalue property.
-     *
-     * @return
-     *     possible object is
-     *     {@link String }
-     *
-     */
-    public String getDefaultvalue() {
-        return defaultvalue;
-    }
-
+    
     /**
      * Sets the value of the defaultvalue property.
      *
@@ -268,8 +264,8 @@ public class Field implements IField, Serializable
      *     {@link String }
      *
      */
-    public void setDefaultvalue(String value) {
-        this.defaultvalue = value;
+    public void setDefaultValue(String value) {
+        this.defaultValue = value;
     }
 
     /**

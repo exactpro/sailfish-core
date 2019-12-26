@@ -64,7 +64,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 		newField.setName(fieldName);
 
 		if (fldStruct.getDefaultValue() != null) {
-			newField.setDefaultvalue(fldStruct.getDefaultValue().toString());
+			newField.setDefaultValue(fldStruct.getDefaultValue().toString());
 		}
 
 		newField.setIsCollection(fldStruct.isCollection());

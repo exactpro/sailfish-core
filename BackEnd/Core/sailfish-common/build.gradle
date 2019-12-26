@@ -74,8 +74,7 @@ task schemaGen () {
         ) {
             // jxc needs to know the package name
             include(name: 'com/exactpro/sf/common/impl/messages/xml/configuration/')
-            exclude(name: 'com/exactpro/sf/common/impl/messages/xml/configuration/XML*')
-
+            
             // jxc needs to know other sources such as interfaces in our case
             classpath {
                 pathElement(path: sourceSets.main.output.classesDirs.asPath )
