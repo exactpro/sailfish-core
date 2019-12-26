@@ -17,7 +17,6 @@ package com.exactpro.sf.common.messages.structures.loaders;
 
 import com.exactpro.sf.common.impl.messages.xml.XMLTransmitter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
-import com.exactpro.sf.common.impl.messages.xml.configuration.XMLDictionary;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.StringUtil;
@@ -53,10 +52,8 @@ public class XmlDictionaryStructureLoader extends AbstractDictionaryStructureLoa
 		ClassLoader currentThreadClassLoader = Thread.currentThread().getContextClassLoader();
 		try {
 			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
-			Dictionary dict = transmitter.unmarshal(Dictionary.class, inputStream, schemaStream, null);
-
-			return dict;
+			
+			return transmitter.unmarshal(Dictionary.class, inputStream, schemaStream, null);
 
 		} catch (JAXBException jabEx) {
 
@@ -89,7 +86,7 @@ public class XmlDictionaryStructureLoader extends AbstractDictionaryStructureLoa
 	}
 
 	@Override
-	public XMLDictionary getDictionary(InputStream inputStream) {
-		return new XMLDictionary(getDictionaryFromGeneratedClass(inputStream));
+	public Dictionary getDictionary(InputStream inputStream) {
+		return getDictionaryFromGeneratedClass(inputStream);
 	}
 }

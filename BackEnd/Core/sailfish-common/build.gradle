@@ -6,6 +6,7 @@ archivesBaseName = 'sailfish-common'
 ext {
     templatesDir    = "${mainDir}/templates"
     xsdDir			= "${mainResDir}/xsd"
+    System.setProperty('javax.xml.accessExternalSchema', 'file')
 }
 
 configurations {
@@ -16,7 +17,12 @@ configurations {
 dependencies {
     jamon 'org.jamon:jamon-anttask:2.4.2'
 
-    jaxb 'com.sun.xml.bind:jaxb-xjc:2.1.3'
+    jaxb 'com.sun.xml.bind:jaxb-xjc:2.2.7'
+    jaxb 'com.sun.xml.bind:jaxb-jxc:2.2.7'
+    jaxb 'com.sun.xml.bind:jaxb-impl:2.2.7'
+    jaxb 'com.sun.xml.bind:jaxb-core:2.2.7'
+    jaxb 'javax.xml.bind:jaxb-api:2.2.7'
+
     jaxb 'javax.xml:jsr173:1.0'
     jaxb 'javax.activation:activation:1.1.1'
     
@@ -50,13 +56,31 @@ dependencies {
 
 task templates {
     doLast {
-	    ant.taskdef(name: 'jamon', classname: 'org.jamon.ant.JamonTask',   classpath: configurations.jamon.asPath)
-	    ant.taskdef(name: 'xjc',   classname: 'com.sun.tools.xjc.XJCTask', classpath: configurations.jaxb.asPath)
-	    ant.jamon(destdir: "${genJavaDir}", srcdir: "${templatesDir}")
-        ant.xjc(schema: "${xsdDir}/dictionary.xsd", destdir: "${genJavaDir}", package: "com.exactpro.sf.common.impl.messages.xml.configuration", removeOldOutput: "yes") {
-            produces(dir: "${genJavaDir}/com/exactpro/common/sf/impl/messages/xml/configuration", includes: "*")
-	        arg(value: "-extension")
-	    }
+        ant.taskdef(name: 'jamon', classname: 'org.jamon.ant.JamonTask',   classpath: configurations.jamon.asPath)
+        ant.jamon(destdir: "${genJavaDir}", srcdir: "${templatesDir}")
+    }
+}
+
+task schemaGen () {
+    dependsOn.add('compileKotlin')
+    doLast {
+        ant.taskdef(name: 'schemagen', classname: 'com.sun.tools.jxc.SchemaGenTask', classpath: configurations.jaxb.asPath)
+        mkdir genResDir
+        ant.schemagen(
+                srcdir: mainJavaDir,
+                destdir: genResDir,
+                includeAntRuntime:'false',
+                verbose: 'false'
+        ) {
+            // jxc needs to know the package name
+            include(name: 'com/exactpro/sf/common/impl/messages/xml/configuration/')
+            
+            // jxc needs to know other sources such as interfaces in our case
+            classpath {
+                pathElement(path: sourceSets.main.output.classesDirs.asPath )
+            }
+            schema(file: "generateddictionary.xsd", namespace: "http://exactprosystems.com/dictionary")
+        }
     }
 }
 

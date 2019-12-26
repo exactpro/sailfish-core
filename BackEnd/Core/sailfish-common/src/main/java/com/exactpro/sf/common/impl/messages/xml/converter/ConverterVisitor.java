@@ -64,7 +64,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 		newField.setName(fieldName);
 
 		if (fldStruct.getDefaultValue() != null) {
-			newField.setDefaultvalue(fldStruct.getDefaultValue().toString());
+			newField.setDefaultValue(fldStruct.getDefaultValue().toString());
 		}
 
 		newField.setIsCollection(fldStruct.isCollection());
@@ -109,7 +109,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 					enumXmlField.getValues().add(valueAttribute);
 				}
 				
-				dictionary.getFields().getFields().add(enumXmlField);
+				dictionary.getFields().add(enumXmlField);
 			}
 			newField.setReference(enumXmlField);
 		}
@@ -260,7 +260,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 
 		Message refferedMessage = null;
 
-		for (Message message : dictionary.getMessages().getMessages()) {
+		for (Message message : dictionary.getMessages()) {
 			if (complexField.getReferenceName().equals(message.getName())) {
 				logger.debug("{} message was found", fieldName);
 				refferedMessage = message;
@@ -276,7 +276,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 			refferedMessage.setId(complexField.getReferenceName());
 			ConverterVisitor visitor = new ConverterVisitor(refferedMessage,
 					dictionary);
-			dictionary.getMessages().getMessages().add(refferedMessage);
+			dictionary.getMessages().add(refferedMessage);
 			writer.traverse(visitor, complexField.getFields());
 		}
 
