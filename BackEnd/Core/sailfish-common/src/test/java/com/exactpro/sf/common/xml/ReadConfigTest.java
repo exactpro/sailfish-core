@@ -29,8 +29,6 @@ import org.junit.Test;
 import com.exactpro.sf.common.impl.messages.xml.XMLTransmitter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Attribute;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
-import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary.Fields;
-import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary.Messages;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Field;
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Message;
@@ -78,8 +76,8 @@ public class ReadConfigTest extends EPSTestCase {
 		tmp.setType(JavaType.JAVA_LANG_BYTE);
 		tmp.setValue("3");
 		field.getValues().add(tmp);
-		dict.setFields(new Fields());
-		dict.getFields().getFields().add(field);
+		dict.setFields(new ArrayList<>());
+		dict.getFields().add(field);
 
 		Message message = new Message();
 		message.setName("message_name");
@@ -88,8 +86,8 @@ public class ReadConfigTest extends EPSTestCase {
 		mfield.setName("f_name");
 		mfield.setReference(field);
 		message.getFields().add(mfield);
-		dict.setMessages(new Messages());
-		dict.getMessages().getMessages().add(message);
+		dict.setMessages(new ArrayList<>());
+		dict.getMessages().add(message);
 
 		XMLTransmitter
 				.getTransmitter()

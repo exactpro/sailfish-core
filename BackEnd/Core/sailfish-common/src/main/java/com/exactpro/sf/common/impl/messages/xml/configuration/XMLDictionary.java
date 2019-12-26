@@ -95,18 +95,18 @@ public class XMLDictionary implements IDictionary {
 
         Map<String, XMLField> fieldMap = new HashMap<>();
 
-        if (dictionary.getFields() != null && dictionary.getFields().getFields() != null) {
-            fields = new ArrayList<>(dictionary.getFields().getFields().size());
-            for (Field field : dictionary.getFields().getFields()) {
+        if (dictionary.getFields() != null && dictionary.getFields() != null) {
+            fields = new ArrayList<>(dictionary.getFields().size());
+            for (Field field : dictionary.getFields()) {
                createBeanWithReference(field, fields, null, fieldMap);
             }
         } else {
             fields = Collections.emptyList();
         }
 
-        if (dictionary.getMessages() != null && dictionary.getMessages().getMessages() != null) {
-            messages = new ArrayList<>(dictionary.getMessages().getMessages().size());
-            for (Message message : dictionary.getMessages().getMessages()) {
+        if (dictionary.getMessages() != null && dictionary.getMessages() != null) {
+            messages = new ArrayList<>(dictionary.getMessages().size());
+            for (Message message : dictionary.getMessages()) {
                 XMLMessage messageAdapter = (XMLMessage) createBeanWithReference(message, fields, messages, fieldMap);
 
                 for (Field field : message.getFields()) {

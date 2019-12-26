@@ -30,7 +30,7 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 public class XmlDictionaryUtils {
 
 	public static Field getDictionaryField(Dictionary dictionary, String name){
-		for(Field field : dictionary.getFields().getFields()){
+		for(Field field : dictionary.getFields()){
 			if(field.getName().equals(name)){
 				return field;
 			}

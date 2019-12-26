@@ -32,7 +32,7 @@ public class DictionaryUtils {
         result.setId(field.getId());
         result.setIsCollection(field.isIsCollection());
         result.setName(field.getName());
-        result.setReference(field.getReference());
+        result.setReference((Field) field.getReference());
         result.setType(field.getType());
         
         for (Attribute attribute : field.getAttributes()) {

@@ -20,14 +20,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.exactpro.sf.common.impl.messages.xml.XmlDictionaryWriter;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Attribute;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary;
-import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary.Fields;
-import com.exactpro.sf.common.impl.messages.xml.configuration.Dictionary.Messages;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Field;
 import com.exactpro.sf.common.impl.messages.xml.configuration.Message;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
@@ -58,8 +58,8 @@ public class XmlDictionaryStructureWriter {
 		dictionary.setDescription(dictionaryStructure.getDescription());
 		dictionary.setName(dictionaryStructure.getNamespace());
 		
-		Fields fields = new Fields();
-		Messages messages = new Messages();
+		List<Field> fields = new ArrayList<>();
+		List<Message> messages = new ArrayList<>();
 		
 		// Fields adding
 		
@@ -79,7 +79,7 @@ public class XmlDictionaryStructureWriter {
 				referenceMap.put(field, fieldStructure.getImplReference());
 			}
 			
-			fields.getFields().add(field);
+			fields.add(field);
 		}
 		
 		for (Field referencedField : referenceMap.keySet()) {
@@ -119,7 +119,7 @@ public class XmlDictionaryStructureWriter {
 				message.getFields().add(field);
 			}
 			
-			messages.getMessages().add(message);
+			messages.add(message);
 		}
 		
 		for (Field referencedField : referenceMap.keySet()) {
