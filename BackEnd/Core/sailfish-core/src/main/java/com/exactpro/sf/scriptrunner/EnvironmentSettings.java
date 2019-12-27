@@ -15,11 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner;
 
-import com.exactpro.sf.aml.Description;
-import com.exactpro.sf.aml.ValidateRegex;
-import com.exactpro.sf.common.util.ICommonSettings;
-import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
-import com.google.common.collect.ImmutableSet;
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 import org.apache.commons.configuration.HierarchicalConfiguration.Node;
@@ -28,13 +31,11 @@ import org.mvel2.math.MathProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.aml.ValidateRegex;
+import com.exactpro.sf.common.util.ICommonSettings;
+import com.exactpro.sf.configuration.dictionary.interfaces.IDictionaryValidator;
+import com.google.common.collect.ImmutableSet;
 
 public class EnvironmentSettings implements ICommonSettings
 {
@@ -144,6 +145,8 @@ public class EnvironmentSettings implements ICommonSettings
     private static final String RELEVANT_MESSAGES_SORTING_MODE = "RelevantMessagesSortingMode";
     private static final String MAX_STORAGE_QUEUE_SIZE = "MaxStorageQueueSize";
 
+    private static final String VERIFICATION_LIMIT = "VerificationLimit";
+
 	private StorageType storageType = StorageType.DB;
 	private String fileStoragePath = "storage";
 	private boolean storeAdminMessages;
@@ -158,6 +161,8 @@ public class EnvironmentSettings implements ICommonSettings
     private RelevantMessagesSortingMode relevantMessagesSortingMode;
     private BigDecimal comparisonPrecision = MathProcessor.COMPARISON_PRECISION;
 
+    private int verificationLimit;
+
     // this config is one per SF
     private final HierarchicalConfiguration config;
 
@@ -171,7 +176,7 @@ public class EnvironmentSettings implements ICommonSettings
         }
 	}
 
-	@Override
+    @Override
     public EnvironmentSettings clone() {
         EnvironmentSettings result = new EnvironmentSettings(config);
         result.fileStoragePath = fileStoragePath;
@@ -186,25 +191,27 @@ public class EnvironmentSettings implements ICommonSettings
         result.relevantMessagesSortingMode = relevantMessagesSortingMode;
         result.comparisonPrecision = comparisonPrecision;
         result.maxQueueSize = maxQueueSize;
+        result.verificationLimit = verificationLimit;
 
-	    return result;
-	}
+        return result;
+    }
 
-	public void set(EnvironmentSettings other) {
-	    this.fileStoragePath = other.fileStoragePath;
-	    this.storageType = other.storageType;
-	    this.storeAdminMessages = other.storeAdminMessages;
-	    this.asyncRunMatrix = other.asyncRunMatrix;
-	    this.notificationIfServicesNotStarted = other.notificationIfServicesNotStarted;
-	    this.matrixCompilerPriority = other.matrixCompilerPriority;
-	    this.excludedMessages = other.excludedMessages;
-	    this.failUnexpected = other.failUnexpected;
+    public void set(EnvironmentSettings other) {
+        this.fileStoragePath = other.fileStoragePath;
+        this.storageType = other.storageType;
+        this.storeAdminMessages = other.storeAdminMessages;
+        this.asyncRunMatrix = other.asyncRunMatrix;
+        this.notificationIfServicesNotStarted = other.notificationIfServicesNotStarted;
+        this.matrixCompilerPriority = other.matrixCompilerPriority;
+        this.excludedMessages = other.excludedMessages;
+        this.failUnexpected = other.failUnexpected;
         this.relevantMessagesSortingMode = other.relevantMessagesSortingMode;
         this.comparisonPrecision = other.comparisonPrecision;
         this.maxQueueSize = other.maxQueueSize;
+        this.verificationLimit = other.verificationLimit;
 
-	    update();
-	}
+        update();
+    }
 
 	public String getFileStoragePath() {
         return fileStoragePath;
@@ -387,6 +394,19 @@ public class EnvironmentSettings implements ICommonSettings
         this.comparisonPrecision = comparisonPrecision;
     }
 
+    public int getVerificationLimit() {
+        return verificationLimit;
+    }
+
+    @Description("Limits the amount of saved verifications in the report. "
+            + "If an action has more verifications than this limit allows, they will be truncated. "
+            + "Works on per-action basis and does not affect related messages. "
+            + "Value '-1' disables the limit")
+    public void setVerificationLimit(int verificationLimit) {
+        this.verificationLimit = verificationLimit;
+        update();
+    }
+
 	@Override
 	public void load(HierarchicalConfiguration config)
 	{
@@ -466,7 +486,8 @@ public class EnvironmentSettings implements ICommonSettings
         reportOutputFormat = ReportOutputFormat.parse(config.getString(REPORT_OUTPUT_FORMAT, ReportOutputFormat.ZIP_FILES.getName()));
         excludedMessages = parseSet(config, EXCLUDED_MESSAGES_FROM_REPORT, IDictionaryValidator.NAME_REGEX, excludedMessages);
         relevantMessagesSortingMode = RelevantMessagesSortingMode.parse(config.getString(RELEVANT_MESSAGES_SORTING_MODE, RelevantMessagesSortingMode.ARRIVAL_TIME.getName()));
-	}
+        verificationLimit = config.getInt(VERIFICATION_LIMIT, 200);
+    }
 
     private void updateScriptRunSettings(HierarchicalConfiguration config) {
         config.setProperty(NOTIFICATION_IF_SOME_SERVICES_NOT_STARTED, notificationIfServicesNotStarted);
@@ -475,6 +496,7 @@ public class EnvironmentSettings implements ICommonSettings
         config.setProperty(EXCLUDED_MESSAGES_FROM_REPORT, excludedMessages.isEmpty() ? "" : excludedMessages);
         config.setProperty(REPORT_OUTPUT_FORMAT, reportOutputFormat);
         config.setProperty(RELEVANT_MESSAGES_SORTING_MODE, relevantMessagesSortingMode.getName());
-	}
+        config.setProperty(VERIFICATION_LIMIT, verificationLimit);
+    }
 
 }

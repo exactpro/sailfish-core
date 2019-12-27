@@ -17,18 +17,18 @@
 import * as React from 'react';
 import Action from "../../models/Action";
 import ParamsTable from './ParamsTable';
-import { RecoverableExpandablePanel, ExpandablePanel } from "../ExpandablePanel";
+import {ExpandablePanel, RecoverableExpandablePanel, SearchExpandablePanel} from "../ExpandablePanel";
 import "../../styles/action.scss";
-import { getSecondsPeriod, formatTime } from "../../helpers/date";
-import { RecoverableExceptionChain } from "../ExceptionChain";
-import { Chip } from "../Chip";
-import { createSelector } from '../../helpers/styleCreators';
+import {formatTime, getSecondsPeriod} from "../../helpers/date";
+import {RecoverableExceptionChain} from "../ExceptionChain";
+import {Chip} from "../Chip";
+import {createSelector} from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
-import { keyForAction } from '../../helpers/keys';
-import { SearchExpandablePanel } from '../ExpandablePanel';
-import { ActionMlUploadButton } from "../ActionMlUploadButton";
-import { StatusType } from '../../models/Status';
-import { stopPropagationHandler } from '../../helpers/react';
+import {keyForAction} from '../../helpers/keys';
+import {ActionMlUploadButton} from "../ActionMlUploadButton";
+import {StatusType} from '../../models/Status';
+import {stopPropagationHandler} from '../../helpers/react';
+import {isVerification} from "../../models/Verification";
 
 const NON_BREAKING_SPACE = '\u00a0';
 
@@ -57,19 +57,21 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
         finishTime,
         outcome
     } = action;
+
     const rootClassName = createSelector(
         "action-card",
         status.status,
         isRoot && !isSelected ? "root" : null,
-        isSelected ? "selected" : null
-    ), headerClassName = createSelector(
+        isSelected ? "selected" : null);
+
+    const headerClassName = createSelector(
         "ac-header",
         status.status,
-        isTransaparent && !isSelected ? "transparent" : null
-    ), inputParametersClassName = createSelector(
+        isTransaparent && !isSelected ? "transparent" : null);
+
+    const inputParametersClassName = createSelector(
         "ac-body__input-params",
-        isTransaparent && !isSelected ? "transparent" : null
-    );
+        isTransaparent && !isSelected ? "transparent" : null);
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
@@ -95,7 +97,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                         contentKey={keyForAction(id, 'serviceName')}/>
                                     {NON_BREAKING_SPACE}
                                     <SearchableContent
-                                        content={name} 
+                                        content={name}
                                         contentKey={keyForAction(id, 'name')}/>
                                     {NON_BREAKING_SPACE}
                                     <SearchableContent
@@ -103,7 +105,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                         contentKey={keyForAction(id, 'messageType')}/>
                                 </div>
                                 <div className="ac-header__description">
-                                    <SearchableContent 
+                                    <SearchableContent
                                         content={description}
                                         contentKey={keyForAction(id, 'description')}/>
                                         {outcome}
@@ -137,6 +139,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                         </div>
                     )
                 }
+
                 <div className="ac-body">
                     <div className={inputParametersClassName}>
                         <SearchExpandablePanel
@@ -150,17 +153,25 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                 name={name} />
                         </SearchExpandablePanel>
                     </div>
+
+                    {action.isTruncated ? (
+                        <div className="ac-body__truncated-warning">
+                            {action.verificationCount - action.subNodes.filter(node => isVerification(node)).length} verifications were truncated
+                        </div>
+                    ) : null}
+
                     {
                         // rendering inner nodes
                         children
                     }
+
                     {
                         action.status.status == StatusType.FAILED && action.status.cause != null ? (
                             <div className="action-card-status">
                                 <RecoverableExpandablePanel
                                     stateKey={keyForAction(id, 'status')}>
                                     <div className="ac-body__item-title">Status</div>
-                                    <RecoverableExceptionChain 
+                                    <RecoverableExceptionChain
                                         exception={action.status.cause}
                                         stateKey={`${keyForAction(id, 'status')}-exception`}/>
                                 </RecoverableExpandablePanel>

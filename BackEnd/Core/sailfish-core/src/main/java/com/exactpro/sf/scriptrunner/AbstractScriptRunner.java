@@ -261,10 +261,12 @@ public abstract class AbstractScriptRunner implements IDisposable {
 							scriptDescription.getTags()));
 
             List<IScriptReport> aggregateReportListeners = new ArrayList<>();
-			// json report
-            aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher, scriptDescription, dictionaryManager));
+            int verificationLimit = sfContext.getEnvironmentManager().getEnvironmentSettings().getVerificationLimit();
+
+            // json report
+            aggregateReportListeners.add(new JsonReport(verificationLimit, reportFolder, workspaceDispatcher, scriptDescription, dictionaryManager));
             // html report
-            aggregateReportListeners.add(new HtmlReport(sfContext.getSfInstanceInfo(), reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
+            aggregateReportListeners.add(new HtmlReport(verificationLimit, sfContext.getSfInstanceInfo(), reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
             //dictionary report
             aggregateReportListeners.add(new ReportDictionaries(reportFolder));
             //services report

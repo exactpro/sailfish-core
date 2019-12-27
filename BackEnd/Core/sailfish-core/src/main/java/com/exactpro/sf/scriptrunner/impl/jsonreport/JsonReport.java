@@ -123,6 +123,8 @@ public class JsonReport implements IScriptReport {
     private final TestScriptDescription testScriptDescription;
     private final IDictionaryManager dictionaryManager;
 
+    private final int verificationLimit;
+
 
     //Main bean of report
     private final ReportRoot reportRoot = new ReportRoot();
@@ -136,7 +138,7 @@ public class JsonReport implements IScriptReport {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSS"));
     }
 
-    public JsonReport(String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription, IDictionaryManager dictionaryManager) {
+    public JsonReport(int verificationLimit, String reportRootDirectoryPath, IWorkspaceDispatcher dispatcher, TestScriptDescription testScriptDescription, IDictionaryManager dictionaryManager) {
         this.messageToActionIdMap = new HashMap<>();
         this.reportStats = new ReportStats();
         this.dispatcher = dispatcher;
@@ -144,6 +146,7 @@ public class JsonReport implements IScriptReport {
         this.testScriptDescription = testScriptDescription;
         this.liveReportDir = Paths.get(reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, LIVE_REPORT_DIRECTORY_NAME);
         this.dictionaryManager = dictionaryManager;
+        this.verificationLimit = verificationLimit;
         this.reportRoot.setTags(
                 (testScriptDescription == null || testScriptDescription.getTags() == null)
                         ? Collections.emptySet()
@@ -344,7 +347,7 @@ public class JsonReport implements IScriptReport {
 
         assertState(ContextType.TESTCASE, ContextType.ACTION, ContextType.ACTIONGROUP);
 
-        Action curAction = new Action();
+        Action curAction = new Action(verificationLimit);
         getCurrentContextNode().addSubNodes(curAction);
 
         curAction.setId(actionIdCounter++);
@@ -400,7 +403,7 @@ public class JsonReport implements IScriptReport {
 
     public void openGroup(String name, String description) {
         assertState(ContextType.ACTION, ContextType.ACTIONGROUP);
-        Action curGroup = new Action();
+        Action curGroup = new Action(verificationLimit);
         getCurrentContextNode().addSubNodes(curGroup);
 
         curGroup.setId(actionIdCounter++);

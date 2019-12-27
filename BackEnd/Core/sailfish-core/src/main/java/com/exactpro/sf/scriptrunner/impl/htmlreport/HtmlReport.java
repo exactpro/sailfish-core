@@ -167,6 +167,7 @@ public class HtmlReport implements IScriptReport {
     private int nodeId;
     private int verificationId;
     private int sequenceId = 100000;
+    private int verificationLimit;
 
     private OutcomeCollector outcomes;
     private IReportStats reportStats = new ReportStats();
@@ -175,7 +176,8 @@ public class HtmlReport implements IScriptReport {
     private Map<Integer, MachineLearningData> dataMap;
     private final RelevantMessagesSortingMode relevantMessagesSortingMode;
 
-    public HtmlReport(SfInstanceInfo currentSfInstance, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
+    public HtmlReport(int verificationLimit, SfInstanceInfo currentSfInstance, String reportFolder, IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, RelevantMessagesSortingMode relevantMessagesSortingMode) {
+        this.verificationLimit = verificationLimit;
         this.reportFolder = reportFolder;
         this.workspaceDispatcher = workspaceDispatcher;
         this.dictionaryManager = dictionaryManager;
@@ -845,6 +847,26 @@ public class HtmlReport implements IScriptReport {
         writeTable(reportWriter, StatusType.NA, table, 4);
     }
 
+    private void addMachineLearningData(StatusDescription status, ComparisonResult result, boolean addActual) {
+        if(currentContext != ContextType.ACTION || result == null || result.getMetaData() == null) {
+            return;
+        }
+
+        Action action = actions.peek();
+        MachineLearningData data = action.getMachineLearningData();
+
+        if(data == null) {
+            CheckPoint checkPoint = action.getCheckPoint();
+            long periodStart = checkPoint != null ? checkPoint.getTimestamp() : testCase.getStartTime().getTime();
+            data = new MachineLearningData(result, periodStart);
+            action.setMachineLearningData(data);
+        }
+
+        if (addActual) {
+            data.addActual(result);
+        }
+    }
+
     @Override
     public void createVerification(String name, String description, StatusDescription status, ComparisonResult result) {
         logger.debug("addVerification - name: {}, description: {}, status: {}", name, description, status.getStatus());
@@ -878,36 +900,24 @@ public class HtmlReport implements IScriptReport {
 
         if (currentContext == ContextType.ACTION) {
             Action action = actions.peek();
-            action.addElement(verification);
+
+            if (verificationLimit == -1 || action.getElements().stream().filter(element -> element instanceof Verification).count() < verificationLimit) {
+                action.addElement(verification);
+            }
+
             action.addAllKnownBugs(allKnownBugs);
             action.addReproducedBugs(reproducedBugs);
         } else if (currentContext == ContextType.ACTIONGROUP) {
             ActionGroup actionGroup = actions.peek().getGroups().peek();
-            actionGroup.addElement(verification);
+
+            if (verificationLimit == -1 || actionGroup.getElements().stream().filter(element -> element instanceof Verification).count() < verificationLimit) {
+                actionGroup.addElement(verification);
+            }
+
             actionGroup.addAllKnownBugs(allKnownBugs);
             actionGroup.addReproducedBugs(reproducedBugs);
         } else {
             writeVerifications(testCaseWriter, Arrays.asList(verification), 5);
-        }
-    }
-
-    private void addMachineLearningData(StatusDescription status, ComparisonResult result, boolean addActual) {
-        if(currentContext != ContextType.ACTION || result == null || result.getMetaData() == null) {
-            return;
-        }
-
-        Action action = actions.peek();
-        MachineLearningData data = action.getMachineLearningData();
-
-        if(data == null) {
-            CheckPoint checkPoint = action.getCheckPoint();
-            long periodStart = checkPoint != null ? checkPoint.getTimestamp() : testCase.getStartTime().getTime();
-            data = new MachineLearningData(result, periodStart);
-            action.setMachineLearningData(data);
-        }
-
-        if (addActual) {
-            data.addActual(result);
         }
     }
 

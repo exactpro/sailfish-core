@@ -25,16 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.exactpro.sf.embedded.statistics.entities.KnownBug;
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TestCase implements IJsonReportNode {
     private final List<IJsonReportNode> actions;
-    private final List<LogEntry> logs;
     private final List<Message> messages;
-    private final List<Verification> verifications;
     private final List<OutcomeSummary> outcomes;
     private Set<String> tags;
     private Instant startTime;
@@ -56,9 +55,7 @@ public class TestCase implements IJsonReportNode {
     public TestCase() {
         this.outcomes = new ArrayList<>();
         this.actions = new ArrayList<>();
-        this.logs = new ArrayList<>();
         this.messages = new ArrayList<>();
-        this.verifications = new ArrayList<>();
         this.tags = new HashSet<>();
         this.bugRoot = new BugCategory("root");
         this.bugToCategoryMap = new HashMap<>();
@@ -73,10 +70,6 @@ public class TestCase implements IJsonReportNode {
                 messages.add((Message)child);
             } else if (child instanceof Bug) {
                 bugRoot.placeBugInTree((Bug)child);
-            } else if (child instanceof LogEntry) {
-                logs.add((LogEntry)child);
-            } else if (child instanceof Verification) {
-                verifications.add((Verification)child);
             } else {
                 throw new IllegalArgumentException("unsupported child node type: " + child.getClass());
             }
@@ -99,16 +92,8 @@ public class TestCase implements IJsonReportNode {
         return actions;
     }
 
-    public List<LogEntry> getLogs() {
-        return logs;
-    }
-
     public List<Message> getMessages() {
         return messages;
-    }
-
-    public List<Verification> getVerifications() {
-        return verifications;
     }
 
     public Collection<Bug> getBugs() {
