@@ -14,6 +14,8 @@
  * limitations under the License.
  ******************************************************************************/
 
+import "setimmediate";
+
 /**
  * Returns next item after current index in array if it exists, or retruns first item if it doesn't exist.
  * @param array Target array
@@ -139,4 +141,31 @@ export function areArraysEqual<T extends unknown[]>(arr1: T, arr2: T): boolean {
     }
 
     return true;
+}
+
+/**
+ * Async version of Array.flatMap - it slices original array to chunks
+ * and maps each chunk in dedicated event loop task.
+ * @param arr target array
+ * @param fn mapper function
+ * @param chunkSize size of chunk
+ */
+export async function asyncFlatMap<T, R extends {}>(arr: T[], fn: (item: T) => R[] | R, chunkSize: number = 25): Promise<R[]> {
+    const results: R[] = [],
+        chunks = sliceToChunks(arr, chunkSize);
+
+    for (const chunk of chunks) {
+        const res = await asyncChunkMapper(chunk, fn);
+        results.push(...res.flat());
+    }
+
+    return results;
+}
+
+function asyncChunkMapper<T, R>(chunk: T[], fn: (item: T) => R[] | R) {
+    return new Promise<(R[] | R)[]>(resolve => {
+        window.setImmediate(() => {
+            resolve(chunk.map(fn));
+        })
+    });
 }

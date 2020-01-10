@@ -25,7 +25,7 @@ describe('[Helpers] filtrate', () => {
 
     const testCaseBase: TestCase = createTestCase();
 
-    test('Filter all in plain action', () => {
+    test('Filter all in plain action', async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -40,12 +40,12 @@ describe('[Helpers] filtrate', () => {
             ]
         };
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results).toEqual([keyForAction(0)]);
     });
 
-    test('Service filter in plain action', () => {
+    test('Service filter in plain action', async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -61,12 +61,12 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results).toEqual([keyForAction(0)]);
     });
 
-    test('Filter actions by status', () => {
+    test('Filter actions by status', async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -85,12 +85,12 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results).toEqual([keyForAction(0)]);
     });
 
-    test("Filter all in action's subnodes", () => {
+    test("Filter all in action's subnodes", async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -110,12 +110,12 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForAction(0), keyForAction(1)].sort());
     });
 
-    test("Filter service in action's subnodes", () => {
+    test("Filter service in action's subnodes", async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -135,12 +135,12 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForAction(0), keyForAction(1)].sort());
     });
 
-    test('Filter verification by name', () => {
+    test('Filter verification by name', async () => {
         const config: FilterConfig = {
             types: [FilterType.VERIFICATION],
             blocks: [{
@@ -160,12 +160,12 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForVerification(0, 1), keyForAction(0)].sort());
     })
 
-    test('Filter verifications by some entry value', () => {
+    test('Filter verifications by some entry value', async () => {
         const config: FilterConfig = {
             types: [FilterType.VERIFICATION],
             blocks: [{
@@ -188,12 +188,12 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForVerification(0, 1), keyForAction(0)].sort());
     });
 
-    test('Filter verification by some deep entry value', () => {
+    test('Filter verification by some deep entry value', async () => {
         const config: FilterConfig = {
             types: [FilterType.VERIFICATION],
             blocks: [{
@@ -219,12 +219,12 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForVerification(0, 1), keyForAction(0)].sort());
     });
 
-    test('Filter messages by name', () => {
+    test('Filter messages by name', async () => {
         const config: FilterConfig = {
             types: [FilterType.MESSAGE],
             blocks: [{
@@ -238,12 +238,12 @@ describe('[Helpers] filtrate', () => {
             messages: [createMessage(0, 'some test name')]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results).toEqual([keyForMessage(0)]);
     })
 
-    test('Filter both actions and messages by service', () => {
+    test('Filter both actions and messages by service', async () => {
         const config: FilterConfig = {
             types: [FilterType.MESSAGE, FilterType.ACTION],
             blocks: [{
@@ -264,12 +264,12 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForAction(1), keyForMessage(0)].sort());
     })
     
-    test('Filter by several block values', () => {
+    test('Filter by several block values', async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -292,12 +292,12 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results.sort()).toEqual([keyForAction(1), keyForAction(2)].sort());
     });
 
-    test('Filter action by service and status', () => {
+    test('Filter action by service and status', async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION],
             blocks: [{
@@ -326,12 +326,12 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const results = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
         expect(results).toEqual([keyForAction(2)]);
     });
 
-    test('Filter action with nested verifications', () => {
+    test('Filter action with nested verifications', async () => {
         const config: FilterConfig = {
             types: [FilterType.ACTION, FilterType.VERIFICATION],
             blocks: [{
@@ -351,9 +351,8 @@ describe('[Helpers] filtrate', () => {
             }]
         }
 
-        const result = filtrate(testCase, config);
+        const results = await filtrate(testCase, config);
 
-        expect(result.sort()).toEqual([keyForVerification(1, 2), keyForAction(3), keyForAction(1)].sort());
+        expect(results.sort()).toEqual([keyForVerification(1, 2), keyForAction(3), keyForAction(1)].sort());
     });
-
 });

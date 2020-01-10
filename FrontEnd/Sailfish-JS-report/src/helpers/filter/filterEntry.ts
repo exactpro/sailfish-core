@@ -21,7 +21,7 @@ import VerificationEntry from "../../models/VerificationEntry";
 
 type Entry = Action | Message | Verification | VerificationEntry;
 
-export default function filterEntry<T extends Entry>(entry: T, fields: (keyof T)[], values: RegExp[]) {
+export default function filterEntry<T extends Entry>(entry: T, fields: (keyof T)[], values: RegExp[]): boolean {
     for (let field of fields) {
         const targetField = entry[field];
 

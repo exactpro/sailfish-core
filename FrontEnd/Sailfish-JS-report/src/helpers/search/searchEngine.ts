@@ -24,10 +24,8 @@ import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
 import { createCaseInsensitiveRegexp } from '../regexp';
 import { isCheckpoint } from '../action';
-import { sliceToChunks } from '../array';
+import { asyncFlatMap } from '../array';
 import "setimmediate";
-
-const CHUNK_SIZE = 25;
 
 // list of fields that will be used to search (order is important!)
 export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -39,42 +37,20 @@ export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'c
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
 
 export async function findAll(searchString: string, testCase: TestCase): Promise<SearchResult> {
-    
-    const searchResults = new Array<[string, number]>();
-
     if (!searchString) {
         return null;
     }
 
     const searchPattern = createCaseInsensitiveRegexp(searchString);
 
-    const filtredActions = testCase.actions.filter(actionNode => isAction(actionNode) && !isCheckpoint(actionNode)),
-        actionChunks = sliceToChunks(filtredActions, CHUNK_SIZE),
-        messagesChunks = sliceToChunks(testCase.messages, CHUNK_SIZE);
+    const filtredActions = testCase.actions.filter(
+        actionNode => isAction(actionNode) && !isCheckpoint(actionNode)
+    ) as Action[];
 
-    for (const chunk of actionChunks) {
-        const result = await findAllInChunk(chunk, searchPattern, findAllInAction);
-        searchResults.push(...result);
-    }
+    const actionResults = await asyncFlatMap(filtredActions, item => findAllInAction(item, searchPattern));
+    const messageResults = await asyncFlatMap(testCase.messages, item => findAllInMessage(item, searchPattern));
 
-    for (const chunk of messagesChunks) {
-        const result = await findAllInChunk(chunk, searchPattern, findAllInMessage);
-        searchResults.push(...result);
-    }
-
-    return new SearchResult(searchResults);
-}
-
-async function findAllInChunk<T>(chunk: Array<T>, searchPattern: RegExp, cb: (entity: T, searchPattern: RegExp) => Array<[string, number]>) {
-    return new Promise<Array<[string, number]>>(resolve => {
-        const result = [];
-
-        // from 'setimmediate' npm package
-        window.setImmediate(() => {
-            chunk.forEach(entity => result.push(...cb(entity, searchPattern)));
-            resolve(result);
-        });
-    });
+    return new SearchResult(actionResults.concat(messageResults));
 }
 
 function findAllInMessage(message: Message, searchPattern: RegExp): Array<[string, number]> {

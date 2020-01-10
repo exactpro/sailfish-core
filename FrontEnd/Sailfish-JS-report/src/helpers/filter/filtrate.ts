@@ -23,6 +23,7 @@ import getVerificationCondition from "./conditions/verification";
 import getMessageCondition from "./conditions/message";
 import FilterCondition from "./conditions/FilterCondition";
 import { FilterConfig, FilterType } from "./FilterConfig";
+import { asyncFlatMap } from "../array";
 
 /**
  * Filtrates target TestCase according to filter config.
@@ -31,10 +32,12 @@ import { FilterConfig, FilterType } from "./FilterConfig";
  * @param config.types list of all types, that will be used for filtrating
  * @param config.blocks list of filter 'blocks' - combination of path and list of string values
  */
-export default function filtrate(testCase: TestCase, { types, blocks }: FilterConfig): string[] {
+export default async function filtrate(testCase: TestCase, { types, blocks }: FilterConfig): Promise<string[]> {
     const results: string[] = [];
 
     if (types.includes(FilterType.ACTION) || types.includes(FilterType.VERIFICATION)) {
+        const actions: Action[] = testCase.actions.filter(isAction);
+
         const actionsConditions = types.includes(FilterType.ACTION) ?
             blocks.map(({ path, values }) => getActionCondition(path, values)) :
             [];
@@ -45,21 +48,15 @@ export default function filtrate(testCase: TestCase, { types, blocks }: FilterCo
 
         const mapper = createActionMapper(actionsConditions, verificationConditions);
 
-        results.push(
-            ...testCase.actions
-                .filter(isAction)
-                .flatMap(action => mapper(action))
-        );
+        results.push(...await asyncFlatMap(actions, action => mapper(action)));
     }
 
     if (types.includes(FilterType.MESSAGE)) {
         const messageConditions = blocks.map(({ path, values }) => getMessageCondition(path, values));
 
-        results.push(
-            ...testCase.messages
-                .filter(msg => messageConditions.every(condition => condition(msg)))
-                .map(msg => keyForMessage(msg.id))
-        );
+        results.push(...await asyncFlatMap(testCase.messages, msg => 
+            messageConditions.every(cond => cond(msg)) ? keyForMessage(msg.id) : []
+        ));
     }
 
     return results;
