@@ -16,38 +16,29 @@
 
 import * as React from 'react';
 import { KnownBugStatus } from '../../models/KnownBugStatus';
-import { createBemElement, createBemBlock } from '../../helpers/styleCreators';
+import { createBemBlock } from '../../helpers/styleCreators';
 import '../../styles/knownbug.scss';
 import KnownBug from "../../models/KnownBug";
-import KnownBugCategory from "../../models/KnownBugCategory";
 import Action from "../../models/Action";
 import { StatusType } from '../../models/Status';
 import ChipsList from '../ChipsList';
 
-const RIGHT_ARROW = '\u25B6';
-
 interface KnownBugCardProps {
     bug: KnownBug;
-    parentCategories: KnownBugCategory[];
     actionsMap: Map<number, Action>;
     isSelected: boolean;
     selectedStatus: StatusType;
     onSelect: (status?: StatusType) => void;
 }
 
-export function KnownBugCard({ bug, parentCategories, actionsMap, isSelected, onSelect, selectedStatus }: KnownBugCardProps) {
+export function KnownBugCard({ bug, actionsMap, isSelected, onSelect, selectedStatus }: KnownBugCardProps) {
     const statusClassName = bug.status === KnownBugStatus.REPRODUCED ? "reproduced" : "not-reproduced";
 
     const rootClassName = createBemBlock(
-            'known-bug-card',
-            statusClassName,
-            isSelected ? 'selected' : null
-        ),
-        indicatorClassName = createBemElement(
-            'known-bug-card',
-            'indicator', 
-            statusClassName
-        );
+        'known-bug-card',
+        statusClassName,
+        isSelected ? 'selected' : null
+    );
 
     return (
         <div className={rootClassName}
@@ -57,17 +48,9 @@ export function KnownBugCard({ bug, parentCategories, actionsMap, isSelected, on
                     actions={bug.relatedActionIds.map(id => actionsMap.get(id))}
                     onStatusSelect={onSelect}
                     selectedStatus={isSelected && selectedStatus}/>
-                <div className="known-bug-card__categories">
-                    {
-                        parentCategories
-                            .map(cat => cat.name)
-                            .join(` ${RIGHT_ARROW} `)
-                    }
-                </div>
             </div>
             <div className="known-bug-card__right">
                 <div className="known-bug-card__name">{bug.subject}</div>
-                <div className={indicatorClassName} />
             </div>
         </div>
     )
