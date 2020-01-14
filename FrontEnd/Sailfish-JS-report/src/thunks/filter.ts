@@ -14,26 +14,22 @@
  * limitations under the License.
  ******************************************************************************/
 
-export const enum FilterType {
-    ACTION = 'ACTION',
-    MESSAGE = 'MESSAGE',
-    VERIFICATION = 'VERIFICATION'
-}
+import { ThunkDispatch, ThunkAction } from "redux-thunk";
+import StateAction from "../actions/stateActions";
+import { FilterConfig } from "../helpers/filter/FilterConfig";
+import AppState from "../state/models/AppState";
+import filtrate from "../helpers/filter/filtrate";
+import { setFilterConfig, setFilterResult } from "../actions/actionCreators";
 
-export const enum FilterPath {
-    ALL = 'ALL',
-    SERVICE = 'SERVICE',
-    STATUS = 'STATUS'
-}
 
-export const FILTER_PATH_VALUES: FilterPath[] = [FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE];
+export function performFilter(config: FilterConfig): ThunkAction<void, AppState, {}, StateAction> {
+    return async (dispatch, getState) => {
+        const testCase = getState().selected.testCase;
 
-export interface FilterBlock {
-    path: FilterPath;
-    values: string[];
-}
+        dispatch(setFilterConfig(config));
 
-export interface FilterConfig {
-    types: FilterType[];
-    blocks: FilterBlock[];
-}
+        const results = await filtrate(testCase, config);
+
+        dispatch(setFilterResult(results));
+    }
+} 

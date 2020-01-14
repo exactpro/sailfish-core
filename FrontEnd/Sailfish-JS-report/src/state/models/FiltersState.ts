@@ -15,10 +15,16 @@
  ******************************************************************************/
 
 import { StatusType } from "../../models/Status";
+import { FilterConfig } from "../../helpers/filter/FilterConfig";
 
 export default interface FilterState {
+    // TODO - remove it after migration to new filter
     actionsTransparencyFilter: Set<StatusType>;
     fieldsTransparencyFilter: Set<StatusType>;
     actionsFilter: Set<StatusType>;
     fieldsFilter: Set<StatusType>;
+
+    results: string[];
+    config: FilterConfig;
+    isTransparent: boolean;
 }

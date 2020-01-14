@@ -18,7 +18,6 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { HeaderBase } from '../../components/Header';
 import { createTestCase } from '../util/creators';
-import FilterPanel from '../../components/FilterPanel';
 
 describe('[React] <HeaderBase/>', () => {
 
@@ -71,23 +70,5 @@ describe('[React] <HeaderBase/>', () => {
         expect(prevHandlerMock).not.toHaveBeenCalled();
         expect(nextHandlerMock).not.toHaveBeenCalled();
     })
-
-    test('Open FilterPanel on filter button click', () => {
-        const wrapper = shallow(
-            <HeaderBase
-                {...defaultProps}/>
-        );
-        const filterButton = wrapper.find('.header-button__icon.filter').parent();
-
-        let filterPanelEnabled = wrapper.find(FilterPanel).length > 0;
-
-        expect(filterPanelEnabled).toBe(false);
-
-        filterButton.simulate('click');
-
-        filterPanelEnabled = wrapper.find(FilterPanel).length > 0;
-
-        expect(filterPanelEnabled).toBe(true);
-    })    
 })
 

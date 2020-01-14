@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import VerificationEntry from "../../models/VerificationEntry";
-import {StatusType} from "../../models/Status";
+import {StatusType, statusValues} from "../../models/Status";
 import "../../styles/tables.scss";
 import {connect} from 'react-redux';
 import AppState from "../../state/models/AppState";
@@ -383,8 +383,9 @@ function paramsToNodes(root: VerificationEntry): TableNode {
 export const VerificationTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
         precision: state.report.precision,
-        transparencyFilter: state.filter.fieldsTransparencyFilter,
-        visibilityFilter: state.filter.fieldsFilter,
+        // TODO: replace deprecated filters with new one
+        transparencyFilter: new Set<StatusType>(statusValues),
+        visibilityFilter: new Set(statusValues),
         expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId),
         searchResults: state.selected.searchResults
     }),

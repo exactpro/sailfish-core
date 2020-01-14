@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+
 import {InitResponse, PredictionResponse, SubmittedData} from "../models/MlServiceResponse"
 import {ThunkAction, ThunkDispatch} from "redux-thunk";
 import {AnyAction} from 'redux';

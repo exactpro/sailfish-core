@@ -107,6 +107,14 @@ export function getScrolledId(array: Array<number>, prevScrolledId: number): Num
     return new Number(array[0]);
 }
 
+export function replaceByIndex<T>(arr: T[], targetIndex: number, targetItem: T): T[] {
+    return arr.map((item, index) => index == targetIndex ? targetItem : item);
+}
+
+export function removeByIndex<T>(arr: T[], targetIndex: number): T[] {
+    return arr.filter((_, index) => index !== targetIndex);
+}
+
 export function intersection<T>(arr1: T[], arr2: T[]): T[] {
     return arr1.filter(item => arr2.includes(item));
 }

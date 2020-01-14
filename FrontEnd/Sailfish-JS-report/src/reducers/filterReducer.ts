@@ -1,3 +1,4 @@
+
 /******************************************************************************
  * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
@@ -17,36 +18,21 @@
 import FilterState from '../state/models/FiltersState';
 import initialFilterState from '../state/initial/initialFilterState';
 import StateActionType, { StateActionTypes } from '../actions/stateActions';
-import { toggleItem } from '../helpers/set';
 
 export function filterReducer(state: FilterState = initialFilterState, stateAction: StateActionType): FilterState {
     switch(stateAction.type) {
 
-        case StateActionTypes.SWITCH_ACTIONS_TRANSPARENCY_FILTER: {
+        case StateActionTypes.SET_FILTER_RESULTS: {
             return {
                 ...state,
-                actionsTransparencyFilter: toggleItem(state.actionsTransparencyFilter, stateAction.status)
+                results: stateAction.results
             }
         }
 
-        case StateActionTypes.SWITCH_FIELDS_TRANSPARENCY_FILTER: {
+        case StateActionTypes.SET_FILTER_CONFIG: {
             return {
                 ...state,
-                fieldsTransparencyFilter: toggleItem(state.fieldsTransparencyFilter, stateAction.status)
-            }
-        }
-
-        case StateActionTypes.SWITCH_ACTIONS_FILTER: {
-            return {
-                ...state,
-                actionsFilter: toggleItem(state.actionsFilter, stateAction.status)
-            }
-        }
-
-        case StateActionTypes.SWITCH_FIELDS_FILTER: {
-            return {
-                ...state,
-                fieldsFilter: toggleItem(state.fieldsFilter, stateAction.status)
+                config: stateAction.config
             }
         }
 

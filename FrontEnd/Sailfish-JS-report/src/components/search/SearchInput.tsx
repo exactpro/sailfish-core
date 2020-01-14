@@ -24,11 +24,7 @@ import { performSearch } from '../../thunks/search';
 import SearchCounter from './SearchCounter';
 import '../../styles/search.scss';
 import SearchResult from '../../helpers/search/SearchResult';
-
-const F_KEY_CODE = 70,
-    F3_KEY_CODE = 114,
-    ENTER_KEY_CODE = 13,
-    ECS_KEY_CODE = 27;
+import KeyCodes from "../../util/KeyCodes";
 
 const REACTIVE_SEARCH_DELAY = 500;
 
@@ -40,10 +36,10 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    updateSearchString: (searchString: string) => any;
-    nextSearchResult: () => any;
-    prevSearchResult: () => any;
-    clear: () => any;
+    updateSearchString: (searchString: string) => void;
+    nextSearchResult: () => void;
+    prevSearchResult: () => void;
+    clear: () => void;
 }
 
 interface Props extends StateProps, DispatchProps { }
@@ -112,24 +108,24 @@ class SearchInputBase extends React.PureComponent<Props, State> {
     }
 
     private onKeyDown = (e: React.KeyboardEvent) => {
-        if (e.keyCode == ENTER_KEY_CODE && e.shiftKey) {
+        if (e.keyCode == KeyCodes.ENTER && e.shiftKey) {
             this.props.prevSearchResult();
             return;
         }
 
-        if (e.keyCode == ENTER_KEY_CODE) {
+        if (e.keyCode == KeyCodes.ENTER) {
             this.props.nextSearchResult();
             return;
         }
 
-        if (e.keyCode == ECS_KEY_CODE) {
+        if (e.keyCode == KeyCodes.ESCAPE) {
             this.inputElement.current.blur();
             this.props.clear();
         }
     }
 
     private documentOnKeyDown = (e: KeyboardEvent) => {
-        if (e.keyCode === F3_KEY_CODE || (e.keyCode === F_KEY_CODE && e.ctrlKey)) {
+        if (e.keyCode === KeyCodes.F3 || (e.keyCode === KeyCodes.F && e.ctrlKey)) {
             // cancel browser search opening
             e.preventDefault();
 

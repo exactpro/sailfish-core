@@ -25,6 +25,7 @@ import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
 import LiveTestCase from '../models/LiveTestCase';
 import KnownBug from '../models/KnownBug';
+import { FilterConfig } from "../helpers/filter/FilterConfig";
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -101,6 +102,16 @@ export const updateLiveActions = (actions: ActionNode[]) => (<const>{
 export const updateLiveMessages = (messages: Message[]) => (<const>{
     type: StateActionTypes.UPDATE_LIVE_MESSAGES,
     messages
+})
+
+export const setFilterResult = (results: string[]) => (<const>{
+    type: StateActionTypes.SET_FILTER_RESULTS,
+    results
+})
+
+export const setFilterConfig = (config: FilterConfig) => (<const>{
+    type: StateActionTypes.SET_FILTER_CONFIG,
+    config
 })
 
 export const switchActionsFilter = (status: StatusType) => (<const>{

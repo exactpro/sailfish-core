@@ -15,13 +15,20 @@
  ******************************************************************************/
 
 import FilterState from '../models/FiltersState';
-import { statusValues } from '../../models/Status';
+import {statusValues} from '../../models/Status';
+import {FilterType} from "../../helpers/filter/FilterConfig";
 
 const initialFilterState : FilterState = {
     actionsTransparencyFilter: new Set(statusValues),
     fieldsTransparencyFilter: new Set(statusValues),
     actionsFilter: new Set(statusValues),
-    fieldsFilter: new Set(statusValues)
-}
+    fieldsFilter: new Set(statusValues),
+    results: [],
+    config: {
+        types: [FilterType.ACTION, FilterType.MESSAGE, FilterType.VERIFICATION],
+        blocks: []
+    },
+    isTransparent: false
+};
 
 export default initialFilterState;

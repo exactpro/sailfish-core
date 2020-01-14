@@ -17,7 +17,7 @@
 import * as React from 'react';
 import TestCase from '../models/TestCase';
 import '../styles/header.scss';
-import FilterPanel from './FilterPanel';
+//import FilterPanel from './FilterPanel';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import { resetTestCase } from '../actions/actionCreators';
@@ -29,6 +29,7 @@ import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
 import SearchInput from './search/SearchInput';
 import { MlUploadIndicator } from "./machinelearning/MlUploadIndicator";
 import LiveTimer from './LiveTimer';
+import FilterPanel from "./filter/FilterPanel";
 
 interface StateProps {
     testCase: TestCase;
@@ -106,7 +107,7 @@ export const HeaderBase = ({
                     </div>
                 </div>
                 <div className="header-button   header-main__contol-button" onClick={() => setShowFilter(!showFilter)}>
-                    <div className="header-button__icon filter" />
+                    <div className="header-button__icon filter-icon" />
                     <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
                 </div>
                 <div className="header-main__search">
