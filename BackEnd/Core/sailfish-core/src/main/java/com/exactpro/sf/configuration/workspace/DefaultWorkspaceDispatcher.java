@@ -23,6 +23,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -43,6 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.util.Pair;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 
 public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
@@ -130,7 +132,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
     }
 
     @Override
-    public File getFolder(FolderType folderType) throws FileNotFoundException {
+    public File getFolder(FolderType folderType) throws WorkspaceStructureException {
         checkFolderType(folderType);
 
         try {
@@ -140,7 +142,7 @@ public class DefaultWorkspaceDispatcher implements IWorkspaceDispatcher {
                 return targetDir;
             }
 
-            throw new FileNotFoundException("Folder {" + folderType + "}/" + targetDir + " can't be created");
+            throw new WorkspaceStructureException("Folder {" + folderType + "}/" + targetDir + " can't be created");
         } finally {
             workspacesLock.readLock().unlock();
         }

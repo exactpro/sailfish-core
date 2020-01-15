@@ -19,9 +19,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Implements UnionMount[1]-like mechanism for SF
@@ -38,12 +36,12 @@ import java.util.stream.Collectors;
 public interface IWorkspaceDispatcher {
 
     /**
-     * Get folder from last workspace layer
+     * Gets folder from last workspace layer. Creates folder if it isn't existed.
      * @param folderType
      * @return returns existing canonical folder from workspace
-     * @throws FileNotFoundException If last workspace layer does not contain folder
+     * @throws WorkspaceStructureException If last workspace layer does not contain folder or can`t create one.
      */
-    File getFolder(FolderType folderType) throws FileNotFoundException;
+    File getFolder(FolderType folderType) throws WorkspaceStructureException;
 
     /**
      * Get file from workspace layers

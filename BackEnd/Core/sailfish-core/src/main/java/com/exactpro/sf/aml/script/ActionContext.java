@@ -113,7 +113,7 @@ public class ActionContext implements IActionContext {
         IScriptConfig scriptConfig = Objects.requireNonNull(scriptContext.getScriptConfig(), "script config cannot be null");
         report = new ActionReport(scriptContext.getReport(), scriptConfig.getReportFolder(), updateStatus, scriptContext.getWorkspaceDispatcher());
         IEnvironmentManager environmentManager = Objects.requireNonNull(scriptContext.getEnvironmentManager(), "environment manager cannot be null");
-        serviceManager = new ActionServiceManager(environmentManager.getConnectionManager(), environmentManager.getServiceStorage());
+        serviceManager = new ActionServiceManager(environmentManager.getConnectionManager(), environmentManager.getServiceStorage(), scriptContext.getServiceMarshalManager());
         this.dataManager = Objects.requireNonNull(scriptContext.getDataManager(), "data manager cannot be null");
         this.pluginClassLoaders = Objects.requireNonNull(scriptContext.getPluginClassLoaders(), "plugin class loaders cannot be null");
 

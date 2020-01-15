@@ -119,7 +119,7 @@ public class ReportTask implements Runnable{
         TestScriptDescription descr = context.getScriptRunner().getTestScriptDescription(id);
         String workFolder = descr.getWorkFolder();
 
-        return context.getWorkspaceDispatcher().getFile(FolderType.REPORT, workFolder, workFolder + ZipReport.ZIP);
+        return context.getWorkspaceDispatcher().getFile(FolderType.REPORT, workFolder + ZipReport.ZIP);
     }
 
     private String getExportZipName(String folder, long passed, long failed) {

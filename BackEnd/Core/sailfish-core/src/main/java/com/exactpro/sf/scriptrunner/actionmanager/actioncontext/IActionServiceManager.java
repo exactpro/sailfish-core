@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.actionmanager.actioncontext;
 
+import java.io.OutputStream;
 import java.util.concurrent.Future;
 
 import com.exactpro.sf.common.services.ServiceInfo;
@@ -30,6 +31,7 @@ public interface IActionServiceManager {
     ServiceName[] getServiceNames();
     IService[] getStartedServices();
     IServiceSettings getServiceSettings(ServiceName serviceName);
+    void serializeServiceSettings(ServiceName serviceName, OutputStream out);
     Future<?> addService(ServiceName serviceName, SailfishURI uri, IServiceSettings settings, IServiceNotifyListener exceptionListener);
     Future<?> updateService(ServiceName serviceName, IServiceSettings settings, IServiceNotifyListener exceptionListener);
     Future<?> initService(ServiceName serviceName, IServiceNotifyListener exceptionListener);

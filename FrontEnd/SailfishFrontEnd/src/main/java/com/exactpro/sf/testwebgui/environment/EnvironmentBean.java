@@ -67,7 +67,6 @@ import com.exactpro.sf.scriptrunner.services.IStaticServiceManager;
 import com.exactpro.sf.services.EnvironmentDescription;
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.ServiceDescription;
-import com.exactpro.sf.services.ServiceMarshalManager;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.testwebgui.BeanUtil;
@@ -696,10 +695,7 @@ public class EnvironmentBean implements Serializable {
 			}
 
 			try {
-			    IStaticServiceManager staticServiceManager = BeanUtil.getSfContext().getStaticServiceManager();
-			    IDictionaryManager dictionaryManager = BeanUtil.getSfContext().getDictionaryManager();
-				ServiceMarshalManager marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
-				services = marshalManager.exportServices(descriptions);
+				services = BeanUtil.getSfContext().getServiceMarshalManager().exportServices(descriptions);
 			} catch(Exception e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -716,10 +712,7 @@ public class EnvironmentBean implements Serializable {
 		logger.info("getServicesInZip invoked {}", getUser());
 
 		try {
-		    IStaticServiceManager staticServiceManager = BeanUtil.getSfContext().getStaticServiceManager();
-            IDictionaryManager dictionaryManager = BeanUtil.getSfContext().getDictionaryManager();
-            ServiceMarshalManager marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
-			InputStream stream = new FileInputStream(marshalManager.packInZip(exportServices()));
+			InputStream stream = new FileInputStream(BeanUtil.getSfContext().getServiceMarshalManager().packInZip(exportServices()));
 			return new DefaultStreamedContent(stream, "application/zip", "Services.zip");
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage(), e);
@@ -737,10 +730,7 @@ public class EnvironmentBean implements Serializable {
 		}
 
 		try {
-		    IStaticServiceManager staticServiceManager = BeanUtil.getSfContext().getStaticServiceManager();
-            IDictionaryManager dictionaryManager = BeanUtil.getSfContext().getDictionaryManager();
-            ServiceMarshalManager marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
-			InputStream stream = new FileInputStream(marshalManager.packInZip(services));
+			InputStream stream = new FileInputStream(BeanUtil.getSfContext().getServiceMarshalManager().packInZip(services));
 			return new DefaultStreamedContent(stream, "application/zip", selectedEnvironment + "_environment.zip");
 		} catch (FileNotFoundException e) {
 			logger.error("File not found exception. {}", e.getMessage());
@@ -767,13 +757,12 @@ public class EnvironmentBean implements Serializable {
 
 		IStaticServiceManager staticServiceManager = BeanUtil.getSfContext().getStaticServiceManager();
         IDictionaryManager dictionaryManager = BeanUtil.getSfContext().getDictionaryManager();
-        ServiceMarshalManager marshalManager = new ServiceMarshalManager(staticServiceManager, dictionaryManager);
 
-		Map<String, File> fileMap = marshalManager.exportServices(servicesInEnvironment);
+		Map<String, File> fileMap = BeanUtil.getSfContext().getServiceMarshalManager().exportServices(servicesInEnvironment);
 
 		String envDescFilename = "environment_description.xml";
 
-        File envDescFile = marshalManager.exportEnvironmentDescription(envDescFilename, new EnvironmentDescription(selectedEnvironment, manager.getEnvironmentVariableSet(selectedEnvironment)));
+        File envDescFile = BeanUtil.getSfContext().getServiceMarshalManager().exportEnvironmentDescription(envDescFilename, new EnvironmentDescription(selectedEnvironment, manager.getEnvironmentVariableSet(selectedEnvironment)));
 		fileMap.put(envDescFilename, envDescFile);
 
 		return fileMap;
