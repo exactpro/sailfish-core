@@ -93,7 +93,7 @@ export default function ActionTreeNode(props: Props) {
 
         case ActionNodeType.VERIFICATION: {
             const verification = action,
-                isSelected = verification.messageId === selectedVerificationId,
+                isSelected = verification.messageId && verification.messageId === selectedVerificationId,
                 isTransparent = !actionsFilter.has(verification.status.status);
 
             return (

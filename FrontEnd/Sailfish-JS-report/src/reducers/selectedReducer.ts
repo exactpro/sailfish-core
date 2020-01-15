@@ -68,7 +68,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 verificationId: initialSelectedState.verificationId,
                 scrolledActionId: initialSelectedState.scrolledActionId,
                 scrolledMessageId: getScrolledId(stateAction.action.relatedMessages, +state.messagesId),
-                activeActionId: stateAction.action.id
+                activeActionId: stateAction.action.id,
+                checkpointActionId: initialSelectedState.checkpointActionId,
+                checkpointMessageId: initialSelectedState.checkpointMessageId
             }
         }
 
@@ -87,7 +89,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             // We must use Number object to handle situation when some action was selected by different messages 
             // and Actions list component can't understand that action was selected again, therefore scroll doesn't work.
             // Using reference comparison with Number objects, component can understand that action with the same id was selected again.
-
+            
             const relatedActions = stateAction.message.relatedActions
                 .filter(actionId => !stateAction.status || (state.actionsMap.get(actionId)?.status.status === stateAction.status));
 
@@ -99,7 +101,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 verificationId: stateAction.message.id,
                 scrolledActionId: getScrolledId(relatedActions, +state.scrolledActionId),
                 scrolledMessageId: initialSelectedState.scrolledMessageId,
-                activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId
+                activeActionId: relatedActions.length === 1 ? relatedActions[0] : initialSelectedState.activeActionId,
+                checkpointActionId: initialSelectedState.checkpointActionId,
+                checkpointMessageId: initialSelectedState.checkpointMessageId,
             }
         }
 
@@ -111,7 +115,9 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 selectedActionStatus: stateAction.status,
                 actionsId: initialSelectedState.actionsId,
                 scrolledMessageId: new Number(stateAction.messageId),
-                activeActionId: stateAction.rootActionId
+                activeActionId: stateAction.rootActionId,
+                checkpointActionId: initialSelectedState.checkpointActionId,
+                checkpointMessageId: initialSelectedState.checkpointMessageId
             }
         }
 
@@ -123,7 +129,11 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 checkpointMessageId: relatedMessages[0] || null,
                 scrolledMessageId: relatedMessages[0] != null ? new Number(relatedMessages[0]) : null,
                 checkpointActionId: id,
-                scrolledActionId: new Number(stateAction.action.id)
+                scrolledActionId: new Number(stateAction.action.id),
+                activeActionId: initialSelectedState.activeActionId,
+                actionsId:initialSelectedState.actionsId,
+                messagesId:initialSelectedState.messagesId,
+                verificationId: initialSelectedState.verificationId,
             }
         }
 
@@ -134,8 +144,12 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                 ...state,
                 checkpointMessageId: id,
                 scrolledMessageId: new Number(id),
-                checkpointActionId: relatedActions[0] || null,
-                scrolledActionId: relatedActions[0] != null ? new Number(relatedActions[0]) : null
+                checkpointActionId: relatedActions[0] != null ? relatedActions[0] : null,
+                scrolledActionId: relatedActions[0] != null ? new Number(relatedActions[0]) : null,
+                messagesId: initialSelectedState.messagesId,
+                activeActionId: initialSelectedState.activeActionId,
+                actionsId: initialSelectedState.actionsId,
+                verificationId: initialSelectedState.verificationId
             }
         }
 
