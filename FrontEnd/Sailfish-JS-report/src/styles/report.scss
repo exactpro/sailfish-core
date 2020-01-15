@@ -71,15 +71,12 @@
 
         &.disabled {
             opacity: 0.7;
+            width: auto;
         }
 
         &.failed {
             width: auto;
             color: $failedTextColor;
-
-            &.disabled {
-                color: $reportTitleTextColor;
-            }
         }
     }
 

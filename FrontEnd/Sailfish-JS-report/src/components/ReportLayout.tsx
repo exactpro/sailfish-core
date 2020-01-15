@@ -34,7 +34,6 @@ const OLD_REPORT_PATH = 'report.html';
 
 interface StateProps {
     report: ReportState;
-    failedTestCasesEnabled: boolean;
     selectedTestCaseId: string;
 }
 
@@ -62,13 +61,14 @@ export class ReportLayoutBase extends React.Component<Props, State> {
 
     render() {
 
-        const { report, failedTestCasesEnabled, selectedTestCaseId } = this.props,
+        const { report, selectedTestCaseId } = this.props,
             { showKnownBugs } = this.state;
 
-        const filtredMetadata = report.metadata.filter(isTestCaseMetadata),
-            knownBugsPresent = filtredMetadata.some(item => item.bugs != null && item.bugs.length > 0),
+        const filteredMetadata = report.metadata.filter(isTestCaseMetadata),
+            knownBugsPresent = filteredMetadata.some(item => item.bugs != null && item.bugs.length > 0),
             knownBugsClass = showKnownBugs ? "active" : "enabled",
-            failedTcTitleClass = createBemElement('report', 'title', 'failed', failedTestCasesEnabled ? null : 'disabled'),
+            failedTestCasesEnabled = filteredMetadata.some(({status}) => status.status === StatusType.FAILED),
+            failedTcTitleClass = createBemElement('report', 'title', failedTestCasesEnabled ? 'failed': 'disabled'),
             isLive = report.finishTime == null,
             alerts = report.alerts || [];
 
@@ -85,7 +85,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                         <div className="report__known-bugs-button__text disabled">No known bugs</div>
                     </div>
                 )
-        )
+        );
 
         const executionTime = getSecondsPeriod(report.startTime, report.finishTime),
             plugins = report.plugins ? Object.entries(report.plugins) : [];
@@ -94,9 +94,9 @@ export class ReportLayoutBase extends React.Component<Props, State> {
             <div className="report">
                 <div className="report__header   report-header">
                     {
-                        isLive ? 
+                        isLive ?
                             <div className="report-header__live-loader"
-                                title="Report executing in progress"/> : 
+                                title="Report executing in progress"/> :
                             null
                     }
                     <div className="report-header__title">{this.props.report.name}</div>
@@ -151,7 +151,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                                 <div className="report-summary__element-value">{report.metadata.length}</div>
                             </div>
                             {
-                                statusValues.map(statusValue => this.renderStatusInfo(statusValue, filtredMetadata))
+                                statusValues.map(statusValue => this.renderStatusInfo(statusValue, filteredMetadata))
                             }
                             <div className="report-summary__divider"/>
                             {
@@ -209,11 +209,11 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                 "bold",
                 status.toLowerCase()
             );
-    
+
         if (!testCasesCount) {
             return null;
         }
-    
+
         return (
             <div className="report-summary__element" key={status}>
                 <div className={valueClassName}>{status.toUpperCase()}</div>
@@ -226,7 +226,6 @@ export class ReportLayoutBase extends React.Component<Props, State> {
 const ReportLayout = connect(
     (state: AppState): StateProps => ({
         report: state.report,
-        failedTestCasesEnabled: (state.report.metadata || []).length > 0,
         selectedTestCaseId: state.selected.selectedTestCaseId
     })
 )(ReportLayoutBase);
