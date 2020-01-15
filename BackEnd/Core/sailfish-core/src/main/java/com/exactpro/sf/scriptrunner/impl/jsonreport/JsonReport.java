@@ -282,6 +282,8 @@ public class JsonReport implements IScriptReport {
 
         reportRoot.setDescription(description);
 
+        exportToFile(reportRoot, REPORT_ROOT_FILE_NAME);
+
         setContext(ContextType.SCRIPT, null);
     }
 
