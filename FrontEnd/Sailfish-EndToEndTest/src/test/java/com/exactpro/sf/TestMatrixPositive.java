@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.exceptions.APIResponseException;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixDescription;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixLinkUploadResponse;
@@ -584,11 +586,11 @@ public class TestMatrixPositive extends TestMatrix {
                         .getId();
 
                 XmlTestscriptRunDescription xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
-                Assert.assertEquals("Status of matrix is wrong: " + xmlDescription.getScriptState(), SCRIPT_STATE_PENDING, xmlDescription.getScriptState());
+                Assert.assertEquals("Status of matrix is wrong: " + xmlDescription.getScriptState(), ScriptState.PENDING, xmlDescription.getScriptState());
                 sfapi.compileTestScriptRun(testScriptId);
                 try {
                     int timewait = 0;
-                    while (timewait != 60 && !SCRIPT_STATE_READY.equals(sfapi.getTestScriptRunInfo(testScriptId).getScriptState())) {
+                    while (timewait != 60 && sfapi.getTestScriptRunInfo(testScriptId).getScriptState() != ScriptState.READY) {
                         timewait++;
                         Thread.sleep(100);
                     }
@@ -596,7 +598,7 @@ public class TestMatrixPositive extends TestMatrix {
                     throw new APICallException(e);
                 }
                 xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
-                Assert.assertEquals("Status of matrix is wrong: " + xmlDescription.getScriptState(), SCRIPT_STATE_READY, xmlDescription.getScriptState());
+                Assert.assertEquals("Status of matrix is wrong: " + xmlDescription.getScriptState(), ScriptState.READY, xmlDescription.getScriptState());
                 sfapi.runCompiledTestScript(testScriptId);
                 runs.add(testScriptId);
                 testScriptRunDescription(true, sfapi, testScriptId);
@@ -703,7 +705,7 @@ public class TestMatrixPositive extends TestMatrix {
             if (matrix != null) {
                 int testScriptId = (int) sfapi.runMatrix(matrix).getId();
                 int timewait = 0;
-                while (timewait != 6000 && !SCRIPT_STATE_RUNNING.equals(sfapi.getTestScriptRunInfo(testScriptId).getScriptState())) {
+                while (timewait != 6000 && sfapi.getTestScriptRunInfo(testScriptId).getScriptState() != ScriptState.RUNNING) {
                     timewait++;
                     Thread.sleep(100);
                 }
@@ -844,10 +846,10 @@ public class TestMatrixPositive extends TestMatrix {
                 sfapi.stopTestScriptRun(testScriptId);
                 Thread.sleep(1500);
                 XmlTestscriptRunDescription xmlDescription = sfapi.getTestScriptRunInfo(testScriptId);
-                Assert.assertEquals("Wrong status", SCRIPT_STATUS_INTERRUPTED, xmlDescription.getScriptStatus()); //FIXME: must be CANCELED
+                Assert.assertEquals("Wrong status", ScriptStatus.INTERRUPTED, xmlDescription.getScriptStatus()); //FIXME: must be CANCELED
                 // Assert.assertEquals("Wrong status", SCRIPT_STATUS_CANCELED, xmlDescription.getScriptStatus());
 
-                Assert.assertEquals("Wrong state", SCRIPT_STATE_FINISHED, xmlDescription.getScriptState()); //FIXME: must be CANCELED
+                Assert.assertEquals("Wrong state", ScriptState.FINISHED, xmlDescription.getScriptState()); //FIXME: must be CANCELED
                 // Assert.assertEquals("Wrong state", SCRIPT_STATE_CANCELED, xmlDescription.getScriptState());
                 Assert.assertFalse("Report locked",  xmlDescription.isLocked());
                 Assert.assertEquals("Wrong number of passed tests for canceled matrix", 0, xmlDescription.getPassed());

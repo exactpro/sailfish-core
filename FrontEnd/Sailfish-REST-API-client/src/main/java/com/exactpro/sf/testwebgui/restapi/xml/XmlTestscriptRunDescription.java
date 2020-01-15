@@ -22,6 +22,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
+
 @XmlRootElement(name = "testscriptrun")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = { "description", "matrixFileName", "id", "scriptState", "scriptStatus", "passed", "conditionallyPassed", "failed", "total",
@@ -42,9 +45,9 @@ public class XmlTestscriptRunDescription {
 	
 	private String matrixFileName;
 	
-	private String scriptState;
+	private ScriptState scriptState;
 	
-	private String scriptStatus;
+	private ScriptStatus scriptStatus;
 	
 	private String problem;
 	
@@ -82,23 +85,23 @@ public class XmlTestscriptRunDescription {
 		this.id = id;
 	}
 
-	public String getScriptState() {
-		return scriptState;
-	}
+    public ScriptState getScriptState() {
+        return scriptState;
+    }
 
-	public void setScriptState(String scriptState) {
-		this.scriptState = scriptState;
-	}
+    public void setScriptState(ScriptState scriptState) {
+        this.scriptState = scriptState;
+    }
 
-	public String getScriptStatus() {
-		return scriptStatus;
-	}
+    public ScriptStatus getScriptStatus() {
+        return scriptStatus;
+    }
 
-	public void setScriptStatus(String scriptStatus) {
-		this.scriptStatus = scriptStatus;
-	}
+    public void setScriptStatus(ScriptStatus scriptStatus) {
+        this.scriptStatus = scriptStatus;
+    }
 
-	public String getProblem() {
+    public String getProblem() {
 		return problem;
 	}
 

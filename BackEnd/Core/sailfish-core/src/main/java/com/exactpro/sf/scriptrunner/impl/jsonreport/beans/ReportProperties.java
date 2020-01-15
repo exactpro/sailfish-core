@@ -16,11 +16,11 @@
 
 package com.exactpro.sf.scriptrunner.impl.jsonreport.beans;
 
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptState;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.util.List;
+
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReportProperties {

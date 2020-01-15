@@ -36,7 +36,8 @@ import com.exactpro.sf.aml.generator.AlertCollector;
 import com.exactpro.sf.aml.generator.AlertType;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.embedded.statistics.entities.Tag;
-
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 
 public class TestScriptDescription implements Closeable
 {
@@ -210,61 +211,6 @@ public class TestScriptDescription implements Closeable
         this.staticVariables = staticVariables;
 
     }
-
-    public enum ScriptState
-	{
-		INITIAL(0, false),
-		PREPARING(1, false),
-		READY(2, false),
-		RUNNING(3, false),
-		FINISHED(4, true),
-		CANCELED(7, true),
-		PENDING(8, false),
-		PAUSED(9, false);
-
-        private final int weight;
-        private final boolean terminate;
-
-		ScriptState(int weight, boolean terminate) {
-			this.weight = weight;
-			this.terminate = terminate;
-		}
-
-		public int getWeight() {
-			return weight;
-		}
-
-        public boolean isTerminateState() {
-            return terminate;
-        }
-    }
-
-    public enum ScriptStatus {
-
-        INIT_FAILED("INIT FAILED", 0), // initialization failed
-        INTERRUPTED("INTERRUPTED", 1), // script was interrupted
-        EXECUTED("EXECUTED", 2),
-        NOT_STARTED("NOT STARTED", 3),
-        NONE("NONE", 4),
-        CANCELED("CANCELED", 5),
-        RUN_FAILED("RUN FAILED", 6);
-
-        private final String title;
-        private final int weight;
-
-        ScriptStatus(String title, int weight) {
-            this.title = title;
-			this.weight = weight;
-		}
-
-        public String getTitle() {
-            return title;
-        }
-
-		public int getWeight() {
-			return weight;
-		}
-	}
 
     public static void resetScriptIdCounter(){
         scriptIdCounter.set(0);

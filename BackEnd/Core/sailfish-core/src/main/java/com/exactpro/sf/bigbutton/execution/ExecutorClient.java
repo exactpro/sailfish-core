@@ -15,6 +15,39 @@
  ******************************************************************************/
 package com.exactpro.sf.bigbutton.execution;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.SFAPIClient;
 import com.exactpro.sf.Service.Status;
 import com.exactpro.sf.ServiceImportResult;
@@ -43,7 +76,8 @@ import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.exceptions.APIResponseException;
 import com.exactpro.sf.scriptrunner.StatusType;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
-import com.exactpro.sf.scriptrunner.TestScriptDescription.ScriptStatus;
+import com.exactpro.sf.scriptrunner.state.ScriptState;
+import com.exactpro.sf.scriptrunner.state.ScriptStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestScriptShortReport;
@@ -51,38 +85,6 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.util.EMailUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterators;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.xml.parsers.ParserConfigurationException;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class ExecutorClient {
 	
@@ -702,7 +704,9 @@ public class ExecutorClient {
          */
         private void waitForCompileTestScript(int testScriptId) throws InterruptedException{
             try {
-                while (!"READY".equals(apiClient.getTestScriptRunInfo(testScriptId).getScriptState())) {
+                ScriptState scriptState;
+                while (!(scriptState = apiClient.getTestScriptRunInfo(testScriptId).getScriptState()).isTerminateState()
+                    && scriptState != ScriptState.READY) {
                     Thread.sleep(1000);
                 }
             } catch (APICallException | APIResponseException e) {
