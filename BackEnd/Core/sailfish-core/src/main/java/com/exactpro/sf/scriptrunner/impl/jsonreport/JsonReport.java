@@ -55,6 +55,7 @@ import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.FolderType;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
+import com.exactpro.sf.embedded.statistics.entities.Tag;
 import com.exactpro.sf.scriptrunner.IReportStats;
 import com.exactpro.sf.scriptrunner.IScriptProgress;
 import com.exactpro.sf.scriptrunner.IScriptReport;
@@ -143,6 +144,10 @@ public class JsonReport implements IScriptReport {
         this.testScriptDescription = testScriptDescription;
         this.liveReportDir = Paths.get(reportRootDirectoryPath, REPORT_DATA_DIRECTORY_NAME, LIVE_REPORT_DIRECTORY_NAME);
         this.dictionaryManager = dictionaryManager;
+        this.reportRoot.setTags(
+                (testScriptDescription == null || testScriptDescription.getTags() == null)
+                        ? Collections.emptySet()
+                        : testScriptDescription.getTags().stream().map(Tag::getName).collect(Collectors.toSet()));
     }
 
     public boolean isActionCreated() throws UnsupportedOperationException {
@@ -352,6 +357,7 @@ public class JsonReport implements IScriptReport {
         curAction.setCheckPointId(checkPoint != null ? checkPoint.getId() : null);
         curAction.setOutcome(outcome);
         curAction.setIsRunning(true);
+        curAction.setTag(tag);
 
         if (parameters != null) {
             curAction.setParameters(Parameter.fromMessage(parameters));

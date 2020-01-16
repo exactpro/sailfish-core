@@ -21,6 +21,7 @@ import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
 import java.io.File;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Set;
 
 public class TestCaseMetadata {
 
@@ -36,6 +37,7 @@ public class TestCaseMetadata {
 
     private String jsonFileName;
     private String jsonpFileName;
+    private Set<String> tags;
 
     public TestCaseMetadata() {
     }
@@ -51,6 +53,7 @@ public class TestCaseMetadata {
         this.description = testCase.getDescription();
         this.jsonFileName = jsonFile.getName();
         this.jsonpFileName = jsonpFile.getName();
+        this.tags = testCase.getTags();
     }
 
 
@@ -132,5 +135,13 @@ public class TestCaseMetadata {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 }
