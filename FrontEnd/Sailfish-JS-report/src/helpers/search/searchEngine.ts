@@ -27,9 +27,9 @@ import { isCheckpoint } from '../action';
 import { sliceToChunks } from '../array';
 import "setimmediate";
 
-// list of fields that will be used to search (order is important!)
+// list of fields that will be used to search (ORDER IS IMPORTANT!)
 const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
-    ACTION_FIELDS: Array<keyof Action> = ['name', 'description'],
+    ACTION_FIELDS: Array<keyof Action> = ['matrixId', 'serviceName', 'name', 'messageType', 'description'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
     INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
     VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', "actualType", "expectedType"],
@@ -125,7 +125,7 @@ function findAllInParams(param: ActionParameter, searchPattern: RegExp, keyPrefi
     ));
 
     param.subParameters && param.subParameters.forEach((param, index) => {
-        results.push(...findAllInParams(param, searchPattern, keyPrefix + `-${index}`));
+        results.push(...findAllInParams(param, searchPattern, `${keyPrefix}-${index}`));
     });
 
     return results;

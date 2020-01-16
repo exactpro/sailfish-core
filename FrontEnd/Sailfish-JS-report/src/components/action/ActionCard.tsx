@@ -30,6 +30,8 @@ import { ActionMlUploadButton } from "../ActionMlUploadButton";
 import { StatusType } from '../../models/Status';
 import { stopPropagationHandler } from '../../helpers/react';
 
+const NON_BREAKING_SPACE = '\u00a0';
+
 interface CardProps {
     action: Action;
     children?: React.ReactNodeArray;
@@ -84,15 +86,21 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                             <div className="ac-header__title">
                                 <div className="ac-header__name"
                                     onClick={() => toggleExpand()}>
-                                    {matrixId}
-                                    {' '}
-                                    {serviceName}
-                                    {' '}
+                                    <SearchableContent
+                                        content={matrixId}
+                                        contentKey={keyForAction(id, 'matrixId')}/>
+                                    {NON_BREAKING_SPACE}
+                                    <SearchableContent
+                                        content={serviceName}
+                                        contentKey={keyForAction(id, 'serviceName')}/>
+                                    {NON_BREAKING_SPACE}
                                     <SearchableContent
                                         content={name} 
                                         contentKey={keyForAction(id, 'name')}/>
-                                    {' '}
-                                    {messageType}
+                                    {NON_BREAKING_SPACE}
+                                    <SearchableContent
+                                        content={messageType}
+                                        contentKey={keyForAction(id, 'messageType')}/>
                                 </div>
                                 <div className="ac-header__description">
                                     <SearchableContent 
