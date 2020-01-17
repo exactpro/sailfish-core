@@ -15,11 +15,12 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
-import com.exactpro.sf.common.util.ICommonSettings;
-import com.exactpro.sf.configuration.suri.SailfishURI;
 import org.apache.commons.configuration.HierarchicalConfiguration;
 
-public class ITCHCodecSettings implements ICommonSettings {
+import com.exactpro.sf.configuration.suri.SailfishURI;
+import com.exactpro.sf.services.codecs.ICodecSettings;
+
+public class ITCHCodecSettings implements ICodecSettings {
 
 	private byte[] chunkDelimiter;
 
@@ -59,6 +60,7 @@ public class ITCHCodecSettings implements ICommonSettings {
 		this.chunkDelimiter = chunkDelimiter;
 	}
 
+	@Override
 	public String getFilterValues() {
 		return filterValues;
 	}
@@ -67,6 +69,7 @@ public class ITCHCodecSettings implements ICommonSettings {
 		this.filterValues = filterValues;
 	}
 
+	@Override
 	public SailfishURI getDictionaryURI() {
 		return dictionaryURI;
 	}
