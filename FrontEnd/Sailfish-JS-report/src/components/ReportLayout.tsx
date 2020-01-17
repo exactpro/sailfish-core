@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+* Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import { ExceptionChain } from './ExceptionChain';
 import TestCaseCard from './TestCaseCard';
 import { FailedTestCaseCarousel } from './FailedTestCaseCarousel';
 import ReportState from '../state/models/ReportState';
+import AlertCard from './AlertCard';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -68,7 +69,8 @@ export class ReportLayoutBase extends React.Component<Props, State> {
             knownBugsPresent = filtredMetadata.some(item => item.bugs != null && item.bugs.length > 0),
             knownBugsClass = showKnownBugs ? "active" : "enabled",
             failedTcTitleClass = createBemElement('report', 'title', 'failed', failedTestCasesEnabled ? null : 'disabled'),
-            isLive = report.finishTime == null;
+            isLive = report.finishTime == null,
+            alerts = report.alerts || [];
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -113,59 +115,64 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                     <FailedTestCaseCarousel/>
                     {knownBugsButton}
                 </div>
-                <div className="report__summary   report-summary">
-                    <div className="report-summary__card">
-                        <div className="report-summary__logo"/>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">Version</div>
-                            <div className="report-summary__element-value">{report.version}</div>
-                        </div>
-                        <div className="report-summary__divider"/>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">Host</div>
-                            <div className="report-summary__element-value">{report.hostName}</div>
-                        </div>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">User</div>
-                            <div className="report-summary__element-value">{report.userName}</div>
-                        </div>
-                        <div className="report-summary__divider"/>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">ScriptRun ID</div>
-                            <div className="report-summary__element-value">{report.scriptRunId}</div>
-                        </div>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">Report Date</div>
-                            <div className="report-summary__element-value">{formatTime(report.startTime)}</div>
-                        </div>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">Execution time</div>
-                            <div className="report-summary__element-value">{executionTime}</div>
-                        </div>
-                        <div className="report-summary__divider"/>
-                        <div className="report-summary__element">
-                            <div className="report-summary__element-title">Test Cases</div>
-                            <div className="report-summary__element-value">{report.metadata.length}</div>
-                        </div>
-                        {
-                            statusValues.map(statusValue => this.renderStatusInfo(statusValue, filtredMetadata))
-                        }
-                        <div className="report-summary__divider"/>
-                        {
-                            plugins.length ?
-                                (
-                                    <div className="report-summary__element">
-                                        <div className="report-summary__element-title">Plugins</div>
-                                        <div className="report-summary__element-value">
-                                            {plugins.map(([name, version], index) => <p key={index}>{name}: {version}</p>)}
+                <div className="report__summary">
+                    <div className="report-summary">
+                        <div className="report-summary__card">
+                            <div className="report-summary__logo"/>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">Version</div>
+                                <div className="report-summary__element-value">{report.version}</div>
+                            </div>
+                            <div className="report-summary__divider"/>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">Host</div>
+                                <div className="report-summary__element-value">{report.hostName}</div>
+                            </div>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">User</div>
+                                <div className="report-summary__element-value">{report.userName}</div>
+                            </div>
+                            <div className="report-summary__divider"/>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">ScriptRun ID</div>
+                                <div className="report-summary__element-value">{report.scriptRunId}</div>
+                            </div>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">Report Date</div>
+                                <div className="report-summary__element-value">{formatTime(report.startTime)}</div>
+                            </div>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">Execution time</div>
+                                <div className="report-summary__element-value">{executionTime}</div>
+                            </div>
+                            <div className="report-summary__divider"/>
+                            <div className="report-summary__element">
+                                <div className="report-summary__element-title">Test Cases</div>
+                                <div className="report-summary__element-value">{report.metadata.length}</div>
+                            </div>
+                            {
+                                statusValues.map(statusValue => this.renderStatusInfo(statusValue, filtredMetadata))
+                            }
+                            <div className="report-summary__divider"/>
+                            {
+                                plugins.length ?
+                                    (
+                                        <div className="report-summary__element">
+                                            <div className="report-summary__element-title">Plugins</div>
+                                            <div className="report-summary__element-value">
+                                                {plugins.map(([name, version], index) => <p key={index}>{name}: {version}</p>)}
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="report-summary__element">
-                                        <div className="report-summary__element-title">No plugins</div>
-                                    </div>
-                                )
-                        }
+                                    ) : (
+                                        <div className="report-summary__element">
+                                            <div className="report-summary__element-title">No plugins</div>
+                                        </div>
+                                    )
+                            }
+                        </div>
+                        <div className="report-summary__alerts">
+                            {alerts.map((alert, i) => <AlertCard {...alert} key={i}/>)}
+                        </div>
                     </div>
                 </div>
                 <div className="report__testcases">

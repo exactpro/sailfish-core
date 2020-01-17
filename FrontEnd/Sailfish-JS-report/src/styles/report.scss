@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@
 
     &__summary-title {
         grid-area: summary-title;
-
         display: flex;
         align-items: center;
         padding-left: 2px;
@@ -50,6 +49,9 @@
 
     &__summary {
         grid-area: summary;
+        height: 100%;
+        overflow: auto;
+        @include scrollbar;
     }
 
     &__testcases {
@@ -166,6 +168,7 @@
         border: 2px solid $reportBorderColor;
         border-radius: 5px;
         padding: 15px;
+        margin-bottom: 12px;
     }
 
     &__logo {
