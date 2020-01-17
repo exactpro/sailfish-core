@@ -17,7 +17,6 @@
 import * as React from 'react';
 import TestCase from '../models/TestCase';
 import '../styles/header.scss';
-//import FilterPanel from './FilterPanel';
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import { resetTestCase } from '../actions/actionCreators';

@@ -71,6 +71,7 @@
     &__bubble {
         display: flex;
         align-items: center;
+        white-space: nowrap;
 
         border-radius: 5px;
         background-color: $filterBubbleBackground;

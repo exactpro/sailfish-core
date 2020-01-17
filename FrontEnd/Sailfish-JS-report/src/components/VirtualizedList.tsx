@@ -32,7 +32,6 @@ const { Provider, Consumer } = React.createContext({
 interface Props {
     renderElement: (idx: number) => React.ReactElement;
     rowCount: number;
-    itemSpacing?: number;
 
     // for heatmap scrollbar
     selectedElements: Map<number, StatusType>;
@@ -73,7 +72,7 @@ export class VirtualizedList extends React.Component<Props, State> {
         // and passing new index value in List doesn't make any effect (because it requires primitive value).
         // So we need to scroll List manually.
         if (prevProps.scrolledIndex !== this.props.scrolledIndex && this.props.scrolledIndex != null) {
-            // We need raf here because in some cases scroling happened before remeasuring row heights,
+            // We need raf here because in some cases scrolling happened before remeasuring row heights,
             // so we need to wait until component is complete rerender after remeasuring changed rows, 
             // and then scroll to selected row.
             // Without it List will calculate wrong scrollTop because it contains outdated information about row's heights.

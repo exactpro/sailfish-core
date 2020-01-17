@@ -55,11 +55,11 @@ function FilterPanelBase({config, updateConfig}: Props) {
         })
     };
 
-    const onNewBlockChange = (values: string[]) => {
+    const onNewBlockChange = (values: string[], path?: FilterPath) => {
         updateConfig({
             ...config,
             blocks: [...config.blocks, {
-                path: FilterPath.ALL,
+                path: path ?? FilterPath.ALL,
                 values
             }]
         })
@@ -101,6 +101,17 @@ function FilterPanelBase({config, updateConfig}: Props) {
                     values={[]}
                     onChange={onNewBlockChange}/>
             </div>
+            <input
+                type="checkbox"
+                id="filter-transparent-checkbox"
+                checked={config.isTransparent}
+                onChange={e => updateConfig({ ...config, isTransparent: e.target.checked })}
+            />
+            <label
+                htmlFor="filter-transparent-checkbox">
+                Transparent
+            </label>
+
         </div>
     )
 }

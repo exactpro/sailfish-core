@@ -16,17 +16,29 @@
 
 import filtrate from "../../../helpers/filter/filtrate";
 import TestCase from "../../../models/TestCase";
-import { createTestCase, createAction, createVerification, createVerificationEntry, createMessage } from "../../util/creators";
-import { keyForAction, keyForVerification, keyForMessage } from "../../../helpers/keys";
-import { FilterConfig, FilterType, FilterPath } from "../../../helpers/filter/FilterConfig";
-import { StatusType } from "../../../models/Status";
+import {
+    createAction,
+    createMessage,
+    createTestCase,
+    createVerification,
+    createVerificationEntry
+} from "../../util/creators";
+import {keyForAction, keyForMessage, keyForVerification} from "../../../helpers/keys";
+import {FilterConfig, FilterPath, FilterType} from "../../../helpers/filter/FilterConfig";
+import {StatusType} from "../../../models/Status";
 
 describe('[Helpers] filtrate', () => {
 
-    const testCaseBase: TestCase = createTestCase();
+    const testCaseBase: TestCase = createTestCase(),
+        configBase: FilterConfig = {
+            types: [FilterType.ACTION, FilterType.VERIFICATION, FilterType.MESSAGE],
+            blocks: [],
+            isTransparent: false
+        };
 
     test('Filter all in plain action', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.ALL,
@@ -47,6 +59,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Service filter in plain action', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.SERVICE,
@@ -68,6 +81,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter actions by status', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.STATUS,
@@ -78,10 +92,10 @@ describe('[Helpers] filtrate', () => {
             ...testCaseBase,
             actions: [{
                 ...createAction(0),
-                status: { status: StatusType.PASSED }
-            },  {
+                status: {status: StatusType.PASSED}
+            }, {
                 ...createAction(1),
-                status: { status: StatusType.FAILED }
+                status: {status: StatusType.FAILED}
             }]
         };
 
@@ -92,6 +106,7 @@ describe('[Helpers] filtrate', () => {
 
     test("Filter all in action's subnodes", async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.ALL,
@@ -117,6 +132,7 @@ describe('[Helpers] filtrate', () => {
 
     test("Filter service in action's subnodes", async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.SERVICE,
@@ -142,6 +158,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter verification by name', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.VERIFICATION],
             blocks: [{
                 path: FilterPath.ALL,
@@ -167,6 +184,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter verifications by some entry value', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.VERIFICATION],
             blocks: [{
                 path: FilterPath.ALL,
@@ -195,6 +213,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter verification by some deep entry value', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.VERIFICATION],
             blocks: [{
                 path: FilterPath.ALL,
@@ -226,6 +245,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter messages by name', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.MESSAGE],
             blocks: [{
                 path: FilterPath.ALL,
@@ -245,6 +265,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter both actions and messages by service', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.MESSAGE, FilterType.ACTION],
             blocks: [{
                 path: FilterPath.SERVICE,
@@ -268,9 +289,10 @@ describe('[Helpers] filtrate', () => {
 
         expect(results.sort()).toEqual([keyForAction(1), keyForMessage(0)].sort());
     })
-    
+
     test('Filter by several block values', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.SERVICE,
@@ -283,7 +305,7 @@ describe('[Helpers] filtrate', () => {
             actions: [{
                 ...createAction(1),
                 serviceName: 'one service'
-            },  {
+            }, {
                 ...createAction(2),
                 serviceName: 'two service'
             }, {
@@ -299,11 +321,12 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter action by service and status', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION],
             blocks: [{
                 path: FilterPath.SERVICE,
                 values: ['one']
-            },  {
+            }, {
                 path: FilterPath.STATUS,
                 values: [StatusType.FAILED]
             }]
@@ -314,15 +337,15 @@ describe('[Helpers] filtrate', () => {
             actions: [{
                 ...createAction(1),
                 serviceName: 'one service',
-                status: { status: StatusType.PASSED }
-            },  {
+                status: {status: StatusType.PASSED}
+            }, {
                 ...createAction(2),
                 serviceName: 'one service',
-                status: { status: StatusType.FAILED }
+                status: {status: StatusType.FAILED}
             }, {
                 ...createAction(3),
                 serviceName: 'two service',
-                status: { status: StatusType.FAILED }
+                status: {status: StatusType.FAILED}
             }]
         }
 
@@ -333,6 +356,7 @@ describe('[Helpers] filtrate', () => {
 
     test('Filter action with nested verifications', async () => {
         const config: FilterConfig = {
+            ...configBase,
             types: [FilterType.ACTION, FilterType.VERIFICATION],
             blocks: [{
                 path: FilterPath.ALL,

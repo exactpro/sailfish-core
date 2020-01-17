@@ -16,27 +16,32 @@
 
 import * as React from 'react';
 import '../../styles/action.scss';
-import Action, { ActionNode, ActionNodeType, isAction } from '../../models/Action';
-import { StatusType } from '../../models/Status';
+import Action, {ActionNode, ActionNodeType} from '../../models/Action';
+import {StatusType} from '../../models/Status';
 import Tree from '../../models/util/Tree';
 import ActionExpandStatus from '../../models/util/ActionExpandStatus';
-import { ActionCard } from './ActionCard';
-import { CustomMessage } from './CustomMessage';
+import {ActionCard} from './ActionCard';
+import {CustomMessage} from './CustomMessage';
 import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
-import { isCheckpoint } from '../../helpers/action';
-import { getSubTree } from '../../helpers/tree';
+import {isCheckpoint} from '../../helpers/action';
+import {getSubTree} from '../../helpers/tree';
 import CheckpointAction from './CheckpointAction';
 import CustomLink from './CustomLink';
+import {FilterConfig, FilterType} from "../../helpers/filter/FilterConfig";
+import {keyForAction, keyForVerification} from "../../helpers/keys";
 
 interface Props {
     action: ActionNode;
     isRoot?: boolean;
     parentAction?: Action | null;
-    selectedActionsId: number[]; 
+    selectedActionsId: number[];
     selectedVerificationId: number;
-    actionsFilter: Set<StatusType>;
     expandPath: Tree<ActionExpandStatus>;
+    filter: {
+        results: string[],
+        config: FilterConfig
+    }
 
     onRootExpand: (actionId: number, isExpanded: boolean) => void;
     onActionSelect: (action: Action) => void;
@@ -44,22 +49,35 @@ interface Props {
 }
 
 export default function ActionTreeNode(props: Props) {
-    const { 
+    const {
         action,
         isRoot = false,
         parentAction = null,
-        onActionSelect, 
-        onVerificationSelect, 
-        selectedActionsId, 
-        selectedVerificationId, 
-        actionsFilter, 
+        onActionSelect,
+        onVerificationSelect,
+        selectedActionsId,
+        selectedVerificationId,
         onRootExpand,
-        expandPath
+        expandPath,
+        filter
     } = props;
 
     // https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions
     switch (action.actionNodeType) {
         case ActionNodeType.ACTION: {
+            let isTransparent = false;
+
+            if (filter.config.types.includes(FilterType.ACTION) &&
+                filter.config.blocks.length > 0 &&
+                !filter.results.includes(keyForAction(action.id))
+            ) {
+                if (filter.config.isTransparent) {
+                    isTransparent = true;
+                } else {
+                    return null;
+                }
+            }
+
             if (isCheckpoint(action)) {
                 return (
                     <CheckpointAction
@@ -68,10 +86,10 @@ export default function ActionTreeNode(props: Props) {
             }
 
             return (
-                <ActionCard 
+                <ActionCard
                     action={action}
                     isSelected={selectedActionsId.includes(action.id)}
-                    isTransparent={!actionsFilter.has(action.status.status)}
+                    isTransparent={isTransparent}
                     onSelect={onActionSelect}
                     isRoot={isRoot}
                     isExpanded={expandPath.value.isExpanded}
@@ -80,9 +98,9 @@ export default function ActionTreeNode(props: Props) {
                         action.subNodes?.map((childAction, index) => (
                             <ActionTreeNode
                                 {...props}
+                                isRoot={false}
                                 key={index}
                                 parentAction={action}
-                                isRoot={false}
                                 action={childAction}
                                 expandPath={getSubTree(childAction, expandPath)}/>
                         ))
@@ -93,8 +111,20 @@ export default function ActionTreeNode(props: Props) {
 
         case ActionNodeType.VERIFICATION: {
             const verification = action,
-                isSelected = verification.messageId && verification.messageId === selectedVerificationId,
-                isTransparent = !actionsFilter.has(verification.status.status);
+                isSelected = verification.messageId === selectedVerificationId;
+
+            let isTransparent = false;
+
+            if (filter.config.types.includes(FilterType.VERIFICATION) &&
+                filter.config.blocks.length > 0 &&
+                !filter.results.includes(keyForVerification(parentAction?.id, verification.messageId))
+            ) {
+                if (filter.config.isTransparent) {
+                    isTransparent = true;
+                } else {
+                    return null;
+                }
+            }
 
             return (
                 <VerificationCard

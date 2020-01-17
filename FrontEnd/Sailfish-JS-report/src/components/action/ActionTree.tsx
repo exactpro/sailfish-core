@@ -32,6 +32,7 @@ import { fetchPredictions } from "../../thunks/machineLearning";
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import ActionTreeNode from './ActionTreeNode';
+import {FilterConfig} from "../../helpers/filter/FilterConfig";
 
 interface OwnProps {
     action: ActionNode;
@@ -40,7 +41,10 @@ interface OwnProps {
 interface StateProps {
     selectedVerificationId: number;
     selectedActionsId: number[];
-    actionsFilter: Set<StatusType>;
+    filter: {
+        config: FilterConfig;
+        results: string[];
+    };
     expandedTreePath: Tree<number> | null;
     mlDataActionIds: Set<number>;
 }
@@ -102,7 +106,7 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                 isRoot
                 selectedActionsId={props.selectedActionsId}
                 selectedVerificationId={props.selectedVerificationId}
-                actionsFilter={props.actionsFilter}
+                filter={props.filter}
                 expandPath={this.state.expandTree}
                 onRootExpand={this.onRootExpand}
                 onActionSelect={this.onActionSelect}
@@ -152,7 +156,7 @@ const RecoverableActionTree = (props: ContainerProps) => {
         <StateSaver 
             stateKey={stateKey}
             getDefaultState={getDefaultState}>
-            {(expandState: Tree<ActionExpandStatus>, stateSaver: (state: Tree<ActionExpandStatus>) => any) => (
+            {(expandState: Tree<ActionExpandStatus>, stateSaver: (state: Tree<ActionExpandStatus>) => void) => (
                 <ActionTreeBase
                     {...props}
                     expandState={expandState}
@@ -172,7 +176,10 @@ export const ActionTree = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
         selectedVerificationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
-        actionsFilter: state.filter.actionsTransparencyFilter,
+        filter: {
+            config: state.filter.config,
+            results: state.filter.results
+        },
         mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map(item => item.actionId)),
         expandedTreePath: 
             // scrolledActionId can be null in 2 cases:

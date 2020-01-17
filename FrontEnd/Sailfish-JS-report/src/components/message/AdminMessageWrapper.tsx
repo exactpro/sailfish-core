@@ -53,7 +53,8 @@ function AdminMessageWrapperBase({ isExpanded, expandHandler, ...props }: Wrappe
     const rootClass = createBemBlock(
         "message-card",
         props.status,
-        props.isSelected ? "selected" : null
+        props.isSelected ? "selected" : null,
+        !props.isSelected && props.isTransparent ? "transparent" : null
     );
 
     return (
@@ -121,7 +122,7 @@ function getLabelsCount(message: Message) {
 interface RecoverableState {
     isExpanded: boolean;
     lastAdminEnabled: Boolean;
-};
+}
 
 const RecoverableAdminMessageWrapper = (props: MessageCardOuterProps) => (
     <StateSaver
@@ -133,7 +134,7 @@ const RecoverableAdminMessageWrapper = (props: MessageCardOuterProps) => (
             // (same logic in Actions / Messages lists with scrolled indexes)
             <AdminMessageWrapperBase
                 {...props}
-                // it is important to use 'Bolean.valueOf()' because Boolean(false) is truthy
+                // it is important to use 'Boolean.valueOf()' because Boolean(false) is truthy
                 isExpanded={props.adminEnabled !== lastAdminEnabled ? props.adminEnabled.valueOf() : isExpanded}
                 expandHandler={nextIsExpanded => saveState({ isExpanded: nextIsExpanded, lastAdminEnabled: props.adminEnabled })}/>
         )}

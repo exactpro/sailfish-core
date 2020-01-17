@@ -43,6 +43,10 @@
         background-color: var(--status-secondary-background-color);
     }
 
+    &.transparent {
+        opacity: 0.3;
+    }
+
     &__labels {
         grid-area: mc-labels;
         display: flex;

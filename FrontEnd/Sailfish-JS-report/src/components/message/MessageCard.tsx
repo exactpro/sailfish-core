@@ -35,6 +35,7 @@ import StateSaver from '../util/StateSaver';
 import ErrorBoundary from '../util/ErrorBoundary';
 import BeautifiedContent from './BeautifiedContent';
 import { PredictionData } from '../../models/MlServiceResponse';
+import {getRejectedMessages, getTransparentMessages} from "../../selectors/messages";
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -50,6 +51,7 @@ export interface RecoveredProps {
 export interface MessageCardStateProps {
     rejectedMessagesCount: number;
     isSelected: boolean;
+    isTransparent: boolean;
     status: StatusType;
     adminEnabled: Boolean;
     isContentBeautified: boolean;
@@ -65,7 +67,8 @@ export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateP
 
 export function MessageCardBase({ 
         message, 
-        isSelected, 
+        isSelected,
+        isTransparent,
         status, 
         rejectedMessagesCount, 
         selectHandler, 
@@ -82,9 +85,22 @@ export function MessageCardBase({
         labels = renderMessageTypeLabels(message, prediction),
         labelsCount = labels.length;
 
-    const rootClass = createBemBlock("message-card", status, isSelected ? "selected" : null), 
-        showRawClass = createBemElement("mc-show-raw", "icon", showRaw ? "expanded" : "hidden"),
-        beautifyIconClass = createBemElement("mc-beautify", "icon", isContentBeautified ? "plain" : "beautify"),
+    const rootClass = createBemBlock(
+            "message-card",
+            status,
+            isSelected ? "selected" : null,
+            !isSelected && isTransparent ? "transparent" : null
+        ),
+        showRawClass = createBemElement(
+            "mc-show-raw",
+            "icon",
+            showRaw ? "expanded" : "hidden"
+        ),
+        beautifyIconClass = createBemElement(
+            "mc-beautify",
+            "icon",
+            isContentBeautified ? "plain" : "beautify"
+        ),
         // session arrow color, we calculating it for each session from-to pair, based on hash 
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
 
@@ -235,7 +251,8 @@ export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
         isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
         status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null,
-        rejectedMessagesCount: isRejected(ownProps.message) ? state.selected.testCase.messages.filter(isRejected).indexOf(ownProps.message) + 1 : null,
+        isTransparent: getTransparentMessages(state).includes(ownProps.message.id),
+        rejectedMessagesCount: isRejected(ownProps.message) ? getRejectedMessages(state).indexOf(ownProps.message) + 1 : null,
         adminEnabled: state.view.adminMessagesEnabled,
         isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id),
         prediction: state.machineLearning.predictionsEnabled ? 

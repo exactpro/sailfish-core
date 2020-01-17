@@ -15,17 +15,16 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 import '../../styles/action.scss';
-import { ActionNode, isAction } from '../../models/Action';
-import { ActionTree } from './ActionTree';
-import { VirtualizedList } from '../VirtualizedList';
+import {ActionNode, isAction} from '../../models/Action';
+import {ActionTree} from './ActionTree';
+import {VirtualizedList} from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
-import { actionsHeatmap } from '../../helpers/heatmapCreator';
-import { getActions } from '../../helpers/action';
-import { memoizeLast } from '../../helpers/memoize';
-import { StatusType } from '../../models/Status';
+import {actionsHeatmap} from '../../helpers/heatmapCreator';
+import {getActions} from '../../helpers/action';
+import {getFilteredActions} from "../../selectors/actions";
 
 interface Props {
     actions: Array<ActionNode>;
@@ -84,7 +83,6 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                     <StateSaverProvider>
                         <VirtualizedList
                             rowCount={actions.length}
-                            itemSpacing={6}
                             ref={this.list}
                             renderElement={this.renderAction}
                             scrolledIndex={scrolledIndex}
@@ -100,15 +98,11 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
         <ActionTree 
             action={this.props.actions[idx]}/>
     )
-}   
-
-const applyActionsFilter = memoizeLast((actions: ActionNode[], filter: Set<StatusType>) => {
-    return actions.filter(action => isAction(action) ? filter.has(action.status.status) : true)
-});
+}
 
 export const ActionsList = connect(
     (state: AppState): Props => ({
-        actions: applyActionsFilter(state.selected.testCase.actions, state.filter.actionsFilter),
+        actions: getFilteredActions(state),
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId
     }),

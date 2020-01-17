@@ -36,4 +36,5 @@ export interface FilterBlock {
 export interface FilterConfig {
     types: FilterType[];
     blocks: FilterBlock[];
+    isTransparent: boolean;
 }

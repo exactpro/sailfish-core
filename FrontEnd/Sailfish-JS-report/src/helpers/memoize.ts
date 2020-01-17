@@ -23,7 +23,7 @@ import { areArraysEqual } from "./array";
  * @param fn target function
  * @param keyMappers optional key mapper for each target fn argument
  */
-function memoize<T extends unknown[], R>(fn: (...args: T) => R, ...keyMappers: ((obj: T[number]) => string)[]): (...args: T) => R {
+export default function memoize<T extends unknown[], R>(fn: (...args: T) => R, ...keyMappers: ((obj: T[number]) => string)[]): (...args: T) => R {
     // T[number] - is a union of all types from array 
     // (e.g. for args like '[string, number, string]' it will be 'string | number')
     const callResultsMap = new Map<string, R>();
@@ -41,25 +41,3 @@ function memoize<T extends unknown[], R>(fn: (...args: T) => R, ...keyMappers: (
         return result;
     };
 }
-
-/**
- * This funciton can be used to save target funciton's call results 
- * and recalculate it only if function's input has been changed since last call.
- * @param fn target funciton
- */
-export function memoizeLast<T extends unknown[], R>(fn: (...args: T) => R): (...args: T) => R {
-    let lastArgs: T,
-        lastResult: R;
-
-    return (...args: T) => {
-        if (lastArgs && areArraysEqual(lastArgs, args)) {
-            return lastResult;
-        }
-        
-        lastResult = fn(...args);
-        lastArgs = args;
-        return lastResult;
-    }
-}
-
-export default memoize;

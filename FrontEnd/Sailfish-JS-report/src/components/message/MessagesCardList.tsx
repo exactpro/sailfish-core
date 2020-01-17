@@ -18,16 +18,17 @@ import * as React from 'react';
 import '../../styles/messages.scss';
 import Message from '../../models/Message';
 import MessageCard from './MessageCard';
-import { StatusType } from '../../models/Status';
-import { connect } from 'react-redux';
+import {StatusType} from '../../models/Status';
+import {connect} from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { isCheckpoint, isAdmin } from '../../helpers/messageType';
-import { AdminMessageWrapper } from './AdminMessageWrapper';
-import { selectMessage } from '../../actions/actionCreators';
-import { messagesHeatmap } from '../../helpers/heatmapCreator';
+import {isAdmin, isCheckpoint} from '../../helpers/messageType';
+import {AdminMessageWrapper} from './AdminMessageWrapper';
+import {selectMessage} from '../../actions/actionCreators';
+import {messagesHeatmap} from '../../helpers/heatmapCreator';
 import StateSaverProvider from '../util/StateSaverProvider';
-import { VirtualizedList } from '../VirtualizedList';
+import {VirtualizedList} from '../VirtualizedList';
 import CheckpointMessage from './CheckpointMessage';
+import {getFilteredMessages, getTransparentMessages} from "../../selectors/messages";
 
 interface MessagesListStateProps {
     messages: Message[];
@@ -36,14 +37,10 @@ interface MessagesListStateProps {
     selectedStatus: StatusType;
 }
 
-interface MessagesListDispatchProps {
-    verificationSelectHandler: (message: Message, status: StatusType) => any;
-}
-
-interface MessagesListProps extends MessagesListStateProps ,MessagesListDispatchProps {}
+interface MessagesListProps extends MessagesListStateProps {}
 
 interface MessagesListState {
-    // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
+    // Number object is used here because in some cases (eg one message / action was selected several times by different entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.
     scrolledIndex: Number;
@@ -90,7 +87,6 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
                         selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
                         rowCount={messages.length}
                         renderElement={this.renderMessage}
-                        itemSpacing={6}
                         scrolledIndex={scrolledIndex}
                     />
                 </StateSaverProvider>
@@ -99,7 +95,6 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
     }
 
     private renderMessage = (index: number) => {
-
         const message = this.props.messages[index];
 
         if (isCheckpoint(message)) {
@@ -124,14 +119,12 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
 
 export const MessagesCardList = connect(
     (state: AppState): MessagesListStateProps => ({
-        messages: state.selected.testCase.messages,
+        messages: getFilteredMessages(state),
         scrolledMessageId: state.selected.scrolledMessageId,
         selectedMessages: state.selected.messagesId,
         selectedStatus: state.selected.selectedActionStatus
     }),
-    (dispatch): MessagesListDispatchProps => ({
-        verificationSelectHandler: (message: Message, status: StatusType) => dispatch(selectMessage(message, status))
-    }),
+    () => ({}),
     (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),
     {
         forwardRef: true
