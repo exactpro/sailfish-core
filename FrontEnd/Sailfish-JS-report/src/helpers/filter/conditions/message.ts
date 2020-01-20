@@ -18,8 +18,8 @@ import filterEntry from "../filterEntry";
 import { MESSAGE_FIELDS } from "../../search/searchEngine";
 import Message from "../../../models/Message";
 import FilterCondition from "./FilterCondition";
-import { FilterPath } from "../FilterConfig";
 import {toRegExpArray} from "../../regexp";
+import FilterPath from "../../../models/filter/FilterPath";
 
 const STUB_FUNCTION = () => false;
 

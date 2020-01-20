@@ -15,25 +15,22 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import {FilterPath, FILTER_PATH_VALUES} from '../../helpers/filter/FilterConfig';
-import KeyCodes from "../../util/KeyCodes";
 import FilterBubble from "./FilterBubble";
 import {removeByIndex, replaceByIndex} from "../../helpers/array";
-import {statusValues} from "../../models/Status";
+import AutocompleteInput from "../util/AutocompleteInput";
+import FilterPath, {FILTER_PATH_PREFIX, FILTER_PATH_VALUES, isFilterPath} from "../../models/filter/FilterPath";
 
 interface Props {
     path: FilterPath | 'type';
     values: string[];
+    index: number;
     onChange: (nextValues: string[], path?: FilterPath) => void;
     onRemove?: () => void;
+    autocompleteVariants: string[] | undefined;
+    validateAutocomplete?: boolean;
 }
 
-const autocompleteMap = new Map([
-    [FilterPath.STATUS, statusValues],
-    ['type', ['action', 'message', 'verification']]
-]);
-
-function FilterRow({path, values, onChange, onRemove}: Props) {
+function FilterRow({path, index, values, onChange, onRemove = () => {}, autocompleteVariants, validateAutocomplete = true}: Props) {
     const [currentValue, setValue] = React.useState('');
     const input = React.useRef<HTMLInputElement>();
 
@@ -41,36 +38,35 @@ function FilterRow({path, values, onChange, onRemove}: Props) {
         input.current?.focus();
     }, []);
 
-    const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
-        if (e.keyCode == KeyCodes.ENTER && currentValue.length > 0) {
-            if (path == FilterPath.ALL && values.length == 0 && currentValue.startsWith('#')) {
-                onChange(values, currentValue.substr(1) as FilterPath);
-            } else {
-                onChange([...values, currentValue]);
-            }
-
-            setValue('');
-            return;
-        }
-
-        if (e.keyCode == KeyCodes.BACKSPACE && currentValue.length == 0 && values.length > 0) {
-            const lastValue = values[values.length - 1],
-                restValues = values.slice(0, values.length - 1);
-
-            e.preventDefault();
-            setValue(lastValue);
-            onChange(restValues);
-            return;
-        }
-
-        if (e.keyCode == KeyCodes.BACKSPACE && currentValue.length == 0 && values.length == 0) {
+    const inputOnRemove = () => {
+        if (values.length == 0) {
             onRemove && onRemove();
+            return;
+        }
+
+        const lastValue = values[values.length - 1],
+            restValues = values.slice(0, values.length - 1);
+
+        setValue(lastValue);
+        onChange(restValues);
+    };
+
+    const inputOnSubmit = (nextValue: string) => {
+        if (values.length == 0 && nextValue.startsWith(FILTER_PATH_PREFIX)) {
+            const nextPath = nextValue.substring(FILTER_PATH_PREFIX.length);
+
+            if (isFilterPath(nextPath)) {
+                onChange(values, nextPath);
+            }
+        } else {
+            onChange([...values, nextValue]);
+            setValue('');
         }
     };
 
-    const inputOnBlur = () => {
-        if (currentValue.length == 0 && values.length == 0 && FilterPath.ALL) {
-            onRemove && onRemove();
+    const inputOnEmptyBlur = () => {
+        if (values.length == 0 && path == FilterPath.ALL) {
+            onRemove();
         }
     };
 
@@ -79,7 +75,7 @@ function FilterRow({path, values, onChange, onRemove}: Props) {
             <FilterBubble
                 className="filter__path"
                 value={path}
-                prefix="#"
+                prefix={FILTER_PATH_PREFIX}
                 autocompleteVariants={FILTER_PATH_VALUES}
                 onChange={nextPath => onChange(values, nextPath as FilterPath)}
                 onRemove={() => onChange(values, FilterPath.ALL)}/>
@@ -90,20 +86,23 @@ function FilterRow({path, values, onChange, onRemove}: Props) {
                             value={val}
                             onChange={nextValue => onChange(replaceByIndex(values, index, nextValue))}
                             onRemove={() => onChange(removeByIndex(values, index))}
-                            autocompleteVariants={autocompleteMap.get(path) ?? []}
+                            autocompleteVariants={autocompleteVariants != null ? [val, ...autocompleteVariants] : []}
                         />
                         <span>or</span>
                     </React.Fragment>
                 ))
             }
-            <input
-                className="filter__row-input"
+            <AutocompleteInput
                 ref={input}
+                className="filter__row-input"
                 value={currentValue}
-                onChange={e => setValue(e.target.value)}
-                onKeyDown={onKeyDown}
-                onBlur={inputOnBlur}
-            />
+                onSubmit={inputOnSubmit}
+                onRemove={inputOnRemove}
+                onEmptyBlur={inputOnEmptyBlur}
+                readonly={autocompleteVariants != null && autocompleteVariants.length == 0}
+                validateAutocomplete={validateAutocomplete}
+                autocomplete={autocompleteVariants ?? []}
+                datalistKey={`autocomplete-${index}`}/>
         </div>
     )
 }

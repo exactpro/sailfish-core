@@ -28,8 +28,9 @@ import {isCheckpoint} from '../../helpers/action';
 import {getSubTree} from '../../helpers/tree';
 import CheckpointAction from './CheckpointAction';
 import CustomLink from './CustomLink';
-import {FilterConfig, FilterType} from "../../helpers/filter/FilterConfig";
 import {keyForAction, keyForVerification} from "../../helpers/keys";
+import {FilterConfig} from "../../models/filter/FilterConfig";
+import FilterType from "../../models/filter/FilterType";
 
 interface Props {
     action: ActionNode;

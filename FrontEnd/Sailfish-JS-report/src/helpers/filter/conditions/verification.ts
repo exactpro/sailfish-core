@@ -18,9 +18,9 @@ import filterEntry from "../filterEntry";
 import { VERIFICATION_FIELDS, VERIFICATION_NODE_FIELDS } from "../../search/searchEngine";
 import Verification from "../../../models/Verification";
 import FilterCondition from "./FilterCondition";
-import { FilterPath } from "../FilterConfig";
 import VerificationEntry from "../../../models/VerificationEntry";
 import {toRegExpArray} from "../../regexp";
+import FilterPath from "../../../models/filter/FilterPath";
 
 const STUB_FUNCTION = () => false;
 

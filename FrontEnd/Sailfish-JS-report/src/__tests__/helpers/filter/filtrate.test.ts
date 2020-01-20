@@ -24,8 +24,10 @@ import {
     createVerificationEntry
 } from "../../util/creators";
 import {keyForAction, keyForMessage, keyForVerification} from "../../../helpers/keys";
-import {FilterConfig, FilterPath, FilterType} from "../../../helpers/filter/FilterConfig";
 import {StatusType} from "../../../models/Status";
+import FilterType from "../../../models/filter/FilterType";
+import {FilterConfig} from "../../../models/filter/FilterConfig";
+import FilterPath from "../../../models/filter/FilterPath";
 
 describe('[Helpers] filtrate', () => {
 

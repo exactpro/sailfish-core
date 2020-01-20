@@ -13,9 +13,12 @@
  * See the License for the specific language governing permissions and
  *  limitations under the License.
  ******************************************************************************/
+
 import * as React from 'react';
 import useOutsideClickListener from "../../hooks/useOutsideClickListener";
 import KeyCodes from "../../util/KeyCodes";
+import AutocompleteInput from "../util/AutocompleteInput";
+
 interface Props {
     className?: string;
     value: string;
@@ -24,38 +27,39 @@ interface Props {
     onChange: (nextValue: string) => void;
     onRemove: () => void;
 }
+
 export default function FilterBubble({value, onChange, onRemove, autocompleteVariants, className, prefix = ''}: Props) {
     const [isEditing, setIsEditing] = React.useState(false);
-    const [currentValue, setCurrentValue] = React.useState('');
-    React.useEffect(() => {
-        setCurrentValue(value);
-    }, [value]);
+
     const rootRef = React.useRef<HTMLDivElement>();
+    const inputRef = React.useRef<HTMLInputElement>();
+
+    React.useEffect(() => {
+        if (isEditing) {
+            inputRef.current?.select();
+        }
+    }, [isEditing]);
+
     useOutsideClickListener(rootRef, () => {
         setIsEditing(false);
-        setCurrentValue(value);
     });
+
     const rootOnClick = () => {
         if (!isEditing) {
             setIsEditing(true);
         }
     };
-    const inputOnKeyDown = (e: React.KeyboardEvent) => {
-        if (e.keyCode == KeyCodes.ENTER && currentValue.length > 0) {
-            setIsEditing(false);
-            onChange(currentValue);
-            return;
-        }
-        if (e.keyCode == KeyCodes.BACKSPACE && currentValue.length == 0) {
-            setIsEditing(false);
+
+    const inputOnSubmit = (nextValue: string) => {
+        if (nextValue.length == 0) {
             onRemove();
             return;
         }
-        if (e.keyCode == KeyCodes.ESCAPE) {
-            setIsEditing(false);
-            setCurrentValue(value);
-        }
+
+        onChange(nextValue);
+        setIsEditing(false);
     };
+
     return (
         <div
             className={`filter__bubble ${className ?? ''}`}
@@ -63,27 +67,20 @@ export default function FilterBubble({value, onChange, onRemove, autocompleteVar
             onClick={rootOnClick}>
             {
                 isEditing ? (
-                    <React.Fragment>
-                        <input
-                            className="filter__bubble-input"
-                            list="bubble-autocomplete"
-                            value={currentValue}
-                            onChange={e => setCurrentValue(e.target.value)}
-                            onKeyDown={inputOnKeyDown}/>
-                        {
-                            autocompleteVariants.length > 0 ? (
-                                <datalist id="bubble-autocomplete">
-                                    {
-                                        autocompleteVariants.map((val, index) => (
-                                            <option key={index} value={val}/>
-                                        ))
-                                    }
-                                </datalist>
-                            ) : null
-                        }
-                    </React.Fragment>
+                    <AutocompleteInput
+                        ref={inputRef}
+                        className="filter__bubble-input"
+                        value={value}
+                        onSubmit={inputOnSubmit}
+                        onRemove={onRemove}
+                        onEmptyBlur={onRemove}
+                        autocomplete={autocompleteVariants}
+                        datalistKey="bubble-autocomplete"
+                    />
                 ) : prefix + value
             }
         </div>
     )
 }
+
+

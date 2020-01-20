@@ -20,10 +20,20 @@ import {connect} from 'react-redux';
 import AppState from '../../state/models/AppState';
 import {ThunkDispatch} from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
-import {FilterConfig, FilterPath, FilterType} from '../../helpers/filter/FilterConfig';
 import {performFilter} from "../../thunks/filter";
 import FilterRow from "./FilterRow";
-import {removeByIndex, replaceByIndex} from "../../helpers/array";
+import {complement, removeByIndex, replaceByIndex} from "../../helpers/array";
+import {StatusType} from "../../models/Status";
+import FilterPath, {FILTER_PATH_PREFIX, FILTER_PATH_VALUES} from "../../models/filter/FilterPath";
+import FilterType from "../../models/filter/FilterType";
+import {FilterConfig} from "../../models/filter/FilterConfig";
+
+const AUTOCOMPLETE_MAP = new Map<FilterPath, string[]>([
+    [FilterPath.STATUS, [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED, StatusType.CONDITIONALLY_FAILED]]
+]);
+
+const FILTER_TYPE_AUTOCOMPLETE = [FilterType.ACTION, FilterType.MESSAGE, FilterType.VERIFICATION],
+    FILTER_PATH_AUTOCOMPLETE = FILTER_PATH_VALUES.map(path => FILTER_PATH_PREFIX + path);
 
 interface StateProps {
     config: FilterConfig;
@@ -77,8 +87,10 @@ function FilterPanelBase({config, updateConfig}: Props) {
             <div className="filter__row-wrapper">
                 <div className="filter__row-divider"/>
                 <FilterRow
+                    index={0}
                     path={'type'}
                     values={config.types}
+                    autocompleteVariants={complement(FILTER_TYPE_AUTOCOMPLETE, config.types)}
                     onChange={onTypesChange}/>
             </div>
             {
@@ -87,7 +99,13 @@ function FilterPanelBase({config, updateConfig}: Props) {
                         <div className="filter__row-divider">and</div>
                         <FilterRow
                             path={block.path}
+                            index={index + 1}
                             values={block.values}
+                            autocompleteVariants={
+                                AUTOCOMPLETE_MAP.has(block.path) ?
+                                    complement(AUTOCOMPLETE_MAP.get(block.path), block.values) :
+                                    undefined
+                            }
                             onChange={onBlockChangeFor(index)}
                             onRemove={onBlockRemoveFor(index)}
                         />
@@ -98,6 +116,9 @@ function FilterPanelBase({config, updateConfig}: Props) {
                 <div className="filter__row-divider">and</div>
                 <FilterRow
                     path={FilterPath.ALL}
+                    index={config.blocks.length + 1}
+                    autocompleteVariants={FILTER_PATH_AUTOCOMPLETE}
+                    validateAutocomplete={false}
                     values={[]}
                     onChange={onNewBlockChange}/>
             </div>

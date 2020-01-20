@@ -22,8 +22,9 @@ import getActionCondition from "./conditions/action";
 import getVerificationCondition from "./conditions/verification";
 import getMessageCondition from "./conditions/message";
 import FilterCondition from "./conditions/FilterCondition";
-import { FilterConfig, FilterType } from "./FilterConfig";
 import { asyncFlatMap } from "../array";
+import FilterType from "../../models/filter/FilterType";
+import {FilterConfig} from "../../models/filter/FilterConfig";
 
 /**
  * Filtrates target TestCase according to filter config.

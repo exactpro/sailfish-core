@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import FilterState from '../models/FiltersState';
-import {FilterType} from "../../helpers/filter/FilterConfig";
+import FilterType from "../../models/filter/FilterType";
 
 const initialFilterState : FilterState = {
     results: [],

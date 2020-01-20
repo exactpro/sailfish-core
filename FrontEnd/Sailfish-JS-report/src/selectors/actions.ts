@@ -16,10 +16,10 @@
 
 import AppState from "../state/models/AppState";
 import {createSelector} from "reselect";
-import {FilterType} from "../helpers/filter/FilterConfig";
 import {isAction} from "../models/Action";
 import {keyForAction} from "../helpers/keys";
 import {getFilterConfig, getFilterResults} from "./filter";
+import FilterType from "../models/filter/FilterType";
 
 export const getActions = (state: AppState) => state.selected.testCase.actions;
 

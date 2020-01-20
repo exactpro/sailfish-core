@@ -25,7 +25,7 @@ import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
 import LiveTestCase from '../models/LiveTestCase';
 import KnownBug from '../models/KnownBug';
-import { FilterConfig } from "../helpers/filter/FilterConfig";
+import { FilterConfig } from "../models/filter/FilterConfig";
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,

@@ -17,9 +17,9 @@
 import AppState from "../state/models/AppState";
 import {createSelector} from "reselect";
 import {getFilterConfig, getFilterResults} from "./filter";
-import {FilterType} from "../helpers/filter/FilterConfig";
 import {keyForMessage} from "../helpers/keys";
 import {isRejected} from "../helpers/messageType";
+import FilterType from "../models/filter/FilterType";
 
 export const getMessages = (state: AppState) => state.selected.testCase.messages;
 

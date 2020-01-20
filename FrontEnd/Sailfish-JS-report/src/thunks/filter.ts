@@ -16,7 +16,7 @@
 
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import StateAction from "../actions/stateActions";
-import { FilterConfig } from "../helpers/filter/FilterConfig";
+import { FilterConfig } from "../models/filter/FilterConfig";
 import AppState from "../state/models/AppState";
 import filtrate from "../helpers/filter/filtrate";
 import { setFilterConfig, setFilterResult } from "../actions/actionCreators";

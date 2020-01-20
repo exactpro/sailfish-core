@@ -32,7 +32,7 @@ import { fetchPredictions } from "../../thunks/machineLearning";
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import ActionTreeNode from './ActionTreeNode';
-import {FilterConfig} from "../../helpers/filter/FilterConfig";
+import {FilterConfig} from "../../models/filter/FilterConfig";
 
 interface OwnProps {
     action: ActionNode;

@@ -18,8 +18,8 @@ import Action from "../../../models/Action";
 import filterEntry from "../filterEntry";
 import { ACTION_FIELDS } from "../../search/searchEngine";
 import FilterCondition from "./FilterCondition";
-import { FilterPath } from "../FilterConfig";
 import {toRegExpArray} from "../../regexp";
+import FilterPath from "../../../models/filter/FilterPath";
 
 const STUB_FUNCTION = () => false;
 
