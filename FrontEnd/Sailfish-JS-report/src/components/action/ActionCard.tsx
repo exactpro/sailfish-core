@@ -1,5 +1,5 @@
 /******************************************************************************
-* Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+* Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -29,8 +29,6 @@ import {ActionMlUploadButton} from "../ActionMlUploadButton";
 import {StatusType} from '../../models/Status';
 import {stopPropagationHandler} from '../../helpers/react';
 import {isVerification} from "../../models/Verification";
-
-const NON_BREAKING_SPACE = '\u00a0';
 
 interface CardProps {
     action: Action;
@@ -88,21 +86,38 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                             <div className="ac-header__title">
                                 <div className="ac-header__name"
                                     onClick={() => toggleExpand()}>
-                                    <SearchableContent
-                                        content={matrixId}
-                                        contentKey={keyForAction(id, 'matrixId')}/>
-                                    {NON_BREAKING_SPACE}
-                                    <SearchableContent
-                                        content={serviceName}
-                                        contentKey={keyForAction(id, 'serviceName')}/>
-                                    {NON_BREAKING_SPACE}
-                                    <SearchableContent
-                                        content={name}
-                                        contentKey={keyForAction(id, 'name')}/>
-                                    {NON_BREAKING_SPACE}
-                                    <SearchableContent
-                                        content={messageType}
-                                        contentKey={keyForAction(id, 'messageType')}/>
+                                    {
+                                        matrixId &&
+                                        <div className="ac-header__name-element">
+                                            <SearchableContent
+                                                content={matrixId}
+                                                contentKey={keyForAction(id, 'matrixId')}/>
+                                        </div>
+                                    }
+                                    {
+                                        serviceName &&
+                                        <div className="ac-header__name-element">
+                                            <SearchableContent
+                                                content={serviceName}
+                                                contentKey={keyForAction(id, 'serviceName')}/>
+                                        </div>
+                                    }
+                                    {
+                                        name &&
+                                        <div className="ac-header__name-element">
+                                            <SearchableContent
+                                                content={name}
+                                                contentKey={keyForAction(id, 'name')}/>
+                                        </div>
+                                    }
+                                    {
+                                        messageType &&
+                                        <div className="ac-header__name-element">
+                                            <SearchableContent
+                                                content={messageType}
+                                                contentKey={keyForAction(id, 'messageType')}/>
+                                        </div>
+                                    }
                                 </div>
                                 <div className="ac-header__description">
                                     <SearchableContent

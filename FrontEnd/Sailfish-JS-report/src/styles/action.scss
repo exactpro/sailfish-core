@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,15 +112,34 @@
     &__name {
         cursor: pointer;
         width: fit-content;
+    }
+
+    &__name-element {
+        padding: 0 8px;
+        cursor: pointer;
+        border-left: 2px solid var(--status-primary-header-background-color);
+        transition: 0.2s;
         color: var(--status-primary-color);
+
+        &:hover {
+            background-color: var(--status-secondary-header-background-color);
+            border-color: var(--status-secondary-header-background-color);
+            &+div {
+                border-color: var(--status-secondary-header-background-color);
+            }
+        }
+
+        &:first-child {
+            border-left: none;
+        }
     }
 
     &__description {
         color: var(--status-secondary-color);
+        padding-left: 8px;
     }
 
     &__name, &__description {
-        padding-right: 8px;
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
