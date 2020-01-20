@@ -38,6 +38,7 @@ export default interface Report {
     reportProperties?: ReportProperties;
     metadata: TestCaseMetadata[];
     precision: string;
+    tags?: string[];
 }
 
 export function isReport(report: TestCase | Report): report is Report {

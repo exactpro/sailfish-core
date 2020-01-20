@@ -204,6 +204,10 @@
         border: 1px solid $reportBorderColor;
         margin: 10px 0;
     }
+
+    &__tags-header {
+        margin-bottom: 5px;
+    }
 }
 
 .tc-card {

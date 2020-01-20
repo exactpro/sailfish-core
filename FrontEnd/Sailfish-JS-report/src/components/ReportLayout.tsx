@@ -29,6 +29,7 @@ import TestCaseCard from './TestCaseCard';
 import { FailedTestCaseCarousel } from './FailedTestCaseCarousel';
 import ReportState from '../state/models/ReportState';
 import AlertCard from './AlertCard';
+import Tag from './Tag';
 
 const OLD_REPORT_PATH = 'report.html';
 
@@ -70,7 +71,8 @@ export class ReportLayoutBase extends React.Component<Props, State> {
             failedTestCasesEnabled = filteredMetadata.some(({status}) => status.status === StatusType.FAILED),
             failedTcTitleClass = createBemElement('report', 'title', failedTestCasesEnabled ? 'failed': 'disabled'),
             isLive = report.finishTime == null,
-            alerts = report.alerts || [];
+            alerts = report.alerts || [],
+            tags = report.tags || [];
 
         const knownBugsButton = (
             knownBugsPresent ?
@@ -166,6 +168,25 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                                     ) : (
                                         <div className="report-summary__element">
                                             <div className="report-summary__element-title">No plugins</div>
+                                        </div>
+                                    )
+                            }
+                            <div className="report-summary__divider"/>
+                            {
+                                tags.length ?
+                                    (
+                                        <div className="report-summary__tags">
+                                            <div className="report-summary__element report-summary__tags-header">
+                                                <div className="report-summary__element-title">Tags</div>
+                                                <div className="report-summary__element-value">{tags.length}</div>
+                                            </div>
+                                            <div className="report-summary__tags-list">
+                                                {tags.map(tag => <Tag tag={tag}/>)}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="report-summary__element">
+                                            <div className="report-summary__element-title">No tags</div>
                                         </div>
                                     )
                             }
