@@ -114,29 +114,18 @@ export const setFilterConfig = (config: FilterConfig) => (<const>{
     config
 })
 
-export const switchActionsFilter = (status: StatusType) => (<const>{
-    type: StateActionTypes.SWITCH_ACTIONS_FILTER,
-    status
-})
-
-export const switchFieldsFilter = (status: StatusType) => (<const>{
-    type: StateActionTypes.SWITCH_FIELDS_FILTER,
-    status
-})
-
-export const switchActionsTransparencyFilter = (status: StatusType) => (<const>{
-    type: StateActionTypes.SWITCH_ACTIONS_TRANSPARENCY_FILTER,
-    status
-})
-
-export const switchFieldsTransparencyFilter = (status: StatusType) => (<const>{
-    type: StateActionTypes.SWITCH_FIELDS_TRANSPARENCY_FILTER,
-    status
+export const setFilterIsTransparent = (isTransparent: boolean) => (<const>{
+    type: StateActionTypes.SET_FILTER_IS_TRANSPARENT,
+    isTransparent
 })
 
 export const setAdminMsgEnabled = (adminEnabled: boolean) => (<const>{
     type: StateActionTypes.SET_ADMIN_MSG_ENABLED,
     adminEnabled
+})
+
+export const resetFilter = () => (<const>{
+    type: StateActionTypes.RESET_FILTER
 })
 
 export const setLeftPane = (pane: Panel) => (<const>{
@@ -194,7 +183,7 @@ export const clearSearch = () => (<const>{
 export const setShouldScrollToSearchItem = (isNeedsScroll: boolean) => (<const>{
     type: StateActionTypes.SET_SHOULD_SCROLL_TO_SEARCH_ITEM,
     isNeedsScroll
-}) 
+})
 
 export const setIsLoading = (isLoading: boolean) => (<const>{
     type: StateActionTypes.SET_IS_LOADING,

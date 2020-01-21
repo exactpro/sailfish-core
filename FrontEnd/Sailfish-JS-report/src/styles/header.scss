@@ -138,11 +138,11 @@
 
 .header-filter {
     padding: 3px 0;
-    background-color: $filterBackground;
+    background-color: $filterPrimaryColor;
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 2px solid $filterBackground;
+    border: 2px solid $filterPrimaryColor;
     border-bottom-right-radius: 7px;
     border-bottom-left-radius: 7px;
 
@@ -158,47 +158,6 @@
         margin-right: 10px;
         font-size: 14px;
         font-weight: bold;
-    }
-}
-
-.filter-toggler {
-    @include status-card;
-    height: 30px;
-    color: var(--status-primary-color);
-    //border-color: var(--status-primary-border-color);
-    padding: 3px 5px;
-    margin: 0 5px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    background: rgb(255, 255, 255);
-    border: 2px solid var(--status-primary-color);
-    border-radius: 7px;
-    cursor: pointer;
-
-    &.transparent {
-        background: rgba(255, 255, 255, 0.3);
-        color: var(--status-secondary-color);
-        border-color: var(--status-secondary-color);
-    }
-    
-    &__title {
-        @include unselectable;
-        font-weight: bold;
-        font-size: 15px;
-        text-transform: uppercase;
-        padding-bottom: 2px;
-    }
-
-    &__icon {
-        @include round-button(url(../../resources/icons/eye.svg), 21px);
-        margin-left: 5px;
-        padding: 2px;
-        background-size: 90%;
-
-        &.hidden {
-            background-image: url(../../resources/icons/eye-closed.svg);
-        }
     }
 }
 
@@ -226,6 +185,14 @@
 
         &.filter-icon {
             background-image: url(../../resources/icons/filter.svg);
+
+            &.applied {
+                background-image: url(../../resources/icons/filter-applied.svg);
+            }
+
+            &.active {
+                background-image: url(../../resources/icons/filter-white.svg);
+            }
         }
 
         &.left {
@@ -234,6 +201,20 @@
 
         &.right {
             background-image: url(../../resources/icons/arr1-right-enabled.svg);
+        }
+    }
+
+    &__filter-wrapper {
+        position: relative;
+        height: calc(100% - 10px);
+        margin: 0 5px;
+        border-radius: 5px 5px 0 0;
+        display: flex;
+        align-items: center;
+
+        &.active {
+            background-color: $filterPrimaryColor;
+            box-shadow: 4px 8px 6px 0px rgba(0, 0, 0, 0.4);
         }
     }
 
@@ -246,6 +227,14 @@
         -webkit-margin-before:0em;
         -webkit-margin-after:0em;
         padding-left: 15px;
+
+        &.active {
+            color: $filterTextColor;
+        }
+
+        &.applied {
+            color: $filterPrimaryColor;
+        }
     }
 
     &.disabled {

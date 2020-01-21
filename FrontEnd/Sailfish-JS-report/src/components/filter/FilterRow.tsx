@@ -30,7 +30,8 @@ interface Props {
     validateAutocomplete?: boolean;
 }
 
-function FilterRow({path, index, values, onChange, onRemove = () => {}, autocompleteVariants, validateAutocomplete = true}: Props) {
+function FilterRow(props: Props) {
+    const {path, index, values, onChange, onRemove = () => {}, autocompleteVariants, validateAutocomplete = true} = props;
     const [currentValue, setValue] = React.useState('');
     const input = React.useRef<HTMLInputElement>();
 
@@ -40,7 +41,7 @@ function FilterRow({path, index, values, onChange, onRemove = () => {}, autocomp
 
     const inputOnRemove = () => {
         if (values.length == 0) {
-            onRemove && onRemove();
+            onRemove();
             return;
         }
 
@@ -71,14 +72,19 @@ function FilterRow({path, index, values, onChange, onRemove = () => {}, autocomp
     };
 
     return (
-        <div className="filter__row">
-            <FilterBubble
-                className="filter__path"
-                value={path}
-                prefix={FILTER_PATH_PREFIX}
-                autocompleteVariants={FILTER_PATH_VALUES}
-                onChange={nextPath => onChange(values, nextPath as FilterPath)}
-                onRemove={() => onChange(values, FilterPath.ALL)}/>
+        <div className="filter-row">
+            {
+                path != FilterPath.ALL ? (
+                    <FilterBubble
+                        className="filter__path"
+                        readonly={path == 'type'}
+                        value={path}
+                        prefix={FILTER_PATH_PREFIX}
+                        autocompleteVariants={FILTER_PATH_VALUES}
+                        onChange={nextPath => onChange(values, nextPath as FilterPath)}
+                        onRemove={() => onChange(values, FilterPath.ALL)}/>
+                ) : null
+            }
             {
                 values.map((val, index) => (
                     <React.Fragment key={index}>
@@ -94,7 +100,7 @@ function FilterRow({path, index, values, onChange, onRemove = () => {}, autocomp
             }
             <AutocompleteInput
                 ref={input}
-                className="filter__row-input"
+                className="filter-row__input"
                 value={currentValue}
                 onSubmit={inputOnSubmit}
                 onRemove={inputOnRemove}
@@ -102,7 +108,12 @@ function FilterRow({path, index, values, onChange, onRemove = () => {}, autocomp
                 readonly={autocompleteVariants != null && autocompleteVariants.length == 0}
                 validateAutocomplete={validateAutocomplete}
                 autocomplete={autocompleteVariants ?? []}
-                datalistKey={`autocomplete-${index}`}/>
+                datalistKey={`autocomplete-${index}`}
+            />
+            <div
+                className="filter-row__remove-btn"
+                onClick={onRemove}
+            />
         </div>
     )
 }

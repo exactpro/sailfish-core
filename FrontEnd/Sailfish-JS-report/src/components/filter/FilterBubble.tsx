@@ -23,12 +23,13 @@ interface Props {
     className?: string;
     value: string;
     prefix?: string;
+    readonly?: boolean;
     autocompleteVariants: string[];
     onChange: (nextValue: string) => void;
     onRemove: () => void;
 }
 
-export default function FilterBubble({value, onChange, onRemove, autocompleteVariants, className, prefix = ''}: Props) {
+export default function FilterBubble({value, onChange, onRemove, autocompleteVariants, className, prefix = '', readonly = false}: Props) {
     const [isEditing, setIsEditing] = React.useState(false);
 
     const rootRef = React.useRef<HTMLDivElement>();
@@ -45,7 +46,7 @@ export default function FilterBubble({value, onChange, onRemove, autocompleteVar
     });
 
     const rootOnClick = () => {
-        if (!isEditing) {
+        if (!readonly && !isEditing) {
             setIsEditing(true);
         }
     };

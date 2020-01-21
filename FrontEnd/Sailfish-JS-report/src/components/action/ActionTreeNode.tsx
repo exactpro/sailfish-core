@@ -40,10 +40,10 @@ interface Props {
     selectedVerificationId: number;
     expandPath: Tree<ActionExpandStatus>;
     filter: {
-        results: string[],
-        config: FilterConfig
+        results: string[];
+        config: FilterConfig;
+        isActive: boolean;
     }
-
     onRootExpand: (actionId: number, isExpanded: boolean) => void;
     onActionSelect: (action: Action) => void;
     onVerificationSelect: (messageId: number, rootActionId: number, status: StatusType) => void;
@@ -68,8 +68,8 @@ export default function ActionTreeNode(props: Props) {
         case ActionNodeType.ACTION: {
             let isTransparent = false;
 
-            if (filter.config.types.includes(FilterType.ACTION) &&
-                filter.config.blocks.length > 0 &&
+            if (filter.isActive &&
+                filter.config.types.includes(FilterType.ACTION) &&
                 !filter.results.includes(keyForAction(action.id))
             ) {
                 if (filter.config.isTransparent) {
@@ -116,8 +116,8 @@ export default function ActionTreeNode(props: Props) {
 
             let isTransparent = false;
 
-            if (filter.config.types.includes(FilterType.VERIFICATION) &&
-                filter.config.blocks.length > 0 &&
+            if (filter.isActive &&
+                filter.config.types.includes(FilterType.VERIFICATION) &&
                 !filter.results.includes(keyForVerification(parentAction?.id, verification.messageId))
             ) {
                 if (filter.config.isTransparent) {

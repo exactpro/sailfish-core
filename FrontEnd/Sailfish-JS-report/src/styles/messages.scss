@@ -22,7 +22,7 @@
 
     // lb-count - number of displaying labels - to make offset for name and session 
     --lb-count: 0;
-    // lb-count variable assgnment through the custom html property
+    // lb-count variable assignment through the custom html property
     &[data-lb-count="0"] { --lb-count: 0; }
     &[data-lb-count="1"] { --lb-count: 1; }
     &[data-lb-count="2"] { --lb-count: 2; }
@@ -453,8 +453,27 @@
     }
 }
 
-.messages-list {
+.messages {
     height: 100%;
     padding: 0 5px;
     word-wrap: break-word;
+
+    &__filter-info {
+        height: $filterCountHeight;
+        font-size: 14px;
+        font-weight: bold;
+        color: $filterPrimaryColor;
+
+        display: flex;
+        align-items: center;
+        padding-left: 20px;
+    }
+
+    &__list {
+        height: 100%;
+
+        &.filter-applied {
+            height: calc(100% - #{$filterCountHeight});
+        }
+    }
 }

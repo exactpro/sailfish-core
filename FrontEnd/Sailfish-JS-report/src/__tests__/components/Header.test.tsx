@@ -27,7 +27,8 @@ describe('[React] <HeaderBase/>', () => {
         nextTestCaseHandler: jest.fn(),
         testCase: createTestCase(),
         backToListHandler: jest.fn(),
-        isNavigationEnabled: true
+        isNavigationEnabled: true,
+        isFilterApplied: false
     };
 
     test('TestCase nav button click', () => {

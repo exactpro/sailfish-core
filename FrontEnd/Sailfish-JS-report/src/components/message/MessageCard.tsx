@@ -36,6 +36,7 @@ import ErrorBoundary from '../util/ErrorBoundary';
 import BeautifiedContent from './BeautifiedContent';
 import { PredictionData } from '../../models/MlServiceResponse';
 import {getRejectedMessages, getTransparentMessages} from "../../selectors/messages";
+import { getIsFilterApplied } from "../../selectors/filter";
 
 const HUE_SEGMENTS_COUNT = 36;
 
@@ -251,7 +252,7 @@ export const MessageCardContainer = connect(
     (state: AppState, ownProps: MessageCardOwnProps): MessageCardStateProps => ({
         isSelected: state.selected.messagesId.includes(ownProps.message.id) || state.selected.rejectedMessageId === ownProps.message.id,
         status: state.selected.messagesId.includes(ownProps.message.id) ? state.selected.selectedActionStatus : null,
-        isTransparent: getTransparentMessages(state).includes(ownProps.message.id),
+        isTransparent: getIsFilterApplied(state) ? getTransparentMessages(state).includes(ownProps.message.id) : false,
         rejectedMessagesCount: isRejected(ownProps.message) ? getRejectedMessages(state).indexOf(ownProps.message) + 1 : null,
         adminEnabled: state.view.adminMessagesEnabled,
         isContentBeautified: state.view.beautifiedMessages.includes(ownProps.message.id),

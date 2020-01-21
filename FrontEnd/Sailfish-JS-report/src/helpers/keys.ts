@@ -18,17 +18,47 @@ import Message from '../models/Message';
 import Action from '../models/Action';
 import UserMessage, { isUserMessage } from '../models/UserMessage';
 import UserTable, { isUserTable } from '../models/UserTable';
+import { ACTION_FIELDS, MESSAGE_FIELDS } from "./search/searchEngine";
+
+const ACTION_KEY_PREFIX = 'action',
+    MESSAGE_KEY_PREFIX = 'msg',
+    VERIFICATION_KEY_PREFIX = 'verification';
 
 export function keyForAction(id: number, fieldName: keyof Action = null): string {
-    return `action-${id}` + (fieldName ? `-${fieldName}` : '');
+    return `${ACTION_KEY_PREFIX}-${id}` + (fieldName ? `-${fieldName}` : '');
+}
+
+export function isKeyForAction(key: string): boolean {
+    const [prefix, id, fieldName] = key.split('-');
+
+    return prefix == ACTION_KEY_PREFIX &&
+        !isNaN(+id) &&
+        (fieldName === undefined || ACTION_FIELDS.includes(fieldName as keyof Action));
 }
 
 export function keyForMessage(id: number, fieldName: keyof Message = null): string {
-    return `msg-${id}` + (fieldName ? `-${fieldName}` : '');
+    return `${MESSAGE_KEY_PREFIX}-${id}` + (fieldName ? `-${fieldName}` : '');
+}
+
+export function isKeyForMessage(key: string): boolean {
+    const [prefix, id, fieldName] = key.split('-');
+
+    return prefix == MESSAGE_KEY_PREFIX &&
+        !isNaN(+id) &&
+        (fieldName === undefined || MESSAGE_FIELDS.includes(fieldName as keyof Message));
 }
 
 export function keyForVerification(parentActionId: number, msgId: number): string {
-    return `action-${parentActionId}-verification-${msgId}`;
+    return `${ACTION_KEY_PREFIX}-${parentActionId}-${VERIFICATION_KEY_PREFIX}-${msgId}`;
+}
+
+export function isKeyForVerification(key: string): boolean {
+    const [actionPrefix, actionId, verificationPrefix, msgId] = key.split('-');
+
+    return actionPrefix == ACTION_KEY_PREFIX &&
+        !isNaN(+actionId) &&
+        verificationPrefix == VERIFICATION_KEY_PREFIX &&
+        !isNaN(+msgId);
 }
 
 export function keyForUserMessage(userMessage: UserMessage, parent: Action): string {

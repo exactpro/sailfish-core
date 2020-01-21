@@ -33,6 +33,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import ActionTreeNode from './ActionTreeNode';
 import {FilterConfig} from "../../models/filter/FilterConfig";
+import { getIsFilterApplied } from "../../selectors/filter";
 
 interface OwnProps {
     action: ActionNode;
@@ -44,6 +45,7 @@ interface StateProps {
     filter: {
         config: FilterConfig;
         results: string[];
+        isActive: boolean;
     };
     expandedTreePath: Tree<number> | null;
     mlDataActionIds: Set<number>;
@@ -178,7 +180,8 @@ export const ActionTree = connect(
         selectedActionsId: state.selected.actionsId,
         filter: {
             config: state.filter.config,
-            results: state.filter.results
+            results: state.filter.results,
+            isActive: getIsFilterApplied(state)
         },
         mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map(item => item.actionId)),
         expandedTreePath: 

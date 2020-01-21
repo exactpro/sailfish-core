@@ -15,6 +15,29 @@
  ******************************************************************************/
 
 import AppState from "../state/models/AppState";
+import { createSelector } from "reselect";
+import { isKeyForAction, isKeyForMessage, isKeyForVerification } from "../helpers/keys";
 
 export const getFilterConfig = (state: AppState) => state.filter.config;
 export const getFilterResults = (state: AppState) => state.filter.results;
+
+export const getIsFilterApplied = createSelector(
+    [getFilterConfig],
+    (config) =>
+        config.types.length > 0 && config.blocks.some(block => block.values.length > 0)
+);
+
+export const getActionsFilterResultsCount = createSelector(
+    [getFilterResults],
+    (results) => results.filter(isKeyForAction).length
+);
+
+export const getMessagesFilterResultsCount = createSelector(
+    [getFilterResults],
+    (results) => results.filter(isKeyForMessage).length
+);
+
+export const getVerificationsFilterResultsCount = createSelector(
+    [getFilterResults],
+    (results) => results.filter(isKeyForVerification).length
+);

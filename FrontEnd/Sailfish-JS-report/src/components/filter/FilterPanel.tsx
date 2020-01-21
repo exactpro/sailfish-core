@@ -16,17 +16,23 @@
 
 import React from 'react';
 import "../../styles/filter.scss";
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import {ThunkDispatch} from 'redux-thunk';
+import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
-import {performFilter} from "../../thunks/filter";
+import { performFilter } from "../../thunks/filter";
 import FilterRow from "./FilterRow";
-import {complement, removeByIndex, replaceByIndex} from "../../helpers/array";
-import {StatusType} from "../../models/Status";
-import FilterPath, {FILTER_PATH_PREFIX, FILTER_PATH_VALUES} from "../../models/filter/FilterPath";
+import { complement, removeByIndex, replaceByIndex } from "../../helpers/array";
+import { StatusType } from "../../models/Status";
+import FilterPath, { FILTER_PATH_PREFIX, FILTER_PATH_VALUES } from "../../models/filter/FilterPath";
 import FilterType from "../../models/filter/FilterType";
-import {FilterConfig} from "../../models/filter/FilterConfig";
+import { FilterConfig } from "../../models/filter/FilterConfig";
+import { resetFilter, setFilterIsTransparent } from "../../actions/actionCreators";
+import {
+    getActionsFilterResultsCount, getIsFilterApplied,
+    getMessagesFilterResultsCount,
+    getVerificationsFilterResultsCount
+} from "../../selectors/filter";
 
 const AUTOCOMPLETE_MAP = new Map<FilterPath, string[]>([
     [FilterPath.STATUS, [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED, StatusType.CONDITIONALLY_FAILED]]
@@ -37,16 +43,22 @@ const FILTER_TYPE_AUTOCOMPLETE = [FilterType.ACTION, FilterType.MESSAGE, FilterT
 
 interface StateProps {
     config: FilterConfig;
+    isFilterApplied: boolean;
+    actionsResultsCount: number;
+    messagesResultsCount: number;
+    verificationsResultsCount: number;
 }
 
 interface DispatchProps {
     updateConfig: (config: FilterConfig) => void;
+    setIsTransparent: (isTransparent: boolean) => void;
+    resetFilter: () => void;
 }
 
 interface Props extends StateProps, DispatchProps {
 }
 
-function FilterPanelBase({config, updateConfig}: Props) {
+function FilterPanelBase({ config, isFilterApplied, updateConfig, setIsTransparent, actionsResultsCount, messagesResultsCount, verificationsResultsCount, resetFilter }: Props) {
 
     const onTypesChange = (values: string[]) => {
         updateConfig({
@@ -84,8 +96,10 @@ function FilterPanelBase({config, updateConfig}: Props) {
 
     return (
         <div className="filter">
-            <div className="filter__row-wrapper">
-                <div className="filter__row-divider"/>
+            <div className="filter-row__wrapper">
+                <div className="filter-row__divider">
+                    Filter
+                </div>
                 <FilterRow
                     index={0}
                     path={'type'}
@@ -95,8 +109,8 @@ function FilterPanelBase({config, updateConfig}: Props) {
             </div>
             {
                 config.blocks.map((block, index) => (
-                    <div className="filter__row-wrapper" key={index}>
-                        <div className="filter__row-divider">and</div>
+                    <div className="filter-row__wrapper" key={index}>
+                        <div className="filter-row__divider">and</div>
                         <FilterRow
                             path={block.path}
                             index={index + 1}
@@ -112,8 +126,8 @@ function FilterPanelBase({config, updateConfig}: Props) {
                     </div>
                 ))
             }
-            <div className="filter__row-wrapper">
-                <div className="filter__row-divider">and</div>
+            <div className="filter-row__wrapper">
+                <div className="filter-row__divider">and</div>
                 <FilterRow
                     path={FilterPath.ALL}
                     index={config.blocks.length + 1}
@@ -122,27 +136,60 @@ function FilterPanelBase({config, updateConfig}: Props) {
                     values={[]}
                     onChange={onNewBlockChange}/>
             </div>
-            <input
-                type="checkbox"
-                id="filter-transparent-checkbox"
-                checked={config.isTransparent}
-                onChange={e => updateConfig({ ...config, isTransparent: e.target.checked })}
-            />
-            <label
-                htmlFor="filter-transparent-checkbox">
-                Transparent
-            </label>
-
+            <div className="filter__controls filter-controls">
+                <div className="filter-controls__counts">
+                    {
+                        isFilterApplied ? [
+                            config.types.includes(FilterType.ACTION) ?
+                                `${actionsResultsCount} Actions ` :
+                                null,
+                            config.types.includes(FilterType.MESSAGE) ?
+                                `${messagesResultsCount} Messages ` :
+                                null,
+                            config.types.includes(FilterType.VERIFICATION) ?
+                                `${verificationsResultsCount} Verifications ` :
+                                null
+                        ].filter(Boolean).join(' and ') + 'Filtered' : null
+                    }
+                </div>
+                <div className="filter-controls__transparency">
+                    Filtered out
+                    <input
+                        type="radio"
+                        id="filter-radio-hide"
+                        checked={!config.isTransparent}
+                        onChange={e => setIsTransparent(false)}
+                    />
+                    <label htmlFor="filter-radio-hide">Hide</label>
+                    <input
+                        type="radio"
+                        id="filter-radio-transparent"
+                        checked={config.isTransparent}
+                        onChange={e => setIsTransparent(true)}
+                    />
+                    <label htmlFor="filter-radio-transparent">Transparent</label>
+                </div>
+                <div className="filter-controls__clear-btn" onClick={() => resetFilter()}>
+                    <div className="filter-controls__clear-icon"/>
+                    Clear All
+                </div>
+            </div>
         </div>
     )
 }
 
 const FilterPanel = connect(
-    ({filter: state}: AppState): StateProps => ({
-        config: state.config
+    (state: AppState): StateProps => ({
+        config: state.filter.config,
+        isFilterApplied: getIsFilterApplied(state),
+        actionsResultsCount: getActionsFilterResultsCount(state),
+        messagesResultsCount: getMessagesFilterResultsCount(state),
+        verificationsResultsCount: getVerificationsFilterResultsCount(state)
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
-        updateConfig: config => dispatch(performFilter(config))
+        updateConfig: config => dispatch(performFilter(config)),
+        setIsTransparent: isTransparent => dispatch(setFilterIsTransparent(isTransparent)),
+        resetFilter: () => dispatch(resetFilter())
     })
 )(FilterPanelBase);
 

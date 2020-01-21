@@ -17,8 +17,8 @@
 import * as React from 'react';
 
 export default function useOutsideClickListener(ref: React.MutableRefObject<HTMLElement>, handler: (e: MouseEvent) => void) {
-    const onOutsideClick = (e) => {
-        if (!ref.current?.contains(e.target)) {
+    const onOutsideClick = (e: MouseEvent) => {
+        if (!ref.current?.contains(e.target as Element)) {
             handler(e);
         }
     };

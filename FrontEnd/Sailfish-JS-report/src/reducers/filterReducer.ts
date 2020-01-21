@@ -36,6 +36,22 @@ export function filterReducer(state: FilterState = initialFilterState, stateActi
             }
         }
 
+        case StateActionTypes.SET_FILTER_IS_TRANSPARENT: {
+            return {
+                ...state,
+                config: {
+                    ...state.config,
+                    isTransparent: stateAction.isTransparent
+                }
+            }
+        }
+
+        case StateActionTypes.RESET_FILTER: {
+            return {
+                ...initialFilterState
+            }
+        }
+
         default: {
             return state;
         }

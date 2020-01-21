@@ -18,37 +18,42 @@ import * as React from 'react';
 import '../../styles/messages.scss';
 import Message from '../../models/Message';
 import MessageCard from './MessageCard';
-import {StatusType} from '../../models/Status';
-import {connect} from 'react-redux';
+import { StatusType } from '../../models/Status';
+import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import {isAdmin, isCheckpoint} from '../../helpers/messageType';
-import {AdminMessageWrapper} from './AdminMessageWrapper';
-import {selectMessage} from '../../actions/actionCreators';
-import {messagesHeatmap} from '../../helpers/heatmapCreator';
+import { isAdmin, isCheckpoint } from '../../helpers/messageType';
+import { AdminMessageWrapper } from './AdminMessageWrapper';
+import { selectMessage } from '../../actions/actionCreators';
+import { messagesHeatmap } from '../../helpers/heatmapCreator';
 import StateSaverProvider from '../util/StateSaverProvider';
-import {VirtualizedList} from '../VirtualizedList';
+import { VirtualizedList } from '../VirtualizedList';
 import CheckpointMessage from './CheckpointMessage';
-import {getFilteredMessages, getTransparentMessages} from "../../selectors/messages";
+import { getFilteredMessages } from "../../selectors/messages";
+import { getIsFilterApplied, getMessagesFilterResultsCount } from "../../selectors/filter";
+import FilterType from "../../models/filter/FilterType";
+import { createBemElement } from "../../helpers/styleCreators";
 
-interface MessagesListStateProps {
+interface StateProps {
     messages: Message[];
     scrolledMessageId: Number;
     selectedMessages: number[];
     selectedStatus: StatusType;
+    isFilterApplied: boolean;
+    filteredCount: number;
 }
 
-interface MessagesListProps extends MessagesListStateProps {}
+interface Props extends StateProps {}
 
-interface MessagesListState {
-    // Number object is used here because in some cases (eg one message / action was selected several times by different entities)
+interface State {
+    // Number objects is used here because in some cases (eg one message / action was selected several times by different entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.
     scrolledIndex: Number;
 }
 
-export class MessagesCardListBase extends React.PureComponent<MessagesListProps, MessagesListState> {
+export class MessagesCardListBase extends React.PureComponent<Props, State> {
 
-    constructor(props: MessagesListProps) {
+    constructor(props: Props) {
         super(props);
 
         this.state = {
@@ -62,9 +67,9 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
         });
     }
 
-    componentDidUpdate(prevProps: MessagesListProps) {
+    componentDidUpdate(prevProps: Props) {
         if (this.props.scrolledMessageId !== prevProps.scrolledMessageId && this.props.scrolledMessageId != null) {
-            this.setState({ 
+            this.setState({
                 scrolledIndex: this.getScrolledIndex(this.props.scrolledMessageId, this.props.messages)
             });
         }
@@ -77,19 +82,34 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
     }
 
     render() {
-        const { messages, selectedMessages, selectedStatus } = this.props,
+        const { messages, selectedMessages, selectedStatus, isFilterApplied, filteredCount } = this.props,
             { scrolledIndex } = this.state;
 
+        const listClassName = createBemElement(
+            "messages",
+            "list",
+            isFilterApplied ? "filter-applied" : null
+        );
+
         return (
-            <div className="messages-list">
-                <StateSaverProvider>
-                    <VirtualizedList
-                        selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
-                        rowCount={messages.length}
-                        renderElement={this.renderMessage}
-                        scrolledIndex={scrolledIndex}
-                    />
-                </StateSaverProvider>
+            <div className="messages">
+                <div className={listClassName}>
+                    {
+                        isFilterApplied ? (
+                            <div className="messages__filter-info">
+                                {filteredCount} Messages Filtered
+                            </div>
+                        ) : null
+                    }
+                    <StateSaverProvider>
+                        <VirtualizedList
+                            selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
+                            rowCount={messages.length}
+                            renderElement={this.renderMessage}
+                            scrolledIndex={scrolledIndex}
+                        />
+                    </StateSaverProvider>
+                </div>
             </div>
         );
     }
@@ -118,11 +138,13 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
 }
 
 export const MessagesCardList = connect(
-    (state: AppState): MessagesListStateProps => ({
-        messages: getFilteredMessages(state),
+    (state: AppState): StateProps => ({
+        messages: getIsFilterApplied(state) ? getFilteredMessages(state) : state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
         selectedMessages: state.selected.messagesId,
-        selectedStatus: state.selected.selectedActionStatus
+        selectedStatus: state.selected.selectedActionStatus,
+        isFilterApplied: getIsFilterApplied(state) && state.filter.config.types.includes(FilterType.MESSAGE),
+        filteredCount: getMessagesFilterResultsCount(state)
     }),
     () => ({}),
     (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="80px" viewBox="0 0 80 80" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Icons/filter</title>
+    <defs>
+        <path d="M68.9969867,8 L11.0034867,8 C8.33873668,8 6.99411168,11.23325 8.88223668,13.121375 L31.9999867,36.242625 L31.9999867,62 C31.9999867,62.978875 32.4776117,63.89625 33.2796117,64.45775 L43.2796117,71.45525 C45.2524867,72.83625 47.9999867,71.436625 47.9999867,68.9975 L47.9999867,36.242625 L71.1183617,13.121375 C73.0026117,11.237 71.6672367,8 68.9969867,8 Z" id="path-1"/>
+    </defs>
+    <g id="Icons/filter" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"/>
+        </mask>
+        <use id="Mask" fill="#00BBCC" fill-rule="nonzero" xlink:href="#path-1"/>
+    </g>
+</svg>

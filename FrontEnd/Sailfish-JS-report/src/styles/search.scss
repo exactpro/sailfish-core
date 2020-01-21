@@ -79,7 +79,7 @@
     }
 
     &__clear {
-        @include round-button(url(../../resources/icons/clear-search.svg));
+        @include round-button(url(../../resources/icons/cross-icon.svg));
     }
 }
 

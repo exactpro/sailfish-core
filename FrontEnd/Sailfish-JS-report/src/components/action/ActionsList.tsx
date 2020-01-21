@@ -15,21 +15,33 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import '../../styles/action.scss';
-import {ActionNode, isAction} from '../../models/Action';
-import {ActionTree} from './ActionTree';
-import {VirtualizedList} from '../VirtualizedList';
+import { ActionNode, isAction } from '../../models/Action';
+import { ActionTree } from './ActionTree';
+import { VirtualizedList } from '../VirtualizedList';
 import AppState from '../../state/models/AppState';
 import StateSaverProvider from '../util/StateSaverProvider';
-import {actionsHeatmap} from '../../helpers/heatmapCreator';
-import {getActions} from '../../helpers/action';
-import {getFilteredActions} from "../../selectors/actions";
+import { actionsHeatmap } from '../../helpers/heatmapCreator';
+import { getActions } from '../../helpers/action';
+import { getFilteredActions } from "../../selectors/actions";
+import {
+    getActionsFilterResultsCount,
+    getIsFilterApplied,
+    getVerificationsFilterResultsCount
+} from "../../selectors/filter";
+import FilterType from "../../models/filter/FilterType";
+import { FilterConfig } from "../../models/filter/FilterConfig";
+import { createBemElement } from "../../helpers/styleCreators";
 
 interface Props {
     actions: Array<ActionNode>;
     selectedActions: number[];
     scrolledActionId: Number;
+    isFilterApplied: boolean;
+    filteredActionsCount: number;
+    filteredVerificationsCount: number;
+    filterConfig: FilterConfig;
 }
 
 interface State {
@@ -74,12 +86,34 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { actions, selectedActions } = this.props,
+        const { actions, selectedActions, isFilterApplied, filteredActionsCount, filteredVerificationsCount, filterConfig } = this.props,
             { scrolledIndex } = this.state;
+
+        const listRootClass = createBemElement(
+            "actions",
+            "list",
+            isFilterApplied ? "filter-applied" : null
+        );
 
         return (
             <div className="actions">
-                <div className="actions__list">
+                {
+                    isFilterApplied ? (
+                        <div className="actions__filter-info">
+                        {
+                            [
+                                filterConfig.types.includes(FilterType.ACTION) ?
+                                    `${filteredActionsCount} Actions` :
+                                    null,
+                                filterConfig.types.includes(FilterType.VERIFICATION) ?
+                                    `${filteredVerificationsCount} Verifications` :
+                                    null
+                            ].filter(Boolean).join(' and ') + ' Filtered'
+                        }
+                        </div>
+                    ) : null
+                }
+                <div className={listRootClass}>
                     <StateSaverProvider>
                         <VirtualizedList
                             rowCount={actions.length}
@@ -90,25 +124,30 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                         />
                     </StateSaverProvider>
                 </div>
-            </div> 
+            </div>
         )
     }
 
     private renderAction = (idx: number): React.ReactElement => (
-        <ActionTree 
+        <ActionTree
             action={this.props.actions[idx]}/>
     )
 }
 
 export const ActionsList = connect(
     (state: AppState): Props => ({
-        actions: getFilteredActions(state),
+        actions: getIsFilterApplied(state) ? getFilteredActions(state) : state.selected.testCase.actions,
         selectedActions: state.selected.actionsId,
-        scrolledActionId: state.selected.scrolledActionId
+        scrolledActionId: state.selected.scrolledActionId,
+        filterConfig: state.filter.config,
+        filteredActionsCount: getActionsFilterResultsCount(state),
+        filteredVerificationsCount: getVerificationsFilterResultsCount(state),
+        isFilterApplied: getIsFilterApplied(state) &&
+            (state.filter.config.types.includes(FilterType.ACTION) || state.filter.config.types.includes(FilterType.VERIFICATION))
     }),
-    dispatch => ({ }),
-    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps}),
+    dispatch => ({}),
+    (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps }),
     {
         forwardRef: true
-    } 
+    }
 )(ActionsListBase);

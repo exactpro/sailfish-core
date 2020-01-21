@@ -21,7 +21,7 @@ import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import { resetTestCase } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/date';
-import { createSelector } from '../helpers/styleCreators';
+import { createBemElement, createSelector } from '../helpers/styleCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
@@ -29,30 +29,31 @@ import SearchInput from './search/SearchInput';
 import { MlUploadIndicator } from "./machinelearning/MlUploadIndicator";
 import LiveTimer from './LiveTimer';
 import FilterPanel from "./filter/FilterPanel";
+import { getIsFilterApplied } from "../selectors/filter";
+import useOutsideClickListener from "../hooks/useOutsideClickListener";
 
 interface StateProps {
     testCase: TestCase;
     isNavigationEnabled: boolean;
+    isFilterApplied: boolean;
 }
 
 interface DispatchProps {
-    nextTestCaseHandler: () => any;
-    prevTestCaseHandler: () => any;
-    backToListHandler: () => any;
+    nextTestCaseHandler: () => void;
+    prevTestCaseHandler: () => void;
+    backToListHandler: () => void;
 }
 
 interface Props extends StateProps, DispatchProps {}
 
-export const HeaderBase = ({ 
-    testCase, 
-    isNavigationEnabled,
-    nextTestCaseHandler, 
-    prevTestCaseHandler, 
-    backToListHandler
+export const HeaderBase = ({
+   testCase,
+   isNavigationEnabled,
+   isFilterApplied,
+   nextTestCaseHandler,
+   prevTestCaseHandler,
+   backToListHandler
 }: Props) => {
-        
-    const [ showFilter, setShowFilter ] = React.useState(false);
-
     const {
         name = 'Test Case',
         startTime,
@@ -62,6 +63,16 @@ export const HeaderBase = ({
         description,
     } = testCase;
 
+    const [showFilter, setShowFilter] = React.useState(false);
+    const filterBaseRef = React.useRef<HTMLDivElement>();
+    const filterButtonRef = React.useRef<HTMLDivElement>();
+
+    useOutsideClickListener(filterBaseRef, e => {
+        if (!filterButtonRef.current?.contains(e.target as Element)) {
+            setShowFilter(false);
+        }
+    });
+
     const isLive = finishTime == null,
         status = testCase.status.status || 'RUNNING',
         period = getSecondsPeriod(startTime, finishTime);
@@ -69,45 +80,82 @@ export const HeaderBase = ({
     const rootClass = createSelector(
             "header",
             status
-        ), 
+        ),
         navButtonClass = createSelector(
             "header-button",
             isNavigationEnabled ? '' : 'disabled'
+        ),
+        filterWrapperClass = createBemElement(
+            "header-button",
+            "filter-wrapper",
+            showFilter ? "active" : null
+        ),
+        filterTitleClass = createBemElement(
+            "header-button",
+            "title",
+            showFilter ? "active" : null,
+            !showFilter && isFilterApplied ? "applied" : null
+        ),
+        filterIconClass = createBemElement(
+            "header-button",
+            "icon",
+            "filter-icon",
+            showFilter ? "active" : null,
+            !showFilter && isFilterApplied ? "applied" : null
         );
 
     return (
         <div className={rootClass}>
             <div className="header__main   header-main">
                 <div className="header-button   header-main__contol-button"
-                    onClick={backToListHandler}>
-                    <div className="header-button__icon go-back" />
+                     onClick={backToListHandler}>
+                    <div className="header-button__icon go-back"/>
                     <div className="header-button__title">Back to list</div>
                 </div>
                 <div className="header-main__name ">
                     <div className={navButtonClass}
-                        onClick={isNavigationEnabled && prevTestCaseHandler}>
+                         onClick={() => isNavigationEnabled && prevTestCaseHandler()}>
                         <div className="header-button__icon left"/>
                     </div>
                     <div className="header-main__title">
-                    {
-                        isLive ? (
-                            <React.Fragment>
-                                <div className="header-main__spinner"/>
-                                {name} — {status} — <LiveTimer startTime={startTime}/>
-                            </React.Fragment>
-                        ) : (
-                            `${name} — ${status} — ${period}`
-                        )
-                    }
+                        {
+                            isLive ? (
+                                <React.Fragment>
+                                    <div className="header-main__spinner"/>
+                                    {name} — {status} — <LiveTimer startTime={startTime}/>
+                                </React.Fragment>
+                            ) : (
+                                `${name} — ${status} — ${period}`
+                            )
+                        }
                     </div>
                     <div className={navButtonClass}
-                        onClick={isNavigationEnabled && nextTestCaseHandler}>
+                         onClick={() => isNavigationEnabled && nextTestCaseHandler()}>
                         <div className="header-button__icon right"/>
                     </div>
                 </div>
-                <div className="header-button   header-main__contol-button" onClick={() => setShowFilter(!showFilter)}>
-                    <div className="header-button__icon filter-icon" />
-                    <div className="header-button__title">{showFilter ? "Hide filter" : "Show filter"}</div>
+                <div className={filterWrapperClass}>
+                    <div className="header-button   header-main__contol-button"
+                         ref={filterButtonRef}
+                         onClick={() => setShowFilter(!showFilter)}>
+                        <div className={filterIconClass}/>
+                        <div className={filterTitleClass}>
+                            {
+                                isFilterApplied ?
+                                    "Filter Applied" :
+                                    showFilter ?
+                                        "Hide Filter" :
+                                        "Show Filter"
+                            }
+                        </div>
+                    </div>
+                    {
+                        showFilter ? (
+                            <div ref={filterBaseRef} className="filter-wrapper">
+                                <FilterPanel/>
+                            </div>
+                        ) : null
+                    }
                 </div>
                 <div className="header-main__search">
                     <SearchInput/>
@@ -145,11 +193,6 @@ export const HeaderBase = ({
                     </div>
                 </div>
             </div>
-            {
-                showFilter ? (
-                    <FilterPanel />
-                ) : null
-            }
         </div>
     );
 };
@@ -157,7 +200,8 @@ export const HeaderBase = ({
 export const Header = connect(
     (state: AppState): StateProps => ({
         testCase: state.selected.testCase,
-        isNavigationEnabled: state.report.metadata.length > 1
+        isNavigationEnabled: state.report.metadata.length > 1,
+        isFilterApplied: getIsFilterApplied(state)
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateActionType>): DispatchProps => ({
         nextTestCaseHandler: () => dispatch(loadNextTestCase()),
