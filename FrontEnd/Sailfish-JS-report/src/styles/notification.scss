@@ -29,6 +29,7 @@
     background-color: $notificationBackground;
     border-radius: 5px;
     font-family: Open sans;
+    z-index: 999;
 
     p {
         margin: 0;

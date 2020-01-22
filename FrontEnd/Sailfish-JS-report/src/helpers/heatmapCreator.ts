@@ -24,7 +24,7 @@ export function messagesHeatmap(messages: Message[], selectedMessages: number[],
 
     messages.forEach((message, idx) => {
         if (selectedMessages.includes(message.id)) {
-            heatmap.set(idx, selectedStatus);
+            heatmap.set(idx, selectedStatus ?? StatusType.NA);
         }
     });
 

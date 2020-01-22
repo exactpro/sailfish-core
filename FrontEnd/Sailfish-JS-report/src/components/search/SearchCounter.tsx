@@ -33,19 +33,21 @@ interface DispatchProps {
 
 interface Props extends StateProps, DispatchProps {}
 
-const SearchCounterBase = ({ resultsCount, currentIndex, next, prev, clear }: Props) => (
-    <div className="search-counter">
-        <div className="search-counter__index">
-            {currentIndex != null ? currentIndex + 1 : 0} / {resultsCount}
-        </div>
-        <div className="search-counter__prev"
-            onClick={() => prev()}/>
-        <div className="search-counter__next"
-            onClick={() => next()}/>
-        <div className="search-counter__clear"
-            onClick={() => clear()}/>
-    </div> 
-)
+function SearchCounterBase({ resultsCount, currentIndex, next, prev, clear }: Props) {
+    return (
+        <div className="search-counter">
+            <div className="search-counter__index">
+                {currentIndex != null ? currentIndex + 1 : 0} / {resultsCount}
+            </div>
+            <div className="search-counter__prev"
+                onClick={() => prev()}/>
+            <div className="search-counter__next"
+                onClick={() => next()}/>
+            <div className="search-counter__clear"
+                onClick={() => clear()}/>
+        </div> 
+    )
+}
 
 const SearchCounter = connect(
     (state: AppState): StateProps => ({

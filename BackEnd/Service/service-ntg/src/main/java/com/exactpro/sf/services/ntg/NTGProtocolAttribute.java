@@ -40,5 +40,10 @@ public enum NTGProtocolAttribute
 	/**
 	 * Defines key for the specifying value of data type protocol attribute.
 	 */
-	Type
+	Type,
+    
+    /**
+     * Defines key for the specifying value of date pattern protocol attribute.
+     */
+    DateTimeFormat,
 }

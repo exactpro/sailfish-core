@@ -48,15 +48,11 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
     }
 
     scrollToTop() {
-        this.scrollbar.current && this.scrollbar.current.scrollToTop();
+        this.scrollbar.current?.scrollToTop();
     }
 
     scrollTop(top: number = 0) {
-        this.scrollbar.current && this.scrollbar.current.scrollTop(top);
-    }
-
-    setScrollTop(value: number) {
-        this.scrollbar.current && this.scrollbar.current.scrollTop(value);
+        this.scrollbar.current?.scrollTop(top);
     }
 
     componentDidMount() {
@@ -64,28 +60,35 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
         // so we need to rerender component with new root element scroll height
 
         this.setState({
-            rootHeight: this.root && this.root.current.scrollHeight
+            rootHeight: this.root.current.scrollHeight
         });
     }
 
     render() {
-        const { children, selectedElements, elementsCount, height, width, onScroll, heightMapper } = this.props, 
+        const { children, selectedElements, elementsCount, height, width, onScroll, heightMapper } = this.props,
             rootHeight = height !== undefined ? height : this.state.rootHeight,
             style = height !== undefined || width !== undefined ? { height, width } : undefined;
 
         return (
-            <div className="heatmap" ref={this.root} style={style}> 
+            <div className="heatmap" ref={this.root} style={style}>
                 <Scrollbars
                     style={style}
-                    renderThumbVertical={props => <div {...props} className="heatmap-scrollbar-thumb" />}
-                    renderTrackVertical={({ style, ...props }) =>
+                    renderThumbVertical={props => (
+                        <div {...props} className="heatmap-scrollbar-thumb" />
+                    )}
+                    renderTrackVertical={({ style, ...props }) => (
                         <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }} />
-                    }
+                    )}
+                    renderView={props => (
+                        <div {...props} style={{ ...props.style, }} />
+                    )}
                     onScroll={onScroll}
-                    ref={this.scrollbar}
-                >
+                    ref={this.scrollbar}>
                     <div className="heatmap-wrapper">
-                        {children}
+                        { /* We need wrapper with position relative to work properly with absolute position childs. */ }
+                        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                            {children}
+                        </div>
                     </div>
                 </Scrollbars>
                 {
@@ -94,10 +97,10 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
                             elementsCount={elementsCount}
                             selectedElements={selectedElements}
                             rootHeight={rootHeight}
-                            elementHeightMapper={heightMapper}/> : 
+                            elementHeightMapper={heightMapper} /> :
                         <Heatmap
                             elementsCount={elementsCount}
-                            selectedElements={selectedElements}/>
+                            selectedElements={selectedElements} />
                 }
             </div>
         )

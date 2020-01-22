@@ -15,6 +15,7 @@
  ******************************************************************************/
 package com.exactpro.sf.scriptrunner.actionmanager.actioncontext.impl;
 
+import java.io.OutputStream;
 import java.util.Objects;
 import java.util.concurrent.Future;
 
@@ -27,15 +28,18 @@ import com.exactpro.sf.scriptrunner.actionmanager.actioncontext.IActionServiceMa
 import com.exactpro.sf.services.IService;
 import com.exactpro.sf.services.IServiceSettings;
 import com.exactpro.sf.services.ServiceDescription;
+import com.exactpro.sf.services.ServiceMarshalManager;
 import com.exactpro.sf.storage.IServiceStorage;
 
 public class ActionServiceManager implements IActionServiceManager {
     private final IConnectionManager connectionManager;
     private final IServiceStorage serviceStorage;
+    private final ServiceMarshalManager serviceMarshalManager;
 
-    public ActionServiceManager(IConnectionManager connectionManager, IServiceStorage serviceStorage) {
+    public ActionServiceManager(IConnectionManager connectionManager, IServiceStorage serviceStorage, ServiceMarshalManager serviceMarshalManager) {
         this.connectionManager = Objects.requireNonNull(connectionManager, "connection manager cannot be null");
         this.serviceStorage = Objects.requireNonNull(serviceStorage, "service storage cannot be null");
+        this.serviceMarshalManager = Objects.requireNonNull(serviceMarshalManager, "service marshal manager cannot be null");
     }
 
     @Override
@@ -56,6 +60,11 @@ public class ActionServiceManager implements IActionServiceManager {
     @Override
     public IServiceSettings getServiceSettings(ServiceName serviceName) {
         return connectionManager.getServiceSettings(serviceName);
+    }
+
+    @Override
+    public void serializeServiceSettings(ServiceName serviceName, OutputStream out) {
+        serviceMarshalManager.serializeService(connectionManager.getServiceDescription(serviceName), out);
     }
 
     @Override

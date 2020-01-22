@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.exactpro.sf.scriptrunner.impl.jsonreport.IJsonReportNode;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 public class Action implements IJsonReportNode {
@@ -46,12 +47,23 @@ public class Action implements IJsonReportNode {
     private Instant finishTime;
     private String outcome;
     private boolean isRunning;
+    private String tag;
+    private boolean isTruncated;
+    private int verificationCount;
+
+    @JsonIgnore
+    private int verificationLimit;
 
     public Action() {
+        this(-1);
+    }
+
+    public Action(int verificationLimit) {
         this.bugs = new HashSet<>();
         this.subNodes = new ArrayList<>();
         this.relatedMessages = new HashSet<>();
         this.logs = new ArrayList<>();
+        this.verificationLimit = verificationLimit;
     }
 
     @Override
@@ -64,10 +76,23 @@ public class Action implements IJsonReportNode {
             } else if (child instanceof Bug) {
                 bugs.add(((Bug)child).getId());
             } else if (child instanceof Verification) {
-                subNodes.add(child);
                 if (((Verification)child).getMessageId() != null) {
                     relatedMessages.add(((Verification)child).getMessageId());
                 }
+
+                verificationCount++;
+
+                if (isTruncated) {
+                    return;
+                }
+
+                if (verificationLimit != -1 && verificationCount > verificationLimit) {
+                    isTruncated = true;
+                    return;
+                }
+
+                subNodes.add(child);
+
             } else if (child instanceof LogEntry) {
                 logs.add((LogEntry)child);
             } else {
@@ -222,5 +247,29 @@ public class Action implements IJsonReportNode {
 
     public void setIsRunning(boolean running) {
         isRunning = running;
+    }
+
+    public boolean getIsTruncated() {
+        return isTruncated;
+    }
+
+    public void setIsTruncated(boolean truncated) {
+        isTruncated = truncated;
+    }
+
+    public int getVerificationCount() {
+        return verificationCount;
+    }
+
+    public void setVerificationCount(int verificationCount) {
+        this.verificationCount = verificationCount;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

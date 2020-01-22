@@ -74,7 +74,7 @@ public class TestJsonReport extends AbstractTest {
         testScriptDescription.setContext(getScriptContext());
         testScriptDescription.setLanguageURI(SailfishURI.unsafeParse("plugin:class.name"));
 
-        IScriptReport report = new JsonReport("report", workspaceDispatcher, testScriptDescription, serviceContext.getDictionaryManager());
+        IScriptReport report = new JsonReport(-1, "report", workspaceDispatcher, testScriptDescription, serviceContext.getDictionaryManager());
 
         report.createReport(getScriptContext(), "name", "descr", 1, "environment", "user");
 

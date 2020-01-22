@@ -27,7 +27,7 @@ interface Props {
     theme?: string;
 }
 
-export const ToggleButton = ({ onClick = () => {}, isToggled = false, text, theme = 'default', isDisabled = false, title = '' }: Props) => {
+export function ToggleButton({ onClick = () => {}, isToggled = false, text, theme = 'default', isDisabled = false, title = '' }: Props) {
     const className = createSelector(
         "toggle-button", 
         theme, 

@@ -73,6 +73,7 @@ public class LiveTestCaseWriter {
 
         cleanDir();
         switchToNextFile();
+        updateRootFile();
     }
 
     public void writeNode(IJsonReportNode node) {

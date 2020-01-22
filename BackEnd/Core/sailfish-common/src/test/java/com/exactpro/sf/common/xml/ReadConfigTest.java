@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,7 @@ public class ReadConfigTest extends EPSTestCase {
 		Field mfield = new Field();
 		mfield.setName("f_name");
 		mfield.setReference(field);
-		message.getFields().add(mfield);
+		message.getFieldsAndMessages().add(mfield);
 		dict.setMessages(new Messages());
 		dict.getMessages().getMessages().add(message);
 
@@ -115,14 +115,12 @@ public class ReadConfigTest extends EPSTestCase {
 			dictionary = loader.load(in);
     	}
 
-		MessageStructureWriter wtraverser = new MessageStructureWriter();
-
 		TestVisitor visitor = new TestVisitor();
 
         for(IMessageStructure imstructure : dictionary.getMessages().values()) {
 
 			System.out.println(" message = " + imstructure.getName());
-			wtraverser.traverse(visitor, imstructure);
+            MessageStructureWriter.WRITER.traverse(visitor, imstructure);
 
 		}
 

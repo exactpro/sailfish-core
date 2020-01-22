@@ -21,8 +21,8 @@ import java.util.List;
 
 public class MessageJsonContainer extends FieldJsonContainer {
 
-    public MessageJsonContainer(String name, String htmlPath, String icon, HelpEntityType type,  List<HelpJsonContainer> childNodes) {
-        super(name, htmlPath, icon, type, null, childNodes);
+    public MessageJsonContainer(String name, String htmlPath, String icon, HelpEntityType type,  boolean isCollection, List<HelpJsonContainer> childNodes) {
+        super(name, htmlPath, icon, type, null, isCollection, childNodes);
     }
 
     public MessageJsonContainer(){

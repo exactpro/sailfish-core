@@ -43,7 +43,6 @@ interface OwnProps {
     params: VerificationEntry[];
     status: StatusType;
     keyPrefix: string;
-    onExpand: () => void;
 }
 
 interface StateProps {
@@ -112,11 +111,6 @@ class VerificationTableBase extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
-        // handle expand state changing to remeasure card size
-        if (this.state.nodes !== prevState.nodes || this.props.visibilityFilter !== prevProps.visibilityFilter) {
-            this.props.onExpand();
-        }
-
         if (this.props.expandPath !== prevProps.expandPath && this.props.expandPath.length > 0) {
             this.setState({
                 nodes: this.updateExpandPath(this.props.expandPath, this.state.nodes)

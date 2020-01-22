@@ -32,7 +32,6 @@ interface OwnProps {
     actionId: number;
     params: ActionParameter[];
     name: string;
-    onExpand: () => void;
 }
 
 interface StateProps {
@@ -90,10 +89,6 @@ class ParamsTableBase extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props, prevState: State) {
-        if (prevState.nodes !== this.state.nodes) {
-            this.props.onExpand();
-        }
-
         if (prevProps.expandPath !== this.props.expandPath && this.props.expandPath && this.props.expandPath.length > 0) {
             this.setState({
                 nodes: this.updateExpandPath(this.props.expandPath, this.state.nodes)

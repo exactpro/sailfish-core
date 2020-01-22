@@ -38,7 +38,6 @@ interface Props {
     actionsFilter: Set<StatusType>;
     expandPath: Tree<ActionExpandStatus>;
 
-    onExpand: () => void;
     onRootExpand: (actionId: number, isExpanded: boolean) => void;
     onActionSelect: (action: Action) => void;
     onVerificationSelect: (messageId: number, rootActionId: number, status: StatusType) => void;
@@ -54,7 +53,6 @@ export default function ActionTreeNode(props: Props) {
         selectedActionsId, 
         selectedVerificationId, 
         actionsFilter, 
-        onExpand, 
         onRootExpand,
         expandPath
     } = props;
@@ -77,12 +75,12 @@ export default function ActionTreeNode(props: Props) {
                     onSelect={onActionSelect}
                     isRoot={isRoot}
                     isExpanded={expandPath.value.isExpanded}
-                    onExpand={onExpand}
                     onRootExpand={isExpanded => onRootExpand(action.id, isExpanded)}>
                     {
-                        action.subNodes?.map(childAction => (
+                        action.subNodes?.map((childAction, index) => (
                             <ActionTreeNode
                                 {...props}
+                                key={index}
                                 parentAction={action}
                                 isRoot={false}
                                 action={childAction}
@@ -95,7 +93,7 @@ export default function ActionTreeNode(props: Props) {
 
         case ActionNodeType.VERIFICATION: {
             const verification = action,
-                isSelected = verification.messageId === selectedVerificationId,
+                isSelected = verification.messageId && verification.messageId === selectedVerificationId,
                 isTransparent = !actionsFilter.has(verification.status.status);
 
             return (
@@ -105,8 +103,7 @@ export default function ActionTreeNode(props: Props) {
                     isSelected={isSelected}
                     isTransparent={isTransparent}
                     onSelect={onVerificationSelect}
-                    parentActionId={parentAction?.id}
-                    onExpand={onExpand}/>
+                    parentActionId={parentAction?.id}/>
             )
         }
 
@@ -114,8 +111,7 @@ export default function ActionTreeNode(props: Props) {
             return (
                 <CustomMessage
                     userMessage={action}
-                    parent={parentAction}
-                    onExpand={onExpand}/>
+                    parent={parentAction}/>
             );
         }
 
@@ -129,8 +125,7 @@ export default function ActionTreeNode(props: Props) {
             return (
                 <UserTableCard
                     table={action}
-                    parent={parentAction}
-                    onExpand={onExpand}/>
+                    parent={parentAction}/>
             );
         }
 

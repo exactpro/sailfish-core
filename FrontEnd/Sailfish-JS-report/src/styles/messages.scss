@@ -33,6 +33,7 @@
     grid-template-areas: "mc-labels mc-header"
                          "mc-labels mc-body";
     width: 100%;
+    margin: 6px 0;
 
     border: 2px solid var(--status-secondary-border-color);
     border-radius: $defaultCardBorderRadius;
@@ -66,8 +67,9 @@
     width: 20px;
     height: 100%;
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
 
     &__icon {
         height: 14px;
@@ -100,9 +102,19 @@
             height: 14px;
             width: 14px;
             margin-top: 12px;
+            margin-bottom: 6px;
             background-size: 100%;
 
             background-image: url(../../resources/icons/ml-prediction.svg)
+        }
+
+        &-percentage {
+            font-size: 10pt;
+            font-weight: bold;
+            color: white;
+
+            -webkit-text-stroke-width: 0.5px;
+            -webkit-text-stroke-color: white;
         }
     }
 }

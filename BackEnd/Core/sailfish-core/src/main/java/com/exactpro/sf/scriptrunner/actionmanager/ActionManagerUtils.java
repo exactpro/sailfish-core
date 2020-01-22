@@ -26,6 +26,7 @@ import com.exactpro.sf.aml.CommonColumns;
 import com.exactpro.sf.aml.CustomColumn;
 import com.exactpro.sf.aml.CustomColumns;
 import com.exactpro.sf.aml.Description;
+import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 
 public class ActionManagerUtils {
@@ -63,8 +64,9 @@ public class ActionManagerUtils {
 
         Class<?>[] parameterTypes = actionMethod.getParameterTypes();
 
-        if(parameterTypes.length == 2) {
-            actionInfo.setMessageType(parameterTypes[1]);
+        if (parameterTypes.length == 2) {
+            Class<?> type = parameterTypes[1];
+            actionInfo.setMessageType(Map.class.isAssignableFrom(type) ? HashMapWrapper.class : type);
         }
 
         actionInfo.setAnnotations(actionMethod.getAnnotations());

@@ -25,17 +25,20 @@ import java.util.List;
 @JsonTypeInfo(use= Id.CLASS, include= As.PROPERTY, property="@class")
 public class FieldJsonContainer extends HelpJsonContainer{
     private String javaType;
+    private boolean collection;
 
-    public FieldJsonContainer(String name, String htmlPath, String icon, HelpEntityType type, String javaType) {
+    public FieldJsonContainer(String name, String htmlPath, String icon, HelpEntityType type, String javaType, boolean isCollection) {
         super(name, htmlPath, icon, type);
 
         this.javaType = javaType;
+        this.collection = isCollection;
     }
 
-    public FieldJsonContainer(String name, String htmlPath, String icon, HelpEntityType type, String javaType, List<HelpJsonContainer> childNodes) {
+    public FieldJsonContainer(String name, String htmlPath, String icon, HelpEntityType type, String javaType, boolean isCollection, List<HelpJsonContainer> childNodes) {
         super(name, htmlPath, icon, type, childNodes);
 
         this.javaType = javaType;
+        this.collection = isCollection;
     }
 
     public FieldJsonContainer() {
@@ -45,5 +48,8 @@ public class FieldJsonContainer extends HelpJsonContainer{
         return javaType;
     }
 
+    public boolean isCollection() {
+        return collection;
+    }
 }
 

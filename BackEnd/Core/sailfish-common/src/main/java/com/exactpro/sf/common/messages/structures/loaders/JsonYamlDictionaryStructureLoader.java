@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,25 @@
  ******************************************************************************/
 package com.exactpro.sf.common.messages.structures.loaders;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+
+import com.exactpro.sf.common.impl.messages.json.configuration.FieldMessageDeserializer;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonField;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonMessage;
 import com.exactpro.sf.common.impl.messages.json.configuration.JsonYamlDictionary;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SingleKeyHashMap;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.lang.StringUtils;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 
 /**
  * Java class for load {@link IDictionaryStructure} from JSON/YAML format.
@@ -41,9 +46,16 @@ public class JsonYamlDictionaryStructureLoader extends AbstractDictionaryStructu
         super(aggregateAttributes);
         objectMapper = new ObjectMapper(
                 new YAMLFactory()
-                .disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
-                .disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
-        );
+                        .disable(Feature.USE_NATIVE_OBJECT_ID)
+                        .disable(Feature.USE_NATIVE_TYPE_ID)
+        )
+                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+                .enableDefaultTyping();
+
+        //For embedded messages
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(JsonField.class, new FieldMessageDeserializer());
+        objectMapper.registerModule(module);
     }
 
     public JsonYamlDictionaryStructureLoader() {

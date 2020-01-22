@@ -16,11 +16,10 @@
 package com.exactpro.sf.storage.xml;
 
 import java.math.BigDecimal;
-import java.util.List;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageStructureVisitor;
@@ -31,8 +30,6 @@ import com.exactpro.sf.common.messages.structures.IFieldStructure;
 public class DataMessageWriterVisitor implements IMessageStructureVisitor {
 
 	private final DataMessage dataMessage;
-	
-	private static final MessageStructureReader rtraverser = new MessageStructureReader();
 	
 	public DataMessageWriterVisitor(DataMessage dataMessage){
 		this.dataMessage = dataMessage;
@@ -211,7 +208,7 @@ public class DataMessageWriterVisitor implements IMessageStructureVisitor {
 		dMessage.setNamespace(message.getNamespace());
 		
 		DataMessageWriterVisitor visitor  = new DataMessageWriterVisitor(dMessage);
-		rtraverser.traverse(visitor, complexField.getFields(), message, MessageStructureReaderHandlerImpl.instance());
+		MessageStructureReader.READER.traverse(visitor, complexField.getFields(), message, MessageStructureReaderHandlerImpl.instance());
 		dataMessage.getFieldsAndFieldsAndMessages().add(dMessage);
 	}
 
@@ -242,8 +239,8 @@ public class DataMessageWriterVisitor implements IMessageStructureVisitor {
 			DataMessage dMessage = new DataMessage();
 			dMessage.setName(imessage.getName());
 			dMessage.setNamespace(imessage.getNamespace());
-			
-			rtraverser.traverse(new DataMessageWriterVisitor(dMessage), complexField.getFields(), imessage, MessageStructureReaderHandlerImpl.instance());
+
+            MessageStructureReader.READER.traverse(new DataMessageWriterVisitor(dMessage), complexField.getFields(), imessage, MessageStructureReaderHandlerImpl.instance());
 			dmessages.getMessages().add(dMessage);
 		}
 		dataMessage.getFieldsAndFieldsAndMessages().add(dmessages);

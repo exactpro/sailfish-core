@@ -26,6 +26,7 @@
     border: 2px solid transparent;
     border-radius: $defaultCardBorderRadius;
     padding: 5px;
+    margin: 6px 0;
 
     &__status {
         padding-left: 10px;
@@ -66,7 +67,7 @@
             color: $linkTextColor;
 
             // https://kirkizh.ru/2018/03/underline/
-            // we can't use standart underline and before pseudoelement with text-shadow
+            // we can't use standard underline and before pseudoelement with text-shadow
             background-image: linear-gradient(to top, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 1px,  $linkUnderlineColor 1px, rgba(0,0,0,0) 2px, rgba(0,0,0,0) 100px);
             text-shadow: 2px 0px #fff, -2px 0px #fff;
         }
@@ -109,6 +110,7 @@
     }
 
     &__name {
+        cursor: pointer;
         width: fit-content;
         color: var(--status-primary-color);
     }
@@ -120,7 +122,7 @@
     &__name, &__description {
         padding-right: 8px;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         justify-content: flex-start;
         white-space: pre-wrap;
     }
@@ -247,6 +249,13 @@
         color: var(--status-primary-color);
         font-weight: bold;
         font-size: 17px;
+    }
+
+    &__truncated-warning {
+        color: $secondaryTextColor;
+        font-size: 12px;
+        font-weight: bold;
+        padding-left: 7px;
     }
 }
 

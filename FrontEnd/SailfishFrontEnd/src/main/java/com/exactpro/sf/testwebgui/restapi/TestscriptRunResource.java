@@ -25,12 +25,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import javax.ws.rs.DefaultValue;
@@ -46,6 +48,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.fileupload.util.Streams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +81,7 @@ public class TestscriptRunResource {
 	private static final Logger logger = LoggerFactory.getLogger(TestscriptRunResource.class);
 
 	private static final String DATE_FORMAT = "yyyyMMdd_HHmmss";
+	private static final String ARCHIVE_EXTENSION = ".zip";
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
@@ -119,15 +123,14 @@ public class TestscriptRunResource {
 			                entity(xmlDescr).
 			                build();
                 } else if("report".equals(actionName)) {
-
-					try {
-                        if (testScriptRun.isLocked()) {
-                            return getLockedReportResponse();
-                        }
-                        File reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, testScriptRun.getWorkFolder(), REPORT_DATA_DIR);
-                        File zipFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
-
-                        try (ZipOutputStream archive = new ZipOutputStream(new FileOutputStream(zipFile))) {
+                    String workFolder = testScriptRun.getWorkFolder();
+                    String reportFolderPath = Paths.get(workFolder, REPORT_DATA_DIR).toString();
+                    File reportFolder = null;
+                    File reportZip = null;
+                    File zipFile = File.createTempFile(UUID.randomUUID().toString(), ".zip");
+                    try (ZipOutputStream archive = new ZipOutputStream(new FileOutputStream(zipFile))) {
+                        try {
+                            reportFolder = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, reportFolderPath);
                             Consumer<java.nio.file.Path> reportZipper = path -> {
                                 try {
                                     archive.putNextEntry(new ZipEntry(path.toFile().getName()));
@@ -139,27 +142,50 @@ public class TestscriptRunResource {
                             };
 
                             Files.walk(reportFolder.toPath()).filter(path -> path.toFile().isFile()).forEach(reportZipper);
+                        } catch (FileNotFoundException e0) {
+                            try {
+
+                                reportZip = SFLocalContext.getDefault().getWorkspaceDispatcher().getFile(FolderType.REPORT, workFolder.endsWith(ARCHIVE_EXTENSION) ? workFolder : workFolder + ARCHIVE_EXTENSION);
+                                ZipFile inputZipFile = new ZipFile(reportZip);
+                                inputZipFile
+                                        .stream()
+                                        .filter(entity -> entity.getName().startsWith(reportFolderPath))
+                                        .forEach(entity -> {
+                                            try {
+                                                archive.putNextEntry(new ZipEntry(Paths.get(entity.getName()).getFileName().toString()));
+                                                Streams.copy(inputZipFile.getInputStream(entity), archive, false);
+                                                archive.closeEntry();
+                                            } catch (IOException e) {
+                                                throw new EPSCommonException(e);
+                                            }
+                                        });
+                            } catch (FileNotFoundException e1) {
+                                logger.error(e0.getMessage(), e0);
+                                logger.error(e1.getMessage(), e1);
+                            }
                         }
+                    }
+
+                    if (reportFolder != null || reportZip != null) {
 
                         StreamingOutput stream = out -> {
-
                             try {
                                 Files.copy(zipFile.toPath(), out);
-                            } catch(Exception e) {
+                            } catch (Exception e) {
                                 logger.error(e.getMessage(), e);
                                 throw new WebApplicationException(e);
                             }
                         };
 
-						return Response
-								.ok(stream)
-								.header("content-disposition",
-										"attachment; filename = "
-												+ zipFile.getName()).build();
-					} catch (FileNotFoundException e) {
-					    logger.error(e.getMessage(), e);
-						errorMessage = "report doesn't exists";
-					}
+                        return Response
+                                .ok(stream)
+                                .header("content-disposition",
+                                        "attachment; filename = "
+                                                + zipFile.getName()).build();
+                    } else {
+                        errorMessage = "report doesn't exists";
+                    }
+
                 } else if("shortreport".equals(actionName)) {
                     XmlTestScriptShortReport xmlProp = createShortReport(testScriptRun);
 
@@ -462,17 +488,30 @@ public class TestscriptRunResource {
             try {
 
                 IWorkspaceDispatcher workspaceDispatcher = SFLocalContext.getDefault().getWorkspaceDispatcher();
-
-                ReportRoot report = OBJECT_MAPPER
-                        .readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder(), "reportData", "report.json"),
-                                ReportRoot.class);
+                ZipFile zipReport = null;
+                ReportRoot reportRoot;
+                try {
+                    reportRoot = OBJECT_MAPPER
+                            .readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder(), "reportData", "report.json"),
+                                    ReportRoot.class);
+                } catch (IOException e) {
+                    zipReport = new ZipFile(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder() + ARCHIVE_EXTENSION));
+                    reportRoot = OBJECT_MAPPER.readValue(zipReport.getInputStream(zipReport.getEntry(Paths.get(testScriptDescr.getWorkFolder(), "reportData", "report.json").toString())),
+                            ReportRoot.class);
+                }
 
 
                 List<XmlTestCaseDescription> list = new ArrayList<>();
 
-                for (TestCaseMetadata metadata : report.getMetadata()) {
-                    TestCase testCase = OBJECT_MAPPER.readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr
-                            .getWorkFolder(), "reportData", metadata.getJsonFileName()), TestCase.class);
+                for (TestCaseMetadata metadata : reportRoot.getMetadata()) {
+                    TestCase testCase;
+
+                    testCase = zipReport == null ?
+                            OBJECT_MAPPER.readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr
+                                    .getWorkFolder(), "reportData", metadata.getJsonFileName()), TestCase.class)
+                            :
+                            OBJECT_MAPPER.readValue(zipReport.getInputStream(zipReport.getEntry(Paths.get(testScriptDescr
+                                    .getWorkFolder(), "reportData", metadata.getJsonFileName()).toString())), TestCase.class);
 
                     XmlTestCaseDescription xmlTestCaseDescription = new XmlTestCaseDescription();
                     xmlTestCaseDescription.setDescription(testCase.getDescription());

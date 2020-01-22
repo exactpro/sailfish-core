@@ -31,6 +31,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
@@ -61,6 +63,7 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
     protected static final int lengthDouble = 8;
     protected static final int lengthBigDecimal = 8;
     protected static final int lengthLong = 8;
+    protected static final int[] lengthLocalDateTime = { 24 };
 
     private final Multimap<JavaType, String> typeAllowedFormats = ImmutableSetMultimap.<JavaType, String>builder()
             .putAll(JavaType.JAVA_LANG_STRING, NTGFieldFormat.A.name(), NTGFieldFormat.D.name())
@@ -237,8 +240,8 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 break;
 
             case JAVA_TIME_LOCAL_DATE_TIME:
-                if (length != lengthLong) {
-                    addProtocolTypeError(errors, message, field, lengthLong, length);
+                if (!isCorrectLength(length, lengthLocalDateTime)) {
+                    addProtocolTypeError(errors, message, field, lengthLocalDateTime, length);
                 }
                 break;
 
@@ -249,7 +252,11 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                 break;
         }
     }
-
+    
+    private boolean isCorrectLength(int length, int[] lengthLocalDateTime) {
+        return ArrayUtils.contains(lengthLocalDateTime, length);
+    }
+    
     private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message,
                                       IFieldStructure field,int expectedLength, int actualLength) {
         errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
@@ -257,6 +264,15 @@ public class NTGDictionaryValidator extends AbstractDictionaryValidator {
                         + actualLength + "]. Must be [" + expectedLength + "]",
                 DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
 
+    }
+    
+    private void addProtocolTypeError(List<DictionaryValidationError> errors, IMessageStructure message,
+            IFieldStructure field, int[] expectedLength, int actualLength) {
+        errors.add(new DictionaryValidationError(message == null ? null : message.getName(), field.getName(),
+                "Attribute <strong>\"Length\"</strong> has incorrect value = ["
+                        + actualLength + "]. Must be [" + Arrays.toString(expectedLength) + "]",
+                DictionaryValidationErrorLevel.FIELD, DictionaryValidationErrorType.ERR_ATTRIBUTES));
+        
     }
 
     private void checkLengthFromPossibleValues(List<DictionaryValidationError> errors, IMessageStructure message,

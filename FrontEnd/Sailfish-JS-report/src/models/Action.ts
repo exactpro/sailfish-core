@@ -52,6 +52,8 @@ export default interface Action {
     subNodes?: ActionNode[];
     checkPointId?: number;
     outcome?: string;
+    verificationCount: number;
+    isTruncated: boolean;
 }
 
 export function isAction(action: ActionNode): action is Action {

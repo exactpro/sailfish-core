@@ -190,7 +190,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         if(converter == null) {
 			FastToIMessageConverter converter = new FastToIMessageConverter(
 					dictionaryManager.getMessageFactory(getSettings().getDictionaryName()),
-					dictionary.getNamespace()
+					dictionary
 			);
 			this.converter = converter;
 		}

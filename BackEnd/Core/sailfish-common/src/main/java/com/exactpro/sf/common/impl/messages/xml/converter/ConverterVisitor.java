@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 			newField.setReference(enumXmlField);
 		}
 
-		xmlMessage.getFields().add(newField);
+		xmlMessage.getFieldsAndMessages().add(newField);
 
 	}
 
@@ -271,13 +271,12 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 
 		if (refferedMessage == null) {
 			refferedMessage = new Message();
-			MessageStructureWriter writer = new MessageStructureWriter();
 			refferedMessage.setName(complexField.getReferenceName());
 			refferedMessage.setId(complexField.getReferenceName());
 			ConverterVisitor visitor = new ConverterVisitor(refferedMessage,
 					dictionary);
 			dictionary.getMessages().getMessages().add(refferedMessage);
-			writer.traverse(visitor, complexField.getFields());
+            MessageStructureWriter.WRITER.traverse(visitor, complexField.getFields());
 		}
 
 		messageField.setReference(refferedMessage);
@@ -301,7 +300,7 @@ public class ConverterVisitor implements IMessageStructureVisitor {
 			messageField.getAttributes().add(attribute);
         });
 
-		xmlMessage.getFields().add(messageField);
+		xmlMessage.getFieldsAndMessages().add(messageField);
 	}
 	
 	@Override

@@ -28,7 +28,7 @@ interface Props {
     visibilityFilterHandler: () => any;
 }
 
-const StatusFilterToggler = ({ status, transparencyFilter, visibilityFilter, transparencyFilterHandler, visibilityFilterHandler }: Props) => {
+function StatusFilterToggler({ status, transparencyFilter, visibilityFilter, transparencyFilterHandler, visibilityFilterHandler }: Props) {
     const formattedStatus = status.replace('_', ' ');
 
     const rootClassName = createBemBlock(

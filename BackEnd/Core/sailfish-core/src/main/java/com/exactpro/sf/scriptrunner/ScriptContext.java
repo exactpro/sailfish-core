@@ -37,6 +37,7 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.Outcome.Status;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.utilitymanager.IUtilityManager;
+import com.exactpro.sf.services.ServiceMarshalManager;
 import com.exactpro.sf.storage.ScriptRun;
 import com.exactpro.sf.util.BugDescription;
 import com.google.common.collect.HashMultimap;
@@ -80,6 +81,7 @@ public class ScriptContext
     private final IDataManager dataManager;
     private final Map<String, ClassLoader> pluginClassLoaders;
     private final SetMultimap<String, String> executedActions = HashMultimap.create();
+    private final ServiceMarshalManager serviceMarshalManager;
 
     public ScriptContext(ISFContext context, IScriptProgress scriptProgress, IScriptReport report, DebugController debugController, String userName, long scriptDescriptionId) {
         this(context, scriptProgress, report, debugController, userName, scriptDescriptionId, ServiceName.DEFAULT_ENVIRONMENT);
@@ -108,6 +110,7 @@ public class ScriptContext
         this.dataManager = context.getDataManager();
         this.pluginClassLoaders = context.getPluginClassLoaders();
         this.environmentName = environmentName;
+        this.serviceMarshalManager = context.getServiceMarshalManager();
 
         IConnectionManager connectionManager = context.getConnectionManager();
 
@@ -334,5 +337,9 @@ public class ScriptContext
 
     public boolean checkExecutedActions(List<String> references) {
         return executedActions.get(getTestCaseName()).containsAll(references);
+    }
+
+    public ServiceMarshalManager getServiceMarshalManager() {
+        return serviceMarshalManager;
     }
 }

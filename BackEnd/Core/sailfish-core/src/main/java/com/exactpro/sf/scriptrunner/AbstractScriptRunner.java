@@ -70,6 +70,8 @@ import com.exactpro.sf.scriptrunner.EnvironmentSettings.ReportOutputFormat;
 import com.exactpro.sf.scriptrunner.ScriptProgress.IScriptRunProgressListener;
 import com.exactpro.sf.scriptrunner.actionmanager.IActionManager;
 import com.exactpro.sf.scriptrunner.impl.BroadcastScriptReport;
+import com.exactpro.sf.scriptrunner.impl.ReportDictionaries;
+import com.exactpro.sf.scriptrunner.impl.ReportServices;
 import com.exactpro.sf.scriptrunner.impl.ScriptReportWithLogs;
 import com.exactpro.sf.scriptrunner.impl.StatisticScriptReport;
 import com.exactpro.sf.scriptrunner.impl.htmlreport.HtmlReport;
@@ -259,10 +261,16 @@ public abstract class AbstractScriptRunner implements IDisposable {
 							scriptDescription.getTags()));
 
             List<IScriptReport> aggregateReportListeners = new ArrayList<>();
-			// json report
-            aggregateReportListeners.add(new JsonReport(reportFolder, workspaceDispatcher, scriptDescription, dictionaryManager));
+            int verificationLimit = sfContext.getEnvironmentManager().getEnvironmentSettings().getVerificationLimit();
+
+            // json report
+            aggregateReportListeners.add(new JsonReport(verificationLimit, reportFolder, workspaceDispatcher, scriptDescription, dictionaryManager));
             // html report
-            aggregateReportListeners.add(new HtmlReport(sfContext.getSfInstanceInfo(), reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
+            aggregateReportListeners.add(new HtmlReport(verificationLimit, sfContext.getSfInstanceInfo(), reportFolder, workspaceDispatcher, dictionaryManager, environmentManager.getEnvironmentSettings().getRelevantMessagesSortingMode()));
+            //dictionary report
+            aggregateReportListeners.add(new ReportDictionaries(reportFolder));
+            //services report
+            aggregateReportListeners.add(new ReportServices(reportFolder));
 
             BroadcastScriptReport aggregateReport = new BroadcastScriptReport(aggregateReportListeners);
 
@@ -272,11 +280,8 @@ public abstract class AbstractScriptRunner implements IDisposable {
                 reportListeners.addAll(userListeners);
             }
 
-            ReportOutputFormat reportOutputFormat = environmentManager.getEnvironmentSettings().getReportOutputFormat();
-            if(reportOutputFormat.isEnableZip()) {
-                // NOTE: ZipReport must be latest
-                reportListeners.add(new ZipReport(reportFolder, workspaceDispatcher, scriptDescription, reportOutputFormat));
-            }
+            // NOTE: ZipReport must be latest
+            reportListeners.add(new ZipReport(reportFolder, workspaceDispatcher, scriptDescription,  ReportOutputFormat.ZIP));
             
             BroadcastScriptReport report = new BroadcastScriptReport(reportListeners);
 

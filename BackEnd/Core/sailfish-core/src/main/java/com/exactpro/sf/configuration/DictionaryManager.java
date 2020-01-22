@@ -329,7 +329,7 @@ public class DictionaryManager implements IDictionaryManager, ILoadableManager {
                 };
             }
 
-            iMessageFactory.init(getDictionary(uri).getNamespace(), uri);
+            iMessageFactory.init(uri, getDictionary(uri));
 
             return iMessageFactory;
         } catch (Exception e) {

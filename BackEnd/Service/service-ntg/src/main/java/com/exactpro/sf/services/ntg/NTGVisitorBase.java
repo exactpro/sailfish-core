@@ -17,7 +17,15 @@ package com.exactpro.sf.services.ntg;
 
 import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.CharBuffer;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -43,6 +51,9 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 
     protected int accumulatedLength;
     protected IoBuffer buffer;
+    
+    protected static final ThreadLocal<CharsetEncoder> ENCODER = ThreadLocal.withInitial(StandardCharsets.ISO_8859_1::newEncoder);
+    protected static final ThreadLocal<CharsetDecoder> DECODER = ThreadLocal.withInitial(StandardCharsets.ISO_8859_1::newDecoder);
 
     protected NTGVisitorBase()
 	{
@@ -110,6 +121,14 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 										+ " Actual value is ["+format+"].");
 			}
 		}
+        
+        if (clazz == LocalDateTime.class && !fldStruct.getAttributes().containsKey(NTGProtocolAttribute.DateTimeFormat.toString())) {
+            
+            errMessage.append(String.format(
+                    "In the protocol attributes map for the field '%s' mandatory key '%s' is missed.",
+                    fieldName, NTGProtocolAttribute.DateTimeFormat.toString()));
+            
+        }
 
 		if (errMessage.length() > 0)
 		{
@@ -145,6 +164,26 @@ abstract class NTGVisitorBase extends DefaultMessageStructureVisitor {
 			throw new EPSCommonException( errMsg );
 		}
 	}
+    
+    static byte[] encodeString(String str, int length) {
+        byte[] array = new byte[length];
+        Arrays.fill(array, (byte)0x20);
+        ByteBuffer buffer = ByteBuffer.wrap(array);
+        CharBuffer charBuffer = CharBuffer.wrap(str);
+        CoderResult result = ENCODER.get().encode(charBuffer, buffer, true);
+        if (result.isOverflow()) {
+            throw new EPSCommonException("The length of value = [" + str
+                    + "] is greater than length specified in the dictionary.");
+        }
+        return array;
+    }
+    
+    static void checkLength(String dateTimeStr, int actualLength, int expectedLength) {
+        if (actualLength != expectedLength) {
+            throw new EPSCommonException("The length of the encoded value does not match the length specified in the dictionary."
+                    + " Encoded value: \"" + dateTimeStr + "\". Length in dictionary: \"" + expectedLength + "\".");
+        }
+    }
 
     public enum ProtocolType {
 

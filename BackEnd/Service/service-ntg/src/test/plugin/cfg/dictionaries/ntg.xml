@@ -454,39 +454,39 @@
             <field isCollection="false" defaultvalue="0" type="java.lang.String" name="TransactTime">
                 <attribute type="java.lang.String" name="Format">D</attribute>
                 <attribute type="java.lang.Integer" name="Offset">129</attribute>
-                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Integer" name="Length">24</attribute>
             </field>
             <field isCollection="false" defaultvalue="0" type="java.lang.Integer" reference="TargetBook" name="TargetBook">
                 <attribute type="java.lang.String" name="Format">N</attribute>
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
-                <attribute type="java.lang.Integer" name="Offset">137</attribute>
+                <attribute type="java.lang.Integer" name="Offset">153</attribute>
             </field>
             <field isCollection="false" defaultvalue="0" type="java.lang.Integer" reference="TypeOfTrade" name="TypeOfTrade">
                 <attribute type="java.lang.String" name="Format">N</attribute>
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
-                <attribute type="java.lang.Integer" name="Offset">138</attribute>
+                <attribute type="java.lang.Integer" name="Offset">154</attribute>
             </field>
             <field isCollection="false" defaultvalue="1" type="java.lang.Integer" reference="Capacity" name="Capacity">
                 <attribute type="java.lang.String" name="Format">N</attribute>
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
-                <attribute type="java.lang.Integer" name="Offset">139</attribute>
+                <attribute type="java.lang.Integer" name="Offset">155</attribute>
             </field>
             <field isCollection="false" defaultvalue="" type="java.lang.String" name="PriceDifferential">
                 <attribute type="java.lang.String" name="Format">A</attribute>
-                <attribute type="java.lang.Integer" name="Offset">140</attribute>
+                <attribute type="java.lang.Integer" name="Offset">156</attribute>
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
             </field>
             <field isCollection="false" defaultvalue="" type="java.lang.String" name="PublicOrderID">
                 <attribute type="java.lang.String" name="Format">A</attribute>
-                <attribute type="java.lang.Integer" name="Offset">141</attribute>
+                <attribute type="java.lang.Integer" name="Offset">157</attribute>
                 <attribute type="java.lang.Integer" name="Length">12</attribute>
             </field>
             <field isCollection="false" defaultvalue="0" type="java.lang.Integer" name="MinimumQuantity">
-                <attribute type="java.lang.Integer" name="Offset">153</attribute>
+                <attribute type="java.lang.Integer" name="Offset">169</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
             </field>
             <field isCollection="false" defaultvalue="0" type="java.lang.Integer" name="ReputationalScore">
-                <attribute type="java.lang.Integer" name="Offset">157</attribute>
+                <attribute type="java.lang.Integer" name="Offset">173</attribute>
                 <attribute type="java.lang.Integer" name="Length">1</attribute>
             </field>
         </message>
@@ -520,14 +520,15 @@
                 <attribute type="java.lang.Integer" name="Offset">41</attribute>
                 <attribute type="java.lang.Integer" name="Length">4</attribute>
             </field>
-            <field isCollection="false" defaultvalue="0" type="java.lang.String" name="TransactTime">
+            <field isCollection="false" type="java.time.LocalDateTime" name="TransactTime">
                 <attribute type="java.lang.String" name="Format">D</attribute>
                 <attribute type="java.lang.Integer" name="Offset">45</attribute>
-                <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.Integer" name="Length">24</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">yyyyMMdd-hh:mm:ss.SSSSSS</attribute>
             </field>
             <field isCollection="false" type="java.lang.String" name="Reserved1">
                 <attribute type="java.lang.String" name="Format">A</attribute>
-                <attribute type="java.lang.Integer" name="Offset">53</attribute>
+                <attribute type="java.lang.Integer" name="Offset">69</attribute>
                 <attribute type="java.lang.Integer" name="Length">10</attribute>
             </field>
         </message>

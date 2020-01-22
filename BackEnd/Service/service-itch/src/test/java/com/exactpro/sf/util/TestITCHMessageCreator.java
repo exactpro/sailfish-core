@@ -15,18 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.util;
 
-import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
-import com.exactpro.sf.services.itch.ITCHMessageHelper;
-import java.time.LocalDateTime;
-
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.services.itch.ITCHMessageHelper;
 
 public class TestITCHMessageCreator {
 	
@@ -173,8 +176,10 @@ public class TestITCHMessageCreator {
 		IMessage message = messageHelper.getMessageFactory().createMessage("testString", "ITCH");
 		message.addField("Alpha", "ffst");
 		message.addField("Time", "10:49:00");
+        message.addField("ExtTime", "10:49:00.123");
 		message.addField("Date", "Mon Jul 04 14:02:30 MSK 2016");
 		message.addField("STUB", "stub");
+        message.addField("Date_Time", "2019-12-31T02:12:68.123456Z");
 		 return messageHelper.prepareMessageToEncode(message, null);
 	}
 	
@@ -223,6 +228,14 @@ public class TestITCHMessageCreator {
         message.addField("Time", DateTimeUtility.toLocalTime(startTime));
         message.addField("Days", DateTimeUtility.toLocalDate(startDate));
         message.addField("STUB", DateTimeUtility.toLocalDateTime(days));
+        
+        DateTimeFormatter extTimeFormatter = DateTimeUtility.createFormatter("HH:mm:ss.SSS");
+        LocalTime extTime = LocalTime.parse("10:10:11.123", extTimeFormatter);
+        message.addField("ExtTime", extTime);
+        
+        DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+        ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(dateTimeFormatter.parse("2019-12-31T01:02:03.123456Z"));
+        message.addField("Date_Time", DateTimeUtility.toLocalDateTime(zonedDateTime));
         // LocalDateTime localDays = DateTimeUtility.toLocalDateTime(100);
         // localDays = localDays.minusNanos(localDays.getNano());
         // message.addField("Date", DateTimeUtility.toLocalDateTime(startDate));

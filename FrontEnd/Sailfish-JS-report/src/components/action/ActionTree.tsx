@@ -35,7 +35,6 @@ import ActionTreeNode from './ActionTreeNode';
 
 interface OwnProps {
     action: ActionNode;
-    onExpand: () => void;
 }
 
 interface StateProps {
@@ -90,12 +89,6 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
         return null;
     }
 
-    componentDidUpdate(prevProps: Props, prevState: State) {
-        if (prevState.expandTree !== this.state.expandTree) {
-           this.props.onExpand();
-        }
-    }
-
     componentWillUnmount() {
         this.props.saveState(this.state.expandTree);
     }
@@ -111,7 +104,6 @@ class ActionTreeBase extends React.PureComponent<Props, State> {
                 selectedVerificationId={props.selectedVerificationId}
                 actionsFilter={props.actionsFilter}
                 expandPath={this.state.expandTree}
-                onExpand={props.onExpand}
                 onRootExpand={this.onRootExpand}
                 onActionSelect={this.onActionSelect}
                 onVerificationSelect={this.onVerificationSelect}/>

@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class XmlDictionaryUtils {
         List<Entry<String, Object>> groupFieldsName = new ArrayList<Entry<String, Object>>();
         Message subField = (Message)field.getReference();
         if(subField == null){
-            for(Field fieldName: field.getFields()){
+            for(Field fieldName: field.getFieldsAndMessages()){
                 SimpleEntry<String, Object> fieldMap = new HashMap.SimpleEntry<String, Object>(fieldName.getName(), null);
                 groupFieldsName.add(fieldMap);
             }

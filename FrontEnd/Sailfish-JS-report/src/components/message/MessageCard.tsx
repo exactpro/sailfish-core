@@ -33,14 +33,13 @@ import { keyForMessage } from '../../helpers/keys';
 import {MessagePredictionIndicator} from "../machinelearning/MlPredictionIndicator";
 import StateSaver from '../util/StateSaver';
 import ErrorBoundary from '../util/ErrorBoundary';
-import BeautifiedContent from '../action/BeautifiedContent';
+import BeautifiedContent from './BeautifiedContent';
 import { PredictionData } from '../../models/MlServiceResponse';
 
 const HUE_SEGMENTS_COUNT = 36;
 
 export interface MessageCardOwnProps {
     message: Message;
-    onExpand: () => void;
 }
 
 export interface RecoveredProps {
@@ -64,7 +63,7 @@ export interface MessageCardDispatchProps {
 
 export interface MessageCardProps extends MessageCardOwnProps, MessageCardStateProps, MessageCardDispatchProps, RecoveredProps { }
 
-export const MessageCardBase = ({ 
+export function MessageCardBase({ 
         message, 
         isSelected, 
         status, 
@@ -74,9 +73,8 @@ export const MessageCardBase = ({
         showRawHandler, 
         isContentBeautified, 
         toggleBeautify, 
-        onExpand ,
         prediction
-    }: MessageCardProps) => {
+    }: MessageCardProps) {
 
     const { id, msgName, timestamp, from, to, contentHumanReadable, raw } = message;
 
@@ -89,9 +87,6 @@ export const MessageCardBase = ({
         beautifyIconClass = createBemElement("mc-beautify", "icon", isContentBeautified ? "plain" : "beautify"),
         // session arrow color, we calculating it for each session from-to pair, based on hash 
         sessionArrowStyle = { filter: `invert(1) sepia(1) saturate(5) hue-rotate(${calculateHueValue(from, to)}deg)` };
-
-    // we need to remeasure card's height when 'showRaw' or 'isContentBeautified' state changed
-    React.useEffect(onExpand, [showRaw, isContentBeautified]);
 
     return (
         <div className={rootClass} data-lb-count={labelsCount}>
@@ -195,8 +190,7 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
 
     if (prediction) {
         labels.push(
-            <MessagePredictionIndicator 
-                prediction={prediction} />
+            <MessagePredictionIndicator prediction={prediction} />
         );
     }
 

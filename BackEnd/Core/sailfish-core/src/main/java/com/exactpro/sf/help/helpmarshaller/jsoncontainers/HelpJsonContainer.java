@@ -61,32 +61,15 @@ public class HelpJsonContainer {
     }
 
     public HelpJsonContainer(HelpEntityName name, String filePath, String icon, HelpEntityType type, List<HelpJsonContainer> childNodes) {
-        this.filePath = filePath;
-        this.childNodes = childNodes;
-        this.name = name.getValue();
-        this.icon = icon;
-        this.type = type;
-
+        this(name.getValue(), filePath, icon, type, childNodes);
     }
 
     public HelpJsonContainer(String name, String filePath, String icon, HelpEntityType type) {
-        this.filePath = filePath;
-        this.name = name;
-        this.icon = icon;
-        this.type = type;
-
-        this.childNodes = null;
+        this(name, filePath, icon, type, null);
     }
 
-
-
     public HelpJsonContainer(String htmlPath, List<HelpJsonContainer> childNodes) {
-        this.filePath = htmlPath;
-        this.childNodes = childNodes;
-
-        this.name = null;
-        this.icon = null;
-        this.type = null;
+        this((String) null, htmlPath, null, null, childNodes);
     }
 
     public HelpJsonContainer() {

@@ -15,7 +15,6 @@
  ******************************************************************************/
 
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
-import { AnyAction } from "redux";
 import { batch } from "react-redux";
 import { fetchReport } from "../helpers/jsonp";
 import { setReport, setIsLoading } from "../actions/actionCreators";

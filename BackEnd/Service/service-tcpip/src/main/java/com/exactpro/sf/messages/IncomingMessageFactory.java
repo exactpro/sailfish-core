@@ -21,6 +21,7 @@ import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.IHumanMessage;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
+import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.services.tcpip.TCPIPMessageHelper;
 
@@ -34,6 +35,11 @@ public class IncomingMessageFactory implements IMessageFactory {
 
     public IncomingMessageFactory() {
         this(DefaultMessageFactory.getFactory());
+    }
+
+    @Override
+    public void init(SailfishURI dictionaryURI, IDictionaryStructure dictionary) {
+        delegateFactory.init(dictionaryURI, dictionary);
     }
 
     @Override

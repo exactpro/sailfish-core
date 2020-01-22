@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,28 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages.json.configuration;
 
-import com.exactpro.sf.common.impl.messages.all.configuration.IMessage;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.exactpro.sf.common.impl.messages.all.configuration.IMessage;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.FieldsDeserializeConverter;
+import com.exactpro.sf.common.impl.messages.json.configuration.Converters.FieldsSerializeConverter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Json class for reading IMessage from JSON/YAML formats.
  */
+
 public class JsonMessage extends JsonField implements IMessage {
 
-    @JsonDeserialize(converter = Converters.FieldsDeserializeConverter.class)
-    @JsonSerialize(converter = Converters.FieldsSerializeConverter.class)
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private static final long serialVersionUID = 1528086301787120122L;
+
+    @JsonDeserialize(converter = FieldsDeserializeConverter.class)
+    @JsonSerialize(converter = FieldsSerializeConverter.class)
+    @JsonInclude(Include.NON_EMPTY)
     protected List<JsonField> fields;
 
     /**
@@ -41,6 +48,6 @@ public class JsonMessage extends JsonField implements IMessage {
         if (fields == null) {
             fields = new ArrayList<>();
         }
-        return this.fields;
+        return fields;
     }
 }

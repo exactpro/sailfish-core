@@ -92,7 +92,7 @@ public class FIXSession implements ISession {
 	public IMessage send(Object message) {
         boolean isSendSuccess = false;
 		if (message instanceof Message) {
-            isSendSuccess = lookupSession().send((Message) message);
+            isSendSuccess = lookupSession().sendRaw((Message) message);
 		} else if (message instanceof String) {
             isSendSuccess = lookupSession().send((String) message);
 		} else if (message instanceof IMessage) {
@@ -106,12 +106,12 @@ public class FIXSession implements ISession {
 
             try {
                 if(converter != null) {
-                    Message fmsg = converter.convert(imsg, session.getSessionID().isFIXT());
-                    isSendSuccess = session.send(fmsg);
+                    Message qfjMsg = converter.convert(imsg, session.getSessionID().isFIXT());
+                    isSendSuccess = session.sendRaw(qfjMsg);
                     if (!isSendSuccess) {
                         throw new SendMessageFailedException("Send message " + imsg.getName() + " failed");
                     }
-                    return converter.convert(fmsg);
+                    return converter.convert(qfjMsg);
                 } else {
                     throw new ServiceException("Service '" + name + "' is configured incorrectly");
                 }
@@ -191,8 +191,6 @@ public class FIXSession implements ISession {
 
 	/**
 	 * Send raw message. Usually is used in incorrect test scenarios
-	 *
-	 * @param message
 	 */
 	public void sendRawMessage(int msgSeqNum, String messageName, String messageString) throws IOException {
         IMessage message = messageHelper.getMessageFactory().createMessage(messageName, getBeginString());

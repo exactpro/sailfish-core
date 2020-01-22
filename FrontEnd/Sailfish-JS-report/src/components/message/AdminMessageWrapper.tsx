@@ -21,6 +21,8 @@ import Message from '../../models/Message';
 import { MessageCardActionChips } from "./MessageCardActionChips";
 import { createBemBlock } from '../../helpers/styleCreators';
 import StateSaver from '../util/StateSaver';
+import SearchableContent from "../search/SearchableContent";
+import {keyForMessage} from "../../helpers/keys";
 
 interface RecoveredProps {
     isExpanded: boolean;
@@ -31,11 +33,7 @@ interface MessageCardOuterProps extends MessageCardStateProps, MessageCardDispat
 
 interface WrapperProps extends MessageCardOuterProps, RecoveredProps {}
 
-const AdminMessageWrapperBase = ({ isExpanded, expandHandler, ...props }: WrapperProps) => {
-
-    // we need to remeasure card's height when 'isExpanded' state changed
-    React.useEffect(props.onExpand, [isExpanded]);
-
+function AdminMessageWrapperBase({ isExpanded, expandHandler, ...props }: WrapperProps) {
     if (isExpanded) {
         const expandButtonClass = createBemBlock(
             "mc-expand-btn", 
@@ -71,7 +69,11 @@ const AdminMessageWrapperBase = ({ isExpanded, expandHandler, ...props }: Wrappe
                         message={props.message}/>
                 </div>
                 <div className="mc-header__name">Name</div>
-                <div className="mc-header__name-value">{props.message.msgName}</div>
+                <div className="mc-header__name-value">
+                    <SearchableContent
+                        content={props.message.msgName}
+                        contentKey={keyForMessage(props.message.id, 'msgName')}/>
+                </div>
                 <div className="mc-header__expand">
                     <div className="mc-header__expand-icon" onClick={() => expandHandler(!isExpanded)}/>
                 </div>

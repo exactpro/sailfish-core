@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  ~ Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-->
+<dictionary name="native1"
+            xmlns="http://exactprosystems.com/dictionary">
+    <attribute type="java.lang.String" name="DictionaryAttr">test_attr</attribute>
+    <fields>
+        <field name="String" id="S4" type="java.lang.String">
+            <attribute name="length">4</attribute>
+            <attribute name="format">S</attribute>
+        </field>
+        <field name="Short" id="N1" type="java.lang.Short">
+            <attribute name="length">1</attribute>
+            <attribute name="format">N</attribute>
+        </field>
+        <field name="MessageType" id="MessageType" type="java.lang.Character">
+            <attribute type="java.lang.Integer" name="Index">10</attribute>
+            <attribute name="format">A</attribute>
+            <attribute name="format">A</attribute>
+            <value name="Heartbeat">0</value>
+            <value name="MissedMessageRequest">M</value>
+        </field>
+        <field name="StartOfMessage" id="StartOfMessage" reference="N1">
+            <value name="ServerStartOfMessage">1</value>
+            <value name="ClientStartOfMessage">2</value>
+        </field>
+        <field name="AppID" defaultvalue="1" id="AppID" reference="N1">
+            <value name="AppID1">1</value>
+            <value name="AppID2">2</value>
+        </field>
+        <field name="MessageLength" id="MessageLength" type="java.lang.Integer">
+            <attribute name="length">2</attribute>
+            <attribute name="format">S</attribute>
+        </field>
+        <field name="parentenum" id="parentenum" type="java.lang.Integer">
+            <value name="1">1</value>
+        </field>
+        <field name="enum" id="enum" reference="parentenum" type="java.lang.String">
+            <value name="2">2</value>
+        </field>
+    </fields>
+    <messages>
+        <message name="Heartbeat">
+            <attribute name="messageType">48</attribute>
+            <message name="MessageHeader">
+                <attribute name="length">4</attribute>
+                <attribute name="inclusion">true</attribute>
+                <field name="StartOfMessage" reference="StartOfMessage"/>
+                <field name="MessageLength" reference="MessageLength"/>
+                <field name="MessageType" reference="MessageType">
+                    <attribute type="java.lang.Integer" name="Index">20</attribute>
+                </field>
+                <field name="enum" reference="enum" type="java.lang.String" />
+            </message>
+        </message>
+        <message name="MissedMessageRequest">
+            <attribute name="messageType">77</attribute>
+            <field name="AppID" defaultvalue="2" reference="AppID"/>
+            <field name="LastMsgSeqNum" type="java.lang.Integer" reference="S4"/>
+        </message>
+    </messages>
+</dictionary>

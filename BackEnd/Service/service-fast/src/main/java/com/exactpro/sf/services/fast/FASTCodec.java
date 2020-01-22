@@ -78,7 +78,7 @@ public class FASTCodec extends AbstractCodec {
         IDataManager dataManager = Objects.requireNonNull(this.serviceContext.getDataManager(), "'Data manager' parameter");
         FastTemplateLoader templateLoader = new FastTemplateLoader();
         this.registry = templateLoader.loadFastTemplates(dataManager, dictionaryName.getPluginAlias(), fastTemplate);
-        this.converter = new FastToIMessageConverter(msgFactory, msgDictionary.getNamespace());
+        this.converter = new FastToIMessageConverter(msgFactory, msgDictionary);
         this.decoder = new FastToIMessageDecoder(converter, this.settings.getSkipInitialByteAmount());
     }
 

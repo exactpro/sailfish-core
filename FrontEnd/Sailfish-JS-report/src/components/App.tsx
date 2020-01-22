@@ -72,13 +72,14 @@ class AppBase extends React.Component<AppProps, {}> {
             this.searchParams = new URLSearchParams(getUrlSearchString(window.location.href));
             this.handleSharedUrl();
         }
-
-        if (!this.props.mlToken && this.props.report.reportProperties) {
-            this.props.fetchToken();
-        }
-
+        
         if (prevProps.report !== this.props.report && this.props.report !== null) {
             document.title = this.props.report.name;
+
+            // init ML features
+            if (!this.props.mlToken && this.props.report.reportProperties) {
+                this.props.fetchToken();
+            }
         }
     }
 

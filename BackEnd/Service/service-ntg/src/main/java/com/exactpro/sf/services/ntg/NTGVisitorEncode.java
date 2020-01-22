@@ -19,6 +19,8 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
@@ -29,10 +31,10 @@ import com.exactpro.sf.common.messages.MessageStructureReader;
 import com.exactpro.sf.common.messages.MessageStructureReaderHandlerImpl;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.GenericConverter;
 import com.exactpro.sf.services.ntg.exceptions.NullFieldValue;
 import com.exactpro.sf.services.ntg.exceptions.TooLongStringValueException;
 import com.exactpro.sf.services.ntg.exceptions.UnknownNTGMessageTypeException;
+import com.exactpro.sf.util.DateTimeUtility;
 
 public final class NTGVisitorEncode extends NTGVisitorBase {
     private static final Logger logger = LoggerFactory.getLogger(NTGVisitorEncode.class);
@@ -54,8 +56,7 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
 
         NTGVisitorEncode visitorNTG = new NTGVisitorEncode();
 
-		MessageStructureReader messageStructureReader = new MessageStructureReader();
-        messageStructureReader.traverse(visitorNTG, complexField.getFields(), message,
+        MessageStructureReader.READER.traverse(visitorNTG, complexField.getFields(), message,
 					MessageStructureReaderHandlerImpl.instance());
 
         buffer.put(visitorNTG.getBuffer().flip());
@@ -110,34 +111,38 @@ public final class NTGVisitorEncode extends NTGVisitorBase {
                     terminatedString.append(STRING_TERMINATOR);
                 }
             }
-
-            buffer.put(GenericConverter.convertStringToArray(length, terminatedString.toString()));
+            String resultStr = terminatedString.toString();
+            byte[] resultBytes = encodeString(resultStr, length);
+            buffer.put(resultBytes);
         }
         accumulatedLength += length;
     }
-	
-	@Override
-	public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
-	    
-	    if (logger.isDebugEnabled()) {
+    
+    @Override
+    public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
+        
+        if (logger.isDebugEnabled()) {
             logger.debug("   Encode visiting String field [{}] , value = [{}]", fieldName, value == null ? "" : value);
         }
-
+        
         validateAttributesMap(fieldName, LocalDateTime.class, fldStruct);
-
+        
         int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
         int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
-
-        validateOffset(fieldName, accumulatedLength, offset);
-
-        long time = NTGUtility.getTransactTime(value);
-        buffer.putLong(time);
+        String dateTimeFormat = getAttributeValue(fldStruct, NTGProtocolAttribute.DateTimeFormat.toString());
         
+        validateOffset(fieldName, accumulatedLength, offset);
+        
+        DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimeFormat);
+        ZonedDateTime zonedDateTime = DateTimeUtility.toZonedDateTime(value);
+        String dateTimeStr = zonedDateTime.format(dateTimeFormatter);
+        byte[] dateTimeBytes = dateTimeStr.getBytes();
+        checkLength(dateTimeStr, dateTimeBytes.length, length);
+        buffer.put(dateTimeBytes);
         accumulatedLength += length;
-	    
-	}
-
-	@Override
+    }
+    
+    @Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault)
 	{
         if(fldStruct.getAttributes().isEmpty())

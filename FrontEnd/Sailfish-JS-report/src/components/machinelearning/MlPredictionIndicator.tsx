@@ -17,14 +17,12 @@
  */
 
 import * as React from 'react';
-import {connect} from 'react-redux';
-import AppState from '../../state/models/AppState';
 import {PredictionData} from '../../models/MlServiceResponse';
 
 const COLOR_HUE = 0;
 const COLOR_SATURATION_PERCENTAGE = 100;
-const COLOR_LIGHTNESS_MAX_PERCENTAGE = 65;
-const COLOR_LIGHTNESS_MIN_PERCENTAGE = 95;
+const COLOR_LIGHTNESS_MAX_PERCENTAGE = 60;
+const COLOR_LIGHTNESS_MIN_PERCENTAGE = 90;
 const VALUE_THRESHOLD = 0.5;
 const VALUE_STEP_COUNT = 10;
 
@@ -33,15 +31,17 @@ interface Props {
     prediction: PredictionData;
 }
 
-export const MessagePredictionIndicator = ({ prediction, className = "mc-label" }: Props) => {
+export const MessagePredictionIndicator = ({prediction, className = "mc-label"}: Props) => {
+    const predictionPercentage = Math.round(prediction.predictedClassProbability * 100);
+
     return (
-        <div
-            className={className} 
-            style={{backgroundColor: `hsl(${COLOR_HUE}, ${COLOR_SATURATION_PERCENTAGE}%, ${getLightness(prediction.predictedClassProbability)}%)`}}>
+        <div className={className}
+             style={{backgroundColor: `hsl(${COLOR_HUE}, ${COLOR_SATURATION_PERCENTAGE}%, ${getLightness(prediction.predictedClassProbability)}%)`}}>
             <div className="ml__prediction-icon"/>
+            <div className="ml__prediction-percentage">{predictionPercentage === 100 ? null : predictionPercentage}</div>
         </div>
     )
-}
+};
 
 function getLightness(value: number) {
     const valueFiltered = (value > VALUE_THRESHOLD)

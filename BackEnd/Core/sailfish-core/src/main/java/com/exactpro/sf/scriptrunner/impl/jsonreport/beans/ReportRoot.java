@@ -23,7 +23,6 @@ public class ReportRoot {
     private Instant finishTime;
     private Instant startTime;
     private final List<Alert> alerts = new ArrayList<>();
-    //IMPORTANT: access should be synchronized
     private Map<String, String> plugins = new HashMap<>();
     private String hostName;
     private String userName;
@@ -36,11 +35,8 @@ public class ReportRoot {
     private List<TestCaseMetadata> metadata = new ArrayList<>();
     private ReportProperties reportProperties;
     private String precision;
+    private Set<String> tags;
 
-    /**
-     * //IMPORTANT: access should be synchronized!
-     * @return
-     */
     public List<Alert> getAlerts() {
         return alerts;
     }
@@ -155,5 +151,13 @@ public class ReportRoot {
 
     public void setPrecision(String precision) {
         this.precision = precision;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 }

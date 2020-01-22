@@ -32,7 +32,7 @@
 		</GeneralSettings>
 		<ScriptRun>
 			<NotificationIfSomeServicesNotStarted>false</NotificationIfSomeServicesNotStarted>
-			<FailUnexpected>false</FailUnexpected>
+			<FailUnexpected>N</FailUnexpected>
 			<!-- Priority of the matrices compilation thread, values [1, 10] -->
 			<MatrixCompilerPriority>1</MatrixCompilerPriority>
             <!-- Format of report creation: zip - remove files after archiving; files - disable auto-archive; zip_files - do not remove files, enable auto-archive -->

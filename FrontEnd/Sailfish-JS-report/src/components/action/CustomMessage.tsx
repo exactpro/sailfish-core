@@ -27,10 +27,9 @@ import { ExceptionChain } from '../ExceptionChain';
 interface CustomMessageProps {
     userMessage: UserMessage;
     parent: Action; 
-    onExpand: () => void;
 }
 
-export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessageProps) => {
+export const CustomMessage = ({ userMessage, parent }: CustomMessageProps) => {
 
     const { message, color, style, level, exception } = userMessage;
 
@@ -54,8 +53,7 @@ export const CustomMessage = ({ userMessage, parent, onExpand }: CustomMessagePr
     if (exception) {
         return (
             <RecoverableExpandablePanel
-                stateKey={keyForUserMessage(userMessage, parent)}
-                onExpand={onExpand}>
+                stateKey={keyForUserMessage(userMessage, parent)}>
                 <div className={rootClass}>
                     <div className="ac-body__item-title" style={messageStyle}>{message}</div>
                 </div>

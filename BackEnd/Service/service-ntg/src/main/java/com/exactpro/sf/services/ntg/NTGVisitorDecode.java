@@ -19,7 +19,12 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
+import java.util.Arrays;
 
 import org.apache.mina.core.buffer.IoBuffer;
 import org.slf4j.Logger;
@@ -30,13 +35,13 @@ import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageStructureWriter;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.util.EPSCommonException;
-import com.exactpro.sf.common.util.GenericConverter;
 import com.exactpro.sf.services.ntg.exceptions.UnknownNTGMessageTypeException;
+import com.exactpro.sf.util.DateTimeUtility;
 
 final class NTGVisitorDecode extends NTGVisitorBase {
     private static final Logger logger = LoggerFactory.getLogger(NTGVisitorDecode.class);
     private final IMessage message;
-	private final IMessageFactory msgFactory ;
+    private final IMessageFactory msgFactory;
 
     public NTGVisitorDecode(IoBuffer buffer, IMessageFactory msgFactory,
                             IMessage message)
@@ -59,8 +64,7 @@ final class NTGVisitorDecode extends NTGVisitorBase {
 		validateOffset(fieldName, accumulatedLength, offset);
 		IMessage msg = msgFactory.createMessage(complexField.getName(), complexField.getNamespace());
         NTGVisitorDecode visitorNTG = new NTGVisitorDecode(buffer, msgFactory, msg);
-		MessageStructureWriter messageStructureWriter = new MessageStructureWriter();
-        messageStructureWriter.traverse(visitorNTG, complexField.getFields());
+        MessageStructureWriter.WRITER.traverse(visitorNTG, complexField.getFields());
 
         this.message.addField(fieldName, visitorNTG.getMessage());
 		accumulatedLength += length;
@@ -84,16 +88,13 @@ final class NTGVisitorDecode extends NTGVisitorBase {
             long time = buffer.getLong();
             decodedValue = NTGUtility.getTransactTime(time);
         }
-        else
-        {
+        else {
             byte[] fieldBytes = new byte[length];
             buffer.get(fieldBytes);
-            decodedValue = GenericConverter.convertByteArrayToString( length, fieldBytes );
-            int index = decodedValue.indexOf( '\0' );
-
-            if(index != -1)
-            {
-                decodedValue = decodedValue.substring( 0 , index );
+            try {
+                decodedValue = DECODER.get().decode(ByteBuffer.wrap(fieldBytes)).toString().trim();
+            } catch (CharacterCodingException e) {
+                throw new EPSCommonException("Problem with decoding the fieldBytes = \"" + Arrays.toString(fieldBytes) + "\"", e);
             }
         }
         if( logger.isDebugEnabled()) {
@@ -103,28 +104,29 @@ final class NTGVisitorDecode extends NTGVisitorBase {
         message.addField(fieldName, decodedValue.toString());
         accumulatedLength += length;
     }
-	
-	@Override
-	public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
-	    validateAttributesMap(fieldName, LocalDateTime.class, fldStruct);
-
+    
+    @Override
+    public void visit(String fieldName, LocalDateTime value, IFieldStructure fldStruct, boolean isDefault) {
+        validateAttributesMap(fieldName, LocalDateTime.class, fldStruct);
+        
         int length = getAttributeValue(fldStruct, NTGProtocolAttribute.Length.toString());
         int offset = getAttributeValue(fldStruct, NTGProtocolAttribute.Offset.toString());
-
-        validateLength(fieldName, lengthLong, length);
-        validateOffset(fieldName, accumulatedLength, offset);
-
-        long time = buffer.getLong();
-
-        LocalDateTime decodedValue = NTGUtility.getTransactTimeAsDate(time);
+        String dateTimeFormat = getAttributeValue(fldStruct, NTGProtocolAttribute.DateTimeFormat.toString());
         
-        if (logger.isDebugEnabled()) {
-            logger.debug("   Decode visiting Double field [{}], decoded value [{}].", fieldName, decodedValue);
+        validateOffset(fieldName, accumulatedLength, offset);
+        
+        DateTimeFormatter dateTimeFormatter = DateTimeUtility.createFormatter(dateTimeFormat);
+        byte[] array = new byte[length];
+        buffer.get(array);
+        try {
+            String asciiDate = DECODER.get().decode(ByteBuffer.wrap(array)).toString().trim();
+            TemporalAccessor dateTime = dateTimeFormatter.parse(asciiDate);
+            message.addField(fieldName, DateTimeUtility.toLocalDateTime(dateTime));
+            accumulatedLength += length;
+        } catch (CharacterCodingException e) {
+            throw new EPSCommonException("Problem with decoding the asciiDate = \"" + Arrays.toString(array) + "\"", e);
         }
-
-        message.addField(fieldName, decodedValue);
-        accumulatedLength += length;
-	}
+    }
 
     @Override
 	public void visit(String fieldName, Double value, IFieldStructure fldStruct, boolean isDefault)

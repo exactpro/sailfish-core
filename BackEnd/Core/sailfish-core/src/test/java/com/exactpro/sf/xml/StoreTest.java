@@ -79,13 +79,11 @@ public class StoreTest extends AbstractTest {
 
 		IMessageFactory imf = DefaultMessageFactory.getFactory();
 
-		MessageStructureWriter wtraverser = new MessageStructureWriter();
-
         IMessageStructure messageStructure = dictionary.getMessages().values().iterator().next();
 
 		CreateIMessageVisitor visitor = new CreateIMessageVisitor(imf, messageStructure.getName(), dictionary.getNamespace());
 
-		wtraverser.traverse(visitor, messageStructure);
+        MessageStructureWriter.WRITER.traverse(visitor, messageStructure);
 
 		return visitor.getImessage();
 	}

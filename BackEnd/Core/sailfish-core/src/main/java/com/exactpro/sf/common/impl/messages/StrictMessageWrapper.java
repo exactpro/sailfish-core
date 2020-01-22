@@ -15,16 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.common.impl.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import com.exactpro.sf.common.messages.FieldMetaData;
 import com.exactpro.sf.common.messages.IFieldInfo;
 import com.exactpro.sf.common.messages.IMessage;
-import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MsgMetaData;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
@@ -43,34 +43,12 @@ public class StrictMessageWrapper implements IMessage {
     private final IMessageStructure messageStructure;
     private final IMessage message;
 
-    /**
-     * 
-     * @param message
-     * @param messageStructure
-     */
-    private StrictMessageWrapper(IMessage message, IMessageStructure messageStructure) {
-        this.message = Objects.requireNonNull(message, "'Message' parameter");
-        this.messageStructure = Objects.requireNonNull(messageStructure, "'Message structure' parameter");
+    public StrictMessageWrapper(IMessage message, IMessageStructure messageStructure) {
+        this.message = requireNonNull(message, "'Message' parameter");
+        this.messageStructure = requireNonNull(messageStructure, "'Message structure' parameter");
         if (!message.getName().equals(messageStructure.getName())) {
             throw new IllegalArgumentException("Message name and message structure name not are same");
         }
-    }
-
-    /**
-     *
-     * @param messageStructure
-     */
-    public StrictMessageWrapper(IMessageStructure messageStructure) {
-        this.messageStructure = Objects.requireNonNull(messageStructure, "'Message structure' parameter");
-        message = new MapMessage(messageStructure.getName(), messageStructure.getNamespace());
-    }
-
-    /**
-     *
-     */
-    public StrictMessageWrapper(IMessageFactory messageFactory, IMessageStructure messageStructure) {
-        this.messageStructure = Objects.requireNonNull(messageStructure, "'Message structure' parameter");
-        message = messageFactory.createMessage(messageStructure.getName(), messageStructure.getNamespace());
     }
 
     /**
@@ -265,23 +243,7 @@ public class StrictMessageWrapper implements IMessage {
 
     @Override
     public String toString() {
-        StringBuilder toString = new StringBuilder(1024);
-
-        for(String fldName : getFieldNames()) {
-            if(toString.length() > 0) {
-                toString.append('|');
-            }
-
-            if(getField(fldName) instanceof IMessage) {
-                toString.append((StrictMessageWrapper)getField(fldName));
-            } else {
-                toString.append(fldName);
-                toString.append('=');
-                toString.append(this.<Object>getField(fldName));
-            }
-        }
-
-        return toString.toString();
+        return "Strict[" + message + ']';
     }
     
     /**

@@ -215,6 +215,14 @@
                 <attribute type="java.lang.String" name="Type">Time</attribute>
                 <attribute type="java.lang.Integer" name="Length">8</attribute>
             </field>
+            <field type="java.lang.String" name="ExtTime">
+                <attribute type="java.lang.String" name="Type">Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+            </field>
+            <field type="java.lang.String" name="Date_Time">
+                <attribute type="java.lang.String" name="Type">Date_Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">27</attribute>
+            </field>
             <field type="java.lang.String" name="Date">
                 <attribute type="java.lang.String" name="Type">Date</attribute>
                 <attribute type="java.lang.Integer" name="Length">28</attribute>
@@ -369,10 +377,22 @@
             <field type="java.time.LocalDate" name="Date">
                 <attribute type="java.lang.String" name="Type">Date</attribute>
                 <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">yyyyMMdd</attribute>
             </field>
             <field type="java.time.LocalTime" name="Time">
                 <attribute type="java.lang.String" name="Type">Time</attribute>
                 <attribute type="java.lang.Integer" name="Length">8</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">HH:mm:ss</attribute>
+            </field>
+            <field type="java.time.LocalTime" name="ExtTime">
+                <attribute type="java.lang.String" name="Type">Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">12</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">HH:mm:ss.SSS</attribute>
+            </field>
+            <field type="java.time.LocalDateTime" name="Date_Time">
+                <attribute type="java.lang.String" name="Type">Date_Time</attribute>
+                <attribute type="java.lang.Integer" name="Length">27</attribute>
+                <attribute type="java.lang.String" name="DateTimeFormat">yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'</attribute>
             </field>
             <field type="java.time.LocalDate" name="Days">
                 <attribute type="java.lang.String" name="Type">Days</attribute>

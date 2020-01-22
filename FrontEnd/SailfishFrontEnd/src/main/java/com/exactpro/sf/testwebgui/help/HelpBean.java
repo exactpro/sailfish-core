@@ -343,12 +343,12 @@ public class HelpBean implements Serializable {
         copyingFormat.format(selectedNode);
 
         copyToClipboardJs(copyingFormat.copyNewColumns(), copyingFormat.copyJustHeader(), copyingFormat.copyToClipboard(),
-                copyingFormat.copyAllStructure());
+                copyingFormat.copyAllStructure(), CopyingFormat.copyAllYamlStructure(selectedNode));
         RequestContext.getCurrentInstance().update("copyDialog");
         RequestContext.getCurrentInstance().execute("PF('copyDialog').show()");
     }
 
-    private void copyToClipboardJs(String toCopy1, String toCopy2, String toCopy3, String toCopy4) {
+    private void copyToClipboardJs(String toCopy1, String toCopy2, String toCopy3, String toCopy4, String toCopy5) {
 
         StringBuilder builder = new StringBuilder();
 
@@ -360,6 +360,8 @@ public class HelpBean implements Serializable {
                 .append(toCopy3)
                 .append("', '")
                 .append(toCopy4)
+                .append("', '")
+                .append(toCopy5)
                 .append("')");
 
         RequestContext.getCurrentInstance().execute(builder.toString());
