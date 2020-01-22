@@ -88,7 +88,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     onClick={() => toggleExpand()}>
                                     {
                                         matrixId &&
-                                        <div className="ac-header__name-element">
+                                        <div className="ac-header__name-element" title="Matrix ID">
                                             <SearchableContent
                                                 content={matrixId}
                                                 contentKey={keyForAction(id, 'matrixId')}/>
@@ -96,7 +96,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     }
                                     {
                                         serviceName &&
-                                        <div className="ac-header__name-element">
+                                        <div className="ac-header__name-element" title="Service name">
                                             <SearchableContent
                                                 content={serviceName}
                                                 contentKey={keyForAction(id, 'serviceName')}/>
@@ -104,7 +104,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     }
                                     {
                                         name &&
-                                        <div className="ac-header__name-element">
+                                        <div className="ac-header__name-element" title="Action name">
                                             <SearchableContent
                                                 content={name}
                                                 contentKey={keyForAction(id, 'name')}/>
@@ -112,7 +112,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     }
                                     {
                                         messageType &&
-                                        <div className="ac-header__name-element">
+                                        <div className="ac-header__name-element" title="Message type">
                                             <SearchableContent
                                                 content={messageType}
                                                 contentKey={keyForAction(id, 'messageType')}/>
