@@ -488,6 +488,7 @@ public class TestscriptRunResource {
             try {
 
                 IWorkspaceDispatcher workspaceDispatcher = SFLocalContext.getDefault().getWorkspaceDispatcher();
+                String reportFolderName = new File(testScriptDescr.getWorkFolder()).getName();
                 ZipFile zipReport = null;
                 ReportRoot reportRoot;
                 try {
@@ -496,7 +497,7 @@ public class TestscriptRunResource {
                                     ReportRoot.class);
                 } catch (IOException e) {
                     zipReport = new ZipFile(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr.getWorkFolder() + ARCHIVE_EXTENSION));
-                    reportRoot = OBJECT_MAPPER.readValue(zipReport.getInputStream(zipReport.getEntry(Paths.get(testScriptDescr.getWorkFolder(), "reportData", "report.json").toString())),
+                    reportRoot = OBJECT_MAPPER.readValue(zipReport.getInputStream(zipReport.getEntry(Paths.get(reportFolderName, "reportData", "report.json").toString())),
                             ReportRoot.class);
                 }
 
@@ -510,8 +511,9 @@ public class TestscriptRunResource {
                             OBJECT_MAPPER.readValue(workspaceDispatcher.getFile(FolderType.REPORT, testScriptDescr
                                     .getWorkFolder(), "reportData", metadata.getJsonFileName()), TestCase.class)
                             :
-                            OBJECT_MAPPER.readValue(zipReport.getInputStream(zipReport.getEntry(Paths.get(testScriptDescr
-                                    .getWorkFolder(), "reportData", metadata.getJsonFileName()).toString())), TestCase.class);
+                            OBJECT_MAPPER.readValue(zipReport.getInputStream(zipReport.getEntry(
+                                    Paths.get(reportFolderName, "reportData", metadata.getJsonFileName()).toString())),
+                                    TestCase.class);
 
                     XmlTestCaseDescription xmlTestCaseDescription = new XmlTestCaseDescription();
                     xmlTestCaseDescription.setDescription(testCase.getDescription());
