@@ -26,7 +26,7 @@
     align-items: center;
 
     &__main {
-        background-color: var(--status-primary-header-background-color);
+        background-color: white;
         color: var(--status-primary-color);
     }
 
@@ -42,23 +42,29 @@
         position: relative;
         border-bottom-left-radius: 7px;
         border-bottom-right-radius: 7px;
-
         background-color: var(--status-secondary-header-background-color);
     }
 
     &__description {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 5px;
         text-align: center;
+        padding: 5px;
         font-weight: bold;
         font-size: 19px;
-        
-        color: var(--status-secondary-color);
+        color: var(--status-primary-color);
     }
     
+    &__info-group {
+        display: flex;
+        flex: 1;
+
+        &:first-child {
+            justify-content: flex-start;
+        }
+        &:last-child {
+            justify-content: flex-end;
+        }
+    }
+
     &__info-element {
         width: auto;
         display: flex;
@@ -69,13 +75,14 @@
         white-space: nowrap;
         padding: 0 5px;
 
-        p {
-            color: $primaryTextColor;
+        span {
+            color: $secondaryLightTextColor;
+            padding-right: 9px;
         }
 
-        span {
+        p {
             color: $secondaryTextColor;
-            padding-right: 9px;
+            font-weight: 600;
         }
         
         .ml__submit {
@@ -87,8 +94,8 @@
 .header-main {
     width: 100%;
     height: 47px;
-    border: 0px;
-    border-radius: 7px;
+    border: 3px solid var(--status-primary-color);
+    border-radius: 5px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -236,7 +243,6 @@
         font-weight: bold;
         display: inline;
         white-space: nowrap;
-        color: $primaryTextColor;
         -webkit-margin-before:0em;
         -webkit-margin-after:0em;
         padding-left: 15px;

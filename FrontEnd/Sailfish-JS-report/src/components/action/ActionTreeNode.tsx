@@ -71,7 +71,7 @@ export default function ActionTreeNode(props: Props) {
                 <ActionCard 
                     action={action}
                     isSelected={selectedActionsId.includes(action.id)}
-                    isTransaparent={!actionsFilter.has(action.status.status)}
+                    isTransparent={!actionsFilter.has(action.status.status)}
                     onSelect={onActionSelect}
                     isRoot={isRoot}
                     isExpanded={expandPath.value.isExpanded}

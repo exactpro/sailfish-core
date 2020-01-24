@@ -53,7 +53,6 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
         if (!mlEnabled) {
             return (
                 <div className="ml__submit-indicator">
-                    <div className="ml__submit-indicator-icon inactive" />
                     <p className="ml__submit-indicator-text unavailable">ML unavailable</p>
                 </div>
             )
@@ -62,7 +61,6 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
         if (submittedActionIds.size === failedActionIds.length && failedActionIds.length > 0) {
             return (
                 <div className="ml__submit-indicator" >
-                    <div className="ml__submit-indicator-icon submitted" />
                     <p className="ml__submit-indicator-text submitted">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
                 </div>
             )
@@ -71,7 +69,6 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
         if (submittedActionIds.size > 0) {
             return (
                 <div className="ml__submit-indicator">
-                    <div className="ml__submit-indicator-icon active" />
                     <p className="ml__submit-indicator-text ready">Submitted {submittedActionIds.size} of {failedActionIds.length}</p>
                 </div>
             )
@@ -80,7 +77,6 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
         if (failedActionIds.length > 0 && this.props.testCase.messages.length > 0) {
             return (
                 <div className="ml__submit-indicator">
-                    <div className="ml__submit-indicator-icon active" />
                     <p className="ml__submit-indicator-text ready">Ready to submit</p>
                 </div>
             )
@@ -89,7 +85,6 @@ export class MlUploadIndicatorBase extends React.Component<MlUploadIndicatorProp
         if (failedActionIds.length === 0 || this.props.testCase.messages.length === 0) {
             return (
                 <div className="ml__submit-indicator">
-                    <div className="ml__submit-indicator-icon not-required" />
                     <p className="ml__submit-indicator-text not-required">Nothing to submit</p>
                 </div>
             )

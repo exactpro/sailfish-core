@@ -101,7 +101,7 @@ class RightPanelBase extends React.Component<Props, State> {
 
             predictionRootClass = createTriStateControlClassName("layout-control", predictionsEnabled, predictionsAvailable),
             predictionIconClass = createTriStateControlClassName("layout-control__icon prediction", predictionsEnabled, predictionsAvailable),
-            predictionTitleClass = createTriStateControlClassName("layout-control__title selectable", predictionsEnabled, predictionsAvailable);
+            predictionTitleClass = createTriStateControlClassName("layout-control__title prediction selectable", predictionsEnabled, predictionsAvailable);
 
 
         return (

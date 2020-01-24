@@ -55,6 +55,8 @@
         --status-secondary-color: #{$passedSecondaryTextColor};
         --status-primary-border-color: #{$passedBorderColor};
         --status-secondary-border-color: #{$passedBorderColorSecondary};
+        --status-hover-border-color: #{$passedBorderHoverColor};
+        --status-primary-delimeter-color: #{$passedDelimiterHoverColor};
         --status-primary-background-color: #{$passedBorderColor};
         --status-secondary-background-color: #{$passedBackgroundColor};
         --status-primary-header-background-color: #{$passedHeaderColor};
@@ -66,10 +68,13 @@
         --status-secondary-color: #{$failedSecondaryTextColor};
         --status-primary-border-color: #{$failedBorderColor};
         --status-secondary-border-color: #{$failedBorderColorSecondary};
+        --status-hover-border-color: #{$failedBorderHoverColor};
+        --status-primary-delimeter-color: #{$failedDelimiterHoverColor};
         --status-primary-background-color: #{$failedBorderColor};
         --status-secondary-background-color: #{$failedBackgroundColor};
         --status-primary-header-background-color: #{$failedHeaderColor};
         --status-secondary-header-background-color: #{$failedHeaderSecondaryBackground};
+        --status-header-border-color: #{$failedHeaderBorderColor};
     }
 
     &.conditionally_passed {
@@ -77,6 +82,8 @@
         --status-secondary-color: #{$conditionallyPassedSecondaryTextColor};
         --status-primary-border-color: #{$conditionallyPassedBorderColor};
         --status-secondary-border-color: #{$conditionallyPassedBorderColorSecondary};
+        --status-hover-border-color: #{$conditionallyPassedBorderHoverColor};
+        --status-primary-delimeter-color: #{$conditionallyPassedDelimiterHoverColor};
         --status-primary-background-color: #{$conditionallyPassedBorderColor};
         --status-secondary-background-color: #{$conditionallyPassedBackgroundColor};
         --status-primary-header-background-color: #{$conditionallyPassedHeaderColor};
@@ -88,6 +95,8 @@
         --status-secondary-color: #{$conditionallyFailedSecondaryTextColor};
         --status-primary-border-color: #{$conditionallyFailedBorderColor};
         --status-secondary-border-color: #{$conditionallyFailedBorderColorSecondary};
+        --status-hover-border-color: #{$conditionallyFailedBorderHoverColor};
+        --status-primary-delimeter-color: #{$conditionallyFailedDelimiterHoverColor};
         --status-primary-background-color: #{$conditionallyFailedBorderColor};
         --status-secondary-background-color: #{$conditionallyFailedBackgroundColor};
         --status-primary-header-background-color: #{$conditionallyFailedHeaderColor};
@@ -103,7 +112,9 @@
         --status-secondary-color: #{$liveSecondaryTextColor};
         --status-primary-border-color: #{$liveBorderColor};
         --status-secondary-border-color: #{$liveBorderSecondaryColor};
+        --status-hover-border-color: #{$liveBorderHoverColor};
         --status-primary-background-color: #{$liveBackgroundColor};
+        --status-primary-delimeter-color: #{$liveDelimiterHoverColor};
         --status-secondary-background-color: #{$liveSecondaryBackgroundColor};
         --status-primary-header-background-color: #{$liveBackgroundColor};
         --status-secondary-header-background-color: #{$liveHeaderSecondaryBackgroundColor};

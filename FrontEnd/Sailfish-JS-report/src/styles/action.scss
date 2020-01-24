@@ -27,6 +27,7 @@
     border-radius: $defaultCardBorderRadius;
     padding: 5px;
     margin: 6px 0;
+    transition: all 0.1s;
 
     &__status {
         padding-left: 10px;
@@ -75,6 +76,9 @@
 
     &.root {
         border-color: var(--status-secondary-border-color);
+        &:hover {
+            border-color: var(--status-hover-border-color);
+        }
     }
 
     &.selected {
@@ -117,15 +121,29 @@
     &__name-element {
         padding: 0 8px;
         cursor: pointer;
-        border-left: 2px solid var(--status-primary-header-background-color);
+        border-left: 2px solid var(--status-hover-border-color);
         transition: 0.2s;
         color: var(--status-primary-color);
 
         &:hover {
             background-color: var(--status-secondary-header-background-color);
             border-color: var(--status-secondary-header-background-color);
+
             &+div {
                 border-color: var(--status-secondary-header-background-color);
+            }
+        }
+
+        &.selected {
+            border-color: var(--status-primary-delimeter-color);
+
+            &:hover {
+                background-color: var(--status-hover-border-color);
+                border-color: var(--status-hover-border-color);
+                
+                &+div {
+                    border-color: var(--status-hover-border-color);
+                }
             }
         }
 
@@ -162,17 +180,18 @@
         padding-right: 8px;
         padding-top: 4px;
 
+        span {
+            font-size: 11px;
+            color: $secondaryLightTextColor;
+            padding-right: 10px;
+            padding-top: 1px;
+        }
+
         p {
             font-size: 12px;
             color: $secondaryTextColor;
+            font-weight: 600;
             white-space: nowrap;
-        }
-
-        span {
-            font-size: 11px;
-            color: $secondaryTextColor;
-            padding-right: 10px;
-            padding-top: 1px;
         }
     }
 
@@ -228,6 +247,10 @@
         border: 2px solid transparent;
         border-radius: $defaultCardBorderRadius;
         padding-bottom: 5px;
+
+        &:hover {
+            border-color: var(--status-hover-border-color);
+        }
         
         &.selected {
             background-color: var(--status-secondary-background-color);

@@ -35,13 +35,13 @@ interface CardProps {
     children?: React.ReactNodeArray;
     isSelected?: boolean;
     isRoot?: boolean;
-    isTransaparent?: boolean;
+    isTransparent?: boolean;
     isExpanded?: boolean;
     onSelect?: (action: Action) => void;
     onRootExpand: (isExpanded: boolean) => void;
 }
 
-export function ActionCard({ action, children, isSelected, onSelect, isRoot, isTransaparent, isExpanded, onRootExpand }: CardProps) {
+export function ActionCard({ action, children, isSelected, onSelect, isRoot, isTransparent, isExpanded, onRootExpand }: CardProps) {
     const {
         id,
         matrixId,
@@ -65,11 +65,15 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
     const headerClassName = createSelector(
         "ac-header",
         status.status,
-        isTransaparent && !isSelected ? "transparent" : null);
+        isTransparent && !isSelected ? "transparent" : null);
 
     const inputParametersClassName = createSelector(
         "ac-body__input-params",
-        isTransaparent && !isSelected ? "transparent" : null);
+        isTransparent && !isSelected ? "transparent" : null);
+    
+    const headerTitleElemClassName = createSelector(
+        'ac-header__name-element',
+        isSelected ? 'selected': null);
 
     const elapsedTime = getSecondsPeriod(startTime, finishTime);
 
@@ -88,7 +92,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     onClick={() => toggleExpand()}>
                                     {
                                         matrixId &&
-                                        <div className="ac-header__name-element" title="Matrix ID">
+                                        <div className={headerTitleElemClassName} title="Matrix ID">
                                             <SearchableContent
                                                 content={matrixId}
                                                 contentKey={keyForAction(id, 'matrixId')}/>
@@ -96,7 +100,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     }
                                     {
                                         serviceName &&
-                                        <div className="ac-header__name-element" title="Service name">
+                                        <div className={headerTitleElemClassName} title="Service name">
                                             <SearchableContent
                                                 content={serviceName}
                                                 contentKey={keyForAction(id, 'serviceName')}/>
@@ -104,7 +108,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     }
                                     {
                                         name &&
-                                        <div className="ac-header__name-element" title="Action name">
+                                        <div className={headerTitleElemClassName} title="Action name">
                                             <SearchableContent
                                                 content={name}
                                                 contentKey={keyForAction(id, 'name')}/>
@@ -112,7 +116,7 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
                                     }
                                     {
                                         messageType &&
-                                        <div className="ac-header__name-element" title="Message type">
+                                        <div className={headerTitleElemClassName} title="Message type">
                                             <SearchableContent
                                                 content={messageType}
                                                 contentKey={keyForAction(id, 'messageType')}/>

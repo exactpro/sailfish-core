@@ -114,31 +114,35 @@ export const HeaderBase = ({
                 </div>
             </div>
             <div className="header__info">
-                <div className="header__info-element">
-                    <span>Start:</span>
-                    <p>{formatTime(startTime)}</p>
+                <div className="header__info-group">
+                    <div className="header__info-element">
+                        <span>Start:</span>
+                        <p>{formatTime(startTime)}</p>
+                    </div>
+                    {
+                        isLive ? null : (
+                            <div className="header__info-element">
+                                <span>Finish:</span>
+                                <p>{formatTime(finishTime)}</p>
+                            </div>
+                        )
+                    }
                 </div>
-                {
-                    isLive ? null : (
-                        <div className="header__info-element">
-                            <span>Finish:</span>
-                            <p>{formatTime(finishTime)}</p>
-                        </div>
-                    )
-                }
                 <div className="header__description">
                     {description}
                 </div>
-                <div className="header__info-element">
-                    <span>ID:</span>
-                    <p>{id}</p>
-                </div>
-                <div className="header__info-element">
-                    <span>Hash:</span>
-                    <p>{hash}</p>
-                </div>
-                <div className="header__info-element">
-                    <MlUploadIndicator/>
+                <div className="header__info-group">
+                    <div className="header__info-element">
+                        <span>ID:</span>
+                        <p>{id}</p>
+                    </div>
+                    <div className="header__info-element">
+                        <span>Hash:</span>
+                        <p>{hash}</p>
+                    </div>
+                    <div className="header__info-element">
+                        <MlUploadIndicator/>
+                    </div>
                 </div>
             </div>
             {

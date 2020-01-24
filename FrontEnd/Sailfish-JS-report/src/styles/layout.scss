@@ -105,6 +105,12 @@
                 cursor: default;
             }
         }
+        
+        &.prediction {
+            &.active {
+                color: $failedTextColor;
+            }
+        }
     }
 
     &__icon {
