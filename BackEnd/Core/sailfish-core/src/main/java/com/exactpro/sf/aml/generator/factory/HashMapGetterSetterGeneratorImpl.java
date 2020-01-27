@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import com.exactpro.sf.aml.AMLLangConst;
 import com.exactpro.sf.aml.generator.IGetterSetterGenerator;
+import com.exactpro.sf.common.impl.messages.HashMapWrapper;
 import com.exactpro.sf.common.messages.IMessage;
 
 public class HashMapGetterSetterGeneratorImpl implements IGetterSetterGenerator {
@@ -53,7 +54,7 @@ public class HashMapGetterSetterGeneratorImpl implements IGetterSetterGenerator 
 	@Override
 	public Class<?> getSubmessageClass(Class<?> type, String childClassName, Class<?> paramClass)
 	{
-        return paramClass == IMessage.class ? IMessage.class : HashMap.class;
+        return paramClass == IMessage.class ? IMessage.class : HashMapWrapper.class;
     }
 
 	//@Override
