@@ -22,8 +22,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -52,17 +54,22 @@ public class ZipReport implements IScriptReport {
         }
     };
 
+    //TODO: In future it can configure from file or db
+    private static final Set<String> staticExcludeFiles = Collections.singleton("bin");
+
     private long id;
     private final String workFolder;
     private final IWorkspaceDispatcher dispatcher;
     private final TestScriptDescription testscriptDescription;
     private final ReportOutputFormat reportOutputFormat;
+    private final Set<String> excludeFiles;
 
     public ZipReport(String reportFolder, IWorkspaceDispatcher dispatcher, TestScriptDescription descr, ReportOutputFormat reportOutputFormat) {
         this.dispatcher = dispatcher;
         this.testscriptDescription = descr;
         this.workFolder = reportFolder;
         this.reportOutputFormat = reportOutputFormat;
+        this.excludeFiles = staticExcludeFiles.stream().map(str -> buildPath(workFolder, str)).collect(Collectors.toSet());
     }
 
     @Override
@@ -185,6 +192,11 @@ public class ZipReport implements IScriptReport {
         String relativeFile = null;
         for (String fileName : dispatcher.listFiles(FILE_FILTER, FolderType.REPORT, relativeFolder)) {
             relativeFile = buildPath(relativeFolder, fileName);
+
+            if (excludeFiles.contains(relativeFile)) {
+                continue;
+            }
+
             if (dispatcher.getFile(FolderType.REPORT, relativeFile).isDirectory()) {
                 zipFolder(dispatcher, zip, relativeFile, zipFolder);
             } else {
