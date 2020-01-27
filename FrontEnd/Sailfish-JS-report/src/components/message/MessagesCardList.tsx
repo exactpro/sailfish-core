@@ -89,7 +89,7 @@ export class MessagesCardListBase extends React.PureComponent<MessagesListProps,
                     <VirtualizedList
                         selectedElements={messagesHeatmap(messages, selectedMessages, selectedStatus)}
                         rowCount={messages.length}
-                        elementRenderer={this.renderMessage}
+                        renderElement={this.renderMessage}
                         itemSpacing={6}
                         scrolledIndex={scrolledIndex}
                     />

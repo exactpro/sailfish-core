@@ -24,13 +24,19 @@ import { MessagesCardList, MessagesCardListBase } from './message/MessagesCardLi
 import { LogsPane } from './LogsPane';
 import AppState from '../state/models/AppState';
 import { isAdmin, isRejected } from '../helpers/messageType';
-import { selectRejectedMessageId, setAdminMsgEnabled, setRightPane, togglePredictions, uglifyAllMessages } from '../actions/actionCreators';
+import {
+    selectRejectedMessageId,
+    setAdminMsgEnabled,
+    setRightPane,
+    togglePredictions,
+    uglifyAllMessages
+} from '../actions/actionCreators';
 import { createSelector, createTriStateControlClassName } from '../helpers/styleCreators';
 import { isAction } from "../models/Action";
 import { KnownBugPanel } from "./knownbugs/KnownBugPanel";
 import { StatusType } from '../models/Status';
 import RejectedMessagesCarousel from './RejectedMessagesCarousel';
-import ResizeObserver from 'react-resize-observer';
+import ResizeObserver from "resize-observer-polyfill";
 
 const MIN_CONTROLS_WIDTH = 850,
     MIN_CONTROLS_WIDTH_WITH_REJECTED = 900;
@@ -54,7 +60,7 @@ interface DispatchProps {
     uglifyAllHandler: () => any;
 }
 
-interface Props extends StateProps, DispatchProps { }
+interface Props extends StateProps, DispatchProps {}
 
 interface State {
     showTitles: boolean;
@@ -63,6 +69,16 @@ interface State {
 class RightPanelBase extends React.Component<Props, State> {
 
     private messagesPanel = React.createRef<MessagesCardListBase>();
+    private root = React.createRef<HTMLDivElement>();
+
+    private rootResizeObserver = new ResizeObserver(elements => {
+        const minWidth = this.props.rejectedMessagesEnabled ? MIN_CONTROLS_WIDTH_WITH_REJECTED : MIN_CONTROLS_WIDTH,
+            showTitles = elements[0]?.contentRect.width > minWidth;
+
+        if (this.state.showTitles !== showTitles) {
+            this.setState({ showTitles });
+        }
+    });
 
     constructor(props) {
         super(props);
@@ -85,9 +101,19 @@ class RightPanelBase extends React.Component<Props, State> {
         }
     }
 
+    componentDidMount() {
+        this.rootResizeObserver.observe(this.root.current);
+    }
+
+    componentWillUnmount() {
+        this.rootResizeObserver.unobserve(this.root.current);
+    }
+
     render() {
-        const { panel, rejectedMessagesEnabled, adminMessages, adminMessagesEnabled, adminEnabledHandler, selectCurrentRejectedMessage,
-            predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler } = this.props;
+        const {
+            panel, rejectedMessagesEnabled, adminMessages, adminMessagesEnabled, adminEnabledHandler, selectCurrentRejectedMessage,
+            predictionsEnabled, predictionsAvailable, beautifiedMessagesEnabled, uglifyAllHandler
+        } = this.props;
 
         const adminControlEnabled = adminMessages.length != 0;
 
@@ -105,38 +131,37 @@ class RightPanelBase extends React.Component<Props, State> {
 
 
         return (
-            <div className="layout-panel">
+            <div className="layout-panel" ref={this.root}>
                 <div className="layout-panel__controls">
-                    <ResizeObserver onResize={this.onResize}/>
                     <div className="layout-panel__tabs">
                         <ToggleButton
                             isToggled={panel == Panel.Messages}
                             onClick={() => this.selectPanel(Panel.Messages)}
-                            text="Messages" />
+                            text="Messages"/>
                         <ToggleButton
                             isToggled={panel == Panel.KnownBugs}
                             isDisabled={!this.props.hasKnownBugs}
                             onClick={() => this.selectPanel(Panel.KnownBugs)}
-                            text="Known bugs" />
+                            text="Known bugs"/>
                         <ToggleButton
                             isToggled={false}
                             isDisabled={true}
-                            title="Not implemeted"
-                            text="Logs" />
+                            title="Not implemented"
+                            text="Logs"/>
                     </div>
                     {
                         beautifiedMessagesEnabled ? (
                             <div className="layout-control"
-                                title="Back to plain text"
-                                onClick={() => uglifyAllHandler()}>
-                                <div className="layout-control__icon beautifier" />
+                                 title="Back to plain text"
+                                 onClick={() => uglifyAllHandler()}>
+                                <div className="layout-control__icon beautifier"/>
                             </div>
                         ) : null
                     }
                     <div className={adminRootClass}
-                        onClick={adminControlEnabled ? (() => adminEnabledHandler(!adminMessagesEnabled)) : undefined}
-                        title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
-                        <div className={adminIconClass} />
+                         onClick={adminControlEnabled ? (() => adminEnabledHandler(!adminMessagesEnabled)) : undefined}
+                         title={(adminMessagesEnabled ? "Hide" : "Show") + " Admin messages"}>
+                        <div className={adminIconClass}/>
                         {
                             this.state.showTitles ?
                                 <div className={adminTitleClass}>
@@ -147,9 +172,9 @@ class RightPanelBase extends React.Component<Props, State> {
                     </div>
                     <div className={rejectedRootClass}>
                         <div className={rejectedIconClass}
-                            onClick={() => rejectedMessagesEnabled && selectCurrentRejectedMessage()}
-                            style={{ cursor: rejectedMessagesEnabled ? 'pointer' : 'unset' }}
-                            title={rejectedMessagesEnabled ? "Scroll to current rejected message" : null} />
+                             onClick={() => rejectedMessagesEnabled && selectCurrentRejectedMessage()}
+                             style={{ cursor: rejectedMessagesEnabled ? 'pointer' : 'unset' }}
+                             title={rejectedMessagesEnabled ? "Scroll to current rejected message" : null}/>
                         {
                             this.state.showTitles ?
                                 <div className={rejectedTitleClass}>
@@ -159,14 +184,14 @@ class RightPanelBase extends React.Component<Props, State> {
                         }
                         {
                             rejectedMessagesEnabled ?
-                                <RejectedMessagesCarousel /> :
+                                <RejectedMessagesCarousel/> :
                                 null
                         }
                     </div>
                     <div className={predictionRootClass}
-                        title={predictionsEnabled ? "Hide predictions" : "Show predictions"}
-                        onClick={this.onPredictionClick}>
-                        <div className={predictionIconClass} />
+                         title={predictionsEnabled ? "Hide predictions" : "Show predictions"}
+                         onClick={this.onPredictionClick}>
+                        <div className={predictionIconClass}/>
                         <div className={predictionTitleClass}>
                             {
                                 this.state.showTitles ?
@@ -187,7 +212,7 @@ class RightPanelBase extends React.Component<Props, State> {
         const messagesRootClass = createSelector(
             "layout-panel__content-wrapper",
             selectedPanel == Panel.Messages ? null : "disabled"
-        ),
+            ),
             knownBugsRootClass = createSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.KnownBugs ? null : "disabled"
@@ -201,13 +226,13 @@ class RightPanelBase extends React.Component<Props, State> {
             <React.Fragment>
                 <div className={messagesRootClass}>
                     <MessagesCardList
-                        ref={this.messagesPanel} />
+                        ref={this.messagesPanel}/>
                 </div>
                 <div className={logsRootClass}>
-                    <LogsPane />
+                    <LogsPane/>
                 </div>
                 <div className={knownBugsRootClass}>
-                    <KnownBugPanel />
+                    <KnownBugPanel/>
                 </div>
             </React.Fragment>
         );
@@ -218,15 +243,6 @@ class RightPanelBase extends React.Component<Props, State> {
             this.scrollPanelToTop(panel);
         } else {
             this.props.panelSelectHandler(panel);
-        }
-    }
-
-    private onResize = (rect: DOMRect) => {
-        const minWidth = this.props.rejectedMessagesEnabled ? MIN_CONTROLS_WIDTH_WITH_REJECTED : MIN_CONTROLS_WIDTH,
-            showTitles = rect.width > minWidth;
-        
-        if (this.state.showTitles !== showTitles) {
-            this.setState({ showTitles });
         }
     }
 

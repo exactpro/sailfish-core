@@ -19,7 +19,7 @@ import { StatusType } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { raf } from '../helpers/raf';
 import { Virtuoso, TScrollContainer } from 'react-virtuoso';
-import ResizeObserver from 'react-resize-observer';
+import ResizeObserver from 'resize-observer-polyfill';
 
 const DEFAULT_ITEM_HEIGHT = 60;
 
@@ -30,7 +30,7 @@ const { Provider, Consumer } = React.createContext({
 });
 
 interface Props {
-    elementRenderer: (idx: number) => React.ReactElement;
+    renderElement: (idx: number) => React.ReactElement;
     rowCount: number;
     itemSpacing?: number;
 
@@ -47,12 +47,29 @@ type State = { [index: number]: number }
 
 export class VirtualizedList extends React.Component<Props, State> {
 
-    state = {}
+    state = {};
+
+    resizeObserver = new ResizeObserver(entries => {
+        const stateUpdate: State = {};
+
+        entries.forEach(entry => {
+            const index = (entry.target as HTMLDivElement).dataset.index;
+            const height = entry.contentRect.height;
+
+            if (this.state[index] != height) {
+                stateUpdate[index] = height;
+            }
+        });
+
+        if (Object.entries(stateUpdate).length > 0) {
+            this.setState(stateUpdate);
+        }
+    });
 
     private virtuoso = React.createRef<Virtuoso>();
 
     componentDidUpdate(prevProps: Props) {
-        // Here we handle a situation, when primitive value of Number object doesn't changed 
+        // Here we handle a situation, when primitive value of Number object doesn't changed
         // and passing new index value in List doesn't make any effect (because it requires primitive value).
         // So we need to scroll List manually.
         if (prevProps.scrolledIndex !== this.props.scrolledIndex && this.props.scrolledIndex != null) {
@@ -91,23 +108,37 @@ export class VirtualizedList extends React.Component<Props, State> {
 
     private itemRenderer = (index: number) => {
         return (
-            <div style={{ position: 'relative' }}>
-                <ResizeObserver
-                    onResize={this.onItemResize(index)}/>
-                {this.props.elementRenderer(index)}
-            </div>
+            <ElementWrapper
+                index={index}
+                onMount={ref => this.resizeObserver.observe(ref.current)}
+                onUnmount={ref => this.resizeObserver.unobserve(ref.current)}>
+                {this.props.renderElement(index)}
+            </ElementWrapper>
         )
-    }
-
-    private onItemResize = (index: number) => (rect: DOMRect) => {
-        if (this.state[index] !== rect.height) {
-            this.setState({
-                [index]: rect.height
-            })
-        }
-    }
+    };
 }
 
+type WrapperProps = React.PropsWithChildren<{
+    onMount: (ref: React.MutableRefObject<HTMLDivElement>) => void;
+    onUnmount: (ref: React.MutableRefObject<HTMLDivElement>) => void;
+    index: number;
+}>;
+
+function ElementWrapper({ index, onMount, onUnmount, children }: WrapperProps) {
+    const ref = React.useRef<HTMLDivElement>();
+
+    React.useEffect(() => {
+        onMount(ref);
+
+        return () => onUnmount(ref);
+    }, []);
+
+    return (
+        <div ref={ref} data-index={index}>
+            {children}
+        </div>
+    )
+}
 
 const ScrollContainer: TScrollContainer = ({ reportScrollTop, scrollTo, children }) => {
     const elRef = React.useRef<HeatmapScrollbar>(null);

@@ -18,31 +18,54 @@ import * as React from 'react';
 import { StatusType } from "../../models/Status";
 import { createSelector } from '../../helpers/styleCreators';
 import { rangeSum } from '../../helpers/range';
+import ResizeObserver from "resize-observer-polyfill";
 
 interface SmartHeatmapProps {
     elementsCount: number;
     selectedElements: Map<number, StatusType>;
-    rootHeight: number;
     elementHeightMapper: (index: number) => number;
 }
 
-const SmartHeatmap = ({ selectedElements, ...props }: SmartHeatmapProps) =>  (
-    <div className="heatmap-scrollbar smart">
-        {
-            Array.from(selectedElements).map(([index, status]) => (
-                <SmartHeatmapElement
-                    {...props}
-                    key={index}
-                    index={index}
-                    status={status}/>
-            ))
+function SmartHeatmap({ selectedElements, ...props }: SmartHeatmapProps) {
+    const [rootHeight, setRootHeight] = React.useState<number>(0);
+    const root = React.useRef<HTMLDivElement>();
+
+    React.useEffect(() => {
+        const resizeObserver = new ResizeObserver(elements => {
+            const nextRootHeight = elements[0]?.contentRect.height;
+
+            if (nextRootHeight != rootHeight) {
+                setRootHeight(nextRootHeight);
+            }
+        });
+
+        resizeObserver.observe(root.current);
+
+        return () => {
+            resizeObserver.unobserve(root.current);
         }
-    </div>
-)
+    }, []);
+
+    return (
+        <div className="heatmap-scrollbar smart" ref={root}>
+            {
+                Array.from(selectedElements).map(([index, status]) => (
+                    <SmartHeatmapElement
+                        {...props}
+                        rootHeight={rootHeight}
+                        key={index}
+                        index={index}
+                        status={status}/>
+                ))
+            }
+        </div>
+    )
+}
 
 interface SmartHeatmapElementProps extends Omit<SmartHeatmapProps, 'selectedElements'> {
     index: number;
     status: StatusType;
+    rootHeight: number;
 }
 
 const SmartHeatmapElement = ({ index, elementHeightMapper, elementsCount, rootHeight, status }: SmartHeatmapElementProps) => {
@@ -53,17 +76,17 @@ const SmartHeatmapElement = ({ index, elementHeightMapper, elementsCount, rootHe
         topOffsetScaled = topOffset * scale,
         elementHeightScaled = elementHeight * scale;
 
-    const className = createSelector("heatmap-scrollbar-item", "smart", status), 
-        style: React.CSSProperties = { 
+    const className = createSelector("heatmap-scrollbar-item", "smart", status),
+        style: React.CSSProperties = {
             top: topOffsetScaled,
             height: elementHeightScaled
         };
 
     return (
-        <div 
+        <div
             className={className}
             style={style}/>
     );
-}
+};
 
 export default SmartHeatmap;

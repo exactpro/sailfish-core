@@ -86,7 +86,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                             rowCount={actions.length}
                             itemSpacing={6}
                             ref={this.list}
-                            elementRenderer={this.renderAction}
+                            renderElement={this.renderAction}
                             scrolledIndex={scrolledIndex}
                             selectedElements={actionsHeatmap(getActions(actions), selectedActions)}
                         />

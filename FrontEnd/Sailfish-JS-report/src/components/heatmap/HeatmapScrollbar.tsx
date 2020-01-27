@@ -32,20 +32,9 @@ interface HeatmapScrollbarProps {
     onScroll?: React.UIEventHandler<any>;
 }
 
-interface HeatmapScrollbarState {
-    rootHeight: number;
-}
-
-export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps, HeatmapScrollbarState> {
+export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarProps> {
 
     private scrollbar = React.createRef<Scrollbars>();
-    private root = React.createRef<HTMLDivElement>();
-
-    constructor(props) {
-        super(props);
-
-        this.state = { rootHeight: 0 }
-    }
 
     scrollToTop() {
         this.scrollbar.current?.scrollToTop();
@@ -55,22 +44,12 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
         this.scrollbar.current?.scrollTop(top);
     }
 
-    componentDidMount() {
-        // at the first mount we can't get real component height, 
-        // so we need to rerender component with new root element scroll height
-
-        this.setState({
-            rootHeight: this.root.current.scrollHeight
-        });
-    }
-
     render() {
         const { children, selectedElements, elementsCount, height, width, onScroll, heightMapper } = this.props,
-            rootHeight = height !== undefined ? height : this.state.rootHeight,
             style = height !== undefined || width !== undefined ? { height, width } : undefined;
 
         return (
-            <div className="heatmap" ref={this.root} style={style}>
+            <div className="heatmap" style={style}>
                 <Scrollbars
                     style={style}
                     renderThumbVertical={props => (
@@ -78,9 +57,6 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
                     )}
                     renderTrackVertical={({ style, ...props }) => (
                         <div {...props} className="heatmap-scrollbar-track" style={{ ...style, width: SCROLLBAR_TRACK_WIDTH }} />
-                    )}
-                    renderView={props => (
-                        <div {...props} style={{ ...props.style, }} />
                     )}
                     onScroll={onScroll}
                     ref={this.scrollbar}>
@@ -96,7 +72,6 @@ export default class HeatmapScrollbar extends React.Component<HeatmapScrollbarPr
                         <SmartHeatmap
                             elementsCount={elementsCount}
                             selectedElements={selectedElements}
-                            rootHeight={rootHeight}
                             elementHeightMapper={heightMapper} /> :
                         <Heatmap
                             elementsCount={elementsCount}
