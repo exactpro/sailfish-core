@@ -32,10 +32,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.impl.messages.xml.configuration.JavaType;
+import com.exactpro.sf.common.messages.IMessage;
+import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.structures.IAttributeStructure;
 import com.exactpro.sf.common.messages.structures.IFieldStructure;
 import com.exactpro.sf.common.messages.structures.impl.AttributeStructure;
 import com.exactpro.sf.common.messages.structures.impl.FieldStructure;
+import com.exactpro.sf.configuration.factory.NTGMessageFactory;
 import com.exactpro.sf.services.ntg.exceptions.TooLongStringValueException;
 import com.exactpro.sf.util.AbstractTest;
 
@@ -236,6 +239,40 @@ public final class TestNTGVisitorPositive extends AbstractTest {
 			Assert.fail(ex.getMessage());
 		}
 	}
+    
+    @Test
+    public void testNTGVisitorDecodeStringWithUnprintableCharacters() {
+        int offset = 0;
+        int length = 21;
+        String fldName = "FieldString";
+        String fldNamespace = "NTG";
+        String fldDescr = "Description " + fldName;
+        IMessageFactory messageFactory = new NTGMessageFactory();
+        
+        Map<String, IAttributeStructure> protocolAttributes = new HashMap<>();
+        
+        protocolAttributes.put(NTGProtocolAttribute.Offset.toString(), new AttributeStructure(
+                NTGProtocolAttribute.Offset.toString(), Integer.toString(offset), offset, JavaType.JAVA_LANG_INTEGER));
+        
+        protocolAttributes.put(NTGProtocolAttribute.Format.toString(), new AttributeStructure(
+                NTGProtocolAttribute.Format.toString(), NTGFieldFormat.A.toString(), NTGFieldFormat.A.toString(),
+                JavaType.JAVA_LANG_STRING));
+        
+        protocolAttributes.put(NTGProtocolAttribute.Length.toString(), new AttributeStructure(
+                NTGProtocolAttribute.Length.toString(), Integer.toString(length), length, JavaType.JAVA_LANG_INTEGER));
+        
+        byte[] data = { 0x01, 0x6c, 0x33, 0x6d, 0x64, 0x4b,
+                0x57, 0x53, 0x51, 0x6b, 0x6f,
+                0x45, 0x34, 0x68, 0x70, 0x79,
+                0x6b, 0x6f, 0x6f, 0x44, 0x01 };
+        IoBuffer ioBuffer = IoBuffer.wrap(data);
+        IFieldStructure fldStruct = new FieldStructure(fldName, fldNamespace, fldDescr, null, protocolAttributes,
+                null, JavaType.JAVA_LANG_STRING, true, false, false, null);
+        IMessage msg = messageFactory.createMessage("test", fldNamespace);
+        NTGVisitorDecode ntgVisitorDecode = new NTGVisitorDecode(ioBuffer, messageFactory, msg);
+        ntgVisitorDecode.visit(fldName, (String)null, fldStruct, false);
+        Assert.assertEquals(length, msg.getField("FieldString").toString().length());
+    }
 
 	/**
 	 * Test case aplha data type

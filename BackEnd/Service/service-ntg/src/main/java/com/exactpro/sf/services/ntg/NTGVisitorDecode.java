@@ -92,16 +92,20 @@ final class NTGVisitorDecode extends NTGVisitorBase {
             byte[] fieldBytes = new byte[length];
             buffer.get(fieldBytes);
             try {
-                decodedValue = DECODER.get().decode(ByteBuffer.wrap(fieldBytes)).toString().trim();
+                decodedValue = DECODER.get().decode(ByteBuffer.wrap(fieldBytes)).toString();
+                int index = decodedValue.indexOf('\0');
+                if (index != -1) {
+                    decodedValue = decodedValue.substring(0, index);
+                }
             } catch (CharacterCodingException e) {
-                throw new EPSCommonException("Problem with decoding the fieldBytes = \"" + Arrays.toString(fieldBytes) + "\"", e);
+                throw new EPSCommonException("Problem with decoding the fieldBytes = \"" + Arrays.toString(fieldBytes) + '"', e);
             }
         }
         if( logger.isDebugEnabled()) {
             logger.debug("   Decode visiting String field [{}], decoded value [{}].", fieldName, decodedValue);
         }
 
-        message.addField(fieldName, decodedValue.toString());
+        message.addField(fieldName, decodedValue);
         accumulatedLength += length;
     }
     
