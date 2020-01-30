@@ -23,30 +23,23 @@ import {
     createVerification,
     createVerificationEntry
 } from "../../util/creators";
-import {keyForAction, keyForMessage, keyForVerification} from "../../../helpers/keys";
-import {StatusType} from "../../../models/Status";
+import { keyForAction, keyForMessage, keyForVerification } from "../../../helpers/keys";
+import { StatusType } from "../../../models/Status";
 import FilterType from "../../../models/filter/FilterType";
-import {FilterConfig} from "../../../models/filter/FilterConfig";
 import FilterPath from "../../../models/filter/FilterPath";
+import { FilterBlock } from "../../../models/filter/FilterBlock";
 
 describe('[Helpers] filtrate', () => {
 
-    const testCaseBase: TestCase = createTestCase(),
-        configBase: FilterConfig = {
-            types: [FilterType.ACTION, FilterType.VERIFICATION, FilterType.MESSAGE],
-            blocks: [],
-            isTransparent: false
-        };
+    const testCaseBase: TestCase = createTestCase();
 
     test('Filter all in plain action', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        };
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
+
         const testCase: TestCase = {
             ...testCaseBase,
             actions: [
@@ -54,20 +47,18 @@ describe('[Helpers] filtrate', () => {
             ]
         };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results).toEqual([keyForAction(0)]);
     });
 
     test('Service filter in plain action', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.SERVICE,
-                values: ['test']
-            }]
-        };
+            path: FilterPath.SERVICE,
+            values: ['test']
+        }];
+
         const testCase: TestCase = {
             ...testCaseBase,
             actions: [{
@@ -76,45 +67,41 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results).toEqual([keyForAction(0)]);
     });
 
     test('Filter actions by status', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.STATUS,
-                values: [StatusType.PASSED]
-            }]
-        };
+            path: FilterPath.STATUS,
+            values: [StatusType.PASSED]
+        }];
+
         const testCase: TestCase = {
             ...testCaseBase,
             actions: [{
                 ...createAction(0),
-                status: {status: StatusType.PASSED}
+                status: { status: StatusType.PASSED }
             }, {
                 ...createAction(1),
-                status: {status: StatusType.FAILED}
+                status: { status: StatusType.FAILED }
             }]
         };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results).toEqual([keyForAction(0)]);
     });
 
     test("Filter all in action's subnodes", async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        };
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
+
         const testCase: TestCase = {
             ...testCaseBase,
             actions: [{
@@ -127,20 +114,18 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForAction(0), keyForAction(1)].sort());
     });
 
     test("Filter service in action's subnodes", async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.SERVICE,
-                values: ['test']
-            }]
-        };
+            path: FilterPath.SERVICE,
+            values: ['test']
+        }];
+
         const testCase: TestCase = {
             ...testCaseBase,
             actions: [{
@@ -153,20 +138,17 @@ describe('[Helpers] filtrate', () => {
             }]
         };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForAction(0), keyForAction(1)].sort());
     });
 
     test('Filter verification by name', async () => {
-        const config: FilterConfig = {
-            ...configBase,
-            types: [FilterType.VERIFICATION],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        }
+        const blocks: FilterBlock[] = [{
+            types: [FilterType.ACTION],
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
@@ -177,22 +159,19 @@ describe('[Helpers] filtrate', () => {
                     name: 'test name'
                 }]
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForVerification(0, 1), keyForAction(0)].sort());
-    })
+    });
 
     test('Filter verifications by some entry value', async () => {
-        const config: FilterConfig = {
-            ...configBase,
-            types: [FilterType.VERIFICATION],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        };
+        const blocks: FilterBlock[] = [{
+            types: [FilterType.ACTION],
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
@@ -206,22 +185,19 @@ describe('[Helpers] filtrate', () => {
                     }]
                 }]
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForVerification(0, 1), keyForAction(0)].sort());
     });
 
     test('Filter verification by some deep entry value', async () => {
-        const config: FilterConfig = {
-            ...configBase,
-            types: [FilterType.VERIFICATION],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        };
+        const blocks: FilterBlock[] = [{
+            types: [FilterType.ACTION],
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
@@ -238,42 +214,36 @@ describe('[Helpers] filtrate', () => {
                     }]
                 }]
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForVerification(0, 1), keyForAction(0)].sort());
     });
 
     test('Filter messages by name', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.MESSAGE],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        }
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
             messages: [createMessage(0, 'some test name')]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results).toEqual([keyForMessage(0)]);
-    })
+    });
 
     test('Filter both actions and messages by service', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.MESSAGE, FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.SERVICE,
-                values: ['test']
-            }]
-        }
+            path: FilterPath.SERVICE,
+            values: ['test']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
@@ -285,22 +255,19 @@ describe('[Helpers] filtrate', () => {
                 ...createAction(1),
                 serviceName: 'test service'
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForAction(1), keyForMessage(0)].sort());
-    })
+    });
 
     test('Filter by several block values', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.SERVICE,
-                values: ['one', 'two']
-            }]
-        }
+            path: FilterPath.SERVICE,
+            values: ['one', 'two']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
@@ -314,57 +281,52 @@ describe('[Helpers] filtrate', () => {
                 ...createAction(3),
                 serviceName: 'three service'
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForAction(1), keyForAction(2)].sort());
     });
 
     test('Filter action by service and status', async () => {
-        const config: FilterConfig = {
-            ...configBase,
+        const blocks: FilterBlock[] = [{
             types: [FilterType.ACTION],
-            blocks: [{
-                path: FilterPath.SERVICE,
-                values: ['one']
-            }, {
-                path: FilterPath.STATUS,
-                values: [StatusType.FAILED]
-            }]
-        }
+            path: FilterPath.SERVICE,
+            values: ['one']
+        }, {
+            types: [FilterType.ACTION],
+            path: FilterPath.STATUS,
+            values: [StatusType.FAILED]
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
             actions: [{
                 ...createAction(1),
                 serviceName: 'one service',
-                status: {status: StatusType.PASSED}
+                status: { status: StatusType.PASSED }
             }, {
                 ...createAction(2),
                 serviceName: 'one service',
-                status: {status: StatusType.FAILED}
+                status: { status: StatusType.FAILED }
             }, {
                 ...createAction(3),
                 serviceName: 'two service',
-                status: {status: StatusType.FAILED}
+                status: { status: StatusType.FAILED }
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results).toEqual([keyForAction(2)]);
     });
 
     test('Filter action with nested verifications', async () => {
-        const config: FilterConfig = {
-            ...configBase,
-            types: [FilterType.ACTION, FilterType.VERIFICATION],
-            blocks: [{
-                path: FilterPath.ALL,
-                values: ['test']
-            }]
-        };
+        const blocks: FilterBlock[] = [{
+            types: [FilterType.ACTION],
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
 
         const testCase: TestCase = {
             ...testCaseBase,
@@ -375,10 +337,36 @@ describe('[Helpers] filtrate', () => {
                 ...createAction(3),
                 name: 'test action'
             }]
-        }
+        };
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         expect(results.sort()).toEqual([keyForVerification(1, 2), keyForAction(3), keyForAction(1)].sort());
     });
+
+    test('Filter action by some input param value', async () => {
+        const blocks: FilterBlock[] = [{
+            types: [FilterType.ACTION],
+            path: FilterPath.ALL,
+            values: ['test']
+        }];
+
+        const testCase: TestCase = {
+            ...testCaseBase,
+            actions: [{
+                ...createAction(1),
+                parameters: [{
+                    name: 'param',
+                    subParameters: [{
+                        name: 'param2',
+                        value: 'test'
+                    }]
+                }]
+            }]
+        };
+
+        const results = await filtrate(testCase, blocks);
+
+        expect(results).toEqual([keyForAction(1)]);
+    })
 });

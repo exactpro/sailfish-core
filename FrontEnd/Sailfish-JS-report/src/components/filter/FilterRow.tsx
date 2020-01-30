@@ -16,28 +16,58 @@
 
 import * as React from 'react';
 import FilterBubble from "./FilterBubble";
-import {removeByIndex, replaceByIndex} from "../../helpers/array";
+import { complement, removeByIndex, replaceByIndex } from "../../helpers/array";
 import AutocompleteInput from "../util/AutocompleteInput";
-import FilterPath, {FILTER_PATH_PREFIX, FILTER_PATH_VALUES, isFilterPath} from "../../models/filter/FilterPath";
+import FilterPath, { isFilterPath } from "../../models/filter/FilterPath";
+import { FilterBlock } from "../../models/filter/FilterBlock";
+import NullableFields from "../../models/util/NullableFields";
+import FilterType from "../../models/filter/FilterType";
+import { StatusType } from "../../models/Status";
+import Select from "../util/Select";
 
 interface Props {
-    path: FilterPath | 'type';
-    values: string[];
-    index: number;
-    onChange: (nextValues: string[], path?: FilterPath) => void;
+    block: NullableFields<FilterBlock>;
+    rowIndex: number;
+    onChange: (nextBlock: FilterBlock) => void;
     onRemove?: () => void;
-    autocompleteVariants: string[] | undefined;
-    validateAutocomplete?: boolean;
 }
 
-function FilterRow(props: Props) {
-    const {path, index, values, onChange, onRemove = () => {}, autocompleteVariants, validateAutocomplete = true} = props;
+const TYPE_PATH_PREFIX = '#',
+    ALL_FILTER_TYPE = 'All';
+
+const TYPE_OPTIONS = [ALL_FILTER_TYPE, FilterType.MESSAGE, FilterType.ACTION],
+    PATH_OPTIONS = [FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE];
+
+const AUTOCOMPLETE_MAP = new Map<FilterPath, string[]>([
+    [FilterPath.STATUS, [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED, StatusType.CONDITIONALLY_FAILED]]
+]);
+
+export default function FilterRow(props: Props) {
+    const { block, rowIndex, onChange, onRemove = () => null } = props;
+
     const [currentValue, setValue] = React.useState('');
+    const [tempBlock, setTempBlock] = React.useState<NullableFields<FilterBlock>>(block);
+
+    React.useEffect(() => {
+        if (tempBlock != block) {
+            setTempBlock(block);
+        }
+    }, [block]);
+
+    const { values, path, types } = tempBlock;
     const input = React.useRef<HTMLInputElement>();
 
     React.useEffect(() => {
         input.current?.focus();
     }, []);
+
+    const submitChange = (nextBlock: NullableFields<FilterBlock>) => {
+        onChange({
+            types: nextBlock.types ?? [FilterType.ACTION, FilterType.MESSAGE],
+            path: nextBlock.path ?? FilterPath.ALL,
+            values: nextBlock.values ?? []
+        })
+    };
 
     const inputOnRemove = () => {
         if (values.length == 0) {
@@ -49,50 +79,136 @@ function FilterRow(props: Props) {
             restValues = values.slice(0, values.length - 1);
 
         setValue(lastValue);
-        onChange(restValues);
+        submitChange({
+            ...block,
+            values: restValues
+        });
     };
 
     const inputOnSubmit = (nextValue: string) => {
-        if (values.length == 0 && nextValue.startsWith(FILTER_PATH_PREFIX)) {
-            const nextPath = nextValue.substring(FILTER_PATH_PREFIX.length);
+        if (values.length > 0 && path != null && types != null) {
+            submitChange({
+                ...tempBlock,
+                values: [...values, nextValue]
+            });
+            return;
+        }
+
+        if (nextValue.startsWith(TYPE_PATH_PREFIX) && types == null) {
+            const nextTypes = nextValue.substring(TYPE_PATH_PREFIX.length);
+
+            if (TYPE_OPTIONS.includes(nextTypes)) {
+                setTempBlock({
+                    ...tempBlock,
+                    types: getTypesByOption(nextTypes)
+                });
+                return;
+            }
+        }
+
+        if (nextValue.startsWith(TYPE_PATH_PREFIX) && path == null) {
+            const nextPath = nextValue.substring(TYPE_PATH_PREFIX.length);
 
             if (isFilterPath(nextPath)) {
-                onChange(values, nextPath);
+                setTempBlock({
+                    ...tempBlock,
+                    path: nextPath
+                });
+
+                return;
             }
-        } else {
-            onChange([...values, nextValue]);
-            setValue('');
         }
+
+        submitChange({
+            ...tempBlock,
+            values: [...values, nextValue]
+        })
     };
 
-    const inputOnEmptyBlur = () => {
-        if (values.length == 0 && path == FilterPath.ALL) {
-            onRemove();
+    const valueBubbleOnChangeFor = (index: number) => (nextValue: string) => {
+        submitChange({
+            ...tempBlock,
+            values: replaceByIndex(values, index, nextValue)
+        })
+    };
+
+    const valueBubbleOnRemoveFor = (index: number) => () => {
+        submitChange({
+            ...tempBlock,
+            values: removeByIndex(values, index)
+        })
+    };
+
+    const getAutocomplete = () => {
+        if (types == null) {
+            return TYPE_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
         }
+
+        if (path == null) {
+            return PATH_OPTIONS.map(option => TYPE_PATH_PREFIX + option);
+        }
+
+        if (AUTOCOMPLETE_MAP.has(path)) {
+            return complement(AUTOCOMPLETE_MAP.get(path), values);
+        }
+
+        return null;
+    };
+
+    const getPlaceholder = () => {
+        if (types == null) {
+            return TYPE_PATH_PREFIX + FilterType.MESSAGE;
+        }
+
+        if (path == null) {
+            return TYPE_PATH_PREFIX + FilterPath.SERVICE;
+        }
+
+        return '';
+    };
+
+    const bubbleIsValid = (value: string) => {
+        if (AUTOCOMPLETE_MAP.has(path)) {
+            return AUTOCOMPLETE_MAP.get(path).includes(value);
+        }
+
+        return true;
     };
 
     return (
-        <div className="filter-row">
+        <div className="filter-row__wrapper">
             {
-                path != FilterPath.ALL ? (
-                    <FilterBubble
-                        className="filter__path"
-                        readonly={path == 'type'}
-                        value={path}
-                        prefix={FILTER_PATH_PREFIX}
-                        autocompleteVariants={FILTER_PATH_VALUES}
-                        onChange={nextPath => onChange(values, nextPath as FilterPath)}
-                        onRemove={() => onChange(values, FilterPath.ALL)}/>
+                types != null ? (
+                    <Select
+                        className="filter-row__select"
+                        options={TYPE_OPTIONS}
+                        selected={getTypesOptionName(types)}
+                        onChange={option => submitChange({...tempBlock, types: getTypesByOption(option)})}
+                    />
                 ) : null
             }
             {
-                values.map((val, index) => (
+                path != null ? (
+                    <React.Fragment>
+                        by
+                        <Select
+                            className="filter-row__select"
+                            options={PATH_OPTIONS}
+                            selected={path}
+                            onChange={(nextPath: FilterPath) => submitChange({...tempBlock, path: nextPath})}
+                        />
+                    </React.Fragment>
+                ) : null
+            }
+            {
+                values?.map((value, index) => (
                     <React.Fragment key={index}>
                         <FilterBubble
-                            value={val}
-                            onChange={nextValue => onChange(replaceByIndex(values, index, nextValue))}
-                            onRemove={() => onChange(removeByIndex(values, index))}
-                            autocompleteVariants={autocompleteVariants != null ? [val, ...autocompleteVariants] : []}
+                            value={value}
+                            isValid={bubbleIsValid(value)}
+                            onChange={valueBubbleOnChangeFor(index)}
+                            onRemove={valueBubbleOnRemoveFor(index)}
+                            autocompleteVariants={getAutocomplete()}
                         />
                         <span>or</span>
                     </React.Fragment>
@@ -104,18 +220,28 @@ function FilterRow(props: Props) {
                 value={currentValue}
                 onSubmit={inputOnSubmit}
                 onRemove={inputOnRemove}
-                onEmptyBlur={inputOnEmptyBlur}
-                readonly={autocompleteVariants != null && autocompleteVariants.length == 0}
-                validateAutocomplete={validateAutocomplete}
-                autocomplete={autocompleteVariants ?? []}
-                datalistKey={`autocomplete-${index}`}
-            />
-            <div
-                className="filter-row__remove-btn"
-                onClick={onRemove}
+                readonly={false}
+                placeholder={getPlaceholder()}
+                onlyAutocompleteValues={path != null && types != null && AUTOCOMPLETE_MAP.has(path)}
+                autocomplete={getAutocomplete()}
+                datalistKey={`autocomplete-${rowIndex}`}
             />
         </div>
     )
 }
 
-export default FilterRow;
+function getTypesOptionName(types: FilterType[]): FilterType | typeof ALL_FILTER_TYPE {
+    if (types.length > 1) {
+        return ALL_FILTER_TYPE;
+    }
+
+    return types[0];
+}
+
+function getTypesByOption(option: string): FilterType[] {
+    if (option == ALL_FILTER_TYPE) {
+        return [FilterType.ACTION, FilterType.MESSAGE];
+    }
+
+    return [option as FilterType];
+}

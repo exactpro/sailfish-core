@@ -16,21 +16,19 @@
 
 import * as React from 'react';
 import '../../styles/action.scss';
-import Action, {ActionNode, ActionNodeType} from '../../models/Action';
-import {StatusType} from '../../models/Status';
+import Action, { ActionNode, ActionNodeType } from '../../models/Action';
+import { StatusType } from '../../models/Status';
 import Tree from '../../models/util/Tree';
 import ActionExpandStatus from '../../models/util/ActionExpandStatus';
-import {ActionCard} from './ActionCard';
-import {CustomMessage} from './CustomMessage';
+import { ActionCard } from './ActionCard';
+import { CustomMessage } from './CustomMessage';
 import VerificationCard from './VerificationCard';
 import UserTableCard from './UserTableCard';
-import {isCheckpoint} from '../../helpers/action';
-import {getSubTree} from '../../helpers/tree';
+import { isCheckpointAction } from '../../helpers/action';
+import { getSubTree } from '../../helpers/tree';
 import CheckpointAction from './CheckpointAction';
 import CustomLink from './CustomLink';
-import {keyForAction, keyForVerification} from "../../helpers/keys";
-import {FilterConfig} from "../../models/filter/FilterConfig";
-import FilterType from "../../models/filter/FilterType";
+import { keyForAction, keyForVerification } from "../../helpers/keys";
 
 interface Props {
     action: ActionNode;
@@ -41,8 +39,8 @@ interface Props {
     expandPath: Tree<ActionExpandStatus>;
     filter: {
         results: string[];
-        config: FilterConfig;
         isActive: boolean;
+        isTransparent: boolean;
     }
     onRootExpand: (actionId: number, isExpanded: boolean) => void;
     onActionSelect: (action: Action) => void;
@@ -66,24 +64,21 @@ export default function ActionTreeNode(props: Props) {
     // https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions
     switch (action.actionNodeType) {
         case ActionNodeType.ACTION: {
-            let isTransparent = false;
-
-            if (filter.isActive &&
-                filter.config.types.includes(FilterType.ACTION) &&
-                !filter.results.includes(keyForAction(action.id))
-            ) {
-                if (filter.config.isTransparent) {
-                    isTransparent = true;
-                } else {
-                    return null;
-                }
-            }
-
-            if (isCheckpoint(action)) {
+            if (isCheckpointAction(action)) {
                 return (
                     <CheckpointAction
                         action={action}/>
                 );
+            }
+
+            let isTransparent = false;
+
+            if (filter.isActive && !filter.results.includes(keyForAction(action.id))) {
+                if (filter.isTransparent) {
+                    isTransparent = true;
+                } else {
+                    return null;
+                }
             }
 
             return (
@@ -116,11 +111,8 @@ export default function ActionTreeNode(props: Props) {
 
             let isTransparent = false;
 
-            if (filter.isActive &&
-                filter.config.types.includes(FilterType.VERIFICATION) &&
-                !filter.results.includes(keyForVerification(parentAction?.id, verification.messageId))
-            ) {
-                if (filter.config.isTransparent) {
+            if (filter.isActive && !filter.results.includes(keyForVerification(parentAction?.id, verification.messageId))) {
+                if (filter.isTransparent) {
                     isTransparent = true;
                 } else {
                     return null;

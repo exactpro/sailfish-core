@@ -15,19 +15,20 @@
  ******************************************************************************/
 
 import AppState from "../state/models/AppState";
-import {createSelector} from "reselect";
-import {getFilterConfig, getFilterResults} from "./filter";
-import {keyForMessage} from "../helpers/keys";
-import {isRejected} from "../helpers/messageType";
+import { createSelector } from "reselect";
+import { getFilterBlocks, getFilterResults } from "./filter";
+import { keyForMessage } from "../helpers/keys";
+import { isCheckpointMessage, isRejected } from "../helpers/messageType";
 import FilterType from "../models/filter/FilterType";
 
 export const getMessages = (state: AppState) => state.selected.testCase.messages;
 
 export const getFilteredMessages = createSelector(
-    [getMessages, getFilterConfig, getFilterResults],
-    (messages, config, results) => {
-        if (config.types.includes(FilterType.MESSAGE) && config.blocks.length > 0 && !config.isTransparent) {
-            return messages.filter(msg => results.includes(keyForMessage(msg.id)))
+    [getMessages, getFilterBlocks, getFilterResults],
+    (messages, blocks, results) => {
+        if (blocks.some(({ types }) => types.includes(FilterType.MESSAGE))) {
+            return messages
+                .filter(msg => isCheckpointMessage(msg) || results.includes(keyForMessage(msg.id)))
         }
 
         return messages;
@@ -35,11 +36,11 @@ export const getFilteredMessages = createSelector(
 );
 
 export const getTransparentMessages = createSelector(
-    [getMessages, getFilterConfig, getFilterResults],
-    (messages, config, results): number[] => {
-        if (config.types.includes(FilterType.MESSAGE) && config.blocks.length > 0 && config.isTransparent) {
+    [getMessages, getFilterBlocks, getFilterResults],
+    (messages, blocks, results): number[] => {
+        if (blocks.some(({ types }) => types.includes(FilterType.MESSAGE))) {
             return messages
-                .filter(msg => !results.includes(keyForMessage(msg.id)))
+                .filter(msg => !isCheckpointMessage(msg) && !results.includes(keyForMessage(msg.id)))
                 .map(msg => msg.id);
         }
 

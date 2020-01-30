@@ -18,13 +18,13 @@ import AppState from "../state/models/AppState";
 import { createSelector } from "reselect";
 import { isKeyForAction, isKeyForMessage, isKeyForVerification } from "../helpers/keys";
 
-export const getFilterConfig = (state: AppState) => state.filter.config;
+export const getFilterBlocks = (state: AppState) => state.filter.blocks;
 export const getFilterResults = (state: AppState) => state.filter.results;
 
 export const getIsFilterApplied = createSelector(
-    [getFilterConfig],
-    (config) =>
-        config.types.length > 0 && config.blocks.some(block => block.values.length > 0)
+    [getFilterBlocks],
+    (blocks) =>
+        blocks.length > 0 && blocks.some(block => block.values.length > 0)
 );
 
 export const getActionsFilterResultsCount = createSelector(
@@ -35,9 +35,4 @@ export const getActionsFilterResultsCount = createSelector(
 export const getMessagesFilterResultsCount = createSelector(
     [getFilterResults],
     (results) => results.filter(isKeyForMessage).length
-);
-
-export const getVerificationsFilterResultsCount = createSelector(
-    [getFilterResults],
-    (results) => results.filter(isKeyForVerification).length
 );

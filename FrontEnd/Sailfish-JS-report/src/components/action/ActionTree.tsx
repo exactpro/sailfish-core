@@ -22,18 +22,17 @@ import { StatusType } from '../../models/Status';
 import Tree, { createNode, mapTree } from '../../models/util/Tree';
 import AppState from '../../state/models/AppState';
 import ActionExpandStatus from '../../models/util/ActionExpandStatus';
-import { selectAction } from '../../actions/actionCreators';
-import { selectVerification } from '../../actions/actionCreators';
+import { selectAction, selectVerification } from '../../actions/actionCreators';
 import StateSaver from '../util/StateSaver';
 import memoize from '../../helpers/memoize';
-import { createExpandTreePath, createExpandTree, updateExpandTree } from '../../helpers/tree';
+import { createExpandTree, createExpandTreePath, updateExpandTree } from '../../helpers/tree';
 import { keyForAction } from '../../helpers/keys';
 import { fetchPredictions } from "../../thunks/machineLearning";
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import ActionTreeNode from './ActionTreeNode';
-import {FilterConfig} from "../../models/filter/FilterConfig";
 import { getIsFilterApplied } from "../../selectors/filter";
+import FilterType from "../../models/filter/FilterType";
 
 interface OwnProps {
     action: ActionNode;
@@ -43,9 +42,9 @@ interface StateProps {
     selectedVerificationId: number;
     selectedActionsId: number[];
     filter: {
-        config: FilterConfig;
         results: string[];
         isActive: boolean;
+        isTransparent: boolean;
     };
     expandedTreePath: Tree<number> | null;
     mlDataActionIds: Set<number>;
@@ -179,9 +178,9 @@ export const ActionTree = connect(
         selectedVerificationId: state.selected.verificationId,
         selectedActionsId: state.selected.actionsId,
         filter: {
-            config: state.filter.config,
             results: state.filter.results,
-            isActive: getIsFilterApplied(state)
+            isActive: getIsFilterApplied(state) && state.filter.blocks.some(({ types }) => types.includes(FilterType.ACTION)),
+            isTransparent: state.filter.isTransparent
         },
         mlDataActionIds: new Set<number>(state.machineLearning.predictionData.map(item => item.actionId)),
         expandedTreePath: 

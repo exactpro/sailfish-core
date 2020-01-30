@@ -32,23 +32,22 @@ export function filterReducer(state: FilterState = initialFilterState, stateActi
         case StateActionTypes.SET_FILTER_CONFIG: {
             return {
                 ...state,
-                config: stateAction.config
+                blocks: stateAction.blocks
             }
         }
 
         case StateActionTypes.SET_FILTER_IS_TRANSPARENT: {
             return {
                 ...state,
-                config: {
-                    ...state.config,
-                    isTransparent: stateAction.isTransparent
-                }
+                isTransparent: stateAction.isTransparent
             }
         }
 
+        case StateActionTypes.SET_TEST_CASE:
         case StateActionTypes.RESET_FILTER: {
             return {
-                ...initialFilterState
+                ...initialFilterState,
+                isTransparent: state.isTransparent
             }
         }
 

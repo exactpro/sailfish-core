@@ -21,7 +21,7 @@ import MessageCard from './MessageCard';
 import { StatusType } from '../../models/Status';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { isAdmin, isCheckpoint } from '../../helpers/messageType';
+import { isAdmin, isCheckpointMessage } from '../../helpers/messageType';
 import { AdminMessageWrapper } from './AdminMessageWrapper';
 import { selectMessage } from '../../actions/actionCreators';
 import { messagesHeatmap } from '../../helpers/heatmapCreator';
@@ -117,7 +117,7 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
     private renderMessage = (index: number) => {
         const message = this.props.messages[index];
 
-        if (isCheckpoint(message)) {
+        if (isCheckpointMessage(message)) {
             return <CheckpointMessage message={message}/>;
         }
 
@@ -139,11 +139,14 @@ export class MessagesCardListBase extends React.PureComponent<Props, State> {
 
 export const MessagesCardList = connect(
     (state: AppState): StateProps => ({
-        messages: getIsFilterApplied(state) ? getFilteredMessages(state) : state.selected.testCase.messages,
+        messages: getIsFilterApplied(state) && !state.filter.isTransparent ?
+            getFilteredMessages(state) :
+            state.selected.testCase.messages,
         scrolledMessageId: state.selected.scrolledMessageId,
         selectedMessages: state.selected.messagesId,
         selectedStatus: state.selected.selectedActionStatus,
-        isFilterApplied: getIsFilterApplied(state) && state.filter.config.types.includes(FilterType.MESSAGE),
+        isFilterApplied: getIsFilterApplied(state) &&
+            state.filter.blocks.some(({ types }) => types.includes(FilterType.MESSAGE)),
         filteredCount: getMessagesFilterResultsCount(state)
     }),
     () => ({}),

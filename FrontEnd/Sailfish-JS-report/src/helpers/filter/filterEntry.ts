@@ -18,8 +18,9 @@ import Action from "../../models/Action";
 import Message from "../../models/Message";
 import Verification from "../../models/Verification";
 import VerificationEntry from "../../models/VerificationEntry";
+import ActionParameter from "../../models/ActionParameter";
 
-type Entry = Action | Message | Verification | VerificationEntry;
+type Entry = Action | Message | Verification | VerificationEntry | ActionParameter;
 
 export default function filterEntry<T extends Entry>(entry: T, fields: (keyof T)[], values: RegExp[]): boolean {
     for (let field of fields) {

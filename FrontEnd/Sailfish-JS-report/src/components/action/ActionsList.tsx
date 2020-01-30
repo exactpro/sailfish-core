@@ -25,13 +25,7 @@ import StateSaverProvider from '../util/StateSaverProvider';
 import { actionsHeatmap } from '../../helpers/heatmapCreator';
 import { getActions } from '../../helpers/action';
 import { getFilteredActions } from "../../selectors/actions";
-import {
-    getActionsFilterResultsCount,
-    getIsFilterApplied,
-    getVerificationsFilterResultsCount
-} from "../../selectors/filter";
-import FilterType from "../../models/filter/FilterType";
-import { FilterConfig } from "../../models/filter/FilterConfig";
+import { getActionsFilterResultsCount, getIsFilterApplied } from "../../selectors/filter";
 import { createBemElement } from "../../helpers/styleCreators";
 
 interface Props {
@@ -40,8 +34,6 @@ interface Props {
     scrolledActionId: Number;
     isFilterApplied: boolean;
     filteredActionsCount: number;
-    filteredVerificationsCount: number;
-    filterConfig: FilterConfig;
 }
 
 interface State {
@@ -86,7 +78,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const { actions, selectedActions, isFilterApplied, filteredActionsCount, filteredVerificationsCount, filterConfig } = this.props,
+        const { actions, selectedActions, isFilterApplied, filteredActionsCount } = this.props,
             { scrolledIndex } = this.state;
 
         const listRootClass = createBemElement(
@@ -100,16 +92,7 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
                 {
                     isFilterApplied ? (
                         <div className="actions__filter-info">
-                        {
-                            [
-                                filterConfig.types.includes(FilterType.ACTION) ?
-                                    `${filteredActionsCount} Actions` :
-                                    null,
-                                filterConfig.types.includes(FilterType.VERIFICATION) ?
-                                    `${filteredVerificationsCount} Verifications` :
-                                    null
-                            ].filter(Boolean).join(' and ') + ' Filtered'
-                        }
+                            {filteredActionsCount} Actions Filtered
                         </div>
                     ) : null
                 }
@@ -139,11 +122,8 @@ export const ActionsList = connect(
         actions: getIsFilterApplied(state) ? getFilteredActions(state) : state.selected.testCase.actions,
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
-        filterConfig: state.filter.config,
         filteredActionsCount: getActionsFilterResultsCount(state),
-        filteredVerificationsCount: getVerificationsFilterResultsCount(state),
-        isFilterApplied: getIsFilterApplied(state) &&
-            (state.filter.config.types.includes(FilterType.ACTION) || state.filter.config.types.includes(FilterType.VERIFICATION))
+        isFilterApplied: getIsFilterApplied(state)
     }),
     dispatch => ({}),
     (stateProps, dispatchProps, ownProps) => ({ ...stateProps, ...dispatchProps, ...ownProps }),

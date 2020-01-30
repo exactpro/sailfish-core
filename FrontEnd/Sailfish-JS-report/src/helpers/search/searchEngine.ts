@@ -18,12 +18,12 @@ import TestCase from '../../models/TestCase';
 import SearchResult from './SearchResult';
 import Message from '../../models/Message';
 import Action, { isAction, ActionNodeType } from '../../models/Action';
-import { keyForMessage, keyForAction, keyForActionParamter, keyForVerification } from '../keys';
+import { keyForMessage, keyForAction, keyForActionParameter, keyForVerification } from '../keys';
 import ActionParameter from '../../models/ActionParameter';
 import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
 import { createCaseInsensitiveRegexp } from '../regexp';
-import { isCheckpoint } from '../action';
+import { isCheckpointAction } from '../action';
 import { asyncFlatMap } from '../array';
 import "setimmediate";
 
@@ -31,9 +31,9 @@ import "setimmediate";
 export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
     ACTION_FIELDS: Array<keyof Action> = ['matrixId', 'serviceName', 'name', 'messageType', 'description'],
     VERIFICATION_FIELDS: Array<keyof Verification> = ['name'],
-    INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
     VERIFICATION_NODE_FIELDS: Array<keyof VerificationEntry> = ['name', 'expected', 'actual', 'status', "actualType", "expectedType"],
-    // we neeed to ignore all fileds besides 'name' in parent nodes because it doesn't render
+    INPUT_PARAM_VALUE_FIELDS: Array<keyof ActionParameter> = ['name', 'value'],
+    // we need to ignore all fields besides 'name' in parent nodes because it doesn't render
     INPUT_PARAM_NODE_FIELD: Array<keyof ActionParameter> = ['name'];
 
 export async function findAll(searchString: string, testCase: TestCase): Promise<SearchResult> {
@@ -43,11 +43,11 @@ export async function findAll(searchString: string, testCase: TestCase): Promise
 
     const searchPattern = createCaseInsensitiveRegexp(searchString);
 
-    const filtredActions = testCase.actions.filter(
-        actionNode => isAction(actionNode) && !isCheckpoint(actionNode)
+    const filteredActions = testCase.actions.filter(
+        actionNode => isAction(actionNode) && !isCheckpointAction(actionNode)
     ) as Action[];
 
-    const actionResults = await asyncFlatMap(filtredActions, item => findAllInAction(item, searchPattern));
+    const actionResults = await asyncFlatMap(filteredActions, item => findAllInAction(item, searchPattern));
     const messageResults = await asyncFlatMap(testCase.messages, item => findAllInMessage(item, searchPattern));
 
     return new SearchResult(actionResults.concat(messageResults));
@@ -68,7 +68,7 @@ function findAllInAction(action: Action, searchPattern: RegExp): Array<[string, 
     results.push(...findAllInObject(action, ACTION_FIELDS, searchPattern, keyForAction(action.id)));
 
     action.parameters?.forEach((param, index) => 
-        results.push(...findAllInParams(param, searchPattern, keyForActionParamter(action.id, index)))
+        results.push(...findAllInParams(param, searchPattern, keyForActionParameter(action.id, index)))
     );
 
     action.subNodes.forEach(subAction => {

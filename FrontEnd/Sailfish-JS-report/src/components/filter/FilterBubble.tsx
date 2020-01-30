@@ -15,24 +15,22 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import useOutsideClickListener from "../../hooks/useOutsideClickListener";
-import KeyCodes from "../../util/KeyCodes";
 import AutocompleteInput from "../util/AutocompleteInput";
+import { stopPropagationHandler } from "../../helpers/react";
+import { createBemBlock } from "../../helpers/styleCreators";
 
 interface Props {
     className?: string;
     value: string;
-    prefix?: string;
-    readonly?: boolean;
-    autocompleteVariants: string[];
+    isValid?: boolean;
+    autocompleteVariants: string[] | null;
     onChange: (nextValue: string) => void;
     onRemove: () => void;
 }
 
-export default function FilterBubble({value, onChange, onRemove, autocompleteVariants, className, prefix = '', readonly = false}: Props) {
+export default function FilterBubble({ value, onChange, onRemove, autocompleteVariants, className = '', isValid = true }: Props) {
     const [isEditing, setIsEditing] = React.useState(false);
 
-    const rootRef = React.useRef<HTMLDivElement>();
     const inputRef = React.useRef<HTMLInputElement>();
 
     React.useEffect(() => {
@@ -41,12 +39,16 @@ export default function FilterBubble({value, onChange, onRemove, autocompleteVar
         }
     }, [isEditing]);
 
-    useOutsideClickListener(rootRef, () => {
+    const onBlur = () => {
+        if (inputRef.current?.value == '') {
+            onRemove();
+        }
+
         setIsEditing(false);
-    });
+    };
 
     const rootOnClick = () => {
-        if (!readonly && !isEditing) {
+        if (!isEditing) {
             setIsEditing(true);
         }
     };
@@ -61,16 +63,21 @@ export default function FilterBubble({value, onChange, onRemove, autocompleteVar
         setIsEditing(false);
     };
 
+    const rootClass = createBemBlock(
+        "filter-bubble",
+        !isValid && !isEditing ? 'invalid' : null
+    );
+
     return (
         <div
-            className={`filter__bubble ${className ?? ''}`}
-            ref={rootRef}
+            className={`${rootClass} ${className}`}
+            onBlur={onBlur}
             onClick={rootOnClick}>
             {
                 isEditing ? (
                     <AutocompleteInput
                         ref={inputRef}
-                        className="filter__bubble-input"
+                        className="filter-bubble__input"
                         value={value}
                         onSubmit={inputOnSubmit}
                         onRemove={onRemove}
@@ -78,10 +85,15 @@ export default function FilterBubble({value, onChange, onRemove, autocompleteVar
                         autocomplete={autocompleteVariants}
                         datalistKey="bubble-autocomplete"
                     />
-                ) : prefix + value
+                ) : (
+                    <React.Fragment>
+                        {value}
+                        <div className="filter-bubble__remove">
+                            <div className="filter-bubble__remove-icon" onClick={stopPropagationHandler(onRemove)}/>
+                        </div>
+                    </React.Fragment>
+                )
             }
         </div>
     )
 }
-
-

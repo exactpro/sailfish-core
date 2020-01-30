@@ -25,7 +25,7 @@ export enum MessageType {
     ADMIN = 'admin'
 }
 
-export function isCheckpoint(message: Message) : boolean {
+export function isCheckpointMessage(message: Message) : boolean {
     const name = message.content['name'] as string;
 
     if (!name) {
@@ -44,7 +44,7 @@ export function isAdmin(message: Message) : boolean {
 }
 
 export function getMessageType(message: Message) : MessageType {
-    if (isCheckpoint(message)) {
+    if (isCheckpointMessage(message)) {
         return MessageType.CHECKPOINT;
     }
 

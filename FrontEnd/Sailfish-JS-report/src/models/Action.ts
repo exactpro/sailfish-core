@@ -39,13 +39,13 @@ export default interface Action {
     matrixId?: string;
     serviceName?: string;
     actionNodeType: ActionNodeType.ACTION;
-    bugs: any[];
+    bugs: unknown[];
     name: string;
     messageType: string;
     description: string;
     parameters?: ActionParameter[];
     relatedMessages: number[];
-    logs?: any;
+    logs?: unknown;
     startTime?: string;
     finishTime?: string;
     status: Status;

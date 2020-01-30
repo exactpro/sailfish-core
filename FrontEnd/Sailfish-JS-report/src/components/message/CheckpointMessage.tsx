@@ -18,7 +18,7 @@ import { connect } from "react-redux";
 import AppState from "../../state/models/AppState";
 import Checkpoint, { CheckpointStateProps, CheckpointDispatchProps } from "../Checkpoint";
 import Message from "../../models/Message";
-import { isCheckpoint } from "../../helpers/messageType";
+import { isCheckpointMessage } from "../../helpers/messageType";
 import { selectCheckpointMessage } from "../../actions/actionCreators";
 
 interface OwnProps {
@@ -29,7 +29,7 @@ const CheckpointMessage = connect(
     (state: AppState, ownProps: OwnProps): CheckpointStateProps => ({
         name: ownProps.message.msgName,
         isSelected: ownProps.message.id === state.selected.checkpointMessageId,
-        index : state.selected.testCase.messages.filter(isCheckpoint).indexOf(ownProps.message) + 1,
+        index : state.selected.testCase.messages.filter(isCheckpointMessage).indexOf(ownProps.message) + 1,
         description : ownProps.message.content["message"] ? ownProps.message.content["message"]["Description"] : ""
     }), 
     (dispatch, ownProps: OwnProps): CheckpointDispatchProps => ({

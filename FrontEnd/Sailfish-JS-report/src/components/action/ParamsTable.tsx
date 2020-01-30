@@ -20,7 +20,7 @@ import '../../styles/tables.scss';
 import { createSelector } from '../../helpers/styleCreators';
 import StateSaver from "../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
-import { keyForActionParamter } from '../../helpers/keys';
+import { keyForActionParameter } from '../../helpers/keys';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
 import { getParamsExpandPath } from '../../helpers/search/getExpandPath';
@@ -110,7 +110,7 @@ class ParamsTableBase extends React.Component<Props, State> {
                         </tr>
                         {
                             this.state.nodes.map((nodes, index) => 
-                                this.renderNodes(nodes, 0, keyForActionParamter(this.props.actionId, index))
+                                this.renderNodes(nodes, 0, keyForActionParameter(this.props.actionId, index))
                             )
                         }
                     </tbody>

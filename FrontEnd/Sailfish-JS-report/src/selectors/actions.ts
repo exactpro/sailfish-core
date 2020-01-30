@@ -15,21 +15,22 @@
  ******************************************************************************/
 
 import AppState from "../state/models/AppState";
-import {createSelector} from "reselect";
-import {isAction} from "../models/Action";
-import {keyForAction} from "../helpers/keys";
-import {getFilterConfig, getFilterResults} from "./filter";
+import { createSelector } from "reselect";
+import { isAction } from "../models/Action";
+import { keyForAction } from "../helpers/keys";
+import { getFilterBlocks, getFilterResults } from "./filter";
 import FilterType from "../models/filter/FilterType";
+import { isCheckpointAction } from "../helpers/action";
 
 export const getActions = (state: AppState) => state.selected.testCase.actions;
 
 export const getFilteredActions = createSelector(
-    [getActions, getFilterConfig, getFilterResults],
-    (actions, config, results) => {
-        if (config.types.includes(FilterType.ACTION) && config.blocks.length > 0 && !config.isTransparent) {
+    [getActions, getFilterBlocks, getFilterResults],
+    (actions, blocks, results) => {
+        if (blocks.some(({ types }) => types.includes(FilterType.ACTION))) {
             return actions
                 .filter(isAction)
-                .filter(action => results.includes(keyForAction(action.id)))
+                .filter(action => isCheckpointAction(action) || results.includes(keyForAction(action.id)))
         }
 
         return actions;

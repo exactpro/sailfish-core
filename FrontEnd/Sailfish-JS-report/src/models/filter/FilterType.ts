@@ -15,9 +15,8 @@
  ******************************************************************************/
 
 const enum FilterType {
-    ACTION = 'ACTION',
-    MESSAGE = 'MESSAGE',
-    VERIFICATION = 'VERIFICATION'
+    ACTION = 'Action',
+    MESSAGE = 'Message'
 }
 
 export default FilterType;

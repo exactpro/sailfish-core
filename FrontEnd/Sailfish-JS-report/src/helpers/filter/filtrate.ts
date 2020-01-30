@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import TestCase from "../../models/TestCase";
-import Action, { isAction, ActionNodeType } from "../../models/Action";
+import Action, { ActionNodeType, isAction } from "../../models/Action";
 import Verification from "../../models/Verification";
 import { keyForAction, keyForMessage, keyForVerification } from "../keys";
 import getActionCondition from "./conditions/action";
@@ -24,40 +24,44 @@ import getMessageCondition from "./conditions/message";
 import FilterCondition from "./conditions/FilterCondition";
 import { asyncFlatMap } from "../array";
 import FilterType from "../../models/filter/FilterType";
-import {FilterConfig} from "../../models/filter/FilterConfig";
+import { FilterBlock } from "../../models/filter/FilterBlock";
+import Message from "../../models/Message";
 
 /**
  * Filtrates target TestCase according to filter config.
  * @param testCase target TestCase
- * @param config configurations for filter 
+ * @param config configurations for filter
  * @param config.types list of all types, that will be used for filtrating
  * @param config.blocks list of filter 'blocks' - combination of path and list of string values
  */
-export default async function filtrate(testCase: TestCase, { types, blocks }: FilterConfig): Promise<string[]> {
+export default async function filtrate(testCase: TestCase, blocks: FilterBlock[]): Promise<string[]> {
     const results: string[] = [];
 
-    if (types.includes(FilterType.ACTION) || types.includes(FilterType.VERIFICATION)) {
-        const actions: Action[] = testCase.actions.filter(isAction);
+    const notEmptyBlocks = blocks.filter(({ values }) => values.length > 0),
+        actionBlocks = notEmptyBlocks.filter(({ types }) => types.includes(FilterType.ACTION)),
+        messageBlocks = notEmptyBlocks.filter(({ types }) => types.includes(FilterType.MESSAGE));
 
-        const actionsConditions = types.includes(FilterType.ACTION) ?
-            blocks.map(({ path, values }) => getActionCondition(path, values)) :
-            [];
+    if (actionBlocks.length > 0) {
+        const actionConditions = actionBlocks
+            .map(({ path, values }) => getActionCondition(path, values));
 
-        const verificationConditions = types.includes(FilterType.VERIFICATION) ? 
-            blocks.map(({ path, values }) => getVerificationCondition(path, values)) :
-            [];
+        const verificationConditions = actionBlocks
+            .map(({ path, values }) => getVerificationCondition(path, values));
 
-        const mapper = createActionMapper(actionsConditions, verificationConditions);
+        const actionMapper = createActionMapper(actionConditions, verificationConditions);
 
-        results.push(...await asyncFlatMap(actions, action => mapper(action)));
+        results.push(...await asyncFlatMap(testCase.actions, actionMapper));
     }
 
-    if (types.includes(FilterType.MESSAGE)) {
-        const messageConditions = blocks.map(({ path, values }) => getMessageCondition(path, values));
+    if (messageBlocks.length > 0) {
+        const messageConditions = messageBlocks
+            .map(({ path, values }) => getMessageCondition(path, values));
 
-        results.push(...await asyncFlatMap(testCase.messages, msg => 
+        const messageMapper = (msg: Message) => (
             messageConditions.every(cond => cond(msg)) ? keyForMessage(msg.id) : []
-        ));
+        );
+
+        results.push(...await asyncFlatMap(testCase.messages, messageMapper));
     }
 
     return results;
@@ -65,38 +69,31 @@ export default async function filtrate(testCase: TestCase, { types, blocks }: Fi
 
 function createActionMapper(actionConditions: FilterCondition<Action>[], verificationConditions: FilterCondition<Verification>[]) {
     return function actionMapper(action: Action): string[] {
-        const results: string[] = [],
-            key = keyForAction(action.id);
 
-        if (actionConditions.length > 0 && actionConditions.every(condition => condition(action))) {
-            results.push(key);
-        }
-
-        action.subNodes?.forEach(subNode => {
+        const subNodeResults = action.subNodes?.flatMap(subNode => {
             switch (subNode.actionNodeType) {
                 case ActionNodeType.ACTION:
-                    const subNodeResults = actionMapper(subNode);
-
-                    if (subNodeResults.length > 0) {
-                        results.push(...subNodeResults);
-                        results.push(key);
-                    }
-
-                    return;
+                    return actionMapper(subNode);
 
                 case ActionNodeType.VERIFICATION:
                     if (verificationConditions.length > 0 && verificationConditions.every(condition => condition(subNode))) {
-                        results.push(keyForVerification(action.id, subNode.messageId));
-                        results.push(key);
+                        return keyForVerification(action.id, subNode.messageId);
                     }
 
-                    return;
+                    return [];
 
                 default:
-                    return;
+                    return [];
             }
-        });
+        }) ?? [];
 
-        return results;
+        if ((actionConditions.length > 0 && actionConditions.every(condition => condition(action))) || subNodeResults.length > 0) {
+            return [
+                ...subNodeResults,
+                keyForAction(action.id)
+            ];
+        }
+
+        return [];
     }
 }

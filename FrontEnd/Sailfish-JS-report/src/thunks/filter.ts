@@ -14,21 +14,21 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { ThunkDispatch, ThunkAction } from "redux-thunk";
+import { ThunkAction } from "redux-thunk";
 import StateAction from "../actions/stateActions";
-import { FilterConfig } from "../models/filter/FilterConfig";
 import AppState from "../state/models/AppState";
 import filtrate from "../helpers/filter/filtrate";
-import { setFilterConfig, setFilterResult } from "../actions/actionCreators";
+import { setFilterBlocks, setFilterResult } from "../actions/actionCreators";
+import { FilterBlock } from "../models/filter/FilterBlock";
 
 
-export function performFilter(config: FilterConfig): ThunkAction<void, AppState, {}, StateAction> {
+export function performFilter(blocks: FilterBlock[]): ThunkAction<void, AppState, {}, StateAction> {
     return async (dispatch, getState) => {
         const testCase = getState().selected.testCase;
 
-        dispatch(setFilterConfig(config));
+        dispatch(setFilterBlocks(blocks));
 
-        const results = await filtrate(testCase, config);
+        const results = await filtrate(testCase, blocks);
 
         dispatch(setFilterResult(results));
     }

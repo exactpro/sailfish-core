@@ -14,16 +14,28 @@
  *  limitations under the License.
  ******************************************************************************/
 
-const enum FilterPath {
-    ALL = 'Text',
-    SERVICE = 'Service',
-    STATUS = 'Status'
+import *  as React from 'react';
+import '../../styles/select.scss';
+
+interface Props {
+    className?: string;
+    options: string[];
+    selected: string;
+    prefix?: string;
+    onChange: (option: string) => void;
 }
 
-export const FILTER_PATH_VALUES: FilterPath[] = [FilterPath.ALL, FilterPath.STATUS, FilterPath.SERVICE];
-
-export function isFilterPath(value: string): value is FilterPath {
-    return FILTER_PATH_VALUES.includes(value as FilterPath);
+export default function Select({ options, selected, onChange, className = '', prefix= '' }: Props) {
+    return (
+        <select
+            className={`options-select ${className}`}
+            value={prefix + selected}
+            onChange={e => onChange(e.target.value.substring(prefix.length))}>
+            {
+                options.map((opt, index) => (
+                    <option key={index}>{prefix + opt}</option>
+                ))
+            }
+        </select>
+    )
 }
-
-export default FilterPath;

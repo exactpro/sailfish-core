@@ -25,7 +25,7 @@ import {PredictionData, SubmittedData} from "../models/MlServiceResponse";
 import SearchResult from '../helpers/search/SearchResult';
 import LiveTestCase from '../models/LiveTestCase';
 import KnownBug from '../models/KnownBug';
-import { FilterConfig } from "../models/filter/FilterConfig";
+import { FilterBlock } from "../models/filter/FilterBlock";
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -109,9 +109,9 @@ export const setFilterResult = (results: string[]) => (<const>{
     results
 })
 
-export const setFilterConfig = (config: FilterConfig) => (<const>{
+export const setFilterBlocks = (blocks: FilterBlock[]) => (<const>{
     type: StateActionTypes.SET_FILTER_CONFIG,
-    config
+    blocks
 })
 
 export const setFilterIsTransparent = (isTransparent: boolean) => (<const>{

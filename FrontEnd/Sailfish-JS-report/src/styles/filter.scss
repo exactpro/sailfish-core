@@ -33,42 +33,15 @@
     box-shadow: 4px 8px 6px 0px rgba(0, 0, 0, 0.4);
 
     color: $filterTextColor;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: bold;
     white-space: nowrap;
 
     overflow-y: auto;
 
-    &__bubble {
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-
-        border-radius: $filterBubbleBorderRadius;
-        background-color: $filterBubbleBackground;
-        color: $filterPathColor;
-        font-size: 15px;
-
-        padding: 3px 5px;
-        margin: 0 10px;
-        height: $filterBubbleHeight;
-    }
-
-    &__bubble-input {
-        border: 0;
-        font-size: 15px;
-        background-color: rgba(0, 0, 0, 0);
-        height: $filterBubbleHeight;
-
-        &:focus {
-            outline: 0;
-        }
-    }
-
     &__path {
         color: $filterPathColor;
         font-weight: bold;
-        font-size: 16px;
         margin-right: 20px;
         background-color: rgba(#FFF, 0.75);
     }
@@ -80,11 +53,71 @@
     }
 }
 
+.filter-bubble {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    position: relative;
+
+    border-radius: $filterBubbleBorderRadius;
+    background-color: $filterBubbleBackground;
+    color: $filterPathColor;
+    font-weight: normal;
+
+    padding: 3px 5px;
+    margin: 0 10px;
+    height: $filterBubbleHeight;
+
+    &__remove {
+        position: absolute;
+        width: 0;
+        top: 0;
+        // -2% to hide bubble's border-radius on the right
+        left: 98%;
+        bottom: 0;
+        overflow: hidden;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        border-radius: 0 3px 3px 0;
+        background-color: white;
+        transition: width 0.15s ease-in-out;
+    }
+
+    &:hover &__remove {
+        width: 20px;
+    }
+
+    &__remove-icon {
+        @include round-button(url(../../resources/icons/cross-icon.svg), 16px);
+        margin-right: 3px;
+    }
+
+    &__input {
+        border: 0;
+        font-size: 15px;
+        background-color: rgba(0, 0, 0, 0);
+        color: $primaryTextColor;
+        height: $filterBubbleHeight;
+
+        &:focus {
+            outline: 0;
+        }
+    }
+
+    &.invalid {
+        color: $failedTextColor;
+    }
+}
+
 .filter-controls {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    font-size: 14px;
 
     &__counts {
         flex: auto;
@@ -95,6 +128,7 @@
         flex: initial;
         display: flex;
         margin: 0 20px;
+        align-items: center;
 
         input {
             margin-left: 10px;
@@ -106,7 +140,7 @@
             cursor: pointer;
         }
 
-        input[type="radio"]:checked+label {
+        input[type="radio"]:checked + label {
             opacity: 1;
         }
     }
@@ -129,28 +163,47 @@
 .filter-row {
     height: 46px;
     width: 100%;
+    font-size: 15px;
+    font-weight: bold;
 
     display: flex;
-    flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    font-size: 14px;
-    font-weight: normal;
+
+    &:hover &__divider-text {
+        display: none;
+    }
+
+    &:hover &__remove-btn {
+        display: block;
+    }
+
+    &__remove-btn {
+        @include round-button(url(../../resources/icons/cross-icon-white.svg));
+        display: none;
+        flex: 0 0 20px;
+    }
+
+    &__divider-text {
+        display: block;
+    }
+
+    &__divider {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 60px;
+        padding-left: 10px;
+        font-weight: bold;
+        font-size: 16px;
+    }
 
     &__wrapper {
         width: 100%;
         display: flex;
+        flex-direction: row;
         justify-content: flex-start;
-        align-items: center
-    }
-
-    &__divider {
-        display: inline-block;
-        width: 60px;
-        padding-left: 10px;
-        text-align: start;
-        font-weight: bold;
-        font-size: 14px;
+        align-items: center;
     }
 
     &__input {
@@ -159,21 +212,28 @@
         padding: 3px 5px;
         border-radius: $filterBubbleBorderRadius;
         width: 100%;
+        min-width: 70px;
         height: 24px;
         background-color: rgba(#FFFFFF, 0.5);
+        font-size: 15px;
 
         &:focus {
             background-color: #FFF;
+
+            &::placeholder {
+                color: $secondaryTextColor;
+            }
+        }
+
+        &::placeholder {
+            color: transparent;
         }
     }
 
-    &__remove-btn {
-        @include round-button(url(../../resources/icons/cross-icon-white.svg));
-        visibility: hidden;
-        flex: 0 0 20px;
-    }
-
-    &:hover &__remove-btn {
-        visibility: visible;
+    &__select {
+        margin: 0 10px;
+        height: $filterBubbleHeight;
+        font-size: 15px;
+        min-width: 105px;
     }
 }

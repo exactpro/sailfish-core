@@ -14,10 +14,33 @@
  * limitations under the License.
  ******************************************************************************/
 
-import { FilterBlock } from "../../models/filter/FilterBlock";
+@import "./common/vars";
 
-export default interface FilterState {
-    results: string[];
-    blocks: FilterBlock[];
-    isTransparent: boolean;
+.options-select {
+    border-radius: 3px;
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+
+    font-family: Open Sans;
+    font-weight: bold;
+    color: $primaryTextColor;
+
+    background: {
+        image:  url(../../resources/icons/arr1-down.svg);
+        color: #E6E6E6;
+        repeat: no-repeat;
+        size: 15px;
+        position-x: 95%;
+        position-y: 50%;
+    }
+
+    padding: 0 15px 0 5px;
+
+    & option {
+        font-weight: bold;
+        height: 30px;
+    }
 }

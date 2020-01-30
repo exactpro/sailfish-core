@@ -14,11 +14,8 @@
  *  limitations under the License.
  ******************************************************************************/
 
-import FilterType from "./FilterType";
-import {FilterBlock} from "./FilterBlock";
+type NullableFields<T extends {}> = {
+    [K in keyof T]: T[K] | null
+};
 
-export interface FilterConfig {
-    types: FilterType[];
-    blocks: FilterBlock[];
-    isTransparent: boolean;
-}
+export default NullableFields;

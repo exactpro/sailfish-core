@@ -19,11 +19,7 @@ import FilterType from "../../models/filter/FilterType";
 
 const initialFilterState : FilterState = {
     results: [],
-    config: {
-        types: [FilterType.ACTION, FilterType.MESSAGE, FilterType.VERIFICATION],
-        blocks: [],
-        isTransparent: false
-    },
+    blocks: [],
     isTransparent: false
 };
 

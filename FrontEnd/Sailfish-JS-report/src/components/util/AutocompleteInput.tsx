@@ -24,15 +24,16 @@ interface Props<T extends string> {
     className?: string;
     value: T;
     readonly?: boolean;
-    validateAutocomplete?: boolean;
+    onlyAutocompleteValues?: boolean;
     onSubmit: (nextValue: T) => void;
     onRemove?: () => void;
     onEmptyBlur?: () => void;
-    autocomplete: T[];
+    autocomplete: T[] | null;
     datalistKey?: string;
+    placeholder?: string;
 }
 
-const AutocompleteInput = React.forwardRef(<T extends string>(props: Props<T>, ref: React.Ref<HTMLInputElement>) => {
+const AutocompleteInput = React.forwardRef(function AutocompleteInput<T extends string>(props: Props<T>, ref: React.Ref<HTMLInputElement>) {
     const {
         value,
         onSubmit,
@@ -40,10 +41,12 @@ const AutocompleteInput = React.forwardRef(<T extends string>(props: Props<T>, r
         onEmptyBlur = STUB_FUNCTION,
         autocomplete,
         readonly = false,
-        validateAutocomplete = true,
+        onlyAutocompleteValues = true,
         datalistKey,
-        className = ''
+        className = '',
+        placeholder = ''
     } = props;
+
     const [currentValue, setCurrentValue] = React.useState<string>(value);
 
     React.useEffect(() => {
@@ -51,7 +54,7 @@ const AutocompleteInput = React.forwardRef(<T extends string>(props: Props<T>, r
     }, [value]);
 
     const onChange: React.ChangeEventHandler<HTMLInputElement> = e => {
-        if (autocomplete.some(val => val.toUpperCase() === e.target.value.toUpperCase())) {
+        if (autocomplete?.some(val => val.toUpperCase() === e.target.value.toUpperCase())) {
             onSubmit(e.target.value as T);
             setCurrentValue('');
         } else {
@@ -61,7 +64,7 @@ const AutocompleteInput = React.forwardRef(<T extends string>(props: Props<T>, r
 
     const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
         if (e.keyCode == KeyCodes.ENTER && currentValue.length > 0) {
-            if (!validateAutocomplete || (autocomplete.length < 1 || autocomplete.includes(currentValue as T))) {
+            if (!onlyAutocompleteValues || (autocomplete == null || autocomplete.includes(currentValue as T))) {
                 onSubmit(currentValue as T);
                 setCurrentValue('');
             }
@@ -86,10 +89,11 @@ const AutocompleteInput = React.forwardRef(<T extends string>(props: Props<T>, r
                 onChange={onChange}
                 onBlur={() => currentValue.length == 0 && onEmptyBlur()}
                 list={datalistKey}
+                placeholder={placeholder}
             />
             <datalist id={datalistKey}>
                 {
-                    autocomplete.map((variant, index) => (
+                    autocomplete?.map((variant, index) => (
                         <option key={index} value={variant}/>
                     ))
                 }

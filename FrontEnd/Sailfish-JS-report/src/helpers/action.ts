@@ -25,7 +25,7 @@ export function getActions(actionNodes: ActionNode[]) : Action[] {
     return actionNodes.filter(isAction);
 }
 
-export function isCheckpoint(action: Action): boolean {
+export function isCheckpointAction(action: Action): boolean {
     return action.parameters?.some(param => param.name === ACTION_CHECKPOINT_NAME);
 }
 

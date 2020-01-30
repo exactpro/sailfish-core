@@ -22,35 +22,25 @@ import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import { performFilter } from "../../thunks/filter";
 import FilterRow from "./FilterRow";
-import { complement, removeByIndex, replaceByIndex } from "../../helpers/array";
-import { StatusType } from "../../models/Status";
-import FilterPath, { FILTER_PATH_PREFIX, FILTER_PATH_VALUES } from "../../models/filter/FilterPath";
+import { removeByIndex, replaceByIndex } from "../../helpers/array";
 import FilterType from "../../models/filter/FilterType";
-import { FilterConfig } from "../../models/filter/FilterConfig";
 import { resetFilter, setFilterIsTransparent } from "../../actions/actionCreators";
 import {
     getActionsFilterResultsCount, getIsFilterApplied,
-    getMessagesFilterResultsCount,
-    getVerificationsFilterResultsCount
+    getMessagesFilterResultsCount
 } from "../../selectors/filter";
-
-const AUTOCOMPLETE_MAP = new Map<FilterPath, string[]>([
-    [FilterPath.STATUS, [StatusType.PASSED, StatusType.FAILED, StatusType.CONDITIONALLY_PASSED, StatusType.CONDITIONALLY_FAILED]]
-]);
-
-const FILTER_TYPE_AUTOCOMPLETE = [FilterType.ACTION, FilterType.MESSAGE, FilterType.VERIFICATION],
-    FILTER_PATH_AUTOCOMPLETE = FILTER_PATH_VALUES.map(path => FILTER_PATH_PREFIX + path);
+import { FilterBlock } from "../../models/filter/FilterBlock";
 
 interface StateProps {
-    config: FilterConfig;
+    blocks: FilterBlock[];
+    isTransparent: boolean;
     isFilterApplied: boolean;
     actionsResultsCount: number;
     messagesResultsCount: number;
-    verificationsResultsCount: number;
 }
 
 interface DispatchProps {
-    updateConfig: (config: FilterConfig) => void;
+    updateFilterBlocks: (blocks: FilterBlock[]) => void;
     setIsTransparent: (isTransparent: boolean) => void;
     resetFilter: () => void;
 }
@@ -58,97 +48,66 @@ interface DispatchProps {
 interface Props extends StateProps, DispatchProps {
 }
 
-function FilterPanelBase({ config, isFilterApplied, updateConfig, setIsTransparent, actionsResultsCount, messagesResultsCount, verificationsResultsCount, resetFilter }: Props) {
+function FilterPanelBase({ blocks, isFilterApplied, isTransparent, updateFilterBlocks, setIsTransparent, actionsResultsCount, messagesResultsCount, resetFilter }: Props) {
 
-    const onTypesChange = (values: string[]) => {
-        updateConfig({
-            ...config,
-            types: values as FilterType[]
-        })
+    const onBlockChangeFor = (blockIndex: number) => (nextBlock: FilterBlock) => {
+        updateFilterBlocks(replaceByIndex(blocks, blockIndex, nextBlock));
     };
 
-    const onBlockChangeFor = (blockIndex: number) => (values: string[], path?: FilterPath) => {
-        updateConfig({
-            ...config,
-            blocks: replaceByIndex(config.blocks, blockIndex, {
-                path: path ?? config.blocks[blockIndex].path,
-                values
-            })
-        })
-    };
-
-    const onNewBlockChange = (values: string[], path?: FilterPath) => {
-        updateConfig({
-            ...config,
-            blocks: [...config.blocks, {
-                path: path ?? FilterPath.ALL,
-                values
-            }]
-        })
+    const onNewBlockChange = (newBlock: FilterBlock) => {
+        updateFilterBlocks([...blocks, newBlock]);
     };
 
     const onBlockRemoveFor = (index: number) => () => {
-        updateConfig({
-            ...config,
-            blocks: removeByIndex(config.blocks, index)
-        })
+        updateFilterBlocks(removeByIndex(blocks, index));
     };
 
     return (
         <div className="filter">
-            <div className="filter-row__wrapper">
-                <div className="filter-row__divider">
-                    Filter
-                </div>
-                <FilterRow
-                    index={0}
-                    path={'type'}
-                    values={config.types}
-                    autocompleteVariants={complement(FILTER_TYPE_AUTOCOMPLETE, config.types)}
-                    onChange={onTypesChange}/>
-            </div>
             {
-                config.blocks.map((block, index) => (
-                    <div className="filter-row__wrapper" key={index}>
-                        <div className="filter-row__divider">and</div>
+                blocks.map((block, index) => (
+                    <div className="filter-row" key={index}>
+                        <div className="filter-row__divider">
+                            <div className="filter-row__divider-text">
+                                {index == 0 ? 'Filter' : 'and'}
+                            </div>
+                            <div
+                                className="filter-row__remove-btn"
+                                onClick={onBlockRemoveFor(index)}
+                            />
+                        </div>
                         <FilterRow
-                            path={block.path}
-                            index={index + 1}
-                            values={block.values}
-                            autocompleteVariants={
-                                AUTOCOMPLETE_MAP.has(block.path) ?
-                                    complement(AUTOCOMPLETE_MAP.get(block.path), block.values) :
-                                    undefined
-                            }
+                            block={block}
+                            rowIndex={index + 1}
                             onChange={onBlockChangeFor(index)}
                             onRemove={onBlockRemoveFor(index)}
                         />
                     </div>
                 ))
             }
-            <div className="filter-row__wrapper">
-                <div className="filter-row__divider">and</div>
+            <div className="filter-row">
+                <div className="filter-row__divider">
+                    {blocks.length == 0 ? 'Filter' : 'and'}
+                </div>
                 <FilterRow
-                    path={FilterPath.ALL}
-                    index={config.blocks.length + 1}
-                    autocompleteVariants={FILTER_PATH_AUTOCOMPLETE}
-                    validateAutocomplete={false}
-                    values={[]}
+                    block={{
+                        types: null,
+                        path: null,
+                        values: []
+                    }}
+                    rowIndex={blocks.length + 1}
                     onChange={onNewBlockChange}/>
             </div>
             <div className="filter__controls filter-controls">
                 <div className="filter-controls__counts">
                     {
                         isFilterApplied ? [
-                            config.types.includes(FilterType.ACTION) ?
+                            blocks.some(({ types }) => types.includes(FilterType.ACTION)) ?
                                 `${actionsResultsCount} Actions ` :
                                 null,
-                            config.types.includes(FilterType.MESSAGE) ?
+                            blocks.some(({ types }) => types.includes(FilterType.MESSAGE)) ?
                                 `${messagesResultsCount} Messages ` :
                                 null,
-                            config.types.includes(FilterType.VERIFICATION) ?
-                                `${verificationsResultsCount} Verifications ` :
-                                null
                         ].filter(Boolean).join(' and ') + 'Filtered' : null
                     }
                 </div>
@@ -157,14 +116,14 @@ function FilterPanelBase({ config, isFilterApplied, updateConfig, setIsTranspare
                     <input
                         type="radio"
                         id="filter-radio-hide"
-                        checked={!config.isTransparent}
+                        checked={!isTransparent}
                         onChange={e => setIsTransparent(false)}
                     />
                     <label htmlFor="filter-radio-hide">Hide</label>
                     <input
                         type="radio"
                         id="filter-radio-transparent"
-                        checked={config.isTransparent}
+                        checked={isTransparent}
                         onChange={e => setIsTransparent(true)}
                     />
                     <label htmlFor="filter-radio-transparent">Transparent</label>
@@ -180,14 +139,14 @@ function FilterPanelBase({ config, isFilterApplied, updateConfig, setIsTranspare
 
 const FilterPanel = connect(
     (state: AppState): StateProps => ({
-        config: state.filter.config,
+        blocks: state.filter.blocks,
+        isTransparent: state.filter.isTransparent,
         isFilterApplied: getIsFilterApplied(state),
         actionsResultsCount: getActionsFilterResultsCount(state),
-        messagesResultsCount: getMessagesFilterResultsCount(state),
-        verificationsResultsCount: getVerificationsFilterResultsCount(state)
+        messagesResultsCount: getMessagesFilterResultsCount(state)
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
-        updateConfig: config => dispatch(performFilter(config)),
+        updateFilterBlocks: config => dispatch(performFilter(config)),
         setIsTransparent: isTransparent => dispatch(setFilterIsTransparent(isTransparent)),
         resetFilter: () => dispatch(resetFilter())
     })
