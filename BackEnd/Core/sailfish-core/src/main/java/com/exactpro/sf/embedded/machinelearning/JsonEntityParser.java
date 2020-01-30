@@ -18,7 +18,6 @@ package com.exactpro.sf.embedded.machinelearning;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.IDictionaryManager;
-import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.configuration.suri.SailfishURIException;
 import com.exactpro.sf.embedded.machinelearning.entities.EntryType;
 import com.exactpro.sf.embedded.machinelearning.entities.FailedAction;
@@ -148,12 +147,7 @@ public class JsonEntityParser {
             JsonMLMessageDecoder decoder = new JsonMLMessageDecoder(dictionaryManager, dictionaryURI, protocol);
             boolean isDirty = !dirty.isEmpty() && Boolean.parseBoolean(dirty);
 
-            Message message = decoder.parse(parser,
-                    protocol,
-                    SailfishURI.parse(dictionaryURI),
-                    rootFields.get(JsonMessageConverter.JSON_MESSAGE_NAMESPACE),
-                    rootFields.get(JsonMessageConverter.JSON_MESSAGE_NAME),
-                    compact, isDirty);
+            Message message = decoder.parse(parser, compact);
 
             message.setDirty(isDirty);
 

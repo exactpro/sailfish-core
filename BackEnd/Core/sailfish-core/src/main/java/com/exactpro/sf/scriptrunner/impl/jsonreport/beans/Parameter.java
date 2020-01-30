@@ -113,4 +113,7 @@ public class Parameter {
     public MsgMetaData getMsgMetadata() {
         return msgMetadata;
     }
+    public void setMsgMetadata(MsgMetaData msgMetadata) {
+        this.msgMetadata = msgMetadata;
+    }
 }

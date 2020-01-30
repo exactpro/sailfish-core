@@ -73,7 +73,6 @@ public abstract class JsonMessageDecoder <T> {
         try {
             JsonFactory factory = new JsonFactory();
             JsonParser parser = factory.createParser(json);
-            
             parser.nextToken();
             return parse(parser, compact);
         } catch (RuntimeException | IOException | SailfishURIException e) {
@@ -81,7 +80,7 @@ public abstract class JsonMessageDecoder <T> {
         }
     }
     
-    private T parse(JsonParser parser, boolean compact) throws JsonParseException, IOException, SailfishURIException {
+    public T parse(JsonParser parser, boolean compact) throws JsonParseException, IOException, SailfishURIException {
         try {
             checkToken(parser, JsonToken.START_OBJECT, parser.getCurrentToken());
             getValue(parser, JSON_MESSAGE_ID, JavaType.JAVA_LANG_LONG);

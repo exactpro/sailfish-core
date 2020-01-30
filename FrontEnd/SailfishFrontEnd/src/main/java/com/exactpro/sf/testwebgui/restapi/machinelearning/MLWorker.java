@@ -44,16 +44,16 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jooq.lambda.tuple.Tuple2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,9 +97,16 @@ public class MLWorker {
             try (ZipInputStream zipInputStream = new ZipInputStream(streamOfZip)) {
                 ZipEntry entry;
                 while ((entry = zipInputStream.getNextEntry()) != null) {
-                    Path path = tmpDir.resolve(Paths.get(entry.getName()));
-                    path.getParent().toFile().mkdirs();
-                    Files.copy(zipInputStream, path);
+                    File unZippedFile = new File(tmpDir + File.separator + entry.getName());
+                    if (entry.isDirectory()) {
+                        unZippedFile.mkdirs();
+                        continue;
+                    } else {
+                        unZippedFile.getParentFile().mkdirs();
+                    }
+                    try (FileOutputStream fos = new FileOutputStream(unZippedFile)) {
+                        IOUtils.copy(zipInputStream, fos);
+                    }
                 }
             }
 
@@ -219,7 +226,7 @@ public class MLWorker {
 
         try {
             JsonParser parser = factory.createParser(message.getContent());
-            com.exactpro.sf.embedded.machinelearning.entities.Message parseMessage = JsonEntityParser.parseMessage(null, parser, sfMessage.entrySet()
+            com.exactpro.sf.embedded.machinelearning.entities.Message parseMessage = JsonEntityParser.parseMessage(SFLocalContext.getDefault().getDictionaryManager(), parser, sfMessage.entrySet()
                     .stream()
                     .filter(o -> !(o instanceof Map))
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> Objects.toString(entry.getValue()))), true);
@@ -263,6 +270,16 @@ public class MLWorker {
             nested.setType(new MessageType(param.getName(),
                     Objects.toString(msgMetaData.getDictionaryURI(), ""),
                     Objects.toString(msgMetaData.getProtocol(), "")));
+            List<Parameter> subParamList = param.getSubParameters();
+            for(Parameter subParam: subParamList){
+                if (subParam.getMsgMetadata() == null) {
+                    //subParam.setMsgMetadata(msgMetaData);
+                    MsgMetaData subMetaData = new MsgMetaData(subParam.getName(), msgMetaData.getMsgNamespace());
+                    subMetaData.setDictionaryURI(msgMetaData.getDictionaryURI());
+                    subMetaData.setProtocol(msgMetaData.getProtocol());
+                    subParam.setMsgMetadata(subMetaData);
+                }
+            }
             createExpectedMessage(param.getSubParameters(), nested);
 
             return nested;
@@ -271,8 +288,7 @@ public class MLWorker {
         for (Parameter subParameter : p) {
 
             boolean collection = subParameter.getType().startsWith(List.class.getSimpleName());
-            boolean complex = IMessage.class.getSimpleName().equals(subParameter.getType());
-
+            boolean complex = subParameter.getType().contains(IMessage.class.getSimpleName());
             MessageEntry messageEntry;
             MsgMetaData msgMetaData = subParameter.getMsgMetadata();
 
