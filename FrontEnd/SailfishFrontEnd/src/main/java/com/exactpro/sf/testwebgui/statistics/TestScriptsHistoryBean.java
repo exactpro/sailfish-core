@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -412,7 +413,12 @@ public class TestScriptsHistoryBean extends AbstractTagsStatisticsBean implement
     }
 
     public String getZipReport(AggregatedReportRow row) {
-        return BeanUtil.getZipReport(customReportsPath, row, false);
+        try {
+            return BeanUtil.getZipReport(customReportsPath, row, false);
+        } catch (MalformedURLException | URISyntaxException e) {
+            logger.error("unable to get a zip report url", e);
+            return "";
+        }
     }
 
     public String getLastResultZipReports() {

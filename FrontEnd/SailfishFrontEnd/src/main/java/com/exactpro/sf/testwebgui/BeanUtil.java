@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -212,33 +213,40 @@ public class BeanUtil {
         }
     }
 
-    public static String getZipReport(String customReportsPath, CommonReportRow row, boolean button) {
-        StringBuilder sb = new StringBuilder(getContextPath(customReportsPath, button));
-
-        sb.append("/report/");
-        sb.append(row.getReportFolder());
-        sb.append("?action=simplezip");
-
-        return sb.toString();
+    public static String getZipReport(String customReportsPath, CommonReportRow row, boolean button) throws MalformedURLException, URISyntaxException {
+        SfInstanceInfo reportSfInstance = getReportSfInstanceInfo(row);
+        URI baseUri = BeanUtil.getBaseUri(customReportsPath, reportSfInstance, false);
+        return baseUri.resolve(new URIBuilder()
+                .setPath(row.getReportFolder())
+                .addParameter("action", "simplezip")
+                .build())
+        .toString();
     }
 
     public static URL buildReportUrl(String customReportsPath, CommonReportRow row, boolean report) throws MalformedURLException {
 
+        SfInstanceInfo reportInstance = getReportSfInstanceInfo(row);
+
+        return buildReportUrl(
+                    row.getReportFolder(),
+                    customReportsPath,
+                    reportInstance,
+                    SFLocalContext.getDefault().getSfInstanceInfo(),
+                    report,
+                    row.getTestCaseId(),
+                    row.getMatrixName(),
+                    false
+        ).toURL();
+
+    }
+
+    @Nullable
+    private static SfInstanceInfo getReportSfInstanceInfo(CommonReportRow row) {
         SfInstanceInfo reportInstance = SfInstanceInfo.fromSfInstance(row.getSfCurrentInstance());
         if (reportInstance == null) {
             reportInstance = SfInstanceInfo.fromSfInstance(row.getSfInstance());
         }
-
-        return buildReportUrl(
-                row.getReportFolder(),
-                customReportsPath,
-                reportInstance,
-                SFLocalContext.getDefault().getSfInstanceInfo(),
-                report,
-                row.getTestCaseId(),
-                row.getMatrixName(),
-                false).toURL();
-
+        return reportInstance;
     }
 
     public static URI buildRelativeReportUrl(String reportDirectory, SfInstanceInfo instance) {
@@ -269,21 +277,8 @@ public class BeanUtil {
             boolean useRelativePath) {
 
         try {
-            URI baseUri = (StringUtils.isNotEmpty(customReportsPath)
-                    ? (new URI(customReportsPath.endsWith("/") ? customReportsPath : (customReportsPath + "/")))
-
-                    : (useRelativePath
-                        ? (new URI(ReportServlet.REPORT_URL_PREFIX + "/"))
-
-                        : (new URIBuilder()
-                            .setScheme("http")
-                            .setHost(reportInstance.getHostname())
-                            .setPort(reportInstance.getPort())
-                            .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
-                            .build())
-                    )
-
-            ).resolve(new URIBuilder().setPath(FilenameUtils.separatorsToUnix(reportDirectoryPath) + "/").build());
+            URI baseUri = getBaseUri(customReportsPath, reportInstance, useRelativePath);
+            baseUri = baseUri.resolve(new URIBuilder().setPath(FilenameUtils.separatorsToUnix(reportDirectoryPath) + "/").build());
 
             if (report) {
                 URIBuilder relativeReportFileUriBuilder = new URIBuilder("index.html");
@@ -302,6 +297,22 @@ public class BeanUtil {
         } catch (URISyntaxException | MalformedURLException e) {
             throw new EPSCommonException(String.format("unable to get report uri with custom path '%s'", customReportsPath), e);
         }
+    }
+
+    private static URI getBaseUri(String customReportsPath, SfInstanceInfo reportInstance, boolean useRelativePath) throws URISyntaxException {
+        return StringUtils.isNotEmpty(customReportsPath)
+                        ? (new URI(customReportsPath.endsWith("/") ? customReportsPath : (customReportsPath + "/")))
+
+                        : (useRelativePath
+                            ? (new URI(ReportServlet.REPORT_URL_PREFIX + "/"))
+
+                            : (new URIBuilder()
+                                .setScheme("http")
+                                .setHost(reportInstance.getHostname())
+                                .setPort(reportInstance.getPort())
+                                .setPath(String.format("/%s/%s/", reportInstance.getContextPath(), ReportServlet.REPORT_URL_PREFIX))
+                                .build())
+                        );
     }
 
     private static URL getMlApiPath(SfInstanceInfo thisInstance) throws MalformedURLException, URISyntaxException {
