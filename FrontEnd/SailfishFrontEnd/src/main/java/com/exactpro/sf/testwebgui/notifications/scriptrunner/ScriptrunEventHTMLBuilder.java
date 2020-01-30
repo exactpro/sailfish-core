@@ -198,18 +198,33 @@ public class ScriptrunEventHTMLBuilder {
 	private static Object formatZipLink(TestScriptDescription descr, ISFContext context) {
 		if(!descr.isLocked()) {
 			String folderName = descr.getWorkFolder();
-            String link = folderName + "/" + folderName + ZipReport.ZIP;
-
-            link =  context.getWorkspaceDispatcher().exists(FolderType.REPORT, link) ||
-                    context.getEnvironmentManager().getEnvironmentSettings().getReportOutputFormat() == ReportOutputFormat.FILES ?
-                    ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(link) + "?action=zip&script_id=" + descr.getId() :
-                    ReportServlet.REPORT_URL_PREFIX + "/" + StringUtil.escapeURL(folderName) + ZipReport.ZIP + "?action=zip&script_id=" + descr.getId();
-
+            // FIXME do this lookup in the ReportTask class
+            String targetFolderName = findReportFile(context.getWorkspaceDispatcher(),
+                    folderName,
+                    folderName + ZipReport.ZIP,
+                    folderName + "/" + folderName + ZipReport.ZIP);
+            if (targetFolderName == null) {
+                logger.error("Neither report folder nor report zip exists");
+                targetFolderName = folderName;
+            }
+            String link = String.format("%s/%s?action=zip&script_id=%s",
+                    ReportServlet.REPORT_URL_PREFIX,
+                    StringUtil.escapeURL(targetFolderName),
+                    descr.getId());
             return "<div title='Download zip' class='eps-result-zip-link-ready'> " + "<a class='eps-outer-link' href=\"" + link
                     + "\" class=\"text-link\">Get Zip<span class='ui-icon ui-icon-arrowthickstop-1-s' style='display:  inline-block; vertical-align: bottom;'></span></a></div>";
 		}
 		return "";
 	}
+
+    private static String findReportFile(IWorkspaceDispatcher workspaceDispatcher, String... possibleFileNames) {
+        for (String possibleFileName : possibleFileNames) {
+            if (workspaceDispatcher.exists(FolderType.REPORT, possibleFileName)) {
+                return possibleFileName;
+            }
+        }
+        return null;
+    }
 
 	private static String formatLogLink(TestScriptDescription descr, ISFContext context) {
 		if(!descr.isLocked()) {
