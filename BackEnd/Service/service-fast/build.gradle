@@ -1,17 +1,13 @@
 archivesBaseName = 'service-fast'
 
 dependencies {
-    compile 'org.openfast:openfast:1.0.0'    
+    compile 'org.openfast:openfast:1.0.0'
 }
 
 test {
     include 'com/exactpro/sf/services/fast/**/Test*.class'
-    
-    exclude '**/*$*.class'
-    
-    systemProperties "basedir": "${projectDir}"    
-    
-    jvmArgs '-XX:MaxPermSize=256m'    
-    
 
+    exclude '**/*$*.class'
+
+    systemProperties "basedir": "${projectDir}"
 }
