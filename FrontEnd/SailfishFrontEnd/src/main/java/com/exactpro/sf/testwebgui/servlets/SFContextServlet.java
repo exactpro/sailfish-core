@@ -25,6 +25,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.faces.context.FacesContext;
 import javax.servlet.Servlet;
@@ -376,18 +377,15 @@ public class SFContextServlet implements Servlet {
 
             try {
                 String hostname;
-
                 try {
                     hostname = InetAddress.getLocalHost().getHostName();
                 } catch (UnknownHostException e) {
                     logger.error(e.getMessage(), e);
                     hostname = SystemUtils.getHostName();
                 }
-
-
                 sfLocalContext = SFLocalContext.createContext(wd, sfContextSettings,
-                        new SfInstanceInfo(hostname, determineTomcatHttpPort(config.getServletContext()), config.getServletContext().getContextPath()));
-
+                        new SfInstanceInfo(hostname, determineTomcatHttpPort(config.getServletContext()),
+                                config.getServletContext().getContextPath(), UUID.randomUUID().toString()));
                 EnvironmentSettings environmentSettings = sfLocalContext.getEnvironmentManager().getEnvironmentSettings();
                 BigDecimal comparisonPrecision = environmentSettings.getComparisonPrecision();
                 MathProcessor.COMPARISON_PRECISION = comparisonPrecision;

@@ -15,8 +15,14 @@
  ******************************************************************************/
 package com.exactpro.sf.testwebgui.restapi;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.exactpro.sf.center.ISFContext;
+import com.exactpro.sf.center.IVersion;
+import com.exactpro.sf.center.impl.CoreVersion;
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.testwebgui.SFWebApplication;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlInfoModuleDescription;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlInfoSFStatus;
+import org.jetbrains.annotations.NotNull;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,13 +30,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import com.exactpro.sf.center.IVersion;
-import com.exactpro.sf.center.impl.CoreVersion;
-import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.testwebgui.SFWebApplication;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlInfoModuleDescription;
-import com.exactpro.sf.testwebgui.restapi.xml.XmlInfoSFStatus;
+import java.util.ArrayList;
+import java.util.List;
 
 @Path("config")
 public class SailfishInfoResource {
@@ -38,53 +39,34 @@ public class SailfishInfoResource {
     @Path("status")
     @Produces(MediaType.APPLICATION_XML)
     public Response info() {
-
+        ISFContext sfContext = SFLocalContext.getDefault();
         XmlInfoModuleDescription core = new XmlInfoModuleDescription();
         IVersion coreVersion = new CoreVersion();
         core.setMainVer(coreVersion.buildShortVersion());
         core.setBuild(String.valueOf(coreVersion.getBuild()));
+        core.setUid(sfContext.getSfInstanceInfo().getUID());
+        XmlInfoSFStatus sfStatus = new XmlInfoSFStatus();
+        sfStatus.setCore(core);
+        sfStatus.setPlugin(getPluginInfo(sfContext));
+        if (SFWebApplication.getInstance().isFatalError()) {
+            sfStatus.setError(SFWebApplication.getInstance().getFatalErrorMessage());
+        }
+        Status status = Status.OK;
+        return Response.status(status).entity(sfStatus).build();
+    }
+
+    @NotNull
+    private List<XmlInfoModuleDescription> getPluginInfo(ISFContext sfContext) {
         List<XmlInfoModuleDescription> plugins = new ArrayList<>();
-
-        for (IVersion pluginVersion : SFLocalContext.getDefault().getPluginVersions()) {
-
+        for (IVersion pluginVersion : sfContext.getPluginVersions()) {
             if (pluginVersion.isGeneral()) {
                 continue;
             }
-
             XmlInfoModuleDescription plugin = new XmlInfoModuleDescription();
-
             plugin.setMainVer(pluginVersion.getAlias());
             plugin.setBuild(String.valueOf(pluginVersion.getBuild()));
             plugins.add(plugin);
         }
-
-        XmlInfoSFStatus sfStatus = new XmlInfoSFStatus();
-        sfStatus.setCore(core);
-        sfStatus.setPlugin(plugins);
-
-        if (SFWebApplication.getInstance().isFatalError()) {
-            sfStatus.setError(SFWebApplication.getInstance().getFatalErrorMessage());
-        }
-        
-//        XmlResponse response = new XmlResponse();
-        Status status = Status.OK;
-//        final StringBuilder result = new StringBuilder();
-//        try {
-//            JAXBContext.newInstance(XmlInfoModuleDescription.class,
-//                    XmlInfoSFStatus.class).createMarshaller().marshal(sfStatus, new OutputStream() {
-//
-//                        @Override
-//                        public void write(int b) throws IOException {
-//
-//                            result.append((char) b);
-//                        }
-//                    });
-//        } catch (JAXBException e) {
-//            response.setMessage(e.getMessage());
-//            status = Status.BAD_REQUEST;
-//        }
-
-//        response.setRootCause(result.toString());
-        return Response.status(status).entity(sfStatus).build();
+        return plugins;
     }
 }

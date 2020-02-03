@@ -17,15 +17,29 @@ package com.exactpro.sf.center.impl;
 
 import com.exactpro.sf.embedded.statistics.entities.SfInstance;
 
+import java.util.UUID;
+
 public class SfInstanceInfo {
     private final String hostname;
     private final int port;
     private final String contextPath;
 
+    /**
+     * Unique identifier of the sailfish instance.
+     * It calculates upon initialization of SfContext instance.
+     * @see com.exactpro.sf.bigbutton.execution.ExecutorClient
+     */
+    private final String uid;
+
     public SfInstanceInfo(String hostname, int port, String contextPath) {
+        this(hostname, port, contextPath, null);
+    }
+
+    public SfInstanceInfo(String hostname, int port, String contextPath, String uid) {
         this.hostname = hostname;
         this.port = port;
         this.contextPath = contextPath;
+        this.uid = uid;
     }
 
     public String getHostname() {
@@ -38,6 +52,10 @@ public class SfInstanceInfo {
 
     public String getContextPath() {
         return contextPath;
+    }
+
+    public String getUID() {
+        return uid;
     }
 
     public static SfInstanceInfo fromSfInstance(SfInstance instance) {

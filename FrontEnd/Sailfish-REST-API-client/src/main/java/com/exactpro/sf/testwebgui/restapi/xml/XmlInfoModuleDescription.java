@@ -24,7 +24,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class XmlInfoModuleDescription {
     private String mainVer;
     private String build;
-    
+    private String uid;
+
     public String getMainVer() {
         return mainVer;
     }
@@ -39,5 +40,13 @@ public class XmlInfoModuleDescription {
     
     public void setBuild(String build) {
         this.build = build;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,15 +70,18 @@ public class RegressionRunner implements AutoCloseable {
 
     private final StatisticsService statisticsService;
 
+    private final SfInstanceInfo sfInstanceInfo;
+
     private BigButtonSettings settings = new BigButtonSettings();
 
 
     public RegressionRunner(ITaskExecutor taskExecutor, IWorkspaceDispatcher workspaceDispatcher, EMailService mailService,
-                            IOptionsStorage optionsStorage, StatisticsService statisticsService) {
+                            IOptionsStorage optionsStorage, StatisticsService statisticsService, SfInstanceInfo sfInstanceInfo) {
         this.workspaceDispatcher = workspaceDispatcher;
 		this.taskExecutor = taskExecutor;
 		this.mailService = mailService;
         this.statisticsService = statisticsService;
+        this.sfInstanceInfo = sfInstanceInfo;
 
         try {
             settings.fillFromMap(optionsStorage.getAllOptions());
@@ -186,7 +190,7 @@ public class RegressionRunner implements AutoCloseable {
 
                     listsQueue.register(executor.getName());
                     ExecutorClient client = new ExecutorClient(workspaceDispatcher, listsQueue,
-                            importResult.getLibrary(), newMonitor, executor, mailService, this, settings);
+                            importResult.getLibrary(), newMonitor, executor, mailService, this, settings, sfInstanceInfo);
 
 					executorClients.add(client);
 
@@ -402,4 +406,7 @@ public class RegressionRunner implements AutoCloseable {
         return statisticsService.getThisSfInstance();
     }
 
+    public SfInstanceInfo getSfInstanceInfo() {
+        return sfInstanceInfo;
+    }
 }

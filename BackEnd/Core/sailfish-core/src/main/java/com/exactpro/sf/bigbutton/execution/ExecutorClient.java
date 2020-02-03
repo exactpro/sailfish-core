@@ -35,6 +35,7 @@ import com.exactpro.sf.bigbutton.library.SfApiOptions;
 import com.exactpro.sf.bigbutton.library.StartMode;
 import com.exactpro.sf.bigbutton.library.Tag;
 import com.exactpro.sf.bigbutton.util.BigButtonUtil;
+import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.embedded.mail.EMailService;
@@ -56,7 +57,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,8 +123,12 @@ public class ExecutorClient {
 
     private final BigButtonSettings settings;
 
+    private final SfInstanceInfo sfInstanceInfo;
+
+    private boolean isMasterSf;
+
     public ExecutorClient(IWorkspaceDispatcher workspaceDispatcher, CombineQueue<ScriptList> listsQueue, Library library, ExecutionProgressMonitor monitor,
-			Executor executor, EMailService mailService, RegressionRunner runner, BigButtonSettings settings) {
+                          Executor executor, EMailService mailService, RegressionRunner runner, BigButtonSettings settings, SfInstanceInfo sfInstanceInfo) {
 		
         this.workspaceDispatcher = workspaceDispatcher;
 		this.listsQueue = listsQueue;
@@ -134,13 +138,13 @@ public class ExecutorClient {
 		this.mailService = mailService;
 		this.runner = runner;
         this.settings = settings;
+        this.sfInstanceInfo = sfInstanceInfo;
 
         actions.put(BigButtonAction.Interrupt, this::interrupt);
         actions.put(BigButtonAction.Skip, this::skipList);
         actions.put(BigButtonAction.SendEmail, this::sendEmail);
-
 	}
-	
+
     public void toErrorState(Throwable t) {
 		
         toErrorState(RegressionRunnerUtils.createErrorText(t));
@@ -184,6 +188,8 @@ public class ExecutorClient {
         if(apiClient == null) {
             createApiClient();
 		}
+
+        checkIsMaster();
 		
 		this.worker = new ClientWorker();
 
@@ -195,7 +201,7 @@ public class ExecutorClient {
 		
 	}
 
-	private void createApiClient() {
+    private void createApiClient() {
 		try {
             this.apiClient = new SFAPIClient(URI.create(executor.getHttpUrl() + "/sfapi").normalize().toString());
 		} catch (ParserConfigurationException e) {
@@ -631,7 +637,8 @@ public class ExecutorClient {
 					}
 					
                     executeOnFinishScript(script);
-                    monitor.scriptExecuted(script, (int)scriptRunId, executor, relativeListReportsFolder, reportDownloadNeeded);
+                    monitor.scriptExecuted(script, (int)scriptRunId, executor, relativeListReportsFolder,
+                            reportDownloadNeeded, isMasterSf);
 					
 					apiClient.deleteMatrix((int)matrix.getId());
 				}
@@ -762,7 +769,7 @@ public class ExecutorClient {
                         script.setFinished(true);
                         statistics.incNumFailed();
                         try {
-                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false);
+                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false, isMasterSf);
                         } catch (Exception e) {
                             logger.error("scriptExecuted error", e);
                         }
@@ -975,7 +982,7 @@ public class ExecutorClient {
                         script.getStatistics().setStatus("CONNECTION_FAILED");
                         script.getStatistics().setNumFailed(script.getStatistics().getNumFailed() + 1);
                         try {
-                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false);
+                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false, isMasterSf);
                         } catch (Exception e) {
                             logger.error("scriptExecuted error", e);
                         }
@@ -1001,7 +1008,7 @@ public class ExecutorClient {
 						script.getStatistics().setStatus("CONNECTION_FAILED");
 						script.getStatistics().setNumFailed(script.getStatistics().getNumFailed() + 1);
 						try {
-                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false);
+                            monitor.scriptExecuted(script, 0, executor, relativeListReportsFolder, false, isMasterSf);
 						} catch (Exception e) {
 							logger.error("scriptExecuted error", e);
 						}
@@ -1075,4 +1082,13 @@ public class ExecutorClient {
         }
 	}
 
+    private void checkIsMaster() {
+        try {
+            String executorUID = apiClient.getUID();
+            isMasterSf = sfInstanceInfo.getUID().equals(executorUID);
+        } catch (APICallException | APIResponseException e) {
+            logger.error("Could not get uid for [{}] executor", executor.getName(), e);
+            toErrorState(e);
+        }
+    }
 }

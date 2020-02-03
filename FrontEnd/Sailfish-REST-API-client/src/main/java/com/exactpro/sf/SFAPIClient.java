@@ -20,6 +20,7 @@ import com.exactpro.sf.exceptions.APICallException;
 import com.exactpro.sf.exceptions.APIResponseException;
 import com.exactpro.sf.testwebgui.restapi.xml.MatrixList;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlBbExecutionStatus;
+import com.exactpro.sf.testwebgui.restapi.xml.XmlInfoSFStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlLibraryImportResult;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixLinkUploadResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlMatrixUploadResponse;
@@ -31,9 +32,9 @@ import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptActionResponse;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlTestscriptRunDescription;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlVariableSets;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -141,11 +142,13 @@ public class SFAPIClient implements AutoCloseable {
 
     private static final String CONFIGURATION = "configuration/";
     private static final String LOGGING_CONFIGURATION = CONFIGURATION + "logging/";
+    private static final String CONFIG_STATUS = "config/status";
 
     private final CloseableHttpClient http;
 	private final String rootUrl;
 	private final DocumentBuilder docBuilder;
     private final Map<Class<?>, Unmarshaller> unmarshallers = new HashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final String defaultServiceHandlerClassName = "com.exactpro.sf.services.CollectorServiceHandler";
 
@@ -1176,6 +1179,16 @@ public class SFAPIClient implements AutoCloseable {
         }
     }
 
+    public String getUID() throws APIResponseException, APICallException {
+        try {
+            XmlInfoSFStatus response = getResponse(CONFIG_STATUS, XmlInfoSFStatus.class);
+            return response.getCore().getUid();
+        } catch (APIResponseException e) {
+            throw new APIResponseException("URL: " + CONFIG_STATUS, e);
+        } catch (Exception e) {
+            throw new APICallException(e);
+        }
+    }
 
 	// Utility methods
 	public DocumentBuilder getDocumentBuilder() {

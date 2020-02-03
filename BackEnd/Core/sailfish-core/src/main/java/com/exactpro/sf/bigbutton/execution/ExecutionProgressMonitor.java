@@ -371,7 +371,7 @@ public class ExecutionProgressMonitor {
 	}
 
 	public synchronized void scriptExecuted(Script script, int scriptRunId, Executor executor, String reportsFolder,
-			 boolean downloadNeded) throws Exception {
+                                            boolean downloadNeded, boolean isMasterSf) throws Exception {
 
 		this.executedScriptsCount++;
 
@@ -385,7 +385,7 @@ public class ExecutionProgressMonitor {
             executionStatistics.incNumInitFailed();
 		}
 
-        if(finished) {
+        if(finished || isMasterSf) {
 			return;
 		}
 

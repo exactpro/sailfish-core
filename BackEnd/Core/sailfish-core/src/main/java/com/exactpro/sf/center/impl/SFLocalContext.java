@@ -373,7 +373,7 @@ public class SFLocalContext implements ISFContext {
 		this.netDumperService = new NetDumperService(connectionManager, workspaceDispatcher, optionsStorage);
         netDumperService.init();
 
-        this.regressionRunner = new RegressionRunner(taskExecutor, workspaceDispatcher, mailService, optionsStorage, statisticsService);
+        this.regressionRunner = new RegressionRunner(taskExecutor, workspaceDispatcher, mailService, optionsStorage, statisticsService, sfInstanceInfo);
 
         regressionRunner.init();
 
