@@ -73,7 +73,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, IInitiatorService {
 
     private final Logger logger = LoggerFactory
-            .getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+            .getLogger(ILoggingConfigurator.getLoggerName(this));
 
     private volatile ServiceStatus curStatus;
 
@@ -208,8 +208,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public void start() {
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
+        logConfigurator.createAndRegister(getServiceName(), this);
         try {
             changeStatus(ServiceStatus.STARTING, "service starting", null);
 
@@ -258,8 +257,7 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
         changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 
         if (logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                    serviceName);
+            logConfigurator.destroyAppender(getServiceName());
         }
 
     }
@@ -302,7 +300,8 @@ public class TCPIPServer extends IoHandlerAdapter implements IAcceptorService, I
 
     @Override
     public void sessionCreated(IoSession session) throws Exception {
-        TCPIPSession tcpipSession = new TCPIPSession(serviceName, session, logConfigurator);
+        TCPIPSession tcpipSession = new TCPIPSession(serviceName, session);
+        logConfigurator.registerLogger(tcpipSession, getServiceName());
         sessions.add(tcpipSession);
         sessionMap.put(session, tcpipSession);
 

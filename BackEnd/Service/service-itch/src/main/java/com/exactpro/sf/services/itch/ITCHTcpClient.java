@@ -159,15 +159,15 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
 
     @Override
     protected MINASession createSession(IoSession session) {
-        return new ITCHSession(getServiceName(), session, loggingConfigurator, getSettings().getMarketDataGroup()) {
+        ITCHSession itchSession = new ITCHSession(getServiceName(), session, getSettings().getMarketDataGroup()) {
             @Override
             protected Object prepareMessage(Object message) {
-                if(message instanceof IMessage) {
+                if (message instanceof IMessage) {
                     IMessage iMessage = (IMessage)message;
                     StringBuilder msg = new StringBuilder("Sending of the message [" + iMessage.getName() + "] with fields such as ");
                     Set<String> fields = iMessage.getFieldNames();
 
-                    for(String field : fields) {
+                    for (String field : fields) {
                         msg.append("[").append(field).append("], ");
                     }
 
@@ -186,6 +186,8 @@ public class ITCHTcpClient extends AbstractMINATCPService implements IITCHClient
                 return super.prepareMessage(message);
             }
         };
+        loggingConfigurator.registerLogger(itchSession, getServiceName());
+        return itchSession;
     }
 
     @Override

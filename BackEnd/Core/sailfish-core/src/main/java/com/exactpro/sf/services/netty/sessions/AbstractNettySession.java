@@ -37,9 +37,7 @@ import io.netty.channel.Channel;
 
 public abstract class AbstractNettySession implements ISession {
     
-    protected final Logger logger = LoggerFactory
-            .getLogger(getClass().getName() + '@' + Integer.toHexString(hashCode()));
-    private final ILoggingConfigurator logConfigurator;
+    protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
     
     @NotNull
     protected final AbstractNettyService service;
@@ -49,11 +47,8 @@ public abstract class AbstractNettySession implements ISession {
     private final ReadWriteLock channelLock = new ReentrantReadWriteLock();
     
     //TODO pass service name and exception handler instead service
-    public AbstractNettySession(@NotNull AbstractNettyService service, @NotNull ILoggingConfigurator logConfigurator, @NotNull Channel channel) {
+    public AbstractNettySession(@NotNull AbstractNettyService service, @NotNull Channel channel) {
         this.service = Objects.requireNonNull(service, "Service must not be null");
-        this.logConfigurator = Objects.requireNonNull(logConfigurator, "LogConfigurator must not be null");
-        logConfigurator.createIndividualAppender(getClass().getName() + '@' + Integer.toHexString(hashCode()),
-                service.getServiceName());
         this.channel = Objects.requireNonNull(channel, "Channel must not be null");
     }
     
@@ -79,8 +74,6 @@ public abstract class AbstractNettySession implements ISession {
             if (channel.isActive() || channel.isOpen()) {
                 disposeChannel(channel);
             }
-            logConfigurator.destroyIndividualAppender(getClass().getName() + '@' + Integer.toHexString(hashCode()),
-                    service.getServiceName());
         } finally {
             channelLock.writeLock().unlock();
         }

@@ -205,16 +205,18 @@ public final class NTGClient extends AbstractMINATCPService {
 
     @Override
     protected MINASession createSession(IoSession session) {
-        return new NTGSession(serviceName, session, loggingConfigurator) {
+        NTGSession ntgSession = new NTGSession(serviceName, session) {
             @Override
             protected Object prepareMessage(Object message) {
-                if(message instanceof IMessage) {
+                if (message instanceof IMessage) {
                     getMessageHelper().prepareMessageToEncode((IMessage)message, null);
                 }
 
                 return message;
             }
         };
+        loggingConfigurator.registerLogger(ntgSession, getServiceName());
+        return ntgSession;
     }
 
     @Override

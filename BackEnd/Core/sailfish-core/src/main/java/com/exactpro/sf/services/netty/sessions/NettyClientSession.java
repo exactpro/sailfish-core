@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
-import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.netty.AbstractNettyService;
 
 import io.netty.channel.Channel;
@@ -29,8 +28,8 @@ import io.netty.channel.ChannelFutureListener;
 
 public class NettyClientSession extends AbstractNettySession {
     
-    public NettyClientSession(@NotNull AbstractNettyService service, @NotNull ILoggingConfigurator logConfigurator, @NotNull Channel channel) {
-        super(service, logConfigurator, channel);
+    public NettyClientSession(@NotNull AbstractNettyService service, @NotNull Channel channel) {
+        super(service, channel);
     }
     
     @Override

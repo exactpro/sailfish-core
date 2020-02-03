@@ -1,13 +1,36 @@
-/******************************************************************************
- * Copyright (c) 2009-2018, Exactpro Systems LLC
- * www.exactpro.com
- * Build Software to Test Software
+/*******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
- * All rights reserved.
- * This is unpublished, licensed software, confidential and proprietary
- * information which is the property of Exactpro Systems LLC or its licensors.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
+
+import static quickfix.Acceptor.SETTING_ACCEPTOR_TEMPLATE;
+import static quickfix.Acceptor.SETTING_SOCKET_ACCEPT_ADDRESS;
+import static quickfix.Acceptor.SETTING_SOCKET_ACCEPT_PORT;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.service.spi.ServiceException;
 
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.common.util.EPSCommonException;
@@ -19,9 +42,7 @@ import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.util.ServiceUtil;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.hibernate.service.spi.ServiceException;
-import quickfix.Acceptor;
+
 import quickfix.Application;
 import quickfix.ConfigError;
 import quickfix.DataDictionaryProvider;
@@ -37,20 +58,6 @@ import quickfix.SessionID;
 import quickfix.SessionSettings;
 import quickfix.SocketAcceptor;
 import quickfix.mina.acceptor.DynamicAcceptorSessionProvider.TemplateMapping;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-
-import static quickfix.Acceptor.SETTING_ACCEPTOR_TEMPLATE;
-import static quickfix.Acceptor.SETTING_SOCKET_ACCEPT_ADDRESS;
-import static quickfix.Acceptor.SETTING_SOCKET_ACCEPT_PORT;
 
 public class FIXServer extends FIXClient implements IAcceptorService {
 	private final Map<InetSocketAddress, List<TemplateMapping>> dynamicSessionMappings = new HashMap<>();
@@ -73,6 +80,7 @@ public class FIXServer extends FIXClient implements IAcceptorService {
 
         changeStatus(ServiceStatus.DISPOSING, "Service disposing.", null );
 
+
 		try {
 			if (acceptor != null) {
 				// rm 35322 - send logout and disconnect immediately
@@ -92,8 +100,7 @@ public class FIXServer extends FIXClient implements IAcceptorService {
 		}
 
 		if(logConfigurator != null) {
-			logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-					serviceName);
+			logConfigurator.destroyAppender(getServiceName());
 		}
 		if (application != null) {
 		    application.stopLogging();
@@ -235,9 +242,7 @@ public class FIXServer extends FIXClient implements IAcceptorService {
 
 	@Override
 	public void start() {
-
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-				serviceName);
+        logConfigurator.createAndRegister(getServiceName(), this);
         application.startLogging();
 		try {
 

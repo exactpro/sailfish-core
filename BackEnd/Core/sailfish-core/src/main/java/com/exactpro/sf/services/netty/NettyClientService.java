@@ -73,7 +73,7 @@ import io.netty.util.internal.TypeParameterMatcher;
 @Deprecated
 public abstract class NettyClientService implements IInitiatorService {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
     protected IServiceContext serviceContext;
 	protected ServiceName serviceName;
@@ -174,9 +174,7 @@ public abstract class NettyClientService implements IInitiatorService {
 	public void start() {
 		try {
 			changeStatus(ServiceStatus.STARTING, "Starting service " + serviceName, null);
-
-            logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
+            logConfigurator.createAndRegister(getServiceName(), this);
 
 			nettySession = createSession();
 			nioEventLoopGroup = new NioEventLoopGroup();
@@ -189,7 +187,9 @@ public abstract class NettyClientService implements IInitiatorService {
 	}
 	@NotNull
 	protected NettySession createSession() {
-		return new NettySession(this, logConfigurator);
+        NettySession nettySession = new NettySession(this);
+        logConfigurator.registerLogger(nettySession, getServiceName());
+        return nettySession;
 	}
 
 
@@ -296,8 +296,7 @@ public abstract class NettyClientService implements IInitiatorService {
             }
             
             if(logConfigurator != null){
-                logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                        serviceName);
+                logConfigurator.destroyAppender(getServiceName());
             }
         }
 

@@ -94,7 +94,8 @@ public class ClientSideIoHandler extends AbstractProxyIoHandler {
 		logger.debug("sessionOpened");
 
 		//Store session to MAP
-        MINASession mSession = new MINASession(serviceName, session, logConfigurator);
+        MINASession mSession = new MINASession(serviceName, session);
+        logConfigurator.registerLogger(mSession, serviceName);
 		proxyService.addSession(session, mSession);
 
 		connector.connect(remoteAddress).addListener(new IoFutureListener<ConnectFuture>() {

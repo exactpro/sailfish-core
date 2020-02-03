@@ -70,7 +70,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 public abstract class TCPIPProxy implements IInitiatorService
 {
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	private Rules rules;
 	private volatile ServiceStatus curStatus;
@@ -232,8 +232,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 	@Override
 	public void start() {
 
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
+        logConfigurator.createAndRegister(getServiceName(), this);
 
 		changeStatus(ServiceStatus.STARTING, "Service starting", null);
 
@@ -292,8 +291,7 @@ public abstract class TCPIPProxy implements IInitiatorService
 		changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 
 		if(logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
+            logConfigurator.destroyAppender(getServiceName());
 		}
 
 	}

@@ -64,8 +64,7 @@ public abstract class NettyMulticastClientService extends NettyClientService {
 		try {
 			changeStatus(ServiceStatus.STARTING, "Starting service " + serviceName, null);
 
-            logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                    serviceName);
+            logConfigurator.createAndRegister(getServiceName(), this);
 
 			nettySession = createSession();
             nioEventLoopGroup = new NioEventLoopGroup();

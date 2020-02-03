@@ -15,6 +15,8 @@
  ******************************************************************************/
 package com.exactpro.sf.configuration;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.exactpro.sf.common.services.ServiceName;
 
 /**
@@ -28,18 +30,45 @@ import com.exactpro.sf.common.services.ServiceName;
 public interface ILoggingConfigurator {
 
     /**
-	 * Create individual appender for logger.
-	 * @param loggerName logger name
-	 * @param serviceName service name
+     * Return expected logger name for an object
+     * @param obj Object which contains logger
+     */
+    @NotNull
+    static String getLoggerName(@NotNull Object obj) {
+        return obj.getClass().getName() + '@' + Integer.toHexString(obj.hashCode());
+    }
+
+    /**
+	 * Creates appender which is associated with a service
+     * @param serviceName Service`s name
+     * @see ServiceName
 	 */
-	void createIndividualAppender(String loggerName, ServiceName serviceName);
+    void createAppender(@NotNull ServiceName serviceName);
 	
 	/**
-	 * Remove individual appender for logger.
-	 * @param loggerName logger name
-	 * @param serviceName service name
+	 * Removes appender which is associated with service.
+     * @param serviceName Service`s name
+     * @see ServiceName
 	 */
-	void destroyIndividualAppender(String loggerName, ServiceName serviceName);
+    void destroyAppender(@NotNull ServiceName serviceName);
+
+    /**
+     * Adds service's appender to object's logger
+     * @param obj Object which contains logger
+     * @param serviceName Service`s name
+     * @see ServiceName
+     */
+	void registerLogger(@NotNull Object obj, @NotNull ServiceName serviceName);
+
+    /**
+     * Creates appender which is associated with a service and adds service's appender to object's logger
+     * @param serviceName Service`s name
+     * @param obj Service object which contains logger
+     */
+	default void createAndRegister(@NotNull ServiceName serviceName, @NotNull Object obj) {
+	    createAppender(serviceName);
+	    registerLogger(obj, serviceName);
+    }
 	
 	void enableIndividualAppenders();
 	void disableIndividualAppenders();
@@ -49,7 +78,7 @@ public interface ILoggingConfigurator {
 	 * @param serviceName Service name
 	 * @return
 	 */
-	String getLogsPath(ServiceName serviceName);
+	String getLogsPath(@NotNull ServiceName serviceName);
 
-	ILoggingConfiguration getConfiguration();
+    @NotNull ILoggingConfiguration getConfiguration();
 }

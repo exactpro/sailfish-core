@@ -175,11 +175,17 @@ public abstract class AbstractMINATCPServer extends AbstractInitiatorService imp
     }
 
     protected MINAServerSession createServerSession() {
-        return new MINAServerSession(this);
+        MINAServerSession serverSession = new MINAServerSession(this);
+        loggingConfigurator.registerLogger(serverSession, getServiceName());
+        logger.info("Server session created: {}", serverSession);
+        return serverSession;
     }
 
     protected MINASession createMINASession(IoSession session) {
-        return new MINASession(serviceName, session, loggingConfigurator);
+        MINASession minaSession = new MINASession(serviceName, session);
+        loggingConfigurator.registerLogger(minaSession, getServiceName());
+        logger.info("Server session created: {}", minaSession);
+        return minaSession;
     }
 
     protected abstract Class<? extends AbstractCodec> getCodecClass();

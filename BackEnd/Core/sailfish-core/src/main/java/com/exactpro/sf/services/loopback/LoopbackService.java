@@ -44,7 +44,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 public class LoopbackService implements IInitiatorService {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	private ServiceName serviceName;
 	private IServiceHandler handler;
@@ -79,7 +79,7 @@ public class LoopbackService implements IInitiatorService {
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
+        logConfigurator.createAndRegister(getServiceName(), this);
 		session = new LoopbackSession();
 		status = ServiceStatus.STARTED;
 	}
@@ -88,7 +88,7 @@ public class LoopbackService implements IInitiatorService {
 	public void dispose() {
 		session = null;
 		if (logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
+            logConfigurator.destroyAppender(getServiceName());
 		}
         status = ServiceStatus.DISPOSED;
 

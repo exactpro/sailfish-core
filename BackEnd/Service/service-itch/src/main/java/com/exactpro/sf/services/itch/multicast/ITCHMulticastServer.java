@@ -52,7 +52,7 @@ import com.exactpro.sf.storage.IMessageStorage;
  * Created by alexey.zarovny on 11/18/14.
  */
 public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorService {
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
     private volatile ServiceStatus curStatus;
     private ServiceName serviceName;
@@ -144,8 +144,7 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
 
     @Override
     public void start() {
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
+        logConfigurator.createAndRegister(getServiceName(), this);
         try {
             cache = new ITCHMulticastCache(settings.getCacheSize());
             udpSession.open(settings.getPrimaryPort(), settings.getPrimaryAddress(), settings.getSecondaryPort(), settings.getSecondaryAddress(), cache);
@@ -174,8 +173,7 @@ public class ITCHMulticastServer extends IoHandlerAdapter implements IInitiatorS
             changeStatus(ServiceStatus.ERROR, "", e);
             throw new ServiceException("Problem during service [" + serviceName + "] disposing", e);
         } finally {
-            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                    serviceName);
+            logConfigurator.destroyAppender(getServiceName());
         }
     }
 

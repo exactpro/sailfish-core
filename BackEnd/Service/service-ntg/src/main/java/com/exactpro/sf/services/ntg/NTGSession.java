@@ -18,11 +18,10 @@ package com.exactpro.sf.services.ntg;
 import org.apache.mina.core.session.IoSession;
 
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.mina.MINASession;
 
 public class NTGSession extends MINASession {
-    public NTGSession(ServiceName serviceName, IoSession session, ILoggingConfigurator logConfigurator) {
-		super(serviceName, session, logConfigurator);
+    public NTGSession(ServiceName serviceName, IoSession session) {
+		super(serviceName, session);
 	}
 }

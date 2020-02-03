@@ -71,6 +71,8 @@ public abstract class AbstractNettyClient extends AbstractNettyService {
     @NotNull
     @Override
     protected NettyClientSession createSession(Channel channel) {
-        return new NettyClientSession(this, loggingConfigurator, channel);
+        NettyClientSession session = new NettyClientSession(this, channel);
+        loggingConfigurator.registerLogger(session, serviceName);
+        return session;
     }
 }

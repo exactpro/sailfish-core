@@ -47,7 +47,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public abstract class AbstractNettyServer extends AbstractNettyService implements IAcceptorService {
-    
+
     private final ConcurrentMap<ChannelId, NettyClientSession> activeSessionMap = new ConcurrentHashMap<>();
     
     public Map<ChannelId, NettyClientSession> getActiveSessionMap() {
@@ -123,12 +123,16 @@ public abstract class AbstractNettyServer extends AbstractNettyService implement
     
     @NotNull
     protected NettyClientSession createClientSession(Channel channel) {
-        return new NettyClientSession(this, loggingConfigurator, channel);
+        NettyClientSession session = new NettyClientSession(this, channel);
+        loggingConfigurator.registerLogger(session, serviceName);
+        return session;
     }
     
     @NotNull
     @Override
     protected NettyServerSession createSession(Channel channel) {
-        return new NettyServerSession(this, loggingConfigurator, channel);
+        NettyServerSession serverSession = new NettyServerSession(this, channel);
+        loggingConfigurator.registerLogger(serverSession, serviceName);
+        return serverSession;
     }
 }

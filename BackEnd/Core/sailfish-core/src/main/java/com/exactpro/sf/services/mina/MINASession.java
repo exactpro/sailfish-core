@@ -34,21 +34,16 @@ import com.exactpro.sf.services.ServiceException;
 public class MINASession implements ISession {
     protected static final long DEFAULT_TIMEOUT = 1000L;
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	protected final IoSession session;
 	protected final ServiceName serviceName;
-	protected final ILoggingConfigurator configurator;
 
     protected volatile boolean loggedOn;
 
-    public MINASession(ServiceName serviceName, IoSession session, ILoggingConfigurator configurator) {
+    public MINASession(ServiceName serviceName, IoSession session) {
         this.serviceName = Objects.requireNonNull(serviceName, "serviceName cannot be null");
         this.session = Objects.requireNonNull(session, "session cannot be null");
-        this.configurator = Objects.requireNonNull(configurator, "configurator cannot be null");
-
-        configurator.createIndividualAppender(logger.getName(), serviceName);
-        logger.debug("Session created: {}", this);
 	}
 
     @Override
@@ -102,7 +97,6 @@ public class MINASession implements ISession {
 
         session.close(true).addListener(future -> {
             logger.debug("Session closed: {}", this);
-            configurator.destroyIndividualAppender(logger.getName(), serviceName);
         });
     }
 

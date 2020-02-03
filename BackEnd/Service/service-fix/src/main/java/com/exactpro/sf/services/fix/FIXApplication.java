@@ -15,6 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.crypto.Cipher;
+
+import org.apache.mina.util.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.actions.FIXMatrixUtil;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
@@ -32,9 +47,7 @@ import com.exactpro.sf.services.ServiceHandlerException;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.services.fix.converter.MessageConvertException;
 import com.exactpro.sf.storage.IMessageStorage;
-import org.apache.mina.util.Base64;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
@@ -56,19 +69,9 @@ import quickfix.field.NextExpectedMsgSeqNum;
 import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 
-import javax.crypto.Cipher;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class FIXApplication extends AbstractApplication implements FIXClientApplication {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	public static final String ENCRYPT_PASSWORD = "EncryptPassword";
 	public static final String ADD_NEXT_EXPECTED_SEQ_NUM = "AddNextExpectedMsgSeqNum";
@@ -597,16 +600,7 @@ public class FIXApplication extends AbstractApplication implements FIXClientAppl
     @Override
     public void startLogging() {
         if (logConfigurator != null) {
-            logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                serviceName);
-        }
-    }
-
-    @Override
-    public void stopLogging() {
-        if (logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                    serviceName);
+            logConfigurator.registerLogger(this, serviceName);
         }
     }
 

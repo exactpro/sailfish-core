@@ -29,7 +29,7 @@ import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
 
 public abstract class AbstractService implements IService {
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + '@' + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
     protected IServiceContext serviceContext;
     protected ServiceName serviceName;
@@ -85,7 +85,7 @@ public abstract class AbstractService implements IService {
                 throw new ServiceException("Service should be initialized before starting");
             }
             changeStatus(ServiceStatus.STARTING, "Starting service");
-            loggingConfigurator.createIndividualAppender(logger.getName(), getServiceName());
+            loggingConfigurator.createAndRegister(getServiceName(), this);
             internalStart();
             changeStatus(ServiceStatus.STARTED, "Started service");
         } catch(Throwable e) {
@@ -117,7 +117,7 @@ public abstract class AbstractService implements IService {
 
     protected void disposeResources() {
         if(loggingConfigurator != null) {
-            loggingConfigurator.destroyIndividualAppender(logger.getName(), getServiceName());
+            loggingConfigurator.destroyAppender(getServiceName());
         }
     }
 

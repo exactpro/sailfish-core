@@ -15,6 +15,22 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
+import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
+import static com.exactpro.sf.services.ServiceHandlerRoute.TO_ADMIN;
+import static com.exactpro.sf.services.ServiceHandlerRoute.TO_APP;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.commons.lang3.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.services.ServiceName;
 import com.exactpro.sf.configuration.ILoggingConfigurator;
@@ -24,9 +40,7 @@ import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.MessageHelper;
 import com.exactpro.sf.services.ServiceHandlerRoute;
 import com.exactpro.sf.storage.IMessageStorage;
-import org.apache.commons.lang3.BooleanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import quickfix.DoNotSend;
 import quickfix.FieldNotFound;
 import quickfix.IncorrectDataFormat;
@@ -45,21 +59,9 @@ import quickfix.field.ResetSeqNumFlag;
 import quickfix.field.Text;
 import quickfix.field.Username;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_ADMIN;
-import static com.exactpro.sf.services.ServiceHandlerRoute.FROM_APP;
-import static com.exactpro.sf.services.ServiceHandlerRoute.TO_ADMIN;
-import static com.exactpro.sf.services.ServiceHandlerRoute.TO_APP;
-
 public class ServerApplication extends AbstractApplication implements FIXServerApplication {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
     private ServiceName serviceName;
     private IMessageStorage messageStorage;
     private ILoggingConfigurator logConfigurator;
@@ -202,12 +204,9 @@ public class ServerApplication extends AbstractApplication implements FIXServerA
 
     @Override
     public void startLogging() {
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
-    }
-
-    @Override
-    public void stopLogging() {
-        logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()), serviceName);
+        if (logConfigurator != null) {
+            logConfigurator.registerLogger(this, serviceName);
+        }
     }
 
     protected ISession getSession(SessionID sessionID) {

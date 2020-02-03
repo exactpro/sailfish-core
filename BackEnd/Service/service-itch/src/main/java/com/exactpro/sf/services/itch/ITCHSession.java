@@ -15,21 +15,21 @@
  ******************************************************************************/
 package com.exactpro.sf.services.itch;
 
-import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.configuration.ILoggingConfigurator;
-import com.exactpro.sf.services.mina.MINASession;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.mina.core.session.IoSession;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.services.mina.MINASession;
 
 public class ITCHSession extends MINASession {
 	private final AtomicInteger seqnum = new AtomicInteger(0);
 
 	private final byte marketDataGroup;
 
-    public ITCHSession(ServiceName serviceName, IoSession session, ILoggingConfigurator logConfigurator, byte marketDataGroup) {
-        super(serviceName, session, logConfigurator);
+    public ITCHSession(ServiceName serviceName, IoSession session, byte marketDataGroup) {
+        super(serviceName, session);
         this.marketDataGroup = marketDataGroup;
     }
 

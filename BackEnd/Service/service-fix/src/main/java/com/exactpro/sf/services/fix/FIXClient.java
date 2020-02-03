@@ -15,6 +15,27 @@
  ******************************************************************************/
 package com.exactpro.sf.services.fix;
 
+import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
+
+import java.io.BufferedReader;
+import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.TimeZone;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.quickfixj.CharsetSupport;
+import org.quickfixj.QFJException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.aml.script.actions.WaitAction;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.messages.IMessageFactory;
@@ -45,13 +66,7 @@ import com.exactpro.sf.services.fix.converter.QFJIMessageConverterSettings;
 import com.exactpro.sf.services.fix.converter.dirty.DirtyQFJIMessageConverter;
 import com.exactpro.sf.services.util.ServiceUtil;
 import com.exactpro.sf.storage.IMessageStorage;
-import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.quickfixj.CharsetSupport;
-import org.quickfixj.QFJException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import quickfix.ConfigError;
 import quickfix.DataDictionary;
 import quickfix.FieldConvertError;
@@ -74,19 +89,6 @@ import quickfix.SocketInitiator;
 import quickfix.mina.SessionConnector;
 import quickfix.mina.ssl.SSLSupport;
 
-import java.io.BufferedReader;
-import java.io.Closeable;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.TimeZone;
-
-import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttributeValue;
-
 /**
  *
  * @author dmitry.guriev
@@ -94,7 +96,7 @@ import static com.exactpro.sf.common.messages.structures.StructureUtils.getAttri
  */
 public class FIXClient implements IInitiatorService {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	protected volatile ServiceStatus curStatus;
 	protected IServiceMonitor monitor;
@@ -192,8 +194,7 @@ public class FIXClient implements IInitiatorService {
             logger.error("Service failed upon closing the resources", e);
         } finally {
             if(logConfigurator != null) {
-                logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                        serviceName);
+                logConfigurator.destroyAppender(getServiceName());
             }
         }
     }
@@ -452,8 +453,7 @@ public class FIXClient implements IInitiatorService {
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-            serviceName);
+        logConfigurator.createAndRegister(getServiceName(), this);
         application.startLogging();
 		logger.info("start service {}", this);
 

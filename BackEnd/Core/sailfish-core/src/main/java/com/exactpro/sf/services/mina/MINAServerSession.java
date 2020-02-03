@@ -28,19 +28,19 @@ import org.slf4j.LoggerFactory;
 
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.SendMessageFailedException;
+import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.util.CloseSessionException;
 
 public class MINAServerSession implements ISession {
 
     private static final int DEFAULT_TIMEOUT = 1000;
-    protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + '@' + Integer.toHexString(hashCode()));
+    protected final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
     protected AbstractMINATCPServer server;
 
     public MINAServerSession(AbstractMINATCPServer server) {
         this.server = server;
-        logger.info("Server session created: {}", this);
     }
 
     @Override

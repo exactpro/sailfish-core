@@ -18,11 +18,10 @@ package com.exactpro.sf.services.tcpip;
 import org.apache.mina.core.session.IoSession;
 
 import com.exactpro.sf.common.services.ServiceName;
-import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.mina.MINASession;
 
 public class TCPIPSession extends MINASession{
-    public TCPIPSession(ServiceName serviceName, IoSession session, ILoggingConfigurator logConfigurator) {
-        super(serviceName, session, logConfigurator);
+    public TCPIPSession(ServiceName serviceName, IoSession session) {
+        super(serviceName, session);
     }
 }

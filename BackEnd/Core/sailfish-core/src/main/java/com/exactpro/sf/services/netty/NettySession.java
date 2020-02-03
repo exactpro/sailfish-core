@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import com.exactpro.sf.common.messages.IMessage;
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.common.util.SendMessageFailedException;
-import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.ISession;
 import com.exactpro.sf.services.netty.sessions.AbstractNettySession;
 
@@ -38,18 +37,13 @@ public class NettySession implements ISession {
 
 	protected final Logger logger = LoggerFactory
             .getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
-	private final ILoggingConfigurator logConfigurator;
 	private final NettyClientService client;
 
-    public NettySession(NettyClientService client, ILoggingConfigurator logConfigurator) {
+    public NettySession(NettyClientService client) {
         if(client == null) {
 			throw new NullPointerException();
 		}
 		this.client = client;
-
-		this.logConfigurator = logConfigurator;
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-				client.getServiceName());
 	}
 
 	@Override
@@ -113,8 +107,6 @@ public class NettySession implements ISession {
 	@Override
 	public void close() {
 		client.stop("Close session", null);
-        logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-				client.getServiceName());
 	}
 
 	@Override

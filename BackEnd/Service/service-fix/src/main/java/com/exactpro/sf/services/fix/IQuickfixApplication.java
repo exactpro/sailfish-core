@@ -18,6 +18,7 @@ package com.exactpro.sf.services.fix;
 import java.util.List;
 
 import com.exactpro.sf.common.services.ServiceName;
+import com.exactpro.sf.configuration.ILoggingConfigurator;
 import com.exactpro.sf.services.IServiceContext;
 import com.exactpro.sf.services.ISession;
 
@@ -27,7 +28,16 @@ public interface IQuickfixApplication extends Application {
 
     void init(IServiceContext serviceContext, ApplicationContext applicationContext, ServiceName serviceName);
     List<ISession> getSessions();
+
+    /**
+     * Use {@link ILoggingConfigurator#registerLogger(Object, ServiceName)} to register application`s logger
+     */
     void startLogging();
-    void stopLogging();
+
+    /**
+     * Deprecated, because service controls logger`s configuration.
+     */
+    @Deprecated
+    default void stopLogging(){};
     default void onConnectionProblem(String reason) {}
 }

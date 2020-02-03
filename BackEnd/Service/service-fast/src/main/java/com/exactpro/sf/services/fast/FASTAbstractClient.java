@@ -69,7 +69,7 @@ import com.exactpro.sf.storage.IMessageStorage;
 
 public abstract class FASTAbstractClient implements IInitiatorService {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
+    private final Logger logger = LoggerFactory.getLogger(ILoggingConfigurator.getLoggerName(this));
 
 	private volatile ServiceStatus curStatus;
 
@@ -228,8 +228,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
         changeStatus(ServiceStatus.DISPOSED, "Service disposed", null);
 
 		if(logConfigurator != null) {
-            logConfigurator.destroyIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-                    serviceName);
+            logConfigurator.destroyAppender(getServiceName());
 		}
 	}
 
@@ -249,8 +248,7 @@ public abstract class FASTAbstractClient implements IInitiatorService {
 
 	@Override
 	public void start() {
-        logConfigurator.createIndividualAppender(getClass().getName() + "@" + Integer.toHexString(hashCode()),
-            serviceName);
+	    logConfigurator.createAndRegister(getServiceName(), this);
         changeStatus(ServiceStatus.STARTING, "Service is starting", null);
 		doStart();
         changeStatus(ServiceStatus.STARTED, "Service is started", null);
