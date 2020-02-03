@@ -25,6 +25,7 @@ import com.exactpro.sf.aml.preprocessor.PreprocessorDefinition;
 import com.exactpro.sf.bigbutton.RegressionRunner;
 import com.exactpro.sf.center.impl.SfInstanceInfo;
 import com.exactpro.sf.common.adapting.IAdapterManager;
+import com.exactpro.sf.configuration.CleanupConfiguration;
 import com.exactpro.sf.configuration.EnvironmentManager;
 import com.exactpro.sf.configuration.IDataManager;
 import com.exactpro.sf.configuration.IDictionaryManager;
@@ -88,6 +89,7 @@ public interface ISFContext {
 
 	// Other
 	EnvironmentManager getEnvironmentManager();
+	CleanupConfiguration getCleanupConfiguration();
 
     // don't use it in your code. It is prefered to use <code>@ManagedProperty(value="#{" + BeanUtil.MATRIX_PROVIDER_HOLDER + "}")</code>
     @Deprecated

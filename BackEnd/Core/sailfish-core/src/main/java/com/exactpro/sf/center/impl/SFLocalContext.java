@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import com.exactpro.sf.configuration.CleanupConfiguration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -161,6 +162,7 @@ public class SFLocalContext implements ISFContext {
 
 	// Other:
 	private final EnvironmentManager environmentManager;
+    private final CleanupConfiguration cleanupConfiguration;
 
 	private final MatrixProviderHolder matrixProviderHolder;
 	private final MatrixConverterManager matrixConverterManager;
@@ -185,7 +187,8 @@ public class SFLocalContext implements ISFContext {
 
     private final ServiceMarshalManager serviceMarshalManager;
 
-	/**
+
+    /**
 	 * Note that getDefault() will return null until createContext() execution will finish.
 	 * It means that SFLocalContext is useless in constructors and static initializations of Storages and Managers
 	 * (For example static initializators of IService will get null from SFLocalContext.getDefault() )
@@ -226,6 +229,9 @@ public class SFLocalContext implements ISFContext {
         // logging configuration
         LoggingConfiguration loggingConfiguration = new LoggingConfiguration(settings.getLoggingConfig());
         loggingConfiguration.load(settings.getLoggingConfig());
+
+        cleanupConfiguration = new CleanupConfiguration(settings.getCleanupConfig());
+        cleanupConfiguration.load(settings.getCleanupConfig());
 
         this.version = new CoreVersion();
         this.branchName = version.getBranch();
@@ -584,6 +590,11 @@ public class SFLocalContext implements ISFContext {
     public EnvironmentManager getEnvironmentManager() {
 		return environmentManager;
 	}
+
+    @Override
+    public CleanupConfiguration getCleanupConfiguration() {
+        return cleanupConfiguration;
+    }
 
     @Override
 	public IActionManager getActionManager() {

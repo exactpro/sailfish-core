@@ -37,6 +37,8 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
+import com.exactpro.sf.configuration.CleanupConfiguration;
+import com.exactpro.sf.testwebgui.configuration.CleanupBean;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -440,6 +442,13 @@ public class SFContextServlet implements Servlet {
             FacesContext.getCurrentInstance().getExternalContext().getApplicationMap().put(BeanUtil.SESSION_ML_PERSISTENCE_MAPPER, new MLPersistenceManager(wd));
 
             BeanUtil.setServletContext(config.getServletContext());
+
+            // ---------- Clean workspace
+            if(sfLocalContext.getCleanupConfiguration().isAutoclean()){
+                CleanupBean cleanupBean = new CleanupBean();
+                cleanupBean.autoclean();
+            }
+
 
     		logger.info("Application initialization finished\n");
 	    } catch (Throwable e) {

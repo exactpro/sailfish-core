@@ -20,25 +20,42 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
 
+import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
+import com.exactpro.sf.center.SFContextSettings;
+import com.exactpro.sf.center.impl.SFLocalContext;
+import com.exactpro.sf.configuration.CleanupConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.testwebgui.BeanUtil;
 
-@ViewScoped
 @ManagedBean(name = "cleanupBean")
+@ViewScoped
 public class CleanupBean implements Serializable {
     private static final long serialVersionUID = -3953209638699015447L;
     private static final Logger logger = LoggerFactory.getLogger(CleanupBean.class);
 
     private Date olderThan = new Date();
     private final Map<ResourceCleaner, Boolean> cleaners = new EnumMap<>(ResourceCleaner.class);
+
+    public CleanupBean (){
+        CleanupConfiguration cleanupConfiguration = BeanUtil.getSfContext().getCleanupConfiguration();
+        setCleanReports(cleanupConfiguration.isReports());
+        setCleanEvents(cleanupConfiguration.isEvents());
+        setCleanLogs(cleanupConfiguration.isLogs());
+        setCleanMatrices(cleanupConfiguration.isMatrices());
+        setCleanML(cleanupConfiguration.isMl());
+        setCleanTrafficDump(cleanupConfiguration.isTrafficDump());
+        setCleanMessages(cleanupConfiguration.isMessages());
+        olderThan.setTime(olderThan.getTime()- TimeUnit.DAYS.toMillis(cleanupConfiguration.getCleanOlderThanDays()));
+    }
 
     public void clean() {
         ISFContext context = BeanUtil.getSfContext();
@@ -57,6 +74,35 @@ public class CleanupBean implements Serializable {
         });
 
         BeanUtil.addInfoMessage("Cleanup completed", StringUtils.EMPTY);
+    }
+
+    public  void autoclean() {
+        ISFContext context = BeanUtil.getSfContext();
+        Instant instant = Instant.ofEpochMilli(olderThan.getTime());
+
+        cleaners.forEach((cleaner, enabled) -> {
+            if(enabled) {
+                try {
+                    cleaner.clean(instant, context);
+                } catch(Exception e) {
+                    logger.error("Failed to cleanup {}", cleaner.getName(), e);
+                }
+            }
+        });
+    }
+
+    public void applySettings() {
+        CleanupConfiguration cleanupConfiguration = BeanUtil.getSfContext().getCleanupConfiguration();
+        cleanupConfiguration.setEvents(isCleanEvents());
+        cleanupConfiguration.setLogs(isCleanLogs());
+        cleanupConfiguration.setMatrices(isCleanMatrices());
+        cleanupConfiguration.setMessages(isCleanMessages());
+        cleanupConfiguration.setMl(isCleanML());
+        cleanupConfiguration.setReports(isCleanReports());
+        cleanupConfiguration.setTrafficDump(isCleanTrafficDump());
+        cleanupConfiguration.setCleanOlderThanDays(getCleanOlderThanDays());
+        cleanupConfiguration.setAutoclean(cleanupConfiguration.isAutoclean());
+        BeanUtil.showMessage(FacesMessage.SEVERITY_INFO, "INFO", "Configuration changes successfully applied");
     }
 
     public Date getOlderThan() {
@@ -121,5 +167,22 @@ public class CleanupBean implements Serializable {
 
     public void setCleanLogs(boolean cleanLogs) {
         cleaners.put(ResourceCleaner.LOGS, cleanLogs);
+    }
+
+    public void setAutoclean(boolean autoclean) {
+        BeanUtil.getSfContext().getCleanupConfiguration().setAutoclean(autoclean);
+    }
+
+    public boolean isAutoclean() {
+        return BeanUtil.getSfContext().getCleanupConfiguration().isAutoclean();
+    }
+
+    public void setCleanOlderThanDays(int cleanOlderThanDays) {
+        BeanUtil.getSfContext().getCleanupConfiguration().setCleanOlderThanDays(cleanOlderThanDays);
+        olderThan.setTime(olderThan.getTime()-TimeUnit.DAYS.toMillis(cleanOlderThanDays));
+    }
+
+    public int getCleanOlderThanDays() {
+        return BeanUtil.getSfContext().getCleanupConfiguration().getCleanOlderThanDays();
     }
 }
