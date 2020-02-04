@@ -26,7 +26,10 @@ export function performSearch(searchString: string): ThunkAction<void, {}, {}, S
         const { testCase } = getState().selected;
         
         dispatch(setSearchString(searchString));
-        const results = await findAll(searchString, testCase);
+        const results = await findAll([{
+            pattern: searchString,
+            color: 'yellow'
+        }], testCase);
 
         if (searchString === getState().selected.searchString) {
             dispatch(setSearchResults(results));

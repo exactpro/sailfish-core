@@ -122,7 +122,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
             this.inputElement.current.blur();
             this.props.clear();
         }
-    }
+    };
 
     private documentOnKeyDown = (e: KeyboardEvent) => {
         if (e.keyCode === KeyCodes.F3 || (e.keyCode === KeyCodes.F && e.ctrlKey)) {
@@ -131,7 +131,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
 
             this.inputElement.current.focus();
         }
-    }
+    };
 
     private inputOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const currentValue = e.target.value;

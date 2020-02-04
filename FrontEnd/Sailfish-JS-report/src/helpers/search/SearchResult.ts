@@ -18,7 +18,7 @@ export default class SearchResult {
 
     private results: Map<string, number>;
 
-    constructor(initMap: Iterable<[string, number]> = null) {
+    constructor(initMap: Iterable<[string, number]> = []) {
         this.results = new Map(initMap);
     }
 
