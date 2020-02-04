@@ -15,17 +15,16 @@
  ******************************************************************************/
 package com.exactpro.sf.storage;
 
-import com.exactpro.sf.configuration.DictionaryManager;
+import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings;
-import org.apache.commons.configuration.EnvironmentConfiguration;
 
 public class BaseStorageSettings {
     protected final IWorkspaceDispatcher workspaceDispatcher;
-    protected final DictionaryManager dictionaryManager;
+    protected final IDictionaryManager dictionaryManager;
     private final EnvironmentSettings environmentSettings;
 
-    public BaseStorageSettings(IWorkspaceDispatcher workspaceDispatcher, DictionaryManager dictionaryManager, EnvironmentSettings environmentSettings) {
+    public BaseStorageSettings(IWorkspaceDispatcher workspaceDispatcher, IDictionaryManager dictionaryManager, EnvironmentSettings environmentSettings) {
         this.workspaceDispatcher = workspaceDispatcher;
         this.dictionaryManager = dictionaryManager;
         this.environmentSettings = environmentSettings;
@@ -35,7 +34,7 @@ public class BaseStorageSettings {
         return workspaceDispatcher;
     }
 
-    public DictionaryManager getDictionaryManager() {
+    public IDictionaryManager getDictionaryManager() {
         return dictionaryManager;
     }
 

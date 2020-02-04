@@ -15,6 +15,30 @@
  ******************************************************************************/
 package com.exactpro.sf.center.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
+import java.util.Set;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.PropertyConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.exactpro.sf.center.IVersion;
 import com.exactpro.sf.center.SFException;
 import com.exactpro.sf.common.logging.CommonLoggers;
@@ -34,30 +58,6 @@ import com.exactpro.sf.scriptrunner.PreprocessorLoader;
 import com.exactpro.sf.scriptrunner.ValidatorLoader;
 import com.exactpro.sf.scriptrunner.services.PluginServiceLoader;
 import com.exactpro.sf.util.DirectoryFilter;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.PropertyConfigurator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
-import java.util.Set;
 
 public class PluginLoader {
 
@@ -105,6 +105,8 @@ public class PluginLoader {
 
     private final IVersion coreVersion;
 
+    private final ILoadableManager messageStorageLoader;
+
     private final List<IVersion> pluginVersions;
 
 	public PluginLoader(
@@ -121,7 +123,8 @@ public class PluginLoader {
             ILoadableManager matrixConverterManager,
             ILoadableManager statisticsReportsLoader,
             PluginServiceLoader pluginServiceLoader,
-            IVersion coreVersion) {
+            IVersion coreVersion,
+            ILoadableManager messageStorageLoader) {
 		if (wd == null) {
 		    throw new NullPointerException("IWorkspaceDispatcher can't be null");
 		}
@@ -140,6 +143,7 @@ public class PluginLoader {
         this.statisticsReportsLoader = statisticsReportsLoader;
         this.pluginServiceLoader = pluginServiceLoader;
         this.coreVersion = coreVersion;
+        this.messageStorageLoader = messageStorageLoader;
 
 		this.pluginVersions = new ArrayList<>();
 	}
@@ -498,6 +502,19 @@ public class PluginLoader {
             }
         } else {
             logger.info("Ignore statistic reports [No StatisticsReportsLoader]. Plugin: {}", pluginPath);
+        }
+
+        //
+        // Load AbstractMessageStorage
+        //
+        if (messageStorageLoader != null) {
+            try {
+              messageStorageLoader.load(loadableContext);
+            } catch (Exception e) {
+                throw new EPSCommonException(e);
+            }
+        } else {
+            logger.info("Ignore message storages [No MessageStorageLoader]. Plugin: {}", pluginPath);
         }
 
         // Collect service description files

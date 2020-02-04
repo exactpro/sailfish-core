@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2018 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.storage;
 
-import org.hibernate.SessionFactory;
+package com.exactpro.sf.storage;
 
 import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.EnvironmentSettings;
+import com.exactpro.sf.storage.impl.AbstractMessageStorage;
 
-public class DBStorageSettings extends BaseStorageSettings {
-    private final SessionFactory sessionFactory;
+public interface IAbstractMessageStorageFactory {
 
-    public DBStorageSettings(IWorkspaceDispatcher workspaceDispatcher, SessionFactory sessionFactory, IDictionaryManager dictionaryManager, EnvironmentSettings environmentSettings
-    ) {
-        super(workspaceDispatcher, dictionaryManager, environmentSettings);
-        this.sessionFactory = sessionFactory;
-    }
-
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
-    }
+    /**
+     * Create secondary message storage
+     * @param environmentSettings Global settings of Sailfish
+     */
+    AbstractMessageStorage createMessageStorage(IWorkspaceDispatcher dispatcher, EnvironmentSettings environmentSettings, IDictionaryManager dictionaryManager);
 
 }

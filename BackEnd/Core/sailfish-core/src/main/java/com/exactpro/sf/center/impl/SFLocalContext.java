@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
-import com.exactpro.sf.configuration.CleanupConfiguration;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -42,6 +41,7 @@ import com.exactpro.sf.center.SFContextSettings;
 import com.exactpro.sf.center.SFException;
 import com.exactpro.sf.common.adapting.IAdapterManager;
 import com.exactpro.sf.common.util.EPSCommonException;
+import com.exactpro.sf.configuration.CleanupConfiguration;
 import com.exactpro.sf.configuration.DataManager;
 import com.exactpro.sf.configuration.DefaultAdapterManager;
 import com.exactpro.sf.configuration.DictionaryManager;
@@ -95,6 +95,9 @@ import com.exactpro.sf.storage.IServiceStorage;
 import com.exactpro.sf.storage.IStorage;
 import com.exactpro.sf.storage.ITestScriptStorage;
 import com.exactpro.sf.storage.IVariableSetStorage;
+import com.exactpro.sf.storage.MessageStorageLoader;
+import com.exactpro.sf.storage.impl.AbstractMessageStorage;
+import com.exactpro.sf.storage.impl.BroadcastMessageStorage;
 import com.exactpro.sf.storage.impl.DatabaseAuthStorage;
 import com.exactpro.sf.storage.impl.DatabaseEnvironmentStorage;
 import com.exactpro.sf.storage.impl.DatabaseMatrixStorage;
@@ -306,6 +309,7 @@ public class SFLocalContext implements ISFContext {
         embeddedServices.add(updateService);
 
         PluginServiceLoader pluginServiceLoader = new PluginServiceLoader();
+        MessageStorageLoader messageStorageLoader = new MessageStorageLoader();
 
         // 5) Load core & plugins
         PluginLoader pluginLoader = new PluginLoader(
@@ -322,13 +326,14 @@ public class SFLocalContext implements ISFContext {
                 matrixConverterLoader,
                 statisticsService,
                 pluginServiceLoader,
-                version);
+                version,
+                messageStorageLoader);
 
         LoadInfo loadInfo = pluginLoader.load();
         loadInfo.appendClassPath(compilerClassPath);
         compilerClassPath = loadInfo.getClassPath();
 
-        messageStorage = createMessageStorage(envSettings, sessionFactory, dictionaryManager);
+        messageStorage = createMessageStorage(envSettings, sessionFactory, dictionaryManager, messageStorageLoader.getSecondaryMessageStorages(workspaceDispatcher, envSettings, dictionaryManager));
         disposables.add(messageStorage);
 
         serviceStorage = createServiceStorage(envSettings, sessionFactory, workspaceDispatcher, staticServiceManager, dictionaryManager, messageStorage);
@@ -398,16 +403,21 @@ public class SFLocalContext implements ISFContext {
         }
     }
 
-    private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, DictionaryManager dictionaryManager) throws WorkspaceStructureException, FileNotFoundException {
-		switch (envSettings.getStorageType()) {
+    private IMessageStorage createMessageStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory, IDictionaryManager dictionaryManager, List<AbstractMessageStorage> secondary) throws WorkspaceStructureException, FileNotFoundException {
+	    AbstractMessageStorage primaryMessageStorage;
+        switch (envSettings.getStorageType()) {
         case DB:
-            return new DatabaseMessageStorage(new DBStorageSettings(workspaceDispatcher, sessionFactory, dictionaryManager, envSettings));
+            primaryMessageStorage = new DatabaseMessageStorage(new DBStorageSettings(workspaceDispatcher, sessionFactory, dictionaryManager, envSettings));
+            break;
         case FILE:
-            return new FileMessageStorage(new BaseStorageSettings(workspaceDispatcher, dictionaryManager, envSettings));
+            primaryMessageStorage = new FileMessageStorage(new BaseStorageSettings(workspaceDispatcher, dictionaryManager, envSettings));
+            break;
         default:
             throw new EPSCommonException("Unsupported message storage type. Check your descriptor.xml file.");
         }
-	}
+
+        return new BroadcastMessageStorage(primaryMessageStorage, secondary);
+    }
 
     private IMatrixStorage createMatrixStorage(EnvironmentSettings envSettings, SessionFactory sessionFactory) {
         switch(envSettings.getStorageType()) {

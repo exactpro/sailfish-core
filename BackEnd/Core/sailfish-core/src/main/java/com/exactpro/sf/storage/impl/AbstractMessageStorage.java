@@ -30,7 +30,7 @@ import com.exactpro.sf.common.messages.IMessageFactory;
 import com.exactpro.sf.common.messages.MessageUtil;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.configuration.DictionaryManager;
+import com.exactpro.sf.configuration.IDictionaryManager;
 import com.exactpro.sf.configuration.suri.SailfishURI;
 import com.exactpro.sf.storage.IMessageStorage;
 import com.exactpro.sf.storage.ScriptRun;
@@ -39,9 +39,9 @@ import com.exactpro.sf.storage.util.JsonMessageConverter;
 public abstract class AbstractMessageStorage implements IMessageStorage {
     protected final Logger logger = LoggerFactory.getLogger(getClass().getName() + "@" + Integer.toHexString(hashCode()));
 
-    protected final DictionaryManager dictionaryManager;
+    protected final IDictionaryManager dictionaryManager;
     
-    public AbstractMessageStorage(DictionaryManager dictionaryManager) {
+    public AbstractMessageStorage(IDictionaryManager dictionaryManager) {
         this.dictionaryManager = Objects.requireNonNull(dictionaryManager, "Dictionary manager cannot be null");
     }
     
