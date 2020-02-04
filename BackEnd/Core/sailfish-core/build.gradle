@@ -111,7 +111,7 @@ dependencies {
     compile 'org.jamon:jamon-runtime:2.4.1'
 
 	// netty
-	compile 'io.netty:netty-codec:4.1.31.Final'
+	compile 'io.netty:netty-codec:4.1.39.Final'
 
     //poi
 	compile 'org.apache.poi:poi-ooxml:4.0.0'
