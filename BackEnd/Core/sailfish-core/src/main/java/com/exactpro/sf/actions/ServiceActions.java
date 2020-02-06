@@ -59,7 +59,7 @@ import com.exactpro.sf.util.DateTimeUtility;
 @ResourceAliases("ServiceActions")
 public class ServiceActions extends AbstractCaller {
 
-    private static final DateTimeFormatter FORMATTER = DateTimeUtility.createFormatter("_dd.MM.yyyy_HH:mm:ss:SSS");
+    private static final DateTimeFormatter FORMATTER = DateTimeUtility.createFormatter("_dd_MM_yyyy_HH_mm_ss_SSS");
     private static final String servicesFolder = "services";
     private static final String changingSettingFolder = "changingSetting";
 
