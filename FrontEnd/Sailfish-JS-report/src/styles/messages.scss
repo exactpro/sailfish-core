@@ -137,7 +137,7 @@
         align-items: center;
 
         &::after {
-            border-bottom: 2px solid $defaultCardBackground;
+            border-bottom: 2px solid var(--status-primary-delimeter-color);
             padding: 0 20px;
             content: '';
             position: absolute;
