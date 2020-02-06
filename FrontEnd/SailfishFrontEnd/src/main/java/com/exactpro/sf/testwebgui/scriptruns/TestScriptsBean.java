@@ -368,7 +368,7 @@ public class TestScriptsBean implements Serializable, IView {
 		UploadedFile uploadedFile = event.getFile() ;
 
 		try {
-			TestToolsAPI.getInstance().uploadMatrix(uploadedFile.getInputstream(), uploadedFile.getFileName(), null, "Unknown creator", null, null, null);
+			BeanUtil.getSfContext().getMatrixStorage().addMatrix(uploadedFile.getInputstream(), uploadedFile.getFileName(), null, "Unknown creator", null, null, null);
 		} catch (Exception e) {
 			logger.error("Could not store uploaded file", e);
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Error", "Could not store uploaded file " + e.getMessage() );
@@ -381,7 +381,7 @@ public class TestScriptsBean implements Serializable, IView {
 	public void createNewScript() {
 		logger.debug("createNewScript invoked {}", BeanUtil.getUser());
 		try {
-            TestToolsAPI.getInstance().uploadMatrix(null, newFileName.trim() + ".csv", null, "Unknown creator", null, null, null);
+			BeanUtil.getSfContext().getMatrixStorage().addMatrix(null, newFileName.trim() + ".csv", null, "Unknown creator", null, null, null);
 		} catch (Exception e) {
 			logger.error("Could not create new script file", e);
 			BeanUtil.showMessage(FacesMessage.SEVERITY_ERROR, "Could not create new script file", e.getMessage() );
@@ -496,7 +496,7 @@ public class TestScriptsBean implements Serializable, IView {
 		logger.debug("delete invoked {}", BeanUtil.getUser());
 		for (Long matrixId : selectedMatrices) {
 			MatrixAdapter matrixAdapter = getMatrixAdapterById(matrixId);
-			TestToolsAPI.getInstance().deleteMatrix(matrixAdapter.getIMatrix());
+			BeanUtil.getSfContext().getMatrixStorage().removeMatrix(matrixAdapter.getIMatrix());
 		}
 		selectedMatrices.clear();
 		syncMatrixAdapterList();
@@ -505,7 +505,7 @@ public class TestScriptsBean implements Serializable, IView {
 	public void deleteAllFiles() {
 		logger.debug("deleteAllFiles invoked {}", BeanUtil.getUser());
 		selectedMatrices.clear();
-		TestToolsAPI.getInstance().deleteAllMatrix();
+		BeanUtil.getSfContext().getMatrixStorage().deleteAllMatrix();
 	}
 
     public void clearAllTestScriptsDescSafe() {

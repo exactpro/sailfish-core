@@ -60,7 +60,7 @@ import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.testwebgui.BeanUtil;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
-import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
 
 @ManagedBean(name="bbBean")
 @SessionScoped

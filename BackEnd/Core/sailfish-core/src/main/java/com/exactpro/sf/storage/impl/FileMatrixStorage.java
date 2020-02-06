@@ -65,7 +65,7 @@ public class FileMatrixStorage extends AbstractMatrixStorage {
 
         writeMatrixMetadata(matrix);
 
-        notifyListeners();
+        notifyAddMatrix(matrix);
 
         return matrix;
     }
@@ -92,7 +92,7 @@ public class FileMatrixStorage extends AbstractMatrixStorage {
             lock.writeLock().unlock();
         }
 
-        notifyListeners();
+        notifyUpdateMatrix(matrix);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class FileMatrixStorage extends AbstractMatrixStorage {
             lock.writeLock().unlock();
         }
 
-        notifyListeners();
+        notifyDeleteMatrix(matrix);
     }
 
     @Override

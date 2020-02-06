@@ -21,7 +21,6 @@ import com.exactpro.sf.matrixhandlers.IMatrixProviderFactory;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.testwebgui.BeanUtil;
-import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.event.FileUploadEvent;
 import org.slf4j.Logger;
@@ -118,7 +117,7 @@ public class UploadMatrixBean implements Serializable {
 
             for (MatrixWrapper wrapper : locals) {
                 try (InputStream wrapperInputStream = wrapper.getMatrixInputStream()) {
-                    TestToolsAPI.getInstance().uploadMatrix(wrapperInputStream,
+                    BeanUtil.getSfContext().getMatrixStorage().addMatrix(wrapperInputStream,
                             wrapper.getMatrixName(), null, "Unknown creator", null, null, null);
                     names.add(wrapper.getMatrixName());
                 } catch (IOException e) {

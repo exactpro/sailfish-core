@@ -397,5 +397,4 @@ public final class DefaultAdapterManager implements IAdapterManager, ILoadableMa
 	public Map<Class<?>, List<IAdapterFactory>> getFactories() {
 		return factories;
 	}
-
 }

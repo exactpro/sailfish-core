@@ -208,8 +208,8 @@ public class ConverterBean implements Serializable {
             if (newMatrixFile.exists()) {
                 String newName = newMatrixFile.getName();
                 try (InputStream matrixInputStream = new FileInputStream(newMatrixFile)) {
-                    TestToolsAPI.getInstance()
-                            .uploadMatrix(matrixInputStream, newName, null, "Converter", SailfishURI.unsafeParse("AML_v3"), null, null);
+                    BeanUtil.getSfContext().getMatrixStorage()
+                            .addMatrix(matrixInputStream, newName, null, "Converter", SailfishURI.unsafeParse("AML_v3"), null, null);
                 } catch (IOException e) {
                     logger.error(e.getMessage(), e);
                 }

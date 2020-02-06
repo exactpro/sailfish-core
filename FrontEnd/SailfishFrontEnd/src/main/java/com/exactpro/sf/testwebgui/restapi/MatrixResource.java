@@ -159,7 +159,10 @@ public class MatrixResource {
 		Response reqResponse = null;
 
 		try {
-			uploaded = TestToolsAPI.getInstance().uploadMatrix(uploadedInputStream,
+
+            uploaded = SFLocalContext.getDefault()
+					.getMatrixStorage()
+					.addMatrix(uploadedInputStream,
 					fileDetail.getFileName(), null, "Unknown creator", null, null, null);
 
 			XmlMatrixUploadResponse matrixUploadResponse = new XmlMatrixUploadResponse();
@@ -615,7 +618,7 @@ public class MatrixResource {
             if (matrixId != 0) {
                 IMatrix matrix = matrixStorage.getMatrixById(matrixId);
                 if (matrix != null) {
-                    TestToolsAPI.getInstance().deleteMatrix(matrix);
+                    SFLocalContext.getDefault().getMatrixStorage().removeMatrix(matrix);
 
                     XmlResponse xmlResponse = new XmlResponse();
                     xmlResponse.setMessage("Matrix " + matrixId + " was successfully removed");
@@ -636,7 +639,7 @@ public class MatrixResource {
                             build();
                 }
             } else {
-                TestToolsAPI.getInstance().deleteAllMatrix();
+                SFLocalContext.getDefault().getMatrixStorage().deleteAllMatrix();
 
                 XmlResponse xmlResponse = new XmlResponse();
                 xmlResponse.setMessage("All matrices was successfully removed");
@@ -671,7 +674,7 @@ public class MatrixResource {
 
                 for(IMatrix matrix:matrices) {
                     if(matrix.getName().equals(matrixName)) {
-                        TestToolsAPI.getInstance().deleteMatrix(matrix);
+                        SFLocalContext.getDefault().getMatrixStorage().removeMatrix(matrix);
                         break;
                     }
                 }
@@ -711,7 +714,7 @@ public class MatrixResource {
         String rootCause = null;
 
         try {
-            TestToolsAPI.getInstance().deleteAllMatrix();
+            SFLocalContext.getDefault().getMatrixStorage().deleteAllMatrix();
 
             XmlResponse xmlResponse = new XmlResponse();
             xmlResponse.setMessage("All matrices was successfully removed");

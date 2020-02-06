@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+import com.exactpro.sf.configuration.CleanupConfiguration;
+import com.exactpro.sf.configuration.CleanupService;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -166,6 +168,7 @@ public class SFLocalContext implements ISFContext {
 	// Other:
 	private final EnvironmentManager environmentManager;
     private final CleanupConfiguration cleanupConfiguration;
+    private final CleanupService cleanupService;
 
 	private final MatrixProviderHolder matrixProviderHolder;
 	private final MatrixConverterManager matrixConverterManager;
@@ -235,6 +238,7 @@ public class SFLocalContext implements ISFContext {
 
         cleanupConfiguration = new CleanupConfiguration(settings.getCleanupConfig());
         cleanupConfiguration.load(settings.getCleanupConfig());
+        cleanupService = new CleanupService(cleanupConfiguration);
 
         this.version = new CoreVersion();
         this.branchName = version.getBranch();
@@ -604,6 +608,11 @@ public class SFLocalContext implements ISFContext {
     @Override
     public CleanupConfiguration getCleanupConfiguration() {
         return cleanupConfiguration;
+    }
+
+    @Override
+    public CleanupService getCleanupService() {
+        return cleanupService;
     }
 
     @Override

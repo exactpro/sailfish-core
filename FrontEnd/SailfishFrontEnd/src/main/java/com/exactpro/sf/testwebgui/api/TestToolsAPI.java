@@ -78,7 +78,6 @@ import com.exactpro.sf.services.ServiceStatus;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.storage.IMappableSettingsSerializer;
 import com.exactpro.sf.storage.IMatrix;
-import com.exactpro.sf.storage.IMatrixStorage;
 import com.exactpro.sf.storage.IOptionsStorage;
 import com.exactpro.sf.storage.StorageException;
 import com.exactpro.sf.storage.util.PropertiesSettingsReaderSerializer;
@@ -98,8 +97,6 @@ public class TestToolsAPI {
 
 	private final ISFContext context;
 
-	private final CopyOnWriteArrayList<IMatrixListener> matrixListeners;
-
 	private final CopyOnWriteArrayList<IServiceNotifyListener> serviceListeners;
 
 	private final IMappableSettingsSerializer settingsWriter = new PropertiesSettingsReaderSerializer();
@@ -108,7 +105,6 @@ public class TestToolsAPI {
 		//FIXME Singletons should be removed from SF framework
 		this.context = SFLocalContext.getDefault();
 
-		this.matrixListeners = new CopyOnWriteArrayList<>();
 		this.serviceListeners = new CopyOnWriteArrayList<>();
 	}
 
@@ -117,19 +113,6 @@ public class TestToolsAPI {
 			instance = new TestToolsAPI();
 		}
 		return instance;
-	}
-
-	public IMatrix uploadMatrix(InputStream stream, String name, String description, String creator, SailfishURI languageURI, String matrixLink, SailfishURI matrixProviderURI) {
-        IMatrix matrix = context.getMatrixStorage().addMatrix(stream, name, description, creator, languageURI, matrixLink, matrixProviderURI);
-
-		notifyAddMatrixListeners(new IMatrixNotifier() {
-			@Override
-			public void notify(IMatrixListener listener, IMatrix matrix) {
-				listener.addMatrix(matrix);
-			}
-		}, matrix);
-
-		return matrix;
 	}
 
 	public void stopScriptRun(long id){
@@ -152,16 +135,15 @@ public class TestToolsAPI {
 
     public Set<SailfishURI> getMatrixConverters() {
         return context.getMatrixConverterManager().getMatrixConverters();
-		}
+    }
 
     public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
         return prepareConverterSettings(matrixId, environment, converterUri, null);
     }
 
     public IMatrixConverterSettings prepareConverterSettings(Long matrixId, String environment, SailfishURI converterUri, String newMatrixName) throws IOException, WorkspaceSecurityException, WorkspaceStructureException {
-	    IMatrixConverterSettings settings = getMatrixConverterSettings(converterUri);
-        IMatrixStorage matrixStorage = context.getMatrixStorage();
-        IMatrix matrix = matrixStorage.getMatrixById(matrixId);
+        IMatrixConverterSettings settings = getMatrixConverterSettings(converterUri);
+        IMatrix matrix = context.getMatrixStorage().getMatrixById(matrixId);
         IWorkspaceDispatcher wd = context.getWorkspaceDispatcher();
 
         if(matrix == null) {
@@ -182,11 +164,11 @@ public class TestToolsAPI {
         settings.setOutputFile(outMatrixFilePath);
 
         return settings;
-	}
+    }
 
-	//FIXME: Get converter
-	@Deprecated
-	public IMatrixConverter getMatrixConverter() {
+    //FIXME: Get converter
+    @Deprecated
+    public IMatrixConverter getMatrixConverter() {
         Iterator<SailfishURI> it = context.getMatrixConverterManager().getMatrixConverters().iterator();
         return it.hasNext() ? getMatrixConverter(it.next()) : null;
     }
@@ -199,13 +181,13 @@ public class TestToolsAPI {
     }
 
     public IMatrixConverter getMatrixConverter(SailfishURI uri) {
-		try {
+        try {
             return context.getMatrixConverterManager().getMatrixConverter(uri);
         } catch (RuntimeException e) {
             logger.error("Failed to create & init MatrixConverter", e);
-			throw new RuntimeException("Failed to init converter", e);
-		}
-	}
+            throw new RuntimeException("Failed to init converter", e);
+        }
+    }
 
     public IMatrixConverterSettings getMatrixConverterSettings(SailfishURI uri) {
         try {
@@ -227,7 +209,7 @@ public class TestToolsAPI {
         if (newMatrixFile.exists()) {
             String newName = newMatrixFile.getName();
             try (InputStream matrixInputStream = new FileInputStream(newMatrixFile)) {
-				IMatrix aml3matrix = uploadMatrix(matrixInputStream, newName, null, "Converter", SailfishURI.unsafeParse("AML_v3"), null, null);
+                IMatrix aml3matrix = context.getMatrixStorage().addMatrix(matrixInputStream, newName, null, "Converter", SailfishURI.unsafeParse("AML_v3"), null, null);
                 return aml3matrix.getId();
             } finally {
                 if (!newMatrixFile.delete()) {
@@ -239,15 +221,15 @@ public class TestToolsAPI {
         }
     }
 
-	public long executeMatrix(IMatrix matrix, SailfishURI languageURI,
-			String rangeParam, String encoding, String environment,
-			String userName, boolean continueOnFailed, boolean autoStart, boolean autoRun,
-			boolean ignoreAskForContinue, boolean runNetDumper, boolean skipOptional,
-            List<Tag> tags, Map<String, String> staticVariables,
-			Collection<IScriptReport> userListeners, String subFolder) throws FileNotFoundException, IOException {
+    public long executeMatrix(IMatrix matrix, SailfishURI languageURI,
+                              String rangeParam, String encoding, String environment,
+                              String userName, boolean continueOnFailed, boolean autoStart, boolean autoRun,
+                              boolean ignoreAskForContinue, boolean runNetDumper, boolean skipOptional,
+                              List<Tag> tags, Map<String, String> staticVariables,
+                              Collection<IScriptReport> userListeners, String subFolder) throws FileNotFoundException, IOException {
         return context.getScriptRunner().enqueueScript(
-				"script.xml",
-				matrix.getFilePath(),
+                "script.xml",
+                matrix.getFilePath(),
                 matrix.getDescription(),
                 matrix.getName(),
                 rangeParam,
@@ -266,44 +248,7 @@ public class TestToolsAPI {
                 userListeners,
                 subFolder,
                 context);
-	}
-
-	public void deleteMatrix(IMatrix matrix) {
-		if (matrix != null) {
-			notifyAddMatrixListeners(new IMatrixNotifier() {
-				@Override
-				public void notify(IMatrixListener listener, IMatrix matrix) {
-					listener.removeMatrix(matrix);
-				}
-			}, matrix);
-            context.getMatrixStorage().removeMatrix(matrix);
-		}
-	}
-
-	public void deleteAllMatrix() {
-        List<IMatrix> matrixList = context.getMatrixStorage().getMatrixList();
-
-		if (matrixList != null) {
-			IMatrixNotifier notifier = new IMatrixNotifier() {
-				@Override
-				public void notify(IMatrixListener listener, IMatrix matrix) {
-					listener.removeMatrix(matrix);
-				}
-			};
-			for (IMatrix matrix : matrixList) {
-				notifyAddMatrixListeners(notifier , matrix);
-                context.getMatrixStorage().removeMatrix(matrix);
-			}
-		}
-	}
-
-	public void addListener(IMatrixListener listener) {
-        matrixListeners.addIfAbsent(listener);
-	}
-
-	public void removeListener(IMatrixListener listener) {
-        matrixListeners.remove(listener);
-	}
+    }
 
 	public void addListener(IServiceNotifyListener listener) {
         serviceListeners.addIfAbsent(listener);
@@ -412,7 +357,6 @@ public class TestToolsAPI {
             }
         }
     }
-
 
     public void stopService(ServiceName serviceName, boolean sync, IServiceNotifyListener notifyListener) throws ExecutionException, InterruptedException {
     	IConnectionManager conManager = context.getConnectionManager();
@@ -729,19 +673,4 @@ public class TestToolsAPI {
             }
         }
     }
-
-	private void notifyAddMatrixListeners(IMatrixNotifier notifier, IMatrix matrix) {
-
-        for(IMatrixListener listener : matrixListeners) {
-			try {
-				notifier.notify(listener, matrix);
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-	}
-
-	private interface IMatrixNotifier {
-        void notify(IMatrixListener listener, IMatrix matrix);
-	}
 }

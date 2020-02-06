@@ -27,6 +27,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+
+import com.exactpro.sf.storage.IMatrixListener;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -39,7 +41,6 @@ import com.exactpro.sf.configuration.workspace.WorkspaceStructureException;
 import com.exactpro.sf.matrixhandlers.IMatrixProvider;
 import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.storage.IMatrixStorage;
-import com.exactpro.sf.storage.MatrixUpdateListener;
 import com.exactpro.sf.storage.StorageException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -49,29 +50,79 @@ public abstract class AbstractMatrixStorage implements IMatrixStorage {
     protected static final String FILE_NAME_MATRIX_METADATA = "matrix-metadata.json";
 
     protected final IWorkspaceDispatcher dispatcher;
-    protected final List<MatrixUpdateListener> listeners;
+    protected final List<IMatrixListener> matrixListeners;
 
     protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public AbstractMatrixStorage(IWorkspaceDispatcher dispatcher) {
         this.dispatcher = Objects.requireNonNull(dispatcher, "dispatcher cannot be null");
-        this.listeners = new CopyOnWriteArrayList<>();
+        this.matrixListeners = new CopyOnWriteArrayList<>();
     }
 
-    protected void notifyListeners() {
-        for(MatrixUpdateListener listener : listeners) {
-            listener.onEvent();
+    protected void notifyUpdateMatrix(IMatrix matrix) {
+        IMatrixNotifier notifier = (listener, notifierMatrix) -> listener.onEvent(notifierMatrix);
+        notifyMatrixListeners(notifier, matrix);
+    }
+
+    @Override
+    public void addMatrixListener(IMatrixListener listener){
+        matrixListeners.add(listener);
+    }
+
+    @Override
+    public void removeMatrixListener(IMatrixListener listener){
+        matrixListeners.remove(listener);
+    }
+
+    private void notifyMatrixListeners(IMatrixNotifier notifier, IMatrix matrix) {
+
+        for(IMatrixListener listener : matrixListeners) {
+            try {
+                notifier.notify(listener, matrix);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    private interface IMatrixNotifier {
+        void notify(IMatrixListener listener, IMatrix matrix);
+    }
+
+    protected void notifyAddMatrix(IMatrix matrix) {
+        IMatrixNotifier notifier = (listener, notifierMatrix) -> {
+                listener.addMatrix(notifierMatrix);
+                listener.onEvent(notifierMatrix);
+        };
+        notifyMatrixListeners(notifier, matrix);
+    }
+
+    protected void notifyDeleteMatrix(IMatrix matrix) {
+        if (matrix != null) {
+            IMatrixNotifier notifier = (listener, notifierMatrix) -> {
+                listener.removeMatrix(notifierMatrix);
+                listener.onEvent(notifierMatrix);
+            };
+            notifyMatrixListeners(notifier, matrix);
+
         }
     }
 
     @Override
-    public void subscribeForUpdates(MatrixUpdateListener listener) {
-        listeners.add(listener);
-    }
+    public void deleteAllMatrix() {
+        List<IMatrix> matrixList = getMatrixList();
 
-    @Override
-    public void unSubscribeForUpdates(MatrixUpdateListener listener) {
-        listeners.remove(listener);
+        if (matrixList != null) {
+            IMatrixNotifier notifier = (listener, notifierMatrix) -> {
+                listener.removeMatrix(notifierMatrix);
+                listener.onEvent(notifierMatrix);
+            };
+            for (IMatrix matrix : matrixList) {
+                notifyMatrixListeners(notifier , matrix);
+                removeMatrix(matrix);
+            }
+        }
     }
 
     @Override
@@ -92,7 +143,7 @@ public abstract class AbstractMatrixStorage implements IMatrixStorage {
         }
 
         updateReloadedMatrix(matrix);
-        notifyListeners();
+        notifyUpdateMatrix(matrix);
     }
 
     protected abstract void updateReloadedMatrix(IMatrix matrix);

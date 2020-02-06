@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.exactpro.sf.testwebgui.BeanUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,6 @@ import com.exactpro.sf.matrixhandlers.IMatrixProvider;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.storage.IMatrixStorage;
-import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 
 public class MatrixUtil {
 
@@ -67,8 +67,8 @@ public class MatrixUtil {
         List<IMatrix> result = new ArrayList<>();
         for (Entry<String, IMatrixProvider> entry : matrixProviders.entrySet()) {
             try (InputStream inputStream = entry.getValue().getMatrix()) {
-                result.add(TestToolsAPI.getInstance()
-                                       .uploadMatrix(inputStream, entry.getValue().getName(), null, "Linked", null,
+                result.add(BeanUtil.getSfContext().getMatrixStorage()  //FIXME
+                                       .addMatrix(inputStream, entry.getValue().getName(), null, "Linked", null,
                                                      entry.getKey(), providerURI));
             }
         }

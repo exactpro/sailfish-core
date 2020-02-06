@@ -108,9 +108,11 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
 			}
 
 		}
-		notifyListeners();
 
 		IMatrix matrix = convertFromStoredMatrix(storedMatrix);
+
+        notifyAddMatrix(matrix);
+
         writeMatrixMetadata(matrix);
 
 		return matrix;
@@ -157,7 +159,7 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
 
 		}
 
-		notifyListeners();
+		notifyUpdateMatrix(matrix);
 	}
 
 	@Override
@@ -196,7 +198,7 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
 
 		}
 
-		notifyListeners();
+		notifyDeleteMatrix(matrix);
 	}
 
     @SuppressWarnings("unchecked")
@@ -279,7 +281,7 @@ public class DatabaseMatrixStorage extends AbstractMatrixStorage {
                     List<StoredMatrix> restoredMatrixList = restoreLostMatrices(session, storedMatrixMap.keySet());
 
                     transaction.commit();
-                    notifyListeners();
+                    notifyUpdateMatrix(null);
 
                     return Stream.concat(storedMatrixMap.values().stream(), restoredMatrixList.stream())
                             .sorted((matrixA, matrixB) -> matrixB.getDate().compareTo(matrixA.getDate()))

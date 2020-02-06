@@ -34,7 +34,7 @@ import java.time.format.DateTimeFormatter;
 
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
 import com.exactpro.sf.testwebgui.restapi.xml.XmlResponse;
 
 @Path("resources")

@@ -16,6 +16,7 @@
 package com.exactpro.sf.testwebgui.configuration;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Map;
@@ -24,16 +25,12 @@ import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 
-import com.exactpro.sf.center.SFContextSettings;
-import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.configuration.CleanupConfiguration;
-import org.apache.commons.lang3.StringUtils;
+import com.exactpro.sf.configuration.CleanupService;
+import com.exactpro.sf.configuration.CleanupServiceCallback;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-
-import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.testwebgui.BeanUtil;
 
 @ManagedBean(name = "cleanupBean")
@@ -45,63 +42,20 @@ public class CleanupBean implements Serializable {
     private Date olderThan = new Date();
     private final Map<ResourceCleaner, Boolean> cleaners = new EnumMap<>(ResourceCleaner.class);
 
-    public CleanupBean (){
-        CleanupConfiguration cleanupConfiguration = BeanUtil.getSfContext().getCleanupConfiguration();
-        setCleanReports(cleanupConfiguration.isReports());
-        setCleanEvents(cleanupConfiguration.isEvents());
-        setCleanLogs(cleanupConfiguration.isLogs());
-        setCleanMatrices(cleanupConfiguration.isMatrices());
-        setCleanML(cleanupConfiguration.isMl());
-        setCleanTrafficDump(cleanupConfiguration.isTrafficDump());
-        setCleanMessages(cleanupConfiguration.isMessages());
-        olderThan.setTime(olderThan.getTime()- TimeUnit.DAYS.toMillis(cleanupConfiguration.getCleanOlderThanDays()));
-    }
+    private CleanupService cleanupService;
 
     public void clean() {
-        ISFContext context = BeanUtil.getSfContext();
         Instant instant = Instant.ofEpochMilli(olderThan.getTime());
-
-        cleaners.forEach((cleaner, enabled) -> {
-            if(enabled) {
-                try {
-                    cleaner.clean(instant, context);
-                    BeanUtil.addInfoMessage("Successfully cleaned up " + cleaner.getName(), StringUtils.EMPTY);
-                } catch(Exception e) {
-                    logger.error("Failed to cleanup {}", cleaner.getName(), e);
-                    BeanUtil.addErrorMessage("Failed to cleanup " + cleaner.getName(), e.getMessage());
-                }
-            }
-        });
-
+        cleanupService.clean(instant, BeanUtil.getSfContext(), new CleanupCallback());
         BeanUtil.addInfoMessage("Cleanup completed", StringUtils.EMPTY);
     }
 
-    public  void autoclean() {
-        ISFContext context = BeanUtil.getSfContext();
-        Instant instant = Instant.ofEpochMilli(olderThan.getTime());
-
-        cleaners.forEach((cleaner, enabled) -> {
-            if(enabled) {
-                try {
-                    cleaner.clean(instant, context);
-                } catch(Exception e) {
-                    logger.error("Failed to cleanup {}", cleaner.getName(), e);
-                }
-            }
-        });
+    public CleanupBean(){
+        cleanupService = BeanUtil.getSfContext().getCleanupService();
     }
 
     public void applySettings() {
-        CleanupConfiguration cleanupConfiguration = BeanUtil.getSfContext().getCleanupConfiguration();
-        cleanupConfiguration.setEvents(isCleanEvents());
-        cleanupConfiguration.setLogs(isCleanLogs());
-        cleanupConfiguration.setMatrices(isCleanMatrices());
-        cleanupConfiguration.setMessages(isCleanMessages());
-        cleanupConfiguration.setMl(isCleanML());
-        cleanupConfiguration.setReports(isCleanReports());
-        cleanupConfiguration.setTrafficDump(isCleanTrafficDump());
-        cleanupConfiguration.setCleanOlderThanDays(getCleanOlderThanDays());
-        cleanupConfiguration.setAutoclean(cleanupConfiguration.isAutoclean());
+        BeanUtil.getSfContext().getCleanupService().applySettings();
         BeanUtil.showMessage(FacesMessage.SEVERITY_INFO, "INFO", "Configuration changes successfully applied");
     }
 
@@ -114,75 +68,87 @@ public class CleanupBean implements Serializable {
     }
 
     public boolean isCleanReports() {
-        return cleaners.getOrDefault(ResourceCleaner.REPORTS, false);
+        return cleanupService.isCleanReports();
     }
 
     public void setCleanReports(boolean cleanReports) {
-        cleaners.put(ResourceCleaner.REPORTS, cleanReports);
+        cleanupService.setCleanReports(cleanReports);
     }
 
     public boolean isCleanML() {
-        return cleaners.getOrDefault(ResourceCleaner.ML, false);
+        return cleanupService.isCleanML();
     }
 
-    public void setCleanML(boolean cleanReports) {
-        cleaners.put(ResourceCleaner.ML, cleanReports);
+    public void setCleanML(boolean cleanML) {
+        cleanupService.setCleanML(cleanML);
     }
 
     public boolean isCleanMatrices() {
-        return cleaners.getOrDefault(ResourceCleaner.MATRICES, false);
+        return cleanupService.isCleanMatrices();
     }
 
     public void setCleanMatrices(boolean cleanMatrices) {
-        cleaners.put(ResourceCleaner.MATRICES, cleanMatrices);
+        cleanupService.setCleanMatrices(cleanMatrices);
     }
 
     public boolean isCleanMessages() {
-        return cleaners.getOrDefault(ResourceCleaner.MESSAGES, false);
+        return cleanupService.isCleanMessages();
     }
 
     public void setCleanMessages(boolean cleanMessages) {
-        cleaners.put(ResourceCleaner.MESSAGES, cleanMessages);
+        cleanupService.setCleanMessages(cleanMessages);
     }
 
     public boolean isCleanEvents() {
-        return cleaners.getOrDefault(ResourceCleaner.EVENTS, false);
+        return cleanupService.isCleanEvents();
     }
 
     public void setCleanEvents(boolean cleanEvents) {
-        cleaners.put(ResourceCleaner.EVENTS, cleanEvents);
+        cleanupService.setCleanEvents(cleanEvents);
     }
 
     public boolean isCleanTrafficDump() {
-        return cleaners.getOrDefault(ResourceCleaner.TRAFFIC_DUMP, false);
+        return cleanupService.isCleanTrafficDump();
     }
 
     public void setCleanTrafficDump(boolean cleanTrafficDump) {
-        cleaners.put(ResourceCleaner.TRAFFIC_DUMP, cleanTrafficDump);
+        cleanupService.setCleanTrafficDump(cleanTrafficDump);
     }
 
     public boolean isCleanLogs() {
-        return cleaners.getOrDefault(ResourceCleaner.LOGS, false);
+        return cleanupService.isCleanLogs();
     }
 
     public void setCleanLogs(boolean cleanLogs) {
-        cleaners.put(ResourceCleaner.LOGS, cleanLogs);
+        cleanupService.setCleanLogs(cleanLogs);
     }
 
     public void setAutoclean(boolean autoclean) {
-        BeanUtil.getSfContext().getCleanupConfiguration().setAutoclean(autoclean);
+        cleanupService.setAutoclean(autoclean);
     }
 
     public boolean isAutoclean() {
-        return BeanUtil.getSfContext().getCleanupConfiguration().isAutoclean();
+        return cleanupService.isAutoclean();
     }
 
     public void setCleanOlderThanDays(int cleanOlderThanDays) {
-        BeanUtil.getSfContext().getCleanupConfiguration().setCleanOlderThanDays(cleanOlderThanDays);
-        olderThan.setTime(olderThan.getTime()-TimeUnit.DAYS.toMillis(cleanOlderThanDays));
+        cleanupService.setCleanOlderThanDays(cleanOlderThanDays);
     }
 
     public int getCleanOlderThanDays() {
-        return BeanUtil.getSfContext().getCleanupConfiguration().getCleanOlderThanDays();
+        return cleanupService.getCleanOlderThanDays();
+    }
+
+    private static class CleanupCallback implements CleanupServiceCallback {
+
+        @Override
+        public void success(ResourceCleaner resource) {
+            BeanUtil.addInfoMessage("Successfully cleaned up " + resource.getName(), StringUtils.EMPTY );
+        }
+
+        @Override
+        public void error(ResourceCleaner resource, Exception e) {
+            BeanUtil.addInfoMessage("Failed to cleanup " + resource.getName(), e.getMessage());
+        }
     }
 }

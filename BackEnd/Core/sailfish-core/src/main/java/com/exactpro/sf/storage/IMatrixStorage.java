@@ -36,8 +36,9 @@ public interface IMatrixStorage {
 
 	void reloadMatrix(IMatrix matrix, IMatrixProvider matrixProvider);
 
-	void subscribeForUpdates(MatrixUpdateListener listener);
+	void addMatrixListener(IMatrixListener listener);
 
-	void unSubscribeForUpdates(MatrixUpdateListener listener);
+	void removeMatrixListener(IMatrixListener listener);
 
+	void deleteAllMatrix();
 }

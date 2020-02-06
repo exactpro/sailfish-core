@@ -15,8 +15,11 @@
  ******************************************************************************/
 package com.exactpro.sf.storage;
 
-public interface MatrixUpdateListener {
+public interface IMatrixListener {
 
-	void onEvent();
-	
+	default void addMatrix(IMatrix matrix) {}
+
+	default void removeMatrix(IMatrix matrix) {}
+
+	default void onEvent(IMatrix matrix) {}
 }

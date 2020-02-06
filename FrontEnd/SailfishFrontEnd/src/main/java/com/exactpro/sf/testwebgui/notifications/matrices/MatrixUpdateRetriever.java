@@ -18,15 +18,16 @@ package com.exactpro.sf.testwebgui.notifications.matrices;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.exactpro.sf.storage.IMatrix;
+import com.exactpro.sf.storage.IMatrixListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.exactpro.sf.storage.MatrixUpdateListener;
 import com.exactprosystems.webchannels.IUpdateRequestListener;
 import com.exactprosystems.webchannels.IUpdateRetriever;
 
 @SuppressWarnings("deprecation")
-public class MatrixUpdateRetriever implements IUpdateRetriever, MatrixUpdateListener {
+public class MatrixUpdateRetriever implements IUpdateRetriever, IMatrixListener {
 
 	private static final Logger logger = LoggerFactory.getLogger(MatrixUpdateRetriever.class);
 
@@ -75,7 +76,7 @@ public class MatrixUpdateRetriever implements IUpdateRetriever, MatrixUpdateList
 	}
 
 	@Override
-	public void onEvent() {
+	public void onEvent(IMatrix matrix) {
 
 		MatrixUpdateEvent event = new MatrixUpdateEvent();
 

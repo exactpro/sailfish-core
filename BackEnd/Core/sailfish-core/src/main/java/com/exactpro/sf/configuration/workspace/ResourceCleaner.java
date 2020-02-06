@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package com.exactpro.sf.testwebgui.configuration;
+package com.exactpro.sf.configuration.workspace;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,14 +29,11 @@ import java.time.Instant;
 
 import com.exactpro.sf.common.util.EPSCommonException;
 import com.exactpro.sf.center.ISFContext;
-import com.exactpro.sf.configuration.workspace.FolderType;
-import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.scriptrunner.AbstractScriptRunner;
 import com.exactpro.sf.scriptrunner.TestScriptDescription;
 import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.storage.ITestScriptStorage;
 import com.exactpro.sf.storage.impl.DefaultTestScriptStorage.ScriptRunsLimit;
-import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 
 public enum ResourceCleaner {
     REPORTS("reports") {
@@ -71,7 +68,7 @@ public enum ResourceCleaner {
 
             for(IMatrix matrix : matrices) {
                 if(matrix.getDate().getTime() < epochMillis) {
-                    TestToolsAPI.getInstance().deleteMatrix(matrix);
+                   context.getMatrixStorage().removeMatrix(matrix);
                 }
             }
         }

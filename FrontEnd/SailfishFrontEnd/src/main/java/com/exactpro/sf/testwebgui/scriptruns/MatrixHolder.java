@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.exactpro.sf.common.logging.CommonLoggers;
+import com.exactpro.sf.testwebgui.BeanUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import com.exactpro.sf.configuration.workspace.IWorkspaceDispatcher;
 import com.exactpro.sf.matrixhandlers.MatrixProviderHolder;
 import com.exactpro.sf.storage.IMatrix;
 import com.exactpro.sf.storage.IMatrixStorage;
-import com.exactpro.sf.testwebgui.api.IMatrixListener;
+import com.exactpro.sf.storage.IMatrixListener;
 import com.exactpro.sf.testwebgui.api.TestToolsAPI;
 
 public class MatrixHolder implements IMatrixListener {
@@ -49,7 +50,6 @@ public class MatrixHolder implements IMatrixListener {
 		this.matrixStorage = matrixStorage;
 		this.matrixProviderHolder = matrixProviderHolder;
 		this.matrices = new CopyOnWriteArrayList<>(getAllExistMatrices());
-		TestToolsAPI.getInstance().addListener(this);
 	}
 
 	public List<IMatrix> getMatrices() {

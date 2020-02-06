@@ -23,6 +23,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
@@ -38,8 +40,9 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 
-import com.exactpro.sf.configuration.CleanupConfiguration;
-import com.exactpro.sf.testwebgui.configuration.CleanupBean;
+import com.exactpro.sf.configuration.CleanupServiceCallback;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
+import com.exactpro.sf.storage.IMatrixListener;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
@@ -78,7 +81,6 @@ import com.exactpro.sf.scriptrunner.IScriptRunListener;
 import com.exactpro.sf.storage.IAuthStorage;
 import com.exactpro.sf.storage.IMapableSettings;
 import com.exactpro.sf.storage.IMappableSettingsSerializer;
-import com.exactpro.sf.storage.MatrixUpdateListener;
 import com.exactpro.sf.storage.auth.PasswordHasher;
 import com.exactpro.sf.storage.auth.User;
 import com.exactpro.sf.storage.util.PropertiesSettingsReaderSerializer;
@@ -91,6 +93,7 @@ import com.exactpro.sf.testwebgui.notifications.events.LogSubscriber;
 import com.exactpro.sf.testwebgui.notifications.events.WebLoggingAppender;
 import com.exactpro.sf.testwebgui.restapi.machinelearning.MLPersistenceManager;
 import com.exactpro.sf.testwebgui.scriptruns.MatrixHolder;
+
 
 public class SFContextServlet implements Servlet {
 	private static final Logger logger = LoggerFactory.getLogger(SFContextServlet.class);
@@ -417,7 +420,7 @@ public class SFContextServlet implements Servlet {
             initServices(sfLocalContext);
 
     		// ---------- subscribe SFWebApplication to events
-    		sfLocalContext.getMatrixStorage().subscribeForUpdates((MatrixUpdateListener)SFWebApplication.getInstance().getMatrixUpdateRetriever());
+    		sfLocalContext.getMatrixStorage().addMatrixListener((IMatrixListener)SFWebApplication.getInstance().getMatrixUpdateRetriever());
     		sfLocalContext.getConnectionManager().subscribeForEvents((IEnvironmentListener) SFWebApplication.getInstance().getEnvironmentUpdateRetriever());
             sfLocalContext.getTestScriptStorage().setScriptRunListener((IScriptRunListener) SFWebApplication.getInstance().getScriptrunsUpdateRetriever());
             sfLocalContext.getScriptRunner().addScriptRunListener((IScriptRunListener) SFWebApplication.getInstance().getScriptrunsUpdateRetriever());
@@ -425,6 +428,7 @@ public class SFContextServlet implements Servlet {
             sfLocalContext.getScriptRunner().loadScriptRunsFromWD();
     		WebLoggingAppender.registerSubscriber((LogSubscriber)SFWebApplication.getInstance().getEventRetriever());
     		MatrixHolder matrixHolder = new MatrixHolder(wd, sfLocalContext.getMatrixStorage(), sfLocalContext.getMatrixProviderHolder());
+    		sfLocalContext.getMatrixStorage().addMatrixListener(matrixHolder);
 
             HelpContentHolder helpContentHolder = new HelpContentHolder(sfLocalContext);
             sfLocalContext.getDictionaryManager().subscribeForEvents(helpContentHolder);
@@ -442,13 +446,19 @@ public class SFContextServlet implements Servlet {
             BeanUtil.setServletContext(config.getServletContext());
 
             // ---------- Clean workspace
+
             if(sfLocalContext.getCleanupConfiguration().isAutoclean()){
-                CleanupBean cleanupBean = new CleanupBean();
-                cleanupBean.autoclean();
+                Instant dateClean = Instant.now().minus(sfLocalContext.getCleanupConfiguration().getCleanOlderThanDays(),ChronoUnit.DAYS);
+                sfLocalContext.getCleanupService().clean(dateClean, sfLocalContext, new CleanupServiceCallback(){
+                    @Override
+                    public void success(ResourceCleaner resource) { }
+
+                    @Override
+                    public void error(ResourceCleaner resource, Exception e) { }
+                });
             }
 
-
-    		logger.info("Application initialization finished\n");
+            logger.info("Application initialization finished\n");
 	    } catch (Throwable e) {
 	        logger.error(e.getMessage(), e);
 	        e.printStackTrace();
@@ -492,7 +502,7 @@ public class SFContextServlet implements Servlet {
 
 		try {
 		    sfLocalContext.dispose();
-			sfLocalContext.getMatrixStorage().unSubscribeForUpdates((MatrixUpdateListener)SFWebApplication.getInstance().getMatrixUpdateRetriever());
+			sfLocalContext.getMatrixStorage().removeMatrixListener((IMatrixListener) SFWebApplication.getInstance().getMatrixUpdateRetriever());
 			sfLocalContext.getConnectionManager().unSubscribeForEvents((IEnvironmentListener)SFWebApplication.getInstance().getEnvironmentUpdateRetriever());
 			sfLocalContext.getScriptRunner().removeScriptRunListener((IScriptRunListener)SFWebApplication.getInstance().getScriptrunsUpdateRetriever());
 			WebLoggingAppender.unRegisterSubscriber((LogSubscriber)SFWebApplication.getInstance().getEventRetriever());

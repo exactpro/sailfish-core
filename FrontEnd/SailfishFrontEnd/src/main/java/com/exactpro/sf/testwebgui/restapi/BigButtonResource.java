@@ -55,7 +55,7 @@ import com.exactpro.sf.bigbutton.importing.CsvLibraryBuilder;
 import com.exactpro.sf.bigbutton.importing.LibraryImportResult;
 import com.exactpro.sf.center.ISFContext;
 import com.exactpro.sf.center.impl.SFLocalContext;
-import com.exactpro.sf.testwebgui.configuration.ResourceCleaner;
+import com.exactpro.sf.configuration.workspace.ResourceCleaner;
 import com.exactpro.sf.testwebgui.restapi.xml.BBNodeStatus;
 import com.exactpro.sf.testwebgui.restapi.xml.BBSettings;
 import com.exactpro.sf.testwebgui.restapi.xml.BbExecutionStatus;
