@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import '../styles/splitter.scss';
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 
 /**
  * Props for splitter component
@@ -143,10 +143,10 @@ export class SplitView extends React.Component<SplitViewProps, SplitState> {
             rootStyle = { gridTemplateColumns: `${leftWidth}px ${splitterWidth}px ${rightWidth}px` };
         }
 
-        const leftClassName = createSelector("splitter-pane-left", isDragging ? "dragging" : null),
-              rightClassName = createSelector("splitter-pane-right", isDragging ? "dragging" : null),
-              splitterClassName = createSelector("splitter-bar", isDragging ? "dragging" : null),
-              rootClassName = createSelector("splitter", isDragging ? "dragging" : null);
+        const leftClassName = createStyleSelector("splitter-pane-left", isDragging ? "dragging" : null),
+              rightClassName = createStyleSelector("splitter-pane-right", isDragging ? "dragging" : null),
+              splitterClassName = createStyleSelector("splitter-bar", isDragging ? "dragging" : null),
+              rootClassName = createStyleSelector("splitter", isDragging ? "dragging" : null);
 
         return (
             <div className={rootClassName} ref={this.root}

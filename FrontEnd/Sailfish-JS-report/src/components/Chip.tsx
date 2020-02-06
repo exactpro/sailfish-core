@@ -18,7 +18,7 @@ import * as React from 'react';
 import { StatusType, } from '../models/Status';
 import { getStatusChipDescription } from '../helpers/action';
 import '../styles/chip.scss';
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 
 interface Props {
     text: string;
@@ -29,7 +29,7 @@ interface Props {
 
 export function Chip({ status, text, isSelected, onClick }: Props) {
 
-    const rootClass = createSelector(
+    const rootClass = createStyleSelector(
         "chip",
         status,
         isSelected ? "selected" : null,

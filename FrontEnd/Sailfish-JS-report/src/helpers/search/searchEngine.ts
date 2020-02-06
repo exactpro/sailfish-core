@@ -24,9 +24,9 @@ import VerificationEntry from '../../models/VerificationEntry';
 import Verification from '../../models/Verification';
 import { isCheckpointAction } from '../action';
 import { asyncFlatMap } from '../array';
-import "setimmediate";
 import multiTokenSplit  from "./multiTokenSplit";
 import SearchToken from "../../models/search/SearchToken";
+import SearchSplitResult from "../../models/search/SearchSplitResult";
 
 // list of fields that will be used to search (order is important!)
 export const MESSAGE_FIELDS: Array<keyof Message> = ['msgName', 'from', 'to' ,'contentHumanReadable'],
@@ -52,7 +52,7 @@ export async function findAll(tokens: ReadonlyArray<SearchToken>, testCase: Test
     return new SearchResult(actionResults.concat(messageResults));
 }
 
-function findAllInMessage(message: Message, searchTokens: ReadonlyArray<SearchToken>): Array<[string, number]> {
+function findAllInMessage(message: Message, searchTokens: ReadonlyArray<SearchToken>): Array<[string, SearchSplitResult[]]> {
     return findAllInObject(
         message,
         MESSAGE_FIELDS,
@@ -61,8 +61,8 @@ function findAllInMessage(message: Message, searchTokens: ReadonlyArray<SearchTo
     );
 }
 
-function findAllInAction(action: Action, searchTokens: ReadonlyArray<SearchToken>): Array<[string, number]> {
-    let results = new Array<[string, number]>();
+function findAllInAction(action: Action, searchTokens: ReadonlyArray<SearchToken>): Array<[string, SearchSplitResult[]]> {
+    let results = new Array<[string, SearchSplitResult[]]>();
 
     results.push(...findAllInObject(action, ACTION_FIELDS, searchTokens, keyForAction(action.id)));
 
@@ -91,8 +91,8 @@ function findAllInAction(action: Action, searchTokens: ReadonlyArray<SearchToken
     return results;
 }
 
-function findAllInParams(param: ActionParameter, searchTokens: ReadonlyArray<SearchToken>, keyPrefix: string): Array<[string, number]> {
-    let results = new Array<[string, number]>();
+function findAllInParams(param: ActionParameter, searchTokens: ReadonlyArray<SearchToken>, keyPrefix: string): Array<[string, SearchSplitResult[]]> {
+    let results = new Array<[string, SearchSplitResult[]]>();
 
     results.push(...findAllInObject(
         param, 
@@ -108,8 +108,8 @@ function findAllInParams(param: ActionParameter, searchTokens: ReadonlyArray<Sea
     return results;
 }
 
-function findAllInVerification(verification: Verification, searchTokens: ReadonlyArray<SearchToken>, parentActionId: number): Array<[string, number]> {
-    let results = new Array<[string, number]>(),
+function findAllInVerification(verification: Verification, searchTokens: ReadonlyArray<SearchToken>, parentActionId: number): Array<[string, SearchSplitResult[]]> {
+    let results = new Array<[string, SearchSplitResult[]]>(),
         key = keyForVerification(parentActionId, verification.messageId);
 
     results.push(...findAllInObject(
@@ -126,8 +126,8 @@ function findAllInVerification(verification: Verification, searchTokens: Readonl
     return results;
 }
 
-function findAllInVerificationEntries(entry: VerificationEntry, searchTokens: ReadonlyArray<SearchToken>, keyPrefix: string): Array<[string, number]> {
-    let results = new Array<[string, number]>();
+function findAllInVerificationEntries(entry: VerificationEntry, searchTokens: ReadonlyArray<SearchToken>, keyPrefix: string): Array<[string, SearchSplitResult[]]> {
+    let results = new Array<[string, SearchSplitResult[]]>();
 
     results.push(...findAllInObject(
         entry,
@@ -144,15 +144,21 @@ function findAllInVerificationEntries(entry: VerificationEntry, searchTokens: Re
 }
 
 /**
- * This funciton perfoms a search in a specific fields of target object 
+ * This function preforms a search in a specific fields of target object
  * and returns result as array of ["<prefix> - <field_name>", number of search results] 
  * @param target target object
  * @param fieldsList list of fields of target object that will be used to search in them
  * @param searchTokens target search tokens
  * @param resultKeyPrefix prefix for search result key
  */
-export function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, searchTokens: ReadonlyArray<SearchToken>, resultKeyPrefix: string): Array<[string, number]> {
-    let results = new Array<[string, number]>();
+export function findAllInObject<T>(
+    target: T, 
+    fieldsList: Array<keyof T>, 
+    searchTokens: ReadonlyArray<SearchToken>, 
+    resultKeyPrefix: string
+): Array<[string, SearchSplitResult[]]> {
+    
+    let results = new Array<[string, SearchSplitResult[]]>();
 
     fieldsList.forEach(fieldName => {
         const targetField = target[fieldName];
@@ -165,11 +171,9 @@ export function findAllInObject<T>(target: T, fieldsList: Array<keyof T>, search
             return;
         }
 
-        const searchResultsCount = multiTokenSplit(targetField, searchTokens)
-            .filter(({ color }) => color != null)
-            .length;
+        const searchResultsCount = multiTokenSplit(targetField, searchTokens);
 
-        if (searchResultsCount > 0) {
+        if (searchResultsCount.some(({ color }) => color != null)) {
             results.push([`${resultKeyPrefix}-${fieldName}`, searchResultsCount]);
         }
     });

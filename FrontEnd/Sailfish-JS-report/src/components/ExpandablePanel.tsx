@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import "../styles/expandablePanel.scss"
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from "./util/StateSaver";
 import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
@@ -29,7 +29,7 @@ interface PanelProps {
 }
 
 export const ExpandablePanel = ({ children, isExpanded, onExpand }: PanelProps) => {
-    const iconClass = createSelector(
+    const iconClass = createStyleSelector(
         "expandable-panel__icon", 
         !isExpanded ? "hidden" : null
     );

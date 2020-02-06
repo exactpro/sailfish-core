@@ -26,6 +26,7 @@ import SearchResult from '../helpers/search/SearchResult';
 import KnownBug from '../models/KnownBug';
 import { FilterBlock } from "../models/filter/FilterBlock";
 import Log from '../models/Log';
+import SearchToken from "../models/search/SearchToken";
 
 export const setReport = (report: Report) => (<const>{
     type: StateActionTypes.SET_REPORT,
@@ -143,9 +144,9 @@ export const removeSubmittedMlData = (data: SubmittedData) => (<const>{
     data: data
 })
 
-export const setSearchString = (searchString: string) => (<const>{
-    type: StateActionTypes.SET_SEARCH_STRING,
-    searchString
+export const setSearchTokens = (searchTokens: SearchToken[]) => (<const>{
+    type: StateActionTypes.SET_SEARCH_TOKENS,
+    searchTokens
 })
 
 export const setSearchResults = (searchResults: SearchResult) => (<const>{

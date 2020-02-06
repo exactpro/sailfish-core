@@ -25,7 +25,7 @@ import AppState from '../state/models/AppState';
 import { setLeftPane, selectCheckpointAction } from '../actions/actionCreators';
 import { StatusPanel } from './StatusPanel';
 import { ActionsListBase } from './action/ActionsList';
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 import CheckpointCarousel from './CheckpointCarousel';
 import { getCheckpointActions } from '../selectors/actions';
 
@@ -56,7 +56,7 @@ class LeftPanelBase extends React.Component<Props> {
     render() {
         const { panel, isCheckpointsEnabled, statusEnabled, currentCheckpointHandler } = this.props;
 
-        const cpRootClass = createSelector(
+        const cpRootClass = createStyleSelector(
                 "layout-control",
                 isCheckpointsEnabled ? null : "disabled"
             );
@@ -101,11 +101,11 @@ class LeftPanelBase extends React.Component<Props> {
     }
 
     private renderPanels(selectedPanel: Panel): React.ReactNode {
-        const actionRootClass = createSelector(
+        const actionRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.Actions ? null : "disabled"
             ),
-            statusRootClass = createSelector(
+            statusRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.Status ? null : "disabled"
             );

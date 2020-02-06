@@ -17,7 +17,7 @@
 import * as React from 'react';
 import UserMessage, { isUserMessage } from '../../models/UserMessage';
 import { RecoverableExpandablePanel } from './../ExpandablePanel';
-import { createSelector } from '../../helpers/styleCreators';
+import { createStyleSelector } from '../../helpers/styleCreators';
 import '../../styles/action.scss';
 import Action, { ActionNodeType } from '../../models/Action';
 import { FontWeightProperty } from 'csstype';
@@ -45,7 +45,7 @@ export const CustomMessage = ({ userMessage, parent }: CustomMessageProps) => {
         fontWeight: (style || "").toLowerCase() as FontWeightProperty
     };
 
-    const rootClass = createSelector(
+    const rootClass = createStyleSelector(
         "action-card__custom-msg",
         level
     );

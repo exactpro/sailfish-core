@@ -25,18 +25,27 @@ import SearchCounter from './SearchCounter';
 import '../../styles/search.scss';
 import SearchResult from '../../helpers/search/SearchResult';
 import KeyCodes from "../../util/KeyCodes";
+import SearchToken from "../../models/search/SearchToken";
 
 const REACTIVE_SEARCH_DELAY = 500;
 
+const COLORS = [
+    '#E69900',
+    '#FF5500',
+    '#1F66AD',
+    '#45A155',
+    '#00BBCC'
+];
+
 interface StateProps {
-    searchString: string;
+    searchTokens: SearchToken[];
     currentIndex: number;
     resultsCount: number;
     searchResults: SearchResult;
 }
 
 interface DispatchProps {
-    updateSearchString: (searchString: string) => void;
+    updateSearchTokens: (searchValues: SearchToken[]) => void;
     nextSearchResult: () => void;
     prevSearchResult: () => void;
     clear: () => void;
@@ -57,7 +66,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
         super(props);
 
         this.state = {
-            inputValue: props.searchString,
+            inputValue: '',
             isLoading: false
         }
     }
@@ -73,18 +82,26 @@ class SearchInputBase extends React.PureComponent<Props, State> {
     componentDidUpdate(prevProps: Props) {
         if (this.props.searchResults !== prevProps.searchResults) {
             // search string and search results updated, so we need to stop loader
-            this.setState({
-                isLoading: false,
-                inputValue: this.props.searchString
-            });
+            // this.setState({
+            //     isLoading: false,
+            //     inputValue: this.props.searchTokens
+            // });
         }
     }
     
     render() {
-        const { inputValue, isLoading } = this.state;
+        const { searchTokens } = this.props,
+            { inputValue, isLoading } = this.state;
         
         return (
             <div className="search-field">
+                {
+                    searchTokens.map(({color, pattern}, index) => (
+                        <span style={{backgroundColor: color}} key={index}>
+                            {pattern}
+                        </span>
+                    ))
+                }
                 <input
                     className="search-field__input"
                     ref={this.inputElement}
@@ -107,7 +124,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
         )
     }
 
-    private onKeyDown = (e: React.KeyboardEvent) => {
+    private onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.keyCode == KeyCodes.ENTER && e.shiftKey) {
             this.props.prevSearchResult();
             return;
@@ -121,6 +138,20 @@ class SearchInputBase extends React.PureComponent<Props, State> {
         if (e.keyCode == KeyCodes.ESCAPE) {
             this.inputElement.current.blur();
             this.props.clear();
+            return;
+        }
+
+        if (e.keyCode == KeyCodes.SPACE && e.currentTarget.value) {
+            this.props.updateSearchTokens([
+                ...this.props.searchTokens, {
+                    pattern: e.currentTarget.value.trim(),
+                    color: COLORS[this.props.searchTokens.length % COLORS.length]
+                }
+            ]);
+
+            this.setState({
+                inputValue: ''
+            })
         }
     };
 
@@ -138,26 +169,26 @@ class SearchInputBase extends React.PureComponent<Props, State> {
 
         this.setState({
             inputValue: currentValue,
-            isLoading: true
+            //isLoading: true
         });
 
         setTimeout(() => {
-            if (this.state.inputValue === currentValue) {
-                this.props.updateSearchString(currentValue);
-            }
+            // if (this.state.inputValue === currentValue) {
+            //     this.props.updateSearchTokens(currentValue);
+            // }
         }, REACTIVE_SEARCH_DELAY)
     }
 }
 
 const SearchInput = connect(
     (state: AppState): StateProps => ({
-        searchString: state.selected.searchString,
+        searchTokens: state.selected.searchTokens,
         resultsCount: state.selected.searchResultsCount,
         currentIndex: state.selected.searchIndex,
         searchResults: state.selected.searchResults
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
-        updateSearchString: searchString => dispatch(performSearch(searchString)),
+        updateSearchTokens: searchTokens => dispatch(performSearch(searchTokens)),
         nextSearchResult: () => dispatch(nextSearchResult()),
         prevSearchResult: () => dispatch(prevSearchResult()),
         clear: () => dispatch(clearSearch())

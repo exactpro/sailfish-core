@@ -18,6 +18,8 @@ import { createAction, createMessage, createTestCase } from "../../util/creators
 import { findAll } from "../../../helpers/search/searchEngine";
 import { keyForAction, keyForMessage } from "../../../helpers/keys";
 import SearchToken from "../../../models/search/SearchToken";
+import SearchSplitResult from "../../../models/search/SearchSplitResult";
+import multiTokenSplit from "../../../helpers/search/multiTokenSplit";
 
 describe('[Helpers] Search - searchEngine', () => {
 
@@ -27,14 +29,17 @@ describe('[Helpers] Search - searchEngine', () => {
             color: 'default'
         }];
 
-        const testCase = createTestCase('0', [{
+        const action = {
             ...createAction(1),
             name: 'some test name here'
-        }]);
+        };
+        const testCase = createTestCase('0', [action]);
 
         const results = await findAll(tokens, testCase);
 
-        const expectedResults: Array<[string, number]> = [[keyForAction(1, 'name'), 1]];
+        const expectedResults: Array<[string, SearchSplitResult[]]> = [
+            [keyForAction(1, 'name'), multiTokenSplit(action.name, tokens)]
+        ];
 
         expect(results.entries).toEqual(expectedResults);
     });
@@ -51,15 +56,16 @@ describe('[Helpers] Search - searchEngine', () => {
             color: 'third'
         }];
 
-        const testCase = createTestCase('0', [{
+        const action = {
             ...createAction(1),
             name: 'some test name here'
-        }]);
+        };
+        const testCase = createTestCase('0', [action]);
 
         const results = await findAll(tokens, testCase);
 
-        const expectedResults: Array<[string, number]> = [
-            [keyForAction(1, 'name'), 4]
+        const expectedResults: Array<[string, SearchSplitResult[]]> = [
+            [keyForAction(1, 'name'), multiTokenSplit(action.name, tokens)]
         ];
 
         expect(results.entries).toEqual(expectedResults);
@@ -77,19 +83,21 @@ describe('[Helpers] Search - searchEngine', () => {
             color: 'third'
         }];
 
-        const testCase = createTestCase('0', [{
+        const action = {
             ...createAction(1),
             name: 'some test name here'
-        }], [{
+        };
+        const message = {
             ...createMessage(2),
             msgName: 'some another name'
-        }]);
+        };
+        const testCase = createTestCase('0', [action], [message]);
 
         const results = await findAll(tokens, testCase);
 
-        const expectedResults: Array<[string, number]> = [
-            [keyForAction(1, 'name'), 4],
-            [keyForMessage(2, 'msgName'), 3]
+        const expectedResults: Array<[string, SearchSplitResult[]]> = [
+            [keyForAction(1, 'name'), multiTokenSplit(action.name, tokens)],
+            [keyForMessage(2, 'msgName'), multiTokenSplit(message.msgName, tokens)]
         ];
 
         expect(results.entries).toEqual(expectedResults);

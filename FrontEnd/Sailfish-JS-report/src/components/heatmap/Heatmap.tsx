@@ -17,7 +17,7 @@
 import * as React from 'react';
 import { StatusType } from '../../models/Status';
 import range from '../../helpers/range';
-import { createSelector } from '../../helpers/styleCreators';
+import { createStyleSelector } from '../../helpers/styleCreators';
 
 interface HeatmapProps  {
     elementsCount: number;
@@ -28,7 +28,7 @@ const Heatmap = ({ elementsCount, selectedElements }: HeatmapProps) => (
     <div className="heatmap-scrollbar">
         {
             range(0, elementsCount - 1).map(index => (
-                <div className={createSelector("heatmap-scrollbar-item", selectedElements.get(index))} key={index} />
+                <div className={createStyleSelector("heatmap-scrollbar-item", selectedElements.get(index))} key={index} />
             ))
         }
     </div>

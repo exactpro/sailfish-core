@@ -28,7 +28,8 @@ function BeautifiedContent({ content, msgId }: Props) {
     return (
         <pre className="mc-body__beautify-wrapper">
             <SearchableContent 
-                content={beautify(content)} 
+                content={beautify(content)}
+                shouldPerformSplit={true}
                 contentKey={keyForMessage(msgId, 'contentHumanReadable')}/>
         </pre>
     )

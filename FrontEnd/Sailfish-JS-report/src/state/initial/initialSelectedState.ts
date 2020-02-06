@@ -32,7 +32,7 @@ export const initialSelectedState: SelectedState = {
     rejectedMessageId: null,
     actionsMap: new Map<number, Action>(),
     activeActionId: null,
-    searchString: '',
+    searchTokens: [],
     searchResults: new SearchResult(),
     searchResultsCount: null,
     searchIndex: null,

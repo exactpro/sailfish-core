@@ -15,18 +15,18 @@
  ******************************************************************************/
 
 /**
- * This funciton can be used to create css selector with the list of modifiers.
+ * This function can be used to create css selector with the list of modifiers.
  * @param className Name of css selector
  * @param modifiers List of css modifiers
  */
-export function createSelector(className: string, ...modifiers: string[]): string {
+export function createStyleSelector(className: string, ...modifiers: string[]): string {
     // we filter out empty modifiers to create selector without insignificant spaces
 
     return className + joinModifiers(modifiers);
 }
 
 export function createTriStateControlClassName(baseName: string, isActive: boolean, isEnabled?: boolean) {
-    return createSelector(baseName, (isEnabled != null && !isEnabled) ? "disabled" : ( isActive ? "active" : "inactive" ))
+    return createStyleSelector(baseName, (isEnabled != null && !isEnabled) ? "disabled" : ( isActive ? "active" : "inactive" ))
 }
 
 export function joinModifiers(modifiers: string[]): string {

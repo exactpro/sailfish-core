@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import Exception from '../models/Exception';
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 import StateSaver, { RecoverableElementProps } from './util/StateSaver';
 import { stopPropagationHandler } from '../helpers/react';
 
@@ -39,13 +39,13 @@ const ExceptionCardBase = ({ exception, isExpanded, onExpand }: BaseProps) => {
                             <div>{exception.class}: </div>
                         ) : null
                     }
-                    <div className={createSelector("status-panel-exception-header-message", exception.message ? "" : "disabled")}>
+                    <div className={createStyleSelector("status-panel-exception-header-message", exception.message ? "" : "disabled")}>
                         {exception.message || "No exception message"}
                     </div>
                 </div>
                 <div className="status-panel-exception-expand" onClick={stopPropagationHandler(onExpand)}>
                     <div className="status-panel-exception-expand-title">More</div>
-                    <div className={createSelector("status-panel-exception-expand-icon", (isExpanded ? "expanded" : "hidden"))} />
+                    <div className={createStyleSelector("status-panel-exception-expand-icon", (isExpanded ? "expanded" : "hidden"))} />
                 </div>
             </div>
             {

@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import { StatusType } from "../../models/Status";
-import { createSelector } from '../../helpers/styleCreators';
+import { createStyleSelector } from '../../helpers/styleCreators';
 import { rangeSum } from '../../helpers/range';
 import ResizeObserver from "resize-observer-polyfill";
 
@@ -76,7 +76,7 @@ const SmartHeatmapElement = ({ index, elementHeightMapper, elementsCount, rootHe
         topOffsetScaled = topOffset * scale,
         elementHeightScaled = elementHeight * scale;
 
-    const className = createSelector("heatmap-scrollbar-item", "smart", status),
+    const className = createStyleSelector("heatmap-scrollbar-item", "smart", status),
         style: React.CSSProperties = {
             top: topOffsetScaled,
             height: elementHeightScaled

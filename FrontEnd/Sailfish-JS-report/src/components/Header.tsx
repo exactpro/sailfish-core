@@ -21,7 +21,7 @@ import { connect } from 'react-redux';
 import AppState from '../state/models/AppState';
 import { resetTestCase } from '../actions/actionCreators';
 import { getSecondsPeriod, formatTime } from '../helpers/date';
-import { createBemElement, createSelector } from '../helpers/styleCreators';
+import { createBemElement, createStyleSelector } from '../helpers/styleCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateActionType from '../actions/stateActions';
 import { loadNextTestCase, loadPrevTestCase } from '../thunks/loadTestCase';
@@ -85,11 +85,11 @@ export const HeaderBase = ({
         status = testCase.status.status || 'RUNNING',
         period = getSecondsPeriod(startTime, finishTime);
 
-    const rootClass = createSelector(
+    const rootClass = createStyleSelector(
             "header",
             status
         ),
-        navButtonClass = createSelector(
+        navButtonClass = createStyleSelector(
             "header-button",
             isNavigationEnabled ? '' : 'disabled'
         ),

@@ -17,11 +17,13 @@
  @import "./common/vars";
 
 .found {
-    color: black;
-    background-color: yellow;
+    color: #FFF;
+    opacity: 0.6;
+    border-radius: 3px;
 
     &.target {
-        background-color: orange; 
+        opacity: 1;
+        color: #000;
     }
 }
 

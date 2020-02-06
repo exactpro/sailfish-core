@@ -18,6 +18,8 @@ import { StatusType } from "../../models/Status";
 import TestCase from '../../models/TestCase';
 import Action from "../../models/Action";
 import SearchResult from "../../helpers/search/SearchResult";
+import Message from '../../models/Message';
+import SearchToken from "../../models/search/SearchToken";
 
 export default interface SelectedState {
     selectedTestCaseId: string;
@@ -33,8 +35,8 @@ export default interface SelectedState {
      * Map (id -> action)
      */
     actionsMap: Map<number, Action>;
-    
-    searchString: string;
+
+    searchTokens: SearchToken[];
     searchResults: SearchResult;
     searchResultsCount: number;
     searchIndex: number;

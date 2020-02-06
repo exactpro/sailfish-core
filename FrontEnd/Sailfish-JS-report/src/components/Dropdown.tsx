@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 import '../styles/dropdown.scss';
 
 interface DropdownContextValue {
@@ -60,7 +60,7 @@ const Dropdown: React.FC<DropdownProps> & DropdownComposition = ({
 		if (!disabled) setIsOpen(true)
 	};
 
-	const rootClassName = createSelector(
+	const rootClassName = createStyleSelector(
 		"dropdown",
 		disabled ? "disabled" : "",
 		className
@@ -84,7 +84,7 @@ function DropdownTrigger({
 	className = ""
 }: DropdownTriggerProps){
 	const { openMenu } = React.useContext(DropdownContext);
-	const triggerClassName = createSelector(
+	const triggerClassName = createStyleSelector(
 		"dropdown__trigger",
 		className
 	);
@@ -110,7 +110,7 @@ function DropdownMenu({
 	const { isOpen } = React.useContext(DropdownContext);
 	if (!isOpen) return null;
 
-	const menuClassName = createSelector(
+	const menuClassName = createStyleSelector(
 		"dropdown__menu",
 		className
 	);
@@ -134,7 +134,7 @@ function DropdownItem({ children, onClick, className }: DropdownItemProps){
 		if (onClick) onClick();
 		closeMenu();
 	}
-	const menuItemClassName = createSelector(
+	const menuItemClassName = createStyleSelector(
 		"dropdown__menu-item",
 		className
 	);

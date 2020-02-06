@@ -22,7 +22,7 @@ import "../../styles/action.scss";
 import {formatTime, getSecondsPeriod} from "../../helpers/date";
 import {RecoverableExceptionChain} from "../ExceptionChain";
 import {Chip} from "../Chip";
-import {createSelector} from '../../helpers/styleCreators';
+import {createStyleSelector} from '../../helpers/styleCreators';
 import SearchableContent from '../search/SearchableContent';
 import {keyForAction} from '../../helpers/keys';
 import {ActionMlUploadButton} from "../ActionMlUploadButton";
@@ -56,22 +56,22 @@ export function ActionCard({ action, children, isSelected, onSelect, isRoot, isT
         outcome
     } = action;
 
-    const rootClassName = createSelector(
+    const rootClassName = createStyleSelector(
         "action-card",
         status.status,
         isRoot && !isSelected ? "root" : null,
         isSelected ? "selected" : null);
 
-    const headerClassName = createSelector(
+    const headerClassName = createStyleSelector(
         "ac-header",
         status.status,
         isTransparent && !isSelected ? "transparent" : null);
 
-    const inputParametersClassName = createSelector(
+    const inputParametersClassName = createStyleSelector(
         "ac-body__input-params",
         isTransparent && !isSelected ? "transparent" : null);
     
-    const headerTitleElemClassName = createSelector(
+    const headerTitleElemClassName = createStyleSelector(
         'ac-header__name-element',
         isSelected ? 'selected': null);
 

@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+import SearchSplitResult from "../../models/search/SearchSplitResult";
 
 export default class SearchResult {
 
-    private results: Map<string, number>;
+    private results: Map<string, SearchSplitResult[]>;
 
-    constructor(initMap: Iterable<[string, number]> = []) {
+    constructor(initMap: Iterable<[string, SearchSplitResult[]]> = []) {
         this.results = new Map(initMap);
     }
-
-    set = (key: string, value: number) => this.results.set(key, value);
 
     has = (key: string) => this.results.has(key);
 
@@ -48,23 +47,25 @@ export default class SearchResult {
         return [...this.results.values()];
     }
 
-    map = <T>(fn: ([string, nmber]) => T): Array<T> => this.entries.map(fn);
+    map = <T>(fn: (entry: [string, SearchSplitResult[]]) => T): Array<T> => this.entries.map(fn);
 
     mapKeys = <T>(fn: (key: string) => T): Array<T> => this.keys.map(fn);
 
-    mapValues = <T>(fn: (value: number) => T): Array<T> => this.values.map(fn);
+    mapValues = <T>(fn: (value: SearchSplitResult[]) => T): Array<T> => this.values.map(fn);
 
-    sum = () => this.values.reduce((sum, value) => sum + value, 0);
+    sum = () => this.values.reduce((sum, value) =>
+        sum + value.filter(res => res.color != null).length
+    , 0);
 
     /**
      * Returns entry which includes target index
      * @param index target index for search result
      */
-    getByIndex(index: number): [string, number] {
+    getByIndex(index: number): [string, SearchSplitResult[]] {
         let count = 0;
 
         const targetEntry = this.entries.find(([key, result]) => {
-            count += result;
+            count += result.filter(res => res.color != null).length;
             return index < count;
         });
 
@@ -82,6 +83,8 @@ export default class SearchResult {
 
         return this.values
             .slice(0, this.keys.findIndex(key => key === targetKey))
-            .reduce((acc, result) => acc + result, 0);
+            .reduce((acc, result) =>
+                acc + result.filter(res => res.color != null).length
+            , 0);
     }
 }

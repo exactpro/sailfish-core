@@ -17,7 +17,7 @@
 import * as React from 'react';
 import ActionParameter from "../../models/ActionParameter";
 import '../../styles/tables.scss';
-import { createSelector } from '../../helpers/styleCreators';
+import { createStyleSelector } from '../../helpers/styleCreators';
 import StateSaver from "../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
 import { keyForActionParameter } from '../../helpers/keys';
@@ -157,7 +157,7 @@ class ParamsTableBase extends React.Component<Props, State> {
 
     private renderTooglerNode(node: TableNode, paddingLevel: number, key: string) : React.ReactNode {
 
-        const rootClass = createSelector(
+        const rootClass = createStyleSelector(
                 "params-table-row-toogler",
                 node.isExpanded ? "expanded" : "collapsed"
             ),

@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import "../styles/checkpoint.scss";
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 
 export interface CheckpointStateProps {
     name: string;
@@ -33,7 +33,7 @@ interface CheckpointProps extends CheckpointStateProps, CheckpointDispatchProps 
 
 const Checkpoint = ({ name, index, isSelected, clickHandler = () => {}, description = '' }: CheckpointProps) => {
 
-    const rootClassName = createSelector(
+    const rootClassName = createStyleSelector(
         "checkpoint", 
         isSelected ? "selected" : ""
     );

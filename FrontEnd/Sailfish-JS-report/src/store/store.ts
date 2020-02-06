@@ -55,5 +55,7 @@ export function createAppStore() {
     initLiveUpdateEventSource(store, liveUpdateService);
     initBrowserHistoryEventSource(store);
 
+    window['REDUX_STORE'] = store;
+
     return store;
 }

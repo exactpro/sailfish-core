@@ -31,7 +31,7 @@ import {
     togglePredictions,
     uglifyAllMessages
 } from '../actions/actionCreators';
-import { createSelector, createTriStateControlClassName } from '../helpers/styleCreators';
+import { createStyleSelector, createTriStateControlClassName } from '../helpers/styleCreators';
 import { isAction } from "../models/Action";
 import { KnownBugPanel } from "./knownbugs/KnownBugPanel";
 import { StatusType } from '../models/Status';
@@ -210,15 +210,15 @@ class RightPanelBase extends React.Component<Props, State> {
     }
 
     private renderPanels(selectedPanel: Panel): React.ReactNode {
-        const messagesRootClass = createSelector(
+        const messagesRootClass = createStyleSelector(
             "layout-panel__content-wrapper",
             selectedPanel == Panel.Messages ? null : "disabled"
             ),
-            knownBugsRootClass = createSelector(
+            knownBugsRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.KnownBugs ? null : "disabled"
             ),
-            logsRootClass = createSelector(
+            logsRootClass = createStyleSelector(
                 "layout-panel__content-wrapper",
                 selectedPanel == Panel.Logs ? null : "disabled"
             );

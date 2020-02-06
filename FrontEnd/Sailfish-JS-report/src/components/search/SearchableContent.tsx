@@ -17,39 +17,39 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { createCaseInsensitiveRegexp } from '../../helpers/regexp';
 import { raf } from '../../helpers/raf';
 import { setShouldScrollToSearchItem } from '../../actions/actionCreators';
 import '../../styles/search.scss';
+import SearchSplitResult from "../../models/search/SearchSplitResult";
+import { createStyleSelector } from "../../helpers/styleCreators";
+import multiTokenSplit from "../../helpers/search/multiTokenSplit";
 
 interface OwnProps {
     content: string;
     contentKey: string;
+    /**
+     * If true, component will split passed content and pass it instead of received from redux store.
+     */
+    shouldPerformSplit?: boolean;
 }
 
 interface StateProps {
     targetIndex: number;
     startIndex: number;
-    searchString: string;
-    resultsCount: number;
+    searchResult: SearchSplitResult[] | undefined;
     needsScroll: boolean;
 }
 
 interface DispatchProps {
-    onScrolled: () => any;
+    onScrolled: () => void;
 }
 
 interface Props extends Omit<OwnProps, 'contentKey'>, StateProps, DispatchProps {}
 
-function SearchableContentBase({ content, startIndex, targetIndex, searchString, resultsCount, needsScroll, onScrolled }: Props) {
-    if (!searchString || !content || !resultsCount) {
-        return (
-            <React.Fragment>{content}</React.Fragment>
-        );
+function SearchableContentBase({ content, startIndex, targetIndex, searchResult, needsScroll, onScrolled }: Props) {
+    if (!searchResult) {
+        return <React.Fragment>{content}</React.Fragment>;
     }
-
-    const splittedContent = content.split(createCaseInsensitiveRegexp(searchString)),
-        internalTargetIndex = targetIndex != null && targetIndex - startIndex;
 
     // we are using 'useRef' instead of 'createRef' in functional components
     // because 'createRef' creates new Ref object for each call, when 'useRef' does not
@@ -57,10 +57,10 @@ function SearchableContentBase({ content, startIndex, targetIndex, searchString,
 
     // fires only if target index has been changed
     React.useEffect(() => {
-        // we neeed to scroll to target element after VirtualizedList scrolled to current row
+        // we need to scroll to target element after VirtualizedList scrolled to current row
         raf(() => {
             // 'needsScroll' flag is used here not to scroll to target in case of second render after virtualized row unmount.
-            // TODO - it's realy bad solution to store some flags in redux - we need to think how to handle this situation without it.
+            // TODO - it's really bad solution to store some flags in redux - we need to think how to handle this situation without it.
             if (targetElement.current && needsScroll) {
                 targetElement.current.scrollIntoView({ block: 'center', inline: 'nearest' });
                 onScrolled();
@@ -68,44 +68,46 @@ function SearchableContentBase({ content, startIndex, targetIndex, searchString,
         });
     }, [targetIndex]);
 
-    let contentCounter = 0;
+    const internalTargetIndex = targetIndex != null && targetIndex - startIndex;
+    let foundPartIndex = -1;
+
+    const renderContentPart = ({ color, content }: SearchSplitResult, index: number) => {
+        const isFound = color != null,
+            isTarget = isFound && ++foundPartIndex == internalTargetIndex,
+            className = createStyleSelector(
+            '',
+            isFound ? 'found' : null,
+            isTarget ? 'target' : null
+        );
+
+        return (
+            <span
+                key={index}
+                className={className}
+                style={{ backgroundColor: color }}
+                ref={isTarget ? targetElement : undefined}>
+                {content}
+            </span>
+        )
+    };
 
     return (
-        <span>
-            {
-                splittedContent.map((contentPart, index) => {
-                    contentCounter += contentPart.length;
-
-                    const foundContent = content.substring(contentCounter, contentCounter + searchString.length);
-
-                    contentCounter += searchString.length;
-
-                    return [
-                        <span key={index}>
-                            {contentPart}
-                        </span>,
-                        index !== splittedContent.length - 1 ? 
-                            <span 
-                                className={'found' + (index === internalTargetIndex ? ' target' : '')} 
-                                key={splittedContent.length + index}
-                                ref={index === internalTargetIndex ? targetElement : undefined}>
-                                {foundContent}
-                            </span> : 
-                            null
-                    ]
-                })
-            }
-        </span>
+        <span>{searchResult.map(renderContentPart)}</span>
     )
 }
 
 const SearchableContent = connect(
-    ({ selected: state }: AppState, ownProps: OwnProps): StateProps => ({
-        searchString: state.searchString,
-        targetIndex: state.searchIndex,
-        startIndex: state.searchResults.getStartIndexForKey(ownProps.contentKey),
-        resultsCount: state.searchResults.get(ownProps.contentKey),
-        needsScroll: state.shouldScrollToSearchItem
+    (state: AppState, ownProps: OwnProps): StateProps => ({
+        targetIndex: state.selected.searchIndex,
+        startIndex: state.selected.searchResults.getStartIndexForKey(ownProps.contentKey),
+        searchResult: state.selected.searchResults.has(ownProps.contentKey) ? (
+            // in some cases (e. g. message's beautified content) we need to split content again, instead of using redux value
+            // because content passed in own props differ from the original.
+            ownProps.shouldPerformSplit ?
+                multiTokenSplit(ownProps.content, state.selected.searchTokens) :
+                state.selected.searchResults.get(ownProps.contentKey)
+        ) : undefined,
+        needsScroll: state.selected.shouldScrollToSearchItem
     }),
     (dispatch): DispatchProps => ({
         onScrolled: () => dispatch(setShouldScrollToSearchItem(false))

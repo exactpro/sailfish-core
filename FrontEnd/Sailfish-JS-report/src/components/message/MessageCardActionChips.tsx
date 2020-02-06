@@ -18,7 +18,7 @@ import * as React from 'react';
 import Action from '../../models/Action';
 import { StatusType } from '../../models/Status';
 import "../../styles/messages.scss";
-import { createSelector } from '../../helpers/styleCreators';
+import { createStyleSelector } from '../../helpers/styleCreators';
 import Message from '../../models/Message';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
@@ -44,7 +44,7 @@ interface ActionChipsProps extends ActionChipsOwnProps, ActionChipsStateProps, A
 
 function MessageCardActionChipsBase({ actions, selectedStatus, selectHandler }: ActionChipsProps) {
 
-    const className = createSelector(
+    const className = createStyleSelector(
         "mc-header__info",
         actions.length ? null : "empty"
     );

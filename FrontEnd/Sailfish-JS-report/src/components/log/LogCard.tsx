@@ -16,7 +16,7 @@
 
 import React from 'react';
 import Log from '../../models/Log';
-import { createSelector } from '../../helpers/styleCreators';
+import { createStyleSelector } from '../../helpers/styleCreators';
 
 interface LogCardProps {
 	log: Log;
@@ -32,7 +32,7 @@ function LogCard({ log }: LogCardProps){
 		timestamp,
 	} = log;
 
-	const rootClassName = createSelector(
+	const rootClassName = createStyleSelector(
         "log-card",
         level
 	);

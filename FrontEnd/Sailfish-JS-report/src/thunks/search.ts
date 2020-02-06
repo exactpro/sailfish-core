@@ -16,24 +16,20 @@
 
 import { ThunkDispatch, ThunkAction } from "redux-thunk";
 import StateAction from "../actions/stateActions";
-import { setSearchString, setSearchResults } from "../actions/actionCreators";
+import { setSearchTokens, setSearchResults } from "../actions/actionCreators";
 import { findAll } from "../helpers/search/searchEngine";
 import AppState from "../state/models/AppState";
+import SearchToken from "../models/search/SearchToken";
 
-
-export function performSearch(searchString: string): ThunkAction<void, {}, {}, StateAction> {
-    return async (dispatch: ThunkDispatch<{}, {}, StateAction>, getState: () => AppState) => {
+export function performSearch(searchTokens: SearchToken[]): ThunkAction<void, AppState, unknown, StateAction> {
+    return async (dispatch, getState) => {
         const { testCase } = getState().selected;
         
-        dispatch(setSearchString(searchString));
-        const results = await findAll([{
-            pattern: searchString,
-            color: 'yellow'
-        }], testCase);
+        dispatch(setSearchTokens(searchTokens));
+        const results = await findAll(searchTokens, testCase);
 
-        if (searchString === getState().selected.searchString) {
+        if (searchTokens === getState().selected.searchTokens) {
             dispatch(setSearchResults(results));
         }
-
     }
 }

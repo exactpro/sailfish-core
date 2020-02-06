@@ -20,7 +20,7 @@ import {StatusType, statusValues} from "../../models/Status";
 import "../../styles/tables.scss";
 import {connect} from 'react-redux';
 import AppState from "../../state/models/AppState";
-import {createSelector} from '../../helpers/styleCreators';
+import {createStyleSelector} from '../../helpers/styleCreators';
 import StateSaver, {RecoverableElementProps} from "./../util/StateSaver";
 import SearchableContent from '../search/SearchableContent';
 import {getVerificationExpandPath} from '../../helpers/search/getExpandPath';
@@ -136,7 +136,7 @@ class VerificationTableBase extends React.Component<Props, State> {
         const {status, keyPrefix, precision} = this.props,
             {nodes} = this.state;
 
-        const rootClass = createSelector("ver-table", status);
+        const rootClass = createStyleSelector("ver-table", status);
 
         return (
             <div className={rootClass}>
@@ -207,51 +207,51 @@ class VerificationTableBase extends React.Component<Props, State> {
 
         const statusAlias = STATUS_ALIASES.has(status) ? STATUS_ALIASES.get(status) : {alias: status, className: ""};
 
-        const rootClassName = createSelector(
+        const rootClassName = createStyleSelector(
             "ver-table-row",
             statusAlias.className,
             isTransparent ? "transparent" : null
         );
 
-        const statusClassName = createSelector(
+        const statusClassName = createStyleSelector(
             "ver-table-row-status",
             statusAlias.className
         );
 
-        const togglerClassName = createSelector(
+        const togglerClassName = createStyleSelector(
             "ver-table-row-toggler",
             statusAlias.className,
             isExpanded ? "expanded" : "collapsed"
         );
 
-        const actualClassName = createSelector(
+        const actualClassName = createStyleSelector(
             "ver-table-row-actual",
             statusAlias.className
         );
 
-        const expectedClassName = createSelector(
+        const expectedClassName = createStyleSelector(
             "ver-table-row-expected",
             statusAlias.className
         );
 
-        const typeClassName = createSelector(
+        const typeClassName = createStyleSelector(
             "ver-table-row-type",
             statusAlias.className,
             hasMismatchedTypes ? "highlighted" : null
         );
 
-        const indicatorClassName = createSelector(
+        const indicatorClassName = createStyleSelector(
             "ver-table-row-indicator",
             "transparent",
             hasHint ? "active" : null
         );
 
-        const actualValueClassName = createSelector(
+        const actualValueClassName = createStyleSelector(
             "ver-table-row-value",
             isToggler ? "notype" : null
         );
 
-        const expectedValueClassName = createSelector(
+        const expectedValueClassName = createStyleSelector(
             "ver-table-row-value",
             isToggler ? "notype" : null,
             expectedType == null && expected == "null" ? "novalue" : null

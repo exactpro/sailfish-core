@@ -20,7 +20,6 @@ import StateActionType, { StateActionTypes } from '../actions/stateActions';
 import { getScrolledId } from '../helpers/array';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/action';
-import SearchResult from '../helpers/search/SearchResult';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
@@ -40,7 +39,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                         description: null
                     }
                 },
-                searchString: initialSelectedState.searchString,
+                searchTokens: initialSelectedState.searchTokens,
                 searchResults: initialSelectedState.searchResults,
                 searchIndex: initialSelectedState.searchIndex,
                 searchResultsCount: initialSelectedState.searchResultsCount
@@ -178,10 +177,10 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
             }
         }
 
-        case StateActionTypes.SET_SEARCH_STRING: {
+        case StateActionTypes.SET_SEARCH_TOKENS: {
             return {
                 ...state,
-                searchString: stateAction.searchString,
+                searchTokens: stateAction.searchTokens,
                 searchResultsCount: 0,
                 searchIndex: null
             }
@@ -207,10 +206,10 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         case StateActionTypes.CLEAR_SEARCH: {
             return {
                 ...state,
-                searchResults: new SearchResult(),
-                searchIndex: null,
-                searchString: '',
-                searchResultsCount: null
+                searchResults: initialSelectedState.searchResults,
+                searchIndex: initialSelectedState.searchIndex,
+                searchTokens: initialSelectedState.searchTokens,
+                searchResultsCount: initialSelectedState.searchResultsCount
             }
         }
 

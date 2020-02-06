@@ -16,7 +16,7 @@
 
 import * as React from 'react';
 import '../styles/buttons.scss';
-import { createSelector } from '../helpers/styleCreators';
+import { createStyleSelector } from '../helpers/styleCreators';
 
 interface Props {
     onClick?: Function;
@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function ToggleButton({ onClick = () => {}, isToggled = false, text, theme = 'default', isDisabled = false, title = '' }: Props) {
-    const className = createSelector(
+    const className = createStyleSelector(
         "toggle-button", 
         theme, 
         isDisabled ? "disabled" : null,

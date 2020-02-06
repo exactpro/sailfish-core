@@ -18,7 +18,7 @@ import * as React from 'react';
 import {TestCaseMetadata, isTestCaseMetadata} from '../models/TestcaseMetadata';
 import {formatTime, getSecondsPeriod} from '../helpers/date';
 import '../styles/report.scss';
-import {createSelector} from '../helpers/styleCreators';
+import {createStyleSelector} from '../helpers/styleCreators';
 import {KnownBugIndicator} from "./knownbugs/KnownBugIndicator";
 import {KnownBugSummary} from "./knownbugs/KnownBugSummary";
 import {connect} from "react-redux";
@@ -63,7 +63,7 @@ function TestCaseCardBase({ metadata, handleClick, index, knownBugsEnabled, isSe
         }
     }, [isSelected]);
     
-    const rootClass = createSelector(
+    const rootClass = createStyleSelector(
         "tc-card",
         status,
         isSelected ? "selected" : null

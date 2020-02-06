@@ -23,7 +23,7 @@ import "../styles/report.scss";
 import { StatusType, statusValues } from '../models/Status';
 import HeatmapScrollbar from './heatmap/HeatmapScrollbar';
 import { testCasesHeatmap } from '../helpers/heatmapCreator';
-import { createSelector, createBemElement } from '../helpers/styleCreators';
+import { createStyleSelector, createBemElement } from '../helpers/styleCreators';
 import { ExceptionChain } from './ExceptionChain';
 import TestCaseCard from './TestCaseCard';
 import { FailedTestCaseCarousel } from './FailedTestCaseCarousel';
@@ -225,7 +225,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
 
     private renderStatusInfo(status: StatusType, metadata: TestCaseMetadata[]): React.ReactNode {
         const testCasesCount = metadata.filter(metadata => metadata.status.status == status).length,
-            valueClassName = createSelector(
+            valueClassName = createStyleSelector(
                 "report-summary__element-value",
                 "bold",
                 status.toLowerCase()

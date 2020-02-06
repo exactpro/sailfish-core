@@ -17,7 +17,7 @@
 import * as React from 'react';
 import Verification from '../../models/Verification';
 import {StatusType} from "../../models/Status";
-import {createSelector} from '../../helpers/styleCreators';
+import {createStyleSelector} from '../../helpers/styleCreators';
 import {SearchExpandablePanel} from "../ExpandablePanel";
 import {VerificationTable} from "./VerificationTable";
 import '../../styles/action.scss';
@@ -38,7 +38,7 @@ const VerificationCard = ({ verification, onSelect, isSelected, isTransparent, p
 
     const { status, messageId, entries, name } = verification;
 
-    const className = createSelector(
+    const className = createStyleSelector(
         "ac-body__verification",
         status && status.status,
         isSelected ? "selected" : null,
