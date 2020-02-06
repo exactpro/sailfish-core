@@ -27,30 +27,22 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.exactpro.sf.common.impl.messages.MapMessage;
+import com.exactpro.sf.common.impl.messages.DefaultMessageFactory;
 import com.exactpro.sf.common.messages.structures.IDictionaryStructure;
 import com.exactpro.sf.common.messages.structures.IMessageStructure;
-import com.exactpro.sf.common.messages.structures.loaders.IDictionaryStructureLoader;
 import com.exactpro.sf.common.messages.structures.loaders.XmlDictionaryStructureLoader;
 
 public class TestMessageStructureReader {
     
     final Path BASE_DIR = Paths.get((System.getProperty("basedir") == null) ? "." : System.getProperty("basedir")).toAbsolutePath().normalize();
     private static final String DICTIONARY_PATH = "src" + File.separator + "test" + File.separator + "resources" + File.separator + "testMessages.xml";
-    private static final String MESSAGE_NAME = "TestMessage";
-    
+
     @Test
     public void testTraverse() throws IOException {
-        IDictionaryStructureLoader loader = new XmlDictionaryStructureLoader();
-        IDictionaryStructure dictionary;
-        try (InputStream fileInputStream = new FileInputStream(new File(BASE_DIR.toString(), DICTIONARY_PATH))) {
-            dictionary = loader.load(fileInputStream);
-        }
-        
-        IMessageStructure structure = dictionary.getMessages().get(MESSAGE_NAME);
-        String namespace = dictionary.getNamespace();
-        String messageName = structure.getName();
-        IMessage message = new MapMessage(namespace, messageName);
+        IDictionaryStructure dictionary = loadDictionary();
+
+        IMessageStructure structure = dictionary.getMessages().get("TestMessage");
+        IMessage message = DefaultMessageFactory.getFactory().createMessage(structure.getName(), dictionary.getNamespace());
         
         message.addField("Boolean", "true");
         message.addField("Byte", 1);
@@ -67,7 +59,7 @@ public class TestMessageStructureReader {
         message.addField("LocalDateTime", "2016-08-18T01:02:03.123456789");
         message.addField("Collection", Arrays.asList("1", "2", "3", "4"));
 
-        IMessageStructureVisitor visitor = new TestVisitor();
+        IMessageStructureVisitor visitor = new TestVisitor<>();
         MessageStructureReader.READER.traverse(visitor, structure, message, MessageStructureReaderHandlerImpl.instance());
         
         structure.getFields().forEach((fieldName, fldStructure) -> {
@@ -79,5 +71,23 @@ public class TestMessageStructureReader {
                 Assert.assertEquals(expectedType, message.getField(fieldName).getClass().getName());
             }
         });
+    }
+
+    @Test
+    public void testDefaultValueIsNotPutToMessage() throws IOException {
+        IDictionaryStructure dictionary = loadDictionary();
+        IMessageStructure messageStructure = dictionary.getMessages().get("MessageWithDefaultValues");
+        IMessage message = DefaultMessageFactory.getFactory().createMessage(messageStructure.getName(), dictionary.getNamespace());
+
+        IMessageStructureVisitor visitor = new TestVisitor<>();
+        MessageStructureReader.READER.traverse(visitor, messageStructure, message, MessageStructureReaderHandlerImpl.instance());
+
+        Assert.assertEquals("Message has unexpected fields", 0, message.getFieldCount());
+    }
+
+    private IDictionaryStructure loadDictionary() throws IOException {
+        try (InputStream fileInputStream = new FileInputStream(new File(BASE_DIR.toString(), DICTIONARY_PATH))) {
+            return new XmlDictionaryStructureLoader().load(fileInputStream);
+        }
     }
 }

@@ -135,12 +135,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Boolean.class),
+                                castByDictionary(message, fieldName, value, Boolean.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitBooleanCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Boolean.class),
+                                castCollectionByDictionary(message, fieldName, value, Boolean.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -148,12 +148,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Short.class),
+                                castByDictionary(message, fieldName, value, Short.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitShortCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Short.class),
+                                castCollectionByDictionary(message, fieldName, value, Short.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -161,12 +161,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Integer.class),
+                                castByDictionary(message, fieldName, value, Integer.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitIntCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Integer.class),
+                                castCollectionByDictionary(message, fieldName, value, Integer.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -174,12 +174,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Long.class),
+                                castByDictionary(message, fieldName, value, Long.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitLongCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Long.class),
+                                castCollectionByDictionary(message, fieldName, value, Long.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -187,12 +187,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 curField.getName(),
-                                castByDictionary(message, fieldName, value, Byte.class),
+                                castByDictionary(message, fieldName, value, Byte.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitByteCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Byte.class),
+                                castCollectionByDictionary(message, fieldName, value, Byte.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -200,12 +200,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Float.class),
+                                castByDictionary(message, fieldName, value, Float.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitFloatCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Float.class),
+                                castCollectionByDictionary(message, fieldName, value, Float.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -213,12 +213,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Double.class),
+                                castByDictionary(message, fieldName, value, Double.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitDoubleCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Double.class),
+                                castCollectionByDictionary(message, fieldName, value, Double.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -226,12 +226,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, String.class),
+                                castByDictionary(message, fieldName, value, String.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitStringCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, String.class),
+                                castCollectionByDictionary(message, fieldName, value, String.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -239,12 +239,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, LocalDateTime.class),
+                                castByDictionary(message, fieldName, value, LocalDateTime.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitDateTimeCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, LocalDateTime.class),
+                                castCollectionByDictionary(message, fieldName, value, LocalDateTime.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -252,12 +252,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, LocalDate.class),
+                                castByDictionary(message, fieldName, value, LocalDate.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitDateCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, LocalDate.class),
+                                castCollectionByDictionary(message, fieldName, value, LocalDate.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -265,12 +265,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, LocalTime.class),
+                                castByDictionary(message, fieldName, value, LocalTime.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitTimeCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, LocalTime.class),
+                                castCollectionByDictionary(message, fieldName, value, LocalTime.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -278,12 +278,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, Character.class),
+                                castByDictionary(message, fieldName, value, Character.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitCharCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, Character.class),
+                                castCollectionByDictionary(message, fieldName, value, Character.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -291,12 +291,12 @@ public class MessageStructureReader {
                     if (!curField.isCollection()) {
                         msgStrVisitor.visit(
                                 fieldName,
-                                castByDictionary(message, fieldName, value, BigDecimal.class),
+                                castByDictionary(message, fieldName, value, BigDecimal.class, isDefault),
                                 curField, isDefault);
                     } else {
                         msgStrVisitor.visitBigDecimalCollection(
                                 fieldName,
-                                castCollectionByDictionary(message, fieldName, value, BigDecimal.class),
+                                castCollectionByDictionary(message, fieldName, value, BigDecimal.class, isDefault),
                                 curField, isDefault);
                     }
                     break;
@@ -311,15 +311,21 @@ public class MessageStructureReader {
             throw new EPSCommonException(e.getMessage()+ " fieldName = " + fieldName + ", javaType = " + javaType, e);
         }
     }
-    
-    private <T> T castByDictionary(IMessage message, String fieldName, Object value, Class<T> clazz) {
+
+    private <T> T castByDictionary(IMessage message, String fieldName, Object value, Class<T> clazz, boolean isDefault) {
         T convertedValue = MultiConverter.convert(value, clazz);
+        if (isDefault) {
+            return convertedValue;
+        }
         message.addField(fieldName, convertedValue);
         return convertedValue;
     }
     
-    private <T> List<T> castCollectionByDictionary(IMessage message, String fieldName, Object value, Class<T> clazz) {
+    private <T> List<T> castCollectionByDictionary(IMessage message, String fieldName, Object value, Class<T> clazz, boolean isDefault) {
         List<T> convertedCollection = MultiConverter.convert((Collection<?>)value, clazz, ArrayList::new);
+        if (isDefault) {
+            return convertedCollection;
+        }
         message.addField(fieldName, convertedCollection);
         return convertedCollection;
     }

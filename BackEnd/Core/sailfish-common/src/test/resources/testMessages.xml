@@ -36,5 +36,17 @@
             <field name="LocalDateTime" type="java.time.LocalDateTime"/>
             <field name="Collection" type="java.lang.Integer" isCollection="true"/>
         </message>
+        <message name="MessageWithDefaultValues">
+            <field defaultvalue="true" name="Boolean" type="java.lang.Boolean"/>
+            <field defaultvalue="0" name="Byte" type="java.lang.Byte"/>
+            <field defaultvalue="0" name="Short" type="java.lang.Short"/>
+            <field defaultvalue="0" name="Integer" type="java.lang.Integer"/>
+            <field defaultvalue="0" name="Long" type="java.lang.Long"/>
+            <field defaultvalue="0.0" name="Float" type="java.lang.Float"/>
+            <field defaultvalue="1.0" name="Double" type="java.lang.Double"/>
+            <field defaultvalue="2.0" name="BigDecimal" type="java.math.BigDecimal"/>
+            <field defaultvalue="H" name="Character" type="java.lang.Character"/>
+            <field defaultvalue="default" name="String" type="java.lang.String"/>
+        </message>
     </messages>
 </dictionary>
