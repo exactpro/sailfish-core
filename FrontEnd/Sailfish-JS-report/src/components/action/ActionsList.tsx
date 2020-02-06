@@ -119,7 +119,9 @@ export class ActionsListBase extends React.PureComponent<Props, State> {
 
 export const ActionsList = connect(
     (state: AppState): Props => ({
-        actions: getIsFilterApplied(state) ? getFilteredActions(state) : state.selected.testCase.actions,
+        actions: getIsFilterApplied(state) && !state.filter.isTransparent ?
+            getFilteredActions(state) :
+            state.selected.testCase.actions,
         selectedActions: state.selected.actionsId,
         scrolledActionId: state.selected.scrolledActionId,
         filteredActionsCount: getActionsFilterResultsCount(state),
