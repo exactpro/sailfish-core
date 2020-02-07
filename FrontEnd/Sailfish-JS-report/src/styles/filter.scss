@@ -25,12 +25,12 @@
 
 .filter {
     @include scrollbar;
+    @include card-shadow;
     min-width: 850px;
     padding: 12px 7px;
     border-radius: 5px 0 5px 5px;
 
     background-color: $filterPrimaryColor;
-    box-shadow: 4px 8px 6px 0px rgba(0, 0, 0, 0.4);
 
     color: $filterTextColor;
     font-size: 15px;
@@ -51,64 +51,11 @@
         margin-right: 25px;
         height: 35px;
     }
-}
 
-.filter-bubble {
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    position: relative;
-
-    border-radius: $filterBubbleBorderRadius;
-    background-color: $filterBubbleBackground;
-    color: $filterPathColor;
-    font-weight: normal;
-
-    padding: 3px 5px;
-    margin: 0 10px;
-    height: $filterBubbleHeight;
-
-    &__remove {
-        position: absolute;
-        width: 0;
-        top: 0;
-        // -2% to hide bubble's border-radius on the right
-        left: 98%;
-        bottom: 0;
-        overflow: hidden;
-
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        border-radius: 0 3px 3px 0;
-        background-color: white;
-        transition: width 0.15s ease-in-out;
-    }
-
-    &:hover &__remove {
-        width: 20px;
-    }
-
-    &__remove-icon {
-        @include round-button(url(../../resources/icons/cross-icon.svg), 16px);
-        margin-right: 3px;
-    }
-
-    &__input {
-        border: 0;
-        font-size: 15px;
-        background-color: rgba(0, 0, 0, 0);
+    &__bubble {
         color: $primaryTextColor;
-        height: $filterBubbleHeight;
-
-        &:focus {
-            outline: 0;
-        }
-    }
-
-    &.invalid {
-        color: $failedTextColor;
+        background-color: #FFF;
+        margin: 0 10px;
     }
 }
 
@@ -210,12 +157,13 @@
         border: 0;
         margin: 0 5px 0 10px;
         padding: 3px 5px;
-        border-radius: $filterBubbleBorderRadius;
+        border-radius: $bubbleBorderRadius;
         width: 100%;
         min-width: 70px;
         height: 24px;
         background-color: rgba(#FFFFFF, 0.5);
         font-size: 15px;
+        color: $primaryTextColor;
 
         &:focus {
             background-color: #FFF;

@@ -17,4 +17,5 @@
 export default interface SearchToken {
     pattern: string;
     color: string;
+    isActive: boolean;
 }

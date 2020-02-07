@@ -21,6 +21,8 @@ import { getScrolledId } from '../helpers/array';
 import { generateActionsMap } from '../helpers/mapGenerator';
 import { getActions } from '../helpers/action';
 import getScrolledIndex from '../helpers/search/getScrolledIndex';
+import initialSearchState from "../state/initial/initialSearchState";
+import searchReducer from "./searchReducer";
 
 export function selectedReducer(state: SelectedState = initialSelectedState, stateAction: StateActionType): SelectedState {
     switch (stateAction.type) {
@@ -39,10 +41,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
                         description: null
                     }
                 },
-                searchTokens: initialSelectedState.searchTokens,
-                searchResults: initialSelectedState.searchResults,
-                searchIndex: initialSelectedState.searchIndex,
-                searchResultsCount: initialSelectedState.searchResultsCount
+                search: initialSearchState
             }
         }
 
@@ -180,9 +179,7 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
         case StateActionTypes.SET_SEARCH_TOKENS: {
             return {
                 ...state,
-                searchTokens: stateAction.searchTokens,
-                searchResultsCount: 0,
-                searchIndex: null
+                search: searchReducer(state.search, stateAction)
             }
         }
 
@@ -194,63 +191,55 @@ export function selectedReducer(state: SelectedState = initialSelectedState, sta
 
             return {
                 ...state,
-                searchResults,
-                searchIndex,
-                searchResultsCount,
+                search: searchReducer(state.search, stateAction),
                 scrolledActionId: actionId,
-                scrolledMessageId: msgId,
-                shouldScrollToSearchItem: true
+                scrolledMessageId: msgId
             }
         }
 
         case StateActionTypes.CLEAR_SEARCH: {
             return {
                 ...state,
-                searchResults: initialSelectedState.searchResults,
-                searchIndex: initialSelectedState.searchIndex,
-                searchTokens: initialSelectedState.searchTokens,
-                searchResultsCount: initialSelectedState.searchResultsCount
+                search: searchReducer(state.search, stateAction)
             }
         }
 
         case StateActionTypes.NEXT_SEARCH_RESULT: {
-            if (state.searchResultsCount < 1) {
+            if (state.search.resultsCount < 1) {
                 return state;
             } 
 
-            const targetIndex = (state.searchIndex + 1) % state.searchResultsCount,
-                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
+            const targetIndex = (state.search.index + 1) % state.search.resultsCount,
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.search.results, targetIndex);
 
             return {
                 ...state,
-                searchIndex: targetIndex,
+                search: searchReducer(state.search, stateAction),
                 scrolledMessageId: msgId,
-                scrolledActionId: actionId,
-                shouldScrollToSearchItem: true
+                scrolledActionId: actionId
             }
         }
 
         case StateActionTypes.PREV_SEARCH_RESULT: { 
-            if (state.searchResultsCount < 1) {
+            if (state.search.resultsCount < 1) {
                 return state;
             }
             
-            const targetIndex = (state.searchResultsCount + state.searchIndex - 1) % state.searchResultsCount,
-                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.searchResults, targetIndex);
+            const targetIndex = (state.search.resultsCount + state.search.index - 1) % state.search.resultsCount,
+                [actionId = state.scrolledActionId, msgId = state.scrolledMessageId] = getScrolledIndex(state.search.results, targetIndex);
 
             return {
                 ...state,
-                searchIndex: targetIndex,
+                search: searchReducer(state.search, stateAction),
                 scrolledMessageId: msgId,
-                scrolledActionId: actionId,
-                shouldScrollToSearchItem: true
+                scrolledActionId: actionId
             }
         }
 
         case StateActionTypes.SET_SHOULD_SCROLL_TO_SEARCH_ITEM: {
             return {
                 ...state,
-                shouldScrollToSearchItem: stateAction.isNeedsScroll 
+                search: searchReducer(state.search, stateAction)
             }
         }
         

@@ -14,7 +14,7 @@
  *  limitations under the License.
  ******************************************************************************/
 
-import { createAction, createMessage, createTestCase } from "../../util/creators";
+import { createAction, createMessage, createSearchToken, createTestCase } from "../../util/creators";
 import { findAll } from "../../../helpers/search/searchEngine";
 import { keyForAction, keyForMessage } from "../../../helpers/keys";
 import SearchToken from "../../../models/search/SearchToken";
@@ -24,10 +24,7 @@ import multiTokenSplit from "../../../helpers/search/multiTokenSplit";
 describe('[Helpers] Search - searchEngine', () => {
 
     test('One token search in action\'s name', async () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'test',
-            color: 'default'
-        }];
+        const tokens: SearchToken[] = [createSearchToken()];
 
         const action = {
             ...createAction(1),
@@ -45,16 +42,11 @@ describe('[Helpers] Search - searchEngine', () => {
     });
 
     test('Several tokens search in action\'s name', async () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'test',
-            color: 'first'
-        }, {
-            pattern: 'some',
-            color: 'second'
-        }, {
-            pattern: 'me',
-            color: 'third'
-        }];
+        const tokens: SearchToken[] = [
+            createSearchToken('test', 'first'),
+            createSearchToken('some', 'second'),
+            createSearchToken('me', 'third')
+        ];
 
         const action = {
             ...createAction(1),
@@ -72,16 +64,11 @@ describe('[Helpers] Search - searchEngine', () => {
     });
 
     test('Several tokens in actions and messages names', async () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'test',
-            color: 'first'
-        }, {
-            pattern: 'some',
-            color: 'second'
-        }, {
-            pattern: 'me',
-            color: 'third'
-        }];
+        const tokens: SearchToken[] = [
+            createSearchToken('test', 'first'),
+            createSearchToken('some', 'second'),
+            createSearchToken('me', 'third')
+        ];
 
         const action = {
             ...createAction(1),

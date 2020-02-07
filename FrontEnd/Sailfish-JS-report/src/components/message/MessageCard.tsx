@@ -230,13 +230,19 @@ function renderMessageTypeLabels(message: Message, prediction: PredictionData): 
 }
 
 function calculateHueValue(from: string, to: string): number {
-    return (getHashCode([from, to].filter(str => str).sort((a, b) => a.localeCompare(b)).join(''))
-        % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
+    const hashCode = getHashCode(
+        [from, to]
+            .filter(str => str)
+            .sort((a, b) => a.localeCompare(b))
+            .join('')
+    );
+
+    return (hashCode % HUE_SEGMENTS_COUNT) * (360 / HUE_SEGMENTS_COUNT);
 }
 
 export const RecoverableMessageCard = (props: MessageCardStateProps & MessageCardOwnProps & MessageCardDispatchProps) => (
     <StateSaver
-        stateKey={`msg-${props.message.id}`}
+        stateKey={keyForMessage(props.message.id)}
         getDefaultState={() => false}>
         {(state, saveState) => (
             <MessageCardBase

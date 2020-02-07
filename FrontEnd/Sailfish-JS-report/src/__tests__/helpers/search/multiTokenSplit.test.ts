@@ -17,6 +17,7 @@
 import multiTokenSplit from "../../../helpers/search/multiTokenSplit";
 import SearchToken from "../../../models/search/SearchToken";
 import SearchSplitResult from "../../../models/search/SearchSplitResult";
+import { createSearchToken } from "../../util/creators";
 
 describe('[Helpers] Search - multiTokenSearch', () => {
 
@@ -36,10 +37,7 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     });
 
     test('One token with one occurrence', () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'sit',
-            color: 'default'
-        }];
+        const tokens: SearchToken[] = [createSearchToken('sit')];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -60,10 +58,7 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     });
 
     test('One token with several occurrences', () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'TEST',
-            color: 'default'
-        }];
+        const tokens: SearchToken[] = [createSearchToken('TEST')];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -90,13 +85,10 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     });
 
     test('Two token search', () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'lorem',
-            color: 'first'
-        }, {
-            pattern: 'dolor',
-            color: 'second'
-        }];
+        const tokens: SearchToken[] = [
+            createSearchToken('lorem', 'first'),
+            createSearchToken('dolor', 'second')
+        ];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -120,13 +112,10 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     test('Two intersected tokens search', () => {
         const target = 'consectetur';
 
-        const tokens: SearchToken[] = [{
-            pattern: 'consectet',
-            color: 'first'
-        }, {
-            pattern: 'tetur',
-            color: 'second'
-        }];
+        const tokens: SearchToken[] = [
+            createSearchToken('consectet', 'first'),
+            createSearchToken('tetur', 'second')
+        ];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -152,16 +141,11 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     test('Tree tokens with intersection search', () => {
         const target = 'consectetur';
 
-        const tokens: SearchToken[] = [{
-            pattern: 'consectet',
-            color: 'first'
-        }, {
-            pattern: 'tetur',
-            color: 'second'
-        }, {
-            pattern: 'TEST',
-            color: 'third'
-        }];
+        const tokens: SearchToken[] = [
+            createSearchToken('consectet', 'first'),
+            createSearchToken('tetur', 'second'),
+            createSearchToken('TEST', 'third')
+        ];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -197,10 +181,7 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     });
 
     test('Not found token', () => {
-        const tokens: SearchToken[] = [{
-            pattern: '12345',
-            color: 'not found'
-        }];
+        const tokens: SearchToken[] = [createSearchToken('12345', 'not found')];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -213,10 +194,7 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     });
 
     test('One token at the end of the content string', () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'et.',
-            color: 'default'
-        }];
+        const tokens: SearchToken[] = [createSearchToken('et.')];
 
         const result = multiTokenSplit(content, tokens);
 
@@ -232,13 +210,10 @@ describe('[Helpers] Search - multiTokenSearch', () => {
     });
 
     test('One token at the start and another at the end', () => {
-        const tokens: SearchToken[] = [{
-            pattern: 'Lorem',
-            color: 'first'
-        },{
-            pattern: 'et.',
-            color: 'second'
-        }];
+        const tokens: SearchToken[] = [
+            createSearchToken('Lorem', 'first'),
+            createSearchToken('et.', 'second')
+        ];
 
         const result = multiTokenSplit(content, tokens);
 

@@ -17,9 +17,7 @@
 import { StatusType } from "../../models/Status";
 import TestCase from '../../models/TestCase';
 import Action from "../../models/Action";
-import SearchResult from "../../helpers/search/SearchResult";
-import Message from '../../models/Message';
-import SearchToken from "../../models/search/SearchToken";
+import SearchState from "./SearchState";
 
 export default interface SelectedState {
     selectedTestCaseId: string;
@@ -36,11 +34,8 @@ export default interface SelectedState {
      */
     actionsMap: Map<number, Action>;
 
-    searchTokens: SearchToken[];
-    searchResults: SearchResult;
-    searchResultsCount: number;
-    searchIndex: number;
-    shouldScrollToSearchItem: boolean;
+    search: SearchState;
+    
     // Number objects is used here because in some cases (eg one message / action was selected several times by diferent entities)
     // We can't understand that we need to scroll to the selected entity again when we are comparing primitive numbers.
     // Objects and reference comparison is the only way to handle numbers changing in this case.

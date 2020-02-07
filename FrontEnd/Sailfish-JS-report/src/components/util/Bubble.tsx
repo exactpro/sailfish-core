@@ -15,22 +15,40 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import AutocompleteInput from "../util/AutocompleteInput";
+import AutocompleteInput from "./AutocompleteInput";
 import { stopPropagationHandler } from "../../helpers/react";
-import { createBemBlock } from "../../helpers/styleCreators";
+import { createBemBlock, createBemElement } from "../../helpers/styleCreators";
+import "../../styles/bubble.scss";
+import KeyCodes from "../../util/KeyCodes";
 
 interface Props {
     className?: string;
+    size?: 'small' | 'medium' | 'large';
+    style?: React.CSSProperties;
+    removeIconType?: 'default' | 'white';
     value: string;
     isValid?: boolean;
-    autocompleteVariants: string[] | null;
-    onChange: (nextValue: string) => void;
+    autocompleteVariants?: string[] | null;
+    submitKeyCodes?: number[];
+    onSubmit?: (nextValue: string) => void;
     onRemove: () => void;
 }
 
-export default function FilterBubble({ value, onChange, onRemove, autocompleteVariants, className = '', isValid = true }: Props) {
-    const [isEditing, setIsEditing] = React.useState(false);
+export default function Bubble(props: Props) {
+    const {
+        value,
+        autocompleteVariants,
+        onRemove,
+        onSubmit = () => null,
+        className = '',
+        size = 'medium',
+        removeIconType = 'default',
+        isValid = true,
+        style = {},
+        submitKeyCodes = [KeyCodes.ENTER]
+    } = props;
 
+    const [isEditing, setIsEditing] = React.useState(false);
     const inputRef = React.useRef<HTMLInputElement>();
 
     React.useEffect(() => {
@@ -59,37 +77,46 @@ export default function FilterBubble({ value, onChange, onRemove, autocompleteVa
             return;
         }
 
-        onChange(nextValue);
+        onSubmit(nextValue);
         setIsEditing(false);
     };
 
     const rootClass = createBemBlock(
-        "filter-bubble",
+        "bubble",
+        size,
         !isValid && !isEditing ? 'invalid' : null
+    );
+
+    const iconClass = createBemElement(
+        "bubble",
+        "remove-icon",
+        removeIconType
     );
 
     return (
         <div
-            className={`${rootClass} ${className}`}
+            className={`${className} ${rootClass}`}
+            style={style}
             onBlur={onBlur}
             onClick={rootOnClick}>
             {
                 isEditing ? (
                     <AutocompleteInput
                         ref={inputRef}
-                        className="filter-bubble__input"
+                        className="bubble__input"
                         value={value}
                         onSubmit={inputOnSubmit}
                         onRemove={onRemove}
                         onEmptyBlur={onRemove}
                         autocomplete={autocompleteVariants}
                         datalistKey="bubble-autocomplete"
+                        submitKeyCodes={submitKeyCodes}
                     />
                 ) : (
                     <React.Fragment>
                         {value}
-                        <div className="filter-bubble__remove">
-                            <div className="filter-bubble__remove-icon" onClick={stopPropagationHandler(onRemove)}/>
+                        <div className="bubble__remove">
+                            <div className={iconClass} onClick={stopPropagationHandler(onRemove)}/>
                         </div>
                     </React.Fragment>
                 )

@@ -28,7 +28,7 @@ export function performSearch(searchTokens: SearchToken[]): ThunkAction<void, Ap
         dispatch(setSearchTokens(searchTokens));
         const results = await findAll(searchTokens, testCase);
 
-        if (searchTokens === getState().selected.searchTokens) {
+        if (searchTokens === getState().selected.search.tokens) {
             dispatch(setSearchResults(results));
         }
     }

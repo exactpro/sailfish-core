@@ -1,5 +1,5 @@
-/******************************************************************************
- * Copyright 2009-2019 Exactpro (Exactpro Systems Limited)
+/*******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,14 +11,18 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ******************************************************************************/
 
-$defaultCardBorderRadius: 5px;
+import SearchState from "../models/SearchState";
+import SearchResult from "../../helpers/search/SearchResult";
 
-$filterBubbleHeight: 30px;
-$filterCountHeight: 35px;
+const initialSearchState: SearchState = {
+    tokens: [],
+    results: new SearchResult(),
+    resultsCount: null,
+    index: null,
+    shouldScrollToItem: false,
+};
 
-$defaultSkeletonElementHigh: 20px;
-$defaultSkeletonElementBorderRadius: 3px;
-$bubbleBorderRadius: 3px;
+export default initialSearchState;

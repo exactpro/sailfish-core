@@ -21,6 +21,7 @@ import { StatusType } from "../../models/Status";
 import ActionParameter from "../../models/ActionParameter";
 import Verification from "../../models/Verification";
 import VerificationEntry from "../../models/VerificationEntry";
+import SearchToken from "../../models/search/SearchToken";
 
 export function createAction(
     id: number = 0, 
@@ -100,5 +101,13 @@ export function createMessage(id: number = 0, msgName: string = 'test'): Message
         content: {},
         contentHumanReadable: '',
         timestamp: new Date().toString()
+    }
+}
+
+export function createSearchToken(pattern = 'test', color = 'default', isActive = false): SearchToken {
+    return {
+        pattern,
+        color,
+        isActive
     }
 }

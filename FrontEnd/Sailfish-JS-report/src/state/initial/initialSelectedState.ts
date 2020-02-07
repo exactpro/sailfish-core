@@ -18,6 +18,7 @@ import SelectedState from '../models/SelectedState';
 import Action from '../../models/Action';
 import SearchResult from '../../helpers/search/SearchResult';
 import { StatusType } from '../../models/Status';
+import initialSearchState from "./initialSearchState";
 
 export const initialSelectedState: SelectedState = {
     testCase: null,
@@ -32,10 +33,6 @@ export const initialSelectedState: SelectedState = {
     rejectedMessageId: null,
     actionsMap: new Map<number, Action>(),
     activeActionId: null,
-    searchTokens: [],
-    searchResults: new SearchResult(),
-    searchResultsCount: null,
-    searchIndex: null,
-    shouldScrollToSearchItem: false,
     selectedTestCaseId: null,
-}
+    search: initialSearchState
+};

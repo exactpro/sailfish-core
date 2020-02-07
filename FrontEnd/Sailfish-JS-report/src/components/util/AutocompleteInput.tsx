@@ -16,6 +16,7 @@
 
 import * as React from 'react';
 import KeyCodes from "../../util/KeyCodes";
+import AutosizeInput from "react-input-autosize";
 
 const STUB_FUNCTION = () => {
 };
@@ -25,26 +26,30 @@ interface Props<T extends string> {
     value: T;
     readonly?: boolean;
     onlyAutocompleteValues?: boolean;
+    autoresize?: boolean;
     onSubmit: (nextValue: T) => void;
     onRemove?: () => void;
     onEmptyBlur?: () => void;
     autocomplete: T[] | null;
     datalistKey?: string;
     placeholder?: string;
+    submitKeyCodes?: number[];
 }
 
-const AutocompleteInput = React.forwardRef(function AutocompleteInput<T extends string>(props: Props<T>, ref: React.Ref<HTMLInputElement>) {
+const AutocompleteInput = React.forwardRef(function AutocompleteInput<T extends string>(props: Props<T>, ref: React.MutableRefObject<HTMLInputElement>) {
     const {
         value,
         onSubmit,
         onRemove = STUB_FUNCTION,
         onEmptyBlur = STUB_FUNCTION,
         autocomplete,
+        autoresize = true,
         readonly = false,
         onlyAutocompleteValues = true,
         datalistKey,
         className = '',
-        placeholder = ''
+        placeholder = '',
+        submitKeyCodes = [KeyCodes.ENTER]
     } = props;
 
     const [currentValue, setCurrentValue] = React.useState<string>(value);
@@ -63,7 +68,7 @@ const AutocompleteInput = React.forwardRef(function AutocompleteInput<T extends 
     };
 
     const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = e => {
-        if (e.keyCode == KeyCodes.ENTER && currentValue.length > 0) {
+        if (submitKeyCodes.includes(e.keyCode) && currentValue.length > 0) {
             if (!onlyAutocompleteValues || (autocomplete == null || autocomplete.includes(currentValue as T))) {
                 onSubmit(currentValue as T);
                 setCurrentValue('');
@@ -78,19 +83,33 @@ const AutocompleteInput = React.forwardRef(function AutocompleteInput<T extends 
         }
     };
 
+    const inputProps: React.InputHTMLAttributes<HTMLInputElement> = {
+        readOnly: readonly,
+        value: currentValue,
+        list: datalistKey,
+        placeholder,
+        onKeyDown,
+        onChange,
+        onBlur: () => currentValue.length == 0 && onEmptyBlur()
+    };
+
     return (
         <React.Fragment>
-            <input
-                ref={ref}
-                className={className}
-                readOnly={readonly}
-                value={currentValue}
-                onKeyDown={onKeyDown}
-                onChange={onChange}
-                onBlur={() => currentValue.length == 0 && onEmptyBlur()}
-                list={datalistKey}
-                placeholder={placeholder}
-            />
+            {
+                autoresize ? (
+                    <AutosizeInput
+                        {...inputProps}
+                        inputRef={input => ref.current = input}
+                        inputClassName={className}
+                    />
+                ) : (
+                    <input
+                        {...inputProps}
+                        ref={ref}
+                        className={className}
+                    />
+                )
+            }
             <datalist id={datalistKey}>
                 {
                     autocomplete?.map((variant, index) => (

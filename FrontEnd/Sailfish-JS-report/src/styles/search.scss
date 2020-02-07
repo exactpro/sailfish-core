@@ -27,50 +27,90 @@
     }
 }
 
-.search-field {
-    height: 27px;
-    
-    display: flex;
-    align-items: center;
+.search-field-wrapper {
+    position: relative;
+    height: 30px;
+    width: 240px;
 
-    background: white;
-    border: 1px solid $primaryTextColor;
+    &.active {
+        width: 455px;
+    }
+}
+
+.search-field {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+
+    border: 2px solid #808080;
     border-radius: 3px;
-    padding: 0 5px;
+    background-color: #FFF;
+    cursor: text;
+
+    min-height: 29px;
+    padding: 2px 5px;
+
+    &__counter {
+        @include unselectable;
+        color: $primaryTextColor;
+        white-space: nowrap;
+        font-size: 12px;
+        float: right;
+        padding: 3px 5px;
+        font-weight: bold;
+    }
 
     &__icon {
         @include icon(url(../../resources/icons/search.svg));
+        display: inline;
+        float: right;
+        margin-top: 3px;
     }
 
     &__input {
         border: 0;
-        background: unset;
-        width: 170px;
+        border-radius: 3px;
+        font-weight: bold;
         color: $primaryTextColor;
-        padding-right: 5px;
+        height: 18px;
+        padding: 1px 5px;
 
         &:focus {
-            outline: unset;
+            outline: 0;
+        }
+
+        &::placeholder {
+            color: $secondaryTextColor;
+            font-style: italic;
+            font-weight: normal;
         }
     }
 
+    &__input-wrapper {
+        margin-left: 3px;
+    }
+
     &.active {
-        width: 260px;
+        @include card-shadow;
+        cursor: default;
     }
 }
 
-.search-counter {
-    color: $primaryTextColor;
-    white-space: nowrap;
-    font-size: 12px;
-    display: flex;
+.search-bubble {
+    display: inline-flex;
+    margin: 2px 5px;
+    color: #FFF;
+}
+
+.search-controls {
+    display: inline-flex;
+    float: right;
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-
-    &__index {
-        padding-right: 5px;
-    }
+    padding-top: 2px;
 
     &__prev {
         @include round-button(url(../../resources/icons/prev-search-result.svg));

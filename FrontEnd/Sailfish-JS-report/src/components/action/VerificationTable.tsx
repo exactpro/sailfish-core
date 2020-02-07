@@ -386,8 +386,8 @@ export const VerificationTable = connect(
         // TODO: replace deprecated filters with new one
         transparencyFilter: new Set<StatusType>(statusValues),
         visibilityFilter: new Set(statusValues),
-        expandPath: getVerificationExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId, ownProps.messageId),
-        searchResults: state.selected.searchResults
+        expandPath: getVerificationExpandPath(state.selected.search.results, state.selected.search.index, ownProps.actionId, ownProps.messageId),
+        searchResults: state.selected.search.results
     }),
     dispatch => ({})
 )(RecoverableVerificationTable);

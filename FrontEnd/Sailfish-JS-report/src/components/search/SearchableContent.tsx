@@ -68,7 +68,7 @@ function SearchableContentBase({ content, startIndex, targetIndex, searchResult,
         });
     }, [targetIndex]);
 
-    const internalTargetIndex = targetIndex != null && targetIndex - startIndex;
+    const internalTargetIndex = targetIndex != null ? targetIndex - startIndex : -1;
     let foundPartIndex = -1;
 
     const renderContentPart = ({ color, content }: SearchSplitResult, index: number) => {
@@ -98,16 +98,16 @@ function SearchableContentBase({ content, startIndex, targetIndex, searchResult,
 
 const SearchableContent = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
-        targetIndex: state.selected.searchIndex,
-        startIndex: state.selected.searchResults.getStartIndexForKey(ownProps.contentKey),
-        searchResult: state.selected.searchResults.has(ownProps.contentKey) ? (
+        targetIndex: state.selected.search.index,
+        startIndex: state.selected.search.results.getStartIndexForKey(ownProps.contentKey),
+        searchResult: state.selected.search.results.has(ownProps.contentKey) ? (
             // in some cases (e. g. message's beautified content) we need to split content again, instead of using redux value
             // because content passed in own props differ from the original.
             ownProps.shouldPerformSplit ?
-                multiTokenSplit(ownProps.content, state.selected.searchTokens) :
-                state.selected.searchResults.get(ownProps.contentKey)
+                multiTokenSplit(ownProps.content, state.selected.search.tokens) :
+                state.selected.search.results.get(ownProps.contentKey)
         ) : undefined,
-        needsScroll: state.selected.shouldScrollToSearchItem
+        needsScroll: state.selected.search.shouldScrollToItem
     }),
     (dispatch): DispatchProps => ({
         onScrolled: () => dispatch(setShouldScrollToSearchItem(false))

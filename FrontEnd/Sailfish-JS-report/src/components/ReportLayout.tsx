@@ -181,7 +181,7 @@ export class ReportLayoutBase extends React.Component<Props, State> {
                                                 <div className="report-summary__element-value">{tags.length}</div>
                                             </div>
                                             <div className="report-summary__tags-list">
-                                                {tags.map(tag => <Tag tag={tag}/>)}
+                                                {tags.map((tag, i) => <Tag tag={tag} key={i}/>)}
                                             </div>
                                         </div>
                                     ) : (

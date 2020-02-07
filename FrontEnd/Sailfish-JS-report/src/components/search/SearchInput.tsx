@@ -17,24 +17,29 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import AppState from '../../state/models/AppState';
-import { nextSearchResult, prevSearchResult, clearSearch } from '../../actions/actionCreators';
+import { clearSearch, nextSearchResult, prevSearchResult } from '../../actions/actionCreators';
 import { ThunkDispatch } from 'redux-thunk';
 import StateAction from '../../actions/stateActions';
 import { performSearch } from '../../thunks/search';
-import SearchCounter from './SearchCounter';
 import '../../styles/search.scss';
 import SearchResult from '../../helpers/search/SearchResult';
 import KeyCodes from "../../util/KeyCodes";
 import SearchToken from "../../models/search/SearchToken";
+import Bubble from "../util/Bubble";
+import { nextCyclicItem, removeByIndex, replaceByIndex } from "../../helpers/array";
+import AutosizeInput from "react-input-autosize";
+import { createBemBlock } from "../../helpers/styleCreators";
 
 const REACTIVE_SEARCH_DELAY = 500;
+const INPUT_PLACEHOLDER = 'Separate words with a space to find multiple words';
 
 const COLORS = [
     '#E69900',
     '#FF5500',
     '#1F66AD',
     '#45A155',
-    '#00BBCC'
+    '#00BBCC',
+    '#987DB3'
 ];
 
 interface StateProps {
@@ -51,78 +56,142 @@ interface DispatchProps {
     clear: () => void;
 }
 
-interface Props extends StateProps, DispatchProps { }
+interface Props extends StateProps, DispatchProps {}
 
 interface State {
     inputValue: string;
-    isLoading: boolean;
+    isActive: boolean;
 }
 
 class SearchInputBase extends React.PureComponent<Props, State> {
 
-    private inputElement = React.createRef<HTMLInputElement>();
-    
+    private inputElement: React.MutableRefObject<HTMLInputElement> = React.createRef();
+    private root = React.createRef<HTMLDivElement>();
+
     constructor(props: Props) {
         super(props);
 
         this.state = {
             inputValue: '',
-            isLoading: false
+            isActive: false
         }
     }
 
     componentDidMount() {
         document.addEventListener("keydown", this.documentOnKeyDown);
+        document.addEventListener("click", this.documentOnClick);
     }
 
     componentWillUnmount() {
         document.removeEventListener("keydown", this.documentOnKeyDown);
+        document.removeEventListener("click", this.documentOnClick);
     }
 
-    componentDidUpdate(prevProps: Props) {
-        if (this.props.searchResults !== prevProps.searchResults) {
-            // search string and search results updated, so we need to stop loader
-            // this.setState({
-            //     isLoading: false,
-            //     inputValue: this.props.searchTokens
-            // });
-        }
+    focus() {
+        this.setState({
+            isActive: true
+        }, () => {
+            this.inputElement.current.focus();
+        })
     }
-    
+
+    blur() {
+        this.setState({
+            isActive: false,
+            inputValue: ''
+        })
+    }
+
     render() {
-        const { searchTokens } = this.props,
-            { inputValue, isLoading } = this.state;
-        
+        const { currentIndex, resultsCount, prevSearchResult } = this.props,
+            { inputValue, isActive } = this.state;
+
+        const searchTokens = this.props.searchTokens.filter(({ isActive }) => !isActive),
+            activeToken = this.props.searchTokens.find(({ isActive }) => isActive);
+
+        const wrapperClassName = createBemBlock(
+            "search-field-wrapper",
+            isActive ? "active" : null
+            ),
+            rootClassName = createBemBlock(
+                "search-field",
+                isActive ? "active" : null
+            );
+
         return (
-            <div className="search-field">
-                {
-                    searchTokens.map(({color, pattern}, index) => (
-                        <span style={{backgroundColor: color}} key={index}>
-                            {pattern}
-                        </span>
-                    ))
-                }
-                <input
-                    className="search-field__input"
-                    ref={this.inputElement}
-                    type="text"
-                    value={inputValue}
-                    onChange={this.inputOnChange}
-                    onKeyDown={this.onKeyDown}/>
-                {
-                    inputValue ? (
-                        isLoading ? (
-                            <div className="loader"/>
+            <div className={wrapperClassName}>
+                <div className={rootClassName}
+                     ref={this.root}
+                     onClick={this.rootOnClick}>
+                    {
+                        isActive ? (
+                            <React.Fragment>
+                                <div className="search-controls">
+                                    <div className="search-controls__prev"
+                                         onClick={prevSearchResult}/>
+                                    <div className="search-controls__next"
+                                         onClick={prevSearchResult}/>
+                                    <div className="search-controls__clear"
+                                         onClick={this.clear}/>
+                                </div>
+                                {
+                                    searchTokens.map(({ color, pattern }, index) => (
+                                        <Bubble
+                                            key={index}
+                                            className="search-bubble"
+                                            size="small"
+                                            removeIconType="white"
+                                            submitKeyCodes={[KeyCodes.ENTER, KeyCodes.SPACE]}
+                                            value={pattern}
+                                            style={{ backgroundColor: color, color: '#FFF' }}
+                                            onSubmit={this.bubbleOnChangeFor(index)}
+                                            onRemove={this.bubbleOnRemoveFor(index)}/>
+                                    ))
+                                }
+                                <AutosizeInput
+                                    inputClassName="search-field__input"
+                                    className="search-field__input-wrapper"
+                                    inputRef={ref => this.inputElement.current = ref}
+                                    inputStyle={
+                                        inputValue.length > 0 ? {
+                                            backgroundColor: activeToken?.color ?? this.getNextColor(),
+                                            color: '#FFF'
+                                        } : undefined
+                                    }
+                                    placeholder={searchTokens.length < 1 && inputValue.length < 1 ? INPUT_PLACEHOLDER : undefined}
+                                    type="text"
+                                    spellCheck={false}
+                                    value={inputValue}
+                                    onChange={this.inputOnChange}
+                                    onKeyDown={this.onKeyDown}/>
+                                <span className="search-field__counter">
+                                    {currentIndex != null ? currentIndex + 1 : 0} of {resultsCount ?? 0}
+                                </span>
+                            </React.Fragment>
                         ) : (
-                            <SearchCounter/>
+                            <div className="search-field__icon"/>
                         )
-                    ) : (
-                        <div className="search-field__icon"/>
-                    ) 
-                }
+                    }
+                </div>
             </div>
         )
     }
+
+    private documentOnClick = (e: MouseEvent) => {
+        if (!this.root.current.contains(e.target as HTMLElement) &&
+            this.state.isActive &&
+            this.props.searchTokens.length < 1 &&
+            this.state.inputValue.length < 1
+        ) {
+            this.blur();
+        }
+    };
+
+    private rootOnClick = (e: React.MouseEvent) => {
+        if (e.target == this.root.current) {
+            this.focus();
+        }
+    };
 
     private onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.keyCode == KeyCodes.ENTER && e.shiftKey) {
@@ -136,18 +205,40 @@ class SearchInputBase extends React.PureComponent<Props, State> {
         }
 
         if (e.keyCode == KeyCodes.ESCAPE) {
-            this.inputElement.current.blur();
-            this.props.clear();
+            this.clear();
             return;
         }
 
-        if (e.keyCode == KeyCodes.SPACE && e.currentTarget.value) {
-            this.props.updateSearchTokens([
-                ...this.props.searchTokens, {
-                    pattern: e.currentTarget.value.trim(),
-                    color: COLORS[this.props.searchTokens.length % COLORS.length]
-                }
-            ]);
+        if (e.keyCode == KeyCodes.BACKSPACE && this.state.inputValue == '' && this.props.searchTokens.length > 0) {
+            // we should check is the last item active or not and remove it
+            const nextTokens = this.props.searchTokens[this.props.searchTokens.length - 1].isActive ?
+                this.props.searchTokens.slice(0, -1) :
+                [...this.props.searchTokens];
+            const [lastItem, ...restItems] = nextTokens.reverse();
+
+            this.props.updateSearchTokens([...restItems.reverse(), {
+                ...lastItem,
+                isActive: true
+            }]);
+            this.setState({
+                inputValue: lastItem.pattern
+            });
+
+            e.preventDefault();
+        }
+
+        if (e.keyCode == KeyCodes.SPACE && e.currentTarget.value != "") {
+            if (this.props.searchTokens.some(({ isActive }) => isActive)) {
+                this.props.updateSearchTokens(this.props.searchTokens.map(token => ({
+                    ...token,
+                    isActive: false
+                })));
+            } else {
+                this.props.updateSearchTokens([
+                    ...this.props.searchTokens,
+                    this.createToken(e.currentTarget.value, undefined, false)
+                ]);
+            }
 
             this.setState({
                 inputValue: ''
@@ -160,7 +251,7 @@ class SearchInputBase extends React.PureComponent<Props, State> {
             // cancel browser search opening
             e.preventDefault();
 
-            this.inputElement.current.focus();
+            this.focus();
         }
     };
 
@@ -168,24 +259,82 @@ class SearchInputBase extends React.PureComponent<Props, State> {
         const currentValue = e.target.value;
 
         this.setState({
-            inputValue: currentValue,
-            //isLoading: true
+            inputValue: currentValue.trim()
         });
 
         setTimeout(() => {
-            // if (this.state.inputValue === currentValue) {
-            //     this.props.updateSearchTokens(currentValue);
-            // }
+            if (this.state.inputValue === currentValue) {
+                // clear last active value
+                if (currentValue == '') {
+                    this.props.updateSearchTokens(
+                        this.props.searchTokens.filter(({ isActive }) => !isActive)
+                    );
+
+                    return;
+                }
+
+                if (this.props.searchTokens.length == 0) {
+                    this.props.updateSearchTokens([this.createToken(this.state.inputValue)]);
+                    return;
+                }
+
+                const activeItem = this.props.searchTokens.find(({ isActive }) => isActive);
+
+                if (activeItem != null) {
+                    this.props.updateSearchTokens(replaceByIndex(
+                        this.props.searchTokens,
+                        this.props.searchTokens.indexOf(activeItem),
+                        this.createToken(this.state.inputValue, activeItem.color)
+                    ));
+                    return;
+                }
+
+                this.props.updateSearchTokens([
+                    ...this.props.searchTokens,
+                    this.createToken(this.state.inputValue)
+                ]);
+            }
         }, REACTIVE_SEARCH_DELAY)
+    };
+
+    private bubbleOnChangeFor = (index: number) => (nextValue: string) => {
+        this.props.updateSearchTokens(replaceByIndex(
+            this.props.searchTokens,
+            index,
+            this.createToken(nextValue, this.props.searchTokens[index].color, false)
+        ));
+    };
+
+    private bubbleOnRemoveFor = (index: number) => () => {
+        this.props.updateSearchTokens(removeByIndex(this.props.searchTokens, index));
+    };
+
+    private clear = () => {
+        this.props.clear();
+        this.blur();
+    };
+
+    private createToken(value: string, color?: string, isActive: boolean = true): SearchToken {
+        return {
+            pattern: value.trim(),
+            color: color ?? this.getNextColor(),
+            isActive
+        }
+    }
+
+    private getNextColor(): string {
+        return this.props.searchTokens.length > 0 ?
+            nextCyclicItem(COLORS, this.props.searchTokens[this.props.searchTokens.length - 1].color) :
+            COLORS[0]
     }
 }
 
 const SearchInput = connect(
     (state: AppState): StateProps => ({
-        searchTokens: state.selected.searchTokens,
-        resultsCount: state.selected.searchResultsCount,
-        currentIndex: state.selected.searchIndex,
-        searchResults: state.selected.searchResults
+        searchTokens: state.selected.search.tokens,
+        resultsCount: state.selected.search.resultsCount,
+        currentIndex: state.selected.search.index,
+        searchResults: state.selected.search.results
     }),
     (dispatch: ThunkDispatch<AppState, {}, StateAction>): DispatchProps => ({
         updateSearchTokens: searchTokens => dispatch(performSearch(searchTokens)),

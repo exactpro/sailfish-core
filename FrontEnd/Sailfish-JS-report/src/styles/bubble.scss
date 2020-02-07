@@ -1,0 +1,94 @@
+/*!******************************************************************************
+ * Copyright 2009-2020 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ******************************************************************************/
+
+@import "./common/vars";
+
+.bubble {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    position: relative;
+
+    border-radius: $bubbleBorderRadius;
+    color: $primaryTextColor;
+    font-weight: bold;
+
+    padding: 3px 5px;
+    height: $filterBubbleHeight;
+
+    &__remove {
+        position: absolute;
+        width: 0;
+        top: 0;
+        // -3px to hide bubble's border-radius on the right
+        left: calc(100% - 3px);
+        bottom: 0;
+        overflow: hidden;
+        z-index: 1;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        border-radius: 0 3px 3px 0;
+        background-color: inherit;
+        transition: width 0.15s ease-in-out;
+    }
+
+    &:hover &__remove {
+        width: 20px;
+    }
+
+    &__remove-icon {
+        @include round-button(url(../../resources/icons/cross-icon.svg), 16px);
+        margin-right: 3px;
+
+        &.white {
+            background-image: url(../../resources/icons/cross-icon-white.svg);
+        }
+    }
+
+    &__input {
+        border: 0;
+        font-size: inherit;
+        background-color: rgba(0, 0, 0, 0);
+        color: inherit;
+        height: $filterBubbleHeight;
+
+        &:focus {
+            outline: 0;
+        }
+    }
+
+    &.small {
+        font-size: 13px;
+        height: 20px;
+    }
+
+    &.medium {
+        font-size: 15px;
+        height: 30px;
+    }
+
+    &.large {
+        font-size: 17px;
+        height: 40px;
+    }
+
+    &.invalid {
+        color: $failedTextColor;
+    }
+}

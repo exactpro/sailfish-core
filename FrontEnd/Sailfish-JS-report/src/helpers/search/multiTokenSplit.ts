@@ -21,6 +21,7 @@ import SearchSplitResult from "../../models/search/SearchSplitResult";
 export default function multiTokenSplit(content: string, tokens: ReadonlyArray<SearchToken>): SearchSplitResult[] {
     // we are sorting tokens from longer to shorter one because in case of intersected tokens will truncate longer tokens
     const tokenSplitResults = [...tokens]
+        .filter(({ pattern }) => pattern.length > 0)
         .sort((a, b) => a.pattern.length < b.pattern.length ? 1 : -1)
         .map(({ pattern, color }) => ({
             content: content

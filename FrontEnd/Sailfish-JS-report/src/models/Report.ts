@@ -18,9 +18,10 @@ import TestCase from "./TestCase";
 import { TestCaseMetadata } from "./TestcaseMetadata";
 import { ReportProperties } from "./ReportProperties";
 import Exception from "./Exception";
+import Alert from "./Alert";
 
 export default interface Report {
-    alerts?: any[];
+    alerts?: Alert[];
     startTime: string;
     finishTime: string;
     plugins: any;

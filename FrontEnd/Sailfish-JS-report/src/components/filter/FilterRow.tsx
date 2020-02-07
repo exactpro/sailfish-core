@@ -15,7 +15,7 @@
  ******************************************************************************/
 
 import * as React from 'react';
-import FilterBubble from "./FilterBubble";
+import Bubble from "../util/Bubble";
 import { complement, removeByIndex, replaceByIndex } from "../../helpers/array";
 import AutocompleteInput from "../util/AutocompleteInput";
 import FilterPath, { isFilterPath } from "../../models/filter/FilterPath";
@@ -203,10 +203,11 @@ export default function FilterRow(props: Props) {
             {
                 values?.map((value, index) => (
                     <React.Fragment key={index}>
-                        <FilterBubble
+                        <Bubble
+                            className="filter__bubble"
                             value={value}
                             isValid={bubbleIsValid(value)}
-                            onChange={valueBubbleOnChangeFor(index)}
+                            onSubmit={valueBubbleOnChangeFor(index)}
                             onRemove={valueBubbleOnRemoveFor(index)}
                             autocompleteVariants={getAutocomplete()}
                         />
@@ -221,6 +222,7 @@ export default function FilterRow(props: Props) {
                 onSubmit={inputOnSubmit}
                 onRemove={inputOnRemove}
                 readonly={false}
+                autoresize={false}
                 placeholder={getPlaceholder()}
                 onlyAutocompleteValues={path != null && types != null && AUTOCOMPLETE_MAP.has(path)}
                 autocomplete={getAutocomplete()}

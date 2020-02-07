@@ -231,8 +231,8 @@
         align-items: center;
 
         &.active {
+            @include card-shadow;
             background-color: $filterPrimaryColor;
-            box-shadow: 4px 8px 6px 0px rgba(0, 0, 0, 0.4);
         }
     }
 

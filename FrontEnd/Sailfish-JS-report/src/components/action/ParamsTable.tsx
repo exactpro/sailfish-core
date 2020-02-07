@@ -227,8 +227,8 @@ function paramsToNodes(root: ActionParameter) : TableNode {
 
 const ParamsTable = connect(
     (state: AppState, ownProps: OwnProps): StateProps => ({
-        expandPath: getParamsExpandPath(state.selected.searchResults, state.selected.searchIndex, ownProps.actionId),
-        searchResults: state.selected.searchResults
+        expandPath: getParamsExpandPath(state.selected.search.results, state.selected.search.index, ownProps.actionId),
+        searchResults: state.selected.search.results
     })
 )(RecoverableParamsTable);
 

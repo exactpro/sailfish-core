@@ -79,7 +79,7 @@ interface SearchExpandablePanelOwnProps extends RecoverablePanelProps {
 
 export const SearchExpandablePanel = connect(
     (state: AppState, ownProps: SearchExpandablePanelOwnProps) => {
-        const [currentKey] = state.selected.searchResults.getByIndex(state.selected.searchIndex),
+        const [currentKey] = state.selected.search.results.getByIndex(state.selected.search.index),
             isExpanded = currentKey && currentKey.startsWith(ownProps.searchKeyPrefix) ? true : undefined;        
 
         return { isExpanded };
